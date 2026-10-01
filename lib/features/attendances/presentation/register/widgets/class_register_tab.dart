@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_day_access.dart';
 import 'package:school_app_flutter/core/components/search/eteelo_search_toolbar.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
@@ -39,6 +39,7 @@ class ClassRegisterTab extends StatelessWidget {
     final cubit = context.read<ClassPresenceCubit>();
     final day = register.day;
     final query = state.dayQuery;
+    final lock = classDayLockIn(context, day, today: state.today);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -50,17 +51,7 @@ class ClassRegisterTab extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         if (day.validated)
           ClassValidatedBanner(state: state, register: register),
-        if (day.reopened &&
-            classDayLock(
-                  day,
-                  today: state.today,
-                  canWrite: true,
-                  canAmend: PermissionGate.allowsAccess(
-                    context,
-                    kAttendanceAmendAccess,
-                  ),
-                ) ==
-                ClassDayLock.needsAmend)
+        if (day.reopened && lock == ClassDayLock.needsAmend)
           PresenceWarning(
             icon: Icons.lock_outline,
             tone: PresenceStatus.none,
@@ -86,20 +77,7 @@ class ClassRegisterTab extends StatelessWidget {
             selected: query.status,
             onStatus: cubit.setDayStatus,
             viewMode: state.viewMode,
-            showLegend:
-                classDayLock(
-                  day,
-                  today: state.today,
-                  canWrite: PermissionGate.allowsAccess(
-                    context,
-                    kAttendanceRecordAccess,
-                  ),
-                  canAmend: PermissionGate.allowsAccess(
-                    context,
-                    kAttendanceAmendAccess,
-                  ),
-                ) ==
-                null,
+            showLegend: lock == null,
             toJustify: register.toJustify,
             toolbar: EteeloSearchToolbar(
               text: query.text,
@@ -122,6 +100,14 @@ class ClassRegisterTab extends StatelessWidget {
               register: register,
               viewMode: state.viewMode,
               classroomName: classroomName,
+              canJustify:
+                  classDayLockIn(
+                    context,
+                    day,
+                    today: state.today,
+                    justifying: true,
+                  ) ==
+                  null,
             ),
         ],
       ],

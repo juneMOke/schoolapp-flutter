@@ -10,8 +10,8 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_d
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/attendances/domain/services/class_day_lock.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_day_access.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_actions.dart';
@@ -56,19 +56,7 @@ class ClassDayBanner extends StatelessWidget {
         if (register.pending > 0) l10n.presenceMarkOnTablet(register.pending),
       ].join(' · '),
       showActions:
-          classDayLock(
-            register.day,
-            today: state.today,
-            canWrite: PermissionGate.allowsAccess(
-              context,
-              kAttendanceRecordAccess,
-            ),
-            canAmend: PermissionGate.allowsAccess(
-              context,
-              kAttendanceAmendAccess,
-            ),
-          ) ==
-          null,
+          classDayLockIn(context, register.day, today: state.today) == null,
       validateLabel: l10n.classPresenceValidate,
       onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
       onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),

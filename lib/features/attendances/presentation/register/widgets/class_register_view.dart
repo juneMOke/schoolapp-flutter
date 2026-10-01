@@ -17,11 +17,15 @@ class ClassRegisterView extends StatelessWidget {
   final CollectionViewMode viewMode;
   final String classroomName;
 
+  /// « Justifier » est proposé (cf. `classDayLock`, `justifying`).
+  final bool canJustify;
+
   const ClassRegisterView({
     super.key,
     required this.register,
     required this.viewMode,
     required this.classroomName,
+    this.canJustify = true,
   });
 
   @override
@@ -36,7 +40,11 @@ class ClassRegisterView extends StatelessWidget {
             itemCount: rows.length,
             itemBuilder: (context, index) => PresenceCard(
               key: ValueKey(rows[index].student.id),
-              row: rows[index].presenceView(l10n, classroomName),
+              row: rows[index].presenceView(
+                l10n,
+                classroomName,
+                canJustify: canJustify,
+              ),
               actions: ClassRowActions(context, rows[index]),
               schedule: schedule,
             ),
@@ -47,7 +55,11 @@ class ClassRegisterView extends StatelessWidget {
               for (final line in rows)
                 PresenceRow(
                   key: ValueKey(line.student.id),
-                  row: line.presenceView(l10n, classroomName),
+                  row: line.presenceView(
+                    l10n,
+                    classroomName,
+                    canJustify: canJustify,
+                  ),
                   actions: ClassRowActions(context, line),
                 ),
             ],

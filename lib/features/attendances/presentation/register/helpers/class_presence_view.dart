@@ -8,7 +8,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// L'envoi se suit à l'échelle de l'appel (une classe, un jour) : un refus se
 /// lit et se reprend dans le bandeau de l'appel validé, pas carte par carte.
 extension ClassPresenceLineView on ClassPresenceLine {
-  PresenceRowView presenceView(AppLocalizations l10n, String classroomName) {
+  PresenceRowView presenceView(
+    AppLocalizations l10n,
+    String classroomName, {
+    bool canJustify = true,
+  }) {
     final justification = mark.justification;
     return PresenceRowView(
       personId: student.id,
@@ -25,6 +29,7 @@ extension ClassPresenceLineView on ClassPresenceLine {
       lateMinutes: mark.lateMinutes,
       justificationLabel: justification?.reason.getDisplayName(l10n),
       sync: sync,
+      canJustify: canJustify,
     );
   }
 }

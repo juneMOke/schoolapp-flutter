@@ -23,7 +23,7 @@ const String kAttendanceClosureAggregateType = 'ATTENDANCE_CLOSURE';
 /// refusé ne la retient plus.
 ///
 /// - 200 (rejeu, mois déjà clos ailleurs compris) → la clôture du serveur ;
-/// - 422 (`MONTH_NOT_ENDED`, `MONTH_OUTSIDE_ACADEMIC_YEAR`…) → refus définitif,
+/// - 422 (`MONTH_NOT_CLOSABLE`, `CLOSURE_GESTURE_ID_CONFLICT`…) → refus définitif,
 ///   le mois n'est plus figé et la raison s'affiche ;
 /// - 403 → attente propre si le geste est d'un autre compte, refus sinon ;
 /// - réseau, 5xx, 401 → nouvel essai.
@@ -107,9 +107,13 @@ class AttendanceClosureOutboxHandler implements OutboxSyncHandler {
   /// La raison du refus, dite en clair pour les codes du contrat.
   static String? _reason(DioException e) {
     return switch (ApiErrorParser.detailCodeOf(e.response)) {
-      'MONTH_NOT_ENDED' =>
-        'Le mois n\'est pas terminé : il se clôture une fois fini.',
-      'MONTH_OUTSIDE_ACADEMIC_YEAR' => 'Ce mois est hors de l\'année scolaire.',
+      // Mois en cours ou à venir, hors de l'année visée, ou année d'une
+      // autre école : un seul code côté serveur.
+      'MONTH_NOT_CLOSABLE' =>
+        'Ce mois ne peut pas être clôturé : il n\'est pas terminé ou il est '
+            'hors de l\'année scolaire.',
+      'CLOSURE_GESTURE_ID_CONFLICT' =>
+        'Cette clôture a déjà servi pour un autre mois ou une autre classe.',
       _ => ApiErrorParser.serverMessageOf(e.response),
     };
   }

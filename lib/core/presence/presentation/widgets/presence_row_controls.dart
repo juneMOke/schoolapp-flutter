@@ -156,11 +156,12 @@ class PresenceJustifyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final label = row.justificationLabel;
+    if (!row.canJustify && label == null) return const SizedBox.shrink();
     final tone = PresenceTone.of(
       label == null ? row.status : PresenceStatus.present,
     );
     return InkWell(
-      onTap: onTap,
+      onTap: row.canJustify ? onTap : null,
       borderRadius: AppRadius.brPill,
       child: Container(
         constraints: const BoxConstraints(

@@ -148,7 +148,10 @@ void main() {
     () async {
       await record();
       when(() => api.submitClosure(any(), any())).thenThrow(
-        refused(422, {'detailCode': 'MONTH_NOT_ENDED', 'message': 'not ended'}),
+        refused(422, {
+          'detailCode': 'MONTH_NOT_CLOSABLE',
+          'message': 'not closable',
+        }),
       );
 
       final result = await handler.dispatch(closureEntry());

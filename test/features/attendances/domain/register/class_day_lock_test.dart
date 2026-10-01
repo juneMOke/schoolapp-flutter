@@ -50,8 +50,19 @@ void main() {
     expect(lock(true, day: yesterday, canAmend: true), ClassDayLock.validated);
   });
 
-  test('justifier un appel validé, même passé, reste permis', () {
-    expect(lock(true, day: yesterday, justifying: true), isNull);
+  test('justifier un appel validé sans le rouvrir : le jour même', () {
+    expect(lock(true, justifying: true), isNull);
+  });
+
+  test('justifier un jour passé exige amend (plan back, correction 3)', () {
+    expect(
+      lock(true, day: yesterday, justifying: true),
+      ClassDayLock.needsAmend,
+    );
+    expect(
+      lock(true, day: yesterday, justifying: true, canAmend: true),
+      isNull,
+    );
   });
 
   test('un jour passé rouvert ne se corrige pas sans amend', () {

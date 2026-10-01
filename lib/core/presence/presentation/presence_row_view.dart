@@ -34,6 +34,10 @@ class PresenceRowView extends Equatable {
   /// ligne refusée propose « Réessayer ».
   final String? refusal;
 
+  /// « Justifier » est proposé. Sinon, un motif déjà posé se lit sans se
+  /// toucher, et rien ne s'affiche à sa place.
+  final bool canJustify;
+
   const PresenceRowView({
     required this.personId,
     required this.firstName,
@@ -47,6 +51,7 @@ class PresenceRowView extends Equatable {
     this.justificationLabel,
     this.sync = RecordSyncState.synced,
     this.refusal,
+    this.canJustify = true,
   });
 
   bool get isJustified => justificationLabel != null;
@@ -65,6 +70,7 @@ class PresenceRowView extends Equatable {
     justificationLabel,
     sync,
     refusal,
+    canJustify,
   ];
 }
 

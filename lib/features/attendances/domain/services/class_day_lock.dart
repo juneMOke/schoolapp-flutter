@@ -21,8 +21,10 @@ enum ClassDayLock {
 /// avant d'ouvrir une modale) et par les commandes (avant d'écrire).
 ///
 /// [justifying] : poser ou retirer une justification sur un appel validé
-/// reste permis sous `attendance.write`, même un jour passé — seul le
-/// constat (liste, statut, heure) exige `attendance.amend` (décision 9).
+/// ne demande pas de le rouvrir (décision 9). Mais un jour passé exige
+/// `attendance.amend`, justification comprise : le motif porte le verdict
+/// justifiée / injustifiée, et le serveur garde ce geste (plan back,
+/// correction 3) — sans le droit, l'envoi prendrait un 403 terminal.
 ClassDayLock? classDayLock(
   ClassPresenceDay day, {
   required String today,
@@ -34,8 +36,8 @@ ClassDayLock? classDayLock(
   if (day.monthClosed) return ClassDayLock.monthClosed;
   final past = day.day.compareTo(today) < 0;
   if (day.validated) {
-    if (justifying) return null;
-    return past && !canAmend ? ClassDayLock.needsAmend : ClassDayLock.validated;
+    if (past && !canAmend) return ClassDayLock.needsAmend;
+    return justifying ? null : ClassDayLock.validated;
   }
   if (day.reopened && past && !canAmend) return ClassDayLock.needsAmend;
   return null;

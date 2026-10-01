@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
@@ -12,10 +11,9 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_t
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
-import 'package:school_app_flutter/features/attendances/domain/services/class_day_lock.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_day_access.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes sur l'élève d'une ligne, **partagés** par la carte de la grille
@@ -50,11 +48,10 @@ class ClassRowActions implements PresenceRowActions {
   bool _intercept({bool justifying = false}) {
     final day = _day;
     if (day == null) return true;
-    final lock = classDayLock(
+    final lock = classDayLockIn(
+      context,
       day,
       today: _cubit.state.today,
-      canWrite: PermissionGate.allowsAccess(context, kAttendanceRecordAccess),
-      canAmend: PermissionGate.allowsAccess(context, kAttendanceAmendAccess),
       justifying: justifying,
     );
     if (lock == null) return false;

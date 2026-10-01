@@ -228,21 +228,43 @@ void main() {
     verify(() => reopen(any())).called(1);
   });
 
-  testWidgets('appel validé : « Justifier » reste ouvert (décision 9)', (
+  testWidgets(
+    'appel validé du jour : « Justifier » sans rouvrir (décision 9)',
+    (tester) async {
+      await pump(tester, day: presenceDay(validated: true));
+
+      await tester.tap(find.text('Justifier').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Justifier — Jean Ilunga'), findsOneWidget);
+
+      await tester.tap(find.text('Maladie'));
+      await tester.pump();
+      await tester.tap(find.text('Enregistrer'));
+      await tester.pumpAndSettle();
+
+      verify(() => validate(any(), any())).called(1);
+      verifyNever(() => reopen(any()));
+    },
+  );
+
+  testWidgets('jour passé validé : « Justifier » seulement avec amend', (
     tester,
   ) async {
     await pump(tester, day: presenceDay(day: '2026-09-30', validated: true));
+    expect(find.text('Justifier'), findsNothing);
 
+    await pump(
+      tester,
+      day: presenceDay(day: '2026-09-30', validated: true),
+      permissions: prefect,
+    );
     await tester.tap(find.text('Justifier').first);
     await tester.pumpAndSettle();
-    expect(find.text('Justifier — Jean Ilunga'), findsOneWidget);
-
     await tester.tap(find.text('Maladie'));
     await tester.pump();
     await tester.tap(find.text('Enregistrer'));
     await tester.pumpAndSettle();
 
     verify(() => validate(any(), any())).called(1);
-    verifyNever(() => reopen(any()));
   });
 }
