@@ -639,6 +639,17 @@ class AppDimensions {
   static const classPickerButtonHeight = 52.0;
   static const classPickerMedallionSize = 38.0;
 
+  /// Le tableau du récapitulatif de l'appel : colonnes fixes, défilement
+  /// horizontal sous sa largeur plancher.
+  static const classRecapMinWidth = 760.0;
+  static const classRecapColPresences = 150.0;
+  static const classRecapColRate = 76.0;
+  static const classRecapColLates = 104.0;
+  static const classRecapColAbsences = 96.0;
+  static const classRecapColSync = 120.0;
+  static const classRecapRateBarWidth = 90.0;
+  static const classRecapWatchDot = 8.0;
+
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
   // Le livre défile horizontalement sous 920 dp ; les colonnes de montant sont
   // alignées à droite, en chiffres tabulaires.

@@ -7,7 +7,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
@@ -17,6 +16,7 @@ import 'package:school_app_flutter/core/presence/presentation/presence_labels.da
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_month_close_dialog.dart';
@@ -99,16 +99,10 @@ class StaffRecapTab extends StatelessWidget {
           StaffRecapTotals(recap: recap),
           const SizedBox(height: AppSpacing.md),
           if (recap.isFilteredEmpty)
-            EteeloEmptyResult(
+            PresenceFilterEmpty(
               label: l10n.staffAttendanceRecapEmptyFilter,
-              medallionIcon: Icons.search_rounded,
-              fullWidthCard: true,
-              primaryAction: EteeloButton.primary(
-                label: l10n.presenceMarkShowAll,
-                icon: Icons.restart_alt,
-                onPressed: cubit.resetRecapFilters,
-                fullWidth: false,
-              ),
+              allMarked: false,
+              onShowAll: cubit.resetRecapFilters,
             )
           else
             PresenceCardFrame(

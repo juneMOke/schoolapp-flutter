@@ -14,7 +14,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cu
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_status_pill.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_table.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les mois tenus, du plus récent au plus ancien ; toucher un mois ouvre son
@@ -82,7 +82,7 @@ class PayrollHistoryTab extends StatelessWidget {
             medallionIcon: Icons.history,
           )
         else
-          StaffTable(
+          EteeloColumnTable(
             minWidth: AppDimensions.payrollHistoryMinWidth,
             widths: _widths,
             endAligned: const {2, 3, 4, 5},
@@ -115,8 +115,8 @@ class PayrollHistoryTab extends StatelessWidget {
           (line.netInCents, line.currency),
     ]);
     final header = view.header;
-    final figures = StaffTableRow.figures();
-    return StaffTableRow(
+    final figures = EteeloColumnTableRow.figures();
+    return EteeloColumnTableRow(
       widths: _widths,
       background: current ? AppColors.terreCuiteSoft : null,
       onTap: () => cubit.openMonth(view.month),
@@ -158,7 +158,7 @@ class PayrollHistoryTab extends StatelessWidget {
             Text(
               sum((t) => t.netInCents),
               textAlign: TextAlign.end,
-              style: StaffTableRow.figures(strong: true),
+              style: EteeloColumnTableRow.figures(strong: true),
             ),
             if (view.phase == PayrollPhase.validated && view.remainingCount > 0)
               Text(

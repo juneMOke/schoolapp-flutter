@@ -13713,4 +13713,113 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get classPresenceToastUnsupported =>
       'Un motif de cette journée est inconnu de cette tablette : mettez l\'application à jour avant de modifier l\'appel.';
+
+  @override
+  String get classPresenceTabRegister => 'Registre du jour';
+
+  @override
+  String classPresenceTabRegisterSubtitle(int marked, int total) {
+    return '$marked / $total élèves';
+  }
+
+  @override
+  String get classPresenceTabStudent => 'Fiche mensuelle';
+
+  @override
+  String classPresenceTabStudentSubtitle(String month) {
+    return 'Par élève · $month';
+  }
+
+  @override
+  String get classPresenceTabRecap => 'Récapitulatif du mois';
+
+  @override
+  String get classPresenceTabRecapSubtitle => 'Totaux → dossiers & bulletin';
+
+  @override
+  String get classPresenceTabRecapSubtitleClosed => 'Transmis aux dossiers';
+
+  @override
+  String get classPresenceStudentPickerPlaceholder => 'Rechercher · Prénom Nom';
+
+  @override
+  String get classPresenceStudentSheetTitle => 'Fiche mensuelle de présence';
+
+  @override
+  String get classPresenceGirl => 'Fille';
+
+  @override
+  String get classPresenceBoy => 'Garçon';
+
+  @override
+  String get classPresenceToWatch => 'À surveiller';
+
+  @override
+  String classPresenceKpiRate(int rate) {
+    return '$rate %';
+  }
+
+  @override
+  String get classPresenceRegisterComplete => 'Registre complet';
+
+  @override
+  String classPresenceRecapEyebrow(String classroom) {
+    return 'Récapitulatif · $classroom';
+  }
+
+  @override
+  String classPresenceRecapDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours de classe',
+      one: '1 jour de classe',
+      zero: 'Aucun jour de classe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceRecapToDate => 'à ce jour';
+
+  @override
+  String classPresenceRecapStudents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceTotalLates => 'Retards';
+
+  @override
+  String classPresenceLatesValue(int count, int minutes) {
+    return '$count · $minutes min';
+  }
+
+  @override
+  String get classPresenceTotalToWatch => 'Élèves à surveiller';
+
+  @override
+  String get classPresenceFilterToWatch => 'À surveiller';
+
+  @override
+  String get classPresenceFilterPerfect => 'Assiduité parfaite';
+
+  @override
+  String get classPresenceColRate => 'Taux';
+
+  @override
+  String get classPresenceColSync => 'Synchro';
+
+  @override
+  String get classPresenceRecapLegend =>
+      'NJ = non justifiée · J = justifiée · ● à surveiller : 2 absences NJ ou taux < 85 % · touchez une ligne pour ouvrir la fiche';
+
+  @override
+  String get classPresenceRecapEmptyFilter => 'Aucun élève trouvé';
 }

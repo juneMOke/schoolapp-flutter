@@ -36,7 +36,13 @@ class PresenceSummaryViewData {
   bool get hasSchoolDays => total > 0;
 
   /// Assiduite parfaite : des jours scolaires, mais aucune absence.
-  bool get isPerfect => hasSchoolDays && justified == 0 && unjustified == 0;
+  /// Retards de la période — des présences, comptées à part.
+  int get late => stats.lateCount;
+  int get lateMinutes => stats.lateMinutes;
+
+  /// Assiduité parfaite : ni absence ni retard (spec v2).
+  bool get isPerfect =>
+      hasSchoolDays && justified == 0 && unjustified == 0 && late == 0;
 
   /// Absences de la periode, triees du plus recent au plus ancien.
   List<StudentAbsenceEntry> get sortedAbsences {

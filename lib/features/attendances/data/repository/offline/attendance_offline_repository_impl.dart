@@ -82,6 +82,12 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
           periodTo: to,
         );
       }
+      final lateRows = await historyDataSource.getStudentLateRecords(
+        studentId: studentId,
+        academicYearId: academicYearId,
+        fromStr: fromStr,
+        toStr: toStr,
+      );
       final absenceRows = await historyDataSource.getStudentAbsenceRecords(
         studentId: studentId,
         academicYearId: academicYearId,
@@ -125,6 +131,11 @@ class AttendanceOfflineRepositoryImpl implements AttendanceOfflineRepository {
               .toList(growable: false),
           bootstrapComplete: bootstrapComplete,
           syncedAt: syncedAt,
+          lateCount: lateRows.length,
+          lateMinutes: lateRows.fold<int>(
+            0,
+            (sum, row) => sum + (row.lateMinutes ?? 0),
+          ),
         ),
       );
     } catch (_) {

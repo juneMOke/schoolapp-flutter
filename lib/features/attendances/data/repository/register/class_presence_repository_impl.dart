@@ -13,14 +13,17 @@ import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_session_row.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_draft_local_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/register/class_presence_mapper.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_month.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/register/class_presence_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/register/class_presence_month_reader.dart';
 
 /// Le registre d'appel d'une classe, lu et écrit sur la tablette.
 ///
@@ -30,6 +33,7 @@ import 'package:school_app_flutter/features/classes/data/datasources/offline/cla
 /// de l'appel d'avant la v2.
 class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
   final AttendanceLocalDataSource sessions;
+  final AttendanceHistoryLocalDataSource history;
   final AttendanceDraftLocalDataSource drafts;
   final AttendanceClosureLocalDataSource closures;
   final ClassroomLocalDataSource roster;
@@ -42,6 +46,7 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
 
   const ClassPresenceRepositoryImpl({
     required this.sessions,
+    required this.history,
     required this.drafts,
     required this.closures,
     required this.roster,
@@ -216,6 +221,17 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
         if (engine != null) unawaited(engine.flush());
         return unit;
       });
+
+  @override
+  Future<Either<Failure, ClassPresenceMonth>> loadMonth(ClassMonthKey key) =>
+      _guard(
+        'Local attendance month read failed',
+        () => ClassPresenceMonthReader(
+          roster: roster,
+          history: history,
+          closures: closures,
+        ).read(key),
+      );
 
   /// Où en est l'envoi de l'appel : au serveur, en file, ou refusé (avec la
   /// raison écrite par le serveur).

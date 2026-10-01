@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_agent_month.dart';
@@ -25,6 +24,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_member_s
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_kpi_grid.dart';
 
 /// L'onglet « Fiche mensuelle » : un agent, un mois, en lecture seule.
 class StaffAgentMonthTab extends StatelessWidget {
@@ -174,22 +174,6 @@ class _Kpis extends StatelessWidget {
           value: '${stats.notMarked}',
         ),
     ];
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns =
-            constraints.maxWidth > AppDimensions.presenceMarkKpiWideBreakpoint
-            ? 4
-            : 2;
-        final width =
-            (constraints.maxWidth - AppSpacing.md * (columns - 1)) / columns;
-        return Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.md,
-          children: [
-            for (final tile in tiles) SizedBox(width: width, child: tile),
-          ],
-        );
-      },
-    );
+    return PresenceKpiGrid(tiles: tiles);
   }
 }

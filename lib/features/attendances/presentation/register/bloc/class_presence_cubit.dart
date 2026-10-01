@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_classroom.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
+import 'package:school_app_flutter/features/attendances/domain/services/class_month_recap.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/register/class_presence_use_cases.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_commands.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
@@ -20,6 +21,7 @@ import 'package:school_app_flutter/features/attendances/presentation/register/bl
 /// geste) et quand un pull ou un flush le périme.
 class ClassPresenceCubit extends Cubit<ClassPresenceState> {
   final LoadClassPresenceDayUseCase _load;
+  final LoadClassPresenceMonthUseCase _loadMonth;
   final ResourceSyncSignals _signals;
   final ClassPresenceCommands commands;
   final DateTime Function() _now;
@@ -32,10 +34,12 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
 
   ClassPresenceCubit({
     required LoadClassPresenceDayUseCase load,
+    required LoadClassPresenceMonthUseCase loadMonth,
     required ResourceSyncSignals signals,
     required this.commands,
     DateTime Function() now = DateTime.now,
   }) : _load = load,
+       _loadMonth = loadMonth,
        _signals = signals,
        _now = now,
        super(_initial(now()));
@@ -47,6 +51,7 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
       today: today,
       // Le week-end, le registre s'ouvre sur le vendredi.
       day: ClassPresenceState.lastSchoolDayOf(today),
+      month: today.substring(0, 7),
     );
   }
 
@@ -68,15 +73,45 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
         classroom: classroom,
         load: ClassPresenceLoad.loading,
         presenceDay: () => null,
+        monthData: () => null,
+        studentId: () => null,
         dayQuery: ClassDayQuery.none,
+        recapQuery: ClassRecapQuery.none,
         clearFailure: true,
       ),
     );
     await _readDay(loading: true);
+    await _readMonth();
   }
 
   /// Relecture **silencieuse** : jamais de squelette, un échec garde l'écran.
-  Future<void> refresh() => _readDay(loading: false);
+  Future<void> refresh() async {
+    await _readDay(loading: false);
+    await _readMonth();
+  }
+
+  /// Le mois de la fiche et du récapitulatif — lu seulement quand l'un de
+  /// leurs onglets est ouvert. Un échec garde le mois déjà lu.
+  Future<void> _readMonth() async {
+    final classroom = state.classroom;
+    final yearId = state.academicYearId;
+    if (isClosed ||
+        classroom == null ||
+        yearId == null ||
+        state.tab == ClassPresenceTab.register) {
+      return;
+    }
+    final month = state.month;
+    final result = await _loadMonth((
+      classroomId: classroom.id,
+      academicYearId: yearId,
+      month: month,
+    ));
+    if (isClosed || month != state.month || classroom != state.classroom) {
+      return;
+    }
+    result.fold((_) {}, (data) => emit(state.copyWith(monthData: () => data)));
+  }
 
   Future<void> _readDay({required bool loading}) async {
     final classroom = state.classroom;
@@ -126,6 +161,51 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
     emit(state.copyWith(day: day));
     await refresh();
   }
+
+  void setTab(ClassPresenceTab tab) {
+    if (tab == state.tab) return;
+    emit(state.copyWith(tab: tab));
+    unawaited(_readMonth());
+  }
+
+  /// Le mois précédent ou suivant ; jamais au-delà du mois en cours.
+  Future<void> stepMonth(int direction) async {
+    if (direction < 0 && !state.canStepMonthBack) return;
+    final month = SchoolDayCalendar.addMonths(state.month, direction);
+    if (month.compareTo(state.today.substring(0, 7)) > 0) return;
+    emit(state.copyWith(month: month, monthData: () => null));
+    await _readMonth();
+  }
+
+  Future<void> goCurrentMonth() async {
+    final month = state.today.substring(0, 7);
+    if (month == state.month) return;
+    emit(state.copyWith(month: month, monthData: () => null));
+    await _readMonth();
+  }
+
+  /// Ouvre la fiche mensuelle d'un élève (sélecteur ou récapitulatif).
+  void openStudent(String studentId) {
+    emit(
+      state.copyWith(
+        studentId: () => studentId,
+        tab: ClassPresenceTab.studentMonth,
+      ),
+    );
+    unawaited(_readMonth());
+  }
+
+  void setRecapFilter(ClassRecapFilter filter) =>
+      emit(state.copyWith(recapQuery: state.recapQuery.withFilter(filter)));
+
+  void setRecapText(String text) {
+    if (text != state.recapQuery.text) {
+      emit(state.copyWith(recapQuery: state.recapQuery.withText(text)));
+    }
+  }
+
+  void resetRecapFilters() =>
+      emit(state.copyWith(recapQuery: ClassRecapQuery.none));
 
   // ── Filtres ───────────────────────────────────────────────────────────
 

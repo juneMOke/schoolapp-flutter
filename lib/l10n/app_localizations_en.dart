@@ -13620,4 +13620,114 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get classPresenceToastUnsupported =>
       'A reason on this day is unknown to this tablet: update the app before changing the call.';
+
+  @override
+  String get classPresenceTabRegister => 'Today\'s register';
+
+  @override
+  String classPresenceTabRegisterSubtitle(int marked, int total) {
+    return '$marked / $total students';
+  }
+
+  @override
+  String get classPresenceTabStudent => 'Monthly sheet';
+
+  @override
+  String classPresenceTabStudentSubtitle(String month) {
+    return 'Per student · $month';
+  }
+
+  @override
+  String get classPresenceTabRecap => 'Monthly summary';
+
+  @override
+  String get classPresenceTabRecapSubtitle => 'Totals → records & report card';
+
+  @override
+  String get classPresenceTabRecapSubtitleClosed => 'Sent to the records';
+
+  @override
+  String get classPresenceStudentPickerPlaceholder =>
+      'Search · First name Last name';
+
+  @override
+  String get classPresenceStudentSheetTitle => 'Monthly attendance sheet';
+
+  @override
+  String get classPresenceGirl => 'Girl';
+
+  @override
+  String get classPresenceBoy => 'Boy';
+
+  @override
+  String get classPresenceToWatch => 'To watch';
+
+  @override
+  String classPresenceKpiRate(int rate) {
+    return '$rate %';
+  }
+
+  @override
+  String get classPresenceRegisterComplete => 'Register complete';
+
+  @override
+  String classPresenceRecapEyebrow(String classroom) {
+    return 'Summary · $classroom';
+  }
+
+  @override
+  String classPresenceRecapDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days school days',
+      one: '1 school day',
+      zero: 'No school day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceRecapToDate => 'to date';
+
+  @override
+  String classPresenceRecapStudents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceTotalLates => 'Late arrivals';
+
+  @override
+  String classPresenceLatesValue(int count, int minutes) {
+    return '$count · $minutes min';
+  }
+
+  @override
+  String get classPresenceTotalToWatch => 'Students to watch';
+
+  @override
+  String get classPresenceFilterToWatch => 'To watch';
+
+  @override
+  String get classPresenceFilterPerfect => 'Perfect attendance';
+
+  @override
+  String get classPresenceColRate => 'Rate';
+
+  @override
+  String get classPresenceColSync => 'Sync';
+
+  @override
+  String get classPresenceRecapLegend =>
+      'NJ = unjustified · J = justified · ● to watch: 2 unjustified absences or rate < 85 % · tap a row to open the sheet';
+
+  @override
+  String get classPresenceRecapEmptyFilter => 'No student found';
 }

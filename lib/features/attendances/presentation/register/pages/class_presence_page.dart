@@ -18,7 +18,10 @@ import 'package:school_app_flutter/features/attendances/presentation/register/wi
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_picker_dialog.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_no_class.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_notices.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_tabs.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_recap_tab.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_tab.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/student_month_tab.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_error_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -181,10 +184,21 @@ class _Body extends StatelessWidget {
               context.read<AuthBloc>().add(const AuthLogoutRequested()),
         );
       case ClassPresenceLoad.ready:
-        return ClassRegisterTab(
-          state: state,
-          register: state.register!,
-          classroomName: state.classroom!.name,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClassPresenceTabs(state: state, onSelect: cubit.setTab),
+            const SizedBox(height: AppSpacing.lg),
+            switch (state.tab) {
+              ClassPresenceTab.register => ClassRegisterTab(
+                state: state,
+                register: state.register!,
+                classroomName: state.classroom!.name,
+              ),
+              ClassPresenceTab.studentMonth => StudentMonthTab(state: state),
+              ClassPresenceTab.recap => ClassRecapTab(state: state),
+            },
+          ],
         );
     }
   }

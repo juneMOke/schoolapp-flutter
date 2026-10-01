@@ -29,6 +29,8 @@ class _Auth extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
 
 class _Load extends Mock implements LoadClassPresenceDayUseCase {}
 
+class _LoadMonth extends Mock implements LoadClassPresenceMonthUseCase {}
+
 class _Save extends Mock implements SaveClassPresenceMarksUseCase {}
 
 class _Validate extends Mock implements ValidateClassPresenceDayUseCase {}
@@ -87,6 +89,7 @@ void main() {
 
     final cubit = ClassPresenceCubit(
       load: load,
+      loadMonth: _LoadMonth(),
       signals: signals,
       commands: ClassPresenceCommands(
         save: save,

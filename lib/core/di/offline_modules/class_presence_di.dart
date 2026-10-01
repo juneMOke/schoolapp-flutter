@@ -16,6 +16,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/presence/data/presence_schedule_reader.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_draft_local_data_source.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/register/class_presence_repository_impl.dart';
@@ -49,6 +50,7 @@ void registerClassPresence(GetIt getIt) {
   getIt.registerLazySingleton<ClassPresenceRepository>(
     () => ClassPresenceRepositoryImpl(
       sessions: getIt<AttendanceLocalDataSource>(),
+      history: getIt<AttendanceHistoryLocalDataSource>(),
       drafts: getIt<AttendanceDraftLocalDataSource>(),
       closures: getIt<AttendanceClosureLocalDataSource>(),
       roster: getIt<ClassroomLocalDataSource>(),
@@ -75,11 +77,15 @@ void registerClassPresence(GetIt getIt) {
   getIt.registerFactory(
     () => RetryClassPresenceDayUseCase(getIt<ClassPresenceRepository>()),
   );
+  getIt.registerFactory(
+    () => LoadClassPresenceMonthUseCase(getIt<ClassPresenceRepository>()),
+  );
 
   // BLoC en factory (règle n°2) : un cubit par écran ouvert.
   getIt.registerFactory<ClassPresenceCubit>(
     () => ClassPresenceCubit(
       load: getIt<LoadClassPresenceDayUseCase>(),
+      loadMonth: getIt<LoadClassPresenceMonthUseCase>(),
       signals: ResourceSyncSignals(
         bus: getIt<PullCompletionBus>(),
         engine: getIt<SyncEngine>(),

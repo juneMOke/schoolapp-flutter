@@ -6,11 +6,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Une rangée de cellules aux largeurs partagées par l'en-tête et les lignes :
 /// `null` = la colonne qui prend le reste.
-class StaffColumns extends StatelessWidget {
+class EteeloColumns extends StatelessWidget {
   final List<double?> widths;
   final List<Widget> cells;
 
-  const StaffColumns({super.key, required this.widths, required this.cells})
+  const EteeloColumns({super.key, required this.widths, required this.cells})
     : assert(widths.length == cells.length);
 
   @override
@@ -25,10 +25,10 @@ class StaffColumns extends StatelessWidget {
   );
 }
 
-/// Les tableaux RH (récapitulatif du Pointage, livre de paie, avances,
-/// historique) : un en-tête gris, des lignes filetées, et un défilement
-/// horizontal sous [minWidth].
-class StaffTable extends StatelessWidget {
+/// Un tableau à colonnes fixes (récapitulatifs du Pointage et de l'appel,
+/// livre de paie, avances, historique) : un en-tête gris, des lignes
+/// filetées, et un défilement horizontal sous [minWidth].
+class EteeloColumnTable extends StatelessWidget {
   final double minWidth;
   final List<double?> widths;
   final List<String> headers;
@@ -41,7 +41,7 @@ class StaffTable extends StatelessWidget {
   /// Une ligne de pied (total), facultative.
   final Widget? footer;
 
-  const StaffTable({
+  const EteeloColumnTable({
     super.key,
     required this.minWidth,
     required this.widths,
@@ -68,7 +68,7 @@ class StaffTable extends StatelessWidget {
                 color: AppColors.surfaceAlt,
                 borderRadius: AppRadius.brSm,
               ),
-              child: StaffColumns(
+              child: EteeloColumns(
                 widths: widths,
                 cells: [
                   for (final (index, text) in headers.indexed)
@@ -94,14 +94,14 @@ class StaffTable extends StatelessWidget {
   );
 }
 
-/// Une ligne de tableau RH : filet bas, toucher facultatif.
-class StaffTableRow extends StatelessWidget {
+/// Une ligne de [EteeloColumnTable] : filet bas, toucher facultatif.
+class EteeloColumnTableRow extends StatelessWidget {
   final List<double?> widths;
   final List<Widget> cells;
   final VoidCallback? onTap;
   final Color? background;
 
-  const StaffTableRow({
+  const EteeloColumnTableRow({
     super.key,
     required this.widths,
     required this.cells,
@@ -126,7 +126,7 @@ class StaffTableRow extends StatelessWidget {
         color: background,
         border: const Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      child: StaffColumns(widths: widths, cells: cells),
+      child: EteeloColumns(widths: widths, cells: cells),
     ),
   );
 }

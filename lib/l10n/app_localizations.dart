@@ -21559,6 +21559,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A reason on this day is unknown to this tablet: update the app before changing the call.'**
   String get classPresenceToastUnsupported;
+
+  /// No description provided for @classPresenceTabRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s register'**
+  String get classPresenceTabRegister;
+
+  /// No description provided for @classPresenceTabRegisterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{marked} / {total} students'**
+  String classPresenceTabRegisterSubtitle(int marked, int total);
+
+  /// No description provided for @classPresenceTabStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly sheet'**
+  String get classPresenceTabStudent;
+
+  /// No description provided for @classPresenceTabStudentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Per student · {month}'**
+  String classPresenceTabStudentSubtitle(String month);
+
+  /// No description provided for @classPresenceTabRecap.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly summary'**
+  String get classPresenceTabRecap;
+
+  /// No description provided for @classPresenceTabRecapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals → records & report card'**
+  String get classPresenceTabRecapSubtitle;
+
+  /// No description provided for @classPresenceTabRecapSubtitleClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to the records'**
+  String get classPresenceTabRecapSubtitleClosed;
+
+  /// No description provided for @classPresenceStudentPickerPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search · First name Last name'**
+  String get classPresenceStudentPickerPlaceholder;
+
+  /// No description provided for @classPresenceStudentSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly attendance sheet'**
+  String get classPresenceStudentSheetTitle;
+
+  /// No description provided for @classPresenceGirl.
+  ///
+  /// In en, this message translates to:
+  /// **'Girl'**
+  String get classPresenceGirl;
+
+  /// No description provided for @classPresenceBoy.
+  ///
+  /// In en, this message translates to:
+  /// **'Boy'**
+  String get classPresenceBoy;
+
+  /// No description provided for @classPresenceToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'To watch'**
+  String get classPresenceToWatch;
+
+  /// No description provided for @classPresenceKpiRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate} %'**
+  String classPresenceKpiRate(int rate);
+
+  /// No description provided for @classPresenceRegisterComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Register complete'**
+  String get classPresenceRegisterComplete;
+
+  /// No description provided for @classPresenceRecapEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary · {classroom}'**
+  String classPresenceRecapEyebrow(String classroom);
+
+  /// No description provided for @classPresenceRecapDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{No school day} =1{1 school day} other{{days} school days}}'**
+  String classPresenceRecapDays(int days);
+
+  /// No description provided for @classPresenceRecapToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'to date'**
+  String get classPresenceRecapToDate;
+
+  /// No description provided for @classPresenceRecapStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student} other{{count} students}}'**
+  String classPresenceRecapStudents(int count);
+
+  /// No description provided for @classPresenceTotalLates.
+  ///
+  /// In en, this message translates to:
+  /// **'Late arrivals'**
+  String get classPresenceTotalLates;
+
+  /// No description provided for @classPresenceLatesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} · {minutes} min'**
+  String classPresenceLatesValue(int count, int minutes);
+
+  /// No description provided for @classPresenceTotalToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Students to watch'**
+  String get classPresenceTotalToWatch;
+
+  /// No description provided for @classPresenceFilterToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'To watch'**
+  String get classPresenceFilterToWatch;
+
+  /// No description provided for @classPresenceFilterPerfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect attendance'**
+  String get classPresenceFilterPerfect;
+
+  /// No description provided for @classPresenceColRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get classPresenceColRate;
+
+  /// No description provided for @classPresenceColSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get classPresenceColSync;
+
+  /// No description provided for @classPresenceRecapLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'NJ = unjustified · J = justified · ● to watch: 2 unjustified absences or rate < 85 % · tap a row to open the sheet'**
+  String get classPresenceRecapLegend;
+
+  /// No description provided for @classPresenceRecapEmptyFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No student found'**
+  String get classPresenceRecapEmptyFilter;
 }
 
 class _AppLocalizationsDelegate

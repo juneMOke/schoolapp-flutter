@@ -161,6 +161,45 @@ void main() {
   );
 
   test(
+    'un retard est une présence : compté à part, jamais en absence',
+    () async {
+      await local.applyPulledSessions([
+        const AttendanceSessionDeltaDto(
+          id: 'srv-late',
+          classroomId: classroomId,
+          attendanceDate: '2026-05-04',
+          academicYearId: yearId,
+          updatedAt: '2026-05-04T08:00:00.000Z',
+          absences: [
+            AbsenceDeltaDto(
+              id: 'a-late',
+              studentId: 's1',
+              status: 'LATE',
+              arrivalTime: '07:48',
+              lateMinutes: 18,
+              updatedAt: '2026-05-04T08:00:00.000Z',
+            ),
+          ],
+        ).toPulled(1000),
+      ], 1000);
+      await seedMembership(studentId: 's1');
+      await markBootstrapComplete();
+
+      final res = (await repo.getStudentAttendanceStats(
+        studentId: 's1',
+        academicYearId: yearId,
+        period: StatsPeriod.month,
+        reference: DateTime(2026, 5, 15),
+      )).getOrElse(() => throw StateError('left'));
+
+      expect(res.absences, 0);
+      expect(res.present, 1);
+      expect(res.lateCount, 1);
+      expect(res.lateMinutes, 18);
+    },
+  );
+
+  test(
     'détail des absences : motif + split justifiée/injustifiée/sans motif',
     () async {
       await seedSession(

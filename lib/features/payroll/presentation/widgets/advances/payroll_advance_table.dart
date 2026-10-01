@@ -13,7 +13,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_table.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
@@ -47,7 +47,7 @@ class PayrollAdvanceTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return StaffTable(
+    return EteeloColumnTable(
       minWidth: AppDimensions.payrollAdvancesMinWidth,
       widths: _widths,
       endAligned: const {2},
@@ -76,7 +76,7 @@ class PayrollAdvanceTable extends StatelessWidget {
         onCancel != null &&
         advance.isLive &&
         !PayrollAdvanceRules.hasFrozenDeduction(snapshot, advance);
-    return StaffTableRow(
+    return EteeloColumnTableRow(
       widths: _widths,
       cells: [
         Row(
@@ -112,12 +112,12 @@ class PayrollAdvanceTable extends StatelessWidget {
         ),
         Text(
           PayrollLabels.day(context, advance.grantedOn),
-          style: StaffTableRow.figures(),
+          style: EteeloColumnTableRow.figures(),
         ),
         Text(
           money(amount),
           textAlign: TextAlign.end,
-          style: StaffTableRow.figures(strong: true),
+          style: EteeloColumnTableRow.figures(strong: true),
         ),
         Text(
           l10n.payrollAdvanceSchedule(

@@ -4,9 +4,17 @@ import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_month.dart';
 
 /// Une journée d'appel : la classe, l'année et le jour `YYYY-MM-DD`.
 typedef ClassDayKey = ({String classroomId, String academicYearId, String day});
+
+/// Un mois d'appel : la classe, l'année et le mois `YYYY-MM`.
+typedef ClassMonthKey = ({
+  String classroomId,
+  String academicYearId,
+  String month,
+});
 
 /// L'appel d'une classe (Présences des élèves v2) : lecture 100 % locale,
 /// brouillon local, envoi de l'appel entier à la validation.
@@ -38,4 +46,7 @@ abstract class ClassPresenceRepository {
 
   /// Remet en file l'envoi refusé d'un appel validé.
   Future<Either<Failure, Unit>> retryDay(ClassDayKey key);
+
+  /// Les appels validés d'un mois, la clôture et l'état de leur envoi.
+  Future<Either<Failure, ClassPresenceMonth>> loadMonth(ClassMonthKey key);
 }

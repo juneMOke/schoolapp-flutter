@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_payout_cell.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_table.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre : une ligne par agent, montants à droite en chiffres tabulaires,
@@ -50,7 +50,7 @@ class PayrollLedgerTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return StaffTable(
+    return EteeloColumnTable(
       minWidth: AppDimensions.payrollLedgerMinWidth,
       widths: _widths,
       endAligned: const {1, 2, 3, 4, 5},
@@ -77,10 +77,10 @@ class PayrollLedgerTable extends StatelessWidget {
     Widget amount(String text, {Color? color, bool strong = false}) => Text(
       text,
       textAlign: TextAlign.end,
-      style: StaffTableRow.figures(color: color, strong: strong),
+      style: EteeloColumnTableRow.figures(color: color, strong: strong),
     );
     final carried = line.carriedInCents;
-    return StaffTableRow(
+    return EteeloColumnTableRow(
       widths: _widths,
       onTap: () => onOpen(line),
       cells: [
@@ -177,7 +177,7 @@ class PayrollLedgerTable extends StatelessWidget {
     return Column(
       children: [
         for (final currency in currencies)
-          StaffTableRow(
+          EteeloColumnTableRow(
             widths: _widths,
             background: AppColors.surfaceAlt,
             cells: [
@@ -198,7 +198,7 @@ class PayrollLedgerTable extends StatelessWidget {
                     currency,
                   ),
                   textAlign: TextAlign.end,
-                  style: StaffTableRow.figures(strong: true),
+                  style: EteeloColumnTableRow.figures(strong: true),
                 ),
               const SizedBox.shrink(),
               const SizedBox.shrink(),

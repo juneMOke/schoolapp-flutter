@@ -70,6 +70,7 @@ void main() {
     );
     repo = ClassPresenceRepositoryImpl(
       sessions: sessions,
+      history: AttendanceHistoryLocalDataSource(db),
       drafts: AttendanceDraftLocalDataSource(db),
       closures: AttendanceClosureLocalDataSource(db),
       roster: roster,
@@ -320,6 +321,38 @@ void main() {
 
       await repo.retryDay(key);
       expect((await load()).sync, RecordSyncState.pending);
+    },
+  );
+
+  test(
+    'le mois : jours appelés et incidents des appels validés seulement',
+    () async {
+      await repo.saveMarks(key, {'s1': late, 's2': absent});
+      await repo.validateDay(key, (await load()).lines);
+      // Un brouillon d'un autre jour n'est pas un appel.
+      const ClassDayKey other = (
+        classroomId: 'c1',
+        academicYearId: 'y1',
+        day: '2026-09-30',
+      );
+      await repo.saveMarks(other, {'s1': absent});
+
+      final month = (await repo.loadMonth((
+        classroomId: key.classroomId,
+        academicYearId: key.academicYearId,
+        month: '2026-09',
+      ))).getOrElse(() => throw StateError('mois'));
+
+      expect(month.calledDays, {'2026-09-29'});
+      expect(month.incidentOf('2026-09-29', 's1')?.mark.lateMinutes, 18);
+      expect(
+        month.incidentOf('2026-09-29', 's2')?.status,
+        PresenceStatus.absent,
+      );
+      expect(month.incidentOf('2026-09-29', 's3'), isNull);
+      expect(month.incidentOf('2026-09-30', 's1'), isNull);
+      expect(month.sync, RecordSyncState.pending);
+      expect(month.closed, isFalse);
     },
   );
 }
