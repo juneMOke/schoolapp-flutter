@@ -41,7 +41,7 @@ class StaffRowActions implements PresenceRowActions {
 
   /// Le compte détient-il `hr.attendance.write` ?
   bool get canWrite =>
-      PermissionGate.allows(context, kStaffAttendanceWriteAccess.requires);
+      PermissionGate.allowsAccess(context, kStaffAttendanceWriteAccess);
 
   StaffAttendanceCubit get _cubit => context.read<StaffAttendanceCubit>();
 

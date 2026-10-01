@@ -1,4 +1,14 @@
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
+import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
+import 'package:school_app_flutter/core/offline/resource_sync_signals.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart'
+    show kAttendanceResource;
+import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_attendance_pull_usecase.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_commands.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
+import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart'
+    show kClassroomMembersResource;
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
@@ -64,5 +74,29 @@ void registerClassPresence(GetIt getIt) {
   );
   getIt.registerFactory(
     () => RetryClassPresenceDayUseCase(getIt<ClassPresenceRepository>()),
+  );
+
+  // BLoC en factory (règle n°2) : un cubit par écran ouvert.
+  getIt.registerFactory<ClassPresenceCubit>(
+    () => ClassPresenceCubit(
+      load: getIt<LoadClassPresenceDayUseCase>(),
+      signals: ResourceSyncSignals(
+        bus: getIt<PullCompletionBus>(),
+        engine: getIt<SyncEngine>(),
+        // L'appel lit l'appel, le roster, et l'horaire du socle.
+        watched: {
+          kAttendanceResource,
+          kClassroomMembersResource,
+          ...resourcesOf(SyncPlanKeys.schoolReferential),
+        },
+        pull: getIt<SyncAttendancePullUseCase>().call,
+      ),
+      commands: ClassPresenceCommands(
+        save: getIt<SaveClassPresenceMarksUseCase>(),
+        validate: getIt<ValidateClassPresenceDayUseCase>(),
+        reopen: getIt<ReopenClassPresenceDayUseCase>(),
+        retry: getIt<RetryClassPresenceDayUseCase>(),
+      ),
+    ),
   );
 }

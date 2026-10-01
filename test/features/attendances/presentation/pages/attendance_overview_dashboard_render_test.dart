@@ -18,7 +18,7 @@ import 'package:school_app_flutter/features/attendances/domain/entities/attendan
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_state.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_error_type.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_overview/attendance_overview_dashboard_skeleton.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/attendance_overview/attendance_overview_empty_view.dart';

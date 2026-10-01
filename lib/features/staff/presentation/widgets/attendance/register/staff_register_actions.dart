@@ -25,9 +25,9 @@ class StaffRegisterActions {
   StaffAttendanceCubit get _cubit => context.read<StaffAttendanceCubit>();
 
   Future<void> openSettings() async {
-    final editable = PermissionGate.allows(
+    final editable = PermissionGate.allowsAccess(
       context,
-      kStaffAttendanceManageAccess.requires,
+      kStaffAttendanceManageAccess,
     );
     final schedule = await EteeloFormDialog.show<PresenceSchedule>(
       context,

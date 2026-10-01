@@ -42,7 +42,7 @@ class StaffDayBanner extends StatelessWidget {
       ].join(' · '),
       showActions:
           !register.frozen &&
-          PermissionGate.allows(context, kStaffAttendanceWriteAccess.requires),
+          PermissionGate.allowsAccess(context, kStaffAttendanceWriteAccess),
       validateLabel: l10n.staffAttendanceValidateReport,
       onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
       onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
@@ -83,7 +83,7 @@ class StaffValidatedBanner extends StatelessWidget {
     final by = lock.lockedByName;
     final mayReopen =
         canReopen &&
-        PermissionGate.allows(context, kStaffAttendanceWriteAccess.requires);
+        PermissionGate.allowsAccess(context, kStaffAttendanceWriteAccess);
     return PresenceValidatedBanner(
       title: l10n.staffAttendanceValidatedTitle,
       byLine: by != null && when != null

@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/offline/student_attendance_stats.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart'
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_error_type.dart'
     show AttendanceErrorType;
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_event.dart';

@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_error_type.dart';
 
 /// Mappe une [Failure] vers le type d'erreur d'affichage [AttendanceErrorType].
 ///

@@ -4,11 +4,11 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
-import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_update.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/offline/daily_attendance.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/student_gender.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
@@ -16,7 +16,6 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
     show kClassroomMembersResource;
 
 import '../../../../../core/offline/offline_full_test_db.dart';
-import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 
 class MockIdGenerator extends Mock implements IdGenerator {}
 
@@ -27,11 +26,10 @@ void main() {
   late SyncMetaDao syncMeta;
   late OutboxDao outbox;
   late MockIdGenerator idGen;
-  late AttendanceOfflineRepositoryImpl repo;
+  late AttendanceDayWriter writer;
 
   const classroomId = 'c1';
   const yearId = 'year-1';
-  final date = DateTime.utc(2026, 6, 15);
   var clock = 5000;
 
   ClassroomMemberDto member(String sid, {String gender = 'MALE'}) =>
@@ -55,6 +53,28 @@ void main() {
         absenceReason: present ? null : AbsenceReason.sickness,
       );
 
+  /// Écrit l'appel du 15/06 comme le faisait l'écran d'avant la v2 : les
+  /// élèves affichés ([updates]) et, parmi eux, les absents.
+  Future<AttendanceDayWrite> record(List<AttendanceUpdate> updates) =>
+      writer.write(
+        classroomId: classroomId,
+        dateStr: '2026-06-15',
+        academicYearId: yearId,
+        covered: {for (final u in updates) u.studentId},
+        lines: [
+          for (final u in updates)
+            if (!u.present)
+              AttendanceDayLine(
+                studentId: u.studentId,
+                studentFirstName: u.studentFirstName,
+                studentLastName: u.studentLastName,
+                studentGender: 'MALE',
+                status: PresenceStatus.absent,
+                absenceReason: u.absenceReason?.toApiValue(),
+              ),
+        ],
+      );
+
   setUp(() async {
     db = await openFullOfflineDb();
     roster = ClassroomLocalDataSource(db);
@@ -66,11 +86,9 @@ void main() {
     var counter = 0;
     when(() => idGen.newId()).thenAnswer((_) => 'id-${counter++}');
 
-    repo = AttendanceOfflineRepositoryImpl(
+    writer = AttendanceDayWriter(
       localDataSource: local,
-      historyDataSource: AttendanceHistoryLocalDataSource(db),
       rosterDataSource: roster,
-      syncMetaDao: syncMeta,
       idGenerator: idGen,
       now: () => clock,
     );
@@ -88,36 +106,14 @@ void main() {
 
   tearDown(() async => db.close());
 
-  const emptyDaily = DailyAttendance(taken: false, records: []);
-
-  test(
-    'loadDailyAttendance : pas de session ⇒ appel non fait, roster présent',
-    () async {
-      final daily = (await repo.loadDailyAttendance(
-        classroomId: classroomId,
-        date: date,
-        academicYearId: yearId,
-      )).getOrElse(() => emptyDaily);
-      // Invariant #1 : aucune session ⇒ appel non fait (jamais « tous présents »).
-      expect(daily.taken, isFalse);
-      expect(daily.records, hasLength(3));
-      expect(daily.records.every((r) => r.present), isTrue);
-    },
-  );
-
   test(
     'recordDailyAttendance : seul l\'absent est matérialisé (par exception)',
     () async {
-      await repo.recordDailyAttendance(
-        classroomId: classroomId,
-        date: date,
-        academicYearId: yearId,
-        updates: [
-          update('s1', present: false),
-          update('s2', present: true),
-          update('s3', present: true),
-        ],
-      );
+      await record([
+        update('s1', present: false),
+        update('s2', present: true),
+        update('s3', present: true),
+      ]);
 
       final rows = await local.getDayRecords(
         classroomId: classroomId,
@@ -137,47 +133,13 @@ void main() {
     },
   );
 
-  test('loadDailyAttendance fusionne les absences locales', () async {
-    await repo.recordDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-      updates: [
-        update('s1', present: false),
-        update('s2', present: true),
-        update('s3', present: true),
-      ],
-    );
-
-    final daily = (await repo.loadDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-    )).getOrElse(() => emptyDaily);
-    // Session créée ⇒ appel fait.
-    expect(daily.taken, isTrue);
-    final s1 = daily.records.firstWhere((r) => r.studentId == 's1');
-    expect(s1.present, isFalse);
-    expect(daily.records.where((r) => r.present).length, 2);
-  });
-
   test(
-    'correction (retard) : l\'élève sort des exceptions (présent = non-ligne)',
+    'correction : l\'élève redevenu présent sort des exceptions (non-ligne)',
     () async {
-      await repo.recordDailyAttendance(
-        classroomId: classroomId,
-        date: date,
-        academicYearId: yearId,
-        updates: [update('s1', present: false)],
-      );
+      await record([update('s1', present: false)]);
       clock = 6000; // horloge plus récente
       // Réconciliation par différence : s1 redevenu présent sort de la liste.
-      await repo.recordDailyAttendance(
-        classroomId: classroomId,
-        date: date,
-        academicYearId: yearId,
-        updates: [update('s1', present: true)],
-      );
+      await record([update('s1', present: true)]);
 
       final rows = await local.getDayRecords(
         classroomId: classroomId,
@@ -185,56 +147,14 @@ void main() {
         academicYearId: yearId,
       );
       expect(rows, isEmpty);
-
-      final daily = (await repo.loadDailyAttendance(
-        classroomId: classroomId,
-        date: date,
-        academicYearId: yearId,
-      )).getOrElse(() => emptyDaily);
-      expect(daily.taken, isTrue);
-      expect(
-        daily.records.firstWhere((r) => r.studentId == 's1').present,
-        isTrue,
-      );
     },
   );
 
   test('outbox coalescé : ré-appel du même jour = 1 seule entrée', () async {
-    await repo.recordDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-      updates: [update('s1', present: false)],
-    );
+    await record([update('s1', present: false)]);
     clock = 6000;
-    await repo.recordDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-      updates: [update('s1', present: false), update('s2', present: false)],
-    );
+    await record([update('s1', present: false), update('s2', present: false)]);
     expect(await outbox.pendingCount(), 1);
-  });
-
-  test('getAttendanceRate : (effectif − absences) / effectif', () async {
-    await repo.recordDailyAttendance(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-      updates: [update('s1', present: false)],
-    );
-
-    final rate = (await repo.getAttendanceRate(
-      classroomId: classroomId,
-      date: date,
-      academicYearId: yearId,
-    )).getOrElse(() => throw StateError('left'));
-
-    expect(rate.effectif, 3);
-    expect(rate.absences, 1);
-    expect(rate.present, 2);
-    expect(rate.rate, closeTo(2 / 3, 0.0001));
-    expect(rate.syncedAt, 9999);
   });
 
   group('conformité régime C (payload exhaustif + horloge monotone)', () {
@@ -242,27 +162,20 @@ void main() {
       'une absence NON AFFICHEE mais toujours au roster est PRESERVEE',
       () async {
         // s3 est absent le 15/06 : la ligne existe en base.
-        await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [
-            update('s1', present: true),
-            update('s2', present: true),
-            update('s3', present: false),
-          ],
-        );
+        await record([
+          update('s1', present: true),
+          update('s2', present: true),
+          update('s3', present: false),
+        ]);
 
         // L'enseignant corrige s1 depuis une vue qui n'affiche PAS s3 (filtre,
         // pagination) : s3 est toujours membre actif, il n'a simplement jamais
         // ete sous les yeux de l'utilisateur.
         clock = 6000;
-        await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [update('s1', present: false), update('s2', present: true)],
-        );
+        await record([
+          update('s1', present: false),
+          update('s2', present: true),
+        ]);
 
         // Omettre s3 du payload le ferait SUPPRIMER cote serveur par
         // reconciliation par difference, alors que personne n'a voulu le retirer.
@@ -281,19 +194,15 @@ void main() {
     test(
       'un élève affiché et marqué présent est bien retiré (suppression voulue)',
       () async {
-        await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [update('s1', present: false), update('s2', present: true)],
-        );
+        await record([
+          update('s1', present: false),
+          update('s2', present: true),
+        ]);
         clock = 6000;
-        await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [update('s1', present: true), update('s2', present: true)],
-        );
+        await record([
+          update('s1', present: true),
+          update('s2', present: true),
+        ]);
 
         final rows = await db.query('attendance_records');
         expect(rows, isEmpty, reason: 'retard corrigé = non-ligne');
@@ -303,25 +212,15 @@ void main() {
     test(
       'horloge monotone : correction non perdue quand updated_at vient du serveur',
       () async {
-        await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [update('s1', present: false)],
-        );
+        await record([update('s1', present: false)]);
         // La session est réalignée sur un temps SERVEUR très en avance sur
         // l'horloge du device (cas nominal : pull au temps serveur).
         await db.update('attendance_sessions', {'updated_at': 900000});
 
         clock = 6000; // device en retard
-        final result = await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [update('s1', present: true)],
-        );
+        final result = await record([update('s1', present: true)]);
 
-        expect(result.isRight(), isTrue);
+        expect(result, AttendanceDayWrite.written);
         final session = (await db.query('attendance_sessions')).single;
         expect(
           session['updated_at'] as int,
@@ -334,22 +233,12 @@ void main() {
     );
 
     test('takenAt garde l\'heure du premier appel', () async {
-      await repo.recordDailyAttendance(
-        classroomId: classroomId,
-        date: date,
-        academicYearId: yearId,
-        updates: [update('s1', present: false)],
-      );
+      await record([update('s1', present: false)]);
       final firstTakenAt =
           (await db.query('attendance_sessions')).single['taken_at'] as int;
 
       clock = 88000;
-      await repo.recordDailyAttendance(
-        classroomId: classroomId,
-        date: date,
-        academicYearId: yearId,
-        updates: [update('s2', present: false)],
-      );
+      await record([update('s2', present: false)]);
 
       expect(
         (await db.query('attendance_sessions')).single['taken_at'],
@@ -361,12 +250,10 @@ void main() {
     test(
       'un eleve SORTI du roster n est PAS reinjecte (sinon 422 sans issue)',
       () async {
-        await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [update('s1', present: true), update('s3', present: false)],
-        );
+        await record([
+          update('s1', present: true),
+          update('s3', present: false),
+        ]);
 
         // s3 quitte la classe (transfert) : il sort du roster ACTIF.
         await db.update(
@@ -377,12 +264,7 @@ void main() {
         );
 
         clock = 6000;
-        await repo.recordDailyAttendance(
-          classroomId: classroomId,
-          date: date,
-          academicYearId: yearId,
-          updates: [update('s1', present: false)],
-        );
+        await record([update('s1', present: false)]);
 
         // Le serveur valide requireAllInRoster sur son roster ACTIF courant et
         // rejette l AGREGAT ENTIER en 422 s il voit s3. Comme ATTENDANCE n est

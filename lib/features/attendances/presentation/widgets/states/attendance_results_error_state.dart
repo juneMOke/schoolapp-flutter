@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_error_type.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Etat d'erreur de l'appel (presences) : reutilise l'anatomie partagee

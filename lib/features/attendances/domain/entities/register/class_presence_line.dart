@@ -85,9 +85,8 @@ class ClassPresenceLine extends Equatable {
   /// Le motif et la précision qui partent au serveur.
   (AbsenceReason?, String?) get wireReason {
     final justification = mark.justification;
-    if (justification != null)
-      return (justification.reason, justification.note);
-    return (keptReason, keptNote);
+    if (justification == null) return (keptReason, keptNote);
+    return (justification.reason, justification.note);
   }
 
   /// La même ligne portant [mark]. Toucher à la justification (en poser une,

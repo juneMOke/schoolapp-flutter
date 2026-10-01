@@ -31,8 +31,6 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/get_atte
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_attendance_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_detail_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/get_disciplinary_case_list_usecase.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/course_remote_data_source.dart';
@@ -1081,17 +1079,6 @@ Future<void> configureDependencies({
 
   getIt.registerFactory<GetAttendanceUseCase>(
     () => GetAttendanceUseCase(getIt<AttendanceRepository>()),
-  );
-
-  getIt.registerFactory<AttendanceBloc>(
-    () => AttendanceBloc(
-      // Lecture offline-first (Phase 2) : l'appel du jour vient du cache local
-      // (LoadDailyAttendanceUseCase). L'écriture est dispatchée séparément vers
-      // AttendanceOfflineBloc (overlay) — l'ancien chemin online
-      // (UpdateAttendanceUseCase) a été retiré. GetAttendanceUseCase reste
-      // enregistré mais dormant (lecture online conservée, non branchée).
-      loadDailyAttendance: getIt<LoadDailyAttendanceUseCase>(),
-    ),
   );
 
   // ── Attendance stats (tableau de bord présence école-wide) ──────────────────

@@ -45,10 +45,7 @@ import 'package:school_app_flutter/features/attendances/data/repository/offline/
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/offline/attendance_offline_repository.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/offline/attendance_pull_repository.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_local_attendance_rate_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/get_student_attendance_stats_usecase.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/offline/load_daily_attendance_usecase.dart';
-import 'package:school_app_flutter/features/attendances/domain/usecases/offline/record_daily_attendance_offline_usecase.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_attendance_pull_usecase.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
@@ -166,13 +163,9 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
   getIt.registerLazySingleton<AttendanceOfflineRepository>(
     () => AttendanceOfflineRepositoryImpl(
-      localDataSource: getIt<AttendanceLocalDataSource>(),
       historyDataSource: getIt<AttendanceHistoryLocalDataSource>(),
       rosterDataSource: getIt<ClassroomLocalDataSource>(),
       syncMetaDao: getIt<SyncMetaDao>(),
-      idGenerator: getIt<IdGenerator>(),
-      currentUser: getIt<CurrentUserContext>(),
-      syncEngine: getIt<SyncEngine>(),
     ),
   );
   getIt.registerLazySingleton<AttendancePullRepository>(
@@ -245,17 +238,7 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
     ),
   );
   // Présence
-  getIt.registerFactory<LoadDailyAttendanceUseCase>(
-    () => LoadDailyAttendanceUseCase(getIt<AttendanceOfflineRepository>()),
-  );
-  getIt.registerFactory<RecordDailyAttendanceOfflineUseCase>(
-    () => RecordDailyAttendanceOfflineUseCase(
-      getIt<AttendanceOfflineRepository>(),
-    ),
-  );
-  getIt.registerFactory<GetLocalAttendanceRateUseCase>(
-    () => GetLocalAttendanceRateUseCase(getIt<AttendanceOfflineRepository>()),
-  );
+
   getIt.registerFactory<SyncAttendancePullUseCase>(
     () => SyncAttendancePullUseCase(getIt<PullCoordinator>()),
   );
@@ -322,9 +305,6 @@ void registerClassroomAttendanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<AttendanceOfflineBloc>(
     () => AttendanceOfflineBloc(
-      loadDaily: getIt<LoadDailyAttendanceUseCase>(),
-      recordDaily: getIt<RecordDailyAttendanceOfflineUseCase>(),
-      getRate: getIt<GetLocalAttendanceRateUseCase>(),
       getStudentStats: getIt<GetStudentAttendanceStatsUseCase>(),
     ),
   );

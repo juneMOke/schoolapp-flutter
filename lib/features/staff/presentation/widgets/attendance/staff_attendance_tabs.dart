@@ -69,9 +69,9 @@ class StaffAttendanceTabs extends StatelessWidget {
           badge: closed
               ? tone(PresenceStatus.present, l10n.presenceMarkBadgeClosed)
               : state.canCloseMonth &&
-                    PermissionGate.allows(
+                    PermissionGate.allowsAccess(
                       context,
-                      kStaffAttendanceManageAccess.requires,
+                      kStaffAttendanceManageAccess,
                     )
               ? tone(PresenceStatus.none, l10n.presenceMarkBadgeToClose)
               : null,

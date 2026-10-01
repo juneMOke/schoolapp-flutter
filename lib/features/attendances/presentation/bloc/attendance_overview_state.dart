@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/entities/stats_period.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/attendance_overview/attendance_overview.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_error_type.dart';
 
 enum AttendanceOverviewStatus { initial, loading, success, failure }
 

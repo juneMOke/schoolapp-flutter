@@ -72,9 +72,9 @@ class StaffRegisterTab extends StatelessWidget {
             selected: query.status,
             onStatus: cubit.setDayStatus,
             viewMode: state.viewMode,
-            showLegend: PermissionGate.allows(
+            showLegend: PermissionGate.allowsAccess(
               context,
-              kStaffAttendanceWriteAccess.requires,
+              kStaffAttendanceWriteAccess,
             ),
             toJustify: register.toJustify,
             toolbar: StaffSearchToolbar(

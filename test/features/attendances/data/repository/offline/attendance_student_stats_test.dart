@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/core/entities/stats_period.dart';
-import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_pull_models.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
@@ -34,11 +32,9 @@ void main() {
     roster = ClassroomLocalDataSource(db);
     syncMeta = SyncMetaDao(db);
     repo = AttendanceOfflineRepositoryImpl(
-      localDataSource: local,
       historyDataSource: AttendanceHistoryLocalDataSource(db),
       rosterDataSource: roster,
       syncMetaDao: syncMeta,
-      idGenerator: const IdGenerator(Uuid()),
     );
   });
 

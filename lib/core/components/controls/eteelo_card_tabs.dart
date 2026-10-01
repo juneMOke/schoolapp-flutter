@@ -85,9 +85,7 @@ class _TabCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = active
-        ? AppColors.presenceMarkOnBanner
-        : AppColors.textPrimary;
+    final ink = active ? AppColors.presenceMarkOnBanner : AppColors.textPrimary;
     final muted = active
         ? AppColors.presenceMarkOnBannerMuted
         : AppColors.textSecondary;

@@ -19,6 +19,9 @@ class EteeloFormDialog extends StatelessWidget {
   /// Action placée à gauche, séparée des autres (retirer, effacer).
   final Widget? leading;
 
+  /// Largeur maximale ; celle des modales de saisie par défaut.
+  final double maxWidth;
+
   const EteeloFormDialog({
     super.key,
     required this.title,
@@ -26,6 +29,7 @@ class EteeloFormDialog extends StatelessWidget {
     required this.actions,
     this.eyebrow,
     this.leading,
+    this.maxWidth = AppDimensions.formDialogMaxWidth,
   });
 
   /// Ouvre [dialog] ; rend la valeur passée à `Navigator.pop`.
@@ -40,8 +44,8 @@ class EteeloFormDialog extends StatelessWidget {
       backgroundColor: AppColors.surfaceRaised,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.formDialogMaxWidth,
+        constraints: BoxConstraints(
+          maxWidth: maxWidth,
           maxHeight: AppDimensions.formDialogMaxHeight,
         ),
         child: Padding(

@@ -97,6 +97,12 @@ class PermissionGate extends StatelessWidget {
     );
   }
 
+  /// [allows] sur un [ModuleAccess] entier, conjonction comprise : passer
+  /// seulement `access.requires` en perdrait le `requiresAll`, et une
+  /// exigence « les deux droits » se lirait « l'un des deux ».
+  static bool allowsAccess(BuildContext context, ModuleAccess access) =>
+      allows(context, access.requires, requiresAll: access.requiresAll);
+
   /// Le [AuthBloc] de l'arbre, ou `null` s'il n'y en a pas — même convention de
   /// transparence que [allows] et que le rendu.
   ///

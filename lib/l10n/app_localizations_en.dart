@@ -4918,42 +4918,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceHeroChipDate => 'Date filter';
 
   @override
-  String get attendanceSearchTitle => 'Attendance Search';
-
-  @override
-  String get attendanceSearchHint =>
-      'Select cycle, level, class and date to display attendance records.';
-
-  @override
-  String get attendanceDateLabel => 'Date';
-
-  @override
-  String get attendanceCycleLabel => 'Cycle';
-
-  @override
-  String get attendanceLevelLabel => 'Level';
-
-  @override
-  String get attendanceClassLabel => 'Class';
-
-  @override
-  String get attendanceShowClassAction => 'Show class';
-
-  @override
-  String get attendanceInvitationMessage =>
-      'Run a search to display attendance for the selected class.';
-
-  @override
-  String get attendanceSelectClassTitle => 'Select a class';
-
-  @override
-  String get attendanceEmptySelectionMessage =>
-      'Select a cycle, a level, and then a class to load the attendance list.';
-
-  @override
-  String get attendanceLoadingMessage => 'Loading attendance records...';
-
-  @override
   String get attendanceEmptyStudentsTitle => 'No students in this class';
 
   @override
@@ -4964,206 +4928,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attendanceEmptyOpenComposition => 'Open Composition';
 
   @override
-  String get attendanceExportAction => 'Export';
-
-  @override
-  String get attendanceExportTooltip => 'Prepare result export';
-
-  @override
-  String get attendanceExportSoon => 'Export will be available soon.';
-
-  @override
-  String get attendanceSaveAction => 'Save';
-
-  @override
-  String get attendanceSavingAction => 'Saving...';
-
-  @override
-  String get attendanceSaveTooltip => 'Save all entered changes';
-
-  @override
-  String get attendanceSaveValidationHint =>
-      'Fix absent rows without a reason before saving.';
-
-  @override
-  String get attendanceSaveSuccess =>
-      'Attendance records were saved successfully.';
-
-  @override
-  String get attendanceValidateCallAction => 'Validate attendance';
-
-  @override
-  String get attendancePendingChanges => 'Pending changes';
-
-  @override
-  String get attendancePendingInvalidChanges => 'Fixes required';
-
-  @override
-  String get attendanceRowModifiedLabel => 'Modified';
-
-  @override
-  String get attendanceUnsavedChangesTitle => 'Unsaved changes';
-
-  @override
-  String get attendanceUnsavedChangesMessage =>
-      'A new search will discard unsaved changes. Do you want to continue?';
-
-  @override
   String get attendanceDateTooltip => 'Choose the attendance date';
-
-  @override
-  String get attendanceStatusInProgress => 'Attendance in progress';
-
-  @override
-  String get attendanceStatusReady => 'Ready to validate';
-
-  @override
-  String get attendancePresentCount => 'Present';
-
-  @override
-  String get attendanceJustifiedCount => 'Justified';
-
-  @override
-  String get attendanceUnjustifiedCount => 'Unjustified';
-
-  @override
-  String get attendancePendingCount => 'Pending reason';
-
-  @override
-  String get attendanceAbsentCount => 'Absent';
-
-  @override
-  String get attendanceTotalCountCompact => 'Total';
-
-  @override
-  String get attendanceDefaultPresenceHelper =>
-      'All students are marked present by default. Tap Absent to report an exception.';
-
-  @override
-  String get attendanceReadyToValidate =>
-      'No absence is missing a reason. You can validate attendance.';
-
-  @override
-  String attendanceMissingReasonsStatus(int count) {
-    return '$count absence(s) without reason - complete required';
-  }
-
-  @override
-  String get attendanceAllPresentConfirmTitle => 'Confirm attendance';
-
-  @override
-  String attendanceAllPresentConfirmMessage(int count) {
-    return 'Do you confirm that all $count students are present?';
-  }
-
-  @override
-  String get attendanceTotalCount => 'Total students';
-
-  @override
-  String get attendanceGirlsCount => 'Girls';
-
-  @override
-  String get attendanceBoysCount => 'Boys';
-
-  @override
-  String attendanceCriteriaSummary(String classroomName, String formattedDate) {
-    return 'Class: $classroomName · Date: $formattedDate';
-  }
-
-  @override
-  String get attendanceTableLastName => 'Last name';
-
-  @override
-  String get attendanceTableMiddleName => 'Middle name';
-
-  @override
-  String get attendanceTableFirstName => 'First name';
-
-  @override
-  String get attendanceTablePresent => 'Present';
-
-  @override
-  String get attendanceTableAbsenceReason => 'Reason';
-
-  @override
-  String get attendanceTableAbsenceReasonNote => 'Note';
-
-  @override
-  String get attendancePresenceStatusLabel => 'Attendance status';
-
-  @override
-  String get attendancePresentValue => 'Present';
-
-  @override
-  String get attendanceAbsentValue => 'Absent';
-
-  @override
-  String get attendanceReadOnlyHint => 'Read-only informational status';
-
-  @override
-  String get attendanceReasonRequiredError =>
-      'Please select a reason for this absence.';
-
-  @override
-  String get attendanceReasonRequiredHint => 'Reason required for an absence.';
-
-  @override
-  String get attendanceMotifRequisLabel => 'Reason required';
-
-  @override
-  String get attendanceReasonDisabledHint =>
-      'Reason is required only when the student is absent.';
-
-  @override
-  String get attendanceNoteDisabledHint =>
-      'Note is optional only when the student is absent.';
-
-  @override
-  String get attendanceNotePlaceholder => 'Add details if needed';
-
-  @override
-  String get attendanceNoMiddleName => 'Not provided';
-
-  @override
-  String get attendanceNoAbsenceReason => 'No reason';
-
-  @override
-  String get attendanceNoAbsenceNote => 'No note';
-
-  @override
-  String get attendanceErrorNetwork =>
-      'Check your internet connection and try again.';
-
-  @override
-  String get attendanceErrorNotFound => 'No attendance resource was found.';
-
-  @override
-  String get attendanceErrorValidation => 'Submitted data is invalid.';
-
-  @override
-  String get attendanceErrorUnauthorized =>
-      'You are not authorized to access this resource.';
-
-  @override
-  String get attendanceErrorInvalidCredentials =>
-      'Your credentials do not allow access to attendance.';
-
-  @override
-  String get attendanceErrorServer =>
-      'Server is unavailable. Please try again later.';
-
-  @override
-  String get attendanceErrorStorage => 'A local storage error occurred.';
-
-  @override
-  String get attendanceErrorAuth => 'An authentication error occurred.';
-
-  @override
-  String get attendanceErrorUnknown => 'An unexpected error occurred.';
-
-  @override
-  String get attendanceErrorForbidden =>
-      'You do not have the required permissions to view attendance.';
 
   @override
   String get attendanceErrorRetry => 'Retry';
@@ -5213,76 +4978,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get attendanceErrorUnknownMessage =>
       'An unexpected error occurred while loading attendance.';
-
-  @override
-  String get attendanceSaveCallAction => 'Save attendance';
-
-  @override
-  String get attendancePastCallAmendLocked =>
-      'This call is already recorded and the day is over: correcting it is for the discipline office, not for whoever takes the call.';
-
-  @override
-  String get attendanceFocusPrevious => 'Previous';
-
-  @override
-  String get attendanceFocusNext => 'Next';
-
-  @override
-  String get attendanceModeList => 'List';
-
-  @override
-  String get attendanceModeFocus => 'Focus';
-
-  @override
-  String attendancePendingReasons(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count reasons to fill in',
-      one: '1 reason to fill in',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get attendanceUnsupportedReasonBlocked =>
-      'An absence carries a reason this version of the app does not know. Pick one to be able to save — otherwise it would be overwritten with nobody noticing.';
-
-  @override
-  String get attendanceMarkAllPresentAction => 'All present';
-
-  @override
-  String get attendanceCallNotTakenTitle => 'Attendance not taken';
-
-  @override
-  String get attendanceCallNotTakenMessage =>
-      'No attendance has been recorded for this day yet. Save to record it.';
-
-  @override
-  String get attendanceSaveOverlayEyebrow => 'Attendance';
-
-  @override
-  String get attendanceSaveProcessingTitle => 'Saving attendance…';
-
-  @override
-  String get attendanceSaveSuccessTitle => 'Attendance saved!';
-
-  @override
-  String get attendanceSaveSuccessSubtitle =>
-      'Class attendance records have been saved.';
-
-  @override
-  String get attendanceSaveErrorTitle => 'Save failed';
-
-  @override
-  String get attendanceSaveErrorMessage =>
-      'Your entries are preserved. Check your connection and try again.';
-
-  @override
-  String get attendanceSaveRetryAction => 'Retry';
-
-  @override
-  String get attendanceSaveCloseAction => 'Done';
 
   @override
   String get absenceReasonSickness => 'Sickness';
@@ -13763,4 +13458,166 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get absenceReasonBadWeather => 'Bad weather';
+
+  @override
+  String get classPresencePickClass => 'Choose the class';
+
+  @override
+  String get classPresencePickerEyebrow => 'Attendance';
+
+  @override
+  String classPresenceClassMeta(String level, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return '$level · $_temp0';
+  }
+
+  @override
+  String classPresenceStudentsShort(int count) {
+    return '$count st.';
+  }
+
+  @override
+  String get classPresenceNoClassTitle =>
+      'Choose the class you are taking attendance for';
+
+  @override
+  String get classPresenceNoClassMessage =>
+      'Attendance is taken class by class from the tablet — even offline.';
+
+  @override
+  String get classPresenceNoClassesTitle => 'No class on this tablet';
+
+  @override
+  String get classPresenceNoClassesMessage =>
+      'This year\'s classes arrive with the synchronisation.';
+
+  @override
+  String classPresenceEyebrowToday(String classroom) {
+    return 'Today\'s call · $classroom';
+  }
+
+  @override
+  String classPresenceEyebrowPast(String classroom) {
+    return 'Call — past day · $classroom';
+  }
+
+  @override
+  String get classPresenceAllMarked => 'The whole class is marked';
+
+  @override
+  String get classPresenceValidate => 'Validate the call';
+
+  @override
+  String get classPresenceSearchLabel => 'Search for a student';
+
+  @override
+  String get classPresenceSearchPlaceholder =>
+      'Last name, middle name, first name';
+
+  @override
+  String get classPresenceColStudent => 'Student';
+
+  @override
+  String classPresenceSubtitle(String firstName, int number, String classroom) {
+    return '$firstName · No. $number · $classroom';
+  }
+
+  @override
+  String get classPresenceEmptyFilterTitle => 'No student in this filter';
+
+  @override
+  String classPresenceReportTitle(String classroom) {
+    return 'Validate the call — $classroom';
+  }
+
+  @override
+  String classPresenceReportUnmarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count unmarked students will be marked present at the start time',
+      one: '1 unmarked student will be marked present at the start time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceReportLock =>
+      'Validating locks the day: the call must be reopened to change an attendance. A justification can be added without reopening.';
+
+  @override
+  String get classPresenceValidatedTitle =>
+      'Call validated — attendance locked';
+
+  @override
+  String classPresenceUpdatedBy(String name, String when) {
+    return 'By $name · updated on $when';
+  }
+
+  @override
+  String classPresenceUpdatedAt(String when) {
+    return 'Updated on $when';
+  }
+
+  @override
+  String get classPresenceMonthClosedBanner =>
+      'Month closed — attendance locked';
+
+  @override
+  String get classPresenceReopenPastHint =>
+      'Only the prefect and the head of discipline can reopen a past day\'s call.';
+
+  @override
+  String classPresenceRefused(String reason) {
+    return 'The call was refused: $reason';
+  }
+
+  @override
+  String classPresenceToastRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students marked present',
+      one: '1 student marked present',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceToastValidated(String classroom) {
+    return 'Call of $classroom validated';
+  }
+
+  @override
+  String get classPresenceToastReopened =>
+      'Call reopened: the day can be edited again';
+
+  @override
+  String get classPresenceToastRetried => 'Sending again';
+
+  @override
+  String get classPresenceToastDayFrozen =>
+      'Call validated — reopen it to change an attendance';
+
+  @override
+  String get classPresenceToastDayFrozenNoAmend =>
+      'Call validated — only the prefect and the head of discipline can reopen it';
+
+  @override
+  String get classPresenceToastMonthFrozen =>
+      'Month closed: its attendance can no longer change';
+
+  @override
+  String get classPresenceToastForbidden =>
+      'Only the homeroom teacher, the prefect and the head of discipline take attendance.';
+
+  @override
+  String get classPresenceToastUnsupported =>
+      'A reason on this day is unknown to this tablet: update the app before changing the call.';
 }

@@ -1,4 +1,6 @@
-/// Les jours et les mois du Pointage, sur des dates civiles `YYYY-MM-DD` —
+import 'package:equatable/equatable.dart';
+
+/// Les jours et les mois du Pointage et de l'appel, sur des dates civiles `YYYY-MM-DD` —
 /// jamais d'heure ni de fuseau, pour qu'un calcul fait à 23 h ne glisse pas
 /// d'un jour.
 ///
@@ -73,7 +75,7 @@ abstract final class SchoolDayCalendar {
 
 /// Les bornes de l'année scolaire courante, `YYYY-MM-DD`. Une borne inconnue
 /// n'exclut rien.
-class SchoolYearBounds {
+class SchoolYearBounds extends Equatable {
   final String? start;
   final String? end;
 
@@ -82,4 +84,7 @@ class SchoolYearBounds {
   bool contains(String day) =>
       (start == null || day.compareTo(start!) >= 0) &&
       (end == null || day.compareTo(end!) <= 0);
+
+  @override
+  List<Object?> get props => [start, end];
 }

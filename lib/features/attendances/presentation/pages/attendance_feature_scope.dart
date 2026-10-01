@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/offline/sync_attendance_pull_usecase.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/disciplinary_case_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/attendance_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
@@ -22,7 +21,6 @@ class AttendanceFeatureScope extends StatefulWidget {
 }
 
 class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
-  late final AttendanceBloc _attendanceBloc;
   late final DisciplinaryCaseBloc _disciplinaryCaseBloc;
   late final AttendanceOfflineBloc _attendanceOfflineBloc;
   late final DisciplinaryCaseOfflineBloc _disciplinaryCaseOfflineBloc;
@@ -32,7 +30,6 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
   @override
   void initState() {
     super.initState();
-    _attendanceBloc = GetIt.instance<AttendanceBloc>();
     _disciplinaryCaseBloc = GetIt.instance<DisciplinaryCaseBloc>();
     _attendanceOfflineBloc = GetIt.instance<AttendanceOfflineBloc>();
     _disciplinaryCaseOfflineBloc =
@@ -64,7 +61,6 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
 
   @override
   void dispose() {
-    _attendanceBloc.close();
     _disciplinaryCaseBloc.close();
     _attendanceOfflineBloc.close();
     _disciplinaryCaseOfflineBloc.close();
@@ -77,7 +73,6 @@ class _AttendanceFeatureScopeState extends State<AttendanceFeatureScope> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AttendanceBloc>.value(value: _attendanceBloc),
         BlocProvider<DisciplinaryCaseBloc>.value(value: _disciplinaryCaseBloc),
         BlocProvider<AttendanceOfflineBloc>.value(
           value: _attendanceOfflineBloc,

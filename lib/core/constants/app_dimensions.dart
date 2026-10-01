@@ -628,6 +628,17 @@ class AppDimensions {
   /// Opacité d'un jour à venir dans le calendrier de la fiche mensuelle.
   static const presenceMarkUpcomingOpacity = 0.4;
 
+  // ── Présences des élèves (appel par classe) ──
+  /// Le sélecteur de classe : une modale plus large que les modales de saisie,
+  /// pour tenir les classes d'un niveau sur une ligne.
+  static const classPickerDialogMaxWidth = 620.0;
+  static const classPickerClassHeight = 48.0;
+  static const classPickerClassMinWidth = 120.0;
+
+  /// Le bouton de classe de l'en-tête et son médaillon.
+  static const classPickerButtonHeight = 52.0;
+  static const classPickerMedallionSize = 38.0;
+
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
   // Le livre défile horizontalement sous 920 dp ; les colonnes de montant sont
   // alignées à droite, en chiffres tabulaires.
