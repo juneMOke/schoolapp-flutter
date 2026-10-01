@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/offline/db_batching.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_line_wire.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_pull_models.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_record_row.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_session_row.dart';
@@ -21,6 +22,7 @@ class AttendanceLocalDataSource {
 
   static const String sessionsTable = 'attendance_sessions';
   static const String recordsTable = 'attendance_records';
+  static const String draftMarksTable = 'attendance_draft_marks';
 
   /// Session d'un `(classe, date, année)` ou `null` = **appel non fait**.
   Future<AttendanceSessionRow?> getSession({
@@ -56,7 +58,8 @@ class AttendanceLocalDataSource {
   /// Confirme un appel (agrégat exhaustif). En une transaction :
   ///  1. **upsert de la session** sur la clé naturelle + LWW (`updated_at`
   ///     rebumpé même si seule une absence change) ;
-  ///  2. **upsert des absences** (present=0), rattachées à la session ;
+  ///  2. **upsert des exceptions** (absences et retards), rattachées à la
+  ///     session ;
   ///  3. **réconciliation par différence** : toute exception de la session dont
   ///     l'élève n'est plus dans la liste d'absents est **supprimée** (retard
   ///     corrigé → l'élève sort simplement des exceptions) ;
@@ -64,7 +67,9 @@ class AttendanceLocalDataSource {
   ///
   /// [session] porte l'`id` client (transport) ; s'il existe déjà une session
   /// pour la clé naturelle, son `id` local est **conservé** (id = transport,
-  /// clé naturelle = vérité). [absentRows] ne contient QUE les absents.
+  /// clé naturelle = vérité). [absentRows] ne contient QUE les exceptions
+  /// (retards et absences). La même transaction vide le brouillon du jour et
+  /// lève une réouverture.
   /// Renvoie `false` si la garde LWW locale a fait barrage (rien n'a été écrit,
   /// rien n'a été enfilé) — l'appelant ne doit alors PAS annoncer un succès.
   Future<bool> confirmDailyAttendance({
@@ -109,11 +114,24 @@ class AttendanceLocalDataSource {
             'updated_at': session.updatedAt,
             'sync_status': SyncState.pendingSync.dbValue,
             'synced_at': null,
+            // Valider (ou renvoyer) l'appel clôt sa correction sur la tablette.
+            'reopened_at': null,
           },
           where: 'id = ?',
           whereArgs: [existing.id],
         );
       }
+      // Le brouillon du jour devient l'appel : il n'a plus lieu d'être.
+      await txn.delete(
+        draftMarksTable,
+        where:
+            'classroom_id = ? AND attendance_date = ? AND academic_year_id = ?',
+        whereArgs: [
+          session.classroomId,
+          session.attendanceDate,
+          session.academicYearId,
+        ],
+      );
 
       for (final row in absentRows) {
         await _upsertAbsence(txn, row.copyWithSessionId(sessionId));
@@ -283,7 +301,10 @@ class AttendanceLocalDataSource {
           recordsTable,
           {
             'session_id': existing.id,
-            'present': 0,
+            'present': canonical.isLate ? 1 : 0,
+            'status': canonical.status,
+            'arrival_time': canonical.arrivalTime,
+            'late_minutes': canonical.lateMinutes,
             'absence_reason': canonical.absenceReason,
             'absence_reason_note': canonical.absenceReasonNote,
             'updated_at': canonical.updatedAt,
@@ -330,6 +351,19 @@ class AttendanceLocalDataSource {
           final row = item.session.copyWithId(sessionId);
           if (existing == null) {
             await txn.insert(sessionsTable, row.toMap());
+            // L'appel de ce jour a été fait ailleurs : un brouillon commencé
+            // ici n'a plus d'objet (il ne serait plus jamais lu).
+            await txn.delete(
+              draftMarksTable,
+              where:
+                  'classroom_id = ? AND attendance_date = ? '
+                  'AND academic_year_id = ?',
+              whereArgs: [
+                row.classroomId,
+                row.attendanceDate,
+                row.academicYearId,
+              ],
+            );
           } else {
             await txn.update(
               sessionsTable,
@@ -359,97 +393,21 @@ class AttendanceLocalDataSource {
     return applied;
   }
 
-  /// Nombre d'absences locales d'un jour (present=0) — numérateur du taux AF-3.
-  Future<int> countAbsences({
+  /// Oublie l'appel d'un jour (session, lignes, brouillon) : l'état local ne
+  /// vaut plus rien et seul le serveur le connaît — un appel refusé dans un
+  /// mois clos. Le pull suivant le rapporte tel que le serveur le tient.
+  Future<void> discardDay({
     required String classroomId,
     required String dateStr,
     required String academicYearId,
-  }) async {
-    final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS c FROM $recordsTable WHERE classroom_id = ? '
-      'AND attendance_date = ? AND academic_year_id = ? AND present = 0',
-      [classroomId, dateStr, academicYearId],
-    );
-    return (rows.first['c'] as int?) ?? 0;
-  }
-
-  /// **Jours appelés** d'une classe sur une période (dénominateur des stats
-  /// AF-3, §5) : nombre de sessions. [fromStr]/[toStr] nuls = année entière
-  /// (les sessions sont déjà cadrées par `academic_year_id`).
-  Future<int> countSessions({
-    required String classroomId,
-    required String academicYearId,
-    String? fromStr,
-    String? toStr,
-  }) async {
-    final where = StringBuffer('classroom_id = ? AND academic_year_id = ?');
-    final args = <Object?>[classroomId, academicYearId];
-    if (fromStr != null && toStr != null) {
-      where.write(' AND attendance_date BETWEEN ? AND ?');
-      args
-        ..add(fromStr)
-        ..add(toStr);
-    }
-    final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS c FROM $sessionsTable WHERE $where',
-      args,
-    );
-    return (rows.first['c'] as int?) ?? 0;
-  }
-
-  /// **Jours appelés** d'une classe sur un intervalle à bornes **indépendantes**
-  /// (F6, intervalles d'appartenance) : chaque borne inclusive s'applique seule
-  /// (≠ [countSessions] qui exige les deux). `null` = borne ouverte de ce côté.
-  Future<int> countSessionsBetween({
-    required String classroomId,
-    required String academicYearId,
-    String? fromInclusive,
-    String? toInclusive,
-  }) async {
-    final where = StringBuffer('classroom_id = ? AND academic_year_id = ?');
-    final args = <Object?>[classroomId, academicYearId];
-    if (fromInclusive != null) {
-      where.write(' AND attendance_date >= ?');
-      args.add(fromInclusive);
-    }
-    if (toInclusive != null) {
-      where.write(' AND attendance_date <= ?');
-      args.add(toInclusive);
-    }
-    final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS c FROM $sessionsTable WHERE $where',
-      args,
-    );
-    return (rows.first['c'] as int?) ?? 0;
-  }
-
-  /// **Absences d'un élève** sur une période, détail complet (numérateur +
-  /// motif/note des stats AF-3 §5), triées du plus récent au plus ancien.
-  /// [fromStr]/[toStr] nuls = année entière.
-  Future<List<AttendanceRecordRow>> getStudentAbsenceRecords({
-    required String studentId,
-    required String academicYearId,
-    String? fromStr,
-    String? toStr,
-  }) async {
-    final where = StringBuffer(
-      'student_id = ? AND academic_year_id = ? AND present = 0',
-    );
-    final args = <Object?>[studentId, academicYearId];
-    if (fromStr != null && toStr != null) {
-      where.write(' AND attendance_date BETWEEN ? AND ?');
-      args
-        ..add(fromStr)
-        ..add(toStr);
-    }
-    final rows = await _db.query(
-      recordsTable,
-      where: where.toString(),
-      whereArgs: args,
-      orderBy: 'attendance_date DESC',
-    );
-    return rows.map(AttendanceRecordRow.fromMap).toList(growable: false);
-  }
+  }) => _db.transaction((txn) async {
+    const where =
+        'classroom_id = ? AND attendance_date = ? AND academic_year_id = ?';
+    final args = [classroomId, dateStr, academicYearId];
+    await txn.delete(recordsTable, where: where, whereArgs: args);
+    await txn.delete(sessionsTable, where: where, whereArgs: args);
+    await txn.delete(draftMarksTable, where: where, whereArgs: args);
+  });
 
   Future<AttendanceSessionRow?> _sessionByKey(
     DatabaseExecutor db, {
@@ -489,13 +447,22 @@ class AttendanceLocalDataSource {
 /// ce qui fait autorité (motif, note, jeton), jamais l'identité de l'élève —
 /// l'ACK ne la transporte pas et on ne l'invente pas.
 class CanonicalAbsence {
+  /// `ABSENT` ou `LATE` ; un serveur d'avant la v2 n'en dit rien (absence).
+  final String status;
+  final String? arrivalTime;
+  final int? lateMinutes;
   final String? absenceReason;
   final String? absenceReasonNote;
   final int updatedAt;
 
   const CanonicalAbsence({
     required this.updatedAt,
+    this.status = AttendanceLineWire.absent,
+    this.arrivalTime,
+    this.lateMinutes,
     this.absenceReason,
     this.absenceReasonNote,
   });
+
+  bool get isLate => status == AttendanceLineWire.late;
 }

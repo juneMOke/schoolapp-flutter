@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fing
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Confirmer une soumission ou une validation : ce qui part, devise par
@@ -33,7 +33,7 @@ class PayrollConfirmDialog extends StatelessWidget {
     required String confirmLabel,
     String? warning,
   }) async =>
-      await StaffDialog.show<bool>(
+      await EteeloFormDialog.show<bool>(
         context,
         PayrollConfirmDialog(
           view: view,
@@ -48,7 +48,7 @@ class PayrollConfirmDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final warning = this.warning;
-    return StaffDialog(
+    return EteeloFormDialog(
       title: title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

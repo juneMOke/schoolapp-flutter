@@ -1,7 +1,7 @@
 import 'package:school_app_flutter/features/staff/data/local/staff_document_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Ce que l'envoi d'une pièce fait à sa ligne, et ce qu'on relit d'elle pour
 /// l'ouvrir.
@@ -30,7 +30,7 @@ class StaffDocumentSyncDao {
       table,
       columns: ['id'],
       where: 'sync_status != ?',
-      whereArgs: [StaffSyncState.pending.dbValue],
+      whereArgs: [RecordSyncState.pending.dbValue],
     );
     return [for (final row in rows) row['id']! as String];
   }
@@ -59,7 +59,7 @@ class StaffDocumentSyncDao {
   }) => _db.update(
     table,
     {
-      'sync_status': StaffSyncState.failed.dbValue,
+      'sync_status': RecordSyncState.failed.dbValue,
       'sync_error': reason,
       'sync_error_code': code,
       'updated_at': nowMs,

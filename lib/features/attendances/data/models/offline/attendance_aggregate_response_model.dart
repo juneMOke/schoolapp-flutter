@@ -84,12 +84,20 @@ class AttendanceAggregateResponseModel extends Equatable {
 /// Une absence telle que le serveur la détient après arbitrage.
 class AttendanceAbsenceAck extends Equatable {
   final String studentId;
+
+  /// `ABSENT` ou `LATE` ; `null` d'un serveur d'avant la v2 (= absence).
+  final String? status;
+  final String? arrivalTime;
+  final int? lateMinutes;
   final String? absenceReason;
   final String? absenceReasonNote;
   final String? updatedAt;
 
   const AttendanceAbsenceAck({
     required this.studentId,
+    this.status,
+    this.arrivalTime,
+    this.lateMinutes,
     this.absenceReason,
     this.absenceReasonNote,
     this.updatedAt,
@@ -100,6 +108,9 @@ class AttendanceAbsenceAck extends Equatable {
     if (studentId == null || studentId.isEmpty) return null;
     return AttendanceAbsenceAck(
       studentId: studentId,
+      status: json['status'] as String?,
+      arrivalTime: json['arrivalTime'] as String?,
+      lateMinutes: (json['lateMinutes'] as num?)?.toInt(),
       absenceReason: json['absenceReason'] as String?,
       absenceReasonNote: json['absenceReasonNote'] as String?,
       updatedAt: json['updatedAt'] as String?,
@@ -109,6 +120,9 @@ class AttendanceAbsenceAck extends Equatable {
   @override
   List<Object?> get props => [
     studentId,
+    status,
+    arrivalTime,
+    lateMinutes,
     absenceReason,
     absenceReasonNote,
     updatedAt,

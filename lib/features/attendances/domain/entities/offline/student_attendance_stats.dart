@@ -32,6 +32,11 @@ class StudentAttendanceStats extends Equatable {
   /// Prérequis des statistiques : l'année entière est en base (invariant #7).
   final bool bootstrapComplete;
 
+  /// Retards de la période (des présences, comptées à part) et leurs
+  /// minutes cumulées.
+  final int lateCount;
+  final int lateMinutes;
+
   /// Fraîcheur du dernier pull (ADR-002), à afficher avec les chiffres.
   final int? syncedAt;
 
@@ -43,6 +48,8 @@ class StudentAttendanceStats extends Equatable {
     required this.entries,
     required this.bootstrapComplete,
     this.syncedAt,
+    this.lateCount = 0,
+    this.lateMinutes = 0,
   });
 
   /// Les chiffres sont fiables (à afficher) uniquement si le bootstrap est fait.
@@ -77,5 +84,7 @@ class StudentAttendanceStats extends Equatable {
     entries,
     bootstrapComplete,
     syncedAt,
+    lateCount,
+    lateMinutes,
   ];
 }

@@ -2,24 +2,29 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_agent_month.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_stats.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_card_frame.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_count_tile.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_agent_picker.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_holiday_state.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_incident_list.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_month_calendar.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_month_nav.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_tile.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_empty.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_month_views.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_incident_list.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_calendar.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_person_picker.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_kpi_grid.dart';
 
 /// L'onglet « Fiche mensuelle » : un agent, un mois, en lecture seule.
 class StaffAgentMonthTab extends StatelessWidget {
@@ -29,11 +34,10 @@ class StaffAgentMonthTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<StaffAttendanceCubit>();
     final members = state.snapshot.members;
-    if (members.isEmpty) {
-      return const StaffRegisterEmpty(filtered: false);
-    }
+    if (members.isEmpty) return const StaffRegisterEmpty();
     final member = members.firstWhere(
       (m) => m.id == state.agentId,
       orElse: () => members.first,
@@ -53,14 +57,27 @@ class StaffAgentMonthTab extends StatelessWidget {
           spacing: AppSpacing.lg,
           runSpacing: AppSpacing.md,
           children: [
-            StaffAgentPicker(
-              members: members,
-              selected: member,
+            PresencePersonPicker<StaffMember>(
+              entries: [
+                for (final m in members)
+                  PresencePickerEntry(
+                    value: m,
+                    id: m.id,
+                    firstName: m.firstName,
+                    lastName: m.lastName,
+                    fullName: m.fullName,
+                    detail: m.jobTitle,
+                  ),
+              ],
+              selectedId: member.id,
+              label: l10n.staffAttendanceTabAgent,
+              placeholder: l10n.staffAttendanceAgentPicker,
+              matches: StaffMemberSearch.matches,
               onSelected: (picked) => cubit.openAgent(picked.id),
             ),
-            StaffMonthNav(
+            PresenceMonthNav(
               month: state.month,
-              isCurrent: state.month == state.today.substring(0, 7),
+              isCurrent: state.isCurrentMonth,
               onPrevious: state.canStepMonthBack
                   ? () => unawaited(cubit.stepMonth(-1))
                   : null,
@@ -71,21 +88,34 @@ class StaffAgentMonthTab extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.lg),
         if (month.isHoliday)
-          StaffHolidayState(
+          PresenceHolidayState(
             month: state.month,
             onCurrent: () => unawaited(cubit.goCurrentMonth()),
           )
         else ...[
           _Kpis(stats: month.stats),
           const SizedBox(height: AppSpacing.lg),
-          StaffAttendanceCardFrame(
+          PresenceCardFrame(
             title: member.fullName,
-            child: StaffMonthCalendar(days: month.calendar),
+            child: PresenceMonthCalendar(days: month.calendar),
           ),
           const SizedBox(height: AppSpacing.lg),
-          StaffAttendanceCardFrame(
-            title: AppLocalizations.of(context)!.staffAttendanceIncidentsTitle,
-            child: StaffIncidentList(incidents: month.incidents),
+          PresenceCardFrame(
+            title: l10n.presenceMarkIncidentsTitle,
+            child: PresenceIncidentList<StaffAbsenceReason>(
+              incidents: [
+                for (final record in month.incidents)
+                  PresenceIncident(
+                    day: record.workDate,
+                    status: record.status,
+                    arrival: record.arrival,
+                    lateMinutes: record.lateMinutes,
+                    reason: record.justification?.reason,
+                  ),
+              ],
+              reasonLabel: (reason) =>
+                  StaffAttendanceLabels.reason(l10n, reason),
+            ),
           ),
         ],
       ],
@@ -103,64 +133,41 @@ class _Kpis extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final amount = stats.amount;
     final tiles = [
-      StaffCountTile(
-        tone: StaffAttendanceStatus.present,
+      PresenceCountTile(
+        tone: PresenceStatus.present,
         label: stats.isHourly
             ? l10n.staffAttendanceKpiDaysWorked
-            : l10n.staffAttendanceKpiPresences,
+            : l10n.presenceMarkKpiPresences,
         value: stats.isHourly
             ? '${stats.present}'
-            : l10n.staffAttendanceKpiRatio(stats.present, stats.workDays),
+            : l10n.presenceMarkKpiRatio(stats.present, stats.workDays),
       ),
-      StaffCountTile(
-        tone: StaffAttendanceStatus.late,
-        label: l10n.staffAttendanceKpiLates,
-        value: '${stats.late}',
-        detail: l10n.staffAttendanceKpiLatesDetail(
-          stats.lateMinutes,
-          stats.lateUnjustified,
-        ),
+      PresenceCountTile.lates(
+        l10n,
+        count: stats.late,
+        minutes: stats.lateMinutes,
+        unjustified: stats.lateUnjustified,
       ),
-      StaffCountTile(
-        tone: StaffAttendanceStatus.absent,
-        label: l10n.staffAttendanceKpiAbsences,
-        value: '${stats.absent}',
-        detail: l10n.staffAttendanceKpiAbsencesDetail(
-          stats.absentJustified,
-          stats.absentUnjustified,
-        ),
+      PresenceCountTile.absences(
+        l10n,
+        count: stats.absent,
+        justified: stats.absentJustified,
+        unjustified: stats.absentUnjustified,
       ),
       if (stats.isHourly)
-        StaffCountTile(
-          tone: StaffAttendanceStatus.none,
+        PresenceCountTile(
+          tone: PresenceStatus.none,
           label: l10n.staffAttendanceKpiHours,
-          value: StaffAttendanceLabels.hours(l10n, stats.workedMinutes),
+          value: PresenceLabels.hours(l10n, stats.workedMinutes),
           detail: amount == null ? null : MoneyFormat.format(amount),
         )
       else
-        StaffCountTile(
-          tone: StaffAttendanceStatus.none,
-          label: l10n.staffAttendanceKpiNotMarked,
+        PresenceCountTile(
+          tone: PresenceStatus.none,
+          label: l10n.presenceMarkKpiNotMarked,
           value: '${stats.notMarked}',
         ),
     ];
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns =
-            constraints.maxWidth >
-                AppDimensions.staffAttendanceKpiWideBreakpoint
-            ? 4
-            : 2;
-        final width =
-            (constraints.maxWidth - AppSpacing.md * (columns - 1)) / columns;
-        return Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.md,
-          children: [
-            for (final tile in tiles) SizedBox(width: width, child: tile),
-          ],
-        );
-      },
-    );
+    return PresenceKpiGrid(tiles: tiles);
   }
 }

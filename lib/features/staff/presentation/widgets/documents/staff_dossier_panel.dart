@@ -12,7 +12,6 @@ import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document_type.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_contract_timeline.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_dossier.dart';
@@ -25,6 +24,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/agent/sta
 import 'package:school_app_flutter/features/staff/presentation/widgets/documents/staff_document_tile.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/documents/staff_document_viewer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les pièces du dossier d'un agent enregistré, sous l'étape « Diplômes &
 /// pièces » : celles que son contrat exige d'abord, puis celles versées en
@@ -155,7 +155,7 @@ class StaffDossierPanel extends StatelessWidget {
                   type: type,
                   document: snapshot.currentOf(type.rawCode),
                   required: required.contains(type.rawCode),
-                  memberPending: member.syncState != StaffSyncState.synced,
+                  memberPending: member.syncState != RecordSyncState.synced,
                   onAdd: canWrite && !state.busy
                       ? () => unawaited(_add(context, type))
                       : null,

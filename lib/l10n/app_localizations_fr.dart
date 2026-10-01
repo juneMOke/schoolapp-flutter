@@ -4955,42 +4955,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceHeroChipDate => 'Filtre par date';
 
   @override
-  String get attendanceSearchTitle => 'Recherche des présences';
-
-  @override
-  String get attendanceSearchHint =>
-      'Sélectionnez cycle, niveau, classe et date pour afficher les enregistrements.';
-
-  @override
-  String get attendanceDateLabel => 'Date';
-
-  @override
-  String get attendanceCycleLabel => 'Cycle';
-
-  @override
-  String get attendanceLevelLabel => 'Niveau';
-
-  @override
-  String get attendanceClassLabel => 'Classe';
-
-  @override
-  String get attendanceShowClassAction => 'Afficher la classe';
-
-  @override
-  String get attendanceInvitationMessage =>
-      'Lancez une recherche pour afficher les présences de la classe sélectionnée.';
-
-  @override
-  String get attendanceSelectClassTitle => 'Sélectionnez une classe';
-
-  @override
-  String get attendanceEmptySelectionMessage =>
-      'Choisissez un cycle, un niveau puis une classe pour charger la liste d\'appel.';
-
-  @override
-  String get attendanceLoadingMessage => 'Chargement des présences en cours...';
-
-  @override
   String get attendanceEmptyStudentsTitle => 'Aucun élève dans cette classe';
 
   @override
@@ -5001,211 +4965,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get attendanceEmptyOpenComposition => 'Ouvrir la Composition';
 
   @override
-  String get attendanceExportAction => 'Exporter';
-
-  @override
-  String get attendanceExportTooltip => 'Préparer l\'export des résultats';
-
-  @override
-  String get attendanceExportSoon => 'L\'export sera disponible prochainement.';
-
-  @override
-  String get attendanceSaveAction => 'Enregistrer';
-
-  @override
-  String get attendanceSavingAction => 'Enregistrement...';
-
-  @override
-  String get attendanceSaveTooltip =>
-      'Enregistrer toutes les modifications saisies';
-
-  @override
-  String get attendanceSaveValidationHint =>
-      'Corrigez les lignes absentes sans motif avant d\'enregistrer.';
-
-  @override
-  String get attendanceSaveSuccess =>
-      'Les présences ont été enregistrées avec succès.';
-
-  @override
-  String get attendanceValidateCallAction => 'Valider l\'appel';
-
-  @override
-  String get attendancePendingChanges => 'Modifications en attente';
-
-  @override
-  String get attendancePendingInvalidChanges => 'Corrections requises';
-
-  @override
-  String get attendanceRowModifiedLabel => 'Modifiée';
-
-  @override
-  String get attendanceUnsavedChangesTitle => 'Modifications non enregistrées';
-
-  @override
-  String get attendanceUnsavedChangesMessage =>
-      'Une nouvelle recherche supprimera les changements non enregistrés. Voulez-vous continuer ?';
-
-  @override
   String get attendanceDateTooltip => 'Choisir la date des présences';
-
-  @override
-  String get attendanceStatusInProgress => 'Appel en cours';
-
-  @override
-  String get attendanceStatusReady => 'Prêt à valider';
-
-  @override
-  String get attendancePresentCount => 'Présents';
-
-  @override
-  String get attendanceJustifiedCount => 'Justifiés';
-
-  @override
-  String get attendanceUnjustifiedCount => 'Non justifiés';
-
-  @override
-  String get attendancePendingCount => 'À motiver';
-
-  @override
-  String get attendanceAbsentCount => 'Absents';
-
-  @override
-  String get attendanceTotalCountCompact => 'Total';
-
-  @override
-  String get attendanceDefaultPresenceHelper =>
-      'Tous les élèves sont présents par défaut. Tapez Absent pour signaler une exception.';
-
-  @override
-  String get attendanceReadyToValidate =>
-      'Aucune absence sans motif. Vous pouvez valider l\'appel.';
-
-  @override
-  String attendanceMissingReasonsStatus(int count) {
-    return '$count absence(s) sans motif — à compléter';
-  }
-
-  @override
-  String get attendanceAllPresentConfirmTitle => 'Confirmer l\'appel';
-
-  @override
-  String attendanceAllPresentConfirmMessage(int count) {
-    return 'Confirmez-vous que les $count élèves sont présents ?';
-  }
-
-  @override
-  String get attendanceTotalCount => 'Effectif total';
-
-  @override
-  String get attendanceGirlsCount => 'Effectif filles';
-
-  @override
-  String get attendanceBoysCount => 'Effectif garçons';
-
-  @override
-  String attendanceCriteriaSummary(String classroomName, String formattedDate) {
-    return 'Classe : $classroomName · Date : $formattedDate';
-  }
-
-  @override
-  String get attendanceTableLastName => 'Nom';
-
-  @override
-  String get attendanceTableMiddleName => 'Post-nom';
-
-  @override
-  String get attendanceTableFirstName => 'Prénom';
-
-  @override
-  String get attendanceTablePresent => 'Présence';
-
-  @override
-  String get attendanceTableAbsenceReason => 'Motif';
-
-  @override
-  String get attendanceTableAbsenceReasonNote => 'Note';
-
-  @override
-  String get attendancePresenceStatusLabel => 'Statut de présence';
-
-  @override
-  String get attendancePresentValue => 'Présent';
-
-  @override
-  String get attendanceAbsentValue => 'Absent';
-
-  @override
-  String get attendanceReadOnlyHint => 'Statut consultatif en lecture seule';
-
-  @override
-  String get attendanceReasonRequiredError =>
-      'Veuillez sélectionner un motif pour cette absence.';
-
-  @override
-  String get attendanceReasonRequiredHint => 'Motif requis pour une absence.';
-
-  @override
-  String get attendanceMotifRequisLabel => 'Motif requis';
-
-  @override
-  String get attendanceReasonDisabledHint =>
-      'Le motif est requis seulement pour une absence.';
-
-  @override
-  String get attendanceNoteDisabledHint =>
-      'La note est facultative seulement pour une absence.';
-
-  @override
-  String get attendanceNotePlaceholder => 'Ajouter une précision si nécessaire';
-
-  @override
-  String get attendanceNoMiddleName => 'Non renseigné';
-
-  @override
-  String get attendanceNoAbsenceReason => 'Aucun motif';
-
-  @override
-  String get attendanceNoAbsenceNote => 'Aucune note';
-
-  @override
-  String get attendanceErrorNetwork =>
-      'Vérifiez votre connexion internet puis réessayez.';
-
-  @override
-  String get attendanceErrorNotFound =>
-      'Aucune ressource de présence n\'a été trouvée.';
-
-  @override
-  String get attendanceErrorValidation =>
-      'Les données envoyées sont invalides.';
-
-  @override
-  String get attendanceErrorUnauthorized =>
-      'Vous n\'êtes pas autorisé à accéder à cette ressource.';
-
-  @override
-  String get attendanceErrorInvalidCredentials =>
-      'Vos identifiants ne permettent pas d\'accéder aux présences.';
-
-  @override
-  String get attendanceErrorServer =>
-      'Le serveur est indisponible. Réessayez plus tard.';
-
-  @override
-  String get attendanceErrorStorage =>
-      'Une erreur de stockage local est survenue.';
-
-  @override
-  String get attendanceErrorAuth =>
-      'Une erreur d\'authentification est survenue.';
-
-  @override
-  String get attendanceErrorUnknown => 'Une erreur inattendue est survenue.';
-
-  @override
-  String get attendanceErrorForbidden =>
-      'Vous n\'avez pas les droits requis pour consulter les présences.';
 
   @override
   String get attendanceErrorRetry => 'Réessayer';
@@ -5257,80 +5017,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une erreur inattendue est survenue lors du chargement de l\'appel.';
 
   @override
-  String get attendanceSaveCallAction => 'Enregistrer l\'appel';
-
-  @override
-  String get attendancePastCallAmendLocked =>
-      'Cet appel a déjà été enregistré et le jour est révolu : le corriger relève de la surveillance générale, pas de la prise d\'appel.';
-
-  @override
-  String get attendanceFocusPrevious => 'Précédent';
-
-  @override
-  String get attendanceFocusNext => 'Suivant';
-
-  @override
-  String get attendanceModeList => 'Liste';
-
-  @override
-  String get attendanceModeFocus => 'Focus';
-
-  @override
-  String attendancePendingReasons(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count motifs à renseigner',
-      one: '1 motif à renseigner',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get attendanceUnsupportedReasonBlocked =>
-      'Une absence porte un motif que cette version de l\'application ne connaît pas. Choisissez-en un pour pouvoir enregistrer — sans quoi il serait remplacé sans que personne le voie.';
-
-  @override
-  String get attendanceMarkAllPresentAction => 'Tout présent';
-
-  @override
-  String get attendanceCallNotTakenTitle => 'Appel non fait';
-
-  @override
-  String get attendanceCallNotTakenMessage =>
-      'Aucun appel n\'a encore été enregistré pour ce jour. Validez pour l\'enregistrer.';
-
-  @override
-  String get attendanceSaveOverlayEyebrow => 'Appel';
-
-  @override
-  String get attendanceSaveProcessingTitle => 'Enregistrement en cours…';
-
-  @override
-  String get attendanceSaveSuccessTitle => 'Appel enregistré !';
-
-  @override
-  String get attendanceSaveSuccessSubtitle =>
-      'Les présences de la classe ont été sauvegardées.';
-
-  @override
-  String get attendanceSaveErrorTitle => 'Échec de l\'enregistrement';
-
-  @override
-  String get attendanceSaveErrorMessage =>
-      'Les saisies sont conservées. Vérifiez votre connexion et réessayez.';
-
-  @override
-  String get attendanceSaveRetryAction => 'Réessayer';
-
-  @override
-  String get attendanceSaveCloseAction => 'Terminer';
-
-  @override
   String get absenceReasonSickness => 'Maladie';
 
   @override
-  String get absenceReasonFamilyEmergency => 'Urgence familiale';
+  String get absenceReasonFamilyEmergency => 'Raison familiale';
 
   @override
   String get absenceReasonPersonal => 'Personnel';
@@ -6046,10 +5736,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get offlineEnrollmentQueued =>
       'Inscription enregistrée — en attente de synchronisation';
-
-  @override
-  String get offlineAttendanceQueued =>
-      'Appel enregistré — en attente de synchronisation';
 
   @override
   String get offlineDisciplinaryCaseQueued =>
@@ -11545,13 +11231,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffCategorySupport => 'Appui';
 
   @override
-  String get staffViewLabel => 'Affichage';
+  String get collectionViewLabel => 'Affichage';
 
   @override
-  String get staffViewGrid => 'Cartes';
+  String get collectionViewGrid => 'Cartes';
 
   @override
-  String get staffViewList => 'Liste';
+  String get collectionViewList => 'Liste';
 
   @override
   String get staffContractLabel => 'Contrat';
@@ -11586,13 +11272,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffNumberPending => 'Matricule en attente';
 
   @override
-  String get staffSyncSynced => 'Synchronisé';
+  String get recordSyncSynced => 'Synchronisé';
 
   @override
-  String get staffSyncPending => 'Sur la tablette';
+  String get recordSyncPending => 'Sur la tablette';
 
   @override
-  String get staffSyncFailed => 'Échec d\'envoi';
+  String get recordSyncFailed => 'Échec d\'envoi';
 
   @override
   String get staffTableAgent => 'Agent';
@@ -12203,18 +11889,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceTabRecapSubtitle => 'Totaux → Paie';
 
   @override
-  String staffAttendanceBadgeToMark(int count) {
+  String presenceMarkBadgeToMark(int count) {
     return '$count à pointer';
   }
 
   @override
-  String get staffAttendanceBadgeValidated => 'Validé';
+  String get presenceMarkBadgeValidated => 'Validé';
 
   @override
-  String get staffAttendanceBadgeToClose => 'À clôturer';
+  String get presenceMarkBadgeToClose => 'À clôturer';
 
   @override
-  String get staffAttendanceBadgeClosed => 'Clôturé';
+  String get presenceMarkBadgeClosed => 'Clôturé';
 
   @override
   String get staffAttendanceEyebrowToday => 'Registre du jour';
@@ -12223,59 +11909,59 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceEyebrowPast => 'Registre — jour passé';
 
   @override
-  String get staffAttendanceGoToday => 'Aujourd\'hui';
+  String get presenceMarkGoToday => 'Aujourd\'hui';
 
   @override
-  String get staffAttendancePreviousDay => 'Jour précédent';
+  String get presenceMarkPreviousDay => 'Jour précédent';
 
   @override
-  String get staffAttendanceNextDay => 'Jour suivant';
+  String get presenceMarkNextDay => 'Jour suivant';
 
   @override
-  String staffAttendanceSettingsPill(String start, int tolerance) {
+  String presenceMarkSettingsPill(String start, int tolerance) {
     return 'Début $start · tolérance $tolerance min';
   }
 
   @override
-  String staffAttendanceProgress(int marked, int total) {
+  String presenceMarkProgress(int marked, int total) {
     return '$marked / $total';
   }
 
   @override
-  String staffAttendanceOnTablet(int count) {
+  String presenceMarkOnTablet(int count) {
     return '$count sur la tablette';
   }
 
   @override
-  String get staffAttendanceMarkRemaining =>
+  String get presenceMarkMarkRemaining =>
       'Marquer tous les « À pointer » présents à l’heure de début';
 
   @override
   String get staffAttendanceValidateReport => 'Valider le rapport';
 
   @override
-  String get staffAttendanceFilterAll => 'Tous';
+  String get presenceMarkFilterAll => 'Tous';
 
   @override
-  String get staffAttendanceFilterPresent => 'Présents';
+  String get presenceMarkFilterPresent => 'Présents';
 
   @override
-  String get staffAttendanceFilterLate => 'Retards';
+  String get presenceMarkFilterLate => 'Retards';
 
   @override
-  String get staffAttendanceFilterAbsent => 'Absents';
+  String get presenceMarkFilterAbsent => 'Absents';
 
   @override
-  String get staffAttendanceStatusNone => 'À pointer';
+  String get presenceMarkStatusNone => 'À pointer';
 
   @override
-  String get staffAttendanceStatusPresent => 'Présent';
+  String get presenceMarkStatusPresent => 'Présent';
 
   @override
-  String get staffAttendanceStatusLate => 'En retard';
+  String get presenceMarkStatusLate => 'En retard';
 
   @override
-  String get staffAttendanceStatusAbsent => 'Absent';
+  String get presenceMarkStatusAbsent => 'Absent';
 
   @override
   String get staffAttendanceSearchLabel => 'Rechercher un agent';
@@ -12285,15 +11971,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'Nom, post-nom, prénom, fonction';
 
   @override
-  String get staffAttendanceLegendGrid =>
+  String get presenceMarkLegendGrid =>
       'Touchez une carte : Présent › En retard › Absent';
 
   @override
-  String get staffAttendanceLegendList =>
+  String get presenceMarkLegendList =>
       'Touchez un statut (retouchez-le pour l’effacer)';
 
   @override
-  String staffAttendanceToJustify(int count) {
+  String presenceMarkToJustify(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -12304,50 +11990,50 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String staffAttendanceLateDetail(int minutes, String start) {
+  String presenceMarkLateDetail(int minutes, String start) {
     return '+$minutes min après $start';
   }
 
   @override
-  String get staffAttendanceAbsenceJustified => 'Absence justifiée';
+  String get presenceMarkAbsenceJustified => 'Absence justifiée';
 
   @override
-  String get staffAttendanceAbsenceUnjustified => 'Absence non justifiée';
+  String get presenceMarkAbsenceUnjustified => 'Absence non justifiée';
 
   @override
-  String get staffAttendanceOnTime => 'Arrivé(e) à l’heure';
+  String get presenceMarkOnTime => 'Arrivé(e) à l’heure';
 
   @override
-  String get staffAttendanceOnTimeShort => 'À l’heure';
+  String get presenceMarkOnTimeShort => 'À l’heure';
 
   @override
-  String get staffAttendanceNotMarked => 'Non pointé';
+  String get presenceMarkNotMarked => 'Non pointé';
 
   @override
-  String get staffAttendanceDeparture => 'Départ';
+  String get presenceMarkDeparture => 'Départ';
 
   @override
-  String get staffAttendanceArrival => 'Arrivée';
+  String get presenceMarkArrival => 'Arrivée';
 
   @override
-  String get staffAttendanceJustify => 'Justifier';
+  String get presenceMarkJustify => 'Justifier';
 
   @override
-  String get staffAttendanceRetry => 'Réessayer';
+  String get presenceMarkRetry => 'Réessayer';
 
   @override
-  String get staffAttendanceClearTooltip =>
+  String get presenceMarkClearTooltip =>
       'Effacer le statut (remettre à pointer)';
 
   @override
-  String get staffAttendanceClearHint =>
+  String get presenceMarkClearHint =>
       'Toucher de nouveau pour effacer le statut';
 
   @override
   String get staffAttendanceHourlyBadge => 'VAC · H';
 
   @override
-  String staffAttendanceHours(int hours) {
+  String presenceMarkHours(int hours) {
     return '$hours h';
   }
 
@@ -12361,7 +12047,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceColAgent => 'Agent';
 
   @override
-  String get staffAttendanceColStatus => 'Statut';
+  String get presenceMarkColStatus => 'Statut';
 
   @override
   String get staffAttendanceColTimes => 'Arrivée · départ';
@@ -12370,62 +12056,62 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceColHours => 'Heures';
 
   @override
-  String get staffAttendanceColLate => 'Retard · justification';
+  String get presenceMarkColLate => 'Retard · justification';
 
   @override
-  String staffAttendanceTimeArrivalTitle(String name) {
+  String presenceMarkTimeArrivalTitle(String name) {
     return 'Heure d’arrivée — $name';
   }
 
   @override
-  String staffAttendanceTimeDepartureTitle(String name) {
+  String presenceMarkTimeDepartureTitle(String name) {
     return 'Heure de départ — $name';
   }
 
   @override
-  String get staffAttendanceTimeField => 'Heure (HH:MM)';
+  String get presenceMarkTimeField => 'Heure (HH:MM)';
 
   @override
-  String get staffAttendanceTimeInvalid =>
+  String get presenceMarkTimeInvalid =>
       'Saisissez une heure entre 00:00 et 23:59.';
 
   @override
-  String get staffAttendanceTimeNow => 'Maintenant';
+  String get presenceMarkTimeNow => 'Maintenant';
 
   @override
-  String get staffAttendanceTimeStart => 'Début des cours';
+  String get presenceMarkTimeStart => 'Début des cours';
 
   @override
-  String staffAttendanceTimePlus(int minutes) {
+  String presenceMarkTimePlus(int minutes) {
     return '+$minutes min';
   }
 
   @override
-  String get staffAttendanceTimeClear => 'Effacer le départ';
+  String get presenceMarkTimeClear => 'Effacer le départ';
 
   @override
-  String staffAttendancePreviewLate(int minutes, String start, int tolerance) {
+  String presenceMarkPreviewLate(int minutes, String start, int tolerance) {
     return 'Classé en retard de $minutes min (début $start, tolérance $tolerance min)';
   }
 
   @override
-  String staffAttendancePreviewOnTime(String until) {
+  String presenceMarkPreviewOnTime(String until) {
     return 'Classé présent à l’heure (jusqu’à $until)';
   }
 
   @override
-  String get staffAttendanceCancel => 'Annuler';
+  String get presenceMarkCancel => 'Annuler';
 
   @override
-  String get staffAttendanceSave => 'Enregistrer';
+  String get presenceMarkSave => 'Enregistrer';
 
   @override
-  String staffAttendanceJustifyTitle(String name) {
+  String presenceMarkJustifyTitle(String name) {
     return 'Justifier — $name';
   }
 
   @override
-  String get staffAttendanceReasonLabel => 'Motif';
+  String get presenceMarkReasonLabel => 'Motif';
 
   @override
   String get staffAttendanceReasonIllness => 'Maladie';
@@ -12449,37 +12135,36 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceReasonOther => 'Autre';
 
   @override
-  String get staffAttendanceNoteLabel => 'Précision';
+  String get presenceMarkNoteLabel => 'Précision';
 
   @override
-  String get staffAttendanceNotePlaceholder =>
+  String get presenceMarkNotePlaceholder =>
       'ex. certificat médical remis demain';
 
   @override
-  String get staffAttendanceRemoveJustification => 'Retirer la justification';
+  String get presenceMarkRemoveJustification => 'Retirer la justification';
 
   @override
-  String get staffAttendanceSettingsTitle => 'Réglages du pointage';
+  String get presenceMarkSettingsTitle => 'Réglages du pointage';
 
   @override
-  String get staffAttendanceSettingsStart => 'Heure de début des cours';
+  String get presenceMarkSettingsStart => 'Heure de début des cours';
 
   @override
-  String get staffAttendanceSettingsTolerance => 'Tolérance';
+  String get presenceMarkSettingsTolerance => 'Tolérance';
 
   @override
-  String staffAttendanceMinutes(int minutes) {
+  String presenceMarkMinutes(int minutes) {
     return '$minutes min';
   }
 
   @override
-  String staffAttendanceSettingsRule(String until, String start) {
+  String presenceMarkSettingsRule(String until, String start) {
     return 'Une arrivée après $until est un retard, compté depuis $start.';
   }
 
   @override
-  String get staffAttendanceSettingsComing =>
-      'S’applique aux pointages à venir.';
+  String get presenceMarkSettingsComing => 'S’applique aux pointages à venir.';
 
   @override
   String get staffAttendanceReportTitle => 'Valider le rapport du jour';
@@ -12496,11 +12181,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get staffAttendanceReportUnmarkedReminder =>
+  String get presenceMarkReportUnmarkedReminder =>
       'Sans cette case, ils seront comptés présents par défaut à la clôture du mois.';
 
   @override
-  String staffAttendanceReportUnjustified(int count) {
+  String presenceMarkReportUnjustified(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -12522,17 +12207,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'Rapport journalier validé — pointages verrouillés';
 
   @override
-  String staffAttendanceValidatedBy(String name, String when) {
+  String presenceMarkValidatedBy(String name, String when) {
     return 'Par $name · $when';
   }
 
   @override
-  String staffAttendanceValidatedCounts(int present, int late, int absent) {
+  String presenceMarkValidatedCounts(int present, int late, int absent) {
     return '$present présents, $late retards, $absent absents';
   }
 
   @override
-  String get staffAttendanceReopen => 'Rouvrir';
+  String get presenceMarkReopen => 'Rouvrir';
 
   @override
   String get staffAttendanceMonthClosedBanner =>
@@ -12542,65 +12227,63 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceAgentPicker => 'Rechercher · Prénom Nom';
 
   @override
-  String get staffAttendancePreviousMonth => 'Mois précédent';
+  String get presenceMarkPreviousMonth => 'Mois précédent';
 
   @override
-  String get staffAttendanceNextMonth => 'Mois suivant';
+  String get presenceMarkNextMonth => 'Mois suivant';
 
   @override
-  String get staffAttendanceCurrentMonth => 'Revenir au mois en cours';
+  String get presenceMarkCurrentMonth => 'Revenir au mois en cours';
 
   @override
-  String get staffAttendanceKpiPresences => 'Présences';
+  String get presenceMarkKpiPresences => 'Présences';
 
   @override
   String get staffAttendanceKpiDaysWorked => 'Jours prestés';
 
   @override
-  String staffAttendanceKpiRatio(int value, int days) {
+  String presenceMarkKpiRatio(int value, int days) {
     return '$value / $days';
   }
 
   @override
-  String get staffAttendanceKpiLates => 'Retards';
+  String get presenceMarkKpiLates => 'Retards';
 
   @override
-  String staffAttendanceKpiLatesDetail(int minutes, int unjustified) {
+  String presenceMarkKpiLatesDetail(int minutes, int unjustified) {
     return '$minutes min · $unjustified non justifiés';
   }
 
   @override
-  String get staffAttendanceKpiAbsences => 'Absences';
+  String get presenceMarkKpiAbsences => 'Absences';
 
   @override
-  String staffAttendanceKpiAbsencesDetail(int justified, int unjustified) {
+  String presenceMarkKpiAbsencesDetail(int justified, int unjustified) {
     return '$justified J · $unjustified NJ';
   }
 
   @override
-  String get staffAttendanceKpiNotMarked => 'Non pointés';
+  String get presenceMarkKpiNotMarked => 'Non pointés';
 
   @override
   String get staffAttendanceKpiHours => 'Heures prestées';
 
   @override
-  String get staffAttendanceIncidentsTitle => 'Retards et absences du mois';
+  String get presenceMarkIncidentsTitle => 'Retards et absences du mois';
 
   @override
-  String get staffAttendanceNoIncidents =>
-      'Aucun retard ni absence ce mois-ci.';
+  String get presenceMarkNoIncidents => 'Aucun retard ni absence ce mois-ci.';
 
   @override
-  String get staffAttendanceUnjustified => 'Non justifié';
+  String get presenceMarkUnjustified => 'Non justifié';
 
   @override
-  String staffAttendanceHolidayTitle(String month) {
+  String presenceMarkHolidayTitle(String month) {
     return 'Vacances — $month';
   }
 
   @override
-  String get staffAttendanceHolidayMessage =>
-      'Aucun jour de classe ce mois-ci.';
+  String get presenceMarkHolidayMessage => 'Aucun jour de classe ce mois-ci.';
 
   @override
   String get staffAttendanceRecapColContract => 'Contrat';
@@ -12612,19 +12295,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceRecapColSync => 'Synchro';
 
   @override
-  String get staffAttendanceTotalRate => 'Taux de présence';
+  String get presenceMarkTotalRate => 'Taux de présence';
 
   @override
   String get staffAttendanceTotalHours => 'Heures de vacation';
 
   @override
-  String get staffAttendanceTotalLateMinutes => 'Minutes de retard';
+  String get presenceMarkTotalLateMinutes => 'Minutes de retard';
 
   @override
-  String get staffAttendanceTotalUnjustified => 'Absences non justifiées';
+  String get presenceMarkTotalUnjustified => 'Absences non justifiées';
 
   @override
-  String get staffAttendanceTotalNotMarked => 'Jours non pointés';
+  String get presenceMarkTotalNotMarked => 'Jours non pointés';
 
   @override
   String get staffAttendanceRecapLegend =>
@@ -12659,7 +12342,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get staffAttendanceCloseIrreversible =>
+  String get presenceMarkCloseIrreversible =>
       'La clôture verrouille le mois : elle ne se rouvre pas depuis la tablette.';
 
   @override
@@ -12679,10 +12362,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceEmptyFilterTitle => 'Aucun agent dans ce filtre';
 
   @override
-  String get staffAttendanceAllMarked => 'Tout le monde est pointé';
+  String get presenceMarkAllMarked => 'Tout le monde est pointé';
 
   @override
-  String get staffAttendanceShowAll => 'Tout afficher';
+  String get presenceMarkShowAll => 'Tout afficher';
 
   @override
   String get staffAttendanceRecapEmptyFilter => 'Aucun agent trouvé';
@@ -12699,17 +12382,17 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String staffAttendanceToastCleared(String name) {
+  String presenceMarkToastCleared(String name) {
     return '$name remis à pointer';
   }
 
   @override
-  String staffAttendanceToastJustified(String name) {
+  String presenceMarkToastJustified(String name) {
     return 'Justification enregistrée — $name';
   }
 
   @override
-  String staffAttendanceToastJustificationRemoved(String name) {
+  String presenceMarkToastJustificationRemoved(String name) {
     return 'Justification retirée — $name';
   }
 
@@ -12737,7 +12420,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get staffAttendanceToastWriteFailed =>
+  String get presenceMarkToastWriteFailed =>
       'Le pointage n’a pas pu être enregistré sur la tablette.';
 
   @override
@@ -12758,18 +12441,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'La validation du rapport a été refusée par le serveur : le jour reste modifiable. Validez-le à nouveau une fois la cause levée.';
 
   @override
-  String staffAttendanceHoursMinutes(int hours, String minutes) {
+  String presenceMarkHoursMinutes(int hours, String minutes) {
     return '$hours h $minutes';
   }
 
   @override
-  String get staffAttendanceReasonRequired => 'Motif *';
+  String get presenceMarkReasonRequired => 'Motif *';
 
   @override
-  String get staffAttendanceDismiss => 'Fermer';
+  String get presenceMarkDismiss => 'Fermer';
 
   @override
-  String staffAttendanceStartTooLate(String latest) {
+  String presenceMarkStartTooLate(String latest) {
     return 'Les cours commencent au plus tard à $latest.';
   }
 
@@ -13853,4 +13536,381 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollAdvanceStatusCarried => 'Reportée';
+
+  @override
+  String get absenceReasonMedicalAppointment => 'Rendez-vous médical';
+
+  @override
+  String get absenceReasonTransport => 'Problème de transport';
+
+  @override
+  String get absenceReasonBereavement => 'Deuil';
+
+  @override
+  String get absenceReasonBadWeather => 'Intempéries';
+
+  @override
+  String get classPresencePickClass => 'Choisir la classe';
+
+  @override
+  String get classPresencePickerEyebrow => 'Présences';
+
+  @override
+  String classPresenceClassMeta(String level, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+    );
+    return '$level · $_temp0';
+  }
+
+  @override
+  String classPresenceStudentsShort(int count) {
+    return '$count él.';
+  }
+
+  @override
+  String get classPresenceNoClassTitle =>
+      'Choisissez la classe dont vous faites l\'appel';
+
+  @override
+  String get classPresenceNoClassMessage =>
+      'L\'appel se fait par classe, depuis la tablette — même sans réseau.';
+
+  @override
+  String get classPresenceNoClassesTitle => 'Aucune classe sur la tablette';
+
+  @override
+  String get classPresenceNoClassesMessage =>
+      'Les classes de l\'année arrivent avec la synchronisation.';
+
+  @override
+  String classPresenceEyebrowToday(String classroom) {
+    return 'Appel du jour · $classroom';
+  }
+
+  @override
+  String classPresenceEyebrowPast(String classroom) {
+    return 'Appel — jour passé · $classroom';
+  }
+
+  @override
+  String get classPresenceAllMarked => 'Toute la classe est pointée';
+
+  @override
+  String get classPresenceValidate => 'Valider l\'appel';
+
+  @override
+  String get classPresenceSearchLabel => 'Rechercher un élève';
+
+  @override
+  String get classPresenceSearchPlaceholder => 'Nom, post-nom, prénom';
+
+  @override
+  String get classPresenceColStudent => 'Élève';
+
+  @override
+  String classPresenceSubtitle(String firstName, int number, String classroom) {
+    return '$firstName · N° $number · $classroom';
+  }
+
+  @override
+  String get classPresenceEmptyFilterTitle => 'Aucun élève dans ce filtre';
+
+  @override
+  String classPresenceReportTitle(String classroom) {
+    return 'Valider l\'appel — $classroom';
+  }
+
+  @override
+  String classPresenceReportUnmarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count élèves non pointés seront marqués présents à l\'heure de début',
+      one: '1 élève non pointé sera marqué présent à l\'heure de début',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceReportLock =>
+      'La validation verrouille la journée : il faudra rouvrir l\'appel pour modifier une présence. Une justification s\'ajoute sans rouvrir.';
+
+  @override
+  String get classPresenceValidatedTitle =>
+      'Appel validé — présences verrouillées';
+
+  @override
+  String classPresenceUpdatedBy(String name, String when) {
+    return 'Par $name · mis à jour le $when';
+  }
+
+  @override
+  String classPresenceUpdatedAt(String when) {
+    return 'Mis à jour le $when';
+  }
+
+  @override
+  String get classPresenceMonthClosedBanner =>
+      'Mois clôturé — présences verrouillées';
+
+  @override
+  String get classPresenceReopenPastHint =>
+      'Seuls le préfet et le directeur de discipline rouvrent l\'appel d\'un jour passé.';
+
+  @override
+  String classPresenceRefused(String reason) {
+    return 'L\'envoi de l\'appel a été refusé : $reason';
+  }
+
+  @override
+  String classPresenceToastRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves marqués présents',
+      one: '1 élève marqué présent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceToastValidated(String classroom) {
+    return 'Appel de la $classroom validé';
+  }
+
+  @override
+  String get classPresenceToastReopened =>
+      'Appel rouvert : la journée se modifie à nouveau';
+
+  @override
+  String get classPresenceToastRetried => 'Envoi relancé';
+
+  @override
+  String get classPresenceToastDayFrozen =>
+      'Appel validé — rouvrez l\'appel pour modifier une présence';
+
+  @override
+  String get classPresenceToastDayFrozenNoAmend =>
+      'Appel validé — seuls le préfet et le directeur de discipline peuvent le rouvrir';
+
+  @override
+  String get classPresenceToastMonthFrozen =>
+      'Mois clôturé : ses présences ne se modifient plus';
+
+  @override
+  String get classPresenceToastForbidden =>
+      'Seuls le titulaire, le préfet et le directeur de discipline font l\'appel.';
+
+  @override
+  String get classPresenceToastUnsupported =>
+      'Un motif de cette journée est inconnu de cette tablette : mettez l\'application à jour avant de modifier l\'appel.';
+
+  @override
+  String get classPresenceTabRegister => 'Registre du jour';
+
+  @override
+  String classPresenceTabRegisterSubtitle(int marked, int total) {
+    return '$marked / $total élèves';
+  }
+
+  @override
+  String get classPresenceTabStudent => 'Fiche mensuelle';
+
+  @override
+  String classPresenceTabStudentSubtitle(String month) {
+    return 'Par élève · $month';
+  }
+
+  @override
+  String get classPresenceTabRecap => 'Récapitulatif du mois';
+
+  @override
+  String get classPresenceTabRecapSubtitle => 'Totaux → dossiers & bulletin';
+
+  @override
+  String get classPresenceTabRecapSubtitleClosed => 'Transmis aux dossiers';
+
+  @override
+  String get classPresenceStudentPickerPlaceholder => 'Rechercher · Prénom Nom';
+
+  @override
+  String get classPresenceStudentSheetTitle => 'Fiche mensuelle de présence';
+
+  @override
+  String get classPresenceGirl => 'Fille';
+
+  @override
+  String get classPresenceBoy => 'Garçon';
+
+  @override
+  String get classPresenceToWatch => 'À surveiller';
+
+  @override
+  String classPresenceKpiRate(int rate) {
+    return '$rate %';
+  }
+
+  @override
+  String get classPresenceRegisterComplete => 'Registre complet';
+
+  @override
+  String classPresenceRecapEyebrow(String classroom) {
+    return 'Récapitulatif · $classroom';
+  }
+
+  @override
+  String classPresenceRecapDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours de classe',
+      one: '1 jour de classe',
+      zero: 'Aucun jour de classe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceRecapStudents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceTotalLates => 'Retards';
+
+  @override
+  String classPresenceLatesValue(int count, int minutes) {
+    return '$count · $minutes min';
+  }
+
+  @override
+  String get classPresenceTotalToWatch => 'Élèves à surveiller';
+
+  @override
+  String get classPresenceFilterToWatch => 'À surveiller';
+
+  @override
+  String get classPresenceFilterPerfect => 'Assiduité parfaite';
+
+  @override
+  String get classPresenceColRate => 'Taux';
+
+  @override
+  String get classPresenceColSync => 'Synchro';
+
+  @override
+  String get classPresenceRecapLegend =>
+      'NJ = non justifiée · J = justifiée · ● à surveiller : 2 absences NJ ou taux < 85 % · touchez une ligne pour ouvrir la fiche';
+
+  @override
+  String get classPresenceRecapEmptyFilter => 'Aucun élève trouvé';
+
+  @override
+  String get classPresenceClose => 'Clôturer le mois';
+
+  @override
+  String classPresenceCloseTitle(String month) {
+    return 'Clôturer $month ?';
+  }
+
+  @override
+  String classPresenceCloseFreeze(String classroom) {
+    return 'Les appels de la $classroom se figent : plus aucune présence du mois ne se modifie, justification comprise.';
+  }
+
+  @override
+  String classPresenceCloseAbsences(int unjustified, int justified) {
+    return '$unjustified absences non justifiées et $justified justifiées restent dans la fiche Présence de chaque élève.';
+  }
+
+  @override
+  String classPresenceCloseToWatch(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves à surveiller, signalés dans le récapitulatif',
+      one: '1 élève à surveiller, signalé dans le récapitulatif',
+      zero: 'Aucun élève à surveiller',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceCloseNotMarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count jours-élève sans appel seront traités comme présents par défaut',
+      one: '1 jour-élève sans appel sera traité comme présent par défaut',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceCloseConfirm => 'Clôturer';
+
+  @override
+  String get classPresenceCloseNotEnded =>
+      'Le mois en cours se clôture une fois terminé.';
+
+  @override
+  String classPresenceClosedOn(String when) {
+    return 'Mois clôturé le $when — présences verrouillées';
+  }
+
+  @override
+  String classPresenceCloseRefused(String reason) {
+    return 'La clôture a été refusée : $reason';
+  }
+
+  @override
+  String classPresenceToastClosed(String month, String classroom) {
+    return '$month clôturé · $classroom';
+  }
+
+  @override
+  String classPresenceCloseOpenDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count journées sont en cours de saisie ou rouvertes : validez-les avant de clôturer le mois.',
+      one:
+          '1 journée est en cours de saisie ou rouverte : validez-la avant de clôturer le mois.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceToastRaced =>
+      'Cet appel vient d\'être modifié ailleurs : la journée a été relue, refaites votre geste.';
+
+  @override
+  String presenceMarkRetryTooltip(String reason) {
+    return '$reason — Réessayer';
+  }
+
+  @override
+  String classPresenceRecapDaysToDate(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days jours de classe à ce jour',
+      one: '1 jour de classe à ce jour',
+      zero: 'Aucun jour de classe à ce jour',
+    );
+    return '$_temp0';
+  }
 }

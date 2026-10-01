@@ -15,10 +15,10 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/payslip
 abstract final class PayrollPayslipPdf {
   static final PdfColor _gold = PdfColor.fromInt(AppColors.orDoux.toARGB32());
   static final PdfColor _alert = PdfColor.fromInt(
-    AppColors.staffAttendanceAbsentInk.toARGB32(),
+    AppColors.presenceMarkAbsentInk.toARGB32(),
   );
   static final PdfColor _banner = PdfColor.fromInt(
-    AppColors.staffAttendanceLateSoft.toARGB32(),
+    AppColors.presenceMarkLateSoft.toARGB32(),
   );
 
   static Future<Uint8List> build(List<PayrollPayslipContent> payslips) {

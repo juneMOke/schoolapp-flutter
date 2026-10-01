@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document_type.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Où en est le dossier administratif d'un agent : les pièces que son contrat
 /// exige, et celles déjà versées.
@@ -31,7 +32,7 @@ class StaffDossier extends Equatable {
     // Une pièce refusée n'est pas au dossier : le serveur ne l'a pas.
     final present = {
       for (final document in documents)
-        if (document.syncState != StaffSyncState.failed) document.rawCode,
+        if (document.syncState != RecordSyncState.failed) document.rawCode,
     };
     return StaffDossier(
       required: required,

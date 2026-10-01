@@ -1,8 +1,8 @@
 import 'package:school_app_flutter/features/staff/data/local/staff_lww.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Ce que l'accusé d'une remontée fait à la fiche locale.
 ///
@@ -36,7 +36,7 @@ class StaffMemberSyncDao {
         'school_id': schoolId,
         ...StaffMemberLocalModel.serverColumns(canonical),
         ...StaffMemberLocalModel.contentColumns(canonical),
-        'sync_status': StaffSyncState.synced.dbValue,
+        'sync_status': RecordSyncState.synced.dbValue,
         'updated_at': nowMs,
       });
       return;
@@ -50,7 +50,7 @@ class StaffMemberSyncDao {
       {
         ...StaffMemberLocalModel.serverColumns(canonical),
         if (latest) ...StaffMemberLocalModel.contentColumns(canonical),
-        if (latest) 'sync_status': StaffSyncState.synced.dbValue,
+        if (latest) 'sync_status': RecordSyncState.synced.dbValue,
         if (latest) 'sync_error': null,
         if (latest) 'sync_error_code': null,
         'updated_at': nowMs,
@@ -86,7 +86,7 @@ class StaffMemberSyncDao {
     await txn.update(
       table,
       {
-        'sync_status': StaffSyncState.failed.dbValue,
+        'sync_status': RecordSyncState.failed.dbValue,
         'sync_error': reason,
         'sync_error_code': code,
         'updated_at': nowMs,

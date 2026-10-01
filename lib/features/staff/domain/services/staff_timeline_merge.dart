@@ -1,6 +1,6 @@
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_period.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// La frise d'un agent telle que la tablette doit la montrer : celle de la
 /// fiche, corrigée par ce que le poste sait de plus récent — ses gestes pas
@@ -34,7 +34,7 @@ abstract final class StaffTimelineMerge {
         if (!hidden.contains(period.contractId)) period,
       for (final contract in local)
         if (!contract.isCorrected &&
-            contract.syncState != StaffSyncState.failed &&
+            contract.syncState != RecordSyncState.failed &&
             !known.contains(contract.id))
           contract.asPeriod,
     ]..sort((a, b) => a.effectiveFrom.compareTo(b.effectiveFrom));

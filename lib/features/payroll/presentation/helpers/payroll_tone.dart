@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_card_tabs.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_card_tabs.dart';
 
 /// La teinte d'un statut de paie : brouillon gris, soumise ambre, validée
 /// bleu profond, versée vert — les trois premières empruntées au Pointage.
@@ -14,14 +14,14 @@ class PayrollTone {
   const PayrollTone._(this.color, this.soft, this.ink);
 
   static const PayrollTone draft = PayrollTone._(
-    AppColors.staffAttendanceNone,
-    AppColors.staffAttendanceNoneSoft,
-    AppColors.staffAttendanceNoneInk,
+    AppColors.presenceMarkNone,
+    AppColors.presenceMarkNoneSoft,
+    AppColors.presenceMarkNoneInk,
   );
   static const PayrollTone submitted = PayrollTone._(
-    AppColors.staffAttendanceLate,
-    AppColors.staffAttendanceLateSoft,
-    AppColors.staffAttendanceLateInk,
+    AppColors.presenceMarkLate,
+    AppColors.presenceMarkLateSoft,
+    AppColors.presenceMarkLateInk,
   );
   static const PayrollTone validated = PayrollTone._(
     AppColors.payrollValidated,
@@ -29,16 +29,16 @@ class PayrollTone {
     AppColors.payrollValidatedInk,
   );
   static const PayrollTone paid = PayrollTone._(
-    AppColors.staffAttendancePresent,
-    AppColors.staffAttendancePresentSoft,
-    AppColors.staffAttendancePresentInk,
+    AppColors.presenceMarkPresent,
+    AppColors.presenceMarkPresentSoft,
+    AppColors.presenceMarkPresentInk,
   );
 
   /// Une retenue, un refus, une absence signalée.
   static const PayrollTone alert = PayrollTone._(
-    AppColors.staffAttendanceAbsent,
-    AppColors.staffAttendanceAbsentSoft,
-    AppColors.staffAttendanceAbsentInk,
+    AppColors.presenceMarkAbsent,
+    AppColors.presenceMarkAbsentSoft,
+    AppColors.presenceMarkAbsentInk,
   );
 
   /// Un geste en vol se lit dans la teinte de là où il va.
@@ -51,11 +51,11 @@ class PayrollTone {
     PayrollPhase.paid => paid,
   };
 
-  StaffTabBadge badge(String label) => (label: label, soft: soft, ink: ink);
+  EteeloTabBadge badge(String label) => (label: label, soft: soft, ink: ink);
 
   /// Un bandeau d'une ligne à cette teinte.
   Widget notice(String message, {IconData icon = Icons.info_outline}) =>
-      StaffNotice.tinted(
+      EteeloNotice.tinted(
         message: message,
         icon: icon,
         ink: ink,

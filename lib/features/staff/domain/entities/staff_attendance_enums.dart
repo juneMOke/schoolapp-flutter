@@ -3,33 +3,26 @@
 /// inconnue se lit `null`, jamais une exception.
 library;
 
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
-/// Statut d'un agent pour un jour.
-///
-/// [none] n'est pas une absence de ligne : c'est un pointage **effacé**, qui
-/// part au serveur comme une modification (jamais une suppression).
-enum StaffAttendanceStatus implements StaffWired {
-  none('NONE'),
-  present('PRESENT'),
-  late('RETARD'),
-  absent('ABSENT');
+/// La forme sur le fil d'un [PresenceStatus] du Pointage (codes français du
+/// contrat RH : `RETARD`, pas `LATE`).
+extension StaffPresenceWire on PresenceStatus {
+  String get staffWire => switch (this) {
+    PresenceStatus.none => 'NONE',
+    PresenceStatus.present => 'PRESENT',
+    PresenceStatus.late => 'RETARD',
+    PresenceStatus.absent => 'ABSENT',
+  };
 
-  const StaffAttendanceStatus(this.wire);
-  @override
-  final String wire;
-
-  static StaffAttendanceStatus? fromWire(String? value) =>
-      staffByWire(values, value);
-
-  /// Le statut porte-t-il une heure d'arrivée ?
-  bool get hasArrival => this == present || this == late;
-
-  /// Le statut admet-il une justification ?
-  bool get isIncident => this == late || this == absent;
-
-  /// Pointé : tout sauf « à pointer ».
-  bool get isMarked => this != none;
+  /// Lecture tolérante : une valeur inconnue se lit `null`.
+  static PresenceStatus? fromStaffWire(String? value) {
+    for (final status in PresenceStatus.values) {
+      if (status.staffWire == value) return status;
+    }
+    return null;
+  }
 }
 
 /// Motif d'une justification. Codes français, libellés tenus par la tablette.

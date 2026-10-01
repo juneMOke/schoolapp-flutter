@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_period.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_diploma.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Un agent du fichier du personnel : enseignant, administratif ou personnel
 /// d'appui.
@@ -47,7 +48,7 @@ class StaffMember extends Equatable {
   /// à poser ».
   final List<StaffContractPeriod> contracts;
 
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
 
   const StaffMember({
     required this.id,

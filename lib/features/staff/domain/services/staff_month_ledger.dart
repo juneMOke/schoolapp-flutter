@@ -3,7 +3,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_contract
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_contract_timeline.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_stats.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 
 /// Le mois d'un agent, tel que la fiche mensuelle et le récapitulatif le
 /// lisent : **une seule** façon de compter, partagée par les deux écrans.
@@ -33,12 +33,12 @@ class StaffMonthLedger {
     required String month,
     required String today,
   }) {
-    final days = StaffWorkCalendar.daysOf(month);
+    final days = SchoolDayCalendar.daysOf(month);
     final last = days.last;
     return StaffMonthLedger._(
       snapshot,
       month,
-      StaffWorkCalendar.workDaysOf(
+      SchoolDayCalendar.workDaysOf(
         month,
         today: today,
         year: snapshot.schoolYear,

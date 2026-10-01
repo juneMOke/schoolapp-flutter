@@ -2,14 +2,15 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_editor.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_rules.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_rules.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_command_outcome.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Les gestes du Pointage, sans état : chacun construit la ligne cohérente
 /// (l'éditeur du domaine), l'enregistre, et rend ce que l'écran annonce —
@@ -38,20 +39,19 @@ class StaffAttendanceCommands {
   Future<StaffAttendanceNotice?> cycle(
     StaffAttendanceSnapshot snapshot,
     StaffDayRow row,
-  ) => choose(snapshot, row, StaffAttendanceRules.nextInCycle(row.status));
+  ) => choose(snapshot, row, PresenceRules.nextInCycle(row.status));
 
   /// Un choix direct (vue liste). Retoucher le statut actif l'efface.
   Future<StaffAttendanceNotice?> choose(
     StaffAttendanceSnapshot snapshot,
     StaffDayRow row,
-    StaffAttendanceStatus status,
+    PresenceStatus status,
   ) {
     if (status == row.status) return clear(snapshot, row);
     return _edit(
       snapshot,
       row,
-      (editor, record) =>
-          editor.mark(record, status, StaffClockTime.of(_now())),
+      (editor, record) => editor.mark(record, status, ClockTime.of(_now())),
     );
   }
 
@@ -84,7 +84,7 @@ class StaffAttendanceCommands {
   Future<StaffAttendanceNotice?> setArrival(
     StaffAttendanceSnapshot snapshot,
     StaffDayRow row,
-    StaffClockTime arrival,
+    ClockTime arrival,
   ) => _edit(
     snapshot,
     row,
@@ -94,7 +94,7 @@ class StaffAttendanceCommands {
   Future<StaffAttendanceNotice?> setDeparture(
     StaffAttendanceSnapshot snapshot,
     StaffDayRow row,
-    StaffClockTime? departure,
+    ClockTime? departure,
   ) => _edit(
     snapshot,
     row,
@@ -173,7 +173,7 @@ class StaffAttendanceCommands {
     StaffAttendanceSnapshot snapshot,
     String day,
   ) async {
-    if (snapshot.isMonthClosed(StaffWorkCalendar.monthOf(day))) {
+    if (snapshot.isMonthClosed(SchoolDayCalendar.monthOf(day))) {
       return const StaffAttendanceNotice(StaffAttendanceNoticeKind.monthFrozen);
     }
     return StaffCommandOutcome.of(
@@ -187,7 +187,7 @@ class StaffAttendanceCommands {
       StaffCommandOutcome.of(
         await _gesture(
           StaffAttendanceGesture.closeMonth,
-          StaffWorkCalendar.firstOf(month),
+          SchoolDayCalendar.firstOf(month),
         ),
         StaffAttendanceNotice(
           StaffAttendanceNoticeKind.monthClosed,
@@ -215,9 +215,7 @@ class StaffAttendanceCommands {
     final frozen = StaffCommandOutcome.frozen(snapshot, row.day);
     if (frozen != null) return frozen;
     final record = _recordOf(row);
-    final editor = StaffAttendanceEditor(
-      StaffAttendanceRules(snapshot.settings),
-    );
+    final editor = StaffAttendanceEditor(PresenceRules(snapshot.settings));
     final changed = change(editor, record);
     if (changed == record) return null;
     return StaffCommandOutcome.of(await _save([changed]), done);
@@ -236,9 +234,7 @@ class StaffAttendanceCommands {
     StaffAttendanceSnapshot snapshot,
     StaffDayRegister register,
   ) {
-    final editor = StaffAttendanceEditor(
-      StaffAttendanceRules(snapshot.settings),
-    );
+    final editor = StaffAttendanceEditor(PresenceRules(snapshot.settings));
     final start = snapshot.settings.start;
     return [
       for (final row in register.unmarked)

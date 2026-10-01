@@ -12,8 +12,8 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_loc
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatch.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_ATTENDANCE_GESTURE` — valider ou
 /// rouvrir un jour, clore un mois.
@@ -91,7 +91,7 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
       send: () async {
         final state = await _api.submitGesture(_extras, request.toJson());
         await _locks.applyServer([state], schoolId: schoolId, nowMs: _now());
-        await _gestures.mark(request.gestureId, StaffSyncState.synced);
+        await _gestures.mark(request.gestureId, RecordSyncState.synced);
         // La réouverture remet en file les pointages refusés `DAY_LOCKED`,
         // même quand la tablette n'avait jamais reçu le jour validé (la
         // descente, elle, ne le fait qu'en voyant passer validé → rouvert).
@@ -102,7 +102,7 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
       reject: (failure) async {
         await _gestures.mark(
           request.gestureId,
-          StaffSyncState.failed,
+          RecordSyncState.failed,
           code: failure.storedCode,
           reason: failure.reason,
         );
@@ -117,7 +117,7 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
     String date,
   ) {
     if (gesture.kind == StaffAttendanceLockKind.day) return (date, date);
-    final days = StaffWorkCalendar.daysOf(StaffWorkCalendar.monthOf(date));
+    final days = SchoolDayCalendar.daysOf(SchoolDayCalendar.monthOf(date));
     return (days.first, days.last);
   }
 
@@ -153,6 +153,6 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
     final member = await _members.find(memberId);
     if (member == null) return false;
     return member.row['version'] != null ||
-        member.syncStatus != StaffSyncState.failed.dbValue;
+        member.syncStatus != RecordSyncState.failed.dbValue;
   }
 }

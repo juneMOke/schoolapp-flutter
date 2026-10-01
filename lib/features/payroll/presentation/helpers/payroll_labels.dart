@@ -5,7 +5,7 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les libellés de la paie, en un seul endroit.
@@ -28,7 +28,7 @@ abstract final class PayrollLabels {
 
   /// « octobre 2026 ».
   static String month(BuildContext context, String month) =>
-      StaffAttendanceLabels.month(MaterialLocalizations.of(context), month);
+      PresenceLabels.month(MaterialLocalizations.of(context), month);
 
   /// « 12 oct. 2026 » depuis un jour ou un instant.
   static String day(BuildContext context, String iso) {
@@ -40,7 +40,7 @@ abstract final class PayrollLabels {
 
   /// « 38 h » ou « 3 h 30 ».
   static String hours(AppLocalizations l10n, int minutes) =>
-      StaffAttendanceLabels.hours(l10n, minutes);
+      PresenceLabels.hours(l10n, minutes);
 
   static String phase(AppLocalizations l10n, PayrollPhase phase) =>
       switch (phase) {

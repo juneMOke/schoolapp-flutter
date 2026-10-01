@@ -1,7 +1,7 @@
 import 'package:school_app_flutter/features/staff/data/local/staff_member_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Accès à `staff_members`.
 class StaffMemberDao {
@@ -62,13 +62,13 @@ class StaffMemberDao {
             'school_id': schoolId,
             ...StaffMemberLocalModel.serverColumns(delta),
             ...StaffMemberLocalModel.contentColumns(delta),
-            'sync_status': StaffSyncState.synced.dbValue,
+            'sync_status': RecordSyncState.synced.dbValue,
             'updated_at': nowMs,
           });
           continue;
         }
         final synced =
-            existing.single['sync_status'] == StaffSyncState.synced.dbValue;
+            existing.single['sync_status'] == RecordSyncState.synced.dbValue;
         await txn.update(
           table,
           {

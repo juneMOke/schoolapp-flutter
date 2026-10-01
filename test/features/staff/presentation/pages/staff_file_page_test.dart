@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/list/staf
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../staff_builders.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class _MockSource extends Mock implements StaffSnapshotSource {}
 
@@ -68,7 +69,7 @@ void main() {
         lastName: 'Mbuyi',
         firstName: 'Élodie',
         staffNumber: null,
-        syncState: StaffSyncState.pending,
+        syncState: RecordSyncState.pending,
       ),
     ],
     documentsByMember: {
@@ -150,7 +151,7 @@ void main() {
     await pumpScreen(
       tester,
       StaffFileSnapshot(
-        members: [member('m-1', syncState: StaffSyncState.pending)],
+        members: [member('m-1', syncState: RecordSyncState.pending)],
         documentsByMember: const {},
         documentTypes: const [],
         hasEverSynced: false,

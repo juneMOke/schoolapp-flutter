@@ -13,6 +13,12 @@ enum AbsenceReason {
   unjustified,
   other,
 
+  // Présences des élèves v2 : quatre motifs de plus, tous justifiés.
+  medicalAppointment,
+  transport,
+  bereavement,
+  badWeather,
+
   /// **Sentinelle front, absente du contrat.** Une valeur de motif que le
   /// serveur connaît et que cette tablette ignore — un catalogue enrichi
   /// au-delà de la version installée.
@@ -45,6 +51,10 @@ extension AbsenceReasonX on AbsenceReason {
       'WORK_LEAVE' => AbsenceReason.workLeave,
       'UNJUSTIFIED' => AbsenceReason.unjustified,
       'OTHER' => AbsenceReason.other,
+      'MEDICAL_APPOINTMENT' => AbsenceReason.medicalAppointment,
+      'TRANSPORT' => AbsenceReason.transport,
+      'BEREAVEMENT' => AbsenceReason.bereavement,
+      'BAD_WEATHER' => AbsenceReason.badWeather,
       // Parsing défensif (invariant #9) : un motif ENRICHI côté back mais
       // inconnu de cette tablette retombe sur [AbsenceReason.unsupported],
       // jamais une exception — ajouter un motif ne doit pas faire tomber les
@@ -70,6 +80,10 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.workLeave => 'WORK_LEAVE',
     AbsenceReason.unjustified => 'UNJUSTIFIED',
     AbsenceReason.other => 'OTHER',
+    AbsenceReason.medicalAppointment => 'MEDICAL_APPOINTMENT',
+    AbsenceReason.transport => 'TRANSPORT',
+    AbsenceReason.bereavement => 'BEREAVEMENT',
+    AbsenceReason.badWeather => 'BAD_WEATHER',
     // Inatteignable par construction : la valeur n'a pas de représentation sur
     // le fil, et l'écran d'appel refuse d'enregistrer tant qu'une ligne la
     // porte. Lever plutôt que d'inventer une valeur — écrire `OTHER` ici
@@ -94,6 +108,10 @@ extension AbsenceReasonX on AbsenceReason {
     AbsenceReason.workLeave => l10n.absenceReasonWorkLeave,
     AbsenceReason.unjustified => l10n.absenceReasonUnjustified,
     AbsenceReason.other => l10n.absenceReasonOther,
+    AbsenceReason.medicalAppointment => l10n.absenceReasonMedicalAppointment,
+    AbsenceReason.transport => l10n.absenceReasonTransport,
+    AbsenceReason.bereavement => l10n.absenceReasonBereavement,
+    AbsenceReason.badWeather => l10n.absenceReasonBadWeather,
     AbsenceReason.unsupported => l10n.absenceReasonUnsupported,
   };
 }
@@ -122,54 +140,39 @@ extension AbsenceReasonX on AbsenceReason {
 /// cette fonction côté back est `AbsenceReason.isUnjustified` (dépôt
 /// `eteelo-backend`) ; les deux ne bougent qu'ensemble.
 ///
-/// ⚠️ L'écran d'appel est la seule exception, et elle est délibérée : il
-/// **interdit** d'enregistrer une absence sans motif, donc « sans motif » y est
-/// un état de saisie en cours, jamais un verdict. Il écarte `null` avant
-/// d'appeler cette fonction et le compte à part.
+/// Depuis les présences v2, l'appel suit la même règle : une absence ou un
+/// retard **sans justification** est non justifié(e) — c'est l'état par
+/// défaut, et « Justifier » le lève.
 bool isUnjustifiedAbsence(AbsenceReason? reason) =>
     reason == null ||
     reason == AbsenceReason.unjustified ||
     reason == AbsenceReason.unknown;
 
-/// Les motifs proposés **à la saisie**, dans l'ordre d'affichage.
+/// Les motifs proposés **à la saisie** d'une justification, dans l'ordre de
+/// la spec (Présences des élèves v2, §8).
 ///
 /// ## Catalogue de transport ≠ liste de saisie
 ///
-/// [AbsenceReason] est le catalogue du contrat : onze valeurs, que le parc lit
-/// et écrit déjà, et dont aucune n'est retirée — supprimer une valeur ferait
+/// [AbsenceReason] est le catalogue du contrat, que le parc lit et écrit
+/// déjà, et dont aucune valeur n'est retirée — supprimer une valeur ferait
 /// tomber sur le repli défensif des données parfaitement valides. Ce que l'UI
-/// propose est autre chose, et c'est cette liste-ci.
+/// propose est cette liste-ci.
 ///
-/// ## Ce qui en sort, et pourquoi
+/// ## Ce qui en sort
 ///
-/// Cinq valeurs sont des congés de **salarié** — vacances, congé d'études, de
-/// mariage, parental, professionnel. Elles n'ont pas de sens pour un élève, et
-/// l'écran les offrait parce qu'il rendait `AbsenceReason.values` brut.
-///
-/// `unjustified` en sort aussi, mais pour la raison inverse : ce n'est pas un
-/// motif, c'est un **verdict**. Des lignes le portent déjà, il reste donc au
-/// catalogue et s'affiche normalement — il n'est simplement plus écrit à neuf.
-///
-/// ## Ce qui y reste, et qui porte le verdict
-///
-/// `unknown` **reste proposé**, et c'est lui qui vaut « pas justifiée » (cf.
-/// [isUnjustifiedAbsence]). Sans lui, plus aucune valeur du côté injustifié ne
-/// serait atteignable — l'appel interdisant déjà d'enregistrer sans motif — et
-/// le taux d'absences injustifiées tendrait vers zéro : un indicateur qui
-/// affiche encore un chiffre tout en ne mesurant plus rien.
-///
-/// ⚠️ Son libellé dit « Non justifiée », pas « Inconnu ». La valeur technique
-/// parle d'ignorance, l'écran doit parler du verdict : un enseignant qui croit
-/// noter qu'il ne sait pas ne saurait pas qu'il tranche, et le KPI se lirait sur
-/// un haussement d'épaules.
-///
-/// Le verdict se corrige après coup **sans écran neuf** : on rouvre l'appel du
-/// jour concerné (le sélecteur de date couvre deux ans en arrière) et on pose le
-/// vrai motif.
+/// - les cinq congés de **salarié** (vacances, études, mariage, parental,
+///   professionnel) : sans objet pour un élève ;
+/// - `unjustified` et `unknown` (« Non justifiée ») : ce ne sont pas des
+///   motifs mais des **verdicts**. Le verdict « non justifiée » est désormais
+///   l'état d'une absence sans justification ; les lignes qui les portent
+///   restent lisibles et comptent comme non justifiées ;
+/// - `personal` : remplacé par des motifs plus précis.
 const List<AbsenceReason> kSelectableAbsenceReasons = [
   AbsenceReason.sickness,
+  AbsenceReason.medicalAppointment,
   AbsenceReason.familyEmergency,
-  AbsenceReason.personal,
+  AbsenceReason.transport,
+  AbsenceReason.bereavement,
+  AbsenceReason.badWeather,
   AbsenceReason.other,
-  AbsenceReason.unknown,
 ];

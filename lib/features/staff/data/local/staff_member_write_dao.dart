@@ -5,8 +5,8 @@ import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_member_local_model.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_push_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Écritures locales d'une fiche — **toujours avec leur entrée d'outbox, dans
 /// la même transaction** : une fiche sans entrée ne partirait jamais, une
@@ -58,7 +58,7 @@ class StaffMemberWriteDao {
       'branches': jsonEncode(input.branches),
       'diplomas': jsonEncode([for (final d in input.diplomas) d.toJson()]),
       'client_updated_at': input.clientUpdatedAt,
-      'sync_status': StaffSyncState.pending.dbValue,
+      'sync_status': RecordSyncState.pending.dbValue,
       'sync_error': null,
       'sync_error_code': null,
       'updated_at': nowMs,

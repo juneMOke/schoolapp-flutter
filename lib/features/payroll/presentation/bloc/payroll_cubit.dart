@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_co
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 
 /// La paie : lecture locale, livre du mois composé ici, filtres en mémoire,
@@ -34,7 +34,7 @@ class PayrollCubit extends Cubit<PayrollState> {
   }) : _load = load,
        _signals = signals,
        _now = now,
-       super(PayrollState.initial(StaffWorkCalendar.dayOf(now())));
+       super(PayrollState.initial(SchoolDayCalendar.dayOf(now())));
 
   Future<void> load() async {
     emit(state.copyWith(load: PayrollLoad.loading, clearFailure: true));
@@ -65,7 +65,7 @@ class PayrollCubit extends Cubit<PayrollState> {
       },
       (snapshot) {
         final view = PayrollLedger.monthView(snapshot, state.month);
-        final today = StaffWorkCalendar.dayOf(_now());
+        final today = SchoolDayCalendar.dayOf(_now());
         emit(
           state.copyWith(
             load: PayrollLoad.ready,

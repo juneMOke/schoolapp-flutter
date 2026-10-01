@@ -7,8 +7,8 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Un versement enregistré, en lecture : mode, preuve, date, état d'envoi.
@@ -28,7 +28,7 @@ class PayrollDisbursementDialog extends StatelessWidget {
   static Future<bool> show(
     BuildContext context,
     PayrollDisbursementDialog dialog,
-  ) async => await StaffDialog.show<bool>(context, dialog) ?? false;
+  ) async => await EteeloFormDialog.show<bool>(context, dialog) ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class PayrollDisbursementDialog extends StatelessWidget {
       if (d.mode == PayoutMode.cash && d.signedRegister)
         (l10n.payrollModeCash, l10n.payrollPaySigned),
     ];
-    return StaffDialog(
+    return EteeloFormDialog(
       eyebrow: name,
       title: l10n.payrollPaidOn(PayrollLabels.day(context, d.paidAt)),
       body: Column(
@@ -86,7 +86,7 @@ class PayrollDisbursementDialog extends StatelessWidget {
             ),
           Align(
             alignment: Alignment.centerLeft,
-            child: StaffSyncPill(state: d.syncState),
+            child: RecordSyncPill(state: d.syncState),
           ),
         ],
       ),

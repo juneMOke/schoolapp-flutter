@@ -7,7 +7,6 @@ import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/disciplinary_student_detail_page.dart';
-import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_email_page.dart';
@@ -60,6 +59,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_l
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
@@ -499,7 +499,7 @@ class AppRouter {
       routes: [
         GoRoute(
           path: AppRoutesNames.presences,
-          builder: (context, state) => const PresencesPage(),
+          builder: (context, state) => const ClassPresencePage(),
         ),
         GoRoute(
           path: AppRoutesNames.disciplinaryStudentDetail,

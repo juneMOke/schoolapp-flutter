@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document_type.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Le dossier d'un agent tel que la tablette le connaît : les pièces du
 /// référentiel et celles versées pour lui, la plus récente d'abord.
@@ -20,7 +20,7 @@ class StaffDossierSnapshot extends Equatable {
     StaffDocument? rejected;
     for (final document in documents) {
       if (document.rawCode != rawCode) continue;
-      if (document.syncState != StaffSyncState.failed) return document;
+      if (document.syncState != RecordSyncState.failed) return document;
       rejected ??= document;
     }
     return rejected;

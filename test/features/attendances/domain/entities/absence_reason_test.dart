@@ -57,13 +57,36 @@ void main() {
       expect(AbsenceReason.values, contains(AbsenceReason.unjustified));
     });
 
-    test('unknown Y EST, et il porte le verdict', () {
-      // Le point qui tient tout : sans lui, plus aucune valeur du côté
-      // injustifié n'est atteignable — l'appel interdisant d'enregistrer sans
-      // motif — et le taux d'absences injustifiées tend structurellement vers
-      // zéro. Un indicateur qui affiche encore un chiffre sans rien mesurer.
-      expect(kSelectableAbsenceReasons, contains(AbsenceReason.unknown));
-      expect(isUnjustifiedAbsence(AbsenceReason.unknown), isTrue);
+    test(
+      'ni unknown ni unjustified : le verdict vient de l\'absence de motif',
+      () {
+        // Présences v2 (décision 3) : « non justifiée » n'est plus un choix de
+        // saisie, c'est l'état d'une absence ou d'un retard sans justification.
+        // Le verdict reste atteignable — c'est même l'état par défaut — et les
+        // lignes qui portent UNKNOWN restent lues comme non justifiées.
+        expect(
+          kSelectableAbsenceReasons,
+          isNot(contains(AbsenceReason.unknown)),
+        );
+        expect(isUnjustifiedAbsence(null), isTrue);
+        expect(isUnjustifiedAbsence(AbsenceReason.unknown), isTrue);
+      },
+    );
+
+    test('les sept motifs de la spec, dans son ordre, tous justifiants', () {
+      expect(kSelectableAbsenceReasons, const [
+        AbsenceReason.sickness,
+        AbsenceReason.medicalAppointment,
+        AbsenceReason.familyEmergency,
+        AbsenceReason.transport,
+        AbsenceReason.bereavement,
+        AbsenceReason.badWeather,
+        AbsenceReason.other,
+      ]);
+      expect(kSelectableAbsenceReasons.any(isUnjustifiedAbsence), isFalse);
+      for (final reason in kSelectableAbsenceReasons) {
+        expect(AbsenceReasonX.fromApiValue(reason.toApiValue()), reason);
+      }
     });
 
     test('au moins un motif proposé reste du côté justifié', () {

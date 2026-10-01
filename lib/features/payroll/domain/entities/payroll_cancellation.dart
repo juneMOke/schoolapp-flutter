@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// L'annulation d'un fait de paie (avance, versement) : un geste avec motif,
 /// jamais une suppression. Partagée par les deux faits qui s'annulent.
@@ -9,7 +9,7 @@ class PayrollCancellation extends Equatable {
 
   /// Quand le serveur l'a enregistrée ; `null` tant qu'elle n'est pas accusée.
   final String? cancelledAt;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
   final String? syncError;
 
   const PayrollCancellation({
@@ -21,7 +21,7 @@ class PayrollCancellation extends Equatable {
   });
 
   /// Refusée : le fait reste vivant.
-  bool get isRefused => syncState == StaffSyncState.failed;
+  bool get isRefused => syncState == RecordSyncState.failed;
 
   @override
   List<Object?> get props => [id, reason, cancelledAt, syncState, syncError];

@@ -3,9 +3,9 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 
 /// Les trois onglets du Pointage.
 enum StaffAttendanceTab { register, agentMonth, recap }
@@ -30,7 +30,7 @@ class StaffAttendanceState extends Equatable {
   final String month;
 
   final StaffDayQuery dayQuery;
-  final StaffViewMode viewMode;
+  final CollectionViewMode viewMode;
   final StaffRecapQuery recapQuery;
 
   /// L'agent de la fiche mensuelle ; `null` = le premier du fichier.
@@ -65,15 +65,15 @@ class StaffAttendanceState extends Equatable {
     day: day,
     month: today.substring(0, 7),
     dayQuery: StaffDayQuery.none,
-    viewMode: StaffViewMode.grid,
+    viewMode: CollectionViewMode.grid,
     recapQuery: StaffRecapQuery.none,
   );
 
   /// Le dernier jour ouvré jusqu'à aujourd'hui : aujourd'hui en semaine, le
   /// vendredi le week-end. C'est là que ramène « Aujourd'hui ».
-  String get lastWorkDay => StaffWorkCalendar.isWeekday(today)
+  String get lastWorkDay => SchoolDayCalendar.isWeekday(today)
       ? today
-      : StaffWorkCalendar.stepWorkDay(today, -1);
+      : SchoolDayCalendar.stepWorkDay(today, -1);
 
   bool get isToday => day == lastWorkDay;
 
@@ -85,7 +85,7 @@ class StaffAttendanceState extends Equatable {
   bool get canStepBack {
     final first = firstDay;
     return first == null ||
-        StaffWorkCalendar.stepWorkDay(day, -1).compareTo(first) >= 0;
+        SchoolDayCalendar.stepWorkDay(day, -1).compareTo(first) >= 0;
   }
 
   /// La fiche et le récapitulatif peuvent-ils reculer d'un mois ?
@@ -100,7 +100,7 @@ class StaffAttendanceState extends Equatable {
   /// connue (sans elle, les vacances se liraient comme des jours ouvrés).
   bool get canCloseMonth =>
       snapshot.schoolYear != null &&
-      StaffWorkCalendar.daysOf(month).last.compareTo(today) <= 0 &&
+      SchoolDayCalendar.daysOf(month).last.compareTo(today) <= 0 &&
       !snapshot.isMonthClosed(month);
 
   StaffDayRegister get register =>
@@ -121,7 +121,7 @@ class StaffAttendanceState extends Equatable {
     String? day,
     String? month,
     StaffDayQuery? dayQuery,
-    StaffViewMode? viewMode,
+    CollectionViewMode? viewMode,
     StaffRecapQuery? recapQuery,
     String? Function()? agentId,
     StaffAttendanceNotice? notice,
@@ -141,6 +141,9 @@ class StaffAttendanceState extends Equatable {
     notice: notice ?? this.notice,
     failure: clearFailure ? null : failure ?? this.failure,
   );
+
+  /// Le mois affiché est le mois en cours (bornes « à ce jour »).
+  bool get isCurrentMonth => month == today.substring(0, 7);
 
   @override
   List<Object?> get props => [

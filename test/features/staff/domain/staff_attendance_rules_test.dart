@@ -2,15 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_editor.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_ids.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_attendance_rules.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_rules.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
-StaffClockTime t(String hhmm) => StaffClockTime.tryParse(hhmm)!;
+ClockTime t(String hhmm) => ClockTime.tryParse(hhmm)!;
 
 void main() {
-  final rules = StaffAttendanceRules(StaffAttendanceSettings.defaults);
+  final rules = PresenceRules(StaffAttendanceSettings.defaults);
   final editor = StaffAttendanceEditor(rules);
   StaffAttendanceRecord blank() =>
       StaffAttendanceEditor.blank(staffMemberId: 'a-1', workDate: '2026-09-29');
@@ -39,37 +40,37 @@ void main() {
     });
   });
 
-  group('StaffClockTime', () {
+  group('ClockTime', () {
     test('lit HH:mm, ignore les secondes, refuse le reste', () {
       expect(t('07:05').minutes, 425);
-      expect(StaffClockTime.tryParse('08:00:00')!.wire, '08:00');
-      expect(StaffClockTime.tryParse('24:00'), isNull);
-      expect(StaffClockTime.tryParse('7h30'), isNull);
+      expect(ClockTime.tryParse('08:00:00')!.wire, '08:00');
+      expect(ClockTime.tryParse('24:00'), isNull);
+      expect(ClockTime.tryParse('7h30'), isNull);
     });
   });
 
-  group('StaffAttendanceRules.classify — début 07:30, tolérance 10', () {
+  group('PresenceRules.classify — début 07:30, tolérance 10', () {
     test('jusqu\'à 07:40 inclus : présent', () {
       final result = rules.classify(t('07:40'));
-      expect(result.status, StaffAttendanceStatus.present);
+      expect(result.status, PresenceStatus.present);
       expect(result.lateMinutes, 0);
     });
 
     test('07:52 : en retard de 22 min, comptées depuis le début', () {
       final result = rules.classify(t('07:52'));
-      expect(result.status, StaffAttendanceStatus.late);
+      expect(result.status, PresenceStatus.late);
       expect(result.lateMinutes, 22);
     });
   });
 
-  group('StaffAttendanceRules.suggestedArrival', () {
+  group('PresenceRules.suggestedArrival', () {
     test('présent : l\'heure courante dans la tolérance, sinon le début', () {
       expect(
-        rules.suggestedArrival(StaffAttendanceStatus.present, t('07:35')),
+        rules.suggestedArrival(PresenceStatus.present, t('07:35')),
         t('07:35'),
       );
       expect(
-        rules.suggestedArrival(StaffAttendanceStatus.present, t('09:00')),
+        rules.suggestedArrival(PresenceStatus.present, t('09:00')),
         t('07:30'),
       );
     });
@@ -78,11 +79,11 @@ void main() {
       'retard : l\'heure courante au-delà, sinon début + tolérance + 15',
       () {
         expect(
-          rules.suggestedArrival(StaffAttendanceStatus.late, t('09:00')),
+          rules.suggestedArrival(PresenceStatus.late, t('09:00')),
           t('09:00'),
         );
         expect(
-          rules.suggestedArrival(StaffAttendanceStatus.late, t('07:00')),
+          rules.suggestedArrival(PresenceStatus.late, t('07:00')),
           t('07:55'),
         );
       },
@@ -90,20 +91,20 @@ void main() {
 
     test('le cycle n\'atteint jamais « à pointer »', () {
       expect(
-        StaffAttendanceRules.nextInCycle(StaffAttendanceStatus.none),
-        StaffAttendanceStatus.present,
+        PresenceRules.nextInCycle(PresenceStatus.none),
+        PresenceStatus.present,
       );
       expect(
-        StaffAttendanceRules.nextInCycle(StaffAttendanceStatus.present),
-        StaffAttendanceStatus.late,
+        PresenceRules.nextInCycle(PresenceStatus.present),
+        PresenceStatus.late,
       );
       expect(
-        StaffAttendanceRules.nextInCycle(StaffAttendanceStatus.late),
-        StaffAttendanceStatus.absent,
+        PresenceRules.nextInCycle(PresenceStatus.late),
+        PresenceStatus.absent,
       );
       expect(
-        StaffAttendanceRules.nextInCycle(StaffAttendanceStatus.absent),
-        StaffAttendanceStatus.present,
+        PresenceRules.nextInCycle(PresenceStatus.absent),
+        PresenceStatus.present,
       );
     });
   });
@@ -124,11 +125,11 @@ void main() {
     });
 
     test('absent efface arrivée, départ et heures, garde la justification', () {
-      var record = editor.mark(blank(), StaffAttendanceStatus.late, t('08:00'));
+      var record = editor.mark(blank(), PresenceStatus.late, t('08:00'));
       record = editor.setDeparture(record, t('12:30'));
       record = editor.setWorked(record, 120);
       record = editor.justify(record, justification);
-      record = editor.mark(record, StaffAttendanceStatus.absent, t('08:00'));
+      record = editor.mark(record, PresenceStatus.absent, t('08:00'));
       expect(record.arrival, isNull);
       expect(record.departure, isNull);
       expect(record.workedMinutes, isNull);
@@ -138,9 +139,9 @@ void main() {
     test('repasser à l\'heure retire la justification', () {
       var record = editor.setArrival(blank(), t('08:10'));
       record = editor.justify(record, justification);
-      expect(record.status, StaffAttendanceStatus.late);
+      expect(record.status, PresenceStatus.late);
       record = editor.setArrival(record, t('07:32'));
-      expect(record.status, StaffAttendanceStatus.present);
+      expect(record.status, PresenceStatus.present);
       expect(record.lateMinutes, 0);
       expect(record.justification, isNull);
     });
@@ -171,7 +172,7 @@ void main() {
       var record = editor.setArrival(blank(), t('08:10'));
       record = editor.justify(record, justification);
       record = editor.clear(record);
-      expect(record.status, StaffAttendanceStatus.none);
+      expect(record.status, PresenceStatus.none);
       expect(record.arrival, isNull);
       expect(record.lateMinutes, 0);
       expect(record.justification, isNull);

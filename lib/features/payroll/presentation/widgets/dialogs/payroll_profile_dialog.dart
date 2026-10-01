@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_payout_fields.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_stepper.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le profil de paie d'un agent : enfants à charge, mode préféré et ses
@@ -27,7 +27,7 @@ class PayrollProfileDialog extends StatefulWidget {
   static Future<StaffPayProfile?> show(
     BuildContext context,
     PayrollProfileDialog dialog,
-  ) => StaffDialog.show<StaffPayProfile>(context, dialog);
+  ) => EteeloFormDialog.show<StaffPayProfile>(context, dialog);
 
   @override
   State<PayrollProfileDialog> createState() => _PayrollProfileDialogState();
@@ -64,7 +64,7 @@ class _PayrollProfileDialogState extends State<PayrollProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return StaffDialog(
+    return EteeloFormDialog(
       eyebrow: widget.name,
       title: l10n.payrollProfileTitle,
       body: Column(

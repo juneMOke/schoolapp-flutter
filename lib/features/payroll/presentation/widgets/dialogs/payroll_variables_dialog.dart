@@ -14,7 +14,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_net_banner.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_stepper.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les éléments variables d'un agent pour le mois : heures supplémentaires,
@@ -41,7 +41,7 @@ class PayrollVariablesDialog extends StatefulWidget {
   static Future<PayrollVariables?> show(
     BuildContext context,
     PayrollVariablesDialog dialog,
-  ) => StaffDialog.show<PayrollVariables>(context, dialog);
+  ) => EteeloFormDialog.show<PayrollVariables>(context, dialog);
 
   @override
   State<PayrollVariablesDialog> createState() => _PayrollVariablesDialogState();
@@ -86,7 +86,7 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
     final preview = widget.preview(_variables) ?? line;
     final unit = widget.settings.of(currency).childAllowanceInCents;
     String money(int cents) => PayrollLabels.money(cents, currency);
-    return StaffDialog(
+    return EteeloFormDialog(
       eyebrow: widget.name,
       title: l10n.payrollVarsTitle,
       body: Column(

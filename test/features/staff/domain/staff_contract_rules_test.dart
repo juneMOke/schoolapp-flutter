@@ -10,11 +10,12 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_dossier.
 import 'package:school_app_flutter/features/staff/domain/services/staff_timeline_merge.dart';
 
 import '../staff_builders.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 StaffContract contract(
   String id, {
   String from = '2026-10-01',
-  StaffSyncState syncState = StaffSyncState.pending,
+  RecordSyncState syncState = RecordSyncState.pending,
   String? correctedAt,
   bool correctionPending = false,
 }) => StaffContract(
@@ -129,7 +130,7 @@ void main() {
 
     test('une pose accusée que la fiche ignore encore y reste', () {
       final merged = StaffTimelineMerge.merge(const [], [
-        contract('c-1', syncState: StaffSyncState.synced),
+        contract('c-1', syncState: RecordSyncState.synced),
       ]);
       expect(merged.single.contractId, 'c-1');
     });
@@ -142,12 +143,12 @@ void main() {
       final merged = StaffTimelineMerge.merge(server, [
         contract(
           'c-1',
-          syncState: StaffSyncState.synced,
+          syncState: RecordSyncState.synced,
           correctionPending: true,
         ),
         contract(
           'c-2',
-          syncState: StaffSyncState.synced,
+          syncState: RecordSyncState.synced,
           correctedAt: '2026-09-29T09:00:00Z',
         ),
       ]);
@@ -156,7 +157,7 @@ void main() {
 
     test('une pose refusée n est en vigueur nulle part', () {
       final merged = StaffTimelineMerge.merge(const [], [
-        contract('c-1', syncState: StaffSyncState.failed),
+        contract('c-1', syncState: RecordSyncState.failed),
       ]);
       expect(merged, isEmpty);
     });
@@ -164,7 +165,7 @@ void main() {
     test('la version de la fiche l emporte sur le doublon local', () {
       final server = [period(StaffContractKind.permanent, id: 'c-1')];
       final merged = StaffTimelineMerge.merge(server, [
-        contract('c-1', syncState: StaffSyncState.synced),
+        contract('c-1', syncState: RecordSyncState.synced),
       ]);
       expect(merged, server);
     });
@@ -182,7 +183,7 @@ void main() {
         capturedAt: '2026-09-01T10:00:00.000Z',
         mimeType: 'image/jpeg',
         sizeBytes: 1,
-        syncState: StaffSyncState.failed,
+        syncState: RecordSyncState.failed,
       );
 
       expect(

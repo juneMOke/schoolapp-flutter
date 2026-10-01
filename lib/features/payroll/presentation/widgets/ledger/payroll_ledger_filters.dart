@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/common/
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -62,7 +62,7 @@ class PayrollLedgerFilters extends StatelessWidget {
     PayrollCubit cubit,
   ) {
     final tone = StaffContractTone.of(kind);
-    return StaffFilterChip(
+    return EteeloFilterChip(
       label: StaffLabels.contract(AppLocalizations.of(context)!, kind),
       selected: state.contractFilter == kind,
       color: tone.color,

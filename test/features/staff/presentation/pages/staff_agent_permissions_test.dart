@@ -13,6 +13,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../staff_builders.dart';
 import 'staff_agent_harness.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 const _contract = StaffContract(
   id: 'c-1',
@@ -20,7 +21,7 @@ const _contract = StaffContract(
   kind: StaffContractKind.permanent,
   effectiveFrom: '2025-09-01',
   recordedAt: '2025-09-01T08:00:00Z',
-  syncState: StaffSyncState.synced,
+  syncState: RecordSyncState.synced,
   amount: Money(32000, 'USD'),
 );
 

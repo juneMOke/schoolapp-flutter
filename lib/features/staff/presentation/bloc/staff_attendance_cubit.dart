@@ -1,18 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_view_mode.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// Le Pointage : lecture locale, filtres en mémoire, gestes en file d'envoi.
 ///
@@ -38,11 +38,11 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
        super(_initial(now()));
 
   static StaffAttendanceState _initial(DateTime now) {
-    final today = StaffWorkCalendar.dayOf(now);
+    final today = SchoolDayCalendar.dayOf(now);
     // Le week-end, le registre s'ouvre sur le vendredi.
-    final day = StaffWorkCalendar.isWeekday(today)
+    final day = SchoolDayCalendar.isWeekday(today)
         ? today
-        : StaffWorkCalendar.stepWorkDay(today, -1);
+        : SchoolDayCalendar.stepWorkDay(today, -1);
     return StaffAttendanceState.initial(today: today, day: day);
   }
 
@@ -75,7 +75,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
         state.copyWith(
           load: StaffAttendanceLoad.ready,
           snapshot: snapshot,
-          today: StaffWorkCalendar.dayOf(_now()),
+          today: SchoolDayCalendar.dayOf(_now()),
           clearFailure: true,
         ),
       ),
@@ -84,10 +84,10 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   /// Les jours lus : le mois du registre et le mois de la fiche.
   static (String, String) _range(String day, String month) {
-    final months = [StaffWorkCalendar.monthOf(day), month]..sort();
+    final months = [SchoolDayCalendar.monthOf(day), month]..sort();
     return (
-      StaffWorkCalendar.firstOf(months.first),
-      StaffWorkCalendar.daysOf(months.last).last,
+      SchoolDayCalendar.firstOf(months.first),
+      SchoolDayCalendar.daysOf(months.last).last,
     );
   }
 
@@ -99,7 +99,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   /// Le jour ouvré précédent ou suivant ; jamais au-delà d'aujourd'hui.
   Future<void> stepDay(int direction) =>
-      _moveDay(StaffWorkCalendar.stepWorkDay(state.day, direction));
+      _moveDay(SchoolDayCalendar.stepWorkDay(state.day, direction));
 
   Future<void> goToday() => _moveDay(state.lastWorkDay);
 
@@ -117,7 +117,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
   /// Le mois précédent ou suivant ; jamais au-delà du mois en cours.
   Future<void> stepMonth(int direction) async {
     if (direction < 0 && !state.canStepMonthBack) return;
-    final month = StaffWorkCalendar.addMonths(state.month, direction);
+    final month = SchoolDayCalendar.addMonths(state.month, direction);
     if (month.compareTo(state.today.substring(0, 7)) > 0) return;
     emit(state.copyWith(month: month));
     await refresh();
@@ -140,7 +140,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   // ── Filtres ───────────────────────────────────────────────────────────
 
-  void setDayStatus(StaffAttendanceStatus? status) =>
+  void setDayStatus(PresenceStatus? status) =>
       emit(state.copyWith(dayQuery: state.dayQuery.withStatus(status)));
 
   void setDayCategory(StaffCategory? category) =>
@@ -154,7 +154,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   void resetDayFilters() => emit(state.copyWith(dayQuery: StaffDayQuery.none));
 
-  void setViewMode(StaffViewMode mode) {
+  void setViewMode(CollectionViewMode mode) {
     if (mode != state.viewMode) emit(state.copyWith(viewMode: mode));
   }
 

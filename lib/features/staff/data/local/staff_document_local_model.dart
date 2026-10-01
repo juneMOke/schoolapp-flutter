@@ -2,6 +2,7 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_document_dto.d
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_push_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne de `staff_documents` : les métadonnées d'une pièce.
 class StaffDocumentLocalModel {
@@ -30,7 +31,7 @@ class StaffDocumentLocalModel {
     'sha256': dto.sha256,
     'version': dto.version,
     'server_updated_at': dto.serverUpdatedAt,
-    'sync_status': StaffSyncState.synced.dbValue,
+    'sync_status': RecordSyncState.synced.dbValue,
     'sync_error': null,
     'sync_error_code': null,
     'updated_at': nowMs,
@@ -52,11 +53,11 @@ class StaffDocumentLocalModel {
     'mime_type': dto.mimeType,
     'size_bytes': dto.sizeBytes,
     'sha256': dto.sha256,
-    'sync_status': StaffSyncState.pending.dbValue,
+    'sync_status': RecordSyncState.pending.dbValue,
     'updated_at': nowMs,
   };
 
-  bool get isSynced => row['sync_status'] == StaffSyncState.synced.dbValue;
+  bool get isSynced => row['sync_status'] == RecordSyncState.synced.dbValue;
 
   /// Empreinte SHA-256 des octets, en hexadécimal minuscule.
   String get sha256 => row['sha256'] as String? ?? '';
@@ -74,7 +75,7 @@ class StaffDocumentLocalModel {
       fileName: text('file_name'),
       mimeType: text('mime_type') ?? '',
       sizeBytes: (row['size_bytes'] as num?)?.toInt() ?? 0,
-      syncState: StaffSyncState.fromDb(text('sync_status')),
+      syncState: RecordSyncState.fromDb(text('sync_status')),
       syncError: text('sync_error'),
     );
   }

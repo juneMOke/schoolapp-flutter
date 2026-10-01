@@ -16,7 +16,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_net_banner.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_payout_fields.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Verser un salaire : le net figé, un mode, et la preuve que ce mode exige —
@@ -39,7 +39,7 @@ class PayrollPayDialog extends StatefulWidget {
   static Future<PayrollDisbursementDraft?> show(
     BuildContext context,
     PayrollPayDialog dialog,
-  ) => StaffDialog.show<PayrollDisbursementDraft>(context, dialog);
+  ) => EteeloFormDialog.show<PayrollDisbursementDraft>(context, dialog);
 
   @override
   State<PayrollPayDialog> createState() => _PayrollPayDialogState();
@@ -91,7 +91,7 @@ class _PayrollPayDialogState extends State<PayrollPayDialog> {
     final refusal = _tried
         ? DisbursePayrollUseCase.refusalOf(widget.view, _draft)
         : null;
-    return StaffDialog(
+    return EteeloFormDialog(
       eyebrow: widget.name,
       title: l10n.payrollPayTitle,
       body: Column(

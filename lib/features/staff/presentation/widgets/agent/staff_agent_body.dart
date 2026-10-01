@@ -8,7 +8,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/agent/sta
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_diplomas_step.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_identity_step.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_job_step.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_notice.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le contenu de l'étape courante, défilant, précédé — après une tentative —
@@ -60,7 +60,7 @@ class StaffAgentBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (stepErrors > 0)
-                StaffNotice.error(l10n.staffErrorsToFix(stepErrors)),
+                EteeloNotice.error(l10n.staffErrorsToFix(stepErrors)),
               KeyedSubtree(
                 key: ValueKey('staff-step-${state.step}'),
                 child: step,

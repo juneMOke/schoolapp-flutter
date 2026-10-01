@@ -4,8 +4,8 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_lww.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne de table désignée par sa clé (`colonne → valeur`).
 typedef PayrollRowKey = Map<String, Object?>;
@@ -80,7 +80,7 @@ class PayrollStore {
   }) => transaction((txn) async {
     await upsert(txn, table, key, {
       ...columns,
-      'sync_status': StaffSyncState.pending.dbValue,
+      'sync_status': RecordSyncState.pending.dbValue,
       'sync_error': null,
       'sync_error_code': null,
     });
@@ -116,23 +116,23 @@ class PayrollStore {
     final error =
         '(SELECT o.last_error FROM ${OutboxDao.table} o '
         "WHERE o.id = '$type:' || $alias.id)";
-    return "CASE WHEN $alias.sync_status = '${StaffSyncState.pending.dbValue}' "
+    return "CASE WHEN $alias.sync_status = '${RecordSyncState.pending.dbValue}' "
         "AND $entry = '${OutboxStatus.syncError.dbValue}' "
-        "THEN '${StaffSyncState.failed.dbValue}' "
+        "THEN '${RecordSyncState.failed.dbValue}' "
         'ELSE $alias.sync_status END AS effective_status, '
         '$error AS outbox_error';
   }
 
   /// L'état effectif lu par [effectiveStatusColumns].
-  static StaffSyncState effectiveState(Map<String, Object?> row) =>
-      StaffSyncState.fromDb(
+  static RecordSyncState effectiveState(Map<String, Object?> row) =>
+      RecordSyncState.fromDb(
         (row['effective_status'] ?? row['sync_status']) as String?,
       );
 
   /// L'erreur effective : celle rangée par le handler, sinon celle du moteur.
   static String? effectiveError(Map<String, Object?> row) =>
       (row['sync_error'] ??
-              (effectiveState(row) == StaffSyncState.failed
+              (effectiveState(row) == RecordSyncState.failed
                   ? row['outbox_error']
                   : null))
           as String?;
@@ -158,7 +158,7 @@ class PayrollStore {
       whereArgs: args(key),
     );
     if (rows.isEmpty ||
-        rows.single['sync_status'] != StaffSyncState.pending.dbValue) {
+        rows.single['sync_status'] != RecordSyncState.pending.dbValue) {
       return false;
     }
     final queued = await txn.rawQuery(
@@ -176,11 +176,11 @@ class PayrollStore {
     String saisieType,
     String keyExpression,
   ) =>
-      "CASE WHEN sync_status = '${StaffSyncState.pending.dbValue}' "
+      "CASE WHEN sync_status = '${RecordSyncState.pending.dbValue}' "
       'AND NOT EXISTS (SELECT 1 FROM ${OutboxDao.table} o '
       "WHERE o.status = '${OutboxStatus.pending.dbValue}' "
       "AND o.id LIKE '$saisieType:' || $keyExpression || '@%') "
-      "THEN '${StaffSyncState.failed.dbValue}' "
+      "THEN '${RecordSyncState.failed.dbValue}' "
       'ELSE sync_status END AS effective_status';
 
   /// L'issue d'un envoi « dernier écrit gagne » : accusé ou refusé. Sans
@@ -213,7 +213,7 @@ class PayrollStore {
       {
         ...serverColumns,
         'sync_status':
-            (failed ? StaffSyncState.failed : StaffSyncState.synced).dbValue,
+            (failed ? RecordSyncState.failed : RecordSyncState.synced).dbValue,
         'sync_error': reason,
         'sync_error_code': code,
       },
@@ -227,7 +227,7 @@ class PayrollStore {
   Future<void> mark(
     String table,
     PayrollRowKey key,
-    StaffSyncState state, {
+    RecordSyncState state, {
     String? code,
     String? reason,
     Map<String, Object?> extra = const {},

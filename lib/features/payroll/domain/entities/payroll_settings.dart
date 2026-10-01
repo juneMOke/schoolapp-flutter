@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les réglages d'une devise : allocation par enfant, taux d'heure sup. par
 /// défaut, et le pas auquel s'arrondit un taux calculé. Centimes.
@@ -44,14 +45,14 @@ class PayrollSettings extends Equatable {
 
   /// Par code ISO.
   final Map<String, PayrollCurrencySettings> byCurrency;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
 
   const PayrollSettings({
     required this.monthlyHoursDivisor,
     required this.overtimeMultiplierPermille,
     required this.allowanceEligibleKinds,
     required this.byCurrency,
-    this.syncState = StaffSyncState.synced,
+    this.syncState = RecordSyncState.synced,
   });
 
   /// Les valeurs de la spec, tant que l'école n'a rien posé.

@@ -11,11 +11,11 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_adva
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_math.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_table.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Le registre des avances : agent et motif, date, montant, échéancier,
 /// remboursement (barre or → vert), statut.
@@ -47,7 +47,7 @@ class PayrollAdvanceTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return StaffTable(
+    return EteeloColumnTable(
       minWidth: AppDimensions.payrollAdvancesMinWidth,
       widths: _widths,
       endAligned: const {2},
@@ -76,7 +76,7 @@ class PayrollAdvanceTable extends StatelessWidget {
         onCancel != null &&
         advance.isLive &&
         !PayrollAdvanceRules.hasFrozenDeduction(snapshot, advance);
-    return StaffTableRow(
+    return EteeloColumnTableRow(
       widths: _widths,
       cells: [
         Row(
@@ -85,7 +85,7 @@ class PayrollAdvanceTable extends StatelessWidget {
               StaffAvatar(
                 member: member,
                 sync: advance.syncState,
-                size: AppDimensions.staffAttendanceIconButtonSize,
+                size: AppDimensions.presenceMarkIconButtonSize,
               ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -112,12 +112,12 @@ class PayrollAdvanceTable extends StatelessWidget {
         ),
         Text(
           PayrollLabels.day(context, advance.grantedOn),
-          style: StaffTableRow.figures(),
+          style: EteeloColumnTableRow.figures(),
         ),
         Text(
           money(amount),
           textAlign: TextAlign.end,
-          style: StaffTableRow.figures(strong: true),
+          style: EteeloColumnTableRow.figures(strong: true),
         ),
         Text(
           l10n.payrollAdvanceSchedule(
@@ -139,10 +139,10 @@ class PayrollAdvanceTable extends StatelessWidget {
             Flexible(
               child: _StatusPill(status: status, advance: advance),
             ),
-            if (advance.syncState != StaffSyncState.synced)
+            if (advance.syncState != RecordSyncState.synced)
               Padding(
                 padding: const EdgeInsets.only(left: AppSpacing.xs),
-                child: StaffSyncDot(state: advance.syncState),
+                child: RecordSyncDot(state: advance.syncState),
               ),
             if (cancellable)
               IconButton(

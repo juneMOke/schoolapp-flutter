@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_outbox_han
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_sync_api.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/salary_advance_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 // Les deux faits de la paie : de l'argent est sorti. Un refus ne les efface
 // jamais — ils restent en erreur, listés à régulariser.
@@ -58,7 +58,7 @@ class SalaryAdvanceOutboxHandler
     if (!await _dao.cancellations.isCancelled(request.advance.id)) return null;
     await _dao.mark(
       request.advance.id,
-      StaffSyncState.failed,
+      RecordSyncState.failed,
       code: kPayrollLocallyCancelled,
     );
     return const OutboxDispatchResult.acked();
@@ -67,7 +67,7 @@ class SalaryAdvanceOutboxHandler
   @override
   Future<void> send(SalaryAdvanceRequestDto request, String schoolId) async {
     await _api.submitAdvance(extras, request.toJson());
-    await _dao.mark(request.advance.id, StaffSyncState.synced);
+    await _dao.mark(request.advance.id, RecordSyncState.synced);
   }
 
   @override
@@ -78,7 +78,7 @@ class SalaryAdvanceOutboxHandler
   ) async {
     await _dao.mark(
       request.advance.id,
-      StaffSyncState.failed,
+      RecordSyncState.failed,
       code: failure.storedCode,
       reason: failure.reason,
     );
@@ -128,7 +128,7 @@ class PayrollDisbursementOutboxHandler
   ) async {
     final id = request.disbursement.id;
     if (!await _dao.cancellations.isCancelled(id)) return null;
-    await _dao.mark(id, StaffSyncState.failed, code: kPayrollLocallyCancelled);
+    await _dao.mark(id, RecordSyncState.failed, code: kPayrollLocallyCancelled);
     return const OutboxDispatchResult.acked();
   }
 
@@ -138,7 +138,7 @@ class PayrollDisbursementOutboxHandler
     String schoolId,
   ) async {
     await _api.submitDisbursement(extras, request.toJson());
-    await _dao.mark(request.disbursement.id, StaffSyncState.synced);
+    await _dao.mark(request.disbursement.id, RecordSyncState.synced);
   }
 
   @override
@@ -149,7 +149,7 @@ class PayrollDisbursementOutboxHandler
   ) async {
     await _dao.mark(
       request.disbursement.id,
-      StaffSyncState.failed,
+      RecordSyncState.failed,
       code: failure.storedCode,
       reason: failure.reason,
     );

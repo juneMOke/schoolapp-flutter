@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La cellule « Versement » : après validation seulement ; le bouton Verser
@@ -60,7 +60,7 @@ class PayrollPayoutCell extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            StaffSyncDot(state: paid.syncState),
+            RecordSyncDot(state: paid.syncState),
           ],
         ),
       );

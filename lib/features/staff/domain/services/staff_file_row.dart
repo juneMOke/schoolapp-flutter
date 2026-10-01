@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_document
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_dossier.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne du fichier : l'agent, son contrat du jour, son dossier et où en
 /// est sa synchronisation.
@@ -19,7 +20,7 @@ class StaffFileRow extends Equatable {
 
   /// Le pire état entre la fiche et ses pièces : échec, puis en attente, puis
   /// synchronisé.
-  final StaffSyncState sync;
+  final RecordSyncState sync;
 
   const StaffFileRow({
     required this.member,
@@ -34,8 +35,8 @@ class StaffFileRow extends Equatable {
       dossier != null && dossier!.isKnown && !dossier!.isComplete;
 
   /// Agrège l'état d'une fiche et de ses pièces.
-  static StaffSyncState worstOf(
-    StaffSyncState member,
+  static RecordSyncState worstOf(
+    RecordSyncState member,
     Iterable<StaffDocument> documents,
   ) {
     var worst = member;
@@ -47,13 +48,13 @@ class StaffFileRow extends Equatable {
 
   /// Le pire de deux états : échec, puis en attente, puis synchronisé.
   /// Partagé par tout ce qui agrège des lignes (pièces, pointages).
-  static StaffSyncState worse(StaffSyncState a, StaffSyncState b) =>
+  static RecordSyncState worse(RecordSyncState a, RecordSyncState b) =>
       _rank(b) > _rank(a) ? b : a;
 
-  static int _rank(StaffSyncState state) => switch (state) {
-    StaffSyncState.failed => 2,
-    StaffSyncState.pending => 1,
-    StaffSyncState.synced => 0,
+  static int _rank(RecordSyncState state) => switch (state) {
+    RecordSyncState.failed => 2,
+    RecordSyncState.pending => 1,
+    RecordSyncState.synced => 0,
   };
 
   @override

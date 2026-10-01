@@ -3,7 +3,7 @@ import 'package:school_app_flutter/features/attendances/domain/usecases/get_atte
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_failure_mapper.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_overview_state.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_error_type.dart';
 
 class AttendanceOverviewBloc
     extends Bloc<AttendanceOverviewEvent, AttendanceOverviewState> {

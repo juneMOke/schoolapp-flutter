@@ -7,12 +7,13 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_state.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 
 /// Le premier chargement, à la géométrie réelle de l'affichage choisi : huit
 /// cartes en grille, huit lignes en liste. Le mouvement réduit est respecté
 /// par les squelettes du socle.
 class StaffFileSkeleton extends StatelessWidget {
-  final StaffViewMode viewMode;
+  final CollectionViewMode viewMode;
 
   const StaffFileSkeleton({super.key, required this.viewMode});
 
@@ -20,7 +21,7 @@ class StaffFileSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (viewMode == StaffViewMode.list) {
+    if (viewMode == CollectionViewMode.list) {
       return const EteeloListSkeleton(rowCount: _count, pillCount: 3);
     }
     return Semantics(

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/mobile_money_operator.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Le profil de paie d'un agent : ce qui préremplit ses éléments variables et
 /// son versement. Donnée de paie, pas de la fiche.
@@ -15,7 +15,7 @@ class StaffPayProfile extends Equatable {
   final String? payoutPhone;
   final String? bankName;
   final String? bankAccount;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
   final String? syncError;
 
   const StaffPayProfile({
@@ -26,7 +26,7 @@ class StaffPayProfile extends Equatable {
     this.payoutPhone,
     this.bankName,
     this.bankAccount,
-    this.syncState = StaffSyncState.synced,
+    this.syncState = RecordSyncState.synced,
     this.syncError,
   });
 

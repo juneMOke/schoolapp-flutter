@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqlite_api.dart';
-import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/core/entities/stats_period.dart';
-import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_pull_models.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
@@ -14,6 +12,7 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_history_local_data_source.dart';
 
 /// Statistiques d'assiduité par élève (AF-3, §5) : dénominateur = COUNT(sessions),
 /// numérateur = absences ; gate bootstrapComplete (invariant #7) ; hebdo MON→SAT.
@@ -33,10 +32,9 @@ void main() {
     roster = ClassroomLocalDataSource(db);
     syncMeta = SyncMetaDao(db);
     repo = AttendanceOfflineRepositoryImpl(
-      localDataSource: local,
+      historyDataSource: AttendanceHistoryLocalDataSource(db),
       rosterDataSource: roster,
       syncMetaDao: syncMeta,
-      idGenerator: const IdGenerator(Uuid()),
     );
   });
 
@@ -159,6 +157,45 @@ void main() {
       expect(res.present, 2);
       expect(res.rate, closeTo(2 / 3, 0.0001));
       expect(res.available, isTrue);
+    },
+  );
+
+  test(
+    'un retard est une présence : compté à part, jamais en absence',
+    () async {
+      await local.applyPulledSessions([
+        const AttendanceSessionDeltaDto(
+          id: 'srv-late',
+          classroomId: classroomId,
+          attendanceDate: '2026-05-04',
+          academicYearId: yearId,
+          updatedAt: '2026-05-04T08:00:00.000Z',
+          absences: [
+            AbsenceDeltaDto(
+              id: 'a-late',
+              studentId: 's1',
+              status: 'LATE',
+              arrivalTime: '07:48',
+              lateMinutes: 18,
+              updatedAt: '2026-05-04T08:00:00.000Z',
+            ),
+          ],
+        ).toPulled(1000),
+      ], 1000);
+      await seedMembership(studentId: 's1');
+      await markBootstrapComplete();
+
+      final res = (await repo.getStudentAttendanceStats(
+        studentId: 's1',
+        academicYearId: yearId,
+        period: StatsPeriod.month,
+        reference: DateTime(2026, 5, 15),
+      )).getOrElse(() => throw StateError('left'));
+
+      expect(res.absences, 0);
+      expect(res.present, 1);
+      expect(res.lateCount, 1);
+      expect(res.lateMinutes, 18);
     },
   );
 

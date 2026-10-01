@@ -236,6 +236,17 @@ class OutboxDao {
   // supprimer : une entrée qui reste en erreur est réparable, une entrée
   // supprimée ne l'est plus.
 
+  /// L'entrée [id], ou `null` (jamais enfilée, ou purgée après accusé).
+  Future<OutboxEntry?> byId(String id) async {
+    final rows = await _db.query(
+      table,
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : OutboxEntry.fromMap(rows.first);
+  }
+
   /// Nombre d'entrées encore en attente (badge « en attente de synchro »).
   Future<int> pendingCount() async {
     final rows = await _db.rawQuery(

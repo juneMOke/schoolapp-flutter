@@ -12,10 +12,10 @@ import 'package:school_app_flutter/features/payroll/data/sync/attendance_summary
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 const _school = 's-1';
 
@@ -142,7 +142,7 @@ void main() {
       ).apply([_payroll('VALIDATED')], schoolId: _school, nowMs: 2);
 
       final gesture = (await gestures.forSchool(_school)).single;
-      expect(gesture.syncState, StaffSyncState.synced);
+      expect(gesture.syncState, RecordSyncState.synced);
       expect(gesture.authorName, 'Mbuyi Kalombo Jean-Pierre');
     });
   });
@@ -169,7 +169,7 @@ void main() {
         db,
       ).forSchool(_school))['2026-10']!['m-1']!;
       expect(variables.overtimeMinutes, 60);
-      expect(variables.syncState, StaffSyncState.pending);
+      expect(variables.syncState, RecordSyncState.pending);
       final entry = (await OutboxDao(db).pendingAll()).single;
       expect(entry.aggregateId, 'payroll:2026-10');
     });

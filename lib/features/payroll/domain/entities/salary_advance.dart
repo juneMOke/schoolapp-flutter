@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_cancellation.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une avance sur salaire, remboursée en 1 à 4 échéances retenues sur la paie,
 /// à partir de [firstMonth], dans la devise du contrat.
@@ -26,7 +26,7 @@ class SalaryAdvance extends Equatable {
   final int deductedInCents;
   final int? balanceInCents;
   final PayrollCancellation? cancellation;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
   final String? syncError;
   final String? syncErrorCode;
 
@@ -43,14 +43,14 @@ class SalaryAdvance extends Equatable {
     this.deductedInCents = 0,
     this.balanceInCents,
     this.cancellation,
-    this.syncState = StaffSyncState.synced,
+    this.syncState = RecordSyncState.synced,
     this.syncError,
     this.syncErrorCode,
   });
 
   /// Refusée par le serveur : elle n'existe pas pour lui — mais l'argent est
   /// sorti, elle reste listée à régulariser.
-  bool get isRefused => syncState == StaffSyncState.failed;
+  bool get isRefused => syncState == RecordSyncState.failed;
 
   /// Annulée, ou en cours d'annulation sur cette tablette.
   bool get isCancelled {

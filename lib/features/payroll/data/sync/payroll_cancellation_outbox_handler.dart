@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellati
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_outbox_handler.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Pousse une annulation ; rend le corps de l'accusé.
 typedef PayrollCancellationSender =
@@ -98,7 +98,7 @@ class PayrollCancellationOutboxHandler
     String schoolId,
   ) async {
     final target = await _store.targetOf(request.cancellationId);
-    if (target == null || target.state == StaffSyncState.failed) {
+    if (target == null || target.state == RecordSyncState.failed) {
       await _store.settle(
         request.cancellationId,
         failed: false,
@@ -106,7 +106,7 @@ class PayrollCancellationOutboxHandler
       );
       return const OutboxDispatchResult.acked();
     }
-    if (target.state == StaffSyncState.pending) {
+    if (target.state == RecordSyncState.pending) {
       return const OutboxDispatchResult.blocked(
         'Le fait annulé attend son propre envoi',
       );

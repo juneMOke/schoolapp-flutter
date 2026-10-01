@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Où en est, sur la tablette, la fiche d'un agent dont dépend un envoi.
 enum StaffParentState {
@@ -36,7 +36,7 @@ class StaffMemberGate {
     if (member.row['version'] != null) {
       return (state: StaffParentState.acknowledged, name: name);
     }
-    final refused = member.syncStatus == StaffSyncState.failed.dbValue;
+    final refused = member.syncStatus == RecordSyncState.failed.dbValue;
     return (
       state: refused ? StaffParentState.refused : StaffParentState.unsent,
       name: name,

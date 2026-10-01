@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/attendances/presentation/widgets/pre
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_status.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/presence_summary/presence_summary_view_data.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 
 /// Zone de synthese : surface unique teintee (degrade + filigrane Kuba) qui
 /// regroupe l'en-tete, la bande de cartes KPI partagee ([EteeloKpiBand]) et la
@@ -87,9 +89,25 @@ class PresenceSummaryCard extends StatelessWidget {
       icon: Icons.percent_rounded,
     ),
     _statusCard(l10n, AttendanceDayStatus.present, data.present),
+    _lateCard(l10n),
     _statusCard(l10n, AttendanceDayStatus.justified, data.justified),
     _statusCard(l10n, AttendanceDayStatus.unjustified, data.unjustified),
   ];
+
+  /// Les retards : des présences, comptées à part, avec leurs minutes.
+  EteeloKpiCardData _lateCard(AppLocalizations l10n) {
+    final tone = PresenceTone.of(PresenceStatus.late);
+    return EteeloKpiCardData(
+      label: l10n.presenceMarkKpiLates,
+      value: data.late,
+      accent: tone.color,
+      accentSoft: tone.soft,
+      icon: tone.icon,
+      subline: data.late == 0
+          ? null
+          : l10n.presenceMarkMinutes(data.lateMinutes),
+    );
+  }
 
   EteeloKpiCardData _statusCard(
     AppLocalizations l10n,

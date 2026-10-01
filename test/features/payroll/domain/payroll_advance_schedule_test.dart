@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
 import '../payroll_builders.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 List<PayrollLineAdvance> deduct({
   required String month,
@@ -137,7 +137,7 @@ void main() {
       grossInCents: 35000,
       advances: [
         advance('m-1', id: 'cdf', currency: 'CDF'),
-        advance('m-1', id: 'refused', syncState: StaffSyncState.failed),
+        advance('m-1', id: 'refused', syncState: RecordSyncState.failed),
         advance('m-1', id: 'later', firstMonth: '2026-11'),
         advance('m-1', id: 'settled', amount: 1000, firstMonth: '2026-09'),
       ],

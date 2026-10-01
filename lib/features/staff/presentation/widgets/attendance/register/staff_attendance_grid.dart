@@ -19,7 +19,7 @@ class StaffAttendanceGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) => EteeloGridView(
     padding: EdgeInsets.zero,
-    minItemWidth: AppDimensions.staffAttendanceCardMinWidth,
+    minItemWidth: AppDimensions.presenceMarkCardMinWidth,
     itemCount: register.rows.length,
     itemBuilder: (context, index) => StaffAttendanceCard(
       key: ValueKey(register.rows[index].member.id),

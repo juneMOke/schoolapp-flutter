@@ -3,11 +3,11 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_sync_pill.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_table.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le tableau du récapitulatif : une ligne par agent ; toucher une ligne
@@ -31,15 +31,15 @@ class StaffRecapTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return StaffTable(
+    return EteeloColumnTable(
       minWidth: AppDimensions.staffAttendanceRecapMinWidth,
       widths: _widths,
       headers: [
         l10n.staffAttendanceColAgent,
         l10n.staffAttendanceRecapColContract,
-        l10n.staffAttendanceKpiPresences,
-        l10n.staffAttendanceKpiLates,
-        l10n.staffAttendanceKpiAbsences,
+        l10n.presenceMarkKpiPresences,
+        l10n.presenceMarkKpiLates,
+        l10n.presenceMarkKpiAbsences,
         l10n.staffAttendanceRecapColHours,
         l10n.staffAttendanceRecapColSync,
       ],
@@ -59,8 +59,8 @@ class _RecapRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final stats = row.stats;
-    final style = StaffTableRow.figures();
-    return StaffTableRow(
+    final style = EteeloColumnTableRow.figures();
+    return EteeloColumnTableRow(
       onTap: () => onOpen(row),
       widths: StaffRecapTable._widths,
       cells: [
@@ -69,7 +69,7 @@ class _RecapRow extends StatelessWidget {
             StaffAvatar(
               member: row.member,
               sync: row.sync,
-              size: AppDimensions.staffAttendanceIconButtonSize,
+              size: AppDimensions.presenceMarkIconButtonSize,
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -88,12 +88,12 @@ class _RecapRow extends StatelessWidget {
         Text(
           stats.isHourly
               ? '${stats.present}'
-              : l10n.staffAttendanceKpiRatio(stats.present, stats.workDays),
+              : l10n.presenceMarkKpiRatio(stats.present, stats.workDays),
           style: style,
         ),
         Text('${stats.late}', style: style),
         Text(
-          l10n.staffAttendanceKpiAbsencesDetail(
+          l10n.presenceMarkKpiAbsencesDetail(
             stats.absentJustified,
             stats.absentUnjustified,
           ),
@@ -101,13 +101,13 @@ class _RecapRow extends StatelessWidget {
         ),
         Text(
           stats.isHourly
-              ? StaffAttendanceLabels.hours(l10n, stats.workedMinutes)
+              ? PresenceLabels.hours(l10n, stats.workedMinutes)
               : '—',
           style: style,
         ),
         Align(
           alignment: Alignment.centerLeft,
-          child: StaffSyncPill(state: row.sync),
+          child: RecordSyncPill(state: row.sync),
         ),
       ],
     );

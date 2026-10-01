@@ -13,7 +13,6 @@ import 'package:school_app_flutter/features/classes/presentation/context/classes
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_scope.dart';
-import 'package:school_app_flutter/features/attendances/presentation/pages/presences_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
@@ -54,6 +53,7 @@ import 'package:school_app_flutter/features/home/presentation/pages/accueil_page
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 
 class HomePage extends StatelessWidget {
   final String? initialSubMenuId;
@@ -441,7 +441,7 @@ class _HomePageView extends StatelessWidget {
           child: ClassesListPage(intent: ClassesListIntent.classesList()),
         );
       case MenuConstants.presencesId:
-        return const AttendanceFeatureScope(child: PresencesPage());
+        return const AttendanceFeatureScope(child: ClassPresencePage());
       case MenuConstants.disciplinesListId:
         return const ClassesFeatureScope(
           key: ValueKey(MenuConstants.disciplinesListId),

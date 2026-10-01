@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/database/table_schema.dart';
+import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
 
 /// Contribution de schéma de la branche offline **Classe + Présence/Discipline**.
 ///
@@ -130,6 +131,10 @@ const TableSchema classroomTransfersTable = TableSchema(
 /// serveur du roster ACTIF (dénominateur des taux agrégés back-office ;
 /// informatif côté tablette). `server_updated_at` = visibilité serveur (ISO),
 /// reçue au pull ; le curseur de pagination reste opaque dans `sync_meta`.
+/// `reopened_at` (v58, local seulement) : l'appel validé a été rouvert sur
+/// cette tablette ; ses marques vivent dans `attendance_draft_marks` jusqu'à
+/// la revalidation, qui le remet à `null`. Jamais envoyé, jamais écrasé par
+/// le pull (absent de `AttendanceSessionRow.toMap`).
 const TableSchema attendanceSessionsTable = TableSchema(
   name: 'attendance_sessions',
   createTableSql: '''
@@ -146,12 +151,20 @@ const TableSchema attendanceSessionsTable = TableSchema(
       version INTEGER,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       synced_at INTEGER,
+      reopened_at INTEGER,
       UNIQUE (classroom_id, attendance_date, academic_year_id)
     )
   ''',
 );
 
-/// `attendance_records` — exceptions locales de l'appel (AF-1). Stockage par
+/// `attendance_records` — exceptions locales de l'appel (AF-1).
+///
+/// Présences des élèves v2 (v58) : une exception est une absence
+/// (`status` = `ABSENT`, `present` = 0) ou un **retard** (`status` = `LATE`,
+/// `present` = 1, `arrival_time` `HH:mm` et `late_minutes` ≥ 1). Une ligne
+/// d'avant la v58 a `status` nul : elle se lit `ABSENT` ou présent selon
+/// `present`. Un retard est une présence : toute requête qui compte des
+/// absences filtre `present = 0`. Stockage par
 /// exception : seuls les absents (ou les retards corrigés) portent une ligne ;
 /// un élève sans ligne sous une session = présent. `updated_at` arbitre le LWW.
 /// Clé naturelle `(student_id, attendance_date, academic_year_id)`. `session_id`
@@ -172,6 +185,9 @@ const TableSchema attendanceRecordsTable = TableSchema(
       attendance_date TEXT NOT NULL,
       academic_year_id TEXT NOT NULL,
       present INTEGER NOT NULL DEFAULT 1,
+      status TEXT,
+      arrival_time TEXT,
+      late_minutes INTEGER,
       absence_reason TEXT,
       absence_reason_note TEXT,
       version INTEGER,
@@ -255,6 +271,7 @@ const List<TableSchema> classroomAttendanceOfflineTables = [
   classroomTransfersTable,
   attendanceSessionsTable,
   attendanceRecordsTable,
+  ...studentAttendanceV2Tables,
   disciplinaryCasesTable,
   disciplinaryCaseCommentsTable,
 ];

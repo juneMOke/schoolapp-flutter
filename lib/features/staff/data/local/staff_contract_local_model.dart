@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_contract_dto.d
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_push_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne de `staff_contracts`.
 ///
@@ -39,7 +40,7 @@ class StaffContractLocalModel {
     'correction_reason': d.correctionReason,
     'version': d.version,
     'server_updated_at': d.serverUpdatedAt,
-    'sync_status': StaffSyncState.synced.dbValue,
+    'sync_status': RecordSyncState.synced.dbValue,
     'sync_error': null,
     'sync_error_code': null,
     'updated_at': nowMs,
@@ -65,7 +66,7 @@ class StaffContractLocalModel {
     'bonus_in_cents': input.bonusInCents,
     'bonus_currency': input.bonusCurrency,
     'recorded_at': input.recordedAt,
-    'sync_status': StaffSyncState.pending.dbValue,
+    'sync_status': RecordSyncState.pending.dbValue,
     'updated_at': nowMs,
   };
 
@@ -91,7 +92,7 @@ class StaffContractLocalModel {
       correctedByName: text('corrected_by_name'),
       correctionReason: text('correction_reason'),
       correctionPending: text('correction_pending_id') != null,
-      syncState: StaffSyncState.fromDb(text('sync_status')),
+      syncState: RecordSyncState.fromDb(text('sync_status')),
       syncError: text('sync_error'),
     );
   }

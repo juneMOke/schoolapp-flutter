@@ -13,21 +13,22 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
+import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_attendance_page.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_time_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_row.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_validated_banner.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_banners.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../staff_builders.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 class _MockLoad extends Mock implements LoadStaffAttendanceUseCase {}
 
@@ -71,8 +72,8 @@ void main() {
               id: 'r-2',
               staffMemberId: 'm-2',
               workDate: _day,
-              status: StaffAttendanceStatus.late,
-              arrival: StaffClockTime.tryParse('07:52'),
+              status: PresenceStatus.late,
+              arrival: ClockTime.tryParse('07:52'),
               lateMinutes: 22,
             ),
           },
@@ -90,7 +91,7 @@ void main() {
             ),
         },
         settings: StaffAttendanceSettings.defaults,
-        schoolYear: const StaffSchoolYear(start: '2026-09-01'),
+        schoolYear: const SchoolYearBounds(start: '2026-09-01'),
         hasEverSynced: true,
       );
 
@@ -179,8 +180,8 @@ void main() {
         verify(() => save(captureAny())).captured.single
             as List<StaffAttendanceRecord>;
     expect(records.single.staffMemberId, 'm-1');
-    expect(records.single.status, StaffAttendanceStatus.present);
-    expect(records.single.arrival, StaffClockTime.tryParse('07:35'));
+    expect(records.single.status, PresenceStatus.present);
+    expect(records.single.arrival, ClockTime.tryParse('07:35'));
   });
 
   testWidgets('la liste donne un segment de statut par agent', (tester) async {
@@ -278,7 +279,7 @@ void main() {
     addTearDown(tester.view.resetViewInsets);
     await tester.pump();
 
-    expect(find.byType(StaffTimeDialog), findsOneWidget);
+    expect(find.byType(PresenceTimeDialog), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

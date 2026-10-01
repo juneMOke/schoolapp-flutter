@@ -22,6 +22,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
 import '../../staff_fixtures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class _MockApi extends Mock implements StaffSyncApi {}
 
@@ -115,7 +116,7 @@ void main() {
       );
 
       final member = (await StaffMemberDao(db).find('m-1'))!.toEntity();
-      expect(member.syncState, StaffSyncState.pending);
+      expect(member.syncState, RecordSyncState.pending);
       expect(member.staffNumber, isNull);
       final entries = await OutboxDao(db).pendingAll();
       expect(entries.map((e) => e.id), ['STAFF_MEMBER:m-1']);
@@ -153,7 +154,7 @@ void main() {
       expect(result.outcome, OutboxDispatchOutcome.acked);
       final member = (await StaffMemberDao(db).find('m-1'))!.toEntity();
       expect(member.staffNumber, 'CF-AG-0048');
-      expect(member.syncState, StaffSyncState.synced);
+      expect(member.syncState, RecordSyncState.synced);
     });
 
     test('une saisie plus récente pendant le vol n est pas écrasée', () async {
@@ -179,7 +180,7 @@ void main() {
       final member = (await StaffMemberDao(db).find('m-1'))!.toEntity();
       expect(member.firstName, 'Didier');
       expect(member.staffNumber, 'CF-AG-0048');
-      expect(member.syncState, StaffSyncState.pending);
+      expect(member.syncState, RecordSyncState.pending);
     });
 
     test('refus 422 : fiche refusée, entrée en échec', () async {

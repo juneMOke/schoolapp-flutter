@@ -12,7 +12,9 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_agent_mo
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 StaffMember member(
   String id,
@@ -24,7 +26,7 @@ StaffMember member(
   lastName: lastName,
   firstName: 'Prénom',
   category: StaffCategory.teacher,
-  syncState: StaffSyncState.synced,
+  syncState: RecordSyncState.synced,
   contracts: [
     StaffContractPeriod(
       contractId: 'c-$id',
@@ -38,11 +40,11 @@ StaffMember member(
 StaffAttendanceRecord record(
   String memberId,
   String day,
-  StaffAttendanceStatus status, {
+  PresenceStatus status, {
   int late = 0,
   int? worked,
   bool justified = false,
-  StaffSyncState sync = StaffSyncState.synced,
+  RecordSyncState sync = RecordSyncState.synced,
 }) => StaffAttendanceRecord(
   id: '$memberId-$day',
   staffMemberId: memberId,
@@ -57,9 +59,9 @@ StaffAttendanceRecord record(
 );
 
 void main() {
-  group('StaffWorkCalendar', () {
+  group('SchoolDayCalendar', () {
     test('lundi → vendredi, jusqu\'à aujourd\'hui', () {
-      final days = StaffWorkCalendar.workDaysOf('2026-09', today: '2026-09-09');
+      final days = SchoolDayCalendar.workDaysOf('2026-09', today: '2026-09-09');
       expect(days, [
         '2026-09-01',
         '2026-09-02',
@@ -72,9 +74,9 @@ void main() {
     });
 
     test('borné par l\'année scolaire ; hors année = vacances', () {
-      const year = StaffSchoolYear(start: '2026-09-07', end: '2027-07-02');
+      const year = SchoolYearBounds(start: '2026-09-07', end: '2027-07-02');
       expect(
-        StaffWorkCalendar.workDaysOf(
+        SchoolDayCalendar.workDaysOf(
           '2026-09',
           today: '2026-09-09',
           year: year,
@@ -82,7 +84,7 @@ void main() {
         ['2026-09-07', '2026-09-08', '2026-09-09'],
       );
       expect(
-        StaffWorkCalendar.workDaysOf(
+        SchoolDayCalendar.workDaysOf(
           '2027-08',
           today: '2027-08-31',
           year: year,
@@ -92,9 +94,9 @@ void main() {
     });
 
     test('le jour ouvré suivant saute le week-end', () {
-      expect(StaffWorkCalendar.stepWorkDay('2026-09-04', 1), '2026-09-07');
-      expect(StaffWorkCalendar.stepWorkDay('2026-09-07', -1), '2026-09-04');
-      expect(StaffWorkCalendar.addMonths('2026-12', 1), '2027-01');
+      expect(SchoolDayCalendar.stepWorkDay('2026-09-04', 1), '2026-09-07');
+      expect(SchoolDayCalendar.stepWorkDay('2026-09-07', -1), '2026-09-04');
+      expect(SchoolDayCalendar.addMonths('2026-12', 1), '2027-01');
     });
   });
 
@@ -109,31 +111,26 @@ void main() {
     members: [alpha, vac],
     records: {
       'a': {
-        '2026-09-01': record('a', '2026-09-01', StaffAttendanceStatus.present),
-        '2026-09-02': record(
-          'a',
-          '2026-09-02',
-          StaffAttendanceStatus.late,
-          late: 22,
-        ),
+        '2026-09-01': record('a', '2026-09-01', PresenceStatus.present),
+        '2026-09-02': record('a', '2026-09-02', PresenceStatus.late, late: 22),
         '2026-09-03': record(
           'a',
           '2026-09-03',
-          StaffAttendanceStatus.absent,
+          PresenceStatus.absent,
           justified: true,
         ),
         '2026-09-04': record(
           'a',
           '2026-09-04',
-          StaffAttendanceStatus.absent,
-          sync: StaffSyncState.pending,
+          PresenceStatus.absent,
+          sync: RecordSyncState.pending,
         ),
       },
       'v': {
         '2026-09-02': record(
           'v',
           '2026-09-02',
-          StaffAttendanceStatus.present,
+          PresenceStatus.present,
           worked: 90,
         ),
       },
@@ -173,7 +170,7 @@ void main() {
       expect(stats.absentJustified, 1);
       expect(stats.absentUnjustified, 1);
       expect(stats.notMarked, 1);
-      expect(alphaRow.sync, StaffSyncState.pending);
+      expect(alphaRow.sync, RecordSyncState.pending);
     });
 
     test(
@@ -241,7 +238,7 @@ void main() {
           lastName: 'Nouveau',
           firstName: 'Prénom',
           category: StaffCategory.teacher,
-          syncState: StaffSyncState.synced,
+          syncState: RecordSyncState.synced,
           contracts: [
             StaffContractPeriod(
               contractId: 'c-n',
@@ -284,8 +281,8 @@ void main() {
         day: '2026-09-02',
         query: StaffDayQuery.none,
       );
-      expect(register.count(StaffAttendanceStatus.late), 1);
-      expect(register.count(StaffAttendanceStatus.present), 1);
+      expect(register.count(PresenceStatus.late), 1);
+      expect(register.count(PresenceStatus.present), 1);
       expect(register.toJustify, 1);
       expect(register.frozen, isTrue);
       expect(register.showsHours, isTrue);
@@ -295,7 +292,7 @@ void main() {
       final register = StaffDayRegister.build(
         snapshot,
         day: '2026-09-07',
-        query: const StaffDayQuery(status: StaffAttendanceStatus.none),
+        query: const StaffDayQuery(status: PresenceStatus.none),
       );
       expect(register.rows, hasLength(2));
       expect(register.unmarked, hasLength(2));

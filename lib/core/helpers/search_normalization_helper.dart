@@ -49,4 +49,18 @@ class SearchNormalizationHelper {
     }
     return !hasCriterion;
   }
+
+  /// `true` si **chaque mot** de [text] se trouve dans au moins un des
+  /// [fields] — sans égard à la casse ni aux accents. [text] vide ⇒ `true`.
+  ///
+  /// La recherche d'une personne dans une liste (agent, élève de la classe) :
+  /// « gra mbu » retrouve Grâce Mbuyi.
+  static bool containsAllWords(Iterable<String?> fields, String text) {
+    final words = normalize(
+      text,
+    ).split(RegExp(r'\s+')).where((word) => word.isNotEmpty);
+    if (words.isEmpty) return true;
+    final haystack = normalize(fields.whereType<String>().join(' '));
+    return words.every(haystack.contains);
+  }
 }

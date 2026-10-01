@@ -3,8 +3,8 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dar
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les éléments variables (`payroll_variables`), dernier écrit gagne, une
 /// ligne par école, mois et agent.
@@ -72,7 +72,7 @@ class PayrollVariablesDao {
         'overtime_rate_in_cents': item.overtimeRateInCents,
         'dependent_children': item.dependentChildren,
         'client_updated_at': item.clientUpdatedAt,
-        'sync_status': StaffSyncState.synced.dbValue,
+        'sync_status': RecordSyncState.synced.dbValue,
         'sync_error': null,
         'sync_error_code': null,
         'updated_at': nowMs,

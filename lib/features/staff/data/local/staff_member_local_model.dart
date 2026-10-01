@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_contract
 import 'package:school_app_flutter/features/staff/domain/entities/staff_diploma.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une ligne de `staff_members`, et ses deux familles de colonnes.
 ///
@@ -95,7 +96,7 @@ class StaffMemberLocalModel {
               endsOn: c.endsOn,
             ),
       ],
-      syncState: StaffSyncState.fromDb(text('sync_status')),
+      syncState: RecordSyncState.fromDb(text('sync_status')),
     );
   }
 

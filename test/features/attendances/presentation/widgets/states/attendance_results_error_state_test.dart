@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/bloc/attendance_error_type.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 

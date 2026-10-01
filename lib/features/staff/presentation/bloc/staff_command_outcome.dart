@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_notice.dart';
 
 /// Ce qu'un geste du Pointage annonce : le refus d'un jour figé avant toute
@@ -13,7 +13,7 @@ abstract final class StaffCommandOutcome {
     StaffAttendanceSnapshot snapshot,
     String day,
   ) {
-    if (snapshot.isMonthClosed(StaffWorkCalendar.monthOf(day))) {
+    if (snapshot.isMonthClosed(SchoolDayCalendar.monthOf(day))) {
       return const StaffAttendanceNotice(StaffAttendanceNoticeKind.monthFrozen);
     }
     if (snapshot.isDayValidated(day)) {

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les éléments variables d'un agent pour un mois. `null` = la règle : zéro
 /// heure sup., le taux du moteur, les enfants du profil.
@@ -8,7 +8,7 @@ class PayrollVariables extends Equatable {
   final int? overtimeMinutes;
   final int? overtimeRateInCents;
   final int? dependentChildren;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
   final String? syncError;
 
   const PayrollVariables({
@@ -16,7 +16,7 @@ class PayrollVariables extends Equatable {
     this.overtimeMinutes,
     this.overtimeRateInCents,
     this.dependentChildren,
-    this.syncState = StaffSyncState.synced,
+    this.syncState = RecordSyncState.synced,
     this.syncError,
   });
 

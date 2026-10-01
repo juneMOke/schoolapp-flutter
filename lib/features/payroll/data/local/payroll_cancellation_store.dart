@@ -1,6 +1,6 @@
 import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_cancellation.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// L'annulation d'un fait de paie, partagée par les avances et les
 /// versements : les mêmes colonnes `cancellation_*` sur les deux tables.
@@ -27,7 +27,7 @@ class PayrollCancellationStore {
       {
         'cancellation_id': cancellationId,
         'cancellation_reason': reason,
-        'cancellation_status': StaffSyncState.pending.dbValue,
+        'cancellation_status': RecordSyncState.pending.dbValue,
         'cancellation_error': null,
       },
       where: 'id = ?',
@@ -47,7 +47,7 @@ class PayrollCancellationStore {
     _table,
     {
       'cancellation_status':
-          (failed ? StaffSyncState.failed : StaffSyncState.synced).dbValue,
+          (failed ? RecordSyncState.failed : RecordSyncState.synced).dbValue,
       'cancellation_error': reason,
       if (!failed) 'cancelled_at': cancelledAt,
     },
@@ -71,7 +71,7 @@ class PayrollCancellationStore {
   }
 
   /// Le fait lié à [cancellationId] : `(id, sync_status)`, ou `null`.
-  Future<({String id, StaffSyncState state})?> targetOf(
+  Future<({String id, RecordSyncState state})?> targetOf(
     String cancellationId,
   ) async {
     final rows = await _store.db.rawQuery(
@@ -97,7 +97,7 @@ class PayrollCancellationStore {
       : {
           'cancelled_at': cancelledAt,
           'cancellation_reason': reason,
-          'cancellation_status': StaffSyncState.synced.dbValue,
+          'cancellation_status': RecordSyncState.synced.dbValue,
           'cancellation_error': null,
         };
 
@@ -110,8 +110,8 @@ class PayrollCancellationStore {
       reason: row['cancellation_reason'] as String? ?? '',
       cancelledAt: cancelledAt,
       syncState: cancelledAt != null
-          ? StaffSyncState.synced
-          : StaffSyncState.fromDb(row['cancellation_status'] as String?),
+          ? RecordSyncState.synced
+          : RecordSyncState.fromDb(row['cancellation_status'] as String?),
       syncError: row['cancellation_error'] as String?,
     );
   }

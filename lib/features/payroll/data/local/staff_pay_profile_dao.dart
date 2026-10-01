@@ -4,8 +4,8 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dar
 import 'package:school_app_flutter/features/payroll/data/sync/staff_pay_profile_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les profils de paie (`staff_pay_profiles`), dernier écrit gagne.
 class StaffPayProfileDao {
@@ -55,7 +55,7 @@ class StaffPayProfileDao {
           'school_id': schoolId,
           ..._columns(item),
           'server_updated_at': item.serverUpdatedAt,
-          'sync_status': StaffSyncState.synced.dbValue,
+          'sync_status': RecordSyncState.synced.dbValue,
           'sync_error': null,
           'sync_error_code': null,
           'updated_at': nowMs,

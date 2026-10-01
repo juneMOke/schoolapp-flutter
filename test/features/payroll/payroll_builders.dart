@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 StaffContract contract(
   String memberId, {
@@ -15,7 +16,7 @@ StaffContract contract(
   String from = '2026-01-01',
   String? endsOn,
   String? id,
-  StaffSyncState syncState = StaffSyncState.synced,
+  RecordSyncState syncState = RecordSyncState.synced,
   String? correctedAt,
 }) => StaffContract(
   id: id ?? 'c-$memberId-$from',
@@ -39,7 +40,7 @@ SalaryAdvance advance(
   int installments = 1,
   String firstMonth = '2026-10',
   String grantedOn = '2026-10-05',
-  StaffSyncState syncState = StaffSyncState.synced,
+  RecordSyncState syncState = RecordSyncState.synced,
 }) => SalaryAdvance(
   id: id,
   staffMemberId: memberId,

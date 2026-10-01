@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_absence_input_model.dart';
@@ -15,6 +16,8 @@ import 'package:school_app_flutter/features/attendances/data/remote/offline/atte
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_sync_api.dart';
 
 class MockAttendanceSyncApi extends Mock implements AttendanceSyncApi {}
+
+class _MockSyncMeta extends Mock implements SyncMetaDao {}
 
 class MockAttendanceLocalDataSource extends Mock
     implements AttendanceLocalDataSource {}
@@ -287,6 +290,57 @@ void main() {
     final result = await handler.dispatch(entry());
     expect(result.outcome, OutboxDispatchOutcome.retry);
   });
+
+  test(
+    'MONTH_CLOSED : la journée locale est oubliée et la descente repart',
+    () async {
+      final syncMeta = _MockSyncMeta();
+      when(
+        () => syncMeta.setCursor(
+          any(),
+          cursor: any(named: 'cursor'),
+          syncedAt: any(named: 'syncedAt'),
+        ),
+      ).thenAnswer((_) async {});
+      when(
+        () => local.discardDay(
+          classroomId: any(named: 'classroomId'),
+          dateStr: any(named: 'dateStr'),
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).thenAnswer((_) async {});
+      when(() => api.submitAttendance(any(), any())).thenThrow(
+        dio(
+          const ValidationFailure('Invalid request data'),
+          status: 422,
+          body: const {'detailCode': 'MONTH_CLOSED', 'message': 'closed'},
+        ),
+      );
+      final closedHandler = AttendanceOutboxHandler(
+        syncApi: api,
+        localDataSource: local,
+        requiredAuth: auth,
+        pendingTransfers: (_, _) async => pendingTransfers,
+        syncMeta: syncMeta,
+        now: () => 7000,
+      );
+
+      final result = await closedHandler.dispatch(entry());
+
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      expect(result.error, contains('Mois clôturé'));
+      verify(
+        () => local.discardDay(
+          classroomId: 'c1',
+          dateStr: '2026-06-15',
+          academicYearId: 'year-1',
+        ),
+      ).called(1);
+      verify(
+        () => syncMeta.setCursor('attendance', cursor: null, syncedAt: 7000),
+      ).called(1);
+    },
+  );
 
   test('rejet métier (ValidationFailure) → failed', () async {
     when(

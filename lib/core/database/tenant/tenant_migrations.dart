@@ -6,7 +6,10 @@ import 'package:school_app_flutter/core/database/schema/payment_corrections_sche
 import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
+
+part 'tenant_migrations_presence.dart';
 
 /// Escalier d'un fichier d'ÉCOLE (`school_<id>.db`).
 ///
@@ -58,6 +61,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(57)) {
     await _createTables(db, payrollTables);
+  }
+  if (upTo(58)) {
+    await _studentAttendanceV2(db);
   }
 }
 

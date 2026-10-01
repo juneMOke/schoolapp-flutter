@@ -7,10 +7,10 @@ import 'package:school_app_flutter/core/staff/local/staff_attendance_settings_se
 import 'package:school_app_flutter/features/staff/data/local/staff_lww.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_settings_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_clock_time.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/data/presence_schedule_reader.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les réglages du Pointage d'une école (`ref_staff_attendance_settings`), et
 /// l'année scolaire courante qui borne ses jours ouvrés.
@@ -32,24 +32,17 @@ class StaffAttendanceSettingsDao {
       whereArgs: [schoolId],
       limit: 1,
     );
-    if (rows.isEmpty) return StaffAttendanceSettings.defaults;
-    final row = rows.single;
-    final start = StaffClockTime.tryParse(row['start_time'] as String?);
-    final tolerance = row['tolerance_minutes'] as int?;
-    if (start == null || tolerance == null) {
-      return StaffAttendanceSettings.defaults;
-    }
+    final schedule = rows.isEmpty
+        ? null
+        : PresenceScheduleReader.fromRow(rows.single);
+    if (schedule == null) return StaffAttendanceSettings.defaults;
     return StaffAttendanceSettings(
-      start: start,
-      toleranceMinutes: tolerance,
-      syncState: StaffSyncState.fromDb(row['sync_status'] as String?),
+      start: schedule.start,
+      toleranceMinutes: schedule.toleranceMinutes,
+      syncState: RecordSyncState.fromDb(rows.single['sync_status'] as String?),
     );
   }
 
-  /// La section du socle. Un réglage modifié sur la tablette et encore en
-  /// file n'est pas écrasé : il partira, et gagnera au dernier écrit. Un
-  /// réglage **refusé** cède, lui : il ne partira plus, et continuer de classer
-  /// les retards avec lui serait faux.
   Future<void> applySeed(
     StaffAttendanceSettingsSeed seed, {
     required String schoolId,
@@ -59,14 +52,14 @@ class StaffAttendanceSettingsDao {
       table,
       columns: ['1'],
       where: 'school_id = ? AND sync_status = ?',
-      whereArgs: [schoolId, StaffSyncState.pending.dbValue],
+      whereArgs: [schoolId, RecordSyncState.pending.dbValue],
     );
     if (pending.isNotEmpty) return;
     await txn.insert(table, {
       'school_id': schoolId,
       'start_time': seed.startTime,
       'tolerance_minutes': seed.toleranceMinutes,
-      'sync_status': StaffSyncState.synced.dbValue,
+      'sync_status': RecordSyncState.synced.dbValue,
       'updated_at': nowMs,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   });
@@ -83,7 +76,7 @@ class StaffAttendanceSettingsDao {
       'start_time': request.startTime,
       'tolerance_minutes': request.toleranceMinutes,
       'client_updated_at': request.clientUpdatedAt,
-      'sync_status': StaffSyncState.pending.dbValue,
+      'sync_status': RecordSyncState.pending.dbValue,
       'updated_at': nowMs,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
     await OutboxDao(txn).enqueue(
@@ -126,7 +119,7 @@ class StaffAttendanceSettingsDao {
       table,
       {
         'sync_status':
-            (failed ? StaffSyncState.failed : StaffSyncState.synced).dbValue,
+            (failed ? RecordSyncState.failed : RecordSyncState.synced).dbValue,
         'sync_error': reason,
         'sync_error_code': code,
       },
@@ -138,7 +131,7 @@ class StaffAttendanceSettingsDao {
 
   /// L'année scolaire courante de l'école, lue du socle d'Inscription ;
   /// `null` tant qu'il n'est pas descendu.
-  Future<StaffSchoolYear?> currentSchoolYear(String schoolId) async {
+  Future<SchoolYearBounds?> currentSchoolYear(String schoolId) async {
     final rows = await _db.query(
       'ref_academic_years',
       columns: ['start_date', 'end_date'],
@@ -149,7 +142,7 @@ class StaffAttendanceSettingsDao {
     if (rows.isEmpty) return null;
     String? day(Object? value) =>
         value is String && value.length >= 10 ? value.substring(0, 10) : null;
-    return StaffSchoolYear(
+    return SchoolYearBounds(
       start: day(rows.single['start_date']),
       end: day(rows.single['end_date']),
     );

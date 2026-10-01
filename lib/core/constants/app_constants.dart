@@ -426,7 +426,6 @@ class AppConstants {
   static const String supportEmail = 'support@school.local';
 
   // ─── Attendance ────────────────────────────────────────────────────────────
-  static const String attendanceEndpoint = '/api/v1/attendances';
   static const String attendanceByClassroomEndpoint =
       '/api/v1/attendances/classes/{classroomId}';
   static const String attendanceOverviewEndpoint =
@@ -787,7 +786,12 @@ class AppConstants {
   // profils de paie, paies, éléments variables, gestes, lignes figées, résumés
   // du Pointage, avances, versements, traces de diffusion. Création pure.
   // Palier d'école.
-  static const int offlineDbSchemaVersion = 57;
+  // v58 (2026-10-01) : les présences des élèves v2 — le retard sur une ligne
+  // d'appel (`attendance_records.status`/`arrival_time`/`late_minutes`), la
+  // réouverture locale (`attendance_sessions.reopened_at`), le brouillon de
+  // l'appel (`attendance_draft_marks`) et les clôtures de mois
+  // (`attendance_month_closures`). Additif. Palier d'école.
+  static const int offlineDbSchemaVersion = 58;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1120,9 +1124,14 @@ class AppConstants {
   ///  - **GET** = pull KEYSET des sessions (absences imbriquées), cadré année,
   ///    jeton `cursor` opaque, 304 applicatif.
   ///
-  /// Remplace l'ancien push record-level [attendanceEndpoint] côté offline
-  /// (celui-ci reste en service pour les lectures online hors offline).
+  /// Remplace l'ancien push record-level `POST /api/v1/attendances` (retiré
+  /// avec l'écran Présences d'avant la v2).
   static const String syncAttendanceEndpoint = '/api/v1/sync/attendance';
+
+  /// Clôtures de mois de l'appel, par classe (présences des élèves v2) :
+  /// POST d'un geste idempotent par `gestureId`, GET keyset.
+  static const String syncAttendanceClosuresEndpoint =
+      '/api/v1/sync/attendance-closures';
 
   /// Pull KEYSET des `ref_classrooms` (CB-2, re-contracté 2026-07-27 —
   /// remplace l'ancien contrat bundlé `updatedSince`/`serverCursor`) :

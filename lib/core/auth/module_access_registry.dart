@@ -117,12 +117,14 @@ const ModuleAccess kAttendanceRecordAccess = ModuleAccess([
 /// Corriger un appel **déjà enregistré**, pour un jour **révolu**
 /// (`POST /sync/attendance`, même point d'entrée).
 ///
-/// **Conjonction** : c'est la même écriture, plus le droit d'arbitrer. Le motif
-/// d'absence porte le verdict justifiée / injustifiée, et « on ne sait pas »
-/// vaut « pas justifiée » : rouvrir l'appel d'hier pour y poser « maladie »
-/// efface une absence injustifiée d'un registre qui sert à convoquer une
-/// famille. Prendre l'appel en retard, ou rectifier celui du jour, reste le
-/// geste de celui qui constate et n'exige que [kAttendanceRecordAccess].
+/// **Conjonction** : c'est la même écriture, plus le droit d'arbitrer. Il
+/// garde, pour un jour passé, la réouverture (refaire le constat : liste,
+/// statut, heure) **et la justification après coup** — le motif porte le
+/// verdict justifiée / injustifiée, et poser « maladie » sur l'absence
+/// d'hier efface une absence injustifiée d'un registre qui sert à convoquer
+/// une famille (plan back, correction 3). Il garde aussi la clôture du mois.
+/// Prendre l'appel en retard, ou rectifier et justifier celui du jour, reste
+/// le geste de celui qui constate et n'exige que [kAttendanceRecordAccess].
 ///
 /// ⚠️ Masquer n'est pas cosmétique ici. Cette écriture part par l'outbox, où un
 /// 403 est classé TERMINAL : sans la garde, l'enseignant corrigerait hors ligne,

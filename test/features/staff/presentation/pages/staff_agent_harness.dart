@@ -23,6 +23,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossie
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class MockSaveMember extends Mock implements SaveStaffMemberUseCase {}
 
@@ -65,7 +66,7 @@ class StaffAgentHarness {
         kind: null,
         effectiveFrom: 'x',
         recordedAt: 'x',
-        syncState: StaffSyncState.synced,
+        syncState: RecordSyncState.synced,
       ),
     );
   }

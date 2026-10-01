@@ -20,7 +20,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_attendance_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_repository.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 
 /// Le Pointage sur la tablette : lecture locale, écriture en outbox, modèles
 /// convertis en entités ici et nulle part ailleurs (règle n°3).
@@ -94,7 +94,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     }
     final locks = await _locks.effective(
       schoolId,
-      from: StaffWorkCalendar.firstOf(StaffWorkCalendar.monthOf(from)),
+      from: SchoolDayCalendar.firstOf(SchoolDayCalendar.monthOf(from)),
       to: to,
     );
     return StaffAttendanceSnapshot(
@@ -199,7 +199,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     final sorted = days.toList()..sort();
     final locks = await _locks.effective(
       schoolId,
-      from: StaffWorkCalendar.firstOf(StaffWorkCalendar.monthOf(sorted.first)),
+      from: SchoolDayCalendar.firstOf(SchoolDayCalendar.monthOf(sorted.first)),
       to: sorted.last,
     );
     for (final lock in locks) {

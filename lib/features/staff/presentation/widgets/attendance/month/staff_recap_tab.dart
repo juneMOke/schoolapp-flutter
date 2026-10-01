@@ -7,27 +7,27 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
-import 'package:school_app_flutter/features/staff/presentation/helpers/staff_attendance_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_card_frame.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/common/staff_attendance_warning.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/dialogs/staff_month_close_dialog.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_holiday_state.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_month_nav.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_recap_table.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/month/staff_recap_totals.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_filter_chip.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
 /// L'onglet « Récapitulatif du mois » : filtres, totaux, tableau, et la
 /// clôture vers la Paie.
@@ -51,9 +51,9 @@ class StaffRecapTab extends StatelessWidget {
           spacing: AppSpacing.lg,
           runSpacing: AppSpacing.md,
           children: [
-            StaffMonthNav(
+            PresenceMonthNav(
               month: state.month,
-              isCurrent: state.month == state.today.substring(0, 7),
+              isCurrent: state.isCurrentMonth,
               onPrevious: state.canStepMonthBack
                   ? () => unawaited(cubit.stepMonth(-1))
                   : null,
@@ -76,15 +76,15 @@ class StaffRecapTab extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         if (closed) ...[
-          StaffAttendanceWarning(
+          PresenceWarning(
             icon: Icons.lock_outline,
-            tone: StaffAttendanceStatus.present,
+            tone: PresenceStatus.present,
             message: l10n.staffAttendanceMonthClosedBanner,
           ),
           const SizedBox(height: AppSpacing.md),
         ],
         if (recap.ledger.isHoliday)
-          StaffHolidayState(
+          PresenceHolidayState(
             month: state.month,
             onCurrent: () => unawaited(cubit.goCurrentMonth()),
           )
@@ -99,19 +99,13 @@ class StaffRecapTab extends StatelessWidget {
           StaffRecapTotals(recap: recap),
           const SizedBox(height: AppSpacing.md),
           if (recap.isFilteredEmpty)
-            EteeloEmptyResult(
+            PresenceFilterEmpty(
               label: l10n.staffAttendanceRecapEmptyFilter,
-              medallionIcon: Icons.search_rounded,
-              fullWidthCard: true,
-              primaryAction: EteeloButton.primary(
-                label: l10n.staffAttendanceShowAll,
-                icon: Icons.restart_alt,
-                onPressed: cubit.resetRecapFilters,
-                fullWidth: false,
-              ),
+              allMarked: false,
+              onShowAll: cubit.resetRecapFilters,
             )
           else
-            StaffAttendanceCardFrame(
+            PresenceCardFrame(
               child: StaffRecapTable(
                 rows: recap.rows,
                 onOpen: (row) => cubit.openAgent(row.member.id),
@@ -131,11 +125,11 @@ class StaffRecapTab extends StatelessWidget {
 
   Future<void> _close(BuildContext context, StaffMonthRecap recap) async {
     final cubit = context.read<StaffAttendanceCubit>();
-    final confirmed = await StaffDialog.show<bool>(
+    final confirmed = await EteeloFormDialog.show<bool>(
       context,
       StaffMonthCloseDialog(
         recap: recap,
-        monthLabel: StaffAttendanceLabels.month(
+        monthLabel: PresenceLabels.month(
           MaterialLocalizations.of(context),
           recap.ledger.month,
         ),
@@ -172,8 +166,8 @@ class _Filters extends StatelessWidget {
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
           children: [
-            StaffFilterChip(
-              label: l10n.staffAttendanceFilterAll,
+            EteeloFilterChip(
+              label: l10n.presenceMarkFilterAll,
               count: recap.all.length,
               selected: query.contract == null,
               color: AppColors.bleuArdoise,
@@ -199,7 +193,7 @@ class _Filters extends StatelessWidget {
 
   Widget _contractChip(AppLocalizations l10n, StaffContractFilter filter) {
     final tone = StaffContractTone.ofFilter(filter);
-    return StaffFilterChip(
+    return EteeloFilterChip(
       label: StaffLabels.contractFilter(l10n, filter),
       count: recap.byContract[filter] ?? 0,
       selected: query.contract == filter,

@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_work_calendar.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 
 /// Tout ce que la tablette sait du Pointage sur une plage de jours, lu en une
 /// fois : les agents (le fichier du personnel), leurs pointages, les jours
@@ -23,7 +23,7 @@ class StaffAttendanceSnapshot extends Equatable {
   final StaffAttendanceSettings settings;
 
   /// L'année scolaire courante ; `null` tant que le socle n'est pas descendu.
-  final StaffSchoolYear? schoolYear;
+  final SchoolYearBounds? schoolYear;
 
   /// Taux horaire des contrats « heures prestées », par `contractId`. Vide
   /// sans `hr.pay.read` : on n'affiche pas un montant qu'on ne peut pas voir.
@@ -62,7 +62,7 @@ class StaffAttendanceSnapshot extends Equatable {
   StaffAttendanceLock? monthLock(String month) =>
       locks[lockKey(
         StaffAttendanceLockKind.month,
-        StaffWorkCalendar.firstOf(month),
+        SchoolDayCalendar.firstOf(month),
       )];
 
   /// Le rapport du jour est validé (et le reste tant qu'il n'est pas rouvert).
@@ -72,7 +72,7 @@ class StaffAttendanceSnapshot extends Equatable {
 
   /// Le jour refuse-t-il toute écriture ? Validé, ou dans un mois clos.
   bool isDayFrozen(String day) =>
-      isDayValidated(day) || isMonthClosed(StaffWorkCalendar.monthOf(day));
+      isDayValidated(day) || isMonthClosed(SchoolDayCalendar.monthOf(day));
 
   @override
   List<Object?> get props => [

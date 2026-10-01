@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Un geste du circuit, posé sur cette tablette ou descendu du serveur.
 class PayrollGesture extends Equatable {
@@ -19,7 +19,7 @@ class PayrollGesture extends Equatable {
 
   /// Les chiffres du serveur, rendus par un refus `PAYROLL_STALE`.
   final PayrollFingerprint? serverState;
-  final StaffSyncState syncState;
+  final RecordSyncState syncState;
   final String? syncError;
   final String? syncErrorCode;
 
@@ -39,9 +39,9 @@ class PayrollGesture extends Equatable {
 
   static const String staleCode = 'PAYROLL_STALE';
 
-  bool get isInFlight => syncState == StaffSyncState.pending;
+  bool get isInFlight => syncState == RecordSyncState.pending;
 
-  bool get isRefused => syncState == StaffSyncState.failed;
+  bool get isRefused => syncState == RecordSyncState.failed;
 
   bool get isStale => isRefused && syncErrorCode == staleCode;
 

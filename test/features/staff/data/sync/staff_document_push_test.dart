@@ -30,12 +30,12 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_document_outbo
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_push_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_transfer_api.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_dto.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../offline_full_db.dart';
 import '../../staff_fixtures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 class _MockApi extends Mock implements StaffDocumentTransferApi {}
 
@@ -391,7 +391,7 @@ void main() {
           (await db.query(
                 'staff_documents',
                 where: 'sync_status = ?',
-                whereArgs: [StaffSyncState.pending.dbValue],
+                whereArgs: [RecordSyncState.pending.dbValue],
               )).single['id']!
               as String;
 

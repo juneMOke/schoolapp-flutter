@@ -112,6 +112,11 @@ abstract final class SyncPlanKeys {
   static const String financeStudentCharges = 'finance.student-charges';
   static const String financePayments = 'finance.payments';
   static const String attendanceRecords = 'attendance.records';
+
+  /// Les clôtures de mois de l'appel, par classe (`attendance.read`).
+  /// ⚠️ À déclarer au plan serveur sous cette clé : sans elle, le plan ne
+  /// désigne jamais le flux.
+  static const String attendanceClosures = 'attendance.closures';
   static const String disciplineCases = 'discipline.cases';
   static const String scheduleTimeSlots = 'schedule.time-slots';
   static const String scheduleSessions = 'schedule.sessions';
@@ -186,6 +191,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.financeStudentCharges: ['finance_student_charges'],
   SyncPlanKeys.financePayments: ['finance_payments'],
   SyncPlanKeys.attendanceRecords: ['attendance'],
+  SyncPlanKeys.attendanceClosures: ['attendance_closures'],
   SyncPlanKeys.disciplineCases: ['disciplinary_cases'],
   SyncPlanKeys.scheduleTimeSlots: ['schedule_time_slots'],
   SyncPlanKeys.scheduleSessions: ['schedule_sessions'],

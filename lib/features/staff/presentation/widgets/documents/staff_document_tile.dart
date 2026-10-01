@@ -6,8 +6,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_document_type.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Une pièce du dossier : son libellé, où elle en est, et ce qu'on peut en
 /// faire.
@@ -111,19 +111,19 @@ class StaffDocumentTile extends StatelessWidget {
       return (l10n.staffDocumentMissing, AppColors.staffPartialInk);
     }
     return switch (document.syncState) {
-      StaffSyncState.synced => (
+      RecordSyncState.synced => (
         l10n.staffDocumentFiled(_day(document.capturedAt)),
         AppColors.textSecondary,
       ),
-      StaffSyncState.failed => (
+      RecordSyncState.failed => (
         l10n.staffDocumentRejected(document.syncError ?? ''),
         AppColors.error,
       ),
-      StaffSyncState.pending when memberPending => (
+      RecordSyncState.pending when memberPending => (
         l10n.staffDocumentWaitingMember,
         AppColors.textSecondary,
       ),
-      StaffSyncState.pending => (
+      RecordSyncState.pending => (
         l10n.staffDocumentPending,
         AppColors.textSecondary,
       ),

@@ -5,8 +5,8 @@ import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_lock_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les gestes de verrou posés sur la tablette (`staff_attendance_gestures`) :
 /// leur pose avec l'entrée d'outbox, leur issue, et les gardes d'ordre qui
@@ -51,7 +51,7 @@ class StaffAttendanceGestureDao {
       'gesture': request.gesture,
       'recorded_at': recordedAt,
       'author_name': authorName,
-      'sync_status': StaffSyncState.pending.dbValue,
+      'sync_status': RecordSyncState.pending.dbValue,
       'created_at': nowMs,
     });
     await OutboxDao(txn).enqueue(
@@ -102,7 +102,7 @@ class StaffAttendanceGestureDao {
       gestureId,
       schoolId,
       OutboxStatus.pending.dbValue,
-      StaffSyncState.pending.dbValue,
+      RecordSyncState.pending.dbValue,
       from,
       to,
     ],
@@ -125,14 +125,14 @@ class StaffAttendanceGestureDao {
       day,
       StaffAttendanceGesture.reopenDay.wire,
       OutboxStatus.pending.dbValue,
-      StaffSyncState.pending.dbValue,
+      RecordSyncState.pending.dbValue,
       queuedBefore,
     ],
   );
 
   Future<void> mark(
     String gestureId,
-    StaffSyncState state, {
+    RecordSyncState state, {
     String? code,
     String? reason,
   }) => _db.update(

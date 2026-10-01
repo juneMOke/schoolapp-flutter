@@ -134,11 +134,6 @@ class AppDimensions {
   static const loginFormPanelRatio = 0.38;
   static const loginFormStackedMax = 400.0;
 
-  // Attendance page tokens
-  static const attendanceStudentAvatarSize = 30.0;
-  static const attendanceResultsPanelMinHeight = 360.0;
-  static const attendanceResultsPanelMaxHeight = 620.0;
-
   // Onglet Discipline — carte de cas & frise de statut
   static const disciplinaryCardAccentWidth = 4.0;
   static const disciplinaryStepperDotSize = 22.0;
@@ -169,12 +164,6 @@ class AppDimensions {
   static const presenceRowAccentBarHeight = 30.0;
   static const presencePerfectMedallionSize = 64.0;
   static const presencePerfectIconSize = 30.0;
-  static const attendanceCounterValueFontSize = 16.0;
-  static const attendanceCycleFieldWidth = 170.0;
-  static const attendanceLevelFieldWidth = 170.0;
-  static const attendanceClassFieldWidth = 210.0;
-  static const attendanceDateFieldWidth = 190.0;
-  static const attendanceCounterColumnWidth = 72.0;
 
   // Enrollment stats dashboard tokens
   static const enrollmentStatsKpiCardHeight = 104.0;
@@ -549,15 +538,15 @@ class AppDimensions {
 
   // ── Ressources humaines — fichier du personnel ──
   /// Champ de recherche : il prend la place qui reste, jamais moins.
-  static const staffSearchMinWidth = 280.0;
-  static const staffSearchMaxWidth = 460.0;
+  static const searchToolbarMinWidth = 280.0;
+  static const searchToolbarMaxWidth = 460.0;
   static const staffCategoryWidth = 220.0;
 
   /// Largeur plancher d'une carte d'agent dans la grille.
   static const staffCardMinWidth = 290.0;
 
   /// Hauteur d'une puce de filtre (zone de tap étendue à 44 par le padding).
-  static const staffFilterChipHeight = 40.0;
+  static const filterChipHeight = 40.0;
 
   /// Hauteur plancher d'une ligne du tableau.
   static const staffTableRowMinHeight = 60.0;
@@ -578,37 +567,37 @@ class AppDimensions {
   // ── Ressources humaines — pointage du personnel (spec B, redlines) ──
   /// Largeur plancher d'une carte de la grille : autant de colonnes que
   /// possible, pour des cartes d'environ 220 à 262 dp, entièrement tactiles.
-  static const staffAttendanceCardMinWidth = 220.0;
-  static const staffAttendanceAvatarSize = 44.0;
-  static const staffAttendanceMedallionSize = 46.0;
-  static const staffAttendanceMedallionIconSize = 24.0;
+  static const presenceMarkCardMinWidth = 220.0;
+  static const presenceMarkAvatarSize = 44.0;
+  static const presenceMarkMedallionSize = 46.0;
+  static const presenceMarkMedallionIconSize = 24.0;
 
   /// Bouton d'icône d'un pied de carte (effacer, réessayer).
-  static const staffAttendanceIconButtonSize = 36.0;
+  static const presenceMarkIconButtonSize = 36.0;
 
   /// Cible tactile standard du module : puces, flèches, segments.
-  static const staffAttendanceTapTarget = 44.0;
-  static const staffAttendanceSegmentHeight = 40.0;
-  static const staffAttendanceRingSize = 64.0;
-  static const staffAttendanceRingStroke = 7.0;
-  static const staffAttendanceBorderWidth = 2.0;
-  static const staffAttendanceAccentWidth = 4.0;
+  static const presenceMarkTapTarget = 44.0;
+  static const presenceMarkSegmentHeight = 40.0;
+  static const presenceMarkRingSize = 64.0;
+  static const presenceMarkRingStroke = 7.0;
+  static const presenceMarkBorderWidth = 2.0;
+  static const presenceMarkAccentWidth = 4.0;
 
   /// La vue liste : largeur plancher avant défilement, et ses colonnes.
-  static const staffAttendanceListMinWidth = 900.0;
-  static const staffAttendanceColStatus = 262.0;
-  static const staffAttendanceColTimes = 168.0;
-  static const staffAttendanceColHours = 96.0;
-  static const staffAttendanceColAction = 40.0;
+  static const presenceMarkListMinWidth = 900.0;
+  static const presenceMarkColStatus = 262.0;
+  static const presenceMarkColTimes = 168.0;
+  static const presenceMarkColHours = 96.0;
+  static const presenceMarkColAction = 40.0;
 
   /// Les modales du pointage.
-  static const staffAttendanceDialogMaxWidth = 480.0;
-  static const staffAttendanceDialogMaxHeight = 640.0;
+  static const formDialogMaxWidth = 480.0;
+  static const formDialogMaxHeight = 640.0;
 
   /// Fiche mensuelle : sélecteur d'agent et calendrier.
-  static const staffAttendancePickerWidth = 340.0;
-  static const staffAttendancePickerMaxHeight = 360.0;
-  static const staffAttendanceCalendarCellHeight = 56.0;
+  static const presenceMarkPickerWidth = 340.0;
+  static const presenceMarkPickerMaxHeight = 360.0;
+  static const presenceMarkCalendarCellHeight = 56.0;
 
   /// Le récapitulatif : ses colonnes.
   static const staffAttendanceRecapColContract = 112.0;
@@ -617,16 +606,38 @@ class AppDimensions {
   static const staffAttendanceRecapMinWidth = 820.0;
 
   /// Opacité de la grille d'un jour validé : lisible, visiblement figée.
-  static const staffAttendanceFrozenOpacity = 0.78;
+  static const presenceMarkFrozenOpacity = 0.78;
 
   /// Au-delà, les quatre indicateurs de la fiche tiennent sur une ligne.
-  static const staffAttendanceKpiWideBreakpoint = 720.0;
+  static const presenceMarkKpiWideBreakpoint = 720.0;
 
   /// Part de la ligne du registre couverte par le voile de son statut.
-  static const staffAttendanceRowTintStop = 0.3;
+  static const presenceMarkRowTintStop = 0.3;
 
   /// Opacité d'un jour à venir dans le calendrier de la fiche mensuelle.
-  static const staffAttendanceUpcomingOpacity = 0.4;
+  static const presenceMarkUpcomingOpacity = 0.4;
+
+  // ── Présences des élèves (appel par classe) ──
+  /// Le sélecteur de classe : une modale plus large que les modales de saisie,
+  /// pour tenir les classes d'un niveau sur une ligne.
+  static const classPickerDialogMaxWidth = 620.0;
+  static const classPickerClassHeight = 48.0;
+  static const classPickerClassMinWidth = 120.0;
+
+  /// Le bouton de classe de l'en-tête et son médaillon.
+  static const classPickerButtonHeight = 52.0;
+  static const classPickerMedallionSize = 38.0;
+
+  /// Le tableau du récapitulatif de l'appel : colonnes fixes, défilement
+  /// horizontal sous sa largeur plancher.
+  static const classRecapMinWidth = 760.0;
+  static const classRecapColPresences = 150.0;
+  static const classRecapColRate = 76.0;
+  static const classRecapColLates = 104.0;
+  static const classRecapColAbsences = 96.0;
+  static const classRecapColSync = 120.0;
+  static const classRecapRateBarWidth = 90.0;
+  static const classRecapWatchDot = 8.0;
 
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
   // Le livre défile horizontalement sous 920 dp ; les colonnes de montant sont
