@@ -52,7 +52,7 @@ class _RecordingPullCoordinator extends PullCoordinator {
   }
 }
 
-/// Les trente-deux constantes de [SyncPlanKeys], référencées **par leur symbole**.
+/// Les trente-trois constantes de [SyncPlanKeys], référencées **par leur symbole**.
 ///
 /// Une liste de chaînes recopiées ne prouverait rien ; ces références-là ne
 /// compilent que tant que les constantes existent, et la comparaison
@@ -71,6 +71,7 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.financeStudentCharges,
   SyncPlanKeys.financePayments,
   SyncPlanKeys.attendanceRecords,
+  SyncPlanKeys.attendanceClosures,
   SyncPlanKeys.disciplineCases,
   SyncPlanKeys.boutiqueSales,
   SyncPlanKeys.scheduleTimeSlots,
@@ -256,20 +257,20 @@ void main() {
 
   // ── Le compte : vingt et une clés, vingt-deux ressources ──────────────────
 
-  test('trente-deux clés de plan pour trente-trois ressources de handler', () {
+  test('trente-trois clés de plan pour trente-quatre ressources de handler', () {
     // Vingt et une depuis le registre des disparitions (V121), second flux de
     // socle : sans lui, une base locale garde indéfiniment ce que le serveur a
     // retiré. Vingt-deux avec le registre des dépenses (`expense.expenses`).
     // Vingt-cinq avec les trois flux du fichier du personnel (`hr.*`),
     // vingt-sept avec les deux du Pointage, trente-deux avec les cinq de la
-    // Paie.
-    expect(kSyncPlanAliases.length, 32);
-    expect(registeredResources.length, 33);
+    // Paie, trente-trois avec les clôtures de mois de l'appel.
+    expect(kSyncPlanAliases.length, 33);
+    expect(registeredResources.length, 34);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 33);
+    expect(aliased.length, 34);
     // Vingt et une ressources aliasées ET autant de handlers : les deux
     // ensembles coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
@@ -287,12 +288,12 @@ void main() {
   });
 
   test(
-    'les trente-deux constantes déclarées sont exactement les clés de la table',
+    'les trente-trois constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 32);
+      expect(_kDeclaredPlanKeys.length, 33);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        32,
+        33,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());
@@ -458,14 +459,15 @@ void main() {
     );
   });
 
-  test('isCursorKeyPrefix : faux pour les quatorze ressources à clé nue', () {
+  test('isCursorKeyPrefix : faux pour les quinze ressources à clé nue', () {
     final bare = registeredResources.toSet().difference(
       _kSuffixedCursorResources,
     );
 
-    // Quatorze : le registre des disparitions a un curseur unique, non scopé —
-    // une disparition n'appartient ni à une année ni à un enseignant.
-    expect(bare.length, 14);
+    // Quinze : le registre des disparitions a un curseur unique, non scopé —
+    // une disparition n'appartient ni à une année ni à un enseignant ; les
+    // clôtures de l'appel vivent dans la base de l'école, comme l'appel.
+    expect(bare.length, 15);
     for (final resource in bare) {
       expect(
         isCursorKeyPrefix(resource),

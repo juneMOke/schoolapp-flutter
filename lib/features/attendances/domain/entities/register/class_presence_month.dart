@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_closure.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_student.dart';
 
@@ -25,8 +26,8 @@ class ClassPresenceMonth extends Equatable {
   /// un jour appelé était présent.
   final Map<String, Map<String, ClassPresenceLine>> incidents;
 
-  /// Le mois est clôturé : ses jours sans appel comptent présents.
-  final bool closed;
+  /// La clôture du mois, refusée comprise ; `null` sans clôture.
+  final ClassPresenceClosure? closure;
 
   /// L'envoi le moins avancé des appels du mois.
   final RecordSyncState sync;
@@ -38,7 +39,7 @@ class ClassPresenceMonth extends Equatable {
     required this.students,
     required this.calledDays,
     required this.incidents,
-    this.closed = false,
+    this.closure,
     this.sync = RecordSyncState.synced,
   });
 
@@ -46,6 +47,10 @@ class ClassPresenceMonth extends Equatable {
   /// l'année scolaire [year]. Vide = vacances.
   List<String> schoolDays({required String today, SchoolYearBounds? year}) =>
       SchoolDayCalendar.workDaysOf(month, today: today, year: year);
+
+  /// Le mois est clôturé (ou en passe de l'être) : ses jours sans appel
+  /// comptent présents. Une clôture refusée ne clôt rien.
+  bool get closed => closure?.closes ?? false;
 
   ClassPresenceLine? incidentOf(String day, String studentId) =>
       incidents[day]?[studentId];
@@ -58,7 +63,7 @@ class ClassPresenceMonth extends Equatable {
     students,
     calledDays,
     incidents,
-    closed,
+    closure,
     sync,
   ];
 }

@@ -70,3 +70,12 @@ class LoadClassPresenceMonthUseCase {
   Future<Either<Failure, ClassPresenceMonth>> call(ClassMonthKey key) =>
       _repository.loadMonth(key);
 }
+
+class CloseClassPresenceMonthUseCase {
+  final ClassPresenceRepository _repository;
+
+  const CloseClassPresenceMonthUseCase(this._repository);
+
+  Future<Either<Failure, Unit>> call(ClassMonthKey key) =>
+      _repository.closeMonth(key);
+}

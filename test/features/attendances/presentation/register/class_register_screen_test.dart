@@ -39,6 +39,8 @@ class _Reopen extends Mock implements ReopenClassPresenceDayUseCase {}
 
 class _Retry extends Mock implements RetryClassPresenceDayUseCase {}
 
+class _Close extends Mock implements CloseClassPresenceMonthUseCase {}
+
 class _Signals extends Mock implements ResourceSyncSignals {}
 
 /// L'écran réel du registre : ce qu'il offre selon l'appel et les droits, et
@@ -96,6 +98,7 @@ void main() {
         validate: validate,
         reopen: reopen,
         retry: _Retry(),
+        close: _Close(),
         now: () => DateTime(2026, 10, 1, 7, 20),
       ),
       now: () => DateTime(2026, 10, 1, 7, 20),

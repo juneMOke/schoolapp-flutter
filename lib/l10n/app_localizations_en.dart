@@ -13730,4 +13730,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classPresenceRecapEmptyFilter => 'No student found';
+
+  @override
+  String get classPresenceClose => 'Close the month';
+
+  @override
+  String classPresenceCloseTitle(String month) {
+    return 'Close $month?';
+  }
+
+  @override
+  String classPresenceCloseFreeze(String classroom) {
+    return 'The calls of $classroom are frozen: no attendance of the month can change anymore, justifications included.';
+  }
+
+  @override
+  String classPresenceCloseAbsences(int unjustified, int justified) {
+    return '$unjustified unjustified and $justified justified absences stay in each student\'s attendance record.';
+  }
+
+  @override
+  String classPresenceCloseToWatch(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students to watch, flagged in the summary',
+      one: '1 student to watch, flagged in the summary',
+      zero: 'No student to watch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceCloseNotMarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count student-days without a call will count as present',
+      one: '1 student-day without a call will count as present',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceCloseConfirm => 'Close';
+
+  @override
+  String get classPresenceCloseNotEnded =>
+      'The current month can be closed once it is over.';
+
+  @override
+  String classPresenceClosedOn(String when) {
+    return 'Month closed on $when — attendance locked';
+  }
+
+  @override
+  String classPresenceCloseRefused(String reason) {
+    return 'The closing was refused: $reason';
+  }
+
+  @override
+  String classPresenceToastClosed(String month, String classroom) {
+    return '$month closed · $classroom';
+  }
 }

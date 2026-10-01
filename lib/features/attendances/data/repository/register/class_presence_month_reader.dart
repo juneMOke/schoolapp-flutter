@@ -62,7 +62,7 @@ class ClassPresenceMonthReader {
       students: students,
       calledDays: syncOf.keys.toSet(),
       incidents: incidents,
-      closed: await closures.isClosed(
+      closure: await closures.closureOf(
         classroomId: key.classroomId,
         academicYearId: key.academicYearId,
         month: key.month,

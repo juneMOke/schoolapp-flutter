@@ -76,6 +76,7 @@ void main() {
       roster: roster,
       scheduleReader: PresenceScheduleReader(db),
       outbox: OutboxDao(db),
+      ids: ids,
       writer: AttendanceDayWriter(
         localDataSource: sessions,
         rosterDataSource: roster,

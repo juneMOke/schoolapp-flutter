@@ -8862,5 +8862,16 @@
   "classPresenceColRate": "Taux",
   "classPresenceColSync": "Synchro",
   "classPresenceRecapLegend": "NJ = non justifiée · J = justifiée · ● à surveiller : 2 absences NJ ou taux < 85 % · touchez une ligne pour ouvrir la fiche",
-  "classPresenceRecapEmptyFilter": "Aucun élève trouvé"
+  "classPresenceRecapEmptyFilter": "Aucun élève trouvé",
+  "classPresenceClose": "Clôturer le mois",
+  "classPresenceCloseTitle": "Clôturer {month} ?",
+  "classPresenceCloseFreeze": "Les appels de la {classroom} se figent : plus aucune présence du mois ne se modifie, justification comprise.",
+  "classPresenceCloseAbsences": "{unjustified} absences non justifiées et {justified} justifiées restent dans la fiche Présence de chaque élève.",
+  "classPresenceCloseToWatch": "{count, plural, =0{Aucun élève à surveiller} =1{1 élève à surveiller, signalé dans le récapitulatif} other{{count} élèves à surveiller, signalés dans le récapitulatif}}",
+  "classPresenceCloseNotMarked": "{count, plural, =1{1 jour-élève sans appel sera traité comme présent par défaut} other{{count} jours-élève sans appel seront traités comme présents par défaut}}",
+  "classPresenceCloseConfirm": "Clôturer",
+  "classPresenceCloseNotEnded": "Le mois en cours se clôture une fois terminé.",
+  "classPresenceClosedOn": "Mois clôturé le {when} — présences verrouillées",
+  "classPresenceCloseRefused": "La clôture a été refusée : {reason}",
+  "classPresenceToastClosed": "{month} clôturé · {classroom}"
 }

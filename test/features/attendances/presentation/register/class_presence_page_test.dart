@@ -141,6 +141,7 @@ void main() {
           validate: _Validate(),
           reopen: _Reopen(),
           retry: _Retry(),
+          close: _Close(),
         ),
         now: () => DateTime(2026, 10, 1, 9),
       );
@@ -204,3 +205,5 @@ class _Validate extends Mock implements ValidateClassPresenceDayUseCase {}
 class _Reopen extends Mock implements ReopenClassPresenceDayUseCase {}
 
 class _Retry extends Mock implements RetryClassPresenceDayUseCase {}
+
+class _Close extends Mock implements CloseClassPresenceMonthUseCase {}

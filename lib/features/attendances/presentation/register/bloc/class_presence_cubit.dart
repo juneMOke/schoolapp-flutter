@@ -248,6 +248,21 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState> {
     emit(state.copyWith(notice: notice.withSeq(++_seq)));
   }
 
+  /// Clôt le mois affiché, relit et annonce.
+  Future<void> closeMonth() async {
+    final month = state.monthData;
+    final classroom = state.classroom;
+    if (month == null || classroom == null) return;
+    final notice = await commands.closeMonth(
+      month,
+      classroomName: classroom.name,
+    );
+    if (isClosed) return;
+    await refresh();
+    if (isClosed || notice == null) return;
+    emit(state.copyWith(notice: notice.withSeq(++_seq)));
+  }
+
   @override
   Future<void> close() {
     _unwatch?.call();

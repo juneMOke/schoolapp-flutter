@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/features/attendances/data/models/offline/attendance_closure_models.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_outbox_handler.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, SyncEngine, systemClock;
@@ -40,6 +44,7 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
   final PresenceScheduleReader scheduleReader;
   final OutboxDao outbox;
   final AttendanceDayWriter writer;
+  final IdGenerator ids;
   final CurrentUserContext? currentUser;
   final SyncEngine? syncEngine;
   final Clock now;
@@ -53,6 +58,7 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
     required this.scheduleReader,
     required this.outbox,
     required this.writer,
+    required this.ids,
     this.currentUser,
     this.syncEngine,
     this.now = systemClock,
@@ -232,6 +238,47 @@ class ClassPresenceRepositoryImpl implements ClassPresenceRepository {
           closures: closures,
         ).read(key),
       );
+
+  @override
+  Future<Either<Failure, Unit>> closeMonth(ClassMonthKey key) => _guard(
+    'Local attendance closure failed',
+    () async {
+      final gestureId = ids.newId();
+      final nowMs = now();
+      final at = DateTime.fromMillisecondsSinceEpoch(
+        nowMs,
+        isUtc: true,
+      ).toIso8601String();
+      final closure = AttendanceClosureRequestModel(
+        gestureId: gestureId,
+        classroomId: key.classroomId,
+        academicYearId: key.academicYearId,
+        month: key.month,
+        clientRecordedAt: at,
+        authorId: currentUser?.uid,
+      );
+      await closures.record(
+        gestureId: gestureId,
+        classroomId: key.classroomId,
+        academicYearId: key.academicYearId,
+        month: key.month,
+        closedAt: at,
+        // Un geste = une entrée, sous son propre identifiant : deux
+        // clôtures ne fusionnent jamais.
+        entry: OutboxEntry(
+          id: gestureId,
+          aggregateType: kAttendanceClosureAggregateType,
+          aggregateId: '${key.classroomId}|${key.month}|${key.academicYearId}',
+          operation: OutboxOperation.upsert,
+          payload: closure.toJsonString(),
+          createdAt: nowMs,
+        ),
+      );
+      final engine = syncEngine;
+      if (engine != null) unawaited(engine.flush());
+      return unit;
+    },
+  );
 
   /// Où en est l'envoi de l'appel : au serveur, en file, ou refusé (avec la
   /// raison écrite par le serveur).

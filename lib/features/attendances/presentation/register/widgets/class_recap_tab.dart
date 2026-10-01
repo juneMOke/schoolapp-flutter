@@ -13,13 +13,13 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_f
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_totals_band.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_month_recap.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_month_close.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_recap_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -27,17 +27,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class ClassRecapTab extends StatelessWidget {
   final ClassPresenceState state;
 
-  /// La clôture du mois (lot suivant) ; `null` tant qu'elle n'est pas offerte.
-  final Widget? closeAction;
-
-  const ClassRecapTab({super.key, required this.state, this.closeAction});
+  const ClassRecapTab({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<ClassPresenceCubit>();
     final recap = state.recap;
-    final closeAction = this.closeAction;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -56,7 +52,8 @@ class ClassRecapTab extends StatelessWidget {
               onNext: () => unawaited(cubit.stepMonth(1)),
               onCurrent: () => unawaited(cubit.goCurrentMonth()),
             ),
-            ?closeAction,
+            if (recap != null)
+              ClassMonthCloseButton(state: state, recap: recap),
           ],
         ),
         const SizedBox(height: AppSpacing.md),
@@ -68,14 +65,8 @@ class ClassRecapTab extends StatelessWidget {
             onCurrent: () => unawaited(cubit.goCurrentMonth()),
           )
         else ...[
-          if (recap.month.closed) ...[
-            PresenceWarning(
-              icon: Icons.lock_outline,
-              tone: PresenceStatus.present,
-              message: l10n.classPresenceMonthClosedBanner,
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
+          ClassMonthCloseState(state: state, closure: recap.month.closure),
+          const SizedBox(height: AppSpacing.md),
           _Totals(state: state, recap: recap),
           const SizedBox(height: AppSpacing.md),
           _Filters(state: state, recap: recap),

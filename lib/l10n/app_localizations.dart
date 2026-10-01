@@ -21721,6 +21721,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No student found'**
   String get classPresenceRecapEmptyFilter;
+
+  /// No description provided for @classPresenceClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the month'**
+  String get classPresenceClose;
+
+  /// No description provided for @classPresenceCloseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close {month}?'**
+  String classPresenceCloseTitle(String month);
+
+  /// No description provided for @classPresenceCloseFreeze.
+  ///
+  /// In en, this message translates to:
+  /// **'The calls of {classroom} are frozen: no attendance of the month can change anymore, justifications included.'**
+  String classPresenceCloseFreeze(String classroom);
+
+  /// No description provided for @classPresenceCloseAbsences.
+  ///
+  /// In en, this message translates to:
+  /// **'{unjustified} unjustified and {justified} justified absences stay in each student\'s attendance record.'**
+  String classPresenceCloseAbsences(int unjustified, int justified);
+
+  /// No description provided for @classPresenceCloseToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No student to watch} =1{1 student to watch, flagged in the summary} other{{count} students to watch, flagged in the summary}}'**
+  String classPresenceCloseToWatch(int count);
+
+  /// No description provided for @classPresenceCloseNotMarked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student-day without a call will count as present} other{{count} student-days without a call will count as present}}'**
+  String classPresenceCloseNotMarked(int count);
+
+  /// No description provided for @classPresenceCloseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get classPresenceCloseConfirm;
+
+  /// No description provided for @classPresenceCloseNotEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'The current month can be closed once it is over.'**
+  String get classPresenceCloseNotEnded;
+
+  /// No description provided for @classPresenceClosedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Month closed on {when} — attendance locked'**
+  String classPresenceClosedOn(String when);
+
+  /// No description provided for @classPresenceCloseRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The closing was refused: {reason}'**
+  String classPresenceCloseRefused(String reason);
+
+  /// No description provided for @classPresenceToastClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} closed · {classroom}'**
+  String classPresenceToastClosed(String month, String classroom);
 }
 
 class _AppLocalizationsDelegate

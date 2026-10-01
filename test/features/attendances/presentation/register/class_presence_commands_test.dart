@@ -5,7 +5,9 @@ import 'package:school_app_flutter/core/presence/domain/presence_justification.d
 import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_closure.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_month.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/register/class_presence_use_cases.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_commands.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
@@ -20,22 +22,32 @@ class _Reopen extends Mock implements ReopenClassPresenceDayUseCase {}
 
 class _Retry extends Mock implements RetryClassPresenceDayUseCase {}
 
+class _Close extends Mock implements CloseClassPresenceMonthUseCase {}
+
 void main() {
   late _Save save;
   late _Validate validate;
   late _Reopen reopen;
+  late _Close close;
   late ClassPresenceCommands commands;
 
   setUpAll(() {
     registerFallbackValue(const (classroomId: '', academicYearId: '', day: ''));
     registerFallbackValue(<String, PresenceMark<AbsenceReason>>{});
     registerFallbackValue(<ClassPresenceLine>[]);
+    registerFallbackValue(const (
+      classroomId: '',
+      academicYearId: '',
+      month: '',
+    ));
   });
 
   setUp(() {
     save = _Save();
     validate = _Validate();
     reopen = _Reopen();
+    close = _Close();
+    when(() => close(any())).thenAnswer((_) async => const Right(unit));
     when(() => save(any(), any())).thenAnswer((_) async => const Right(unit));
     when(
       () => validate(any(), any()),
@@ -46,6 +58,7 @@ void main() {
       validate: validate,
       reopen: reopen,
       retry: _Retry(),
+      close: close,
       // 07:20 : avant la tolérance, « présent » prend l'heure courante.
       now: () => DateTime(2026, 10, 1, 7, 20),
     );
@@ -145,4 +158,35 @@ void main() {
       verifyNever(() => reopen(any(), any()));
     },
   );
+
+  test('clôturer le mois : le geste part, l annonce nomme le mois', () async {
+    const month = ClassPresenceMonth(
+      classroomId: 'c1',
+      academicYearId: 'y1',
+      month: '2026-09',
+      students: [],
+      calledDays: {},
+      incidents: {},
+    );
+    final notice = await commands.closeMonth(month, classroomName: '6e A');
+
+    expect(notice?.kind, ClassPresenceNoticeKind.monthClosed);
+    expect(notice?.month, '2026-09');
+    verify(() => close(any())).called(1);
+
+    final already = await commands.closeMonth(
+      const ClassPresenceMonth(
+        classroomId: 'c1',
+        academicYearId: 'y1',
+        month: '2026-09',
+        students: [],
+        calledDays: {},
+        incidents: {},
+        closure: ClassPresenceClosure(),
+      ),
+      classroomName: '6e A',
+    );
+    expect(already?.kind, ClassPresenceNoticeKind.monthFrozen);
+    verifyNoMoreInteractions(close);
+  });
 }

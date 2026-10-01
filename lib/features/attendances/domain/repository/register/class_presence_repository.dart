@@ -49,4 +49,8 @@ abstract class ClassPresenceRepository {
 
   /// Les appels validés d'un mois, la clôture et l'état de leur envoi.
   Future<Either<Failure, ClassPresenceMonth>> loadMonth(ClassMonthKey key);
+
+  /// Clôt le mois de la classe : le geste part en file, le mois se fige dès
+  /// la saisie. Irréversible depuis la tablette.
+  Future<Either<Failure, Unit>> closeMonth(ClassMonthKey key);
 }

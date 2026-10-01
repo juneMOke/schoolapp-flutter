@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_month.dart';
 import 'package:school_app_flutter/features/attendances/domain/repository/register/class_presence_repository.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/register/class_presence_use_cases.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
@@ -27,6 +28,7 @@ class ClassPresenceCommands {
   final ValidateClassPresenceDayUseCase _validate;
   final ReopenClassPresenceDayUseCase _reopen;
   final RetryClassPresenceDayUseCase _retry;
+  final CloseClassPresenceMonthUseCase _close;
   final DateTime Function() _now;
 
   const ClassPresenceCommands({
@@ -34,11 +36,13 @@ class ClassPresenceCommands {
     required ValidateClassPresenceDayUseCase validate,
     required ReopenClassPresenceDayUseCase reopen,
     required RetryClassPresenceDayUseCase retry,
+    required CloseClassPresenceMonthUseCase close,
     DateTime Function() now = DateTime.now,
   }) : _save = save,
        _validate = validate,
        _reopen = reopen,
        _retry = retry,
+       _close = close,
        _now = now;
 
   /// Un toucher sur une carte : le statut suivant du cycle.
@@ -178,6 +182,28 @@ class ClassPresenceCommands {
     await _retry(_key(day)),
     const ClassPresenceNotice(ClassPresenceNoticeKind.retried),
   );
+
+  /// Clôt le mois de la classe — irréversible depuis la tablette.
+  Future<ClassPresenceNotice?> closeMonth(
+    ClassPresenceMonth month, {
+    required String classroomName,
+  }) async {
+    if (month.closed) {
+      return const ClassPresenceNotice(ClassPresenceNoticeKind.monthFrozen);
+    }
+    return _outcome(
+      await _close((
+        classroomId: month.classroomId,
+        academicYearId: month.academicYearId,
+        month: month.month,
+      )),
+      ClassPresenceNotice(
+        ClassPresenceNoticeKind.monthClosed,
+        name: classroomName,
+        month: month.month,
+      ),
+    );
+  }
 
   Future<ClassPresenceNotice?> _edit(
     ClassPresenceDay day,

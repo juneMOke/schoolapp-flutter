@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_justification.d
 import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
+import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_closure.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_line.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_month.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_student.dart';
@@ -65,7 +66,7 @@ void main() {
             for (final entry in byStudent.entries) entry.key.id: entry.value,
           }),
         ),
-    closed: closed,
+    closure: closed ? const ClassPresenceClosure() : null,
   );
 
   group('StudentMonthStats', () {

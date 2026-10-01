@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -27,6 +28,17 @@ void showClassPresenceNotice(BuildContext context, ClassPresenceNotice notice) {
       AppSnackBar.showSuccess(context, l10n.classPresenceToastValidated(name));
     case ClassPresenceNoticeKind.reopened:
       AppSnackBar.showInfo(context, l10n.classPresenceToastReopened);
+    case ClassPresenceNoticeKind.monthClosed:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.classPresenceToastClosed(
+          PresenceLabels.month(
+            MaterialLocalizations.of(context),
+            notice.month!,
+          ),
+          name,
+        ),
+      );
     case ClassPresenceNoticeKind.retried:
       AppSnackBar.showInfo(context, l10n.classPresenceToastRetried);
     case ClassPresenceNoticeKind.dayFrozen:

@@ -1129,6 +1129,11 @@ class AppConstants {
   /// (celui-ci reste en service pour les lectures online hors offline).
   static const String syncAttendanceEndpoint = '/api/v1/sync/attendance';
 
+  /// Clôtures de mois de l'appel, par classe (présences des élèves v2) :
+  /// POST d'un geste idempotent par `gestureId`, GET keyset.
+  static const String syncAttendanceClosuresEndpoint =
+      '/api/v1/sync/attendance-closures';
+
   /// Pull KEYSET des `ref_classrooms` (CB-2, re-contracté 2026-07-27 —
   /// remplace l'ancien contrat bundlé `updatedSince`/`serverCursor`) :
   /// `KeysetPage<ClassroomSyncView>` (`nextCursor`/`nextWatermark`/`hasMore`),

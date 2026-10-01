@@ -16,6 +16,10 @@ enum ClassPresenceNoticeKind {
   reopened,
   retried,
 
+  /// Le mois [ClassPresenceNotice.month] de la classe [ClassPresenceNotice.name]
+  /// est clôturé.
+  monthClosed,
+
   /// Un geste refusé sur un appel validé : le rouvrir d'abord.
   dayFrozen,
 
@@ -41,13 +45,27 @@ class ClassPresenceNotice extends Equatable {
   final ClassPresenceNoticeKind kind;
   final String? name;
   final int? count;
+
+  /// `YYYY-MM`.
+  final String? month;
   final int seq;
 
-  const ClassPresenceNotice(this.kind, {this.name, this.count, this.seq = 0});
+  const ClassPresenceNotice(
+    this.kind, {
+    this.name,
+    this.count,
+    this.month,
+    this.seq = 0,
+  });
 
-  ClassPresenceNotice withSeq(int value) =>
-      ClassPresenceNotice(kind, name: name, count: count, seq: value);
+  ClassPresenceNotice withSeq(int value) => ClassPresenceNotice(
+    kind,
+    name: name,
+    count: count,
+    month: month,
+    seq: value,
+  );
 
   @override
-  List<Object?> get props => [kind, name, count, seq];
+  List<Object?> get props => [kind, name, count, month, seq];
 }

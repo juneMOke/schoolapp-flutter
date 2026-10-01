@@ -13822,4 +13822,68 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get classPresenceRecapEmptyFilter => 'Aucun élève trouvé';
+
+  @override
+  String get classPresenceClose => 'Clôturer le mois';
+
+  @override
+  String classPresenceCloseTitle(String month) {
+    return 'Clôturer $month ?';
+  }
+
+  @override
+  String classPresenceCloseFreeze(String classroom) {
+    return 'Les appels de la $classroom se figent : plus aucune présence du mois ne se modifie, justification comprise.';
+  }
+
+  @override
+  String classPresenceCloseAbsences(int unjustified, int justified) {
+    return '$unjustified absences non justifiées et $justified justifiées restent dans la fiche Présence de chaque élève.';
+  }
+
+  @override
+  String classPresenceCloseToWatch(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves à surveiller, signalés dans le récapitulatif',
+      one: '1 élève à surveiller, signalé dans le récapitulatif',
+      zero: 'Aucun élève à surveiller',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceCloseNotMarked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count jours-élève sans appel seront traités comme présents par défaut',
+      one: '1 jour-élève sans appel sera traité comme présent par défaut',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classPresenceCloseConfirm => 'Clôturer';
+
+  @override
+  String get classPresenceCloseNotEnded =>
+      'Le mois en cours se clôture une fois terminé.';
+
+  @override
+  String classPresenceClosedOn(String when) {
+    return 'Mois clôturé le $when — présences verrouillées';
+  }
+
+  @override
+  String classPresenceCloseRefused(String reason) {
+    return 'La clôture a été refusée : $reason';
+  }
+
+  @override
+  String classPresenceToastClosed(String month, String classroom) {
+    return '$month clôturé · $classroom';
+  }
 }
