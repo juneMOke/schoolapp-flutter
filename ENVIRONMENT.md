@@ -165,6 +165,44 @@ flutter build ipa --flavor prod --release --dart-define=APP_ENV=prod --dart-defi
 - Vérifier le profil de signature/certificat de prod dans Xcode
 - Vérifier l’écran de QA indiquant l’environnement attendu (si bannière activée)
 
+## Build desktop (Windows, Linux)
+
+Pas de `--flavor` sur ces plateformes : seuls les `--dart-define` distinguent
+les environnements. L'application range donc ses bases locales **par
+environnement** (`<support>/databases/<APP_ENV>`), sans quoi une installation
+de staging relirait la base de la production.
+
+| | Windows | Linux |
+|---|---|---|
+| Livrable | `eteelo-connect-<version>-<env>-windows-x64-setup.exe` (Inno Setup) | `eteelo-connect-<version>-<env>-linux-x64.tar.gz` + `install.sh` |
+| Où se construit | **sur Windows uniquement** (CI `windows-latest`) | ici ou en CI |
+| Bases locales | `%APPDATA%\com.junethink\ETEELO CONNECT\databases\<env>` | `~/.local/share/com.junethink.school_app_flutter/databases/<env>` |
+| Prérequis poste | aucun (runtime VC++ embarqué) | `libgtk-3-0`, `libsecret-1-0`, un trousseau (`gnome-keyring`) |
+
+```bash
+# Linux, en local
+bash scripts/package_linux.sh --env=staging --api-base-url=https://staging.api.example.com \
+  --build-name=1.2.3 --build-number=42
+
+# Windows et Linux, en CI : Actions > Build Desktop > Run workflow
+```
+
+Ce qui diffère de la tablette :
+
+- **Base chiffrée** : `sqflite_sqlcipher` n'existe pas sur ces plateformes. La
+  base passe par `sqflite_common_ffi` sur **SQLite3MultipleCiphers**, choisi
+  par `hooks.user_defines` dans `pubspec.yaml` — ne pas retirer ce bloc,
+  l'ouvreur refuserait d'ouvrir une base qui resterait en clair.
+- **Ticket 80 mm** : pas de thermique Bluetooth (le paquet ne parle que BLE sur
+  Windows, nos imprimantes sont en Bluetooth Classic). « Imprimer » passe par
+  le spouleur : appairer l'imprimante dans le système et installer son pilote.
+- **Numériser** : pas de caméra, seul l'import de fichier est proposé.
+- Fenêtre bornée à 1024 × 640 au minimum (mise en page tablette paysage).
+
+⚠ Toujours un build **propre** (`flutter clean`) pour livrer : un build
+incrémental a déjà produit un exécutable qui ignorait la bibliothèque
+SQLite3MultipleCiphers posée à côté de lui.
+
 ## Garde-fous
 
 - Ne pas hardcoder d’URL API dans le code applicatif

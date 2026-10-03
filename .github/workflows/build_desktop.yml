@@ -1,0 +1,194 @@
+name: Build Desktop
+
+# Postes de bureau : Windows (installateur Inno Setup) et Linux (archive
+# tar.gz + install.sh). Pas de flavor sur ces plateformes — seuls les
+# `--dart-define` distinguent les environnements, et l'application range ses
+# bases locales par environnement.
+#
+# ⚠️ Windows se construit SUR Windows : Flutter ne sait pas compiler un poste
+# Windows depuis Linux.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement cible'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      version_tag:
+        description: 'Tag SemVer (ex: v1.2.3) — obligatoire en prod, remplace la version du pubspec en dev/staging'
+        required: false
+        type: string
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Job 1 — Version et validation fail-fast
+  # ─────────────────────────────────────────────────────────────────
+  resolve-config:
+    name: Resolve config (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      build_name: ${{ steps.version.outputs.build_name }}
+      build_number: ${{ steps.version.outputs.build_number }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Require version tag for prod
+        if: ${{ inputs.environment == 'prod' && inputs.version_tag == '' }}
+        run: |
+          echo "Un version_tag est requis pour un build prod (ex: v1.2.3)."
+          exit 1
+
+      - name: Validate environment variables
+        run: |
+          case "${{ inputs.environment }}" in
+            dev)     API_BASE_URL="${{ secrets.DEV_API_BASE_URL }}" ;;
+            staging) API_BASE_URL="${{ secrets.STAGING_API_BASE_URL }}" ;;
+            prod)    API_BASE_URL="${{ secrets.PROD_API_BASE_URL }}" ;;
+          esac
+          bash scripts/validate_env.sh \
+            --env="${{ inputs.environment }}" \
+            --api-base-url="$API_BASE_URL"
+
+      - name: Resolve Flutter version
+        id: version
+        env:
+          APP_ENV: ${{ inputs.environment }}
+          VERSION_TAG: ${{ inputs.version_tag }}
+        run: |
+          # Substitution de commande, et non `< <(…)` : un tag invalide doit
+          # faire échouer l'étape, pas laisser passer un build_name vide.
+          VERSION_OUTPUT="$(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")"
+          echo "$VERSION_OUTPUT" >> "$GITHUB_OUTPUT"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 2 — Linux x64
+  # ─────────────────────────────────────────────────────────────────
+  build-linux:
+    name: Build Linux (${{ inputs.environment }})
+    needs: resolve-config
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev libsecret-1-dev
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Generate code
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+
+      - name: Build and package
+        run: |
+          case "${{ inputs.environment }}" in
+            dev)     API_BASE_URL="${{ secrets.DEV_API_BASE_URL }}" ;;
+            staging) API_BASE_URL="${{ secrets.STAGING_API_BASE_URL }}" ;;
+            prod)    API_BASE_URL="${{ secrets.PROD_API_BASE_URL }}" ;;
+          esac
+          bash scripts/package_linux.sh \
+            --env="${{ inputs.environment }}" \
+            --api-base-url="$API_BASE_URL" \
+            --build-name="${{ needs.resolve-config.outputs.build_name }}" \
+            --build-number="${{ needs.resolve-config.outputs.build_number }}"
+
+      - name: Upload Linux archive
+        uses: actions/upload-artifact@v6
+        with:
+          name: linux-x64-${{ inputs.environment }}-${{ github.sha }}
+          path: build/dist/*.tar.gz
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 3 — Windows x64
+  # ─────────────────────────────────────────────────────────────────
+  build-windows:
+    name: Build Windows (${{ inputs.environment }})
+    needs: resolve-config
+    runs-on: windows-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Generate code
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+
+      - name: Build Windows
+        run: |
+          case "${{ inputs.environment }}" in
+            dev)     API_BASE_URL="${{ secrets.DEV_API_BASE_URL }}" ;;
+            staging) API_BASE_URL="${{ secrets.STAGING_API_BASE_URL }}" ;;
+            prod)    API_BASE_URL="${{ secrets.PROD_API_BASE_URL }}" ;;
+          esac
+          flutter build windows --release \
+            --build-name "${{ needs.resolve-config.outputs.build_name }}" \
+            --build-number "${{ needs.resolve-config.outputs.build_number }}" \
+            --dart-define=APP_ENV="${{ inputs.environment }}" \
+            --dart-define=API_BASE_URL="$API_BASE_URL"
+
+      - name: Check bundle
+        run: |
+          BUNDLE="build/windows/x64/runner/Release"
+          # La base chiffrée du poste : sans elle, l'application s'arrête à
+          # l'ouverture de la base.
+          ls "$BUNDLE" | grep -i sqlite3mc || {
+            echo "sqlite3mc absente du bundle Windows." >&2
+            ls -R "$BUNDLE"
+            exit 1
+          }
+          # Les postes d'école n'ont pas toujours le runtime Visual C++ :
+          # l'application l'emporte avec elle.
+          for dll in msvcp140.dll vcruntime140.dll vcruntime140_1.dll; do
+            cp "/c/Windows/System32/$dll" "$BUNDLE/"
+          done
+
+      - name: Build installer
+        run: |
+          ISCC="/c/Program Files (x86)/Inno Setup 6/ISCC.exe"
+          if [[ ! -x "$ISCC" ]]; then
+            choco install innosetup -y --no-progress
+          fi
+          "$ISCC" \
+            "//DAppVersion=${{ needs.resolve-config.outputs.build_name }}" \
+            "//DAppEnv=${{ inputs.environment }}" \
+            windows/installer/eteelo_connect.iss
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-x64-${{ inputs.environment }}-${{ github.sha }}
+          path: build/dist/*.exe
+          retention-days: 30

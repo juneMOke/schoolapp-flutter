@@ -8,6 +8,8 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/database/offline_database_opener.dart';
+import 'package:school_app_flutter/core/database/desktop_database_opener.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/database/tenant/device_database.dart';
 import 'package:school_app_flutter/core/database/tenant/offline_database_files.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_database.dart';
@@ -108,10 +110,16 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
     tenants = const PinnedTenantSession();
     await backfillPaymentTariffs(database);
   } else {
+    // Le poste de bureau n'a pas de SQLCipher natif : même base, même clé,
+    // ouverte par ffi sur SQLite3MultipleCiphers.
     final files = OfflineDatabaseFiles(
-      directory: await offlineDatabasesDirectory(),
+      directory: isDesktopPlatform
+          ? await desktopDatabasesDirectory()
+          : await offlineDatabasesDirectory(),
       keys: getIt<DatabaseKeyService>(),
-      open: openSqlCipherDatabase,
+      open: isDesktopPlatform
+          ? openDesktopCipherDatabase
+          : openSqlCipherDatabase,
     );
     device = DeviceDatabase(await files.openDevice());
     final tenant = TenantDatabase();

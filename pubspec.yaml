@@ -57,6 +57,11 @@ dependencies:
   # détection de connectivité pour le vidage opportuniste de l'outbox.
   sqflite_sqlcipher: ^3.1.0+1
   sqflite_common: ^2.5.4+6
+  # Poste de bureau (Windows, Linux) : `sqflite_sqlcipher` n'y a AUCUNE
+  # implémentation, l'application s'y arrêtait au premier `getDatabasesPath`.
+  # La base y passe par ffi, sur SQLite3MultipleCiphers (voir `hooks` en bas
+  # de fichier). Sert aussi, comme avant, aux tests des DAO hors appareil.
+  sqflite_common_ffi: ^2.3.4
   path: ^1.9.0
   uuid: ^4.5.1
   connectivity_plus: ^6.1.0
@@ -167,8 +172,6 @@ dev_dependencies:
   retrofit_generator: ^10.2.3
   flutter_gen_runner: ^5.13.0+1
   flutter_launcher_icons: ^0.14.1
-  # Base sqflite en mémoire pour les tests unitaires des DAO/outbox (hors device).
-  sqflite_common_ffi: ^2.3.4
 
 
 # For information on the generic Dart part of this file, see the
@@ -292,3 +295,16 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/app-icon/appstore_1024.png"
     icon_size: 48
+
+# ── Bibliothèque SQLite embarquée par `package:sqlite3` ─────────────────────
+# SQLite3MultipleCiphers au lieu de SQLite : c'est ce qui CHIFFRE la base
+# offline sur poste de bureau (`desktop_database_opener.dart`). Sans cette
+# ligne, `PRAGMA key` serait ignoré en silence et la base resterait en clair —
+# l'ouvreur refuse donc d'ouvrir s'il ne trouve pas `sqlite3mc_version()`.
+#
+# ⚠️ Aucune option par OS : la bibliothèque part aussi dans l'APK, où elle ne
+# sert pas (Android et iOS restent sur `sqflite_sqlcipher`).
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
