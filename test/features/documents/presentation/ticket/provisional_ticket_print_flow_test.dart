@@ -293,6 +293,43 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
+  /// Le poste de bureau n'a pas de thermique Bluetooth (le paquet n'y parle
+  /// que BLE) : « Imprimer » y va droit au spouleur, sans sélecteur
+  /// d'imprimante ni permission — et sans trace, comme tout passage par lui.
+  group('poste de bureau', () {
+    const desktop = TargetPlatformVariant({
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    });
+
+    testWidgets(
+      'le spouleur sort le ticket, la thermique n est jamais vue',
+      (tester) async {
+        await run(tester);
+
+        expect(printing.laidOut, hasLength(1));
+        expect(port.sentTo, isEmpty);
+        expect(find.byType(SnackBar), findsNothing);
+        expect(repository.marked, isZero);
+      },
+      variant: desktop,
+    );
+
+    testWidgets('spouleur indisponible : l échec est dit', (tester) async {
+      printing.fails = true;
+
+      await run(tester);
+
+      expect(port.sentTo, isEmpty);
+      expect(
+        find.text(
+          'Impression indisponible : le ticket n\'a pas pu être produit.',
+        ),
+        findsOneWidget,
+      );
+    }, variant: desktop);
+  });
+
   /// Le contrat NEUF de l'aperçu, et la raison pour laquelle il est tenable au
   /// comptoir : **rien ne part tant que personne n'a appuyé**. Refermer la
   /// visionneuse est un renoncement, et il ne coûte pas une feuille — ni la
@@ -634,6 +671,9 @@ TicketReceiptModel _model(TicketLabels labels, String studentFullName) =>
 class _FakePrinting extends PrintingPlatform {
   final List<Uint8List> laidOut = [];
 
+  /// Spouleur absent : `layoutPdf` lève, comme sans canal de plateforme.
+  bool fails = false;
+
   @override
   Future<bool> layoutPdf(
     Printer? printer,
@@ -645,6 +685,7 @@ class _FakePrinting extends PrintingPlatform {
     OutputType outputType,
     bool forceCustomPrintPaper,
   ) async {
+    if (fails) throw StateError('aucun spouleur');
     laidOut.add(await onLayout(PdfPageFormat.a4));
     return true;
   }

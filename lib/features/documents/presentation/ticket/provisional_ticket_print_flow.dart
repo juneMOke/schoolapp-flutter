@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -161,19 +162,29 @@ Future<void> printProvisionalTicketWithFallback(
     // Le papier est sorti (ou la cause est dite) : garder l'aperçu n'a plus
     // d'objet, et le message d'échec doit redevenir atteignable.
     closeAfterPrint: true,
-    // ⚠️ **Jamais le spouleur ici.** Sur le parc ETEELO la NT-8003DD lui est
-    // invisible : l'impression d'un ticket est thermique, et le PDF n'est que
-    // le filet (AM-11).
-    onPrint: () => _sendTicketToPrinter(
-      context,
-      model: model,
-      paymentId: paymentId,
-      cutNotice: cutNotice,
-      logoBand: logoBand,
-      defaultCopies: defaultCopies,
-      messenger: messenger,
-      l10n: l10n,
-    ),
+    // ⚠️ **Jamais le spouleur ici sur tablette.** Sur le parc ETEELO la
+    // NT-8003DD lui est invisible : l'impression d'un ticket est thermique, et
+    // le PDF n'est que le filet (AM-11). Le poste de bureau, sans thermique
+    // Bluetooth, n'a QUE le spouleur.
+    onPrint: () => isDesktopPlatform
+        ? sendTicketToSystemPrinter(
+            model: model,
+            cutNotice: cutNotice,
+            logoBand: logoBand,
+            copies: defaultCopies,
+            messenger: messenger,
+            l10n: l10n,
+          )
+        : _sendTicketToPrinter(
+            context,
+            model: model,
+            paymentId: paymentId,
+            cutNotice: cutNotice,
+            logoBand: logoBand,
+            defaultCopies: defaultCopies,
+            messenger: messenger,
+            l10n: l10n,
+          ),
   );
 }
 

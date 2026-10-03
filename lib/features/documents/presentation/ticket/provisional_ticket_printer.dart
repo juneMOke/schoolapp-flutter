@@ -111,6 +111,36 @@ Future<bool> printProvisionalTicket({
   }
 }
 
+/// Le geste « Imprimer » du poste de bureau : le spouleur du système, et lui
+/// seul.
+///
+/// Le poste n'a pas de thermique Bluetooth — le paquet ne sait y parler qu'en
+/// BLE, nos imprimantes sont en Bluetooth Classic. Une thermique installée
+/// sous Windows ou CUPS y devient en revanche une imprimante ordinaire, que le
+/// spouleur sert au format du rouleau.
+///
+/// ⚠️ Aucune trace d'impression, même ici où le spouleur est la sortie
+/// principale : il rend la main dès qu'il accepte le document, « Enregistrer
+/// en PDF » compris. Le rattrapage du versement reste donc ouvert.
+Future<void> sendTicketToSystemPrinter({
+  required TicketReceiptModel model,
+  required String cutNotice,
+  required TicketLogoBand? logoBand,
+  required int copies,
+  required ScaffoldMessengerState? messenger,
+  required AppLocalizations l10n,
+}) async {
+  final printed = await printProvisionalTicket(
+    model: model,
+    cutNotice: cutNotice,
+    logoBand: logoBand,
+    copies: copies,
+  );
+  if (!printed) {
+    messenger?.showSnackBar(SnackBar(content: Text(l10n.ticketPrintFailed)));
+  }
+}
+
 /// Proposition initiale de la boîte de dialogue — jamais une contrainte : c'est
 /// le média annoncé par `onLayout` qui décide de la composition. A4 est le
 /// papier de bureau par défaut de la cible.
