@@ -31,6 +31,10 @@ static int g_active_window_count = 0;
 
 using EnableNonClientDpiScaling = BOOL __stdcall(HWND hwnd);
 
+// Taille minimale de la fenêtre, en pixels logiques (cf. WM_GETMINMAXINFO).
+constexpr int kMinWindowWidth = 1024;
+constexpr int kMinWindowHeight = 640;
+
 // Scale helper to convert logical scaler values to physical using passed in
 // scale factor
 int Scale(int source, double scale_factor) {
@@ -197,6 +201,19 @@ Win32Window::MessageHandler(HWND hwnd,
 
       return 0;
     }
+    // Taille plancher : l'interface est pensée pour une tablette en paysage,
+    // et ses écrans débordent en deçà. Le premier WM_GETMINMAXINFO précède
+    // WM_NCCREATE et n'arrive jamais ici — sans effet, la fenêtre naît à
+    // 1280 x 720.
+    case WM_GETMINMAXINFO: {
+      HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+      double scale_factor = FlutterDesktopGetDpiForMonitor(monitor) / 96.0;
+      auto info = reinterpret_cast<MINMAXINFO*>(lparam);
+      info->ptMinTrackSize.x = Scale(kMinWindowWidth, scale_factor);
+      info->ptMinTrackSize.y = Scale(kMinWindowHeight, scale_factor);
+      return 0;
+    }
+
     case WM_SIZE: {
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {
