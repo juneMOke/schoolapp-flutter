@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/documents/data/datasources/offline/e
 import 'package:school_app_flutter/features/documents/data/datasources/offline/editique_document_pull_handler.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/platform_blob_files.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
@@ -79,6 +80,7 @@ void registerDocumentsOffline(GetIt getIt) {
     instanceName: AppConstants.editiqueCacheDirectoryName,
     () => EncryptedBlobStore(
       directoryName: AppConstants.editiqueCacheDirectoryName,
+      files: platformBlobFiles(AppConstants.editiqueCacheDirectoryName),
       keyService: BlobKeyService(
         getIt<FlutterSecureStorage>(),
         storageKey: AppConstants.editiqueCacheKeyStorageKey,

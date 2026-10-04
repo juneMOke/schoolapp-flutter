@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path/path.dart' as p;
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_files.dart';
 
 /// Le répertoire d'un `EncryptedBlobStore` et la façon d'y nommer les
 /// fichiers : un fichier scellé (`<id>.enc`) et, le temps d'une écriture, un
@@ -10,7 +12,7 @@ import 'package:path/path.dart' as p;
 /// ce qu'ils disent. Aucune de ses opérations ne lève sur une panne
 /// d'entrée-sortie, à l'exception de [ensure], dont l'échec interrompt une
 /// écriture que l'appelant sait déjà rattraper.
-class BlobDirectory {
+class BlobDirectory implements BlobFiles {
   /// Suffixe d'un fichier complet, et d'une écriture en cours. Séparés parce
   /// qu'une écriture interrompue ne doit jamais être relue comme une pièce.
   static const String sealedSuffix = '.enc';
@@ -69,9 +71,47 @@ class BlobDirectory {
   static File pendingFile(Directory dir, String id) =>
       File(p.join(dir.path, '$id$pendingSuffix'));
 
+  @override
+  Future<void> writePending(String id, Uint8List sealed) async {
+    final dir = await ensure();
+    await pendingFile(dir, id).writeAsBytes(sealed, flush: true);
+  }
+
+  @override
+  Future<bool> commit(String id) async {
+    final dir = await resolve();
+    final pending = pendingFile(dir, id);
+    if (!await pending.exists()) return false;
+    await pending.rename(sealedFile(dir, id).path);
+    return true;
+  }
+
+  @override
+  Future<void> discardPending(String id) async =>
+      quietlyDelete(pendingFile(await resolve(), id));
+
+  @override
+  Future<bool> sealedExists(String id) async =>
+      sealedFile(await resolve(), id).exists();
+
+  @override
+  Future<Uint8List?> readSealed(String id) async {
+    final file = sealedFile(await resolve(), id);
+    if (!await file.exists()) return null;
+    return file.readAsBytes();
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    final dir = await resolve();
+    await quietlyDelete(sealedFile(dir, id));
+    await quietlyDelete(pendingFile(dir, id));
+  }
+
   /// Efface le répertoire entier. Sans conséquence s'il est verrouillé ou déjà
   /// parti : les octets qui y restent ne sont plus déchiffrables par personne
   /// dès que la clé change.
+  @override
   Future<void> deleteAll() async {
     try {
       final dir = await resolve();
@@ -87,6 +127,7 @@ class BlobDirectory {
   /// Les fichiers qui ne portent pas nos noms sont laissés en place : ce
   /// répertoire nous appartient, mais rien ne prouve qu'il n'appartienne qu'à
   /// nous.
+  @override
   Future<int> reclaimOrphans({required Set<String> indexedIds}) async {
     try {
       final dir = await resolve();

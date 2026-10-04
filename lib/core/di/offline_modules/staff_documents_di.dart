@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/platform_blob_files.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_session_guard.dart';
@@ -41,6 +42,7 @@ void registerStaffDocuments(GetIt getIt) {
     instanceName: AppConstants.staffDocumentsDirectoryName,
     () => EncryptedBlobStore(
       directoryName: AppConstants.staffDocumentsDirectoryName,
+      files: platformBlobFiles(AppConstants.staffDocumentsDirectoryName),
       keyService: BlobKeyService(
         getIt<FlutterSecureStorage>(),
         storageKey: AppConstants.staffDocumentsKeyStorageKey,
