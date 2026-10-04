@@ -32,6 +32,15 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 
+# `permission_handler_windows` (dernière version, 0.2.x) compile encore avec
+# `/await` et <experimental/coroutine>. Depuis MSVC 14.51 (Visual Studio 18,
+# image `windows-latest`), ces en-têtes lèvent l'erreur STL1011 au lieu d'un
+# avertissement. Cette définition, proposée par le message lui-même, rend la
+# compilation possible tant que Microsoft n'a pas retiré les en-têtes ; le
+# plugin ne sert de toute façon jamais sur le poste (Bluetooth Android seul).
+# Posée ici, AVANT l'inclusion des plugins, elle atteint leurs cibles.
+add_definitions(-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by
