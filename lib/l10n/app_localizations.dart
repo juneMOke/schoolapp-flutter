@@ -350,6 +350,18 @@ abstract class AppLocalizations {
   /// **'Unable to load the application data. Check your connection, then try again.'**
   String get splashErrorMessage;
 
+  /// No description provided for @webOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection required'**
+  String get webOfflineTitle;
+
+  /// No description provided for @webOfflineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The web version only works online. Check your connection: the application will resume on its own as soon as it is back.'**
+  String get webOfflineMessage;
+
   /// No description provided for @splashErrorRetry.
   ///
   /// In en, this message translates to:
