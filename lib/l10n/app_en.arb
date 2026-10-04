@@ -67,6 +67,8 @@
   },
   "splashErrorTitle": "Connection failed",
   "splashErrorMessage": "Unable to load the application data. Check your connection, then try again.",
+  "webOfflineTitle": "Connection required",
+  "webOfflineMessage": "The web version only works online. Check your connection: the application will resume on its own as soon as it is back.",
   "splashErrorRetry": "Retry",
   "accueilUnknownRightsTitle": "Rights not known",
   "@accueilUnknownRightsTitle": {

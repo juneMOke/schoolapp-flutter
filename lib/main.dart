@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/staff/data/local/staff_document_sess
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/payment_anomalies_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+import 'package:school_app_flutter/core/components/status/web_online_gate.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
@@ -357,11 +359,17 @@ class _MyAppState extends State<MyApp> {
             // La photo des élèves est posée ici, au-dessus de toutes les
             // routes : tout avatar qui la demande la trouve, ceux qui ne la
             // demandent pas gardent leurs initiales.
-            builder: (context, child) => PersonPhotoScope(
-              source: getIt<StudentPhotoRegistry>(),
-              child: PaymentAnomalyBanner(
-                child: SessionDegradationBanner(
-                  child: child ?? const SizedBox.shrink(),
+            //
+            // Sur le web, le tout sous le voile « Connexion requise » : la
+            // version web est en ligne seulement.
+            builder: (context, child) => WebOnlineGate(
+              connectivity: getIt<ConnectivityService>(),
+              child: PersonPhotoScope(
+                source: getIt<StudentPhotoRegistry>(),
+                child: PaymentAnomalyBanner(
+                  child: SessionDegradationBanner(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

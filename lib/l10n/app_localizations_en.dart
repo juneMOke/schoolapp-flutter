@@ -144,6 +144,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to load the application data. Check your connection, then try again.';
 
   @override
+  String get webOfflineTitle => 'Connection required';
+
+  @override
+  String get webOfflineMessage =>
+      'The web version only works online. Check your connection: the application will resume on its own as soon as it is back.';
+
+  @override
   String get splashErrorRetry => 'Retry';
 
   @override
