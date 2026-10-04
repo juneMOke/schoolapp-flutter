@@ -153,6 +153,17 @@ dependencies:
   image_picker: ^1.2.3
   file_picker: ^11.0.3
 
+  # ── Version web ──────────────────────────────────────────────────────────
+  # SQLite compilé en WASM, persisté dans IndexedDB : la base locale du
+  # navigateur. NON chiffrée — la clé vivrait dans le même navigateur.
+  # `web/sqlite3.wasm` et `web/sqflite_sw.js` viennent de
+  # `dart run sqflite_common_ffi_web:setup`, à relancer à chaque montée de
+  # version du paquet.
+  sqflite_common_ffi_web: ^1.1.1
+  # gzip/zlib pour tout le monde : `dart:io` les refuse dans le navigateur, et
+  # `archive` choisit lui-même zlib natif ailleurs. Déjà tiré en transitif.
+  archive: ^4.0.9
+
 
 dev_dependencies:
   flutter_test:

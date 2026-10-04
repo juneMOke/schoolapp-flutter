@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart' as sqlcipher;
 import 'package:school_app_flutter/core/database/table_schema.dart';
@@ -16,6 +18,13 @@ typedef OfflineDatabaseOpener =
       required OnDatabaseCreateFn onCreate,
       required OnDatabaseVersionChangeFn onUpgrade,
     });
+
+/// Existence d'un fichier de base. Un seam pour le navigateur, où une base
+/// n'est pas un fichier et où `File.exists` lève.
+typedef DatabaseExistsFn = Future<bool> Function(String path);
+
+/// Existence sur disque : tablette et poste de bureau.
+Future<bool> databaseFileExists(String path) => File(path).exists();
 
 /// L'ouvreur de production : SQLCipher, clés étrangères actives.
 Future<Database> openSqlCipherDatabase(
