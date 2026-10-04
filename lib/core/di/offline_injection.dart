@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/money/local/exchange_rate_dao.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -9,6 +10,7 @@ import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.da
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/database/offline_database_opener.dart';
 import 'package:school_app_flutter/core/database/desktop_database_opener.dart';
+import 'package:school_app_flutter/core/database/web_database_opener.dart';
 import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/database/tenant/device_database.dart';
 import 'package:school_app_flutter/core/database/tenant/offline_database_files.dart';
@@ -110,17 +112,26 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
     tenants = const PinnedTenantSession();
     await backfillPaymentTariffs(database);
   } else {
-    // Le poste de bureau n'a pas de SQLCipher natif : même base, même clé,
-    // ouverte par ffi sur SQLite3MultipleCiphers.
-    final files = OfflineDatabaseFiles(
-      directory: isDesktopPlatform
-          ? await desktopDatabasesDirectory()
-          : await offlineDatabasesDirectory(),
-      keys: getIt<DatabaseKeyService>(),
-      open: isDesktopPlatform
-          ? openDesktopCipherDatabase
-          : openSqlCipherDatabase,
-    );
+    // Ni le poste de bureau ni le navigateur n'ont de SQLCipher natif. Le
+    // poste ouvre la même base, sous la même clé, par ffi sur
+    // SQLite3MultipleCiphers ; le navigateur, en WASM dans IndexedDB, non
+    // chiffrée — et une base n'y est pas un fichier.
+    final files = kIsWeb
+        ? OfflineDatabaseFiles(
+            directory: webDatabasesDirectory,
+            keys: getIt<DatabaseKeyService>(),
+            open: openWebDatabase,
+            exists: webDatabaseExists,
+          )
+        : OfflineDatabaseFiles(
+            directory: isDesktopPlatform
+                ? await desktopDatabasesDirectory()
+                : await offlineDatabasesDirectory(),
+            keys: getIt<DatabaseKeyService>(),
+            open: isDesktopPlatform
+                ? openDesktopCipherDatabase
+                : openSqlCipherDatabase,
+          );
     device = DeviceDatabase(await files.openDevice());
     final tenant = TenantDatabase();
     schoolDatabase = tenant;

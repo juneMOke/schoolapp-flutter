@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:archive/archive.dart' show ZLibDecoder;
 import 'dart:typed_data';
 
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
@@ -17,7 +17,8 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_
 /// qui tourne hors ligne sur des tablettes d'école, une dépendance de plus n'est
 /// jamais gratuite.
 ///
-/// L'inflate, lui, ne s'écrit pas : `dart:io` le donne.
+/// L'inflate, lui, ne s'écrit pas : `archive` le donne — zlib natif hors du
+/// navigateur, Dart pur dedans (`zlib` de `dart:io` y lève).
 ///
 /// ## Le mode de défaillance est contenu, et c'est ce qui rend le choix tenable
 ///
@@ -87,7 +88,7 @@ abstract final class MonoPngDecoder {
       return null;
     }
 
-    final raw = Uint8List.fromList(zlib.decode(idat.takeBytes()));
+    final raw = const ZLibDecoder().decodeBytes(idat.takeBytes());
     final stride = (width + 7) ~/ 8;
     // Une ligne = un octet de filtre + `stride` octets de données.
     if (raw.length != (stride + 1) * height) return null;

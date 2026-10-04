@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
@@ -128,13 +126,16 @@ class LegacyDatabaseSplit {
   final String legacyPath;
   final DatabaseKeyService _keys;
   final OfflineDatabaseOpener _open;
+  final DatabaseExistsFn _exists;
 
   const LegacyDatabaseSplit({
     required this.legacyPath,
     required DatabaseKeyService keys,
     required OfflineDatabaseOpener open,
+    DatabaseExistsFn exists = databaseFileExists,
   }) : _keys = keys,
-       _open = open;
+       _open = open,
+       _exists = exists;
 
   /// Éclate la base héritée si elle attend de l'être.
   ///
@@ -148,7 +149,7 @@ class LegacyDatabaseSplit {
       if (state == kLegacyStateAdopted) await _forgetAdoptedKey();
       return;
     }
-    if (!await File(legacyPath).exists()) return;
+    if (!await _exists(legacyPath)) return;
     final key = await _keys.readLegacyKey();
     if (key == null) return;
 
@@ -251,7 +252,7 @@ class LegacyDatabaseSplit {
   /// même valeur vit déjà sous le nom de l'école.
   Future<void> _forgetAdoptedKey() async {
     try {
-      if (await File(legacyPath).exists()) return;
+      if (await _exists(legacyPath)) return;
       if (await _keys.readLegacyKey() == null) return;
       await _keys.forgetLegacyKey();
     } catch (_) {

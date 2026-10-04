@@ -17,18 +17,22 @@ class OfflineDatabaseFiles {
   final String directory;
   final DatabaseKeyService _keys;
   final OfflineDatabaseOpener _open;
+  final DatabaseExistsFn _exists;
   late final LegacyDatabaseSplit _split = LegacyDatabaseSplit(
     legacyPath: legacyPath,
     keys: _keys,
     open: _open,
+    exists: _exists,
   );
 
   OfflineDatabaseFiles({
     required this.directory,
     required DatabaseKeyService keys,
     required OfflineDatabaseOpener open,
+    DatabaseExistsFn exists = databaseFileExists,
   }) : _keys = keys,
-       _open = open;
+       _open = open,
+       _exists = exists;
 
   static final RegExp _schoolIdPattern = RegExp(r'^[A-Za-z0-9-]{1,64}$');
 
@@ -85,7 +89,7 @@ class OfflineDatabaseFiles {
     required Database device,
   }) async {
     final path = schoolPath(schoolId);
-    if (!await File(path).exists()) {
+    if (!await _exists(path)) {
       // Retenté ici, et SANS filet : créer un fichier neuf pendant que la base
       // héritée attend son éclatement l'orphelinerait. Son école aurait déjà
       // un fichier, et l'adoption n'aurait plus jamais lieu — avec, dedans, les
@@ -117,8 +121,7 @@ class OfflineDatabaseFiles {
     if (await readDeviceMeta(device, kLegacyStateKey) != kLegacyStateSplit) {
       return;
     }
-    final legacy = File(legacyPath);
-    if (!await legacy.exists()) {
+    if (!await _exists(legacyPath)) {
       // Renommée par une adoption coupée avant sa note : le fichier est déjà
       // là où il devait aller, seule la note manquait. Rattrapée quelle que
       // soit l'école qui passe ici — celle qui a adopté ne repasse plus par
@@ -130,7 +133,7 @@ class OfflineDatabaseFiles {
     if (owner != null && owner != schoolId) return;
 
     await _keys.adoptLegacyKey(schoolId);
-    await legacy.rename(target);
+    await File(legacyPath).rename(target);
     // Un journal laissé derrière rattacherait ses pages à un fichier qui n'est
     // plus là. L'éclatement a ouvert puis fermé la base : il n'en reste
     // normalement aucun.

@@ -203,6 +203,47 @@ Ce qui diffère de la tablette :
 incrémental a déjà produit un exécutable qui ignorait la bibliothèque
 SQLite3MultipleCiphers posée à côté de lui.
 
+## Build web (en ligne seulement)
+
+La version web est **complète mais en ligne seulement** : sans réseau, un voile
+« Connexion requise » recouvre l'application (`WebOnlineGate`) et elle reprend
+d'elle-même au retour.
+
+| | Navigateur |
+|---|---|
+| Base locale | SQLite WASM dans IndexedDB (`sqflite_common_ffi_web`), **non chiffrée** — la clé vivrait dans le même navigateur. Une base par environnement (`eteelo/<APP_ENV>/…`). |
+| Outbox | conservée dans IndexedDB, vidée dès l'écriture (comme sur tablette) ; fermer l'onglet avec un envoi en attente demande confirmation |
+| Pièces (éditique, justificatifs RH) | même coffre chiffré, octets dans IndexedDB (`WebBlobFiles`) |
+| Ticket 80 mm | boîte d'impression du navigateur |
+| Numériser | pas de caméra : import de fichier seulement |
+
+```bash
+flutter build web --release --dart-define=APP_ENV=staging --dart-define=API_BASE_URL=https://…
+docker build -f deploy/web/Dockerfile -t eteelo-web:1.2.3 .
+# CI : Actions > Build Web > Run workflow (archive de build/web)
+```
+
+`web/sqlite3.wasm` et `web/sqflite_sw.js` sont générés par
+`dart run sqflite_common_ffi_web:setup` : à relancer à chaque montée de version
+du paquet, et vérifier que `sqlite3.wasm` commence bien par `\0asm` (une page
+d'erreur GitHub a déjà été téléchargée à la place d'un binaire).
+
+### Déploiement derrière Traefik — même origine recommandée
+
+Servir le site et l'API **sur le même hôte** supprime CORS : Traefik envoie
+`/api` à l'API et tout le reste au conteneur web (`deploy/web/`). Le build web
+prend alors `API_BASE_URL=https://<hôte>/api/v1`.
+
+Si le site vit sur un autre hôte que l'API, l'API doit répondre en CORS :
+
+- `Access-Control-Allow-Origin` : l'origine du site (jamais `*` : requêtes authentifiées) ;
+- `Access-Control-Allow-Headers` : `Authorization, Content-Type, Content-Encoding, If-None-Match, X-Refresh-Token, X-OTP-Token` ;
+- `Access-Control-Expose-Headers` : `Date, X-User-Version, ETag, Content-Disposition, X-Document-Id`.
+
+⚠ Sans `Expose-Headers`, rien ne casse visiblement : le navigateur masque ces
+en-têtes, et l'application perd en silence l'horloge serveur, la révocation
+(`X-User-Version`), les ETag et les noms des PDF.
+
 ## Garde-fous
 
 - Ne pas hardcoder d’URL API dans le code applicatif
