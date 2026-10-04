@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:archive/archive.dart' show GZipEncoder;
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -109,9 +109,13 @@ class RelanceListRepositoryImpl implements RelanceListRepository {
 
   /// Compresse le corps JSON avant l'envoi.
   ///
-  /// `gzip.encode` plutôt qu'un flux : le corps est déjà tout entier en mémoire
+  /// `GZipEncoder` du paquet `archive` et non `dart:io` : il retombe sur zlib
+  /// natif hors du navigateur, et sur du Dart pur dans le navigateur, où
+  /// `gzip` de `dart:io` lève.
+  ///
+  /// Encodé d'un bloc plutôt qu'en flux : le corps est déjà tout entier en mémoire
   /// — on vient de le construire — et le streamer n'économiserait rien tout en
   /// compliquant la mesure de sa taille.
   static List<int> _gzipJson(String request, RequestOptions options) =>
-      gzip.encode(utf8.encode(request));
+      const GZipEncoder().encodeBytes(utf8.encode(request));
 }
