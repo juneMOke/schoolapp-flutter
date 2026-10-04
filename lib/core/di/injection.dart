@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kDebugMode;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -96,6 +97,7 @@ import 'package:school_app_flutter/features/auth/data/services/token_storage_ser
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/storage/serialized_secure_storage.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/password_verifier_service.dart';
@@ -236,8 +238,13 @@ Future<void> configureDependencies({
   EnvConfig? envConfig,
   Database? offlineDatabase,
 }) async {
+  // Windows : le greffon réécrit un fichier unique à chaque écriture, sans
+  // verrou — les écritures parallèles de la session s'y effaçaient (voir
+  // `SerializedSecureStorage`).
   getIt.registerLazySingleton<FlutterSecureStorage>(
-    () => const FlutterSecureStorage(),
+    () => defaultTargetPlatform == TargetPlatform.windows
+        ? SerializedSecureStorage()
+        : const FlutterSecureStorage(),
   );
 
   // ── Socle offline (base chiffrée + outbox + moteur de synchro) ──────────────

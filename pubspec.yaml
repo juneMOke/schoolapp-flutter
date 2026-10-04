@@ -172,6 +172,9 @@ dev_dependencies:
   retrofit_generator: ^10.2.3
   flutter_gen_runner: ^5.13.0+1
   flutter_launcher_icons: ^0.14.1
+  # Contrat des greffons de stockage sécurisé : les tests y substituent un
+  # greffon qui rejoue le fichier unique de Windows.
+  flutter_secure_storage_platform_interface: ^2.0.1
 
 
 # For information on the generic Dart part of this file, see the
