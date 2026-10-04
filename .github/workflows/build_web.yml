@@ -1,0 +1,107 @@
+name: Build Web
+
+# Version web, EN LIGNE SEULEMENT : produit l'archive de build/web à déposer
+# derrière Traefik (deploy/web/ : nginx.conf, Dockerfile, exemple compose).
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environnement cible'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      version_tag:
+        description: 'Tag SemVer (ex: v1.2.3) — obligatoire en prod, remplace la version du pubspec en dev/staging'
+        required: false
+        type: string
+
+jobs:
+  build-web:
+    name: Build Web (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Require version tag for prod
+        if: ${{ inputs.environment == 'prod' && inputs.version_tag == '' }}
+        run: |
+          echo "Un version_tag est requis pour un build prod (ex: v1.2.3)."
+          exit 1
+
+      - name: Resolve API base URL
+        run: |
+          case "${{ inputs.environment }}" in
+            dev)     echo "API_BASE_URL=${{ secrets.DEV_API_BASE_URL }}" >> "$GITHUB_ENV" ;;
+            staging) echo "API_BASE_URL=${{ secrets.STAGING_API_BASE_URL }}" >> "$GITHUB_ENV" ;;
+            prod)    echo "API_BASE_URL=${{ secrets.PROD_API_BASE_URL }}" >> "$GITHUB_ENV" ;;
+          esac
+
+      - name: Validate environment variables
+        run: |
+          bash scripts/validate_env.sh \
+            --env="${{ inputs.environment }}" \
+            --api-base-url="$API_BASE_URL"
+
+      - name: Resolve Flutter version
+        id: version
+        env:
+          APP_ENV: ${{ inputs.environment }}
+          VERSION_TAG: ${{ inputs.version_tag }}
+        run: |
+          VERSION_OUTPUT="$(bash scripts/resolve_flutter_version.sh --env "$APP_ENV" --version-tag "$VERSION_TAG")"
+          echo "$VERSION_OUTPUT" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Generate code
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+
+      - name: Build web
+        run: |
+          flutter build web --release \
+            --build-name "${{ steps.version.outputs.build_name }}" \
+            --build-number "${{ steps.version.outputs.build_number }}" \
+            --dart-define=APP_ENV="${{ inputs.environment }}" \
+            --dart-define=API_BASE_URL="$API_BASE_URL"
+
+      - name: Check bundle
+        run: |
+          # La base du navigateur : sans ces deux fichiers, l'application
+          # s'arrête à l'ouverture de la base.
+          for f in sqlite3.wasm sqflite_sw.js; do
+            test -s "build/web/$f" || { echo "build/web/$f absent." >&2; exit 1; }
+          done
+          # En-tête « \0asm » : une page d'erreur GitHub téléchargée à la
+          # place du binaire s'est déjà vue.
+          MAGIC="$(head -c 4 build/web/sqlite3.wasm | od -An -tx1 | tr -d ' \n')"
+          [[ "$MAGIC" == "0061736d" ]] || {
+            echo "build/web/sqlite3.wasm n'est pas un module WASM." >&2
+            exit 1
+          }
+
+      - name: Package
+        run: |
+          mkdir -p build/dist
+          tar -C build/web -czf "build/dist/eteelo-web-${{ steps.version.outputs.build_name }}-${{ inputs.environment }}.tar.gz" .
+
+      - name: Upload web archive
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-${{ inputs.environment }}-${{ github.sha }}
+          path: build/dist/*.tar.gz
+          retention-days: 30
