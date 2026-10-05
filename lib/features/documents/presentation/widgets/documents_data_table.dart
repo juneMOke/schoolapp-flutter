@@ -154,6 +154,7 @@ class _DocumentsDataTableState extends State<DocumentsDataTable> {
             firstName: summary.student.firstName,
             lastName: summary.student.lastName,
             personId: summary.student.id,
+            studentPhotoOf: summary.student.id,
             size: core_avatar.AvatarSize.sm,
           ),
           cells: [

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/beneficiary_picker_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_line_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
 
 /// « Désigner un élève » — les deux voies de la spec §09.
 ///
@@ -253,12 +254,16 @@ class _CandidateTile extends StatelessWidget {
       // ≥ 48 dp : on vise vite au guichet.
       minVerticalPadding: 8,
       enabled: candidate.isSelectable,
-      leading: CircleAvatar(
-        radius: 17,
-        backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
-        child: Text(
-          _initialsOf(candidate.fullName),
-          style: const TextStyle(fontSize: 12, color: AppColors.bleuArdoise),
+      leading: PersonPhotoOr(
+        personId: candidate.studentId,
+        size: 34,
+        fallback: CircleAvatar(
+          radius: 17,
+          backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
+          child: Text(
+            _initialsOf(candidate.fullName),
+            style: const TextStyle(fontSize: 12, color: AppColors.bleuArdoise),
+          ),
         ),
       ),
       title: Text(

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
+import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
 
 /// AppBar sombre des dossiers élève — Inscription, Facturation, Discipline,
 /// Documents.
@@ -49,6 +50,9 @@ class StudentDetailAppBar extends StatelessWidget
   /// `PopScope` ne voit pas passer un `Navigator.pop` explicite.
   final VoidCallback? onExit;
 
+  /// L'élève du dossier : sa photo remplace les initiales quand il en a une.
+  final String? studentId;
+
   const StudentDetailAppBar({
     super.key,
     required this.fullName,
@@ -59,6 +63,7 @@ class StudentDetailAppBar extends StatelessWidget
     this.trailing,
     this.showCloseButton = false,
     this.onExit,
+    this.studentId,
   });
 
   @override
@@ -117,7 +122,11 @@ class StudentDetailAppBar extends StatelessWidget
       ),
       title: Row(
         children: [
-          _AvatarBadge(initials: _initials, size: _avatarSize),
+          _AvatarBadge(
+            initials: _initials,
+            size: _avatarSize,
+            studentId: studentId,
+          ),
           const SizedBox(width: AppDimensions.spacingM),
           Expanded(
             child: Column(
@@ -273,16 +282,22 @@ class _GoldDivider extends StatelessWidget {
   }
 }
 
-/// Avatar rond à initiales sur fond blanc translucide.
+/// Avatar rond à initiales sur fond blanc translucide — ou la photo de
+/// l'élève, quand il en a une.
 class _AvatarBadge extends StatelessWidget {
   final String initials;
   final double size;
+  final String? studentId;
 
-  const _AvatarBadge({required this.initials, required this.size});
+  const _AvatarBadge({
+    required this.initials,
+    required this.size,
+    this.studentId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final badge = Container(
       width: size,
       height: size,
       alignment: Alignment.center,
@@ -298,6 +313,7 @@ class _AvatarBadge extends StatelessWidget {
         ),
       ),
     );
+    return PersonPhotoOr(personId: studentId, size: size, fallback: badge);
   }
 }
 

@@ -128,6 +128,7 @@ class _ClassesOrganisationMemberTileState
                 firstName: widget.member.studentFirstName,
                 lastName: widget.member.studentLastName,
                 personId: widget.member.studentId,
+                studentPhotoOf: widget.member.studentId,
                 size: AvatarSize.md,
               ),
               const SizedBox(width: AppDimensions.spacingS),

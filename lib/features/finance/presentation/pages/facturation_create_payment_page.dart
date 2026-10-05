@@ -740,6 +740,7 @@ class _FacturationCreatePaymentViewState
               '${classLabel(widget.intent, l10n)}',
           firstName: widget.intent.firstName,
           lastName: widget.intent.lastName,
+          studentId: widget.intent.studentId,
           fallbackRoute: AppRoutesNames.facturationDetailPath(
             studentId: widget.intent.studentId,
             academicYearId: widget.intent.academicYearId,

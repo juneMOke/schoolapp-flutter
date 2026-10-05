@@ -43,6 +43,7 @@ import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_
 import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/boutique_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_offline_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/student_photo_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/expense_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/documents_offline_di.dart';
 import 'package:uuid/uuid.dart';
@@ -318,6 +319,7 @@ void registerOfflineModules(GetIt getIt) {
   registerClassPresence(getIt); // Présences des élèves v2 — registre d'appel
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
   registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
+  registerStudentPhoto(getIt); // Photo de l'élève — après l'inscription
 }
 
 /// Plan de synchronisation par profil (ADR-015 F2).

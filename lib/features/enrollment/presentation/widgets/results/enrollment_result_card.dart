@@ -66,6 +66,7 @@ class EnrollmentResultCard extends StatelessWidget {
         firstName: enrollment.student.firstName,
         lastName: enrollment.student.lastName,
         personId: enrollment.student.id,
+        studentPhotoOf: enrollment.student.id,
         size: core_avatar.AvatarSize.lg,
         variant: _avatarVariantForStatus(status),
       ),

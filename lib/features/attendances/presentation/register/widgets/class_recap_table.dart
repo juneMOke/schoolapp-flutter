@@ -85,6 +85,7 @@ class _RecapRow extends StatelessWidget {
               firstName: student.firstName,
               lastName: student.lastName,
               personId: student.id,
+              studentPhotoOf: student.id,
               size: AppDimensions.presenceMarkIconButtonSize,
             ),
             const SizedBox(width: AppSpacing.sm),

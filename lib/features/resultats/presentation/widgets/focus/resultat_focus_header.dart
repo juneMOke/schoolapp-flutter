@@ -74,6 +74,7 @@ class ResultatFocusHeader extends StatelessWidget {
                 firstName: prenom,
                 lastName: nom,
                 personId: studentId,
+                studentPhotoOf: studentId,
                 size: AvatarSize.lg,
               ),
               ConstrainedBox(

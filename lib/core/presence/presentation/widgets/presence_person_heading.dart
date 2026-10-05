@@ -26,6 +26,7 @@ class PresencePersonHeading extends StatelessWidget {
           personId: row.personId,
           sync: row.sync,
           size: AppDimensions.presenceMarkAvatarSize,
+          studentPhotoOf: row.showsStudentPhoto ? row.personId : null,
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(

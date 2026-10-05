@@ -51,6 +51,7 @@ class DisciplinaryStudentCompactHeader extends StatelessWidget {
           firstName: firstName,
           lastName: lastName,
           personId: studentId,
+          studentPhotoOf: studentId,
           size: AppDimensions.spacingXL + AppDimensions.spacingM,
         ),
         const SizedBox(width: AppDimensions.spacingM),

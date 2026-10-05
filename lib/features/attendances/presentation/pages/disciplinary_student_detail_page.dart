@@ -169,6 +169,7 @@ class _DisciplinaryStudentDetailPageState
               firstName: intent.studentFirstName,
               lastName: intent.studentLastName,
               fallbackRoute: AppRoutesNames.presences,
+              studentId: intent.studentId,
               trailing: DisciplinaryOpenCasesAppBarPill(
                 openCasesCount: openCount,
                 openLabel: l10n.dossierOpenCasesChip(openCount ?? 0),

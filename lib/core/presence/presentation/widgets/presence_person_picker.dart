@@ -37,6 +37,9 @@ class PresencePersonPicker<T extends Object> extends StatelessWidget {
   final bool Function(T value, String query) matches;
   final ValueChanged<T> onSelected;
 
+  /// Les personnes sont des élèves : leur photo remplace les initiales.
+  final bool showsStudentPhotos;
+
   const PresencePersonPicker({
     super.key,
     required this.entries,
@@ -45,6 +48,7 @@ class PresencePersonPicker<T extends Object> extends StatelessWidget {
     required this.placeholder,
     required this.matches,
     required this.onSelected,
+    this.showsStudentPhotos = false,
   });
 
   @override
@@ -99,6 +103,7 @@ class PresencePersonPicker<T extends Object> extends StatelessWidget {
                         personId: entry.id,
                         sync: RecordSyncState.synced,
                         size: AppDimensions.presenceMarkIconButtonSize,
+                        studentPhotoOf: showsStudentPhotos ? entry.id : null,
                       ),
                       title: Text(entry.fullName),
                       subtitle: entry.detail == null
