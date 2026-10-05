@@ -22,6 +22,10 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
   /// [EnrollmentJourneyAppBar.action]).
   final Widget? action;
 
+  /// L'avatar de l'élève dans l'en-tête (voir
+  /// [EnrollmentJourneyAppBar.avatar]).
+  final Widget? avatar;
+
   const EnrollmentJourneyScaffold({
     super.key,
     required this.modeLabel,
@@ -30,6 +34,7 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
     required this.body,
     this.onExitRequested,
     this.action,
+    this.avatar,
   });
 
   @override
@@ -43,6 +48,7 @@ class EnrollmentJourneyScaffold extends StatelessWidget {
         totalSteps: EnrollmentWizardStep.values.length,
         onExitRequested: onExitRequested,
         action: action,
+        avatar: avatar,
       ),
       body: body,
     );

@@ -18,6 +18,7 @@ class EnrollmentResultsBarActions extends StatelessWidget {
   final ValueChanged<EnrollmentListingViewMode>? onViewModeChanged;
   final EnrollmentListingViewMode currentViewMode;
   final Future<void> Function()? onRefresh;
+  final List<Widget> extraActions;
 
   const EnrollmentResultsBarActions({
     super.key,
@@ -28,6 +29,7 @@ class EnrollmentResultsBarActions extends StatelessWidget {
     required this.onViewModeChanged,
     required this.currentViewMode,
     required this.onRefresh,
+    this.extraActions = const [],
   });
 
   bool get _hasStructuredSort =>
@@ -46,6 +48,7 @@ class EnrollmentResultsBarActions extends StatelessWidget {
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
+        ...extraActions,
         if (_hasStructuredSort)
           Row(
             mainAxisSize: MainAxisSize.min,

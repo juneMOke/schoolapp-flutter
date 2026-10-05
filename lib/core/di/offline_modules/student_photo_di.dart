@@ -1,4 +1,19 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/capture/camera/camera_viewfinder_gateway.dart';
+import 'package:school_app_flutter/core/capture/camera/platform_camera_viewfinder_gateway.dart';
+import 'package:school_app_flutter/core/capture/document_capture_gateway.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
+import 'package:school_app_flutter/features/student_photo/data/photo/image_square_photo_encoder.dart';
+import 'package:school_app_flutter/features/student_photo/data/roster/classes_roster_source.dart';
+import 'package:school_app_flutter/features/student_photo/domain/services/class_roster_source.dart';
+import 'package:school_app_flutter/features/student_photo/domain/services/square_photo_encoder.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/student_photo_capture_cubit.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/edit/student_photo_draft_cubit.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/edit/student_photo_edit_cubit.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/session/photo_network_cubit.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_cubit.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
@@ -100,6 +115,47 @@ void registerStudentPhoto(GetIt getIt) {
       loadIndex: getIt<LoadStudentPhotoIndexUseCase>(),
       read: getIt<ReadStudentPhotoUseCase>(),
     ),
+  );
+
+  // ── Prise de vue (modale, séance) ───────────────────────────────────────
+  getIt.registerLazySingleton<CameraViewfinderGateway>(
+    PlatformCameraViewfinderGateway.new,
+  );
+  getIt.registerLazySingleton<SquarePhotoEncoder>(
+    () => const ImageSquarePhotoEncoder(),
+  );
+  getIt.registerLazySingleton<ClassRosterSource>(
+    () => ClassesRosterSource(
+      classrooms: getIt<GetOfflineClassroomsUseCase>(),
+      roster: getIt<GetOfflineRosterUseCase>(),
+    ),
+  );
+  getIt.registerFactory<StudentPhotoCaptureCubit>(
+    () => StudentPhotoCaptureCubit(
+      cameras: getIt<CameraViewfinderGateway>(),
+      files: getIt<DocumentCaptureGateway>(),
+      encoder: getIt<SquarePhotoEncoder>(),
+      save: getIt<SaveStudentPhotoUseCase>(),
+    ),
+  );
+  getIt.registerFactory<StudentPhotoEditCubit>(
+    () => StudentPhotoEditCubit(remove: getIt<RemoveStudentPhotoUseCase>()),
+  );
+  getIt.registerFactory<StudentPhotoDraftCubit>(
+    () => StudentPhotoDraftCubit(save: getIt<SaveStudentPhotoUseCase>()),
+  );
+  getIt.registerFactory<PhotoSessionCubit>(
+    () => PhotoSessionCubit(
+      rosters: getIt<ClassRosterSource>(),
+      index: getIt<LoadStudentPhotoIndexUseCase>(),
+      save: getIt<SaveStudentPhotoUseCase>(),
+      encoder: getIt<SquarePhotoEncoder>(),
+      cameras: getIt<CameraViewfinderGateway>(),
+      files: getIt<DocumentCaptureGateway>(),
+    ),
+  );
+  getIt.registerFactory<PhotoNetworkCubit>(
+    () => PhotoNetworkCubit(getIt<ConnectivityService>()),
   );
 
   getIt<PullCoordinator>().registerHandler(

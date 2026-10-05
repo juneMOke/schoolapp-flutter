@@ -444,6 +444,9 @@ const Map<String, ModuleAccess> kStandaloneRouteAccess = {
   // `school.provisioning.write`, jamais `platform.school.provision` : cf.
   // [Perm.schoolProvisioningWrite].
   'configuration': ModuleAccess([Perm.schoolProvisioningWrite]),
+  // La séance photo : plein écran hors coquille, au-dessus des listes
+  // d'inscription. Un lien profond n'y mène pas sans le droit de photographier.
+  'student-photo': kStudentPhotoWriteAccess,
 };
 
 /// Vrai si [location] est atteignable avec [permissions].

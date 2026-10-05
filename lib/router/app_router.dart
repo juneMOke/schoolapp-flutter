@@ -60,6 +60,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_o
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final AuthBloc _authBloc;
@@ -304,6 +305,11 @@ class AppRouter {
           builder: (context, state) => const ConfigurationSettingsPage(),
         ),
       ],
+    ),
+    GoRoute(
+      path: AppRoutesNames.photoSessionPath,
+      name: AppRoutesNames.photoSession,
+      builder: (context, state) => const PhotoSessionPage(),
     ),
     GoRoute(
       path: '/home',

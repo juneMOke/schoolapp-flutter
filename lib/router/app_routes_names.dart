@@ -4,6 +4,10 @@ class AppRoutesNames {
   static const String splash = 'splash';
   static const String login = 'login';
   static const String home = 'home';
+
+  /// La séance photo d'une classe, plein écran (hors coquille).
+  static const String photoSession = 'photo-session';
+  static const String photoSessionPath = '/student-photo/session';
   static const String forgotPasswordEmail = 'forgot-password-email';
   static const String forgotPasswordOtp = 'forgot-password-otp';
   static const String forgotPasswordReset = 'forgot-password-reset';

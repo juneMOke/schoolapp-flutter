@@ -25,6 +25,10 @@ class EnrollmentJourneyAppBar extends StatelessWidget
   /// porte pas sur ce qu'on regarde, mais sur le dossier entier.
   final Widget? action;
 
+  /// L'avatar de l'élève, posé devant son nom (la photo, modifiable selon
+  /// les droits). Absent : le nom seul.
+  final Widget? avatar;
+
   const EnrollmentJourneyAppBar({
     super.key,
     required this.modeLabel,
@@ -33,6 +37,7 @@ class EnrollmentJourneyAppBar extends StatelessWidget
     required this.totalSteps,
     this.onExitRequested,
     this.action,
+    this.avatar,
   });
 
   @override
@@ -80,6 +85,10 @@ class EnrollmentJourneyAppBar extends StatelessWidget
                               onExitRequested ?? () => _defaultExit(context),
                         ),
                         const SizedBox(width: AppSpacing.md),
+                        if (avatar != null) ...[
+                          avatar!,
+                          const SizedBox(width: AppSpacing.md),
+                        ],
                         Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

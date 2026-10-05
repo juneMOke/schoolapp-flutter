@@ -32,6 +32,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_navigation_helper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/photo/enrollment_photo_avatar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/photo/enrollment_photo_draft_scope.dart';
 
 class EnrollmentDetailPage extends StatefulWidget {
   final EnrollmentDetailIntent intent;
@@ -430,6 +432,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           modeLabel: _buildJourneyModeLabel(l10n),
           studentDisplayName: _localDraftDisplayName(detail, l10n),
           currentStep: _currentStep,
+          avatar: enrollmentPhotoAvatar(detail),
           onExitRequested: hasUnvalidatedCorrection
               ? _confirmReeditionExit
               : null,
@@ -535,22 +538,28 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           }
           final detail = _resolveLocalDraftDetail(academicYearState.context);
           _draftFormShown = detail != null;
-          return _wrapWithExitGuard(
-            EnrollmentJourneyScaffold(
-              modeLabel: _buildJourneyModeLabel(l10n),
-              studentDisplayName: _localDraftDisplayName(detail, l10n),
-              currentStep: _currentStep,
-              onExitRequested: _onExitRequested,
-              body: detail == null
-                  ? _buildLocalDraftPending()
-                  : EnrollmentDetailContentShell(
-                      child: EnrollmentStepperScope(
-                        enrollmentDetail: detail,
-                        detailIntent: _effectiveIntent,
-                        detailPolicy: _policy,
-                        onStepChanged: _onStepChanged,
+          // Nouvelle inscription : la photo attend en brouillon que l'étape 1
+          // écrive l'élève ; ailleurs, l'avatar de l'en-tête la gère.
+          return EnrollmentPhotoDraftScope(
+            enabled: _isNewOffline,
+            child: _wrapWithExitGuard(
+              EnrollmentJourneyScaffold(
+                modeLabel: _buildJourneyModeLabel(l10n),
+                studentDisplayName: _localDraftDisplayName(detail, l10n),
+                currentStep: _currentStep,
+                avatar: _isNewOffline ? null : enrollmentPhotoAvatar(detail),
+                onExitRequested: _onExitRequested,
+                body: detail == null
+                    ? _buildLocalDraftPending()
+                    : EnrollmentDetailContentShell(
+                        child: EnrollmentStepperScope(
+                          enrollmentDetail: detail,
+                          detailIntent: _effectiveIntent,
+                          detailPolicy: _policy,
+                          onStepChanged: _onStepChanged,
+                        ),
                       ),
-                    ),
+              ),
             ),
           );
         },
