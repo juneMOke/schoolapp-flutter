@@ -118,6 +118,9 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
   'students': TombstoneTarget(
     table: 'students',
     syncStatusColumn: 'sync_status',
+    // La photo part avec l'élève : le serveur la purge en cascade et ne la
+    // redescendra pas.
+    children: {'student_photos': 'student_id'},
   ),
   'parents': TombstoneTarget(table: 'parents', syncStatusColumn: 'sync_status'),
   // Le couple (élève, parent) tient dans (entityId, scopeKey) faute de clé de

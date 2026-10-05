@@ -142,6 +142,13 @@ const ModuleAccess kAttendanceAmendAccess = ModuleAccess([
 /// silence, sur une saisie que l'économe croit enregistrée.
 const ModuleAccess kExpenseWriteAccess = ModuleAccess([Perm.expenseWrite]);
 
+/// Prendre, remplacer ou retirer la photo d'un élève
+/// (`PUT`/`DELETE /sync/students/{id}/photo`). Semée au secrétariat et à la
+/// direction ; masquée sans elle, comme toute écriture qui part par l'outbox.
+const ModuleAccess kStudentPhotoWriteAccess = ModuleAccess([
+  Perm.studentPhotoWrite,
+]);
+
 /// Créer ou modifier la fiche d'un agent (`POST /sync/staff-members`). Poser
 /// un contrat et verser une pièce ont leurs propres droits.
 const ModuleAccess kStaffWriteAccess = ModuleAccess([Perm.hrStaffWrite]);
@@ -229,6 +236,7 @@ const Map<String, ModuleAccess> kGuardedWriteActions = {
   'répartir ou affecter des élèves': ModuleAccess([Perm.classroomWrite]),
   'enregistrer une dépense': kExpenseWriteAccess,
   'retirer une dépense': kExpenseWithdrawAccess,
+  'photographier un élève': kStudentPhotoWriteAccess,
 };
 
 /// **Source unique** du mapping sous-module → permissions requises.

@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 /// L'empreinte d'un livre sur le fil (`expected` d'un geste, `server` d'un
 /// refus `PAYROLL_STALE`) et dans la base (même forme, JSON).

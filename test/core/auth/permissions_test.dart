@@ -77,6 +77,7 @@ void main() {
     Perm.schoolProvisioningWrite: 'school.provisioning.write',
     Perm.studentRead: 'student.read',
     Perm.studentWrite: 'student.write',
+    Perm.studentPhotoWrite: 'student.photo.write',
     Perm.teacherRead: 'teacher.read',
     Perm.teacherWrite: 'teacher.write',
     Perm.scheduleRead: 'schedule.read',
@@ -88,7 +89,7 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 72 permissions (v1.8 du catalogue serveur + RH)', () {
+  test('le catalogue compte 73 permissions (v1.8 du catalogue serveur + RH)', () {
     // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
     // le prendre. Un ajout, pas un renommage — aucune ligne de
     // `school_role_permission` ne référence la valeur neuve, donc rien à
@@ -144,7 +145,10 @@ void main() {
     // 71 → 72 : `hr.pay.manage`, qui garde valider, renvoyer et rouvrir la
     // paie, et ses réglages (DIRECTOR, SUPER_ADMIN). ⚠️ Déclaré avant que le
     // serveur ne le sème (lot back P0).
-    expect(Perm.values, hasLength(72));
+    //
+    // 72 → 73 : `student.photo.write`, prendre ou retirer la photo d'un élève
+    // (SECRETARY, DIRECTOR, SUPER_ADMIN — migration back V161).
+    expect(Perm.values, hasLength(73));
   });
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule

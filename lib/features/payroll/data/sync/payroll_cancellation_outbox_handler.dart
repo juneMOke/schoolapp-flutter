@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_cancellat
 import 'package:school_app_flutter/features/payroll/data/local/payroll_outbox.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellation_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_outbox_handler.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 

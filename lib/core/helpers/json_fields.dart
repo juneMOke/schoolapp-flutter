@@ -1,7 +1,7 @@
 /// Lecture tolérante des champs d'une ligne descendue : une valeur absente,
 /// vide ou mal typée devient `null`, jamais une exception. C'est à l'appelant
 /// de décider quels champs sont indispensables.
-extension StaffJsonFields on Map<dynamic, dynamic> {
+extension JsonFields on Map<dynamic, dynamic> {
   /// Chaîne rognée, `null` si absente, vide ou d'un autre type.
   String? text(String key) {
     final value = this[key];

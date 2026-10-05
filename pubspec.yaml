@@ -143,8 +143,9 @@ dependencies:
   # JPEG 82) : une photo de 12 Mpx dépasserait sinon les 5 Mo du serveur.
   # `file_picker` pour les PDF seuls, qui ne se réduisent pas.
   #
-  # Aucune permission ajoutée au manifeste Android : la caméra passe par
-  # l'application photo du système (intent), qui n'en demande pas à la nôtre.
+  # La numérisation de pièces passe par l'application photo du système
+  # (intent) ; la permission CAMERA du manifeste n'est due qu'au viseur de la
+  # photo d'élève, plus bas.
   # iOS exige en revanche `NSCameraUsageDescription` et
   # `NSPhotoLibraryUsageDescription` (ios/Runner/Info.plist).
   #
@@ -152,6 +153,20 @@ dependencies:
   # reste de la capture se teste sans appareil.
   image_picker: ^1.2.3
   file_picker: ^11.0.3
+
+  # ── Photo de l'élève (features/student_photo) ────────────────────────────
+  # `camera` pour le viseur intégré (guide ovale, bascule, séance en rafale) :
+  # l'intent système ne sait ni cadrer ni enchaîner. Android, iOS et web par
+  # la fédération du paquet ; Windows par `camera_windows`, qu'elle n'endosse
+  # pas ; Linux n'a aucun greffon — import de fichier seul.
+  # `image` pour recadrer et ré-encoder le carré JPEG 512 envoyé au serveur,
+  # hors du fil d'interface.
+  #
+  # ⚠️ Ne JAMAIS importer `camera` hors de `CameraViewfinderGateway` : le reste
+  # de la capture se teste sans appareil.
+  camera: ^0.12.0+2
+  camera_windows: ^0.3.0
+  image: ^4.10.1
 
 
 dev_dependencies:

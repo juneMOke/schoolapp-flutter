@@ -2,7 +2,7 @@ import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_fingerprint_json.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 // Les remontées de la paie qui ne sont pas des faits : réglages, éléments
 // variables, gestes du circuit. Chacune telle qu'elle est mise en file.

@@ -3,6 +3,25 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <!--
+      Photo de l'élève : viseur intégré (greffon `camera`, prise de vue dans
+      l'application, guide ovale et séance en rafale).
+
+      Le greffon `camera_android_camerax` déclare aussi RECORD_AUDIO et
+      WRITE_EXTERNAL_STORAGE : l'application ne filme pas et n'écrit rien dans la
+      galerie — la photo reste en mémoire puis dans le magasin chiffré. Elles
+      sont retirées de la fusion. La caméra n'est pas EXIGÉE de l'appareil : une
+      tablette sans caméra s'installe et importe un fichier.
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"
+        tools:node="remove" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:node="remove" />
+    <uses-feature android:name="android.hardware.camera.any"
+        android:required="false"
+        tools:node="replace" />
+
+    <!--
       Impression thermique du ticket provisoire (ADR-012 L2.4).
 
       Le plugin `print_bluetooth_thermal` déclare CINQ permissions dans son

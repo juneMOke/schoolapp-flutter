@@ -197,6 +197,14 @@ enum Perm {
   studentRead('student.read'),
   studentWrite('student.write'),
 
+  /// Prendre, remplacer ou retirer la photo d'un élève.
+  ///
+  /// Séparée de [studentWrite] : la photo se gère hors du dossier, y compris
+  /// sur un dossier verrouillé, et le serveur ne l'accorde qu'au secrétariat
+  /// et à la direction. Le front montre ou cache les gestes sur elle, jamais
+  /// sur le rôle.
+  studentPhotoWrite('student.photo.write'),
+
   // ── Enseignants ───────────────────────────────────────────────────────────
   teacherRead('teacher.read'),
   teacherWrite('teacher.write'),
