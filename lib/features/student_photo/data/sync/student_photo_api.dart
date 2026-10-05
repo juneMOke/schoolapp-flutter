@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/features/student_photo/data/sync/student_photo_dto.dart';
 import 'package:school_app_flutter/features/student_photo/data/sync/student_photo_push_request.dart';
 import 'package:school_app_flutter/features/student_photo/domain/entities/student_photo.dart';
@@ -60,7 +61,10 @@ class StudentPhotoApi {
   ) async {
     final response = await _dio.delete<Object?>(
       _photoPath(AppConstants.syncStudentPhotoEndpoint, request.studentId),
-      queryParameters: {'removedAt': request.at},
+      queryParameters: {
+        'removedAt': request.at,
+        kOutboxAuthorIdKey: request.authorId,
+      },
       options: Options(extra: extras),
     );
     return StudentPhotoStateDto.parseAck(response.data);

@@ -3,10 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
-import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -18,7 +16,11 @@ import 'package:school_app_flutter/features/student_photo/presentation/edit/stud
 import 'package:school_app_flutter/features/student_photo/presentation/edit/student_photo_launcher.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_slot_parts.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/slot_photo.dart';
+
+export 'package:school_app_flutter/features/student_photo/presentation/widgets/slot_photo.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_capture_support.dart';
 
 /// L'emplacement photo de l'étape « Identité » : une colonne de 148 dp à
 /// gauche de la grille, comme sur une carte d'élève.
@@ -40,14 +42,19 @@ class PhotoSlot extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: AppDimensions.photoSlotColumn,
-      child: PermissionGate.access(
-        kStudentPhotoWriteAccess,
-        fallback: _ReadOnlySlot(studentId: studentId),
-        child: BlocProvider(
-          create: (_) => getIt<StudentPhotoEditCubit>(),
-          child: _EditableSlot(studentId: studentId, studentName: studentName),
-        ),
-      ),
+      child: !photoCaptureSupported
+          ? _ReadOnlySlot(studentId: studentId)
+          : PermissionGate.access(
+              kStudentPhotoWriteAccess,
+              fallback: _ReadOnlySlot(studentId: studentId),
+              child: BlocProvider(
+                create: (_) => getIt<StudentPhotoEditCubit>(),
+                child: _EditableSlot(
+                  studentId: studentId,
+                  studentName: studentName,
+                ),
+              ),
+            ),
     );
   }
 }
@@ -175,7 +182,7 @@ class _EditableSlotState extends State<_EditableSlot> {
                       icon: Icons.photo_camera_outlined,
                       onPressed: () => _capture(PhotoCaptureEntry.camera),
                     ),
-                    const SizedBox(height: AppSpacing.xs + 2),
+                    const SizedBox(height: AppDimensions.photoSlotActionGap),
                     EteeloButton.secondary(
                       label: l10n.photoImport,
                       icon: Icons.upload_rounded,
@@ -201,55 +208,6 @@ class _EditableSlotState extends State<_EditableSlot> {
         else if (!view.hasPhoto)
           PhotoSlotCaption(text: l10n.photoOptional),
       ],
-    );
-  }
-}
-
-/// La photo de l'emplacement : un anneau blanc et un filet, autour de la
-/// photo en brouillon ou de celle du registre.
-class SlotPhoto extends StatelessWidget {
-  final String studentId;
-  final Uint8List? draft;
-  final double size;
-
-  const SlotPhoto({
-    super.key,
-    required this.studentId,
-    this.draft,
-    this.size = AppDimensions.photoSlotCircle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final draft = this.draft;
-    // L'anneau garde la proportion de l'emplacement (4 dp pour 128).
-    final ring =
-        size * AppDimensions.photoSlotRing / AppDimensions.photoSlotCircle;
-    final inner = size - 2 * ring;
-    return Container(
-      width: size,
-      height: size,
-      padding: EdgeInsets.all(ring),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: draft != null
-          ? ClipOval(
-              child: Image.memory(
-                draft,
-                width: inner,
-                height: inner,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => SizedBox.square(dimension: inner),
-              ),
-            )
-          : PersonPhotoOr(
-              personId: studentId,
-              size: inner,
-              fallback: SizedBox.square(dimension: inner),
-            ),
     );
   }
 }

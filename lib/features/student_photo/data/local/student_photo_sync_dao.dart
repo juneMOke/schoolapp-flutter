@@ -53,6 +53,7 @@ class StudentPhotoSyncDao {
       table,
       {
         'sha256': state.sha256,
+        'thumbnail_sha256': state.thumbnailSha256,
         'taken_at': state.takenAt,
         'server_updated_at': state.serverUpdatedAt,
         if (settled) ...{
@@ -89,6 +90,31 @@ class StudentPhotoSyncDao {
         'sync_status': RecordSyncState.failed.dbValue,
         'sync_error': reason,
         'sync_error_code': code,
+        'updated_at': nowMs,
+      },
+      where: 'student_id = ?',
+      whereArgs: [request.studentId],
+    );
+    return true;
+  });
+
+  /// L'élève a été purgé côté serveur : le geste s'efface sans refus à
+  /// montrer — il n'y a plus rien à corriger. Rend `false` si un geste plus
+  /// récent l'a déjà remplacé.
+  Future<bool> dropGesture(
+    StudentPhotoPushRequest request, {
+    required int nowMs,
+  }) => _db.transaction((txn) async {
+    if (!await _holds(txn, request)) return false;
+    await txn.update(
+      table,
+      {
+        'pending_op': null,
+        'pending_sha256': null,
+        'pending_at': null,
+        'sync_status': RecordSyncState.synced.dbValue,
+        'sync_error': null,
+        'sync_error_code': null,
         'updated_at': nowMs,
       },
       where: 'student_id = ?',

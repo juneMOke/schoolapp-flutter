@@ -82,7 +82,7 @@ void main() {
       expect(ref.hasPhoto, isTrue);
       expect(ref.isPending, isTrue);
       final bytes = await h.repository.bytesOf(ref, StudentPhotoSize.thumb);
-      expect(bytes.getOrElse(() => null), photoBytes());
+      expect(bytes.getOrElse(() => null)?.bytes, photoBytes());
       verifyNever(() => h.api.download(any(), any(), any()));
     });
 
@@ -223,31 +223,86 @@ void main() {
       expect(await h.blobs.readPending(kStudent, sha), isA<BlobGone>());
     });
 
-    test('404 pour un élève que le poste porte : on attend', () async {
+    test('409 STUDENT_NOT_YET_SYNCED pour un élève que le poste porte : une '
+        'attente, sans consommer de tentative', () async {
       await h.insertStudent(kStudent);
-      await save();
-      when(
-        () => h.api.put(any(), any(), any()),
-      ).thenThrow(httpError(404, detailCode: 'STUDENT_NOT_FOUND'));
-      final result = await h.handler.dispatch(await entry());
-      expect(result.outcome, OutboxDispatchOutcome.blocked);
-      expect((await row()).pendingOp, StudentPhotoOp.put);
-    });
-
-    test('404 pour un élève disparu du poste : photo orpheline, refusée et '
-        'effacée', () async {
       final sha = await save();
       when(
         () => h.api.put(any(), any(), any()),
-      ).thenThrow(httpError(404, detailCode: 'STUDENT_NOT_FOUND'));
+      ).thenThrow(httpError(409, detailCode: 'STUDENT_NOT_YET_SYNCED'));
+      final result = await h.handler.dispatch(await entry());
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+      expect((await row()).pendingOp, StudentPhotoOp.put);
+      expect(await h.blobs.readPending(kStudent, sha), isA<BlobFound>());
+    });
+
+    test(
+      '404 (élève d\'une autre école) : terminal, le geste est refusé',
+      () async {
+        await h.insertStudent(kStudent);
+        final sha = await save();
+        when(() => h.api.put(any(), any(), any())).thenThrow(httpError(404));
+        final result = await h.handler.dispatch(await entry());
+        expect(result.outcome, OutboxDispatchOutcome.failed);
+        expect((await row()).syncState, RecordSyncState.failed);
+        expect(await h.blobs.readPending(kStudent, sha), isA<BlobGone>());
+      },
+    );
+
+    test('410 AGGREGATE_TOMBSTONED : l\'élève purgé, le geste s\'efface sans '
+        'refus à montrer', () async {
+      await h.insertStudent(kStudent);
+      final sha = await save();
+      when(
+        () => h.api.put(any(), any(), any()),
+      ).thenThrow(httpError(410, detailCode: 'AGGREGATE_TOMBSTONED'));
+      final result = await h.handler.dispatch(await entry());
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      final dropped = await row();
+      expect(dropped.pendingOp, isNull);
+      expect(dropped.toRef().rejection, isNull);
+      expect(await h.blobs.readPending(kStudent, sha), isA<BlobGone>());
+    });
+
+    test('un échec sur un geste remplacé pendant l\'envoi est acquitté : le '
+        'nouveau n\'hérite pas de ses tentatives', () async {
+      await save(1);
+      final inFlight = await entry();
+      for (final error in [httpError(503), httpError(422)]) {
+        when(() => h.api.put(any(), any(), any())).thenAnswer((_) async {
+          await save(2, DateTime.now().toUtc());
+          throw error;
+        });
+        final result = await h.handler.dispatch(inFlight);
+        expect(result.outcome, OutboxDispatchOutcome.acked);
+        expect((await row()).syncState, RecordSyncState.pending);
+      }
+    });
+
+    test('élève retiré du poste (registre des disparitions) : l\'entrée '
+        'est soldée et ses octets effacés', () async {
+      final sha = await save();
+      final pending = await entry();
+      await h.db.delete('student_photos');
+      final result = await h.handler.dispatch(pending);
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect(await h.blobs.readPending(kStudent, sha), isA<BlobGone>());
+    });
+
+    test('409 pour un élève disparu du poste : photo orpheline, refusée et '
+        'effacée — rien ne viendra la débloquer', () async {
+      final sha = await save();
+      when(
+        () => h.api.put(any(), any(), any()),
+      ).thenThrow(httpError(409, detailCode: 'STUDENT_NOT_YET_SYNCED'));
       final result = await h.handler.dispatch(await entry());
       expect(result.outcome, OutboxDispatchOutcome.failed);
       expect(await h.blobs.readPending(kStudent, sha), isA<BlobGone>());
     });
 
-    test('transport, 5xx, 401 et 429 se rejouent', () async {
+    test('transport, 5xx, 401, 409 sans code et 429 se rejouent', () async {
       await save();
-      for (final status in [null, 503, 401, 429]) {
+      for (final status in [null, 503, 401, 409, 429]) {
         when(() => h.api.put(any(), any(), any())).thenThrow(httpError(status));
         final result = await h.handler.dispatch(await entry());
         expect(result.outcome, OutboxDispatchOutcome.retry, reason: '$status');

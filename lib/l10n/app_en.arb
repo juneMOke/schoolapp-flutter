@@ -8647,5 +8647,6 @@
   "photoSessionPendingWarning": "{count, plural, =1{1 photo waiting to be sent} other{{count} photos waiting to be sent}} — do not clear this device's cache.",
   "@photoSessionPendingWarning": {"placeholders": {"count": {"type": "int"}}},
   "photoSessionLoadErrorTitle": "Classes unavailable",
-  "photoSessionLoadErrorMessage": "This year's classes could not be read on this device."
+  "photoSessionLoadErrorMessage": "This year's classes could not be read on this device.",
+  "photoCropUnavailable": "The original photo is not on this device: reconnect to crop it."
 }

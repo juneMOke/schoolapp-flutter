@@ -5,26 +5,6 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/student_photo/domain/entities/photo_session.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/camera_opener.dart';
 
-/// Une classe au choix, avec ses élèves et combien n'ont pas de photo.
-class SessionClassSummary extends Equatable {
-  final SessionClass klass;
-  final List<SessionStudent> students;
-  final Set<String> withPhoto;
-
-  const SessionClassSummary({
-    required this.klass,
-    required this.students,
-    required this.withPhoto,
-  });
-
-  int get total => students.length;
-  int get missing => students.where((s) => !withPhoto.contains(s.id)).length;
-  bool get complete => missing == 0;
-
-  @override
-  List<Object?> get props => [klass, students, withPhoto];
-}
-
 sealed class PhotoSessionState extends Equatable {
   const PhotoSessionState();
 
@@ -123,6 +103,7 @@ class SessionShooting extends PhotoSessionState {
     List<SessionItem>? queue,
     int? index,
     CameraOpening? camera,
+    bool clearCamera = false,
     SessionFlash? flash,
     bool clearFlash = false,
     bool? busy,
@@ -130,7 +111,7 @@ class SessionShooting extends PhotoSessionState {
     klass: klass,
     queue: queue ?? this.queue,
     index: index ?? this.index,
-    camera: camera ?? this.camera,
+    camera: clearCamera ? null : (camera ?? this.camera),
     flash: clearFlash ? null : (flash ?? this.flash),
     busy: busy ?? this.busy,
   );

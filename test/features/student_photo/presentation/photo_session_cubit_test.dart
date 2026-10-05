@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/student_photo/domain/entities/photo_
 import 'package:school_app_flutter/features/student_photo/domain/entities/student_photo.dart';
 import 'package:school_app_flutter/features/student_photo/domain/repositories/student_photo_repository.dart';
 import 'package:school_app_flutter/features/student_photo/domain/services/class_roster_source.dart';
+import 'package:school_app_flutter/features/student_photo/domain/usecases/load_photo_session_classes_use_case.dart';
 import 'package:school_app_flutter/features/student_photo/domain/usecases/student_photo_use_cases.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/camera_opener.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_cubit.dart';
@@ -79,8 +80,10 @@ void main() {
       ),
     ).thenAnswer((_) async => const Right(unit));
     cubit = PhotoSessionCubit(
-      rosters: _Rosters(),
-      index: LoadStudentPhotoIndexUseCase(repository),
+      classes: LoadPhotoSessionClassesUseCase(
+        rosters: _Rosters(),
+        photos: repository,
+      ),
       save: SaveStudentPhotoUseCase(repository),
       encoder: encoder,
       cameras: cameras,

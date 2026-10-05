@@ -313,7 +313,7 @@ class _BeneficiaryChip extends StatelessWidget {
     return InputChip(
       avatar: PersonPhotoOr(
         personId: beneficiary.studentId,
-        size: 22,
+        size: AppDimensions.boutiqueBeneficiaryChipAvatar,
         fallback: CircleAvatar(
           radius: 11,
           backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.12),

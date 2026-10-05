@@ -9,24 +9,10 @@ import 'package:school_app_flutter/features/student_photo/domain/entities/crop_w
 import 'package:school_app_flutter/features/student_photo/domain/services/square_photo_encoder.dart';
 import 'package:school_app_flutter/features/student_photo/domain/usecases/student_photo_use_cases.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/camera_opener.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/photo_capture_target.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/student_photo_capture_state.dart';
 
-/// Ce que devient la photo validée : enregistrée pour un élève qui existe, ou
-/// rendue en brouillon à une nouvelle inscription (l'élève n'existe pas
-/// encore sur le poste).
-sealed class PhotoCaptureTarget {
-  const PhotoCaptureTarget();
-}
-
-class SaveForStudent extends PhotoCaptureTarget {
-  final String studentId;
-
-  const SaveForStudent(this.studentId);
-}
-
-class KeepAsDraft extends PhotoCaptureTarget {
-  const KeepAsDraft();
-}
+export 'package:school_app_flutter/features/student_photo/presentation/capture/photo_capture_target.dart';
 
 /// La modale de capture : caméra, import, recadrage, puis enregistrement.
 ///
@@ -95,10 +81,31 @@ class StudentPhotoCaptureCubit extends Cubit<StudentPhotoCaptureState> {
         emit(CaptureLive(session: session, canSwitch: canSwitch));
       case CameraUnavailable(:final reason):
         if (!isClosed) emit(CaptureBlocked(reason));
+      case CameraSuperseded():
+        // Une ouverture plus récente montrera son propre flux.
+        break;
     }
   }
 
   Future<void> _closeCamera() async => _opener?.close();
+
+  bool _suspended = false;
+
+  /// L'application passe en arrière-plan : la caméra est rendue au système
+  /// (le paquet `camera` laisse ce soin à l'application).
+  Future<void> suspendCamera() async {
+    if (state is! CaptureLive && state is! CaptureStarting) return;
+    _suspended = true;
+    await _opener?.release();
+    if (!isClosed) emit(const CaptureStarting());
+  }
+
+  /// Retour au premier plan : le flux rendu à l'arrière-plan se rouvre.
+  Future<void> resumeCamera() async {
+    if (!_suspended) return;
+    _suspended = false;
+    if (!isClosed && state is CaptureStarting) await _openCamera();
+  }
 
   /// Passe à la caméra suivante (avant ↔ arrière).
   Future<void> switchCamera() async {
@@ -124,11 +131,14 @@ class StudentPhotoCaptureCubit extends Cubit<StudentPhotoCaptureState> {
     try {
       bytes = await current.session.capture();
     } catch (_) {
+      if (isClosed || state != current.copyShooting()) return;
       emit(CaptureLive(session: current.session, canSwitch: current.canSwitch));
       return;
     }
+    if (isClosed) return;
     final mirror = current.session.lens.mirrors;
-    await _closeCamera();
+    // Le recadrage remplace le viseur AVANT que la caméra ne s'éteigne : un
+    // flux refermé encore à l'écran lèverait au premier rebuild.
     await _review(
       bytes,
       origin: PhotoOrigin.camera,
@@ -136,29 +146,25 @@ class StudentPhotoCaptureCubit extends Cubit<StudentPhotoCaptureState> {
       takenAt: takenAt,
       guided: true,
     );
+    await _closeCamera();
   }
 
   /// Importe une image du poste. Un renoncement laisse l'écran tel quel.
   Future<void> importFile() async {
-    final RawCapture? raw;
+    RawCapture? raw;
     try {
       raw = await _files.acquire(DocumentCaptureMode.importImage);
-    } on DocumentTooLargeException {
-      await _closeCamera();
-      emit(const CaptureBadFile());
-      return;
     } catch (_) {
-      await _closeCamera();
-      emit(const CaptureBadFile());
-      return;
+      // Trop lourd avant lecture, ou lecture ratée : le même refus.
+      raw = RawCapture(bytes: Uint8List(maxImportBytes + 1));
     }
     if (raw == null || isClosed) return;
-    await _closeCamera();
     if (raw.bytes.length > maxImportBytes) {
       emit(const CaptureBadFile());
-      return;
+    } else {
+      await _review(raw.bytes, origin: PhotoOrigin.file, mirror: false);
     }
-    await _review(raw.bytes, origin: PhotoOrigin.file, mirror: false);
+    await _closeCamera();
   }
 
   Future<void> _review(
@@ -252,7 +258,7 @@ class StudentPhotoCaptureCubit extends Cubit<StudentPhotoCaptureState> {
 
   @override
   Future<void> close() async {
-    await _closeCamera();
+    await _opener?.release();
     return super.close();
   }
 }

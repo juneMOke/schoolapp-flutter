@@ -21,6 +21,8 @@ import 'package:school_app_flutter/features/student/domain/entities/student_deta
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../student_photo/student_photo_test_module.dart';
+
 class _MockStudentBloc extends Mock implements StudentBloc {}
 
 class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
@@ -99,6 +101,7 @@ void main() {
   });
 
   setUp(() {
+    addTearDown(registerInertStudentPhotoModule());
     studentBloc = _MockStudentBloc();
     enrollmentBloc = _MockEnrollmentBloc();
     draftBloc = _MockDraftBloc();

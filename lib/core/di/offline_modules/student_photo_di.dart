@@ -37,8 +37,10 @@ import 'package:school_app_flutter/features/student_photo/data/sync/student_phot
 import 'package:school_app_flutter/features/student_photo/data/sync/student_photo_pull_handler.dart';
 import 'package:school_app_flutter/features/student_photo/data/sync/student_photo_puller.dart';
 import 'package:school_app_flutter/features/student_photo/domain/repositories/student_photo_repository.dart';
+import 'package:school_app_flutter/features/student_photo/domain/usecases/load_photo_session_classes_use_case.dart';
 import 'package:school_app_flutter/features/student_photo/domain/usecases/student_photo_use_cases.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_removal_hooks.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// La photo de l'élève : sa table, son magasin chiffré, son flux, son envoi.
@@ -76,6 +78,13 @@ void registerStudentPhoto(GetIt getIt) {
       ),
     ),
   );
+  // La tombe d'un élève emporte sa ligne photo (table fille) : ses copies
+  // d'affichage, elles, dorment sur disque et l'avatar les montrerait encore.
+  // Les octets d'un geste en attente partent à l'envoi (ligne absente).
+  getIt<TombstoneRemovalHooks>().add('students', (studentId) async {
+    await getIt<StudentPhotoBlobs>().deleteCaches(studentId);
+    getIt<StudentPhotoChangeBus>().emit({studentId});
+  });
   getIt.registerLazySingleton<StudentPhotoFetcher>(
     () => StudentPhotoFetcher(
       api: getIt<StudentPhotoApi>(),
@@ -130,6 +139,12 @@ void registerStudentPhoto(GetIt getIt) {
       roster: getIt<GetOfflineRosterUseCase>(),
     ),
   );
+  getIt.registerFactory<LoadPhotoSessionClassesUseCase>(
+    () => LoadPhotoSessionClassesUseCase(
+      rosters: getIt<ClassRosterSource>(),
+      photos: getIt<StudentPhotoRepository>(),
+    ),
+  );
   getIt.registerFactory<StudentPhotoCaptureCubit>(
     () => StudentPhotoCaptureCubit(
       cameras: getIt<CameraViewfinderGateway>(),
@@ -146,8 +161,7 @@ void registerStudentPhoto(GetIt getIt) {
   );
   getIt.registerFactory<PhotoSessionCubit>(
     () => PhotoSessionCubit(
-      rosters: getIt<ClassRosterSource>(),
-      index: getIt<LoadStudentPhotoIndexUseCase>(),
+      classes: getIt<LoadPhotoSessionClassesUseCase>(),
       save: getIt<SaveStudentPhotoUseCase>(),
       encoder: getIt<SquarePhotoEncoder>(),
       cameras: getIt<CameraViewfinderGateway>(),

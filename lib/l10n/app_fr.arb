@@ -8958,5 +8958,6 @@
   "photoSessionResume": "Reprendre absents & passés ({count})",
   "photoSessionPendingWarning": "{count, plural, =1{1 photo en attente d'envoi} other{{count} photos en attente d'envoi}} — ne videz pas le cache de ce poste.",
   "photoSessionLoadErrorTitle": "Classes indisponibles",
-  "photoSessionLoadErrorMessage": "Les classes de l'année n'ont pas pu être lues sur ce poste."
+  "photoSessionLoadErrorMessage": "Les classes de l'année n'ont pas pu être lues sur ce poste.",
+  "photoCropUnavailable": "La photo d'origine n'est pas sur ce poste : reconnectez-vous pour la recadrer."
 }

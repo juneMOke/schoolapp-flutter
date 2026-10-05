@@ -14243,4 +14243,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get photoSessionLoadErrorMessage =>
       'Les classes de l\'année n\'ont pas pu être lues sur ce poste.';
+
+  @override
+  String get photoCropUnavailable =>
+      'La photo d\'origine n\'est pas sur ce poste : reconnectez-vous pour la recadrer.';
 }

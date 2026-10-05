@@ -50,7 +50,8 @@ void main() {
 
   void thumbnailServed() =>
       when(() => h.api.download(any(), any(), any())).thenAnswer(
-        (_) async => StudentPhotoDownload(bytes: photoBytes(3), etag: 'sha-a'),
+        (_) async =>
+            StudentPhotoDownload(bytes: photoBytes(3), etag: 'thumb-a'),
       );
 
   test('la descente range la photo et précharge sa vignette', () async {
@@ -58,6 +59,7 @@ void main() {
       {
         'studentId': kStudent,
         'sha256': 'SHA-A',
+        'thumbnailSha256': 'THUMB-A',
         'takenAt': '2026-10-05T08:14:03Z',
       },
     ]);
@@ -68,6 +70,8 @@ void main() {
 
     expect(result.isRight(), isTrue);
     expect((await row()).sha256, 'sha-a');
+    expect((await row()).servedShaOf(StudentPhotoSize.thumb), 'thumb-a');
+    // Marquée de la VERSION de la photo, confrontée à l'ETag de sa taille.
     expect((await row()).cachedShaOf(StudentPhotoSize.thumb), 'sha-a');
     expect(
       await h.blobs.readCache(kStudent, StudentPhotoSize.thumb),
@@ -141,7 +145,13 @@ void main() {
   group('l\'affichage', () {
     setUp(() async {
       await h.photos.applyPulled(
-        [const StudentPhotoStateDto(studentId: kStudent, sha256: 'sha-a')],
+        [
+          const StudentPhotoStateDto(
+            studentId: kStudent,
+            sha256: 'sha-a',
+            thumbnailSha256: 'thumb-a',
+          ),
+        ],
         schoolId: kSchool,
         nowMs: 1,
       );
@@ -149,7 +159,10 @@ void main() {
 
     Future<Object?> read(StudentPhotoSize size) async {
       final ref = (await row()).toRef();
-      return (await h.repository.bytesOf(ref, size)).getOrElse(() => null);
+      return (await h.repository.bytesOf(
+        ref,
+        size,
+      )).getOrElse(() => null)?.bytes;
     }
 
     test('télécharge une fois, puis relit la copie', () async {
@@ -164,6 +177,15 @@ void main() {
     test('une copie d\'une autre empreinte n\'est pas gardée', () async {
       when(() => h.api.download(any(), any(), any())).thenAnswer(
         (_) async => StudentPhotoDownload(bytes: photoBytes(3), etag: 'sha-z'),
+      );
+      expect(await read(StudentPhotoSize.thumb), photoBytes(3));
+      expect((await row()).cachedShaOf(StudentPhotoSize.thumb), isNull);
+    });
+
+    test('la vignette se confronte à SON empreinte, pas à celle de la grande '
+        'photo', () async {
+      when(() => h.api.download(any(), any(), any())).thenAnswer(
+        (_) async => StudentPhotoDownload(bytes: photoBytes(3), etag: 'sha-a'),
       );
       expect(await read(StudentPhotoSize.thumb), photoBytes(3));
       expect((await row()).cachedShaOf(StudentPhotoSize.thumb), isNull);
@@ -198,6 +220,37 @@ void main() {
           sha256: 'sha-a',
         );
         expect(await read(StudentPhotoSize.full), photoBytes(7));
+      },
+    );
+
+    test(
+      'exact : hors ligne, la vignette ne tient pas lieu de grande photo',
+      () async {
+        when(
+          () => h.api.download(any(), any(), any()),
+        ).thenThrow(httpError(null));
+        await h.blobs.writeCache(
+          kStudent,
+          StudentPhotoSize.thumb,
+          photoBytes(7),
+        );
+        await h.photos.markCached(
+          kStudent,
+          StudentPhotoSize.thumb,
+          sha256: 'sha-a',
+        );
+        final ref = (await row()).toRef();
+        final lenient = (await h.repository.bytesOf(
+          ref,
+          StudentPhotoSize.full,
+        )).getOrElse(() => null);
+        expect(lenient?.size, StudentPhotoSize.thumb);
+        final exact = (await h.repository.bytesOf(
+          ref,
+          StudentPhotoSize.full,
+          exact: true,
+        )).getOrElse(() => null);
+        expect(exact, isNull);
       },
     );
 

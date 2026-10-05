@@ -50,7 +50,7 @@ void main() {
     when(() => repository.changes).thenAnswer((_) => changes.stream);
     when(() => repository.loadIndex()).thenAnswer((_) async => Right(index));
     when(
-      () => repository.bytesOf(any(), any()),
+      () => repository.bytesOf(any(), any(), exact: any(named: 'exact')),
     ).thenAnswer((_) async => const Right(null));
     when(
       () => repository.removePhoto(

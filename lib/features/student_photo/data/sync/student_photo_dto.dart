@@ -8,12 +8,16 @@ import 'package:school_app_flutter/core/offline/keyset_page.dart';
 class StudentPhotoStateDto {
   final String studentId;
   final String? sha256;
+
+  /// Empreinte de la vignette 96 px : l'`ETag` de `size=96`.
+  final String? thumbnailSha256;
   final String? takenAt;
   final String? serverUpdatedAt;
 
   const StudentPhotoStateDto({
     required this.studentId,
     this.sha256,
+    this.thumbnailSha256,
     this.takenAt,
     this.serverUpdatedAt,
   });
@@ -26,6 +30,7 @@ class StudentPhotoStateDto {
     return StudentPhotoStateDto(
       studentId: studentId,
       sha256: sha256,
+      thumbnailSha256: raw.text('thumbnailSha256')?.toLowerCase(),
       takenAt: raw.instant('takenAt'),
       serverUpdatedAt: raw.instant('serverUpdatedAt'),
     );

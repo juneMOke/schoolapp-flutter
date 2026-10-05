@@ -1,22 +1,20 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/helpers/initials_helper.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:school_app_flutter/features/student_photo/domain/entities/student_photo.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/student_photo_capture_dialog.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/edit/student_photo_edit_cubit.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/edit/student_photo_launcher.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_avatar_parts.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_capture_support.dart';
 
 /// L'avatar de l'en-tête d'une fiche, qui est lui-même le bouton photo.
 ///
@@ -44,8 +42,9 @@ class PhotoAvatarButton extends StatelessWidget {
     final avatar = PersonPhotoOr(
       personId: studentId,
       size: _size,
-      fallback: _HeaderInitials(firstName: firstName, lastName: lastName),
+      fallback: PhotoHeaderInitials(firstName: firstName, lastName: lastName),
     );
+    if (!photoCaptureSupported) return avatar;
     return PermissionGate.access(
       kStudentPhotoWriteAccess,
       fallback: avatar,
@@ -115,7 +114,7 @@ class _EditableHeaderAvatar extends StatelessWidget {
       valueListenable: getIt<StudentPhotoRegistry>().watch(studentId),
       builder: (context, ref, _) {
         final hasPhoto = ref?.hasPhoto ?? false;
-        final badged = _Badged(avatar: avatar, dashed: !hasPhoto);
+        final badged = PhotoAvatarBadged(avatar: avatar, dashed: !hasPhoto);
         if (!hasPhoto) {
           return IconButton(
             tooltip: l10n.photoAddTooltip,
@@ -188,93 +187,4 @@ class _EditableHeaderAvatar extends StatelessWidget {
       style: danger ? const TextStyle(color: AppColors.error) : null,
     ),
   );
-}
-
-/// L'avatar et son badge caméra terre cuite, Ø max(20, 0,42 × Ø) ; un contour
-/// pointillé or quand il n'y a pas encore de photo.
-class _Badged extends StatelessWidget {
-  final Widget avatar;
-  final bool dashed;
-
-  const _Badged({required this.avatar, required this.dashed});
-
-  @override
-  Widget build(BuildContext context) {
-    const size = AppDimensions.photoHeaderAvatar;
-    final badge = math.max(
-      AppDimensions.photoHeaderBadgeMin,
-      AppDimensions.photoHeaderBadgeRatio * size,
-    );
-    const outline = size + 2 * AppDimensions.photoHeaderOutlineGap;
-    return SizedBox.square(
-      dimension: outline,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          if (dashed)
-            Container(
-              width: outline,
-              height: outline,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.orDoux.withValues(alpha: 0.75),
-                  width: AppDimensions.photoHeaderOutlineStroke,
-                ),
-              ),
-            ),
-          avatar,
-          Positioned(
-            right: -AppDimensions.photoHeaderOutlineStroke,
-            bottom: -AppDimensions.photoHeaderOutlineStroke,
-            child: Container(
-              width: badge,
-              height: badge,
-              decoration: BoxDecoration(
-                color: AppColors.terreCuite,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.bleuProfond,
-                  width: AppDimensions.photoHeaderBadgeBorder,
-                ),
-              ),
-              child: Icon(
-                Icons.photo_camera_rounded,
-                size: badge * 0.5,
-                color: AppColors.onPhotoCapture,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Les initiales sur fond blanc translucide, comme l'avatar des fiches.
-class _HeaderInitials extends StatelessWidget {
-  final String firstName;
-  final String lastName;
-
-  const _HeaderInitials({required this.firstName, required this.lastName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: AppDimensions.photoHeaderAvatar,
-      height: AppDimensions.photoHeaderAvatar,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: AppColors.onPhotoCaptureVeil,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        InitialsHelper.initialsFrom(firstName, lastName),
-        style: AppTypography.labelLarge.copyWith(
-          color: AppColors.onPhotoCapture,
-        ),
-      ),
-    );
-  }
 }

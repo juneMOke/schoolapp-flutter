@@ -12,6 +12,10 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// que ce geste est devenu ; un geste refusé efface `pending_*` et garde la
 /// raison dans `sync_error`.
 ///
+/// `thumbnail_sha256` : l'empreinte de la vignette 96 px, l'`ETag` de
+/// `size=96` — le serveur ré-encode chaque taille, la vignette n'a donc pas
+/// l'empreinte de la grande photo.
+///
 /// `cached_96_sha` / `cached_512_sha` : l'empreinte de la photo dont les octets
 /// sont déjà dans le magasin chiffré, par taille. Différente de `sha256`, la
 /// copie est périmée et se retélécharge.
@@ -22,6 +26,7 @@ const TableSchema studentPhotosTable = TableSchema(
       student_id TEXT PRIMARY KEY,
       school_id TEXT NOT NULL,
       sha256 TEXT,
+      thumbnail_sha256 TEXT,
       taken_at TEXT,
       server_updated_at TEXT,
       pending_op TEXT,

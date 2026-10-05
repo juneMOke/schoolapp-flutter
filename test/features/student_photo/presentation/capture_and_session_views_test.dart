@@ -120,13 +120,13 @@ void main() {
         SessionSetup(
           selectedId: selected,
           onlyMissing: onlyMissing,
-          classes: [
-            const SessionClassSummary(
+          classes: const [
+            SessionClassSummary(
               klass: SessionClass(id: 'c', name: '6e A'),
               students: students,
               withPhoto: {'a'},
             ),
-            const SessionClassSummary(
+            SessionClassSummary(
               klass: SessionClass(id: 'd', name: '5e B'),
               students: students,
               withPhoto: {'a', 'b'},

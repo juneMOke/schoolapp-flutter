@@ -11,30 +11,14 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/student_photo_capture_cubit.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/student_photo_capture_state.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/camera_lifecycle_guard.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/capture_body.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/capture_header.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/photo_capture_outcome.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/photo_capture_decor.dart';
 
-/// Comment la modale s'ouvre.
-enum PhotoCaptureEntry { camera, import }
-
-/// Ce que la modale rend en se fermant.
-sealed class PhotoCaptureOutcome {
-  const PhotoCaptureOutcome();
-}
-
-/// La photo est enregistrée pour l'élève (et partira par l'outbox).
-class PhotoSavedOutcome extends PhotoCaptureOutcome {
-  const PhotoSavedOutcome();
-}
-
-/// Nouvelle inscription : la photo, à garder en brouillon par l'appelant.
-class PhotoDraftOutcome extends PhotoCaptureOutcome {
-  final Uint8List photo;
-  final DateTime takenAt;
-
-  const PhotoDraftOutcome(this.photo, this.takenAt);
-}
+export 'package:school_app_flutter/features/student_photo/presentation/capture/photo_capture_outcome.dart';
 
 /// La modale de capture, partagée par les trois points d'entrée (étape 1,
 /// en-tête de fiche, Résumé). Rendue au niveau racine pour échapper aux
@@ -73,9 +57,10 @@ class StudentPhotoCaptureDialog extends StatefulWidget {
       transitionBuilder: (_, animation, _, child) => FadeTransition(
         opacity: animation,
         child: ScaleTransition(
-          scale: Tween<double>(begin: 0.9, end: 1).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-          ),
+          scale: Tween<double>(begin: PhotoCaptureDecor.entryScale, end: 1)
+              .animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              ),
           child: child,
         ),
       ),
@@ -153,36 +138,40 @@ class _StudentPhotoCaptureDialogState extends State<StudentPhotoCaptureDialog> {
         AppDimensions.photoPanelFullscreenBelow;
     return BlocProvider.value(
       value: _cubit,
-      child: CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.escape): () {
-            if (!_busy) _close();
+      child: CameraLifecycleGuard(
+        onSuspend: _cubit.suspendCamera,
+        onResume: _cubit.resumeCamera,
+        child: CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.escape): () {
+              if (!_busy) _close();
+            },
+            const SingleActivator(LogicalKeyboardKey.space): _cubit.shoot,
           },
-          const SingleActivator(LogicalKeyboardKey.space): _cubit.shoot,
-        },
-        child: FocusScope(
-          autofocus: true,
-          child: Stack(
-            children: [
-              // Le voile : un clic dehors ferme, sauf pendant l'enregistrement.
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    if (!_busy) _close();
-                  },
+          child: FocusScope(
+            autofocus: true,
+            child: Stack(
+              children: [
+                // Le voile : un clic dehors ferme, sauf pendant l'enregistrement.
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (!_busy) _close();
+                    },
+                  ),
                 ),
-              ),
-              Center(
-                child: Semantics(
-                  scopesRoute: true,
-                  namesRoute: true,
-                  explicitChildNodes: true,
-                  label: l10n.photoDialogSemantics(widget.studentName),
-                  child: _panel(context, fullscreen),
+                Center(
+                  child: Semantics(
+                    scopesRoute: true,
+                    namesRoute: true,
+                    explicitChildNodes: true,
+                    label: l10n.photoDialogSemantics(widget.studentName),
+                    child: _panel(context, fullscreen),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -207,20 +196,8 @@ class _StudentPhotoCaptureDialogState extends State<StudentPhotoCaptureDialog> {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: radius,
-            gradient: const LinearGradient(
-              begin: Alignment(-0.34, -1),
-              end: Alignment(0.34, 1),
-              colors: [AppColors.photoCaptureTop, AppColors.photoCaptureBottom],
-            ),
-            boxShadow: fullscreen
-                ? null
-                : const [
-                    BoxShadow(
-                      color: AppColors.photoPanelShadow,
-                      blurRadius: 64,
-                      offset: Offset(0, 24),
-                    ),
-                  ],
+            gradient: PhotoCaptureDecor.gradient,
+            boxShadow: fullscreen ? null : PhotoCaptureDecor.panelShadow,
           ),
           child: SafeArea(
             child: SingleChildScrollView(

@@ -12,7 +12,9 @@ import 'package:school_app_flutter/features/student_photo/presentation/capture/w
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/photo_viewfinder.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_state.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/widgets/session_flash.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/session/widgets/session_progress_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/photo_capture_decor.dart';
 
 /// La prise de vue d'un élève : qui il est, où en est la classe, le viseur,
 /// et la barre Passer · déclencheur · Absent.
@@ -54,11 +56,7 @@ class SessionShootPanel extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: const BoxDecoration(
         borderRadius: AppRadius.brLg,
-        gradient: LinearGradient(
-          begin: Alignment(-0.34, -1),
-          end: Alignment(0.34, 1),
-          colors: [AppColors.photoCaptureTop, AppColors.photoCaptureBottom],
-        ),
+        gradient: PhotoCaptureDecor.gradient,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -111,7 +109,7 @@ class SessionShootPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          _ProgressBar(value: progress),
+          SessionProgressBar(value: progress),
           const SizedBox(height: AppSpacing.md),
           Stack(
             children: [
@@ -213,41 +211,6 @@ class SessionShootPanel extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 4 dp, du terre cuite à l'or : la part des élèves traités.
-class _ProgressBar extends StatelessWidget {
-  final double value;
-
-  const _ProgressBar({required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: AppRadius.brPill,
-      child: SizedBox(
-        height: AppDimensions.photoSessionProgressBar,
-        child: Stack(
-          children: [
-            const Positioned.fill(
-              child: ColoredBox(color: AppColors.onPhotoCaptureVeil),
-            ),
-            FractionallySizedBox(
-              widthFactor: value.clamp(0, 1),
-              child: const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.terreCuite, AppColors.orDoux],
-                  ),
-                ),
-                child: SizedBox.expand(),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

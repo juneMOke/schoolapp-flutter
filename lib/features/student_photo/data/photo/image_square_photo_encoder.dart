@@ -81,9 +81,12 @@ Uint8List? _encode(_EncodeRequest request) {
   final decoded = _decodeOriented(request.bytes);
   if (decoded == null) return null;
   // Le carré a été choisi sur l'image telle qu'elle s'affichait — en miroir
-  // pour une caméra frontale : on la retourne donc AVANT de découper.
-  final image = request.mirror ? img.flipHorizontal(decoded) : decoded;
-  final x = (request.left * image.width).round().clamp(0, image.width - 1);
+  // pour une caméra frontale. C'est la FENÊTRE qu'on retourne, pas l'image :
+  // une photo d'identité se garde dans le vrai sens (raie, écusson, texte du
+  // vêtement), comme la verraient ceux qui la regardent.
+  final image = decoded;
+  final left = request.mirror ? 1 - request.left - request.width : request.left;
+  final x = (left * image.width).round().clamp(0, image.width - 1);
   final y = (request.top * image.height).round().clamp(0, image.height - 1);
   final side = math.max(
     1,

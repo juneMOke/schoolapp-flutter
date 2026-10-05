@@ -6,12 +6,13 @@ import 'package:school_app_flutter/features/student_photo/data/photo/image_squar
 import 'package:school_app_flutter/features/student_photo/domain/entities/crop_window.dart';
 import 'package:school_app_flutter/features/student_photo/domain/services/square_photo_encoder.dart';
 
-/// Une image 400 × 200 : moitié gauche rouge, moitié droite bleue.
-Uint8List _halves() {
-  final image = img.Image(width: 400, height: 200);
+/// Une image [width] × 200 : moitié gauche rouge, moitié droite bleue.
+Uint8List _halves({int width = 400}) {
+  final image = img.Image(width: width, height: 200);
   for (var y = 0; y < 200; y++) {
-    for (var x = 0; x < 400; x++) {
-      image.setPixelRgb(x, y, x < 200 ? 255 : 0, 0, x < 200 ? 0 : 255);
+    for (var x = 0; x < width; x++) {
+      final red = x < width / 2;
+      image.setPixelRgb(x, y, red ? 255 : 0, 0, red ? 0 : 255);
     }
   }
   return img.encodePng(image);
@@ -56,5 +57,21 @@ void main() {
     // Retournée, la moitié gauche est bleue.
     expect(pixel.b, greaterThan(200));
     expect(pixel.r, lessThan(60));
+  });
+
+  test('en miroir, la photo se garde dans le VRAI sens : seul le choix du '
+      'carré est retourné', () async {
+    // Un carré qui couvre les deux moitiés : son contenu dit le sens gardé.
+    final out = await encoder.encode(
+      _halves(width: 200),
+      CropWindow.centered(200, 200),
+      mirror: true,
+    );
+
+    final decoded = img.decodeJpg(out)!;
+    final left = decoded.getPixel(64, 256);
+    final right = decoded.getPixel(448, 256);
+    expect(left.r, greaterThan(200), reason: 'rouge à gauche, comme le réel');
+    expect(right.b, greaterThan(200));
   });
 }

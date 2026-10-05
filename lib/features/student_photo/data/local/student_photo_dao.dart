@@ -55,6 +55,7 @@ class StudentPhotoDao {
         {
           'school_id': schoolId,
           'sha256': state.sha256,
+          'thumbnail_sha256': state.thumbnailSha256,
           'taken_at': state.takenAt,
           'server_updated_at': state.serverUpdatedAt,
           'updated_at': nowMs,

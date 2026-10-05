@@ -256,7 +256,7 @@ class _CandidateTile extends StatelessWidget {
       enabled: candidate.isSelectable,
       leading: PersonPhotoOr(
         personId: candidate.studentId,
-        size: 34,
+        size: AppDimensions.boutiqueBeneficiaryListAvatar,
         fallback: CircleAvatar(
           radius: 17,
           backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.12),

@@ -5,24 +5,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/capture/camera/camera_viewfinder_gateway.dart';
 import 'package:school_app_flutter/core/capture/captured_document.dart';
 import 'package:school_app_flutter/core/capture/document_capture_gateway.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/features/student_photo/domain/entities/crop_window.dart';
 import 'package:school_app_flutter/features/student_photo/domain/entities/photo_session.dart';
-import 'package:school_app_flutter/features/student_photo/domain/services/class_roster_source.dart';
+import 'package:school_app_flutter/features/student_photo/domain/usecases/load_photo_session_classes_use_case.dart';
 import 'package:school_app_flutter/features/student_photo/domain/services/square_photo_encoder.dart';
 import 'package:school_app_flutter/features/student_photo/domain/usecases/student_photo_use_cases.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/camera_opener.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_state.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/session/session_camera_control.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/session/session_queue.dart';
 
 /// La séance photo d'une classe : choisir la classe, photographier en rafale
 /// (recadrage automatique sur le guide ovale), puis le bilan.
 ///
 /// Chaque photo est gardée sur le poste dès la prise et part par l'outbox :
 /// hors connexion, la séance continue.
-class PhotoSessionCubit extends Cubit<PhotoSessionState> {
-  final ClassRosterSource _rosters;
-  final LoadStudentPhotoIndexUseCase _index;
+class PhotoSessionCubit extends Cubit<PhotoSessionState>
+    with SessionCameraControl {
+  final LoadPhotoSessionClassesUseCase _classes;
   final SaveStudentPhotoUseCase _save;
   final SquarePhotoEncoder _encoder;
   final CameraViewfinderGateway _cameras;
@@ -30,15 +30,13 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
   final DateTime Function() _now;
 
   PhotoSessionCubit({
-    required ClassRosterSource rosters,
-    required LoadStudentPhotoIndexUseCase index,
+    required LoadPhotoSessionClassesUseCase classes,
     required SaveStudentPhotoUseCase save,
     required SquarePhotoEncoder encoder,
     required CameraViewfinderGateway cameras,
     required DocumentCaptureGateway files,
     DateTime Function()? now,
-  }) : _rosters = rosters,
-       _index = index,
+  }) : _classes = classes,
        _save = save,
        _encoder = encoder,
        _cameras = cameras,
@@ -46,38 +44,19 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
        _now = now ?? DateTime.now,
        super(const SessionLoading());
 
-  CameraOpener? _opener;
+  @override
+  CameraOpener? opener;
 
   /// Les classes de l'année, chacune avec ses élèves sans photo.
   Future<void> load(String academicYearId, {required bool isTouch}) async {
-    _opener ??= CameraOpener(_cameras, isTouch: isTouch);
+    opener ??= CameraOpener(_cameras, isTouch: isTouch);
     emit(const SessionLoading());
-    final classes = await _rosters.classes(academicYearId);
-    final index = await _index();
-    final failure =
-        classes.fold<Failure?>((f) => f, (_) => null) ??
-        index.fold<Failure?>((f) => f, (_) => null);
-    if (failure != null) {
-      if (!isClosed) emit(SessionLoadFailed(failure));
-      return;
-    }
-    final refs = index.getOrElse(() => const {});
-    final withPhoto = {
-      for (final entry in refs.entries)
-        if (entry.value.hasPhoto) entry.key,
-    };
-    final summaries = <SessionClassSummary>[];
-    for (final klass in classes.getOrElse(() => const [])) {
-      final roster = await _rosters.roster(klass.id);
-      summaries.add(
-        SessionClassSummary(
-          klass: klass,
-          students: roster.getOrElse(() => const []),
-          withPhoto: withPhoto,
-        ),
-      );
-    }
-    if (!isClosed) emit(SessionSetup(classes: summaries));
+    final result = await _classes(academicYearId);
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(SessionLoadFailed(failure)),
+      (summaries) => emit(SessionSetup(classes: summaries)),
+    );
   }
 
   void selectClass(String classId) {
@@ -90,21 +69,6 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
     if (current is SessionSetup) emit(current.copyWith(onlyMissing: value));
   }
 
-  /// Les élèves sans photo d'abord, puis l'ordre alphabétique.
-  static int _order(SessionStudent a, SessionStudent b, Set<String> withPhoto) {
-    final aHas = withPhoto.contains(a.id) ? 1 : 0;
-    final bHas = withPhoto.contains(b.id) ? 1 : 0;
-    if (aHas != bHas) return aHas - bHas;
-    return _byName(a, b);
-  }
-
-  static final Comparator<SessionStudent> _byName = PersonNameComparator.by(
-    lastName: (s) => s.lastName,
-    surname: (s) => s.middleName,
-    firstName: (s) => s.firstName,
-    id: (s) => s.id,
-  );
-
   /// « Commencer » : la file de la classe choisie, et la caméra.
   Future<void> start() async {
     final setup = state;
@@ -115,7 +79,7 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
       for (final student in summary.students)
         if (!setup.onlyMissing || !summary.withPhoto.contains(student.id))
           student,
-    ]..sort((a, b) => _order(a, b, summary.withPhoto));
+    ]..sort((a, b) => SessionQueue.order(a, b, summary.withPhoto));
     emit(
       SessionShooting(
         klass: summary.klass,
@@ -123,20 +87,8 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
         index: 0,
       ),
     );
-    await _openCamera();
+    await openCamera();
   }
-
-  Future<void> _openCamera([Future<CameraOpening> Function()? how]) async {
-    final opening = await (how ?? _opener!.open)();
-    final current = state;
-    if (isClosed || current is! SessionShooting) {
-      await _opener?.close();
-      return;
-    }
-    emit(current.copyWith(camera: opening));
-  }
-
-  Future<void> switchCamera() => _openCamera(_opener!.switchNext);
 
   /// Déclenche : recadrage automatique sur l'ovale, photo gardée, flash.
   Future<void> shoot() async {
@@ -215,7 +167,7 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
     emit(
       shooting.copyWith(
         busy: false,
-        queue: _set(
+        queue: SessionQueue.withStatus(
           shooting.queue,
           shooting.index,
           SessionItemStatus.photographed,
@@ -225,20 +177,11 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
     );
   }
 
-  static List<SessionItem> _set(
-    List<SessionItem> queue,
-    int index,
-    SessionItemStatus status,
-  ) => [
-    for (var i = 0; i < queue.length; i++)
-      i == index ? queue[i].withStatus(status) : queue[i],
-  ];
-
   /// Le flash a duré : élève suivant (le prochain encore à photographier).
   Future<void> advance() async {
     final current = state;
     if (current is! SessionShooting) return;
-    final next = _nextTodo(current.queue, current.index);
+    final next = SessionQueue.nextTodo(current.queue, current.index);
     if (next == null) {
       await finish();
       return;
@@ -254,7 +197,11 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
     emit(
       current.copyWith(
         clearFlash: true,
-        queue: _set(current.queue, current.index, SessionItemStatus.todo),
+        queue: SessionQueue.withStatus(
+          current.queue,
+          current.index,
+          SessionItemStatus.todo,
+        ),
       ),
     );
   }
@@ -264,7 +211,7 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
     if (current is! SessionShooting || current.busy) return;
     emit(
       current.copyWith(
-        queue: _set(current.queue, current.index, status),
+        queue: SessionQueue.withStatus(current.queue, current.index, status),
         clearFlash: true,
       ),
     );
@@ -283,19 +230,13 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
     emit(current.copyWith(index: index, clearFlash: true));
   }
 
-  static int? _nextTodo(List<SessionItem> queue, int from) {
-    for (var step = 1; step <= queue.length; step++) {
-      final i = (from + step) % queue.length;
-      if (queue[i].status == SessionItemStatus.todo) return i;
-    }
-    return null;
-  }
-
   /// « Terminer » : la caméra s'éteint, le bilan s'affiche.
   Future<void> finish() async {
     final current = state;
-    if (current is! SessionShooting) return;
-    await _opener?.close();
+    // Une photo en préparation se termine d'abord : elle serait sinon gardée
+    // sans compter au bilan.
+    if (current is! SessionShooting || current.busy) return;
+    await opener?.release();
     if (!isClosed) {
       emit(SessionSummary(klass: current.klass, queue: current.queue));
     }
@@ -314,12 +255,12 @@ class PhotoSessionCubit extends Cubit<PhotoSessionState> {
     final first = queue.indexWhere((i) => i.status == SessionItemStatus.todo);
     if (first < 0) return;
     emit(SessionShooting(klass: current.klass, queue: queue, index: first));
-    await _openCamera();
+    await openCamera();
   }
 
   @override
   Future<void> close() async {
-    await _opener?.close();
+    await opener?.release();
     return super.close();
   }
 }

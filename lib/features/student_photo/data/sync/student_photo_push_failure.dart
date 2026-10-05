@@ -3,12 +3,14 @@ import 'package:school_app_flutter/core/network/api_error_parser.dart';
 
 /// Lecture d'un échec d'envoi d'un geste sur une photo.
 ///
-/// Le transport, les 5xx et 401/408/429 se rejouent. Le 404
-/// `STUDENT_NOT_FOUND` dit que le serveur ne connaît pas (encore) l'élève :
-/// c'est l'appelant qui sait si l'inscription est en route. Tout autre 4xx
-/// (403 sans le droit, 413, 415, 422 `PHOTO_NOT_SQUARE` / `PHOTO_TOO_LARGE`)
-/// est déterministe : le serveur n'a rien écrit, et le rejouer redonnerait le
-/// même refus.
+/// Le transport, les 5xx et 401/408/409/429 se rejouent. Deux réponses ont
+/// leur conduite propre : le 409 `STUDENT_NOT_YET_SYNCED` est une **attente**
+/// (l'inscription qui crée l'élève n'est pas arrivée — rejouer sans consommer
+/// de tentative), le 410 `AGGREGATE_TOMBSTONED` dit l'élève purgé (le geste
+/// s'efface). Tout autre 4xx — 400, 403 sans le droit, 404 élève d'une autre
+/// école, 415, 422 `PHOTO_NOT_SQUARE` / `PHOTO_TOO_LARGE`… — est
+/// déterministe : le serveur n'a rien écrit, et le rejouer redonnerait le même
+/// refus.
 class StudentPhotoPushFailure {
   final int? status;
   final String? detailCode;
@@ -18,7 +20,7 @@ class StudentPhotoPushFailure {
 
   const StudentPhotoPushFailure._(this.status, this.detailCode, this.reason);
 
-  static const String studentNotFound = 'STUDENT_NOT_FOUND';
+  static const String studentNotYetSynced = 'STUDENT_NOT_YET_SYNCED';
 
   factory StudentPhotoPushFailure.of(DioException e) {
     final status = e.response?.statusCode;
@@ -39,13 +41,15 @@ class StudentPhotoPushFailure {
 
   static const Set<int> _transientStatuses = {401, 408, 409, 429};
 
-  bool get isTransient =>
-      status == null || status! >= 500 || _transientStatuses.contains(status);
+  /// Le serveur n'a pas encore l'élève : son inscription est en route.
+  bool get awaitsStudent => status == 409 && detailCode == studentNotYetSynced;
 
-  /// Le serveur ne connaît pas l'élève. Un 404 sans code se lit de même : la
-  /// route n'a pas d'autre ressource à ne pas trouver.
-  bool get isStudentUnknown =>
-      status == 404 && (detailCode == null || detailCode == studentNotFound);
+  /// L'élève a été purgé côté serveur : le geste n'a plus d'objet.
+  bool get isStudentGone => status == 410;
+
+  bool get isTransient =>
+      !awaitsStudent &&
+      (status == null || status! >= 500 || _transientStatuses.contains(status));
 
   /// Code rangé sur la ligne : le `detailCode`, sinon le statut.
   String get storedCode =>

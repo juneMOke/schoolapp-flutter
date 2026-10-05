@@ -32,16 +32,22 @@ class StudentPhotoFetcher {
 
   /// Les octets de la photo d'empreinte [sha256] à [size]. Lève l'échec du
   /// transport tel quel : hors ligne, l'appelant se rabat sur ce qu'il a.
+  ///
+  /// [served] : l'empreinte que le flux donne aux octets de CETTE taille
+  /// (l'`ETag` attendu) — le serveur ré-encode chaque taille, la vignette n'a
+  /// pas l'empreinte de la grande photo. La copie reste marquée de [sha256],
+  /// la version de la photo.
   Future<Uint8List> fetch(
     String studentId,
     String sha256,
-    StudentPhotoSize size,
-  ) => _tenant.run(() async {
+    StudentPhotoSize size, {
+    required String? served,
+  }) => _tenant.run(() async {
     final download = await _api.download(_extras, studentId, size);
     // La photo a changé depuis la descente : montrée, mais pas gardée sous
     // une empreinte qui n'est pas la sienne. Le prochain pull la rattrapera.
     final etag = download.etag;
-    final current = etag == null || etag == sha256;
+    final current = etag == null || served == null || etag == served;
     if (current &&
         download.bytes.isNotEmpty &&
         await _blobs.writeCache(studentId, size, download.bytes)) {

@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/student_photo_capture_cubit.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/student_photo_capture_dialog.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/edit/student_photo_draft_cubit.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ouvre la modale de capture pour un élève, depuis n'importe quel point
 /// d'entrée (étape 1, en-tête de fiche, Résumé).
@@ -38,13 +38,20 @@ abstract final class StudentPhotoLauncher {
     required String studentName,
   }) async {
     final draft = _draftOf(context);
+    // La grande photo seulement : recadrer une vignette l'agrandirait, et
+    // la version floue remplacerait l'originale chez le serveur.
     final bytes =
         draft?.state.photo ??
-        await getIt<StudentPhotoRegistry>().photoBytesOf(
-          studentId,
-          diameter: AppDimensions.photoSlotCircle,
-        );
-    if (bytes == null || !context.mounted) return;
+        await getIt<StudentPhotoRegistry>().fullPhotoOf(studentId);
+    if (!context.mounted) return;
+    if (bytes == null) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.photoCropUnavailable),
+        ),
+      );
+      return;
+    }
     await _open(context, studentId, studentName, recrop: bytes);
   }
 

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_capture_support.dart';
 
 /// « Séance photo », dans la barre de résultats des listes d'inscription.
 /// Absent — pas désactivé — sans `student.photo.write`.
@@ -14,6 +15,7 @@ class PhotoSessionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!photoCaptureSupported) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
     return PermissionGate.access(
       kStudentPhotoWriteAccess,

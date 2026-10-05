@@ -38,11 +38,31 @@ class StudentPhotoRegistry implements PersonPhotoSource {
   int _cachedBytes = 0;
   StreamSubscription<Set<String>>? _changes;
   Future<void>? _loading;
+  bool _refreshing = false;
+  bool _stale = false;
 
   /// Charge l'index et s'abonne aux changements. Idempotent.
   Future<void> start() {
-    _changes ??= _loadIndex.changes.listen((_) => unawaited(refresh()));
+    _changes ??= _loadIndex.changes.listen((_) => unawaited(_coalesce()));
     return _loading ??= refresh();
+  }
+
+  /// Une relecture à la fois : les annonces reçues pendant qu'elle court en
+  /// demandent UNE de plus, pas une chacune.
+  Future<void> _coalesce() async {
+    if (_refreshing) {
+      _stale = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _stale = false;
+        await refresh();
+      } while (_stale);
+    } finally {
+      _refreshing = false;
+    }
   }
 
   /// Relit l'index et prévient les avatars dont la photo a changé.
@@ -103,10 +123,25 @@ class StudentPhotoRegistry implements PersonPhotoSource {
     String key,
     double diameter,
   ) async {
-    final result = await _read(ref, StudentPhotoSize.forDiameter(diameter));
-    final bytes = result.fold((_) => null, (bytes) => bytes);
-    if (bytes != null) _remember(key, bytes);
-    return bytes;
+    final wanted = StudentPhotoSize.forDiameter(diameter);
+    final result = await _read(ref, wanted);
+    final photo = result.fold((_) => null, (photo) => photo);
+    if (photo == null) return null;
+    // Rangés sous la taille REÇUE : une vignette servie faute de mieux (hors
+    // ligne) ne doit pas passer pour la grande photo une fois le réseau
+    // revenu.
+    if (photo.size == wanted) _remember(key, photo.bytes);
+    return photo.bytes;
+  }
+
+  /// La grande photo (512 px) de [studentId], **elle seule** : ce qu'un
+  /// recadrage peut reprendre sans perdre en finesse. `null` si elle n'est ni
+  /// sur le poste ni téléchargeable.
+  Future<Uint8List?> fullPhotoOf(String studentId) async {
+    final ref = _refs[studentId];
+    if (ref == null || !ref.hasPhoto) return null;
+    final result = await _read(ref, StudentPhotoSize.full, exact: true);
+    return result.fold((_) => null, (photo) => photo?.bytes);
   }
 
   String? _cacheKey(String personId, double diameter) {

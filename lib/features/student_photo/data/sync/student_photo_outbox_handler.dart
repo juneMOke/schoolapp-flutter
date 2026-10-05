@@ -82,7 +82,14 @@ class StudentPhotoOutboxHandler implements OutboxSyncHandler {
 
     // Déjà soldé (accusé dont l'entrée a survécu) : rien à renvoyer.
     final row = await _sync.find(request.studentId);
-    if (row == null || !row.holdsGesture(request.op, request.at)) {
+    if (row == null) {
+      // L'élève a été retiré (registre des disparitions) : sa ligne est
+      // partie, ses octets en attente ne partiront jamais.
+      final sha = request.sha256;
+      if (sha != null) await _blobs.deletePending(request.studentId, sha);
+      return const OutboxDispatchResult.acked();
+    }
+    if (!row.holdsGesture(request.op, request.at)) {
       return const OutboxDispatchResult.acked();
     }
 
@@ -126,16 +133,24 @@ class StudentPhotoOutboxHandler implements OutboxSyncHandler {
       state = await send();
     } on DioException catch (e) {
       final failure = StudentPhotoPushFailure.of(e);
-      if (failure.isTransient) {
-        return OutboxDispatchResult.retry(failure.reason);
+      // Le poste porte la fiche : son inscription n'est simplement pas encore
+      // arrivée. Sans fiche sur le poste, rien ne viendra la débloquer.
+      if (failure.awaitsStudent && student != null) {
+        return _unlessReplaced(
+          request,
+          OutboxDispatchResult.blocked(failure.reason),
+        );
       }
-      if (failure.isStudentUnknown && student != null) {
-        // Le poste porte la fiche : le serveur ne l'a simplement pas encore.
-        return OutboxDispatchResult.blocked(failure.reason);
+      if (failure.isStudentGone) return _drop(request);
+      if (failure.isTransient) {
+        return _unlessReplaced(
+          request,
+          OutboxDispatchResult.retry(failure.reason),
+        );
       }
       return _reject(request, failure.storedCode, failure.reason);
     } catch (e) {
-      return OutboxDispatchResult.retry(e.toString());
+      return _unlessReplaced(request, OutboxDispatchResult.retry(e.toString()));
     }
 
     final settled = await _sync.applyAck(request, state, nowMs: _now());
@@ -188,13 +203,38 @@ class StudentPhotoOutboxHandler implements OutboxSyncHandler {
       reason: reason,
       nowMs: _now(),
     );
-    // Remplacé pendant l'envoi : le nouveau geste repart avec la même entrée.
-    if (!marked) return OutboxDispatchResult.retry(reason);
+    // Remplacé pendant l'envoi : le nouveau geste repart avec son entrée à
+    // lui. L'accusé est gardé par `created_at`, il ne la touchera pas.
+    if (!marked) return const OutboxDispatchResult.acked();
     if (request.op == StudentPhotoOp.put) {
       await _blobs.deletePending(request.studentId, request.sha256!);
     }
     _bus.emit({request.studentId});
     return OutboxDispatchResult.failed(reason);
+  }
+
+  /// L'élève purgé côté serveur (410) : le geste et ses octets s'effacent.
+  Future<OutboxDispatchResult> _drop(StudentPhotoPushRequest request) async {
+    if (await _sync.dropGesture(request, nowMs: _now()) &&
+        request.op == StudentPhotoOp.put) {
+      await _blobs.deletePending(request.studentId, request.sha256!);
+    }
+    _bus.emit({request.studentId});
+    return const OutboxDispatchResult.acked();
+  }
+
+  /// Un geste remplacé pendant l'envoi ne se rejoue pas : son entrée porte
+  /// déjà le geste neuf, qui ne doit hériter ni de ses tentatives ni de son
+  /// backoff.
+  Future<OutboxDispatchResult> _unlessReplaced(
+    StudentPhotoPushRequest request,
+    OutboxDispatchResult result,
+  ) async {
+    final row = await _sync.find(request.studentId);
+    if (row == null || !row.holdsGesture(request.op, request.at)) {
+      return const OutboxDispatchResult.acked();
+    }
+    return result;
   }
 
   /// Deux instants ISO-8601 égaux à la milliseconde, quelle que soit leur

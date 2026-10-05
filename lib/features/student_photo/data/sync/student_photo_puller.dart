@@ -18,6 +18,10 @@ const String kStudentPhotosResource = 'student_photos';
 /// photo retirée efface la sienne, une photo neuve voit sa vignette
 /// préchargée — en arrière-plan, pour qu'une liste s'ouvre déjà illustrée.
 class StudentPhotoPuller {
+  /// Le préchargement en cours : deux cycles rapprochés ne téléchargent pas
+  /// deux fois les mêmes vignettes, ils attendent le même.
+  Future<void>? _prefetching;
+
   final StudentPhotoApi _api;
   final KeysetPullRunner _runner;
   final StudentPhotoDao _photos;
@@ -27,7 +31,7 @@ class StudentPhotoPuller {
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _requiredAuth;
 
-  const StudentPhotoPuller({
+  StudentPhotoPuller({
     required StudentPhotoApi api,
     required KeysetPullRunner runner,
     required StudentPhotoDao photos,
@@ -69,8 +73,10 @@ class StudentPhotoPuller {
     if (result case Right(:final value) when !value.notModified) {
       await _dropStaleCaches(schoolId);
       _bus.emitAll();
-      unawaited(prefetchThumbnails(schoolId));
     }
+    // Même sans ligne neuve : des vignettes peuvent manquer encore (un
+    // préchargement interrompu hors ligne reprend ici).
+    if (result.isRight()) unawaited(prefetchThumbnails(schoolId));
     return result;
   }
 
@@ -86,16 +92,34 @@ class StudentPhotoPuller {
   /// Précharge les vignettes manquantes, une à une. S'arrête au premier échec
   /// de transport : hors ligne, la suite échouerait de même ; les vignettes
   /// restantes viendront à l'affichage ou au prochain pull.
-  Future<void> prefetchThumbnails(String schoolId) async {
+  ///
+  /// Une seule annonce, en fin de lot : une par vignette ferait relire l'index
+  /// entier mille fois pour une école de mille élèves.
+  Future<void> prefetchThumbnails(String schoolId) =>
+      _prefetching ??= _prefetch(schoolId).whenComplete(() {
+        // Le rappel ne rend rien : rendre ce futur le ferait s'attendre
+        // lui-même.
+        _prefetching = null;
+      });
+
+  Future<void> _prefetch(String schoolId) async {
+    final fetched = <String>{};
     try {
       for (final row in await _photos.missingThumbnails(schoolId)) {
         final sha = row.sha256;
         if (sha == null) continue;
-        await _fetcher.fetch(row.studentId, sha, StudentPhotoSize.thumb);
-        _bus.emit({row.studentId});
+        await _fetcher.fetch(
+          row.studentId,
+          sha,
+          StudentPhotoSize.thumb,
+          served: row.servedShaOf(StudentPhotoSize.thumb),
+        );
+        fetched.add(row.studentId);
       }
     } catch (_) {
       // Un préchargement raté n'est pas une panne de synchronisation.
+    } finally {
+      if (fetched.isNotEmpty) _bus.emit(fetched);
     }
   }
 }

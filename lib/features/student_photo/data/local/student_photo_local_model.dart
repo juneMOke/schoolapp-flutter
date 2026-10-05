@@ -33,6 +33,13 @@ class StudentPhotoLocalModel {
   String? get sha256 => row['sha256'] as String?;
   String? get takenAt => row['taken_at'] as String?;
 
+  /// Empreinte des octets que le serveur sert à [size] — son `ETag`. `null`
+  /// pour une vignette descendue avant la v60 : rien à confronter.
+  String? servedShaOf(StudentPhotoSize size) => switch (size) {
+    StudentPhotoSize.thumb => row['thumbnail_sha256'] as String?,
+    StudentPhotoSize.full => sha256,
+  };
+
   StudentPhotoOp? get pendingOp =>
       StudentPhotoOp.fromWire(row['pending_op'] as String?);
   String? get pendingSha256 => row['pending_sha256'] as String?;

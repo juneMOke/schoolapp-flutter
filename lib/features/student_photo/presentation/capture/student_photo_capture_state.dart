@@ -38,6 +38,10 @@ class CaptureLive extends StudentPhotoCaptureState {
     this.shooting = false,
   });
 
+  /// Le même flux, déclencheur en cours.
+  CaptureLive copyShooting() =>
+      CaptureLive(session: session, canSwitch: canSwitch, shooting: true);
+
   @override
   List<Object?> get props => [session, canSwitch, shooting];
 }

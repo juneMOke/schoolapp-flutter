@@ -14147,4 +14147,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get photoSessionLoadErrorMessage =>
       'This year\'s classes could not be read on this device.';
+
+  @override
+  String get photoCropUnavailable =>
+      'The original photo is not on this device: reconnect to crop it.';
 }

@@ -747,4 +747,14 @@ class AppDimensions {
   static const photoHairline = 1.5;
   static const photoFlashRing = 3.0;
   static const photoFilterRow = 44.0;
+
+  /// L'écart entre « Prendre » et « Importer », et la marge horizontale de
+  /// la ligne photo du Résumé.
+  static const photoSlotActionGap = 6.0;
+  static const photoRecapPaddingH = 14.0;
+
+  /// L'avatar du bénéficiaire en boutique : la puce du panier, la liste de
+  /// choix.
+  static const boutiqueBeneficiaryChipAvatar = 22.0;
+  static const boutiqueBeneficiaryListAvatar = 34.0;
 }

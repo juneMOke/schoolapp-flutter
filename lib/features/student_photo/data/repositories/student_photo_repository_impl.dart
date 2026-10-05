@@ -59,46 +59,63 @@ class StudentPhotoRepositoryImpl implements StudentPhotoRepository {
   }
 
   @override
-  Future<Either<Failure, Uint8List?>> bytesOf(
+  Future<Either<Failure, StudentPhotoBytes?>> bytesOf(
     StudentPhotoRef ref,
-    StudentPhotoSize size,
-  ) async {
+    StudentPhotoSize size, {
+    bool exact = false,
+  }) async {
     try {
       final row = await _photos.find(ref.studentId);
       if (row == null) return const Right(null);
-      return Right(await _bytesOf(row, size));
+      return Right(await _bytesOf(row, size, exact: exact));
     } catch (e) {
       return Left(StorageFailure('Lecture de la photo : $e'));
     }
   }
 
-  Future<Uint8List?> _bytesOf(
+  Future<StudentPhotoBytes?> _bytesOf(
     StudentPhotoLocalModel row,
-    StudentPhotoSize size,
-  ) async {
+    StudentPhotoSize size, {
+    required bool exact,
+  }) async {
     final pendingSha = row.pendingSha256;
     if (row.pendingOp == StudentPhotoOp.delete) return null;
     if (row.pendingOp == StudentPhotoOp.put && pendingSha != null) {
+      // Le geste en attente est toujours le carré 512 px envoyé.
       final read = await _blobs.readPending(row.studentId, pendingSha);
-      return read is BlobFound ? read.blob.bytes : null;
+      return read is BlobFound
+          ? StudentPhotoBytes(read.blob.bytes, StudentPhotoSize.full)
+          : null;
     }
     final sha = row.sha256;
     if (sha == null) return null;
 
     final wanted = await _cached(row, size, sha);
-    if (wanted != null) return wanted;
+    if (wanted != null) return StudentPhotoBytes(wanted, size);
     // La vignette peut se tirer de la grande copie ; l'inverse se verrait.
-    final larger = size == StudentPhotoSize.thumb
-        ? await _cached(row, StudentPhotoSize.full, sha)
-        : null;
-    if (larger != null) return larger;
+    if (size == StudentPhotoSize.thumb) {
+      final larger = await _cached(row, StudentPhotoSize.full, sha);
+      if (larger != null) {
+        return StudentPhotoBytes(larger, StudentPhotoSize.full);
+      }
+    }
     try {
-      return await _fetcher.fetch(row.studentId, sha, size);
+      return StudentPhotoBytes(
+        await _fetcher.fetch(
+          row.studentId,
+          sha,
+          size,
+          served: row.servedShaOf(size),
+        ),
+        size,
+      );
     } catch (_) {
+      if (exact || size == StudentPhotoSize.thumb) return null;
       // Hors ligne : la vignette, faute de mieux, plutôt que les initiales.
-      return size == StudentPhotoSize.full
-          ? await _cached(row, StudentPhotoSize.thumb, sha)
-          : null;
+      final thumb = await _cached(row, StudentPhotoSize.thumb, sha);
+      return thumb == null
+          ? null
+          : StudentPhotoBytes(thumb, StudentPhotoSize.thumb);
     }
   }
 

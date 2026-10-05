@@ -794,7 +794,9 @@ class AppConstants {
   // v59 (2026-10-05) : la photo de l'élève (`student_photos`) — miroir du flux
   // `student.photos` et geste en attente d'envoi. Création pure. Palier
   // d'école.
-  static const int offlineDbSchemaVersion = 59;
+  // v60 (2026-10-05) : `student_photos.thumbnail_sha256` — l'empreinte de la
+  // vignette, `ETag` de `size=96`. Additif. Palier d'école.
+  static const int offlineDbSchemaVersion = 60;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

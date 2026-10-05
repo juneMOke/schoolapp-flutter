@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/student_photo/presentation/edit/stud
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_slot.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_capture_support.dart';
 
 /// La ligne photo en tête du Résumé : un rappel, jamais une erreur — la photo
 /// est facultative. L'action ouvre la caméra sans quitter le Résumé.
@@ -71,7 +72,7 @@ class PhotoRecapRow extends StatelessWidget {
     );
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md + 2,
+        horizontal: AppDimensions.photoRecapPaddingH,
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
@@ -114,24 +115,25 @@ class PhotoRecapRow extends StatelessWidget {
               ],
             ),
           ),
-          PermissionGate.access(
-            kStudentPhotoWriteAccess,
-            child: SessionWriteGate(
-              child: hasPhoto
-                  ? EteeloButton.ghost(
-                      label: l10n.photoRetake,
-                      icon: Icons.photo_camera_outlined,
-                      fullWidth: false,
-                      onPressed: open,
-                    )
-                  : EteeloButton.secondary(
-                      label: l10n.photoAddTooltip,
-                      icon: Icons.photo_camera_outlined,
-                      fullWidth: false,
-                      onPressed: open,
-                    ),
+          if (photoCaptureSupported)
+            PermissionGate.access(
+              kStudentPhotoWriteAccess,
+              child: SessionWriteGate(
+                child: hasPhoto
+                    ? EteeloButton.ghost(
+                        label: l10n.photoRetake,
+                        icon: Icons.photo_camera_outlined,
+                        fullWidth: false,
+                        onPressed: open,
+                      )
+                    : EteeloButton.secondary(
+                        label: l10n.photoAddTooltip,
+                        icon: Icons.photo_camera_outlined,
+                        fullWidth: false,
+                        onPressed: open,
+                      ),
+              ),
             ),
-          ),
         ],
       ),
     );

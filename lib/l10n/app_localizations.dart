@@ -22297,6 +22297,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This year\'s classes could not be read on this device.'**
   String get photoSessionLoadErrorMessage;
+
+  /// No description provided for @photoCropUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The original photo is not on this device: reconnect to crop it.'**
+  String get photoCropUnavailable;
 }
 
 class _AppLocalizationsDelegate

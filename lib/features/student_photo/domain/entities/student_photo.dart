@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 
 /// Les deux tailles servies par le serveur : la vignette des listes et la
@@ -46,4 +48,14 @@ class StudentPhotoRef extends Equatable {
 
   @override
   List<Object?> get props => [studentId, version, isPending, rejection];
+}
+
+/// Les octets d'une photo, et la taille qu'ils ont réellement : hors ligne,
+/// la vignette peut tenir lieu de la grande photo — pour l'affichage, jamais
+/// pour un recadrage.
+class StudentPhotoBytes {
+  final Uint8List bytes;
+  final StudentPhotoSize size;
+
+  const StudentPhotoBytes(this.bytes, this.size);
 }

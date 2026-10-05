@@ -37,6 +37,7 @@ import 'package:school_app_flutter/core/offline/tombstone/tombstone_dao.dart';
 import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_api.dart';
 import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_handler.dart';
 import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_repository.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_removal_hooks.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
 import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_offline_di.dart';
@@ -51,6 +52,7 @@ import 'package:school_app_flutter/features/configuration/data/local/provisionin
 import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_draft_repository_impl.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
 import 'package:school_app_flutter/core/di/offline_modules/class_presence_di.dart';
+import 'package:school_app_flutter/features/student_photo/data/student_photo_change_bus.dart';
 
 /// Enregistre le socle offline dans le conteneur GetIt.
 ///
@@ -130,7 +132,17 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
       tenant: tenant,
       files: files,
       device: device.db,
-      onAttached: [() => backfillPaymentTariffs(tenant)],
+      onAttached: [
+        () => backfillPaymentTariffs(tenant),
+        // Les photos montrées sont celles de l'école ouverte : une autre
+        // école attachée, l'index des avatars se relit. Résolu à l'appel —
+        // le module photo s'enregistre après ce socle.
+        () async {
+          if (getIt.isRegistered<StudentPhotoChangeBus>()) {
+            getIt<StudentPhotoChangeBus>().emitAll();
+          }
+        },
+      ],
     );
   }
   getIt.registerSingleton<DeviceDatabase>(device);
@@ -346,6 +358,7 @@ void registerOfflineModules(GetIt getIt) {
 /// été treize chantiers, treize occasions d'oublier une garde, et treize
 /// endroits où la règle d'effacement pouvait diverger.
 void _registerTombstones(GetIt getIt) {
+  getIt.registerLazySingleton<TombstoneRemovalHooks>(TombstoneRemovalHooks.new);
   getIt.registerLazySingleton<TombstonePullApi>(
     () => TombstonePullApi(getIt<Dio>()),
   );
@@ -357,6 +370,7 @@ void _registerTombstones(GetIt getIt) {
         getIt<SyncMetaDao>(),
         // L'index éditique vit avec l'appareil (MULTI_ECOLE_PLAN.md §10.2).
         deviceDb: getIt<DeviceDatabase>().db,
+        hooks: getIt<TombstoneRemovalHooks>(),
       ),
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),

@@ -24,10 +24,11 @@ class ReadStudentPhotoUseCase {
 
   const ReadStudentPhotoUseCase(this._repository);
 
-  Future<Either<Failure, Uint8List?>> call(
+  Future<Either<Failure, StudentPhotoBytes?>> call(
     StudentPhotoRef ref,
-    StudentPhotoSize size,
-  ) => _repository.bytesOf(ref, size);
+    StudentPhotoSize size, {
+    bool exact = false,
+  }) => _repository.bytesOf(ref, size, exact: exact);
 }
 
 /// Enregistre une photo prise ou importée, et la met en file d'envoi.

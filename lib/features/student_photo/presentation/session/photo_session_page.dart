@@ -14,6 +14,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/student_photo/domain/entities/photo_session.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/camera_lifecycle_guard.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_network_cubit.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_cubit.dart';
@@ -63,22 +64,28 @@ class _PhotoSessionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<PhotoSessionCubit>();
-    return CallbackShortcuts(
-      bindings: {const SingleActivator(LogicalKeyboardKey.space): cubit.shoot},
-      child: Focus(
-        autofocus: true,
-        child: BlocBuilder<PhotoSessionCubit, PhotoSessionState>(
-          builder: (context, state) => Scaffold(
-            backgroundColor: AppColors.surface,
-            appBar: PhotoSessionAppBar(
-              state: state,
-              onBack: () => _back(context, state),
-              onFinish: cubit.finish,
-            ),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: _body(context, state),
+    return CameraLifecycleGuard(
+      onSuspend: cubit.suspendCamera,
+      onResume: cubit.resumeCamera,
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.space): cubit.shoot,
+        },
+        child: Focus(
+          autofocus: true,
+          child: BlocBuilder<PhotoSessionCubit, PhotoSessionState>(
+            builder: (context, state) => Scaffold(
+              backgroundColor: AppColors.surface,
+              appBar: PhotoSessionAppBar(
+                state: state,
+                onBack: () => _back(context, state),
+                onFinish: cubit.finish,
+              ),
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: _body(context, state),
+                ),
               ),
             ),
           ),

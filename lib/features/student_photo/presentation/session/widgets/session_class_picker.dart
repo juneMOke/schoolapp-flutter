@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_state.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/session/widgets/session_class_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le choix de la classe : une tuile par classe (élèves sans photo, taux de
@@ -84,7 +85,7 @@ class SessionClassPicker extends StatelessWidget {
                   for (final summary in state.classes)
                     SizedBox(
                       width: width,
-                      child: _ClassTile(
+                      child: SessionClassTile(
                         summary: summary,
                         selected: summary.klass.id == state.selectedId,
                         onTap: () => onSelect(summary.klass.id),
@@ -141,111 +142,6 @@ class SessionClassPicker extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ClassTile extends StatelessWidget {
-  final SessionClassSummary summary;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ClassTile({
-    required this.summary,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final coverage = summary.total == 0
-        ? 0.0
-        : (summary.total - summary.missing) / summary.total;
-    const radius = BorderRadius.all(
-      Radius.circular(AppDimensions.photoSessionTileRadius),
-    );
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: Material(
-        color: selected ? AppColors.stateHover : AppColors.surfaceRaised,
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: BorderSide(
-            color: selected ? AppColors.bleuArdoise : AppColors.border,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: InkWell(
-          borderRadius: radius,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        summary.klass.name,
-                        style: AppTypography.titleMedium.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    if (selected)
-                      const Icon(
-                        Icons.check_circle_rounded,
-                        size: AppDimensions.photoSessionCheck,
-                        color: AppColors.bleuArdoise,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                summary.complete
-                    ? Text(
-                        l10n.photoSessionComplete(summary.total),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.photoDone,
-                        ),
-                      )
-                    : Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: l10n.photoSessionMissing(summary.missing),
-                              style: const TextStyle(
-                                color: AppColors.terreCuite,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            TextSpan(
-                              text:
-                                  ' · ${l10n.photoSessionStudents(summary.total)}',
-                            ),
-                          ],
-                        ),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                const SizedBox(height: AppSpacing.sm),
-                ClipRRect(
-                  borderRadius: AppRadius.brPill,
-                  child: LinearProgressIndicator(
-                    value: coverage,
-                    minHeight: AppDimensions.photoSessionCoverageBar,
-                    color: AppColors.photoDone,
-                    backgroundColor: AppColors.surfaceAlt,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

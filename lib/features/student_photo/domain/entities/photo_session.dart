@@ -69,3 +69,23 @@ class SessionItem extends Equatable {
   @override
   List<Object?> get props => [student, status];
 }
+
+/// Une classe au choix, avec ses élèves et combien n'ont pas de photo.
+class SessionClassSummary extends Equatable {
+  final SessionClass klass;
+  final List<SessionStudent> students;
+  final Set<String> withPhoto;
+
+  const SessionClassSummary({
+    required this.klass,
+    required this.students,
+    required this.withPhoto,
+  });
+
+  int get total => students.length;
+  int get missing => students.where((s) => !withPhoto.contains(s.id)).length;
+  bool get complete => missing == 0;
+
+  @override
+  List<Object?> get props => [klass, students, withPhoto];
+}

@@ -13,10 +13,14 @@ abstract class StudentPhotoRepository {
   /// Les octets JPEG de la photo de [ref] à [size] : la copie locale d'abord,
   /// sinon un téléchargement mis en cache. `null` si la photo n'est pas
   /// disponible (pas de photo, hors ligne sans copie).
-  Future<Either<Failure, Uint8List?>> bytesOf(
+  ///
+  /// Sans [exact], une autre taille peut tenir lieu de celle demandée (la
+  /// vignette, hors ligne) : la taille rendue le dit.
+  Future<Either<Failure, StudentPhotoBytes?>> bytesOf(
     StudentPhotoRef ref,
-    StudentPhotoSize size,
-  );
+    StudentPhotoSize size, {
+    bool exact = false,
+  });
 
   /// Enregistre [jpeg] (carré 512 px) comme photo de [studentId], prise à
   /// [takenAt] — la date du déclenchement, qui arbitrera côté serveur.
