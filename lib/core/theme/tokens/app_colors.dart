@@ -565,4 +565,21 @@ class AppColors {
 
   /// Ligne courante de la file : terre cuite à 8 %.
   static const photoQueueCurrent = Color(0x14B85C2C);
+
+  // ── Programme de cours (Cours ▸ Mes cours) ────────────────────────────────
+  /// « Planifié » : gris tiède sur papier, défaut de création.
+  static const programmePlanifie = textMuted;
+  static const programmePlanifieSoft = surfaceAlt;
+
+  /// « En cours » : la terre cuite et son voile.
+  static const programmeEnCours = terreCuite;
+  static const programmeEnCoursSoft = Color(0xFFF8EEE7);
+
+  /// « Terminé » : le vert savane et son voile — il compte dans l'avancement.
+  static const programmeTermine = vertSavane;
+  static const programmeTermineSoft = Color(0xFFEBF2ED);
+
+  /// Bloc « À retenir » du contenu rédigé : fond ocre pâle, liséré ocre.
+  static const programmeEncadreSurface = financeCrossedSurface;
+  static const programmeEncadreAccent = Color(0xFFB8862B);
 }

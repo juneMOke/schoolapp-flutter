@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/di/offline_modules/course_programme_presentation_di.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -10,6 +11,8 @@ import 'package:school_app_flutter/core/offline/tombstone/tombstone_removal_hook
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_metier_pull_handlers.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart'
+    show kAcademicsChapitresResourcePrefix;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/per_cours_keyset_puller.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_children_write_dao.dart';
@@ -150,6 +153,8 @@ void registerCourseProgramme(GetIt getIt) {
         extras: requiredAuth,
       ),
     );
+
+  registerCourseProgrammePresentation(getIt);
 
   // ── Descente (après le pull cours, qui range les cours itérés) ──
   getIt<PullCoordinator>().registerHandler(

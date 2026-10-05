@@ -21,6 +21,14 @@ String syncAggregateLabel(AppLocalizations l10n, String aggregateType) {
       return l10n.syncAggregateEvaluation;
     case 'CLASSROOM_TRANSFER':
       return l10n.syncAggregateClassroomTransfer;
+    case 'CHAPITRE':
+      return l10n.syncAggregateChapitre;
+    case 'CHAPITRE_ORDRE':
+      return l10n.syncAggregateChapitreOrdre;
+    case 'CHAPITRE_NOTE':
+      return l10n.syncAggregateChapitreNote;
+    case 'CHAPITRE_RESSOURCE':
+      return l10n.syncAggregateChapitreRessource;
     default:
       return aggregateType;
   }

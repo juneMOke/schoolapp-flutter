@@ -1,15 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart'
+    show kAcademicsChapitresResourcePrefix;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/per_cours_keyset_puller.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/offline/academics_delta_pull_outcome.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_pull_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/chapitre_dto.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_sync_api.dart';
-
-/// Préfixe `sync_meta` du flux des chapitres — clé effective
-/// `academics_chapitres:{coursId}`, un curseur par cours comme les
-/// évaluations. C'est aussi la ressource du registre des disparitions.
-const String kAcademicsChapitresResourcePrefix = 'academics_chapitres';
 
 /// La descente des chapitres de tous les cours du professeur, par le moteur
 /// des flux scopés cours ([PerCoursKeysetPuller]).

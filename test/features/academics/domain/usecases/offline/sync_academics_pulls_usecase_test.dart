@@ -61,8 +61,9 @@ class _RecordingCoordinator extends PullCoordinator {
 }
 
 void main() {
-  /// L'ordre d'enregistrement des six handlers dans
-  /// `lib/core/di/offline_modules/academics_offline_di.dart`, recopié ici parce
+  /// L'ordre d'enregistrement des sept handlers dans
+  /// `lib/core/di/offline_modules/academics_offline_di.dart` (puis
+  /// `course_programme_di.dart` pour les chapitres), recopié ici parce
   /// qu'un test unitaire ne peut pas monter la DI réelle (base, Dio, réseau).
   ///
   /// Ce n'est pas cette liste qui fait autorité : `test/core/di/
@@ -76,6 +77,7 @@ void main() {
     'academics_cours',
     'academics_evaluations',
     'academics_notes',
+    'academics_chapitres',
   ];
   const applique = PullOutcome.updated(upserted: 1);
 
@@ -116,7 +118,7 @@ void main() {
   tearDown(() async => completionBus.dispose());
 
   group('périmètre demandé', () {
-    test('les six ressources des deux écrans, et elles seules', () async {
+    test('les sept ressources des deux écrans, et elles seules', () async {
       mountRegistry(ordreDeLaDi);
 
       await useCase();
@@ -129,6 +131,7 @@ void main() {
         'academics_cours',
         'academics_evaluations',
         'academics_notes',
+        'academics_chapitres',
       });
     });
 
@@ -138,7 +141,7 @@ void main() {
       await useCase();
 
       expect(handlers['finance_payments']!.calls, 0);
-      expect(journal, hasLength(6));
+      expect(journal, hasLength(7));
     });
 
     test('le rapport rend compte de CHAQUE ressource demandée', () async {
@@ -190,6 +193,7 @@ void main() {
         {'academics_cours'},
         {'academics_evaluations'},
         {'academics_notes'},
+        {'academics_chapitres'},
       ]);
     });
 
@@ -204,10 +208,10 @@ void main() {
       // diffusait lui aussi, et rien n'aurait fait rougir un écran relu deux
       // fois par pull si on ne comptait que les messages.
       final diffusees = notified.expand((sujets) => sujets).toList();
-      expect(diffusees, hasLength(6));
+      expect(diffusees, hasLength(7));
       expect(
         diffusees.toSet(),
-        hasLength(6),
+        hasLength(7),
         reason: 'ressource diffusée deux fois : $diffusees',
       );
     });
@@ -222,7 +226,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(notified, isNot(contains({'schedule_sessions'})));
-      expect(notified, hasLength(5));
+      expect(notified, hasLength(6));
     });
 
     test(
@@ -237,7 +241,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
 
         expect(notified, isNot(contains({'schedule_sessions'})));
-        expect(notified, hasLength(5));
+        expect(notified, hasLength(6));
         expect(rapport.succeeded('schedule_sessions'), isFalse);
         expect(rapport.succeeded('academics_notes'), isTrue);
       },

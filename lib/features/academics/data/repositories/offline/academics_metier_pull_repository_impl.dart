@@ -12,6 +12,11 @@ import 'package:school_app_flutter/features/academics/domain/entities/offline/ac
 const String kAcademicsEvaluationsResourcePrefix = 'academics_evaluations';
 const String kAcademicsNotesResourcePrefix = 'academics_notes';
 
+/// Le flux des chapitres du programme, scopé cours comme les deux autres —
+/// clé effective `academics_chapitres:{coursId}`. Tiré par le module
+/// `course_programme`, déclaré ici avec ses frères.
+const String kAcademicsChapitresResourcePrefix = 'academics_chapitres';
+
 /// Pull KEYSET métier (évaluations, notes), **itéré par cours** par le
 /// [PerCoursKeysetPuller]. L'application saute les lignes locales
 /// `PENDING_SYNC` (jamais de clobber d'écriture non synchronisée).

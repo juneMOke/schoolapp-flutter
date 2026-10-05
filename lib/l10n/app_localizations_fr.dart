@@ -1450,7 +1450,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuCourses => 'Cours';
 
   @override
-  String get subMenuMyCourses => 'Mes cours';
+  String get subMenuMyCourses => 'Mes évaluations';
 
   @override
   String get subMenuTimetable => 'Emploi du temps';
@@ -1591,7 +1591,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get courseDetailBackToCourses => 'Mes cours';
+  String get courseDetailBackToCourses => 'Mes évaluations';
 
   @override
   String courseDetailEvaluationCount(int count) {
@@ -14247,4 +14247,211 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get photoCropUnavailable =>
       'La photo d\'origine n\'est pas sur ce poste : reconnectez-vous pour la recadrer.';
+
+  @override
+  String get subMenuCourseProgramme => 'Mes cours';
+
+  @override
+  String get programmeBackToCourses => 'Mes cours';
+
+  @override
+  String programmeChapitresCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chapitres',
+      one: '1 chapitre',
+      zero: 'Aucun chapitre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String programmeSeancesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances prévues',
+      one: '1 séance prévue',
+      zero: 'Aucune séance prévue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String programmeEvaluationsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count évaluations',
+      one: '1 évaluation',
+      zero: 'Aucune évaluation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get programmeProgressTitle => 'Avancement du programme';
+
+  @override
+  String programmeProgressDone(int done, int total) {
+    return '$done/$total chapitres terminés';
+  }
+
+  @override
+  String programmeProgressDetail(int enCours, int aVenir) {
+    return '$enCours en cours · $aVenir à venir';
+  }
+
+  @override
+  String programmeProgressA11y(int percent) {
+    return 'Avancement : $percent %';
+  }
+
+  @override
+  String get programmeChapitresTitle => 'Chapitres';
+
+  @override
+  String get programmeChapitresSubtitle => 'dans l\'ordre de progression';
+
+  @override
+  String get chapitreStatutPlanifie => 'Planifié';
+
+  @override
+  String get chapitreStatutEnCours => 'En cours';
+
+  @override
+  String get chapitreStatutTermine => 'Terminé';
+
+  @override
+  String chapitreRowSeances(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances',
+      one: '1 séance',
+      zero: 'Aucune séance',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapitreRowObjectifs(int done, int total) {
+    return '$done/$total objectifs';
+  }
+
+  @override
+  String chapitreRowBlocs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count blocs de contenu',
+      one: '1 bloc de contenu',
+      zero: 'Aucun bloc',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapitreRowEvaluations(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count évaluations',
+      one: '1 évaluation',
+      zero: 'Aucune évaluation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapitreRowNotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chapitreActionMoveUp => 'Monter';
+
+  @override
+  String get chapitreActionMoveDown => 'Descendre';
+
+  @override
+  String get chapitreActionEdit => 'Modifier';
+
+  @override
+  String get chapitreActionDelete => 'Supprimer';
+
+  @override
+  String get chapitreActionMore => 'Plus d\'actions';
+
+  @override
+  String chapitreActionOpen(int numero, String titre) {
+    return 'Ouvrir le chapitre $numero : $titre';
+  }
+
+  @override
+  String get chapitreAwaitingDownload => 'Synchronisation en cours';
+
+  @override
+  String get programmeFabNewChapitre => 'Nouveau chapitre';
+
+  @override
+  String get programmeEmptyTitle => 'Programme vide';
+
+  @override
+  String get programmeEmptyMessage =>
+      'Ce cours n\'a pas encore de chapitre. Découpez le programme annuel en chapitres pour suivre l\'avancement et rattacher les évaluations.';
+
+  @override
+  String get programmeEmptyAction => 'Créer un chapitre';
+
+  @override
+  String get programmeEmptyReadOnlyMessage =>
+      'Ce cours n\'a pas encore de chapitre.';
+
+  @override
+  String get programmeLoadingA11yLabel => 'Chargement du programme';
+
+  @override
+  String get programmeErrorTitle => 'Programme illisible';
+
+  @override
+  String get programmeErrorMessage =>
+      'Le programme n\'a pas pu être lu sur cette tablette.';
+
+  @override
+  String get programmeDeleteTitle => 'Supprimer le chapitre ?';
+
+  @override
+  String programmeDeleteMessage(String titre) {
+    return '« $titre » sera retiré du programme. Les évaluations qui y étaient rattachées restent en place, mais perdent ce rattachement.';
+  }
+
+  @override
+  String get programmeDeleteConfirm => 'Supprimer';
+
+  @override
+  String get programmeChapitreDeleted => 'Chapitre supprimé';
+
+  @override
+  String get programmeWriteFailed =>
+      'L\'enregistrement a échoué sur la tablette.';
+
+  @override
+  String get syncAggregateChapitre => 'Chapitre du programme';
+
+  @override
+  String get syncAggregateChapitreOrdre => 'Ordre des chapitres';
+
+  @override
+  String get syncAggregateChapitreNote => 'Note de séance';
+
+  @override
+  String get syncAggregateChapitreRessource => 'Ressource de chapitre';
 }

@@ -325,7 +325,7 @@ class MenuFactory {
     );
   }
 
-  /// Menu Cours avec son sous-menu « Mes cours ».
+  /// Menu Cours : Emploi du temps, Mes cours (le programme), Mes évaluations.
   static MenuItem _createCoursesMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.coursesMenuId,
@@ -333,14 +333,19 @@ class MenuFactory {
       icon: Icons.menu_book_outlined,
       subMenus: [
         SubMenuItem(
-          id: MenuConstants.myCoursesId,
-          title: l10n.subMenuMyCourses,
-          route: AppRoutesNames.myCourses,
-        ),
-        SubMenuItem(
           id: MenuConstants.timetableId,
           title: l10n.subMenuTimetable,
           route: AppRoutesNames.timetable,
+        ),
+        SubMenuItem(
+          id: MenuConstants.courseProgrammeId,
+          title: l10n.subMenuCourseProgramme,
+          route: AppRoutesNames.courseProgramme,
+        ),
+        SubMenuItem(
+          id: MenuConstants.myCoursesId,
+          title: l10n.subMenuMyCourses,
+          route: AppRoutesNames.myCourses,
         ),
       ],
     );

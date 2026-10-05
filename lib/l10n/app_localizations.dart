@@ -2357,7 +2357,7 @@ abstract class AppLocalizations {
   /// No description provided for @subMenuMyCourses.
   ///
   /// In en, this message translates to:
-  /// **'My courses'**
+  /// **'My assessments'**
   String get subMenuMyCourses;
 
   /// No description provided for @subMenuTimetable.
@@ -2519,7 +2519,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailBackToCourses.
   ///
   /// In en, this message translates to:
-  /// **'My courses'**
+  /// **'My assessments'**
   String get courseDetailBackToCourses;
 
   /// No description provided for @courseDetailEvaluationCount.
@@ -22303,6 +22303,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The original photo is not on this device: reconnect to crop it.'**
   String get photoCropUnavailable;
+
+  /// No description provided for @subMenuCourseProgramme.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get subMenuCourseProgramme;
+
+  /// No description provided for @programmeBackToCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get programmeBackToCourses;
+
+  /// No description provided for @programmeChapitresCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No chapters} =1{1 chapter} other{{count} chapters}}'**
+  String programmeChapitresCount(int count);
+
+  /// No description provided for @programmeSeancesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No sessions planned} =1{1 session planned} other{{count} sessions planned}}'**
+  String programmeSeancesCount(int count);
+
+  /// No description provided for @programmeEvaluationsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No assessments} =1{1 assessment} other{{count} assessments}}'**
+  String programmeEvaluationsCount(int count);
+
+  /// No description provided for @programmeProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme progress'**
+  String get programmeProgressTitle;
+
+  /// No description provided for @programmeProgressDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} chapters completed'**
+  String programmeProgressDone(int done, int total);
+
+  /// No description provided for @programmeProgressDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{enCours} in progress · {aVenir} upcoming'**
+  String programmeProgressDetail(int enCours, int aVenir);
+
+  /// No description provided for @programmeProgressA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {percent}%'**
+  String programmeProgressA11y(int percent);
+
+  /// No description provided for @programmeChapitresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapters'**
+  String get programmeChapitresTitle;
+
+  /// No description provided for @programmeChapitresSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'in teaching order'**
+  String get programmeChapitresSubtitle;
+
+  /// No description provided for @chapitreStatutPlanifie.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get chapitreStatutPlanifie;
+
+  /// No description provided for @chapitreStatutEnCours.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get chapitreStatutEnCours;
+
+  /// No description provided for @chapitreStatutTermine.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get chapitreStatutTermine;
+
+  /// No description provided for @chapitreRowSeances.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No sessions} =1{1 session} other{{count} sessions}}'**
+  String chapitreRowSeances(int count);
+
+  /// No description provided for @chapitreRowObjectifs.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} objectives'**
+  String chapitreRowObjectifs(int done, int total);
+
+  /// No description provided for @chapitreRowBlocs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No content block} =1{1 content block} other{{count} content blocks}}'**
+  String chapitreRowBlocs(int count);
+
+  /// No description provided for @chapitreRowEvaluations.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No assessments} =1{1 assessment} other{{count} assessments}}'**
+  String chapitreRowEvaluations(int count);
+
+  /// No description provided for @chapitreRowNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note} other{{count} notes}}'**
+  String chapitreRowNotes(int count);
+
+  /// No description provided for @chapitreActionMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get chapitreActionMoveUp;
+
+  /// No description provided for @chapitreActionMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get chapitreActionMoveDown;
+
+  /// No description provided for @chapitreActionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get chapitreActionEdit;
+
+  /// No description provided for @chapitreActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get chapitreActionDelete;
+
+  /// No description provided for @chapitreActionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get chapitreActionMore;
+
+  /// No description provided for @chapitreActionOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open chapter {numero}: {titre}'**
+  String chapitreActionOpen(int numero, String titre);
+
+  /// No description provided for @chapitreAwaitingDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing'**
+  String get chapitreAwaitingDownload;
+
+  /// No description provided for @programmeFabNewChapitre.
+  ///
+  /// In en, this message translates to:
+  /// **'New chapter'**
+  String get programmeFabNewChapitre;
+
+  /// No description provided for @programmeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty programme'**
+  String get programmeEmptyTitle;
+
+  /// No description provided for @programmeEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no chapter yet. Split the yearly programme into chapters to track progress and link assessments.'**
+  String get programmeEmptyMessage;
+
+  /// No description provided for @programmeEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a chapter'**
+  String get programmeEmptyAction;
+
+  /// No description provided for @programmeEmptyReadOnlyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no chapter yet.'**
+  String get programmeEmptyReadOnlyMessage;
+
+  /// No description provided for @programmeLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the programme'**
+  String get programmeLoadingA11yLabel;
+
+  /// No description provided for @programmeErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme unavailable'**
+  String get programmeErrorTitle;
+
+  /// No description provided for @programmeErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The programme could not be read on this device.'**
+  String get programmeErrorMessage;
+
+  /// No description provided for @programmeDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the chapter?'**
+  String get programmeDeleteTitle;
+
+  /// No description provided for @programmeDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'“{titre}” will be removed from the programme. Assessments linked to it remain, but lose this link.'**
+  String programmeDeleteMessage(String titre);
+
+  /// No description provided for @programmeDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get programmeDeleteConfirm;
+
+  /// No description provided for @programmeChapitreDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter deleted'**
+  String get programmeChapitreDeleted;
+
+  /// No description provided for @programmeWriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving failed on this device.'**
+  String get programmeWriteFailed;
+
+  /// No description provided for @syncAggregateChapitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme chapter'**
+  String get syncAggregateChapitre;
+
+  /// No description provided for @syncAggregateChapitreOrdre.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter order'**
+  String get syncAggregateChapitreOrdre;
+
+  /// No description provided for @syncAggregateChapitreNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Session note'**
+  String get syncAggregateChapitreNote;
+
+  /// No description provided for @syncAggregateChapitreRessource.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter resource'**
+  String get syncAggregateChapitreRessource;
 }
 
 class _AppLocalizationsDelegate

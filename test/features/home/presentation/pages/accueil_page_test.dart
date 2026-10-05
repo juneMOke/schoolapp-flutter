@@ -129,12 +129,13 @@ void main() {
 
     // Résultats et Configuration : page unique, au singulier.
     expect(find.text('1 page'), findsNWidgets(2));
-    // Cours, Inscriptions (Réinscription et Pré-inscription masquées par
+    // Inscriptions (Réinscription et Pré-inscription masquées par
     // `kHiddenSubMenus`), Finances (tableau de bord + Facturations) et Contrôle
     // des frais (tableau de bord + contrôle par frais) en ont deux.
-    expect(find.text('2 pages'), findsNWidgets(4));
-    // Classes et Disciplines en ont trois.
-    expect(find.text('3 pages'), findsNWidgets(2));
+    expect(find.text('2 pages'), findsNWidgets(3));
+    // Classes, Disciplines et Cours (emploi du temps, programme, évaluations)
+    // en ont trois.
+    expect(find.text('3 pages'), findsNWidgets(3));
     expect(find.text('4 pages'), findsNothing);
   });
 
@@ -194,12 +195,13 @@ void main() {
   ) async {
     await pumpAccueil(tester);
 
-    // 2 + 2 + 2 + 3 + 2 + 1 + 3 + 1 sous-modules (spec §03 ; Finances redescendue
+    // 2 + 2 + 2 + 3 + 3 + 1 + 3 + 1 sous-modules (spec §03 ; Cours en a trois
+    // depuis le programme de cours ; Finances redescendue
     // à 2, le Recouvrement ayant emporté sa page dans son propre module,
     // où il en a depuis deux ; plus le pavé Configuration). Inscriptions est
     // descendue de 4 à 2 : Réinscription et Pré-inscription sont masquées par
     // décision produit (`kHiddenSubMenus`).
-    expect(find.byType(AccueilSubModulePill), findsNWidgets(16));
+    expect(find.byType(AccueilSubModulePill), findsNWidgets(17));
   });
 
   /// L'accueil est le **seul** chemin vers `/dev/components` et

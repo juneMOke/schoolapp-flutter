@@ -43,6 +43,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_o
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_settings_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_coordinator_page.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/pages/programme_coordinator_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_feature_scope.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_coordinator_page.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_feature_scope.dart';
@@ -452,7 +453,15 @@ class _HomePageView extends StatelessWidget {
           child: AttendanceOverviewDashboardPage(),
         );
       case MenuConstants.myCoursesId:
-        return const CoursesFeatureScope(child: CoursesCoordinatorPage());
+        return const CoursesFeatureScope(
+          key: ValueKey(MenuConstants.myCoursesId),
+          child: CoursesCoordinatorPage(),
+        );
+      case MenuConstants.courseProgrammeId:
+        return const CoursesFeatureScope(
+          key: ValueKey(MenuConstants.courseProgrammeId),
+          child: ProgrammeCoordinatorPage(),
+        );
       case MenuConstants.timetableId:
         return const ScheduleFeatureScope(child: ScheduleCoordinatorPage());
       case MenuConstants.resultatsClasseId:

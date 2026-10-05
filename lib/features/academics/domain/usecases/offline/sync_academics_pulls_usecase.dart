@@ -38,7 +38,7 @@ class SyncAcademicsPullsUseCase {
 
   const SyncAcademicsPullsUseCase(this._coordinator);
 
-  /// Les six ressources que ces écrans lisent — **un ensemble, jamais une
+  /// Les sept ressources que ces écrans lisent — **un ensemble, jamais une
   /// séquence** : l'ordre d'exécution est celui du registre, pas celui de ces
   /// accolades (cf. `PullCoordinator.pullSubset`).
   ///
@@ -54,6 +54,9 @@ class SyncAcademicsPullsUseCase {
     kAcademicsCoursResourcePrefix,
     kAcademicsEvaluationsResourcePrefix,
     kAcademicsNotesResourcePrefix,
+    // Le programme (Cours ▸ Mes cours) et la modale de création d'évaluation,
+    // qui coche ses chapitres.
+    kAcademicsChapitresResourcePrefix,
   };
 
   Future<PullRunReport> call() => _coordinator.pullSubset(resources);

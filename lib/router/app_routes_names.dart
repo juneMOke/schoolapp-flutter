@@ -91,6 +91,8 @@ class AppRoutesNames {
       '/disciplines/${MenuConstants.disciplinesListId}';
 
   static const String myCourses = '/cours/${MenuConstants.myCoursesId}';
+  static const String courseProgramme =
+      '/cours/${MenuConstants.courseProgrammeId}';
   static const String timetable = '/cours/${MenuConstants.timetableId}';
 
   static const String resultatsClasse =

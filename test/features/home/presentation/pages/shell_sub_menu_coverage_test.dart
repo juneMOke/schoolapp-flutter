@@ -103,6 +103,7 @@ const Map<String, String> _constants = {
   'presencesId': 'presences',
   'disciplinesListId': 'disciplines-list',
   'myCoursesId': 'my-courses',
+  'courseProgrammeId': 'course-programme',
   'timetableId': 'timetable',
   'resultatsClasseId': 'resultats-classe',
   'documentsStudentId': 'documents-eleve',

@@ -62,6 +62,7 @@ void main() {
     Perm.disciplineDelete: 'discipline.delete',
     Perm.academicsCourseRead: 'academics.course.read',
     Perm.academicsCourseWrite: 'academics.course.write',
+    Perm.academicsProgrammeWrite: 'academics.programme.write',
     Perm.academicsCourseDelete: 'academics.course.delete',
     Perm.academicsGradeRead: 'academics.grade.read',
     Perm.academicsGradeWrite: 'academics.grade.write',
@@ -89,67 +90,71 @@ void main() {
     Perm.platformSchoolProvision: 'platform.school.provision',
   };
 
-  test('le catalogue compte 73 permissions (v1.8 du catalogue serveur + RH)', () {
-    // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
-    // le prendre. Un ajout, pas un renommage — aucune ligne de
-    // `school_role_permission` ne référence la valeur neuve, donc rien à
-    // migrer ; mais le serveur doit la connaître avant que cette release ne
-    // pose la garde, sinon elle ferme une porte que personne ne peut ouvrir.
-    //
-    // 49 → 50 : `school.provisioning.write`, semée par la migration serveur V93
-    // sur `DIRECTOR` et `SUPER_ADMIN`. Ajout également, et le serveur la connaît
-    // déjà — c'est le client qui rattrapait son retard.
-    //
-    // 50 → 54 : les quatre droits de la caisse boutique (ADR-020), semés sur
-    // tout le parc par la migration serveur V97. La scission `catalog` / `sale`
-    // n'est pas une symétrie de façade : la comptabilité tient la caisse et LIT
-    // le catalogue, mais ne l'écrit pas — sinon l'interdiction du prix libre à
-    // la caisse ne garderait plus rien.
-    //
-    // 54 → 57 : les trois droits du registre des dépenses, semés sur la
-    // Direction, le Super admin et la Comptabilité par la migration serveur
-    // V133. Retirer (`expense.delete`) est nommé à part de saisir : une école
-    // peut confier l'un sans l'autre.
-    //
-    // 57 → 58 : `finance.rate.override`, qui garde la correction d'un taux au
-    // guichet. ⚠️ **Le client la déclare AVANT que le serveur ne la sème** —
-    // l'inverse des ajouts précédents. C'est sans danger dans ce sens : un
-    // ensemble effectif qui ne la porte pas masque le déclencheur, et le taux de
-    // l'école s'applique. Mais tant que le template serveur ne l'accorde à
-    // personne, la correction de taux est **inaccessible à toute l'école** — et
-    // c'est pour cela que l'exigence n'est pas encore inscrite dans
-    // `kGuardedWriteActions` : elle y ferait rougir, à raison, le test « aucune
-    // exigence n'est hors de portée de tous ».
-    //
-    // 58 → 61 : les trois gestes du circuit de validation des dépenses
-    // (`expense.decide`, `expense.pay`, `expense.reopen`). ⚠️ **Mêmes réserves
-    // que `finance.rate.override` ci-dessus, et pour la même raison** : le
-    // client les déclare avant que le serveur ne les sème (livraison back
-    // C0→C3). D'ici là aucun rôle ne les détient, décider reste inaccessible à
-    // toute l'école, et c'est pourquoi les trois `ModuleAccess` correspondants
-    // sont hors de `kGuardedWriteActions`.
-    //
-    // 61 → 62 : `finance.payment.cancel`, qui garde l'annulation et la
-    // correction d'un versement. Le serveur la connaît DÉJÀ (elle garde sa
-    // route d'annulation en ligne) et la sème : les comptes de caisse de La
-    // Fontaine la détiennent. C'est le client qui rattrape son retard.
-    //
-    // 62 → 68 : les six droits du fichier du personnel (`hr.staff.*`,
-    // `hr.pay.*`, `hr.document.*`), arrêtés avec le back le 2026-09-29.
-    // ⚠️ **Déclarés avant que le serveur ne les sème** (lot back H0), comme les
-    // gestes du circuit des dépenses : aucun écran ne les consulte encore.
-    //
-    // 68 → 71 : les trois droits du Pointage (`hr.attendance.read`, `.write`,
-    // `.manage`), arrêtés avec le back le 2026-09-29.
-    //
-    // 71 → 72 : `hr.pay.manage`, qui garde valider, renvoyer et rouvrir la
-    // paie, et ses réglages (DIRECTOR, SUPER_ADMIN). ⚠️ Déclaré avant que le
-    // serveur ne le sème (lot back P0).
-    //
-    // 72 → 73 : `student.photo.write`, prendre ou retirer la photo d'un élève
-    // (SECRETARY, DIRECTOR, SUPER_ADMIN — migration back V161).
-    expect(Perm.values, hasLength(73));
-  });
+  test(
+    'le catalogue compte 74 permissions (v1.8 du catalogue serveur + RH + programme)',
+    () {
+      // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
+      // le prendre. Un ajout, pas un renommage — aucune ligne de
+      // `school_role_permission` ne référence la valeur neuve, donc rien à
+      // migrer ; mais le serveur doit la connaître avant que cette release ne
+      // pose la garde, sinon elle ferme une porte que personne ne peut ouvrir.
+      //
+      // 49 → 50 : `school.provisioning.write`, semée par la migration serveur V93
+      // sur `DIRECTOR` et `SUPER_ADMIN`. Ajout également, et le serveur la connaît
+      // déjà — c'est le client qui rattrapait son retard.
+      //
+      // 50 → 54 : les quatre droits de la caisse boutique (ADR-020), semés sur
+      // tout le parc par la migration serveur V97. La scission `catalog` / `sale`
+      // n'est pas une symétrie de façade : la comptabilité tient la caisse et LIT
+      // le catalogue, mais ne l'écrit pas — sinon l'interdiction du prix libre à
+      // la caisse ne garderait plus rien.
+      //
+      // 54 → 57 : les trois droits du registre des dépenses, semés sur la
+      // Direction, le Super admin et la Comptabilité par la migration serveur
+      // V133. Retirer (`expense.delete`) est nommé à part de saisir : une école
+      // peut confier l'un sans l'autre.
+      //
+      // 57 → 58 : `finance.rate.override`, qui garde la correction d'un taux au
+      // guichet. ⚠️ **Le client la déclare AVANT que le serveur ne la sème** —
+      // l'inverse des ajouts précédents. C'est sans danger dans ce sens : un
+      // ensemble effectif qui ne la porte pas masque le déclencheur, et le taux de
+      // l'école s'applique. Mais tant que le template serveur ne l'accorde à
+      // personne, la correction de taux est **inaccessible à toute l'école** — et
+      // c'est pour cela que l'exigence n'est pas encore inscrite dans
+      // `kGuardedWriteActions` : elle y ferait rougir, à raison, le test « aucune
+      // exigence n'est hors de portée de tous ».
+      //
+      // 58 → 61 : les trois gestes du circuit de validation des dépenses
+      // (`expense.decide`, `expense.pay`, `expense.reopen`). ⚠️ **Mêmes réserves
+      // que `finance.rate.override` ci-dessus, et pour la même raison** : le
+      // client les déclare avant que le serveur ne les sème (livraison back
+      // C0→C3). D'ici là aucun rôle ne les détient, décider reste inaccessible à
+      // toute l'école, et c'est pourquoi les trois `ModuleAccess` correspondants
+      // sont hors de `kGuardedWriteActions`.
+      //
+      // 61 → 62 : `finance.payment.cancel`, qui garde l'annulation et la
+      // correction d'un versement. Le serveur la connaît DÉJÀ (elle garde sa
+      // route d'annulation en ligne) et la sème : les comptes de caisse de La
+      // Fontaine la détiennent. C'est le client qui rattrape son retard.
+      //
+      // 62 → 68 : les six droits du fichier du personnel (`hr.staff.*`,
+      // `hr.pay.*`, `hr.document.*`), arrêtés avec le back le 2026-09-29.
+      // ⚠️ **Déclarés avant que le serveur ne les sème** (lot back H0), comme les
+      // gestes du circuit des dépenses : aucun écran ne les consulte encore.
+      //
+      // 68 → 71 : les trois droits du Pointage (`hr.attendance.read`, `.write`,
+      // `.manage`), arrêtés avec le back le 2026-09-29.
+      //
+      // 71 → 72 : `hr.pay.manage`, qui garde valider, renvoyer et rouvrir la
+      // paie, et ses réglages (DIRECTOR, SUPER_ADMIN). ⚠️ Déclaré avant que le
+      // serveur ne le sème (lot back P0).
+      //
+      // 73 → 74 : `academics.programme.write`, écrire le programme de cours.
+      // 72 → 73 : `student.photo.write`, prendre ou retirer la photo d'un élève
+      // (SECRETARY, DIRECTOR, SUPER_ADMIN — migration back V161).
+      expect(Perm.values, hasLength(74));
+    },
+  );
 
   // La confusion coûteuse : deux permissions au nom voisin, dont une seule
   // ouvre quoi que ce soit. Si un jour l'une prenait la valeur de l'autre, la
