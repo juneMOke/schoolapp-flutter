@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -10,6 +11,8 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/detai
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_cubit.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_state.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/widgets/common/programme_write_gate.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/widgets/form/chapitre_form_launcher.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/programme/programme_chapitres_card.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/programme/programme_header_card.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_empty_state.dart';
@@ -18,27 +21,25 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le programme d'un cours (spec §2–3) : barre de retour, en-tête, chapitres
-/// dans l'ordre de progression. Lit le [ProgrammeCubit] fourni par le parent.
-///
-/// [onCreate] / [onEdit] ouvrent la modale du chapitre ; `null`, la page est en
-/// lecture seule.
+/// dans l'ordre de progression, FAB « Nouveau chapitre ». Lit le
+/// [ProgrammeCubit] fourni par le parent ; les gestes d'écriture n'existent
+/// qu'avec `academics.programme.write` ([ProgrammeWriteGate]).
 class ProgrammePage extends StatelessWidget {
   final CoursDetailArgs cours;
   final VoidCallback onBack;
   final void Function(Chapitre chapitre) onOpenChapitre;
-  final VoidCallback? onCreate;
-  final void Function(Chapitre chapitre)? onEdit;
-  final Widget? floatingActionButton;
 
   const ProgrammePage({
     super.key,
     required this.cours,
     required this.onBack,
     required this.onOpenChapitre,
-    this.onCreate,
-    this.onEdit,
-    this.floatingActionButton,
   });
+
+  void _create(BuildContext context) => openChapitreForm(context, cours: cours);
+
+  void _edit(BuildContext context, Chapitre chapitre) =>
+      openChapitreForm(context, cours: cours, chapitre: chapitre);
 
   Future<void> _confirmDelete(BuildContext context, Chapitre chapitre) async {
     final l10n = AppLocalizations.of(context)!;
@@ -58,9 +59,16 @@ class ProgrammePage extends StatelessWidget {
 
   void _onFeedback(BuildContext context, ProgrammeState state) {
     final l10n = AppLocalizations.of(context)!;
+    final titre = state.feedback?.titre ?? '';
     switch (state.feedback?.kind) {
+      case ProgrammeFeedbackKind.chapitreCreated:
+        AppSnackBar.showSuccess(context, l10n.programmeChapitreCreated(titre));
+      case ProgrammeFeedbackKind.chapitreUpdated:
+        AppSnackBar.showSuccess(context, l10n.programmeChapitreUpdated(titre));
       case ProgrammeFeedbackKind.chapitreDeleted:
         AppSnackBar.showSuccess(context, l10n.programmeChapitreDeleted);
+      case ProgrammeFeedbackKind.ressourceKeepFailed:
+        AppSnackBar.showError(context, l10n.ressourceKeepFailed);
       case ProgrammeFeedbackKind.writeFailed:
         AppSnackBar.showError(context, l10n.programmeWriteFailed);
       case null:
@@ -77,7 +85,7 @@ class ProgrammePage extends StatelessWidget {
       listener: _onFeedback,
       child: AppPageBackground(
         scrollable: true,
-        floatingActionButton: floatingActionButton,
+        floatingActionButton: _fab(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -108,6 +116,30 @@ class ProgrammePage extends StatelessWidget {
     );
   }
 
+  /// « Nouveau chapitre » : seulement quand le programme a déjà un chapitre —
+  /// vide, l'appel à l'action est dans l'état vide.
+  Widget _fab(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return BlocBuilder<ProgrammeCubit, ProgrammeState>(
+      buildWhen: (prev, curr) =>
+          prev.status != curr.status ||
+          prev.programme?.isEmpty != curr.programme?.isEmpty,
+      builder: (context, state) {
+        final ready = state.status == ProgrammeStatus.ready;
+        if (!ready || (state.programme?.isEmpty ?? true)) {
+          return const SizedBox.shrink();
+        }
+        return ProgrammeWriteGate(
+          child: EteeloFab(
+            label: l10n.programmeFabNewChapitre,
+            icon: Icons.add_rounded,
+            onPressed: () => _create(context),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _body(BuildContext context, ProgrammeState state) {
     final programme = state.programme;
     if (state.status == ProgrammeStatus.failure || programme == null) {
@@ -128,13 +160,13 @@ class ProgrammePage extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         if (programme.isEmpty)
-          ProgrammeEmptyState(onCreate: onCreate)
+          ProgrammeEmptyState(onCreate: () => _create(context))
         else
           ProgrammeChapitresCard(
             chapitres: programme.chapitres,
             onOpen: onOpenChapitre,
             onMove: (chapitre, offset) => cubit.move(chapitre.id, offset),
-            onEdit: onEdit,
+            onEdit: (chapitre) => _edit(context, chapitre),
             onDelete: (chapitre) => _confirmDelete(context, chapitre),
           ),
       ],

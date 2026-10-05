@@ -60,6 +60,11 @@ class EteeloTextInput extends StatefulWidget {
   /// padding gauche du cadre passe donc à zéro quand il est fourni.
   final Widget? prefix;
 
+  /// Masque le libellé visible ; il continue de nommer le champ pour les
+  /// lecteurs d'écran. Réservé aux champs déjà nommés par leur contexte (une
+  /// ligne numérotée d'une liste, la saisie libre sous des puces).
+  final bool hideLabel;
+
   const EteeloTextInput({
     super.key,
     required this.controller,
@@ -82,6 +87,7 @@ class EteeloTextInput extends StatefulWidget {
     this.inputFormatters,
     this.capitalization = EteeloTextCapitalization.auto,
     this.prefix,
+    this.hideLabel = false,
   });
 
   @override
@@ -295,8 +301,10 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ExcludeSemantics(child: _buildLabel()),
-            const SizedBox(height: _labelGap),
+            if (!widget.hideLabel) ...[
+              ExcludeSemantics(child: _buildLabel()),
+              const SizedBox(height: _labelGap),
+            ],
             _buildField(state, resolvedErrorText),
             if (resolvedErrorText != null && resolvedErrorText.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xs),

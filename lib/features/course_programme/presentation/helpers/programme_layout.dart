@@ -21,6 +21,9 @@ class ProgrammeLayout {
   /// Sous cette largeur, Modifier / Supprimer passent dans un menu « ⋮ ».
   static const double compactRowBelow = 600;
 
+  /// Largeur de la modale d'un chapitre.
+  static const double formDialogMaxWidth = 600;
+
   /// Largeur maximale du contenu.
   static const double contentMaxWidth = 1180;
 }

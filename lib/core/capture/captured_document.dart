@@ -7,14 +7,19 @@ import 'package:equatable/equatable.dart';
 enum DocumentMimeType {
   jpeg('image/jpeg'),
   png('image/png'),
-  pdf('application/pdf');
+  pdf('application/pdf'),
+  docx(
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ),
+  doc('application/msword');
 
   const DocumentMimeType(this.value);
 
   /// Type MIME, tel qu'il part dans la partie `metadata` d'un envoi.
   final String value;
 
-  bool get isImage => this != DocumentMimeType.pdf;
+  bool get isImage =>
+      this == DocumentMimeType.jpeg || this == DocumentMimeType.png;
 }
 
 /// Origine d'une pièce : photographiée depuis l'application, ou choisie parmi

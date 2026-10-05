@@ -60,8 +60,6 @@ void main() {
         cours: kMathsCours,
         onBack: () {},
         onOpenChapitre: (_) {},
-        onCreate: () {},
-        onEdit: (_) {},
       ),
     ),
     permissions: permissions,

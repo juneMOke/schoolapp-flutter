@@ -14454,4 +14454,217 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncAggregateChapitreRessource => 'Ressource de chapitre';
+
+  @override
+  String documentCaptureLimitsWithWord(int maxMegabytes) {
+    return 'JPEG, PNG, PDF ou Word · $maxMegabytes Mo au plus';
+  }
+
+  @override
+  String get documentCaptureImportFile => 'Importer un fichier';
+
+  @override
+  String get documentCaptureImportFileHint =>
+      'Un PDF ou un document Word déjà sur la tablette';
+
+  @override
+  String get chapitreFormNewTitle => 'Nouveau chapitre';
+
+  @override
+  String get chapitreFormEditTitle => 'Modifier le chapitre';
+
+  @override
+  String chapitreFormEyebrow(String branche, String classe) {
+    return '$branche — $classe';
+  }
+
+  @override
+  String get chapitreFormGroupIdentification => 'Identification';
+
+  @override
+  String get chapitreFormGroupPedagogie => 'Pédagogie';
+
+  @override
+  String get chapitreFormGroupPlanification => 'Planification';
+
+  @override
+  String get chapitreFormOptional => '(optionnel)';
+
+  @override
+  String get chapitreFormAdd => 'Ajouter';
+
+  @override
+  String get chapitreFormTitreLabel => 'Titre du chapitre';
+
+  @override
+  String get chapitreFormTitreHint => 'Ex. Fractions et décimaux';
+
+  @override
+  String get chapitreFormTitreRequired =>
+      'Le titre du chapitre est obligatoire.';
+
+  @override
+  String get chapitreFormTitreTooShort => 'Au moins 3 caractères.';
+
+  @override
+  String get chapitreFormResumeLabel => 'Résumé';
+
+  @override
+  String get chapitreFormResumeHint =>
+      'Ce que couvre le chapitre, en une ou deux phrases';
+
+  @override
+  String get chapitreFormObjectifsLabel => 'Objectifs d\'apprentissage';
+
+  @override
+  String get chapitreFormObjectifHint =>
+      'Ex. Résoudre une équation du 1er degré';
+
+  @override
+  String get chapitreFormObjectifRemove => 'Retirer cet objectif';
+
+  @override
+  String get chapitreFormStrategiesLabel => 'Stratégies d\'intervention';
+
+  @override
+  String get chapitreFormStrategyHint =>
+      'Autre stratégie (ex. Tutorat entre pairs)';
+
+  @override
+  String get chapitreStrategy1 => 'Exposé magistral';
+
+  @override
+  String get chapitreStrategy2 => 'Démonstration au tableau';
+
+  @override
+  String get chapitreStrategy3 => 'Travail en groupe';
+
+  @override
+  String get chapitreStrategy4 => 'Apprentissage par problèmes';
+
+  @override
+  String get chapitreStrategy5 => 'Questionnement dialogué';
+
+  @override
+  String get chapitreStrategy6 => 'Exercices gradués';
+
+  @override
+  String get chapitreStrategy7 => 'Pédagogie différenciée';
+
+  @override
+  String get chapitreStrategy8 => 'Remédiation';
+
+  @override
+  String get chapitreStrategy9 => 'Jeu de rôle';
+
+  @override
+  String get chapitreStrategy10 => 'Sortie / observation de terrain';
+
+  @override
+  String get chapitreFormRessourcesLabel => 'Ressources éducatives';
+
+  @override
+  String get ressourceEditorEmpty =>
+      'Joindre un document, un lien ou une référence de manuel';
+
+  @override
+  String get ressourceTypeRadioLabel => 'Type de ressource';
+
+  @override
+  String get ressourceTypeDocument => 'Document';
+
+  @override
+  String get ressourceTypeLien => 'Lien';
+
+  @override
+  String get ressourceTypeManuel => 'Manuel';
+
+  @override
+  String get ressourceNomLabel => 'Intitulé';
+
+  @override
+  String get ressourceNomHintDocument => 'Ex. Fiche d\'exercices n°2';
+
+  @override
+  String get ressourceNomHintLien => 'Ex. Vidéo — les fractions expliquées';
+
+  @override
+  String get ressourceNomHintManuel => 'Ex. Mathématiques 7e — Éd. CRP';
+
+  @override
+  String get ressourceUrlLabel => 'Adresse (URL)';
+
+  @override
+  String get ressourceUrlInvalid =>
+      'Adresse invalide — elle doit commencer par https://';
+
+  @override
+  String get ressourceReferenceLabel => 'Référence (pages, chapitre)';
+
+  @override
+  String get ressourceReferenceHint => 'Ex. p. 42 à 57';
+
+  @override
+  String get ressourceChooseFile => 'Choisir un fichier';
+
+  @override
+  String get ressourceReplaceFile => 'Remplacer le fichier';
+
+  @override
+  String ressourceFileHint(int maxMegabytes) {
+    return 'PDF, Word, image — $maxMegabytes Mo max';
+  }
+
+  @override
+  String get ressourceCaptureTitle => 'Document du chapitre';
+
+  @override
+  String get ressourceAddConfirm => 'Ajouter la ressource';
+
+  @override
+  String get ressourceRemove => 'Retirer la ressource';
+
+  @override
+  String ressourceDetail(String type, String detail) {
+    return '$type · $detail';
+  }
+
+  @override
+  String get chapitreFormStatutLabel => 'État d\'avancement';
+
+  @override
+  String get chapitreFormSousPeriodeLabel => 'Rattachement';
+
+  @override
+  String get chapitreFormSousPeriodeNone => 'Non rattaché';
+
+  @override
+  String get chapitreFormSeancesLabel => 'Nombre de séances prévues';
+
+  @override
+  String get chapitreFormSeancesInvalid => 'Nombre invalide.';
+
+  @override
+  String get chapitreFormRequiredLegend =>
+      'Champ obligatoire — le reste peut être complété plus tard.';
+
+  @override
+  String get chapitreFormCreate => 'Créer le chapitre';
+
+  @override
+  String get chapitreFormSave => 'Enregistrer';
+
+  @override
+  String programmeChapitreCreated(String titre) {
+    return 'Chapitre « $titre » créé';
+  }
+
+  @override
+  String programmeChapitreUpdated(String titre) {
+    return 'Chapitre « $titre » mis à jour';
+  }
+
+  @override
+  String get ressourceKeepFailed =>
+      'Une ressource n\'a pas pu être gardée sur la tablette.';
 }

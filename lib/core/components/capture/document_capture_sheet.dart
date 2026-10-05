@@ -17,6 +17,7 @@ Future<DocumentCaptureMode?> showDocumentCaptureSheet(
   BuildContext context, {
   required String title,
   bool cameraUnavailable = false,
+  DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
 }) {
   return showModalBottomSheet<DocumentCaptureMode>(
     context: context,
@@ -28,6 +29,7 @@ Future<DocumentCaptureMode?> showDocumentCaptureSheet(
     builder: (_) => DocumentCaptureSheet(
       title: title,
       cameraUnavailable: cameraUnavailable,
+      policy: policy,
     ),
   );
 }
@@ -37,11 +39,13 @@ Future<DocumentCaptureMode?> showDocumentCaptureSheet(
 class DocumentCaptureSheet extends StatelessWidget {
   final String title;
   final bool cameraUnavailable;
+  final DocumentCapturePolicy policy;
 
   const DocumentCaptureSheet({
     super.key,
     required this.title,
     this.cameraUnavailable = false,
+    this.policy = DocumentCapturePolicy.staffDocument,
   });
 
   @override
@@ -62,7 +66,9 @@ class DocumentCaptureSheet extends StatelessWidget {
             Text(title, style: AppTypography.titleMedium),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              l10n.documentCaptureLimits(DocumentCapturePolicy.maxMegabytes),
+              policy.acceptsWord
+                  ? l10n.documentCaptureLimitsWithWord(policy.maxMegabytes)
+                  : l10n.documentCaptureLimits(policy.maxMegabytes),
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -87,8 +93,12 @@ class DocumentCaptureSheet extends StatelessWidget {
             ),
             _CaptureOption(
               icon: Icons.picture_as_pdf_outlined,
-              label: l10n.documentCaptureImportPdf,
-              hint: l10n.documentCaptureImportPdfHint,
+              label: policy.acceptsWord
+                  ? l10n.documentCaptureImportFile
+                  : l10n.documentCaptureImportPdf,
+              hint: policy.acceptsWord
+                  ? l10n.documentCaptureImportFileHint
+                  : l10n.documentCaptureImportPdfHint,
               mode: DocumentCaptureMode.importPdf,
             ),
           ],

@@ -24,6 +24,7 @@ class _ScriptedSheet {
     BuildContext context, {
     required String title,
     bool cameraUnavailable = false,
+    DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
   }) async {
     cameraUnavailableSeen.add(cameraUnavailable);
     return answers.removeAt(0);
@@ -92,7 +93,8 @@ void main() {
     tester,
   ) async {
     gateway.next = RawCapture(
-      bytes: Uint8List(DocumentCapturePolicy.maxBytes + 1)..setAll(0, pdfBytes),
+      bytes: Uint8List(DocumentCapturePolicy.staffDocument.maxBytes + 1)
+        ..setAll(0, pdfBytes),
     );
 
     await runFlow(tester, _ScriptedSheet([DocumentCaptureMode.importPdf]));
@@ -121,7 +123,10 @@ class _CameraRefusedOnceGateway extends FakeDocumentCaptureGateway {
   _CameraRefusedOnceGateway(this.bytes);
 
   @override
-  Future<RawCapture?> acquire(DocumentCaptureMode mode) async {
+  Future<RawCapture?> acquire(
+    DocumentCaptureMode mode, {
+    DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
+  }) async {
     calls.add(mode);
     if (_first) {
       _first = false;

@@ -14356,4 +14356,214 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncAggregateChapitreRessource => 'Chapter resource';
+
+  @override
+  String documentCaptureLimitsWithWord(int maxMegabytes) {
+    return 'JPEG, PNG, PDF or Word · $maxMegabytes MB max';
+  }
+
+  @override
+  String get documentCaptureImportFile => 'Import a file';
+
+  @override
+  String get documentCaptureImportFileHint =>
+      'A PDF or Word document already on the tablet';
+
+  @override
+  String get chapitreFormNewTitle => 'New chapter';
+
+  @override
+  String get chapitreFormEditTitle => 'Edit chapter';
+
+  @override
+  String chapitreFormEyebrow(String branche, String classe) {
+    return '$branche — $classe';
+  }
+
+  @override
+  String get chapitreFormGroupIdentification => 'Identification';
+
+  @override
+  String get chapitreFormGroupPedagogie => 'Teaching';
+
+  @override
+  String get chapitreFormGroupPlanification => 'Planning';
+
+  @override
+  String get chapitreFormOptional => '(optional)';
+
+  @override
+  String get chapitreFormAdd => 'Add';
+
+  @override
+  String get chapitreFormTitreLabel => 'Chapter title';
+
+  @override
+  String get chapitreFormTitreHint => 'E.g. Fractions and decimals';
+
+  @override
+  String get chapitreFormTitreRequired => 'The chapter title is required.';
+
+  @override
+  String get chapitreFormTitreTooShort => 'At least 3 characters.';
+
+  @override
+  String get chapitreFormResumeLabel => 'Summary';
+
+  @override
+  String get chapitreFormResumeHint =>
+      'What the chapter covers, in a sentence or two';
+
+  @override
+  String get chapitreFormObjectifsLabel => 'Learning objectives';
+
+  @override
+  String get chapitreFormObjectifHint => 'E.g. Solve a first-degree equation';
+
+  @override
+  String get chapitreFormObjectifRemove => 'Remove this objective';
+
+  @override
+  String get chapitreFormStrategiesLabel => 'Teaching strategies';
+
+  @override
+  String get chapitreFormStrategyHint => 'Other strategy (e.g. Peer tutoring)';
+
+  @override
+  String get chapitreStrategy1 => 'Lecture';
+
+  @override
+  String get chapitreStrategy2 => 'Board demonstration';
+
+  @override
+  String get chapitreStrategy3 => 'Group work';
+
+  @override
+  String get chapitreStrategy4 => 'Problem-based learning';
+
+  @override
+  String get chapitreStrategy5 => 'Guided questioning';
+
+  @override
+  String get chapitreStrategy6 => 'Graded exercises';
+
+  @override
+  String get chapitreStrategy7 => 'Differentiated teaching';
+
+  @override
+  String get chapitreStrategy8 => 'Remediation';
+
+  @override
+  String get chapitreStrategy9 => 'Role play';
+
+  @override
+  String get chapitreStrategy10 => 'Field trip / observation';
+
+  @override
+  String get chapitreFormRessourcesLabel => 'Teaching resources';
+
+  @override
+  String get ressourceEditorEmpty =>
+      'Attach a document, a link or a textbook reference';
+
+  @override
+  String get ressourceTypeRadioLabel => 'Resource type';
+
+  @override
+  String get ressourceTypeDocument => 'Document';
+
+  @override
+  String get ressourceTypeLien => 'Link';
+
+  @override
+  String get ressourceTypeManuel => 'Textbook';
+
+  @override
+  String get ressourceNomLabel => 'Title';
+
+  @override
+  String get ressourceNomHintDocument => 'E.g. Exercise sheet #2';
+
+  @override
+  String get ressourceNomHintLien => 'E.g. Video — fractions explained';
+
+  @override
+  String get ressourceNomHintManuel => 'E.g. Mathematics Grade 7 — CRP ed.';
+
+  @override
+  String get ressourceUrlLabel => 'Address (URL)';
+
+  @override
+  String get ressourceUrlInvalid =>
+      'Invalid address — it must start with https://';
+
+  @override
+  String get ressourceReferenceLabel => 'Reference (pages, chapter)';
+
+  @override
+  String get ressourceReferenceHint => 'E.g. pp. 42–57';
+
+  @override
+  String get ressourceChooseFile => 'Choose a file';
+
+  @override
+  String get ressourceReplaceFile => 'Replace the file';
+
+  @override
+  String ressourceFileHint(int maxMegabytes) {
+    return 'PDF, Word, image — $maxMegabytes MB max';
+  }
+
+  @override
+  String get ressourceCaptureTitle => 'Chapter document';
+
+  @override
+  String get ressourceAddConfirm => 'Add the resource';
+
+  @override
+  String get ressourceRemove => 'Remove the resource';
+
+  @override
+  String ressourceDetail(String type, String detail) {
+    return '$type · $detail';
+  }
+
+  @override
+  String get chapitreFormStatutLabel => 'Progress status';
+
+  @override
+  String get chapitreFormSousPeriodeLabel => 'Term';
+
+  @override
+  String get chapitreFormSousPeriodeNone => 'No term';
+
+  @override
+  String get chapitreFormSeancesLabel => 'Planned sessions';
+
+  @override
+  String get chapitreFormSeancesInvalid => 'Invalid number.';
+
+  @override
+  String get chapitreFormRequiredLegend =>
+      'Required field — the rest can be completed later.';
+
+  @override
+  String get chapitreFormCreate => 'Create the chapter';
+
+  @override
+  String get chapitreFormSave => 'Save';
+
+  @override
+  String programmeChapitreCreated(String titre) {
+    return 'Chapter “$titre” created';
+  }
+
+  @override
+  String programmeChapitreUpdated(String titre) {
+    return 'Chapter “$titre” updated';
+  }
+
+  @override
+  String get ressourceKeepFailed =>
+      'A resource could not be kept on this device.';
 }

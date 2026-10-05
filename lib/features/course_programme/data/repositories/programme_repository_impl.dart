@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -10,6 +8,7 @@ import 'package:school_app_flutter/features/academics/data/models/offline/evalua
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_write_dao.dart';
+import 'package:school_app_flutter/features/course_programme/data/repositories/programme_local_write.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_detail.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/programme.dart';
@@ -107,7 +106,8 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
           if (!bloc.isEmpty) bloc,
       ],
     );
-    return _write(
+    return writeProgrammeLocally(
+      _syncEngine,
       () => _writer.saveChapitre(
         stamped,
         schoolId: _currentUser.schoolId,
@@ -118,20 +118,23 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> deleteChapitre(String chapitreId) => _write(
-    () => _writer.deleteChapitre(
-      chapitreId,
-      schoolId: _currentUser.schoolId,
-      nowMs: _now(),
-    ),
-    unit,
-  );
+  Future<Either<Failure, Unit>> deleteChapitre(String chapitreId) =>
+      writeProgrammeLocally(
+        _syncEngine,
+        () => _writer.deleteChapitre(
+          chapitreId,
+          schoolId: _currentUser.schoolId,
+          nowMs: _now(),
+        ),
+        unit,
+      );
 
   @override
   Future<Either<Failure, Unit>> reorder(
     String coursId,
     List<String> chapitreIds,
-  ) => _write(
+  ) => writeProgrammeLocally(
+    _syncEngine,
     () => _writer.reorder(
       coursId,
       chapitreIds,
@@ -148,22 +151,6 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
         date: DateTime.fromMillisecondsSinceEpoch(row.evalDate, isUtc: true),
         maxPoints: row.maxPoints,
       );
-
-  /// Un geste local : écrit, puis un envoi opportuniste si le poste est en
-  /// ligne. Une écriture qui échoue n'a rien mis en file.
-  Future<Either<Failure, T>> _write<T>(
-    Future<void> Function() write,
-    T result,
-  ) async {
-    try {
-      await write();
-    } catch (e) {
-      return Left(StorageFailure(e.toString()));
-    }
-    final engine = _syncEngine;
-    if (engine != null) unawaited(engine.flush());
-    return Right(result);
-  }
 
   static Future<Either<Failure, T>> _guard<T>(Future<T> Function() read) async {
     try {

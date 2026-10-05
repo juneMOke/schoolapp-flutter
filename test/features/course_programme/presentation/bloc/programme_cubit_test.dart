@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
+import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_edit.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/programme.dart';
+import 'package:school_app_flutter/features/course_programme/domain/usecases/chapitre_edit_use_cases.dart';
 import 'package:school_app_flutter/features/course_programme/domain/usecases/programme_use_cases.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_change_source.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_cubit.dart';
@@ -15,6 +17,12 @@ class _MockLoad extends Mock implements LoadProgrammeUseCase {}
 class _MockReorder extends Mock implements ReorderChapitresUseCase {}
 
 class _MockDelete extends Mock implements DeleteChapitreUseCase {}
+
+class _MockLoadChapitre extends Mock implements LoadChapitreUseCase {}
+
+class _MockSousPeriodes extends Mock implements LoadSousPeriodesUseCase {}
+
+class _MockSaveEdit extends Mock implements SaveChapitreEditUseCase {}
 
 Programme _programme(List<String> ids) => Programme(
   coursId: 'c-1',
@@ -30,23 +38,38 @@ List<String> _ids(ProgrammeState state) => [
   for (final row in state.programme!.chapitres) row.chapitre.id,
 ];
 
+class _FakeEdit extends Fake implements ChapitreEdit {}
+
 void main() {
+  setUpAll(() => registerFallbackValue(_FakeEdit()));
+
   late _MockLoad load;
   late _MockReorder reorder;
   late _MockDelete delete;
+  late _MockSousPeriodes sousPeriodes;
+  late _MockSaveEdit saveEdit;
 
   ProgrammeCubit build() => ProgrammeCubit(
     coursId: 'c-1',
     load: load,
+    loadChapitre: _MockLoadChapitre(),
+    loadSousPeriodes: sousPeriodes,
+    saveEdit: saveEdit,
     reorder: reorder,
     delete: delete,
     source: const ProgrammeChangeSource(),
+    newId: () => 'new',
   );
 
   setUp(() {
     load = _MockLoad();
     reorder = _MockReorder();
     delete = _MockDelete();
+    sousPeriodes = _MockSousPeriodes();
+    saveEdit = _MockSaveEdit();
+    when(
+      () => sousPeriodes('c-1'),
+    ).thenAnswer((_) async => const [SousPeriodeOption(id: 'sp-1', ordre: 1)]);
     when(
       () => load('c-1'),
     ).thenAnswer((_) async => Right(_programme(['a', 'b'])));
@@ -59,7 +82,43 @@ void main() {
     verify: (cubit) {
       expect(cubit.state.status, ProgrammeStatus.ready);
       expect(_ids(cubit.state), ['a', 'b']);
+      expect(cubit.state.sousPeriodes.single.id, 'sp-1');
     },
+  );
+
+  blocTest<ProgrammeCubit, ProgrammeState>(
+    'une création annonce le titre ; une ressource perdue le dit',
+    build: build,
+    act: (cubit) async {
+      const chapitre = Chapitre(
+        id: 'n',
+        coursId: 'c-1',
+        ordre: 0,
+        titre: 'Géométrie',
+      );
+      when(() => saveEdit(any())).thenAnswer(
+        (_) async => const Right(
+          ChapitreEditOutcome(chapitre: chapitre, ressourcesKept: true),
+        ),
+      );
+      await cubit.load();
+      await cubit.saveEdit(const ChapitreEdit(chapitre: chapitre, isNew: true));
+      expect(cubit.state.feedback?.kind, ProgrammeFeedbackKind.chapitreCreated);
+      expect(cubit.state.feedback?.titre, 'Géométrie');
+
+      when(() => saveEdit(any())).thenAnswer(
+        (_) async => const Right(
+          ChapitreEditOutcome(chapitre: chapitre, ressourcesKept: false),
+        ),
+      );
+      await cubit.saveEdit(
+        const ChapitreEdit(chapitre: chapitre, isNew: false),
+      );
+    },
+    verify: (cubit) => expect(
+      cubit.state.feedback?.kind,
+      ProgrammeFeedbackKind.ressourceKeepFailed,
+    ),
   );
 
   blocTest<ProgrammeCubit, ProgrammeState>(

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:school_app_flutter/core/capture/captured_document.dart';
 import 'package:school_app_flutter/core/capture/document_capture_gateway.dart';
+import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 
 /// Octets minimaux portant la signature de chaque type accepté.
 final Uint8List jpegBytes = Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0, 1, 2]);
@@ -19,9 +20,16 @@ class FakeDocumentCaptureGateway implements DocumentCaptureGateway {
 
   FakeDocumentCaptureGateway({this.next, this.error});
 
+  /// La politique reçue au dernier appel.
+  DocumentCapturePolicy? lastPolicy;
+
   @override
-  Future<RawCapture?> acquire(DocumentCaptureMode mode) async {
+  Future<RawCapture?> acquire(
+    DocumentCaptureMode mode, {
+    DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
+  }) async {
     calls.add(mode);
+    lastPolicy = policy;
     final failure = error;
     if (failure != null) throw failure;
     return next;
