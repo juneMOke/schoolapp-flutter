@@ -21,6 +21,8 @@ import 'package:school_app_flutter/features/student/presentation/bloc/student_bl
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
+import '../../../student_photo/student_photo_test_module.dart';
+
 /// Garde de SORTIE du wizard (popin de confirmation d'abandon) :
 ///  - brouillon matérialisé → back système ET boutons app bar passent par la
 ///    popin ; refus → on reste ; confirmation → retour listing Première
@@ -63,6 +65,7 @@ void main() {
   );
 
   setUp(() {
+    addTearDown(registerInertStudentPhotoModule());
     offlineBloc = _MockOfflineBloc();
     enrollmentBloc = _MockEnrollmentBloc();
     currentYearBloc = _MockCurrentYearBloc();

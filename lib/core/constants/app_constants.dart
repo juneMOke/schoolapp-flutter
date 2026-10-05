@@ -791,7 +791,12 @@ class AppConstants {
   // réouverture locale (`attendance_sessions.reopened_at`), le brouillon de
   // l'appel (`attendance_draft_marks`) et les clôtures de mois
   // (`attendance_month_closures`). Additif. Palier d'école.
-  static const int offlineDbSchemaVersion = 58;
+  // v59 (2026-10-05) : la photo de l'élève (`student_photos`) — miroir du flux
+  // `student.photos` et geste en attente d'envoi. Création pure. Palier
+  // d'école.
+  // v60 (2026-10-05) : `student_photos.thumbnail_sha256` — l'empreinte de la
+  // vignette, `ETag` de `size=96`. Additif. Palier d'école.
+  static const int offlineDbSchemaVersion = 60;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -839,6 +844,14 @@ class AppConstants {
   /// renomme pas** : un autre nom rendrait orphelines les pièces en attente
   /// d'envoi.
   static const String staffDocumentsDirectoryName = 'staff_documents';
+
+  /// Clé du secure storage qui scelle les photos d'élèves.
+  static const String studentPhotosKeyStorageKey = 'student_photos_key';
+
+  /// Sous-répertoire des photos d'élèves (copies d'affichage et gestes en
+  /// attente). **Ne se renomme pas** : une photo en attente d'envoi n'existe
+  /// que là.
+  static const String studentPhotosDirectoryName = 'student_photos';
 
   // ─── Éditique — cache de restitution (ADR-012 D-2, RG-012-5) ─────────────────
   /// Budget disque du cache éditique, en octets (2 Gio).
@@ -1068,6 +1081,21 @@ class AppConstants {
   /// Octets d'une pièce, à la demande (`ETag` = empreinte SHA-256).
   static const String staffDocumentContentEndpoint =
       '/api/v1/hr/staff-documents/{documentId}/content';
+
+  // ─── Photo de l'élève ───────────────────────────────────────────────────────
+  /// Pose (`PUT`, multipart `metadata` + `file`) ou retrait (`DELETE`,
+  /// `?removedAt=`) de la photo d'un élève, sous `student.photo.write`. Sous
+  /// `/sync` parce que l'outbox les rejoue : la date de prise arbitre.
+  static const String syncStudentPhotoEndpoint =
+      '/api/v1/sync/students/{studentId}/photo';
+
+  /// Descente keyset des photos (flux `student.photos`, `student.read`).
+  static const String syncStudentPhotosEndpoint = '/api/v1/sync/student-photos';
+
+  /// Octets d'une photo, `?size=96|512` (`ETag` = empreinte, 304, 404 sans
+  /// photo).
+  static const String studentPhotoContentEndpoint =
+      '/api/v1/students/{studentId}/photo';
 
   /// L'hôte des liens de conversation WhatsApp (`https://wa.me/<numéro>`).
   static const String whatsappHost = 'wa.me';

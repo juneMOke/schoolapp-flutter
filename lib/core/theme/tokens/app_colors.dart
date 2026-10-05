@@ -519,4 +519,50 @@ class AppColors {
   /// Le bouton d'envoi WhatsApp, et lui seul. Le vert de la spec (#25A162)
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
   static const payrollWhatsapp = Color(0xFF1B7A4A);
+
+  // ── Photo de l'élève ──────────────────────────────────────────────────────
+  /// Liseré intérieur d'une photo d'avatar : il détache un visage clair d'un
+  /// fond clair sans dessiner de bordure visible.
+  static const photoInnerRing = Color(0x0F000000);
+
+  /// Le panneau de capture et la séance photo : dégradé du bleu profond
+  /// (160°). Texte blanc ≥ 12:1.
+  static const photoCaptureTop = bleuProfond;
+  static const photoCaptureBottom = Color(0xFF143A52);
+
+  /// Ombre du panneau de capture (35 %).
+  static const photoPanelShadow = Color(0x59000000);
+
+  /// Voile sous la modale de capture (62 %).
+  static const photoCaptureScrim = Color(0x9E0A2233);
+
+  /// Fond du viseur et de la zone de recadrage.
+  static const photoViewfinder = Color(0xFF0A2233);
+
+  /// Extérieur du guide ovale et du cercle de recadrage (50 % / 55 %).
+  static const photoGuideShade = Color(0x800A2233);
+  static const photoCropShade = Color(0x8C0A2233);
+
+  /// Textes et bordures sur le panneau sombre : blanc à 88 %, 45 %, 28 %,
+  /// 16 % et 6 %.
+  static const onPhotoCapture = Color(0xFFFFFFFF);
+  static const onPhotoCaptureMuted = Color(0xE0FFFFFF);
+  static const onPhotoCaptureRing = Color(0x73FFFFFF);
+  static const onPhotoCaptureBorder = Color(0x47FFFFFF);
+  static const onPhotoCaptureVeil = Color(0x29FFFFFF);
+  static const onPhotoCaptureFaint = Color(0x0FFFFFFF);
+
+  /// Voile du flash de déclenchement en séance (82 %).
+  static const photoFlash = Color(0xD1FFFFFF);
+
+  /// « Photographié » : le vert savane et son voile.
+  static const photoDone = vertSavane;
+  static const photoDoneSoft = Color(0xFFE8F0EA);
+
+  /// « Absent » et « En file » : la famille ambre (fond / encre).
+  static const photoWaitSoft = Color(0xFFFBF1DF);
+  static const photoWaitInk = Color(0xFF8A5A16);
+
+  /// Ligne courante de la file : terre cuite à 8 %.
+  static const photoQueueCurrent = Color(0x14B85C2C);
 }

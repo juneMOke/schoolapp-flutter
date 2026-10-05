@@ -51,6 +51,7 @@ abstract final class EnrollmentEntryRow {
         firstName: entry.firstName,
         lastName: entry.lastName,
         personId: entry.studentId,
+        studentPhotoOf: entry.studentId,
         size: AppDimensions.enrollmentDashboardDayAvatarSize,
       ),
       onTap: onTap == null ? null : () => onTap(entry),

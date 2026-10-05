@@ -27,6 +27,9 @@ class EnrollmentResultsBar extends StatelessWidget {
   final EnrollmentListingViewMode currentViewMode;
   final Future<void> Function()? onRefresh;
 
+  /// Actions propres à une liste, posées avant le tri (« Séance photo »).
+  final List<Widget> extraActions;
+
   const EnrollmentResultsBar({
     super.key,
     required this.count,
@@ -40,6 +43,7 @@ class EnrollmentResultsBar extends StatelessWidget {
     this.onViewModeChanged,
     this.currentViewMode = EnrollmentListingViewMode.auto,
     this.onRefresh,
+    this.extraActions = const [],
   });
 
   @override
@@ -180,6 +184,7 @@ class EnrollmentResultsBar extends StatelessWidget {
       onViewModeChanged: onViewModeChanged,
       currentViewMode: effectiveMode,
       onRefresh: onRefresh,
+      extraActions: extraActions,
     );
   }
 }

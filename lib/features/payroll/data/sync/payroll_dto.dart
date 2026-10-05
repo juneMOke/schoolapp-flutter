@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 /// Les éléments variables d'un agent, tels qu'ils descendent avec la paie.
 class PayrollVariablesDto {

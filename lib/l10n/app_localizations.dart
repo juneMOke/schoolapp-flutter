@@ -21799,6 +21799,510 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{days, plural, =0{No school day to date} =1{1 school day to date} other{{days} school days to date}}'**
   String classPresenceRecapDaysToDate(int days);
+
+  /// No description provided for @photoEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Student photo'**
+  String get photoEyebrow;
+
+  /// No description provided for @photoReviewEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Check & crop'**
+  String get photoReviewEyebrow;
+
+  /// No description provided for @photoDialogSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo of {name}'**
+  String photoDialogSemantics(String name);
+
+  /// No description provided for @photoCaptureTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Face in the oval · plain background · good light'**
+  String get photoCaptureTip;
+
+  /// No description provided for @photoSessionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Face in the oval · Space to shoot'**
+  String get photoSessionTip;
+
+  /// No description provided for @photoCameraStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting the camera…'**
+  String get photoCameraStarting;
+
+  /// No description provided for @photoCameraAllowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If the browser or tablet asks, allow the camera.'**
+  String get photoCameraAllowHint;
+
+  /// No description provided for @photoImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get photoImport;
+
+  /// No description provided for @photoShutter.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the photo'**
+  String get photoShutter;
+
+  /// No description provided for @photoSwitchCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch camera'**
+  String get photoSwitchCamera;
+
+  /// No description provided for @photoClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get photoClose;
+
+  /// No description provided for @photoRetake.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get photoRetake;
+
+  /// No description provided for @photoOtherFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Another file'**
+  String get photoOtherFile;
+
+  /// No description provided for @photoUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this photo'**
+  String get photoUse;
+
+  /// No description provided for @photoZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get photoZoom;
+
+  /// No description provided for @photoSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving the photo…'**
+  String get photoSaving;
+
+  /// No description provided for @photoSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo saved'**
+  String get photoSaved;
+
+  /// No description provided for @photoSavedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It now replaces the initials, and will reach the server as soon as the network allows.'**
+  String get photoSavedMessage;
+
+  /// No description provided for @photoCameraBlockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera blocked'**
+  String get photoCameraBlockedTitle;
+
+  /// No description provided for @photoCameraBlockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow it in the settings, or import a photo.'**
+  String get photoCameraBlockedMessage;
+
+  /// No description provided for @photoNoCameraTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No camera found'**
+  String get photoNoCameraTitle;
+
+  /// No description provided for @photoNoCameraMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a photo from a file or the gallery.'**
+  String get photoNoCameraMessage;
+
+  /// No description provided for @photoBadFileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported file'**
+  String get photoBadFileTitle;
+
+  /// No description provided for @photoBadFileMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a JPG or PNG image of up to 8 MB.'**
+  String get photoBadFileMessage;
+
+  /// No description provided for @photoImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a photo'**
+  String get photoImportAction;
+
+  /// No description provided for @photoSaveFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo not saved'**
+  String get photoSaveFailedTitle;
+
+  /// No description provided for @photoSaveFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The device could not store it. The photo is kept: try again.'**
+  String get photoSaveFailedMessage;
+
+  /// No description provided for @photoRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get photoRetry;
+
+  /// No description provided for @photoTake.
+  ///
+  /// In en, this message translates to:
+  /// **'Take'**
+  String get photoTake;
+
+  /// No description provided for @photoOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get photoOptional;
+
+  /// No description provided for @photoCrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop'**
+  String get photoCrop;
+
+  /// No description provided for @photoRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get photoRemove;
+
+  /// No description provided for @photoRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the photo?'**
+  String get photoRemoveConfirm;
+
+  /// No description provided for @photoRemoveConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The initials will be shown instead.'**
+  String get photoRemoveConfirmMessage;
+
+  /// No description provided for @photoNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get photoNo;
+
+  /// No description provided for @photoCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get photoCancel;
+
+  /// No description provided for @photoManagedBySecretariat.
+  ///
+  /// In en, this message translates to:
+  /// **'Managed by the office'**
+  String get photoManagedBySecretariat;
+
+  /// No description provided for @photoDraftPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved with this step'**
+  String get photoDraftPending;
+
+  /// No description provided for @photoPendingSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get photoPendingSync;
+
+  /// No description provided for @photoRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo refused by the server'**
+  String get photoRejected;
+
+  /// No description provided for @photoMenuRetake.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake the photo'**
+  String get photoMenuRetake;
+
+  /// No description provided for @photoMenuImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a file'**
+  String get photoMenuImport;
+
+  /// No description provided for @photoMenuRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the photo'**
+  String get photoMenuRemove;
+
+  /// No description provided for @photoAddTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get photoAddTooltip;
+
+  /// No description provided for @photoRecapMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided — optional'**
+  String get photoRecapMissing;
+
+  /// No description provided for @photoRecapAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get photoRecapAdded;
+
+  /// No description provided for @photoSessionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo session'**
+  String get photoSessionButton;
+
+  /// No description provided for @photoSessionChooseClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the class'**
+  String get photoSessionChooseClass;
+
+  /// No description provided for @photoSessionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 without photo} other{{count} without photo}}'**
+  String photoSessionMissing(int count);
+
+  /// No description provided for @photoSessionStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student} other{{count} students}}'**
+  String photoSessionStudents(int count);
+
+  /// No description provided for @photoSessionComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Class complete · {count, plural, =1{1 student} other{{count} students}}'**
+  String photoSessionComplete(int count);
+
+  /// No description provided for @photoSessionOnlyMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Only students without a photo'**
+  String get photoSessionOnlyMissing;
+
+  /// No description provided for @photoSessionStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start · {count, plural, =1{1 student} other{{count} students}}'**
+  String photoSessionStart(int count);
+
+  /// No description provided for @photoSessionPickClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class'**
+  String get photoSessionPickClass;
+
+  /// No description provided for @photoSessionAllDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole class has a photo'**
+  String get photoSessionAllDoneTitle;
+
+  /// No description provided for @photoSessionAllDoneMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still retake the photos.'**
+  String get photoSessionAllDoneMessage;
+
+  /// No description provided for @photoSessionIncludeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Include the whole class'**
+  String get photoSessionIncludeAll;
+
+  /// No description provided for @photoSessionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'STUDENT {index} OF {total}'**
+  String photoSessionProgress(int index, int total);
+
+  /// No description provided for @photoSessionSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get photoSessionSkip;
+
+  /// No description provided for @photoSessionAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get photoSessionAbsent;
+
+  /// No description provided for @photoSessionImportForStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a file for this student'**
+  String get photoSessionImportForStudent;
+
+  /// No description provided for @photoSessionImportInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'The session goes on: import a photo for each student.'**
+  String get photoSessionImportInstead;
+
+  /// No description provided for @photoSessionFlash.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo taken · next student…'**
+  String get photoSessionFlash;
+
+  /// No description provided for @photoSessionFlashQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo queued — sent when the network is back'**
+  String get photoSessionFlashQueued;
+
+  /// No description provided for @photoSessionFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get photoSessionFinish;
+
+  /// No description provided for @photoSessionHandled.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total}'**
+  String photoSessionHandled(int done, int total);
+
+  /// No description provided for @photoSessionQueueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue · {className}'**
+  String photoSessionQueueTitle(String className);
+
+  /// No description provided for @photoSessionQueueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No photo} =1{1 photo} other{{count} photos}}'**
+  String photoSessionQueueCount(int count);
+
+  /// No description provided for @photoStatusTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'To photograph'**
+  String get photoStatusTodo;
+
+  /// No description provided for @photoStatusSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get photoStatusSending;
+
+  /// No description provided for @photoStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Photographed'**
+  String get photoStatusDone;
+
+  /// No description provided for @photoStatusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get photoStatusQueued;
+
+  /// No description provided for @photoStatusAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get photoStatusAbsent;
+
+  /// No description provided for @photoStatusSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get photoStatusSkipped;
+
+  /// No description provided for @photoSessionOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline — {count, plural, =1{1 photo queued} other{{count} photos queued}} on this device. Sent automatically when the network is back; keep going.'**
+  String photoSessionOfflineBanner(int count);
+
+  /// No description provided for @photoSessionDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session finished · {className}'**
+  String photoSessionDoneTitle(String className);
+
+  /// No description provided for @photoSessionDoneCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Photographed'**
+  String get photoSessionDoneCount;
+
+  /// No description provided for @photoSessionAbsentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get photoSessionAbsentCount;
+
+  /// No description provided for @photoSessionSkippedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get photoSessionSkippedCount;
+
+  /// No description provided for @photoSessionResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume absent & skipped ({count})'**
+  String photoSessionResume(int count);
+
+  /// No description provided for @photoSessionPendingWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo waiting to be sent} other{{count} photos waiting to be sent}} — do not clear this device\'s cache.'**
+  String photoSessionPendingWarning(int count);
+
+  /// No description provided for @photoSessionLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes unavailable'**
+  String get photoSessionLoadErrorTitle;
+
+  /// No description provided for @photoSessionLoadErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This year\'s classes could not be read on this device.'**
+  String get photoSessionLoadErrorMessage;
+
+  /// No description provided for @photoCropUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The original photo is not on this device: reconnect to crop it.'**
+  String get photoCropUnavailable;
 }
 
 class _AppLocalizationsDelegate

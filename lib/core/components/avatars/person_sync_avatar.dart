@@ -13,6 +13,9 @@ class PersonSyncAvatar extends StatelessWidget {
   final RecordSyncState sync;
   final double size;
 
+  /// Identifiant de l'élève dont montrer la photo ; `null` : initiales.
+  final String? studentPhotoOf;
+
   const PersonSyncAvatar({
     super.key,
     required this.firstName,
@@ -20,6 +23,7 @@ class PersonSyncAvatar extends StatelessWidget {
     required this.personId,
     required this.sync,
     this.size = AvatarSize.lg,
+    this.studentPhotoOf,
   });
 
   @override
@@ -36,6 +40,7 @@ class PersonSyncAvatar extends StatelessWidget {
             lastName: lastName,
             personId: personId,
             size: size,
+            studentPhotoOf: studentPhotoOf,
           ),
           Positioned(
             right: 0,

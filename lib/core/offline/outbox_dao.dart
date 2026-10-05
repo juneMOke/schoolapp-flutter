@@ -86,22 +86,40 @@ class OutboxDao {
 
   /// Marque une entrée en erreur métier (rejet validation) — non rejouable
   /// automatiquement, à corriger côté présentation.
-  Future<void> markSyncError(String id, String? error) async {
+  ///
+  /// [expectedCreatedAt] : même garde que [markAcked]. Une entrée ré-enfilée
+  /// pendant le dispatch porte un geste NEUF : le refus de l'ancien ne doit
+  /// pas la figer en `SYNC_ERROR`.
+  Future<void> markSyncError(
+    String id,
+    String? error, {
+    int? expectedCreatedAt,
+  }) async {
     await _db.update(
       table,
       {'status': OutboxStatus.syncError.dbValue, 'last_error': error},
-      where: 'id = ?',
-      whereArgs: [id],
+      where: _whereId(expectedCreatedAt),
+      whereArgs: _whereIdArgs(id, expectedCreatedAt),
     );
   }
 
+  static String _whereId(int? expectedCreatedAt) =>
+      expectedCreatedAt == null ? 'id = ?' : 'id = ? AND created_at = ?';
+
+  static List<Object> _whereIdArgs(String id, int? expectedCreatedAt) =>
+      expectedCreatedAt == null ? [id] : [id, expectedCreatedAt];
+
   /// Reprogramme une entrée après une erreur transitoire (réseau) : reste
   /// PENDING, incrémente les tentatives, repousse la barrière de backoff.
+  ///
+  /// [expectedCreatedAt] : même garde que [markAcked] — une entrée ré-enfilée
+  /// pendant le dispatch n'hérite ni des tentatives ni du backoff de l'ancienne.
   Future<void> reschedule(
     String id, {
     required int attempts,
     required int nextAttemptAt,
     String? lastError,
+    int? expectedCreatedAt,
   }) async {
     await _db.update(
       table,
@@ -111,8 +129,8 @@ class OutboxDao {
         'next_attempt_at': nextAttemptAt,
         'last_error': lastError,
       },
-      where: 'id = ?',
-      whereArgs: [id],
+      where: _whereId(expectedCreatedAt),
+      whereArgs: _whereIdArgs(id, expectedCreatedAt),
     );
   }
 
@@ -124,6 +142,7 @@ class OutboxDao {
     String id, {
     required int nextAttemptAt,
     String? reason,
+    int? expectedCreatedAt,
   }) async {
     await _db.update(
       table,
@@ -132,8 +151,8 @@ class OutboxDao {
         'next_attempt_at': nextAttemptAt,
         'last_error': reason,
       },
-      where: 'id = ?',
-      whereArgs: [id],
+      where: _whereId(expectedCreatedAt),
+      whereArgs: _whereIdArgs(id, expectedCreatedAt),
     );
   }
 

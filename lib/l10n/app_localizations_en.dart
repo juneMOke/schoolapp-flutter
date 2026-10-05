@@ -13820,4 +13820,335 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get photoEyebrow => 'Student photo';
+
+  @override
+  String get photoReviewEyebrow => 'Check & crop';
+
+  @override
+  String photoDialogSemantics(String name) {
+    return 'Photo of $name';
+  }
+
+  @override
+  String get photoCaptureTip =>
+      'Face in the oval · plain background · good light';
+
+  @override
+  String get photoSessionTip => 'Face in the oval · Space to shoot';
+
+  @override
+  String get photoCameraStarting => 'Starting the camera…';
+
+  @override
+  String get photoCameraAllowHint =>
+      'If the browser or tablet asks, allow the camera.';
+
+  @override
+  String get photoImport => 'Import';
+
+  @override
+  String get photoShutter => 'Take the photo';
+
+  @override
+  String get photoSwitchCamera => 'Switch camera';
+
+  @override
+  String get photoClose => 'Close';
+
+  @override
+  String get photoRetake => 'Retake';
+
+  @override
+  String get photoOtherFile => 'Another file';
+
+  @override
+  String get photoUse => 'Use this photo';
+
+  @override
+  String get photoZoom => 'Zoom';
+
+  @override
+  String get photoSaving => 'Saving the photo…';
+
+  @override
+  String get photoSaved => 'Photo saved';
+
+  @override
+  String get photoSavedMessage =>
+      'It now replaces the initials, and will reach the server as soon as the network allows.';
+
+  @override
+  String get photoCameraBlockedTitle => 'Camera blocked';
+
+  @override
+  String get photoCameraBlockedMessage =>
+      'Allow it in the settings, or import a photo.';
+
+  @override
+  String get photoNoCameraTitle => 'No camera found';
+
+  @override
+  String get photoNoCameraMessage =>
+      'Import a photo from a file or the gallery.';
+
+  @override
+  String get photoBadFileTitle => 'Unsupported file';
+
+  @override
+  String get photoBadFileMessage => 'Choose a JPG or PNG image of up to 8 MB.';
+
+  @override
+  String get photoImportAction => 'Import a photo';
+
+  @override
+  String get photoSaveFailedTitle => 'Photo not saved';
+
+  @override
+  String get photoSaveFailedMessage =>
+      'The device could not store it. The photo is kept: try again.';
+
+  @override
+  String get photoRetry => 'Try again';
+
+  @override
+  String get photoTake => 'Take';
+
+  @override
+  String get photoOptional => 'Optional';
+
+  @override
+  String get photoCrop => 'Crop';
+
+  @override
+  String get photoRemove => 'Remove';
+
+  @override
+  String get photoRemoveConfirm => 'Remove the photo?';
+
+  @override
+  String get photoRemoveConfirmMessage => 'The initials will be shown instead.';
+
+  @override
+  String get photoNo => 'No';
+
+  @override
+  String get photoCancel => 'Cancel';
+
+  @override
+  String get photoManagedBySecretariat => 'Managed by the office';
+
+  @override
+  String get photoDraftPending => 'Saved with this step';
+
+  @override
+  String get photoPendingSync => 'Waiting to be sent';
+
+  @override
+  String get photoRejected => 'Photo refused by the server';
+
+  @override
+  String get photoMenuRetake => 'Retake the photo';
+
+  @override
+  String get photoMenuImport => 'Import a file';
+
+  @override
+  String get photoMenuRemove => 'Remove the photo';
+
+  @override
+  String get photoAddTooltip => 'Add a photo';
+
+  @override
+  String get photoRecapMissing => 'Not provided — optional';
+
+  @override
+  String get photoRecapAdded => 'Added';
+
+  @override
+  String get photoSessionButton => 'Photo session';
+
+  @override
+  String get photoSessionChooseClass => 'Choose the class';
+
+  @override
+  String photoSessionMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count without photo',
+      one: '1 without photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String photoSessionStudents(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String photoSessionComplete(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return 'Class complete · $_temp0';
+  }
+
+  @override
+  String get photoSessionOnlyMissing => 'Only students without a photo';
+
+  @override
+  String photoSessionStart(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return 'Start · $_temp0';
+  }
+
+  @override
+  String get photoSessionPickClass => 'Choose a class';
+
+  @override
+  String get photoSessionAllDoneTitle => 'The whole class has a photo';
+
+  @override
+  String get photoSessionAllDoneMessage => 'You can still retake the photos.';
+
+  @override
+  String get photoSessionIncludeAll => 'Include the whole class';
+
+  @override
+  String photoSessionProgress(int index, int total) {
+    return 'STUDENT $index OF $total';
+  }
+
+  @override
+  String get photoSessionSkip => 'Skip';
+
+  @override
+  String get photoSessionAbsent => 'Absent';
+
+  @override
+  String get photoSessionImportForStudent => 'Import a file for this student';
+
+  @override
+  String get photoSessionImportInstead =>
+      'The session goes on: import a photo for each student.';
+
+  @override
+  String get photoSessionFlash => 'Photo taken · next student…';
+
+  @override
+  String get photoSessionFlashQueued =>
+      'Photo queued — sent when the network is back';
+
+  @override
+  String get photoSessionFinish => 'Finish';
+
+  @override
+  String photoSessionHandled(int done, int total) {
+    return '$done / $total';
+  }
+
+  @override
+  String photoSessionQueueTitle(String className) {
+    return 'Queue · $className';
+  }
+
+  @override
+  String photoSessionQueueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos',
+      one: '1 photo',
+      zero: 'No photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get photoStatusTodo => 'To photograph';
+
+  @override
+  String get photoStatusSending => 'Sending…';
+
+  @override
+  String get photoStatusDone => 'Photographed';
+
+  @override
+  String get photoStatusQueued => 'Queued';
+
+  @override
+  String get photoStatusAbsent => 'Absent';
+
+  @override
+  String get photoStatusSkipped => 'Skipped';
+
+  @override
+  String photoSessionOfflineBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos queued',
+      one: '1 photo queued',
+    );
+    return 'Offline — $_temp0 on this device. Sent automatically when the network is back; keep going.';
+  }
+
+  @override
+  String photoSessionDoneTitle(String className) {
+    return 'Session finished · $className';
+  }
+
+  @override
+  String get photoSessionDoneCount => 'Photographed';
+
+  @override
+  String get photoSessionAbsentCount => 'Absent';
+
+  @override
+  String get photoSessionSkippedCount => 'Skipped';
+
+  @override
+  String photoSessionResume(int count) {
+    return 'Resume absent & skipped ($count)';
+  }
+
+  @override
+  String photoSessionPendingWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos waiting to be sent',
+      one: '1 photo waiting to be sent',
+    );
+    return '$_temp0 — do not clear this device\'s cache.';
+  }
+
+  @override
+  String get photoSessionLoadErrorTitle => 'Classes unavailable';
+
+  @override
+  String get photoSessionLoadErrorMessage =>
+      'This year\'s classes could not be read on this device.';
+
+  @override
+  String get photoCropUnavailable =>
+      'The original photo is not on this device: reconnect to crop it.';
 }

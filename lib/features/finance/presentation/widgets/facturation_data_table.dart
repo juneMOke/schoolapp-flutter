@@ -151,6 +151,7 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
               firstName: summary.student.firstName,
               lastName: summary.student.lastName,
               personId: summary.student.id,
+              studentPhotoOf: summary.student.id,
               size: core_avatar.AvatarSize.sm,
             ),
             cells: [

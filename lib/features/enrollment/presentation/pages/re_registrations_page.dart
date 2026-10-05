@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration_search_form.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/re_registration/re_registration_empty_before_search.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_session_button.dart';
 
 class ReRegistrationsPage extends StatefulWidget {
   const ReRegistrationsPage({super.key});
@@ -70,6 +71,7 @@ class _ReRegistrationsPageState extends State<ReRegistrationsPage> {
             showStatusBadge: false,
             onViewModeChanged: _onViewModeChanged,
             currentViewMode: _preferredViewMode,
+            extraActions: const [PhotoSessionButton()],
           );
         },
         // Routage du tap (option b : éditable ⟺ brouillon DRAFT) :

@@ -119,6 +119,7 @@ class FeeControlTableLayout {
               firstName: student.firstName,
               lastName: student.lastName,
               personId: student.id,
+              studentPhotoOf: student.id,
               size: core_avatar.AvatarSize.sm,
             ),
             onTap: () => onRowTapped(row),

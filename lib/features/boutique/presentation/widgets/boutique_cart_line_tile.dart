@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/cart_line.d
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_family_style.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_money_format.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
 
 /// Un niveau proposable au guichet pour une ligne walk-in.
 class BoutiqueLevelOption {
@@ -310,12 +311,16 @@ class _BeneficiaryChip extends StatelessWidget {
     }
 
     return InputChip(
-      avatar: CircleAvatar(
-        radius: 11,
-        backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
-        child: Text(
-          _initialsOf(beneficiary.fullName),
-          style: const TextStyle(fontSize: 9, color: AppColors.bleuArdoise),
+      avatar: PersonPhotoOr(
+        personId: beneficiary.studentId,
+        size: AppDimensions.boutiqueBeneficiaryChipAvatar,
+        fallback: CircleAvatar(
+          radius: 11,
+          backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.12),
+          child: Text(
+            _initialsOf(beneficiary.fullName),
+            style: const TextStyle(fontSize: 9, color: AppColors.bleuArdoise),
+          ),
         ),
       ),
       label: Text(

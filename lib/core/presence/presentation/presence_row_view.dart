@@ -38,6 +38,10 @@ class PresenceRowView extends Equatable {
   /// toucher, et rien ne s'affiche à sa place.
   final bool canJustify;
 
+  /// La personne est un élève : sa photo remplace les initiales. Jamais pour
+  /// un agent — le registre est partagé, la photo ne l'est pas.
+  final bool showsStudentPhoto;
+
   const PresenceRowView({
     required this.personId,
     required this.firstName,
@@ -52,6 +56,7 @@ class PresenceRowView extends Equatable {
     this.sync = RecordSyncState.synced,
     this.refusal,
     this.canJustify = true,
+    this.showsStudentPhoto = false,
   });
 
   bool get isJustified => justificationLabel != null;
@@ -71,6 +76,7 @@ class PresenceRowView extends Equatable {
     sync,
     refusal,
     canJustify,
+    showsStudentPhoto,
   ];
 }
 

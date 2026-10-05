@@ -101,6 +101,7 @@ class _MemberRow extends StatelessWidget {
                   firstName: eleve.studentFirstName,
                   lastName: eleve.studentLastName,
                   personId: eleve.studentId,
+                  studentPhotoOf: eleve.studentId,
                   size: AvatarSize.md,
                 ),
                 const SizedBox(width: AppSpacing.sm),

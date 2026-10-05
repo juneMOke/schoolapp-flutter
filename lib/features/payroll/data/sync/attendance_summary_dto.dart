@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 /// Le résumé d'un mois clos du Pointage (flux `hr.staff-attendance-summaries`,
 /// sous `hr.pay.read`). Les agents restent bruts : ils se relisent à la

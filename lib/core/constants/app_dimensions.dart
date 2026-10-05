@@ -668,4 +668,93 @@ class AppDimensions {
   static const payrollCircuitLink = 14.0;
   static const payrollModeTileHeight = 52.0;
   static const payrollProgressHeight = 8.0;
+
+  // ── Photo de l'élève (spec « Photo de l'élève », 1 px = 1 dp) ────────────
+  /// Le panneau de capture : largeur maximale, rayon, et en dessous de quelle
+  /// largeur d'écran il passe en plein écran.
+  static const photoPanelMaxWidth = 580.0;
+  static const photoPanelRadius = 22.0;
+  static const photoPanelFullscreenBelow = 600.0;
+  static const photoViewfinderRadius = 14.0;
+  static const photoShutter = 68.0;
+  static const photoShutterRing = 4.0;
+  static const photoDarkButton = 44.0;
+  static const photoCloseButton = 40.0;
+  static const photoCloseRadius = 12.0;
+  static const photoGuideStroke = 2.5;
+
+  /// La zone de recadrage carrée, et le retrait du cercle à l'intérieur.
+  static const photoCropSide = 300.0;
+  static const photoCropInset = 10.0;
+
+  /// Envoi et confirmation : l'aperçu et la coche.
+  static const photoSavingPreview = 150.0;
+  static const photoSavedCheck = 38.0;
+
+  /// L'emplacement de l'étape 1 : la colonne, le cercle et son anneau.
+  static const photoSlotColumn = 148.0;
+  static const photoSlotCircle = 128.0;
+  static const photoSlotRing = 4.0;
+  static const photoSlotReflowBelow = 552.0;
+  static const photoSlotActionHeight = 40.0;
+  static const photoSlotLinkHeight = 32.0;
+
+  /// L'avatar modifiable de l'en-tête, son badge caméra et son contour.
+  static const photoHeaderAvatar = 42.0;
+  static const photoHeaderMenuWidth = 240.0;
+  static const photoHeaderMenuItem = 44.0;
+
+  /// La ligne photo du Résumé.
+  static const photoRecapAvatar = 52.0;
+
+  /// Séance photo : tuiles de classe, prise de vue, file.
+  static const photoSessionTileMin = 190.0;
+  static const photoSessionCheck = 22.0;
+  static const photoSessionCoverageBar = 6.0;
+  static const photoSessionProgressBar = 4.0;
+  static const photoSessionShootMin = 520.0;
+  static const photoSessionQueueMin = 300.0;
+  static const photoSessionQueueMax = 400.0;
+  static const photoSessionStackBelow = 840.0;
+  static const photoSessionHeaderAvatar = 44.0;
+  static const photoSessionQueueRow = 56.0;
+  static const photoSessionQueueAvatar = 36.0;
+  static const photoSessionCurrentRule = 4.0;
+  static const photoSessionFlashPreview = 160.0;
+  static const photoSessionSummaryMedallion = 72.0;
+  static const photoSessionSummaryAvatar = 40.0;
+  static const photoSessionClassMedallion = 46.0;
+  static const photoSessionTileRadius = 14.0;
+  static const photoSessionCountTile = 140.0;
+
+  /// La hauteur que la file laisse à l'en-tête et aux marges : elle défile
+  /// dans « 100 % de l'écran moins 260 ».
+  static const photoSessionQueueReserve = 260.0;
+
+  /// Le badge caméra de l'avatar d'en-tête : au moins 20 dp, sinon 42 % de
+  /// l'avatar ; et l'écart du contour pointillé.
+  static const photoHeaderBadgeMin = 20.0;
+  static const photoHeaderBadgeRatio = 0.42;
+  static const photoHeaderOutlineGap = 3.0;
+  static const photoHeaderOutlineStroke = 2.0;
+  static const photoHeaderBadgeBorder = 2.5;
+
+  /// Les petites icônes de la photo (puces, liens, curseur) et le trait des
+  /// bordures fines sur fond sombre.
+  static const photoIconXs = 14.0;
+  static const photoIconSm = 16.0;
+  static const photoIconMd = 18.0;
+  static const photoHairline = 1.5;
+  static const photoFlashRing = 3.0;
+  static const photoFilterRow = 44.0;
+
+  /// L'écart entre « Prendre » et « Importer », et la marge horizontale de
+  /// la ligne photo du Résumé.
+  static const photoSlotActionGap = 6.0;
+  static const photoRecapPaddingH = 14.0;
+
+  /// L'avatar du bénéficiaire en boutique : la puce du panier, la liste de
+  /// choix.
+  static const boutiqueBeneficiaryChipAvatar = 22.0;
+  static const boutiqueBeneficiaryListAvatar = 34.0;
 }

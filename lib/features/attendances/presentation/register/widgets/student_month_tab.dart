@@ -53,6 +53,7 @@ class StudentMonthTab extends StatelessWidget {
                   ),
               ],
               selectedId: sheet?.student.id,
+              showsStudentPhotos: true,
               label: l10n.classPresenceTabStudent,
               placeholder: l10n.classPresenceStudentPickerPlaceholder,
               matches: (s, text) => SearchNormalizationHelper.containsAllWords([

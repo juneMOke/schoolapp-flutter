@@ -84,6 +84,7 @@ class DocumentsCatalogPage extends StatelessWidget {
           firstName: intent.firstName,
           lastName: intent.lastName,
           fallbackRoute: AppRoutesNames.documentsStudents,
+          studentId: intent.studentId,
         ),
         child: Center(
           child: ConstrainedBox(

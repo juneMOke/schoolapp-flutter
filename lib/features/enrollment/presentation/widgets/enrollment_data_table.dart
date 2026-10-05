@@ -179,6 +179,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
               firstName: enrollment.student.firstName,
               lastName: enrollment.student.lastName,
               personId: enrollment.student.id,
+              studentPhotoOf: enrollment.student.id,
               size: core_avatar.AvatarSize.sm,
               variant: _avatarVariantForStatus(
                 EnrollmentStatus.fromString(enrollment.status),

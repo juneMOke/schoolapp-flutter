@@ -32,6 +32,7 @@ const _secretariat = <String>[
   'classroom.read',
   'student.read',
   'student.write',
+  'student.photo.write',
   'school.read',
   'schedule.read',
   'academics.result.read',

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/database/schema/expense_offline_schema.d
 import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 /// Table `outbox` — file d'écriture différée idempotente (socle).
@@ -116,4 +117,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...staffOfflineTables, // RH — fichier du personnel
   ...staffAttendanceTables, // RH — pointage du personnel
   ...payrollTables, // RH — paie du personnel
+  ...studentPhotoTables, // Photo de l'élève — miroir du flux et geste en attente
 ];

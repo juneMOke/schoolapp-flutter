@@ -25,6 +25,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/resu
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_session_button.dart';
 
 class FirstRegistrationPage extends StatefulWidget {
   const FirstRegistrationPage({super.key});
@@ -126,6 +127,7 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
               onRefresh: screenCtx.onRefreshRequested,
               onViewModeChanged: _onViewModeChanged,
               currentViewMode: _preferredViewMode,
+              extraActions: const [PhotoSessionButton()],
             ),
         detailIntentFactory: (summary) => EnrollmentDetailIntent(
           origin: EnrollmentDetailOrigin.firstRegistration,

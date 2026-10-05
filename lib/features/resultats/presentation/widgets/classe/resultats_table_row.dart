@@ -122,6 +122,7 @@ class ResultatsTableRow extends StatelessWidget {
           firstName: ligne.prenom,
           lastName: ligne.nom,
           personId: ligne.studentId,
+          studentPhotoOf: ligne.studentId,
           size: AvatarSize.md,
         ),
         const SizedBox(width: AppSpacing.sm),

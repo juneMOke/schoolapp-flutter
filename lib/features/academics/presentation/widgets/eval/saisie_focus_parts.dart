@@ -88,6 +88,7 @@ class _Identity extends StatelessWidget {
           firstName: student.firstName,
           lastName: student.lastName,
           personId: student.studentId,
+          studentPhotoOf: student.studentId,
           size: 40,
         ),
         const SizedBox(width: AppSpacing.sm),

@@ -1,6 +1,7 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/tombstone/tombstone_models.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_removal_hooks.dart';
 import 'package:school_app_flutter/core/offline/tombstone/tombstone_targets.dart';
 
 /// Ce qu'une page de retraits a produit localement.
@@ -57,8 +58,16 @@ class TombstoneDao {
   /// (tests, base unique), ces filles se purgent dans la base de l'école.
   final DatabaseExecutor? _deviceDb;
 
-  const TombstoneDao(this._db, this._syncMetaDao, {DatabaseExecutor? deviceDb})
-    : _deviceDb = deviceDb;
+  /// Ce que les modules effacent hors de la base après un retrait.
+  final TombstoneRemovalHooks? _hooks;
+
+  const TombstoneDao(
+    this._db,
+    this._syncMetaDao, {
+    DatabaseExecutor? deviceDb,
+    TombstoneRemovalHooks? hooks,
+  }) : _deviceDb = deviceDb,
+       _hooks = hooks;
 
   /// Applique une page de retraits.
   Future<TombstoneApplyResult> apply(List<TombstoneDto> tombstones) async {
@@ -165,6 +174,8 @@ class TombstoneDao {
       await _syncMetaDao.deleteCursor('$prefix:$parentId');
       await _syncMetaDao.deleteCursor('${prefix}_bootstrap:$parentId');
     }
+
+    if (removed > 0) await _hooks?.run(tombstone.resource, parentId);
 
     return TombstoneApplyResult(removed: removed, deferred: 0);
   }

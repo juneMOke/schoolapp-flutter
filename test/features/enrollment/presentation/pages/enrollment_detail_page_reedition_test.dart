@@ -26,6 +26,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/enroll
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
+import '../../../student_photo/student_photo_test_module.dart';
+
 class _MockOfflineBloc extends Mock implements EnrollmentOfflineBloc {}
 
 class _MockEnrollmentBloc extends Mock implements EnrollmentBloc {}
@@ -64,6 +66,7 @@ void main() {
   );
 
   setUp(() {
+    addTearDown(registerInertStudentPhotoModule());
     offlineBloc = _MockOfflineBloc();
     enrollmentBloc = _MockEnrollmentBloc();
     currentYearBloc = _MockCurrentYearBloc();

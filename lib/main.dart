@@ -27,6 +27,8 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_passwo
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_degradation_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_router.dart';
+import 'package:school_app_flutter/core/components/avatars/person_photo_source.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -351,9 +353,16 @@ class _MyAppState extends State<MyApp> {
             // Deux bandeaux globaux, empilés du plus contraignant au moins :
             // l'anomalie d'argent (non dismissible, ADR-012) prime sur la
             // dégradation de session (informative, ADR-010).
-            builder: (context, child) => PaymentAnomalyBanner(
-              child: SessionDegradationBanner(
-                child: child ?? const SizedBox.shrink(),
+            //
+            // La photo des élèves est posée ici, au-dessus de toutes les
+            // routes : tout avatar qui la demande la trouve, ceux qui ne la
+            // demandent pas gardent leurs initiales.
+            builder: (context, child) => PersonPhotoScope(
+              source: getIt<StudentPhotoRegistry>(),
+              child: PaymentAnomalyBanner(
+                child: SessionDegradationBanner(
+                  child: child ?? const SizedBox.shrink(),
+                ),
               ),
             ),
           ),

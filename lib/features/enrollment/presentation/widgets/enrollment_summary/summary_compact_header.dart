@@ -22,6 +22,8 @@ class SummaryCompactHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final student = enrollmentDetail.studentDetail;
+    // Un élève pas encore créé n'a pas d'identifiant, donc pas de photo.
+    final photoOf = student.id.isEmpty ? null : student.id;
 
     return BlocBuilder<StudentChargesBloc, StudentChargesState>(
       buildWhen: (prev, curr) =>
@@ -114,6 +116,7 @@ class SummaryCompactHeader extends StatelessWidget {
                           firstName: student.firstName,
                           lastName: student.lastName,
                           size: 52,
+                          studentPhotoOf: photoOf,
                         ),
                         const SizedBox(width: AppDimensions.spacingS),
                         identity,
@@ -131,6 +134,7 @@ class SummaryCompactHeader extends StatelessWidget {
                     firstName: student.firstName,
                     lastName: student.lastName,
                     size: 52,
+                    studentPhotoOf: photoOf,
                   ),
                   const SizedBox(width: AppDimensions.spacingM),
                   identity,

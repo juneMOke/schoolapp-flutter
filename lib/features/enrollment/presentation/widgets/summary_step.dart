@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/enrollmen
     as enrollment;
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_summary/enrollment_summary_widgets.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/student_charges_bloc.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_recap_row.dart';
 
 class SummaryStep extends StatefulWidget {
   final enrollment.EnrollmentDetail enrollmentDetail;
@@ -85,6 +86,18 @@ class _SummaryStepState extends State<SummaryStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_studentId.isNotEmpty) ...[
+            PhotoRecapRow(
+              studentId: _studentId,
+              firstName: widget.enrollmentDetail.studentDetail.firstName,
+              lastName: widget.enrollmentDetail.studentDetail.lastName,
+              studentName: [
+                widget.enrollmentDetail.studentDetail.lastName,
+                widget.enrollmentDetail.studentDetail.firstName,
+              ].where((p) => p.trim().isNotEmpty).join(' '),
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+          ],
           SummaryCompactHeader(enrollmentDetail: widget.enrollmentDetail),
           const SizedBox(height: AppDimensions.spacingM),
           SummaryPersonalInfoSection(

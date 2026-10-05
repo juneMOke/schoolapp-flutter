@@ -1,6 +1,6 @@
 import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_dto.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 // Modèles de la remontée des contrats : la pose d'une période
 // (`POST …/staff-members/{id}/contracts`) et sa correction

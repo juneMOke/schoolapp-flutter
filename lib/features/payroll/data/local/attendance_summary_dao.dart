@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/attendance_summary_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Les résumés des mois clos du Pointage (`staff_attendance_summaries`) :

@@ -1,6 +1,6 @@
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/core/offline/outbox_author.dart';
-import 'package:school_app_flutter/features/staff/data/sync/staff_json.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 /// Une avance sur salaire, sur le fil : la même forme pour la remontée
 /// (`{ advance, authorId }`) et la descente (plus ce que le serveur a figé).

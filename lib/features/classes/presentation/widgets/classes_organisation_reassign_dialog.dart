@@ -207,6 +207,7 @@ class _ReassignDialogState extends State<_ReassignDialog> {
                 firstName: widget.intent.studentFirstName,
                 lastName: widget.intent.studentLastName,
                 personId: widget.intent.studentId,
+                studentPhotoOf: widget.intent.studentId,
                 size: AvatarSize.lg,
               ),
               const SizedBox(width: AppDimensions.spacingM),

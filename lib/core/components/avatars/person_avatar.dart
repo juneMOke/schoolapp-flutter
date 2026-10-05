@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/helpers/avatar_palette.dart';
 import 'package:school_app_flutter/core/helpers/initials_helper.dart';
@@ -29,7 +30,7 @@ enum AvatarVariant {
 }
 
 /// Avatar circulaire d'une personne — élève, parent, agent — affichant ses
-/// initiales.
+/// initiales, ou la photo de l'élève quand [studentPhotoOf] le demande.
 ///
 /// - Ordre NOM-Prénom (convention RDC), initiales via [InitialsHelper].
 /// - Teinte d'identité déterministe par personne via [AvatarPalette] (palette
@@ -38,6 +39,9 @@ enum AvatarVariant {
 /// - La teinte et les initiales ne portent aucune information : elles sont
 ///   exclues du lecteur d'écran sauf si [semanticLabel] est fourni (cas d'un
 ///   avatar isolé sans nom affiché à côté).
+/// - La photo est **opt-in**, écran par écran : seuls les élèves en ont, et un
+///   agent ou un parent ne doit jamais en recevoir une par erreur. Sans
+///   `PersonPhotoScope` au-dessus, ou sans photo, les initiales restent.
 class PersonAvatar extends StatelessWidget {
   /// Ratio police / diamètre — lisible à toutes les échelles.
   static const double _initialsRatio = 0.36;
@@ -60,6 +64,10 @@ class PersonAvatar extends StatelessWidget {
   /// affiché à côté → évite la redite).
   final String? semanticLabel;
 
+  /// Identifiant de l'élève dont montrer la photo — en pratique [personId].
+  /// `null` : initiales seulement.
+  final String? studentPhotoOf;
+
   const PersonAvatar({
     super.key,
     required this.firstName,
@@ -68,6 +76,7 @@ class PersonAvatar extends StatelessWidget {
     this.size = AvatarSize.md,
     this.variant = AvatarVariant.solid,
     this.semanticLabel,
+    this.studentPhotoOf,
   });
 
   @override
@@ -76,7 +85,7 @@ class PersonAvatar extends StatelessWidget {
     final tint = AvatarPalette.colorFor(personId);
     final isSolid = variant == AvatarVariant.solid;
 
-    final avatar = Container(
+    final initialsAvatar = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
@@ -92,6 +101,12 @@ class PersonAvatar extends StatelessWidget {
           color: isSolid ? AppColors.blancCasse : tint,
         ),
       ),
+    );
+
+    final avatar = PersonPhotoOr(
+      personId: studentPhotoOf,
+      size: size,
+      fallback: initialsAvatar,
     );
 
     if (semanticLabel != null) {

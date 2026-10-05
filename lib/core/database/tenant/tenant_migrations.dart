@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
+import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 part 'tenant_migrations_presence.dart';
@@ -64,6 +65,12 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(58)) {
     await _studentAttendanceV2(db);
+  }
+  if (upTo(59)) {
+    await _createTables(db, studentPhotoTables);
+  }
+  if (upTo(60)) {
+    await _addStudentPhotoThumbnailSha(db);
   }
 }
 
@@ -150,7 +157,7 @@ Future<void> _paymentCorrections(DatabaseExecutor db) async {
 }
 
 /// v55 — le fichier du personnel ; v56 — le Pointage du personnel ; v57 — la
-/// Paie du personnel. Tables
+/// Paie du personnel ; v59 — la photo de l'élève. Tables
 /// neuves, création pure.
 ///
 /// ⚠️ Gardes `IF NOT EXISTS`, même raison qu'à la v54 : une base héritée
@@ -217,6 +224,16 @@ Future<void> _addTillPhone(DatabaseExecutor db) async {
   final info = await db.rawQuery('PRAGMA table_info(ref_school)');
   if (info.any((row) => row['name'] == 'till_phone')) return;
   await db.execute('ALTER TABLE ref_school ADD COLUMN till_phone TEXT');
+}
+
+/// v60 — l'empreinte de la vignette d'une photo d'élève. Gardée comme la v50 :
+/// une base créée en v60 porte déjà la colonne.
+Future<void> _addStudentPhotoThumbnailSha(DatabaseExecutor db) async {
+  final info = await db.rawQuery('PRAGMA table_info(student_photos)');
+  if (info.any((row) => row['name'] == 'thumbnail_sha256')) return;
+  await db.execute(
+    'ALTER TABLE student_photos ADD COLUMN thumbnail_sha256 TEXT',
+  );
 }
 
 /// v49 — la base adoptée rend à l'appareil ce qui lui appartient.

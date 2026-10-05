@@ -223,6 +223,7 @@ class _ClassesListStudentsTableState extends State<ClassesListStudentsTable> {
               firstName: row.firstName,
               lastName: row.lastName,
               personId: row.studentId,
+              studentPhotoOf: row.studentId,
               size: core_avatar.AvatarSize.sm,
             ),
             cells: [

@@ -40,6 +40,7 @@ class StudentMonthHeader extends StatelessWidget {
           firstName: student.firstName,
           lastName: student.lastName,
           personId: student.id,
+          studentPhotoOf: student.id,
           size: AvatarSize.lg,
         ),
         const SizedBox(width: AppSpacing.md),

@@ -10,6 +10,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/pers
 import 'package:school_app_flutter/features/student/domain/entities/student_detail.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/personal_info/identity_photo_layout.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_slot.dart';
 
 class PersonalInfoStepBody extends StatelessWidget {
   final StudentDetail studentDetail;
@@ -71,6 +73,21 @@ class PersonalInfoStepBody extends StatelessWidget {
     this.dateOfBirthError,
   });
 
+  /// Le nom porté par la modale de capture : ce qui est saisi, sinon ce que
+  /// le dossier connaît.
+  String get _studentName {
+    final typed = [
+      lastNameController.text,
+      surnameController.text,
+      firstNameController.text,
+    ].map((p) => p.trim()).where((p) => p.isNotEmpty).join(' ');
+    if (typed.isNotEmpty) return typed;
+    return [
+      studentDetail.lastName,
+      studentDetail.firstName,
+    ].where((p) => p.trim().isNotEmpty).join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -80,109 +97,119 @@ class PersonalInfoStepBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          WizardFieldsGrid(
-            fields: [
-              WizardGridField(
-                EteeloTextInput(
-                  label: l10n.firstName,
-                  controller: firstNameController,
-                  required: true,
-                  errorText: firstNameError,
-                  readOnly: !isEditable,
+          IdentityPhotoLayout(
+            // Un élève sans identifiant n'a pas encore de place où ranger sa
+            // photo ; la photo se gère hors du dossier, même verrouillé.
+            photo: studentDetail.id.isEmpty
+                ? null
+                : PhotoSlot(
+                    studentId: studentDetail.id,
+                    studentName: _studentName,
+                  ),
+            fields: WizardFieldsGrid(
+              fields: [
+                WizardGridField(
+                  EteeloTextInput(
+                    label: l10n.firstName,
+                    controller: firstNameController,
+                    required: true,
+                    errorText: firstNameError,
+                    readOnly: !isEditable,
+                  ),
                 ),
-              ),
-              WizardGridField(
-                EteeloTextInput(
-                  label: l10n.lastName,
-                  controller: lastNameController,
-                  required: true,
-                  errorText: lastNameError,
-                  readOnly: !isEditable,
+                WizardGridField(
+                  EteeloTextInput(
+                    label: l10n.lastName,
+                    controller: lastNameController,
+                    required: true,
+                    errorText: lastNameError,
+                    readOnly: !isEditable,
+                  ),
                 ),
-              ),
-              WizardGridField(
-                EteeloTextInput(
-                  label: l10n.surname,
-                  controller: surnameController,
-                  required: true,
-                  errorText: surnameError,
-                  readOnly: !isEditable,
+                WizardGridField(
+                  EteeloTextInput(
+                    label: l10n.surname,
+                    controller: surnameController,
+                    required: true,
+                    errorText: surnameError,
+                    readOnly: !isEditable,
+                  ),
                 ),
-              ),
-              WizardGridField(
-                EteeloDateInput(
-                  label: l10n.dateOfBirth,
-                  placeholder: l10n.dateHint,
-                  value: selectedDate,
-                  required: true,
-                  errorText: dateOfBirthError,
-                  enabled: isEditable,
-                  readOnly: !isEditable,
-                  lastDate: DateTime.now(),
-                  initialPickerDate: DateTime(DateTime.now().year - 10),
-                  locale: const Locale('fr'),
-                  helpText: l10n.selectDateOfBirthHelpText,
-                  cancelText: l10n.cancel,
-                  confirmText: l10n.confirm,
-                  onChanged: onDateChanged,
+                WizardGridField(
+                  EteeloDateInput(
+                    label: l10n.dateOfBirth,
+                    placeholder: l10n.dateHint,
+                    value: selectedDate,
+                    required: true,
+                    errorText: dateOfBirthError,
+                    enabled: isEditable,
+                    readOnly: !isEditable,
+                    lastDate: DateTime.now(),
+                    initialPickerDate: DateTime(DateTime.now().year - 10),
+                    locale: const Locale('fr'),
+                    helpText: l10n.selectDateOfBirthHelpText,
+                    cancelText: l10n.cancel,
+                    confirmText: l10n.confirm,
+                    onChanged: onDateChanged,
+                  ),
                 ),
-              ),
-              WizardGridField(
-                EteeloTextInput(
-                  label: l10n.birthPlace,
-                  controller: birthPlaceController,
-                  required: true,
-                  errorText: birthPlaceError,
-                  readOnly: !isEditable,
+                WizardGridField(
+                  EteeloTextInput(
+                    label: l10n.birthPlace,
+                    controller: birthPlaceController,
+                    required: true,
+                    errorText: birthPlaceError,
+                    readOnly: !isEditable,
+                  ),
                 ),
-              ),
-              WizardGridField(
-                NationalityDropdownField(
-                  label: l10n.nationality,
-                  value: selectedNationality,
-                  options: nationalityOptions,
-                  onChanged: onNationalityChanged,
-                  requiredField: true,
-                  errorText: nationalityError,
-                  enabled: isEditable,
-                  readOnly: !isEditable,
+                WizardGridField(
+                  NationalityDropdownField(
+                    label: l10n.nationality,
+                    value: selectedNationality,
+                    options: nationalityOptions,
+                    onChanged: onNationalityChanged,
+                    requiredField: true,
+                    errorText: nationalityError,
+                    enabled: isEditable,
+                    readOnly: !isEditable,
+                  ),
                 ),
-              ),
-              // Genre (contrôle segmenté M/F) — pleine largeur, comme
-              // « Année validée » à l'étape 3.
-              WizardGridField(
-                GenderSegmentedField(
-                  width: double.infinity,
-                  label: l10n.gender,
-                  selectedGender: selectedGender,
-                  requiredField: true,
-                  helpMessage: l10n.genderHelp,
-                  onChanged: onGenderChanged,
-                  enabled: isEditable,
-                  readOnly: !isEditable,
+                // Genre (contrôle segmenté M/F) — pleine largeur, comme
+                // « Année validée » à l'étape 3.
+                WizardGridField(
+                  GenderSegmentedField(
+                    width: double.infinity,
+                    label: l10n.gender,
+                    selectedGender: selectedGender,
+                    requiredField: true,
+                    helpMessage: l10n.genderHelp,
+                    onChanged: onGenderChanged,
+                    enabled: isEditable,
+                    readOnly: !isEditable,
+                  ),
+                  fullWidth: true,
                 ),
-                fullWidth: true,
-              ),
-              // Fiche santé — pleine largeur, en fin de bloc : c'est le seul
-              // champ libre de l'étape, et le seul qu'on relira un jour
-              // d'urgence.
-              WizardGridField(
-                EteeloTextInput(
-                  label: l10n.medicalNotesLabel,
-                  controller: medicalNotesController,
-                  placeholder: l10n.medicalNotesHelp,
-                  keyboardType: EteeloTextInputType.multiline,
-                  minLines: 3,
-                  maxLines: 5,
-                  // Le contrat serveur rejette au-delà de 2000 : mieux vaut
-                  // buter à la frappe que perdre la saisie sur un 422, qui
-                  // n'arriverait qu'après la finalisation du dossier.
-                  inputFormatters: [LengthLimitingTextInputFormatter(2000)],
-                  readOnly: !isEditable,
+                // Fiche santé — pleine largeur, en fin de bloc : c'est le seul
+                // champ libre de l'étape, et le seul qu'on relira un jour
+                // d'urgence.
+                WizardGridField(
+                  EteeloTextInput(
+                    label: l10n.medicalNotesLabel,
+                    controller: medicalNotesController,
+                    placeholder: l10n.medicalNotesHelp,
+                    keyboardType: EteeloTextInputType.multiline,
+                    minLines: 3,
+                    maxLines: 5,
+                    // Le contrat serveur rejette au-delà de 2000 : mieux vaut
+                    // buter à la frappe que perdre la saisie sur un 422, qui
+                    // n'arriverait qu'après la finalisation du dossier.
+                    inputFormatters: [LengthLimitingTextInputFormatter(2000)],
+                    readOnly: !isEditable,
+                  ),
+                  fullWidth: true,
                 ),
-                fullWidth: true,
-              ),
-            ],
+              ],
+            ),
           ),
           if (showInlineSaveButton) ...[
             const SizedBox(height: 24),

@@ -408,6 +408,7 @@ class _ReleveRow extends StatelessWidget {
             firstName: eleve.firstName,
             lastName: eleve.lastName,
             personId: eleve.studentId,
+            studentPhotoOf: eleve.studentId,
             size: 30,
           ),
           const SizedBox(width: AppSpacing.sm),

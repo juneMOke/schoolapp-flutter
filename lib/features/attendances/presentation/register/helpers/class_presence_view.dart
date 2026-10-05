@@ -30,6 +30,7 @@ extension ClassPresenceLineView on ClassPresenceLine {
       justificationLabel: justification?.reason.getDisplayName(l10n),
       sync: sync,
       canJustify: canJustify,
+      showsStudentPhoto: true,
     );
   }
 }

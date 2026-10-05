@@ -24,6 +24,11 @@ class AppMotion {
   static const Duration actionCooldown = Duration(milliseconds: 600);
   static const Duration refreshCooldown = Duration(milliseconds: 700);
   static const Duration tooltipShowDuration = Duration(seconds: 3);
+  // Photo de l'élève : la modale se ferme seule une fois la photo
+  // enregistrée ; en séance, le flash laisse voir la photo avant l'élève
+  // suivant.
+  static const Duration photoSavedAutoClose = Duration(milliseconds: 1400);
+  static const Duration photoSessionAdvance = Duration(milliseconds: 1500);
 
   static const Curve inCurve = Curves.easeInCubic;
   static const Curve outCurve = Curves.easeOutCubic;

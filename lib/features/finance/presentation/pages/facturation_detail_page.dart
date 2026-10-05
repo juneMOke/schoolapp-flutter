@@ -286,6 +286,7 @@ class FacturationDetailPage extends StatelessWidget {
           lastName: intent.lastName,
           fallbackRoute: AppRoutesNames.facturations,
           showCloseButton: true,
+          studentId: intent.studentId,
           trailing: const _BillingBalanceAppBarPill(),
         ),
         child: LayoutBuilder(
