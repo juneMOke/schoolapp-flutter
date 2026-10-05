@@ -41,23 +41,10 @@ class ProgrammePurge {
     List<String> chapitreIds,
   ) async {
     for (final chapitreId in chapitreIds) {
-      final notes = await _ids(
-        txn,
-        ProgrammeTables.note,
-        'chapitre_id',
-        chapitreId,
-      );
-      final ressources = await _ids(
-        txn,
-        ProgrammeTables.ressource,
-        'chapitre_id',
-        chapitreId,
-      );
       await ProgrammeOutbox.neutralize(txn, [
         ProgrammeOutbox.chapitreEntry(chapitreId),
-        ...notes.map(ProgrammeOutbox.noteEntry),
-        ...ressources.map(ProgrammeOutbox.ressourceEntry),
       ]);
+      await ProgrammeOutbox.neutralizeChildren(txn, chapitreId);
       for (final table in [ProgrammeTables.note, ProgrammeTables.ressource]) {
         await txn.delete(
           table,

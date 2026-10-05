@@ -3,18 +3,27 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
+import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/tombstone/tombstone_removal_hooks.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_metier_pull_handlers.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/per_cours_keyset_puller.dart';
+import 'package:school_app_flutter/features/course_programme/data/local/chapitre_children_write_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_pull_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_purge.dart';
+import 'package:school_app_flutter/features/course_programme/data/local/programme_sync_dao.dart';
+import 'package:school_app_flutter/features/course_programme/data/local/chapitre_write_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/repositories/chapitre_pull_repository.dart';
+import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_note_outbox_handler.dart';
+import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_ordre_outbox_handler.dart';
+import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_outbox_handler.dart';
+import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_ressource_outbox_handler.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_sync_api.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_transfer_api.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -55,6 +64,20 @@ void registerCourseProgramme(GetIt getIt) {
   getIt.registerLazySingleton<ProgrammePurge>(
     () => ProgrammePurge(db: getIt<Database>(), blobs: getIt<ProgrammeBlobs>()),
   );
+  getIt.registerLazySingleton<ChapitreWriteDao>(
+    () =>
+        ChapitreWriteDao(db: getIt<Database>(), blobs: getIt<ProgrammeBlobs>()),
+  );
+  getIt.registerLazySingleton<ChapitreChildrenWriteDao>(
+    () => ChapitreChildrenWriteDao(
+      db: getIt<Database>(),
+      blobs: getIt<ProgrammeBlobs>(),
+    ),
+  );
+  getIt.registerLazySingleton<ProgrammeSyncDao>(
+    () =>
+        ProgrammeSyncDao(db: getIt<Database>(), blobs: getIt<ProgrammeBlobs>()),
+  );
 
   // ── Réseau ──
   getIt.registerLazySingleton<ProgrammeSyncApi>(
@@ -83,6 +106,50 @@ void registerCourseProgramme(GetIt getIt) {
       (_) async => getIt<ProgrammeBlobs>().reclaimOrphans(),
     );
   }
+
+  // ── Remontée : quatre agrégats, les enfants attendent leur chapitre ──
+  final engine = getIt<SyncEngine>();
+  Future<void> evictCours(String coursId) =>
+      getIt<CoursEviction>().evict(coursId);
+  engine
+    ..registerHandler(
+      ChapitreOutboxHandler(
+        api: getIt<ProgrammeSyncApi>(),
+        dao: getIt<ProgrammeSyncDao>(),
+        evictCours: evictCours,
+        currentUser: getIt<CurrentUserContext>(),
+        extras: requiredAuth,
+      ),
+    )
+    ..registerHandler(
+      ChapitreOrdreOutboxHandler(
+        api: getIt<ProgrammeSyncApi>(),
+        dao: getIt<ProgrammeSyncDao>(),
+        evictCours: evictCours,
+        currentUser: getIt<CurrentUserContext>(),
+        extras: requiredAuth,
+      ),
+    )
+    ..registerHandler(
+      ChapitreNoteOutboxHandler(
+        api: getIt<ProgrammeSyncApi>(),
+        dao: getIt<ProgrammeSyncDao>(),
+        evictCours: evictCours,
+        currentUser: getIt<CurrentUserContext>(),
+        extras: requiredAuth,
+      ),
+    )
+    ..registerHandler(
+      ChapitreRessourceOutboxHandler(
+        api: getIt<ProgrammeSyncApi>(),
+        transfer: getIt<ProgrammeTransferApi>(),
+        blobs: getIt<ProgrammeBlobs>(),
+        dao: getIt<ProgrammeSyncDao>(),
+        evictCours: evictCours,
+        currentUser: getIt<CurrentUserContext>(),
+        extras: requiredAuth,
+      ),
+    );
 
   // ── Descente (après le pull cours, qui range les cours itérés) ──
   getIt<PullCoordinator>().registerHandler(

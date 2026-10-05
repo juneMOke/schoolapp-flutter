@@ -23,6 +23,10 @@ ProgrammeSyncState programmeSyncStateOf(Object? dbValue) =>
       _ => ProgrammeSyncState.pending,
     };
 
+/// L'instant [ms] en ISO-8601 UTC, la forme rangée en base et sur le fil.
+String programmeInstant(int ms) =>
+    DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toIso8601String();
+
 DateTime? _instant(Object? value) =>
     value is String ? DateTime.tryParse(value)?.toUtc() : null;
 

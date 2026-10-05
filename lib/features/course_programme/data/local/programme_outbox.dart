@@ -46,6 +46,23 @@ class ProgrammeOutbox {
     return rows.isNotEmpty;
   }
 
+  /// L'entrée [entryId] a-t-elle été remplacée par un geste plus récent
+  /// depuis l'envoi de celle créée à [sentCreatedAt] ?
+  static Future<bool> replacedSince(
+    DatabaseExecutor db,
+    String entryId,
+    int sentCreatedAt,
+  ) async {
+    final rows = await db.query(
+      OutboxDao.table,
+      columns: ['1'],
+      where: 'id = ? AND status = ? AND created_at <> ?',
+      whereArgs: [entryId, OutboxStatus.pending.dbValue, sentCreatedAt],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
   /// Neutralise les entrées [ids] qui n'ont plus rien à pousser (l'objet
   /// n'existera jamais côté serveur), quel que soit leur statut.
   static Future<void> neutralize(DatabaseExecutor db, List<String> ids) async {
@@ -56,6 +73,25 @@ class ProgrammeOutbox {
       {'status': OutboxStatus.acked.dbValue},
       where: 'id IN ($marks) AND status <> ?',
       whereArgs: [...ids, OutboxStatus.acked.dbValue],
+    );
+  }
+
+  /// Neutralise les gestes en attente des notes et ressources de
+  /// [chapitreId] : le chapitre part, le serveur les emporte avec lui.
+  static Future<void> neutralizeChildren(
+    DatabaseExecutor db,
+    String chapitreId,
+  ) async {
+    await db.update(
+      OutboxDao.table,
+      {'status': OutboxStatus.acked.dbValue},
+      where: 'aggregate_type IN (?, ?) AND aggregate_id = ? AND status <> ?',
+      whereArgs: [
+        noteType,
+        ressourceType,
+        chapitreId,
+        OutboxStatus.acked.dbValue,
+      ],
     );
   }
 }

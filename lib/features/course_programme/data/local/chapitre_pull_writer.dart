@@ -67,25 +67,7 @@ class ChapitrePullWriter {
       whereArgs: [dto.id],
       limit: 1,
     )).firstOrNull;
-    final row = <String, Object?>{
-      'cours_id': dto.coursId,
-      'titre': dto.titre,
-      'resume': dto.resume,
-      'statut': dto.statut,
-      'seances': dto.seances,
-      'sous_periode_id': dto.sousPeriodeId,
-      'objectifs_json': jsonEncode(
-        ChapitreFicheCodec.objectifsToJson(dto.objectifs),
-      ),
-      'strategies_json': jsonEncode(dto.strategies),
-      'blocs_json': jsonEncode(ChapitreFicheCodec.blocsToJson(dto.blocs)),
-      'client_updated_at': dto.clientUpdatedAt,
-      'server_updated_at': dto.serverUpdatedAt,
-      'server_known': 1,
-      'sync_status': SyncState.synced.dbValue,
-      'sync_error_code': null,
-      'updated_at': nowMs,
-    };
+    final row = ficheColumnsOf(dto, nowMs: nowMs);
     if (local == null) {
       await txn.insert(ProgrammeTables.chapitre, {
         'id': dto.id,
@@ -116,6 +98,31 @@ class ChapitrePullWriter {
     );
     return true;
   }
+
+  /// La fiche serveur [dto], synchronisée, telle qu'elle se range — sans
+  /// `ordre`, que l'appelant pose ou garde.
+  static Map<String, Object?> ficheColumnsOf(
+    ChapitreDto dto, {
+    required int nowMs,
+  }) => {
+    'cours_id': dto.coursId,
+    'titre': dto.titre,
+    'resume': dto.resume,
+    'statut': dto.statut,
+    'seances': dto.seances,
+    'sous_periode_id': dto.sousPeriodeId,
+    'objectifs_json': jsonEncode(
+      ChapitreFicheCodec.objectifsToJson(dto.objectifs),
+    ),
+    'strategies_json': jsonEncode(dto.strategies),
+    'blocs_json': jsonEncode(ChapitreFicheCodec.blocsToJson(dto.blocs)),
+    'client_updated_at': dto.clientUpdatedAt,
+    'server_updated_at': dto.serverUpdatedAt,
+    'server_known': 1,
+    'sync_status': SyncState.synced.dbValue,
+    'sync_error_code': null,
+    'updated_at': nowMs,
+  };
 
   static bool _isNewer(String? server, Object? local) {
     final s = server == null ? null : DateTime.tryParse(server);
