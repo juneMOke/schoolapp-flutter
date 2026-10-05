@@ -106,6 +106,26 @@ void main() {
     expect(await dao.pendingCount(), 1);
   });
 
+  test('reprogrammer, reporter ou refuser l\'ancienne version ne touche pas '
+      'l\'entrée ré-enfilée en vol', () async {
+    await dao.enqueue(entry(id: 'agg', createdAt: 1000));
+    await dao.enqueue(entry(id: 'agg', createdAt: 2000));
+
+    await dao.reschedule(
+      'agg',
+      attempts: 5,
+      nextAttemptAt: 99999,
+      expectedCreatedAt: 1000,
+    );
+    await dao.defer('agg', nextAttemptAt: 99999, expectedCreatedAt: 1000);
+    await dao.markSyncError('agg', 'refus', expectedCreatedAt: 1000);
+
+    final fresh = await dao.pendingReady(5000);
+    expect(fresh, hasLength(1));
+    expect(fresh.single.createdAt, 2000);
+    expect(fresh.single.attempts, 0);
+  });
+
   test('markSyncError passe l\'entrée en SYNC_ERROR avec message', () async {
     await dao.enqueue(entry(id: 'e1'));
     await dao.markSyncError('e1', 'champ requis manquant');

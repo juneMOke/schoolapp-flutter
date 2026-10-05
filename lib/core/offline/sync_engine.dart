@@ -268,10 +268,17 @@ class SyncEngine {
                 entry.id,
                 nextAttemptAt: _now() + _blockedDelayMs,
                 reason: result.error,
+                expectedCreatedAt: entry.createdAt,
               );
               blocked++;
             case OutboxDispatchOutcome.failed:
-              await _outbox.markSyncError(entry.id, result.error);
+              // Gardé comme l'accusé : un geste ré-enfilé pendant le dispatch
+              // n'hérite pas du refus de l'ancien.
+              await _outbox.markSyncError(
+                entry.id,
+                result.error,
+                expectedCreatedAt: entry.createdAt,
+              );
               failed++;
           }
         } on StaleTenantException {
@@ -319,6 +326,7 @@ class SyncEngine {
         entry.id,
         'poison: abandon après $attempts tentatives'
         '${error != null ? ' ($error)' : ''}',
+        expectedCreatedAt: entry.createdAt,
       );
       return true;
     }
@@ -327,6 +335,7 @@ class SyncEngine {
       attempts: attempts,
       nextAttemptAt: _now() + backoffMs(attempts),
       lastError: error,
+      expectedCreatedAt: entry.createdAt,
     );
     return false;
   }
