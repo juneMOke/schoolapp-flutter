@@ -796,7 +796,10 @@ class AppConstants {
   // d'école.
   // v60 (2026-10-05) : `student_photos.thumbnail_sha256` — l'empreinte de la
   // vignette, `ETag` de `size=96`. Additif. Palier d'école.
-  static const int offlineDbSchemaVersion = 60;
+  // v61 (2026-10-06) : le programme de cours (`chapitre`, `chapitre_note`,
+  // `chapitre_ressource`) et la recopie des chapitres de `ref_chapitre` en
+  // ébauches. Création pure. Palier d'école.
+  static const int offlineDbSchemaVersion = 61;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
