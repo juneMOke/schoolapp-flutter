@@ -15,6 +15,9 @@ import 'package:school_app_flutter/features/academics/data/models/offline/academ
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_keyset_cycle.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/per_cours_keyset_puller.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/offline/academics_delta_pull_outcome.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
@@ -41,10 +44,21 @@ void main() {
     repo = AcademicsMetierPullRepositoryImpl(
       api: api,
       localDataSource: local,
-      refLocalDataSource: refLocal,
-      syncMetaDao: syncMeta,
+      puller: PerCoursKeysetPuller(
+        refLocalDataSource: refLocal,
+        syncMetaDao: syncMeta,
+        eviction: CoursEviction(
+          refLocalDataSource: refLocal,
+          localDataSource: local,
+          syncMetaDao: syncMeta,
+          cursorPrefixes: const {
+            kAcademicsEvaluationsResourcePrefix,
+            kAcademicsNotesResourcePrefix,
+          },
+        ),
+        now: () => 10000,
+      ),
       requiredAuth: auth,
-      now: () => 10000,
     );
   });
 
@@ -55,13 +69,16 @@ void main() {
     Response(requestOptions: RequestOptions(path: '/'), statusCode: 200),
   );
 
-  DioException status(int code) => DioException(
+  DioException status(int code, {String? detailCode}) => DioException(
     requestOptions: RequestOptions(path: '/'),
     response: Response(
       requestOptions: RequestOptions(path: '/'),
       statusCode: code,
+      data: detailCode == null ? null : {'detailCode': detailCode},
     ),
   );
+
+  DioException notOwned() => status(403, detailCode: kCoursNotOwnedCode);
 
   Future<void> insertCours(String id) => db.insert('ref_cours', {
     'id': id,
@@ -305,7 +322,7 @@ void main() {
 
           when(
             () => api.pullEvaluations(auth, 'co-lost', null, 100),
-          ).thenThrow(status(403));
+          ).thenThrow(notOwned());
           when(() => api.pullEvaluations(auth, 'co-ok', null, 100)).thenAnswer(
             (_) async => httpOk(
               const EvaluationPageDto(
@@ -368,7 +385,7 @@ void main() {
 
           when(
             () => api.pullEvaluations(auth, 'co-lost', null, 100),
-          ).thenThrow(status(403));
+          ).thenThrow(notOwned());
 
           final result = await repo.syncEvaluations();
 
@@ -377,6 +394,20 @@ void main() {
           expect(await refLocal.getCours('co-lost'), isNull);
         },
       );
+
+      test('403 SANS COURS_NOT_OWNED (permission absente du jeton) : échec du '
+          'cours, jamais d\'éviction', () async {
+        await insertCours('co-1');
+
+        when(
+          () => api.pullEvaluations(auth, 'co-1', null, 100),
+        ).thenThrow(status(403));
+
+        final result = await repo.syncEvaluations();
+
+        expect(result.isLeft(), isTrue);
+        expect(await refLocal.getCours('co-1'), isNotNull);
+      });
     },
   );
 

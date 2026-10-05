@@ -24,6 +24,8 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/academics/data/repositories/offline/course_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/grades_referential_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/per_cours_keyset_puller.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notation_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart';
@@ -104,14 +106,34 @@ void registerAcademicsOffline(GetIt getIt) {
       currentUser: getIt<CurrentUserContext>(),
     ),
   );
+  // Le retrait d'un cours réaffecté (403 `COURS_NOT_OWNED`), en un seul
+  // endroit : les modules rattachés aux cours (le programme) s'y enregistrent.
+  getIt.registerLazySingleton<CoursEviction>(
+    () => CoursEviction(
+      refLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
+      localDataSource: getIt<AcademicsLocalDataSource>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      cursorPrefixes: const {
+        kAcademicsEvaluationsResourcePrefix,
+        kAcademicsNotesResourcePrefix,
+      },
+    ),
+  );
+  // Le moteur des flux scopés cours, partagé : évaluations, notes, chapitres.
+  getIt.registerLazySingleton<PerCoursKeysetPuller>(
+    () => PerCoursKeysetPuller(
+      refLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
+      syncMetaDao: getIt<SyncMetaDao>(),
+      eviction: getIt<CoursEviction>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
   getIt.registerLazySingleton<AcademicsMetierPullRepositoryImpl>(
     () => AcademicsMetierPullRepositoryImpl(
       api: getIt<AcademicsMetierPullApi>(),
       localDataSource: getIt<AcademicsLocalDataSource>(),
-      refLocalDataSource: getIt<AcademicsRefLocalDataSource>(),
-      syncMetaDao: getIt<SyncMetaDao>(),
+      puller: getIt<PerCoursKeysetPuller>(),
       requiredAuth: requiredAuth,
-      currentUser: getIt<CurrentUserContext>(),
     ),
   );
   getIt.registerLazySingleton<EvaluationOfflineRepositoryImpl>(
