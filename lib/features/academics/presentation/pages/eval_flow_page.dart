@@ -20,6 +20,9 @@ class EvalFlowPage extends StatefulWidget {
 }
 
 class _EvalFlowPageState extends State<EvalFlowPage> {
+  /// En-tête courant : le détail le relit (maximum ajusté) avant d'ouvrir la
+  /// saisie, et le retrouve au retour.
+  late EvalDetailArgs _args = widget.args;
   bool _inSaisie = false;
 
   @override
@@ -31,14 +34,17 @@ class _EvalFlowPageState extends State<EvalFlowPage> {
       child: _inSaisie
           ? EvalSaisiePage(
               key: const ValueKey<String>('eval-saisie'),
-              args: widget.args,
+              args: _args,
               onBack: () => setState(() => _inSaisie = false),
             )
           : EvalDetailPage(
               key: const ValueKey<String>('eval-detail'),
-              args: widget.args,
+              args: _args,
               onBack: widget.onBack,
-              onOpenSaisie: () => setState(() => _inSaisie = true),
+              onOpenSaisie: (args) => setState(() {
+                _args = args;
+                _inSaisie = true;
+              }),
             ),
     );
   }

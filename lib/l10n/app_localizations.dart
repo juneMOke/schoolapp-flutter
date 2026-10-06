@@ -3044,6 +3044,252 @@ abstract class AppLocalizations {
   /// **'(optional)'**
   String get formOptionalMark;
 
+  /// No description provided for @sujetSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get sujetSectionTitle;
+
+  /// No description provided for @sujetSummaryQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No questions} =1{1 question} other{{count} questions}}'**
+  String sujetSummaryQuestions(int count);
+
+  /// No description provided for @sujetPointsOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} / {max} pts'**
+  String sujetPointsOf(String total, String max);
+
+  /// No description provided for @sujetShowAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show answers'**
+  String get sujetShowAnswers;
+
+  /// No description provided for @sujetHideAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide answers'**
+  String get sujetHideAnswers;
+
+  /// No description provided for @sujetRevealAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the answer'**
+  String get sujetRevealAnswer;
+
+  /// No description provided for @sujetHideAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the answer'**
+  String get sujetHideAnswer;
+
+  /// No description provided for @sujetEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get sujetEdit;
+
+  /// No description provided for @sujetEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject to write'**
+  String get sujetEmptyTitle;
+
+  /// No description provided for @sujetEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the questions, their points and the expected answers.'**
+  String get sujetEmptyDescription;
+
+  /// No description provided for @sujetEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the subject'**
+  String get sujetEmptyAction;
+
+  /// No description provided for @sujetQuestionBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Q{number}'**
+  String sujetQuestionBadge(int number);
+
+  /// No description provided for @sujetQuestionPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts'**
+  String sujetQuestionPoints(String points);
+
+  /// No description provided for @sujetPointsSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'pts'**
+  String get sujetPointsSuffix;
+
+  /// No description provided for @sujetQuestionPointsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Points for question {number}'**
+  String sujetQuestionPointsLabel(int number);
+
+  /// No description provided for @sujetQuestionEnonceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number} text'**
+  String sujetQuestionEnonceLabel(int number);
+
+  /// No description provided for @sujetQuestionEnonceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Question text'**
+  String get sujetQuestionEnonceHint;
+
+  /// No description provided for @sujetAnswerHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected answer · visible to the teacher only'**
+  String get sujetAnswerHeader;
+
+  /// No description provided for @sujetAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected answer (optional)'**
+  String get sujetAnswerHint;
+
+  /// No description provided for @sujetAnswerRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected answer — {answer}'**
+  String sujetAnswerRead(String answer);
+
+  /// No description provided for @sujetMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get sujetMoveUp;
+
+  /// No description provided for @sujetMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get sujetMoveDown;
+
+  /// No description provided for @sujetDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get sujetDuplicate;
+
+  /// No description provided for @sujetDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get sujetDelete;
+
+  /// No description provided for @sujetIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete'**
+  String get sujetIncomplete;
+
+  /// No description provided for @sujetIncompleteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 question to complete} other{{count} questions to complete}}'**
+  String sujetIncompleteCount(int count);
+
+  /// No description provided for @sujetAddQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a question'**
+  String get sujetAddQuestion;
+
+  /// No description provided for @sujetAddFirstQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the first question'**
+  String get sujetAddFirstQuestion;
+
+  /// No description provided for @sujetBaremeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking {total} / {max} pts'**
+  String sujetBaremeValue(String total, String max);
+
+  /// No description provided for @sujetBaremeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No points assigned'**
+  String get sujetBaremeEmpty;
+
+  /// No description provided for @sujetBaremeUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'{gap} pts left to assign'**
+  String sujetBaremeUnder(String gap);
+
+  /// No description provided for @sujetBaremeComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking complete'**
+  String get sujetBaremeComplete;
+
+  /// No description provided for @sujetBaremeOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceeds the maximum by {gap} pts'**
+  String sujetBaremeOver(String gap);
+
+  /// No description provided for @sujetBaremeAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the maximum to {max}'**
+  String sujetBaremeAdjust(String max);
+
+  /// No description provided for @sujetBaremeLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum locked: grades have been entered'**
+  String get sujetBaremeLocked;
+
+  /// No description provided for @sujetCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get sujetCancel;
+
+  /// No description provided for @sujetClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get sujetClose;
+
+  /// No description provided for @sujetSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the subject'**
+  String get sujetSave;
+
+  /// No description provided for @sujetSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get sujetSaving;
+
+  /// No description provided for @sujetSavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject saved — {summary}'**
+  String sujetSavedToast(String summary);
+
+  /// No description provided for @sujetSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving the subject failed. Your changes are kept.'**
+  String get sujetSaveError;
+
   /// No description provided for @evalRejectionPeriodClosed.
   ///
   /// In en, this message translates to:

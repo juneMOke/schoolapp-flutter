@@ -1688,6 +1688,144 @@
   "sujetConsignesLabel": "Instructions",
   "sujetConsignesHint": "Allowed materials, documents provided…",
   "formOptionalMark": "(optional)",
+  "sujetSectionTitle": "Subject",
+  "sujetSummaryQuestions": "{count, plural, =0{No questions} =1{1 question} other{{count} questions}}",
+  "@sujetSummaryQuestions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetPointsOf": "{total} / {max} pts",
+  "@sujetPointsOf": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetShowAnswers": "Show answers",
+  "sujetHideAnswers": "Hide answers",
+  "sujetRevealAnswer": "Show the answer",
+  "sujetHideAnswer": "Hide the answer",
+  "sujetEdit": "Edit",
+  "sujetEmptyTitle": "Subject to write",
+  "sujetEmptyDescription": "Add the questions, their points and the expected answers.",
+  "sujetEmptyAction": "Write the subject",
+  "sujetQuestionBadge": "Q{number}",
+  "@sujetQuestionBadge": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionPoints": "{points} pts",
+  "@sujetQuestionPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetPointsSuffix": "pts",
+  "sujetQuestionPointsLabel": "Points for question {number}",
+  "@sujetQuestionPointsLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionEnonceLabel": "Question {number} text",
+  "@sujetQuestionEnonceLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionEnonceHint": "Question text",
+  "sujetAnswerHeader": "Expected answer · visible to the teacher only",
+  "sujetAnswerHint": "Expected answer (optional)",
+  "sujetAnswerRead": "Expected answer — {answer}",
+  "@sujetAnswerRead": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetMoveUp": "Move up",
+  "sujetMoveDown": "Move down",
+  "sujetDuplicate": "Duplicate",
+  "sujetDelete": "Delete",
+  "sujetIncomplete": "To complete",
+  "sujetIncompleteCount": "{count, plural, =1{1 question to complete} other{{count} questions to complete}}",
+  "@sujetIncompleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetAddQuestion": "Add a question",
+  "sujetAddFirstQuestion": "Add the first question",
+  "sujetBaremeValue": "Marking {total} / {max} pts",
+  "@sujetBaremeValue": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeEmpty": "No points assigned",
+  "sujetBaremeUnder": "{gap} pts left to assign",
+  "@sujetBaremeUnder": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeComplete": "Marking complete",
+  "sujetBaremeOver": "Exceeds the maximum by {gap} pts",
+  "@sujetBaremeOver": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeAdjust": "Set the maximum to {max}",
+  "@sujetBaremeAdjust": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeLocked": "Maximum locked: grades have been entered",
+  "sujetCancel": "Cancel",
+  "sujetClose": "Close",
+  "sujetSave": "Save the subject",
+  "sujetSaving": "Saving…",
+  "sujetSavedToast": "Subject saved — {summary}",
+  "@sujetSavedToast": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetSaveError": "Saving the subject failed. Your changes are kept.",
   "evalRejectionPeriodClosed": "Rejected: closed period",
   "evalRejectionExamNotAllowed": "Rejected: exam not allowed",
   "evalRejectionMaxReached": "Rejected: cap reached",

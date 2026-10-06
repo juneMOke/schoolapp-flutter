@@ -4,22 +4,27 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/s
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_eleves_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_evaluation_sujet_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/save_evaluation_sujet_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_state.dart';
 
 /// Page de pilotage d'une évaluation (spec S1) : son sujet et l'avancement de
-/// la saisie, lus en local.
+/// la saisie, lus en local ; l'enregistrement du sujet (S4).
 class EvalDetailBloc extends Bloc<EvalDetailEvent, EvalDetailState> {
   final GetEvaluationSujetUseCase _getSujet;
   final GetNotesElevesUseCase _getNotes;
+  final SaveEvaluationSujetUseCase _saveSujet;
 
   EvalDetailBloc({
     required GetEvaluationSujetUseCase getEvaluationSujetUseCase,
     required GetNotesElevesUseCase getNotesElevesUseCase,
+    required SaveEvaluationSujetUseCase saveEvaluationSujetUseCase,
   }) : _getSujet = getEvaluationSujetUseCase,
        _getNotes = getNotesElevesUseCase,
+       _saveSujet = saveEvaluationSujetUseCase,
        super(const EvalDetailState()) {
     on<EvalDetailRequested>(_onRequested);
+    on<EvalDetailSujetSaveRequested>(_onSujetSave);
   }
 
   Future<void> _onRequested(
@@ -56,10 +61,40 @@ class EvalDetailBloc extends Bloc<EvalDetailEvent, EvalDetailState> {
     );
   }
 
+  Future<void> _onSujetSave(
+    EvalDetailSujetSaveRequested event,
+    Emitter<EvalDetailState> emit,
+  ) async {
+    if (state.sujetSave == SujetSaveStatus.saving) return;
+    // Garde du maximum figé : une note posée le borne (refus serveur
+    // `MAX_LOCKED`) — on ne l'envoie pas.
+    final maxPoints = state.progress.maxLocked ? null : event.maxPoints;
+    emit(state.copyWith(sujetSave: SujetSaveStatus.saving));
+    final result = await _saveSujet(
+      event.evaluationId,
+      cadre: event.cadre,
+      questions: event.questions,
+      maxPoints: maxPoints,
+    );
+    result.fold(
+      (_) => emit(state.copyWith(sujetSave: SujetSaveStatus.failed)),
+      (sujet) => emit(
+        state.copyWith(
+          sujet: sujet,
+          sujetSave: SujetSaveStatus.saved,
+          maxPoints: maxPoints,
+        ),
+      ),
+    );
+    // L'issue est consommée par l'écran ; la suivante repart d'un état neutre.
+    emit(state.copyWith(sujetSave: SujetSaveStatus.idle));
+  }
+
   static NotesProgress _progressOf(List<NoteEleve> notes) => NotesProgress(
     saisies: notes
         .where((n) => n.statut != null && n.statut != StatutNote.enAttente)
         .length,
     total: notes.length,
+    notees: notes.where((n) => n.statut == StatutNote.notee).length,
   );
 }

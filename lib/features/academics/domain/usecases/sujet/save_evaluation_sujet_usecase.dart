@@ -3,18 +3,22 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_sujet_repository.dart';
 
-/// Le sujet d'une évaluation : lu en local, écrit en local puis envoyé par
-/// l'outbox.
-abstract class EvaluationSujetRepository {
-  Future<Either<Failure, EvaluationSujet>> getSujet(String evaluationId);
+class SaveEvaluationSujetUseCase {
+  final EvaluationSujetRepository _repository;
 
-  /// Remplace le sujet d'un bloc. [maxPoints], s'il est fourni, aligne le
-  /// maximum de l'évaluation (« Ajuster le maximum »). Renvoie le sujet relu.
-  Future<Either<Failure, EvaluationSujet>> saveSujet(
+  const SaveEvaluationSujetUseCase(this._repository);
+
+  Future<Either<Failure, EvaluationSujet>> call(
     String evaluationId, {
     required EvaluationCadre cadre,
     required List<SujetQuestion> questions,
     double? maxPoints,
-  });
+  }) => _repository.saveSujet(
+    evaluationId,
+    cadre: cadre.normalized(),
+    questions: questions,
+    maxPoints: maxPoints,
+  );
 }

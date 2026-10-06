@@ -1939,6 +1939,171 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formOptionalMark => '(optional)';
 
   @override
+  String get sujetSectionTitle => 'Subject';
+
+  @override
+  String sujetSummaryQuestions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions',
+      one: '1 question',
+      zero: 'No questions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sujetPointsOf(String total, String max) {
+    return '$total / $max pts';
+  }
+
+  @override
+  String get sujetShowAnswers => 'Show answers';
+
+  @override
+  String get sujetHideAnswers => 'Hide answers';
+
+  @override
+  String get sujetRevealAnswer => 'Show the answer';
+
+  @override
+  String get sujetHideAnswer => 'Hide the answer';
+
+  @override
+  String get sujetEdit => 'Edit';
+
+  @override
+  String get sujetEmptyTitle => 'Subject to write';
+
+  @override
+  String get sujetEmptyDescription =>
+      'Add the questions, their points and the expected answers.';
+
+  @override
+  String get sujetEmptyAction => 'Write the subject';
+
+  @override
+  String sujetQuestionBadge(int number) {
+    return 'Q$number';
+  }
+
+  @override
+  String sujetQuestionPoints(String points) {
+    return '$points pts';
+  }
+
+  @override
+  String get sujetPointsSuffix => 'pts';
+
+  @override
+  String sujetQuestionPointsLabel(int number) {
+    return 'Points for question $number';
+  }
+
+  @override
+  String sujetQuestionEnonceLabel(int number) {
+    return 'Question $number text';
+  }
+
+  @override
+  String get sujetQuestionEnonceHint => 'Question text';
+
+  @override
+  String get sujetAnswerHeader =>
+      'Expected answer · visible to the teacher only';
+
+  @override
+  String get sujetAnswerHint => 'Expected answer (optional)';
+
+  @override
+  String sujetAnswerRead(String answer) {
+    return 'Expected answer — $answer';
+  }
+
+  @override
+  String get sujetMoveUp => 'Move up';
+
+  @override
+  String get sujetMoveDown => 'Move down';
+
+  @override
+  String get sujetDuplicate => 'Duplicate';
+
+  @override
+  String get sujetDelete => 'Delete';
+
+  @override
+  String get sujetIncomplete => 'To complete';
+
+  @override
+  String sujetIncompleteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions to complete',
+      one: '1 question to complete',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sujetAddQuestion => 'Add a question';
+
+  @override
+  String get sujetAddFirstQuestion => 'Add the first question';
+
+  @override
+  String sujetBaremeValue(String total, String max) {
+    return 'Marking $total / $max pts';
+  }
+
+  @override
+  String get sujetBaremeEmpty => 'No points assigned';
+
+  @override
+  String sujetBaremeUnder(String gap) {
+    return '$gap pts left to assign';
+  }
+
+  @override
+  String get sujetBaremeComplete => 'Marking complete';
+
+  @override
+  String sujetBaremeOver(String gap) {
+    return 'Exceeds the maximum by $gap pts';
+  }
+
+  @override
+  String sujetBaremeAdjust(String max) {
+    return 'Set the maximum to $max';
+  }
+
+  @override
+  String get sujetBaremeLocked => 'Maximum locked: grades have been entered';
+
+  @override
+  String get sujetCancel => 'Cancel';
+
+  @override
+  String get sujetClose => 'Close';
+
+  @override
+  String get sujetSave => 'Save the subject';
+
+  @override
+  String get sujetSaving => 'Saving…';
+
+  @override
+  String sujetSavedToast(String summary) {
+    return 'Subject saved — $summary';
+  }
+
+  @override
+  String get sujetSaveError =>
+      'Saving the subject failed. Your changes are kept.';
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejected: closed period';
 
   @override

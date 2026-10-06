@@ -769,4 +769,5 @@ class AppDimensions {
   static const sujetAddQuestionHeight = 48.0;
   static const sujetBaremeBar = 6.0;
   static const sujetDureeOtherWidth = 120.0;
+  static const sujetCadreRubriqueMaxWidth = 420.0;
 }

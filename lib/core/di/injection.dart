@@ -47,6 +47,7 @@ import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_
 import 'package:school_app_flutter/features/academics/domain/usecases/saisir_note_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_sujet_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_evaluation_sujet_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/save_evaluation_sujet_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/cours_notation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
@@ -1261,10 +1262,15 @@ Future<void> configureDependencies({
     () => GetEvaluationSujetUseCase(getIt<EvaluationSujetRepository>()),
   );
 
+  getIt.registerFactory<SaveEvaluationSujetUseCase>(
+    () => SaveEvaluationSujetUseCase(getIt<EvaluationSujetRepository>()),
+  );
+
   getIt.registerFactory<EvalDetailBloc>(
     () => EvalDetailBloc(
       getEvaluationSujetUseCase: getIt<GetEvaluationSujetUseCase>(),
       getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
+      saveEvaluationSujetUseCase: getIt<SaveEvaluationSujetUseCase>(),
     ),
   );
 

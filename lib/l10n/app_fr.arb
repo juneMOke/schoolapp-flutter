@@ -1634,6 +1634,144 @@
   "sujetConsignesLabel": "Consignes",
   "sujetConsignesHint": "Matériel autorisé, documents fournis…",
   "formOptionalMark": "(optionnel)",
+  "sujetSectionTitle": "Sujet",
+  "sujetSummaryQuestions": "{count, plural, =0{Aucune question} =1{1 question} other{{count} questions}}",
+  "@sujetSummaryQuestions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetPointsOf": "{total} / {max} pts",
+  "@sujetPointsOf": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetShowAnswers": "Afficher les réponses",
+  "sujetHideAnswers": "Masquer les réponses",
+  "sujetRevealAnswer": "Afficher la réponse",
+  "sujetHideAnswer": "Masquer la réponse",
+  "sujetEdit": "Modifier",
+  "sujetEmptyTitle": "Sujet à rédiger",
+  "sujetEmptyDescription": "Ajoutez les questions, leurs points et les réponses attendues.",
+  "sujetEmptyAction": "Rédiger le sujet",
+  "sujetQuestionBadge": "Q{number}",
+  "@sujetQuestionBadge": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionPoints": "{points} pts",
+  "@sujetQuestionPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetPointsSuffix": "pts",
+  "sujetQuestionPointsLabel": "Points de la question {number}",
+  "@sujetQuestionPointsLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionEnonceLabel": "Énoncé de la question {number}",
+  "@sujetQuestionEnonceLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionEnonceHint": "Énoncé de la question",
+  "sujetAnswerHeader": "Réponse attendue · visible du professeur uniquement",
+  "sujetAnswerHint": "Réponse attendue (optionnel)",
+  "sujetAnswerRead": "Réponse attendue — {answer}",
+  "@sujetAnswerRead": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetMoveUp": "Monter",
+  "sujetMoveDown": "Descendre",
+  "sujetDuplicate": "Dupliquer",
+  "sujetDelete": "Supprimer",
+  "sujetIncomplete": "À compléter",
+  "sujetIncompleteCount": "{count, plural, =1{1 question à compléter} other{{count} questions à compléter}}",
+  "@sujetIncompleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetAddQuestion": "Ajouter une question",
+  "sujetAddFirstQuestion": "Ajouter la première question",
+  "sujetBaremeValue": "Barème {total} / {max} pts",
+  "@sujetBaremeValue": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeEmpty": "Aucun point attribué",
+  "sujetBaremeUnder": "Reste {gap} pts à répartir",
+  "@sujetBaremeUnder": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeComplete": "Barème complet",
+  "sujetBaremeOver": "Dépasse le maximum de {gap} pts",
+  "@sujetBaremeOver": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeAdjust": "Ajuster le maximum à {max}",
+  "@sujetBaremeAdjust": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeLocked": "Maximum figé : des notes sont saisies",
+  "sujetCancel": "Annuler",
+  "sujetClose": "Fermer",
+  "sujetSave": "Enregistrer le sujet",
+  "sujetSaving": "Enregistrement…",
+  "sujetSavedToast": "Sujet enregistré — {summary}",
+  "@sujetSavedToast": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetSaveError": "L'enregistrement du sujet a échoué. Vos modifications sont conservées.",
   "evalRejectionPeriodClosed": "Rejetée : période clôturée",
   "evalRejectionExamNotAllowed": "Rejetée : examen non autorisé",
   "evalRejectionMaxReached": "Rejetée : plafond atteint",

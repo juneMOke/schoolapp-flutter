@@ -358,21 +358,34 @@ class EvalVm extends Equatable {
   /// posées sur [total]. Le badge se recalcule comme pour le détail du cours.
   EvalVm withProgress({required int saisies, required int total}) {
     final pct = total > 0 ? saisies / total * 100 : 0.0;
-    return EvalVm(
-      id: id,
-      type: type,
-      nom: nom,
-      chapitres: chapitres,
-      date: date,
-      maxPoints: maxPoints,
-      poids: poids,
+    return copyWith(
       state: _stateFrom(StatutSaisieEvaluation.unknown, pct),
       pourcentageSaisie: pct,
       saisies: saisies,
       total: total,
-      rejectionCode: rejectionCode,
     );
   }
+
+  EvalVm copyWith({
+    double? maxPoints,
+    EvalState? state,
+    double? pourcentageSaisie,
+    int? saisies,
+    int? total,
+  }) => EvalVm(
+    id: id,
+    type: type,
+    nom: nom,
+    chapitres: chapitres,
+    date: date,
+    maxPoints: maxPoints ?? this.maxPoints,
+    poids: poids,
+    state: state ?? this.state,
+    pourcentageSaisie: pourcentageSaisie ?? this.pourcentageSaisie,
+    saisies: saisies ?? this.saisies,
+    total: total ?? this.total,
+    rejectionCode: rejectionCode,
+  );
 
   static int _saisies(double pourcentage, int effectif) =>
       (pourcentage.clamp(0, 100) / 100 * effectif).round();

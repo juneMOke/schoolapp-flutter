@@ -1949,6 +1949,171 @@ class AppLocalizationsFr extends AppLocalizations {
   String get formOptionalMark => '(optionnel)';
 
   @override
+  String get sujetSectionTitle => 'Sujet';
+
+  @override
+  String sujetSummaryQuestions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions',
+      one: '1 question',
+      zero: 'Aucune question',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sujetPointsOf(String total, String max) {
+    return '$total / $max pts';
+  }
+
+  @override
+  String get sujetShowAnswers => 'Afficher les réponses';
+
+  @override
+  String get sujetHideAnswers => 'Masquer les réponses';
+
+  @override
+  String get sujetRevealAnswer => 'Afficher la réponse';
+
+  @override
+  String get sujetHideAnswer => 'Masquer la réponse';
+
+  @override
+  String get sujetEdit => 'Modifier';
+
+  @override
+  String get sujetEmptyTitle => 'Sujet à rédiger';
+
+  @override
+  String get sujetEmptyDescription =>
+      'Ajoutez les questions, leurs points et les réponses attendues.';
+
+  @override
+  String get sujetEmptyAction => 'Rédiger le sujet';
+
+  @override
+  String sujetQuestionBadge(int number) {
+    return 'Q$number';
+  }
+
+  @override
+  String sujetQuestionPoints(String points) {
+    return '$points pts';
+  }
+
+  @override
+  String get sujetPointsSuffix => 'pts';
+
+  @override
+  String sujetQuestionPointsLabel(int number) {
+    return 'Points de la question $number';
+  }
+
+  @override
+  String sujetQuestionEnonceLabel(int number) {
+    return 'Énoncé de la question $number';
+  }
+
+  @override
+  String get sujetQuestionEnonceHint => 'Énoncé de la question';
+
+  @override
+  String get sujetAnswerHeader =>
+      'Réponse attendue · visible du professeur uniquement';
+
+  @override
+  String get sujetAnswerHint => 'Réponse attendue (optionnel)';
+
+  @override
+  String sujetAnswerRead(String answer) {
+    return 'Réponse attendue — $answer';
+  }
+
+  @override
+  String get sujetMoveUp => 'Monter';
+
+  @override
+  String get sujetMoveDown => 'Descendre';
+
+  @override
+  String get sujetDuplicate => 'Dupliquer';
+
+  @override
+  String get sujetDelete => 'Supprimer';
+
+  @override
+  String get sujetIncomplete => 'À compléter';
+
+  @override
+  String sujetIncompleteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions à compléter',
+      one: '1 question à compléter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sujetAddQuestion => 'Ajouter une question';
+
+  @override
+  String get sujetAddFirstQuestion => 'Ajouter la première question';
+
+  @override
+  String sujetBaremeValue(String total, String max) {
+    return 'Barème $total / $max pts';
+  }
+
+  @override
+  String get sujetBaremeEmpty => 'Aucun point attribué';
+
+  @override
+  String sujetBaremeUnder(String gap) {
+    return 'Reste $gap pts à répartir';
+  }
+
+  @override
+  String get sujetBaremeComplete => 'Barème complet';
+
+  @override
+  String sujetBaremeOver(String gap) {
+    return 'Dépasse le maximum de $gap pts';
+  }
+
+  @override
+  String sujetBaremeAdjust(String max) {
+    return 'Ajuster le maximum à $max';
+  }
+
+  @override
+  String get sujetBaremeLocked => 'Maximum figé : des notes sont saisies';
+
+  @override
+  String get sujetCancel => 'Annuler';
+
+  @override
+  String get sujetClose => 'Fermer';
+
+  @override
+  String get sujetSave => 'Enregistrer le sujet';
+
+  @override
+  String get sujetSaving => 'Enregistrement…';
+
+  @override
+  String sujetSavedToast(String summary) {
+    return 'Sujet enregistré — $summary';
+  }
+
+  @override
+  String get sujetSaveError =>
+      'L\'enregistrement du sujet a échoué. Vos modifications sont conservées.';
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejetée : période clôturée';
 
   @override
