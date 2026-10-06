@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -56,8 +57,16 @@ class ChapitreCubit extends Cubit<ChapitreState> {
   Future<void> load() async {
     emit(const ChapitreState());
     await refresh();
-    _unwatch ??= _source.watch(() => unawaited(refresh()));
+    if (isClosed) return;
+    _unwatch ??= _source.watch(
+      () => unawaited(refresh()),
+      onFlush: !(state.detail?.chapitre.readOnly ?? false),
+    );
   }
+
+  bool get _actionable =>
+      state.status == ChapitreStatus.ready &&
+      (state.detail?.chapitre.actionable ?? false);
 
   /// Relecture : un échec ne remplace jamais un chapitre affiché.
   Future<void> refresh() async {
@@ -69,6 +78,10 @@ class ChapitreCubit extends Cubit<ChapitreState> {
           emit(
             state.copyWith(status: ChapitreStatus.failure, failure: failure),
           );
+        } else if (failure is NotFoundFailure) {
+          // Supprimé ailleurs pendant qu'il était à l'écran : un geste le
+          // recréerait. Plus aucun geste ; l'écran rend la main.
+          emit(state.copyWith(status: ChapitreStatus.gone));
         }
       },
       (detail) =>
@@ -89,28 +102,37 @@ class ChapitreCubit extends Cubit<ChapitreState> {
   );
 
   /// Enregistre le contenu rédigé ; les blocs vides ne sont pas gardés.
-  Future<bool> saveBlocs(List<ChapitreBloc> blocs, {bool announce = true}) =>
-      _saveFiche(
-        (chapitre) => chapitre.copyWith(blocs: blocs),
-        announce: announce ? ChapitreFeedbackKind.contentSaved : null,
-      );
+  /// Un contenu inchangé n'écrit rien : chaque écriture horodate la fiche et
+  /// l'envoie entière — elle écraserait une modification faite ailleurs.
+  Future<bool> saveBlocs(
+    List<ChapitreBloc> blocs, {
+    bool announce = true,
+  }) async {
+    if (listEquals(blocs, state.detail?.chapitre.blocs)) return true;
+    return _saveFiche(
+      (chapitre) => chapitre.copyWith(blocs: blocs),
+      announce: announce ? ChapitreFeedbackKind.contentSaved : null,
+    );
+  }
 
-  Future<void> addNote(String texte) async {
+  /// Rend `true` si la note est gardée : un échec laisse le texte saisi.
+  Future<bool> addNote(String texte) async {
     final chapitre = state.detail?.chapitre;
-    if (chapitre == null || texte.trim().isEmpty) return;
+    if (chapitre == null || !_actionable || texte.trim().isEmpty) return false;
     final result = await _addNote(chapitre, texte);
-    if (isClosed) return;
+    if (isClosed) return result.isRight();
     _feedback(
       result.isRight()
           ? ChapitreFeedbackKind.noteAdded
           : ChapitreFeedbackKind.writeFailed,
     );
     await refresh();
+    return result.isRight();
   }
 
   /// Masque la note et arme sa suppression ; [undoNoteDeletion] la rend.
   void requestNoteDeletion(String noteId) {
-    if (_pendingDeletions.containsKey(noteId)) return;
+    if (!_actionable || _pendingDeletions.containsKey(noteId)) return;
     _pendingDeletions[noteId] = Timer(
       undoWindow,
       () => unawaited(_commitNoteDeletion(noteId)),
@@ -153,7 +175,11 @@ class ChapitreCubit extends Cubit<ChapitreState> {
     ChapitreFeedbackKind? announce,
   }) async {
     final detail = state.detail;
-    if (detail == null || detail.chapitre.awaitingDownload) return false;
+    if (detail == null ||
+        state.status != ChapitreStatus.ready ||
+        !detail.chapitre.editable) {
+      return false;
+    }
     final changed = change(detail.chapitre);
     emit(
       state.copyWith(
@@ -166,6 +192,10 @@ class ChapitreCubit extends Cubit<ChapitreState> {
     );
     final result = await _save(changed);
     if (isClosed) return result.isRight();
+    if (result.fold((f) => f is NotFoundFailure, (_) => false)) {
+      emit(state.copyWith(status: ChapitreStatus.gone));
+      return false;
+    }
     if (result.isLeft()) {
       _feedback(ChapitreFeedbackKind.writeFailed);
     } else if (announce != null) {

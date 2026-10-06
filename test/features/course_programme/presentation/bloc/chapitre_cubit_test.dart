@@ -62,7 +62,7 @@ void main() {
     addNote: _MockAddNote(),
     deleteNote: deleteNote,
     openDocument: _MockOpen(),
-    source: const ProgrammeChangeSource(),
+    source: _silentSource(),
     undoWindow: const Duration(seconds: 5),
   );
 
@@ -135,4 +135,15 @@ void main() {
 
     verify(() => deleteNote('n-1')).called(1);
   });
+}
+
+class _MockSource extends Mock implements ProgrammeChangeSource {}
+
+/// Une source qui ne signale rien : les tests pilotent les relectures.
+ProgrammeChangeSource _silentSource() {
+  final source = _MockSource();
+  when(
+    () => source.watch(any(), onFlush: any(named: 'onFlush')),
+  ).thenReturn(() {});
+  return source;
 }

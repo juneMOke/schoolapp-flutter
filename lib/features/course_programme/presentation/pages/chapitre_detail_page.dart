@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/documents/eteelo_file_preview.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_back_bar.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_detail.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_edit.dart';
-import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_enums.dart';
-import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_ressource.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/chapitre_cubit.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/chapitre_state.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/common/programme_write_gate.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/contenu/chapitre_contenu_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_blank_state.dart';
@@ -20,13 +19,13 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_header_card.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_notes_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_objectifs_section.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/open_chapitre_ressource.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_ressources_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_strategies_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/form/chapitre_form_launcher.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_failure_view.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_skeleton.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Le détail d'un chapitre (spec §7–9) : en-tête, contenu rédigé, puis
 /// Objectifs, Stratégies, Notes, et la grille Ressources | Évaluations liées. Lit le
@@ -52,41 +51,17 @@ class ChapitreDetailPage extends StatelessWidget {
     required this.newId,
   });
 
-  static const double _gridColumnMin = 280;
-
   Future<void> _edit(BuildContext context, ChapitreDetail detail) async {
     final cubit = context.read<ChapitreCubit>();
     await openChapitreForm(context, cours: cours, chapitre: detail.chapitre);
     await cubit.refresh();
   }
 
-  Future<void> _open(BuildContext context, ChapitreRessource ressource) async {
-    final l10n = AppLocalizations.of(context)!;
-    if (ressource.type == RessourceType.lien) {
-      final uri = Uri.tryParse(ressource.url ?? '');
-      if (uri != null) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-      return;
-    }
-    final result = await context.read<ChapitreCubit>().openDocument(ressource);
-    if (!context.mounted) return;
-    await result.fold(
-      (_) async =>
-          AppSnackBar.showError(context, l10n.chapitreRessourceUnavailable),
-      (bytes) async {
-        final shown = await showEteeloFilePreview(
-          context,
-          title: ressource.nom,
-          bytes: bytes,
-          mimeType: ressource.mimeType ?? '',
-          fileName: ressource.fileName ?? ressource.nom,
-        );
-        if (!shown && context.mounted) {
-          AppSnackBar.showInfo(context, l10n.chapitreRessourceNotPreviewable);
-        }
-      },
-    );
+  /// Quitter fige les suppressions armées : leur « Annuler » ne ferait
+  /// plus rien, il ne reste pas affiché.
+  void _leave(BuildContext context) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    onBack();
   }
 
   void _onFeedback(BuildContext context, ChapitreState state) {
@@ -117,10 +92,20 @@ class ChapitreDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return BlocListener<ChapitreCubit, ChapitreState>(
-      listenWhen: (prev, curr) =>
-          curr.feedback != null && prev.feedback != curr.feedback,
-      listener: _onFeedback,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ChapitreCubit, ChapitreState>(
+          listenWhen: (prev, curr) =>
+              curr.feedback != null && prev.feedback != curr.feedback,
+          listener: _onFeedback,
+        ),
+        // Supprimé ailleurs : plus rien à montrer, l'écran rend la main.
+        BlocListener<ChapitreCubit, ChapitreState>(
+          listenWhen: (prev, curr) =>
+              prev.status != curr.status && curr.status == ChapitreStatus.gone,
+          listener: (context, _) => _leave(context),
+        ),
+      ],
       child: AppPageBackground(
         scrollable: true,
         child: Column(
@@ -136,7 +121,7 @@ class ChapitreDetailPage extends StatelessWidget {
                   cours.classroomName,
                 ),
                 crumb: current,
-                onBack: onBack,
+                onBack: () => _leave(context),
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -175,7 +160,9 @@ class ChapitreDetailPage extends StatelessWidget {
     final cubit = context.read<ChapitreCubit>();
     final chapitre = detail.chapitre;
     final canWrite =
-        !chapitre.awaitingDownload && ProgrammeWriteGate.allows(context);
+        chapitre.editable &&
+        ProgrammeWriteGate.allows(context) &&
+        !SessionWriteGate.blocksWritesOf(context);
     final notes = [
       for (final note in chapitre.notes)
         if (!state.hiddenNotes.contains(note.id)) note,
@@ -200,6 +187,9 @@ class ChapitreDetailPage extends StatelessWidget {
           gap,
         ],
         ChapitreContenuSection(
+          // Clé stable : la section garde son brouillon quand le bloc
+          // « non renseigné » apparaît ou disparaît au-dessus d'elle.
+          key: const ValueKey<String>('chapitre-contenu'),
           blocs: chapitre.blocs,
           canWrite: canWrite,
           newId: newId,
@@ -217,6 +207,7 @@ class ChapitreDetailPage extends StatelessWidget {
         ],
         ChapitreNotesSection(
           notes: notes,
+          readOnly: !chapitre.actionable,
           onAdd: cubit.addNote,
           onDelete: cubit.requestNoteDeletion,
         ),
@@ -224,7 +215,7 @@ class ChapitreDetailPage extends StatelessWidget {
         _grid(
           ChapitreRessourcesSection(
             ressources: chapitre.ressources,
-            onOpen: (ressource) => _open(context, ressource),
+            onOpen: (ressource) => openChapitreRessource(context, ressource),
           ),
           ChapitreEvaluationsSection(
             evaluations: detail.evaluations,
@@ -239,7 +230,8 @@ class ChapitreDetailPage extends StatelessWidget {
   /// tiennent ; l'une sous l'autre sinon.
   Widget _grid(Widget left, Widget right) => LayoutBuilder(
     builder: (context, constraints) {
-      if (constraints.maxWidth < _gridColumnMin * 2 + AppSpacing.lg) {
+      if (constraints.maxWidth <
+          ProgrammeLayout.gridColumnMin * 2 + AppSpacing.lg) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

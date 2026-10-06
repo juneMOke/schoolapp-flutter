@@ -27,14 +27,20 @@ class ResourceSyncSignals {
   Future<void> pull() => _pull();
 
   /// Appelle [onChanged] à chaque signal ; rend la fonction qui désabonne.
-  void Function() watch(void Function() onChanged) {
+  ///
+  /// [onFlush] : `false` pour un écran qui ne lit rien que l'outbox puisse
+  /// changer (une lecture en ligne) — chaque flush, de tout module, le
+  /// ferait relire pour rien.
+  void Function() watch(void Function() onChanged, {bool onFlush = true}) {
     final subscription = _bus.stream
         .where((resources) => resources.any(watched.contains))
         .listen((_) => onChanged());
-    final removeFlushListener = _engine.addFlushCompleteListener(onChanged);
+    final removeFlushListener = onFlush
+        ? _engine.addFlushCompleteListener(onChanged)
+        : null;
     return () {
       unawaited(subscription.cancel());
-      removeFlushListener();
+      removeFlushListener?.call();
     };
   }
 }

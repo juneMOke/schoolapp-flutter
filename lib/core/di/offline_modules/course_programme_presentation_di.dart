@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/course_programme/data/repositories/programme_online_reader.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_read_api.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_children_write_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
 import 'package:school_app_flutter/features/course_programme/data/repositories/chapitre_children_repository_impl.dart';
@@ -49,6 +50,9 @@ void registerCourseProgrammePresentation(GetIt getIt) {
     () => ProgrammeChangeSource(
       bus: getIt<PullCompletionBus>(),
       engine: getIt<SyncEngine>(),
+      pull: () async {
+        await getIt<SyncAcademicsPullsUseCase>()();
+      },
     ),
   );
 

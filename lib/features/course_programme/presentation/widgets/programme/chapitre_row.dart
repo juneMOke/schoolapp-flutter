@@ -23,7 +23,9 @@ class ChapitreRow extends StatelessWidget {
   final VoidCallback? onMoveUp;
   final VoidCallback? onMoveDown;
   final VoidCallback? onEdit;
-  final VoidCallback onDelete;
+
+  /// `null` : lecture seule, aucun geste sur la rangée.
+  final VoidCallback? onDelete;
 
   const ChapitreRow({
     super.key,
@@ -100,15 +102,16 @@ class ChapitreRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              ProgrammeWriteGate(
-                child: ChapitreRowActions(
-                  onMoveUp: onMoveUp,
-                  onMoveDown: onMoveDown,
-                  onEdit: onEdit,
-                  onDelete: onDelete,
-                  compact: compact,
+              if (onDelete != null)
+                ProgrammeWriteGate(
+                  child: ChapitreRowActions(
+                    onMoveUp: onMoveUp,
+                    onMoveDown: onMoveDown,
+                    onEdit: onEdit,
+                    onDelete: onDelete!,
+                    compact: compact,
+                  ),
                 ),
-              ),
               const ExcludeSemantics(
                 child: Padding(
                   padding: EdgeInsets.only(top: AppSpacing.md),

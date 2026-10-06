@@ -45,8 +45,18 @@ void main() {
   tearDown(() => db.close());
 
   test('un chapitre neuf se range en fin, inconnu du serveur', () async {
-    await dao.saveChapitre(chapitre('a'), schoolId: 's-1', nowMs: 1);
-    await dao.saveChapitre(chapitre('b'), schoolId: 's-1', nowMs: 2);
+    await dao.saveChapitre(
+      chapitre('a'),
+      schoolId: 's-1',
+      nowMs: 1,
+      create: true,
+    );
+    await dao.saveChapitre(
+      chapitre('b'),
+      schoolId: 's-1',
+      nowMs: 2,
+      create: true,
+    );
 
     expect((await row('b'))!['ordre'], 1);
     expect((await row('b'))!['server_known'], 0);
@@ -56,7 +66,12 @@ void main() {
   });
 
   test('un second enregistrement remplace l\'entrée en attente', () async {
-    await dao.saveChapitre(chapitre('a'), schoolId: null, nowMs: 1);
+    await dao.saveChapitre(
+      chapitre('a'),
+      schoolId: null,
+      create: true,
+      nowMs: 1,
+    );
     await dao.saveChapitre(
       chapitre('a', titre: 'Décimaux', at: 2),
       schoolId: null,
@@ -72,7 +87,12 @@ void main() {
 
   test('supprimer un chapitre jamais envoyé le retire des évaluations en '
       'attente, ligne et payload', () async {
-    await dao.saveChapitre(chapitre('a'), schoolId: null, nowMs: 1);
+    await dao.saveChapitre(
+      chapitre('a'),
+      schoolId: null,
+      create: true,
+      nowMs: 1,
+    );
     await db.insert('evaluation', {
       'id': 'ev-1',
       'cours_id': 'c-1',
@@ -128,7 +148,12 @@ void main() {
 
   test('supprimer un chapitre connu le masque et remplace sa fiche en '
       'attente ; ses notes en attente sont abandonnées', () async {
-    await dao.saveChapitre(chapitre('a'), schoolId: null, nowMs: 1);
+    await dao.saveChapitre(
+      chapitre('a'),
+      schoolId: null,
+      create: true,
+      nowMs: 1,
+    );
     await db.update('chapitre', {'server_known': 1});
     await OutboxDao(db).enqueue(
       OutboxEntry(
@@ -152,8 +177,18 @@ void main() {
   });
 
   test('un chapitre supprimé quitte l\'ordre en attente', () async {
-    await dao.saveChapitre(chapitre('a'), schoolId: null, nowMs: 1);
-    await dao.saveChapitre(chapitre('b'), schoolId: null, nowMs: 2);
+    await dao.saveChapitre(
+      chapitre('a'),
+      schoolId: null,
+      create: true,
+      nowMs: 1,
+    );
+    await dao.saveChapitre(
+      chapitre('b'),
+      schoolId: null,
+      create: true,
+      nowMs: 2,
+    );
     await dao.reorder('c-1', ['b', 'a'], schoolId: null, nowMs: 3);
 
     await dao.deleteChapitre('a', schoolId: null, nowMs: 4);
@@ -166,6 +201,7 @@ void main() {
     await dao.saveChapitre(
       chapitre('a'),
       schoolId: null,
+      create: true,
       nowMs: 1,
       authorId: 'u-1',
     );
@@ -174,8 +210,18 @@ void main() {
   });
 
   test('réordonner range les rangs et met la liste en file', () async {
-    await dao.saveChapitre(chapitre('a'), schoolId: null, nowMs: 1);
-    await dao.saveChapitre(chapitre('b'), schoolId: null, nowMs: 2);
+    await dao.saveChapitre(
+      chapitre('a'),
+      schoolId: null,
+      create: true,
+      nowMs: 1,
+    );
+    await dao.saveChapitre(
+      chapitre('b'),
+      schoolId: null,
+      create: true,
+      nowMs: 2,
+    );
 
     await dao.reorder('c-1', ['b', 'a'], schoolId: null, nowMs: 3);
 
@@ -183,5 +229,14 @@ void main() {
     expect((await row('a'))!['ordre'], 1);
     final entry = (await outboxById(db))[ProgrammeOutbox.ordreEntry('c-1')]!;
     expect(jsonDecode(entry.payload)['chapitreIds'], ['b', 'a']);
+  });
+
+  test('modifier un chapitre disparu ne le recrée pas', () async {
+    await expectLater(
+      dao.saveChapitre(chapitre('z'), schoolId: null, nowMs: 1),
+      throwsA(isA<ChapitreGoneException>()),
+    );
+    expect(await row('z'), isNull);
+    expect(await outboxById(db), isEmpty);
   });
 }

@@ -22817,7 +22817,7 @@ abstract class AppLocalizations {
   /// No description provided for @ressourceUrlInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Invalid address — it must start with https://'**
+  /// **'Invalid address — it must start with http:// or https://'**
   String get ressourceUrlInvalid;
 
   /// No description provided for @ressourceReferenceLabel.

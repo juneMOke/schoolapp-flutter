@@ -9060,7 +9060,7 @@
   "ressourceNomHintLien": "Ex. Vidéo — les fractions expliquées",
   "ressourceNomHintManuel": "Ex. Mathématiques 7e — Éd. CRP",
   "ressourceUrlLabel": "Adresse (URL)",
-  "ressourceUrlInvalid": "Adresse invalide — elle doit commencer par https://",
+  "ressourceUrlInvalid": "Adresse invalide — elle doit commencer par http:// ou https://",
   "ressourceReferenceLabel": "Référence (pages, chapitre)",
   "ressourceReferenceHint": "Ex. p. 42 à 57",
   "ressourceChooseFile": "Choisir un fichier",

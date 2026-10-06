@@ -125,9 +125,12 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
       });
 
   @override
-  Future<Either<Failure, Chapitre>> saveChapitre(Chapitre chapitre) async {
-    if (chapitre.awaitingDownload) {
-      return const Left(ValidationFailure('Chapitre pas encore téléchargé'));
+  Future<Either<Failure, Chapitre>> saveChapitre(
+    Chapitre chapitre, {
+    bool create = false,
+  }) async {
+    if (!chapitre.editable) {
+      return const Left(ValidationFailure('Chapitre non modifiable'));
     }
     final nowMs = _now();
     final stamped = chapitre.copyWith(
@@ -144,6 +147,7 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
         schoolId: _currentUser.schoolId,
         authorId: _currentUser.uid,
         nowMs: nowMs,
+        create: create,
       ),
       stamped,
     );

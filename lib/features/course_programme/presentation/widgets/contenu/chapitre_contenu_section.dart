@@ -41,7 +41,6 @@ class ChapitreContenuSection extends StatefulWidget {
   });
 
   /// La ligne de lecture : environ 68 caractères.
-  static const double readingMaxWidth = 680;
 
   @override
   State<ChapitreContenuSection> createState() => _ChapitreContenuSectionState();
@@ -168,7 +167,7 @@ class _ChapitreContenuSectionState extends State<ChapitreContenuSection> {
       alignment: Alignment.topLeft,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          maxWidth: ChapitreContenuSection.readingMaxWidth,
+          maxWidth: ProgrammeLayout.readingMaxWidth,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

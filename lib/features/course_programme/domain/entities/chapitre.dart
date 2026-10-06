@@ -33,9 +33,13 @@ class Chapitre extends Equatable {
   final ProgrammeSyncState syncState;
   final String? rejectionCode;
 
-  /// Ébauche recopiée de l'ancien référentiel, pas encore descendue : elle se
-  /// lit mais ne s'édite pas (cf. `course_programme_schema.dart`).
+  /// Ébauche recopiée de l'ancien référentiel, pas encore descendue : sa
+  /// fiche ne se réécrit pas (cf. `course_programme_schema.dart`) — l'envoyer
+  /// écraserait une fiche serveur que le poste n'a jamais vue.
   final bool awaitingDownload;
+
+  /// Lu en ligne (un cours absent de la tablette) : aucun geste ne part.
+  final bool readOnly;
 
   const Chapitre({
     required this.id,
@@ -55,6 +59,7 @@ class Chapitre extends Equatable {
     this.syncState = ProgrammeSyncState.synced,
     this.rejectionCode,
     this.awaitingDownload = false,
+    this.readOnly = false,
   });
 
   /// Séances prévues d'un chapitre neuf.
@@ -64,6 +69,12 @@ class Chapitre extends Equatable {
   static const int minTitreLength = 3;
 
   int get objectifsAtteints => objectifs.where((o) => o.atteint).length;
+
+  /// Un geste peut-il partir de ce chapitre (note, ordre, suppression) ?
+  bool get actionable => !readOnly;
+
+  /// Sa fiche peut-elle être réécrite (statut, objectifs, contenu, modale) ?
+  bool get editable => !readOnly && !awaitingDownload;
 
   /// Un chapitre « non renseigné » : ni objectif, ni note, ni ressource.
   bool get isBlank => objectifs.isEmpty && notes.isEmpty && ressources.isEmpty;
@@ -104,6 +115,7 @@ class Chapitre extends Equatable {
     syncState: syncState ?? this.syncState,
     rejectionCode: rejectionCode,
     awaitingDownload: awaitingDownload,
+    readOnly: readOnly,
   );
 
   @override
@@ -125,5 +137,6 @@ class Chapitre extends Equatable {
     syncState,
     rejectionCode,
     awaitingDownload,
+    readOnly,
   ];
 }

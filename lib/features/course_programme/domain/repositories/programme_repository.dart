@@ -14,9 +14,14 @@ abstract class ProgrammeRepository {
   /// Un identifiant neuf (chapitre, objectif, bloc, note, ressource).
   String newId();
 
-  /// Enregistre la fiche entière, horodatée maintenant. Une ébauche pas
-  /// encore descendue est refusée ([ValidationFailure]).
-  Future<Either<Failure, Chapitre>> saveChapitre(Chapitre chapitre);
+  /// Enregistre la fiche entière, horodatée maintenant ; [create] pour un
+  /// chapitre neuf. Une fiche non modifiable (ébauche pas encore descendue,
+  /// lecture en ligne) est refusée ([ValidationFailure]) ; un chapitre disparu
+  /// n'est jamais recréé ([NotFoundFailure]).
+  Future<Either<Failure, Chapitre>> saveChapitre(
+    Chapitre chapitre, {
+    bool create = false,
+  });
 
   Future<Either<Failure, Unit>> deleteChapitre(String chapitreId);
 

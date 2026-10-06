@@ -97,6 +97,7 @@ void main() {
           ChapitreBloc(id: 'b-2', type: ChapitreBlocType.titre, texte: 'Intro'),
         ],
       ),
+      create: true,
     );
     final saved = result.getOrElse(() => fail('Left'));
     expect(saved.clientUpdatedAt, DateTime.utc(2026, 10, 6));

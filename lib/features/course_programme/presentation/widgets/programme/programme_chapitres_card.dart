@@ -12,6 +12,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// carte sans padding, rangées séparées d'un filet.
 class ProgrammeChapitresCard extends StatelessWidget {
   final List<ProgrammeChapitre> chapitres;
+
+  /// Lu en ligne : les rangées s'ouvrent, aucun geste ne part.
+  final bool readOnly;
   final void Function(Chapitre chapitre) onOpen;
   final void Function(Chapitre chapitre, int offset) onMove;
   final void Function(Chapitre chapitre)? onEdit;
@@ -20,6 +23,7 @@ class ProgrammeChapitresCard extends StatelessWidget {
   const ProgrammeChapitresCard({
     super.key,
     required this.chapitres,
+    this.readOnly = false,
     required this.onOpen,
     required this.onMove,
     required this.onEdit,
@@ -87,12 +91,10 @@ class ProgrammeChapitresCard extends StatelessWidget {
       row: row,
       numero: index + 1,
       onOpen: () => onOpen(chapitre),
-      onMoveUp: index == 0 ? null : () => onMove(chapitre, -1),
-      onMoveDown: index == last ? null : () => onMove(chapitre, 1),
-      onEdit: edit == null || chapitre.awaitingDownload
-          ? null
-          : () => edit(chapitre),
-      onDelete: () => onDelete(chapitre),
+      onMoveUp: readOnly || index == 0 ? null : () => onMove(chapitre, -1),
+      onMoveDown: readOnly || index == last ? null : () => onMove(chapitre, 1),
+      onEdit: edit == null || !chapitre.editable ? null : () => edit(chapitre),
+      onDelete: readOnly ? null : () => onDelete(chapitre),
     );
   }
 }

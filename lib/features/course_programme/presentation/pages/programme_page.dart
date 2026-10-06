@@ -5,12 +5,12 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_back_bar.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_cubit.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_state.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/widgets/common/programme_feedback_listener.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/common/programme_write_gate.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/form/chapitre_form_launcher.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/programme/programme_chapitres_card.dart';
@@ -57,32 +57,10 @@ class ProgrammePage extends StatelessWidget {
     await cubit.delete(chapitre.id);
   }
 
-  void _onFeedback(BuildContext context, ProgrammeState state) {
-    final l10n = AppLocalizations.of(context)!;
-    final titre = state.feedback?.titre ?? '';
-    switch (state.feedback?.kind) {
-      case ProgrammeFeedbackKind.chapitreCreated:
-        AppSnackBar.showSuccess(context, l10n.programmeChapitreCreated(titre));
-      case ProgrammeFeedbackKind.chapitreUpdated:
-        AppSnackBar.showSuccess(context, l10n.programmeChapitreUpdated(titre));
-      case ProgrammeFeedbackKind.chapitreDeleted:
-        AppSnackBar.showSuccess(context, l10n.programmeChapitreDeleted);
-      case ProgrammeFeedbackKind.ressourceKeepFailed:
-        AppSnackBar.showError(context, l10n.ressourceKeepFailed);
-      case ProgrammeFeedbackKind.writeFailed:
-        AppSnackBar.showError(context, l10n.programmeWriteFailed);
-      case null:
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return BlocListener<ProgrammeCubit, ProgrammeState>(
-      listenWhen: (prev, curr) =>
-          curr.feedback != null && prev.feedback != curr.feedback,
-      listener: _onFeedback,
+    return ProgrammeFeedbackListener(
       child: AppPageBackground(
         scrollable: true,
         floatingActionButton: _fab(context),
@@ -126,7 +104,11 @@ class ProgrammePage extends StatelessWidget {
           prev.programme?.isEmpty != curr.programme?.isEmpty,
       builder: (context, state) {
         final ready = state.status == ProgrammeStatus.ready;
-        if (!ready || (state.programme?.isEmpty ?? true)) {
+        final programme = state.programme;
+        if (!ready ||
+            programme == null ||
+            programme.isEmpty ||
+            programme.readOnly) {
           return const SizedBox.shrink();
         }
         return ProgrammeWriteGate(
@@ -161,11 +143,14 @@ class ProgrammePage extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xl),
         if (programme.isEmpty)
-          ProgrammeEmptyState(onCreate: () => _create(context))
+          ProgrammeEmptyState(
+            onCreate: programme.readOnly ? null : () => _create(context),
+          )
         else
           ProgrammeChapitresCard(
             chapitres: programme.chapitres,
             onOpen: onOpenChapitre,
+            readOnly: programme.readOnly,
             onMove: (chapitre, offset) => cubit.move(chapitre.id, offset),
             onEdit: (chapitre) => _edit(context, chapitre),
             onDelete: (chapitre) => _confirmDelete(context, chapitre),

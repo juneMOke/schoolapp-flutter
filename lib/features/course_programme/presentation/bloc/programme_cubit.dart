@@ -52,7 +52,13 @@ class ProgrammeCubit extends Cubit<ProgrammeState> {
   Future<void> load() async {
     emit(const ProgrammeState());
     await refresh();
-    _unwatch ??= _source.watch(() => unawaited(refresh()));
+    if (isClosed) return;
+    // Lu en ligne, rien que l'outbox puisse changer : les flush n'ont pas à
+    // le relire (une requête réseau chacun).
+    _unwatch ??= _source.watch(
+      () => unawaited(refresh()),
+      onFlush: !(state.programme?.readOnly ?? false),
+    );
     final sousPeriodes = await _loadSousPeriodes(coursId);
     if (!isClosed) emit(state.copyWith(sousPeriodes: sousPeriodes));
   }
@@ -83,7 +89,7 @@ class ProgrammeCubit extends Cubit<ProgrammeState> {
   /// Échange le chapitre [chapitreId] avec son voisin ([offset] = -1 ou 1).
   Future<void> move(String chapitreId, int offset) async {
     final programme = state.programme;
-    if (programme == null) return;
+    if (programme == null || programme.readOnly) return;
     final rows = [...programme.chapitres];
     final from = rows.indexWhere((row) => row.chapitre.id == chapitreId);
     final to = from + offset;
@@ -131,6 +137,7 @@ class ProgrammeCubit extends Cubit<ProgrammeState> {
   }
 
   Future<void> delete(String chapitreId) async {
+    if (state.programme?.readOnly ?? true) return;
     final result = await _delete(chapitreId);
     if (isClosed) return;
     _feedback(

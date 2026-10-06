@@ -25,10 +25,11 @@ class ProgrammeOnlineReader {
         dtos.sort((a, b) => a.ordre.compareTo(b.ordre));
         return Programme(
           coursId: coursId,
+          readOnly: true,
           chapitres: [
             for (final dto in dtos)
               ProgrammeChapitre(
-                chapitre: dto.toEntity(),
+                chapitre: dto.toEntity(readOnly: true),
                 notesCount: dto.notes.length,
               ),
           ],
@@ -38,7 +39,10 @@ class ProgrammeOnlineReader {
   Future<Either<Failure, ChapitreDetail>> readChapitre(String chapitreId) =>
       _guard(() async {
         final dto = await _api.chapitre(_extras, chapitreId);
-        return ChapitreDetail(chapitre: dto.toEntity(), numero: dto.ordre + 1);
+        return ChapitreDetail(
+          chapitre: dto.toEntity(readOnly: true),
+          numero: dto.ordre + 1,
+        );
       });
 
   /// Classe l'échec : l'intercepteur range sa [Failure] dans `error` (403 →

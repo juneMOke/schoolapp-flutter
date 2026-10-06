@@ -31,6 +31,7 @@ class Programme extends Equatable {
     required this.coursId,
     required this.chapitres,
     this.evaluationsCount = 0,
+    this.readOnly = false,
   });
 
   ProgrammeStats get stats =>
@@ -38,6 +39,9 @@ class Programme extends Equatable {
 
   bool get isEmpty => chapitres.isEmpty;
 
+  /// Lu en ligne : ni création, ni ordre, ni suppression.
+  final bool readOnly;
+
   @override
-  List<Object?> get props => [coursId, chapitres, evaluationsCount];
+  List<Object?> get props => [coursId, chapitres, evaluationsCount, readOnly];
 }

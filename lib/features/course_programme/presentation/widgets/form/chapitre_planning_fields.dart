@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_edit.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/chapitre_form_model.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -22,8 +23,6 @@ class ChapitrePlanningFields extends StatelessWidget {
     required this.touched,
     required this.onChanged,
   });
-
-  static const double _fieldMinWidth = 180;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +57,8 @@ class ChapitrePlanningFields extends StatelessWidget {
     );
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < _fieldMinWidth * 2 + AppSpacing.md) {
+        if (constraints.maxWidth <
+            ProgrammeLayout.planningFieldMinWidth * 2 + AppSpacing.md) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

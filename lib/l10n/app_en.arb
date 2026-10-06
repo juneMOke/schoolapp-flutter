@@ -8749,7 +8749,7 @@
   "ressourceNomHintLien": "E.g. Video — fractions explained",
   "ressourceNomHintManuel": "E.g. Mathematics Grade 7 — CRP ed.",
   "ressourceUrlLabel": "Address (URL)",
-  "ressourceUrlInvalid": "Invalid address — it must start with https://",
+  "ressourceUrlInvalid": "Invalid address — it must start with http:// or https://",
   "ressourceReferenceLabel": "Reference (pages, chapter)",
   "ressourceReferenceHint": "E.g. pp. 42–57",
   "ressourceChooseFile": "Choose a file",

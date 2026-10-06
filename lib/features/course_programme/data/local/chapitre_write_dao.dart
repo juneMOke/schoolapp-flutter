@@ -20,13 +20,19 @@ class ChapitreWriteDao {
     : _db = db,
       _blobs = blobs;
 
-  /// Enregistre la fiche entière et la met en file. Un chapitre neuf se range
-  /// en fin de programme ; le serveur le rangera aussi en fin à son arrivée.
+  /// Enregistre la fiche entière et la met en file. Un chapitre neuf
+  /// ([create]) se range en fin de programme ; le serveur le rangera aussi en
+  /// fin à son arrivée.
+  ///
+  /// Hors création, un chapitre absent (supprimé ailleurs pendant qu'il était
+  /// à l'écran) n'est **jamais** recréé : la modification lève
+  /// [ChapitreGoneException] au lieu de le ressusciter comme une création.
   Future<void> saveChapitre(
     Chapitre chapitre, {
     required String? schoolId,
     required int nowMs,
     String? authorId,
+    bool create = false,
   }) => _db.transaction((txn) async {
     final fiche = {
       ...ChapitreRowMapper.ficheColumns(chapitre),
@@ -41,6 +47,7 @@ class ChapitreWriteDao {
       whereArgs: [chapitre.id],
     );
     if (updated == 0) {
+      if (!create) throw ChapitreGoneException(chapitre.id);
       await txn.insert(ProgrammeTables.chapitre, {
         'id': chapitre.id,
         'cours_id': chapitre.coursId,
@@ -162,4 +169,11 @@ class ChapitreWriteDao {
     );
     return rows.single['next'] as int;
   }
+}
+
+/// Le chapitre à modifier n'est plus sur la tablette.
+class ChapitreGoneException implements Exception {
+  final String chapitreId;
+
+  const ChapitreGoneException(this.chapitreId);
 }

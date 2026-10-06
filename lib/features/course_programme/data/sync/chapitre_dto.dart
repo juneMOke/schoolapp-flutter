@@ -180,8 +180,9 @@ class ChapitreDto {
       for (final item in raw) ?parse(item),
   ];
 
-  /// Le chapitre tel que l'écran le lit (lecture en ligne).
-  Chapitre toEntity() => Chapitre(
+  /// Le chapitre tel que l'écran le lit. [readOnly] : lu en ligne, aucun
+  /// geste ne doit en partir.
+  Chapitre toEntity({bool readOnly = false}) => Chapitre(
     id: id,
     coursId: coursId,
     ordre: ordre,
@@ -196,6 +197,7 @@ class ChapitreDto {
     notes: [for (final note in notes) note.toEntity(id)],
     ressources: [for (final r in ressources) r.toEntity(id)],
     clientUpdatedAt: _instant(clientUpdatedAt),
+    readOnly: readOnly,
   );
 }
 

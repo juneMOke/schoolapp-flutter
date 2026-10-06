@@ -16,14 +16,20 @@ import 'package:school_app_flutter/features/course_programme/presentation/helper
 /// quelques secondes (le toast porte « Annuler »).
 class ChapitreNotesSection extends StatefulWidget {
   final List<ChapitreNote> notes;
-  final Future<void> Function(String texte) onAdd;
+
+  /// Rend `true` si la note est gardée ; un échec laisse le texte saisi.
+  final Future<bool> Function(String texte) onAdd;
   final ValueChanged<String> onDelete;
+
+  /// Lu en ligne : ni ajout ni suppression.
+  final bool readOnly;
 
   const ChapitreNotesSection({
     super.key,
     required this.notes,
     required this.onAdd,
     required this.onDelete,
+    this.readOnly = false,
   });
 
   @override
@@ -33,6 +39,7 @@ class ChapitreNotesSection extends StatefulWidget {
 class _ChapitreNotesSectionState extends State<ChapitreNotesSection> {
   final _draft = TextEditingController();
   bool _writing = false;
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -40,13 +47,20 @@ class _ChapitreNotesSectionState extends State<ChapitreNotesSection> {
     super.dispose();
   }
 
+  /// Un seul envoi à la fois : un double appui ne crée pas deux notes.
   Future<void> _save() async {
     final texte = _draft.text.trim();
-    if (texte.isEmpty) return;
-    await widget.onAdd(texte);
+    if (texte.isEmpty || _saving) return;
+    setState(() => _saving = true);
+    final kept = await widget.onAdd(texte);
     if (!mounted) return;
-    _draft.clear();
-    setState(() => _writing = false);
+    setState(() {
+      _saving = false;
+      if (kept) {
+        _draft.clear();
+        _writing = false;
+      }
+    });
   }
 
   @override
@@ -57,7 +71,7 @@ class _ChapitreNotesSectionState extends State<ChapitreNotesSection> {
       icon: Icons.sticky_note_2_outlined,
       title: l10n.chapitreSectionNotes,
       count: notes.length,
-      action: _writing
+      action: _writing || widget.readOnly
           ? null
           : ProgrammeWriteGate(
               child: TextButton.icon(
@@ -81,7 +95,9 @@ class _ChapitreNotesSectionState extends State<ChapitreNotesSection> {
             _NoteTile(
               key: ValueKey<String>(notes[i].id),
               note: notes[i],
-              onDelete: () => widget.onDelete(notes[i].id),
+              onDelete: widget.readOnly
+                  ? null
+                  : () => widget.onDelete(notes[i].id),
             ),
           ],
         ],
@@ -118,7 +134,7 @@ class _ChapitreNotesSectionState extends State<ChapitreNotesSection> {
               builder: (context, value, _) => EteeloButton.primary(
                 label: l10n.chapitreFormSave,
                 icon: Icons.check_rounded,
-                onPressed: value.text.trim().isEmpty ? null : _save,
+                onPressed: value.text.trim().isEmpty || _saving ? null : _save,
                 fullWidth: false,
               ),
             ),
@@ -131,7 +147,7 @@ class _ChapitreNotesSectionState extends State<ChapitreNotesSection> {
 
 class _NoteTile extends StatelessWidget {
   final ChapitreNote note;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
 
   const _NoteTile({super.key, required this.note, required this.onDelete});
 
@@ -175,14 +191,15 @@ class _NoteTile extends StatelessWidget {
               ],
             ),
           ),
-          ProgrammeWriteGate(
-            child: IconButton(
-              tooltip: l10n.chapitreNoteDelete,
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline_rounded),
-              color: AppColors.error,
+          if (onDelete != null)
+            ProgrammeWriteGate(
+              child: IconButton(
+                tooltip: l10n.chapitreNoteDelete,
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline_rounded),
+                color: AppColors.error,
+              ),
             ),
-          ),
         ],
       ),
     );

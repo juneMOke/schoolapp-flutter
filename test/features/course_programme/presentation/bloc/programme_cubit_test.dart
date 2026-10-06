@@ -57,7 +57,7 @@ void main() {
     saveEdit: saveEdit,
     reorder: reorder,
     delete: delete,
-    source: const ProgrammeChangeSource(),
+    source: _silentSource(),
     newId: () => 'new',
   );
 
@@ -174,4 +174,15 @@ void main() {
       verify(() => load('c-1')).called(2);
     },
   );
+}
+
+class _MockSource extends Mock implements ProgrammeChangeSource {}
+
+/// Une source qui ne signale rien : les tests pilotent les relectures.
+ProgrammeChangeSource _silentSource() {
+  final source = _MockSource();
+  when(
+    () => source.watch(any(), onFlush: any(named: 'onFlush')),
+  ).thenReturn(() {});
+  return source;
 }

@@ -51,7 +51,7 @@ class ChapitreHeaderCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final visual = ChapitreStatutVisual.of(chapitre.statut);
     final sousPeriode = _sousPeriodeLabel(l10n);
-    final editable = !chapitre.awaitingDownload;
+    final editable = chapitre.editable;
     return AccentEdgeCard(
       accent: visual.accent,
       child: Column(
@@ -190,6 +190,8 @@ class _QuickStatut extends StatelessWidget {
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: selected,
+      label: label,
+      onTap: selected ? null : () => onChanged(statut),
       child: IconButton(
         tooltip: l10n.chapitreQuickStatut(label),
         onPressed: selected ? null : () => onChanged(statut),
@@ -200,7 +202,9 @@ class _QuickStatut extends StatelessWidget {
           backgroundColor: selected ? visual.soft : null,
           side: BorderSide(
             color: selected ? visual.accent : AppColors.border,
-            width: selected ? 2 : 1,
+            width: selected
+                ? ProgrammeLayout.statutBorderSelected
+                : ProgrammeLayout.statutBorder,
           ),
         ),
       ),

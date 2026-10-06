@@ -25,6 +25,10 @@ class ProgrammeLayout {
   static const double iconSmall = 16;
   static const double iconMedium = 18;
 
+  /// Bordure d'un bouton de statut rapide : choisi, ou non.
+  static const double statutBorderSelected = 2;
+  static const double statutBorder = 1;
+
   /// Icône d'en-tête de section, d'encadré.
   static const double sectionIcon = 17;
   static const double asideIcon = 15;
@@ -54,6 +58,15 @@ class ProgrammeLayout {
 
   /// Largeur de la modale d'un chapitre.
   static const double formDialogMaxWidth = 600;
+
+  /// Largeur minimale d'une colonne du détail (Ressources | Évaluations).
+  static const double gridColumnMin = 280;
+
+  /// Largeur de lecture confortable du contenu rédigé.
+  static const double readingMaxWidth = 680;
+
+  /// Largeur minimale d'un champ de planification (séances, sous-période).
+  static const double planningFieldMinWidth = 180;
 
   /// Largeur maximale du contenu.
   static const double contentMaxWidth = 1180;

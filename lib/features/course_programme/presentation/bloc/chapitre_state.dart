@@ -2,7 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_detail.dart';
 
-enum ChapitreStatus { loading, ready, failure }
+/// `gone` : le chapitre affiché a disparu (supprimé ailleurs) — plus aucun
+/// geste, l'écran rend la main au programme.
+enum ChapitreStatus { loading, ready, failure, gone }
 
 enum ChapitreFeedbackKind { noteAdded, noteDeleted, contentSaved, writeFailed }
 

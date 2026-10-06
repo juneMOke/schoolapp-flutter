@@ -14593,7 +14593,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ressourceUrlInvalid =>
-      'Adresse invalide — elle doit commencer par https://';
+      'Adresse invalide — elle doit commencer par http:// ou https://';
 
   @override
   String get ressourceReferenceLabel => 'Référence (pages, chapitre)';
