@@ -236,9 +236,7 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
         final uid = currentUser?.uid;
         final authorId = aggregate.authorId;
         if (authorId != null && uid != null && authorId != uid) {
-          return const OutboxDispatchResult.blocked(
-            'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
-          );
+          return OutboxDispatchResult.foreignAuthor;
         }
         return OutboxDispatchResult.failed(
           serverMessage ?? (failure is Failure ? failure.message : 'Forbidden'),

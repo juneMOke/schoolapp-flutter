@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
+import 'dart:ui' show Color;
+
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 import 'package:school_app_flutter/features/academics/presentation/export/sujet_copie_fonts.dart';
@@ -40,13 +43,15 @@ class SujetCopieContent {
 /// sélectionnable et imprimable sans réseau. Le serveur rend sa propre version
 /// pour les parents ; les deux partent de la même feuille.
 abstract final class SujetCopiePdf {
-  static const PdfColor _ink = PdfColor.fromInt(0xFF2C2A26);
-  static const PdfColor _muted = PdfColor.fromInt(0xFF5C5852);
-  static const PdfColor _accent = PdfColor.fromInt(0xFFB85C2C);
-  static const PdfColor _rule = PdfColor.fromInt(0xFFC9C3B0);
-  static const PdfColor _answerSoft = PdfColor.fromInt(0xFFF3F8F4);
-  static const PdfColor _answerBorder = PdfColor.fromInt(0xFFCFE0D4);
-  static const PdfColor _answerInk = PdfColor.fromInt(0xFF3D6B4A);
+  static PdfColor _pdf(Color color) => PdfColor.fromInt(color.toARGB32());
+
+  static final PdfColor _ink = _pdf(AppColors.textPrimary);
+  static final PdfColor _muted = _pdf(AppColors.textSecondary);
+  static final PdfColor _accent = _pdf(AppColors.terreCuite);
+  static final PdfColor _rule = _pdf(AppColors.borderStrong);
+  static final PdfColor _answerSoft = _pdf(AppColors.academicsAnswerSoft);
+  static final PdfColor _answerBorder = _pdf(AppColors.academicsAnswerBorder);
+  static final PdfColor _answerInk = _pdf(AppColors.academicsScoreGood);
 
   static const double _titleSize = 26;
   static const double _bodySize = 11;
@@ -107,7 +112,7 @@ abstract final class SujetCopiePdf {
     return [
       pw.Text(
         '${content.brancheNom} — ${content.classroomName}'.toUpperCase(),
-        style: const pw.TextStyle(
+        style: pw.TextStyle(
           fontSize: _smallSize,
           letterSpacing: 1,
           color: _muted,
@@ -125,7 +130,7 @@ abstract final class SujetCopiePdf {
       pw.SizedBox(height: 4),
       pw.Text(
         meta,
-        style: const pw.TextStyle(fontSize: _bodySize, color: _muted),
+        style: pw.TextStyle(fontSize: _bodySize, color: _muted),
       ),
       pw.SizedBox(height: 14),
       pw.Row(
@@ -145,7 +150,7 @@ abstract final class SujetCopiePdf {
 
   static pw.Widget _fillLine(String label) => pw.Container(
     padding: const pw.EdgeInsets.only(bottom: 4),
-    decoration: const pw.BoxDecoration(
+    decoration: pw.BoxDecoration(
       border: pw.Border(bottom: pw.BorderSide(color: _rule)),
     ),
     child: pw.Text(label, style: const pw.TextStyle(fontSize: _bodySize)),
@@ -223,10 +228,10 @@ abstract final class SujetCopiePdf {
                   pw.TextSpan(
                     text:
                         '  ${l10n.copieSheetQuestionPoints(formatPoints(points))}',
-                    style: const pw.TextStyle(color: _muted),
+                    style: pw.TextStyle(color: _muted),
                   ),
               ],
-              style: const pw.TextStyle(fontSize: _bodySize, color: _ink),
+              style: pw.TextStyle(fontSize: _bodySize, color: _ink),
             ),
           ),
           pw.SizedBox(height: 6),
@@ -241,17 +246,14 @@ abstract final class SujetCopiePdf {
               ),
               child: pw.Text(
                 l10n.copieSheetCorrige(answer),
-                style: const pw.TextStyle(
-                  fontSize: _bodySize,
-                  color: _answerInk,
-                ),
+                style: pw.TextStyle(fontSize: _bodySize, color: _answerInk),
               ),
             )
           else
             for (var line = 0; line < _answerLines; line++)
               pw.Container(
                 height: _answerLineGap,
-                decoration: const pw.BoxDecoration(
+                decoration: pw.BoxDecoration(
                   border: pw.Border(bottom: pw.BorderSide(color: _rule)),
                 ),
               ),

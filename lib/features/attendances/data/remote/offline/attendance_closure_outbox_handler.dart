@@ -78,9 +78,7 @@ class AttendanceClosureOutboxHandler implements OutboxSyncHandler {
       if (status == 403) {
         final uid = currentUser?.uid;
         if (uid != null && closure.authorId != uid) {
-          return const OutboxDispatchResult.blocked(
-            'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
-          );
+          return OutboxDispatchResult.foreignAuthor;
         }
         return _refuse(closure, _reason(e) ?? 'Clôture non autorisée.');
       }

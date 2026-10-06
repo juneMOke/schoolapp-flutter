@@ -14,7 +14,7 @@ class PublicationContext extends Equatable {
   /// L'évaluation n'est pas encore connue du serveur.
   final bool evaluationPending;
 
-  /// Le sujet attend son envoi.
+  /// Le serveur n'a pas la version affichée du sujet (en file ou refusée).
   final bool sujetPending;
 
   /// Des notes de l'évaluation attendent leur envoi.

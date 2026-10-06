@@ -64,7 +64,7 @@ void main() {
     Perm.academicsCourseWrite: 'academics.course.write',
     Perm.academicsProgrammeWrite: 'academics.programme.write',
     Perm.academicsEvaluationPublish: 'academics.evaluation.publish',
-    Perm.academicsEvaluationPublishAny: 'academics.evaluation.publish.any',
+    Perm.academicsPublicationManage: 'academics.publication.manage',
     Perm.academicsCourseDelete: 'academics.course.delete',
     Perm.academicsGradeRead: 'academics.grade.read',
     Perm.academicsGradeWrite: 'academics.grade.write',
@@ -152,8 +152,8 @@ void main() {
       // serveur ne le sème (lot back P0).
       //
       // 73 → 74 : `academics.programme.write`, écrire le programme de cours.
-      // 74 → 76 : `academics.evaluation.publish` et `.publish.any`, publier
-      // une évaluation aux parents (son cours / toute l'école).
+      // 74 → 76 : `academics.evaluation.publish` (son cours) et
+      // `academics.publication.manage` (toute l'école), publier aux parents.
       // 72 → 73 : `student.photo.write`, prendre ou retirer la photo d'un élève
       // (SECRETARY, DIRECTOR, SUPER_ADMIN — migration back V161).
       expect(Perm.values, hasLength(76));

@@ -49,8 +49,20 @@ class EvaluationCopieLogOutboxHandler implements OutboxSyncHandler {
     }
     final blocked = support.attribution(request.authorId);
     if (blocked != null) return blocked;
-    final evaluationId = request.entry.evaluationId;
 
+    final result = await _send(request);
+    if (result.outcome == OutboxDispatchOutcome.failed) {
+      try {
+        await copieLog.markSyncError(request.entry.id);
+      } catch (_) {
+        // Terminal même si l'écriture locale échoue.
+      }
+    }
+    return result;
+  }
+
+  Future<OutboxDispatchResult> _send(CopieLogPushRequestModel request) async {
+    final evaluationId = request.entry.evaluationId;
     try {
       final gate = await support.evaluationGate(evaluationId);
       if (gate != null) return gate;
@@ -66,11 +78,6 @@ class EvaluationCopieLogOutboxHandler implements OutboxSyncHandler {
       final code = ApiErrorParser.detailCodeOf(e.response);
       if (e.response?.statusCode == 422 &&
           code == EvaluationSujetCodes.copieLogMismatch) {
-        try {
-          await copieLog.markSyncError(request.entry.id);
-        } catch (_) {
-          // Terminal même si l'écriture locale échoue.
-        }
         return OutboxDispatchResult.failed(code!);
       }
       return support.classify(e);

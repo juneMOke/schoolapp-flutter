@@ -170,10 +170,10 @@ enum Perm {
   // direction le lit sous `academicsCourseRead`.
   academicsProgrammeWrite('academics.programme.write'),
   // Publier aux parents le sujet, le corrigé ou les notes d'une évaluation
-  // (WhatsApp) : l'enseignant pour son cours, la direction pour toute
-  // l'école (`.any`, sans garde de propriété du cours).
+  // (WhatsApp) : l'enseignant pour son cours ; `academics.publication.manage`
+  // pour la direction, sur tout cours de l'école (sans garde de propriété).
   academicsEvaluationPublish('academics.evaluation.publish'),
-  academicsEvaluationPublishAny('academics.evaluation.publish.any'),
+  academicsPublicationManage('academics.publication.manage'),
 
   // ── Éditique ──────────────────────────────────────────────────────────────
   // `editiqueCancel` est séparée de `editiqueWrite` : une pièce émise ne se

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/sujet_draft_controller.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_notation_atoms.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_question_tile.dart';
@@ -15,13 +16,26 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// descendre, dupliquer, supprimer), énoncé, puis la réponse attendue dans sa
 /// zone verte. Rien n'est écrit avant « Enregistrer le sujet » : la
 /// suppression ne demande pas de confirmation.
+/// Points : chiffres et un séparateur décimal, deux décimales au plus — le
+/// serveur refuse au-delà.
+final TextInputFormatter _pointsFormatter = TextInputFormatter.withFunction(
+  (previous, next) =>
+      RegExp(r'^\d{0,5}([.,]\d{0,2})?$').hasMatch(next.text) ? next : previous,
+);
+
+final TextInputFormatter _textLimit = LengthLimitingTextInputFormatter(
+  SujetLimits.questionTextMaxLength,
+);
+
 class SujetQuestionCard extends StatelessWidget {
   final SujetQuestionDraft draft;
   final int number;
   final bool isFirst;
   final bool isLast;
   final ValueChanged<int> onMove;
-  final VoidCallback onDuplicate;
+
+  /// `null` : le sujet a atteint son nombre de questions.
+  final VoidCallback? onDuplicate;
   final VoidCallback onDelete;
 
   const SujetQuestionCard({
@@ -60,9 +74,7 @@ class SujetQuestionCard extends StatelessWidget {
                   hideLabel: true,
                   placeholder: l10n.sujetPointsSuffix,
                   keyboardType: EteeloTextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[0-9.,]')),
-                  ],
+                  inputFormatters: [_pointsFormatter],
                 ),
               ),
               const SizedBox(width: AppSpacing.xs),
@@ -95,7 +107,8 @@ class SujetQuestionCard extends StatelessWidget {
                   l10n.sujetMoveDown,
                   () => onMove(1),
                 ),
-              _action(Icons.copy_rounded, l10n.sujetDuplicate, onDuplicate),
+              if (onDuplicate != null)
+                _action(Icons.copy_rounded, l10n.sujetDuplicate, onDuplicate!),
               _action(
                 Icons.delete_outline_rounded,
                 l10n.sujetDelete,
@@ -113,6 +126,7 @@ class SujetQuestionCard extends StatelessWidget {
             keyboardType: EteeloTextInputType.multiline,
             minLines: 2,
             maxLines: 6,
+            inputFormatters: [_textLimit],
           ),
           const SizedBox(height: AppSpacing.sm),
           SujetAnswerBox(
@@ -135,6 +149,7 @@ class SujetQuestionCard extends StatelessWidget {
                   keyboardType: EteeloTextInputType.multiline,
                   minLines: 2,
                   maxLines: 6,
+                  inputFormatters: [_textLimit],
                 ),
               ],
             ),

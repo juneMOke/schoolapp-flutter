@@ -15,6 +15,10 @@ import 'package:school_app_flutter/features/academics/data/models/offline/sujet/
 /// chaque enregistrement : seule la dernière version part).
 const String kEvaluationSujetAggregateType = 'ACADEMICS_EVALUATION_SUJET';
 
+/// Code posé sur un sujet refusé sans code métier (400, 403, évaluation
+/// refusée ou absente).
+const String kSujetRejectedCode = 'REJECTED';
+
 /// Pousse le sujet d'une évaluation (`PUT …/evaluations/{id}/sujet`),
 /// sous-agrégat LWW sur `clientUpdatedAt`.
 ///
@@ -25,8 +29,9 @@ const String kEvaluationSujetAggregateType = 'ACADEMICS_EVALUATION_SUJET';
 ///   le serveur avait plus récent, on prend le sien — sauf brouillon ré-édité
 ///   entre-temps, qui repartira. L'évaluation, son journal et ses publications
 ///   sont rafraîchis au passage.
-/// - 422 `MAX_LOCKED` / `QUESTION_MISMATCH` : refus terminal, le brouillon
-///   reste lisible avec son code (`sujet_rejection_code`).
+/// - Tout refus terminal laisse le brouillon lisible, marqué refusé avec son
+///   code (`MAX_LOCKED`, `QUESTION_MISMATCH`, sinon `REJECTED`) ; un
+///   `MAX_LOCKED` abandonne le maximum ajusté.
 /// - 404 (évaluation pas encore acquittée), réseau, 5xx, 401 → nouvel essai ;
 ///   400, 403 → terminal.
 class EvaluationSujetOutboxHandler implements OutboxSyncHandler {
@@ -65,6 +70,29 @@ class EvaluationSujetOutboxHandler implements OutboxSyncHandler {
     final blocked = support.attribution(request.authorId);
     if (blocked != null) return blocked;
 
+    final result = await _send(request);
+    // Tout échec terminal se voit sur le brouillon : sans cela il resterait
+    // « en attente » pour toujours, et le pull ne le corrigerait jamais.
+    if (result.outcome == OutboxDispatchOutcome.failed) {
+      final code = _terminalCodes.contains(result.error)
+          ? result.error
+          : kSujetRejectedCode;
+      try {
+        await sujets.markSujetSyncError(
+          evaluationId: request.evaluationId,
+          pushedUpdatedAt: request.clientUpdatedAt,
+          rejectionCode: code,
+          dropPendingMax: code == EvaluationSujetCodes.maxLocked,
+        );
+      } catch (_) {
+        // Le refus reste terminal même si l'écriture locale échoue : un
+        // retry repousserait indéfiniment un refus déterministe.
+      }
+    }
+    return result;
+  }
+
+  Future<OutboxDispatchResult> _send(SujetPushRequestModel request) async {
     try {
       final gate = await support.evaluationGate(request.evaluationId);
       if (gate != null) return gate;
@@ -91,16 +119,6 @@ class EvaluationSujetOutboxHandler implements OutboxSyncHandler {
     } on DioException catch (e) {
       final code = ApiErrorParser.detailCodeOf(e.response);
       if (e.response?.statusCode == 422 && _terminalCodes.contains(code)) {
-        try {
-          await sujets.markSujetSyncError(
-            evaluationId: request.evaluationId,
-            pushedUpdatedAt: request.clientUpdatedAt,
-            rejectionCode: code,
-          );
-        } catch (_) {
-          // Le refus reste terminal même si l'écriture locale échoue : un
-          // retry repousserait indéfiniment un 422 déterministe.
-        }
         return OutboxDispatchResult.failed(code!);
       }
       return support.classify(e);

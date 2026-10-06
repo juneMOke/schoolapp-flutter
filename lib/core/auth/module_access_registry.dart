@@ -223,7 +223,7 @@ const ModuleAccess kExpenseReopenAccess = ModuleAccess([Perm.expenseReopen]);
 /// l'enseignant du cours, ou la direction pour toute l'école.
 const ModuleAccess kEvaluationPublishAccess = ModuleAccess([
   Perm.academicsEvaluationPublish,
-  Perm.academicsEvaluationPublishAny,
+  Perm.academicsPublicationManage,
 ]);
 
 /// Toutes les actions d'écriture gardées, avec le libellé qui sert aux

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_bareme.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 
 void main() {
@@ -49,5 +50,14 @@ void main() {
       consignes: '  ',
     );
     expect(cadre.normalized(), const EvaluationCadre(programme: ['A', 'B']));
+  });
+
+  test('bornes du serveur : deux décimales, durée plafonnée', () {
+    expect(SujetLimits.roundPoints(1.1 + 2.2), 3.3);
+    expect(SujetLimits.roundPoints(0.333), 0.33);
+    expect(
+      const EvaluationCadre(dureeMinutes: 700).normalized().dureeMinutes,
+      SujetLimits.dureeMinutesMax,
+    );
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/academics_offline_schema.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_migrations.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -73,6 +74,25 @@ void main() {
       expect(await columnsOf(db, 'evaluation_copie_log'), contains('canal'));
     },
   );
+
+  test('le flux des évaluations repart du début, les autres non', () async {
+    await db.execute(syncMetaTable.createTableSql);
+    for (final resource in [
+      'academics_evaluations:c-1',
+      'academics_notes:c-1',
+    ]) {
+      await db.insert('sync_meta', {
+        'resource': resource,
+        'cursor': 'x',
+        'synced_at': 1,
+      });
+    }
+
+    await migrateTenantDatabase(db, 61, newVersion: 62);
+
+    final left = await db.query('sync_meta');
+    expect(left.map((r) => r['resource']), ['academics_notes:c-1']);
+  });
 
   test('le palier se rejoue sans lever', () async {
     await migrateTenantDatabase(db, 61, newVersion: 62);

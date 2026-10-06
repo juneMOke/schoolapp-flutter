@@ -42,6 +42,22 @@ class OutboxDispatchResult {
 
   const OutboxDispatchResult.failed(String error)
     : this._(OutboxDispatchOutcome.failed, error);
+
+  /// Tablette partagée : une écriture d'un AUTRE compte ne part pas sous ce
+  /// jeton (le serveur la refuserait en 403 terminal et la saisie serait
+  /// brûlée). Attente propre, sans tentative consommée, qui se lève à la
+  /// reconnexion de son auteur.
+  static const OutboxDispatchResult foreignAuthor =
+      OutboxDispatchResult.blocked(
+        'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
+      );
+
+  /// [foreignAuthor] si [authorId] est connu et n'est pas [currentUid] ;
+  /// `null` sinon (l'écriture peut partir).
+  static OutboxDispatchResult? blockForeignAuthor(
+    String? authorId,
+    String? currentUid,
+  ) => authorId != null && authorId != currentUid ? foreignAuthor : null;
 }
 
 /// Contrat qu'un module offline implémente pour pousser un type d'agrégat.

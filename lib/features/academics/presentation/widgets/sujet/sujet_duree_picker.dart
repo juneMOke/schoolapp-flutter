@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_duree.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -33,16 +34,22 @@ class _SujetDureePickerState extends State<SujetDureePicker> {
     text: _isOther(widget.value) ? '${widget.value}' : '',
   );
 
+  /// Dernière valeur émise par ce widget : son retour par le parent n'est pas
+  /// une valeur « imposée », il ne doit pas refermer « Autre » (taper « 60 »
+  /// en route vers « 600 » passe par un préréglage).
+  int? _emitted;
+
   static bool _isOther(int? value) =>
       value != null && !kDureePresets.contains(value);
 
   @override
   void didUpdateWidget(SujetDureePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Une valeur imposée de l'extérieur (défaut d'un type) referme « Autre ».
-    if (widget.value != oldWidget.value && !_isOther(widget.value)) {
-      _other = false;
-    }
+    final value = widget.value;
+    if (value == oldWidget.value || value == _emitted) return;
+    // Une valeur imposée de l'extérieur (défaut d'un type) : « Autre » suit.
+    _other = _isOther(value);
+    if (_other) _minutes.text = '$value';
   }
 
   @override
@@ -51,19 +58,31 @@ class _SujetDureePickerState extends State<SujetDureePicker> {
     super.dispose();
   }
 
-  void _pick(int? minutes) {
-    setState(() => _other = false);
+  void _emit(int? minutes) {
+    _emitted = minutes;
     widget.onChanged(minutes);
   }
 
-  void _pickOther() {
-    setState(() => _other = true);
-    widget.onChanged(int.tryParse(_minutes.text));
+  void _pick(int? minutes) {
+    setState(() => _other = false);
+    _emit(minutes);
   }
+
+  /// Ouvre le champ minutes, prérempli avec la durée courante : la valeur ne
+  /// change pas tant que rien n'est tapé.
+  void _pickOther() => setState(() {
+    _other = true;
+    final value = widget.value;
+    _minutes.text = value == null ? '' : '$value';
+  });
 
   void _onMinutesChanged(String text) {
     final minutes = int.tryParse(text);
-    widget.onChanged(minutes != null && minutes > 0 ? minutes : null);
+    _emit(
+      minutes == null || minutes <= 0
+          ? null
+          : minutes.clamp(1, SujetLimits.dureeMinutesMax),
+    );
   }
 
   @override
@@ -103,7 +122,10 @@ class _SujetDureePickerState extends State<SujetDureePicker> {
                   placeholder: l10n.dureeOtherMinutes,
                   controller: _minutes,
                   keyboardType: EteeloTextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(3),
+                  ],
                   onChanged: _onMinutesChanged,
                 ),
               ),

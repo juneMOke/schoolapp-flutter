@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_bareme.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 
 /// Une question en cours d'édition : ses trois champs ont leur contrôleur.
@@ -17,9 +18,12 @@ class SujetQuestionDraft {
       points = TextEditingController(text: _formatPoints(from?.points)),
       reponse = TextEditingController(text: from?.reponseAttendue ?? '');
 
-  /// Points saisis : virgule ou point décimal ; vide ou illisible → `null`.
-  double? get pointsValue =>
-      double.tryParse(points.text.trim().replaceAll(',', '.'));
+  /// Points saisis : virgule ou point décimal, deux décimales au plus ; vide
+  /// ou illisible → `null`.
+  double? get pointsValue {
+    final value = double.tryParse(points.text.trim().replaceAll(',', '.'));
+    return value == null ? null : SujetLimits.roundPoints(value);
+  }
 
   SujetQuestion toQuestion() {
     final answer = reponse.text.trim();
@@ -97,9 +101,13 @@ class SujetDraftController extends ChangeNotifier {
   ];
 
   SujetBareme get bareme => SujetBareme(
-    total: questionValues.fold(0, (sum, q) => sum + (q.points ?? 0)),
+    total: SujetLimits.roundPoints(
+      questionValues.fold(0, (sum, q) => sum + (q.points ?? 0)),
+    ),
     maxPoints: maxPoints,
   );
+
+  bool get canAddQuestion => _questions.length < SujetLimits.questionsMax;
 
   int get incompleteCount => questionValues.where((q) => q.isIncomplete).length;
 
@@ -119,11 +127,13 @@ class SujetDraftController extends ChangeNotifier {
   }
 
   void addQuestion() {
+    if (!canAddQuestion) return;
     _questions.add(_track(SujetQuestionDraft(_newId())));
     notifyListeners();
   }
 
   void duplicate(SujetQuestionDraft draft) {
+    if (!canAddQuestion) return;
     final copy = _track(SujetQuestionDraft(_newId(), from: draft.toQuestion()));
     _questions.insert(_questions.indexOf(draft) + 1, copy);
     notifyListeners();

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -124,24 +125,27 @@ void main() {
     verifyNever(() => api.replaceSujet(any(), any(), any()));
   });
 
-  test('accepté : le sujet passe envoyé, le maximum part', () async {
-    await seedEvaluation('SYNCED');
-    when(
-      () => api.replaceSujet(auth, 'ev-1', any()),
-    ).thenAnswer((_) async => view(sujetAt: '2025-10-06T08:00:00.000Z'));
+  test(
+    'accepté : le sujet passe envoyé ; un maximum inchangé ne part pas',
+    () async {
+      await seedEvaluation('SYNCED');
+      when(
+        () => api.replaceSujet(auth, 'ev-1', any()),
+      ).thenAnswer((_) async => view(sujetAt: '2025-10-06T08:00:00.000Z'));
 
-    final result = await saveAndDispatch();
+      final result = await saveAndDispatch();
 
-    expect(result.outcome, OutboxDispatchOutcome.acked);
-    expect((await localSujet()).envoi, SujetEnvoi.envoye);
-    final body =
-        verify(
-              () => api.replaceSujet(auth, 'ev-1', captureAny()),
-            ).captured.single
-            as Map<String, dynamic>;
-    expect(body['maxPoints'], 10);
-    expect(body['authorId'], 'teacher');
-  });
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect((await localSujet()).envoi, SujetEnvoi.envoye);
+      final body =
+          verify(
+                () => api.replaceSujet(auth, 'ev-1', captureAny()),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(body.containsKey('maxPoints'), isFalse);
+      expect(body['authorId'], 'teacher');
+    },
+  );
 
   test('le serveur gardait plus récent : on prend le sien', () async {
     await seedEvaluation('SYNCED');
@@ -183,6 +187,22 @@ void main() {
     expect(sujet.questions, [q]);
   });
 
+  test('400 : refus terminal, le brouillon est marqué refusé', () async {
+    await seedEvaluation('SYNCED');
+    when(() => api.replaceSujet(auth, 'ev-1', any())).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(requestOptions: RequestOptions(), statusCode: 400),
+        error: const ValidationFailure(),
+      ),
+    );
+
+    expect((await saveAndDispatch()).outcome, OutboxDispatchOutcome.failed);
+    final sujet = await localSujet();
+    expect(sujet.envoi, SujetEnvoi.refuse);
+    expect(sujet.rejectionCode, 'REJECTED');
+  });
+
   test('404 (évaluation pas encore acquittée) : nouvel essai', () async {
     await seedEvaluation('SYNCED');
     when(() => api.replaceSujet(auth, 'ev-1', any())).thenThrow(
@@ -194,12 +214,13 @@ void main() {
     expect((await saveAndDispatch()).outcome, OutboxDispatchOutcome.retry);
   });
 
-  test('renvoi sans maximum : le corps ne le porte pas', () async {
+  test('renvoi sans maximum : un ajustement en attente ne part plus', () async {
     await seedEvaluation('SYNCED');
     await repo.saveSujet(
       'ev-1',
       cadre: const EvaluationCadre(),
       questions: const [q],
+      maxPoints: 10,
     );
     await repo.resendSujetWithoutMax('ev-1');
     when(

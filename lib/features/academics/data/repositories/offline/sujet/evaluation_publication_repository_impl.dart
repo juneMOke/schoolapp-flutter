@@ -57,7 +57,10 @@ class EvaluationPublicationRepositoryImpl
         PublicationContext(
           publications: await _publications.getPublications(evaluationId),
           evaluationPending: evaluation.syncState != SyncState.synced,
-          sujetPending: sujet?.syncStatus == SyncState.pendingSync.dbValue,
+          // En file ou refusé : le serveur n'a pas la version affichée.
+          sujetPending:
+              sujet?.syncStatus != null &&
+              sujet!.syncStatus != SyncState.synced.dbValue,
           notesPending: pendingNotes.isNotEmpty,
         ),
       );

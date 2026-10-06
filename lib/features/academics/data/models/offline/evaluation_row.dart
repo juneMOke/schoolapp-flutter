@@ -84,7 +84,12 @@ class EvaluationRow extends Equatable {
     coursId: map['cours_id'] as String,
     type: map['type'] as String,
     evalDate: _asIntOrNull(map['eval_date']) ?? 0,
-    maxPoints: _asDoubleOrNull(map['max_points']) ?? 0,
+    // Un maximum ajusté par le sujet, pas encore accusé, est celui qui vaut
+    // sur la tablette (détail, saisie) ; `max_points` garde celui du serveur.
+    maxPoints:
+        _asDoubleOrNull(map['sujet_max_points']) ??
+        _asDoubleOrNull(map['max_points']) ??
+        0,
     poids: _asIntOrNull(map['poids']) ?? 0,
     sousPeriodeId: map['sous_periode_id'] as String?,
     periodeScolaireId: map['periode_scolaire_id'] as String?,

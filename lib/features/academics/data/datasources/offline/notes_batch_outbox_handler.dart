@@ -61,12 +61,11 @@ class NotesBatchOutboxHandler implements OutboxSyncHandler {
     // serveur (SyncAttributionGuard) la rejetterait en 403 TERMINAL et la
     // saisie serait brûlée. `blocked` = attente propre, auto-cicatrisante à la
     // reconnexion de l'auteur.
-    final uid = currentUser?.uid;
-    if (request.authorId != null && request.authorId != uid) {
-      return const OutboxDispatchResult.blocked(
-        'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
-      );
-    }
+    final foreign = OutboxDispatchResult.blockForeignAuthor(
+      request.authorId,
+      currentUser?.uid,
+    );
+    if (foreign != null) return foreign;
 
     // Toute erreur DB (gate, réconciliation) → retry : le contrat
     // `OutboxSyncHandler` interdit de lever ; le re-push est idempotent.

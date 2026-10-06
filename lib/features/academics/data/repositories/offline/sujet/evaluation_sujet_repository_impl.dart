@@ -61,7 +61,6 @@ class EvaluationSujetRepositoryImpl implements EvaluationSujetRepository {
     evaluationId,
     EvaluationSujetRow.fromEntity(cadre, questions),
     maxPoints: maxPoints,
-    sendMax: true,
   );
 
   @override
@@ -71,36 +70,35 @@ class EvaluationSujetRepositoryImpl implements EvaluationSujetRepository {
     try {
       final current = await _local.getSujet(evaluationId);
       if (current == null) return const Left(NotFoundFailure());
-      return _write(evaluationId, current, sendMax: false);
+      return _write(evaluationId, current, dropPendingMax: true);
     } catch (e) {
       return Left(StorageFailure(e.toString()));
     }
   }
 
-  /// Écrit [sujet] en attente, horodaté, et enfile son envoi. [sendMax] :
-  /// le corps porte le maximum local (égal à celui du serveur, il ne change
-  /// rien) ; sinon il est omis et le serveur garde le sien.
+  /// Écrit [sujet] en attente et enfile son envoi. L'horloge (monotone) et le
+  /// maximum qui voyage (un ajustement en attente, sinon rien) sont décidés
+  /// par la source locale, dans sa transaction.
   Future<Either<Failure, EvaluationSujet>> _write(
     String evaluationId,
     EvaluationSujetRow sujet, {
     double? maxPoints,
-    required bool sendMax,
+    bool dropPendingMax = false,
   }) async {
     try {
-      final nowMs = _now();
-      final row = EvaluationSujetRow(
+      final content = EvaluationSujetRow(
         dureeMinutes: sujet.dureeMinutes,
         programme: sujet.programme,
         consignes: sujet.consignes,
         questions: sujet.questions,
-        updatedAt: nowMs,
-        syncStatus: SyncState.pendingSync.dbValue,
       );
-      final saved = await _local.saveSujet(
+      final clientUpdatedAt = await _local.saveSujet(
         evaluationId: evaluationId,
-        sujet: row,
+        sujet: content,
+        now: _now(),
         maxPoints: maxPoints,
-        buildOutboxEntry: (localMax) => OutboxEntry(
+        dropPendingMax: dropPendingMax,
+        buildOutboxEntry: (clientUpdatedAt, max) => OutboxEntry(
           id: outboxId(evaluationId),
           aggregateType: kEvaluationSujetAggregateType,
           aggregateId: evaluationId,
@@ -108,17 +106,26 @@ class EvaluationSujetRepositoryImpl implements EvaluationSujetRepository {
           payload: SujetPushRequestModel(
             evaluationId: evaluationId,
             authorId: _currentUser?.uid,
-            clientUpdatedAt: nowMs,
-            maxPoints: sendMax ? localMax : null,
-            sujet: row,
+            clientUpdatedAt: clientUpdatedAt,
+            maxPoints: max,
+            sujet: content,
           ).toJsonString(),
-          createdAt: nowMs,
+          createdAt: clientUpdatedAt,
         ),
       );
-      if (!saved) return const Left(NotFoundFailure());
+      if (clientUpdatedAt == null) return const Left(NotFoundFailure());
       final engine = _syncEngine;
       if (engine != null) unawaited(engine.flush());
-      return Right(row.toEntity());
+      return Right(
+        EvaluationSujetRow(
+          dureeMinutes: content.dureeMinutes,
+          programme: content.programme,
+          consignes: content.consignes,
+          questions: content.questions,
+          updatedAt: clientUpdatedAt,
+          syncStatus: SyncState.pendingSync.dbValue,
+        ).toEntity(),
+      );
     } catch (e) {
       return Left(StorageFailure(e.toString()));
     }

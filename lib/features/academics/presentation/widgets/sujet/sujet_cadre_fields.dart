@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/labels/form_section_label.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_duree_picker.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_programme_editor.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -54,6 +56,9 @@ class SujetCadreFields extends StatelessWidget {
           keyboardType: EteeloTextInputType.multiline,
           minLines: 2,
           maxLines: 4,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(SujetLimits.consignesMaxLength),
+          ],
           onChanged: onConsignesChanged == null
               ? null
               : (_) => onConsignesChanged!(),

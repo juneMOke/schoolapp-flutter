@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/copie_log_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_codecs.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
-
-String _isoUtc(int epochMs) =>
-    DateTime.fromMillisecondsSinceEpoch(epochMs, isUtc: true).toIso8601String();
 
 /// Corps de `PUT /sync/academics/evaluations/{id}/sujet` (`SujetSyncRequest`)
 /// et **payload d'outbox** : le sujet entier, qui remplace le précédent.
@@ -34,7 +32,7 @@ class SujetPushRequestModel extends Equatable {
   /// Corps envoyé au serveur (sans l'id d'évaluation, porté par la route).
   Map<String, dynamic> toBody() => {
     'authorId': ?authorId,
-    'clientUpdatedAt': _isoUtc(clientUpdatedAt),
+    'clientUpdatedAt': EpochIsoHelper.toIso(clientUpdatedAt),
     'dureeMinutes': sujet.dureeMinutes,
     'programme': sujet.programme,
     'consignes': sujet.consignes,
@@ -90,7 +88,7 @@ class CopieLogPushRequestModel extends Equatable {
       'kind': entry.kind,
       'canal': entry.canal,
       'corrige': entry.corrige,
-      'occurredAt': _isoUtc(entry.occurredAt),
+      'occurredAt': EpochIsoHelper.toIso(entry.occurredAt),
     },
   };
 

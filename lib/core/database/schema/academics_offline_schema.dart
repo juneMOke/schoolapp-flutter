@@ -132,7 +132,8 @@ const TableSchema refCoursTable = TableSchema(
 /// v62 — `titre` (calculé à la création, nul pour l'historique) ; le **sujet**
 /// (`duree_minutes`, `programme_json`, `consignes`, `sujet_questions_json`) est
 /// un sous-agrégat LWW à statut propre (`sujet_updated_at`,
-/// `sujet_sync_status`, `sujet_rejection_code`) : il change après la création
+/// `sujet_sync_status`, `sujet_rejection_code`, `sujet_max_points` = maximum
+/// ajusté en attente d'accusé) : il change après la création
 /// sans rouvrir l'insert seul. `publication_json` = état des publications
 /// (sujet, corrigé, notes), écrit par la réponse en ligne puis le delta.
 const TableSchema evaluationTable = TableSchema(
@@ -161,6 +162,7 @@ const TableSchema evaluationTable = TableSchema(
       sujet_updated_at INTEGER,
       sujet_sync_status TEXT,
       sujet_rejection_code TEXT,
+      sujet_max_points REAL,
       publication_json TEXT
     )
   ''',

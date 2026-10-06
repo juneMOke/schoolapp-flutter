@@ -75,8 +75,8 @@ void main() {
       evaluationId: 'ev-1',
       sujet: const EvaluationSujetRow(
         questions: [SujetQuestion(id: 'q1', enonce: 'Local', points: 20)],
-        updatedAt: 9000,
       ),
+      now: 9999999999999,
     );
 
     await applier.apply([view(enonce: 'Plus tard')], 2000);

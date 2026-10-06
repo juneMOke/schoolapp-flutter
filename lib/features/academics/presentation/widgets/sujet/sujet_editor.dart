@@ -66,7 +66,9 @@ class SujetEditor extends StatelessWidget {
                 isFirst: i == 0,
                 isLast: i == questions.length - 1,
                 onMove: (offset) => draft.move(q, offset),
-                onDuplicate: () => draft.duplicate(q),
+                onDuplicate: draft.canAddQuestion
+                    ? () => draft.duplicate(q)
+                    : null,
                 onDelete: () => draft.remove(q),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -74,7 +76,7 @@ class SujetEditor extends StatelessWidget {
             SizedBox(
               height: AppDimensions.sujetAddQuestionHeight,
               child: OutlinedButton.icon(
-                onPressed: draft.addQuestion,
+                onPressed: draft.canAddQuestion ? draft.addQuestion : null,
                 icon: const Icon(Icons.add_rounded),
                 label: Text(
                   questions.isEmpty

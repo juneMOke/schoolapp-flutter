@@ -17,15 +17,9 @@ class EvaluationChildOutboxSupport {
     this.currentUser,
   });
 
-  /// Tablette partagée : une écriture d'un autre compte ne part pas sous ce
-  /// jeton (le serveur la refuserait en 403 terminal) ; elle attend la
-  /// reconnexion de son auteur.
-  OutboxDispatchResult? attribution(String? authorId) {
-    if (authorId == null || authorId == currentUser?.uid) return null;
-    return const OutboxDispatchResult.blocked(
-      'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
-    );
-  }
+  /// Tablette partagée : voir [OutboxDispatchResult.blockForeignAuthor].
+  OutboxDispatchResult? attribution(String? authorId) =>
+      OutboxDispatchResult.blockForeignAuthor(authorId, currentUser?.uid);
 
   /// L'évaluation doit être connue du serveur : en attente → on attend ;
   /// refusée ou évincée → l'écriture ne pourra jamais s'y rattacher.

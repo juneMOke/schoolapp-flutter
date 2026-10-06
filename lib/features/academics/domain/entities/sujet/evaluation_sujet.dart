@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 
 /// Où en est l'envoi du sujet au serveur.
@@ -33,8 +34,9 @@ class EvaluationSujet extends Equatable {
   });
 
   /// Somme des points des questions (une question sans points compte 0).
-  double get totalPoints =>
-      questions.fold(0, (sum, q) => sum + (q.points ?? 0));
+  double get totalPoints => SujetLimits.roundPoints(
+    questions.fold(0, (sum, q) => sum + (q.points ?? 0)),
+  );
 
   int get incompleteCount => questions.where((q) => q.isIncomplete).length;
 

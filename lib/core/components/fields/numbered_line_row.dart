@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -23,6 +24,7 @@ class NumberedLineRow extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
   final double badgeSize;
 
   const NumberedLineRow({
@@ -37,6 +39,7 @@ class NumberedLineRow extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.textInputAction,
+    this.inputFormatters,
     this.badgeSize = AppSpacing.xl,
   });
 
@@ -56,6 +59,7 @@ class NumberedLineRow extends StatelessWidget {
             onChanged: onChanged,
             onSubmitted: onSubmitted,
             textInputAction: textInputAction,
+            inputFormatters: inputFormatters,
             capitalization: EteeloTextCapitalization.sentence,
           ),
         ),

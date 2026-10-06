@@ -6,12 +6,14 @@ import 'package:school_app_flutter/core/components/labels/form_section_label.dar
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Liste ordonnée « Au programme » (spec §4 bis) : ce que l'élève révise.
 ///
 /// Entrée ajoute une ligne dessous ; Retour arrière sur une ligne vide la
-/// supprime ; ✕ la retire. Les lignes vides partent telles quelles dans
+/// supprime — au clavier physique : un clavier virtuel ne remonte pas cette
+/// touche sur un champ vide, le ✕ reste alors le geste ; ✕ la retire. Les lignes vides partent telles quelles dans
 /// [onChanged] — c'est l'enregistrement qui les écarte.
 ///
 /// [onReprendreChapitres], s'il est fourni, s'affiche à droite du libellé
@@ -77,9 +79,16 @@ class _SujetProgrammeEditorState extends State<SujetProgrammeEditor> {
     super.dispose();
   }
 
+  /// Remplace les lignes. Les anciennes sont libérées après l'image : leur
+  /// champ peut encore être monté, et le clavier lui écrire.
   void _reset(List<String> texts) {
-    for (final line in _lines) {
-      line.dispose();
+    final old = List.of(_lines);
+    if (old.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (final line in old) {
+          line.dispose();
+        }
+      });
     }
     _lines
       ..clear()
@@ -100,11 +109,19 @@ class _SujetProgrammeEditorState extends State<SujetProgrammeEditor> {
     }
     final index = _lines.indexOf(line);
     _remove(line);
-    if (index > 0) _lines[index - 1].focusNode.requestFocus();
+    // La ligne d'avant, ou la suivante quand on retire la première.
+    if (index > 0) {
+      _lines[index - 1].focusNode.requestFocus();
+    } else if (_lines.isNotEmpty) {
+      _lines.first.focusNode.requestFocus();
+    }
     return KeyEventResult.handled;
   }
 
+  bool get _canAdd => _lines.length < SujetLimits.programmeMaxLines;
+
   void _insertAfter(int index) {
+    if (!_canAdd) return;
     final line = _newLine('');
     setState(() => _lines.insert(index + 1, line));
     _emit();
@@ -156,6 +173,11 @@ class _SujetProgrammeEditorState extends State<SujetProgrammeEditor> {
               placeholder: l10n.sujetProgrammeHint,
               removeTooltip: l10n.sujetProgrammeRemove,
               textInputAction: TextInputAction.next,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(
+                  SujetLimits.programmeLineMaxLength,
+                ),
+              ],
               onChanged: (_) => _emit(),
               onSubmitted: (_) => _insertAfter(i),
               onRemove: () => _remove(line),
@@ -164,7 +186,7 @@ class _SujetProgrammeEditorState extends State<SujetProgrammeEditor> {
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
-            onPressed: () => _insertAfter(_lines.length - 1),
+            onPressed: _canAdd ? () => _insertAfter(_lines.length - 1) : null,
             icon: const Icon(Icons.add_rounded),
             label: Text(l10n.sujetProgrammeAdd),
             style: TextButton.styleFrom(foregroundColor: AppColors.bleuArdoise),

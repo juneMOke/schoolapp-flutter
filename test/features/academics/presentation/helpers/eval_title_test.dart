@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/s
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_periode.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_saisie_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_duree.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -95,6 +96,12 @@ void main() {
         title(TypeEvaluation.interro, chapitres: ['A', 'B']),
         'Interrogation 3',
       );
+    });
+
+    test('un titre trop long est coupé à la borne du serveur', () {
+      final long = title(TypeEvaluation.interro, chapitres: ['x' * 300]);
+      expect(long.length, SujetLimits.titreMaxLength);
+      expect(long.endsWith('…'), isTrue);
     });
 
     test('examen : rattaché à la période', () {
