@@ -2918,6 +2918,132 @@ abstract class AppLocalizations {
   /// **'Entry cap reached for this date.'**
   String get evalCreateMaxReachedError;
 
+  /// No description provided for @evalCreateSujetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions, their points and the expected answers are written afterwards in the Subject section.'**
+  String get evalCreateSujetHint;
+
+  /// No description provided for @evalTitleRanked.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} {rank}'**
+  String evalTitleRanked(String type, int rank);
+
+  /// No description provided for @evalTitleWithSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{base} — {suffix}'**
+  String evalTitleWithSuffix(String base, String suffix);
+
+  /// No description provided for @evalDerivedName.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} of {date}'**
+  String evalDerivedName(String type, String date);
+
+  /// No description provided for @dureeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String dureeMinutes(int minutes);
+
+  /// No description provided for @dureeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String dureeHours(int hours);
+
+  /// No description provided for @dureeHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String dureeHoursMinutes(int hours, String minutes);
+
+  /// No description provided for @dureeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get dureeOther;
+
+  /// No description provided for @dureeUndefined.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get dureeUndefined;
+
+  /// No description provided for @dureeOtherMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get dureeOtherMinutes;
+
+  /// No description provided for @dureeEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'that is {duree}'**
+  String dureeEquivalent(String duree);
+
+  /// No description provided for @sujetDureeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get sujetDureeLabel;
+
+  /// No description provided for @sujetProgrammeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'To revise'**
+  String get sujetProgrammeLabel;
+
+  /// No description provided for @sujetProgrammeFromChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the chapters'**
+  String get sujetProgrammeFromChapters;
+
+  /// No description provided for @sujetProgrammeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {number} to revise'**
+  String sujetProgrammeLine(int number);
+
+  /// No description provided for @sujetProgrammeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What students should revise'**
+  String get sujetProgrammeHint;
+
+  /// No description provided for @sujetProgrammeRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this item'**
+  String get sujetProgrammeRemove;
+
+  /// No description provided for @sujetProgrammeAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item'**
+  String get sujetProgrammeAdd;
+
+  /// No description provided for @sujetConsignesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get sujetConsignesLabel;
+
+  /// No description provided for @sujetConsignesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed materials, documents provided…'**
+  String get sujetConsignesHint;
+
+  /// No description provided for @formOptionalMark.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get formOptionalMark;
+
   /// No description provided for @evalRejectionPeriodClosed.
   ///
   /// In en, this message translates to:
@@ -22603,12 +22729,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Planning'**
   String get chapitreFormGroupPlanification;
-
-  /// No description provided for @chapitreFormOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'(optional)'**
-  String get chapitreFormOptional;
 
   /// No description provided for @chapitreFormAdd.
   ///

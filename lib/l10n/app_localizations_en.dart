@@ -1859,6 +1859,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String get evalCreateMaxReachedError => 'Entry cap reached for this date.';
 
   @override
+  String get evalCreateSujetHint =>
+      'Questions, their points and the expected answers are written afterwards in the Subject section.';
+
+  @override
+  String evalTitleRanked(String type, int rank) {
+    return '$type $rank';
+  }
+
+  @override
+  String evalTitleWithSuffix(String base, String suffix) {
+    return '$base — $suffix';
+  }
+
+  @override
+  String evalDerivedName(String type, String date) {
+    return '$type of $date';
+  }
+
+  @override
+  String dureeMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String dureeHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String dureeHoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String get dureeOther => 'Other';
+
+  @override
+  String get dureeUndefined => 'Not set';
+
+  @override
+  String get dureeOtherMinutes => 'Minutes';
+
+  @override
+  String dureeEquivalent(String duree) {
+    return 'that is $duree';
+  }
+
+  @override
+  String get sujetDureeLabel => 'Duration';
+
+  @override
+  String get sujetProgrammeLabel => 'To revise';
+
+  @override
+  String get sujetProgrammeFromChapters => 'Use the chapters';
+
+  @override
+  String sujetProgrammeLine(int number) {
+    return 'Item $number to revise';
+  }
+
+  @override
+  String get sujetProgrammeHint => 'What students should revise';
+
+  @override
+  String get sujetProgrammeRemove => 'Remove this item';
+
+  @override
+  String get sujetProgrammeAdd => 'Add an item';
+
+  @override
+  String get sujetConsignesLabel => 'Instructions';
+
+  @override
+  String get sujetConsignesHint => 'Allowed materials, documents provided…';
+
+  @override
+  String get formOptionalMark => '(optional)';
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejected: closed period';
 
   @override
@@ -14382,9 +14462,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chapitreFormGroupPlanification => 'Planning';
-
-  @override
-  String get chapitreFormOptional => '(optional)';
 
   @override
   String get chapitreFormAdd => 'Add';

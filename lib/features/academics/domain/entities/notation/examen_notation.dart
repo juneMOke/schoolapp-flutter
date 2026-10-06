@@ -5,7 +5,10 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/s
 /// élèves notés). [moyenneGenerale] est `null` tant qu'aucune note n'est comptée.
 class ExamenNotation extends Equatable {
   final String evaluationId;
-  final String nom;
+
+  /// Titre stocké (calculé à la création, ou nom renvoyé par le serveur) ;
+  /// `null` = aucun titre : l’écran dérive « Examen du 12 juin 2026 ».
+  final String? nom;
   final DateTime date;
   final int poids;
   final double maxPoints;
@@ -19,7 +22,7 @@ class ExamenNotation extends Equatable {
 
   const ExamenNotation({
     required this.evaluationId,
-    required this.nom,
+    this.nom,
     required this.date,
     required this.poids,
     required this.maxPoints,

@@ -1545,6 +1545,95 @@
   "evalCreateErrorToast": "La création de l'évaluation a échoué. Réessayez.",
   "evalCreateClosedPeriodError": "Période clôturée : impossible d'y ajouter une évaluation.",
   "evalCreateMaxReachedError": "Plafond de saisie atteint pour cette date.",
+  "evalCreateSujetHint": "Les questions, leurs points et les réponses attendues se rédigent ensuite dans la section Sujet.",
+  "evalTitleRanked": "{type} {rank}",
+  "@evalTitleRanked": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "evalTitleWithSuffix": "{base} — {suffix}",
+  "@evalTitleWithSuffix": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "evalDerivedName": "{type} du {date}",
+  "@evalDerivedName": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dureeMinutes": "{minutes} min",
+  "@dureeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dureeHours": "{hours} h",
+  "@dureeHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "dureeHoursMinutes": "{hours} h {minutes}",
+  "@dureeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "dureeOther": "Autre",
+  "dureeUndefined": "Non définie",
+  "dureeOtherMinutes": "Minutes",
+  "dureeEquivalent": "soit {duree}",
+  "@dureeEquivalent": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetDureeLabel": "Durée",
+  "sujetProgrammeLabel": "Au programme",
+  "sujetProgrammeFromChapters": "Reprendre les chapitres",
+  "sujetProgrammeLine": "Point {number} du programme",
+  "@sujetProgrammeLine": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetProgrammeHint": "Ce que l'élève doit réviser",
+  "sujetProgrammeRemove": "Retirer ce point",
+  "sujetProgrammeAdd": "Ajouter un point",
+  "sujetConsignesLabel": "Consignes",
+  "sujetConsignesHint": "Matériel autorisé, documents fournis…",
+  "formOptionalMark": "(optionnel)",
   "evalRejectionPeriodClosed": "Rejetée : période clôturée",
   "evalRejectionExamNotAllowed": "Rejetée : examen non autorisé",
   "evalRejectionMaxReached": "Rejetée : plafond atteint",
@@ -9022,7 +9111,6 @@
   "chapitreFormGroupIdentification": "Identification",
   "chapitreFormGroupPedagogie": "Pédagogie",
   "chapitreFormGroupPlanification": "Planification",
-  "chapitreFormOptional": "(optionnel)",
   "chapitreFormAdd": "Ajouter",
   "chapitreFormTitreLabel": "Titre du chapitre",
   "chapitreFormTitreHint": "Ex. Fractions et décimaux",

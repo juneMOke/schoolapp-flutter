@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/state
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 
 /// Page de saisie des notes d'une évaluation (spec §6–§10) : en-tête résumé +
 /// panneau de saisie (bascule Tableau / Focus, brouillon partagé, barre
@@ -200,7 +201,7 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
               EvalBackBar(
                 brancheNom: widget.args.brancheNom,
                 classroomName: widget.args.classroomName,
-                evalName: widget.args.eval.nom,
+                evalName: evalDisplayName(context, widget.args.eval),
                 onBack: widget.onBack,
               ),
               const SizedBox(height: AppSpacing.lg),

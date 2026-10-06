@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/labels/form_section_label.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -69,7 +70,7 @@ class _RessourcesEditorState extends State<RessourcesEditor> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ChapitreFormLabel(
+        FormSectionLabel(
           label: l10n.chapitreFormRessourcesLabel,
           optional: true,
           count: model.ressourcesCount,

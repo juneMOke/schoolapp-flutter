@@ -1599,6 +1599,95 @@
   "evalCreateErrorToast": "Creating the evaluation failed. Please try again.",
   "evalCreateClosedPeriodError": "Closed period: you can't add an evaluation to it.",
   "evalCreateMaxReachedError": "Entry cap reached for this date.",
+  "evalCreateSujetHint": "Questions, their points and the expected answers are written afterwards in the Subject section.",
+  "evalTitleRanked": "{type} {rank}",
+  "@evalTitleRanked": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "evalTitleWithSuffix": "{base} — {suffix}",
+  "@evalTitleWithSuffix": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "evalDerivedName": "{type} of {date}",
+  "@evalDerivedName": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dureeMinutes": "{minutes} min",
+  "@dureeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dureeHours": "{hours} h",
+  "@dureeHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "dureeHoursMinutes": "{hours} h {minutes}",
+  "@dureeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "dureeOther": "Other",
+  "dureeUndefined": "Not set",
+  "dureeOtherMinutes": "Minutes",
+  "dureeEquivalent": "that is {duree}",
+  "@dureeEquivalent": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetDureeLabel": "Duration",
+  "sujetProgrammeLabel": "To revise",
+  "sujetProgrammeFromChapters": "Use the chapters",
+  "sujetProgrammeLine": "Item {number} to revise",
+  "@sujetProgrammeLine": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetProgrammeHint": "What students should revise",
+  "sujetProgrammeRemove": "Remove this item",
+  "sujetProgrammeAdd": "Add an item",
+  "sujetConsignesLabel": "Instructions",
+  "sujetConsignesHint": "Allowed materials, documents provided…",
+  "formOptionalMark": "(optional)",
   "evalRejectionPeriodClosed": "Rejected: closed period",
   "evalRejectionExamNotAllowed": "Rejected: exam not allowed",
   "evalRejectionMaxReached": "Rejected: cap reached",
@@ -8714,7 +8803,6 @@
   "chapitreFormGroupIdentification": "Identification",
   "chapitreFormGroupPedagogie": "Teaching",
   "chapitreFormGroupPlanification": "Planning",
-  "chapitreFormOptional": "(optional)",
   "chapitreFormAdd": "Add",
   "chapitreFormTitreLabel": "Chapter title",
   "chapitreFormTitreHint": "E.g. Fractions and decimals",

@@ -2,13 +2,15 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_saisie_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 
-/// Résumé d'une évaluation. [nom] et [statutSaisie] sont dérivés côté backend
-/// (non persistés) : [nom] est un libellé « type + date », ex.
-/// « Interrogation du 2025-11-10 ».
+/// Résumé d'une évaluation. [statutSaisie] est dérivé (non persisté) ; [nom]
+/// est le titre stocké, ou le nom que le serveur renvoie.
 class EvaluationSummary extends Equatable {
   final String id;
   final TypeEvaluation type;
-  final String nom;
+
+  /// Titre stocké (calculé à la création, ou nom renvoyé par le serveur) ;
+  /// `null` = aucun titre : l'écran dérive « Interrogation du 12 juin 2026 ».
+  final String? nom;
 
   /// Titres des chapitres couverts par l'évaluation.
   final List<String> chapitres;
@@ -28,7 +30,7 @@ class EvaluationSummary extends Equatable {
   const EvaluationSummary({
     required this.id,
     required this.type,
-    required this.nom,
+    this.nom,
     required this.chapitres,
     required this.date,
     required this.maxPoints,

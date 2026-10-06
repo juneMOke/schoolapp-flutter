@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/cours
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_notation_atoms.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 
 /// En-tête résumé d'une évaluation (spec §6) : médaillon du type, eyebrow +
 /// badge d'avancement, titre, rangée de chips (date · maximum · poids · classe ·
@@ -48,7 +49,7 @@ class EvalSummaryCard extends StatelessWidget {
                 _EyebrowRow(eval: eval, color: typeVisual.color),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  eval.nom,
+                  evalDisplayName(context, eval),
                   style: AppTypography.titleMedium.copyWith(
                     color: AppColors.textPrimary,
                   ),

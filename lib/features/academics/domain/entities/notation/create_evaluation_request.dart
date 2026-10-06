@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 
 /// Corps de la requête de création d'une évaluation, **garantissant
 /// l'exclusivité du rattachement temporel par construction** via ses deux
@@ -35,6 +36,12 @@ class CreateEvaluationRequest extends Equatable {
   /// Chapitres couverts (relation n-n, éventuellement vide).
   final List<String> chapitreIds;
 
+  /// Titre calculé par la tablette (§4) ; `null` = repli sur le nom dérivé.
+  final String? titre;
+
+  /// Durée, programme et consignes saisis à la création (§4 bis).
+  final EvaluationCadre cadre;
+
   const CreateEvaluationRequest._({
     required this.type,
     required this.date,
@@ -43,6 +50,8 @@ class CreateEvaluationRequest extends Equatable {
     this.sousPeriodeId,
     this.periodeScolaireId,
     this.chapitreIds = const [],
+    this.titre,
+    this.cadre = EvaluationCadre.empty,
   });
 
   /// Évaluation de type EXAMEN, rattachée à une **période scolaire**.
@@ -55,6 +64,8 @@ class CreateEvaluationRequest extends Equatable {
     required String periodeScolaireId,
     int? poids,
     List<String> chapitreIds = const [],
+    String? titre,
+    EvaluationCadre cadre = EvaluationCadre.empty,
   }) {
     _validateMaxPoints(maxPoints);
     _validatePoids(poids);
@@ -66,6 +77,8 @@ class CreateEvaluationRequest extends Equatable {
       poids: poids,
       periodeScolaireId: periodeScolaireId,
       chapitreIds: chapitreIds,
+      titre: titre,
+      cadre: cadre,
     );
   }
 
@@ -81,6 +94,8 @@ class CreateEvaluationRequest extends Equatable {
     required String sousPeriodeId,
     int? poids,
     List<String> chapitreIds = const [],
+    String? titre,
+    EvaluationCadre cadre = EvaluationCadre.empty,
   }) {
     if (type != TypeEvaluation.interro && type != TypeEvaluation.devoir) {
       throw ArgumentError.value(
@@ -99,6 +114,8 @@ class CreateEvaluationRequest extends Equatable {
       poids: poids,
       sousPeriodeId: sousPeriodeId,
       chapitreIds: chapitreIds,
+      titre: titre,
+      cadre: cadre,
     );
   }
 
@@ -137,5 +154,7 @@ class CreateEvaluationRequest extends Equatable {
     sousPeriodeId,
     periodeScolaireId,
     chapitreIds,
+    titre,
+    cadre,
   ];
 }

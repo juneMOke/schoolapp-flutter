@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/labels/form_section_label.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -172,7 +173,7 @@ class _ChapitreFormDialogState extends State<ChapitreFormDialog> {
           numero: 3,
           title: l10n.chapitreFormGroupPlanification,
           children: [
-            ChapitreFormLabel(label: l10n.chapitreFormStatutLabel),
+            FormSectionLabel(label: l10n.chapitreFormStatutLabel),
             ChapitreStatutPicker(
               value: _model.statut,
               onChanged: (statut) => setState(() => _model.statut = statut),

@@ -288,7 +288,9 @@ class BucketVm extends Equatable {
 class EvalVm extends Equatable {
   final String id;
   final TypeEvaluation type;
-  final String nom;
+
+  /// Titre stocké ; `null` → `evalDisplayName` dérive le nom localisé.
+  final String? nom;
   final List<String> chapitres;
   final DateTime date;
   final double maxPoints;
@@ -310,7 +312,7 @@ class EvalVm extends Equatable {
   const EvalVm({
     required this.id,
     required this.type,
-    required this.nom,
+    this.nom,
     required this.chapitres,
     required this.date,
     required this.maxPoints,

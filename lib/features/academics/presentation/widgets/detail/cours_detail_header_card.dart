@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/commo
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 
 /// En-tête du cours (spec §1) : médaillon de classe, branche, classe, chips
 /// (effectif · évaluations · « à saisir ») et encart « Prochaine évaluation ».
@@ -232,7 +233,7 @@ class _NextEvalCard extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            eval.nom,
+            evalDisplayName(context, eval),
             style: AppTypography.bodyMedium.copyWith(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
