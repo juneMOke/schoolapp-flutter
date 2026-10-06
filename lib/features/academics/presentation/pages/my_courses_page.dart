@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/helpers/support_contact.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
@@ -37,11 +36,6 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
     if (context.read<CourseBloc>().state.status == CourseStatus.initial) {
       context.read<CourseBloc>().add(const MyCoursesRequested());
     }
-  }
-
-  Future<void> _contactAdmin() async {
-    await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
-    if (!mounted) return; // garde mounted après await (règle non-négociable #8)
   }
 
   @override
@@ -96,7 +90,7 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
             context.read<CourseBloc>().add(const MyCoursesRequested()),
         onReconnect: () =>
             context.read<AuthBloc>().add(const AuthLogoutRequested()),
-        onContactAdmin: _contactAdmin,
+        onContactAdmin: contactSupport,
       ),
       CourseStatus.initial => const SizedBox.shrink(),
     };

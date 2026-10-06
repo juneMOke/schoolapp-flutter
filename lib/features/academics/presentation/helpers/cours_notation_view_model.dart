@@ -288,7 +288,9 @@ class BucketVm extends Equatable {
 class EvalVm extends Equatable {
   final String id;
   final TypeEvaluation type;
-  final String nom;
+
+  /// Titre stocké ; `null` → `evalDisplayName` dérive le nom localisé.
+  final String? nom;
   final List<String> chapitres;
   final DateTime date;
   final double maxPoints;
@@ -310,7 +312,7 @@ class EvalVm extends Equatable {
   const EvalVm({
     required this.id,
     required this.type,
-    required this.nom,
+    this.nom,
     required this.chapitres,
     required this.date,
     required this.maxPoints,
@@ -350,6 +352,39 @@ class EvalVm extends Equatable {
     saisies: _saisies(e.pourcentageSaisie, effectif),
     total: effectif,
     rejectionCode: e.rejectionCode,
+  );
+
+  /// La même évaluation, avec l'avancement relu en local : [saisies] notes
+  /// posées sur [total]. Le badge se recalcule comme pour le détail du cours.
+  EvalVm withProgress({required int saisies, required int total}) {
+    final pct = total > 0 ? saisies / total * 100 : 0.0;
+    return copyWith(
+      state: _stateFrom(StatutSaisieEvaluation.unknown, pct),
+      pourcentageSaisie: pct,
+      saisies: saisies,
+      total: total,
+    );
+  }
+
+  EvalVm copyWith({
+    double? maxPoints,
+    EvalState? state,
+    double? pourcentageSaisie,
+    int? saisies,
+    int? total,
+  }) => EvalVm(
+    id: id,
+    type: type,
+    nom: nom,
+    chapitres: chapitres,
+    date: date,
+    maxPoints: maxPoints ?? this.maxPoints,
+    poids: poids,
+    state: state ?? this.state,
+    pourcentageSaisie: pourcentageSaisie ?? this.pourcentageSaisie,
+    saisies: saisies ?? this.saisies,
+    total: total ?? this.total,
+    rejectionCode: rejectionCode,
   );
 
   static int _saisies(double pourcentage, int effectif) =>

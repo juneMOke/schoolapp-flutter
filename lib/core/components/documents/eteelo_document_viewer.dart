@@ -42,6 +42,8 @@ Future<void> showEteeloDocumentViewer(
   bool canShare = true,
   bool canPrint = true,
   bool closeAfterPrint = false,
+  VoidCallback? onPrinted,
+  VoidCallback? onShared,
   Widget Function(BuildContext context, PrintableDocument document)?
   previewBuilder,
 }) {
@@ -56,6 +58,8 @@ Future<void> showEteeloDocumentViewer(
       canShare: canShare,
       canPrint: canPrint,
       closeAfterPrint: closeAfterPrint,
+      onPrinted: onPrinted,
+      onShared: onShared,
       previewBuilder: previewBuilder,
     ),
   );
@@ -89,6 +93,14 @@ class EteeloDocumentViewerView extends StatelessWidget {
   /// partager sans le rouvrir.
   final bool closeAfterPrint;
 
+  /// Appelés quand l'impression, ou le partage, a abouti — sans échec, et
+  /// sans annulation quand le canal la rapporte. ⚠️ Le partage rend la main
+  /// dès que la feuille du système s'est ouverte : un partage abandonné
+  /// ensuite compte comme partagé. Un appelant y journalise la diffusion
+  /// d'une pièce.
+  final VoidCallback? onPrinted;
+  final VoidCallback? onShared;
+
   /// Point d'injection de l'aperçu.
   ///
   /// [EteeloPdfPreview] rasterise par canal de plateforme et ne se monte pas en
@@ -105,6 +117,8 @@ class EteeloDocumentViewerView extends StatelessWidget {
     this.canShare = true,
     this.canPrint = true,
     this.closeAfterPrint = false,
+    this.onPrinted,
+    this.onShared,
     this.previewBuilder,
   });
 
@@ -117,7 +131,7 @@ class EteeloDocumentViewerView extends StatelessWidget {
     // entre-temps.
     final navigator = Navigator.of(context);
 
-    await _runPlatformAction(
+    final printed = await _runPlatformAction(
       context,
       print ??
           () => Printing.layoutPdf(
@@ -125,6 +139,7 @@ class EteeloDocumentViewerView extends StatelessWidget {
             name: document.fileName,
           ),
     );
+    if (printed) onPrinted?.call();
 
     // ⚠️ **La visionneuse s'efface, et c'est ce qui rend le message utilisable.**
     // Un SnackBar posé pendant qu'une modale est ouverte reste visible mais
@@ -134,12 +149,13 @@ class EteeloDocumentViewerView extends StatelessWidget {
     if (closeAfterPrint) navigator.maybePop();
   }
 
-  Future<void> _share(BuildContext context) {
-    return _runPlatformAction(
+  Future<void> _share(BuildContext context) async {
+    final shared = await _runPlatformAction(
       context,
       () =>
           Printing.sharePdf(bytes: document.bytes, filename: document.fileName),
     );
+    if (shared) onShared?.call();
   }
 
   /// Exécute une action de plateforme en rendant son échec visible.
@@ -149,9 +165,12 @@ class EteeloDocumentViewerView extends StatelessWidget {
   /// d'impression. Sans cette prise en charge, l'appui ne produit **rien du
   /// tout** : ni action, ni message, et l'exception part en erreur asynchrone
   /// non capturée.
-  Future<void> _runPlatformAction(
+  ///
+  /// Rend `true` si le geste a abouti : ni exception, ni annulation (`false`
+  /// rendu par le canal).
+  Future<bool> _runPlatformAction(
     BuildContext context,
-    Future<void> Function() action,
+    Future<Object?> Function() action,
   ) async {
     // Prélevé AVANT le premier `await` : l'action peut survivre à la modale —
     // un envoi thermique reste en vol une trentaine de secondes — et le
@@ -159,10 +178,11 @@ class EteeloDocumentViewerView extends StatelessWidget {
     final message = AppLocalizations.of(context)!.documentViewerActionFailed;
     final messenger = ScaffoldMessenger.maybeOf(context);
     try {
-      await action();
+      return await action() != false;
     } catch (_) {
       // Le document est intact et toujours à l'écran : seul le geste a échoué.
       messenger?.showSnackBar(SnackBar(content: Text(message)));
+      return false;
     }
   }
 

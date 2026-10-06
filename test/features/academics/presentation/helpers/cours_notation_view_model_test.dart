@@ -243,4 +243,26 @@ void main() {
     );
     expect(uni.decoupage, PeriodeDecoupage.trimestre);
   });
+
+  test('withProgress recalcule l’avancement relu en local', () {
+    final eval = EvalVm(
+      id: 'e',
+      type: TypeEvaluation.interro,
+      chapitres: const [],
+      date: DateTime.utc(2026, 6, 12),
+      maxPoints: 10,
+      poids: 1,
+      state: EvalState.upcoming,
+      pourcentageSaisie: 0,
+      saisies: 0,
+      total: 28,
+    );
+
+    final partial = eval.withProgress(saisies: 18, total: 28);
+    expect(partial.state, EvalState.partial);
+    expect(partial.saisies, 18);
+
+    expect(eval.withProgress(saisies: 28, total: 28).state, EvalState.complete);
+    expect(eval.withProgress(saisies: 0, total: 28).state, EvalState.upcoming);
+  });
 }

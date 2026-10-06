@@ -65,16 +65,8 @@ class FinanceStatsResultsErrorState extends StatelessWidget {
     );
   }
 
-  static EteeloErrorType _typeOf(Failure failure) => switch (failure) {
-    NetworkFailure() => EteeloErrorType.network,
-    InvalidCredentialsFailure() ||
-    AuthFailure() => EteeloErrorType.unauthorized,
-    UnauthorizedFailure() => EteeloErrorType.forbidden,
-    // Le stockage rejoint le serveur : dans les deux cas la donnée n'a pas pu
-    // être lue, et le geste est le même — réessayer, puis appeler à l'aide.
-    ServerFailure() || StorageFailure() => EteeloErrorType.server,
-    _ => EteeloErrorType.unknown,
-  };
+  static EteeloErrorType _typeOf(Failure failure) =>
+      EteeloErrorType.fromFailure(failure);
 
   String _title(AppLocalizations l10n, EteeloErrorType type) => switch (type) {
     EteeloErrorType.network => l10n.financeStatsErrorNetworkTitle,

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/helpers/support_contact.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -16,6 +14,7 @@ import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_n
 import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_notes_state.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/saisie_draft_controller.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/common/eval_sticky_bottom_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_back_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_summary_card.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/saisie_focus.dart';
@@ -27,8 +26,10 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/state
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 
-/// Page de saisie des notes d'une évaluation (spec §6–§10) : en-tête résumé +
+/// Page de saisie des notes d'une évaluation (spec §6–§10), sous son détail
+/// (retour vers lui) : en-tête résumé +
 /// panneau de saisie (bascule Tableau / Focus, brouillon partagé, barre
 /// d'enregistrement collante). Fournit son propre `SaisieNotesBloc` et charge la
 /// grille au montage ; l'en-tête provient de l'argument (pas de requête).
@@ -86,13 +87,6 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
         maxPoints: widget.args.eval.maxPoints,
       ),
     );
-  }
-
-  Future<void> _contactAdmin() async {
-    await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
-    if (!mounted) {
-      return; // garde mounted après await (règle non-négociable #8).
-    }
   }
 
   void _save() {
@@ -194,14 +188,17 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
             prev.rows != curr.rows ||
             prev.gridErrorType != curr.gridErrorType,
         builder: (context, state) {
+          final l10n = AppLocalizations.of(context)!;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EvalBackBar(
                 brancheNom: widget.args.brancheNom,
                 classroomName: widget.args.classroomName,
-                evalName: widget.args.eval.nom,
+                evalName: evalDisplayName(context, widget.args.eval),
                 onBack: widget.onBack,
+                backLabel: l10n.evalSaisieBack,
+                subPage: l10n.evalSaisiePageTitle,
               ),
               const SizedBox(height: AppSpacing.lg),
               EvalSummaryCard(args: widget.args),
@@ -229,7 +226,7 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
         onRetry: _retry,
         onReconnect: () =>
             context.read<AuthBloc>().add(const AuthLogoutRequested()),
-        onContactAdmin: _contactAdmin,
+        onContactAdmin: contactSupport,
       ),
       SaisieNotesGridStatus.loaded =>
         state.rows.isEmpty ? _empty(context) : _panel(state.rows),
@@ -309,33 +306,11 @@ class _StickySaveBar extends StatelessWidget {
             state.gridStatus == SaisieNotesGridStatus.loaded &&
             state.rows.isNotEmpty;
         if (!ready) return const SizedBox.shrink();
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.sm,
-              AppSpacing.md,
-              AppSpacing.md,
-            ),
-            // heightFactor: 1.0 → la barre s'ajuste à sa hauteur intrinsèque.
-            // Sans lui, l'Align remplirait la contrainte lâche du
-            // bottomNavigationBar (toute la hauteur d'écran) et masquerait le
-            // corps + pousserait les toasts flottants hors écran.
-            child: Align(
-              alignment: Alignment.topCenter,
-              heightFactor: 1.0,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppDimensions.detailContentMaxWidth,
-                ),
-                child: SaisieSaveBar(
-                  draft: draft,
-                  isSaving: isSaving,
-                  onSave: onSave,
-                ),
-              ),
-            ),
+        return EvalStickyBottomBar(
+          child: SaisieSaveBar(
+            draft: draft,
+            isSaving: isSaving,
+            onSave: onSave,
           ),
         );
       },

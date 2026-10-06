@@ -18,12 +18,14 @@ class CoursNotationBloc extends Bloc<CoursNotationEvent, CoursNotationState> {
     CoursNotationRequested event,
     Emitter<CoursNotationState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        status: CoursNotationStatus.loading,
-        errorType: CoursNotationErrorType.none,
-      ),
-    );
+    if (!event.silent || state.detail == null) {
+      emit(
+        state.copyWith(
+          status: CoursNotationStatus.loading,
+          errorType: CoursNotationErrorType.none,
+        ),
+      );
+    }
 
     final result = await _getCoursNotationDetailUseCase(event.coursId);
 

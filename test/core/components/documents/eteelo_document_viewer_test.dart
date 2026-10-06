@@ -31,6 +31,7 @@ final _document = PrintableDocument(
 Future<void> _pumpViewer(
   WidgetTester tester, {
   Future<void> Function()? onPrint,
+  VoidCallback? onPrinted,
   bool canShare = true,
   PrintableDocument? document,
   Size size = _tabletLandscape,
@@ -50,6 +51,7 @@ Future<void> _pumpViewer(
           title: 'Registre des inscrits',
           document: document ?? _document,
           onPrint: onPrint,
+          onPrinted: onPrinted,
           canShare: canShare,
           previewBuilder: (_, doc) => Text('aperçu de ${doc.fileName}'),
         ),
@@ -119,6 +121,30 @@ void main() {
 
       expect(called, 1);
       expect(tester.takeException(), isNull);
+    });
+
+    // Le journal des copies d'une évaluation s'appuie sur ce retour.
+    testWidgets('onPrinted suit une impression aboutie, pas un échec', (
+      tester,
+    ) async {
+      var printed = 0;
+      await _pumpViewer(
+        tester,
+        onPrint: () async {},
+        onPrinted: () => printed++,
+      );
+      await tester.tap(find.text('Imprimer'));
+      await tester.pump();
+      expect(printed, 1);
+
+      await _pumpViewer(
+        tester,
+        onPrint: () async => throw Exception('canal'),
+        onPrinted: () => printed++,
+      );
+      await tester.tap(find.text('Imprimer'));
+      await tester.pump();
+      expect(printed, 1);
     });
 
     // Sans cette prise en charge, l'appui ne produirait RIEN : ni papier, ni

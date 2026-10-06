@@ -7,16 +7,21 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/acade
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_detail_args.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/eval_duree.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_notation_atoms.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 
 /// En-tête résumé d'une évaluation (spec §6) : médaillon du type, eyebrow +
-/// badge d'avancement, titre, rangée de chips (date · maximum · poids · classe ·
-/// rattachement) et, le cas échéant, la ligne des chapitres.
+/// badge d'avancement, titre, rangée de chips (date · maximum · poids · durée ·
+/// classe · rattachement) et, le cas échéant, la ligne des chapitres.
 class EvalSummaryCard extends StatelessWidget {
   final EvalDetailArgs args;
 
-  const EvalSummaryCard({super.key, required this.args});
+  /// Durée du sujet ; la chip est tue quand elle est nulle.
+  final int? dureeMinutes;
+
+  const EvalSummaryCard({super.key, required this.args, this.dureeMinutes});
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +53,13 @@ class EvalSummaryCard extends StatelessWidget {
                 _EyebrowRow(eval: eval, color: typeVisual.color),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  eval.nom,
+                  evalDisplayName(context, eval),
                   style: AppTypography.titleMedium.copyWith(
                     color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                _ChipsRow(args: args),
+                _ChipsRow(args: args, dureeMinutes: dureeMinutes),
                 if (eval.chapitres.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.sm),
                   _ChaptersLine(chapitres: eval.chapitres),
@@ -156,8 +161,9 @@ class _AdvancementBadge extends StatelessWidget {
 
 class _ChipsRow extends StatelessWidget {
   final EvalDetailArgs args;
+  final int? dureeMinutes;
 
-  const _ChipsRow({required this.args});
+  const _ChipsRow({required this.args, this.dureeMinutes});
 
   @override
   Widget build(BuildContext context) {
@@ -173,6 +179,10 @@ class _ChipsRow extends StatelessWidget {
         _EvalChip(label: dateLabel),
         _EvalChip(label: l10n.evalChipMax(formatPoints(eval.maxPoints))),
         _EvalChip(label: l10n.evalChipPoids(eval.poids)),
+        if (dureeMinutes != null)
+          _EvalChip(
+            label: l10n.evalChipDuree(formatDuree(l10n, dureeMinutes!)),
+          ),
         _EvalChip(label: args.classroomName),
         _EvalChip(
           label: args.rattachementLabel,

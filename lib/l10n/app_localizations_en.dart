@@ -1859,6 +1859,598 @@ class AppLocalizationsEn extends AppLocalizations {
   String get evalCreateMaxReachedError => 'Entry cap reached for this date.';
 
   @override
+  String get evalCreateSujetHint =>
+      'Questions, their points and the expected answers are written afterwards in the Subject section.';
+
+  @override
+  String evalTitleRanked(String type, int rank) {
+    return '$type $rank';
+  }
+
+  @override
+  String evalTitleWithSuffix(String base, String suffix) {
+    return '$base — $suffix';
+  }
+
+  @override
+  String evalDerivedName(String type, String date) {
+    return '$type of $date';
+  }
+
+  @override
+  String dureeMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String dureeHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String dureeHoursMinutes(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String get dureeOther => 'Other';
+
+  @override
+  String get dureeUndefined => 'Not set';
+
+  @override
+  String get dureeOtherMinutes => 'Minutes';
+
+  @override
+  String dureeEquivalent(String duree) {
+    return 'that is $duree';
+  }
+
+  @override
+  String get sujetDureeLabel => 'Duration';
+
+  @override
+  String get sujetProgrammeLabel => 'To revise';
+
+  @override
+  String get sujetProgrammeFromChapters => 'Use the chapters';
+
+  @override
+  String sujetProgrammeLine(int number) {
+    return 'Item $number to revise';
+  }
+
+  @override
+  String get sujetProgrammeHint => 'What students should revise';
+
+  @override
+  String get sujetProgrammeRemove => 'Remove this item';
+
+  @override
+  String get sujetProgrammeAdd => 'Add an item';
+
+  @override
+  String get sujetConsignesLabel => 'Instructions';
+
+  @override
+  String get sujetConsignesHint => 'Allowed materials, documents provided…';
+
+  @override
+  String get formOptionalMark => '(optional)';
+
+  @override
+  String get sujetSectionTitle => 'Subject';
+
+  @override
+  String sujetSummaryQuestions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions',
+      one: '1 question',
+      zero: 'No questions',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sujetPointsOf(String total, String max) {
+    return '$total / $max pts';
+  }
+
+  @override
+  String get sujetShowAnswers => 'Show answers';
+
+  @override
+  String get sujetHideAnswers => 'Hide answers';
+
+  @override
+  String get sujetRevealAnswer => 'Show the answer';
+
+  @override
+  String get sujetHideAnswer => 'Hide the answer';
+
+  @override
+  String get sujetEdit => 'Edit';
+
+  @override
+  String get sujetEmptyTitle => 'Subject to write';
+
+  @override
+  String get sujetEmptyDescription =>
+      'Add the questions, their points and the expected answers.';
+
+  @override
+  String get sujetEmptyAction => 'Write the subject';
+
+  @override
+  String sujetQuestionBadge(int number) {
+    return 'Q$number';
+  }
+
+  @override
+  String sujetQuestionPoints(String points) {
+    return '$points pts';
+  }
+
+  @override
+  String get sujetPointsSuffix => 'pts';
+
+  @override
+  String sujetQuestionPointsLabel(int number) {
+    return 'Points for question $number';
+  }
+
+  @override
+  String sujetQuestionEnonceLabel(int number) {
+    return 'Question $number text';
+  }
+
+  @override
+  String get sujetQuestionEnonceHint => 'Question text';
+
+  @override
+  String get sujetAnswerHeader =>
+      'Expected answer · visible to the teacher only';
+
+  @override
+  String get sujetAnswerHint => 'Expected answer (optional)';
+
+  @override
+  String sujetAnswerRead(String answer) {
+    return 'Expected answer — $answer';
+  }
+
+  @override
+  String get sujetMoveUp => 'Move up';
+
+  @override
+  String get sujetMoveDown => 'Move down';
+
+  @override
+  String get sujetDuplicate => 'Duplicate';
+
+  @override
+  String get sujetDelete => 'Delete';
+
+  @override
+  String get sujetIncomplete => 'To complete';
+
+  @override
+  String sujetIncompleteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions to complete',
+      one: '1 question to complete',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sujetAddQuestion => 'Add a question';
+
+  @override
+  String get sujetAddFirstQuestion => 'Add the first question';
+
+  @override
+  String sujetBaremeValue(String total, String max) {
+    return 'Marking $total / $max pts';
+  }
+
+  @override
+  String get sujetBaremeEmpty => 'No points assigned';
+
+  @override
+  String sujetBaremeUnder(String gap) {
+    return '$gap pts left to assign';
+  }
+
+  @override
+  String get sujetBaremeComplete => 'Marking complete';
+
+  @override
+  String sujetBaremeOver(String gap) {
+    return 'Exceeds the maximum by $gap pts';
+  }
+
+  @override
+  String sujetBaremeAdjust(String max) {
+    return 'Set the maximum to $max';
+  }
+
+  @override
+  String get sujetBaremeLocked => 'Maximum locked: grades have been entered';
+
+  @override
+  String get sujetCancel => 'Cancel';
+
+  @override
+  String get sujetClose => 'Close';
+
+  @override
+  String get sujetSave => 'Save the subject';
+
+  @override
+  String get sujetSaving => 'Saving…';
+
+  @override
+  String sujetSavedToast(String summary) {
+    return 'Subject saved — $summary';
+  }
+
+  @override
+  String get sujetSaveError =>
+      'Saving the subject failed. Your changes are kept.';
+
+  @override
+  String get sujetRejectedMaxLocked =>
+      'The server refused the subject: the maximum can no longer change, grades have been entered.';
+
+  @override
+  String get sujetRejectedQuestionMismatch =>
+      'The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.';
+
+  @override
+  String get sujetRejectedGeneric =>
+      'The server refused the subject. Edit it, then save it.';
+
+  @override
+  String get sujetRejectedEmptyPublished =>
+      'A published subject keeps at least one question: add one, or withdraw the publication first.';
+
+  @override
+  String get sujetResendWithoutMax => 'Resend without changing the maximum';
+
+  @override
+  String get sujetPendingSend => 'Waiting to be sent';
+
+  @override
+  String get sujetResentToast => 'Subject resent without changing the maximum';
+
+  @override
+  String get sujetDiscardTitle => 'Discard the changes to the subject?';
+
+  @override
+  String get sujetDiscardMessage =>
+      'The subject is not saved. Leaving will lose your changes.';
+
+  @override
+  String get sujetDiscardConfirm => 'Discard';
+
+  @override
+  String get sujetDiscardCancel => 'Keep editing';
+
+  @override
+  String publicationConfirmItem(String item) {
+    return '✓ $item';
+  }
+
+  @override
+  String copieViewerScope(String branche, String classroom) {
+    return '$branche · $classroom';
+  }
+
+  @override
+  String get copieSectionTitle => 'Copy';
+
+  @override
+  String copiePrintedTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Printed $count times',
+      one: 'Printed once',
+      zero: 'Never printed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String copieSharedTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'shared $count times',
+      one: 'shared once',
+      zero: 'never shared',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get copieOptionsLabel => 'Show on the copy';
+
+  @override
+  String get copieOptionProgramme => 'To revise';
+
+  @override
+  String get copieOptionPoints => 'Points';
+
+  @override
+  String get copieOptionConsignes => 'Instructions';
+
+  @override
+  String get copieOptionDuree => 'Duration';
+
+  @override
+  String get copieOptionReponses => 'Answers';
+
+  @override
+  String get copieCorrigeWarning =>
+      'This is an answer key — do not hand it out before the test.';
+
+  @override
+  String get copieShow => 'Show the copy';
+
+  @override
+  String get copieShowCorrige => 'Show the answer key';
+
+  @override
+  String get copieNeedsQuestion => 'Add at least one question to the subject.';
+
+  @override
+  String copiePrintCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count prints',
+      one: '1 print',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String copieShareCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count shares',
+      one: '1 share',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String copieLastDiffusion(String label) {
+    return 'Last shared: $label';
+  }
+
+  @override
+  String get copieHistory => 'History';
+
+  @override
+  String get copieCorrigePill => 'answer key';
+
+  @override
+  String copieDiffusionPrinted(String date) {
+    return 'printed on $date';
+  }
+
+  @override
+  String copieDiffusionShared(String canal, String date) {
+    return 'shared ($canal) on $date';
+  }
+
+  @override
+  String get copieCanalSysteme => 'system share';
+
+  @override
+  String get copieCanalWhatsapp => 'WhatsApp';
+
+  @override
+  String get copieCanalEmail => 'email';
+
+  @override
+  String get copieCanalLien => 'link';
+
+  @override
+  String copieViewerTitle(String scope) {
+    return 'Student copy — $scope';
+  }
+
+  @override
+  String copieViewerTitleCorrige(String scope) {
+    return 'Answer key — $scope';
+  }
+
+  @override
+  String get copieViewerCorrigeWarning =>
+      'Answer key: do not hand out before the test';
+
+  @override
+  String get copieBuildError => 'The copy could not be prepared. Try again.';
+
+  @override
+  String get copiePrintedToast => 'Copy sent to the printer';
+
+  @override
+  String get copieSharedToast => 'Copy shared';
+
+  @override
+  String copieSheetDuree(String duree) {
+    return 'Duration: $duree';
+  }
+
+  @override
+  String copieSheetNotedOn(String max) {
+    return 'Marked out of $max pts';
+  }
+
+  @override
+  String get copieSheetName => 'Name:';
+
+  @override
+  String copieSheetGrade(String max) {
+    return 'Grade: ____ / $max';
+  }
+
+  @override
+  String copieSheetQuestionPoints(String points) {
+    return '($points pts)';
+  }
+
+  @override
+  String copieSheetCorrige(String answer) {
+    return 'Answer — $answer';
+  }
+
+  @override
+  String get publicationSectionTitle => 'Publishing to parents';
+
+  @override
+  String get publicationSubtitlePublished => 'sent by WhatsApp';
+
+  @override
+  String get publicationKindSujet => 'Homework subject';
+
+  @override
+  String get publicationKindCorrige => 'Answer key (questions + answers)';
+
+  @override
+  String get publicationKindNotes => 'Grades';
+
+  @override
+  String get publicationInClass => 'In class';
+
+  @override
+  String get publicationNotPublished => 'Not published';
+
+  @override
+  String publicationPublishedOn(String date) {
+    return 'Published on $date';
+  }
+
+  @override
+  String publicationUpdatedOn(String published, String date) {
+    return '$published · updated $date';
+  }
+
+  @override
+  String get publicationSujetInClass =>
+      'The subject of a quiz or an exam is done in class: it is not published.';
+
+  @override
+  String publicationSujetDue(String date) {
+    return 'Due on $date.';
+  }
+
+  @override
+  String publicationCorrigeWaiting(int saisies, int total) {
+    return 'Available once the assessment is fully graded — $saisies/$total grades entered.';
+  }
+
+  @override
+  String get publicationPendingWrites =>
+      'Changes are waiting to be sent: publishing will be possible once online.';
+
+  @override
+  String get publicationPublish => 'Publish';
+
+  @override
+  String get publicationWithdraw => 'Withdraw';
+
+  @override
+  String get publicationPublishNotes => 'Publish grades';
+
+  @override
+  String get publicationNotesPublished => 'Grades published';
+
+  @override
+  String publicationNotesPublishedOn(String date) {
+    return 'Grades published on $date';
+  }
+
+  @override
+  String get publicationNotesReady => 'Ready to publish';
+
+  @override
+  String get publicationNotesWaiting =>
+      'Publishing is possible once every grade is entered';
+
+  @override
+  String get publicationConfirmTitle => 'Publish to parents?';
+
+  @override
+  String publicationConfirmAudience(int count, String classroom) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Sent by WhatsApp to the parents of the $count students of $classroom.',
+      one: 'Sent by WhatsApp to the parents of the student of $classroom.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationConfirmSujetItems =>
+      'The questions, points, syllabus, instructions and duration';
+
+  @override
+  String get publicationConfirmSujetNote => 'Never the expected answers';
+
+  @override
+  String get publicationConfirmCorrigeItems =>
+      'The questions and their expected answers';
+
+  @override
+  String get publicationConfirmNotesItems =>
+      'Each parent only receives their own child\'s grade';
+
+  @override
+  String publicationSentToast(String kind) {
+    return 'Published to parents — $kind';
+  }
+
+  @override
+  String publicationWithdrawnToast(String kind) {
+    return 'Publication withdrawn — $kind';
+  }
+
+  @override
+  String get publicationRefusedIncomplete =>
+      'The assessment is not fully graded.';
+
+  @override
+  String publicationRefusedIncompleteCount(int saisies, int effectif) {
+    return 'The assessment is not fully graded: $saisies/$effectif grades.';
+  }
+
+  @override
+  String get publicationRefusedEmpty => 'The subject has no questions.';
+
+  @override
+  String get publicationRefusedNotOwned =>
+      'You cannot publish for this course.';
+
+  @override
+  String get publicationOffline => 'Offline: publishing needs a connection.';
+
+  @override
+  String get publicationFailed => 'Publishing failed. Try again.';
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejected: closed period';
 
   @override
@@ -1888,6 +2480,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get evalDetailBack => 'Back to course';
+
+  @override
+  String get evalSaisieBack => 'Back to the assessment';
+
+  @override
+  String get evalSaisiePageTitle => 'Grade entry';
+
+  @override
+  String evalChipDuree(String duree) {
+    return 'Duration: $duree';
+  }
+
+  @override
+  String evalDetailNotesProgress(int saisies, int total) {
+    return '$saisies / $total grades entered';
+  }
+
+  @override
+  String get evalDetailSaisirNotes => 'Enter grades';
+
+  @override
+  String get evalDetailSaisieNotes => 'Grade entry';
 
   @override
   String get evalBadgeComplete => 'Closed';
@@ -14382,9 +14996,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chapitreFormGroupPlanification => 'Planning';
-
-  @override
-  String get chapitreFormOptional => '(optional)';
 
   @override
   String get chapitreFormAdd => 'Add';

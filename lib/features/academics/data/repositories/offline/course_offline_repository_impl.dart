@@ -383,6 +383,8 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
       sousPeriodeId: request.sousPeriodeId,
       periodeScolaireId: request.periodeScolaireId,
       chapitreIds: request.chapitreIds,
+      titre: request.titre,
+      cadre: request.cadre,
     );
     return result.fold(
       Left.new,
@@ -425,7 +427,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     return EvaluationSummary(
       id: row.id,
       type: TypeEvaluationX.fromApiValue(row.type),
-      nom: _derivedNom(row),
+      nom: row.titre,
       chapitres: _chapitreTitresFor(row, chapitreTitles),
       date: DateTime.fromMillisecondsSinceEpoch(row.evalDate, isUtc: true),
       maxPoints: row.maxPoints,
@@ -449,7 +451,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     );
     return ExamenNotation(
       evaluationId: row.id,
-      nom: _derivedNom(row),
+      nom: row.titre,
       date: DateTime.fromMillisecondsSinceEpoch(row.evalDate, isUtc: true),
       poids: row.poids,
       maxPoints: row.maxPoints,
@@ -530,15 +532,6 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     final moyenne = notes.reduce((a, b) => a + b) / notes.length;
     final above50 = notes.where((n) => n >= 50).length;
     return _ClassAverage(moyenne, notes.length, above50);
-  }
-
-  /// Nom dérivé (la table locale `evaluation` ne stocke aucun libellé — le nom
-  /// est TOUJOURS dérivé, avant comme après pull) : type + date `jj/MM`.
-  String _derivedNom(EvaluationRow row) {
-    final d = DateTime.fromMillisecondsSinceEpoch(row.evalDate, isUtc: true);
-    final jj = d.day.toString().padLeft(2, '0');
-    final mm = d.month.toString().padLeft(2, '0');
-    return '${row.type} $jj/$mm';
   }
 }
 

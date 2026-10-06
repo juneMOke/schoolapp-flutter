@@ -128,6 +128,14 @@ const TableSchema refCoursTable = TableSchema(
 /// création. `eval_date` en epoch ms ; `max_points` REAL ; `poids` > 0. Un des
 /// deux rattachements temporels est posé selon le `type` : `sous_periode_id`
 /// (INTERRO/DEVOIR) ou `periode_scolaire_id` (EXAMEN).
+///
+/// v62 — `titre` (calculé à la création, nul pour l'historique) ; le **sujet**
+/// (`duree_minutes`, `programme_json`, `consignes`, `sujet_questions_json`) est
+/// un sous-agrégat LWW à statut propre (`sujet_updated_at`,
+/// `sujet_sync_status`, `sujet_rejection_code`, `sujet_max_points` = maximum
+/// ajusté en attente d'accusé) : il change après la création
+/// sans rouvrir l'insert seul. `publication_json` = état des publications
+/// (sujet, corrigé, notes), écrit par la réponse en ligne puis le delta.
 const TableSchema evaluationTable = TableSchema(
   name: 'evaluation',
   createTableSql: '''
@@ -145,12 +153,47 @@ const TableSchema evaluationTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       synced_at INTEGER,
       chapitre_ids_json TEXT NOT NULL DEFAULT '[]',
-      rejection_code TEXT
+      rejection_code TEXT,
+      titre TEXT,
+      duree_minutes INTEGER,
+      programme_json TEXT NOT NULL DEFAULT '[]',
+      consignes TEXT,
+      sujet_questions_json TEXT NOT NULL DEFAULT '[]',
+      sujet_updated_at INTEGER,
+      sujet_sync_status TEXT,
+      sujet_rejection_code TEXT,
+      sujet_max_points REAL,
+      publication_json TEXT
     )
   ''',
   createIndexSql: [
     'CREATE INDEX idx_evaluation_cours ON evaluation(cours_id)',
     'CREATE INDEX idx_evaluation_sync ON evaluation(sync_status)',
+  ],
+);
+
+/// `evaluation_copie_log` — journal des impressions et partages d'une copie
+/// (v62). **Insert seul**, uuid client, rejeu ignoré par le serveur. `kind` ∈
+/// PRINT | SHARE ; `canal` nul pour PRINT, `SYSTEME` pour un partage par la
+/// feuille du système. `occurred_at` en epoch ms. Les lignes des autres
+/// tablettes descendent avec le delta d'évaluation, déjà `SYNCED`.
+const TableSchema evaluationCopieLogTable = TableSchema(
+  name: 'evaluation_copie_log',
+  createTableSql: '''
+    CREATE TABLE evaluation_copie_log (
+      id TEXT PRIMARY KEY,
+      evaluation_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      canal TEXT,
+      corrige INTEGER NOT NULL DEFAULT 0,
+      occurred_at INTEGER NOT NULL,
+      author_user_id TEXT,
+      sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC'
+    )
+  ''',
+  createIndexSql: [
+    'CREATE INDEX idx_evaluation_copie_log '
+        'ON evaluation_copie_log(evaluation_id, occurred_at)',
   ],
 );
 
@@ -316,6 +359,7 @@ const List<TableSchema> academicsOfflineTables = [
   refRecurringSessionsTable,
   refCoursTable,
   evaluationTable,
+  evaluationCopieLogTable,
   noteEvaluationTable,
   refBrancheTable,
   refLigneBaremeTable,

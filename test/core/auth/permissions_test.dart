@@ -63,6 +63,8 @@ void main() {
     Perm.academicsCourseRead: 'academics.course.read',
     Perm.academicsCourseWrite: 'academics.course.write',
     Perm.academicsProgrammeWrite: 'academics.programme.write',
+    Perm.academicsEvaluationPublish: 'academics.evaluation.publish',
+    Perm.academicsPublicationManage: 'academics.publication.manage',
     Perm.academicsCourseDelete: 'academics.course.delete',
     Perm.academicsGradeRead: 'academics.grade.read',
     Perm.academicsGradeWrite: 'academics.grade.write',
@@ -91,7 +93,7 @@ void main() {
   };
 
   test(
-    'le catalogue compte 74 permissions (v1.8 du catalogue serveur + RH + programme)',
+    'le catalogue compte 76 permissions (v1.8 du catalogue serveur + RH + programme + publication)',
     () {
       // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
       // le prendre. Un ajout, pas un renommage — aucune ligne de
@@ -150,9 +152,11 @@ void main() {
       // serveur ne le sème (lot back P0).
       //
       // 73 → 74 : `academics.programme.write`, écrire le programme de cours.
+      // 74 → 76 : `academics.evaluation.publish` (son cours) et
+      // `academics.publication.manage` (toute l'école), publier aux parents.
       // 72 → 73 : `student.photo.write`, prendre ou retirer la photo d'un élève
       // (SECRETARY, DIRECTOR, SUPER_ADMIN — migration back V161).
-      expect(Perm.values, hasLength(74));
+      expect(Perm.values, hasLength(76));
     },
   );
 

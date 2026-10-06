@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/acade
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_notation_atoms.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 
 /// Ligne d'évaluation (spec §5) : carré de type · identité · avancement · badge
 /// de statut. Cliquable ([onTap] non nul → chevron) pour ouvrir la saisie des
@@ -37,7 +38,7 @@ class CoursEvalRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          eval.nom,
+          evalDisplayName(context, eval),
           style: AppTypography.bodyMedium.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -130,7 +131,7 @@ class CoursEvalRow extends StatelessWidget {
     if (onTap == null) return content;
     return Semantics(
       button: true,
-      label: eval.nom,
+      label: evalDisplayName(context, eval),
       child: Material(
         color: Colors.transparent,
         child: InkWell(onTap: onTap, child: content),

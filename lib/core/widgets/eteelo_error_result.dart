@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -7,7 +8,24 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Carte d'erreur reutilisable avec anatomie unique: medaillon, titre,
 /// message et action de recuperation.
-enum EteeloErrorType { network, unauthorized, forbidden, server, unknown }
+enum EteeloErrorType {
+  network,
+  unauthorized,
+  forbidden,
+  server,
+  unknown;
+
+  /// Famille d'affichage d'un [Failure] : 401 → session expirée, 403 →
+  /// refus (jamais « Réessayer »), stockage local → serveur.
+  static EteeloErrorType fromFailure(Failure? failure) => switch (failure) {
+    NetworkFailure() => EteeloErrorType.network,
+    InvalidCredentialsFailure() ||
+    AuthFailure() => EteeloErrorType.unauthorized,
+    UnauthorizedFailure() => EteeloErrorType.forbidden,
+    ServerFailure() || StorageFailure() => EteeloErrorType.server,
+    _ => EteeloErrorType.unknown,
+  };
+}
 
 class EteeloErrorResult extends StatelessWidget {
   final EteeloErrorType type;

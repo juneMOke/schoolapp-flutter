@@ -169,6 +169,11 @@ enum Perm {
   // Le programme de cours : seul le professeur affecté au cours écrit ; la
   // direction le lit sous `academicsCourseRead`.
   academicsProgrammeWrite('academics.programme.write'),
+  // Publier aux parents le sujet, le corrigé ou les notes d'une évaluation
+  // (WhatsApp) : l'enseignant pour son cours ; `academics.publication.manage`
+  // pour la direction, sur tout cours de l'école (sans garde de propriété).
+  academicsEvaluationPublish('academics.evaluation.publish'),
+  academicsPublicationManage('academics.publication.manage'),
 
   // ── Éditique ──────────────────────────────────────────────────────────────
   // `editiqueCancel` est séparée de `editiqueWrite` : une pièce émise ne se

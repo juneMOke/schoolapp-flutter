@@ -1,0 +1,104 @@
+import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_state.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/publication/notes_publish_action.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// Barre d'actions collante du détail (spec S7) : « x / n notes saisies » et
+/// l'état de la publication des notes à gauche ; « Saisir les notes » puis
+/// « Publier les notes » à droite.
+class EvalDetailActionBar extends StatelessWidget {
+  final String evaluationId;
+  final String classroomName;
+  final NotesProgress progress;
+  final VoidCallback onSaisir;
+
+  const EvalDetailActionBar({
+    super.key,
+    required this.evaluationId,
+    required this.classroomName,
+    required this.progress,
+    required this.onSaisir,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final legend = notesPublicationLegend(
+      context,
+      progress,
+      context.select<PublicationBloc, PublicationEtat?>(
+        (bloc) => bloc.state.context.publications.notes,
+      ),
+    );
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.brCard,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Wrap(
+        spacing: AppSpacing.md,
+        runSpacing: AppSpacing.md,
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.evalDetailNotesProgress(progress.saisies, progress.total),
+                style: AppTypography.titleSmall.copyWith(
+                  color: AppColors.textPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              Text(
+                legend,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              // La grille est nominative : elle exige le droit de lire les
+              // notes (ADR-015 §6-B), comme la ligne du détail du cours.
+              PermissionGate(
+                requires: const [Perm.academicsGradeRead],
+                child: EteeloButton.secondary(
+                  label: progress.saisies == 0
+                      ? l10n.evalDetailSaisirNotes
+                      : l10n.evalDetailSaisieNotes,
+                  icon: Icons.edit_outlined,
+                  fullWidth: false,
+                  onPressed: onSaisir,
+                ),
+              ),
+              NotesPublishAction(
+                evaluationId: evaluationId,
+                classroomName: classroomName,
+                progress: progress,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

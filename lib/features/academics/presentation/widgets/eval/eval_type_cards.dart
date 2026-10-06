@@ -8,14 +8,15 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/acade
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Défaut de barème + poids d'un type d'évaluation (spec §2).
-({double max, int poids}) evalTypeDefaults(TypeEvaluation type) =>
-    switch (type) {
-      TypeEvaluation.interro => (max: 10, poids: 1),
-      TypeEvaluation.devoir => (max: 20, poids: 2),
-      TypeEvaluation.examen => (max: 40, poids: 1),
-      TypeEvaluation.unknown => (max: 10, poids: 1),
-    };
+/// Défauts d'un type d'évaluation : barème et poids (spec §2), durée (§4 bis).
+({double max, int poids, int dureeMinutes}) evalTypeDefaults(
+  TypeEvaluation type,
+) => switch (type) {
+  TypeEvaluation.interro => (max: 10, poids: 1, dureeMinutes: 30),
+  TypeEvaluation.devoir => (max: 20, poids: 2, dureeMinutes: 60),
+  TypeEvaluation.examen => (max: 40, poids: 1, dureeMinutes: 120),
+  TypeEvaluation.unknown => (max: 10, poids: 1, dureeMinutes: 30),
+};
 
 /// Trois cartes radio de type (spec §2). Choisir un type applique ses défauts
 /// (géré par l'appelant via [onChanged]). [disabledTypes] grise une carte sans

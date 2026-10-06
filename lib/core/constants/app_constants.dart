@@ -799,7 +799,11 @@ class AppConstants {
   // v61 (2026-10-06) : le programme de cours (`chapitre`, `chapitre_note`,
   // `chapitre_ressource`) et la recopie des chapitres de `ref_chapitre` en
   // ébauches. Création pure. Palier d'école.
-  static const int offlineDbSchemaVersion = 61;
+  // v62 (2026-10-06) : le sujet d'une évaluation — `evaluation.titre`, le
+  // sujet en sous-agrégat LWW (`duree_minutes`, `programme_json`, `consignes`,
+  // `sujet_*`), `publication_json`, et la table `evaluation_copie_log`.
+  // Additif. Palier d'école.
+  static const int offlineDbSchemaVersion = 62;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1246,6 +1250,20 @@ class AppConstants {
   ///    l'état serveur. Toujours 200.
   static const String syncAcademicsNotesEndpoint =
       '/api/v1/sync/academics/notes';
+
+  /// Le sujet d'une évaluation, remplacé d'un bloc (cadre + questions +
+  /// maximum ?) — dernier enregistrement gagnant sur `clientUpdatedAt`.
+  static const String syncAcademicsEvaluationSujetEndpoint =
+      '/api/v1/sync/academics/evaluations/{evaluationId}/sujet';
+
+  /// Une impression ou un partage de la copie (journal, insert seul).
+  static const String syncAcademicsEvaluationCopieLogEndpoint =
+      '/api/v1/sync/academics/evaluations/{evaluationId}/copie-log';
+
+  /// Publier (`POST`) ou retirer (`DELETE`) le sujet, le corrigé ou les
+  /// notes — **en ligne**, jamais rejoué : publier envoie un WhatsApp.
+  static const String syncAcademicsEvaluationPublicationEndpoint =
+      '/api/v1/sync/academics/evaluations/{evaluationId}/publications/{kind}';
 
   // ── Programme de cours (chapitres) — contrat proposé, P0 à confirmer ──
   //

@@ -219,6 +219,13 @@ const ModuleAccess kExpenseReopenAccess = ModuleAccess([Perm.expenseReopen]);
 /// jour où le back sème ces droits (lots C0→C3)**, en même temps que la copie
 /// du template dans `role_journeys_test.dart`, et pas avant.
 
+/// Publier le sujet, le corrigé ou les notes d'une évaluation aux parents :
+/// l'enseignant du cours, ou la direction pour toute l'école.
+const ModuleAccess kEvaluationPublishAccess = ModuleAccess([
+  Perm.academicsEvaluationPublish,
+  Perm.academicsPublicationManage,
+]);
+
 /// Toutes les actions d'écriture gardées, avec le libellé qui sert aux
 /// messages d'échec. Énumérées pour qu'un test puisse vérifier qu'aucune n'est
 /// hors de portée de tous les rôles.
@@ -233,6 +240,7 @@ const Map<String, ModuleAccess> kGuardedWriteActions = {
   'créer une évaluation / saisir des notes': ModuleAccess([
     Perm.academicsGradeWrite,
   ]),
+  'publier une évaluation aux parents': kEvaluationPublishAccess,
   'répartir ou affecter des élèves': ModuleAccess([Perm.classroomWrite]),
   'enregistrer une dépense': kExpenseWriteAccess,
   'retirer une dépense': kExpenseWithdrawAccess,

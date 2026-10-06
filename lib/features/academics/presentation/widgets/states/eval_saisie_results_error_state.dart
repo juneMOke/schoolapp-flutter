@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/saisie_notes_state.dart';
@@ -16,26 +17,40 @@ class EvalSaisieResultsErrorState extends StatelessWidget {
   final VoidCallback? onReconnect;
   final VoidCallback? onContactAdmin;
 
+  /// Erreur d'un chargement d'évaluation qui n'a pas de type propre (page de
+  /// détail) : la famille d'affichage se lit sur le [Failure].
+  final Failure? failure;
+
   const EvalSaisieResultsErrorState({
     super.key,
     required this.type,
     this.onRetry,
     this.onReconnect,
     this.onContactAdmin,
-  });
+  }) : failure = null;
 
-  EteeloErrorType get _viewType => switch (type) {
-    SaisieNotesErrorType.network => EteeloErrorType.network,
-    SaisieNotesErrorType.invalidCredentials ||
-    SaisieNotesErrorType.auth => EteeloErrorType.unauthorized,
-    SaisieNotesErrorType.forbidden => EteeloErrorType.forbidden,
-    SaisieNotesErrorType.server ||
-    SaisieNotesErrorType.storage => EteeloErrorType.server,
-    SaisieNotesErrorType.notFound ||
-    SaisieNotesErrorType.validation ||
-    SaisieNotesErrorType.none ||
-    SaisieNotesErrorType.unknown => EteeloErrorType.unknown,
-  };
+  const EvalSaisieResultsErrorState.failure({
+    super.key,
+    required Failure this.failure,
+    this.onRetry,
+    this.onReconnect,
+    this.onContactAdmin,
+  }) : type = SaisieNotesErrorType.unknown;
+
+  EteeloErrorType get _viewType => failure != null
+      ? EteeloErrorType.fromFailure(failure)
+      : switch (type) {
+          SaisieNotesErrorType.network => EteeloErrorType.network,
+          SaisieNotesErrorType.invalidCredentials ||
+          SaisieNotesErrorType.auth => EteeloErrorType.unauthorized,
+          SaisieNotesErrorType.forbidden => EteeloErrorType.forbidden,
+          SaisieNotesErrorType.server ||
+          SaisieNotesErrorType.storage => EteeloErrorType.server,
+          SaisieNotesErrorType.notFound ||
+          SaisieNotesErrorType.validation ||
+          SaisieNotesErrorType.none ||
+          SaisieNotesErrorType.unknown => EteeloErrorType.unknown,
+        };
 
   @override
   Widget build(BuildContext context) {

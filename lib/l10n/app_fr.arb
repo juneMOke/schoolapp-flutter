@@ -1545,6 +1545,509 @@
   "evalCreateErrorToast": "La création de l'évaluation a échoué. Réessayez.",
   "evalCreateClosedPeriodError": "Période clôturée : impossible d'y ajouter une évaluation.",
   "evalCreateMaxReachedError": "Plafond de saisie atteint pour cette date.",
+  "evalCreateSujetHint": "Les questions, leurs points et les réponses attendues se rédigent ensuite dans la section Sujet.",
+  "evalTitleRanked": "{type} {rank}",
+  "@evalTitleRanked": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "evalTitleWithSuffix": "{base} — {suffix}",
+  "@evalTitleWithSuffix": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "evalDerivedName": "{type} du {date}",
+  "@evalDerivedName": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dureeMinutes": "{minutes} min",
+  "@dureeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "dureeHours": "{hours} h",
+  "@dureeHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "dureeHoursMinutes": "{hours} h {minutes}",
+  "@dureeHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "dureeOther": "Autre",
+  "dureeUndefined": "Non définie",
+  "dureeOtherMinutes": "Minutes",
+  "dureeEquivalent": "soit {duree}",
+  "@dureeEquivalent": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetDureeLabel": "Durée",
+  "sujetProgrammeLabel": "Au programme",
+  "sujetProgrammeFromChapters": "Reprendre les chapitres",
+  "sujetProgrammeLine": "Point {number} du programme",
+  "@sujetProgrammeLine": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetProgrammeHint": "Ce que l'élève doit réviser",
+  "sujetProgrammeRemove": "Retirer ce point",
+  "sujetProgrammeAdd": "Ajouter un point",
+  "sujetConsignesLabel": "Consignes",
+  "sujetConsignesHint": "Matériel autorisé, documents fournis…",
+  "formOptionalMark": "(optionnel)",
+  "sujetSectionTitle": "Sujet",
+  "sujetSummaryQuestions": "{count, plural, =0{Aucune question} =1{1 question} other{{count} questions}}",
+  "@sujetSummaryQuestions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetPointsOf": "{total} / {max} pts",
+  "@sujetPointsOf": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetShowAnswers": "Afficher les réponses",
+  "sujetHideAnswers": "Masquer les réponses",
+  "sujetRevealAnswer": "Afficher la réponse",
+  "sujetHideAnswer": "Masquer la réponse",
+  "sujetEdit": "Modifier",
+  "sujetEmptyTitle": "Sujet à rédiger",
+  "sujetEmptyDescription": "Ajoutez les questions, leurs points et les réponses attendues.",
+  "sujetEmptyAction": "Rédiger le sujet",
+  "sujetQuestionBadge": "Q{number}",
+  "@sujetQuestionBadge": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionPoints": "{points} pts",
+  "@sujetQuestionPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetPointsSuffix": "pts",
+  "sujetQuestionPointsLabel": "Points de la question {number}",
+  "@sujetQuestionPointsLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionEnonceLabel": "Énoncé de la question {number}",
+  "@sujetQuestionEnonceLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetQuestionEnonceHint": "Énoncé de la question",
+  "sujetAnswerHeader": "Réponse attendue · visible du professeur uniquement",
+  "sujetAnswerHint": "Réponse attendue (optionnel)",
+  "sujetAnswerRead": "Réponse attendue — {answer}",
+  "@sujetAnswerRead": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetMoveUp": "Monter",
+  "sujetMoveDown": "Descendre",
+  "sujetDuplicate": "Dupliquer",
+  "sujetDelete": "Supprimer",
+  "sujetIncomplete": "À compléter",
+  "sujetIncompleteCount": "{count, plural, =1{1 question à compléter} other{{count} questions à compléter}}",
+  "@sujetIncompleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sujetAddQuestion": "Ajouter une question",
+  "sujetAddFirstQuestion": "Ajouter la première question",
+  "sujetBaremeValue": "Barème {total} / {max} pts",
+  "@sujetBaremeValue": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeEmpty": "Aucun point attribué",
+  "sujetBaremeUnder": "Reste {gap} pts à répartir",
+  "@sujetBaremeUnder": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeComplete": "Barème complet",
+  "sujetBaremeOver": "Dépasse le maximum de {gap} pts",
+  "@sujetBaremeOver": {
+    "placeholders": {
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeAdjust": "Ajuster le maximum à {max}",
+  "@sujetBaremeAdjust": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetBaremeLocked": "Maximum figé : des notes sont saisies",
+  "sujetCancel": "Annuler",
+  "sujetClose": "Fermer",
+  "sujetSave": "Enregistrer le sujet",
+  "sujetSaving": "Enregistrement…",
+  "sujetSavedToast": "Sujet enregistré — {summary}",
+  "@sujetSavedToast": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "sujetSaveError": "L'enregistrement du sujet a échoué. Vos modifications sont conservées.",
+  "sujetRejectedMaxLocked": "Le serveur a refusé le sujet : le maximum ne change plus, des notes sont saisies.",
+  "sujetRejectedQuestionMismatch": "Le serveur a refusé le sujet : une question appartient déjà à une autre évaluation. Modifiez le sujet puis enregistrez-le.",
+  "sujetRejectedGeneric": "Le serveur a refusé le sujet. Modifiez-le puis enregistrez-le.",
+  "sujetRejectedEmptyPublished": "Un sujet publié garde au moins une question : ajoutez-en une, ou retirez d'abord la publication.",
+  "sujetResendWithoutMax": "Renvoyer sans changer le maximum",
+  "sujetPendingSend": "En attente d'envoi",
+  "sujetResentToast": "Sujet renvoyé sans changer le maximum",
+  "sujetDiscardTitle": "Abandonner les modifications du sujet ?",
+  "sujetDiscardMessage": "Le sujet n'est pas enregistré. En quittant, vos modifications seront perdues.",
+  "sujetDiscardConfirm": "Abandonner",
+  "sujetDiscardCancel": "Continuer la rédaction",
+  "publicationConfirmItem": "✓ {item}",
+  "@publicationConfirmItem": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerScope": "{branche} · {classroom}",
+  "@copieViewerScope": {
+    "placeholders": {
+      "branche": {
+        "type": "String"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSectionTitle": "Copie",
+  "copiePrintedTimes": "{count, plural, =0{Jamais imprimée} =1{Imprimée 1 fois} other{Imprimée {count} fois}}",
+  "@copiePrintedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieSharedTimes": "{count, plural, =0{jamais partagée} =1{partagée 1 fois} other{partagée {count} fois}}",
+  "@copieSharedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieOptionsLabel": "Afficher sur la copie",
+  "copieOptionProgramme": "Programme",
+  "copieOptionPoints": "Points",
+  "copieOptionConsignes": "Consignes",
+  "copieOptionDuree": "Durée",
+  "copieOptionReponses": "Réponses",
+  "copieCorrigeWarning": "C'est un corrigé — à ne pas distribuer avant l'épreuve.",
+  "copieShow": "Afficher la copie",
+  "copieShowCorrige": "Afficher le corrigé",
+  "copieNeedsQuestion": "Ajoutez au moins une question au sujet.",
+  "copiePrintCount": "{count, plural, =0{0 impression} =1{1 impression} other{{count} impressions}}",
+  "@copiePrintCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieShareCount": "{count, plural, =0{0 partage} =1{1 partage} other{{count} partages}}",
+  "@copieShareCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieLastDiffusion": "Dernière diffusion : {label}",
+  "@copieLastDiffusion": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "copieHistory": "Historique",
+  "copieCorrigePill": "corrigé",
+  "copieDiffusionPrinted": "imprimée le {date}",
+  "@copieDiffusionPrinted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "copieDiffusionShared": "partagée ({canal}) le {date}",
+  "@copieDiffusionShared": {
+    "placeholders": {
+      "canal": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "copieCanalSysteme": "partage du système",
+  "copieCanalWhatsapp": "WhatsApp",
+  "copieCanalEmail": "e-mail",
+  "copieCanalLien": "lien",
+  "copieViewerTitle": "Copie élève — {scope}",
+  "@copieViewerTitle": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerTitleCorrige": "Corrigé — {scope}",
+  "@copieViewerTitleCorrige": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerCorrigeWarning": "Corrigé : à ne pas distribuer avant l'épreuve",
+  "copieBuildError": "La copie n'a pas pu être préparée. Réessayez.",
+  "copiePrintedToast": "Copie envoyée à l'impression",
+  "copieSharedToast": "Copie partagée",
+  "copieSheetDuree": "Durée : {duree}",
+  "@copieSheetDuree": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetNotedOn": "Noté sur {max} pts",
+  "@copieSheetNotedOn": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetName": "Nom :",
+  "copieSheetGrade": "Note : ____ / {max}",
+  "@copieSheetGrade": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetQuestionPoints": "({points} pts)",
+  "@copieSheetQuestionPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetCorrige": "Corrigé — {answer}",
+  "@copieSheetCorrige": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationSectionTitle": "Publication aux parents",
+  "publicationSubtitlePublished": "envoyé par WhatsApp",
+  "publicationKindSujet": "Sujet du devoir",
+  "publicationKindCorrige": "Corrigé (questions + réponses)",
+  "publicationKindNotes": "Notes",
+  "publicationInClass": "En classe",
+  "publicationNotPublished": "Non publié",
+  "publicationPublishedOn": "Publié le {date}",
+  "@publicationPublishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationUpdatedOn": "{published} · màj {date}",
+  "@publicationUpdatedOn": {
+    "placeholders": {
+      "published": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationSujetInClass": "Le sujet d'une interrogation ou d'un examen se fait en classe : il ne se publie pas.",
+  "publicationSujetDue": "À rendre le {date}.",
+  "@publicationSujetDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationCorrigeWaiting": "Disponible quand l'évaluation est entièrement corrigée — {saisies}/{total} notes saisies.",
+  "@publicationCorrigeWaiting": {
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "publicationPendingWrites": "Des modifications attendent leur envoi : la publication sera possible une fois en ligne.",
+  "publicationPublish": "Publier",
+  "publicationWithdraw": "Retirer",
+  "publicationPublishNotes": "Publier les notes",
+  "publicationNotesPublished": "Notes publiées",
+  "publicationNotesPublishedOn": "Notes publiées le {date}",
+  "@publicationNotesPublishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationNotesReady": "Prêtes à être publiées",
+  "publicationNotesWaiting": "Publication possible quand toutes les notes sont saisies",
+  "publicationConfirmTitle": "Publier aux parents ?",
+  "publicationConfirmAudience": "{count, plural, =1{Envoyé par WhatsApp aux parents de l'élève de {classroom}.} other{Envoyé par WhatsApp aux parents des {count} élèves de {classroom}.}}",
+  "@publicationConfirmAudience": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationConfirmSujetItems": "Les énoncés, les points, le programme, les consignes et la durée",
+  "publicationConfirmSujetNote": "Jamais les réponses attendues",
+  "publicationConfirmCorrigeItems": "Les questions et leurs réponses attendues",
+  "publicationConfirmNotesItems": "Chaque parent ne reçoit que la note de son enfant",
+  "publicationSentToast": "Publication envoyée aux parents — {kind}",
+  "@publicationSentToast": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationWithdrawnToast": "Publication retirée — {kind}",
+  "@publicationWithdrawnToast": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationRefusedIncomplete": "L'évaluation n'est pas entièrement corrigée.",
+  "publicationRefusedIncompleteCount": "L'évaluation n'est pas entièrement corrigée : {saisies}/{effectif} notes.",
+  "@publicationRefusedIncompleteCount": {
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "effectif": {
+        "type": "int"
+      }
+    }
+  },
+  "publicationRefusedEmpty": "Le sujet n'a aucune question.",
+  "publicationRefusedNotOwned": "Vous ne pouvez pas publier pour ce cours.",
+  "publicationOffline": "Hors ligne : la publication demande une connexion.",
+  "publicationFailed": "La publication n'a pas abouti. Réessayez.",
   "evalRejectionPeriodClosed": "Rejetée : période clôturée",
   "evalRejectionExamNotAllowed": "Rejetée : examen non autorisé",
   "evalRejectionMaxReached": "Rejetée : plafond atteint",
@@ -1555,6 +2058,29 @@
   "noteRejectionContextUnavailable": "Contexte indisponible",
   "noteRejectionGeneric": "Rejetée par le serveur",
   "evalDetailBack": "Retour au cours",
+  "evalSaisieBack": "Retour à l'évaluation",
+  "evalSaisiePageTitle": "Saisie des notes",
+  "evalChipDuree": "Durée : {duree}",
+  "@evalChipDuree": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "evalDetailNotesProgress": "{saisies} / {total} notes saisies",
+  "@evalDetailNotesProgress": {
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "evalDetailSaisirNotes": "Saisir les notes",
+  "evalDetailSaisieNotes": "Saisie des notes",
   "evalBadgeComplete": "Clôturée",
   "evalBadgePartial": "Saisie en cours · {done}/{total}",
   "@evalBadgePartial": {
@@ -9022,7 +9548,6 @@
   "chapitreFormGroupIdentification": "Identification",
   "chapitreFormGroupPedagogie": "Pédagogie",
   "chapitreFormGroupPlanification": "Planification",
-  "chapitreFormOptional": "(optionnel)",
   "chapitreFormAdd": "Ajouter",
   "chapitreFormTitreLabel": "Titre du chapitre",
   "chapitreFormTitreHint": "Ex. Fractions et décimaux",

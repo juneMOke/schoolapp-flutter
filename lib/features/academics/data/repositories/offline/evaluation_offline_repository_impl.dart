@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_input_model.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_push_models.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 
 /// Type d'agrégat d'outbox de l'évaluation (routage → `EvaluationOutboxHandler`).
 const String kEvaluationAggregateType = 'ACADEMICS_EVALUATION';
@@ -48,7 +50,8 @@ class EvaluationOfflineRepositoryImpl {
   /// dérive de fuseau. Rattachement temporel exclusif : un seul de [sousPeriodeId]
   /// / [periodeScolaireId] doit être non nul (garanti par l'appelant / l'UI).
   /// [chapitreIds] est intra-agrégat (régime A) : figé à la création, jamais
-  /// modifié ensuite.
+  /// modifié ensuite. [titre] et [cadre] sont écrits avec la ligne ; le cadre
+  /// devient ensuite le sujet, modifiable (sous-agrégat LWW).
   Future<Either<Failure, EvaluationRow>> createEvaluation({
     required String coursId,
     required String type,
@@ -58,6 +61,8 @@ class EvaluationOfflineRepositoryImpl {
     String? sousPeriodeId,
     String? periodeScolaireId,
     List<String> chapitreIds = const [],
+    String? titre,
+    EvaluationCadre cadre = EvaluationCadre.empty,
   }) async {
     try {
       final nowMs = _now();
@@ -79,8 +84,10 @@ class EvaluationOfflineRepositoryImpl {
         periodeScolaireId: periodeScolaireId,
         updatedAt: nowMs,
         chapitreIdsJson: EvaluationRow.encodeChapitreIds(chapitreIds),
+        titre: titre,
       );
 
+      final sujet = EvaluationSujetRow.fromEntity(cadre, const []);
       final entry = OutboxEntry(
         id: aggregateOutboxId(id),
         aggregateType: kEvaluationAggregateType,
@@ -89,12 +96,16 @@ class EvaluationOfflineRepositoryImpl {
         payload: EvaluationPushRequestModel(
           authorId: _currentUser?.uid,
           coursId: coursId,
-          evaluation: EvaluationInputModel.fromRow(row),
+          evaluation: EvaluationInputModel.fromRow(row, sujet: sujet),
         ).toJsonString(),
         createdAt: nowMs,
       );
 
-      await _local.createEvaluationWithOutbox(row: row, outboxEntry: entry);
+      await _local.createEvaluationWithOutbox(
+        row: row,
+        sujet: sujet,
+        outboxEntry: entry,
+      );
       // Flush opportuniste : si connecté, l'évaluation part tout de suite.
       final engine = _syncEngine;
       if (engine != null) unawaited(engine.flush());

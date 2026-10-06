@@ -5,7 +5,14 @@
 
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/sujet/copie_log_row.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_codecs.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 
 List<T> _lenientList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
   final out = <T>[];
@@ -52,6 +59,11 @@ int? _dateOnlyToMs(String? value) {
 
 // ── Évaluations (régime A) ────────────────────────────────────────────────────
 
+/// Une évaluation descendue du serveur (`EvaluationSyncView`) : le delta du
+/// pull, et la réponse des écritures du sujet et du journal. Porte, en plus
+/// du fait d'origine, le titre, le cadre, les questions, le journal des copies
+/// et l'état des publications — décodés en tolérance (un champ absent ou mal
+/// formé ne fige jamais le curseur).
 class EvaluationDeltaDto {
   final String id;
   final String coursId;
@@ -63,6 +75,17 @@ class EvaluationDeltaDto {
   final String? periodeScolaireId;
   final List<String> chapitreIds;
   final String serverUpdatedAt;
+  final String? titre;
+  final int? dureeMinutes;
+  final List<String> programme;
+  final String? consignes;
+  final List<SujetQuestion> questions;
+
+  /// Heure, sur le poste, du dernier sujet accepté ; `null` tant qu'aucun
+  /// sujet n'a été envoyé.
+  final String? sujetClientUpdatedAt;
+  final List<Map<String, dynamic>> copieLog;
+  final EvaluationPublications publications;
 
   const EvaluationDeltaDto({
     required this.id,
@@ -75,6 +98,14 @@ class EvaluationDeltaDto {
     this.periodeScolaireId,
     this.chapitreIds = const [],
     required this.serverUpdatedAt,
+    this.titre,
+    this.dureeMinutes,
+    this.programme = const [],
+    this.consignes,
+    this.questions = const [],
+    this.sujetClientUpdatedAt,
+    this.copieLog = const [],
+    this.publications = EvaluationPublications.none,
   });
 
   factory EvaluationDeltaDto.fromJson(Map<String, dynamic> j) =>
@@ -93,6 +124,17 @@ class EvaluationDeltaDto {
             ) ??
             const [],
         serverUpdatedAt: j['serverUpdatedAt'] as String,
+        titre: j.text('titre'),
+        dureeMinutes: j.integer('dureeMinutes'),
+        programme: SujetCodecs.programmeFromJson(j['programme']),
+        consignes: j.text('consignes'),
+        questions: SujetCodecs.questionsFromJson(j['questions']),
+        sujetClientUpdatedAt: j.text('sujetClientUpdatedAt'),
+        copieLog: [
+          for (final e in (j['copieLog'] as List<dynamic>? ?? const []))
+            if (e is Map<String, dynamic>) e,
+        ],
+        publications: SujetCodecs.publicationsFromJson(j['publication']),
       );
 
   EvaluationRow toLocalRow(int syncedAt) {
@@ -111,8 +153,40 @@ class EvaluationDeltaDto {
       syncStatus: 'SYNCED',
       syncedAt: syncedAt,
       chapitreIdsJson: EvaluationRow.encodeChapitreIds(chapitreIds),
+      titre: titre,
     );
   }
+
+  /// Le sujet tel que le serveur le connaît. Statut d'envoi `SYNCED` dès
+  /// qu'un sujet a été accepté ; nul sinon (le cadre vient de la création).
+  EvaluationSujetRow toSujetRow() {
+    final clientMs = _isoToMs(sujetClientUpdatedAt);
+    return EvaluationSujetRow(
+      dureeMinutes: dureeMinutes,
+      programme: programme,
+      consignes: consignes,
+      questions: questions,
+      updatedAt: clientMs,
+      syncStatus: clientMs == null ? null : SyncState.synced.dbValue,
+    );
+  }
+
+  /// Le journal des copies ; une ligne illisible est écartée.
+  List<CopieLogRow> toCopieLogRows() => [
+    for (final e in copieLog)
+      if (e.text('id') case final logId?)
+        if (e.text('kind') case final kind?)
+          CopieLogRow(
+            id: logId,
+            evaluationId: id,
+            kind: kind,
+            canal: e.text('canal'),
+            corrige: e.flag('corrige') ?? false,
+            occurredAt: _isoToMs(e.text('occurredAt')) ?? 0,
+            authorUserId: e.text('authorUserId'),
+            syncStatus: SyncState.synced.dbValue,
+          ),
+  ];
 }
 
 class EvaluationPageDto implements KeysetPageDto<EvaluationDeltaDto> {

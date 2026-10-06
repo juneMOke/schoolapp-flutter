@@ -12,9 +12,11 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_evaluation_sync_api.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_outbox_handler.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_sujet_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_input_model.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_push_models.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
 
@@ -125,6 +127,32 @@ void main() {
         expect(payload.evaluation.sousPeriodeId, 'sp-1');
       },
     );
+
+    test('écrit le titre et le cadre ; le sujet n’a rien à envoyer', () async {
+      await repo.createEvaluation(
+        coursId: 'c-1',
+        type: 'DEVOIR',
+        date: DateTime.utc(2026, 6, 10),
+        maxPoints: 20,
+        poids: 2,
+        sousPeriodeId: 'sp-1',
+        titre: 'Devoir 2',
+        cadre: const EvaluationCadre(
+          dureeMinutes: 60,
+          programme: [' Réactions ', ''],
+          consignes: '  ',
+        ),
+      );
+
+      expect((await local.getEvaluation('ev-1'))!.titre, 'Devoir 2');
+      final sujet = (await EvaluationSujetLocalDataSource(
+        db,
+      ).getSujet('ev-1'))!;
+      expect(sujet.dureeMinutes, 60);
+      expect(sujet.programme, ['Réactions']);
+      expect(sujet.consignes, isNull);
+      expect(sujet.syncStatus, isNull);
+    });
   });
 
   group('EvaluationOutboxHandler.dispatch', () {

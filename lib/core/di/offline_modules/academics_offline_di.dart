@@ -38,6 +38,8 @@ import 'package:school_app_flutter/features/schedule/data/datasources/offline/sc
 import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
+import 'package:school_app_flutter/core/di/offline_modules/evaluation_sujet_di.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_view_applier.dart';
 
 /// Registrar de la branche offline **Notes / Cours** (academics + schedule,
 /// ADR-006). Appelé depuis `registerOfflineModules` APRÈS le socle et les
@@ -132,6 +134,8 @@ void registerAcademicsOffline(GetIt getIt) {
     () => AcademicsMetierPullRepositoryImpl(
       api: getIt<AcademicsMetierPullApi>(),
       localDataSource: getIt<AcademicsLocalDataSource>(),
+      // Enregistré par `registerEvaluationSujet`, résolu au premier pull.
+      evaluationViews: getIt<EvaluationViewApplier>(),
       puller: getIt<PerCoursKeysetPuller>(),
       requiredAuth: requiredAuth,
     ),
@@ -214,6 +218,10 @@ void registerAcademicsOffline(GetIt getIt) {
   getIt.registerFactory<SyncAcademicsPullsUseCase>(
     () => SyncAcademicsPullsUseCase(getIt<PullCoordinator>()),
   );
+
+  // ── Sujet d'une évaluation : sujet, copie, publications ──
+  // Avant les handlers : le pull des évaluations résout son applicateur.
+  registerEvaluationSujet(getIt);
 
   // ── Handlers d'outbox (push, routés par aggregateType) ──
   getIt<SyncEngine>().registerHandler(

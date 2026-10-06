@@ -343,6 +343,10 @@ class AppColors {
   static const academicsScoreWeakSoft = Color(0xFFFBF1DF);
   static const academicsScoreGood = vertSavane;
   static const academicsScoreGoodSoft = Color(0xFFEBF2ED);
+  // Sujet d'une évaluation — zone « Réponse attendue », visible du professeur
+  // seul : un vert très doux qui la distingue de l'énoncé.
+  static const academicsAnswerSoft = Color(0xFFF3F8F4);
+  static const academicsAnswerBorder = Color(0xFFCFE0D4);
 
   // Éditique — badges de NATURE d'une pièce (§08 de la spec Documents).
   // « Figé » reprend le bleu-ardoise de marque ; « horodaté » introduit l'ambre

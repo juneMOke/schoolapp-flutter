@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
@@ -65,6 +66,9 @@ class NotationOfflineRepositoryImpl implements NotationRepository {
               statut: note == null
                   ? null
                   : StatutNoteX.fromApiValue(note.statut),
+              rejectionReason: note?.syncState == SyncState.syncError
+                  ? note!.rejectionReason ?? ''
+                  : null,
             );
           })
           .toList(growable: false);

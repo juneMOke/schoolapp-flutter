@@ -757,4 +757,18 @@ class AppDimensions {
   /// choix.
   static const boutiqueBeneficiaryChipAvatar = 22.0;
   static const boutiqueBeneficiaryListAvatar = 34.0;
+
+  /// Le sujet d'une évaluation (spec Évaluation §4 bis, S2-S4) : numéro de
+  /// ligne du programme et badge de question, boutons d'action d'une
+  /// question, champ des points, bouton « Ajouter une question », barre du
+  /// barème, champ « Autre » de la durée.
+  static const sujetNumberBadge = 28.0;
+  static const sujetIconAction = 32.0;
+  static const sujetIconSize = 16.0;
+  static const sujetPointsFieldWidth = 92.0;
+  static const sujetAddQuestionHeight = 48.0;
+  static const sujetBaremeBar = 6.0;
+  static const sujetDureeOtherWidth = 120.0;
+  static const sujetCadreRubriqueMaxWidth = 420.0;
+  static const publicationRowTextMaxWidth = 520.0;
 }

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_view_applier.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_metier_pull_api.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/academics_metier_pull_models.dart';
@@ -44,6 +45,7 @@ void main() {
     repo = AcademicsMetierPullRepositoryImpl(
       api: api,
       localDataSource: local,
+      evaluationViews: EvaluationViewApplier.on(db),
       puller: PerCoursKeysetPuller(
         refLocalDataSource: refLocal,
         syncMetaDao: syncMeta,

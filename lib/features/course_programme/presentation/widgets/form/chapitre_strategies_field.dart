@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/labels/form_section_label.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -37,7 +38,7 @@ class ChapitreStrategiesField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ChapitreFormLabel(
+        FormSectionLabel(
           label: l10n.chapitreFormStrategiesLabel,
           optional: true,
           count: model.strategies.length,

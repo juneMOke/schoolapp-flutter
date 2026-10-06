@@ -39,6 +39,11 @@ class EvaluationRow extends Equatable {
   /// `MAX_REACHED`) ayant rejeté la création — `null` tant qu'aucun rejet.
   final String? rejectionCode;
 
+  /// Titre calculé par la tablette à la création (« Interrogation 3 —
+  /// Proportionnalité ») et stocké tel quel ; nul pour l'historique, qui se
+  /// replie sur le nom dérivé.
+  final String? titre;
+
   const EvaluationRow({
     required this.id,
     required this.coursId,
@@ -54,6 +59,7 @@ class EvaluationRow extends Equatable {
     this.syncedAt,
     this.chapitreIdsJson = '[]',
     this.rejectionCode,
+    this.titre,
   });
 
   static int? _asIntOrNull(Object? v) {
@@ -78,7 +84,12 @@ class EvaluationRow extends Equatable {
     coursId: map['cours_id'] as String,
     type: map['type'] as String,
     evalDate: _asIntOrNull(map['eval_date']) ?? 0,
-    maxPoints: _asDoubleOrNull(map['max_points']) ?? 0,
+    // Un maximum ajusté par le sujet, pas encore accusé, est celui qui vaut
+    // sur la tablette (détail, saisie) ; `max_points` garde celui du serveur.
+    maxPoints:
+        _asDoubleOrNull(map['sujet_max_points']) ??
+        _asDoubleOrNull(map['max_points']) ??
+        0,
     poids: _asIntOrNull(map['poids']) ?? 0,
     sousPeriodeId: map['sous_periode_id'] as String?,
     periodeScolaireId: map['periode_scolaire_id'] as String?,
@@ -88,6 +99,7 @@ class EvaluationRow extends Equatable {
     syncedAt: _asIntOrNull(map['synced_at']),
     chapitreIdsJson: (map['chapitre_ids_json'] as String?) ?? '[]',
     rejectionCode: map['rejection_code'] as String?,
+    titre: map['titre'] as String?,
   );
 
   Map<String, Object?> toMap() => <String, Object?>{
@@ -105,6 +117,7 @@ class EvaluationRow extends Equatable {
     'synced_at': syncedAt,
     'chapitre_ids_json': chapitreIdsJson,
     'rejection_code': rejectionCode,
+    'titre': titre,
   };
 
   SyncState get syncState => SyncState.fromDbValue(syncStatus);
@@ -137,5 +150,6 @@ class EvaluationRow extends Equatable {
     syncedAt,
     chapitreIdsJson,
     rejectionCode,
+    titre,
   ];
 }

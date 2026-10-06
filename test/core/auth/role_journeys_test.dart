@@ -128,6 +128,8 @@ const _enseignant = <String>[
   'academics.grade.write',
   'academics.result.read',
   'academics.referential.read',
+  // Semée avec la publication des évaluations (plan back E5).
+  'academics.evaluation.publish',
 ];
 
 /// `DIRECTOR` et `SUPER_ADMIN` partagent `FULL_SCHOOL_ACCESS` : tout le

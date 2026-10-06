@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -226,6 +228,15 @@ class _Identity extends StatelessWidget {
             ],
           ),
         ),
+        if (student.rejectionReason case final reason?)
+          Tooltip(
+            message: noteRejectionLabel(AppLocalizations.of(context)!, reason),
+            child: const Icon(
+              Icons.error_outline_rounded,
+              size: AppDimensions.sujetIconSize,
+              color: AppColors.error,
+            ),
+          ),
       ],
     );
   }

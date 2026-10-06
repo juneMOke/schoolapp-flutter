@@ -2918,6 +2918,876 @@ abstract class AppLocalizations {
   /// **'Entry cap reached for this date.'**
   String get evalCreateMaxReachedError;
 
+  /// No description provided for @evalCreateSujetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions, their points and the expected answers are written afterwards in the Subject section.'**
+  String get evalCreateSujetHint;
+
+  /// No description provided for @evalTitleRanked.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} {rank}'**
+  String evalTitleRanked(String type, int rank);
+
+  /// No description provided for @evalTitleWithSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{base} — {suffix}'**
+  String evalTitleWithSuffix(String base, String suffix);
+
+  /// No description provided for @evalDerivedName.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} of {date}'**
+  String evalDerivedName(String type, String date);
+
+  /// No description provided for @dureeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String dureeMinutes(int minutes);
+
+  /// No description provided for @dureeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String dureeHours(int hours);
+
+  /// No description provided for @dureeHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String dureeHoursMinutes(int hours, String minutes);
+
+  /// No description provided for @dureeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get dureeOther;
+
+  /// No description provided for @dureeUndefined.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get dureeUndefined;
+
+  /// No description provided for @dureeOtherMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get dureeOtherMinutes;
+
+  /// No description provided for @dureeEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'that is {duree}'**
+  String dureeEquivalent(String duree);
+
+  /// No description provided for @sujetDureeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get sujetDureeLabel;
+
+  /// No description provided for @sujetProgrammeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'To revise'**
+  String get sujetProgrammeLabel;
+
+  /// No description provided for @sujetProgrammeFromChapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the chapters'**
+  String get sujetProgrammeFromChapters;
+
+  /// No description provided for @sujetProgrammeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {number} to revise'**
+  String sujetProgrammeLine(int number);
+
+  /// No description provided for @sujetProgrammeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What students should revise'**
+  String get sujetProgrammeHint;
+
+  /// No description provided for @sujetProgrammeRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this item'**
+  String get sujetProgrammeRemove;
+
+  /// No description provided for @sujetProgrammeAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an item'**
+  String get sujetProgrammeAdd;
+
+  /// No description provided for @sujetConsignesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get sujetConsignesLabel;
+
+  /// No description provided for @sujetConsignesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed materials, documents provided…'**
+  String get sujetConsignesHint;
+
+  /// No description provided for @formOptionalMark.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get formOptionalMark;
+
+  /// No description provided for @sujetSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get sujetSectionTitle;
+
+  /// No description provided for @sujetSummaryQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No questions} =1{1 question} other{{count} questions}}'**
+  String sujetSummaryQuestions(int count);
+
+  /// No description provided for @sujetPointsOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} / {max} pts'**
+  String sujetPointsOf(String total, String max);
+
+  /// No description provided for @sujetShowAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Show answers'**
+  String get sujetShowAnswers;
+
+  /// No description provided for @sujetHideAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide answers'**
+  String get sujetHideAnswers;
+
+  /// No description provided for @sujetRevealAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the answer'**
+  String get sujetRevealAnswer;
+
+  /// No description provided for @sujetHideAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the answer'**
+  String get sujetHideAnswer;
+
+  /// No description provided for @sujetEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get sujetEdit;
+
+  /// No description provided for @sujetEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject to write'**
+  String get sujetEmptyTitle;
+
+  /// No description provided for @sujetEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the questions, their points and the expected answers.'**
+  String get sujetEmptyDescription;
+
+  /// No description provided for @sujetEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the subject'**
+  String get sujetEmptyAction;
+
+  /// No description provided for @sujetQuestionBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Q{number}'**
+  String sujetQuestionBadge(int number);
+
+  /// No description provided for @sujetQuestionPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts'**
+  String sujetQuestionPoints(String points);
+
+  /// No description provided for @sujetPointsSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'pts'**
+  String get sujetPointsSuffix;
+
+  /// No description provided for @sujetQuestionPointsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Points for question {number}'**
+  String sujetQuestionPointsLabel(int number);
+
+  /// No description provided for @sujetQuestionEnonceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number} text'**
+  String sujetQuestionEnonceLabel(int number);
+
+  /// No description provided for @sujetQuestionEnonceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Question text'**
+  String get sujetQuestionEnonceHint;
+
+  /// No description provided for @sujetAnswerHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected answer · visible to the teacher only'**
+  String get sujetAnswerHeader;
+
+  /// No description provided for @sujetAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected answer (optional)'**
+  String get sujetAnswerHint;
+
+  /// No description provided for @sujetAnswerRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected answer — {answer}'**
+  String sujetAnswerRead(String answer);
+
+  /// No description provided for @sujetMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get sujetMoveUp;
+
+  /// No description provided for @sujetMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get sujetMoveDown;
+
+  /// No description provided for @sujetDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get sujetDuplicate;
+
+  /// No description provided for @sujetDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get sujetDelete;
+
+  /// No description provided for @sujetIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete'**
+  String get sujetIncomplete;
+
+  /// No description provided for @sujetIncompleteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 question to complete} other{{count} questions to complete}}'**
+  String sujetIncompleteCount(int count);
+
+  /// No description provided for @sujetAddQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a question'**
+  String get sujetAddQuestion;
+
+  /// No description provided for @sujetAddFirstQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the first question'**
+  String get sujetAddFirstQuestion;
+
+  /// No description provided for @sujetBaremeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking {total} / {max} pts'**
+  String sujetBaremeValue(String total, String max);
+
+  /// No description provided for @sujetBaremeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No points assigned'**
+  String get sujetBaremeEmpty;
+
+  /// No description provided for @sujetBaremeUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'{gap} pts left to assign'**
+  String sujetBaremeUnder(String gap);
+
+  /// No description provided for @sujetBaremeComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking complete'**
+  String get sujetBaremeComplete;
+
+  /// No description provided for @sujetBaremeOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceeds the maximum by {gap} pts'**
+  String sujetBaremeOver(String gap);
+
+  /// No description provided for @sujetBaremeAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the maximum to {max}'**
+  String sujetBaremeAdjust(String max);
+
+  /// No description provided for @sujetBaremeLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum locked: grades have been entered'**
+  String get sujetBaremeLocked;
+
+  /// No description provided for @sujetCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get sujetCancel;
+
+  /// No description provided for @sujetClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get sujetClose;
+
+  /// No description provided for @sujetSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the subject'**
+  String get sujetSave;
+
+  /// No description provided for @sujetSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get sujetSaving;
+
+  /// No description provided for @sujetSavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject saved — {summary}'**
+  String sujetSavedToast(String summary);
+
+  /// No description provided for @sujetSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving the subject failed. Your changes are kept.'**
+  String get sujetSaveError;
+
+  /// No description provided for @sujetRejectedMaxLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the subject: the maximum can no longer change, grades have been entered.'**
+  String get sujetRejectedMaxLocked;
+
+  /// No description provided for @sujetRejectedQuestionMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.'**
+  String get sujetRejectedQuestionMismatch;
+
+  /// No description provided for @sujetRejectedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the subject. Edit it, then save it.'**
+  String get sujetRejectedGeneric;
+
+  /// No description provided for @sujetRejectedEmptyPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'A published subject keeps at least one question: add one, or withdraw the publication first.'**
+  String get sujetRejectedEmptyPublished;
+
+  /// No description provided for @sujetResendWithoutMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend without changing the maximum'**
+  String get sujetResendWithoutMax;
+
+  /// No description provided for @sujetPendingSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get sujetPendingSend;
+
+  /// No description provided for @sujetResentToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject resent without changing the maximum'**
+  String get sujetResentToast;
+
+  /// No description provided for @sujetDiscardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard the changes to the subject?'**
+  String get sujetDiscardTitle;
+
+  /// No description provided for @sujetDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The subject is not saved. Leaving will lose your changes.'**
+  String get sujetDiscardMessage;
+
+  /// No description provided for @sujetDiscardConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get sujetDiscardConfirm;
+
+  /// No description provided for @sujetDiscardCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get sujetDiscardCancel;
+
+  /// No description provided for @publicationConfirmItem.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ {item}'**
+  String publicationConfirmItem(String item);
+
+  /// No description provided for @copieViewerScope.
+  ///
+  /// In en, this message translates to:
+  /// **'{branche} · {classroom}'**
+  String copieViewerScope(String branche, String classroom);
+
+  /// No description provided for @copieSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copieSectionTitle;
+
+  /// No description provided for @copiePrintedTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Never printed} =1{Printed once} other{Printed {count} times}}'**
+  String copiePrintedTimes(int count);
+
+  /// No description provided for @copieSharedTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{never shared} =1{shared once} other{shared {count} times}}'**
+  String copieSharedTimes(int count);
+
+  /// No description provided for @copieOptionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on the copy'**
+  String get copieOptionsLabel;
+
+  /// No description provided for @copieOptionProgramme.
+  ///
+  /// In en, this message translates to:
+  /// **'To revise'**
+  String get copieOptionProgramme;
+
+  /// No description provided for @copieOptionPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get copieOptionPoints;
+
+  /// No description provided for @copieOptionConsignes.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get copieOptionConsignes;
+
+  /// No description provided for @copieOptionDuree.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get copieOptionDuree;
+
+  /// No description provided for @copieOptionReponses.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get copieOptionReponses;
+
+  /// No description provided for @copieCorrigeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an answer key — do not hand it out before the test.'**
+  String get copieCorrigeWarning;
+
+  /// No description provided for @copieShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the copy'**
+  String get copieShow;
+
+  /// No description provided for @copieShowCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the answer key'**
+  String get copieShowCorrige;
+
+  /// No description provided for @copieNeedsQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one question to the subject.'**
+  String get copieNeedsQuestion;
+
+  /// No description provided for @copiePrintCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 print} other{{count} prints}}'**
+  String copiePrintCount(int count);
+
+  /// No description provided for @copieShareCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 share} other{{count} shares}}'**
+  String copieShareCount(int count);
+
+  /// No description provided for @copieLastDiffusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Last shared: {label}'**
+  String copieLastDiffusion(String label);
+
+  /// No description provided for @copieHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get copieHistory;
+
+  /// No description provided for @copieCorrigePill.
+  ///
+  /// In en, this message translates to:
+  /// **'answer key'**
+  String get copieCorrigePill;
+
+  /// No description provided for @copieDiffusionPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'printed on {date}'**
+  String copieDiffusionPrinted(String date);
+
+  /// No description provided for @copieDiffusionShared.
+  ///
+  /// In en, this message translates to:
+  /// **'shared ({canal}) on {date}'**
+  String copieDiffusionShared(String canal, String date);
+
+  /// No description provided for @copieCanalSysteme.
+  ///
+  /// In en, this message translates to:
+  /// **'system share'**
+  String get copieCanalSysteme;
+
+  /// No description provided for @copieCanalWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get copieCanalWhatsapp;
+
+  /// No description provided for @copieCanalEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'email'**
+  String get copieCanalEmail;
+
+  /// No description provided for @copieCanalLien.
+  ///
+  /// In en, this message translates to:
+  /// **'link'**
+  String get copieCanalLien;
+
+  /// No description provided for @copieViewerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student copy — {scope}'**
+  String copieViewerTitle(String scope);
+
+  /// No description provided for @copieViewerTitleCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer key — {scope}'**
+  String copieViewerTitleCorrige(String scope);
+
+  /// No description provided for @copieViewerCorrigeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer key: do not hand out before the test'**
+  String get copieViewerCorrigeWarning;
+
+  /// No description provided for @copieBuildError.
+  ///
+  /// In en, this message translates to:
+  /// **'The copy could not be prepared. Try again.'**
+  String get copieBuildError;
+
+  /// No description provided for @copiePrintedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy sent to the printer'**
+  String get copiePrintedToast;
+
+  /// No description provided for @copieSharedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy shared'**
+  String get copieSharedToast;
+
+  /// No description provided for @copieSheetDuree.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duree}'**
+  String copieSheetDuree(String duree);
+
+  /// No description provided for @copieSheetNotedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked out of {max} pts'**
+  String copieSheetNotedOn(String max);
+
+  /// No description provided for @copieSheetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name:'**
+  String get copieSheetName;
+
+  /// No description provided for @copieSheetGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade: ____ / {max}'**
+  String copieSheetGrade(String max);
+
+  /// No description provided for @copieSheetQuestionPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'({points} pts)'**
+  String copieSheetQuestionPoints(String points);
+
+  /// No description provided for @copieSheetCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer — {answer}'**
+  String copieSheetCorrige(String answer);
+
+  /// No description provided for @publicationSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing to parents'**
+  String get publicationSectionTitle;
+
+  /// No description provided for @publicationSubtitlePublished.
+  ///
+  /// In en, this message translates to:
+  /// **'sent by WhatsApp'**
+  String get publicationSubtitlePublished;
+
+  /// No description provided for @publicationKindSujet.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework subject'**
+  String get publicationKindSujet;
+
+  /// No description provided for @publicationKindCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer key (questions + answers)'**
+  String get publicationKindCorrige;
+
+  /// No description provided for @publicationKindNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades'**
+  String get publicationKindNotes;
+
+  /// No description provided for @publicationInClass.
+  ///
+  /// In en, this message translates to:
+  /// **'In class'**
+  String get publicationInClass;
+
+  /// No description provided for @publicationNotPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Not published'**
+  String get publicationNotPublished;
+
+  /// No description provided for @publicationPublishedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Published on {date}'**
+  String publicationPublishedOn(String date);
+
+  /// No description provided for @publicationUpdatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{published} · updated {date}'**
+  String publicationUpdatedOn(String published, String date);
+
+  /// No description provided for @publicationSujetInClass.
+  ///
+  /// In en, this message translates to:
+  /// **'The subject of a quiz or an exam is done in class: it is not published.'**
+  String get publicationSujetInClass;
+
+  /// No description provided for @publicationSujetDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on {date}.'**
+  String publicationSujetDue(String date);
+
+  /// No description provided for @publicationCorrigeWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Available once the assessment is fully graded — {saisies}/{total} grades entered.'**
+  String publicationCorrigeWaiting(int saisies, int total);
+
+  /// No description provided for @publicationPendingWrites.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are waiting to be sent: publishing will be possible once online.'**
+  String get publicationPendingWrites;
+
+  /// No description provided for @publicationPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get publicationPublish;
+
+  /// No description provided for @publicationWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get publicationWithdraw;
+
+  /// No description provided for @publicationPublishNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish grades'**
+  String get publicationPublishNotes;
+
+  /// No description provided for @publicationNotesPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades published'**
+  String get publicationNotesPublished;
+
+  /// No description provided for @publicationNotesPublishedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades published on {date}'**
+  String publicationNotesPublishedOn(String date);
+
+  /// No description provided for @publicationNotesReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to publish'**
+  String get publicationNotesReady;
+
+  /// No description provided for @publicationNotesWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing is possible once every grade is entered'**
+  String get publicationNotesWaiting;
+
+  /// No description provided for @publicationConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to parents?'**
+  String get publicationConfirmTitle;
+
+  /// No description provided for @publicationConfirmAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Sent by WhatsApp to the parents of the student of {classroom}.} other{Sent by WhatsApp to the parents of the {count} students of {classroom}.}}'**
+  String publicationConfirmAudience(int count, String classroom);
+
+  /// No description provided for @publicationConfirmSujetItems.
+  ///
+  /// In en, this message translates to:
+  /// **'The questions, points, syllabus, instructions and duration'**
+  String get publicationConfirmSujetItems;
+
+  /// No description provided for @publicationConfirmSujetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Never the expected answers'**
+  String get publicationConfirmSujetNote;
+
+  /// No description provided for @publicationConfirmCorrigeItems.
+  ///
+  /// In en, this message translates to:
+  /// **'The questions and their expected answers'**
+  String get publicationConfirmCorrigeItems;
+
+  /// No description provided for @publicationConfirmNotesItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Each parent only receives their own child\'s grade'**
+  String get publicationConfirmNotesItems;
+
+  /// No description provided for @publicationSentToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Published to parents — {kind}'**
+  String publicationSentToast(String kind);
+
+  /// No description provided for @publicationWithdrawnToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication withdrawn — {kind}'**
+  String publicationWithdrawnToast(String kind);
+
+  /// No description provided for @publicationRefusedIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'The assessment is not fully graded.'**
+  String get publicationRefusedIncomplete;
+
+  /// No description provided for @publicationRefusedIncompleteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'The assessment is not fully graded: {saisies}/{effectif} grades.'**
+  String publicationRefusedIncompleteCount(int saisies, int effectif);
+
+  /// No description provided for @publicationRefusedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The subject has no questions.'**
+  String get publicationRefusedEmpty;
+
+  /// No description provided for @publicationRefusedNotOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot publish for this course.'**
+  String get publicationRefusedNotOwned;
+
+  /// No description provided for @publicationOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: publishing needs a connection.'**
+  String get publicationOffline;
+
+  /// No description provided for @publicationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing failed. Try again.'**
+  String get publicationFailed;
+
   /// No description provided for @evalRejectionPeriodClosed.
   ///
   /// In en, this message translates to:
@@ -2977,6 +3847,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to course'**
   String get evalDetailBack;
+
+  /// No description provided for @evalSaisieBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the assessment'**
+  String get evalSaisieBack;
+
+  /// No description provided for @evalSaisiePageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get evalSaisiePageTitle;
+
+  /// No description provided for @evalChipDuree.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duree}'**
+  String evalChipDuree(String duree);
+
+  /// No description provided for @evalDetailNotesProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{saisies} / {total} grades entered'**
+  String evalDetailNotesProgress(int saisies, int total);
+
+  /// No description provided for @evalDetailSaisirNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter grades'**
+  String get evalDetailSaisirNotes;
+
+  /// No description provided for @evalDetailSaisieNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get evalDetailSaisieNotes;
 
   /// No description provided for @evalBadgeComplete.
   ///
@@ -22603,12 +23509,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Planning'**
   String get chapitreFormGroupPlanification;
-
-  /// No description provided for @chapitreFormOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'(optional)'**
-  String get chapitreFormOptional;
 
   /// No description provided for @chapitreFormAdd.
   ///

@@ -288,13 +288,25 @@ void main() {
       await tester.tap(find.text('Fractions'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(EteeloButton, "Créer l'évaluation"));
+      // « Reprendre les chapitres » : une ligne de programme par chapitre.
+      await tester.ensureVisible(find.text('Reprendre les chapitres'));
+      await tester.tap(find.text('Reprendre les chapitres'));
+      await tester.pumpAndSettle();
+
+      final submit = find.widgetWithText(EteeloButton, "Créer l'évaluation");
+      await tester.ensureVisible(submit);
+      await tester.tap(submit);
       await tester.pumpAndSettle();
 
       final captured =
           verify(() => useCase.call(any(), captureAny())).captured.single
               as CreateEvaluationRequest;
       expect(captured.chapitreIds, ['ch1']);
+      // Un seul chapitre coché : il entre dans le titre.
+      expect(captured.titre, 'Interrogation 1 — Fractions');
+      // Défaut de durée d'une interrogation, programme repris des chapitres.
+      expect(captured.cadre.dureeMinutes, 30);
+      expect(captured.cadre.programme, ['Fractions']);
     });
   });
 

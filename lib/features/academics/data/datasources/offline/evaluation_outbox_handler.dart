@@ -76,11 +76,11 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
     // Garde d'ATTRIBUTION (tablette partagée) : une évaluation créée par un
     // AUTRE utilisateur ne part pas sous ce JWT (403 terminal sinon) —
     // `blocked`, repartira à la reconnexion de l'auteur.
-    if (request.authorId != null && request.authorId != currentUser?.uid) {
-      return const OutboxDispatchResult.blocked(
-        'Saisie d\'un autre utilisateur — repartira à sa reconnexion',
-      );
-    }
+    final foreign = OutboxDispatchResult.blockForeignAuthor(
+      request.authorId,
+      currentUser?.uid,
+    );
+    if (foreign != null) return foreign;
 
     final awaiting = chapitresAwaitingAck;
     if (awaiting != null && await awaiting(request.evaluation.chapitreIds)) {
