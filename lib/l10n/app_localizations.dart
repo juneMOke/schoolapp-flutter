@@ -3320,6 +3320,48 @@ abstract class AppLocalizations {
   /// **'Waiting to be sent'**
   String get sujetPendingSend;
 
+  /// No description provided for @sujetResentToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject resent without changing the maximum'**
+  String get sujetResentToast;
+
+  /// No description provided for @sujetDiscardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard the changes to the subject?'**
+  String get sujetDiscardTitle;
+
+  /// No description provided for @sujetDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The subject is not saved. Leaving will lose your changes.'**
+  String get sujetDiscardMessage;
+
+  /// No description provided for @sujetDiscardConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get sujetDiscardConfirm;
+
+  /// No description provided for @sujetDiscardCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get sujetDiscardCancel;
+
+  /// No description provided for @publicationConfirmItem.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ {item}'**
+  String publicationConfirmItem(String item);
+
+  /// No description provided for @copieViewerScope.
+  ///
+  /// In en, this message translates to:
+  /// **'{branche} · {classroom}'**
+  String copieViewerScope(String branche, String classroom);
+
   /// No description provided for @copieSectionTitle.
   ///
   /// In en, this message translates to:

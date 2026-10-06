@@ -99,10 +99,14 @@ class EvalDetailBloc extends Bloc<EvalDetailEvent, EvalDetailState> {
     EvalDetailSujetResendRequested event,
     Emitter<EvalDetailState> emit,
   ) async {
+    // Même garde que l'enregistrement : un seul envoi du sujet à la fois.
+    if (state.sujetSave == SujetSaveStatus.saving) return;
+    emit(state.copyWith(sujetSave: SujetSaveStatus.saving));
     final result = await _resendSujet(event.evaluationId);
     result.fold(
       (_) => emit(state.copyWith(sujetSave: SujetSaveStatus.failed)),
-      (sujet) => emit(state.copyWith(sujet: sujet)),
+      (sujet) =>
+          emit(state.copyWith(sujet: sujet, sujetSave: SujetSaveStatus.resent)),
     );
     emit(state.copyWith(sujetSave: SujetSaveStatus.idle));
   }

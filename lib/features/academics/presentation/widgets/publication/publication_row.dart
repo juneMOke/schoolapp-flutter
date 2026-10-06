@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/publication_labels.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_notation_atoms.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une ligne de publication (spec S6) : ce qui se publie, son état, ce qui
@@ -103,21 +104,23 @@ class PublicationRow extends StatelessWidget {
             ),
           ),
           if (!inClass)
-            etat != null
-                ? EteeloButton.secondary(
-                    label: l10n.publicationWithdraw,
-                    icon: Icons.undo_rounded,
-                    fullWidth: false,
-                    isLoading: busy,
-                    onPressed: busy ? null : onWithdraw,
-                  )
-                : EteeloButton.primary(
-                    label: l10n.publicationPublish,
-                    icon: Icons.send_rounded,
-                    fullWidth: false,
-                    isLoading: busy,
-                    onPressed: busy ? null : onPublish,
-                  ),
+            SessionWriteGate(
+              child: etat != null
+                  ? EteeloButton.secondary(
+                      label: l10n.publicationWithdraw,
+                      icon: Icons.undo_rounded,
+                      fullWidth: false,
+                      isLoading: busy,
+                      onPressed: busy ? null : onWithdraw,
+                    )
+                  : EteeloButton.primary(
+                      label: l10n.publicationPublish,
+                      icon: Icons.send_rounded,
+                      fullWidth: false,
+                      isLoading: busy,
+                      onPressed: busy ? null : onPublish,
+                    ),
+            ),
         ],
       ),
     );

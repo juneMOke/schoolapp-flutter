@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/academics/presentation/bloc/publicat
 import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_state.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/publication/publication_confirm.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Légende de la barre d'actions (spec S7) : où en est la publication des
@@ -64,14 +65,16 @@ class NotesPublishAction extends StatelessWidget {
               progress.isComplete &&
               !state.context.notesPending &&
               !state.context.evaluationPending;
-          return EteeloButton.primary(
-            label: l10n.publicationPublishNotes,
-            icon: Icons.send_rounded,
-            fullWidth: false,
-            isLoading: state.inFlight == PublicationKind.notes,
-            onPressed: ready && state.inFlight == null
-                ? () => _publish(context)
-                : null,
+          return SessionWriteGate(
+            child: EteeloButton.primary(
+              label: l10n.publicationPublishNotes,
+              icon: Icons.send_rounded,
+              fullWidth: false,
+              isLoading: state.inFlight == PublicationKind.notes,
+              onPressed: ready && state.inFlight == null
+                  ? () => _publish(context)
+                  : null,
+            ),
           );
         },
       ),

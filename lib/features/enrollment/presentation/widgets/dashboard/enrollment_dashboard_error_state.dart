@@ -61,18 +61,8 @@ class EnrollmentDashboardErrorState extends StatelessWidget {
     );
   }
 
-  static EteeloErrorType _typeOf(Failure failure) => switch (failure) {
-    NetworkFailure() => EteeloErrorType.network,
-    // 401 — la session a expiré.
-    InvalidCredentialsFailure() ||
-    AuthFailure() => EteeloErrorType.unauthorized,
-    // 403 — le droit manque. Voir l'avertissement en tête de classe.
-    UnauthorizedFailure() => EteeloErrorType.forbidden,
-    // Le stockage rejoint le serveur : dans les deux cas la donnée n'a pas pu
-    // être lue, et le geste est le même.
-    ServerFailure() || StorageFailure() => EteeloErrorType.server,
-    _ => EteeloErrorType.unknown,
-  };
+  static EteeloErrorType _typeOf(Failure failure) =>
+      EteeloErrorType.fromFailure(failure);
 
   String _title(AppLocalizations l10n, EteeloErrorType type) => switch (type) {
     EteeloErrorType.network => l10n.enrollmentDashboardErrorNetworkTitle,

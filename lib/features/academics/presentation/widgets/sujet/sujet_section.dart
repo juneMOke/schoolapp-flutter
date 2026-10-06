@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/sujet
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_notation_atoms.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval_detail/eval_section_card.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Section « Sujet » du détail (spec S2) : pliable, avec son résumé et la
@@ -105,11 +106,13 @@ class _SujetSectionState extends State<SujetSection> {
     medallionIcon: Icons.list_alt_rounded,
     primaryAction: PermissionGate(
       requires: const [Perm.academicsGradeWrite],
-      child: EteeloButton.primary(
-        label: l10n.sujetEmptyAction,
-        icon: Icons.edit_outlined,
-        fullWidth: false,
-        onPressed: widget.onEdit,
+      child: SessionWriteGate(
+        child: EteeloButton.primary(
+          label: l10n.sujetEmptyAction,
+          icon: Icons.edit_outlined,
+          fullWidth: false,
+          onPressed: widget.onEdit,
+        ),
       ),
     ),
   );

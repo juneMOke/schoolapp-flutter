@@ -5,7 +5,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/create_evaluation_request.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
@@ -18,6 +17,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/eval_
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_chapters_field.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_creation_cascade.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_creation_footer.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_max_poids_fields.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_type_cards.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_cadre_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -101,6 +101,9 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
   ];
 
   void _onTypeChanged(TypeEvaluation type) {
+    // Retoucher la carte déjà choisie ne réapplique pas les défauts : la
+    // saisie de l'utilisateur reste.
+    if (type == _type) return;
     final defaults = evalTypeDefaults(type);
     setState(() {
       _type = type;
@@ -222,7 +225,11 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
               onChanged: (d) => setState(() => _date = d),
             ),
             const SizedBox(height: AppSpacing.md),
-            _maxAndPoids(l10n),
+            EvalMaxPoidsFields(
+              maxController: _maxController,
+              poidsController: _poidsController,
+              onChanged: () => setState(() {}),
+            ),
             const SizedBox(height: AppSpacing.md),
             EvalChaptersField(
               options: widget.detail.chapitresDisponibles,
@@ -256,29 +263,4 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
       },
     );
   }
-
-  Widget _maxAndPoids(AppLocalizations l10n) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(
-        child: EteeloTextInput(
-          label: l10n.evalCreateFieldMax,
-          controller: _maxController,
-          required: true,
-          keyboardType: EteeloTextInputType.number,
-          onChanged: (_) => setState(() {}),
-        ),
-      ),
-      const SizedBox(width: AppSpacing.md),
-      Expanded(
-        child: EteeloTextInput(
-          label: l10n.evalCreateFieldPoids,
-          controller: _poidsController,
-          required: true,
-          keyboardType: EteeloTextInputType.number,
-          onChanged: (_) => setState(() {}),
-        ),
-      ),
-    ],
-  );
 }

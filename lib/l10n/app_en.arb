@@ -1831,6 +1831,30 @@
   "sujetRejectedGeneric": "The server refused the subject. Edit it, then save it.",
   "sujetResendWithoutMax": "Resend without changing the maximum",
   "sujetPendingSend": "Waiting to be sent",
+  "sujetResentToast": "Subject resent without changing the maximum",
+  "sujetDiscardTitle": "Discard the changes to the subject?",
+  "sujetDiscardMessage": "The subject is not saved. Leaving will lose your changes.",
+  "sujetDiscardConfirm": "Discard",
+  "sujetDiscardCancel": "Keep editing",
+  "publicationConfirmItem": "✓ {item}",
+  "@publicationConfirmItem": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerScope": "{branche} · {classroom}",
+  "@copieViewerScope": {
+    "placeholders": {
+      "branche": {
+        "type": "String"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
   "copieSectionTitle": "Copy",
   "copiePrintedTimes": "{count, plural, =0{Never printed} =1{Printed once} other{Printed {count} times}}",
   "@copiePrintedTimes": {

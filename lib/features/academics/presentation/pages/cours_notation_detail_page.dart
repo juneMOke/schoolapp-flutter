@@ -121,7 +121,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
   void _backFromEval() {
     setState(() => _openEval = null);
     context.read<CoursNotationBloc>().add(
-      CoursNotationRequested(coursId: widget.args.coursId),
+      CoursNotationRequested(coursId: widget.args.coursId, silent: true),
     );
   }
 

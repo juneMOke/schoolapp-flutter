@@ -6,7 +6,7 @@ enum EvalDetailStatus { loading, ready, failure }
 
 /// Enregistrement du sujet : chaque issue est un état, pour que l'écran
 /// réagisse une fois (toast, sortie de l'éditeur) sans relire l'historique.
-enum SujetSaveStatus { idle, saving, saved, failed }
+enum SujetSaveStatus { idle, saving, saved, resent, failed }
 
 /// Avancement de la saisie : notes posées (notée ou absence) sur l'effectif.
 class NotesProgress extends Equatable {

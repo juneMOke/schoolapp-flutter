@@ -2122,6 +2122,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sujetPendingSend => 'Waiting to be sent';
 
   @override
+  String get sujetResentToast => 'Subject resent without changing the maximum';
+
+  @override
+  String get sujetDiscardTitle => 'Discard the changes to the subject?';
+
+  @override
+  String get sujetDiscardMessage =>
+      'The subject is not saved. Leaving will lose your changes.';
+
+  @override
+  String get sujetDiscardConfirm => 'Discard';
+
+  @override
+  String get sujetDiscardCancel => 'Keep editing';
+
+  @override
+  String publicationConfirmItem(String item) {
+    return '✓ $item';
+  }
+
+  @override
+  String copieViewerScope(String branche, String classroom) {
+    return '$branche · $classroom';
+  }
+
+  @override
   String get copieSectionTitle => 'Copy';
 
   @override

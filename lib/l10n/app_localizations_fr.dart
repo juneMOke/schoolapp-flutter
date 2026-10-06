@@ -2132,6 +2132,32 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sujetPendingSend => 'En attente d\'envoi';
 
   @override
+  String get sujetResentToast => 'Sujet renvoyé sans changer le maximum';
+
+  @override
+  String get sujetDiscardTitle => 'Abandonner les modifications du sujet ?';
+
+  @override
+  String get sujetDiscardMessage =>
+      'Le sujet n\'est pas enregistré. En quittant, vos modifications seront perdues.';
+
+  @override
+  String get sujetDiscardConfirm => 'Abandonner';
+
+  @override
+  String get sujetDiscardCancel => 'Continuer la rédaction';
+
+  @override
+  String publicationConfirmItem(String item) {
+    return '✓ $item';
+  }
+
+  @override
+  String copieViewerScope(String branche, String classroom) {
+    return '$branche · $classroom';
+  }
+
+  @override
   String get copieSectionTitle => 'Copie';
 
   @override

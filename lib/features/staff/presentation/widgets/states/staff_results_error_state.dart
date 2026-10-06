@@ -70,12 +70,6 @@ class StaffResultsErrorState extends StatelessWidget {
     );
   }
 
-  static EteeloErrorType typeOf(Failure? failure) => switch (failure) {
-    NetworkFailure() => EteeloErrorType.network,
-    InvalidCredentialsFailure() ||
-    AuthFailure() => EteeloErrorType.unauthorized,
-    UnauthorizedFailure() => EteeloErrorType.forbidden,
-    ServerFailure() || StorageFailure() => EteeloErrorType.server,
-    _ => EteeloErrorType.unknown,
-  };
+  static EteeloErrorType typeOf(Failure? failure) =>
+      EteeloErrorType.fromFailure(failure);
 }

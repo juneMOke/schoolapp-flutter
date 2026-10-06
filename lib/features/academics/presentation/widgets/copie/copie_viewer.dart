@@ -29,7 +29,7 @@ Future<void> openCopieViewer(
     );
     document = PrintableDocument(
       bytes: bytes,
-      fileName: '${content.titre}.pdf',
+      fileName: _fileName(content.titre, fallback: l10n.copieSectionTitle),
       reference: options.reponses ? l10n.copieViewerCorrigeWarning : null,
     );
   } catch (_) {
@@ -37,7 +37,10 @@ Future<void> openCopieViewer(
     return;
   }
   if (!context.mounted) return;
-  final scope = '${content.brancheNom} · ${content.classroomName}';
+  final scope = l10n.copieViewerScope(
+    content.brancheNom,
+    content.classroomName,
+  );
   await showEteeloDocumentViewer(
     context,
     title: options.reponses
@@ -53,4 +56,11 @@ Future<void> openCopieViewer(
       messenger?.showSnackBar(SnackBar(content: Text(l10n.copieSharedToast)));
     },
   );
+}
+
+/// Nom de fichier du PDF : le titre, débarrassé des caractères qu'un système
+/// de fichiers refuse (un titre de chapitre peut contenir « / »).
+String _fileName(String titre, {required String fallback}) {
+  final safe = titre.replaceAll(RegExp(r'[\\/:*?"<>|]+'), '-').trim();
+  return '${safe.isEmpty ? fallback : safe}.pdf';
 }

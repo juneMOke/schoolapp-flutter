@@ -37,15 +37,23 @@ class CopieSection extends StatefulWidget {
 class _CopieSectionState extends State<CopieSection> {
   CopieOptions _options = const CopieOptions();
 
-  void _open() {
+  /// La copie se construit (polices, PDF) : un second appui n'ouvre pas une
+  /// seconde visionneuse.
+  bool _opening = false;
+
+  Future<void> _open() async {
+    if (_opening) return;
     final options = _options;
-    openCopieViewer(
+    setState(() => _opening = true);
+    await openCopieViewer(
       context,
       content: widget.content,
       options: options,
       onDiffused: (kind) =>
           widget.onDiffused((kind: kind, corrige: options.reponses)),
     );
+    if (!mounted) return;
+    setState(() => _opening = false);
   }
 
   @override
@@ -103,7 +111,8 @@ class _CopieSectionState extends State<CopieSection> {
                     : l10n.copieShow,
                 icon: Icons.visibility_outlined,
                 fullWidth: false,
-                onPressed: hasQuestions ? _open : null,
+                isLoading: _opening,
+                onPressed: hasQuestions && !_opening ? _open : null,
               ),
               NotationPill(
                 color: AppColors.textSecondary,

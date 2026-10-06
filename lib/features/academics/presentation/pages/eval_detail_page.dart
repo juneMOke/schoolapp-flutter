@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_event.dart';
@@ -39,11 +40,15 @@ class EvalDetailPage extends StatelessWidget {
   final VoidCallback onBack;
   final ValueChanged<EvalDetailArgs> onOpenSaisie;
 
+  /// Change quand la page doit se relire (retour de la saisie).
+  final int refreshToken;
+
   const EvalDetailPage({
     super.key,
     required this.args,
     required this.onBack,
     required this.onOpenSaisie,
+    this.refreshToken = 0,
   });
 
   @override
@@ -69,6 +74,7 @@ class EvalDetailPage extends StatelessWidget {
         args: args,
         onBack: onBack,
         onOpenSaisie: onOpenSaisie,
+        refreshToken: refreshToken,
       ),
     );
   }
@@ -78,11 +84,13 @@ class _EvalDetailView extends StatefulWidget {
   final EvalDetailArgs args;
   final VoidCallback onBack;
   final ValueChanged<EvalDetailArgs> onOpenSaisie;
+  final int refreshToken;
 
   const _EvalDetailView({
     required this.args,
     required this.onBack,
     required this.onOpenSaisie,
+    required this.refreshToken,
   });
 
   @override
@@ -96,9 +104,39 @@ class _EvalDetailViewState extends State<_EvalDetailView> {
   EvalDetailArgs get _args => widget.args;
 
   @override
+  void didUpdateWidget(_EvalDetailView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.refreshToken != oldWidget.refreshToken) {
+      // Retour de la saisie : avancement, notes en file.
+      context.read<EvalDetailBloc>().add(EvalDetailRequested(_args.eval.id));
+      context.read<PublicationBloc>().add(
+        PublicationContextRequested(_args.eval.id),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _draft?.dispose();
     super.dispose();
+  }
+
+  /// Quitter avec un sujet modifié non enregistré demande confirmation.
+  Future<void> _leave() async {
+    if (_draft?.isDirty != true) return widget.onBack();
+    final l10n = AppLocalizations.of(context)!;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (_) => AppConfirmationDialog(
+        title: l10n.sujetDiscardTitle,
+        message: l10n.sujetDiscardMessage,
+        confirmLabel: l10n.sujetDiscardConfirm,
+        cancelLabel: l10n.sujetDiscardCancel,
+        isDestructive: true,
+      ),
+    );
+    if (!mounted || discard != true) return;
+    widget.onBack();
   }
 
   /// En-tête relu : avancement local et maximum ajusté.
@@ -156,6 +194,8 @@ class _EvalDetailViewState extends State<_EvalDetailView> {
           );
         }
         _closeEditor();
+      case SujetSaveStatus.resent:
+        AppSnackBar.showSuccess(context, l10n.sujetResentToast);
       case SujetSaveStatus.failed:
         AppSnackBar.showError(context, l10n.sujetSaveError);
       case SujetSaveStatus.idle || SujetSaveStatus.saving:
@@ -180,7 +220,7 @@ class _EvalDetailViewState extends State<_EvalDetailView> {
                 brancheNom: args.brancheNom,
                 classroomName: args.classroomName,
                 evalName: evalDisplayName(context, args.eval),
-                onBack: widget.onBack,
+                onBack: _leave,
               ),
               const SizedBox(height: AppSpacing.lg),
               EvalSummaryCard(

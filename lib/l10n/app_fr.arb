@@ -1777,6 +1777,30 @@
   "sujetRejectedGeneric": "Le serveur a refusé le sujet. Modifiez-le puis enregistrez-le.",
   "sujetResendWithoutMax": "Renvoyer sans changer le maximum",
   "sujetPendingSend": "En attente d'envoi",
+  "sujetResentToast": "Sujet renvoyé sans changer le maximum",
+  "sujetDiscardTitle": "Abandonner les modifications du sujet ?",
+  "sujetDiscardMessage": "Le sujet n'est pas enregistré. En quittant, vos modifications seront perdues.",
+  "sujetDiscardConfirm": "Abandonner",
+  "sujetDiscardCancel": "Continuer la rédaction",
+  "publicationConfirmItem": "✓ {item}",
+  "@publicationConfirmItem": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerScope": "{branche} · {classroom}",
+  "@copieViewerScope": {
+    "placeholders": {
+      "branche": {
+        "type": "String"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
   "copieSectionTitle": "Copie",
   "copiePrintedTimes": "{count, plural, =0{Jamais imprimée} =1{Imprimée 1 fois} other{Imprimée {count} fois}}",
   "@copiePrintedTimes": {

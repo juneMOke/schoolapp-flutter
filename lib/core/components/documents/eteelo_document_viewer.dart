@@ -93,8 +93,11 @@ class EteeloDocumentViewerView extends StatelessWidget {
   /// partager sans le rouvrir.
   final bool closeAfterPrint;
 
-  /// Appelés quand l'impression, ou le partage, a abouti — ni annulé, ni en
-  /// échec. Un appelant y journalise la diffusion d'une pièce.
+  /// Appelés quand l'impression, ou le partage, a abouti — sans échec, et
+  /// sans annulation quand le canal la rapporte. ⚠️ Le partage rend la main
+  /// dès que la feuille du système s'est ouverte : un partage abandonné
+  /// ensuite compte comme partagé. Un appelant y journalise la diffusion
+  /// d'une pièce.
   final VoidCallback? onPrinted;
   final VoidCallback? onShared;
 

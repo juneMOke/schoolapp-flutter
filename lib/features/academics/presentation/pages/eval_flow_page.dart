@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/eval_detail_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/eval_saisie_page.dart';
 
 /// Niveau « évaluation » de la coquille Cours (spec § Anatomie) : le détail,
-/// et sous lui la saisie des notes. Revenir de la saisie remonte le détail,
-/// qui relit son état en local.
+/// et au-dessus de lui la saisie des notes. Revenir de la saisie retrouve le
+/// détail tel qu'il était, qui relit son état en local.
 class EvalFlowPage extends StatefulWidget {
   final EvalDetailArgs args;
 
@@ -25,27 +24,36 @@ class _EvalFlowPageState extends State<EvalFlowPage> {
   late EvalDetailArgs _args = widget.args;
   bool _inSaisie = false;
 
+  /// Incrémenté au retour de la saisie : le détail, resté monté, se relit.
+  int _returns = 0;
+
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: AppMotion.standard,
-      switchInCurve: AppMotion.outCurve,
-      switchOutCurve: AppMotion.inCurve,
-      child: _inSaisie
-          ? EvalSaisiePage(
-              key: const ValueKey<String>('eval-saisie'),
-              args: _args,
-              onBack: () => setState(() => _inSaisie = false),
-            )
-          : EvalDetailPage(
-              key: const ValueKey<String>('eval-detail'),
-              args: _args,
-              onBack: widget.onBack,
-              onOpenSaisie: (args) => setState(() {
-                _args = args;
-                _inSaisie = true;
-              }),
-            ),
+    // Le détail reste monté sous la saisie : au retour, il garde ses sections
+    // dépliées et ses options de copie, et se relit sans squelette.
+    return IndexedStack(
+      index: _inSaisie ? 1 : 0,
+      children: [
+        EvalDetailPage(
+          args: _args,
+          refreshToken: _returns,
+          onBack: widget.onBack,
+          onOpenSaisie: (args) => setState(() {
+            _args = args;
+            _inSaisie = true;
+          }),
+        ),
+        if (_inSaisie)
+          EvalSaisiePage(
+            args: _args,
+            onBack: () => setState(() {
+              _inSaisie = false;
+              _returns++;
+            }),
+          )
+        else
+          const SizedBox.shrink(),
+      ],
     );
   }
 }

@@ -216,7 +216,13 @@ void main() {
       ),
     ),
     act: (bloc) => bloc.add(const EvalDetailSujetResendRequested('ev-1')),
+    skip: 1,
     expect: () => [
+      const EvalDetailState(
+        status: EvalDetailStatus.ready,
+        sujet: EvaluationSujet(envoi: SujetEnvoi.enAttente),
+        sujetSave: SujetSaveStatus.resent,
+      ),
       const EvalDetailState(
         status: EvalDetailStatus.ready,
         sujet: EvaluationSujet(envoi: SujetEnvoi.enAttente),
