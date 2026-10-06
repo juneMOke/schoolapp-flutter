@@ -91,8 +91,9 @@ class EvaluationSujetLocalDataSource {
   }
 
   /// Applique le sujet descendu du serveur sur [executor] (la transaction du
-  /// pull). Un sujet local `PENDING_SYNC` gagne : rien n'est écrit. Renvoie
-  /// `true` si le sujet a été écrit.
+  /// pull). Un sujet local en attente ou refusé gagne : le brouillon reste,
+  /// rien n'est écrit. [sujet] porte son statut (`SYNCED`, ou nul si aucun
+  /// sujet n'a jamais été envoyé). Renvoie `true` si le sujet a été écrit.
   Future<bool> applyPulledSujet(
     DatabaseExecutor executor, {
     required String evaluationId,
@@ -100,10 +101,26 @@ class EvaluationSujetLocalDataSource {
   }) async {
     final updated = await executor.update(
       _table,
-      {...sujet.toMap(), 'sujet_sync_status': SyncState.synced.dbValue},
-      where: 'id = ? AND (sujet_sync_status IS NULL OR sujet_sync_status != ?)',
-      whereArgs: [evaluationId, SyncState.pendingSync.dbValue],
+      sujet.toMap(),
+      where: 'id = ? AND (sujet_sync_status IS NULL OR sujet_sync_status = ?)',
+      whereArgs: [evaluationId, SyncState.synced.dbValue],
     );
     return updated > 0;
+  }
+
+  /// Le serveur a gardé un sujet plus récent que celui envoyé à
+  /// [pushedUpdatedAt] : on prend le sien, sauf si le brouillon local a été
+  /// ré-édité depuis l'envoi (il repartira).
+  Future<void> replaceSupersededSujet({
+    required String evaluationId,
+    required int pushedUpdatedAt,
+    required EvaluationSujetRow serverSujet,
+  }) async {
+    await _db.update(
+      _table,
+      serverSujet.toMap(),
+      where: 'id = ? AND sujet_updated_at = ?',
+      whereArgs: [evaluationId, pushedUpdatedAt],
+    );
   }
 }

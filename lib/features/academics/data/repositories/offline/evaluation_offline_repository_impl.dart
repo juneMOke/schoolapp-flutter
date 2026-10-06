@@ -87,6 +87,7 @@ class EvaluationOfflineRepositoryImpl {
         titre: titre,
       );
 
+      final sujet = EvaluationSujetRow.fromEntity(cadre, const []);
       final entry = OutboxEntry(
         id: aggregateOutboxId(id),
         aggregateType: kEvaluationAggregateType,
@@ -95,14 +96,14 @@ class EvaluationOfflineRepositoryImpl {
         payload: EvaluationPushRequestModel(
           authorId: _currentUser?.uid,
           coursId: coursId,
-          evaluation: EvaluationInputModel.fromRow(row),
+          evaluation: EvaluationInputModel.fromRow(row, sujet: sujet),
         ).toJsonString(),
         createdAt: nowMs,
       );
 
       await _local.createEvaluationWithOutbox(
         row: row,
-        sujet: EvaluationSujetRow.fromEntity(cadre, const []),
+        sujet: sujet,
         outboxEntry: entry,
       );
       // Flush opportuniste : si connecté, l'évaluation part tout de suite.

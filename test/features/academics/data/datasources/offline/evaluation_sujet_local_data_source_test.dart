@@ -175,7 +175,12 @@ void main() {
       await sujets.applyPulledSujet(
         db,
         evaluationId: 'ev-1',
-        sujet: const EvaluationSujetRow(questions: [q2], dureeMinutes: 30),
+        sujet: const EvaluationSujetRow(
+          questions: [q2],
+          dureeMinutes: 30,
+          updatedAt: 4000,
+          syncStatus: 'SYNCED',
+        ),
       );
 
       final sujet = (await sujets.getSujet('ev-1'))!;

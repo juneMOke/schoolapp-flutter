@@ -1251,6 +1251,20 @@ class AppConstants {
   static const String syncAcademicsNotesEndpoint =
       '/api/v1/sync/academics/notes';
 
+  /// Le sujet d'une évaluation, remplacé d'un bloc (cadre + questions +
+  /// maximum ?) — dernier enregistrement gagnant sur `clientUpdatedAt`.
+  static const String syncAcademicsEvaluationSujetEndpoint =
+      '/api/v1/sync/academics/evaluations/{evaluationId}/sujet';
+
+  /// Une impression ou un partage de la copie (journal, insert seul).
+  static const String syncAcademicsEvaluationCopieLogEndpoint =
+      '/api/v1/sync/academics/evaluations/{evaluationId}/copie-log';
+
+  /// Publier (`POST`) ou retirer (`DELETE`) le sujet, le corrigé ou les
+  /// notes — **en ligne**, jamais rejoué : publier envoie un WhatsApp.
+  static const String syncAcademicsEvaluationPublicationEndpoint =
+      '/api/v1/sync/academics/evaluations/{evaluationId}/publications/{kind}';
+
   // ── Programme de cours (chapitres) — contrat proposé, P0 à confirmer ──
   //
   // Toutes les écritures de la tablette passent sous `/sync`, avec des
