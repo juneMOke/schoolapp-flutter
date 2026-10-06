@@ -1830,6 +1830,143 @@
   "sujetRejectedQuestionMismatch": "The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.",
   "sujetRejectedGeneric": "The server refused the subject. Edit it, then save it.",
   "sujetResendWithoutMax": "Resend without changing the maximum",
+  "copieSectionTitle": "Copy",
+  "copiePrintedTimes": "{count, plural, =0{Never printed} =1{Printed once} other{Printed {count} times}}",
+  "@copiePrintedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieSharedTimes": "{count, plural, =0{never shared} =1{shared once} other{shared {count} times}}",
+  "@copieSharedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieOptionsLabel": "Show on the copy",
+  "copieOptionProgramme": "To revise",
+  "copieOptionPoints": "Points",
+  "copieOptionConsignes": "Instructions",
+  "copieOptionDuree": "Duration",
+  "copieOptionReponses": "Answers",
+  "copieCorrigeWarning": "This is an answer key — do not hand it out before the test.",
+  "copieShow": "Show the copy",
+  "copieShowCorrige": "Show the answer key",
+  "copieNeedsQuestion": "Add at least one question to the subject.",
+  "copiePrintCount": "{count, plural, =1{1 print} other{{count} prints}}",
+  "@copiePrintCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieShareCount": "{count, plural, =1{1 share} other{{count} shares}}",
+  "@copieShareCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieLastDiffusion": "Last shared: {label}",
+  "@copieLastDiffusion": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "copieHistory": "History",
+  "copieCorrigePill": "answer key",
+  "copieDiffusionPrinted": "printed on {date}",
+  "@copieDiffusionPrinted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "copieDiffusionShared": "shared ({canal}) on {date}",
+  "@copieDiffusionShared": {
+    "placeholders": {
+      "canal": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "copieCanalSysteme": "system share",
+  "copieCanalWhatsapp": "WhatsApp",
+  "copieCanalEmail": "email",
+  "copieCanalLien": "link",
+  "copieViewerTitle": "Student copy — {scope}",
+  "@copieViewerTitle": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerTitleCorrige": "Answer key — {scope}",
+  "@copieViewerTitleCorrige": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerCorrigeWarning": "Answer key: do not hand out before the test",
+  "copieBuildError": "The copy could not be prepared. Try again.",
+  "copiePrintedToast": "Copy sent to the printer",
+  "copieSharedToast": "Copy shared",
+  "copieSheetDuree": "Duration: {duree}",
+  "@copieSheetDuree": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetNotedOn": "Marked out of {max} pts",
+  "@copieSheetNotedOn": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetName": "Name:",
+  "copieSheetGrade": "Grade: ____ / {max}",
+  "@copieSheetGrade": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetQuestionPoints": "({points} pts)",
+  "@copieSheetQuestionPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetCorrige": "Answer — {answer}",
+  "@copieSheetCorrige": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "evalRejectionPeriodClosed": "Rejected: closed period",
   "evalRejectionExamNotAllowed": "Rejected: exam not allowed",
   "evalRejectionMaxReached": "Rejected: cap reached",

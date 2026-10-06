@@ -2129,6 +2129,173 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sujetResendWithoutMax => 'Renvoyer sans changer le maximum';
 
   @override
+  String get copieSectionTitle => 'Copie';
+
+  @override
+  String copiePrintedTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Imprimée $count fois',
+      one: 'Imprimée 1 fois',
+      zero: 'Jamais imprimée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String copieSharedTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'partagée $count fois',
+      one: 'partagée 1 fois',
+      zero: 'jamais partagée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get copieOptionsLabel => 'Afficher sur la copie';
+
+  @override
+  String get copieOptionProgramme => 'Programme';
+
+  @override
+  String get copieOptionPoints => 'Points';
+
+  @override
+  String get copieOptionConsignes => 'Consignes';
+
+  @override
+  String get copieOptionDuree => 'Durée';
+
+  @override
+  String get copieOptionReponses => 'Réponses';
+
+  @override
+  String get copieCorrigeWarning =>
+      'C\'est un corrigé — à ne pas distribuer avant l\'épreuve.';
+
+  @override
+  String get copieShow => 'Afficher la copie';
+
+  @override
+  String get copieShowCorrige => 'Afficher le corrigé';
+
+  @override
+  String get copieNeedsQuestion => 'Ajoutez au moins une question au sujet.';
+
+  @override
+  String copiePrintCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count impressions',
+      one: '1 impression',
+      zero: '0 impression',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String copieShareCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count partages',
+      one: '1 partage',
+      zero: '0 partage',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String copieLastDiffusion(String label) {
+    return 'Dernière diffusion : $label';
+  }
+
+  @override
+  String get copieHistory => 'Historique';
+
+  @override
+  String get copieCorrigePill => 'corrigé';
+
+  @override
+  String copieDiffusionPrinted(String date) {
+    return 'imprimée le $date';
+  }
+
+  @override
+  String copieDiffusionShared(String canal, String date) {
+    return 'partagée ($canal) le $date';
+  }
+
+  @override
+  String get copieCanalSysteme => 'partage du système';
+
+  @override
+  String get copieCanalWhatsapp => 'WhatsApp';
+
+  @override
+  String get copieCanalEmail => 'e-mail';
+
+  @override
+  String get copieCanalLien => 'lien';
+
+  @override
+  String copieViewerTitle(String scope) {
+    return 'Copie élève — $scope';
+  }
+
+  @override
+  String copieViewerTitleCorrige(String scope) {
+    return 'Corrigé — $scope';
+  }
+
+  @override
+  String get copieViewerCorrigeWarning =>
+      'Corrigé : à ne pas distribuer avant l\'épreuve';
+
+  @override
+  String get copieBuildError =>
+      'La copie n\'a pas pu être préparée. Réessayez.';
+
+  @override
+  String get copiePrintedToast => 'Copie envoyée à l\'impression';
+
+  @override
+  String get copieSharedToast => 'Copie partagée';
+
+  @override
+  String copieSheetDuree(String duree) {
+    return 'Durée : $duree';
+  }
+
+  @override
+  String copieSheetNotedOn(String max) {
+    return 'Noté sur $max pts';
+  }
+
+  @override
+  String get copieSheetName => 'Nom :';
+
+  @override
+  String copieSheetGrade(String max) {
+    return 'Note : ____ / $max';
+  }
+
+  @override
+  String copieSheetQuestionPoints(String points) {
+    return '($points pts)';
+  }
+
+  @override
+  String copieSheetCorrige(String answer) {
+    return 'Corrigé — $answer';
+  }
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejetée : période clôturée';
 
   @override

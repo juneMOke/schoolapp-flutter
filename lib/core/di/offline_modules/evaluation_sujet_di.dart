@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_evaluation_sujet_api.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
@@ -9,9 +10,12 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/e
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_publication_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_sujet_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_child_outbox_support.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_copie_log_outbox_handler.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_sujet_outbox_handler.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_view_applier.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/sujet/evaluation_copie_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/sujet/evaluation_sujet_repository_impl.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_copie_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_sujet_repository.dart';
 
 /// Registrar du **sujet d'une évaluation** (plan front EV) : sujet, copie,
@@ -65,11 +69,29 @@ void registerEvaluationSujet(GetIt getIt) {
     ),
   );
 
+  getIt.registerLazySingleton<EvaluationCopieRepository>(
+    () => EvaluationCopieRepositoryImpl(
+      localDataSource: getIt<EvaluationCopieLogLocalDataSource>(),
+      idGenerator: getIt<IdGenerator>(),
+      currentUser: getIt<CurrentUserContext>(),
+      syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+
   // ── Handlers d'outbox (push, routés par aggregateType) ──
   getIt<SyncEngine>().registerHandler(
     EvaluationSujetOutboxHandler(
       api: getIt<AcademicsEvaluationSujetApi>(),
       sujets: getIt<EvaluationSujetLocalDataSource>(),
+      views: getIt<EvaluationViewApplier>(),
+      support: getIt<EvaluationChildOutboxSupport>(),
+      requiredAuth: requiredAuth,
+    ),
+  );
+  getIt<SyncEngine>().registerHandler(
+    EvaluationCopieLogOutboxHandler(
+      api: getIt<AcademicsEvaluationSujetApi>(),
+      copieLog: getIt<EvaluationCopieLogLocalDataSource>(),
       views: getIt<EvaluationViewApplier>(),
       support: getIt<EvaluationChildOutboxSupport>(),
       requiredAuth: requiredAuth,

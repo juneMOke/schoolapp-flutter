@@ -3314,6 +3314,222 @@ abstract class AppLocalizations {
   /// **'Resend without changing the maximum'**
   String get sujetResendWithoutMax;
 
+  /// No description provided for @copieSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copieSectionTitle;
+
+  /// No description provided for @copiePrintedTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Never printed} =1{Printed once} other{Printed {count} times}}'**
+  String copiePrintedTimes(int count);
+
+  /// No description provided for @copieSharedTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{never shared} =1{shared once} other{shared {count} times}}'**
+  String copieSharedTimes(int count);
+
+  /// No description provided for @copieOptionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on the copy'**
+  String get copieOptionsLabel;
+
+  /// No description provided for @copieOptionProgramme.
+  ///
+  /// In en, this message translates to:
+  /// **'To revise'**
+  String get copieOptionProgramme;
+
+  /// No description provided for @copieOptionPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get copieOptionPoints;
+
+  /// No description provided for @copieOptionConsignes.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get copieOptionConsignes;
+
+  /// No description provided for @copieOptionDuree.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get copieOptionDuree;
+
+  /// No description provided for @copieOptionReponses.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get copieOptionReponses;
+
+  /// No description provided for @copieCorrigeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This is an answer key — do not hand it out before the test.'**
+  String get copieCorrigeWarning;
+
+  /// No description provided for @copieShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the copy'**
+  String get copieShow;
+
+  /// No description provided for @copieShowCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the answer key'**
+  String get copieShowCorrige;
+
+  /// No description provided for @copieNeedsQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one question to the subject.'**
+  String get copieNeedsQuestion;
+
+  /// No description provided for @copiePrintCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 print} other{{count} prints}}'**
+  String copiePrintCount(int count);
+
+  /// No description provided for @copieShareCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 share} other{{count} shares}}'**
+  String copieShareCount(int count);
+
+  /// No description provided for @copieLastDiffusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Last shared: {label}'**
+  String copieLastDiffusion(String label);
+
+  /// No description provided for @copieHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get copieHistory;
+
+  /// No description provided for @copieCorrigePill.
+  ///
+  /// In en, this message translates to:
+  /// **'answer key'**
+  String get copieCorrigePill;
+
+  /// No description provided for @copieDiffusionPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'printed on {date}'**
+  String copieDiffusionPrinted(String date);
+
+  /// No description provided for @copieDiffusionShared.
+  ///
+  /// In en, this message translates to:
+  /// **'shared ({canal}) on {date}'**
+  String copieDiffusionShared(String canal, String date);
+
+  /// No description provided for @copieCanalSysteme.
+  ///
+  /// In en, this message translates to:
+  /// **'system share'**
+  String get copieCanalSysteme;
+
+  /// No description provided for @copieCanalWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get copieCanalWhatsapp;
+
+  /// No description provided for @copieCanalEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'email'**
+  String get copieCanalEmail;
+
+  /// No description provided for @copieCanalLien.
+  ///
+  /// In en, this message translates to:
+  /// **'link'**
+  String get copieCanalLien;
+
+  /// No description provided for @copieViewerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student copy — {scope}'**
+  String copieViewerTitle(String scope);
+
+  /// No description provided for @copieViewerTitleCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer key — {scope}'**
+  String copieViewerTitleCorrige(String scope);
+
+  /// No description provided for @copieViewerCorrigeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer key: do not hand out before the test'**
+  String get copieViewerCorrigeWarning;
+
+  /// No description provided for @copieBuildError.
+  ///
+  /// In en, this message translates to:
+  /// **'The copy could not be prepared. Try again.'**
+  String get copieBuildError;
+
+  /// No description provided for @copiePrintedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy sent to the printer'**
+  String get copiePrintedToast;
+
+  /// No description provided for @copieSharedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy shared'**
+  String get copieSharedToast;
+
+  /// No description provided for @copieSheetDuree.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duree}'**
+  String copieSheetDuree(String duree);
+
+  /// No description provided for @copieSheetNotedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked out of {max} pts'**
+  String copieSheetNotedOn(String max);
+
+  /// No description provided for @copieSheetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name:'**
+  String get copieSheetName;
+
+  /// No description provided for @copieSheetGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade: ____ / {max}'**
+  String copieSheetGrade(String max);
+
+  /// No description provided for @copieSheetQuestionPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'({points} pts)'**
+  String copieSheetQuestionPoints(String points);
+
+  /// No description provided for @copieSheetCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer — {answer}'**
+  String copieSheetCorrige(String answer);
+
   /// No description provided for @evalRejectionPeriodClosed.
   ///
   /// In en, this message translates to:

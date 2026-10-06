@@ -1776,6 +1776,143 @@
   "sujetRejectedQuestionMismatch": "Le serveur a refusé le sujet : une question appartient déjà à une autre évaluation. Modifiez le sujet puis enregistrez-le.",
   "sujetRejectedGeneric": "Le serveur a refusé le sujet. Modifiez-le puis enregistrez-le.",
   "sujetResendWithoutMax": "Renvoyer sans changer le maximum",
+  "copieSectionTitle": "Copie",
+  "copiePrintedTimes": "{count, plural, =0{Jamais imprimée} =1{Imprimée 1 fois} other{Imprimée {count} fois}}",
+  "@copiePrintedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieSharedTimes": "{count, plural, =0{jamais partagée} =1{partagée 1 fois} other{partagée {count} fois}}",
+  "@copieSharedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieOptionsLabel": "Afficher sur la copie",
+  "copieOptionProgramme": "Programme",
+  "copieOptionPoints": "Points",
+  "copieOptionConsignes": "Consignes",
+  "copieOptionDuree": "Durée",
+  "copieOptionReponses": "Réponses",
+  "copieCorrigeWarning": "C'est un corrigé — à ne pas distribuer avant l'épreuve.",
+  "copieShow": "Afficher la copie",
+  "copieShowCorrige": "Afficher le corrigé",
+  "copieNeedsQuestion": "Ajoutez au moins une question au sujet.",
+  "copiePrintCount": "{count, plural, =0{0 impression} =1{1 impression} other{{count} impressions}}",
+  "@copiePrintCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieShareCount": "{count, plural, =0{0 partage} =1{1 partage} other{{count} partages}}",
+  "@copieShareCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "copieLastDiffusion": "Dernière diffusion : {label}",
+  "@copieLastDiffusion": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "copieHistory": "Historique",
+  "copieCorrigePill": "corrigé",
+  "copieDiffusionPrinted": "imprimée le {date}",
+  "@copieDiffusionPrinted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "copieDiffusionShared": "partagée ({canal}) le {date}",
+  "@copieDiffusionShared": {
+    "placeholders": {
+      "canal": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "copieCanalSysteme": "partage du système",
+  "copieCanalWhatsapp": "WhatsApp",
+  "copieCanalEmail": "e-mail",
+  "copieCanalLien": "lien",
+  "copieViewerTitle": "Copie élève — {scope}",
+  "@copieViewerTitle": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerTitleCorrige": "Corrigé — {scope}",
+  "@copieViewerTitleCorrige": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "copieViewerCorrigeWarning": "Corrigé : à ne pas distribuer avant l'épreuve",
+  "copieBuildError": "La copie n'a pas pu être préparée. Réessayez.",
+  "copiePrintedToast": "Copie envoyée à l'impression",
+  "copieSharedToast": "Copie partagée",
+  "copieSheetDuree": "Durée : {duree}",
+  "@copieSheetDuree": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetNotedOn": "Noté sur {max} pts",
+  "@copieSheetNotedOn": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetName": "Nom :",
+  "copieSheetGrade": "Note : ____ / {max}",
+  "@copieSheetGrade": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetQuestionPoints": "({points} pts)",
+  "@copieSheetQuestionPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "copieSheetCorrige": "Corrigé — {answer}",
+  "@copieSheetCorrige": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
   "evalRejectionPeriodClosed": "Rejetée : période clôturée",
   "evalRejectionExamNotAllowed": "Rejetée : examen non autorisé",
   "evalRejectionMaxReached": "Rejetée : plafond atteint",

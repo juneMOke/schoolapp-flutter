@@ -17,6 +17,9 @@ import 'package:school_app_flutter/features/academics/domain/entities/sujet/suje
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/copie/copie_bloc.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_copie_log_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/log_copie_diffusion_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_detail_args.dart';
@@ -30,6 +33,10 @@ class _MockGetNotes extends Mock implements GetNotesElevesUseCase {}
 class _MockSaveSujet extends Mock implements SaveEvaluationSujetUseCase {}
 
 class _MockResend extends Mock implements ResendSujetWithoutMaxUseCase {}
+
+class _MockGetLog extends Mock implements GetCopieLogUseCase {}
+
+class _MockLog extends Mock implements LogCopieDiffusionUseCase {}
 
 void main() {
   final getIt = GetIt.instance;
@@ -50,6 +57,14 @@ void main() {
       ),
     );
     getIt.registerSingleton<IdGenerator>(const IdGenerator(Uuid()));
+    final getLog = _MockGetLog();
+    when(() => getLog(any())).thenAnswer((_) async => const Right([]));
+    getIt.registerFactory<CopieBloc>(
+      () => CopieBloc(
+        getCopieLogUseCase: getLog,
+        logCopieDiffusionUseCase: _MockLog(),
+      ),
+    );
   });
   tearDown(() => getIt.reset());
 

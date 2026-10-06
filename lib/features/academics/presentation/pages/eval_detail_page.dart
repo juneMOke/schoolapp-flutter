@@ -11,7 +11,6 @@ import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_state.dart';
-import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/sujet_draft_controller.dart';
@@ -20,13 +19,11 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/commo
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_back_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_summary_card.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval_detail/eval_detail_action_bar.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/eval_detail/eval_detail_sections.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/copie/copie_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/copie/copie_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/states/eval_saisie_results_error_state.dart';
-import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_editor.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_editor_bar.dart';
-import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_read_view.dart';
-import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_rejection_banner.dart';
-import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_section.dart';
-import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -49,10 +46,18 @@ class EvalDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<EvalDetailBloc>(
-      create: (_) =>
-          GetIt.instance<EvalDetailBloc>()
-            ..add(EvalDetailRequested(args.eval.id)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<EvalDetailBloc>(
+          create: (_) =>
+              GetIt.instance<EvalDetailBloc>()
+                ..add(EvalDetailRequested(args.eval.id)),
+        ),
+        BlocProvider<CopieBloc>(
+          create: (_) =>
+              GetIt.instance<CopieBloc>()..add(CopieLogRequested(args.eval.id)),
+        ),
+      ],
       child: _EvalDetailView(
         args: args,
         onBack: onBack,
@@ -222,37 +227,11 @@ class _EvalDetailViewState extends State<_EvalDetailView> {
           context.read<AuthBloc>().add(const AuthLogoutRequested()),
       onContactAdmin: contactSupport,
     ),
-    EvalDetailStatus.ready => Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SujetSection(
-          sujet: state.sujet,
-          maxPoints: args.eval.maxPoints,
-          // Ouverte si l'évaluation est à venir ou son sujet vide.
-          initiallyExpanded:
-              state.sujet.isEmpty || args.eval.state == EvalState.upcoming,
-          onEdit: () => _startEdit(state, args.eval.maxPoints),
-          readView: () => SujetReadView(
-            sujet: state.sujet,
-            onEdit: () => _startEdit(state, args.eval.maxPoints),
-          ),
-          notice: state.sujet.envoi == SujetEnvoi.refuse
-              ? SujetRejectionBanner(
-                  code: state.sujet.rejectionCode,
-                  onResendWithoutMax: () => context.read<EvalDetailBloc>().add(
-                    EvalDetailSujetResendRequested(_args.eval.id),
-                  ),
-                )
-              : null,
-          editor: _draft == null
-              ? null
-              : SujetEditor(
-                  draft: _draft!,
-                  chapitres: args.eval.chapitres,
-                  maxLocked: state.progress.maxLocked,
-                ),
-        ),
-      ],
+    EvalDetailStatus.ready => EvalDetailSections(
+      args: args,
+      state: state,
+      draft: _draft,
+      onEditSujet: () => _startEdit(state, args.eval.maxPoints),
     ),
   };
 }
