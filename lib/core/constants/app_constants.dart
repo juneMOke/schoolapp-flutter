@@ -796,7 +796,10 @@ class AppConstants {
   // d'école.
   // v60 (2026-10-05) : `student_photos.thumbnail_sha256` — l'empreinte de la
   // vignette, `ETag` de `size=96`. Additif. Palier d'école.
-  static const int offlineDbSchemaVersion = 60;
+  // v61 (2026-10-06) : le programme de cours (`chapitre`, `chapitre_note`,
+  // `chapitre_ressource`) et la recopie des chapitres de `ref_chapitre` en
+  // ébauches. Création pure. Palier d'école.
+  static const int offlineDbSchemaVersion = 61;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -852,6 +855,14 @@ class AppConstants {
   /// attente). **Ne se renomme pas** : une photo en attente d'envoi n'existe
   /// que là.
   static const String studentPhotosDirectoryName = 'student_photos';
+
+  /// Clé du secure storage qui scelle les fichiers du programme de cours.
+  static const String courseProgrammeKeyStorageKey = 'course_programme_key';
+
+  /// Sous-répertoire des fichiers des ressources du programme (à envoyer, ou
+  /// copies de lecture). **Ne se renomme pas** : une ressource en attente
+  /// d'envoi n'existe que là.
+  static const String courseProgrammeDirectoryName = 'course_programme';
 
   // ─── Éditique — cache de restitution (ADR-012 D-2, RG-012-5) ─────────────────
   /// Budget disque du cache éditique, en octets (2 Gio).
@@ -1235,6 +1246,53 @@ class AppConstants {
   ///    l'état serveur. Toujours 200.
   static const String syncAcademicsNotesEndpoint =
       '/api/v1/sync/academics/notes';
+
+  // ── Programme de cours (chapitres) — contrat proposé, P0 à confirmer ──
+  //
+  // Toutes les écritures de la tablette passent sous `/sync`, avec des
+  // identifiants créés par la tablette. Un 403 `COURS_NOT_OWNED` dit que le
+  // cours n'est plus au professeur ; un 409 `CHAPITRE_NOT_YET_SYNCED` qu'un
+  // enfant (note, ressource, ordre, évaluation) est arrivé avant son chapitre.
+
+  /// **GET** = delta keyset des chapitres d'un cours (`coursId`, `cursor`,
+  /// `limit`), chapitre entier (fiche + notes + ressources) ;
+  /// **POST** = envoi de la fiche (le dernier enregistrement gagne) — 201 créé,
+  /// 200 avec la fiche retenue et son verdict, 410 si supprimé entre-temps.
+  static const String syncAcademicsChapitresEndpoint =
+      '/api/v1/sync/academics/chapitres';
+
+  /// **DELETE** = supprimer un chapitre (204, rejouable).
+  static const String syncAcademicsChapitreEndpoint =
+      '/api/v1/sync/academics/chapitres/{chapitreId}';
+
+  /// **PUT** = réordonner les chapitres d'un cours (liste complète des ids).
+  static const String syncAcademicsChapitresOrdreEndpoint =
+      '/api/v1/sync/academics/cours/{coursId}/chapitres-ordre';
+
+  /// **POST** = ajouter une note de séance.
+  static const String syncAcademicsChapitreNotesEndpoint =
+      '/api/v1/sync/academics/chapitre-notes';
+
+  /// **DELETE** = supprimer une note de séance (204, rejouable).
+  static const String syncAcademicsChapitreNoteEndpoint =
+      '/api/v1/sync/academics/chapitre-notes/{noteId}';
+
+  /// **PUT** (multipart `metadata` + `file`) = joindre une ressource ;
+  /// **DELETE** = la retirer.
+  static const String syncAcademicsChapitreRessourceEndpoint =
+      '/api/v1/sync/academics/chapitres/{chapitreId}/ressources/{ressourceId}';
+
+  /// **GET** = les octets d'une ressource-document, à la demande (`ETag`).
+  static const String academicsChapitreRessourceContentEndpoint =
+      '/api/v1/academics/chapitres/{chapitreId}/ressources/{ressourceId}/contenu';
+
+  /// **GET** = programme d'un cours, en ligne (lecture de la direction).
+  static const String academicsCoursChapitresEndpoint =
+      '/api/v1/academics/cours/{coursId}/chapitres';
+
+  /// **GET** = un chapitre entier, en ligne (lecture de la direction).
+  static const String academicsChapitreEndpoint =
+      '/api/v1/academics/chapitres/{chapitreId}';
 
   /// Pull du **bundle** grille & périodes (réf de saisie, lecture seule),
   /// cadré **enseignant dérivé du token**. Mécanisme **ETag applicatif**

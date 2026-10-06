@@ -1450,7 +1450,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuCourses => 'Cours';
 
   @override
-  String get subMenuMyCourses => 'Mes cours';
+  String get subMenuMyCourses => 'Mes évaluations';
 
   @override
   String get subMenuTimetable => 'Emploi du temps';
@@ -1591,7 +1591,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get courseDetailBackToCourses => 'Mes cours';
+  String get courseDetailBackToCourses => 'Mes évaluations';
 
   @override
   String courseDetailEvaluationCount(int count) {
@@ -11825,9 +11825,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Pièce indisponible : elle n\'est pas sur la tablette et le serveur ne l\'a pas rendue.';
 
   @override
-  String get staffDocumentClose => 'Fermer';
-
-  @override
   String get staffDocumentOpenOffline =>
       'Hors ligne : cette pièce n\'est pas encore sur la tablette.';
 
@@ -14247,4 +14244,627 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get photoCropUnavailable =>
       'La photo d\'origine n\'est pas sur ce poste : reconnectez-vous pour la recadrer.';
+
+  @override
+  String get subMenuCourseProgramme => 'Mes cours';
+
+  @override
+  String get programmeBackToCourses => 'Mes cours';
+
+  @override
+  String programmeChapitresCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chapitres',
+      one: '1 chapitre',
+      zero: 'Aucun chapitre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String programmeSeancesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances prévues',
+      one: '1 séance prévue',
+      zero: 'Aucune séance prévue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String programmeEvaluationsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count évaluations',
+      one: '1 évaluation',
+      zero: 'Aucune évaluation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get programmeProgressTitle => 'Avancement du programme';
+
+  @override
+  String programmeProgressDone(int done, int total) {
+    return '$done/$total chapitres terminés';
+  }
+
+  @override
+  String programmeProgressDetail(int enCours, int aVenir) {
+    return '$enCours en cours · $aVenir à venir';
+  }
+
+  @override
+  String programmeProgressA11y(int percent) {
+    return 'Avancement : $percent %';
+  }
+
+  @override
+  String get programmeChapitresTitle => 'Chapitres';
+
+  @override
+  String get programmeChapitresSubtitle => 'dans l\'ordre de progression';
+
+  @override
+  String get chapitreStatutPlanifie => 'Planifié';
+
+  @override
+  String get chapitreStatutEnCours => 'En cours';
+
+  @override
+  String get chapitreStatutTermine => 'Terminé';
+
+  @override
+  String chapitreRowSeances(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances',
+      one: '1 séance',
+      zero: 'Aucune séance',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapitreRowObjectifs(int done, int total) {
+    return '$done/$total objectifs';
+  }
+
+  @override
+  String chapitreRowBlocs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count blocs de contenu',
+      one: '1 bloc de contenu',
+      zero: 'Aucun bloc',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapitreRowEvaluations(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count évaluations',
+      one: '1 évaluation',
+      zero: 'Aucune évaluation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chapitreRowNotes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chapitreActionMoveUp => 'Monter';
+
+  @override
+  String get chapitreActionMoveDown => 'Descendre';
+
+  @override
+  String get chapitreActionEdit => 'Modifier';
+
+  @override
+  String get chapitreActionDelete => 'Supprimer';
+
+  @override
+  String get chapitreActionMore => 'Plus d\'actions';
+
+  @override
+  String chapitreActionOpen(int numero, String titre) {
+    return 'Ouvrir le chapitre $numero : $titre';
+  }
+
+  @override
+  String get programmeFabNewChapitre => 'Nouveau chapitre';
+
+  @override
+  String get programmeEmptyTitle => 'Programme vide';
+
+  @override
+  String get programmeEmptyMessage =>
+      'Ce cours n\'a pas encore de chapitre. Découpez le programme annuel en chapitres pour suivre l\'avancement et rattacher les évaluations.';
+
+  @override
+  String get programmeEmptyAction => 'Créer un chapitre';
+
+  @override
+  String get programmeEmptyReadOnlyMessage =>
+      'Ce cours n\'a pas encore de chapitre.';
+
+  @override
+  String get programmeLoadingA11yLabel => 'Chargement du programme';
+
+  @override
+  String get programmeErrorTitle => 'Programme illisible';
+
+  @override
+  String get programmeErrorMessage =>
+      'Le programme n\'a pas pu être lu sur cette tablette.';
+
+  @override
+  String get programmeDeleteTitle => 'Supprimer le chapitre ?';
+
+  @override
+  String programmeDeleteMessage(String titre) {
+    return '« $titre » sera retiré du programme. Les évaluations qui y étaient rattachées restent en place, mais perdent ce rattachement.';
+  }
+
+  @override
+  String get programmeDeleteConfirm => 'Supprimer';
+
+  @override
+  String get programmeChapitreDeleted => 'Chapitre supprimé';
+
+  @override
+  String get programmeWriteFailed =>
+      'L\'enregistrement a échoué sur la tablette.';
+
+  @override
+  String get syncAggregateChapitre => 'Chapitre du programme';
+
+  @override
+  String get syncAggregateChapitreOrdre => 'Ordre des chapitres';
+
+  @override
+  String get syncAggregateChapitreNote => 'Note de séance';
+
+  @override
+  String get syncAggregateChapitreRessource => 'Ressource de chapitre';
+
+  @override
+  String documentCaptureLimitsWithWord(int maxMegabytes) {
+    return 'JPEG, PNG, PDF ou Word · $maxMegabytes Mo au plus';
+  }
+
+  @override
+  String get documentCaptureImportFile => 'Importer un fichier';
+
+  @override
+  String get documentCaptureImportFileHint =>
+      'Un PDF ou un document Word déjà sur la tablette';
+
+  @override
+  String get chapitreFormNewTitle => 'Nouveau chapitre';
+
+  @override
+  String get chapitreFormEditTitle => 'Modifier le chapitre';
+
+  @override
+  String chapitreFormEyebrow(String branche, String classe) {
+    return '$branche — $classe';
+  }
+
+  @override
+  String get chapitreFormGroupIdentification => 'Identification';
+
+  @override
+  String get chapitreFormGroupPedagogie => 'Pédagogie';
+
+  @override
+  String get chapitreFormGroupPlanification => 'Planification';
+
+  @override
+  String get chapitreFormOptional => '(optionnel)';
+
+  @override
+  String get chapitreFormAdd => 'Ajouter';
+
+  @override
+  String get chapitreFormTitreLabel => 'Titre du chapitre';
+
+  @override
+  String get chapitreFormTitreHint => 'Ex. Fractions et décimaux';
+
+  @override
+  String get chapitreFormTitreRequired =>
+      'Le titre du chapitre est obligatoire.';
+
+  @override
+  String get chapitreFormTitreTooShort => 'Au moins 3 caractères.';
+
+  @override
+  String get chapitreFormResumeLabel => 'Résumé';
+
+  @override
+  String get chapitreFormResumeHint =>
+      'Ce que couvre le chapitre, en une ou deux phrases';
+
+  @override
+  String get chapitreFormObjectifsLabel => 'Objectifs d\'apprentissage';
+
+  @override
+  String get chapitreFormObjectifHint =>
+      'Ex. Résoudre une équation du 1er degré';
+
+  @override
+  String get chapitreFormObjectifRemove => 'Retirer cet objectif';
+
+  @override
+  String get chapitreFormStrategiesLabel => 'Stratégies d\'intervention';
+
+  @override
+  String get chapitreFormStrategyHint =>
+      'Autre stratégie (ex. Tutorat entre pairs)';
+
+  @override
+  String get chapitreStrategy1 => 'Exposé magistral';
+
+  @override
+  String get chapitreStrategy2 => 'Démonstration au tableau';
+
+  @override
+  String get chapitreStrategy3 => 'Travail en groupe';
+
+  @override
+  String get chapitreStrategy4 => 'Apprentissage par problèmes';
+
+  @override
+  String get chapitreStrategy5 => 'Questionnement dialogué';
+
+  @override
+  String get chapitreStrategy6 => 'Exercices gradués';
+
+  @override
+  String get chapitreStrategy7 => 'Pédagogie différenciée';
+
+  @override
+  String get chapitreStrategy8 => 'Remédiation';
+
+  @override
+  String get chapitreStrategy9 => 'Jeu de rôle';
+
+  @override
+  String get chapitreStrategy10 => 'Sortie / observation de terrain';
+
+  @override
+  String get chapitreFormRessourcesLabel => 'Ressources éducatives';
+
+  @override
+  String get ressourceEditorEmpty =>
+      'Joindre un document, un lien ou une référence de manuel';
+
+  @override
+  String get ressourceTypeRadioLabel => 'Type de ressource';
+
+  @override
+  String get ressourceTypeDocument => 'Document';
+
+  @override
+  String get ressourceTypeLien => 'Lien';
+
+  @override
+  String get ressourceTypeManuel => 'Manuel';
+
+  @override
+  String get ressourceNomLabel => 'Intitulé';
+
+  @override
+  String get ressourceNomHintDocument => 'Ex. Fiche d\'exercices n°2';
+
+  @override
+  String get ressourceNomHintLien => 'Ex. Vidéo — les fractions expliquées';
+
+  @override
+  String get ressourceNomHintManuel => 'Ex. Mathématiques 7e — Éd. CRP';
+
+  @override
+  String get ressourceUrlLabel => 'Adresse (URL)';
+
+  @override
+  String get ressourceUrlInvalid =>
+      'Adresse invalide — elle doit commencer par http:// ou https://';
+
+  @override
+  String get ressourceReferenceLabel => 'Référence (pages, chapitre)';
+
+  @override
+  String get ressourceReferenceHint => 'Ex. p. 42 à 57';
+
+  @override
+  String get ressourceChooseFile => 'Choisir un fichier';
+
+  @override
+  String get ressourceReplaceFile => 'Remplacer le fichier';
+
+  @override
+  String ressourceFileHint(int maxMegabytes) {
+    return 'PDF, Word, image — $maxMegabytes Mo max';
+  }
+
+  @override
+  String get ressourceCaptureTitle => 'Document du chapitre';
+
+  @override
+  String get ressourceAddConfirm => 'Ajouter la ressource';
+
+  @override
+  String get ressourceRemove => 'Retirer la ressource';
+
+  @override
+  String ressourceDetail(String type, String detail) {
+    return '$type · $detail';
+  }
+
+  @override
+  String get chapitreFormStatutLabel => 'État d\'avancement';
+
+  @override
+  String get chapitreFormSousPeriodeLabel => 'Rattachement';
+
+  @override
+  String get chapitreFormSousPeriodeNone => 'Non rattaché';
+
+  @override
+  String get chapitreFormSeancesLabel => 'Nombre de séances prévues';
+
+  @override
+  String get chapitreFormSeancesInvalid => 'Nombre invalide.';
+
+  @override
+  String get chapitreFormRequiredLegend =>
+      'Champ obligatoire — le reste peut être complété plus tard.';
+
+  @override
+  String get chapitreFormCreate => 'Créer le chapitre';
+
+  @override
+  String get chapitreFormSave => 'Enregistrer';
+
+  @override
+  String programmeChapitreCreated(String titre) {
+    return 'Chapitre « $titre » créé';
+  }
+
+  @override
+  String programmeChapitreUpdated(String titre) {
+    return 'Chapitre « $titre » mis à jour';
+  }
+
+  @override
+  String get ressourceKeepFailed =>
+      'Une ressource n\'a pas pu être gardée sur la tablette.';
+
+  @override
+  String get chapitreDetailEyebrow => 'Chapitre';
+
+  @override
+  String chapitreChipObjectifs(int done, int total) {
+    return '$done/$total objectifs atteints';
+  }
+
+  @override
+  String chapitreQuickStatut(String label) {
+    return 'Marquer « $label »';
+  }
+
+  @override
+  String get chapitreSectionObjectifs => 'Objectifs';
+
+  @override
+  String get chapitreSectionStrategies => 'Stratégies d\'intervention';
+
+  @override
+  String get chapitreSectionNotes => 'Notes de cours';
+
+  @override
+  String get chapitreSectionRessources => 'Ressources';
+
+  @override
+  String get chapitreSectionEvaluations => 'Évaluations liées';
+
+  @override
+  String get chapitreObjectifsEmpty =>
+      'Aucun objectif défini — ajoutez-en via « Modifier ».';
+
+  @override
+  String get chapitreStrategiesEmpty =>
+      'Aucune stratégie définie — précisez comment ce chapitre sera enseigné.';
+
+  @override
+  String get chapitreNotesEmpty =>
+      'Aucune note pour ce chapitre. Consignez ici ce qui s\'est passé en séance.';
+
+  @override
+  String get chapitreRessourcesEmpty => 'Aucune ressource attachée.';
+
+  @override
+  String get chapitreEvaluationsEmpty =>
+      'Aucune évaluation ne porte sur ce chapitre.';
+
+  @override
+  String get chapitreNoteAdd => 'Ajouter une note';
+
+  @override
+  String get chapitreNoteHint =>
+      'Observation de séance, rappel, point à reprendre…';
+
+  @override
+  String chapitreNoteDate(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get chapitreNoteDelete => 'Supprimer la note';
+
+  @override
+  String get chapitreNoteAdded => 'Note de cours ajoutée';
+
+  @override
+  String get chapitreNoteDeleted => 'Note supprimée';
+
+  @override
+  String get chapitreNoteUndo => 'Annuler';
+
+  @override
+  String chapitreRessourceOpen(String nom) {
+    return 'Ouvrir $nom';
+  }
+
+  @override
+  String get chapitreRessourceNotPreviewable =>
+      'Ce type de fichier ne s\'ouvre pas sur la tablette.';
+
+  @override
+  String get chapitreRessourceUnavailable =>
+      'Le fichier n\'a pas pu être ouvert. Vérifiez la connexion, puis réessayez.';
+
+  @override
+  String chapitreEvaluationLine(DateTime date, String max) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString · /$max pts';
+  }
+
+  @override
+  String get chapitreBlankTitle => 'Chapitre non renseigné';
+
+  @override
+  String get chapitreBlankMessage =>
+      'Ce chapitre n\'a ni objectif, ni note, ni ressource. Complétez-le pour en garder la trace d\'une année sur l\'autre.';
+
+  @override
+  String get chapitreBlankAction => 'Compléter le chapitre';
+
+  @override
+  String get chapitreErrorTitle => 'Chapitre illisible';
+
+  @override
+  String get chapitreErrorMessage =>
+      'Ce chapitre n\'a pas pu être lu sur cette tablette. Il a peut-être été supprimé.';
+
+  @override
+  String get chapitreLoadingA11yLabel => 'Chargement du chapitre';
+
+  @override
+  String get chapitreAwaitingDownloadHint =>
+      'Ce chapitre se télécharge ; il pourra être modifié une fois synchronisé.';
+
+  @override
+  String get chapitreContenuSaved => 'Contenu enregistré';
+
+  @override
+  String get chapitreSectionContenu => 'Contenu du cours';
+
+  @override
+  String get contenuWrite => 'Rédiger';
+
+  @override
+  String get contenuDone => 'Terminer';
+
+  @override
+  String get contenuEmpty =>
+      'Rédigez le contenu du chapitre : sections, notions, points à retenir, exemples.';
+
+  @override
+  String get contenuStart => 'Rédiger le contenu';
+
+  @override
+  String get contenuAddBloc => 'Ajouter un bloc';
+
+  @override
+  String get blocTypeTitre => 'Titre';
+
+  @override
+  String get blocTypeParagraphe => 'Paragraphe';
+
+  @override
+  String get blocTypeListe => 'Liste';
+
+  @override
+  String get blocTypeEncadre => 'À retenir';
+
+  @override
+  String get blocTypeExemple => 'Exemple';
+
+  @override
+  String get blocLabelTitre => 'Titre de section';
+
+  @override
+  String get blocLabelListe => 'Liste à puces';
+
+  @override
+  String get blocLabelExemple => 'Exemple / exercice';
+
+  @override
+  String get blocHintTitre => 'Titre de la section';
+
+  @override
+  String get blocHintParagraphe => 'Rédigez le paragraphe';
+
+  @override
+  String get blocHintListe => 'Un élément par ligne';
+
+  @override
+  String get blocHintEncadre => 'Ce que l\'élève doit retenir.';
+
+  @override
+  String get blocHintExemple => 'Décrivez l\'exemple ou l\'exercice.';
+
+  @override
+  String get blocMoveUp => 'Monter le bloc';
+
+  @override
+  String get blocMoveDown => 'Descendre le bloc';
+
+  @override
+  String get blocDelete => 'Supprimer le bloc';
+
+  @override
+  String contenuTooManyBlocs(int max) {
+    return 'Le contenu est limité à $max blocs.';
+  }
+
+  @override
+  String get contenuTooHeavy =>
+      'Le contenu est trop long pour être enregistré : raccourcissez-le.';
+
+  @override
+  String get ressourceUrlHint => 'https://…';
+
+  @override
+  String chapitreFormObjectifLabel(int numero) {
+    return 'Objectif $numero';
+  }
 }

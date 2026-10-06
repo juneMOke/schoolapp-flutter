@@ -111,6 +111,39 @@ void main() {
     error: error,
   );
 
+  group('chapitres cités pas encore accusés', () {
+    test('la garde locale fait attendre, sans réseau', () async {
+      await insertEval('ev-1');
+      final gated = EvaluationOutboxHandler(
+        syncApi: api,
+        localDataSource: local,
+        requiredAuth: auth,
+        currentUser: currentUser,
+        chapitresAwaitingAck: (_) async => true,
+      );
+
+      final result = await gated.dispatch(entry('ev-1'));
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+      verifyNever(() => api.submitEvaluation(any(), any()));
+    });
+
+    test('409 CHAPITRE_NOT_YET_SYNCED : attente, jamais refus', () async {
+      await insertEval('ev-1');
+      when(
+        () => api.submitEvaluation(auth, any()),
+      ).thenThrow(status(409, data: {'detailCode': kChapitreNotYetSyncedCode}));
+
+      final result = await handler.dispatch(entry('ev-1'));
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+      expect(
+        (await local.getEvaluation('ev-1'))!.syncState,
+        SyncState.pendingSync,
+      );
+    });
+  });
+
   test('succès (201/200) : évaluation SYNCED + server_updated_at', () async {
     await insertEval('ev-1');
     when(() => api.submitEvaluation(auth, any())).thenAnswer(

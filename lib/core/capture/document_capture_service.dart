@@ -26,11 +26,12 @@ class DocumentCaptureService {
        _now = now ?? DateTime.now;
 
   Future<Either<DocumentCaptureFailure, CapturedDocument>> capture(
-    DocumentCaptureMode mode,
-  ) async {
+    DocumentCaptureMode mode, {
+    DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
+  }) async {
     final RawCapture? raw;
     try {
-      raw = await _gateway.acquire(mode);
+      raw = await _gateway.acquire(mode, policy: policy);
     } on CameraUnavailableException {
       return const Left(CameraUnavailableFailure());
     } on DocumentTooLargeException catch (error) {
@@ -41,14 +42,13 @@ class DocumentCaptureService {
     if (raw == null) return const Left(DocumentCaptureCancelled());
 
     final mimeType = DocumentTypeSniffer.sniff(raw.bytes);
-    if (mimeType == null ||
-        !DocumentCapturePolicy.acceptedTypes.contains(mimeType)) {
+    if (mimeType == null || !policy.acceptedTypes.contains(mimeType)) {
       return const Left(UnsupportedDocumentFailure());
     }
     // Jugé avant le calcul : inutile de nettoyer et d'empreinter ce qui sera
     // refusé. Le nettoyage ne fait que retirer des octets, il ne peut pas
     // faire passer la pièce au-dessus du plafond.
-    if (raw.bytes.length > DocumentCapturePolicy.maxBytes) {
+    if (raw.bytes.length > policy.maxBytes) {
       return Left(DocumentTooLargeFailure(raw.bytes.length));
     }
 

@@ -56,6 +56,35 @@ class ApiErrorParser {
   static ApiErrorCode codeOf(Response<dynamic>? response) =>
       ApiErrorCode.fromWire(_bodyOf(response)?['code']);
 
+  /// La [Failure] d'une lecture en échec : celle que l'intercepteur a rangée
+  /// dans `error` (403 → [UnauthorizedFailure], 401 →
+  /// [InvalidCredentialsFailure]…), sinon le réseau (pas de réponse) ou le
+  /// serveur.
+  static Failure failureOf(DioException e) {
+    final failure = e.error;
+    if (failure is Failure) return failure;
+    return e.response == null
+        ? const NetworkFailure()
+        : ServerFailure(e.message ?? 'HTTP ${e.response?.statusCode}');
+  }
+
+  /// La cause lisible d'un échec de remontée, pour le journal de l'outbox et
+  /// la ligne « à corriger » : le code machine d'abord, la phrase du serveur
+  /// ensuite ; à défaut, le statut (ou « réseau ») et ce que Dio en dit.
+  static String pushFailureReason(DioException e) {
+    final detailCode = detailCodeOf(e.response);
+    final serverMessage = serverMessageOf(e.response);
+    if (detailCode != null) {
+      return serverMessage == null
+          ? detailCode
+          : '$detailCode — $serverMessage';
+    }
+    final status = e.response?.statusCode;
+    final where = status != null ? 'HTTP $status' : 'réseau';
+    final detail = serverMessage ?? e.message ?? e.error?.toString();
+    return detail == null || detail.isEmpty ? where : '$where — $detail';
+  }
+
   /// Message rédigé par le serveur, `null` s'il est absent ou vide.
   static String? serverMessageOf(Response<dynamic>? response) {
     final message = _bodyOf(response)?['message'];

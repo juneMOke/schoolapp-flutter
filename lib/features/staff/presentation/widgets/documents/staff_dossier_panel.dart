@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 import 'package:school_app_flutter/core/components/capture/document_capture_flow.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -49,6 +50,7 @@ class StaffDossierPanel extends StatelessWidget {
       title: AppLocalizations.of(
         context,
       )!.staffDocumentCaptureTitle(type.label),
+      policy: DocumentCapturePolicy.staffDocument,
     );
     if (captured == null) return;
     await cubit.add(member.id, type.rawCode, captured);

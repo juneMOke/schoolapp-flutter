@@ -2,6 +2,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
@@ -11,6 +12,7 @@ import 'package:school_app_flutter/core/database/schema/student_photo_schema.dar
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 part 'tenant_migrations_presence.dart';
+part 'tenant_migrations_programme.dart';
 
 /// Escalier d'un fichier d'ÉCOLE (`school_<id>.db`).
 ///
@@ -71,6 +73,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(60)) {
     await _addStudentPhotoThumbnailSha(db);
+  }
+  if (upTo(61)) {
+    await _courseProgramme(db);
   }
 }
 

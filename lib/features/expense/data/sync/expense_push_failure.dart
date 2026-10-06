@@ -31,17 +31,7 @@ class ExpensePushFailure {
   factory ExpensePushFailure.of(DioException e) {
     final status = e.response?.statusCode;
     final detailCode = ApiErrorParser.detailCodeOf(e.response);
-    final serverMessage = ApiErrorParser.serverMessageOf(e.response);
-    final String reason;
-    if (detailCode != null) {
-      reason = serverMessage == null
-          ? detailCode
-          : '$detailCode — $serverMessage';
-    } else {
-      final where = status != null ? 'HTTP $status' : 'réseau';
-      final detail = serverMessage ?? e.message ?? e.error?.toString();
-      reason = detail == null || detail.isEmpty ? where : '$where — $detail';
-    }
+    final reason = ApiErrorParser.pushFailureReason(e);
     final body = e.response?.data;
     return ExpensePushFailure._(
       status,

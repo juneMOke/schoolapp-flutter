@@ -13,8 +13,8 @@ import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 /// Les images passent par `image_picker`, qui les réduit **nativement** au
 /// grand côté et à la qualité de [DocumentCapturePolicy] : une photo de
 /// tablette de 12 Mpx sortirait sinon au-delà du plafond du serveur. Les PDF
-/// passent par `file_picker`, sans retouche — un PDF ne se réduit pas, il est
-/// accepté ou refusé tel quel.
+/// (et les documents Word, selon la politique) passent par `file_picker`, sans
+/// retouche — ils ne se réduisent pas, ils sont acceptés ou refusés tels quels.
 ///
 /// La caméra est celle du système : le cadre guide au format A4 de la
 /// maquette demanderait le greffon `camera` et un écran de prise de vue à
@@ -43,11 +43,14 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
     : _imagePicker = imagePicker ?? ImagePicker();
 
   @override
-  Future<RawCapture?> acquire(DocumentCaptureMode mode) {
+  Future<RawCapture?> acquire(
+    DocumentCaptureMode mode, {
+    DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
+  }) {
     return switch (mode) {
       DocumentCaptureMode.scan => _pickImage(ImageSource.camera),
       DocumentCaptureMode.importImage => _pickImage(ImageSource.gallery),
-      DocumentCaptureMode.importPdf => _pickPdf(),
+      DocumentCaptureMode.importPdf => _pickFile(policy),
     };
   }
 
@@ -83,10 +86,10 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
     }
   }
 
-  Future<RawCapture?> _pickPdf() async {
+  Future<RawCapture?> _pickFile(DocumentCapturePolicy policy) async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
-      allowedExtensions: const ['pdf'],
+      allowedExtensions: policy.fileExtensions,
       // Les octets ne sont chargés d'office que sur le web, qui n'a pas de
       // chemin ; ailleurs, la taille est jugée avant toute lecture.
       withData: kIsWeb,
@@ -94,7 +97,7 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
     try {
       final file = result?.files.singleOrNull;
       if (file == null) return null;
-      if (file.size > DocumentCapturePolicy.maxBytes) {
+      if (file.size > policy.maxBytes) {
         throw DocumentTooLargeException(file.size);
       }
       final bytes = file.bytes ?? await file.xFile.readAsBytes();

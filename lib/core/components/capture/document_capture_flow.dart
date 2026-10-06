@@ -13,6 +13,7 @@ typedef DocumentCaptureSheetOpener =
       BuildContext context, {
       required String title,
       bool cameraUnavailable,
+      required DocumentCapturePolicy policy,
     });
 
 /// Le parcours complet d'obtention d'une pièce, vu de l'écran : choisir un
@@ -33,9 +34,12 @@ class DocumentCaptureFlow {
     DocumentCaptureSheetOpener openSheet = showDocumentCaptureSheet,
   }) : _openSheet = openSheet;
 
+  /// [policy] : les bornes de la pièce attendue — chaque écran nomme la
+  /// sienne.
   Future<CapturedDocument?> run(
     BuildContext context, {
     required String title,
+    required DocumentCapturePolicy policy,
   }) async {
     var cameraUnavailable = false;
     while (true) {
@@ -43,10 +47,11 @@ class DocumentCaptureFlow {
         context,
         title: title,
         cameraUnavailable: cameraUnavailable,
+        policy: policy,
       );
       if (mode == null || !context.mounted) return null;
 
-      final result = await _service.capture(mode);
+      final result = await _service.capture(mode, policy: policy);
       if (!context.mounted) return null;
 
       DocumentCaptureFailure? failure;
@@ -57,7 +62,11 @@ class DocumentCaptureFlow {
         cameraUnavailable = true;
         continue;
       }
-      final message = _messageOf(AppLocalizations.of(context)!, failure!);
+      final message = _messageOf(
+        AppLocalizations.of(context)!,
+        failure!,
+        policy,
+      );
       if (message != null) AppSnackBar.showError(context, message);
       return null;
     }
@@ -67,12 +76,13 @@ class DocumentCaptureFlow {
   static String? _messageOf(
     AppLocalizations l10n,
     DocumentCaptureFailure failure,
+    DocumentCapturePolicy policy,
   ) {
     return switch (failure) {
       DocumentCaptureCancelled() => null,
       CameraUnavailableFailure() => l10n.documentCaptureCameraUnavailable,
       DocumentTooLargeFailure() => l10n.documentCaptureTooLarge(
-        DocumentCapturePolicy.maxMegabytes,
+        policy.maxMegabytes,
       ),
       UnsupportedDocumentFailure() => l10n.documentCaptureUnsupported,
       DocumentReadFailure() => l10n.documentCaptureReadError,

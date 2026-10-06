@@ -110,7 +110,12 @@ class MenuConstants {
   static const String presencesId = 'presences';
   static const String disciplinesListId = 'disciplines-list';
 
+  /// « Mes évaluations » (ex-« Mes cours ») : l'identifiant ne change pas,
+  /// seul le libellé du menu a changé.
   static const String myCoursesId = 'my-courses';
+
+  /// « Mes cours » : le programme de chaque cours (chapitres).
+  static const String courseProgrammeId = 'course-programme';
   static const String timetableId = 'timetable';
 
   static const String resultatsClasseId = 'resultats-classe';

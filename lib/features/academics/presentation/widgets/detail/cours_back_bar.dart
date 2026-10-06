@@ -6,34 +6,49 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Fil de retour de la page détail (spec § Anatomie) : bouton « Mes cours » +
-/// fil d'Ariane « Mes cours › {branche} · {classe} ». Reste visible dans tous
-/// les états (y compris erreur).
+/// Fil de retour d'une page empilée (spec § Anatomie) : bouton de retour +
+/// cran courant du fil d'Ariane, « {branche} · {classe} » par défaut. Reste
+/// visible dans tous les états (y compris erreur).
+///
+/// Sert le détail d'un cours (retour « Mes évaluations »), le programme d'un
+/// cours (retour « Mes cours ») et un chapitre (retour vers son programme,
+/// [crumb] = le titre du chapitre).
 class CoursBackBar extends StatelessWidget {
   final String brancheNom;
   final String classroomName;
   final VoidCallback onBack;
+
+  /// Libellé du bouton ; par défaut celui du détail d'un cours.
+  final String? backLabel;
+
+  /// Cran courant ; par défaut « {branche} · {classe} ».
+  final String? crumb;
 
   const CoursBackBar({
     super.key,
     required this.brancheNom,
     required this.classroomName,
     required this.onBack,
+    this.backLabel,
+    this.crumb,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final crumbLast = '$brancheNom · $classroomName';
+    final crumbLast = crumb ?? '$brancheNom · $classroomName';
 
-    // Le bouton de retour porte déjà « Mes cours » : le fil d'Ariane n'affiche
-    // donc que le cran courant (branche · classe) pour éviter la redite.
+    // Le bouton de retour porte déjà le cran parent : le fil d'Ariane n'affiche
+    // donc que le cran courant pour éviter la redite.
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        _BackButton(label: l10n.courseDetailBackToCourses, onTap: onBack),
+        _BackButton(
+          label: backLabel ?? l10n.courseDetailBackToCourses,
+          onTap: onBack,
+        ),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
           child: Text(

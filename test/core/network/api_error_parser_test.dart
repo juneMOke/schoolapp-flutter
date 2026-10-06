@@ -217,4 +217,60 @@ void main() {
       },
     );
   });
+
+  group('ApiErrorParser — échecs de remontée et de lecture', () {
+    final options = RequestOptions(path: '/x');
+    DioException error({int? status, Object? body, Object? cause}) =>
+        DioException(
+          requestOptions: options,
+          error: cause,
+          message: 'boom',
+          response: status == null
+              ? null
+              : Response(
+                  requestOptions: options,
+                  statusCode: status,
+                  data: body,
+                ),
+        );
+
+    test('pushFailureReason : le code machine, puis la phrase du serveur', () {
+      expect(
+        ApiErrorParser.pushFailureReason(
+          error(
+            status: 409,
+            body: {
+              'detailCode': 'CHAPITRE_NOT_YET_SYNCED',
+              'message': 'Attendre',
+            },
+          ),
+        ),
+        'CHAPITRE_NOT_YET_SYNCED — Attendre',
+      );
+    });
+
+    test('pushFailureReason : à défaut, le statut ou « réseau »', () {
+      expect(
+        ApiErrorParser.pushFailureReason(error(status: 500)),
+        'HTTP 500 — boom',
+      );
+      expect(ApiErrorParser.pushFailureReason(error()), 'réseau — boom');
+    });
+
+    test('failureOf : la Failure rangée par l\'intercepteur prime', () {
+      const unauthorized = UnauthorizedFailure();
+      expect(
+        ApiErrorParser.failureOf(error(status: 403, cause: unauthorized)),
+        unauthorized,
+      );
+    });
+
+    test('failureOf : sans réponse le réseau, sinon le serveur', () {
+      expect(ApiErrorParser.failureOf(error()), isA<NetworkFailure>());
+      expect(
+        ApiErrorParser.failureOf(error(status: 500)),
+        isA<ServerFailure>(),
+      );
+    });
+  });
 }

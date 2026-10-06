@@ -309,6 +309,11 @@ class AccueilModulesFactory {
         ),
         _page(
           menuId: menuId,
+          subMenuId: MenuConstants.courseProgrammeId,
+          title: l10n.subMenuCourseProgramme,
+        ),
+        _page(
+          menuId: menuId,
           subMenuId: MenuConstants.myCoursesId,
           title: l10n.subMenuMyCourses,
         ),

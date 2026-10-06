@@ -24,7 +24,13 @@ class AcademicsRefLocalDataSource {
   static const String coursTable = 'ref_cours';
   static const String brancheTable = 'ref_branche';
   static const String ligneBaremeTable = 'ref_ligne_bareme';
+
+  /// L'ancienne table des chapitres du bundle : gardée pour l'escalier de
+  /// migration hérité, vidée au prochain bundle, plus jamais lue (v61).
   static const String chapitreTable = 'ref_chapitre';
+
+  /// Les chapitres du programme de cours, seule source depuis la v61.
+  static const String programmeChapitreTable = 'chapitre';
   static const String periodeTable = 'ref_periode';
   static const String sousPeriodeTable = 'ref_sous_periode';
 
@@ -155,10 +161,9 @@ class AcademicsRefLocalDataSource {
         ligneBaremeTable,
         bundle.ligneBaremes.map((lb) => lb.toLocalRow().toMap()),
       );
-      insertAll(
-        chapitreTable,
-        bundle.chapitres.map((c) => c.toLocalRow().toMap()),
-      );
+      // Les chapitres du bundle ne sont plus rangés : le flux du programme
+      // de cours les descend entiers (v61). Le DELETE ci-dessus vide l'ancien
+      // cache.
       insertAll(
         periodeTable,
         bundle.periodes.map((p) => p.toLocalRow().toMap()),
@@ -203,16 +208,18 @@ class AcademicsRefLocalDataSource {
     return RefBrancheRow.fromMap(rows.first);
   }
 
-  /// Chapitres d'un cours, triés par `ordre`.
-  Future<List<RefChapitreRow>> getChapitresForCours(
-    String coursId, {
-    required String? ownerUid,
-  }) async {
+  /// Chapitres d'un cours, dans l'ordre du programme : ceux de la table
+  /// `chapitre` du programme de cours (descendus, ou créés sur la tablette),
+  /// et non plus ceux du bundle — un chapitre créé hors ligne doit pouvoir se
+  /// cocher à la création d'une évaluation. Un chapitre dont la suppression
+  /// attend son accusé n'est plus proposé.
+  Future<List<RefChapitreRow>> getChapitresForCours(String coursId) async {
     final rows = await _db.query(
-      chapitreTable,
-      where: 'cours_id = ? AND owner_uid = ?',
-      whereArgs: [coursId, ownerKey(ownerUid)],
-      orderBy: 'ordre ASC',
+      programmeChapitreTable,
+      columns: ['id', 'cours_id', 'titre', 'ordre'],
+      where: 'cours_id = ? AND deleted_at IS NULL',
+      whereArgs: [coursId],
+      orderBy: 'ordre ASC, rowid ASC',
     );
     return rows.map(RefChapitreRow.fromMap).toList(growable: false);
   }

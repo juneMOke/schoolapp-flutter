@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -12,11 +13,21 @@ import 'package:school_app_flutter/features/academics/data/models/offline/evalua
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart'
     show kEvaluationAggregateType;
 
+/// Code du 409 qui dit qu'un chapitre cité n'est pas encore arrivé au
+/// serveur : une attente, jamais un refus.
+const String kChapitreNotYetSyncedCode = 'CHAPITRE_NOT_YET_SYNCED';
+
+/// Les chapitres créés sur la tablette et pas encore accusés : une évaluation
+/// qui en cite un doit attendre que leur fiche soit partie.
+typedef ChapitresAwaitingAck = Future<bool> Function(List<String> chapitreIds);
+
 /// Pousse une évaluation (régime A) vers `POST /sync/academics/evaluations`.
 /// Idempotent côté serveur (uuid client honoré) : 201 créée ≡ 200 rejeu, les
 /// deux succès → l'évaluation passe SYNCED (+ `server_updated_at`). L'évaluation
-/// est **immuable** après création : aucune garde LWW nécessaire, aucun gate de
-/// dépendance (elle référence un `cours` serveur, jamais un agrégat créé offline).
+/// est **immuable** après création : aucune garde LWW nécessaire. Une seule
+/// dépendance : les chapitres qu'elle cite, s'ils ont été créés hors ligne —
+/// elle les attend (`blocked`), et un 409 `CHAPITRE_NOT_YET_SYNCED` (course
+/// perdue) l'attend de même.
 ///
 /// - succès → SYNCED.
 /// - **`422` backstop (DF-N)** : `PERIOD_CLOSED`/`EXAM_NOT_ALLOWED`/`MAX_REACHED`,
@@ -38,6 +49,7 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
   final AcademicsLocalDataSource localDataSource;
   final Map<String, dynamic> requiredAuth;
   final CurrentUserContext? currentUser;
+  final ChapitresAwaitingAck? chapitresAwaitingAck;
   final Clock now;
 
   const EvaluationOutboxHandler({
@@ -45,6 +57,7 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
     required this.localDataSource,
     required this.requiredAuth,
     this.currentUser,
+    this.chapitresAwaitingAck,
     this.now = systemClock,
   });
 
@@ -69,6 +82,11 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
       );
     }
 
+    final awaiting = chapitresAwaitingAck;
+    if (awaiting != null && await awaiting(request.evaluation.chapitreIds)) {
+      return const OutboxDispatchResult.blocked('Chapitre pas encore accusé');
+    }
+
     try {
       final response = await syncApi.submitEvaluation(requiredAuth, request);
       await localDataSource.markEvaluationSynced(
@@ -78,6 +96,11 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
       );
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
+      if (e.response?.statusCode == 409 &&
+          ApiErrorParser.detailCodeOf(e.response) ==
+              kChapitreNotYetSyncedCode) {
+        return const OutboxDispatchResult.blocked('Chapitre pas encore accusé');
+      }
       if (e.response?.statusCode == 422) {
         final code = _backstopCode(e) ?? 'REJECTED';
         try {

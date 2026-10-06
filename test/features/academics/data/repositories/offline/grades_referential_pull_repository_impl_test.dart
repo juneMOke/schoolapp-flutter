@@ -83,58 +83,62 @@ void main() {
     sousPeriodes: sousPeriodes,
   );
 
-  test('200 : remplace les 5 tables, persiste le nouvel ETag', () async {
-    when(() => api.pullGradesReferential(auth, null)).thenAnswer(
-      (_) async => httpOk(
-        bundle(
-          branches: const [BrancheDto(id: 'b1', nom: 'Maths')],
-          ligneBaremes: const [
-            LigneBaremeDto(
-              id: 'lb1',
-              grilleId: 'g1',
-              rubriqueId: 'r1',
-              brancheId: 'b1',
-              ordre: 1,
-              maxJournalierParSousPeriode: 2,
-              maxExamenParPeriodeScolaire: null,
-            ),
-          ],
-          chapitres: const [
-            ChapitreDto(id: 'ch1', coursId: 'co1', titre: 'Ch1', ordre: 1),
-          ],
-          periodes: const [
-            PeriodeDto(
-              id: 'p1',
-              academicYearId: 'ay1',
-              schoolLevelGroupId: 'g1',
-              ordre: 1,
-              statut: 'CLOTUREE',
-            ),
-          ],
-          sousPeriodes: const [
-            SousPeriodeDto(
-              id: 'sp1',
-              periodeScolaireId: 'p1',
-              ordre: 1,
-              statut: 'OUVERTE',
-            ),
-          ],
+  test(
+    '200 : remplace les 4 tables vivantes, persiste le nouvel ETag',
+    () async {
+      when(() => api.pullGradesReferential(auth, null)).thenAnswer(
+        (_) async => httpOk(
+          bundle(
+            branches: const [BrancheDto(id: 'b1', nom: 'Maths')],
+            ligneBaremes: const [
+              LigneBaremeDto(
+                id: 'lb1',
+                grilleId: 'g1',
+                rubriqueId: 'r1',
+                brancheId: 'b1',
+                ordre: 1,
+                maxJournalierParSousPeriode: 2,
+                maxExamenParPeriodeScolaire: null,
+              ),
+            ],
+            chapitres: const [
+              ChapitreDto(id: 'ch1', coursId: 'co1', titre: 'Ch1', ordre: 1),
+            ],
+            periodes: const [
+              PeriodeDto(
+                id: 'p1',
+                academicYearId: 'ay1',
+                schoolLevelGroupId: 'g1',
+                ordre: 1,
+                statut: 'CLOTUREE',
+              ),
+            ],
+            sousPeriodes: const [
+              SousPeriodeDto(
+                id: 'sp1',
+                periodeScolaireId: 'p1',
+                ordre: 1,
+                statut: 'OUVERTE',
+              ),
+            ],
+          ),
+          etag: '"abc"',
         ),
-        etag: '"abc"',
-      ),
-    );
+      );
 
-    final outcome = right(await repo.syncGradesReferential());
+      final outcome = right(await repo.syncGradesReferential());
 
-    expect(outcome.upserted, 5);
-    expect(outcome.notModified, isFalse);
-    expect(await syncMeta.getCursor(kGradesReferentialResource), '"abc"');
-    expect(await db.query('ref_branche'), hasLength(1));
-    expect(await db.query('ref_ligne_bareme'), hasLength(1));
-    expect(await db.query('ref_chapitre'), hasLength(1));
-    expect(await db.query('ref_periode'), hasLength(1));
-    expect(await db.query('ref_sous_periode'), hasLength(1));
-  });
+      expect(outcome.upserted, 4);
+      expect(outcome.notModified, isFalse);
+      expect(await syncMeta.getCursor(kGradesReferentialResource), '"abc"');
+      expect(await db.query('ref_branche'), hasLength(1));
+      expect(await db.query('ref_ligne_bareme'), hasLength(1));
+      // Les chapitres viennent du flux du programme de cours depuis la v61.
+      expect(await db.query('ref_chapitre'), isEmpty);
+      expect(await db.query('ref_periode'), hasLength(1));
+      expect(await db.query('ref_sous_periode'), hasLength(1));
+    },
+  );
 
   test('200 après un précédent bundle : remplacement d\'ensemble (l\'ancien '
       'disparaît, pas de delta)', () async {

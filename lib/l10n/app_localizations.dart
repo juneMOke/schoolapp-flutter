@@ -2357,7 +2357,7 @@ abstract class AppLocalizations {
   /// No description provided for @subMenuMyCourses.
   ///
   /// In en, this message translates to:
-  /// **'My courses'**
+  /// **'My assessments'**
   String get subMenuMyCourses;
 
   /// No description provided for @subMenuTimetable.
@@ -2519,7 +2519,7 @@ abstract class AppLocalizations {
   /// No description provided for @courseDetailBackToCourses.
   ///
   /// In en, this message translates to:
-  /// **'My courses'**
+  /// **'My assessments'**
   String get courseDetailBackToCourses;
 
   /// No description provided for @courseDetailEvaluationCount.
@@ -18555,12 +18555,6 @@ abstract class AppLocalizations {
   /// **'Document unavailable: it is not on this tablet and the server did not return it.'**
   String get staffDocumentOpenFailed;
 
-  /// No description provided for @staffDocumentClose.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get staffDocumentClose;
-
   /// No description provided for @staffDocumentOpenOffline.
   ///
   /// In en, this message translates to:
@@ -22303,6 +22297,990 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The original photo is not on this device: reconnect to crop it.'**
   String get photoCropUnavailable;
+
+  /// No description provided for @subMenuCourseProgramme.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get subMenuCourseProgramme;
+
+  /// No description provided for @programmeBackToCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'My courses'**
+  String get programmeBackToCourses;
+
+  /// No description provided for @programmeChapitresCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No chapters} =1{1 chapter} other{{count} chapters}}'**
+  String programmeChapitresCount(int count);
+
+  /// No description provided for @programmeSeancesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No sessions planned} =1{1 session planned} other{{count} sessions planned}}'**
+  String programmeSeancesCount(int count);
+
+  /// No description provided for @programmeEvaluationsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No assessments} =1{1 assessment} other{{count} assessments}}'**
+  String programmeEvaluationsCount(int count);
+
+  /// No description provided for @programmeProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme progress'**
+  String get programmeProgressTitle;
+
+  /// No description provided for @programmeProgressDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} chapters completed'**
+  String programmeProgressDone(int done, int total);
+
+  /// No description provided for @programmeProgressDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{enCours} in progress · {aVenir} upcoming'**
+  String programmeProgressDetail(int enCours, int aVenir);
+
+  /// No description provided for @programmeProgressA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress: {percent}%'**
+  String programmeProgressA11y(int percent);
+
+  /// No description provided for @programmeChapitresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapters'**
+  String get programmeChapitresTitle;
+
+  /// No description provided for @programmeChapitresSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'in teaching order'**
+  String get programmeChapitresSubtitle;
+
+  /// No description provided for @chapitreStatutPlanifie.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get chapitreStatutPlanifie;
+
+  /// No description provided for @chapitreStatutEnCours.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get chapitreStatutEnCours;
+
+  /// No description provided for @chapitreStatutTermine.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get chapitreStatutTermine;
+
+  /// No description provided for @chapitreRowSeances.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No sessions} =1{1 session} other{{count} sessions}}'**
+  String chapitreRowSeances(int count);
+
+  /// No description provided for @chapitreRowObjectifs.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} objectives'**
+  String chapitreRowObjectifs(int done, int total);
+
+  /// No description provided for @chapitreRowBlocs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No content block} =1{1 content block} other{{count} content blocks}}'**
+  String chapitreRowBlocs(int count);
+
+  /// No description provided for @chapitreRowEvaluations.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No assessments} =1{1 assessment} other{{count} assessments}}'**
+  String chapitreRowEvaluations(int count);
+
+  /// No description provided for @chapitreRowNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note} other{{count} notes}}'**
+  String chapitreRowNotes(int count);
+
+  /// No description provided for @chapitreActionMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get chapitreActionMoveUp;
+
+  /// No description provided for @chapitreActionMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get chapitreActionMoveDown;
+
+  /// No description provided for @chapitreActionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get chapitreActionEdit;
+
+  /// No description provided for @chapitreActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get chapitreActionDelete;
+
+  /// No description provided for @chapitreActionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get chapitreActionMore;
+
+  /// No description provided for @chapitreActionOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open chapter {numero}: {titre}'**
+  String chapitreActionOpen(int numero, String titre);
+
+  /// No description provided for @programmeFabNewChapitre.
+  ///
+  /// In en, this message translates to:
+  /// **'New chapter'**
+  String get programmeFabNewChapitre;
+
+  /// No description provided for @programmeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty programme'**
+  String get programmeEmptyTitle;
+
+  /// No description provided for @programmeEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no chapter yet. Split the yearly programme into chapters to track progress and link assessments.'**
+  String get programmeEmptyMessage;
+
+  /// No description provided for @programmeEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a chapter'**
+  String get programmeEmptyAction;
+
+  /// No description provided for @programmeEmptyReadOnlyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no chapter yet.'**
+  String get programmeEmptyReadOnlyMessage;
+
+  /// No description provided for @programmeLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the programme'**
+  String get programmeLoadingA11yLabel;
+
+  /// No description provided for @programmeErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme unavailable'**
+  String get programmeErrorTitle;
+
+  /// No description provided for @programmeErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The programme could not be read on this device.'**
+  String get programmeErrorMessage;
+
+  /// No description provided for @programmeDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the chapter?'**
+  String get programmeDeleteTitle;
+
+  /// No description provided for @programmeDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'“{titre}” will be removed from the programme. Assessments linked to it remain, but lose this link.'**
+  String programmeDeleteMessage(String titre);
+
+  /// No description provided for @programmeDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get programmeDeleteConfirm;
+
+  /// No description provided for @programmeChapitreDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter deleted'**
+  String get programmeChapitreDeleted;
+
+  /// No description provided for @programmeWriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving failed on this device.'**
+  String get programmeWriteFailed;
+
+  /// No description provided for @syncAggregateChapitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme chapter'**
+  String get syncAggregateChapitre;
+
+  /// No description provided for @syncAggregateChapitreOrdre.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter order'**
+  String get syncAggregateChapitreOrdre;
+
+  /// No description provided for @syncAggregateChapitreNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Session note'**
+  String get syncAggregateChapitreNote;
+
+  /// No description provided for @syncAggregateChapitreRessource.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter resource'**
+  String get syncAggregateChapitreRessource;
+
+  /// No description provided for @documentCaptureLimitsWithWord.
+  ///
+  /// In en, this message translates to:
+  /// **'JPEG, PNG, PDF or Word · {maxMegabytes} MB max'**
+  String documentCaptureLimitsWithWord(int maxMegabytes);
+
+  /// No description provided for @documentCaptureImportFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a file'**
+  String get documentCaptureImportFile;
+
+  /// No description provided for @documentCaptureImportFileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A PDF or Word document already on the tablet'**
+  String get documentCaptureImportFileHint;
+
+  /// No description provided for @chapitreFormNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New chapter'**
+  String get chapitreFormNewTitle;
+
+  /// No description provided for @chapitreFormEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit chapter'**
+  String get chapitreFormEditTitle;
+
+  /// No description provided for @chapitreFormEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{branche} — {classe}'**
+  String chapitreFormEyebrow(String branche, String classe);
+
+  /// No description provided for @chapitreFormGroupIdentification.
+  ///
+  /// In en, this message translates to:
+  /// **'Identification'**
+  String get chapitreFormGroupIdentification;
+
+  /// No description provided for @chapitreFormGroupPedagogie.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching'**
+  String get chapitreFormGroupPedagogie;
+
+  /// No description provided for @chapitreFormGroupPlanification.
+  ///
+  /// In en, this message translates to:
+  /// **'Planning'**
+  String get chapitreFormGroupPlanification;
+
+  /// No description provided for @chapitreFormOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get chapitreFormOptional;
+
+  /// No description provided for @chapitreFormAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get chapitreFormAdd;
+
+  /// No description provided for @chapitreFormTitreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter title'**
+  String get chapitreFormTitreLabel;
+
+  /// No description provided for @chapitreFormTitreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Fractions and decimals'**
+  String get chapitreFormTitreHint;
+
+  /// No description provided for @chapitreFormTitreRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The chapter title is required.'**
+  String get chapitreFormTitreRequired;
+
+  /// No description provided for @chapitreFormTitreTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 3 characters.'**
+  String get chapitreFormTitreTooShort;
+
+  /// No description provided for @chapitreFormResumeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get chapitreFormResumeLabel;
+
+  /// No description provided for @chapitreFormResumeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What the chapter covers, in a sentence or two'**
+  String get chapitreFormResumeHint;
+
+  /// No description provided for @chapitreFormObjectifsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning objectives'**
+  String get chapitreFormObjectifsLabel;
+
+  /// No description provided for @chapitreFormObjectifHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Solve a first-degree equation'**
+  String get chapitreFormObjectifHint;
+
+  /// No description provided for @chapitreFormObjectifRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this objective'**
+  String get chapitreFormObjectifRemove;
+
+  /// No description provided for @chapitreFormStrategiesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching strategies'**
+  String get chapitreFormStrategiesLabel;
+
+  /// No description provided for @chapitreFormStrategyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Other strategy (e.g. Peer tutoring)'**
+  String get chapitreFormStrategyHint;
+
+  /// No description provided for @chapitreStrategy1.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture'**
+  String get chapitreStrategy1;
+
+  /// No description provided for @chapitreStrategy2.
+  ///
+  /// In en, this message translates to:
+  /// **'Board demonstration'**
+  String get chapitreStrategy2;
+
+  /// No description provided for @chapitreStrategy3.
+  ///
+  /// In en, this message translates to:
+  /// **'Group work'**
+  String get chapitreStrategy3;
+
+  /// No description provided for @chapitreStrategy4.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem-based learning'**
+  String get chapitreStrategy4;
+
+  /// No description provided for @chapitreStrategy5.
+  ///
+  /// In en, this message translates to:
+  /// **'Guided questioning'**
+  String get chapitreStrategy5;
+
+  /// No description provided for @chapitreStrategy6.
+  ///
+  /// In en, this message translates to:
+  /// **'Graded exercises'**
+  String get chapitreStrategy6;
+
+  /// No description provided for @chapitreStrategy7.
+  ///
+  /// In en, this message translates to:
+  /// **'Differentiated teaching'**
+  String get chapitreStrategy7;
+
+  /// No description provided for @chapitreStrategy8.
+  ///
+  /// In en, this message translates to:
+  /// **'Remediation'**
+  String get chapitreStrategy8;
+
+  /// No description provided for @chapitreStrategy9.
+  ///
+  /// In en, this message translates to:
+  /// **'Role play'**
+  String get chapitreStrategy9;
+
+  /// No description provided for @chapitreStrategy10.
+  ///
+  /// In en, this message translates to:
+  /// **'Field trip / observation'**
+  String get chapitreStrategy10;
+
+  /// No description provided for @chapitreFormRessourcesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching resources'**
+  String get chapitreFormRessourcesLabel;
+
+  /// No description provided for @ressourceEditorEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach a document, a link or a textbook reference'**
+  String get ressourceEditorEmpty;
+
+  /// No description provided for @ressourceTypeRadioLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource type'**
+  String get ressourceTypeRadioLabel;
+
+  /// No description provided for @ressourceTypeDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get ressourceTypeDocument;
+
+  /// No description provided for @ressourceTypeLien.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get ressourceTypeLien;
+
+  /// No description provided for @ressourceTypeManuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Textbook'**
+  String get ressourceTypeManuel;
+
+  /// No description provided for @ressourceNomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get ressourceNomLabel;
+
+  /// No description provided for @ressourceNomHintDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Exercise sheet #2'**
+  String get ressourceNomHintDocument;
+
+  /// No description provided for @ressourceNomHintLien.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Video — fractions explained'**
+  String get ressourceNomHintLien;
+
+  /// No description provided for @ressourceNomHintManuel.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Mathematics Grade 7 — CRP ed.'**
+  String get ressourceNomHintManuel;
+
+  /// No description provided for @ressourceUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address (URL)'**
+  String get ressourceUrlLabel;
+
+  /// No description provided for @ressourceUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid address — it must start with http:// or https://'**
+  String get ressourceUrlInvalid;
+
+  /// No description provided for @ressourceReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference (pages, chapter)'**
+  String get ressourceReferenceLabel;
+
+  /// No description provided for @ressourceReferenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. pp. 42–57'**
+  String get ressourceReferenceHint;
+
+  /// No description provided for @ressourceChooseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file'**
+  String get ressourceChooseFile;
+
+  /// No description provided for @ressourceReplaceFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the file'**
+  String get ressourceReplaceFile;
+
+  /// No description provided for @ressourceFileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF, Word, image — {maxMegabytes} MB max'**
+  String ressourceFileHint(int maxMegabytes);
+
+  /// No description provided for @ressourceCaptureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter document'**
+  String get ressourceCaptureTitle;
+
+  /// No description provided for @ressourceAddConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the resource'**
+  String get ressourceAddConfirm;
+
+  /// No description provided for @ressourceRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the resource'**
+  String get ressourceRemove;
+
+  /// No description provided for @ressourceDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} · {detail}'**
+  String ressourceDetail(String type, String detail);
+
+  /// No description provided for @chapitreFormStatutLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress status'**
+  String get chapitreFormStatutLabel;
+
+  /// No description provided for @chapitreFormSousPeriodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Term'**
+  String get chapitreFormSousPeriodeLabel;
+
+  /// No description provided for @chapitreFormSousPeriodeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No term'**
+  String get chapitreFormSousPeriodeNone;
+
+  /// No description provided for @chapitreFormSeancesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned sessions'**
+  String get chapitreFormSeancesLabel;
+
+  /// No description provided for @chapitreFormSeancesInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid number.'**
+  String get chapitreFormSeancesInvalid;
+
+  /// No description provided for @chapitreFormRequiredLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Required field — the rest can be completed later.'**
+  String get chapitreFormRequiredLegend;
+
+  /// No description provided for @chapitreFormCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the chapter'**
+  String get chapitreFormCreate;
+
+  /// No description provided for @chapitreFormSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get chapitreFormSave;
+
+  /// No description provided for @programmeChapitreCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter “{titre}” created'**
+  String programmeChapitreCreated(String titre);
+
+  /// No description provided for @programmeChapitreUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter “{titre}” updated'**
+  String programmeChapitreUpdated(String titre);
+
+  /// No description provided for @ressourceKeepFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'A resource could not be kept on this device.'**
+  String get ressourceKeepFailed;
+
+  /// No description provided for @chapitreDetailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter'**
+  String get chapitreDetailEyebrow;
+
+  /// No description provided for @chapitreChipObjectifs.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} objectives met'**
+  String chapitreChipObjectifs(int done, int total);
+
+  /// No description provided for @chapitreQuickStatut.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark “{label}”'**
+  String chapitreQuickStatut(String label);
+
+  /// No description provided for @chapitreSectionObjectifs.
+  ///
+  /// In en, this message translates to:
+  /// **'Objectives'**
+  String get chapitreSectionObjectifs;
+
+  /// No description provided for @chapitreSectionStrategies.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching strategies'**
+  String get chapitreSectionStrategies;
+
+  /// No description provided for @chapitreSectionNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Session notes'**
+  String get chapitreSectionNotes;
+
+  /// No description provided for @chapitreSectionRessources.
+  ///
+  /// In en, this message translates to:
+  /// **'Resources'**
+  String get chapitreSectionRessources;
+
+  /// No description provided for @chapitreSectionEvaluations.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked assessments'**
+  String get chapitreSectionEvaluations;
+
+  /// No description provided for @chapitreObjectifsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No objective yet — add some through “Edit”.'**
+  String get chapitreObjectifsEmpty;
+
+  /// No description provided for @chapitreStrategiesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No strategy yet — say how this chapter will be taught.'**
+  String get chapitreStrategiesEmpty;
+
+  /// No description provided for @chapitreNotesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No note for this chapter. Record here what happened in class.'**
+  String get chapitreNotesEmpty;
+
+  /// No description provided for @chapitreRessourcesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No resource attached.'**
+  String get chapitreRessourcesEmpty;
+
+  /// No description provided for @chapitreEvaluationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No assessment covers this chapter.'**
+  String get chapitreEvaluationsEmpty;
+
+  /// No description provided for @chapitreNoteAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get chapitreNoteAdd;
+
+  /// No description provided for @chapitreNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Class observation, reminder, point to revisit…'**
+  String get chapitreNoteHint;
+
+  /// No description provided for @chapitreNoteDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String chapitreNoteDate(DateTime date);
+
+  /// No description provided for @chapitreNoteDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the note'**
+  String get chapitreNoteDelete;
+
+  /// No description provided for @chapitreNoteAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Session note added'**
+  String get chapitreNoteAdded;
+
+  /// No description provided for @chapitreNoteDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Note deleted'**
+  String get chapitreNoteDeleted;
+
+  /// No description provided for @chapitreNoteUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get chapitreNoteUndo;
+
+  /// No description provided for @chapitreRessourceOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {nom}'**
+  String chapitreRessourceOpen(String nom);
+
+  /// No description provided for @chapitreRessourceNotPreviewable.
+  ///
+  /// In en, this message translates to:
+  /// **'This file type cannot be opened on this device.'**
+  String get chapitreRessourceNotPreviewable;
+
+  /// No description provided for @chapitreRessourceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be opened. Check the connection, then try again.'**
+  String get chapitreRessourceUnavailable;
+
+  /// No description provided for @chapitreEvaluationLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · /{max} pts'**
+  String chapitreEvaluationLine(DateTime date, String max);
+
+  /// No description provided for @chapitreBlankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter not filled in'**
+  String get chapitreBlankTitle;
+
+  /// No description provided for @chapitreBlankMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter has no objective, note or resource. Complete it to keep a record from one year to the next.'**
+  String get chapitreBlankMessage;
+
+  /// No description provided for @chapitreBlankAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the chapter'**
+  String get chapitreBlankAction;
+
+  /// No description provided for @chapitreErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter unavailable'**
+  String get chapitreErrorTitle;
+
+  /// No description provided for @chapitreErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter could not be read on this device. It may have been deleted.'**
+  String get chapitreErrorMessage;
+
+  /// No description provided for @chapitreLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the chapter'**
+  String get chapitreLoadingA11yLabel;
+
+  /// No description provided for @chapitreAwaitingDownloadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter is downloading; it can be edited once synced.'**
+  String get chapitreAwaitingDownloadHint;
+
+  /// No description provided for @chapitreContenuSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Content saved'**
+  String get chapitreContenuSaved;
+
+  /// No description provided for @chapitreSectionContenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Course content'**
+  String get chapitreSectionContenu;
+
+  /// No description provided for @contenuWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get contenuWrite;
+
+  /// No description provided for @contenuDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get contenuDone;
+
+  /// No description provided for @contenuEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the chapter content: sections, key notions, takeaways, examples.'**
+  String get contenuEmpty;
+
+  /// No description provided for @contenuStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the content'**
+  String get contenuStart;
+
+  /// No description provided for @contenuAddBloc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a block'**
+  String get contenuAddBloc;
+
+  /// No description provided for @blocTypeTitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading'**
+  String get blocTypeTitre;
+
+  /// No description provided for @blocTypeParagraphe.
+  ///
+  /// In en, this message translates to:
+  /// **'Paragraph'**
+  String get blocTypeParagraphe;
+
+  /// No description provided for @blocTypeListe.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get blocTypeListe;
+
+  /// No description provided for @blocTypeEncadre.
+  ///
+  /// In en, this message translates to:
+  /// **'Key point'**
+  String get blocTypeEncadre;
+
+  /// No description provided for @blocTypeExemple.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get blocTypeExemple;
+
+  /// No description provided for @blocLabelTitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Section heading'**
+  String get blocLabelTitre;
+
+  /// No description provided for @blocLabelListe.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulleted list'**
+  String get blocLabelListe;
+
+  /// No description provided for @blocLabelExemple.
+  ///
+  /// In en, this message translates to:
+  /// **'Example / exercise'**
+  String get blocLabelExemple;
+
+  /// No description provided for @blocHintTitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Section heading'**
+  String get blocHintTitre;
+
+  /// No description provided for @blocHintParagraphe.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the paragraph'**
+  String get blocHintParagraphe;
+
+  /// No description provided for @blocHintListe.
+  ///
+  /// In en, this message translates to:
+  /// **'One item per line'**
+  String get blocHintListe;
+
+  /// No description provided for @blocHintEncadre.
+  ///
+  /// In en, this message translates to:
+  /// **'What the student must remember.'**
+  String get blocHintEncadre;
+
+  /// No description provided for @blocHintExemple.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the example or exercise.'**
+  String get blocHintExemple;
+
+  /// No description provided for @blocMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the block up'**
+  String get blocMoveUp;
+
+  /// No description provided for @blocMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the block down'**
+  String get blocMoveDown;
+
+  /// No description provided for @blocDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the block'**
+  String get blocDelete;
+
+  /// No description provided for @contenuTooManyBlocs.
+  ///
+  /// In en, this message translates to:
+  /// **'Content is limited to {max} blocks.'**
+  String contenuTooManyBlocs(int max);
+
+  /// No description provided for @contenuTooHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'The content is too long to be saved: shorten it.'**
+  String get contenuTooHeavy;
+
+  /// No description provided for @ressourceUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://…'**
+  String get ressourceUrlHint;
+
+  /// No description provided for @chapitreFormObjectifLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Objective {numero}'**
+  String chapitreFormObjectifLabel(int numero);
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:school_app_flutter/core/capture/captured_document.dart';
+import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 
 /// Octets rendus par la plateforme, avant toute vérification.
 class RawCapture {
@@ -32,9 +33,13 @@ class DocumentTooLargeException implements Exception {
 /// capture se teste sans appareil.
 abstract class DocumentCaptureGateway {
   /// Rend les octets obtenus par [mode], ou `null` si l'utilisateur a renoncé.
+  /// [policy] dit les fichiers proposés et le plafond jugé avant lecture.
   ///
   /// Lève [CameraUnavailableException] quand la caméra est refusée ou absente,
   /// [DocumentTooLargeException] quand un fichier dépasse le plafond avant
   /// même d'être lu ; toute autre exception est une lecture ratée.
-  Future<RawCapture?> acquire(DocumentCaptureMode mode);
+  Future<RawCapture?> acquire(
+    DocumentCaptureMode mode, {
+    DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
+  });
 }

@@ -577,13 +577,23 @@ void main() {
     });
 
     test(
-      'chapitres couverts résolus depuis le bundle (titres, pas ids)',
+      'chapitres couverts résolus depuis le programme (titres, pas ids)',
       () async {
-        await db.insert('ref_chapitre', {
+        await db.insert('chapitre', {
           'id': 'ch1',
           'cours_id': 'co1',
           'titre': 'Fractions',
           'ordre': 1,
+          'updated_at': 1,
+        });
+        // Une suppression qui attend son accusé n'est plus proposée.
+        await db.insert('chapitre', {
+          'id': 'ch-gone',
+          'cours_id': 'co1',
+          'titre': 'Supprimé',
+          'ordre': 2,
+          'deleted_at': '2026-10-06T08:00:00.000Z',
+          'updated_at': 1,
         });
         await db.update(
           'evaluation',

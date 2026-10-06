@@ -77,10 +77,11 @@ class GradesReferentialPullRepositoryImpl {
         cursor: newEtag,
         syncedAt: syncedAt,
       );
+      // Les chapitres du bundle ne sont plus rangés (v61) : ils ne comptent
+      // pas parmi les lignes écrites.
       final upserted =
           bundle.branches.length +
           bundle.ligneBaremes.length +
-          bundle.chapitres.length +
           bundle.periodes.length +
           bundle.sousPeriodes.length;
       return Right(

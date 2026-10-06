@@ -257,11 +257,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('trente-cinq handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(35));
+    test('trente-six handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(36));
       expect(
         order().toSet(),
-        hasLength(35),
+        hasLength(36),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -291,11 +291,11 @@ void main() {
       ]);
     });
 
-    // Les trente-trois autres restent gouvernés par leur permission : sans cette
+    // Les trente-quatre autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
     test(
-      'les trente-trois autres flux déclarent tous une exigence de lecture',
+      'les trente-quatre autres flux déclarent tous une exigence de lecture',
       () {
         final sansExigence = coordinator.registered
             .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
@@ -307,7 +307,7 @@ void main() {
         expect(sansExigence, isEmpty);
         expect(
           coordinator.registered.where((h) => !h.isBaseline),
-          hasLength(33),
+          hasLength(34),
         );
       },
     );
@@ -336,7 +336,7 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les trente-cinq ressources attendues sont toutes enregistrées', () {
+  test('les trente-six ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       kTombstonesResource,
       EnrollmentPullRepositoryImpl.referentialResource,
@@ -359,6 +359,7 @@ void main() {
       kAcademicsCoursResourcePrefix,
       kAcademicsEvaluationsResourcePrefix,
       kAcademicsNotesResourcePrefix,
+      kAcademicsChapitresResourcePrefix,
       kEditiqueDocumentsResource,
       kBoutiqueSalesResource,
       kExpensesResource,

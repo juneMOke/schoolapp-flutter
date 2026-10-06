@@ -166,6 +166,9 @@ enum Perm {
   academicsResultRead('academics.result.read'),
   academicsReferentialRead('academics.referential.read'),
   academicsReferentialWrite('academics.referential.write'),
+  // Le programme de cours : seul le professeur affecté au cours écrit ; la
+  // direction le lit sous `academicsCourseRead`.
+  academicsProgrammeWrite('academics.programme.write'),
 
   // ── Éditique ──────────────────────────────────────────────────────────────
   // `editiqueCancel` est séparée de `editiqueWrite` : une pièce émise ne se

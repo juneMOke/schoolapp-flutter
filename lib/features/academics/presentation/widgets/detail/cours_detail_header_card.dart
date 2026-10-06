@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_class_visual.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/common/accent_edge_card.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -28,68 +29,47 @@ class CoursDetailHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Liséré gauche via fond accent révélé sur 5 dp (cf. accordéon Mes cours :
-    // pas de Row `stretch`, qui planterait dans une vue défilante).
-    return ClipRRect(
-      borderRadius: AppRadius.brCard,
-      child: ColoredBox(
-        color: visual.accent,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 5),
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceRaised,
-              border: Border(
-                top: BorderSide(color: AppColors.border),
-                right: BorderSide(color: AppColors.border),
-                bottom: BorderSide(color: AppColors.border),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final narrow = constraints.maxWidth < 560;
-                  final identity = _Identity(
-                    brancheNom: brancheNom,
-                    classroomName: classroomName,
-                    visual: visual,
-                    viewModel: viewModel,
-                  );
-                  final next = viewModel.prochaineEval == null
-                      ? null
-                      : _NextEvalCard(eval: viewModel.prochaineEval!);
+    return AccentEdgeCard(
+      accent: visual.accent,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow = constraints.maxWidth < 560;
+          final identity = _Identity(
+            brancheNom: brancheNom,
+            classroomName: classroomName,
+            visual: visual,
+            viewModel: viewModel,
+          );
+          final next = viewModel.prochaineEval == null
+              ? null
+              : _NextEvalCard(eval: viewModel.prochaineEval!);
 
-                  if (narrow) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        identity,
-                        if (next != null) ...[
-                          const SizedBox(height: AppSpacing.md),
-                          next,
-                        ],
-                      ],
-                    );
-                  }
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: identity),
-                      if (next != null) ...[
-                        const SizedBox(width: AppSpacing.md),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 240),
-                          child: next,
-                        ),
-                      ],
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
+          if (narrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                identity,
+                if (next != null) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  next,
+                ],
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: identity),
+              if (next != null) ...[
+                const SizedBox(width: AppSpacing.md),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 240),
+                  child: next,
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }

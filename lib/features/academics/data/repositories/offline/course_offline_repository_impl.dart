@@ -250,7 +250,6 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
 
       final chapitreRows = await _academicsRefLocal.getChapitresForCours(
         coursId,
-        ownerUid: owner,
       );
       final chapitreTitles = {for (final c in chapitreRows) c.id: c.titre};
       final chapitresDisponibles = chapitreRows

@@ -80,6 +80,7 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.academicsCours,
   SyncPlanKeys.academicsEvaluations,
   SyncPlanKeys.academicsNotes,
+  SyncPlanKeys.academicsChapitres,
   SyncPlanKeys.editiqueDocuments,
   SyncPlanKeys.expenseExpenses,
   SyncPlanKeys.hrStaffMembers,
@@ -113,6 +114,7 @@ const Set<String> _kSuffixedCursorResources = {
   'academics_cours',
   'academics_evaluations',
   'academics_notes',
+  'academics_chapitres',
   'academics_grades_referential',
   'schedule_sessions',
   'editique_documents',
@@ -259,21 +261,21 @@ void main() {
 
   // ── Le compte : vingt et une clés, vingt-deux ressources ──────────────────
 
-  test('trente-quatre clés de plan pour trente-cinq ressources de handler', () {
+  test('trente-cinq clés de plan pour trente-six ressources de handler', () {
     // Vingt et une depuis le registre des disparitions (V121), second flux de
     // socle : sans lui, une base locale garde indéfiniment ce que le serveur a
     // retiré. Vingt-deux avec le registre des dépenses (`expense.expenses`).
     // Vingt-cinq avec les trois flux du fichier du personnel (`hr.*`),
     // vingt-sept avec les deux du Pointage, trente-deux avec les cinq de la
     // Paie, trente-trois avec les clôtures de mois de l'appel, trente-quatre
-    // avec la photo de l'élève.
-    expect(kSyncPlanAliases.length, 34);
-    expect(registeredResources.length, 35);
+    // avec la photo de l'élève, trente-cinq avec les chapitres du programme.
+    expect(kSyncPlanAliases.length, 35);
+    expect(registeredResources.length, 36);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 35);
+    expect(aliased.length, 36);
     // Vingt et une ressources aliasées ET autant de handlers : les deux
     // ensembles coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
@@ -291,12 +293,12 @@ void main() {
   });
 
   test(
-    'les trente-quatre constantes déclarées sont exactement les clés de la table',
+    'les trente-cinq constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 34);
+      expect(_kDeclaredPlanKeys.length, 35);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        34,
+        35,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());

@@ -197,11 +197,18 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
           '(SELECT id FROM evaluation WHERE cours_id = ?)',
       'DELETE FROM evaluation WHERE cours_id = ?',
       'DELETE FROM ref_chapitre WHERE cours_id = ?',
+      'DELETE FROM chapitre_note WHERE cours_id = ?',
+      'DELETE FROM chapitre_ressource WHERE cours_id = ?',
+      'DELETE FROM chapitre WHERE cours_id = ?',
     ],
     // Sans cette purge, un cours réaffecté PUIS rendu reprendrait un curseur
     // périmé au lieu de rebootstraper, et perdrait en silence tout ce qui
     // existait avant l'éviction.
-    scopedCursorPrefixes: ['academics_evaluations', 'academics_notes'],
+    scopedCursorPrefixes: [
+      'academics_evaluations',
+      'academics_notes',
+      'academics_chapitres',
+    ],
   ),
   'academics_evaluations': TombstoneTarget(
     table: 'evaluation',
@@ -212,6 +219,17 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
     table: 'note_evaluation',
     scopeColumn: 'evaluation_id',
     syncStatusColumn: 'sync_status',
+  ),
+  // Un chapitre supprimé emporte ses notes et ses ressources ; les fichiers
+  // de celles-ci partent par le crochet du programme.
+  'academics_chapitres': TombstoneTarget(
+    table: 'chapitre',
+    scopeColumn: 'cours_id',
+    syncStatusColumn: 'sync_status',
+    children: {
+      'chapitre_note': 'chapitre_id',
+      'chapitre_ressource': 'chapitre_id',
+    },
   ),
 
   // ── éditique & boutique ───────────────────────────────────────────────────

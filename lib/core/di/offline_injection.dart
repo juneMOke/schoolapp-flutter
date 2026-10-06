@@ -52,6 +52,7 @@ import 'package:school_app_flutter/features/configuration/data/local/provisionin
 import 'package:school_app_flutter/features/configuration/data/repositories/provisioning_draft_repository_impl.dart';
 import 'package:school_app_flutter/features/configuration/domain/repositories/provisioning_draft_repository.dart';
 import 'package:school_app_flutter/core/di/offline_modules/class_presence_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/course_programme_di.dart';
 import 'package:school_app_flutter/features/student_photo/data/student_photo_change_bus.dart';
 
 /// Enregistre le socle offline dans le conteneur GetIt.
@@ -330,6 +331,7 @@ void registerOfflineModules(GetIt getIt) {
   registerClassroomAttendanceOffline(getIt); // branche B
   registerClassPresence(getIt); // Présences des élèves v2 — registre d'appel
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
+  registerCourseProgramme(getIt); // Programme de cours — après academics
   registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
   registerStudentPhoto(getIt); // Photo de l'élève — après l'inscription
 }

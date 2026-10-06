@@ -82,7 +82,7 @@ void main() {
   });
 
   test('une pièce au-delà du plafond est refusée avec son poids', () async {
-    final heavy = Uint8List(DocumentCapturePolicy.maxBytes + 1)
+    final heavy = Uint8List(DocumentCapturePolicy.staffDocument.maxBytes + 1)
       ..setAll(0, pdfBytes);
     gateway.next = RawCapture(bytes: heavy);
 
@@ -92,7 +92,7 @@ void main() {
   });
 
   test('une pièce exactement au plafond passe', () async {
-    final atLimit = Uint8List(DocumentCapturePolicy.maxBytes)
+    final atLimit = Uint8List(DocumentCapturePolicy.staffDocument.maxBytes)
       ..setAll(0, pdfBytes);
     gateway.next = RawCapture(bytes: atLimit);
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 import 'package:school_app_flutter/core/capture/captured_document.dart';
 import 'package:school_app_flutter/core/components/capture/document_capture_sheet.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -27,6 +28,7 @@ void main() {
                   context,
                   title: "Pièce d'identité",
                   cameraUnavailable: cameraUnavailable,
+                  policy: DocumentCapturePolicy.staffDocument,
                 );
                 closed = true;
               },
