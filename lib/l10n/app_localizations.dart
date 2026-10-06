@@ -23281,6 +23281,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The content is too long to be saved: shorten it.'**
   String get contenuTooHeavy;
+
+  /// No description provided for @ressourceUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://…'**
+  String get ressourceUrlHint;
+
+  /// No description provided for @chapitreFormObjectifLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Objective {numero}'**
+  String chapitreFormObjectifLabel(int numero);
 }
 
 class _AppLocalizationsDelegate

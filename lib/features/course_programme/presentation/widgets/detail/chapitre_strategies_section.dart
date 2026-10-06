@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Les stratégies d'intervention, en pilules de lecture.
 class ChapitreStrategiesSection extends StatelessWidget {
@@ -52,8 +53,8 @@ class _Pill extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 6,
-          height: 6,
+          width: ProgrammeLayout.bullet,
+          height: ProgrammeLayout.bullet,
           decoration: const BoxDecoration(
             color: AppColors.bleuArdoise,
             shape: BoxShape.circle,

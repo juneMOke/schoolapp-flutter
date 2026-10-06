@@ -8837,5 +8837,8 @@
   "blocDelete": "Delete the block",
   "contenuTooManyBlocs": "Content is limited to {max} blocks.",
   "@contenuTooManyBlocs": {"placeholders": {"max": {"type": "int"}}},
-  "contenuTooHeavy": "The content is too long to be saved: shorten it."
+  "contenuTooHeavy": "The content is too long to be saved: shorten it.",
+  "ressourceUrlHint": "https://…",
+  "chapitreFormObjectifLabel": "Objective {numero}",
+  "@chapitreFormObjectifLabel": {"placeholders": {"numero": {"type": "int"}}}
 }

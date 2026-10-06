@@ -35,12 +35,16 @@ class ProgrammeSkeleton extends StatelessWidget {
                 children: [
                   FractionallySizedBox(
                     widthFactor: 0.4,
-                    child: EteeloSkeletonBox(height: 20),
+                    child: EteeloSkeletonBox(
+                      height: ProgrammeLayout.skeletonTitleHeight,
+                    ),
                   ),
                   SizedBox(height: AppSpacing.sm),
                   FractionallySizedBox(
                     widthFactor: 0.25,
-                    child: EteeloSkeletonBox(height: 14),
+                    child: EteeloSkeletonBox(
+                      height: ProgrammeLayout.skeletonSubtitleHeight,
+                    ),
                   ),
                 ],
               ),

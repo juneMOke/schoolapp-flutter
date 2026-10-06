@@ -14765,4 +14765,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get contenuTooHeavy =>
       'The content is too long to be saved: shorten it.';
+
+  @override
+  String get ressourceUrlHint => 'https://…';
+
+  @override
+  String chapitreFormObjectifLabel(int numero) {
+    return 'Objective $numero';
+  }
 }

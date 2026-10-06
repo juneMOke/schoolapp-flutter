@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/course_programme/domain/entities/cha
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_enums.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/bloc_visual.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Un bloc rendu en lecture (spec §8) : titre à trait terre cuite, paragraphe
 /// aéré, liste à puces, encadré « À retenir », exemple.
@@ -29,8 +30,8 @@ class BlocLecture extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 4,
-                height: 18,
+                width: ProgrammeLayout.titleMarkerWidth,
+                height: ProgrammeLayout.titleMarkerHeight,
                 decoration: const BoxDecoration(
                   color: AppColors.terreCuite,
                   borderRadius: AppRadius.brPill,
@@ -66,9 +67,12 @@ class BlocLecture extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(top: 9, right: AppSpacing.md),
-                    width: 6,
-                    height: 6,
+                    margin: const EdgeInsets.only(
+                      top: ProgrammeLayout.bulletTopOffset,
+                      right: AppSpacing.md,
+                    ),
+                    width: ProgrammeLayout.bullet,
+                    height: ProgrammeLayout.bullet,
                     decoration: const BoxDecoration(
                       color: AppColors.bleuArdoise,
                       shape: BoxShape.circle,
@@ -126,14 +130,16 @@ class _Aside extends StatelessWidget {
     padding: const EdgeInsets.all(AppSpacing.md),
     decoration: BoxDecoration(
       color: surface,
-      border: Border(left: BorderSide(color: accent, width: 4)),
+      border: Border(
+        left: BorderSide(color: accent, width: ProgrammeLayout.asideEdge),
+      ),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, size: 15, color: accent),
+            Icon(icon, size: ProgrammeLayout.asideIcon, color: accent),
             const SizedBox(width: AppSpacing.xs),
             Text(
               label,

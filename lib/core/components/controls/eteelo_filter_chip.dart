@@ -66,10 +66,16 @@ class EteeloFilterChip extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.xs),
                   ],
-                  Text(
-                    label,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: selected ? ink : AppColors.textPrimary,
+                  // Flexible : sur un écran étroit, un libellé long se
+                  // tronque au lieu de faire déborder la puce.
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: selected ? ink : AppColors.textPrimary,
+                      ),
                     ),
                   ),
                   if (count != null) ...[

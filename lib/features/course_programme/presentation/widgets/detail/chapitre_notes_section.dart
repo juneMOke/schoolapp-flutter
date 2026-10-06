@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/common/programme_write_gate.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Les notes de séance : « + Ajouter une note » ouvre une saisie en ligne ;
 /// la note s'insère en tête, datée du jour. Supprimer se défait pendant
@@ -61,7 +62,10 @@ class _ChapitreNotesSectionState extends State<ChapitreNotesSection> {
           : ProgrammeWriteGate(
               child: TextButton.icon(
                 onPressed: () => setState(() => _writing = true),
-                icon: const Icon(Icons.add_rounded, size: 18),
+                icon: const Icon(
+                  Icons.add_rounded,
+                  size: ProgrammeLayout.iconMedium,
+                ),
                 label: Text(l10n.chapitreNoteAdd),
               ),
             ),

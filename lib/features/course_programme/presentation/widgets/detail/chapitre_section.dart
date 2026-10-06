@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Une section du détail d'un chapitre (spec §9) : carte sans padding,
 /// en-tête (icône, titre, compteur, action à droite), contenu sous un filet.
@@ -42,33 +43,52 @@ class ChapitreSection extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(icon, size: 17, color: AppColors.bleuArdoise),
+                Icon(
+                  icon,
+                  size: ProgrammeLayout.sectionIcon,
+                  color: AppColors.bleuArdoise,
+                ),
                 const SizedBox(width: AppSpacing.sm),
-                Flexible(
+                // Le titre cède la place à l'action sur un écran étroit.
+                Expanded(
                   child: Semantics(
                     header: true,
-                    child: Text(
-                      title,
+                    child: Text.rich(
+                      TextSpan(
+                        text: title,
+                        children: [
+                          if (count != null)
+                            TextSpan(
+                              text: '  $count',
+                              style: AppTypography.labelMedium.copyWith(
+                                color: AppColors.textMuted,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
                       style: AppTypography.titleSmall.copyWith(
                         color: AppColors.textPrimary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-                if (count != null) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    '$count',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.textMuted,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                // Sur un téléphone, l'action se resserre plutôt que de
+                // déborder (quelques pour cent au plus).
+                Flexible(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: ProgrammeLayout.sectionActionMinHeight,
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: action ?? const SizedBox.shrink(),
                     ),
                   ),
-                ],
-                const Spacer(),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 40),
-                  child: action ?? const SizedBox.shrink(),
                 ),
               ],
             ),

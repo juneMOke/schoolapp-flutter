@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/course_programme/domain/entities/cha
 import 'package:school_app_flutter/features/course_programme/domain/entities/ressource_draft.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/ressource_visual.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Le brouillon d'une ressource, en ligne sous la liste (spec §5) : le type
 /// (groupe radio), l'intitulé, puis l'adresse, la référence ou le fichier.
@@ -120,7 +121,7 @@ class _RessourceDraftPanelState extends State<RessourceDraftPanel> {
               EteeloTextInput(
                 controller: _url,
                 label: l10n.ressourceUrlLabel,
-                placeholder: 'https://…',
+                placeholder: l10n.ressourceUrlHint,
                 capitalization: EteeloTextCapitalization.none,
                 errorText: urlInvalid ? l10n.ressourceUrlInvalid : null,
                 onChanged: (_) => setState(() {}),
@@ -169,7 +170,10 @@ class _RessourceDraftPanelState extends State<RessourceDraftPanel> {
       children: [
         TextButton.icon(
           onPressed: _chooseFile,
-          icon: const Icon(Icons.upload_file_rounded, size: 18),
+          icon: const Icon(
+            Icons.upload_file_rounded,
+            size: ProgrammeLayout.iconMedium,
+          ),
           label: Text(
             file == null ? l10n.ressourceChooseFile : l10n.ressourceReplaceFile,
           ),
@@ -206,7 +210,10 @@ class _TypeChoice extends StatelessWidget {
           for (final type in RessourceType.values)
             ButtonSegment(
               value: type,
-              icon: Icon(RessourceVisual.icon(type), size: 16),
+              icon: Icon(
+                RessourceVisual.icon(type),
+                size: ProgrammeLayout.iconSmall,
+              ),
               label: Text(RessourceVisual.label(l10n, type)),
             ),
         ],

@@ -49,7 +49,7 @@ class ChapitreObjectifsField extends StatelessWidget {
                 Expanded(
                   child: EteeloTextInput(
                     controller: lines[i].controller,
-                    label: '${l10n.chapitreFormObjectifsLabel} ${i + 1}',
+                    label: l10n.chapitreFormObjectifLabel(i + 1),
                     hideLabel: true,
                     placeholder: l10n.chapitreFormObjectifHint,
                     capitalization: EteeloTextCapitalization.sentence,

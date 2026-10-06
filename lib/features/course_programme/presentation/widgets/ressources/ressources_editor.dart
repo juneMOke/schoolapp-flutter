@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/form/chapitre_form_sections.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/ressources/ressource_draft_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Les ressources du chapitre dans la modale (spec §5) : la liste (gardées et
 /// jointes), un ✕ pour retirer, et le brouillon en ligne. Les fichiers
@@ -123,7 +124,10 @@ class _EmptyButton extends StatelessWidget {
       color: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: AppRadius.brMd,
-        side: BorderSide(color: AppColors.borderStrong, width: 1.5),
+        side: BorderSide(
+          color: AppColors.borderStrong,
+          width: ProgrammeLayout.emptyBorderWidth,
+        ),
       ),
       child: InkWell(
         borderRadius: AppRadius.brMd,
@@ -135,7 +139,7 @@ class _EmptyButton extends StatelessWidget {
             children: [
               const Icon(
                 Icons.attach_file_rounded,
-                size: 16,
+                size: ProgrammeLayout.iconSmall,
                 color: AppColors.bleuArdoise,
               ),
               const SizedBox(width: AppSpacing.sm),

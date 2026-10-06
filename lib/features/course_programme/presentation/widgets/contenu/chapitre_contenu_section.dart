@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/contenu/contenu_add_bar.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Enregistre les blocs ; [announce] : dire « Contenu enregistré ».
 typedef ContenuSaver =
@@ -119,7 +120,10 @@ class _ChapitreContenuSectionState extends State<ChapitreContenuSection> {
     child: _editing
         ? FilledButton.icon(
             onPressed: _draft!.tooHeavy ? null : _finish,
-            icon: const Icon(Icons.check_rounded, size: 18),
+            icon: const Icon(
+              Icons.check_rounded,
+              size: ProgrammeLayout.iconMedium,
+            ),
             label: Text(l10n.contenuDone),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.bleuArdoise,
@@ -128,7 +132,10 @@ class _ChapitreContenuSectionState extends State<ChapitreContenuSection> {
           )
         : OutlinedButton.icon(
             onPressed: _startEditing,
-            icon: const Icon(Icons.edit_outlined, size: 18),
+            icon: const Icon(
+              Icons.edit_outlined,
+              size: ProgrammeLayout.iconMedium,
+            ),
             label: Text(l10n.contenuWrite),
             style: OutlinedButton.styleFrom(minimumSize: _inlineButtonSize),
           ),
@@ -216,7 +223,7 @@ class _Warning extends StatelessWidget {
       children: [
         const Icon(
           Icons.warning_amber_rounded,
-          size: 16,
+          size: ProgrammeLayout.iconSmall,
           color: AppColors.error,
         ),
         const SizedBox(width: AppSpacing.xs),

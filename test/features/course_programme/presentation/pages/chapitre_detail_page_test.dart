@@ -130,4 +130,14 @@ void main() {
     await pump(tester, page());
     expect(find.text('Reprendre les prérequis'), findsNothing);
   });
+
+  testWidgets('sur un téléphone (360 dp), rien ne déborde', (tester) async {
+    tester.view.physicalSize = const Size(360, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    stub(ChapitreState(status: ChapitreStatus.ready, detail: detail));
+    await tester.pumpWidget(page());
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }

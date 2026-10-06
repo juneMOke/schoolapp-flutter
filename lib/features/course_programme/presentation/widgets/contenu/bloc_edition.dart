@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/course_programme/domain/entities/cha
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/bloc_visual.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/contenu_draft.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Un bloc en édition : une carte avec son type, ses gestes (monter,
 /// descendre, supprimer) et son champ — une ligne pour un titre, une zone de
@@ -43,7 +44,11 @@ class BlocEdition extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(BlocVisual.icon(type), size: 16, color: AppColors.textMuted),
+              Icon(
+                BlocVisual.icon(type),
+                size: ProgrammeLayout.iconSmall,
+                color: AppColors.textMuted,
+              ),
               const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
@@ -57,18 +62,27 @@ class BlocEdition extends StatelessWidget {
                 IconButton(
                   tooltip: l10n.blocMoveUp,
                   onPressed: onMoveUp,
-                  icon: const Icon(Icons.arrow_upward_rounded, size: 18),
+                  icon: const Icon(
+                    Icons.arrow_upward_rounded,
+                    size: ProgrammeLayout.iconMedium,
+                  ),
                 ),
               if (onMoveDown != null)
                 IconButton(
                   tooltip: l10n.blocMoveDown,
                   onPressed: onMoveDown,
-                  icon: const Icon(Icons.arrow_downward_rounded, size: 18),
+                  icon: const Icon(
+                    Icons.arrow_downward_rounded,
+                    size: ProgrammeLayout.iconMedium,
+                  ),
                 ),
               IconButton(
                 tooltip: l10n.blocDelete,
                 onPressed: onDelete,
-                icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  size: ProgrammeLayout.iconMedium,
+                ),
                 color: AppColors.error,
               ),
             ],

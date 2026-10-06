@@ -64,7 +64,14 @@ class _Meta extends StatelessWidget {
       children: [
         Icon(icon, size: ProgrammeLayout.metaIcon, color: AppColors.textMuted),
         const SizedBox(width: AppSpacing.xs),
-        Text(label, style: style),
+        Flexible(
+          child: Text(
+            label,
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }

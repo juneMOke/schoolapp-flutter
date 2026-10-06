@@ -122,4 +122,18 @@ void main() {
     expect(find.text('Programme vide'), findsOneWidget);
     expect(find.text('Créer un chapitre'), findsOneWidget);
   });
+
+  testWidgets('sur un téléphone (360 dp), rien ne déborde ; Modifier et '
+      'Supprimer passent dans « ⋮ »', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    stub(ProgrammeState(status: ProgrammeStatus.ready, programme: programme));
+    await tester.pumpWidget(page());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byTooltip('Plus d\'actions'), findsNWidgets(2));
+    expect(find.byTooltip('Supprimer'), findsNothing);
+  });
 }

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_enums.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/ressource_visual.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Une ressource en une ligne : icône du type, intitulé, « Type · détail »
 /// (ellipse), et un geste à droite (retirer, ouvrir).
@@ -48,7 +49,7 @@ class RessourceTile extends StatelessWidget {
             ),
             child: Icon(
               RessourceVisual.icon(type),
-              size: 16,
+              size: ProgrammeLayout.iconSmall,
               color: AppColors.bleuArdoise,
             ),
           ),

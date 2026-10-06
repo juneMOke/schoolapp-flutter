@@ -193,7 +193,7 @@ class _QuickStatut extends StatelessWidget {
       child: IconButton(
         tooltip: l10n.chapitreQuickStatut(label),
         onPressed: selected ? null : () => onChanged(statut),
-        icon: Icon(visual.icon, size: 18),
+        icon: Icon(visual.icon, size: ProgrammeLayout.iconMedium),
         color: visual.accent,
         disabledColor: visual.accent,
         style: IconButton.styleFrom(

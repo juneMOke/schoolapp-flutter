@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_edit.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/chapitre_form_model.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
 
 /// Rattachement (sous-période) et séances prévues, côte à côte quand la
 /// largeur le permet.
@@ -49,7 +50,7 @@ class ChapitrePlanningFields extends StatelessWidget {
     final seances = EteeloTextInput(
       controller: model.seances,
       label: l10n.chapitreFormSeancesLabel,
-      placeholder: '4',
+      placeholder: '${Chapitre.defaultSeances}',
       keyboardType: EteeloTextInputType.number,
       errorText: touched && model.seancesInvalid
           ? l10n.chapitreFormSeancesInvalid

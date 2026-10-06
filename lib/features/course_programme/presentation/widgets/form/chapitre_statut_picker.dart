@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_enums.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/helpers/chapitre_statut_visual.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// L'état d'avancement en trois tuiles (icône + libellé), un groupe radio.
 class ChapitreStatutPicker extends StatelessWidget {
@@ -85,7 +86,11 @@ class _Tile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               child: Column(
                 children: [
-                  Icon(visual.icon, size: 18, color: ink),
+                  Icon(
+                    visual.icon,
+                    size: ProgrammeLayout.iconMedium,
+                    color: ink,
+                  ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     label,

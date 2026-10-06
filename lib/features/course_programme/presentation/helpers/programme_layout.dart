@@ -21,6 +21,37 @@ class ProgrammeLayout {
   /// Sous cette largeur, Modifier / Supprimer passent dans un menu « ⋮ ».
   static const double compactRowBelow = 600;
 
+  /// Icônes de bouton et de ligne.
+  static const double iconSmall = 16;
+  static const double iconMedium = 18;
+
+  /// Icône d'en-tête de section, d'encadré.
+  static const double sectionIcon = 17;
+  static const double asideIcon = 15;
+
+  /// Hauteur minimale de l'en-tête d'une section (place de son action).
+  static const double sectionActionMinHeight = 40;
+
+  /// Puce d'une liste, d'une pilule de stratégie.
+  static const double bullet = 6;
+
+  /// Décalage d'une puce pour l'aligner sur la première ligne du texte.
+  static const double bulletTopOffset = 9;
+
+  /// Trait terre cuite d'un titre de bloc.
+  static const double titleMarkerWidth = 4;
+  static const double titleMarkerHeight = 18;
+
+  /// Liséré gauche d'un encadré (« À retenir », « Exemple »).
+  static const double asideEdge = 4;
+
+  /// Bordure pointillée du bouton « Joindre… » d'une liste vide.
+  static const double emptyBorderWidth = 1.5;
+
+  /// Lignes fantômes de l'en-tête en chargement.
+  static const double skeletonTitleHeight = 20;
+  static const double skeletonSubtitleHeight = 14;
+
   /// Largeur de la modale d'un chapitre.
   static const double formDialogMaxWidth = 600;
 

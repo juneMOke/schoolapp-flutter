@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/helpers/programme_layout.dart';
 
 /// Un groupe numéroté de la modale (« 01 IDENTIFICATION »), séparé du
 /// précédent par un filet.
@@ -141,7 +142,7 @@ class ChapitreFormAddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton.icon(
       onPressed: onPressed,
-      icon: const Icon(Icons.add_rounded, size: 18),
+      icon: const Icon(Icons.add_rounded, size: ProgrammeLayout.iconMedium),
       label: Text(label ?? AppLocalizations.of(context)!.chapitreFormAdd),
       style: TextButton.styleFrom(foregroundColor: AppColors.bleuArdoise),
     );

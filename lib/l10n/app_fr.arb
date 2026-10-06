@@ -9148,5 +9148,8 @@
   "blocDelete": "Supprimer le bloc",
   "contenuTooManyBlocs": "Le contenu est limité à {max} blocs.",
   "@contenuTooManyBlocs": {"placeholders": {"max": {"type": "int"}}},
-  "contenuTooHeavy": "Le contenu est trop long pour être enregistré : raccourcissez-le."
+  "contenuTooHeavy": "Le contenu est trop long pour être enregistré : raccourcissez-le.",
+  "ressourceUrlHint": "https://…",
+  "chapitreFormObjectifLabel": "Objectif {numero}",
+  "@chapitreFormObjectifLabel": {"placeholders": {"numero": {"type": "int"}}}
 }
