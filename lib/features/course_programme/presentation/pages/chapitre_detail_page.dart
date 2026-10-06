@@ -23,7 +23,7 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_ressources_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_strategies_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/form/chapitre_form_launcher.dart';
-import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_error_state.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_failure_view.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_skeleton.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -165,9 +165,10 @@ class ChapitreDetailPage extends StatelessWidget {
     if (detail == null) {
       return state.status == ChapitreStatus.loading
           ? ProgrammeSkeleton(semanticsLabel: l10n.chapitreLoadingA11yLabel)
-          : ProgrammeResultsErrorState(
-              title: l10n.chapitreErrorTitle,
-              message: l10n.chapitreErrorMessage,
+          : ProgrammeFailureView(
+              failure: state.failure,
+              localTitle: l10n.chapitreErrorTitle,
+              localMessage: l10n.chapitreErrorMessage,
               onRetry: () => context.read<ChapitreCubit>().load(),
             );
     }

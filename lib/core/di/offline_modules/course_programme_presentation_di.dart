@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -5,6 +6,9 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
+import 'package:school_app_flutter/features/course_programme/data/repositories/programme_online_reader.dart';
+import 'package:school_app_flutter/features/course_programme/data/sync/programme_read_api.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_children_write_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
@@ -31,6 +35,11 @@ void registerCourseProgrammePresentation(GetIt getIt) {
       dao: getIt<ChapitreDao>(),
       writer: getIt<ChapitreWriteDao>(),
       evaluations: getIt<AcademicsLocalDataSource>(),
+      cours: getIt<AcademicsRefLocalDataSource>(),
+      online: ProgrammeOnlineReader(
+        api: ProgrammeReadApi(getIt<Dio>()),
+        extras: getIt<Map<String, dynamic>>(),
+      ),
       ids: getIt<IdGenerator>(),
       currentUser: getIt<CurrentUserContext>(),
       syncEngine: getIt<SyncEngine>(),

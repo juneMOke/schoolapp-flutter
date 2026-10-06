@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/course_summary.dart';
 
 enum CourseStatus { initial, loading, success, failure }
@@ -16,7 +17,22 @@ enum CourseErrorType {
   server,
   storage,
   auth,
-  unknown,
+  unknown;
+
+  /// Le type d'erreur d'une [Failure]. Convention projet (cf. intercepteur
+  /// Dio) : HTTP 403 -> [UnauthorizedFailure] -> forbidden ; HTTP 401 ->
+  /// [InvalidCredentialsFailure] -> invalidCredentials.
+  static CourseErrorType of(Failure failure) => switch (failure) {
+    NetworkFailure() => CourseErrorType.network,
+    NotFoundFailure() => CourseErrorType.notFound,
+    ValidationFailure() => CourseErrorType.validation,
+    UnauthorizedFailure() => CourseErrorType.forbidden,
+    InvalidCredentialsFailure() => CourseErrorType.invalidCredentials,
+    ServerFailure() => CourseErrorType.server,
+    StorageFailure() => CourseErrorType.storage,
+    AuthFailure() => CourseErrorType.auth,
+    _ => CourseErrorType.unknown,
+  };
 }
 
 class CourseState extends Equatable {

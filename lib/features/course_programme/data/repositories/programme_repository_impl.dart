@@ -4,11 +4,13 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_write_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/repositories/programme_local_write.dart';
+import 'package:school_app_flutter/features/course_programme/data/repositories/programme_online_reader.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_detail.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/programme.dart';
@@ -17,10 +19,15 @@ import 'package:school_app_flutter/features/course_programme/domain/repositories
 /// Le programme lu et écrit sur la tablette. Les évaluations liées se lisent
 /// dans la table des évaluations, par leurs `chapitreIds` : aucun compteur ne
 /// descend du serveur.
+///
+/// Un cours absent de la tablette (la direction n'a pas de cours à elle) se
+/// lit en ligne, en lecture seule ([ProgrammeOnlineReader]).
 class ProgrammeRepositoryImpl implements ProgrammeRepository {
   final ChapitreDao _dao;
   final ChapitreWriteDao _writer;
   final AcademicsLocalDataSource _evaluations;
+  final AcademicsRefLocalDataSource _cours;
+  final ProgrammeOnlineReader? _online;
   final IdGenerator _ids;
   final CurrentUserContext _currentUser;
   final SyncEngine? _syncEngine;
@@ -30,6 +37,8 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
     required ChapitreDao dao,
     required ChapitreWriteDao writer,
     required AcademicsLocalDataSource evaluations,
+    required AcademicsRefLocalDataSource cours,
+    ProgrammeOnlineReader? online,
     required IdGenerator ids,
     required CurrentUserContext currentUser,
     SyncEngine? syncEngine,
@@ -37,6 +46,8 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
   }) : _dao = dao,
        _writer = writer,
        _evaluations = evaluations,
+       _cours = cours,
+       _online = online,
        _ids = ids,
        _currentUser = currentUser,
        _syncEngine = syncEngine,
@@ -46,7 +57,15 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
   String newId() => _ids.newId();
 
   @override
-  Future<Either<Failure, Programme>> loadProgramme(String coursId) =>
+  Future<Either<Failure, Programme>> loadProgramme(String coursId) async {
+    final online = _online;
+    if (online != null && await _cours.getCours(coursId) == null) {
+      return online.readProgramme(coursId);
+    }
+    return _readProgramme(coursId);
+  }
+
+  Future<Either<Failure, Programme>> _readProgramme(String coursId) =>
       _guard(() async {
         final chapitres = await _dao.chapitresOfCours(coursId);
         final notes = await _dao.notesCountByChapitre(coursId);
@@ -72,7 +91,19 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
       });
 
   @override
-  Future<Either<Failure, ChapitreDetail>> loadChapitre(String chapitreId) =>
+  Future<Either<Failure, ChapitreDetail>> loadChapitre(
+    String chapitreId,
+  ) async {
+    final local = await _readChapitre(chapitreId);
+    final online = _online;
+    if (online != null &&
+        local.fold((f) => f is NotFoundFailure, (_) => false)) {
+      return online.readChapitre(chapitreId);
+    }
+    return local;
+  }
+
+  Future<Either<Failure, ChapitreDetail>> _readChapitre(String chapitreId) =>
       _guard(() async {
         final chapitre = await _dao.find(chapitreId);
         if (chapitre == null) throw const _Missing();

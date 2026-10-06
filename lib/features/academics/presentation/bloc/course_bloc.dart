@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_my_courses_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_state.dart';
@@ -63,7 +62,7 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       (failure) => emit(
         state.copyWith(
           status: CourseStatus.failure,
-          errorType: _mapFailureToErrorType(failure),
+          errorType: CourseErrorType.of(failure),
         ),
       ),
       (courses) => emit(
@@ -75,18 +74,4 @@ class CourseBloc extends Bloc<CourseEvent, CourseState> {
       ),
     );
   }
-
-  CourseErrorType _mapFailureToErrorType(Failure failure) => switch (failure) {
-    NetworkFailure() => CourseErrorType.network,
-    NotFoundFailure() => CourseErrorType.notFound,
-    ValidationFailure() => CourseErrorType.validation,
-    // Convention projet (cf. interceptor Dio) : HTTP 403 -> UnauthorizedFailure
-    // -> forbidden ; HTTP 401 -> InvalidCredentialsFailure -> invalidCredentials.
-    UnauthorizedFailure() => CourseErrorType.forbidden,
-    InvalidCredentialsFailure() => CourseErrorType.invalidCredentials,
-    ServerFailure() => CourseErrorType.server,
-    StorageFailure() => CourseErrorType.storage,
-    AuthFailure() => CourseErrorType.auth,
-    _ => CourseErrorType.unknown,
-  };
 }

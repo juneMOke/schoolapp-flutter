@@ -16,7 +16,7 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/programme/programme_chapitres_card.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/programme/programme_header_card.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_empty_state.dart';
-import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_error_state.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_failure_view.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/states/programme_skeleton.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -145,7 +145,8 @@ class ProgrammePage extends StatelessWidget {
     if (state.status == ProgrammeStatus.failure || programme == null) {
       return state.status == ProgrammeStatus.loading
           ? const ProgrammeSkeleton()
-          : ProgrammeResultsErrorState(
+          : ProgrammeFailureView(
+              failure: state.failure,
               onRetry: () => context.read<ProgrammeCubit>().load(),
             );
     }

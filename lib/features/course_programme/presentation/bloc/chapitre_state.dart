@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_detail.dart';
 
 enum ChapitreStatus { loading, ready, failure }
@@ -21,6 +22,7 @@ class ChapitreFeedback extends Equatable {
 class ChapitreState extends Equatable {
   final ChapitreStatus status;
   final ChapitreDetail? detail;
+  final Failure? failure;
   final ChapitreFeedback? feedback;
 
   /// Notes masquées dont la suppression attend la fin du délai d'annulation.
@@ -29,6 +31,7 @@ class ChapitreState extends Equatable {
   const ChapitreState({
     this.status = ChapitreStatus.loading,
     this.detail,
+    this.failure,
     this.feedback,
     this.hiddenNotes = const {},
   });
@@ -36,15 +39,17 @@ class ChapitreState extends Equatable {
   ChapitreState copyWith({
     ChapitreStatus? status,
     ChapitreDetail? detail,
+    Failure? failure,
     ChapitreFeedback? feedback,
     Set<String>? hiddenNotes,
   }) => ChapitreState(
     status: status ?? this.status,
     detail: detail ?? this.detail,
+    failure: failure ?? this.failure,
     feedback: feedback ?? this.feedback,
     hiddenNotes: hiddenNotes ?? this.hiddenNotes,
   );
 
   @override
-  List<Object?> get props => [status, detail, feedback, hiddenNotes];
+  List<Object?> get props => [status, detail, failure, feedback, hiddenNotes];
 }

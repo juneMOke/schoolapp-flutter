@@ -64,9 +64,11 @@ class ChapitreCubit extends Cubit<ChapitreState> {
     final result = await _load(chapitreId);
     if (isClosed) return;
     result.fold(
-      (_) {
+      (failure) {
         if (state.detail == null) {
-          emit(state.copyWith(status: ChapitreStatus.failure));
+          emit(
+            state.copyWith(status: ChapitreStatus.failure, failure: failure),
+          );
         }
       },
       (detail) =>
