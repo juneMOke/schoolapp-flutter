@@ -12,6 +12,13 @@ class ChapitreObjectif extends Equatable {
     this.atteint = false,
   });
 
+  /// La forme du fil et de la ligne locale.
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'texte': texte,
+    'atteint': atteint,
+  };
+
   ChapitreObjectif copyWith({String? texte, bool? atteint}) => ChapitreObjectif(
     id: id,
     texte: texte ?? this.texte,

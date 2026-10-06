@@ -14791,4 +14791,80 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get chapitreContenuSaved => 'Contenu enregistré';
+
+  @override
+  String get chapitreSectionContenu => 'Contenu du cours';
+
+  @override
+  String get contenuWrite => 'Rédiger';
+
+  @override
+  String get contenuDone => 'Terminer';
+
+  @override
+  String get contenuEmpty =>
+      'Rédigez le contenu du chapitre : sections, notions, points à retenir, exemples.';
+
+  @override
+  String get contenuStart => 'Rédiger le contenu';
+
+  @override
+  String get contenuAddBloc => 'Ajouter un bloc';
+
+  @override
+  String get blocTypeTitre => 'Titre';
+
+  @override
+  String get blocTypeParagraphe => 'Paragraphe';
+
+  @override
+  String get blocTypeListe => 'Liste';
+
+  @override
+  String get blocTypeEncadre => 'À retenir';
+
+  @override
+  String get blocTypeExemple => 'Exemple';
+
+  @override
+  String get blocLabelTitre => 'Titre de section';
+
+  @override
+  String get blocLabelListe => 'Liste à puces';
+
+  @override
+  String get blocLabelExemple => 'Exemple / exercice';
+
+  @override
+  String get blocHintTitre => 'Titre de la section';
+
+  @override
+  String get blocHintParagraphe => 'Rédigez le paragraphe';
+
+  @override
+  String get blocHintListe => 'Un élément par ligne';
+
+  @override
+  String get blocHintEncadre => 'Ce que l\'élève doit retenir.';
+
+  @override
+  String get blocHintExemple => 'Décrivez l\'exemple ou l\'exercice.';
+
+  @override
+  String get blocMoveUp => 'Monter le bloc';
+
+  @override
+  String get blocMoveDown => 'Descendre le bloc';
+
+  @override
+  String get blocDelete => 'Supprimer le bloc';
+
+  @override
+  String contenuTooManyBlocs(int max) {
+    return 'Le contenu est limité à $max blocs.';
+  }
+
+  @override
+  String get contenuTooHeavy =>
+      'Le contenu est trop long pour être enregistré : raccourcissez-le.';
 }

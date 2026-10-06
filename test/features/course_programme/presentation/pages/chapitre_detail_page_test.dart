@@ -71,6 +71,7 @@ void main() {
         sousPeriodes: const [SousPeriodeOption(id: 'sp-1', ordre: 1)],
         onBack: () {},
         onOpenEvaluations: () {},
+        newId: () => 'new',
       ),
     ),
     permissions: permissions,

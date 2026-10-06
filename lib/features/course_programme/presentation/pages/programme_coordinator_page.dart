@@ -138,6 +138,7 @@ class _CourseStack extends StatelessWidget {
             titre: chapitre.titre,
             sousPeriodes: programme.state.sousPeriodes,
             onOpenEvaluations: onOpenEvaluations,
+            newId: programme.newId,
             onBack: () {
               programme.refresh();
               onBack();

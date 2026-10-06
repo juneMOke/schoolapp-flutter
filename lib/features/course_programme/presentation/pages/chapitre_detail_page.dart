@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/course_programme/domain/entities/cha
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/chapitre_cubit.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/chapitre_state.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/common/programme_write_gate.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/widgets/contenu/chapitre_contenu_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_blank_state.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_evaluations_section.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/detail/chapitre_header_card.dart';
@@ -27,8 +28,8 @@ import 'package:school_app_flutter/features/course_programme/presentation/widget
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Le détail d'un chapitre (spec §7–9) : en-tête, puis Objectifs, Stratégies,
-/// Notes, et la grille Ressources | Évaluations liées. Lit le
+/// Le détail d'un chapitre (spec §7–9) : en-tête, contenu rédigé, puis
+/// Objectifs, Stratégies, Notes, et la grille Ressources | Évaluations liées. Lit le
 /// [ChapitreCubit] fourni par le parent ; modifier passe par la modale du
 /// programme.
 class ChapitreDetailPage extends StatelessWidget {
@@ -38,8 +39,8 @@ class ChapitreDetailPage extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onOpenEvaluations;
 
-  /// Le contenu rédigé, posé au-dessus des sections.
-  final Widget Function(ChapitreDetail detail)? contentBuilder;
+  /// Un identifiant neuf (bloc de contenu).
+  final String Function() newId;
 
   const ChapitreDetailPage({
     super.key,
@@ -48,7 +49,7 @@ class ChapitreDetailPage extends StatelessWidget {
     required this.sousPeriodes,
     required this.onBack,
     required this.onOpenEvaluations,
-    this.contentBuilder,
+    required this.newId,
   });
 
   static const double _gridColumnMin = 280;
@@ -197,7 +198,13 @@ class ChapitreDetailPage extends StatelessWidget {
           ),
           gap,
         ],
-        if (contentBuilder != null) ...[contentBuilder!(detail), gap],
+        ChapitreContenuSection(
+          blocs: chapitre.blocs,
+          canWrite: canWrite,
+          newId: newId,
+          onSave: cubit.saveBlocs,
+        ),
+        gap,
         if (!chapitre.isBlank) ...[
           ChapitreObjectifsSection(
             objectifs: chapitre.objectifs,

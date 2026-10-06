@@ -23137,6 +23137,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Content saved'**
   String get chapitreContenuSaved;
+
+  /// No description provided for @chapitreSectionContenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Course content'**
+  String get chapitreSectionContenu;
+
+  /// No description provided for @contenuWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get contenuWrite;
+
+  /// No description provided for @contenuDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get contenuDone;
+
+  /// No description provided for @contenuEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the chapter content: sections, key notions, takeaways, examples.'**
+  String get contenuEmpty;
+
+  /// No description provided for @contenuStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the content'**
+  String get contenuStart;
+
+  /// No description provided for @contenuAddBloc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a block'**
+  String get contenuAddBloc;
+
+  /// No description provided for @blocTypeTitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading'**
+  String get blocTypeTitre;
+
+  /// No description provided for @blocTypeParagraphe.
+  ///
+  /// In en, this message translates to:
+  /// **'Paragraph'**
+  String get blocTypeParagraphe;
+
+  /// No description provided for @blocTypeListe.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get blocTypeListe;
+
+  /// No description provided for @blocTypeEncadre.
+  ///
+  /// In en, this message translates to:
+  /// **'Key point'**
+  String get blocTypeEncadre;
+
+  /// No description provided for @blocTypeExemple.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get blocTypeExemple;
+
+  /// No description provided for @blocLabelTitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Section heading'**
+  String get blocLabelTitre;
+
+  /// No description provided for @blocLabelListe.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulleted list'**
+  String get blocLabelListe;
+
+  /// No description provided for @blocLabelExemple.
+  ///
+  /// In en, this message translates to:
+  /// **'Example / exercise'**
+  String get blocLabelExemple;
+
+  /// No description provided for @blocHintTitre.
+  ///
+  /// In en, this message translates to:
+  /// **'Section heading'**
+  String get blocHintTitre;
+
+  /// No description provided for @blocHintParagraphe.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the paragraph'**
+  String get blocHintParagraphe;
+
+  /// No description provided for @blocHintListe.
+  ///
+  /// In en, this message translates to:
+  /// **'One item per line'**
+  String get blocHintListe;
+
+  /// No description provided for @blocHintEncadre.
+  ///
+  /// In en, this message translates to:
+  /// **'What the student must remember.'**
+  String get blocHintEncadre;
+
+  /// No description provided for @blocHintExemple.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the example or exercise.'**
+  String get blocHintExemple;
+
+  /// No description provided for @blocMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the block up'**
+  String get blocMoveUp;
+
+  /// No description provided for @blocMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the block down'**
+  String get blocMoveDown;
+
+  /// No description provided for @blocDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the block'**
+  String get blocDelete;
+
+  /// No description provided for @contenuTooManyBlocs.
+  ///
+  /// In en, this message translates to:
+  /// **'Content is limited to {max} blocks.'**
+  String contenuTooManyBlocs(int max);
+
+  /// No description provided for @contenuTooHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'The content is too long to be saved: shorten it.'**
+  String get contenuTooHeavy;
 }
 
 class _AppLocalizationsDelegate

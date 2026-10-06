@@ -21,6 +21,14 @@ class ChapitreBloc extends Equatable {
       ? items.every((item) => item.trim().isEmpty)
       : texte.trim().isEmpty;
 
+  /// La forme du fil et de la ligne locale.
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'type': type.wireValue,
+    'texte': texte,
+    'items': items,
+  };
+
   ChapitreBloc copyWith({String? texte, List<String>? items}) => ChapitreBloc(
     id: id,
     type: type,

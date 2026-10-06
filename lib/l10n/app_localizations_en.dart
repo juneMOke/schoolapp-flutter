@@ -14689,4 +14689,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chapitreContenuSaved => 'Content saved';
+
+  @override
+  String get chapitreSectionContenu => 'Course content';
+
+  @override
+  String get contenuWrite => 'Write';
+
+  @override
+  String get contenuDone => 'Done';
+
+  @override
+  String get contenuEmpty =>
+      'Write the chapter content: sections, key notions, takeaways, examples.';
+
+  @override
+  String get contenuStart => 'Write the content';
+
+  @override
+  String get contenuAddBloc => 'Add a block';
+
+  @override
+  String get blocTypeTitre => 'Heading';
+
+  @override
+  String get blocTypeParagraphe => 'Paragraph';
+
+  @override
+  String get blocTypeListe => 'List';
+
+  @override
+  String get blocTypeEncadre => 'Key point';
+
+  @override
+  String get blocTypeExemple => 'Example';
+
+  @override
+  String get blocLabelTitre => 'Section heading';
+
+  @override
+  String get blocLabelListe => 'Bulleted list';
+
+  @override
+  String get blocLabelExemple => 'Example / exercise';
+
+  @override
+  String get blocHintTitre => 'Section heading';
+
+  @override
+  String get blocHintParagraphe => 'Write the paragraph';
+
+  @override
+  String get blocHintListe => 'One item per line';
+
+  @override
+  String get blocHintEncadre => 'What the student must remember.';
+
+  @override
+  String get blocHintExemple => 'Describe the example or exercise.';
+
+  @override
+  String get blocMoveUp => 'Move the block up';
+
+  @override
+  String get blocMoveDown => 'Move the block down';
+
+  @override
+  String get blocDelete => 'Delete the block';
+
+  @override
+  String contenuTooManyBlocs(int max) {
+    return 'Content is limited to $max blocks.';
+  }
+
+  @override
+  String get contenuTooHeavy =>
+      'The content is too long to be saved: shorten it.';
 }

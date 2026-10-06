@@ -12,10 +12,7 @@ class ChapitreFicheCodec {
 
   static List<Map<String, Object?>> objectifsToJson(
     List<ChapitreObjectif> objectifs,
-  ) => [
-    for (final o in objectifs)
-      {'id': o.id, 'texte': o.texte, 'atteint': o.atteint},
-  ];
+  ) => [for (final o in objectifs) o.toJson()];
 
   static List<ChapitreObjectif> objectifsFromJson(Object? json) => [
     for (final item in _maps(json))
@@ -32,13 +29,7 @@ class ChapitreFicheCodec {
       : const [];
 
   static List<Map<String, Object?>> blocsToJson(List<ChapitreBloc> blocs) => [
-    for (final b in blocs)
-      {
-        'id': b.id,
-        'type': b.type.wireValue,
-        'texte': b.texte,
-        'items': b.items,
-      },
+    for (final b in blocs) b.toJson(),
   ];
 
   static List<ChapitreBloc> blocsFromJson(Object? json) => [
