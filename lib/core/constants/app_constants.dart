@@ -799,7 +799,11 @@ class AppConstants {
   // v61 (2026-10-06) : le programme de cours (`chapitre`, `chapitre_note`,
   // `chapitre_ressource`) et la recopie des chapitres de `ref_chapitre` en
   // ébauches. Création pure. Palier d'école.
-  static const int offlineDbSchemaVersion = 61;
+  // v62 (2026-10-06) : le sujet d'une évaluation — `evaluation.titre`, le
+  // sujet en sous-agrégat LWW (`duree_minutes`, `programme_json`, `consignes`,
+  // `sujet_*`), `publication_json`, et la table `evaluation_copie_log`.
+  // Additif. Palier d'école.
+  static const int offlineDbSchemaVersion = 62;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

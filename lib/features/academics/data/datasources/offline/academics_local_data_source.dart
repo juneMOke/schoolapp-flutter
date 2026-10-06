@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
 
 /// État canonique serveur (`NoteSyncView`) à écrire sur une note lors du
 /// réalignement post-ACK — `null` si le serveur n'a pas renvoyé de `note`
@@ -47,6 +48,7 @@ class AcademicsLocalDataSource {
 
   static const String evaluationTable = 'evaluation';
   static const String noteTable = 'note_evaluation';
+  static const String copieLogTable = 'evaluation_copie_log';
 
   // ── Lectures du chemin d'écriture ───────────────────────────────────────────
 
@@ -150,16 +152,19 @@ class AcademicsLocalDataSource {
   /// Création d'une évaluation (**régime A**) : INSERT + entrée d'outbox, dans
   /// une seule transaction. `ConflictAlgorithm.replace` = idempotent sur l'uuid
   /// client (un rejeu local ne duplique jamais).
+  ///
+  /// [sujet] porte le cadre saisi à la création (durée, programme, consignes) ;
+  /// il part dans l'enveloppe de création, son statut d'envoi reste donc nul.
   Future<void> createEvaluationWithOutbox({
     required EvaluationRow row,
+    EvaluationSujetRow? sujet,
     required OutboxEntry outboxEntry,
   }) async {
     await _db.transaction((txn) async {
-      await txn.insert(
-        evaluationTable,
-        row.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await txn.insert(evaluationTable, {
+        ...row.toMap(),
+        ...?sujet?.toMap(),
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       await OutboxDao(txn).enqueue(outboxEntry);
     });
   }
@@ -375,8 +380,9 @@ class AcademicsLocalDataSource {
   /// **réconciliée** : la vérité serveur remplace un état que le serveur a
   /// refusé — sinon la ligne rejetée survivrait à jamais comme si elle était
   /// valide. Une évaluation absente est matérialisée SYNCED ; une déjà SYNCED
-  /// est rafraîchie (fait immuable : REPLACE sans risque). Renvoie le nombre
-  /// appliqué.
+  /// est rafraîchie par un `UPDATE` de SES colonnes : un `REPLACE` effacerait
+  /// le sujet, l'état des publications et tout ce que la ligne porte hors de
+  /// [EvaluationRow]. Renvoie le nombre appliqué.
   Future<int> applyPulledEvaluations(List<EvaluationRow> rows) async {
     var applied = 0;
     await applyInBatches<EvaluationRow>(
@@ -395,11 +401,16 @@ class AcademicsLocalDataSource {
               existing.first['sync_status'] == SyncState.pendingSync.dbValue) {
             continue; // écriture locale en attente de push = gagnante.
           }
-          await txn.insert(
-            evaluationTable,
-            row.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
+          if (existing.isEmpty) {
+            await txn.insert(evaluationTable, row.toMap());
+          } else {
+            await txn.update(
+              evaluationTable,
+              row.toMap()..remove('id'),
+              where: 'id = ?',
+              whereArgs: [row.id],
+            );
+          }
           applied++;
         }
       },
@@ -465,11 +476,11 @@ class AcademicsLocalDataSource {
   // ── Réconciliation (DF-L) — cours perdu (réaffectation prof) ────────────────
 
   /// Purge les évaluations d'un cours évincé (référence perdue — réaffectation,
-  /// garde d'ownership 403) et leurs notes, dans une seule transaction. Emporte
-  /// aussi le contenu `PENDING_SYNC` non encore poussé : une fois le cours
-  /// perdu, ce travail ne peut plus être poussé (le serveur le rejetterait en
-  /// 403 à son tour) — ce n'est pas une perte due à un bug de synchro, mais une
-  /// conséquence légitime de la perte d'accès.
+  /// garde d'ownership 403), leurs notes et leur journal de copies, dans une
+  /// seule transaction. Emporte aussi le contenu `PENDING_SYNC` non encore
+  /// poussé : une fois le cours perdu, ce travail ne peut plus être poussé (le
+  /// serveur le rejetterait en 403 à son tour) — ce n'est pas une perte due à
+  /// un bug de synchro, mais une conséquence légitime de la perte d'accès.
   Future<void> evictCoursData(String coursId) async {
     await _db.transaction((txn) async {
       final evalRows = await txn.query(
@@ -483,6 +494,11 @@ class AcademicsLocalDataSource {
         final placeholders = List.filled(evalIds.length, '?').join(',');
         await txn.delete(
           noteTable,
+          where: 'evaluation_id IN ($placeholders)',
+          whereArgs: evalIds,
+        );
+        await txn.delete(
+          copieLogTable,
           where: 'evaluation_id IN ($placeholders)',
           whereArgs: evalIds,
         );
