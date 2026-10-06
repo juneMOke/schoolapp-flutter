@@ -24,7 +24,9 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/state
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_editor.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_editor_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_read_view.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_rejection_banner.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_section.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -234,6 +236,14 @@ class _EvalDetailViewState extends State<_EvalDetailView> {
             sujet: state.sujet,
             onEdit: () => _startEdit(state, args.eval.maxPoints),
           ),
+          notice: state.sujet.envoi == SujetEnvoi.refuse
+              ? SujetRejectionBanner(
+                  code: state.sujet.rejectionCode,
+                  onResendWithoutMax: () => context.read<EvalDetailBloc>().add(
+                    EvalDetailSujetResendRequested(_args.eval.id),
+                  ),
+                )
+              : null,
           editor: _draft == null
               ? null
               : SujetEditor(

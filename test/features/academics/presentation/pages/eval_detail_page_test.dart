@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/sujet/eval
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_eleves_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_evaluation_sujet_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/resend_sujet_without_max_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/save_evaluation_sujet_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -28,6 +29,8 @@ class _MockGetNotes extends Mock implements GetNotesElevesUseCase {}
 
 class _MockSaveSujet extends Mock implements SaveEvaluationSujetUseCase {}
 
+class _MockResend extends Mock implements ResendSujetWithoutMaxUseCase {}
+
 void main() {
   final getIt = GetIt.instance;
   late _MockGetSujet getSujet;
@@ -43,6 +46,7 @@ void main() {
         getEvaluationSujetUseCase: getSujet,
         getNotesElevesUseCase: getNotes,
         saveEvaluationSujetUseCase: saveSujet,
+        resendSujetWithoutMaxUseCase: _MockResend(),
       ),
     );
     getIt.registerSingleton<IdGenerator>(const IdGenerator(Uuid()));

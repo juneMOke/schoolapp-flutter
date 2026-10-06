@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
@@ -26,6 +27,9 @@ class SujetSection extends StatefulWidget {
   /// Vue de lecture d'un sujet non vide.
   final Widget Function() readView;
 
+  /// Avis posé au-dessus du contenu (refus du serveur).
+  final Widget? notice;
+
   const SujetSection({
     super.key,
     required this.sujet,
@@ -34,6 +38,7 @@ class SujetSection extends StatefulWidget {
     required this.onEdit,
     required this.readView,
     this.editor,
+    this.notice,
   });
 
   @override
@@ -73,8 +78,16 @@ class _SujetSectionState extends State<SujetSection> {
       ],
       expanded: editing || _expanded,
       onToggle: editing ? null : () => setState(() => _expanded = !_expanded),
-      child:
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.notice != null) ...[
+            widget.notice!,
+            const SizedBox(height: AppSpacing.md),
+          ],
           widget.editor ?? (sujet.isEmpty ? _empty(l10n) : widget.readView()),
+        ],
+      ),
     );
   }
 

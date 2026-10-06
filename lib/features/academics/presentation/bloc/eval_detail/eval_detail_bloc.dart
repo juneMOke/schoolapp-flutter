@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/s
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_eleves_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_evaluation_sujet_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/resend_sujet_without_max_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/save_evaluation_sujet_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_state.dart';
@@ -14,17 +15,21 @@ class EvalDetailBloc extends Bloc<EvalDetailEvent, EvalDetailState> {
   final GetEvaluationSujetUseCase _getSujet;
   final GetNotesElevesUseCase _getNotes;
   final SaveEvaluationSujetUseCase _saveSujet;
+  final ResendSujetWithoutMaxUseCase _resendSujet;
 
   EvalDetailBloc({
     required GetEvaluationSujetUseCase getEvaluationSujetUseCase,
     required GetNotesElevesUseCase getNotesElevesUseCase,
     required SaveEvaluationSujetUseCase saveEvaluationSujetUseCase,
+    required ResendSujetWithoutMaxUseCase resendSujetWithoutMaxUseCase,
   }) : _getSujet = getEvaluationSujetUseCase,
        _getNotes = getNotesElevesUseCase,
        _saveSujet = saveEvaluationSujetUseCase,
+       _resendSujet = resendSujetWithoutMaxUseCase,
        super(const EvalDetailState()) {
     on<EvalDetailRequested>(_onRequested);
     on<EvalDetailSujetSaveRequested>(_onSujetSave);
+    on<EvalDetailSujetResendRequested>(_onSujetResend);
   }
 
   Future<void> _onRequested(
@@ -87,6 +92,18 @@ class EvalDetailBloc extends Bloc<EvalDetailEvent, EvalDetailState> {
       ),
     );
     // L'issue est consommée par l'écran ; la suivante repart d'un état neutre.
+    emit(state.copyWith(sujetSave: SujetSaveStatus.idle));
+  }
+
+  Future<void> _onSujetResend(
+    EvalDetailSujetResendRequested event,
+    Emitter<EvalDetailState> emit,
+  ) async {
+    final result = await _resendSujet(event.evaluationId);
+    result.fold(
+      (_) => emit(state.copyWith(sujetSave: SujetSaveStatus.failed)),
+      (sujet) => emit(state.copyWith(sujet: sujet)),
+    );
     emit(state.copyWith(sujetSave: SujetSaveStatus.idle));
   }
 

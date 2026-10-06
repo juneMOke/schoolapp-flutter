@@ -1772,6 +1772,10 @@
     }
   },
   "sujetSaveError": "L'enregistrement du sujet a échoué. Vos modifications sont conservées.",
+  "sujetRejectedMaxLocked": "Le serveur a refusé le sujet : le maximum ne change plus, des notes sont saisies.",
+  "sujetRejectedQuestionMismatch": "Le serveur a refusé le sujet : une question appartient déjà à une autre évaluation. Modifiez le sujet puis enregistrez-le.",
+  "sujetRejectedGeneric": "Le serveur a refusé le sujet. Modifiez-le puis enregistrez-le.",
+  "sujetResendWithoutMax": "Renvoyer sans changer le maximum",
   "evalRejectionPeriodClosed": "Rejetée : période clôturée",
   "evalRejectionExamNotAllowed": "Rejetée : examen non autorisé",
   "evalRejectionMaxReached": "Rejetée : plafond atteint",

@@ -38,3 +38,13 @@ class EvalDetailSujetSaveRequested extends EvalDetailEvent {
   @override
   List<Object?> get props => [evaluationId, cadre, questions, maxPoints];
 }
+
+/// Renvoie le sujet refusé en `MAX_LOCKED` sans changer le maximum.
+class EvalDetailSujetResendRequested extends EvalDetailEvent {
+  final String evaluationId;
+
+  const EvalDetailSujetResendRequested(this.evaluationId);
+
+  @override
+  List<Object?> get props => [evaluationId];
+}

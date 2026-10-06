@@ -2104,6 +2104,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Saving the subject failed. Your changes are kept.';
 
   @override
+  String get sujetRejectedMaxLocked =>
+      'The server refused the subject: the maximum can no longer change, grades have been entered.';
+
+  @override
+  String get sujetRejectedQuestionMismatch =>
+      'The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.';
+
+  @override
+  String get sujetRejectedGeneric =>
+      'The server refused the subject. Edit it, then save it.';
+
+  @override
+  String get sujetResendWithoutMax => 'Resend without changing the maximum';
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejected: closed period';
 
   @override

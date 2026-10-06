@@ -2114,6 +2114,21 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'enregistrement du sujet a échoué. Vos modifications sont conservées.';
 
   @override
+  String get sujetRejectedMaxLocked =>
+      'Le serveur a refusé le sujet : le maximum ne change plus, des notes sont saisies.';
+
+  @override
+  String get sujetRejectedQuestionMismatch =>
+      'Le serveur a refusé le sujet : une question appartient déjà à une autre évaluation. Modifiez le sujet puis enregistrez-le.';
+
+  @override
+  String get sujetRejectedGeneric =>
+      'Le serveur a refusé le sujet. Modifiez-le puis enregistrez-le.';
+
+  @override
+  String get sujetResendWithoutMax => 'Renvoyer sans changer le maximum';
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejetée : période clôturée';
 
   @override

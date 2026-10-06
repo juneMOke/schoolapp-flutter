@@ -17,4 +17,10 @@ abstract class EvaluationSujetRepository {
     required List<SujetQuestion> questions,
     double? maxPoints,
   });
+
+  /// Renvoie le sujet refusé en `MAX_LOCKED` sans toucher au maximum : des
+  /// notes sont posées, il ne change plus.
+  Future<Either<Failure, EvaluationSujet>> resendSujetWithoutMax(
+    String evaluationId,
+  );
 }

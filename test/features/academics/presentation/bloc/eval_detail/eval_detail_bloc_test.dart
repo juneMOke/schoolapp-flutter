@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/sujet/eval
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_eleves_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_evaluation_sujet_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/resend_sujet_without_max_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/save_evaluation_sujet_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
@@ -21,6 +22,8 @@ class _MockGetNotes extends Mock implements GetNotesElevesUseCase {}
 
 class _MockSaveSujet extends Mock implements SaveEvaluationSujetUseCase {}
 
+class _MockResend extends Mock implements ResendSujetWithoutMaxUseCase {}
+
 NoteEleve _note(String id, StatutNote? statut) =>
     NoteEleve(studentId: id, firstName: 'A', lastName: 'B', statut: statut);
 
@@ -28,6 +31,7 @@ void main() {
   late _MockGetSujet getSujet;
   late _MockGetNotes getNotes;
   late _MockSaveSujet saveSujet;
+  late _MockResend resend;
 
   const sujet = EvaluationSujet(cadre: EvaluationCadre(dureeMinutes: 30));
 
@@ -35,12 +39,14 @@ void main() {
     getSujet = _MockGetSujet();
     getNotes = _MockGetNotes();
     saveSujet = _MockSaveSujet();
+    resend = _MockResend();
   });
 
   EvalDetailBloc build() => EvalDetailBloc(
     getEvaluationSujetUseCase: getSujet,
     getNotesElevesUseCase: getNotes,
     saveEvaluationSujetUseCase: saveSujet,
+    resendSujetWithoutMaxUseCase: resend,
   );
 
   blocTest<EvalDetailBloc, EvalDetailState>(
@@ -195,4 +201,26 @@ void main() {
       ],
     );
   });
+
+  blocTest<EvalDetailBloc, EvalDetailState>(
+    'renvoi sans maximum : le sujet repart en attente',
+    setUp: () => when(() => resend('ev-1')).thenAnswer(
+      (_) async => const Right(EvaluationSujet(envoi: SujetEnvoi.enAttente)),
+    ),
+    build: build,
+    seed: () => const EvalDetailState(
+      status: EvalDetailStatus.ready,
+      sujet: EvaluationSujet(
+        envoi: SujetEnvoi.refuse,
+        rejectionCode: 'MAX_LOCKED',
+      ),
+    ),
+    act: (bloc) => bloc.add(const EvalDetailSujetResendRequested('ev-1')),
+    expect: () => [
+      const EvalDetailState(
+        status: EvalDetailStatus.ready,
+        sujet: EvaluationSujet(envoi: SujetEnvoi.enAttente),
+      ),
+    ],
+  );
 }

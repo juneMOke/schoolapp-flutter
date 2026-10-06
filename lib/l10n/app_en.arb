@@ -1826,6 +1826,10 @@
     }
   },
   "sujetSaveError": "Saving the subject failed. Your changes are kept.",
+  "sujetRejectedMaxLocked": "The server refused the subject: the maximum can no longer change, grades have been entered.",
+  "sujetRejectedQuestionMismatch": "The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.",
+  "sujetRejectedGeneric": "The server refused the subject. Edit it, then save it.",
+  "sujetResendWithoutMax": "Resend without changing the maximum",
   "evalRejectionPeriodClosed": "Rejected: closed period",
   "evalRejectionExamNotAllowed": "Rejected: exam not allowed",
   "evalRejectionMaxReached": "Rejected: cap reached",

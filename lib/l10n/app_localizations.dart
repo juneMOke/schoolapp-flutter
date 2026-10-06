@@ -3290,6 +3290,30 @@ abstract class AppLocalizations {
   /// **'Saving the subject failed. Your changes are kept.'**
   String get sujetSaveError;
 
+  /// No description provided for @sujetRejectedMaxLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the subject: the maximum can no longer change, grades have been entered.'**
+  String get sujetRejectedMaxLocked;
+
+  /// No description provided for @sujetRejectedQuestionMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.'**
+  String get sujetRejectedQuestionMismatch;
+
+  /// No description provided for @sujetRejectedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the subject. Edit it, then save it.'**
+  String get sujetRejectedGeneric;
+
+  /// No description provided for @sujetResendWithoutMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend without changing the maximum'**
+  String get sujetResendWithoutMax;
+
   /// No description provided for @evalRejectionPeriodClosed.
   ///
   /// In en, this message translates to:

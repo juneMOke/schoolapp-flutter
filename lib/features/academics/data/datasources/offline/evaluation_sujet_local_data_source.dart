@@ -30,14 +30,15 @@ class EvaluationSujetLocalDataSource {
   }
 
   /// Enregistre le sujet (statut `PENDING_SYNC`) et, si fourni, le nouveau
-  /// [maxPoints] de l'évaluation, puis enfile [outboxEntry] — le tout dans une
+  /// [maxPoints] de l'évaluation, puis enfile l'entrée que construit
+  /// [buildOutboxEntry] à partir du maximum relu — le tout dans une
   /// transaction. Renvoie `false` si l'évaluation n'existe pas (rien n'est
   /// écrit, aucune entrée n'est enfilée).
   Future<bool> saveSujet({
     required String evaluationId,
     required EvaluationSujetRow sujet,
     double? maxPoints,
-    OutboxEntry? outboxEntry,
+    OutboxEntry Function(double maxPoints)? buildOutboxEntry,
   }) => _db.transaction((txn) async {
     final updated = await txn.update(
       _table,
@@ -51,7 +52,16 @@ class EvaluationSujetLocalDataSource {
       whereArgs: [evaluationId],
     );
     if (updated == 0) return false;
-    if (outboxEntry != null) await OutboxDao(txn).enqueue(outboxEntry);
+    if (buildOutboxEntry != null) {
+      final rows = await txn.query(
+        _table,
+        columns: ['max_points'],
+        where: 'id = ?',
+        whereArgs: [evaluationId],
+      );
+      final max = (rows.single['max_points'] as num).toDouble();
+      await OutboxDao(txn).enqueue(buildOutboxEntry(max));
+    }
     return true;
   });
 

@@ -87,7 +87,7 @@ void main() {
       evaluationId: 'ev-1',
       sujet: const EvaluationSujetRow(questions: [q1, q2], updatedAt: 2000),
       maxPoints: 7,
-      outboxEntry: entry(),
+      buildOutboxEntry: (_) => entry(),
     );
 
     expect(saved, isTrue);
@@ -105,7 +105,7 @@ void main() {
     final saved = await sujets.saveSujet(
       evaluationId: 'absente',
       sujet: const EvaluationSujetRow(updatedAt: 2000),
-      outboxEntry: entry(),
+      buildOutboxEntry: (_) => entry(),
     );
 
     expect(saved, isFalse);

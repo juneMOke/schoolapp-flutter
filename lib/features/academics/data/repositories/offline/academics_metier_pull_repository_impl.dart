@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_view_applier.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_metier_pull_api.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/academics_metier_pull_models.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/per_cours_keyset_puller.dart';
@@ -23,6 +24,7 @@ const String kAcademicsChapitresResourcePrefix = 'academics_chapitres';
 class AcademicsMetierPullRepositoryImpl {
   final AcademicsMetierPullApi _api;
   final AcademicsLocalDataSource _local;
+  final EvaluationViewApplier _evaluationViews;
   final PerCoursKeysetPuller _puller;
   final Map<String, dynamic> _requiredAuth;
 
@@ -31,10 +33,12 @@ class AcademicsMetierPullRepositoryImpl {
   const AcademicsMetierPullRepositoryImpl({
     required AcademicsMetierPullApi api,
     required AcademicsLocalDataSource localDataSource,
+    required EvaluationViewApplier evaluationViews,
     required PerCoursKeysetPuller puller,
     required Map<String, dynamic> requiredAuth,
   }) : _api = api,
        _local = localDataSource,
+       _evaluationViews = evaluationViews,
        _puller = puller,
        _requiredAuth = requiredAuth;
 
@@ -48,9 +52,8 @@ class AcademicsMetierPullRepositoryImpl {
           cursor,
           pageLimit,
         )).data,
-        apply: (page, syncedAt) => _local.applyPulledEvaluations(
-          page.items.map((d) => d.toLocalRow(syncedAt)).toList(),
-        ),
+        // L'évaluation, son sujet, son journal et ses publications.
+        apply: (page, syncedAt) => _evaluationViews.apply(page.items, syncedAt),
       );
 
   /// Pull des notes de tous les cours locaux.
