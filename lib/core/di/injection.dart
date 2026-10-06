@@ -51,6 +51,9 @@ import 'package:school_app_flutter/features/academics/domain/usecases/sujet/rese
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/save_evaluation_sujet_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/copie/copie_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_bloc.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_publication_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/publication_usecases.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_copie_repository.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_copie_log_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/log_copie_diffusion_usecase.dart';
@@ -1287,6 +1290,27 @@ Future<void> configureDependencies({
     () => CopieBloc(
       getCopieLogUseCase: getIt<GetCopieLogUseCase>(),
       logCopieDiffusionUseCase: getIt<LogCopieDiffusionUseCase>(),
+    ),
+  );
+
+  getIt.registerFactory<GetPublicationContextUseCase>(
+    () =>
+        GetPublicationContextUseCase(getIt<EvaluationPublicationRepository>()),
+  );
+
+  getIt.registerFactory<PublishEvaluationUseCase>(
+    () => PublishEvaluationUseCase(getIt<EvaluationPublicationRepository>()),
+  );
+
+  getIt.registerFactory<WithdrawPublicationUseCase>(
+    () => WithdrawPublicationUseCase(getIt<EvaluationPublicationRepository>()),
+  );
+
+  getIt.registerFactory<PublicationBloc>(
+    () => PublicationBloc(
+      getPublicationContextUseCase: getIt<GetPublicationContextUseCase>(),
+      publishEvaluationUseCase: getIt<PublishEvaluationUseCase>(),
+      withdrawPublicationUseCase: getIt<WithdrawPublicationUseCase>(),
     ),
   );
 

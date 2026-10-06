@@ -6,32 +6,40 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_state.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/publication/notes_publish_action.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Barre d'actions collante du détail (spec S7) : « x / n notes saisies » et
-/// sa légende à gauche ; « Saisir les notes » puis [publishAction] à droite.
+/// l'état de la publication des notes à gauche ; « Saisir les notes » puis
+/// « Publier les notes » à droite.
 class EvalDetailActionBar extends StatelessWidget {
+  final String evaluationId;
+  final String classroomName;
   final NotesProgress progress;
   final VoidCallback onSaisir;
 
-  /// Légende sous le compteur (état de la publication des notes).
-  final String? legend;
-
-  /// Action de publication des notes, posée à droite de « Saisir ».
-  final Widget? publishAction;
-
   const EvalDetailActionBar({
     super.key,
+    required this.evaluationId,
+    required this.classroomName,
     required this.progress,
     required this.onSaisir,
-    this.legend,
-    this.publishAction,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final legend = notesPublicationLegend(
+      context,
+      progress,
+      context.select<PublicationBloc, PublicationEtat?>(
+        (bloc) => bloc.state.context.publications.notes,
+      ),
+    );
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -57,13 +65,12 @@ class EvalDetailActionBar extends StatelessWidget {
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
-              if (legend != null)
-                Text(
-                  legend!,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textMuted,
-                  ),
+              Text(
+                legend,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textMuted,
                 ),
+              ),
             ],
           ),
           Wrap(
@@ -83,7 +90,11 @@ class EvalDetailActionBar extends StatelessWidget {
                   onPressed: onSaisir,
                 ),
               ),
-              ?publishAction,
+              NotesPublishAction(
+                evaluationId: evaluationId,
+                classroomName: classroomName,
+                progress: progress,
+              ),
             ],
           ),
         ],

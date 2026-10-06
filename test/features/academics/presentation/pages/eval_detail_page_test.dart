@@ -18,6 +18,9 @@ import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:uuid/uuid.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/copie/copie_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_bloc.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/publication_usecases.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/publication_context.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_copie_log_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/sujet/log_copie_diffusion_usecase.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
@@ -37,6 +40,12 @@ class _MockResend extends Mock implements ResendSujetWithoutMaxUseCase {}
 class _MockGetLog extends Mock implements GetCopieLogUseCase {}
 
 class _MockLog extends Mock implements LogCopieDiffusionUseCase {}
+
+class _MockPubContext extends Mock implements GetPublicationContextUseCase {}
+
+class _MockPublish extends Mock implements PublishEvaluationUseCase {}
+
+class _MockWithdraw extends Mock implements WithdrawPublicationUseCase {}
 
 void main() {
   final getIt = GetIt.instance;
@@ -59,6 +68,17 @@ void main() {
     getIt.registerSingleton<IdGenerator>(const IdGenerator(Uuid()));
     final getLog = _MockGetLog();
     when(() => getLog(any())).thenAnswer((_) async => const Right([]));
+    final getContext = _MockPubContext();
+    when(
+      () => getContext(any()),
+    ).thenAnswer((_) async => const Right(PublicationContext()));
+    getIt.registerFactory<PublicationBloc>(
+      () => PublicationBloc(
+        getPublicationContextUseCase: getContext,
+        publishEvaluationUseCase: _MockPublish(),
+        withdrawPublicationUseCase: _MockWithdraw(),
+      ),
+    );
     getIt.registerFactory<CopieBloc>(
       () => CopieBloc(
         getCopieLogUseCase: getLog,

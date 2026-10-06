@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/s
 import 'package:school_app_flutter/features/academics/data/repositories/offline/sujet/evaluation_copie_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/sujet/evaluation_sujet_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_copie_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_publication_repository.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/sujet/evaluation_publication_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_sujet_repository.dart';
 
 /// Registrar du **sujet d'une évaluation** (plan front EV) : sujet, copie,
@@ -75,6 +77,17 @@ void registerEvaluationSujet(GetIt getIt) {
       idGenerator: getIt<IdGenerator>(),
       currentUser: getIt<CurrentUserContext>(),
       syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+
+  // Publications : en ligne, jamais par l'outbox.
+  getIt.registerLazySingleton<EvaluationPublicationRepository>(
+    () => EvaluationPublicationRepositoryImpl(
+      api: getIt<AcademicsEvaluationSujetApi>(),
+      publications: getIt<EvaluationPublicationLocalDataSource>(),
+      academics: getIt<AcademicsLocalDataSource>(),
+      sujets: getIt<EvaluationSujetLocalDataSource>(),
+      requiredAuth: requiredAuth,
     ),
   );
 

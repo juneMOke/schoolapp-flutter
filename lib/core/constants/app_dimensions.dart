@@ -770,4 +770,5 @@ class AppDimensions {
   static const sujetBaremeBar = 6.0;
   static const sujetDureeOtherWidth = 120.0;
   static const sujetCadreRubriqueMaxWidth = 420.0;
+  static const publicationRowTextMaxWidth = 520.0;
 }

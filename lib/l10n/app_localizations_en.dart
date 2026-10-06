@@ -2283,6 +2283,141 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get publicationSectionTitle => 'Publishing to parents';
+
+  @override
+  String get publicationSubtitlePublished => 'sent by WhatsApp';
+
+  @override
+  String get publicationKindSujet => 'Homework subject';
+
+  @override
+  String get publicationKindCorrige => 'Answer key (questions + answers)';
+
+  @override
+  String get publicationKindNotes => 'Grades';
+
+  @override
+  String get publicationInClass => 'In class';
+
+  @override
+  String get publicationNotPublished => 'Not published';
+
+  @override
+  String publicationPublishedOn(String date) {
+    return 'Published on $date';
+  }
+
+  @override
+  String publicationUpdatedOn(String published, String date) {
+    return '$published · updated $date';
+  }
+
+  @override
+  String get publicationSujetInClass =>
+      'The subject of a quiz or an exam is done in class: it is not published.';
+
+  @override
+  String publicationSujetDue(String date) {
+    return 'Due on $date.';
+  }
+
+  @override
+  String publicationCorrigeWaiting(int saisies, int total) {
+    return 'Available once the assessment is fully graded — $saisies/$total grades entered.';
+  }
+
+  @override
+  String get publicationPendingWrites =>
+      'Changes are waiting to be sent: publishing will be possible once online.';
+
+  @override
+  String get publicationPublish => 'Publish';
+
+  @override
+  String get publicationWithdraw => 'Withdraw';
+
+  @override
+  String get publicationPublishNotes => 'Publish grades';
+
+  @override
+  String get publicationNotesPublished => 'Grades published';
+
+  @override
+  String publicationNotesPublishedOn(String date) {
+    return 'Grades published on $date';
+  }
+
+  @override
+  String get publicationNotesReady => 'Ready to publish';
+
+  @override
+  String get publicationNotesWaiting =>
+      'Publishing is possible once every grade is entered';
+
+  @override
+  String get publicationConfirmTitle => 'Publish to parents?';
+
+  @override
+  String publicationConfirmAudience(int count, String classroom) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Sent by WhatsApp to the parents of the $count students of $classroom.',
+      one: 'Sent by WhatsApp to the parents of the student of $classroom.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get publicationConfirmSujetItems =>
+      'The questions, points, syllabus, instructions and duration';
+
+  @override
+  String get publicationConfirmSujetNote => 'Never the expected answers';
+
+  @override
+  String get publicationConfirmCorrigeItems =>
+      'The questions and their expected answers';
+
+  @override
+  String get publicationConfirmNotesItems =>
+      'Each parent only receives their own child\'s grade';
+
+  @override
+  String publicationSentToast(String kind) {
+    return 'Published to parents — $kind';
+  }
+
+  @override
+  String publicationWithdrawnToast(String kind) {
+    return 'Publication withdrawn — $kind';
+  }
+
+  @override
+  String get publicationRefusedIncomplete =>
+      'The assessment is not fully graded.';
+
+  @override
+  String publicationRefusedIncompleteCount(int saisies, int effectif) {
+    return 'The assessment is not fully graded: $saisies/$effectif grades.';
+  }
+
+  @override
+  String get publicationRefusedEmpty => 'The subject has no questions.';
+
+  @override
+  String get publicationRefusedNotOwned =>
+      'You cannot publish for this course.';
+
+  @override
+  String get publicationOffline => 'Offline: publishing needs a connection.';
+
+  @override
+  String get publicationFailed => 'Publishing failed. Try again.';
+
+  @override
   String get evalRejectionPeriodClosed => 'Rejected: closed period';
 
   @override

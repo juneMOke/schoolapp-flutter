@@ -22,6 +22,8 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/eval_
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval_detail/eval_detail_sections.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/copie/copie_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/copie/copie_event.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_bloc.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/states/eval_saisie_results_error_state.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_editor_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -56,6 +58,11 @@ class EvalDetailPage extends StatelessWidget {
         BlocProvider<CopieBloc>(
           create: (_) =>
               GetIt.instance<CopieBloc>()..add(CopieLogRequested(args.eval.id)),
+        ),
+        BlocProvider<PublicationBloc>(
+          create: (_) =>
+              GetIt.instance<PublicationBloc>()
+                ..add(PublicationContextRequested(args.eval.id)),
         ),
       ],
       child: _EvalDetailView(
@@ -206,6 +213,8 @@ class _EvalDetailViewState extends State<_EvalDetailView> {
               onSave: _save,
             )
           : EvalDetailActionBar(
+              evaluationId: args.eval.id,
+              classroomName: args.classroomName,
               progress: state.progress,
               onSaisir: () => widget.onOpenSaisie(args),
             ),

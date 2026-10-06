@@ -14,13 +14,15 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/eval_
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/sujet_draft_controller.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/copie/copie_section.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/publication/publication_feedback.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/publication/publication_section.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_editor.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_read_view.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_rejection_banner.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_section.dart';
 
 /// Les sections empilées du détail d'une évaluation (spec S1) : Sujet,
-/// Copie — et la publication.
+/// Copie, Publication aux parents.
 class EvalDetailSections extends StatelessWidget {
   final EvalDetailArgs args;
   final EvalDetailState state;
@@ -41,54 +43,63 @@ class EvalDetailSections extends StatelessWidget {
   Widget build(BuildContext context) {
     final eval = args.eval;
     final sujet = state.sujet;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SujetSection(
-          sujet: sujet,
-          maxPoints: eval.maxPoints,
-          // Ouverte si l'évaluation est à venir ou son sujet vide.
-          initiallyExpanded: sujet.isEmpty || eval.state == EvalState.upcoming,
-          onEdit: onEditSujet,
-          readView: () => SujetReadView(sujet: sujet, onEdit: onEditSujet),
-          notice: sujet.envoi == SujetEnvoi.refuse
-              ? SujetRejectionBanner(
-                  code: sujet.rejectionCode,
-                  onResendWithoutMax: () => context.read<EvalDetailBloc>().add(
-                    EvalDetailSujetResendRequested(eval.id),
+    return PublicationFeedback(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SujetSection(
+            sujet: sujet,
+            maxPoints: eval.maxPoints,
+            // Ouverte si l'évaluation est à venir ou son sujet vide.
+            initiallyExpanded:
+                sujet.isEmpty || eval.state == EvalState.upcoming,
+            onEdit: onEditSujet,
+            readView: () => SujetReadView(sujet: sujet, onEdit: onEditSujet),
+            notice: sujet.envoi == SujetEnvoi.refuse
+                ? SujetRejectionBanner(
+                    code: sujet.rejectionCode,
+                    onResendWithoutMax: () => context
+                        .read<EvalDetailBloc>()
+                        .add(EvalDetailSujetResendRequested(eval.id)),
+                  )
+                : null,
+            editor: draft == null
+                ? null
+                : SujetEditor(
+                    draft: draft!,
+                    chapitres: eval.chapitres,
+                    maxLocked: state.progress.maxLocked,
                   ),
-                )
-              : null,
-          editor: draft == null
-              ? null
-              : SujetEditor(
-                  draft: draft!,
-                  chapitres: eval.chapitres,
-                  maxLocked: state.progress.maxLocked,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          BlocBuilder<CopieBloc, CopieState>(
+            builder: (context, copie) => CopieSection(
+              content: SujetCopieContent(
+                brancheNom: args.brancheNom,
+                classroomName: args.classroomName,
+                titre: evalDisplayName(context, eval),
+                dateLabel: formatEvalDate(context, eval.date),
+                maxPoints: eval.maxPoints,
+                sujet: sujet,
+              ),
+              state: copie,
+              onDiffused: (d) => context.read<CopieBloc>().add(
+                CopieDiffused(
+                  evaluationId: eval.id,
+                  kind: d.kind,
+                  corrige: d.corrige,
                 ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        BlocBuilder<CopieBloc, CopieState>(
-          builder: (context, copie) => CopieSection(
-            content: SujetCopieContent(
-              brancheNom: args.brancheNom,
-              classroomName: args.classroomName,
-              titre: evalDisplayName(context, eval),
-              dateLabel: formatEvalDate(context, eval.date),
-              maxPoints: eval.maxPoints,
-              sujet: sujet,
-            ),
-            state: copie,
-            onDiffused: (d) => context.read<CopieBloc>().add(
-              CopieDiffused(
-                evaluationId: eval.id,
-                kind: d.kind,
-                corrige: d.corrige,
               ),
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpacing.lg),
+          PublicationSection(
+            args: args,
+            hasQuestions: !sujet.isEmpty,
+            progress: state.progress,
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1967,6 +1967,115 @@
       }
     }
   },
+  "publicationSectionTitle": "Publishing to parents",
+  "publicationSubtitlePublished": "sent by WhatsApp",
+  "publicationKindSujet": "Homework subject",
+  "publicationKindCorrige": "Answer key (questions + answers)",
+  "publicationKindNotes": "Grades",
+  "publicationInClass": "In class",
+  "publicationNotPublished": "Not published",
+  "publicationPublishedOn": "Published on {date}",
+  "@publicationPublishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationUpdatedOn": "{published} · updated {date}",
+  "@publicationUpdatedOn": {
+    "placeholders": {
+      "published": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationSujetInClass": "The subject of a quiz or an exam is done in class: it is not published.",
+  "publicationSujetDue": "Due on {date}.",
+  "@publicationSujetDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationCorrigeWaiting": "Available once the assessment is fully graded — {saisies}/{total} grades entered.",
+  "@publicationCorrigeWaiting": {
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "publicationPendingWrites": "Changes are waiting to be sent: publishing will be possible once online.",
+  "publicationPublish": "Publish",
+  "publicationWithdraw": "Withdraw",
+  "publicationPublishNotes": "Publish grades",
+  "publicationNotesPublished": "Grades published",
+  "publicationNotesPublishedOn": "Grades published on {date}",
+  "@publicationNotesPublishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationNotesReady": "Ready to publish",
+  "publicationNotesWaiting": "Publishing is possible once every grade is entered",
+  "publicationConfirmTitle": "Publish to parents?",
+  "publicationConfirmAudience": "{count, plural, =1{Sent by WhatsApp to the parents of the student of {classroom}.} other{Sent by WhatsApp to the parents of the {count} students of {classroom}.}}",
+  "@publicationConfirmAudience": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "classroom": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationConfirmSujetItems": "The questions, points, syllabus, instructions and duration",
+  "publicationConfirmSujetNote": "Never the expected answers",
+  "publicationConfirmCorrigeItems": "The questions and their expected answers",
+  "publicationConfirmNotesItems": "Each parent only receives their own child's grade",
+  "publicationSentToast": "Published to parents — {kind}",
+  "@publicationSentToast": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationWithdrawnToast": "Publication withdrawn — {kind}",
+  "@publicationWithdrawnToast": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "publicationRefusedIncomplete": "The assessment is not fully graded.",
+  "publicationRefusedIncompleteCount": "The assessment is not fully graded: {saisies}/{effectif} grades.",
+  "@publicationRefusedIncompleteCount": {
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "effectif": {
+        "type": "int"
+      }
+    }
+  },
+  "publicationRefusedEmpty": "The subject has no questions.",
+  "publicationRefusedNotOwned": "You cannot publish for this course.",
+  "publicationOffline": "Offline: publishing needs a connection.",
+  "publicationFailed": "Publishing failed. Try again.",
   "evalRejectionPeriodClosed": "Rejected: closed period",
   "evalRejectionExamNotAllowed": "Rejected: exam not allowed",
   "evalRejectionMaxReached": "Rejected: cap reached",

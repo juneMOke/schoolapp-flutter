@@ -3530,6 +3530,210 @@ abstract class AppLocalizations {
   /// **'Answer — {answer}'**
   String copieSheetCorrige(String answer);
 
+  /// No description provided for @publicationSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing to parents'**
+  String get publicationSectionTitle;
+
+  /// No description provided for @publicationSubtitlePublished.
+  ///
+  /// In en, this message translates to:
+  /// **'sent by WhatsApp'**
+  String get publicationSubtitlePublished;
+
+  /// No description provided for @publicationKindSujet.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework subject'**
+  String get publicationKindSujet;
+
+  /// No description provided for @publicationKindCorrige.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer key (questions + answers)'**
+  String get publicationKindCorrige;
+
+  /// No description provided for @publicationKindNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades'**
+  String get publicationKindNotes;
+
+  /// No description provided for @publicationInClass.
+  ///
+  /// In en, this message translates to:
+  /// **'In class'**
+  String get publicationInClass;
+
+  /// No description provided for @publicationNotPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Not published'**
+  String get publicationNotPublished;
+
+  /// No description provided for @publicationPublishedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Published on {date}'**
+  String publicationPublishedOn(String date);
+
+  /// No description provided for @publicationUpdatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{published} · updated {date}'**
+  String publicationUpdatedOn(String published, String date);
+
+  /// No description provided for @publicationSujetInClass.
+  ///
+  /// In en, this message translates to:
+  /// **'The subject of a quiz or an exam is done in class: it is not published.'**
+  String get publicationSujetInClass;
+
+  /// No description provided for @publicationSujetDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on {date}.'**
+  String publicationSujetDue(String date);
+
+  /// No description provided for @publicationCorrigeWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Available once the assessment is fully graded — {saisies}/{total} grades entered.'**
+  String publicationCorrigeWaiting(int saisies, int total);
+
+  /// No description provided for @publicationPendingWrites.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are waiting to be sent: publishing will be possible once online.'**
+  String get publicationPendingWrites;
+
+  /// No description provided for @publicationPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get publicationPublish;
+
+  /// No description provided for @publicationWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get publicationWithdraw;
+
+  /// No description provided for @publicationPublishNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish grades'**
+  String get publicationPublishNotes;
+
+  /// No description provided for @publicationNotesPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades published'**
+  String get publicationNotesPublished;
+
+  /// No description provided for @publicationNotesPublishedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades published on {date}'**
+  String publicationNotesPublishedOn(String date);
+
+  /// No description provided for @publicationNotesReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to publish'**
+  String get publicationNotesReady;
+
+  /// No description provided for @publicationNotesWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing is possible once every grade is entered'**
+  String get publicationNotesWaiting;
+
+  /// No description provided for @publicationConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to parents?'**
+  String get publicationConfirmTitle;
+
+  /// No description provided for @publicationConfirmAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Sent by WhatsApp to the parents of the student of {classroom}.} other{Sent by WhatsApp to the parents of the {count} students of {classroom}.}}'**
+  String publicationConfirmAudience(int count, String classroom);
+
+  /// No description provided for @publicationConfirmSujetItems.
+  ///
+  /// In en, this message translates to:
+  /// **'The questions, points, syllabus, instructions and duration'**
+  String get publicationConfirmSujetItems;
+
+  /// No description provided for @publicationConfirmSujetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Never the expected answers'**
+  String get publicationConfirmSujetNote;
+
+  /// No description provided for @publicationConfirmCorrigeItems.
+  ///
+  /// In en, this message translates to:
+  /// **'The questions and their expected answers'**
+  String get publicationConfirmCorrigeItems;
+
+  /// No description provided for @publicationConfirmNotesItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Each parent only receives their own child\'s grade'**
+  String get publicationConfirmNotesItems;
+
+  /// No description provided for @publicationSentToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Published to parents — {kind}'**
+  String publicationSentToast(String kind);
+
+  /// No description provided for @publicationWithdrawnToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication withdrawn — {kind}'**
+  String publicationWithdrawnToast(String kind);
+
+  /// No description provided for @publicationRefusedIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'The assessment is not fully graded.'**
+  String get publicationRefusedIncomplete;
+
+  /// No description provided for @publicationRefusedIncompleteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'The assessment is not fully graded: {saisies}/{effectif} grades.'**
+  String publicationRefusedIncompleteCount(int saisies, int effectif);
+
+  /// No description provided for @publicationRefusedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The subject has no questions.'**
+  String get publicationRefusedEmpty;
+
+  /// No description provided for @publicationRefusedNotOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot publish for this course.'**
+  String get publicationRefusedNotOwned;
+
+  /// No description provided for @publicationOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: publishing needs a connection.'**
+  String get publicationOffline;
+
+  /// No description provided for @publicationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Publishing failed. Try again.'**
+  String get publicationFailed;
+
   /// No description provided for @evalRejectionPeriodClosed.
   ///
   /// In en, this message translates to:
