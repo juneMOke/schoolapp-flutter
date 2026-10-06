@@ -354,6 +354,26 @@ class EvalVm extends Equatable {
     rejectionCode: e.rejectionCode,
   );
 
+  /// La même évaluation, avec l'avancement relu en local : [saisies] notes
+  /// posées sur [total]. Le badge se recalcule comme pour le détail du cours.
+  EvalVm withProgress({required int saisies, required int total}) {
+    final pct = total > 0 ? saisies / total * 100 : 0.0;
+    return EvalVm(
+      id: id,
+      type: type,
+      nom: nom,
+      chapitres: chapitres,
+      date: date,
+      maxPoints: maxPoints,
+      poids: poids,
+      state: _stateFrom(StatutSaisieEvaluation.unknown, pct),
+      pourcentageSaisie: pct,
+      saisies: saisies,
+      total: total,
+      rejectionCode: rejectionCode,
+    );
+  }
+
   static int _saisies(double pourcentage, int effectif) =>
       (pourcentage.clamp(0, 100) / 100 * effectif).round();
 

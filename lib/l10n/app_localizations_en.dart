@@ -1970,6 +1970,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get evalDetailBack => 'Back to course';
 
   @override
+  String get evalSaisieBack => 'Back to the assessment';
+
+  @override
+  String get evalSaisiePageTitle => 'Grade entry';
+
+  @override
+  String evalChipDuree(String duree) {
+    return 'Duration: $duree';
+  }
+
+  @override
+  String evalDetailNotesProgress(int saisies, int total) {
+    return '$saisies / $total grades entered';
+  }
+
+  @override
+  String get evalDetailSaisirNotes => 'Enter grades';
+
+  @override
+  String get evalDetailSaisieNotes => 'Grade entry';
+
+  @override
   String get evalBadgeComplete => 'Closed';
 
   @override

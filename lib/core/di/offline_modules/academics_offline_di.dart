@@ -38,6 +38,7 @@ import 'package:school_app_flutter/features/schedule/data/datasources/offline/sc
 import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
+import 'package:school_app_flutter/core/di/offline_modules/evaluation_sujet_di.dart';
 
 /// Registrar de la branche offline **Notes / Cours** (academics + schedule,
 /// ADR-006). Appelé depuis `registerOfflineModules` APRÈS le socle et les
@@ -269,4 +270,7 @@ void registerAcademicsOffline(GetIt getIt) {
   getIt<PullCoordinator>().registerHandler(
     NotesPullHandler(getIt<AcademicsMetierPullRepositoryImpl>()),
   );
+
+  // ── Sujet d'une évaluation : sujet, copie, publications ──
+  registerEvaluationSujet(getIt);
 }

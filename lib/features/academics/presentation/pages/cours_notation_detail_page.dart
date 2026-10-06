@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/helpers/support_contact.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -18,7 +17,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/cours
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_detail_args.dart';
-import 'package:school_app_flutter/features/academics/presentation/pages/eval_saisie_page.dart';
+import 'package:school_app_flutter/features/academics/presentation/pages/eval_flow_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_back_bar.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_bucket_panel.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_bucket_timeline.dart';
@@ -37,8 +36,9 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/session_wr
 /// Page détail d'un cours (spec « Détail-Cours ») : en-tête → onglets de période
 /// → frise de buckets → panneau de la sélection. Le FAB « Nouvelle évaluation »
 /// (visible à l'état `ready`) ouvre la modale de création ; les lignes
-/// d'évaluation ouvrent la saisie des notes (niveau imbriqué, le `CoursNotationBloc`
-/// restant vivant sous la saisie pour un retour sans re-fetch).
+/// d'évaluation ouvrent son détail (niveau imbriqué [EvalFlowPage], le
+/// `CoursNotationBloc` restant vivant dessous). Au retour, le cours se relit en
+/// local : la saisie a pu changer son avancement.
 class CoursNotationDetailPage extends StatelessWidget {
   final CoursDetailArgs args;
   final VoidCallback onBack;
@@ -76,7 +76,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
   int? _periodeIdx;
   String? _bucketKey;
 
-  /// Évaluation ouverte en saisie (niveau imbriqué) ; `null` = détail du cours.
+  /// Évaluation ouverte (niveau imbriqué) ; `null` = détail du cours.
   EvalDetailArgs? _openEval;
 
   /// Id d'une évaluation fraîchement créée, à ouvrir dès le rechargement du cours.
@@ -95,18 +95,12 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
     CoursNotationRequested(coursId: widget.args.coursId),
   );
 
-  Future<void> _contactAdmin() async {
-    await launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail));
-    // garde mounted après await (règle non-négociable #8).
-    if (!mounted) return;
-  }
-
   String _brancheNom(CoursNotationDetail detail) =>
       detail.brancheNom?.trim().isNotEmpty == true
       ? detail.brancheNom!
       : widget.args.brancheNom;
 
-  void _openEvalSaisie(
+  void _openEvalDetail(
     EvalVm eval,
     PeriodeVm periode,
     BucketVm bucket,
@@ -124,7 +118,12 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
     });
   }
 
-  void _backFromEval() => setState(() => _openEval = null);
+  void _backFromEval() {
+    setState(() => _openEval = null);
+    context.read<CoursNotationBloc>().add(
+      CoursNotationRequested(coursId: widget.args.coursId),
+    );
+  }
 
   Future<void> _openCreateModal(CoursNotationDetail detail) async {
     final l10n = AppLocalizations.of(context)!;
@@ -139,8 +138,8 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
     }
     if (created == null) return;
     AppSnackBar.showSuccess(context, l10n.evalCreateSuccessToast);
-    // Recharge le cours : la nouvelle évaluation apparaîtra avec son nom backend,
-    // puis on ouvrira sa saisie (cf. _onCoursNotationState).
+    // Recharge le cours : la nouvelle évaluation y apparaît, puis on ouvre son
+    // détail (cf. _onCoursNotationState).
     setState(() => _pendingOpenEvalId = created.id);
     context.read<CoursNotationBloc>().add(
       CoursNotationRequested(coursId: widget.args.coursId),
@@ -169,7 +168,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
       for (final bucket in periode.buckets) {
         for (final eval in bucket.evaluations) {
           if (eval.id == pendingId) {
-            _openEvalSaisie(eval, periode, bucket, state.detail!);
+            _openEvalDetail(eval, periode, bucket, state.detail!);
             return;
           }
         }
@@ -190,7 +189,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
         switchInCurve: AppMotion.outCurve,
         switchOutCurve: AppMotion.inCurve,
         child: _openEval != null
-            ? EvalSaisiePage(
+            ? EvalFlowPage(
                 key: ValueKey<String>('eval-${_openEval!.eval.id}'),
                 args: _openEval!,
                 onBack: _backFromEval,
@@ -262,7 +261,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
           child: SessionWriteGate(
             child: FloatingActionButton.extended(
               // Pas de hero : la coquille bascule entre plusieurs Scaffolds
-              // (liste ↔ cours ↔ saisie) via AnimatedSwitcher.
+              // (liste ↔ cours ↔ évaluation) via AnimatedSwitcher.
               heroTag: null,
               onPressed: () => _openCreateModal(detail),
               backgroundColor: AppColors.terreCuite,
@@ -285,7 +284,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
         onRetry: _retry,
         onReconnect: () =>
             context.read<AuthBloc>().add(const AuthLogoutRequested()),
-        onContactAdmin: _contactAdmin,
+        onContactAdmin: contactSupport,
       ),
       CoursNotationStatus.success =>
         state.detail == null
@@ -361,7 +360,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
             // retirée, pas remplacée par un refus au dernier moment.
             onOpenEval:
                 PermissionGate.allows(context, const [Perm.academicsGradeRead])
-                ? (eval) => _openEvalSaisie(eval, periode, bucket, detail)
+                ? (eval) => _openEvalDetail(eval, periode, bucket, detail)
                 : null,
           ),
       ],

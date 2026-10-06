@@ -3104,6 +3104,42 @@ abstract class AppLocalizations {
   /// **'Back to course'**
   String get evalDetailBack;
 
+  /// No description provided for @evalSaisieBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the assessment'**
+  String get evalSaisieBack;
+
+  /// No description provided for @evalSaisiePageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get evalSaisiePageTitle;
+
+  /// No description provided for @evalChipDuree.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duree}'**
+  String evalChipDuree(String duree);
+
+  /// No description provided for @evalDetailNotesProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{saisies} / {total} grades entered'**
+  String evalDetailNotesProgress(int saisies, int total);
+
+  /// No description provided for @evalDetailSaisirNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter grades'**
+  String get evalDetailSaisirNotes;
+
+  /// No description provided for @evalDetailSaisieNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get evalDetailSaisieNotes;
+
   /// No description provided for @evalBadgeComplete.
   ///
   /// In en, this message translates to:

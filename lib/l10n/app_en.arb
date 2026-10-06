@@ -1698,6 +1698,29 @@
   "noteRejectionContextUnavailable": "Context unavailable",
   "noteRejectionGeneric": "Rejected by the server",
   "evalDetailBack": "Back to course",
+  "evalSaisieBack": "Back to the assessment",
+  "evalSaisiePageTitle": "Grade entry",
+  "evalChipDuree": "Duration: {duree}",
+  "@evalChipDuree": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "evalDetailNotesProgress": "{saisies} / {total} grades entered",
+  "@evalDetailNotesProgress": {
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "evalDetailSaisirNotes": "Enter grades",
+  "evalDetailSaisieNotes": "Grade entry",
   "evalBadgeComplete": "Closed",
   "evalBadgePartial": "Grading · {done}/{total}",
   "@evalBadgePartial": {

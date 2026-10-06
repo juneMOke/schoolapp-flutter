@@ -45,6 +45,9 @@ import 'package:school_app_flutter/features/academics/domain/usecases/get_cours_
 import 'package:school_app_flutter/features/academics/domain/usecases/get_my_courses_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/get_notes_eleves_usecase.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/saisir_note_usecase.dart';
+import 'package:school_app_flutter/features/academics/domain/repositories/evaluation_sujet_repository.dart';
+import 'package:school_app_flutter/features/academics/domain/usecases/sujet/get_evaluation_sujet_usecase.dart';
+import 'package:school_app_flutter/features/academics/presentation/bloc/eval_detail/eval_detail_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/cours_notation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/course_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
@@ -1248,6 +1251,19 @@ Future<void> configureDependencies({
   // l'en-tête Evaluation est fourni par l'écran appelant, pas rechargé ici.
   getIt.registerFactory<EvaluationNotesBloc>(
     () => EvaluationNotesBloc(
+      getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
+    ),
+  );
+
+  // ── Academics — Évaluation : pilotage (sujet, copie, publication) ──────────
+  // Le dépôt du sujet est enregistré par `registerEvaluationSujet` (offline).
+  getIt.registerFactory<GetEvaluationSujetUseCase>(
+    () => GetEvaluationSujetUseCase(getIt<EvaluationSujetRepository>()),
+  );
+
+  getIt.registerFactory<EvalDetailBloc>(
+    () => EvalDetailBloc(
+      getEvaluationSujetUseCase: getIt<GetEvaluationSujetUseCase>(),
       getNotesElevesUseCase: getIt<GetNotesElevesUseCase>(),
     ),
   );

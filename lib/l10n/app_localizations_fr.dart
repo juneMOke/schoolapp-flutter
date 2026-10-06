@@ -1979,6 +1979,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get evalDetailBack => 'Retour au cours';
 
   @override
+  String get evalSaisieBack => 'Retour à l\'évaluation';
+
+  @override
+  String get evalSaisiePageTitle => 'Saisie des notes';
+
+  @override
+  String evalChipDuree(String duree) {
+    return 'Durée : $duree';
+  }
+
+  @override
+  String evalDetailNotesProgress(int saisies, int total) {
+    return '$saisies / $total notes saisies';
+  }
+
+  @override
+  String get evalDetailSaisirNotes => 'Saisir les notes';
+
+  @override
+  String get evalDetailSaisieNotes => 'Saisie des notes';
+
+  @override
   String get evalBadgeComplete => 'Clôturée';
 
   @override

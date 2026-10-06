@@ -1644,6 +1644,29 @@
   "noteRejectionContextUnavailable": "Contexte indisponible",
   "noteRejectionGeneric": "Rejetée par le serveur",
   "evalDetailBack": "Retour au cours",
+  "evalSaisieBack": "Retour à l'évaluation",
+  "evalSaisiePageTitle": "Saisie des notes",
+  "evalChipDuree": "Durée : {duree}",
+  "@evalChipDuree": {
+    "placeholders": {
+      "duree": {
+        "type": "String"
+      }
+    }
+  },
+  "evalDetailNotesProgress": "{saisies} / {total} notes saisies",
+  "@evalDetailNotesProgress": {
+    "placeholders": {
+      "saisies": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "evalDetailSaisirNotes": "Saisir les notes",
+  "evalDetailSaisieNotes": "Saisie des notes",
   "evalBadgeComplete": "Clôturée",
   "evalBadgePartial": "Saisie en cours · {done}/{total}",
   "@evalBadgePartial": {

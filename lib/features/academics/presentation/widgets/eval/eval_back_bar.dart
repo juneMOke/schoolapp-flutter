@@ -6,14 +6,21 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Fil de retour de la page de saisie (spec § Anatomie) : bouton « Retour au
-/// cours » + fil d'Ariane « {branche} · {classe} › {évaluation} ». Reste visible
-/// dans tous les états.
+/// Fil de retour des pages d'une évaluation (spec § Anatomie) : bouton de
+/// retour + fil d'Ariane « {branche} · {classe} › {évaluation} » — suivi de
+/// [subPage] (« Saisie des notes ») sous le détail. Reste visible dans tous les
+/// états.
 class EvalBackBar extends StatelessWidget {
   final String brancheNom;
   final String classroomName;
   final String evalName;
   final VoidCallback onBack;
+
+  /// Libellé du bouton ; « Retour au cours » par défaut.
+  final String? backLabel;
+
+  /// Dernier maillon du fil, sous la page de l'évaluation.
+  final String? subPage;
 
   const EvalBackBar({
     super.key,
@@ -21,19 +28,25 @@ class EvalBackBar extends StatelessWidget {
     required this.classroomName,
     required this.evalName,
     required this.onBack,
+    this.backLabel,
+    this.subPage,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final crumb = '$brancheNom · $classroomName  ›  $evalName';
+    final crumb = [
+      '$brancheNom · $classroomName',
+      evalName,
+      ?subPage,
+    ].join('  ›  ');
 
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        _BackButton(label: l10n.evalDetailBack, onTap: onBack),
+        _BackButton(label: backLabel ?? l10n.evalDetailBack, onTap: onBack),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
           child: Text(
