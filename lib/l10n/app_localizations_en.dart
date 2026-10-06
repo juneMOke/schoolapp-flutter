@@ -14297,9 +14297,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get chapitreAwaitingDownload => 'Syncing';
-
-  @override
   String get programmeFabNewChapitre => 'New chapter';
 
   @override
@@ -14609,11 +14606,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chapitreEvaluationsEmpty => 'No assessment covers this chapter.';
-
-  @override
-  String chapitreObjectifToggle(String texte) {
-    return 'Objective met: $texte';
-  }
 
   @override
   String get chapitreNoteAdd => 'Add a note';

@@ -17,7 +17,7 @@ Future<DocumentCaptureMode?> showDocumentCaptureSheet(
   BuildContext context, {
   required String title,
   bool cameraUnavailable = false,
-  DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
+  required DocumentCapturePolicy policy,
 }) {
   return showModalBottomSheet<DocumentCaptureMode>(
     context: context,
@@ -45,7 +45,7 @@ class DocumentCaptureSheet extends StatelessWidget {
     super.key,
     required this.title,
     this.cameraUnavailable = false,
-    this.policy = DocumentCapturePolicy.staffDocument,
+    required this.policy,
   });
 
   @override

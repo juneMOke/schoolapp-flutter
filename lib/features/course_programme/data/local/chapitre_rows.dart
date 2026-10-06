@@ -5,6 +5,8 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_fiche_codec.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
+import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_objectif.dart';
+import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_bloc.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_enums.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_note.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_ressource.dart';
@@ -78,18 +80,40 @@ class ChapitreRowMapper {
 
   /// Les colonnes de la **fiche** — ce qu'un enregistrement local réécrit.
   /// Ni `ordre` (le geste d'ordre), ni l'état serveur (`server_*`).
-  static Map<String, Object?> ficheColumns(Chapitre chapitre) => {
-    'titre': chapitre.titre,
-    'resume': chapitre.resume,
-    'statut': chapitre.statut.wireValue,
-    'seances': chapitre.seances,
-    'sous_periode_id': chapitre.sousPeriodeId,
-    'objectifs_json': jsonEncode(
-      ChapitreFicheCodec.objectifsToJson(chapitre.objectifs),
-    ),
-    'strategies_json': jsonEncode(chapitre.strategies),
-    'blocs_json': jsonEncode(ChapitreFicheCodec.blocsToJson(chapitre.blocs)),
-    'client_updated_at': chapitre.clientUpdatedAt?.toUtc().toIso8601String(),
+  static Map<String, Object?> ficheColumns(Chapitre chapitre) => ficheFields(
+    titre: chapitre.titre,
+    resume: chapitre.resume,
+    statut: chapitre.statut.wireValue,
+    seances: chapitre.seances,
+    sousPeriodeId: chapitre.sousPeriodeId,
+    objectifs: chapitre.objectifs,
+    strategies: chapitre.strategies,
+    blocs: chapitre.blocs,
+    clientUpdatedAt: chapitre.clientUpdatedAt?.toUtc().toIso8601String(),
+  );
+
+  /// Les colonnes de la fiche, d'où qu'elle vienne (saisie locale ou
+  /// descente) : un seul endroit sait les nommer et les encoder.
+  static Map<String, Object?> ficheFields({
+    required String titre,
+    required String? resume,
+    required String statut,
+    required int seances,
+    required String? sousPeriodeId,
+    required List<ChapitreObjectif> objectifs,
+    required List<String> strategies,
+    required List<ChapitreBloc> blocs,
+    required String? clientUpdatedAt,
+  }) => {
+    'titre': titre,
+    'resume': resume,
+    'statut': statut,
+    'seances': seances,
+    'sous_periode_id': sousPeriodeId,
+    'objectifs_json': jsonEncode(ChapitreFicheCodec.objectifsToJson(objectifs)),
+    'strategies_json': jsonEncode(strategies),
+    'blocs_json': jsonEncode(ChapitreFicheCodec.blocsToJson(blocs)),
+    'client_updated_at': clientUpdatedAt,
   };
 }
 

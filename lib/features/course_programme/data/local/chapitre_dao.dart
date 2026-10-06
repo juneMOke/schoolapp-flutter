@@ -68,16 +68,4 @@ class ChapitreDao {
         .map(ChapitreRessourceRowMapper.toEntity)
         .toList(growable: false);
   }
-
-  Future<ChapitreRessource?> findRessource(String id) async {
-    final rows = await _db.query(
-      ProgrammeTables.ressource,
-      where: 'id = ? AND deleted_at IS NULL',
-      whereArgs: [id],
-      limit: 1,
-    );
-    return rows.isEmpty
-        ? null
-        : ChapitreRessourceRowMapper.toEntity(rows.single);
-  }
 }

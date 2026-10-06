@@ -22448,12 +22448,6 @@ abstract class AppLocalizations {
   /// **'Open chapter {numero}: {titre}'**
   String chapitreActionOpen(int numero, String titre);
 
-  /// No description provided for @chapitreAwaitingDownload.
-  ///
-  /// In en, this message translates to:
-  /// **'Syncing'**
-  String get chapitreAwaitingDownload;
-
   /// No description provided for @programmeFabNewChapitre.
   ///
   /// In en, this message translates to:
@@ -23017,12 +23011,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No assessment covers this chapter.'**
   String get chapitreEvaluationsEmpty;
-
-  /// No description provided for @chapitreObjectifToggle.
-  ///
-  /// In en, this message translates to:
-  /// **'Objective met: {texte}'**
-  String chapitreObjectifToggle(String texte);
 
   /// No description provided for @chapitreNoteAdd.
   ///

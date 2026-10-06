@@ -13,7 +13,7 @@ typedef DocumentCaptureSheetOpener =
       BuildContext context, {
       required String title,
       bool cameraUnavailable,
-      DocumentCapturePolicy policy,
+      required DocumentCapturePolicy policy,
     });
 
 /// Le parcours complet d'obtention d'une pièce, vu de l'écran : choisir un
@@ -34,12 +34,12 @@ class DocumentCaptureFlow {
     DocumentCaptureSheetOpener openSheet = showDocumentCaptureSheet,
   }) : _openSheet = openSheet;
 
-  /// [policy] : les bornes de la pièce attendue (celles du dossier du
-  /// personnel par défaut).
+  /// [policy] : les bornes de la pièce attendue — chaque écran nomme la
+  /// sienne.
   Future<CapturedDocument?> run(
     BuildContext context, {
     required String title,
-    DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
+    required DocumentCapturePolicy policy,
   }) async {
     var cameraUnavailable = false;
     while (true) {

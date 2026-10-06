@@ -8308,9 +8308,6 @@
   "@staffDocumentOpenFailed": {
     "description": "Échec d'ouverture."
   },
-  "@staffDocumentClose": {
-    "description": "Fermer la visionneuse."
-  },
   "staffDocumentOpenOffline": "Hors ligne : cette pièce n'est pas encore sur la tablette.",
   "@staffDocumentOpenOffline": {
     "description": "Ouverture impossible hors ligne."
@@ -8996,7 +8993,6 @@
   "chapitreActionMore": "Plus d'actions",
   "chapitreActionOpen": "Ouvrir le chapitre {numero} : {titre}",
   "@chapitreActionOpen": {"placeholders": {"numero": {"type": "int"}, "titre": {"type": "String"}}},
-  "chapitreAwaitingDownload": "Synchronisation en cours",
   "programmeFabNewChapitre": "Nouveau chapitre",
   "programmeEmptyTitle": "Programme vide",
   "programmeEmptyMessage": "Ce cours n'a pas encore de chapitre. Découpez le programme annuel en chapitres pour suivre l'avancement et rattacher les évaluations.",
@@ -9100,8 +9096,6 @@
   "chapitreNotesEmpty": "Aucune note pour ce chapitre. Consignez ici ce qui s'est passé en séance.",
   "chapitreRessourcesEmpty": "Aucune ressource attachée.",
   "chapitreEvaluationsEmpty": "Aucune évaluation ne porte sur ce chapitre.",
-  "chapitreObjectifToggle": "Objectif atteint : {texte}",
-  "@chapitreObjectifToggle": {"placeholders": {"texte": {"type": "String"}}},
   "chapitreNoteAdd": "Ajouter une note",
   "chapitreNoteHint": "Observation de séance, rappel, point à reprendre…",
   "chapitreNoteDate": "{date}",

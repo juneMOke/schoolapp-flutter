@@ -50,7 +50,11 @@ void main() {
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
-                captured = await flow.run(context, title: 'Diplôme');
+                captured = await flow.run(
+                  context,
+                  title: 'Diplôme',
+                  policy: DocumentCapturePolicy.staffDocument,
+                );
               },
               child: const Text('capturer'),
             ),

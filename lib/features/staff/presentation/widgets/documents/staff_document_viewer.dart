@@ -7,6 +7,10 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_document
 ///
 /// Ni partage ni impression : une pièce d'identité ou un diplôme ne quitte
 /// pas la tablette par ce geste — le spouleur offre « Enregistrer en PDF ».
+///
+/// Le « montrée ou non » de la visionneuse est ignoré : le dossier
+/// n'accepte que PDF et images (`DocumentCapturePolicy.staffDocument`), qui
+/// se prévisualisent toujours.
 Future<void> showStaffDocumentViewer(
   BuildContext context, {
   required String title,

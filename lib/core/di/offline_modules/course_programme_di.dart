@@ -11,6 +11,8 @@ import 'package:school_app_flutter/core/offline/tombstone/tombstone_removal_hook
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_metier_pull_handlers.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_outbox_handler.dart'
+    show ChapitresAwaitingAck;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart'
     show kAcademicsCoursResourcePrefix;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart'
@@ -99,6 +101,11 @@ void registerCourseProgramme(GetIt getIt) {
       requiredAuth: requiredAuth,
       blobs: getIt<ProgrammeBlobs>(),
     ),
+  );
+
+  // Une évaluation qui cite un chapitre pas encore accusé attend sa fiche.
+  getIt.registerLazySingleton<ChapitresAwaitingAck>(
+    () => getIt<ProgrammeSyncDao>().anyUnknown,
   );
 
   // ── Retraits : cours réaffecté, chapitre ou cours disparu ──

@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:school_app_flutter/core/offline/sync_state.dart';
-import 'package:school_app_flutter/features/course_programme/data/local/chapitre_fiche_codec.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/chapitre_dto.dart';
@@ -106,17 +103,17 @@ class ChapitrePullWriter {
     required int nowMs,
   }) => {
     'cours_id': dto.coursId,
-    'titre': dto.titre,
-    'resume': dto.resume,
-    'statut': dto.statut,
-    'seances': dto.seances,
-    'sous_periode_id': dto.sousPeriodeId,
-    'objectifs_json': jsonEncode(
-      ChapitreFicheCodec.objectifsToJson(dto.objectifs),
+    ...ChapitreRowMapper.ficheFields(
+      titre: dto.titre,
+      resume: dto.resume,
+      statut: dto.statut,
+      seances: dto.seances,
+      sousPeriodeId: dto.sousPeriodeId,
+      objectifs: dto.objectifs,
+      strategies: dto.strategies,
+      blocs: dto.blocs,
+      clientUpdatedAt: dto.clientUpdatedAt,
     ),
-    'strategies_json': jsonEncode(dto.strategies),
-    'blocs_json': jsonEncode(ChapitreFicheCodec.blocsToJson(dto.blocs)),
-    'client_updated_at': dto.clientUpdatedAt,
     'server_updated_at': dto.serverUpdatedAt,
     'server_known': 1,
     'sync_status': SyncState.synced.dbValue,

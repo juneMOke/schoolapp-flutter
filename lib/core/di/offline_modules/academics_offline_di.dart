@@ -31,7 +31,6 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
-import 'package:school_app_flutter/features/course_programme/data/local/programme_sync_dao.dart';
 // ── Schedule (offline) ──
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_handler.dart';
@@ -223,8 +222,11 @@ void registerAcademicsOffline(GetIt getIt) {
       localDataSource: getIt<AcademicsLocalDataSource>(),
       requiredAuth: requiredAuth,
       currentUser: getIt<CurrentUserContext>(),
-      // Résolu à l'envoi : le programme s'enregistre après academics.
-      chapitresAwaitingAck: (ids) => getIt<ProgrammeSyncDao>().anyUnknown(ids),
+      // Résolu à l'envoi : le programme (enregistré après academics) fournit
+      // la sonde ; academics n'en dépend pas.
+      chapitresAwaitingAck: (ids) => getIt.isRegistered<ChapitresAwaitingAck>()
+          ? getIt<ChapitresAwaitingAck>()(ids)
+          : Future.value(false),
     ),
   );
   getIt<SyncEngine>().registerHandler(
