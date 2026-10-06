@@ -11740,9 +11740,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Document unavailable: it is not on this tablet and the server did not return it.';
 
   @override
-  String get staffDocumentClose => 'Close';
-
-  @override
   String get staffDocumentOpenOffline =>
       'Offline: this document is not on the tablet yet.';
 
@@ -14566,4 +14563,130 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ressourceKeepFailed =>
       'A resource could not be kept on this device.';
+
+  @override
+  String get chapitreDetailEyebrow => 'Chapter';
+
+  @override
+  String chapitreChipObjectifs(int done, int total) {
+    return '$done/$total objectives met';
+  }
+
+  @override
+  String chapitreQuickStatut(String label) {
+    return 'Mark “$label”';
+  }
+
+  @override
+  String get chapitreSectionObjectifs => 'Objectives';
+
+  @override
+  String get chapitreSectionStrategies => 'Teaching strategies';
+
+  @override
+  String get chapitreSectionNotes => 'Session notes';
+
+  @override
+  String get chapitreSectionRessources => 'Resources';
+
+  @override
+  String get chapitreSectionEvaluations => 'Linked assessments';
+
+  @override
+  String get chapitreObjectifsEmpty =>
+      'No objective yet — add some through “Edit”.';
+
+  @override
+  String get chapitreStrategiesEmpty =>
+      'No strategy yet — say how this chapter will be taught.';
+
+  @override
+  String get chapitreNotesEmpty =>
+      'No note for this chapter. Record here what happened in class.';
+
+  @override
+  String get chapitreRessourcesEmpty => 'No resource attached.';
+
+  @override
+  String get chapitreEvaluationsEmpty => 'No assessment covers this chapter.';
+
+  @override
+  String chapitreObjectifToggle(String texte) {
+    return 'Objective met: $texte';
+  }
+
+  @override
+  String get chapitreNoteAdd => 'Add a note';
+
+  @override
+  String get chapitreNoteHint =>
+      'Class observation, reminder, point to revisit…';
+
+  @override
+  String chapitreNoteDate(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get chapitreNoteDelete => 'Delete the note';
+
+  @override
+  String get chapitreNoteAdded => 'Session note added';
+
+  @override
+  String get chapitreNoteDeleted => 'Note deleted';
+
+  @override
+  String get chapitreNoteUndo => 'Undo';
+
+  @override
+  String chapitreRessourceOpen(String nom) {
+    return 'Open $nom';
+  }
+
+  @override
+  String get chapitreRessourceNotPreviewable =>
+      'This file type cannot be opened on this device.';
+
+  @override
+  String get chapitreRessourceUnavailable =>
+      'The file could not be opened. Check the connection, then try again.';
+
+  @override
+  String chapitreEvaluationLine(DateTime date, String max) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString · /$max pts';
+  }
+
+  @override
+  String get chapitreBlankTitle => 'Chapter not filled in';
+
+  @override
+  String get chapitreBlankMessage =>
+      'This chapter has no objective, note or resource. Complete it to keep a record from one year to the next.';
+
+  @override
+  String get chapitreBlankAction => 'Complete the chapter';
+
+  @override
+  String get chapitreErrorTitle => 'Chapter unavailable';
+
+  @override
+  String get chapitreErrorMessage =>
+      'This chapter could not be read on this device. It may have been deleted.';
+
+  @override
+  String get chapitreLoadingA11yLabel => 'Loading the chapter';
+
+  @override
+  String get chapitreAwaitingDownloadHint =>
+      'This chapter is downloading; it can be edited once synced.';
+
+  @override
+  String get chapitreContenuSaved => 'Content saved';
 }

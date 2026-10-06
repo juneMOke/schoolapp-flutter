@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
@@ -16,6 +17,8 @@ import 'package:school_app_flutter/features/course_programme/data/local/chapitre
 import 'package:school_app_flutter/features/course_programme/data/repositories/programme_repository_impl.dart';
 import 'package:school_app_flutter/features/course_programme/domain/repositories/programme_repository.dart';
 import 'package:school_app_flutter/features/course_programme/domain/usecases/programme_use_cases.dart';
+import 'package:school_app_flutter/features/course_programme/domain/usecases/chapitre_children_use_cases.dart';
+import 'package:school_app_flutter/features/course_programme/presentation/bloc/chapitre_cubit.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_change_source.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/bloc/programme_cubit.dart';
 
@@ -68,6 +71,30 @@ void registerCourseProgrammePresentation(GetIt getIt) {
       ),
     )
     ..registerFactory(() => LoadSousPeriodesUseCase(getIt<CourseRepository>()));
+
+  getIt
+    ..registerFactory(
+      () => AddChapitreNoteUseCase(getIt<ChapitreChildrenRepository>()),
+    )
+    ..registerFactory(
+      () => DeleteChapitreNoteUseCase(getIt<ChapitreChildrenRepository>()),
+    )
+    ..registerFactory(
+      () => OpenChapitreDocumentUseCase(getIt<ChapitreChildrenRepository>()),
+    );
+
+  getIt.registerFactoryParam<ChapitreCubit, String, void>(
+    (chapitreId, _) => ChapitreCubit(
+      chapitreId: chapitreId,
+      load: getIt<LoadChapitreUseCase>(),
+      save: getIt<SaveChapitreUseCase>(),
+      addNote: getIt<AddChapitreNoteUseCase>(),
+      deleteNote: getIt<DeleteChapitreNoteUseCase>(),
+      openDocument: getIt<OpenChapitreDocumentUseCase>(),
+      source: getIt<ProgrammeChangeSource>(),
+      undoWindow: AppSnackBar.undoDuration,
+    ),
+  );
 
   getIt.registerFactoryParam<ProgrammeCubit, String, void>(
     (coursId, _) => ProgrammeCubit(

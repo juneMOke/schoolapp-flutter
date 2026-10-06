@@ -18555,12 +18555,6 @@ abstract class AppLocalizations {
   /// **'Document unavailable: it is not on this tablet and the server did not return it.'**
   String get staffDocumentOpenFailed;
 
-  /// No description provided for @staffDocumentClose.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get staffDocumentClose;
-
   /// No description provided for @staffDocumentOpenOffline.
   ///
   /// In en, this message translates to:
@@ -22945,6 +22939,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A resource could not be kept on this device.'**
   String get ressourceKeepFailed;
+
+  /// No description provided for @chapitreDetailEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter'**
+  String get chapitreDetailEyebrow;
+
+  /// No description provided for @chapitreChipObjectifs.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} objectives met'**
+  String chapitreChipObjectifs(int done, int total);
+
+  /// No description provided for @chapitreQuickStatut.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark “{label}”'**
+  String chapitreQuickStatut(String label);
+
+  /// No description provided for @chapitreSectionObjectifs.
+  ///
+  /// In en, this message translates to:
+  /// **'Objectives'**
+  String get chapitreSectionObjectifs;
+
+  /// No description provided for @chapitreSectionStrategies.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching strategies'**
+  String get chapitreSectionStrategies;
+
+  /// No description provided for @chapitreSectionNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Session notes'**
+  String get chapitreSectionNotes;
+
+  /// No description provided for @chapitreSectionRessources.
+  ///
+  /// In en, this message translates to:
+  /// **'Resources'**
+  String get chapitreSectionRessources;
+
+  /// No description provided for @chapitreSectionEvaluations.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked assessments'**
+  String get chapitreSectionEvaluations;
+
+  /// No description provided for @chapitreObjectifsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No objective yet — add some through “Edit”.'**
+  String get chapitreObjectifsEmpty;
+
+  /// No description provided for @chapitreStrategiesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No strategy yet — say how this chapter will be taught.'**
+  String get chapitreStrategiesEmpty;
+
+  /// No description provided for @chapitreNotesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No note for this chapter. Record here what happened in class.'**
+  String get chapitreNotesEmpty;
+
+  /// No description provided for @chapitreRessourcesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No resource attached.'**
+  String get chapitreRessourcesEmpty;
+
+  /// No description provided for @chapitreEvaluationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No assessment covers this chapter.'**
+  String get chapitreEvaluationsEmpty;
+
+  /// No description provided for @chapitreObjectifToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Objective met: {texte}'**
+  String chapitreObjectifToggle(String texte);
+
+  /// No description provided for @chapitreNoteAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get chapitreNoteAdd;
+
+  /// No description provided for @chapitreNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Class observation, reminder, point to revisit…'**
+  String get chapitreNoteHint;
+
+  /// No description provided for @chapitreNoteDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String chapitreNoteDate(DateTime date);
+
+  /// No description provided for @chapitreNoteDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the note'**
+  String get chapitreNoteDelete;
+
+  /// No description provided for @chapitreNoteAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Session note added'**
+  String get chapitreNoteAdded;
+
+  /// No description provided for @chapitreNoteDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Note deleted'**
+  String get chapitreNoteDeleted;
+
+  /// No description provided for @chapitreNoteUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get chapitreNoteUndo;
+
+  /// No description provided for @chapitreRessourceOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {nom}'**
+  String chapitreRessourceOpen(String nom);
+
+  /// No description provided for @chapitreRessourceNotPreviewable.
+  ///
+  /// In en, this message translates to:
+  /// **'This file type cannot be opened on this device.'**
+  String get chapitreRessourceNotPreviewable;
+
+  /// No description provided for @chapitreRessourceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be opened. Check the connection, then try again.'**
+  String get chapitreRessourceUnavailable;
+
+  /// No description provided for @chapitreEvaluationLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · /{max} pts'**
+  String chapitreEvaluationLine(DateTime date, String max);
+
+  /// No description provided for @chapitreBlankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter not filled in'**
+  String get chapitreBlankTitle;
+
+  /// No description provided for @chapitreBlankMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter has no objective, note or resource. Complete it to keep a record from one year to the next.'**
+  String get chapitreBlankMessage;
+
+  /// No description provided for @chapitreBlankAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the chapter'**
+  String get chapitreBlankAction;
+
+  /// No description provided for @chapitreErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter unavailable'**
+  String get chapitreErrorTitle;
+
+  /// No description provided for @chapitreErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter could not be read on this device. It may have been deleted.'**
+  String get chapitreErrorMessage;
+
+  /// No description provided for @chapitreLoadingA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the chapter'**
+  String get chapitreLoadingA11yLabel;
+
+  /// No description provided for @chapitreAwaitingDownloadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter is downloading; it can be edited once synced.'**
+  String get chapitreAwaitingDownloadHint;
+
+  /// No description provided for @chapitreContenuSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Content saved'**
+  String get chapitreContenuSaved;
 }
 
 class _AppLocalizationsDelegate
