@@ -1,4 +1,8 @@
 import 'package:dartz/dartz.dart';
+import 'package:uuid/uuid.dart';
+import 'package:school_app_flutter/core/offline/id_generator.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,11 +45,17 @@ void main() {
   late _GetNotes getNotes;
   late _GetContext getContext;
   late _Publish publish;
+  late _GetSujet getSujet;
+  late _Save save;
 
-  setUpAll(() => registerFallbackValue(PublicationKind.notes));
+  setUpAll(() {
+    registerFallbackValue(PublicationKind.notes);
+    registerFallbackValue(const EvaluationCadre());
+  });
 
   setUp(() {
-    final getSujet = _GetSujet();
+    getSujet = _GetSujet();
+    save = _Save();
     when(
       () => getSujet(any()),
     ).thenAnswer((_) async => const Right(EvaluationSujet()));
@@ -59,7 +69,7 @@ void main() {
         () => EvalDetailBloc(
           getEvaluationSujetUseCase: getSujet,
           getNotesElevesUseCase: getNotes,
-          saveEvaluationSujetUseCase: _Save(),
+          saveEvaluationSujetUseCase: save,
           resendSujetWithoutMaxUseCase: _Resend(),
         ),
       )
@@ -161,6 +171,53 @@ void main() {
 
     verify(() => publish('e1', PublicationKind.notes)).called(1);
     expect(find.text('Notes publiées'), findsOneWidget);
+  });
+
+  testWidgets('vider un sujet dont la feuille est publiée est refusé', (
+    tester,
+  ) async {
+    allNotesEntered();
+    when(() => getSujet('e1')).thenAnswer(
+      (_) async => const Right(
+        EvaluationSujet(
+          questions: [SujetQuestion(id: 'q1', enonce: 'Q', points: 10)],
+        ),
+      ),
+    );
+    when(() => getContext('e1')).thenAnswer(
+      (_) async => Right(
+        PublicationContext(
+          publications: EvaluationPublications(
+            corrige: PublicationEtat(publishedAt: DateTime.utc(2026, 10, 6)),
+          ),
+        ),
+      ),
+    );
+    getIt.registerSingleton<IdGenerator>(const IdGenerator(Uuid()));
+    await pump(tester);
+
+    // La section Sujet est repliée (évaluation clôturée) : on la déplie.
+    await tester.tap(find.text('Sujet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Modifier'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Supprimer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Enregistrer le sujet'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Un sujet publié garde au moins une question'),
+      findsOneWidget,
+    );
+    verifyNever(
+      () => save(
+        any(),
+        cadre: any(named: 'cadre'),
+        questions: any(named: 'questions'),
+        maxPoints: any(named: 'maxPoints'),
+      ),
+    );
   });
 
   testWidgets('des notes en file : la publication attend', (tester) async {

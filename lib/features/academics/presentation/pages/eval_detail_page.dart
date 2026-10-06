@@ -166,6 +166,21 @@ class _EvalDetailViewState extends State<_EvalDetailView> {
   void _save() {
     final draft = _draft;
     if (draft == null) return;
+    // Le serveur refuse de vider un sujet dont la feuille est publiée
+    // (`SUJET_EMPTY`) : on le dit avant d'enregistrer.
+    final published = context
+        .read<PublicationBloc>()
+        .state
+        .context
+        .publications;
+    if (draft.questions.isEmpty &&
+        (published.sujet != null || published.corrige != null)) {
+      AppSnackBar.showError(
+        context,
+        AppLocalizations.of(context)!.sujetRejectedEmptyPublished,
+      );
+      return;
+    }
     context.read<EvalDetailBloc>().add(
       EvalDetailSujetSaveRequested(
         evaluationId: _args.eval.id,

@@ -1775,6 +1775,7 @@
   "sujetRejectedMaxLocked": "Le serveur a refusé le sujet : le maximum ne change plus, des notes sont saisies.",
   "sujetRejectedQuestionMismatch": "Le serveur a refusé le sujet : une question appartient déjà à une autre évaluation. Modifiez le sujet puis enregistrez-le.",
   "sujetRejectedGeneric": "Le serveur a refusé le sujet. Modifiez-le puis enregistrez-le.",
+  "sujetRejectedEmptyPublished": "Un sujet publié garde au moins une question : ajoutez-en une, ou retirez d'abord la publication.",
   "sujetResendWithoutMax": "Renvoyer sans changer le maximum",
   "sujetPendingSend": "En attente d'envoi",
   "sujetResentToast": "Sujet renvoyé sans changer le maximum",

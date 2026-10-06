@@ -13,7 +13,8 @@ abstract final class EvaluationSujetCodes {
   /// Sujet d'une interrogation ou d'un examen : il se fait en classe.
   static const String sujetNotPublishable = 'SUJET_NOT_PUBLISHABLE';
 
-  /// Aucune question à publier.
+  /// Aucune question à publier — ou, sur le sujet, vider un sujet dont le
+  /// sujet ou le corrigé sont publiés.
   static const String sujetEmpty = 'SUJET_EMPTY';
 
   /// Un élève n'a pas de note, ou une note est en attente ; `details` porte

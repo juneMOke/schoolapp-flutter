@@ -2126,6 +2126,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le serveur a refusé le sujet. Modifiez-le puis enregistrez-le.';
 
   @override
+  String get sujetRejectedEmptyPublished =>
+      'Un sujet publié garde au moins une question : ajoutez-en une, ou retirez d\'abord la publication.';
+
+  @override
   String get sujetResendWithoutMax => 'Renvoyer sans changer le maximum';
 
   @override

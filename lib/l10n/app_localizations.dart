@@ -3308,6 +3308,12 @@ abstract class AppLocalizations {
   /// **'The server refused the subject. Edit it, then save it.'**
   String get sujetRejectedGeneric;
 
+  /// No description provided for @sujetRejectedEmptyPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'A published subject keeps at least one question: add one, or withdraw the publication first.'**
+  String get sujetRejectedEmptyPublished;
+
   /// No description provided for @sujetResendWithoutMax.
   ///
   /// In en, this message translates to:

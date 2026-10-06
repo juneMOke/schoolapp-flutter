@@ -30,7 +30,7 @@ const String kSujetRejectedCode = 'REJECTED';
 ///   entre-temps, qui repartira. L'évaluation, son journal et ses publications
 ///   sont rafraîchis au passage.
 /// - Tout refus terminal laisse le brouillon lisible, marqué refusé avec son
-///   code (`MAX_LOCKED`, `QUESTION_MISMATCH`, sinon `REJECTED`) ; un
+///   code (`MAX_LOCKED`, `QUESTION_MISMATCH`, `SUJET_EMPTY`, sinon `REJECTED`) ; un
 ///   `MAX_LOCKED` abandonne le maximum ajusté.
 /// - 404 (évaluation pas encore acquittée), réseau, 5xx, 401 → nouvel essai ;
 ///   400, 403 → terminal.
@@ -54,6 +54,8 @@ class EvaluationSujetOutboxHandler implements OutboxSyncHandler {
   static const List<String> _terminalCodes = [
     EvaluationSujetCodes.maxLocked,
     EvaluationSujetCodes.questionMismatch,
+    // Un sujet ou un corrigé publiés gardent au moins une question.
+    EvaluationSujetCodes.sujetEmpty,
   ];
 
   @override

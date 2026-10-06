@@ -2116,6 +2116,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The server refused the subject. Edit it, then save it.';
 
   @override
+  String get sujetRejectedEmptyPublished =>
+      'A published subject keeps at least one question: add one, or withdraw the publication first.';
+
+  @override
   String get sujetResendWithoutMax => 'Resend without changing the maximum';
 
   @override

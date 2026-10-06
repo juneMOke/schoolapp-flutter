@@ -187,6 +187,26 @@ void main() {
     expect(sujet.questions, [q]);
   });
 
+  test(
+    'SUJET_EMPTY : vider un sujet publié est refusé avec son code',
+    () async {
+      await seedEvaluation('SYNCED');
+      when(() => api.replaceSujet(auth, 'ev-1', any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(),
+          response: Response(
+            requestOptions: RequestOptions(),
+            statusCode: 422,
+            data: {'detailCode': 'SUJET_EMPTY'},
+          ),
+        ),
+      );
+
+      expect((await saveAndDispatch()).outcome, OutboxDispatchOutcome.failed);
+      expect((await localSujet()).rejectionCode, 'SUJET_EMPTY');
+    },
+  );
+
   test('400 : refus terminal, le brouillon est marqué refusé', () async {
     await seedEvaluation('SYNCED');
     when(() => api.replaceSujet(auth, 'ev-1', any())).thenThrow(

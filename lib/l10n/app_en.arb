@@ -1829,6 +1829,7 @@
   "sujetRejectedMaxLocked": "The server refused the subject: the maximum can no longer change, grades have been entered.",
   "sujetRejectedQuestionMismatch": "The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.",
   "sujetRejectedGeneric": "The server refused the subject. Edit it, then save it.",
+  "sujetRejectedEmptyPublished": "A published subject keeps at least one question: add one, or withdraw the publication first.",
   "sujetResendWithoutMax": "Resend without changing the maximum",
   "sujetPendingSend": "Waiting to be sent",
   "sujetResentToast": "Subject resent without changing the maximum",
