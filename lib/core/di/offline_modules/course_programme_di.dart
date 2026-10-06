@@ -11,6 +11,8 @@ import 'package:school_app_flutter/core/offline/tombstone/tombstone_removal_hook
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_metier_pull_handlers.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart'
+    show kAcademicsCoursResourcePrefix;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart'
     show kAcademicsChapitresResourcePrefix;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
@@ -45,25 +47,25 @@ void registerCourseProgramme(GetIt getIt) {
   getIt.registerLazySingleton<ChapitrePullWriter>(
     () => ChapitrePullWriter(getIt<Database>()),
   );
-  // Les fichiers des ressources : leur magasin et leur clé à eux.
-  getIt.registerLazySingleton<EncryptedBlobStore>(
-    instanceName: AppConstants.courseProgrammeDirectoryName,
-    () => EncryptedBlobStore(
-      directoryName: AppConstants.courseProgrammeDirectoryName,
-      keyService: BlobKeyService(
-        getIt<FlutterSecureStorage>(),
-        storageKey: AppConstants.courseProgrammeKeyStorageKey,
+  // Les fichiers des ressources : leur clé à eux, et un magasin (un
+  // répertoire) par école — le ménage des orphelins ne voit que la base
+  // ouverte, il ne doit voir que les fichiers de son école.
+  getIt.registerLazySingleton<ProgrammeBlobs>(() {
+    final keys = BlobKeyService(
+      getIt<FlutterSecureStorage>(),
+      storageKey: AppConstants.courseProgrammeKeyStorageKey,
+    );
+    return ProgrammeBlobs(
+      storeFor: (schoolId) => EncryptedBlobStore(
+        directoryName: schoolId == null
+            ? AppConstants.courseProgrammeDirectoryName
+            : '${AppConstants.courseProgrammeDirectoryName}_$schoolId',
+        keyService: keys,
       ),
-    ),
-  );
-  getIt.registerLazySingleton<ProgrammeBlobs>(
-    () => ProgrammeBlobs(
-      store: getIt<EncryptedBlobStore>(
-        instanceName: AppConstants.courseProgrammeDirectoryName,
-      ),
+      schoolId: () => getIt<CurrentUserContext>().schoolId,
       db: getIt<Database>(),
-    ),
-  );
+    );
+  });
   getIt.registerLazySingleton<ProgrammePurge>(
     () => ProgrammePurge(db: getIt<Database>(), blobs: getIt<ProgrammeBlobs>()),
   );
@@ -95,6 +97,7 @@ void registerCourseProgramme(GetIt getIt) {
       writer: getIt<ChapitrePullWriter>(),
       puller: getIt<PerCoursKeysetPuller>(),
       requiredAuth: requiredAuth,
+      blobs: getIt<ProgrammeBlobs>(),
     ),
   );
 
@@ -103,7 +106,10 @@ void registerCourseProgramme(GetIt getIt) {
     cursorPrefix: kAcademicsChapitresResourcePrefix,
     evict: (coursId) => getIt<ProgrammePurge>().purgeCours(coursId),
   );
-  for (final resource in const ['academics_chapitres', 'academics_cours']) {
+  for (final resource in const [
+    kAcademicsChapitresResourcePrefix,
+    kAcademicsCoursResourcePrefix,
+  ]) {
     getIt<TombstoneRemovalHooks>().add(
       resource,
       (_) async => getIt<ProgrammeBlobs>().reclaimOrphans(),

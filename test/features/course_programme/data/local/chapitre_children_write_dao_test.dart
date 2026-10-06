@@ -34,7 +34,8 @@ void main() {
   });
   tearDown(() => db.close());
 
-  test('une note ajoutée puis retirée avant envoi n\'envoie rien', () async {
+  test('une note retirée avant accusé quitte la tablette ; son retrait part '
+      'quand même (un ajout en vol a pu être écrit)', () async {
     await dao.addNote(note, coursId: 'c-1', schoolId: null, nowMs: 1);
     final added = (await outboxById(db))[ProgrammeOutbox.noteEntry('n-1')]!;
     expect(added.aggregateId, 'ch-1');
@@ -42,10 +43,9 @@ void main() {
     await dao.deleteNote('n-1', schoolId: null, nowMs: 2);
 
     expect(await db.query('chapitre_note'), isEmpty);
-    expect(
-      (await outboxById(db))[ProgrammeOutbox.noteEntry('n-1')]!.status,
-      OutboxStatus.acked,
-    );
+    final entry = (await outboxById(db))[ProgrammeOutbox.noteEntry('n-1')]!;
+    expect(entry.status, OutboxStatus.pending);
+    expect(jsonDecode(entry.payload)['op'], 'delete');
   });
 
   test('une note synchronisée se retire par un geste', () async {

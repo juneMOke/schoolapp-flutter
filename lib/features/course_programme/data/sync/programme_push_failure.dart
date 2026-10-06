@@ -44,8 +44,14 @@ class ProgrammePushFailure {
   bool get awaitsChapitre =>
       status == 409 && detailCode == kChapitreNotYetSyncedCode;
 
-  /// L'objet n'existe plus côté serveur (supprimé ailleurs).
-  bool get isGone => status == 410 || status == 404;
+  /// L'objet a été supprimé côté serveur.
+  ///
+  /// Un 404 nu n'en dit pas autant pour un enregistrement (route absente,
+  /// proxy) : effacer sur lui perdrait du travail jamais envoyé.
+  bool get isGone => status == 410;
+
+  /// Pour un retrait, l'objet absent suffit : le geste est acquis.
+  bool get isGoneForDelete => status == 410 || status == 404;
 
   /// Code rangé sur la ligne : le `detailCode`, sinon le statut.
   String get storedCode =>

@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/course_programme/data/local/programm
 import 'package:school_app_flutter/features/course_programme/data/local/programme_sync_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/chapitre_dto.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_note_outbox_handler.dart';
+import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_ordre_outbox_handler.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_outbox_handler.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_ressource_outbox_handler.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
@@ -147,6 +148,83 @@ void main() {
       expect((await db.query('chapitre')).single['sync_status'], 'SYNC_ERROR');
     });
 
+    test('le corps porte l\'auteur du geste', () async {
+      when(() => api.saveChapitre(extras, any())).thenThrow(_dio(500));
+      final entry = OutboxEntry(
+        id: 'CHAPITRE:ch-1',
+        aggregateType: ProgrammeOutbox.chapitreType,
+        aggregateId: 'ch-1',
+        operation: OutboxOperation.upsert,
+        payload: jsonEncode({...save.toJson(), 'authorId': 'u-1'}),
+        schoolId: 's-1',
+        createdAt: 1,
+      );
+      await handler.dispatch(entry);
+      final body =
+          verify(() => api.saveChapitre(extras, captureAny())).captured.single
+              as Map;
+      expect(body['authorId'], 'u-1');
+    });
+
+    test('404 nu sur un enregistrement : refus, rien n\'est effacé', () async {
+      when(() => api.saveChapitre(extras, any())).thenThrow(_dio(404));
+      final result = await handler.dispatch(
+        entryOf(ProgrammeOutbox.chapitreType, save.toJson()),
+      );
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      expect(await db.query('chapitre'), hasLength(1));
+    });
+
+    test('refus après qu\'une descente a remplacé la ligne : définitif, '
+        'pas de rejeu jusqu\'au poison', () async {
+      await db.update('chapitre', {
+        'client_updated_at': '2026-10-05T08:00:00.000Z',
+      });
+      when(() => api.saveChapitre(extras, any())).thenThrow(_dio(422));
+      final result = await handler.dispatch(
+        entryOf(ProgrammeOutbox.chapitreType, save.toJson()),
+      );
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+    });
+
+    test('une suppression refusée fait réapparaître le chapitre', () async {
+      await db.update('chapitre', {
+        'server_known': 1,
+        'deleted_at': '2026-10-05T08:00:00.000Z',
+      });
+      when(() => api.deleteChapitre(extras, 'ch-1')).thenThrow(_dio(422));
+      final result = await handler.dispatch(
+        entryOf(
+          ProgrammeOutbox.chapitreType,
+          ChapitreFichePayload.delete(
+            chapitreId: 'ch-1',
+            coursId: 'c-1',
+          ).toJson(),
+        ),
+      );
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      final row = (await db.query('chapitre')).single;
+      expect(row['deleted_at'], isNull);
+      expect(row['sync_status'], 'SYNC_ERROR');
+    });
+
+    test(
+      'un retrait sur un chapitre inconnu du serveur (404) est acquis',
+      () async {
+        when(() => api.deleteChapitre(extras, 'ch-1')).thenThrow(_dio(404));
+        final result = await handler.dispatch(
+          entryOf(
+            ProgrammeOutbox.chapitreType,
+            ChapitreFichePayload.delete(
+              chapitreId: 'ch-1',
+              coursId: 'c-1',
+            ).toJson(),
+          ),
+        );
+        expect(result.outcome, OutboxDispatchOutcome.acked);
+      },
+    );
+
     test('410 : supprimé ailleurs, la ligne part', () async {
       when(() => api.saveChapitre(extras, any())).thenThrow(_dio(410));
       final result = await handler.dispatch(
@@ -251,8 +329,12 @@ void main() {
 
         blobs.files['r-1'] = Uint8List.fromList([1]);
         when(
-          () =>
-              transfer.putRessource(extras, any(), bytes: any(named: 'bytes')),
+          () => transfer.putRessource(
+            extras,
+            any(),
+            metadata: any(named: 'metadata'),
+            bytes: any(named: 'bytes'),
+          ),
         ).thenAnswer((_) async {});
         final sent = await ressources.dispatch(
           entryOf(ProgrammeOutbox.ressourceType, payload),
@@ -264,5 +346,65 @@ void main() {
         );
       },
     );
+  });
+
+  group('ordre', () {
+    late ChapitreOrdreOutboxHandler handler;
+    const payload = ChapitreOrdrePayload(
+      coursId: 'c-1',
+      chapitreIds: ['ch-1'],
+      clientUpdatedAt: '2026-10-06T08:00:00.000Z',
+    );
+
+    setUp(() {
+      handler = ChapitreOrdreOutboxHandler(
+        api: api,
+        dao: dao,
+        evictCours: evict,
+        currentUser: user,
+        extras: extras,
+      );
+    });
+
+    test('attend tant qu\'un chapitre cité est inconnu, sans réseau', () async {
+      final result = await handler.dispatch(
+        entryOf(ProgrammeOutbox.ordreType, payload.toJson()),
+      );
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+      verifyNever(() => api.reorderChapitres(any(), any(), any()));
+    });
+
+    test('l\'ordre retenu s\'applique', () async {
+      await db.update('chapitre', {'server_known': 1, 'ordre': 7});
+      when(
+        () => api.reorderChapitres(extras, 'c-1', any()),
+      ).thenAnswer((_) async => const ChapitreOrdreAck(['ch-1']));
+      final entry = OutboxEntry(
+        id: ProgrammeOutbox.ordreEntry('c-1'),
+        aggregateType: ProgrammeOutbox.ordreType,
+        aggregateId: 'c-1',
+        operation: OutboxOperation.upsert,
+        payload: jsonEncode(payload.toJson()),
+        createdAt: 1,
+      );
+      await db.insert('outbox', entry.toMap());
+
+      final result = await handler.dispatch(entry);
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect((await db.query('chapitre')).single['ordre'], 0);
+    });
+
+    test('403 COURS_NOT_OWNED : le cours est évincé', () async {
+      await db.update('chapitre', {'server_known': 1});
+      when(
+        () => api.reorderChapitres(extras, 'c-1', any()),
+      ).thenThrow(_dio(403, detailCode: 'COURS_NOT_OWNED'));
+      final result = await handler.dispatch(
+        entryOf(ProgrammeOutbox.ordreType, payload.toJson()),
+      );
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect(evicted, ['c-1']);
+    });
   });
 }

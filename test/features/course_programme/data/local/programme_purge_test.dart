@@ -21,7 +21,7 @@ void main() {
   setUp(() async {
     db = await openFullOfflineDb();
     blobs = _MockBlobs();
-    when(() => blobs.reclaimOrphans()).thenAnswer((_) async => 0);
+    when(() => blobs.deleteAll(any())).thenAnswer((_) async {});
   });
   tearDown(() => db.close());
 
@@ -37,7 +37,7 @@ void main() {
         ),
       );
 
-  test('purgeCours retire tout et neutralise les gestes', () async {
+  test('purgeCours retire tout et retire les gestes de la file', () async {
     for (final (id, cours) in [('ch-1', 'c-1'), ('ch-2', 'c-2')]) {
       await db.insert('chapitre', {
         'id': id,
@@ -87,6 +87,6 @@ void main() {
     expect(pending.map((r) => r['id']), [
       ProgrammeOutbox.chapitreEntry('ch-2'),
     ]);
-    verify(() => blobs.reclaimOrphans()).called(1);
+    verify(() => blobs.deleteAll(any())).called(1);
   });
 }

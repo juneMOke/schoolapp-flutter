@@ -59,9 +59,10 @@ abstract class ChapitreChildOutboxHandler<P> implements OutboxSyncHandler {
   ChildGesture gestureOf(P payload);
 
   /// Envoie l'ajout ; rend un échec local terminal à ranger, ou `null`.
-  Future<OutboxDispatchResult?> sendSave(P payload);
+  /// [entry] porte l'auteur à recopier dans le corps ([withOutboxAuthor]).
+  Future<OutboxDispatchResult?> sendSave(P payload, OutboxEntry entry);
 
-  Future<void> sendDelete(P payload);
+  Future<void> sendDelete(P payload, OutboxEntry entry);
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -82,17 +83,21 @@ abstract class ChapitreChildOutboxHandler<P> implements OutboxSyncHandler {
       return const OutboxDispatchResult.acked();
     }
     final saving = gesture.op == ProgrammePushOp.save;
-    if (saving && state == ChapitreServerState.unknown) {
-      return const OutboxDispatchResult.blocked('Chapitre pas encore accusé');
+    if (state == ChapitreServerState.unknown) {
+      // Un ajout attend son chapitre ; un retrait n'a rien à retirer : tant
+      // que le chapitre est inconnu, aucun ajout n'a pu partir.
+      return saving
+          ? const OutboxDispatchResult.blocked('Chapitre pas encore accusé')
+          : const OutboxDispatchResult.acked();
     }
 
     try {
       if (saving) {
-        final local = await sendSave(payload);
+        final local = await sendSave(payload, entry);
         if (local != null) return local;
         await dao.markChildSynced(table, gesture.id, now());
       } else {
-        await sendDelete(payload);
+        await sendDelete(payload, entry);
         await dao.removeChild(table, gesture.id);
       }
       return const OutboxDispatchResult.acked();
@@ -115,14 +120,17 @@ abstract class ChapitreChildOutboxHandler<P> implements OutboxSyncHandler {
     if (failure.awaitsChapitre) {
       return OutboxDispatchResult.blocked(failure.reason);
     }
-    if (failure.isGone) {
+    final saving = gesture.op == ProgrammePushOp.save;
+    if (saving ? failure.isGone : failure.isGoneForDelete) {
       // Retrait : déjà fait. Ajout : son chapitre a été supprimé ailleurs.
       await dao.removeChild(table, gesture.id);
       return const OutboxDispatchResult.acked();
     }
     if (failure.isTransient) return OutboxDispatchResult.retry(failure.reason);
-    if (gesture.op == ProgrammePushOp.save) {
+    if (saving) {
       await dao.markChildRejected(table, gesture.id, failure.storedCode, now());
+    } else {
+      await dao.restoreChild(table, gesture.id, failure.storedCode, now());
     }
     return OutboxDispatchResult.failed(failure.reason);
   }

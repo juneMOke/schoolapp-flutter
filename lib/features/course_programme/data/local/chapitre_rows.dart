@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:sqflite_common/sqlite_api.dart';
+
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_fiche_codec.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
@@ -14,6 +16,24 @@ class ProgrammeTables {
   static const String chapitre = 'chapitre';
   static const String note = 'chapitre_note';
   static const String ressource = 'chapitre_ressource';
+
+  /// Range les chapitres de [coursId] dans l'ordre [chapitreIds] ; un id
+  /// absent de la tablette est sans effet.
+  static Future<void> applyOrdre(
+    DatabaseExecutor txn,
+    String coursId,
+    List<String> chapitreIds, {
+    required int nowMs,
+  }) async {
+    for (var i = 0; i < chapitreIds.length; i++) {
+      await txn.update(
+        chapitre,
+        {'ordre': i, 'updated_at': nowMs},
+        where: 'id = ? AND cours_id = ?',
+        whereArgs: [chapitreIds[i], coursId],
+      );
+    }
+  }
 }
 
 ProgrammeSyncState programmeSyncStateOf(Object? dbValue) =>
@@ -22,10 +42,6 @@ ProgrammeSyncState programmeSyncStateOf(Object? dbValue) =>
       SyncState.syncError => ProgrammeSyncState.rejected,
       _ => ProgrammeSyncState.pending,
     };
-
-/// L'instant [ms] en ISO-8601 UTC, la forme rangée en base et sur le fil.
-String programmeInstant(int ms) =>
-    DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toIso8601String();
 
 DateTime? _instant(Object? value) =>
     value is String ? DateTime.tryParse(value)?.toUtc() : null;

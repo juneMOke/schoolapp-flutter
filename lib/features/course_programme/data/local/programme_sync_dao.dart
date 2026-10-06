@@ -68,6 +68,11 @@ class ProgrammeSyncDao {
     return row?['cours_id'] as String?;
   }
 
+  /// L'entrée [entryId] a-t-elle été remplacée par un geste plus récent
+  /// depuis l'envoi de celle créée à [sentCreatedAt] ?
+  Future<bool> entryReplaced(String entryId, int sentCreatedAt) =>
+      ProgrammeOutbox.replacedSince(_db, entryId, sentCreatedAt);
+
   /// Accusé d'une fiche. Ligne inchangée depuis l'envoi : la fiche retenue
   /// s'applique (celle du serveur si la nôtre a été ignorée, plus ancienne).
   /// Ligne changée : seul « connu du serveur » se pose.
@@ -126,11 +131,32 @@ class ProgrammeSyncDao {
   /// Le chapitre n'existe plus côté serveur (suppression accusée, 410) : il
   /// quitte la tablette avec ses enfants et leurs fichiers.
   Future<void> removeChapitre(String chapitreId) async {
-    await _db.transaction(
+    final files = await _db.transaction(
       (txn) => ProgrammePurge.removeChapitres(txn, [chapitreId]),
     );
-    await _blobs.reclaimOrphans();
+    await _blobs.deleteAll(files);
   }
+
+  /// Refus définitif d'une suppression : la ligne réapparaît, « à corriger »
+  /// — elle existe toujours au serveur, des évaluations peuvent la citer.
+  Future<void> restoreChapitre(String chapitreId, String code, int nowMs) =>
+      restoreChild(ProgrammeTables.chapitre, chapitreId, code, nowMs);
+
+  /// Refus définitif du retrait d'une note ou d'une ressource : elle
+  /// réapparaît, « à corriger ». Une ligne jamais accusée, partie de la
+  /// tablette au geste, ne revient pas.
+  Future<void> restoreChild(String table, String id, String code, int nowMs) =>
+      _db.update(
+        table,
+        {
+          'deleted_at': null,
+          'sync_status': SyncState.syncError.dbValue,
+          'sync_error_code': code,
+          'updated_at': nowMs,
+        },
+        where: 'id = ? AND deleted_at IS NOT NULL',
+        whereArgs: [id],
+      );
 
   /// L'ordre retenu par le serveur, appliqué sauf si un nouvel ordre a été
   /// mis en file pendant le vol (l'entrée porte alors un autre `created_at`).
@@ -147,14 +173,7 @@ class ProgrammeSyncDao {
     )) {
       return;
     }
-    for (var i = 0; i < chapitreIds.length; i++) {
-      await txn.update(
-        ProgrammeTables.chapitre,
-        {'ordre': i, 'updated_at': nowMs},
-        where: 'id = ? AND cours_id = ?',
-        whereArgs: [chapitreIds[i], coursId],
-      );
-    }
+    await ProgrammeTables.applyOrdre(txn, coursId, chapitreIds, nowMs: nowMs);
   });
 
   /// Ajout d'une note ou d'une ressource accusé.

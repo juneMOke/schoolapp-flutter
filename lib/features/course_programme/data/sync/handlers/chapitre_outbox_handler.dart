@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
+import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_sync_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_failure.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
@@ -67,7 +68,10 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
     try {
       switch (payload.op) {
         case ProgrammePushOp.save:
-          final ack = await _api.saveChapitre(_extras, payload.fiche);
+          final ack = await _api.saveChapitre(
+            _extras,
+            withOutboxAuthor(payload.fiche, entry),
+          );
           await _dao.applyFicheAck(
             ack,
             sentClientUpdatedAt: payload.clientUpdatedAt,
@@ -79,7 +83,7 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
       }
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
-      return _onFailure(payload, ProgrammePushFailure.of(e));
+      return _onFailure(entry, payload, ProgrammePushFailure.of(e));
     } catch (e) {
       // Échec LOCAL après un envoi peut-être accusé : le rejeu est idempotent.
       return OutboxDispatchResult.retry(e.toString());
@@ -87,6 +91,7 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
   }
 
   Future<OutboxDispatchResult> _onFailure(
+    OutboxEntry entry,
     ChapitreFichePayload payload,
     ProgrammePushFailure failure,
   ) async {
@@ -94,12 +99,18 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
       await _evictCours(payload.coursId);
       return const OutboxDispatchResult.acked();
     }
-    if (failure.isGone) {
+    final deleting = payload.op == ProgrammePushOp.delete;
+    if (deleting ? failure.isGoneForDelete : failure.isGone) {
       await _dao.removeChapitre(payload.chapitreId);
       return const OutboxDispatchResult.acked();
     }
     if (failure.isTransient) return OutboxDispatchResult.retry(failure.reason);
-    if (payload.op == ProgrammePushOp.delete) {
+    if (deleting) {
+      await _dao.restoreChapitre(
+        payload.chapitreId,
+        failure.storedCode,
+        _now(),
+      );
       return OutboxDispatchResult.failed(failure.reason);
     }
     final marked = await _dao.markChapitreRejected(
@@ -108,8 +119,12 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
       code: failure.storedCode,
       nowMs: _now(),
     );
-    return marked
-        ? OutboxDispatchResult.failed(failure.reason)
-        : OutboxDispatchResult.retry(failure.reason);
+    // Non marquée : soit une saisie plus récente a remplacé l'entrée (elle
+    // repartira), soit une descente a remplacé la ligne — le refus est alors
+    // définitif, le rejouer ne ferait que monter jusqu'au poison.
+    if (!marked && await _dao.entryReplaced(entry.id, entry.createdAt)) {
+      return OutboxDispatchResult.retry(failure.reason);
+    }
+    return OutboxDispatchResult.failed(failure.reason);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_read_api.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_detail.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/programme.dart';
@@ -47,13 +48,7 @@ class ProgrammeOnlineReader {
     try {
       return Right(await read());
     } on DioException catch (e) {
-      final failure = e.error;
-      if (failure is Failure) return Left(failure);
-      return Left(
-        e.response == null
-            ? const NetworkFailure()
-            : ServerFailure(e.message ?? 'HTTP ${e.response?.statusCode}'),
-      );
+      return Left(ApiErrorParser.failureOf(e));
     } on FormatException catch (e) {
       return Left(ServerFailure(e.message));
     }

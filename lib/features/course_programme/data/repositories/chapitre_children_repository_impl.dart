@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/crypto/sha256_hex.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -63,6 +64,7 @@ class ChapitreChildrenRepositoryImpl implements ChapitreChildrenRepository {
         ),
         coursId: chapitre.coursId,
         schoolId: _currentUser.schoolId,
+        authorId: _currentUser.uid,
         nowMs: nowMs,
       ),
       unit,
@@ -76,6 +78,7 @@ class ChapitreChildrenRepositoryImpl implements ChapitreChildrenRepository {
         () => _writer.deleteNote(
           noteId,
           schoolId: _currentUser.schoolId,
+          authorId: _currentUser.uid,
           nowMs: _now(),
         ),
         unit,
@@ -102,6 +105,7 @@ class ChapitreChildrenRepositoryImpl implements ChapitreChildrenRepository {
       coursId: chapitre.coursId,
       bytes: draft.bytes,
       schoolId: _currentUser.schoolId,
+      authorId: _currentUser.uid,
       nowMs: _now(),
     );
     if (!kept) throw StateError('Fichier non scellé');
@@ -114,6 +118,7 @@ class ChapitreChildrenRepositoryImpl implements ChapitreChildrenRepository {
         () => _writer.deleteRessource(
           ressourceId,
           schoolId: _currentUser.schoolId,
+          authorId: _currentUser.uid,
           nowMs: _now(),
         ),
         unit,
@@ -146,11 +151,7 @@ class ChapitreChildrenRepositoryImpl implements ChapitreChildrenRepository {
         ressourceId: ressource.id,
       );
     } on DioException catch (e) {
-      return Left(
-        e.response == null
-            ? const NetworkFailure()
-            : ServerFailure(e.message ?? 'HTTP ${e.response?.statusCode}'),
-      );
+      return Left(ApiErrorParser.failureOf(e));
     }
     final expected = ressource.sha256;
     if (expected != null && await sha256Hex(bytes) != expected) {

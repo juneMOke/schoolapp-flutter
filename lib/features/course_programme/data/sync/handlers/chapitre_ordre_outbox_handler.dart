@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
+import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_sync_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_failure.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
@@ -67,7 +68,7 @@ class ChapitreOrdreOutboxHandler implements OutboxSyncHandler {
       final ack = await _api.reorderChapitres(
         _extras,
         payload.coursId,
-        payload.toBody(),
+        withOutboxAuthor(payload.toBody(), entry),
       );
       await _dao.applyOrdreAck(
         payload.coursId,

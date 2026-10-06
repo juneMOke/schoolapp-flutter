@@ -1,10 +1,12 @@
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
+import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Ce qui retire des chapitres de la tablette **avec tout ce qui pend à
-/// eux** : notes, ressources, entrées d'outbox devenues sans objet, fichiers.
+/// eux** : notes, ressources, gestes devenus sans objet, place dans un ordre
+/// en attente, fichiers.
 ///
 /// sqflite n'applique aucune cascade : chaque retrait nomme ses enfants.
 class ProgrammePurge {
@@ -18,33 +20,58 @@ class ProgrammePurge {
   /// Un cours qui n'est plus au professeur (403 `COURS_NOT_OWNED`) : ses
   /// gestes en attente partiraient tous en refus, ils sont abandonnés.
   Future<void> purgeCours(String coursId) async {
-    await _db.transaction((txn) async {
-      final ids = await _ids(
-        txn,
-        ProgrammeTables.chapitre,
-        'cours_id',
-        coursId,
-      );
-      await removeChapitres(txn, ids);
-      await ProgrammeOutbox.neutralize(txn, [
-        ProgrammeOutbox.ordreEntry(coursId),
-      ]);
+    final files = await _db.transaction((txn) async {
+      final ids = [
+        for (final row in await txn.query(
+          ProgrammeTables.chapitre,
+          columns: ['id'],
+          where: 'cours_id = ?',
+          whereArgs: [coursId],
+        ))
+          row['id'] as String,
+      ];
+      await ProgrammeOutbox.discard(txn, [ProgrammeOutbox.ordreEntry(coursId)]);
+      return removeChapitres(txn, ids);
     });
-    await _blobs.reclaimOrphans();
+    await _blobs.deleteAll(files);
   }
 
   /// Retire [chapitreIds] et leurs enfants dans la transaction de l'appelant,
-  /// et neutralise leurs entrées d'outbox. Les fichiers partent ensuite, au
-  /// ménage des orphelins ([ProgrammeBlobs.reclaimOrphans]).
-  static Future<void> removeChapitres(
+  /// retire leurs gestes de la file et leur place dans l'ordre en attente.
+  /// Rend les ressources-documents retirées : leurs fichiers partent **après**
+  /// la transaction ([ProgrammeBlobs.deleteAll]).
+  static Future<List<String>> removeChapitres(
     DatabaseExecutor txn,
     List<String> chapitreIds,
   ) async {
+    final files = <String>[];
     for (final chapitreId in chapitreIds) {
-      await ProgrammeOutbox.neutralize(txn, [
+      final row = (await txn.query(
+        ProgrammeTables.chapitre,
+        columns: ['cours_id'],
+        where: 'id = ?',
+        whereArgs: [chapitreId],
+      )).firstOrNull;
+      if (row != null) {
+        await ProgrammeOutbox.detachFromOrdre(
+          txn,
+          coursId: row['cours_id'] as String,
+          chapitreId: chapitreId,
+        );
+      }
+      await ProgrammeOutbox.discard(txn, [
         ProgrammeOutbox.chapitreEntry(chapitreId),
       ]);
-      await ProgrammeOutbox.neutralizeChildren(txn, chapitreId);
+      await ProgrammeOutbox.discardChildren(txn, chapitreId);
+      files.addAll([
+        for (final r in await txn.query(
+          ProgrammeTables.ressource,
+          columns: ['id'],
+          where: 'chapitre_id = ? AND type = ?',
+          whereArgs: [chapitreId, RessourceType.document.wireValue],
+        ))
+          r['id'] as String,
+      ]);
       for (final table in [ProgrammeTables.note, ProgrammeTables.ressource]) {
         await txn.delete(
           table,
@@ -58,20 +85,6 @@ class ProgrammePurge {
         whereArgs: [chapitreId],
       );
     }
+    return files;
   }
-
-  static Future<List<String>> _ids(
-    DatabaseExecutor txn,
-    String table,
-    String column,
-    String value,
-  ) async => [
-    for (final row in await txn.query(
-      table,
-      columns: ['id'],
-      where: '$column = ?',
-      whereArgs: [value],
-    ))
-      row['id'] as String,
-  ];
 }

@@ -142,6 +142,7 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
       () => _writer.saveChapitre(
         stamped,
         schoolId: _currentUser.schoolId,
+        authorId: _currentUser.uid,
         nowMs: nowMs,
       ),
       stamped,
@@ -155,6 +156,7 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
         () => _writer.deleteChapitre(
           chapitreId,
           schoolId: _currentUser.schoolId,
+          authorId: _currentUser.uid,
           nowMs: _now(),
         ),
         unit,
@@ -170,6 +172,7 @@ class ProgrammeRepositoryImpl implements ProgrammeRepository {
       coursId,
       chapitreIds,
       schoolId: _currentUser.schoolId,
+      authorId: _currentUser.uid,
       nowMs: _now(),
     ),
     unit,

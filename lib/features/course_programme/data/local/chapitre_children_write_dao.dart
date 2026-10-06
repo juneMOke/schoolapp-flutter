@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
@@ -15,9 +16,10 @@ import 'package:sqflite_common/sqlite_api.dart';
 /// toujours avec leur entrée d'outbox (agrégat = le chapitre, pour que ses
 /// gestes l'attendent et partent avec lui).
 ///
-/// Retirer ce que le serveur n'a jamais accusé ne part pas : l'ajout en
-/// attente est neutralisé et la ligne disparaît — l'ajout puis le retrait
-/// d'une note jamais envoyée n'en font aucun.
+/// Retirer part **toujours** par un geste, qui remplace un ajout en attente :
+/// un ajout en vol a pu être écrit par le serveur sans que l'accusé revienne,
+/// et la note redescendrait. Ce que le serveur n'a jamais accusé quitte la
+/// tablette tout de suite ; un 404 en retour acquiert le geste.
 class ChapitreChildrenWriteDao {
   final Database _db;
   final ProgrammeBlobs _blobs;
@@ -33,6 +35,7 @@ class ChapitreChildrenWriteDao {
     required String coursId,
     required String? schoolId,
     required int nowMs,
+    String? authorId,
   }) => _db.transaction((txn) async {
     final payload = ChapitreNotePayload(
       op: ProgrammePushOp.save,
@@ -51,14 +54,15 @@ class ChapitreChildrenWriteDao {
       'sync_status': SyncState.pendingSync.dbValue,
       'updated_at': nowMs,
     });
-    await _enqueue(
+    await enqueueProgrammeGesture(
       txn,
-      ProgrammeOutbox.noteEntry(note.id),
-      ProgrammeOutbox.noteType,
-      note.chapitreId,
-      payload.toJson(),
-      schoolId,
-      nowMs,
+      entryId: ProgrammeOutbox.noteEntry(note.id),
+      type: ProgrammeOutbox.noteType,
+      aggregateId: note.chapitreId,
+      payload: payload.toJson(),
+      schoolId: schoolId,
+      nowMs: nowMs,
+      authorId: authorId,
     );
   });
 
@@ -66,31 +70,25 @@ class ChapitreChildrenWriteDao {
     String noteId, {
     required String? schoolId,
     required int nowMs,
+    String? authorId,
   }) => _db.transaction((txn) async {
     final row = await _row(txn, ProgrammeTables.note, noteId);
     if (row == null) return;
     final chapitreId = row['chapitre_id'] as String;
-    if (await _dropIfLocalOnly(
+    await _retire(txn, ProgrammeTables.note, row, nowMs);
+    await enqueueProgrammeGesture(
       txn,
-      ProgrammeTables.note,
-      row,
-      ProgrammeOutbox.noteEntry(noteId),
-    )) {
-      return;
-    }
-    await _markDeleting(txn, ProgrammeTables.note, noteId, nowMs);
-    await _enqueue(
-      txn,
-      ProgrammeOutbox.noteEntry(noteId),
-      ProgrammeOutbox.noteType,
-      chapitreId,
-      ChapitreNotePayload(
+      entryId: ProgrammeOutbox.noteEntry(noteId),
+      type: ProgrammeOutbox.noteType,
+      aggregateId: chapitreId,
+      payload: ChapitreNotePayload(
         op: ProgrammePushOp.delete,
         id: noteId,
         chapitreId: chapitreId,
       ).toJson(),
-      schoolId,
-      nowMs,
+      schoolId: schoolId,
+      nowMs: nowMs,
+      authorId: authorId,
     );
   });
 
@@ -103,6 +101,7 @@ class ChapitreChildrenWriteDao {
     Uint8List? bytes,
     required String? schoolId,
     required int nowMs,
+    String? authorId,
   }) => _blobs.guarded(() async {
     if (bytes != null && !await _blobs.write(ressource.id, bytes)) return false;
     await _db.transaction((txn) async {
@@ -121,71 +120,65 @@ class ChapitreChildrenWriteDao {
         'sync_status': SyncState.pendingSync.dbValue,
         'updated_at': nowMs,
       });
-      await _enqueue(
+      await enqueueProgrammeGesture(
         txn,
-        ProgrammeOutbox.ressourceEntry(ressource.id),
-        ProgrammeOutbox.ressourceType,
-        ressource.chapitreId,
-        ChapitreRessourcePayload(
-          op: ProgrammePushOp.save,
-          chapitreId: ressource.chapitreId,
-          ressource: _dtoOf(ressource),
-        ).toJson(),
-        schoolId,
-        nowMs,
+        entryId: ProgrammeOutbox.ressourceEntry(ressource.id),
+        type: ProgrammeOutbox.ressourceType,
+        aggregateId: ressource.chapitreId,
+        payload: _ressourcePayload(ProgrammePushOp.save, ressource),
+        schoolId: schoolId,
+        nowMs: nowMs,
+        authorId: authorId,
       );
     });
     return true;
   });
 
-  /// Retire une ressource ; son fichier quitte le magasin tout de suite.
+  /// Retire une ressource ; son fichier quitte le magasin tout de suite (une
+  /// ressource accusée se retélécharge si son retrait est refusé).
   Future<void> deleteRessource(
     String ressourceId, {
     required String? schoolId,
     required int nowMs,
+    String? authorId,
   }) async {
     await _db.transaction((txn) async {
       final row = await _row(txn, ProgrammeTables.ressource, ressourceId);
       if (row == null) return;
-      if (await _dropIfLocalOnly(
+      await _retire(txn, ProgrammeTables.ressource, row, nowMs);
+      final ressource = ChapitreRessourceRowMapper.toEntity(row);
+      await enqueueProgrammeGesture(
         txn,
-        ProgrammeTables.ressource,
-        row,
-        ProgrammeOutbox.ressourceEntry(ressourceId),
-      )) {
-        return;
-      }
-      await _markDeleting(txn, ProgrammeTables.ressource, ressourceId, nowMs);
-      final chapitreId = row['chapitre_id'] as String;
-      await _enqueue(
-        txn,
-        ProgrammeOutbox.ressourceEntry(ressourceId),
-        ProgrammeOutbox.ressourceType,
-        chapitreId,
-        ChapitreRessourcePayload(
-          op: ProgrammePushOp.delete,
-          chapitreId: chapitreId,
-          ressource: _dtoOf(ChapitreRessourceRowMapper.toEntity(row)),
-        ).toJson(),
-        schoolId,
-        nowMs,
+        entryId: ProgrammeOutbox.ressourceEntry(ressourceId),
+        type: ProgrammeOutbox.ressourceType,
+        aggregateId: ressource.chapitreId,
+        payload: _ressourcePayload(ProgrammePushOp.delete, ressource),
+        schoolId: schoolId,
+        nowMs: nowMs,
+        authorId: authorId,
       );
     });
     await _blobs.delete(ressourceId);
   }
 
-  static ChapitreRessourceDto _dtoOf(ChapitreRessource r) =>
-      ChapitreRessourceDto(
-        id: r.id,
-        type: r.type.wireValue,
-        nom: r.nom,
-        url: r.url,
-        reference: r.reference,
-        taille: r.taille,
-        sha256: r.sha256,
-        mimeType: r.mimeType,
-        fileName: r.fileName,
-      );
+  static Map<String, Object?> _ressourcePayload(
+    ProgrammePushOp op,
+    ChapitreRessource r,
+  ) => ChapitreRessourcePayload(
+    op: op,
+    chapitreId: r.chapitreId,
+    ressource: ChapitreRessourceDto(
+      id: r.id,
+      type: r.type.wireValue,
+      nom: r.nom,
+      url: r.url,
+      reference: r.reference,
+      taille: r.taille,
+      sha256: r.sha256,
+      mimeType: r.mimeType,
+      fileName: r.fileName,
+    ),
+  ).toJson();
 
   static Future<Map<String, Object?>?> _row(
     DatabaseExecutor txn,
@@ -197,51 +190,27 @@ class ChapitreChildrenWriteDao {
     whereArgs: [id],
   )).firstOrNull;
 
-  /// Un ajout jamais accusé (en attente ou refusé) : la ligne part, l'ajout
-  /// est neutralisé, rien ne part au serveur.
-  static Future<bool> _dropIfLocalOnly(
+  /// Jamais accusé (en attente ou refusé) : la ligne part. Accusé : elle est
+  /// masquée jusqu'à l'accusé de son retrait.
+  static Future<void> _retire(
     DatabaseExecutor txn,
     String table,
     Map<String, Object?> row,
-    String entryId,
+    int nowMs,
   ) async {
-    if (row['sync_status'] == SyncState.synced.dbValue) return false;
-    await ProgrammeOutbox.neutralize(txn, [entryId]);
-    await txn.delete(table, where: 'id = ?', whereArgs: [row['id']]);
-    return true;
+    if (row['sync_status'] != SyncState.synced.dbValue) {
+      await txn.delete(table, where: 'id = ?', whereArgs: [row['id']]);
+      return;
+    }
+    await txn.update(
+      table,
+      {
+        'deleted_at': EpochIsoHelper.toIso(nowMs),
+        'sync_status': SyncState.pendingSync.dbValue,
+        'updated_at': nowMs,
+      },
+      where: 'id = ?',
+      whereArgs: [row['id']],
+    );
   }
-
-  static Future<void> _markDeleting(
-    DatabaseExecutor txn,
-    String table,
-    String id,
-    int nowMs,
-  ) => txn.update(
-    table,
-    {
-      'deleted_at': programmeInstant(nowMs),
-      'sync_status': SyncState.pendingSync.dbValue,
-      'updated_at': nowMs,
-    },
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-
-  static Future<void> _enqueue(
-    DatabaseExecutor txn,
-    String entryId,
-    String type,
-    String chapitreId,
-    Map<String, Object?> payload,
-    String? schoolId,
-    int nowMs,
-  ) => enqueueProgrammeGesture(
-    txn,
-    entryId: entryId,
-    type: type,
-    aggregateId: chapitreId,
-    payload: payload,
-    schoolId: schoolId,
-    nowMs: nowMs,
-  );
 }

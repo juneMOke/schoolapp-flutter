@@ -34,6 +34,13 @@ class FakeProgrammeBlobs implements ProgrammeBlobs {
   Future<void> delete(String ressourceId) async => files.remove(ressourceId);
 
   @override
+  Future<void> deleteAll(Iterable<String> ressourceIds) async {
+    for (final id in ressourceIds) {
+      files.remove(id);
+    }
+  }
+
+  @override
   Future<int> reclaimOrphans() async {
     reclaims++;
     return 0;

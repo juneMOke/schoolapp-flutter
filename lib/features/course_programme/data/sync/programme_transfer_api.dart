@@ -23,15 +23,17 @@ class ProgrammeTransferApi {
 
   /// Joint la ressource décrite par [payload] ; [bytes] seulement pour un
   /// document — un lien ou une référence de manuel part sans fichier.
+  /// [metadata] : la partie `metadata`, auteur compris.
   Future<void> putRessource(
     Map<String, dynamic> extras,
     ChapitreRessourcePayload payload, {
+    required Map<String, Object?> metadata,
     Uint8List? bytes,
   }) async {
     final ressource = payload.ressource;
     final form = FormData.fromMap({
       'metadata': MultipartFile.fromString(
-        jsonEncode(payload.toMetadata()),
+        jsonEncode(metadata),
         contentType: DioMediaType('application', 'json'),
       ),
       if (bytes != null)

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -7,8 +9,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 ///
 /// Un geste remplace l'entrée encore en attente du même objet : la fiche d'un
 /// chapitre n'attend jamais qu'une fois (son dernier état), et sa suppression
-/// remplace une fiche jamais partie ; l'ordre d'un cours n'attend qu'une
-/// liste ; l'ajout puis le retrait d'une note jamais envoyée n'en font qu'un.
+/// remplace une fiche en attente ; l'ordre d'un cours n'attend qu'une liste.
 class ProgrammeOutbox {
   ProgrammeOutbox._();
 
@@ -63,35 +64,56 @@ class ProgrammeOutbox {
     return rows.isNotEmpty;
   }
 
-  /// Neutralise les entrées [ids] qui n'ont plus rien à pousser (l'objet
-  /// n'existera jamais côté serveur), quel que soit leur statut.
-  static Future<void> neutralize(DatabaseExecutor db, List<String> ids) async {
+  /// Retire de la file les entrées [ids], devenues sans objet.
+  ///
+  /// **Supprimées, et non passées « acquittées »** : une entrée en vol que le
+  /// moteur reprogramme ensuite (`reschedule` ne regarde que l'identifiant et
+  /// le `created_at`) repasserait en attente et ressusciterait le geste.
+  /// Supprimée, elle ne laisse rien à reprogrammer.
+  static Future<void> discard(DatabaseExecutor db, List<String> ids) async {
     if (ids.isEmpty) return;
     final marks = List.filled(ids.length, '?').join(', ');
-    await db.update(
-      OutboxDao.table,
-      {'status': OutboxStatus.acked.dbValue},
-      where: 'id IN ($marks) AND status <> ?',
-      whereArgs: [...ids, OutboxStatus.acked.dbValue],
-    );
+    await db.delete(OutboxDao.table, where: 'id IN ($marks)', whereArgs: ids);
   }
 
-  /// Neutralise les gestes en attente des notes et ressources de
-  /// [chapitreId] : le chapitre part, le serveur les emporte avec lui.
-  static Future<void> neutralizeChildren(
-    DatabaseExecutor db,
-    String chapitreId,
-  ) async {
+  /// Retire de la file les gestes des notes et ressources de [chapitreId] :
+  /// le chapitre part, le serveur les emporte avec lui.
+  static Future<void> discardChildren(DatabaseExecutor db, String chapitreId) =>
+      db.delete(
+        OutboxDao.table,
+        where: 'aggregate_type IN (?, ?) AND aggregate_id = ?',
+        whereArgs: [noteType, ressourceType, chapitreId],
+      );
+
+  /// Retire [chapitreId] du geste d'ordre de [coursId] encore en attente :
+  /// le serveur refuserait (409) une liste qui cite un chapitre qu'il ne
+  /// connaîtra jamais — indéfiniment.
+  static Future<void> detachFromOrdre(
+    DatabaseExecutor db, {
+    required String coursId,
+    required String chapitreId,
+  }) async {
+    final entryId = ordreEntry(coursId);
+    final rows = await db.query(
+      OutboxDao.table,
+      columns: ['payload'],
+      where: 'id = ? AND status <> ?',
+      whereArgs: [entryId, OutboxStatus.acked.dbValue],
+    );
+    if (rows.isEmpty) return;
+    final payload = jsonDecode(rows.single['payload'] as String);
+    if (payload is! Map<String, dynamic>) return;
+    final ids = payload['chapitreIds'];
+    if (ids is! List || !ids.contains(chapitreId)) return;
+    payload['chapitreIds'] = [
+      for (final id in ids)
+        if (id != chapitreId) id,
+    ];
     await db.update(
       OutboxDao.table,
-      {'status': OutboxStatus.acked.dbValue},
-      where: 'aggregate_type IN (?, ?) AND aggregate_id = ? AND status <> ?',
-      whereArgs: [
-        noteType,
-        ressourceType,
-        chapitreId,
-        OutboxStatus.acked.dbValue,
-      ],
+      {'payload': jsonEncode(payload)},
+      where: 'id = ?',
+      whereArgs: [entryId],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -109,10 +110,10 @@ void main() {
 
     expect(await row('a'), isNull);
     final entries = await outboxById(db);
-    expect(
-      entries[ProgrammeOutbox.chapitreEntry('a')]!.status,
-      OutboxStatus.acked,
-    );
+    // Le geste part quand même : une fiche en vol a pu être écrite.
+    final gesture = entries[ProgrammeOutbox.chapitreEntry('a')]!;
+    expect(gesture.status, OutboxStatus.pending);
+    expect(jsonDecode(gesture.payload)['op'], 'delete');
     final eval = (await db.query('evaluation')).single;
     expect(eval['chapitre_ids_json'], '["z"]');
     final evalEntry =
@@ -123,7 +124,6 @@ void main() {
       ).evaluation.chapitreIds,
       ['z'],
     );
-    expect(blobs.reclaims, 1);
   });
 
   test('supprimer un chapitre connu le masque et remplace sa fiche en '
@@ -148,10 +148,29 @@ void main() {
     final chapitreEntry = entries[ProgrammeOutbox.chapitreEntry('a')]!;
     expect(chapitreEntry.status, OutboxStatus.pending);
     expect(jsonDecode(chapitreEntry.payload)['op'], 'delete');
-    expect(
-      entries[ProgrammeOutbox.noteEntry('n-1')]!.status,
-      OutboxStatus.acked,
+    expect(entries.containsKey(ProgrammeOutbox.noteEntry('n-1')), isFalse);
+  });
+
+  test('un chapitre supprimé quitte l\'ordre en attente', () async {
+    await dao.saveChapitre(chapitre('a'), schoolId: null, nowMs: 1);
+    await dao.saveChapitre(chapitre('b'), schoolId: null, nowMs: 2);
+    await dao.reorder('c-1', ['b', 'a'], schoolId: null, nowMs: 3);
+
+    await dao.deleteChapitre('a', schoolId: null, nowMs: 4);
+
+    final ordre = (await outboxById(db))[ProgrammeOutbox.ordreEntry('c-1')]!;
+    expect(jsonDecode(ordre.payload)['chapitreIds'], ['b']);
+  });
+
+  test('le geste porte son auteur à la racine', () async {
+    await dao.saveChapitre(
+      chapitre('a'),
+      schoolId: null,
+      nowMs: 1,
+      authorId: 'u-1',
     );
+    final entry = (await outboxById(db))[ProgrammeOutbox.chapitreEntry('a')]!;
+    expect(outboxAuthorUidOf(entry.payload), 'u-1');
   });
 
   test('réordonner range les rangs et met la liste en file', () async {
