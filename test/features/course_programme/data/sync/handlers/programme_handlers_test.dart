@@ -148,7 +148,7 @@ void main() {
       expect((await db.query('chapitre')).single['sync_status'], 'SYNC_ERROR');
     });
 
-    test('le corps porte l\'auteur du geste', () async {
+    test('le corps suit le contrat : {authorId, chapitre: fiche}', () async {
       when(() => api.saveChapitre(extras, any())).thenThrow(_dio(500));
       final entry = OutboxEntry(
         id: 'CHAPITRE:ch-1',
@@ -163,7 +163,34 @@ void main() {
       final body =
           verify(() => api.saveChapitre(extras, captureAny())).captured.single
               as Map;
+      expect(body.keys, unorderedEquals(['authorId', 'chapitre']));
       expect(body['authorId'], 'u-1');
+      expect((body['chapitre'] as Map)['id'], 'ch-1');
+      expect((body['chapitre'] as Map)['titre'], save.fiche['titre']);
+    });
+
+    test('une suppression porte son auteur en paramètre', () async {
+      when(
+        () => api.deleteChapitre(extras, 'ch-1', 'u-1'),
+      ).thenAnswer((_) async {});
+      final result = await handler.dispatch(
+        OutboxEntry(
+          id: 'CHAPITRE:ch-1',
+          aggregateType: ProgrammeOutbox.chapitreType,
+          aggregateId: 'ch-1',
+          operation: OutboxOperation.upsert,
+          payload: jsonEncode({
+            ...ChapitreFichePayload.delete(
+              chapitreId: 'ch-1',
+              coursId: 'c-1',
+            ).toJson(),
+            'authorId': 'u-1',
+          }),
+          createdAt: 1,
+        ),
+      );
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      verify(() => api.deleteChapitre(extras, 'ch-1', 'u-1')).called(1);
     });
 
     test('404 nu sur un enregistrement : refus, rien n\'est effacé', () async {
@@ -192,7 +219,9 @@ void main() {
         'server_known': 1,
         'deleted_at': '2026-10-05T08:00:00.000Z',
       });
-      when(() => api.deleteChapitre(extras, 'ch-1')).thenThrow(_dio(422));
+      when(
+        () => api.deleteChapitre(extras, 'ch-1', any()),
+      ).thenThrow(_dio(422));
       final result = await handler.dispatch(
         entryOf(
           ProgrammeOutbox.chapitreType,
@@ -211,7 +240,9 @@ void main() {
     test(
       'un retrait sur un chapitre inconnu du serveur (404) est acquis',
       () async {
-        when(() => api.deleteChapitre(extras, 'ch-1')).thenThrow(_dio(404));
+        when(
+          () => api.deleteChapitre(extras, 'ch-1', any()),
+        ).thenThrow(_dio(404));
         final result = await handler.dispatch(
           entryOf(
             ProgrammeOutbox.chapitreType,
@@ -271,6 +302,22 @@ void main() {
       );
       expect(result.outcome, OutboxDispatchOutcome.blocked);
       verifyNever(() => api.addNote(any(), any()));
+    });
+
+    test('le corps suit le contrat : {authorId, note}', () async {
+      await db.update('chapitre', {'server_known': 1});
+      when(() => api.addNote(extras, any())).thenAnswer((_) async {});
+      await notes.dispatch(
+        entryOf(ProgrammeOutbox.noteType, {
+          ...note.toJson(),
+          'authorId': 'u-1',
+        }),
+      );
+      final body =
+          verify(() => api.addNote(extras, captureAny())).captured.single
+              as Map;
+      expect(body.keys, unorderedEquals(['authorId', 'note']));
+      expect((body['note'] as Map)['texte'], note.texte);
     });
 
     test('409 CHAPITRE_NOT_YET_SYNCED : attente, pas refus', () async {

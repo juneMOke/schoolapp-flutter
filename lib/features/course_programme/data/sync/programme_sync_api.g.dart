@@ -94,10 +94,12 @@ class _ProgrammeSyncApi implements ProgrammeSyncApi {
   Future<void> deleteChapitre(
     Map<String, dynamic> extras,
     String chapitreId,
+    String? authorId,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'authorId': authorId};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
@@ -171,10 +173,15 @@ class _ProgrammeSyncApi implements ProgrammeSyncApi {
   }
 
   @override
-  Future<void> deleteNote(Map<String, dynamic> extras, String noteId) async {
+  Future<void> deleteNote(
+    Map<String, dynamic> extras,
+    String noteId,
+    String? authorId,
+  ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'authorId': authorId};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(
@@ -195,10 +202,12 @@ class _ProgrammeSyncApi implements ProgrammeSyncApi {
     Map<String, dynamic> extras,
     String chapitreId,
     String ressourceId,
+    String? authorId,
   ) async {
     final _extra = <String, dynamic>{};
     _extra.addAll(extras);
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'authorId': authorId};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<void>(

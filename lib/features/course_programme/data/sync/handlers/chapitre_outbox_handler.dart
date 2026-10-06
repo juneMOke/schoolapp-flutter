@@ -70,7 +70,7 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
         case ProgrammePushOp.save:
           final ack = await _api.saveChapitre(
             _extras,
-            withOutboxAuthor(payload.fiche, entry),
+            outboxEnvelope('chapitre', payload.fiche, entry),
           );
           await _dao.applyFicheAck(
             ack,
@@ -78,7 +78,11 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
             nowMs: _now(),
           );
         case ProgrammePushOp.delete:
-          await _api.deleteChapitre(_extras, payload.chapitreId);
+          await _api.deleteChapitre(
+            _extras,
+            payload.chapitreId,
+            outboxAuthorOf(entry),
+          );
           await _dao.removeChapitre(payload.chapitreId);
       }
       return const OutboxDispatchResult.acked();

@@ -91,5 +91,10 @@ class ChapitreRessourceOutboxHandler
   Future<void> sendDelete(
     ChapitreRessourcePayload payload,
     OutboxEntry entry,
-  ) => _api.deleteRessource(extras, payload.chapitreId, payload.ressource.id);
+  ) => _api.deleteRessource(
+    extras,
+    payload.chapitreId,
+    payload.ressource.id,
+    outboxAuthorOf(entry),
+  );
 }

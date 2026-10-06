@@ -8,6 +8,21 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 /// Le corps d'une requête, l'auteur du geste à sa racine — la valeur que la
 /// garde d'attribution du serveur compare au jeton.
+/// L'auteur d'une entrée, `null` si elle n'en porte pas — pour les routes
+/// qui le prennent en paramètre (`?authorId=`, les suppressions).
+String? outboxAuthorOf(OutboxEntry entry) {
+  final author = outboxAuthorUidOf(entry.payload);
+  return author == kUnattributedOutboxAuthor ? null : author;
+}
+
+/// Le corps enveloppé du contrat : `{authorId, <key>: body}` — la fiche sous
+/// `chapitre`, la note sous `note` (comme `{authorId, expense}`).
+Map<String, Object?> outboxEnvelope(
+  String key,
+  Map<String, Object?> body,
+  OutboxEntry entry,
+) => withOutboxAuthor({key: body}, entry);
+
 Map<String, Object?> withOutboxAuthor(
   Map<String, Object?> body,
   OutboxEntry entry,

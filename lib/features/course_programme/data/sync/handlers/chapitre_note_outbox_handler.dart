@@ -44,11 +44,11 @@ class ChapitreNoteOutboxHandler
     ChapitreNotePayload payload,
     OutboxEntry entry,
   ) async {
-    await _api.addNote(extras, withOutboxAuthor(payload.toBody(), entry));
+    await _api.addNote(extras, outboxEnvelope('note', payload.toBody(), entry));
     return null;
   }
 
   @override
   Future<void> sendDelete(ChapitreNotePayload payload, OutboxEntry entry) =>
-      _api.deleteNote(extras, payload.id);
+      _api.deleteNote(extras, payload.id, outboxAuthorOf(entry));
 }

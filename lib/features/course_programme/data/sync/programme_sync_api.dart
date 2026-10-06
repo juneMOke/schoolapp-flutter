@@ -36,6 +36,7 @@ abstract class ProgrammeSyncApi {
   Future<void> deleteChapitre(
     @Extras() Map<String, dynamic> extras,
     @Path('chapitreId') String chapitreId,
+    @Query('authorId') String? authorId,
   );
 
   /// Réordonner les chapitres d'un cours ; rend l'ordre retenu.
@@ -58,6 +59,7 @@ abstract class ProgrammeSyncApi {
   Future<void> deleteNote(
     @Extras() Map<String, dynamic> extras,
     @Path('noteId') String noteId,
+    @Query('authorId') String? authorId,
   );
 
   /// Retirer une ressource — 204, rejouable.
@@ -66,5 +68,6 @@ abstract class ProgrammeSyncApi {
     @Extras() Map<String, dynamic> extras,
     @Path('chapitreId') String chapitreId,
     @Path('ressourceId') String ressourceId,
+    @Query('authorId') String? authorId,
   );
 }
