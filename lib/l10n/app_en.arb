@@ -1830,6 +1830,7 @@
   "sujetRejectedQuestionMismatch": "The server refused the subject: a question already belongs to another assessment. Edit the subject, then save it.",
   "sujetRejectedGeneric": "The server refused the subject. Edit it, then save it.",
   "sujetResendWithoutMax": "Resend without changing the maximum",
+  "sujetPendingSend": "Waiting to be sent",
   "copieSectionTitle": "Copy",
   "copiePrintedTimes": "{count, plural, =0{Never printed} =1{Printed once} other{Printed {count} times}}",
   "@copiePrintedTimes": {

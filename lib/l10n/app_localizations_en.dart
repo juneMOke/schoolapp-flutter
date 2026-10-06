@@ -2119,6 +2119,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sujetResendWithoutMax => 'Resend without changing the maximum';
 
   @override
+  String get sujetPendingSend => 'Waiting to be sent';
+
+  @override
   String get copieSectionTitle => 'Copy';
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -68,6 +69,13 @@ class _SujetSectionState extends State<SujetSection> {
         dureeMinutes: sujet.cadre.dureeMinutes,
       ),
       trailing: [
+        if (sujet.envoi == SujetEnvoi.enAttente)
+          NotationPill(
+            color: AppColors.textSecondary,
+            soft: AppColors.surfaceAlt,
+            icon: Icons.cloud_upload_outlined,
+            label: l10n.sujetPendingSend,
+          ),
         if (!sujet.isEmpty && status != BaremeStatus.complete)
           NotationPill(
             color: visual.color,

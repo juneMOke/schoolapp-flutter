@@ -101,6 +101,30 @@ void main() {
       expect(byId['s2']!.statut, isNull);
     });
 
+    test(
+      'une note refusée porte son motif ; les autres n’en ont pas',
+      () async {
+        await db.insert('note_evaluation', {
+          'id': 'nx',
+          'evaluation_id': 'ev-1',
+          'student_id': 's1',
+          'points_obtenus': 14.5,
+          'statut': 'NOTEE',
+          'updated_at': 10,
+          'sync_status': 'SYNC_ERROR',
+          'rejection_reason': 'PERIODE_CLOSE',
+        });
+
+        final eleves = (await repo.getNotesEleves(
+          'ev-1',
+        )).getOrElse(() => fail('Left'));
+
+        final byId = {for (final e in eleves) e.studentId: e};
+        expect(byId['s1']!.rejectionReason, 'PERIODE_CLOSE');
+        expect(byId['s2']!.rejectionReason, isNull);
+      },
+    );
+
     test('évaluation absente → NotFoundFailure', () async {
       final result = await repo.getNotesEleves('inconnue');
       expect(result.isLeft(), isTrue);

@@ -20,6 +20,11 @@ class NoteEleve extends Equatable {
   /// `null` tant qu'aucune saisie n'existe pour cet élève.
   final StatutNote? statut;
 
+  /// Motif du refus de la note par le serveur (`NoteLineOutcome.reason`) ;
+  /// `null` tant qu'elle n'a pas été refusée. La ligne le signale, la note
+  /// n'est jamais perdue en silence.
+  final String? rejectionReason;
+
   const NoteEleve({
     required this.studentId,
     required this.firstName,
@@ -27,6 +32,7 @@ class NoteEleve extends Equatable {
     this.middleName,
     this.pointsObtenus,
     this.statut,
+    this.rejectionReason,
   });
 
   @override
@@ -37,5 +43,6 @@ class NoteEleve extends Equatable {
     middleName,
     pointsObtenus,
     statut,
+    rejectionReason,
   ];
 }

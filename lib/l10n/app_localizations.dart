@@ -3314,6 +3314,12 @@ abstract class AppLocalizations {
   /// **'Resend without changing the maximum'**
   String get sujetResendWithoutMax;
 
+  /// No description provided for @sujetPendingSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get sujetPendingSend;
+
   /// No description provided for @copieSectionTitle.
   ///
   /// In en, this message translates to:
