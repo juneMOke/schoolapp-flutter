@@ -18,6 +18,7 @@ void main() {
     Perm.enrollmentWrite: 'enrollment.write',
     Perm.enrollmentDelete: 'enrollment.delete',
     Perm.enrollmentStatsRead: 'enrollment.stats.read',
+    Perm.enrollmentSuspend: 'enrollment.suspend',
     Perm.financeChargeRead: 'finance.charge.read',
     Perm.financeChargeWrite: 'finance.charge.write',
     Perm.financeChargeDelete: 'finance.charge.delete',
@@ -93,7 +94,7 @@ void main() {
   };
 
   test(
-    'le catalogue compte 76 permissions (v1.8 du catalogue serveur + RH + programme + publication)',
+    'le catalogue compte 77 permissions (v1.8 du catalogue serveur + RH + programme + publication + désactivation)',
     () {
       // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
       // le prendre. Un ajout, pas un renommage — aucune ligne de
@@ -156,7 +157,9 @@ void main() {
       // `academics.publication.manage` (toute l'école), publier aux parents.
       // 72 → 73 : `student.photo.write`, prendre ou retirer la photo d'un élève
       // (SECRETARY, DIRECTOR, SUPER_ADMIN — migration back V161).
-      expect(Perm.values, hasLength(76));
+      // 76 → 77 : `enrollment.suspend`, désactiver ou réactiver un élève
+      // (SECRETARY, DIRECTOR — migration back V170).
+      expect(Perm.values, hasLength(77));
     },
   );
 

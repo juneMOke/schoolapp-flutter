@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/database/schema/configuration_offline_sc
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/enrollment_suspension_schema.dart';
 import 'package:school_app_flutter/core/database/schema/expense_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
@@ -120,4 +121,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...payrollTables, // RH — paie du personnel
   ...studentPhotoTables, // Photo de l'élève — miroir du flux et geste en attente
   ...courseProgrammeTables, // Cours ▸ Mes cours — le programme (chapitres)
+  ...enrollmentSuspensionTables, // Inscriptions — désactivation d'élèves
 ];
