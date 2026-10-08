@@ -1218,13 +1218,19 @@ class AppConstants {
       '/api/v1/sync/classroom-transfers';
 
   /// Désactivation d'élèves (flux `enrollment.suspensions`) :
-  ///  - **POST** = un geste (`SUSPEND` | `REACTIVATE`) identifié par son uuid,
-  ///    rejouable ; le corps rendu est l'état canonique de l'inscription
-  ///    (`enrollment.suspend`). Refus en 422, jamais en 409 ;
+  ///  - **POST** = désactiver, geste identifié par son uuid, rejouable ; le
+  ///    corps rendu est l'état canonique de l'inscription
+  ///    (`enrollment.suspend`). 409 `ENROLLMENT_NOT_YET_SYNCED` = attente,
+  ///    422 = refus terminal ;
   ///  - **GET** = pull KEYSET des périodes de l'année, ouvertes et fermées
   ///    (`enrollment.read`).
   static const String syncEnrollmentSuspensionsEndpoint =
       '/api/v1/sync/enrollment-suspensions';
+
+  /// Réactiver un élève désactivé : ferme la période ouverte de l'inscription,
+  /// quelle que soit la tablette qui l'a posée (`enrollment.suspend`).
+  static const String syncEnrollmentReactivationsEndpoint =
+      '/api/v1/sync/enrollment-suspensions/reactivations';
 
   /// Volet Discipline offline (contrat openapi_discipline_sync 1.1.0) :
   ///  - **POST** = push de l'agrégat `{case, comments[]}` (upsert 200) : le FAIT

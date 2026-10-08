@@ -179,6 +179,10 @@ abstract final class SyncPlanKeys {
   /// `student.read`. Les octets ne descendent pas : ils se téléchargent à
   /// l'affichage ou au préchargement des vignettes.
   static const String studentPhotos = 'student.photos';
+
+  /// Les périodes de désactivation des élèves (ouvertes et fermées), accordées
+  /// par `enrollment.read`.
+  static const String enrollmentSuspensions = 'enrollment.suspensions';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -224,6 +228,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.hrSalaryAdvances: ['salary_advances'],
   SyncPlanKeys.hrPayrollDisbursements: ['payroll_disbursements'],
   SyncPlanKeys.studentPhotos: ['student_photos'],
+  SyncPlanKeys.enrollmentSuspensions: ['enrollment_suspensions'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -337,4 +342,5 @@ const Set<String> _kCursorKeyPrefixes = {
   'enrollment_reenrollment_cohort',
   // Cadré par l'école du jeton, comme les flux RH.
   'student_photos',
+  'enrollment_suspensions',
 };

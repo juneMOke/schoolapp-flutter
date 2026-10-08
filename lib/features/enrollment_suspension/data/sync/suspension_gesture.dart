@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/suspension_reason.dart';
 
 /// Les deux gestes d'une désactivation.
@@ -65,17 +66,12 @@ class SuspensionGesture extends Equatable {
   static SuspensionGesture? tryParse(Object? json) {
     if (json is! Map) return null;
     final op = SuspensionGestureOp.fromWire(json['op']);
-    String? text(String key) {
-      final value = json[key];
-      return value is String && value.isNotEmpty ? value : null;
-    }
-
-    final id = text('id');
-    final enrollmentId = text('enrollmentId');
-    final studentId = text('studentId');
-    final yearId = text('academicYearId');
-    final at = text('at');
-    final authorId = text('authorId');
+    final id = json.text('id');
+    final enrollmentId = json.text('enrollmentId');
+    final studentId = json.text('studentId');
+    final yearId = json.text('academicYearId');
+    final at = json.text('at');
+    final authorId = json.text('authorId');
     if (op == null ||
         id == null ||
         enrollmentId == null ||
@@ -93,8 +89,8 @@ class SuspensionGesture extends Equatable {
       academicYearId: yearId,
       at: at,
       authorId: authorId,
-      reason: SuspensionReason.fromWire(text('reason')),
-      precision: text('precision'),
+      reason: SuspensionReason.fromWire(json.text('reason')),
+      precision: json.text('precision'),
     );
   }
 
