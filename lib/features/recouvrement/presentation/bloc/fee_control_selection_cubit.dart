@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/helpers/selection_sets.dart';
 
 /// Ce que le percepteur **désigne** pendant sa séance : les élèves cochés, et
 /// ceux qu'il a marqués « à renvoyer ».
@@ -36,26 +37,25 @@ class FeeControlSelectionState extends Equatable {
 class FeeControlSelectionCubit extends Cubit<FeeControlSelectionState> {
   FeeControlSelectionCubit() : super(const FeeControlSelectionState());
 
-  void toggle(String studentId) {
-    final next = Set<String>.from(state.selected);
-    if (!next.remove(studentId)) next.add(studentId);
-    emit(FeeControlSelectionState(selected: next, marked: state.marked));
-  }
+  void toggle(String studentId) => emit(
+    FeeControlSelectionState(
+      selected: SelectionSets.toggled(state.selected, studentId),
+      marked: state.marked,
+    ),
+  );
 
   /// Coche **toute la page visible**, ou la décoche si elle l'est déjà en
   /// entier. Le geste ne porte jamais au-delà des lignes affichées : cocher
   /// vingt et un élèves d'un clic sur une page qui en montre dix ferait signer
   /// une liste qu'on n'a pas lue.
   void togglePage(Iterable<String> pageIds) {
-    final ids = pageIds.toSet();
-    if (ids.isEmpty) return;
-    final next = Set<String>.from(state.selected);
-    if (ids.every(next.contains)) {
-      next.removeAll(ids);
-    } else {
-      next.addAll(ids);
-    }
-    emit(FeeControlSelectionState(selected: next, marked: state.marked));
+    if (pageIds.isEmpty) return;
+    emit(
+      FeeControlSelectionState(
+        selected: SelectionSets.pageToggled(state.selected, pageIds),
+        marked: state.marked,
+      ),
+    );
   }
 
   void clearSelection() {
@@ -71,11 +71,12 @@ class FeeControlSelectionCubit extends Cubit<FeeControlSelectionState> {
   }
 
   /// Bascule un seul élève — le geste du pied de fiche.
-  void toggleMark(String studentId) {
-    final next = Set<String>.from(state.marked);
-    if (!next.remove(studentId)) next.add(studentId);
-    emit(FeeControlSelectionState(selected: state.selected, marked: next));
-  }
+  void toggleMark(String studentId) => emit(
+    FeeControlSelectionState(
+      selected: state.selected,
+      marked: SelectionSets.toggled(state.marked, studentId),
+    ),
+  );
 
   void clearMarks() {
     if (state.marked.isEmpty) return;

@@ -42,6 +42,9 @@ EnrollmentSummary localItemToEnrollmentSummary(LocalEnrollmentListItem item) =>
       schoolLevelId: item.schoolLevelId,
       schoolLevelName: item.schoolLevelName,
       schoolLevelGroupName: item.schoolLevelGroupName,
+      academicYearId: item.academicYearId,
+      suspendedAt: item.suspendedAt,
+      suspensionReason: item.suspensionReason,
       student: StudentSummary(
         id: item.studentId,
         firstName: item.firstName,

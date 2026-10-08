@@ -15566,4 +15566,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
     return '$dateString';
   }
+
+  @override
+  String suspensionBannerTitle(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Student deactivated since $dateString';
+  }
+
+  @override
+  String get suspensionBannerEffects =>
+      'Hidden from roll calls, grade entry, billing and debt recovery.';
+
+  @override
+  String suspensionBannerRefused(String reason) {
+    return 'The reactivation was refused: $reason';
+  }
+
+  @override
+  String suspensionMemberAction(String name) {
+    return 'Deactivate $name';
+  }
+
+  @override
+  String suspensionDoneClasses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students deactivated · removed from the headcount',
+      one: 'Student deactivated · removed from the headcount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionNoEnrollment =>
+      'This student\'s enrollment file is not on the tablet: sync before deactivating them.';
+
+  @override
+  String suspendedSectionTitle(int count) {
+    return 'Deactivated students · $count';
+  }
+
+  @override
+  String get suspendedSectionSubtitle =>
+      'Out of the class headcount until they are reactivated.';
+
+  @override
+  String suspendedMemberLine(
+    String firstName,
+    String classroom,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$firstName · $classroom · since $dateString';
+  }
 }

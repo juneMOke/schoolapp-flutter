@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -27,6 +28,10 @@ class EnrollmentReadDao {
   /// `ref_school_level_groups` peuvent être vides tant que le pull du
   /// référentiel n'est pas descendu. Une jointure interne ferait alors
   /// **disparaître les dossiers** de toutes les listes.
+  ///
+  /// La période de désactivation ouverte (au plus une par inscription, index
+  /// unique partiel) vient aussi en `LEFT JOIN` : la ligne dit si l'élève est
+  /// désactivé, et depuis quand.
   static const String _listSelect = '''
     SELECT e.id AS enrollment_id, e.student_id AS student_id,
            e.enrollment_type AS enrollment_type, e.status AS enrollment_status,
@@ -38,11 +43,15 @@ class EnrollmentReadDao {
            slg.name AS school_level_group_name,
            s.first_name AS first_name, s.last_name AS last_name,
            s.surname AS surname, s.date_of_birth AS date_of_birth,
-           s.gender AS gender, s.matriculation_number AS matriculation_number
+           s.gender AS gender, s.matriculation_number AS matriculation_number,
+           e.academic_year_id AS academic_year_id,
+           es.suspended_at AS suspended_at, es.reason AS suspension_reason
     FROM enrollments e
     JOIN students s ON s.id = e.student_id
     LEFT JOIN ref_school_levels sl ON sl.id = e.school_level_id
     LEFT JOIN ref_school_level_groups slg ON slg.id = e.school_level_group_id
+    LEFT JOIN enrollment_suspensions es
+      ON es.enrollment_id = e.id AND es.reactivated_at IS NULL
   ''';
 
   LocalEnrollmentListItem _listItem(Map<String, Object?> r) =>
@@ -69,6 +78,11 @@ class EnrollmentReadDao {
         syncState: SyncState.fromDbValue(
           r['enrollment_sync_status'] as String?,
         ),
+        academicYearId: r['academic_year_id'] as String?,
+        suspendedAt: DateTime.tryParse(
+          r['suspended_at'] as String? ?? '',
+        )?.toLocal(),
+        suspensionReason: r['suspension_reason'] as String?,
       );
 
   /// Liste des dossiers, optionnellement filtrée par statut métier et/ou année
@@ -157,14 +171,20 @@ class EnrollmentReadDao {
   /// PENDING_SYNC au prochain envoi) — l'élève reste facturable entre-temps.
   /// Optionnellement bornée au groupe de niveau / niveau. Le raffinement
   /// nom/surnom reste client-side (projector).
+  ///
+  /// Les élèves désactivés en sont exclus : c'est la liste de travail de la
+  /// facturation, du recouvrement, de la boutique et de la répartition. Seul
+  /// [includeSuspended] les ramène (Documents).
   Future<List<LocalEnrollmentListItem>> searchEnrolledByAcademicInfo({
     required String academicYearId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    bool includeSuspended = false,
   }) async {
     final clauses = <String>[
       'e.academic_year_id = ?',
       'e.sync_status IN (?, ?, ?)',
+      if (!includeSuspended) EnrollmentSuspensionSql.notSuspended('e.id'),
     ];
     final args = <Object?>[
       academicYearId,

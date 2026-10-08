@@ -6,12 +6,15 @@ import 'package:school_app_flutter/core/components/avatars/person_avatar.dart'
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/core/components/status/sync_state_icon.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_row_selection.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_data_table_sorter.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_listing_tones.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_status_badge.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_suspension_marks.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentDataTable extends StatefulWidget {
@@ -85,10 +88,15 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
     List<EnrollmentSummary> sorted,
     bool isCompact,
   ) {
+    final selection = EnrollmentRowSelectionScope.of(context);
     return DataTableView(
-      rows: _buildRows(sorted, l10n, isCompact),
+      rows: _buildRows(sorted, l10n, isCompact, selection),
       config: DataTableViewConfig(
-        columns: _buildColumns(l10n, isCompact),
+        columns: [
+          // La case du mode sélection : une colonne en tête, étroite.
+          if (selection != null) const DataTableColumnDef(label: '', flex: 1),
+          ..._buildColumns(l10n, isCompact),
+        ],
         isLoading: widget.isLoading,
         isError: widget.isError,
         loadingLabel: widget.loadingLabel ?? l10n.loadingStudents,
@@ -169,12 +177,20 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
     List<EnrollmentSummary> enrollments,
     AppLocalizations l10n,
     bool isCompact,
+    EnrollmentRowSelection? selection,
   ) {
     return enrollments
         .map(
           (enrollment) => DataTableRowSpec(
             id: enrollment.enrollmentId,
             displayName: _studentFullName(enrollment),
+            // En mode sélection, toucher une ligne éligible la coche au lieu
+            // d'ouvrir la fiche.
+            onTap:
+                selection != null &&
+                    EnrollmentRowSelection.isEligible(enrollment)
+                ? () => selection.onToggle(enrollment)
+                : null,
             leading: core_avatar.PersonAvatar(
               firstName: enrollment.student.firstName,
               lastName: enrollment.student.lastName,
@@ -185,15 +201,27 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
                 EnrollmentStatus.fromString(enrollment.status),
               ),
             ),
-            cells: _buildCells(enrollment, isCompact, l10n),
-            trailing: DataTableTrailingSpec(
-              type: DataTableTrailingType.eye,
-              tooltip: l10n.viewDetails,
-              semanticLabel: l10n.openDetailsForStudent(
-                _studentFullName(enrollment),
-              ),
-              onTap: () => widget.onViewRequested(enrollment),
-            ),
+            cells: [
+              if (selection != null)
+                DataTableCellSpec(
+                  child: EnrollmentSuspensionMarks.checkbox(
+                    enrollment,
+                    selection,
+                    l10n,
+                  ),
+                ),
+              ..._buildCells(enrollment, isCompact, l10n),
+            ],
+            trailing: selection != null
+                ? const DataTableTrailingSpec()
+                : DataTableTrailingSpec(
+                    type: DataTableTrailingType.eye,
+                    tooltip: l10n.viewDetails,
+                    semanticLabel: l10n.openDetailsForStudent(
+                      _studentFullName(enrollment),
+                    ),
+                    onTap: () => widget.onViewRequested(enrollment),
+                  ),
           ),
         )
         .toList(growable: false);
@@ -212,6 +240,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
         DataTableCellSpec(
           text: _studentFullName(enrollment),
           variant: DataTableCellTextVariant.strong,
+          color: _identityColor(enrollment),
           secondaryText: formattedDate,
           secondaryVariant: DataTableCellTextVariant.mono,
         ),
@@ -223,6 +252,7 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
       DataTableCellSpec(
         text: _studentFullName(enrollment),
         variant: DataTableCellTextVariant.strong,
+        color: _identityColor(enrollment),
       ),
       DataTableCellSpec(
         text: formattedDate,
@@ -254,7 +284,9 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
             // sinon à tort un candidat PRE brut comme « À réinscrire »).
             // « À réinscrire » pour un candidat RE N-1 non commencé, sinon
             // statut métier générique — même logique que la carte grille.
-            child: enrollment.isReEnrollment
+            child: enrollment.isSuspended
+                ? EnrollmentSuspensionMarks.badge(enrollment, l10n)
+                : enrollment.isReEnrollment
                 ? StatusBadge.enrollmentReEnrollment(
                     label: enrollment.isLocalDraft
                         ? l10n.enrollmentStatusInProgress
@@ -304,6 +336,13 @@ class _EnrollmentDataTableState extends State<EnrollmentDataTable> {
       _sortAscending = ascending;
     });
   }
+
+  /// L'identité d'un élève désactivé s'estompe ; son statut reste écrit.
+  Color? _identityColor(EnrollmentSummary enrollment) => enrollment.isSuspended
+      ? AppColors.textPrimary.withValues(
+          alpha: EnrollmentSuspensionMarks.suspendedOpacity,
+        )
+      : null;
 
   String _studentFullName(EnrollmentSummary enrollment) {
     final parts = <String>[

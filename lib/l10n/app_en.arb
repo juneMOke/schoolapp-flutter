@@ -9413,5 +9413,20 @@
   "reactivationDone": "{count, plural, =1{Student reactivated} other{{count} students reactivated}}",
   "@reactivationDone": {"placeholders": {"count": {"type": "int"}}},
   "suspensionDate": "{date}",
-  "@suspensionDate": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}}
+  "@suspensionDate": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "suspensionBannerTitle": "Student deactivated since {date}",
+  "@suspensionBannerTitle": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "suspensionBannerEffects": "Hidden from roll calls, grade entry, billing and debt recovery.",
+  "suspensionBannerRefused": "The reactivation was refused: {reason}",
+  "@suspensionBannerRefused": {"placeholders": {"reason": {"type": "String"}}},
+  "suspensionMemberAction": "Deactivate {name}",
+  "@suspensionMemberAction": {"placeholders": {"name": {"type": "String"}}},
+  "suspensionDoneClasses": "{count, plural, =1{Student deactivated · removed from the headcount} other{{count} students deactivated · removed from the headcount}}",
+  "@suspensionDoneClasses": {"placeholders": {"count": {"type": "int"}}},
+  "suspensionNoEnrollment": "This student's enrollment file is not on the tablet: sync before deactivating them.",
+  "suspendedSectionTitle": "Deactivated students · {count}",
+  "@suspendedSectionTitle": {"placeholders": {"count": {"type": "int"}}},
+  "suspendedSectionSubtitle": "Out of the class headcount until they are reactivated.",
+  "suspendedMemberLine": "{firstName} · {classroom} · since {date}",
+  "@suspendedMemberLine": {"placeholders": {"firstName": {"type": "String"}, "classroom": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}}
 }

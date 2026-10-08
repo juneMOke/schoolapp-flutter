@@ -24409,6 +24409,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{date}'**
   String suspensionDate(DateTime date);
+
+  /// No description provided for @suspensionBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student deactivated since {date}'**
+  String suspensionBannerTitle(DateTime date);
+
+  /// No description provided for @suspensionBannerEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden from roll calls, grade entry, billing and debt recovery.'**
+  String get suspensionBannerEffects;
+
+  /// No description provided for @suspensionBannerRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The reactivation was refused: {reason}'**
+  String suspensionBannerRefused(String reason);
+
+  /// No description provided for @suspensionMemberAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate {name}'**
+  String suspensionMemberAction(String name);
+
+  /// No description provided for @suspensionDoneClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Student deactivated · removed from the headcount} other{{count} students deactivated · removed from the headcount}}'**
+  String suspensionDoneClasses(int count);
+
+  /// No description provided for @suspensionNoEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'This student\'s enrollment file is not on the tablet: sync before deactivating them.'**
+  String get suspensionNoEnrollment;
+
+  /// No description provided for @suspendedSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated students · {count}'**
+  String suspendedSectionTitle(int count);
+
+  /// No description provided for @suspendedSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of the class headcount until they are reactivated.'**
+  String get suspendedSectionSubtitle;
+
+  /// No description provided for @suspendedMemberLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{firstName} · {classroom} · since {date}'**
+  String suspendedMemberLine(String firstName, String classroom, DateTime date);
 }
 
 class _AppLocalizationsDelegate

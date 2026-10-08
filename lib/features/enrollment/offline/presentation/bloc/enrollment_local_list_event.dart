@@ -17,6 +17,17 @@ class LocalListRefreshRequested extends EnrollmentLocalListEvent {
   const LocalListRefreshRequested();
 }
 
+/// Montre ou masque les élèves désactivés (bascule « Afficher les
+/// désactivés »), sans relire la base ; retour en première page.
+class LocalListShowSuspendedChanged extends EnrollmentLocalListEvent {
+  final bool show;
+
+  const LocalListShowSuspendedChanged(this.show);
+
+  @override
+  List<Object?> get props => [show];
+}
+
 /// Change de page (pagination client-side sur le cache de la dernière requête).
 class LocalListPageRequested extends EnrollmentLocalListEvent {
   final int page;
@@ -290,6 +301,9 @@ class LocalListByEnrolledAcademicInfoRequested
   final int page;
   final int size;
 
+  /// Les élèves désactivés aussi (Documents) ; exclus par défaut.
+  final bool includeSuspended;
+
   const LocalListByEnrolledAcademicInfoRequested({
     required this.academicYearId,
     required this.firstName,
@@ -299,6 +313,7 @@ class LocalListByEnrolledAcademicInfoRequested
     required this.schoolLevelId,
     this.page = 0,
     this.size = AppConstants.enrollmentDefaultPageSize,
+    this.includeSuspended = false,
   });
 
   @override
@@ -311,5 +326,6 @@ class LocalListByEnrolledAcademicInfoRequested
     schoolLevelId,
     page,
     size,
+    includeSuspended,
   ];
 }

@@ -750,6 +750,31 @@ void main() {
       await seedPendingEnrollment(parents: [parent()], document: doc());
     });
 
+    test('la ligne dit si l\'élève est désactivé, et depuis quand', () async {
+      expect((await readDao.getEnrollments()).single.suspendedAt, isNull);
+      Future<void> period(String id, {String? reactivatedAt}) =>
+          db.insert('enrollment_suspensions', {
+            'id': id,
+            'school_id': 'school-1',
+            'enrollment_id': 'e1',
+            'student_id': 's1',
+            'academic_year_id': 'y1',
+            'suspended_at': '2026-10-02T08:00:00Z',
+            'reason': 'MEDICAL',
+            'reactivated_at': reactivatedAt,
+            'reactivation_id': reactivatedAt == null ? null : 'r-$id',
+            'reactivated_by': reactivatedAt == null ? null : 'u',
+            'updated_at': 1,
+          });
+      await period('old', reactivatedAt: '2026-10-01T08:00:00Z');
+      expect((await readDao.getEnrollments()).single.suspendedAt, isNull);
+
+      await period('open');
+      final item = (await readDao.getEnrollments()).single;
+      expect(item.suspendedAt!.toUtc(), DateTime.utc(2026, 10, 2, 8));
+      expect(item.suspensionReason, 'MEDICAL');
+    });
+
     test('getEnrollments + filtre par statut', () async {
       expect(await readDao.getEnrollments(), hasLength(1));
       expect(await readDao.getEnrollments(status: 'IN_PROGRESS'), hasLength(1));
@@ -909,6 +934,32 @@ void main() {
         isEmpty,
       );
     });
+
+    test(
+      'les élèves désactivés en sont exclus, sauf demande expresse',
+      () async {
+        await db.insert('enrollment_suspensions', {
+          'id': 'p-e3',
+          'school_id': 'school-1',
+          'enrollment_id': 'e3',
+          'student_id': 's3',
+          'academic_year_id': 'ay-2026',
+          'suspended_at': '2026-10-02T08:00:00Z',
+          'updated_at': 1,
+        });
+
+        final working = await readDao.searchEnrolledByAcademicInfo(
+          academicYearId: 'ay-2026',
+        );
+        expect(working.map((r) => r.studentId).toSet(), {'s1', 's4'});
+
+        final all = await readDao.searchEnrolledByAcademicInfo(
+          academicYearId: 'ay-2026',
+          includeSuspended: true,
+        );
+        expect(all.map((r) => r.studentId).toSet(), {'s1', 's3', 's4'});
+      },
+    );
 
     test('borné au niveau quand fourni', () async {
       expect(

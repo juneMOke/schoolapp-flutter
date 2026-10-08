@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/first_registration_search_form.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/search_form/search_form_status_options.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/suspension/first_registration_suspension.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
@@ -65,78 +66,90 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
               ),
             ),
       floatingActionButtonLocation: const EndFloatEdgeOffsetFabLocation(),
-      child: EnrollmentListingPageScaffold(
-        readyKey: 'first-reg-content',
-        bootstrapBuilder: (context, onReady) =>
-            EnrollmentCurrentYearBootstrapBuilder(
-              status: _effectiveStatus,
-              onReady: (context, screenCtx) => onReady(
-                context,
-                EnrollmentScreenContext(
-                  schoolId: screenCtx.schoolId,
-                  academicYearId: screenCtx.academicYearId,
-                  isLoading: screenCtx.isLoading,
-                  onRefreshRequested: screenCtx.onRefreshRequested,
-                  preferredViewMode: _preferredViewMode,
-                  onSortToggled: _onSortToggled,
-                  onViewModeChanged: _onViewModeChanged,
-                  onResetSearchRequested: _onResetSearch,
-                  onCreateEnrollmentRequested: () =>
-                      _openNewEnrollment(context),
-                  onReconnectRequested: () {
-                    context.read<AuthBloc>().add(const AuthLogoutRequested());
-                  },
-                  onContactAdminRequested: _contactAdmin,
+      child: FirstRegistrationSuspensionScope(
+        child: EnrollmentListingPageScaffold(
+          readyKey: 'first-reg-content',
+          bootstrapBuilder: (context, onReady) =>
+              EnrollmentCurrentYearBootstrapBuilder(
+                status: _effectiveStatus,
+                onReady: (context, screenCtx) => onReady(
+                  context,
+                  EnrollmentScreenContext(
+                    schoolId: screenCtx.schoolId,
+                    academicYearId: screenCtx.academicYearId,
+                    isLoading: screenCtx.isLoading,
+                    onRefreshRequested: screenCtx.onRefreshRequested,
+                    preferredViewMode: _preferredViewMode,
+                    onSortToggled: _onSortToggled,
+                    onViewModeChanged: _onViewModeChanged,
+                    onResetSearchRequested: _onResetSearch,
+                    onCreateEnrollmentRequested: () =>
+                        _openNewEnrollment(context),
+                    onReconnectRequested: () {
+                      context.read<AuthBloc>().add(const AuthLogoutRequested());
+                    },
+                    onContactAdminRequested: _contactAdmin,
+                  ),
                 ),
               ),
-            ),
-        searchSectionBuilder: (context, screenCtx, dispatch) {
-          final academicYearState = context
-              .read<AcademicYearContextBloc>()
-              .state;
-          final academicOptions =
-              FirstRegistrationPageHelpers.buildAcademicOptions(
-                academicYearState.context?.schoolLevelGroups ?? const [],
-              );
+          searchSectionBuilder: (context, screenCtx, dispatch) {
+            final academicYearState = context
+                .read<AcademicYearContextBloc>()
+                .state;
+            final academicOptions =
+                FirstRegistrationPageHelpers.buildAcademicOptions(
+                  academicYearState.context?.schoolLevelGroups ?? const [],
+                );
 
-          return FirstRegistrationSearchForm(
-            options: academicOptions,
-            isLoading: screenCtx.isLoading,
-            status: _effectiveStatus,
-            dispatch: dispatch,
-            onStatusChanged: (newStatus) {
-              setState(() => _effectiveStatus = newStatus);
-            },
-          );
-        },
-        onSearchCommand:
-            EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc,
-        // Read-your-writes : au retour du détail (brouillon finalisé, dossier
-        // abandonné ou simple consultation), on re-lit la base locale — sans
-        // quoi la ligne qu'on vient de finaliser resterait affichée avec son
-        // ancien badge « Brouillon ».
-        onDetailReturned: () => context.read<EnrollmentLocalListBloc>().add(
-          const LocalListRefreshRequested(),
+            return FirstRegistrationSearchForm(
+              options: academicOptions,
+              isLoading: screenCtx.isLoading,
+              status: _effectiveStatus,
+              dispatch: dispatch,
+              onStatusChanged: (newStatus) {
+                setState(() => _effectiveStatus = newStatus);
+              },
+            );
+          },
+          onSearchCommand:
+              EnrollmentSearchCommandHandlers.dispatchThroughLocalListBloc,
+          // Read-your-writes : au retour du détail (brouillon finalisé, dossier
+          // abandonné ou simple consultation), on re-lit la base locale — sans
+          // quoi la ligne qu'on vient de finaliser resterait affichée avec son
+          // ancien badge « Brouillon ».
+          onDetailReturned: () => context.read<EnrollmentLocalListBloc>().add(
+            const LocalListRefreshRequested(),
+          ),
+          resultsSummaryBuilder: (context, state, screenCtx) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              EnrollmentResultsBar(
+                count: state.summariesTotalElements,
+                isLoading:
+                    state.summariesStatus == EnrollmentLoadStatus.loading,
+                statusLabel: _effectiveStatus,
+                showStatusBadge: true,
+                onRefresh: screenCtx.onRefreshRequested,
+                onViewModeChanged: _onViewModeChanged,
+                currentViewMode: _preferredViewMode,
+                extraActions: const [
+                  PhotoSessionButton(),
+                  FirstRegistrationSuspensionActions(),
+                ],
+              ),
+              const FirstRegistrationSelectionBar(),
+            ],
+          ),
+          detailIntentFactory: (summary) => EnrollmentDetailIntent(
+            origin: EnrollmentDetailOrigin.firstRegistration,
+            enrollmentId: summary.enrollmentId,
+            status: summary.status,
+          ),
+          resultsFooterBuilder: useInlineCreate
+              ? (context, _) => _buildInlineCreateAction(context, l10n)
+              : null,
         ),
-        resultsSummaryBuilder: (context, state, screenCtx) =>
-            EnrollmentResultsBar(
-              count: state.summariesTotalElements,
-              isLoading: state.summariesStatus == EnrollmentLoadStatus.loading,
-              statusLabel: _effectiveStatus,
-              showStatusBadge: true,
-              onRefresh: screenCtx.onRefreshRequested,
-              onViewModeChanged: _onViewModeChanged,
-              currentViewMode: _preferredViewMode,
-              extraActions: const [PhotoSessionButton()],
-            ),
-        detailIntentFactory: (summary) => EnrollmentDetailIntent(
-          origin: EnrollmentDetailOrigin.firstRegistration,
-          enrollmentId: summary.enrollmentId,
-          status: summary.status,
-        ),
-        resultsFooterBuilder: useInlineCreate
-            ? (context, _) => _buildInlineCreateAction(context, l10n)
-            : null,
       ),
     );
   }

@@ -15671,4 +15671,62 @@ class AppLocalizationsFr extends AppLocalizations {
 
     return '$dateString';
   }
+
+  @override
+  String suspensionBannerTitle(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Élève désactivé depuis le $dateString';
+  }
+
+  @override
+  String get suspensionBannerEffects =>
+      'Masqué des appels, de la saisie des notes, de la facturation et du recouvrement.';
+
+  @override
+  String suspensionBannerRefused(String reason) {
+    return 'La réactivation a été refusée : $reason';
+  }
+
+  @override
+  String suspensionMemberAction(String name) {
+    return 'Désactiver $name';
+  }
+
+  @override
+  String suspensionDoneClasses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves désactivés · retirés de l\'effectif',
+      one: 'Élève désactivé · retiré de l\'effectif',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionNoEnrollment =>
+      'Le dossier d\'inscription de cet élève n\'est pas sur la tablette : synchronisez avant de le désactiver.';
+
+  @override
+  String suspendedSectionTitle(int count) {
+    return 'Élèves désactivés · $count';
+  }
+
+  @override
+  String get suspendedSectionSubtitle =>
+      'Hors effectif des classes tant qu\'ils ne sont pas réactivés.';
+
+  @override
+  String suspendedMemberLine(
+    String firstName,
+    String classroom,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$firstName · $classroom · depuis le $dateString';
+  }
 }

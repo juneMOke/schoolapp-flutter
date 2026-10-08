@@ -488,6 +488,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
     String? academicYearId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    bool includeSuspended = false,
   }) => _guardList(() async {
     // Année passée par l'appelant (bootstrap Facturation) sinon année courante
     // locale. Non résolue (référentiel non pullé) → aucun résultat : la
@@ -498,6 +499,7 @@ class EnrollmentOfflineRepositoryImpl implements EnrollmentOfflineRepository {
       academicYearId: yearId,
       schoolLevelId: schoolLevelId,
       schoolLevelGroupId: schoolLevelGroupId,
+      includeSuspended: includeSuspended,
     );
   });
 

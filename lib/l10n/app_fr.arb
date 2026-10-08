@@ -9721,5 +9721,20 @@
   "reactivationDone": "{count, plural, =1{Élève réactivé} other{{count} élèves réactivés}}",
   "@reactivationDone": {"placeholders": {"count": {"type": "int"}}},
   "suspensionDate": "{date}",
-  "@suspensionDate": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}}
+  "@suspensionDate": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "suspensionBannerTitle": "Élève désactivé depuis le {date}",
+  "@suspensionBannerTitle": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "suspensionBannerEffects": "Masqué des appels, de la saisie des notes, de la facturation et du recouvrement.",
+  "suspensionBannerRefused": "La réactivation a été refusée : {reason}",
+  "@suspensionBannerRefused": {"placeholders": {"reason": {"type": "String"}}},
+  "suspensionMemberAction": "Désactiver {name}",
+  "@suspensionMemberAction": {"placeholders": {"name": {"type": "String"}}},
+  "suspensionDoneClasses": "{count, plural, =1{Élève désactivé · retiré de l'effectif} other{{count} élèves désactivés · retirés de l'effectif}}",
+  "@suspensionDoneClasses": {"placeholders": {"count": {"type": "int"}}},
+  "suspensionNoEnrollment": "Le dossier d'inscription de cet élève n'est pas sur la tablette : synchronisez avant de le désactiver.",
+  "suspendedSectionTitle": "Élèves désactivés · {count}",
+  "@suspendedSectionTitle": {"placeholders": {"count": {"type": "int"}}},
+  "suspendedSectionSubtitle": "Hors effectif des classes tant qu'ils ne sont pas réactivés.",
+  "suspendedMemberLine": "{firstName} · {classroom} · depuis le {date}",
+  "@suspendedMemberLine": {"placeholders": {"firstName": {"type": "String"}, "classroom": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}}
 }
