@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/presentation/widgets/class_member_suspend_button.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -126,6 +127,7 @@ class ClassesOrganisationClassroomCard extends StatelessWidget {
             _MembersGrid(
               members: members,
               classroomId: classroom.id,
+              classroomName: classroom.name,
               isReassigning: isReassigning,
               reassigningMemberId: reassigningMemberId,
               onTransferTap: onTransferTap,
@@ -215,6 +217,7 @@ class _CapacityBar extends StatelessWidget {
 class _MembersGrid extends StatelessWidget {
   final List<ClassroomMember> members;
   final String classroomId;
+  final String classroomName;
   final bool isReassigning;
   final String reassigningMemberId;
   final ValueChanged<ClassroomMemberReassignIntent> onTransferTap;
@@ -222,6 +225,7 @@ class _MembersGrid extends StatelessWidget {
   const _MembersGrid({
     required this.members,
     required this.classroomId,
+    required this.classroomName,
     required this.isReassigning,
     required this.reassigningMemberId,
     required this.onTransferTap,
@@ -256,6 +260,14 @@ class _MembersGrid extends StatelessWidget {
                         member.id == reassigningMemberId,
                     action: ClassesOrganisationMemberAction.transfer,
                     onTransferTap: onTransferTap,
+                    extraAction: ClassMemberSuspendButton(
+                      studentId: member.studentId,
+                      academicYearId: member.academicYearId,
+                      lastName: member.studentLastName,
+                      middleName: member.studentMiddleName,
+                      firstName: member.studentFirstName,
+                      classLabel: classroomName,
+                    ),
                   ),
                 ),
               )

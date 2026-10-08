@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/classes/presentation/helpers/classes
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_pending_distribution_card.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_split_results.dart';
+import 'package:school_app_flutter/features/classes/presentation/widgets/classes_suspension_panel.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -93,24 +94,69 @@ class ClassesOrganisationResultsSection extends StatelessWidget {
           );
         }
 
-        return ClassesOrganisationSplitResults(
-          classroomsStatus: offlineState.levelClassroomsStatus,
-          classroomsErrorType: offlineState.levelClassroomsErrorType,
-          classrooms: offlineState.levelClassrooms,
-          composedRosters: offlineState.levelRosters,
-          unassignedEnrollments: offlineState.levelUnassignedEnrollments,
-          isAssigning: offlineState.assignStatus == ClassroomStatus.loading,
-          assigningEnrollmentId: offlineState.assigningEnrollmentId,
-          errorMessage:
-              ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
-                l10n,
-                offlineState.levelClassroomsErrorType,
+        // L'année des classes affichées : aucune classe, rien à désactiver.
+        final academicYearId = offlineState.levelClassrooms.isEmpty
+            ? ''
+            : offlineState.levelClassrooms.first.academicYearId;
+        return ClassesSuspensionPanel(
+          academicYearId: academicYearId,
+          classNames: {
+            for (final c in offlineState.levelClassrooms) c.id: c.name,
+          },
+          onChanged: () => _reloadRosters(context, selectedLevel!),
+          builder: (context, summaryAccessory, afterSummary) =>
+              ClassesOrganisationSplitResults(
+                summaryAccessory: summaryAccessory,
+                afterSummary: afterSummary,
+                classroomsStatus: offlineState.levelClassroomsStatus,
+                classroomsErrorType: offlineState.levelClassroomsErrorType,
+                classrooms: offlineState.levelClassrooms,
+                composedRosters: offlineState.levelRosters,
+                unassignedEnrollments: offlineState.levelUnassignedEnrollments,
+                isAssigning:
+                    offlineState.assignStatus == ClassroomStatus.loading,
+                assigningEnrollmentId: offlineState.assigningEnrollmentId,
+                errorMessage:
+                    ClassesOrganisationPageHelpers.mapClassroomErrorToMessage(
+                      l10n,
+                      offlineState.levelClassroomsErrorType,
+                    ),
+                onTransferTap: onTransferTap,
+                onRetry: () => _retryLocalClassrooms(context, selectedLevel!),
               ),
-          onTransferTap: onTransferTap,
-          onRetry: () => _retryLocalClassrooms(context, selectedLevel!),
         );
       },
     );
+  }
+
+  /// Une désactivation a changé : les rosters et les non-répartis se
+  /// relisent, sans repasser par le squelette des classes.
+  void _reloadRosters(
+    BuildContext context,
+    ClassesOrganisationLevelOption level,
+  ) {
+    final academicYearId =
+        context
+            .read<AcademicYearContextBloc>()
+            .state
+            .context
+            ?.academicYear
+            .id ??
+        '';
+    if (academicYearId.isEmpty) return;
+    context.read<ClassroomOfflineBloc>()
+      ..add(
+        OfflineLevelRostersRequested(
+          academicYearId: academicYearId,
+          schoolLevelId: level.schoolLevelId,
+        ),
+      )
+      ..add(
+        OfflineLevelUnassignedEnrollmentsRequested(
+          academicYearId: academicYearId,
+          schoolLevelId: level.schoolLevelId,
+        ),
+      );
   }
 
   void _retryLocalClassrooms(
