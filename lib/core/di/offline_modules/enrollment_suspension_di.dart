@@ -19,6 +19,9 @@ import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enro
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enrollment_suspension_puller.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/repositories/enrollment_suspension_repository.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/usecases/enrollment_suspension_use_cases.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/presentation/bloc/enrollment_suspension_status_cubit.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/presentation/bloc/open_suspensions_count_cubit.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/presentation/bloc/suspended_members_cubit.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/presentation/bloc/suspension_gesture_cubit.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -65,6 +68,31 @@ void registerEnrollmentSuspension(GetIt getIt) {
   getIt.registerLazySingleton(
     () => LoadEnrollmentSuspensionUseCase(
       getIt<EnrollmentSuspensionRepository>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => LoadSuspendedMembersUseCase(getIt<EnrollmentSuspensionRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () =>
+        ResolveSuspensionTargetUseCase(getIt<EnrollmentSuspensionRepository>()),
+  );
+  getIt.registerFactoryParam<OpenSuspensionsCountCubit, String, void>(
+    (academicYearId, _) => OpenSuspensionsCountCubit(
+      getIt<LoadOpenSuspensionsUseCase>(),
+      academicYearId: academicYearId,
+    ),
+  );
+  getIt.registerFactoryParam<SuspendedMembersCubit, String, void>(
+    (academicYearId, _) => SuspendedMembersCubit(
+      getIt<LoadSuspendedMembersUseCase>(),
+      academicYearId: academicYearId,
+    ),
+  );
+  getIt.registerFactoryParam<EnrollmentSuspensionStatusCubit, String, void>(
+    (enrollmentId, _) => EnrollmentSuspensionStatusCubit(
+      getIt<LoadEnrollmentSuspensionUseCase>(),
+      enrollmentId: enrollmentId,
     ),
   );
   getIt.registerFactory<SuspensionGestureCubit>(

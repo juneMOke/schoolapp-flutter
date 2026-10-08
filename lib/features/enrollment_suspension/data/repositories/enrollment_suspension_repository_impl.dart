@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/enrollment_suspension/data/local/enr
 import 'package:school_app_flutter/features/enrollment_suspension/data/local/enrollment_suspension_write_dao.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/suspension_gesture.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/student_suspension.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/suspended_member.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/suspension_reason.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/suspension_target.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/repositories/enrollment_suspension_repository.dart';
@@ -83,6 +84,46 @@ class EnrollmentSuspensionRepositoryImpl
       return Right(await _reader.latestFor(enrollmentId));
     } catch (e) {
       return Left(StorageFailure('Lecture de la désactivation : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<SuspendedMember>>> suspendedMembers(
+    String academicYearId,
+  ) async {
+    try {
+      return Right(
+        await _reader.suspendedMembers(
+          schoolId: _currentUser.schoolId ?? '',
+          academicYearId: academicYearId,
+        ),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Lecture des élèves désactivés : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, SuspensionTarget?>> targetOf({
+    required String studentId,
+    required String academicYearId,
+  }) async {
+    try {
+      final enrollmentId = await _reader.completedEnrollmentOf(
+        studentId: studentId,
+        academicYearId: academicYearId,
+      );
+      return Right(
+        enrollmentId == null
+            ? null
+            : SuspensionTarget(
+                enrollmentId: enrollmentId,
+                studentId: studentId,
+                academicYearId: academicYearId,
+              ),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Lecture de l\'inscription : $e'));
     }
   }
 
