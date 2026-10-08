@@ -9428,5 +9428,9 @@
   "@suspendedSectionTitle": {"placeholders": {"count": {"type": "int"}}},
   "suspendedSectionSubtitle": "Out of the class headcount until they are reactivated.",
   "suspendedMemberLine": "{firstName} · {classroom} · since {date}",
-  "@suspendedMemberLine": {"placeholders": {"firstName": {"type": "String"}, "classroom": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}}
+  "@suspendedMemberLine": {"placeholders": {"firstName": {"type": "String"}, "classroom": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "suspensionInsightTitle": "Deactivated students",
+  "suspensionInsightBody": "{count, plural, =1{1 student is temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.} other{{count} students are temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.}}",
+  "@suspensionInsightBody": {"placeholders": {"count": {"type": "int"}}},
+  "suspensionInsightAction": "Manage deactivated students"
 }

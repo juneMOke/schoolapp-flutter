@@ -15729,4 +15729,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
     return '$firstName · $classroom · depuis le $dateString';
   }
+
+  @override
+  String get suspensionInsightTitle => 'Élèves désactivés';
+
+  @override
+  String suspensionInsightBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count élèves sont temporairement désactivés : toujours inscrits, mais hors effectif, appels, notes et recouvrement.',
+      one:
+          '1 élève est temporairement désactivé : toujours inscrit, mais hors effectif, appels, notes et recouvrement.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionInsightAction => 'Gérer les élèves désactivés';
 }

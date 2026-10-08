@@ -26,10 +26,19 @@ class EnrollmentInsightsSection extends StatelessWidget {
   /// la carte : l'information reste vraie même sans raccourci.
   final VoidCallback? onOpenPreRegistrations;
 
+  /// Élèves désactivés de l'année, comptés sur la tablette : la carte
+  /// n'existe que s'il y en a.
+  final int suspendedCount;
+
+  /// Ouvre Première inscription, où ils se gèrent.
+  final VoidCallback? onOpenSuspended;
+
   const EnrollmentInsightsSection({
     super.key,
     required this.stats,
     this.onOpenPreRegistrations,
+    this.suspendedCount = 0,
+    this.onOpenSuspended,
   });
 
   @override
@@ -38,6 +47,7 @@ class EnrollmentInsightsSection extends StatelessWidget {
     final cards = <Widget>[
       ..._peakCard(l10n),
       _parityCard(l10n),
+      ..._suspendedCard(l10n),
       ..._pendingCard(l10n),
     ];
 
@@ -151,6 +161,31 @@ class EnrollmentInsightsSection extends StatelessWidget {
                 label: l10n.enrollmentDashboardInsightPreAction,
                 icon: Icons.arrow_forward_rounded,
                 onPressed: onOpenPreRegistrations,
+                fullWidth: false,
+              ),
+      ),
+    ];
+  }
+}
+
+/// Les élèves désactivés : le tableau de bord ne désactive rien, il signale
+/// et renvoie là où ça se gère.
+extension on EnrollmentInsightsSection {
+  List<Widget> _suspendedCard(AppLocalizations l10n) {
+    if (suspendedCount <= 0) return const [];
+    return [
+      _InsightCard(
+        icon: Icons.person_remove_outlined,
+        accent: AppColors.suspendedInk,
+        accentSoft: AppColors.suspendedSurface,
+        title: l10n.suspensionInsightTitle,
+        body: l10n.suspensionInsightBody(suspendedCount),
+        action: onOpenSuspended == null
+            ? null
+            : EteeloButton.ghost(
+                label: l10n.suspensionInsightAction,
+                icon: Icons.arrow_forward_rounded,
+                onPressed: onOpenSuspended,
                 fullWidth: false,
               ),
       ),

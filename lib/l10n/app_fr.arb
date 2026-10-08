@@ -9736,5 +9736,9 @@
   "@suspendedSectionTitle": {"placeholders": {"count": {"type": "int"}}},
   "suspendedSectionSubtitle": "Hors effectif des classes tant qu'ils ne sont pas réactivés.",
   "suspendedMemberLine": "{firstName} · {classroom} · depuis le {date}",
-  "@suspendedMemberLine": {"placeholders": {"firstName": {"type": "String"}, "classroom": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}}
+  "@suspendedMemberLine": {"placeholders": {"firstName": {"type": "String"}, "classroom": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "suspensionInsightTitle": "Élèves désactivés",
+  "suspensionInsightBody": "{count, plural, =1{1 élève est temporairement désactivé : toujours inscrit, mais hors effectif, appels, notes et recouvrement.} other{{count} élèves sont temporairement désactivés : toujours inscrits, mais hors effectif, appels, notes et recouvrement.}}",
+  "@suspensionInsightBody": {"placeholders": {"count": {"type": "int"}}},
+  "suspensionInsightAction": "Gérer les élèves désactivés"
 }

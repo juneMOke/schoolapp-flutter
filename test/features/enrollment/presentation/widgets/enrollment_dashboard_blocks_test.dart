@@ -640,6 +640,36 @@ void main() {
       expect(find.text('Demandes en ligne à traiter'), findsNothing);
     });
 
+    testWidgets('les élèves désactivés : une carte seulement s\'il y en a', (
+      tester,
+    ) async {
+      var opened = false;
+      await tester.pumpWidget(
+        _host(
+          EnrollmentInsightsSection(
+            stats: stats(buckets: const []),
+            suspendedCount: 2,
+            onOpenSuspended: () => opened = true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Élèves désactivés'), findsOneWidget);
+      expect(
+        find.textContaining('2 élèves sont temporairement'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Gérer les élèves désactivés'));
+      expect(opened, isTrue);
+
+      await tester.pumpWidget(
+        _host(EnrollmentInsightsSection(stats: stats(buckets: const []))),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Élèves désactivés'), findsNothing);
+    });
+
     testWidgets('le pic n\'apparaît que s\'il compte quelque chose', (
       tester,
     ) async {

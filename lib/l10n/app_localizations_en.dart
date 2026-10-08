@@ -15624,4 +15624,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
     return '$firstName · $classroom · since $dateString';
   }
+
+  @override
+  String get suspensionInsightTitle => 'Deactivated students';
+
+  @override
+  String suspensionInsightBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count students are temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.',
+      one:
+          '1 student is temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionInsightAction => 'Manage deactivated students';
 }

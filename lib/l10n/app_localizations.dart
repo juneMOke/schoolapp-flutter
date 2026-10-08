@@ -24463,6 +24463,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{firstName} · {classroom} · since {date}'**
   String suspendedMemberLine(String firstName, String classroom, DateTime date);
+
+  /// No description provided for @suspensionInsightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated students'**
+  String get suspensionInsightTitle;
+
+  /// No description provided for @suspensionInsightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student is temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.} other{{count} students are temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.}}'**
+  String suspensionInsightBody(int count);
+
+  /// No description provided for @suspensionInsightAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage deactivated students'**
+  String get suspensionInsightAction;
 }
 
 class _AppLocalizationsDelegate

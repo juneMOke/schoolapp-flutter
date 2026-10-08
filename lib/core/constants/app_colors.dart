@@ -290,4 +290,8 @@ class AppColors {
   static const paveInkPercu = tokens.AppColors.paveInkPercu;
   static const paveInkReste = tokens.AppColors.paveInkReste;
   static const finRingTrack = tokens.AppColors.finRingTrack;
+
+  static const suspendedInk = tokens.AppColors.suspendedInk;
+  static const suspendedSurface = tokens.AppColors.suspendedSurface;
+  static const suspendedBorder = tokens.AppColors.suspendedBorder;
 }

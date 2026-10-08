@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/suspension/suspended_count_builder.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
@@ -191,21 +192,25 @@ class _EnrollmentStatsDashboardPageState
       EnrollmentStatsStatus.loading => const EnrollmentDashboardSkeleton(
         kpiCount: 4,
       ),
-      EnrollmentStatsStatus.success => EnrollmentDashboardSuccessView(
-        stats: state.stats!,
-        windowLabel: _windowLabel(l10n, state.window.kind),
-        isSingleDay: state.window.isSingleDay,
-        // Une ligne de niveau renvoie vers Première inscription — c'est la
-        // sortie « où en ajouter » de la spec.
-        //
-        // ⚠️ Le niveau cliqué N'EST PAS transmis : l'écran d'arrivée ne sait
-        // pas encore recevoir de cadrage. `LevelStat.id` est déjà au contrat
-        // et arrive jusqu'ici, il ne manque que le destinataire. Renvoyer sans
-        // le niveau est ce que la spec demande ; le jour où l'écran d'arrivée
-        // acceptera une intention, c'est ici que ça se branche.
-        onLevelTap: (_) => _openFirstRegistration(),
-        onOpenPreRegistrations: _openPreRegistrations,
-        onEntryTap: _openDossier,
+      EnrollmentStatsStatus.success => SuspendedCountBuilder(
+        builder: (context, suspendedCount) => EnrollmentDashboardSuccessView(
+          suspendedCount: suspendedCount,
+          onOpenSuspended: _openFirstRegistration,
+          stats: state.stats!,
+          windowLabel: _windowLabel(l10n, state.window.kind),
+          isSingleDay: state.window.isSingleDay,
+          // Une ligne de niveau renvoie vers Première inscription — c'est la
+          // sortie « où en ajouter » de la spec.
+          //
+          // ⚠️ Le niveau cliqué N'EST PAS transmis : l'écran d'arrivée ne sait
+          // pas encore recevoir de cadrage. `LevelStat.id` est déjà au contrat
+          // et arrive jusqu'ici, il ne manque que le destinataire. Renvoyer sans
+          // le niveau est ce que la spec demande ; le jour où l'écran d'arrivée
+          // acceptera une intention, c'est ici que ça se branche.
+          onLevelTap: (_) => _openFirstRegistration(),
+          onOpenPreRegistrations: _openPreRegistrations,
+          onEntryTap: _openDossier,
+        ),
       ),
       EnrollmentStatsStatus.empty => EnrollmentDashboardEmptyState(
         windowLabel: _windowLabel(l10n, state.window.kind),
