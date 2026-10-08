@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
@@ -11,10 +12,14 @@ import 'package:school_app_flutter/features/enrollment_suspension/data/enrollmen
 import 'package:school_app_flutter/features/enrollment_suspension/data/local/enrollment_suspension_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/local/enrollment_suspension_sync_dao.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/local/enrollment_suspension_write_dao.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/data/repositories/enrollment_suspension_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enrollment_suspension_api.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enrollment_suspension_outbox_handler.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enrollment_suspension_pull_handler.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enrollment_suspension_puller.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/domain/repositories/enrollment_suspension_repository.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/domain/usecases/enrollment_suspension_use_cases.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/presentation/bloc/suspension_gesture_cubit.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// La désactivation d'élèves : sa table, son flux, son envoi.
@@ -37,6 +42,36 @@ void registerEnrollmentSuspension(GetIt getIt) {
   );
   getIt.registerLazySingleton<EnrollmentSuspensionApi>(
     () => EnrollmentSuspensionApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<EnrollmentSuspensionRepository>(
+    () => EnrollmentSuspensionRepositoryImpl(
+      reader: getIt<EnrollmentSuspensionReadDao>(),
+      writer: getIt<EnrollmentSuspensionWriteDao>(),
+      bus: getIt<EnrollmentSuspensionChangeBus>(),
+      currentUser: getIt<CurrentUserContext>(),
+      ids: getIt<IdGenerator>(),
+      syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => SuspendStudentsUseCase(getIt<EnrollmentSuspensionRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => ReactivateStudentsUseCase(getIt<EnrollmentSuspensionRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => LoadOpenSuspensionsUseCase(getIt<EnrollmentSuspensionRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => LoadEnrollmentSuspensionUseCase(
+      getIt<EnrollmentSuspensionRepository>(),
+    ),
+  );
+  getIt.registerFactory<SuspensionGestureCubit>(
+    () => SuspensionGestureCubit(
+      suspend: getIt<SuspendStudentsUseCase>(),
+      reactivate: getIt<ReactivateStudentsUseCase>(),
+    ),
   );
 
   getIt<PullCoordinator>().registerHandler(

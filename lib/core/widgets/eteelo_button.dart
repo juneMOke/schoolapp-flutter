@@ -5,15 +5,16 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
-/// primary · secondary · ghost · danger
-enum EteeloButtonVariant { primary, secondary, ghost, danger }
+/// primary · secondary · ghost · danger · success
+enum EteeloButtonVariant { primary, secondary, ghost, danger, success }
 
 /// compact (sm) · regular (md)
 enum EteeloButtonSize { compact, regular }
 
 /// Bouton design-system Eteelo — 4 variantes sémantiques, 2 tailles.
 /// Tokens : primary=terreCuite · secondary=outlined bleuArdoise 1.5px ·
-/// ghost=texte bleuArdoise sans bordure · danger=error.
+/// ghost=texte bleuArdoise sans bordure · danger=error · success=vertSavane
+/// (un retour à la normale : réactiver).
 /// Focus ring via BoxShadow ; hover simulation via overlayColor.
 class EteeloButton extends StatefulWidget {
   const EteeloButton.primary({
@@ -64,6 +65,18 @@ class EteeloButton extends StatefulWidget {
     this.tooltip,
   }) : _variant = EteeloButtonVariant.danger;
 
+  const EteeloButton.success({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.isLoading = false,
+    this.loadingLabel,
+    this.size = EteeloButtonSize.compact,
+    this.fullWidth = true,
+    this.tooltip,
+  }) : _variant = EteeloButtonVariant.success;
+
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
@@ -112,7 +125,8 @@ class _EteeloButtonState extends State<EteeloButton> {
 
   bool get _isFilledVariant =>
       widget._variant == EteeloButtonVariant.primary ||
-      widget._variant == EteeloButtonVariant.danger;
+      widget._variant == EteeloButtonVariant.danger ||
+      widget._variant == EteeloButtonVariant.success;
 
   BorderRadius get _focusBorderRadius => AppRadius.brPill;
 
@@ -147,15 +161,18 @@ class _EteeloButtonState extends State<EteeloButton> {
 
   Widget _buildByVariant() => switch (widget._variant) {
     EteeloButtonVariant.primary ||
-    EteeloButtonVariant.danger => _buildElevatedButton(),
+    EteeloButtonVariant.danger ||
+    EteeloButtonVariant.success => _buildElevatedButton(),
     EteeloButtonVariant.secondary => _buildOutlinedButton(),
     EteeloButtonVariant.ghost => _buildTextButton(),
   };
 
   Widget _buildElevatedButton() {
-    final bg = widget._variant == EteeloButtonVariant.primary
-        ? AppColors.terreCuite
-        : AppColors.error;
+    final bg = switch (widget._variant) {
+      EteeloButtonVariant.danger => AppColors.error,
+      EteeloButtonVariant.success => AppColors.success,
+      _ => AppColors.terreCuite,
+    };
     return _wrapWidth(
       ElevatedButton(
         focusNode: _focusNode,

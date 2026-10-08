@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -7,7 +8,6 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/classroom_state.dart';
-import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_common_widgets.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Squelette de chargement de la vue répartie : conserve la grille en affichant
@@ -171,7 +171,7 @@ class ClassesOrganisationSplitEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return ClassesOrganisationDashedContainer(
+    return EteeloDashedContainer(
       backgroundColor: AppColors.surfaceRaised,
       borderColor: AppColors.borderStrong.withValues(alpha: 0.4),
       child: Column(

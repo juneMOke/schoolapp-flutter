@@ -586,4 +586,18 @@ class AppColors {
   /// Bloc « À retenir » du contenu rédigé : fond ocre pâle, liséré ocre.
   static const programmeEncadreSurface = financeCrossedSurface;
   static const programmeEncadreAccent = Color(0xFFB8862B);
+
+  // ── Désactivation d'élèves ────────────────────────────────────────────────
+  // Une pierre chaude, distincte des statuts d'inscription (vert, ardoise) et
+  // des erreurs (ambre, rouge) : l'élève reste inscrit, il est seulement mis
+  // de côté. Le contour pointillé dit le provisoire.
+
+  /// Encre « Désactivé » : 7,0:1 sur [suspendedSurface].
+  static const suspendedInk = Color(0xFF5E5850);
+
+  /// Fond du bandeau et de l'en-tête de section des élèves désactivés.
+  static const suspendedSurface = Color(0xFFEFECE4);
+
+  /// Contour pointillé des surfaces « désactivé ».
+  static const suspendedBorder = Color(0xFFD9D3C6);
 }

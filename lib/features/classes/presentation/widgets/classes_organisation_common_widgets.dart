@@ -4,37 +4,6 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 
-class ClassesOrganisationDashedContainer extends StatelessWidget {
-  final Widget child;
-  final Color backgroundColor;
-  final Color borderColor;
-
-  const ClassesOrganisationDashedContainer({
-    required this.child,
-    required this.backgroundColor,
-    required this.borderColor,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: backgroundColor,
-      elevation: 0,
-      surfaceTintColor: Colors.transparent,
-      borderRadius: BorderRadius.circular(AppDimensions.cardRadius),
-      clipBehavior: Clip.antiAlias,
-      child: CustomPaint(
-        foregroundPainter: _DashedBorderPainter(borderColor),
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingL),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
 class ClassesOrganisationStatChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -181,35 +150,4 @@ class ClassesOrganisationInfoChip extends StatelessWidget {
       ),
     );
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  final Color color;
-
-  const _DashedBorderPainter(this.color);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const borderRadius = Radius.circular(AppDimensions.cardRadius);
-    final rect = Offset.zero & size;
-    final rRect = RRect.fromRectAndRadius(rect.deflate(0.5), borderRadius);
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-
-    final path = Path()..addRRect(rRect);
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        final next = (distance + 8).clamp(0.0, metric.length);
-        canvas.drawPath(metric.extractPath(distance, next), paint);
-        distance += 12;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) =>
-      oldDelegate.color != color;
 }

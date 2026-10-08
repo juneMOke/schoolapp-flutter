@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -41,6 +42,9 @@ class StatusBadge extends StatelessWidget {
   final StatusBadgeSize size;
   final StatusBadgeStyle style;
 
+  /// Contour pointillé : un état provisoire, que l'on peut défaire.
+  final bool dashed;
+
   const StatusBadge({
     super.key,
     required this.icon,
@@ -48,6 +52,7 @@ class StatusBadge extends StatelessWidget {
     required this.color,
     this.size = StatusBadgeSize.medium,
     this.style = StatusBadgeStyle.soft,
+    this.dashed = false,
   });
 
   // ---------------------------------------------------------------------------
@@ -355,6 +360,18 @@ class StatusBadge extends StatelessWidget {
     style: style,
   );
 
+  /// Élève désactivé : toujours inscrit, mis de côté jusqu'à sa réactivation.
+  factory StatusBadge.suspended({
+    required String label,
+    StatusBadgeSize size = StatusBadgeSize.medium,
+  }) => StatusBadge(
+    icon: Icons.person_remove_outlined,
+    label: label,
+    color: AppColors.suspendedInk,
+    size: size,
+    dashed: true,
+  );
+
   // ---------------------------------------------------------------------------
   // Build
   // ---------------------------------------------------------------------------
@@ -363,7 +380,7 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = _resolveVisualConfig();
 
-    return Container(
+    final badge = Container(
       padding: EdgeInsets.symmetric(
         horizontal: config.horizontalPadding,
         vertical: config.verticalPadding,
@@ -371,7 +388,7 @@ class StatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: config.backgroundColor,
         borderRadius: config.borderRadius,
-        border: Border.all(color: config.borderColor),
+        border: dashed ? null : Border.all(color: config.borderColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -392,6 +409,17 @@ class StatusBadge extends StatelessWidget {
           ),
         ],
       ),
+    );
+    if (!dashed) return badge;
+    return CustomPaint(
+      foregroundPainter: DashedRRectPainter(
+        color: config.borderColor,
+        borderRadius: config.borderRadius,
+        strokeWidth: 1,
+        dash: 3,
+        gap: 2,
+      ),
+      child: badge,
     );
   }
 
