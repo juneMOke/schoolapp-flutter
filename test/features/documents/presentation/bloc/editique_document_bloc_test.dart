@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'dart:typed_data';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -25,6 +26,9 @@ class MockEmitAccountStatementUseCase extends Mock
 
 class MockEmitEnrollmentAttestationUseCase extends Mock
     implements EmitEnrollmentAttestationUseCase {}
+
+class MockEmitEnrollmentSheetUseCase extends Mock
+    implements EmitEnrollmentSheetUseCase {}
 
 class MockEmitNotePerceptionUseCase extends Mock
     implements EmitNotePerceptionUseCase {}
@@ -78,6 +82,7 @@ void main() {
   });
 
   EditiqueDocumentBloc build() => EditiqueDocumentBloc(
+    emitEnrollmentSheetUseCase: MockEmitEnrollmentSheetUseCase(),
     emitEnrollmentAttestationUseCase: attestationUseCase,
     emitNotePerceptionUseCase: notePerceptionUseCase,
     emitPaymentReceiptUseCase: useCase,

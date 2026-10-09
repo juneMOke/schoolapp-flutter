@@ -36,6 +36,14 @@ abstract class EditiqueRemoteDataSource {
     @Path('enrollmentId') String enrollmentId,
   );
 
+  @POST(AppConstants.emitEnrollmentSheetEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> emitEnrollmentSheet(
+    @Extras() Map<String, dynamic> extras,
+    @Path('enrollmentId') String enrollmentId,
+  );
+
   @POST(AppConstants.emitNotePerceptionEndpoint)
   @DioResponseType(ResponseType.bytes)
   @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})

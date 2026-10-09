@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,6 +22,9 @@ class _MockEmitAccountStatementUseCase extends Mock
 
 class _MockEmitEnrollmentAttestationUseCase extends Mock
     implements EmitEnrollmentAttestationUseCase {}
+
+class _MockEmitEnrollmentSheetUseCase extends Mock
+    implements EmitEnrollmentSheetUseCase {}
 
 class _MockEmitNotePerceptionUseCase extends Mock
     implements EmitNotePerceptionUseCase {}
@@ -51,6 +55,7 @@ void main() {
   });
 
   EditiqueDocumentBloc buildBloc() => EditiqueDocumentBloc(
+    emitEnrollmentSheetUseCase: _MockEmitEnrollmentSheetUseCase(),
     emitEnrollmentAttestationUseCase: _MockEmitEnrollmentAttestationUseCase(),
     emitNotePerceptionUseCase: _MockEmitNotePerceptionUseCase(),
     emitPaymentReceiptUseCase: receiptUseCase,

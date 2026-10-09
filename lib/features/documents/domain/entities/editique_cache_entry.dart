@@ -26,7 +26,7 @@ class EditiqueCacheEntry extends Equatable {
   ///
   /// La contrainte est **doublée en SQL** (`CHECK`) : c'est un invariant de
   /// stockage, pas une politique d'appelant.
-  static const Set<String> cacheableDocTypes = {'AI', 'NP', 'RC', 'BU'};
+  static const Set<String> cacheableDocTypes = {'AI', 'FI', 'NP', 'RC', 'BU'};
 
   /// Clé locale, stable pour la vie de l'entrée. C'est elle qui nomme le
   /// fichier chiffré — jamais le numéro de pièce, qui exposerait le type et le

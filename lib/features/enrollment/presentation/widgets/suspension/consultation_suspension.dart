@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_detail.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_journey_pill_button.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/suspension_candidate.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/suspension_target.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/presentation/bloc/enrollment_suspension_status_cubit.dart';
@@ -51,47 +50,23 @@ class ConsultationSuspensionAction extends StatelessWidget {
 
   const ConsultationSuspensionAction({super.key, required this.candidate});
 
-  static const double _height = 40;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final status = context.watch<EnrollmentSuspensionStatusCubit>().state;
     final suspended = status.isSuspended;
     return SuspensionGate(
-      child: SizedBox(
-        height: _height,
-        child: OutlinedButton.icon(
-          onPressed: () => suspended
-              ? SuspensionFlow.reactivate(context, [
-                  candidate,
-                ], suspension: status.period)
-              : SuspensionFlow.suspend(context, [candidate]),
-          icon: Icon(
-            suspended
-                ? Icons.how_to_reg_outlined
-                : Icons.person_remove_outlined,
-            size: 16,
-          ),
-          label: Text(
-            suspended ? l10n.reactivationConfirm : l10n.suspensionConfirm(1),
-          ),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.textOnDark,
-            backgroundColor: suspended
-                ? AppColors.success.withValues(alpha: 0.35)
-                : AppColors.textOnDark.withValues(alpha: 0.06),
-            side: BorderSide(
-              width: 1.5,
-              color: suspended
-                  ? AppColors.success.withValues(alpha: 0.6)
-                  : AppColors.textOnDark.withValues(alpha: 0.35),
-            ),
-            shape: const StadiumBorder(),
-            textStyle: AppTypography.labelMedium,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          ),
-        ),
+      child: EnrollmentJourneyPillButton(
+        label: suspended ? l10n.reactivationConfirm : l10n.suspensionConfirm(1),
+        icon: suspended
+            ? Icons.how_to_reg_outlined
+            : Icons.person_remove_outlined,
+        positive: suspended,
+        onPressed: () => suspended
+            ? SuspensionFlow.reactivate(context, [
+                candidate,
+              ], suspension: status.period)
+            : SuspensionFlow.suspend(context, [candidate]),
       ),
     );
   }

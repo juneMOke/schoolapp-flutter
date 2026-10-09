@@ -32,6 +32,23 @@ class EditiqueEnrollmentAttestationRequested extends EditiqueDocumentEvent {
   List<Object?> get props => [enrollmentId, studentId, academicYearId];
 }
 
+/// Demande la fiche d'inscription (FI) d'un dossier — mêmes clés que
+/// l'attestation.
+class EditiqueEnrollmentSheetRequested extends EditiqueDocumentEvent {
+  final String enrollmentId;
+  final String? studentId;
+  final String? academicYearId;
+
+  const EditiqueEnrollmentSheetRequested({
+    required this.enrollmentId,
+    this.studentId,
+    this.academicYearId,
+  });
+
+  @override
+  List<Object?> get props => [enrollmentId, studentId, academicYearId];
+}
+
 /// Demande la note de perception annuelle (NP) d'un élève.
 ///
 /// Pièce archivée et idempotente. Le serveur répond 404 quand l'élève n'a

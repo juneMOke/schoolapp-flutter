@@ -43,6 +43,31 @@ Future<void> showEditiqueEnrollmentAttestationDialog(
   );
 }
 
+/// Ouvre la visionneuse sur la fiche d'inscription (FI) d'un dossier.
+///
+/// Rouvrir ne produit pas de doublon : à contenu inchangé, le serveur re-sert
+/// la fiche en vigueur.
+Future<void> showEditiqueEnrollmentSheetDialog(
+  BuildContext context, {
+  required String enrollmentId,
+  String? studentId,
+  String? academicYearId,
+  EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: AppLocalizations.of(context)!.editiqueViewerSheetTitle,
+    request: EditiqueEnrollmentSheetRequested(
+      enrollmentId: enrollmentId,
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
+    bloc: bloc,
+    dispatchOnOpen: dispatchOnOpen,
+  );
+}
+
 /// Ouvre la visionneuse sur la note de perception (NP) d'un élève.
 ///
 /// Pièce archivée et idempotente. Le serveur répond 404 quand l'élève n'a

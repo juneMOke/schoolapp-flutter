@@ -24481,6 +24481,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage deactivated students'**
   String get suspensionInsightAction;
+
+  /// No description provided for @editiqueViewerSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment form'**
+  String get editiqueViewerSheetTitle;
+
+  /// No description provided for @documentsHintSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'The signed enrollment file: identity, schooling, guardians and fees. One form in force; correcting the file seals a new one.'**
+  String get documentsHintSheet;
+
+  /// No description provided for @enrollmentSheetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment form'**
+  String get enrollmentSheetAction;
+
+  /// No description provided for @enrollmentSheetOfflineNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: no enrollment form is kept on the tablet for this student.'**
+  String get enrollmentSheetOfflineNone;
 }
 
 class _AppLocalizationsDelegate

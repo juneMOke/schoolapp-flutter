@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,6 +39,9 @@ class _MockEmitAccountStatementUseCase extends Mock
 
 class _MockEmitEnrollmentAttestationUseCase extends Mock
     implements EmitEnrollmentAttestationUseCase {}
+
+class _MockEmitEnrollmentSheetUseCase extends Mock
+    implements EmitEnrollmentSheetUseCase {}
 
 class _MockEmitNotePerceptionUseCase extends Mock
     implements EmitNotePerceptionUseCase {}
@@ -175,6 +179,7 @@ void main() {
     );
     _getIt.registerFactory<EditiqueDocumentBloc>(
       () => EditiqueDocumentBloc(
+        emitEnrollmentSheetUseCase: _MockEmitEnrollmentSheetUseCase(),
         emitEnrollmentAttestationUseCase:
             _MockEmitEnrollmentAttestationUseCase(),
         emitNotePerceptionUseCase: _MockEmitNotePerceptionUseCase(),
@@ -213,7 +218,7 @@ void main() {
   testWidgets('marque la nature de chaque pièce', (tester) async {
     await _pump(tester);
 
-    expect(find.text('Figé'), findsNWidgets(3));
+    expect(find.text('Figé'), findsNWidgets(4));
     expect(find.text('Horodaté'), findsNWidgets(2));
   });
 
@@ -232,7 +237,7 @@ void main() {
 
     expect(
       find.textContaining('Élève pas encore synchronisé'),
-      findsNWidgets(3),
+      findsNWidgets(4),
     );
   });
 
@@ -240,7 +245,7 @@ void main() {
   testWidgets('éteint et explique les pièces hors ligne', (tester) async {
     await _pump(tester, syncStatus: SyncStatus.offline);
 
-    expect(find.textContaining('Hors connexion'), findsNWidgets(3));
+    expect(find.textContaining('Hors connexion'), findsNWidgets(4));
   });
 
   // D-9 : `authRequired` reste actif — une émission en 401 est une erreur
@@ -289,6 +294,13 @@ void main() {
     tester,
   ) async {
     await _pump(tester);
+    // La fiche d'inscription allonge la liste : le quitus, dernier, est plus
+    // bas.
+    await tester.scrollUntilVisible(
+      find.text('Générer maintenant').last,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
 
     await tester.tap(find.text('Générer maintenant').last);
     await tester.pump();

@@ -9,6 +9,9 @@ void main() {
   group('EditiqueDocumentType — régime d archivage', () {
     const archived = <EditiqueDocumentType>[
       EditiqueDocumentType.enrollmentAttestation,
+      // Une seule fiche en vigueur : re-servie à contenu inchangé, rescellée
+      // sinon — jamais deux pièces pour un même rejeu.
+      EditiqueDocumentType.enrollmentSheet,
       EditiqueDocumentType.notePerception,
       EditiqueDocumentType.paymentReceipt,
       // Le reçu de vente est FIGÉ côté serveur (`DocumentType.RV(true)`) : son
@@ -23,7 +26,7 @@ void main() {
       EditiqueDocumentType.financialClearance,
     ];
 
-    test('AI, NP, RC et RV sont archivées donc rejouables', () {
+    test('AI, FI, NP, RC et RV sont archivées donc rejouables', () {
       for (final type in archived) {
         expect(type.isArchived, isTrue, reason: type.name);
         expect(type.isReplayable, isTrue, reason: type.name);
@@ -46,6 +49,7 @@ void main() {
 
     test('chaque type porte le préfixe de numéro du serveur', () {
       expect(EditiqueDocumentType.enrollmentAttestation.code, 'AI');
+      expect(EditiqueDocumentType.enrollmentSheet.code, 'FI');
       expect(EditiqueDocumentType.notePerception.code, 'NP');
       expect(EditiqueDocumentType.paymentReceipt.code, 'RC');
       expect(EditiqueDocumentType.accountStatement.code, 'RL');

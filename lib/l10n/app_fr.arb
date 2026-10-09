@@ -9740,5 +9740,9 @@
   "suspensionInsightTitle": "Élèves désactivés",
   "suspensionInsightBody": "{count, plural, =1{1 élève est temporairement désactivé : toujours inscrit, mais hors effectif, appels, notes et recouvrement.} other{{count} élèves sont temporairement désactivés : toujours inscrits, mais hors effectif, appels, notes et recouvrement.}}",
   "@suspensionInsightBody": {"placeholders": {"count": {"type": "int"}}},
-  "suspensionInsightAction": "Gérer les élèves désactivés"
+  "suspensionInsightAction": "Gérer les élèves désactivés",
+  "editiqueViewerSheetTitle": "Fiche d'inscription",
+  "documentsHintSheet": "Le dossier d'inscription signé : identité, scolarité, tuteurs et frais. Une seule fiche en vigueur ; une correction du dossier en scelle une nouvelle.",
+  "enrollmentSheetAction": "Fiche d'inscription",
+  "enrollmentSheetOfflineNone": "Hors ligne : aucune fiche d'inscription n'est gardée sur la tablette pour cet élève."
 }

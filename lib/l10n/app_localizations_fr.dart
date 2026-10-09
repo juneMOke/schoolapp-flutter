@@ -15748,4 +15748,18 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get suspensionInsightAction => 'Gérer les élèves désactivés';
+
+  @override
+  String get editiqueViewerSheetTitle => 'Fiche d\'inscription';
+
+  @override
+  String get documentsHintSheet =>
+      'Le dossier d\'inscription signé : identité, scolarité, tuteurs et frais. Une seule fiche en vigueur ; une correction du dossier en scelle une nouvelle.';
+
+  @override
+  String get enrollmentSheetAction => 'Fiche d\'inscription';
+
+  @override
+  String get enrollmentSheetOfflineNone =>
+      'Hors ligne : aucune fiche d\'inscription n\'est gardée sur la tablette pour cet élève.';
 }

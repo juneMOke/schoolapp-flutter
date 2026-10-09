@@ -13,6 +13,7 @@ abstract final class DocumentsCatalogLabels {
       switch (type) {
         EditiqueDocumentType.enrollmentAttestation =>
           l10n.editiqueViewerAttestationTitle,
+        EditiqueDocumentType.enrollmentSheet => l10n.editiqueViewerSheetTitle,
         EditiqueDocumentType.notePerception =>
           l10n.editiqueViewerNotePerceptionTitle,
         EditiqueDocumentType.paymentReceipt => l10n.editiqueViewerReceiptTitle,
@@ -34,6 +35,7 @@ abstract final class DocumentsCatalogLabels {
       switch (type) {
         EditiqueDocumentType.enrollmentAttestation =>
           l10n.documentsHintAttestation,
+        EditiqueDocumentType.enrollmentSheet => l10n.documentsHintSheet,
         EditiqueDocumentType.notePerception => l10n.documentsHintNotePerception,
         EditiqueDocumentType.paymentReceipt => l10n.documentsHintReceipt,
         EditiqueDocumentType.accountStatement => l10n.documentsHintStatement,
@@ -42,7 +44,8 @@ abstract final class DocumentsCatalogLabels {
       };
 
   static Color accentOf(EditiqueDocumentType type) => switch (type) {
-    EditiqueDocumentType.enrollmentAttestation => AppColors.bleuArdoise,
+    EditiqueDocumentType.enrollmentAttestation ||
+    EditiqueDocumentType.enrollmentSheet => AppColors.bleuArdoise,
     EditiqueDocumentType.notePerception ||
     EditiqueDocumentType.paymentReceipt ||
     EditiqueDocumentType.accountStatement => AppColors.terreCuite,

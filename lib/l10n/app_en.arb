@@ -9432,5 +9432,9 @@
   "suspensionInsightTitle": "Deactivated students",
   "suspensionInsightBody": "{count, plural, =1{1 student is temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.} other{{count} students are temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.}}",
   "@suspensionInsightBody": {"placeholders": {"count": {"type": "int"}}},
-  "suspensionInsightAction": "Manage deactivated students"
+  "suspensionInsightAction": "Manage deactivated students",
+  "editiqueViewerSheetTitle": "Enrollment form",
+  "documentsHintSheet": "The signed enrollment file: identity, schooling, guardians and fees. One form in force; correcting the file seals a new one.",
+  "enrollmentSheetAction": "Enrollment form",
+  "enrollmentSheetOfflineNone": "Offline: no enrollment form is kept on the tablet for this student."
 }

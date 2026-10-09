@@ -15643,4 +15643,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get suspensionInsightAction => 'Manage deactivated students';
+
+  @override
+  String get editiqueViewerSheetTitle => 'Enrollment form';
+
+  @override
+  String get documentsHintSheet =>
+      'The signed enrollment file: identity, schooling, guardians and fees. One form in force; correcting the file seals a new one.';
+
+  @override
+  String get enrollmentSheetAction => 'Enrollment form';
+
+  @override
+  String get enrollmentSheetOfflineNone =>
+      'Offline: no enrollment form is kept on the tablet for this student.';
 }

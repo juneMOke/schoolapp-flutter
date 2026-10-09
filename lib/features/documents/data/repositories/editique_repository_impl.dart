@@ -75,6 +75,18 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
   }
 
   @override
+  Future<Either<Failure, EditiqueDocument>> emitEnrollmentSheet({
+    required String enrollmentId,
+    String? studentId,
+    String? academicYearId,
+  }) => _emit(
+    EditiqueDocumentType.enrollmentSheet,
+    () => remoteDataSource.emitEnrollmentSheet(requiredAuth, enrollmentId),
+    studentId: studentId,
+    academicYearId: academicYearId,
+  );
+
+  @override
   Future<Either<Failure, EditiqueDocument>> emitNotePerception({
     required String studentId,
     required String academicYearId,

@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_sheet_action.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/suspension/consultation_suspension.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -451,6 +452,13 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
               children: [
                 if (_offersSuspension)
                   ConsultationSuspensionAction(candidate: candidate),
+                // Toute inscription complétée, quel que soit son type (D9).
+                if (_offersSheet)
+                  EnrollmentSheetAction(
+                    enrollmentId: candidate.target.enrollmentId,
+                    studentId: candidate.target.studentId,
+                    academicYearId: candidate.target.academicYearId,
+                  ),
                 if (_canReedit)
                   PermissionGate.access(
                     kEnrollmentSubmitAccess,
@@ -484,6 +492,12 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   /// « Désactiver » n'est offert qu'en consultation d'un dossier complété
   /// ouvert depuis Première inscription — ni en correction, ni en
   /// réinscription ou pré-inscription.
+  /// La fiche d'inscription : tout dossier complété consulté, quel qu'en
+  /// soit le type.
+  bool get _offersSheet =>
+      !_isCompletedReedition &&
+      _localReadOnly?.enrollment.status == OfflineEnrollmentStatus.completed;
+
   bool get _offersSuspension =>
       !_isCompletedReedition &&
       _isFirstRegistrationListing &&
