@@ -50,6 +50,16 @@ abstract final class EnrollmentSuspensionSql {
       'ORDER BY t.transferred_at DESC LIMIT 1), cm.classroom_id) '
       "ORDER BY (cm.status = 'ACTIVE') DESC, cm.updated_at DESC LIMIT 1)";
 
+  /// Prédicat « le membre [alias] est la classe de l'élève » : `ACTIVE`, ou
+  /// l'appartenance courante d'un élève désactivé — qui garde sa classe pour
+  /// ses statistiques passées et ses pièces, sans revenir dans les listes de
+  /// travail.
+  static String activeOrSuspendedCurrent(String alias) =>
+      "($alias.status = 'ACTIVE' OR ("
+      '${studentSuspended('$alias.student_id', '$alias.academic_year_id')} '
+      'AND $alias.id = '
+      '${currentMemberId('$alias.student_id', '$alias.academic_year_id')}))';
+
   /// Projette sur l'appartenance courante de l'élève, pour chacune des
   /// [targets] `(élève, année)`, ce que dit la table locale : `INACTIVE` tant
   /// qu'une période est ouverte, `ACTIVE` sinon.

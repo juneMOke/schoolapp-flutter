@@ -131,10 +131,11 @@ class DocumentsCatalogAction extends Equatable {
       );
     }
 
-    // L'attestation est la seule pièce clé-dossier ; les trois autres sont
-    // clé-élève. Ses gardes sont donc distinctes.
-    final isAttestation =
-        entry.type == EditiqueDocumentType.enrollmentAttestation;
+    // L'attestation et la fiche d'inscription sont les pièces clé-dossier ;
+    // les autres sont clé-élève. Leurs gardes sont donc distinctes.
+    final isDossierPiece =
+        entry.type == EditiqueDocumentType.enrollmentAttestation ||
+        entry.type == EditiqueDocumentType.enrollmentSheet;
 
     // Le retrait d'une pièce se constate AVANT toute garde, et se porte sur
     // toutes les issues. Les gardes qui suivent disent si l'on peut ÉMETTRE —
@@ -146,7 +147,7 @@ class DocumentsCatalogAction extends Equatable {
     // serveur pour la lui donner.
     final cancelled = _findCancelled(cachedPieces, entry.code);
 
-    if (isAttestation) {
+    if (isDossierPiece) {
       if (enrollmentId.trim().isEmpty) {
         return DocumentsCatalogAction._(
           kind: DocumentsCatalogActionKind.disabled,
@@ -201,7 +202,15 @@ class DocumentsCatalogAction extends Equatable {
     // Elle s'ouvre sur un FAIT (une entrée d'index pour cette pièce), jamais
     // sur le barème : « restitution offline ✅ » dit ce que le type autorise,
     // pas ce qui est déjà là.
-    final cached = _findCached(cachedPieces, entry.code);
+    // La fiche d'inscription fait exception : son contenu change par
+    // conception (un élève désactivé, un dossier corrigé), et la tablette
+    // n'apprend jamais qu'une fiche a été remplacée — elle est hors du flux
+    // éditique. En ligne, on redemande donc toujours la fiche en vigueur ; la
+    // copie ne sert que hors ligne.
+    final cached =
+        entry.type == EditiqueDocumentType.enrollmentSheet && !isOffline
+        ? null
+        : _findCached(cachedPieces, entry.code);
     if (cached != null) {
       return DocumentsCatalogAction._(
         kind: DocumentsCatalogActionKind.consult,

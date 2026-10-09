@@ -69,6 +69,35 @@ LocalGeneratedDocument _piece({
 void main() {
   // L3.5 — ce que la tablette détient réellement, par opposition à ce que le
   // barème autorise.
+  group('fiche d\'inscription', () {
+    test('en ligne : redemandée, jamais servie depuis la copie', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentSheet,
+        cachedPieces: [_cached(docType: 'FI')],
+      );
+      expect(action.kind, DocumentsCatalogActionKind.emit);
+      expect(action.cachedPiece, isNull);
+    });
+
+    test('hors ligne : la copie se consulte', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentSheet,
+        isOffline: true,
+        cachedPieces: [_cached(docType: 'FI')],
+      );
+      expect(action.kind, DocumentsCatalogActionKind.consult);
+    });
+
+    test('pièce de dossier : attend que le dossier soit synchronisé', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentSheet,
+        enrollmentSyncState: SyncState.pendingSync,
+      );
+      expect(action.kind, DocumentsCatalogActionKind.disabled);
+      expect(action.reason, DocumentsCatalogBlockReason.enrollmentPendingSync);
+    });
+  });
+
   group('copie locale', () {
     // C'est l'objet même du cache : hors ligne, une pièce dont on a les octets
     // se consulte. La garde de connectivité ne doit donc PAS la précéder.

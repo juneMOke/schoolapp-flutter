@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 
@@ -453,7 +454,11 @@ class ProvisionalTicketDao {
     required String studentId,
     String? academicYearId,
   }) async {
-    final where = StringBuffer("m.student_id = ? AND m.status = 'ACTIVE'");
+    // Un élève désactivé paie encore : son ticket garde sa classe.
+    final where = StringBuffer(
+      'm.student_id = ? AND '
+      '${EnrollmentSuspensionSql.activeOrSuspendedCurrent('m')}',
+    );
     final args = <Object?>[studentId];
     if (academicYearId != null && academicYearId.isNotEmpty) {
       where.write(' AND m.academic_year_id = ?');

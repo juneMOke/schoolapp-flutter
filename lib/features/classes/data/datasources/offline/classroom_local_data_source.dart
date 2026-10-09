@@ -340,6 +340,9 @@ class ClassroomLocalDataSource {
   /// sur l'ordre physique. Le tri répond d'ailleurs à « quelle ligne a changé en
   /// dernier », jamais à « laquelle est active ».
   ///
+  /// Un élève **désactivé** n'a plus de ligne `ACTIVE` : son appartenance
+  /// courante répond alors, pour que ses statistiques passées restent justes.
+  ///
   /// Le filtre rend donc le cas nominal univoque. **Le tri reste** : rien en SQL
   /// n'impose l'unicité, et un filet dont on a mesuré la faiblesse vaut mieux
   /// que pas de filet.
@@ -351,8 +354,8 @@ class ClassroomLocalDataSource {
       'SELECT $_composedClassroomExpr AS classroom_id '
       'FROM $membersTable m '
       'WHERE m.student_id = ? AND m.academic_year_id = ? '
-      "AND m.status = 'ACTIVE' "
-      'ORDER BY m.updated_at DESC LIMIT 1',
+      'AND ${EnrollmentSuspensionSql.activeOrSuspendedCurrent('m')} '
+      "ORDER BY (m.status = 'ACTIVE') DESC, m.updated_at DESC LIMIT 1",
       [studentId, academicYearId],
     );
     if (rows.isEmpty) return null;
