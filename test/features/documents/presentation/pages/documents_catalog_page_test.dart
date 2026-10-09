@@ -230,14 +230,14 @@ void main() {
     expect(find.textContaining('Un reçu par versement'), findsOneWidget);
   });
 
-  // La garde qui évite un 404 : trois des quatre identifiants sont des uuid
-  // CLIENT avant l'acquittement serveur.
+  // La garde qui évite un 404 : les pièces clé-élève attendent l'élève. Les
+  // deux pièces clé-dossier (attestation, fiche) ont leur propre garde.
   testWidgets('éteint les pièces d un élève non synchronisé', (tester) async {
     await _pump(tester, eligibility: EditiqueEligibilityStatus.blocked);
 
     expect(
       find.textContaining('Élève pas encore synchronisé'),
-      findsNWidgets(4),
+      findsNWidgets(3),
     );
   });
 
@@ -245,7 +245,8 @@ void main() {
   testWidgets('éteint et explique les pièces hors ligne', (tester) async {
     await _pump(tester, syncStatus: SyncStatus.offline);
 
-    expect(find.textContaining('Hors connexion'), findsNWidgets(4));
+    // La fiche, pièce de dossier, suit la garde de l'attestation.
+    expect(find.textContaining('Hors connexion'), findsNWidgets(3));
   });
 
   // D-9 : `authRequired` reste actif — une émission en 401 est une erreur
@@ -270,7 +271,8 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('Dossier introuvable'), findsOneWidget);
+    // L'attestation et la fiche d'inscription, les deux pièces de dossier.
+    expect(find.textContaining('Dossier introuvable'), findsNWidgets(2));
   });
 
   // Chaque émission d'une pièce horodatée brûle un numéro de séquence : l'appui
