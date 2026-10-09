@@ -15798,4 +15798,11 @@ class AppLocalizationsFr extends AppLocalizations {
     });
     return '${_temp0}depuis le $dateString';
   }
+
+  @override
+  String get resultatsErrorSuspendedTitle => 'Élève désactivé';
+
+  @override
+  String get resultatsErrorSuspendedMessage =>
+      'Ses résultats ne sont pas calculés tant qu\'il est désactivé. Réactivez-le depuis sa fiche d\'inscription pour les retrouver.';
 }

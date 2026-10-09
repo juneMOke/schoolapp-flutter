@@ -55,10 +55,15 @@ class ResultatFocusBloc extends Bloc<ResultatFocusEvent, ResultatFocusState> {
     );
   }
 
+  /// Refus serveur d'un élève désactivé, hors du calcul de sa classe.
+  static const String studentSuspendedCode = 'STUDENT_SUSPENDED';
+
   ResultatsErrorType _mapFailureToErrorType(Failure failure) =>
       switch (failure) {
         NetworkFailure() => ResultatsErrorType.network,
         NotFoundFailure() => ResultatsErrorType.notFound,
+        ApiValidationFailure(detailCode: studentSuspendedCode) =>
+          ResultatsErrorType.studentSuspended,
         ValidationFailure() => ResultatsErrorType.validation,
         // Convention projet (cf. interceptor Dio) : HTTP 403 ->
         // UnauthorizedFailure -> forbidden ; HTTP 401 ->

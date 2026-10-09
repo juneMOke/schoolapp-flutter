@@ -68,6 +68,7 @@ class ResultatsResultsErrorState extends StatelessWidget {
     ResultatsErrorType.none ||
     ResultatsErrorType.notFound ||
     ResultatsErrorType.validation ||
+    ResultatsErrorType.studentSuspended ||
     ResultatsErrorType.unknown => EteeloErrorType.unknown,
   };
 
@@ -75,6 +76,8 @@ class ResultatsResultsErrorState extends StatelessWidget {
     AppLocalizations l10n,
     EteeloErrorType viewType,
   ) {
+    // Un élève désactivé ne se « réessaie » pas : il se réactive.
+    if (type == ResultatsErrorType.studentSuspended) return null;
     return switch (viewType) {
       // 403 ne propose jamais « Réessayer » : l'accès est refusé par les droits.
       EteeloErrorType.forbidden =>
@@ -107,22 +110,27 @@ class ResultatsResultsErrorState extends StatelessWidget {
   }
 
   String _title(AppLocalizations l10n, EteeloErrorType viewType) =>
-      switch (viewType) {
-        EteeloErrorType.network => l10n.resultatsErrorNetworkTitle,
-        EteeloErrorType.unauthorized => l10n.resultatsErrorUnauthorizedTitle,
-        EteeloErrorType.forbidden => l10n.resultatsErrorForbiddenTitle,
-        EteeloErrorType.server => l10n.resultatsErrorServerTitle,
-        EteeloErrorType.unknown => l10n.resultatsErrorUnknownTitle,
-      };
+      type == ResultatsErrorType.studentSuspended
+      ? l10n.resultatsErrorSuspendedTitle
+      : switch (viewType) {
+          EteeloErrorType.network => l10n.resultatsErrorNetworkTitle,
+          EteeloErrorType.unauthorized => l10n.resultatsErrorUnauthorizedTitle,
+          EteeloErrorType.forbidden => l10n.resultatsErrorForbiddenTitle,
+          EteeloErrorType.server => l10n.resultatsErrorServerTitle,
+          EteeloErrorType.unknown => l10n.resultatsErrorUnknownTitle,
+        };
 
   String _message(AppLocalizations l10n, EteeloErrorType viewType) =>
-      switch (viewType) {
-        EteeloErrorType.network => l10n.resultatsErrorNetworkMessage,
-        EteeloErrorType.unauthorized => l10n.resultatsErrorUnauthorizedMessage,
-        EteeloErrorType.forbidden => l10n.resultatsErrorForbiddenMessage,
-        EteeloErrorType.server => l10n.resultatsErrorServerMessage,
-        EteeloErrorType.unknown => l10n.resultatsErrorUnknownMessage,
-      };
+      type == ResultatsErrorType.studentSuspended
+      ? l10n.resultatsErrorSuspendedMessage
+      : switch (viewType) {
+          EteeloErrorType.network => l10n.resultatsErrorNetworkMessage,
+          EteeloErrorType.unauthorized =>
+            l10n.resultatsErrorUnauthorizedMessage,
+          EteeloErrorType.forbidden => l10n.resultatsErrorForbiddenMessage,
+          EteeloErrorType.server => l10n.resultatsErrorServerMessage,
+          EteeloErrorType.unknown => l10n.resultatsErrorUnknownMessage,
+        };
 }
 
 class _ErrorAction {

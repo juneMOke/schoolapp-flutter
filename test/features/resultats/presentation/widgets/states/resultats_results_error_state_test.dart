@@ -41,6 +41,21 @@ void main() {
     expect(find.text('Réessayer'), findsNothing);
   });
 
+  testWidgets('élève désactivé → le dire, sans « Réessayer »', (tester) async {
+    await tester.pumpWidget(
+      _host(
+        ResultatsResultsErrorState(
+          type: ResultatsErrorType.studentSuspended,
+          onRetry: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Élève désactivé'), findsOneWidget);
+    expect(find.text('Réessayer'), findsNothing);
+  });
+
   testWidgets('réseau → action « Réessayer »', (tester) async {
     await tester.pumpWidget(
       _host(

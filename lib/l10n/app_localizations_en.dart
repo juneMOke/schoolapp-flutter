@@ -15693,4 +15693,11 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '${_temp0}since $dateString';
   }
+
+  @override
+  String get resultatsErrorSuspendedTitle => 'Deactivated student';
+
+  @override
+  String get resultatsErrorSuspendedMessage =>
+      'Their results are not computed while they are deactivated. Reactivate them from their enrollment file to see them again.';
 }

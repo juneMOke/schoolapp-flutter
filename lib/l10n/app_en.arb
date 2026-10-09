@@ -9439,5 +9439,7 @@
   "suspensionReasonLine": "{reason, select, none{—} other{{reason}}}{precision, select, none{} other{ · {precision}}}",
   "@suspensionReasonLine": {"placeholders": {"reason": {"type": "String"}, "precision": {"type": "String"}}},
   "suspensionBadgeTooltip": "{reason, select, none{} other{{reason} · }}since {date}",
-  "@suspensionBadgeTooltip": {"placeholders": {"reason": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}}
+  "@suspensionBadgeTooltip": {"placeholders": {"reason": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "resultatsErrorSuspendedTitle": "Deactivated student",
+  "resultatsErrorSuspendedMessage": "Their results are not computed while they are deactivated. Reactivate them from their enrollment file to see them again."
 }

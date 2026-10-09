@@ -9747,5 +9747,7 @@
   "suspensionReasonLine": "{reason, select, none{—} other{{reason}}}{precision, select, none{} other{ · {precision}}}",
   "@suspensionReasonLine": {"placeholders": {"reason": {"type": "String"}, "precision": {"type": "String"}}},
   "suspensionBadgeTooltip": "{reason, select, none{} other{{reason} · }}depuis le {date}",
-  "@suspensionBadgeTooltip": {"placeholders": {"reason": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}}
+  "@suspensionBadgeTooltip": {"placeholders": {"reason": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "resultatsErrorSuspendedTitle": "Élève désactivé",
+  "resultatsErrorSuspendedMessage": "Ses résultats ne sont pas calculés tant qu'il est désactivé. Réactivez-le depuis sa fiche d'inscription pour les retrouver."
 }

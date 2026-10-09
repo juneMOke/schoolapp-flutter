@@ -24521,6 +24521,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{reason, select, none{} other{{reason} · }}since {date}'**
   String suspensionBadgeTooltip(String reason, DateTime date);
+
+  /// No description provided for @resultatsErrorSuspendedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated student'**
+  String get resultatsErrorSuspendedTitle;
+
+  /// No description provided for @resultatsErrorSuspendedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Their results are not computed while they are deactivated. Reactivate them from their enrollment file to see them again.'**
+  String get resultatsErrorSuspendedMessage;
 }
 
 class _AppLocalizationsDelegate
