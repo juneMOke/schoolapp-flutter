@@ -92,7 +92,7 @@ void main() {
 
     await ClassroomLocalDataSource(db).upsertMembers(
       members: [
-        ClassroomMemberDto.fromJson({
+        ClassroomMemberDto.fromJson(const {
           'id': 'm-s1-$kYear',
           'studentId': 's1',
           'classroomId': 'class-1',
