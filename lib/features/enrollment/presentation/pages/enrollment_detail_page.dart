@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_sheet_action.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_consultation_actions.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/suspension/consultation_suspension.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -446,30 +444,11 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
             // c'est la seule porte de sortie de la lecture seule, et un libellé
             // posé sur un dégradé bleu se lit comme un titre, pas comme une
             // action — le guichet ne le voyait pas.
-            action: Wrap(
-              spacing: AppSpacing.sm,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (_offersSuspension)
-                  ConsultationSuspensionAction(candidate: candidate),
-                // Toute inscription complétée, quel que soit son type (D9).
-                if (_offersSheet)
-                  EnrollmentSheetAction(
-                    enrollmentId: candidate.target.enrollmentId,
-                    studentId: candidate.target.studentId,
-                    academicYearId: candidate.target.academicYearId,
-                  ),
-                if (_canReedit)
-                  PermissionGate.access(
-                    kEnrollmentSubmitAccess,
-                    child: EteeloButton.primary(
-                      label: l10n.enrollmentReeditAction,
-                      icon: Icons.edit_outlined,
-                      fullWidth: false,
-                      onPressed: _enterReedition,
-                    ),
-                  ),
-              ],
+            action: EnrollmentConsultationActions(
+              candidate: candidate,
+              offersSuspension: _offersSuspension,
+              offersSheet: _offersSheet,
+              onReedit: _canReedit ? _enterReedition : null,
             ),
             body: EnrollmentDetailContentShell(
               child: EnrollmentStepperScope(

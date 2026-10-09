@@ -9414,11 +9414,10 @@
   "@reactivationDone": {"placeholders": {"count": {"type": "int"}}},
   "suspensionDate": "{date}",
   "@suspensionDate": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}},
-  "suspensionBannerTitle": "Student deactivated since {date}",
-  "@suspensionBannerTitle": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}}},
+  "suspensionBannerHeadline": "Student deactivated since {date}{reason, select, none{} other{ · {reason}}}{precision, select, none{} other{ — {precision}}}.",
+  "@suspensionBannerHeadline": {"placeholders": {"date": {"type": "DateTime", "format": "yMMMMd"}, "reason": {"type": "String"}, "precision": {"type": "String"}}},
   "suspensionBannerEffects": "Hidden from roll calls, grade entry, billing and debt recovery.",
-  "suspensionBannerRefused": "The reactivation was refused: {reason}",
-  "@suspensionBannerRefused": {"placeholders": {"reason": {"type": "String"}}},
+  "suspensionBannerRefused": "The server refused the reactivation: the student stays deactivated. Try again, or contact the administrator.",
   "suspensionMemberAction": "Deactivate {name}",
   "@suspensionMemberAction": {"placeholders": {"name": {"type": "String"}}},
   "suspensionDoneClasses": "{count, plural, =1{Student deactivated · removed from the headcount} other{{count} students deactivated · removed from the headcount}}",
@@ -9436,5 +9435,9 @@
   "editiqueViewerSheetTitle": "Enrollment form",
   "documentsHintSheet": "The signed enrollment file: identity, schooling, guardians and fees. One form in force; correcting the file seals a new one.",
   "enrollmentSheetAction": "Enrollment form",
-  "enrollmentSheetOfflineNone": "Offline: no enrollment form is kept on the tablet for this student."
+  "enrollmentSheetOfflineNone": "Offline: no enrollment form is kept on the tablet for this student.",
+  "suspensionReasonLine": "{reason, select, none{—} other{{reason}}}{precision, select, none{} other{ · {precision}}}",
+  "@suspensionReasonLine": {"placeholders": {"reason": {"type": "String"}, "precision": {"type": "String"}}},
+  "suspensionBadgeTooltip": "{reason, select, none{} other{{reason} · }}since {date}",
+  "@suspensionBadgeTooltip": {"placeholders": {"reason": {"type": "String"}, "date": {"type": "DateTime", "format": "yMMMMd"}}}
 }

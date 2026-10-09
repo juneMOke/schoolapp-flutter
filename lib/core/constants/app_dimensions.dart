@@ -771,4 +771,20 @@ class AppDimensions {
   static const sujetDureeOtherWidth = 120.0;
   static const sujetCadreRubriqueMaxWidth = 420.0;
   static const publicationRowTextMaxWidth = 520.0;
+
+  // ── Désactivation d'élèves ────────────────────────────────────────────────
+  /// Icône inline des gestes de désactivation (bandeau, modales, barre).
+  static const suspensionIconSize = 16.0;
+
+  /// Rond de l'icône « Désactiver » d'une ligne élève (cible tactile autour).
+  static const suspensionMemberButtonSize = 32.0;
+
+  /// Médaillon du bandeau « élève désactivé ».
+  static const suspensionBannerMedallion = 30.0;
+
+  /// Sous cette largeur, le bandeau passe son bouton sous le texte.
+  static const suspensionBannerStackMax = 480.0;
+
+  /// Largeur minimale d'une tuile de la section « Élèves désactivés ».
+  static const suspendedMemberTileMinWidth = 280.0;
 }

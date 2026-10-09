@@ -15568,11 +15568,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String suspensionBannerTitle(DateTime date) {
+  String suspensionBannerHeadline(
+    DateTime date,
+    String reason,
+    String precision,
+  ) {
     final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
     final String dateString = dateDateFormat.format(date);
 
-    return 'Student deactivated since $dateString';
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '',
+      'other': ' · $reason',
+    });
+    String _temp1 = intl.Intl.selectLogic(precision, {
+      'none': '',
+      'other': ' — $precision',
+    });
+    return 'Student deactivated since $dateString$_temp0$_temp1.';
   }
 
   @override
@@ -15580,9 +15592,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Hidden from roll calls, grade entry, billing and debt recovery.';
 
   @override
-  String suspensionBannerRefused(String reason) {
-    return 'The reactivation was refused: $reason';
-  }
+  String get suspensionBannerRefused =>
+      'The server refused the reactivation: the student stays deactivated. Try again, or contact the administrator.';
 
   @override
   String suspensionMemberAction(String name) {
@@ -15657,4 +15668,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get enrollmentSheetOfflineNone =>
       'Offline: no enrollment form is kept on the tablet for this student.';
+
+  @override
+  String suspensionReasonLine(String reason, String precision) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '—',
+      'other': '$reason',
+    });
+    String _temp1 = intl.Intl.selectLogic(precision, {
+      'none': '',
+      'other': ' · $precision',
+    });
+    return '$_temp0$_temp1';
+  }
+
+  @override
+  String suspensionBadgeTooltip(String reason, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '',
+      'other': '$reason · ',
+    });
+    return '${_temp0}since $dateString';
+  }
 }

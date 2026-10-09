@@ -24410,11 +24410,15 @@ abstract class AppLocalizations {
   /// **'{date}'**
   String suspensionDate(DateTime date);
 
-  /// No description provided for @suspensionBannerTitle.
+  /// No description provided for @suspensionBannerHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Student deactivated since {date}'**
-  String suspensionBannerTitle(DateTime date);
+  /// **'Student deactivated since {date}{reason, select, none{} other{ · {reason}}}{precision, select, none{} other{ — {precision}}}.'**
+  String suspensionBannerHeadline(
+    DateTime date,
+    String reason,
+    String precision,
+  );
 
   /// No description provided for @suspensionBannerEffects.
   ///
@@ -24425,8 +24429,8 @@ abstract class AppLocalizations {
   /// No description provided for @suspensionBannerRefused.
   ///
   /// In en, this message translates to:
-  /// **'The reactivation was refused: {reason}'**
-  String suspensionBannerRefused(String reason);
+  /// **'The server refused the reactivation: the student stays deactivated. Try again, or contact the administrator.'**
+  String get suspensionBannerRefused;
 
   /// No description provided for @suspensionMemberAction.
   ///
@@ -24505,6 +24509,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Offline: no enrollment form is kept on the tablet for this student.'**
   String get enrollmentSheetOfflineNone;
+
+  /// No description provided for @suspensionReasonLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, none{—} other{{reason}}}{precision, select, none{} other{ · {precision}}}'**
+  String suspensionReasonLine(String reason, String precision);
+
+  /// No description provided for @suspensionBadgeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, none{} other{{reason} · }}since {date}'**
+  String suspensionBadgeTooltip(String reason, DateTime date);
 }
 
 class _AppLocalizationsDelegate

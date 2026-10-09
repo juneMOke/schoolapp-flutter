@@ -20,9 +20,8 @@ abstract final class EnrollmentSuspensionMarks {
     StatusBadgeSize size = StatusBadgeSize.medium,
   }) {
     final reason = SuspensionReason.fromWire(s.suspensionReason)?.label(l10n);
-    final since = l10n.suspensionSince(s.suspendedAt!);
     return Tooltip(
-      message: reason == null ? since : '$reason · $since',
+      message: l10n.suspensionBadgeTooltip(reason ?? 'none', s.suspendedAt!),
       child: StatusBadge.suspended(label: l10n.suspensionBadge, size: size),
     );
   }

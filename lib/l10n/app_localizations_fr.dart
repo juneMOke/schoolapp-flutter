@@ -15673,11 +15673,23 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String suspensionBannerTitle(DateTime date) {
+  String suspensionBannerHeadline(
+    DateTime date,
+    String reason,
+    String precision,
+  ) {
     final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
     final String dateString = dateDateFormat.format(date);
 
-    return 'Élève désactivé depuis le $dateString';
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '',
+      'other': ' · $reason',
+    });
+    String _temp1 = intl.Intl.selectLogic(precision, {
+      'none': '',
+      'other': ' — $precision',
+    });
+    return 'Élève désactivé depuis le $dateString$_temp0$_temp1.';
   }
 
   @override
@@ -15685,9 +15697,8 @@ class AppLocalizationsFr extends AppLocalizations {
       'Masqué des appels, de la saisie des notes, de la facturation et du recouvrement.';
 
   @override
-  String suspensionBannerRefused(String reason) {
-    return 'La réactivation a été refusée : $reason';
-  }
+  String get suspensionBannerRefused =>
+      'La réactivation a été refusée par le serveur : l\'élève reste désactivé. Réessayez, ou contactez l\'administrateur.';
 
   @override
   String suspensionMemberAction(String name) {
@@ -15762,4 +15773,29 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get enrollmentSheetOfflineNone =>
       'Hors ligne : aucune fiche d\'inscription n\'est gardée sur la tablette pour cet élève.';
+
+  @override
+  String suspensionReasonLine(String reason, String precision) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '—',
+      'other': '$reason',
+    });
+    String _temp1 = intl.Intl.selectLogic(precision, {
+      'none': '',
+      'other': ' · $precision',
+    });
+    return '$_temp0$_temp1';
+  }
+
+  @override
+  String suspensionBadgeTooltip(String reason, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '',
+      'other': '$reason · ',
+    });
+    return '${_temp0}depuis le $dateString';
+  }
 }

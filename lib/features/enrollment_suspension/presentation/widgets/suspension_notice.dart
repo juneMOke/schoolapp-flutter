@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -24,7 +25,11 @@ class SuspensionNotice extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.info_outline, size: 18, color: AppColors.bleuArdoise),
+        const Icon(
+          Icons.info_outline,
+          size: AppDimensions.suspensionIconSize,
+          color: AppColors.bleuArdoise,
+        ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text.rich(
@@ -63,7 +68,11 @@ class SuspensionGestureError extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline, size: 18, color: AppColors.error),
+          const Icon(
+            Icons.error_outline,
+            size: AppDimensions.suspensionIconSize,
+            color: AppColors.error,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(

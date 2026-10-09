@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -91,7 +92,10 @@ class SuspensionSelectionBar extends StatelessWidget {
               ),
               FilledButton.icon(
                 onPressed: selectedCount == 0 ? null : onConfirm,
-                icon: const Icon(Icons.person_remove_outlined, size: 16),
+                icon: const Icon(
+                  Icons.person_remove_outlined,
+                  size: AppDimensions.suspensionIconSize,
+                ),
                 label: Text(l10n.suspensionConfirmSelection(selectedCount)),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.orDoux,

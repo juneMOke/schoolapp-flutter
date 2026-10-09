@@ -57,7 +57,11 @@ class _ClassesSuspensionPanelState extends State<ClassesSuspensionPanel> {
             for (final m in all)
               if (widget.classNames.containsKey(m.classroomId)) m,
           ];
-          if (members.isEmpty) return widget.builder(context, null, null);
+          if (members.isEmpty) {
+            // Plus personne à montrer : la bascule repart éteinte.
+            _show = false;
+            return widget.builder(context, null, null);
+          }
           return widget.builder(
             context,
             ShowSuspendedToggle(

@@ -99,6 +99,8 @@ class _SuspendDialogState extends State<SuspendDialog> {
                   controller: _precision,
                   label: l10n.suspensionPrecisionLabel,
                   placeholder: l10n.suspensionPrecisionHint,
+                  // Un texte libre : première lettre seulement.
+                  capitalization: EteeloTextCapitalization.sentence,
                   enabled: !busy,
                   inputFormatters: [
                     LengthLimitingTextInputFormatter(

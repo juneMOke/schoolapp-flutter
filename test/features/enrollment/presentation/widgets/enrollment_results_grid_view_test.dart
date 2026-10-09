@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/components/tables/data_table_pagination_
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_row_selection.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_result_card.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_grid_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -236,5 +237,41 @@ void main() {
     await tester.pump();
 
     expect(nextTapped, isTrue);
+  });
+
+  testWidgets('mode sélection : une case par carte, et la carte coche', (
+    tester,
+  ) async {
+    final toggled = <String>[];
+    final eligible = EnrollmentSummary(
+      enrollmentId: 'e-ok',
+      enrollmentCode: '',
+      status: 'COMPLETED',
+      academicYearId: 'y',
+      student: createMockEnrollment(1).student,
+    );
+    await tester.pumpWidget(
+      buildHarness(
+        EnrollmentRowSelectionScope(
+          selection: EnrollmentRowSelection(
+            selected: const {},
+            onToggle: (s) => toggled.add(s.enrollmentId),
+          ),
+          child: SizedBox(
+            width: 800,
+            height: 800,
+            child: EnrollmentResultsGridView(
+              enrollments: [eligible, createMockEnrollment(2)],
+              onViewRequested: (_) => fail('la carte ne doit pas s\'ouvrir'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Checkbox), findsNWidgets(2));
+    await tester.tap(find.byType(EnrollmentResultCard).first);
+    expect(toggled, ['e-ok']);
   });
 }

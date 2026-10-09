@@ -50,4 +50,13 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('tient sur un téléphone, bouton sous le texte', (tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pump(tester, period());
+    expect(tester.takeException(), isNull);
+    expect(find.text('Réactiver'), findsOneWidget);
+  });
 }

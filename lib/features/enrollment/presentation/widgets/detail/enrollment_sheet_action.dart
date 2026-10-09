@@ -14,7 +14,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// « Fiche d'inscription », en pilule sur la barre sombre d'un dossier
 /// complété. En ligne, le serveur rend la fiche en vigueur (re-servie ou
 /// rescellée) ; hors ligne, la dernière que la tablette a gardée.
-class EnrollmentSheetAction extends StatelessWidget {
+class EnrollmentSheetAction extends StatefulWidget {
   final String enrollmentId;
   final String studentId;
   final String academicYearId;
@@ -26,39 +26,8 @@ class EnrollmentSheetAction extends StatelessWidget {
     required this.academicYearId,
   });
 
-  Future<void> _open(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    if (await getIt<ConnectivityService>().isOnline()) {
-      if (!context.mounted) return;
-      await showEditiqueEnrollmentSheetDialog(
-        context,
-        enrollmentId: enrollmentId,
-        studentId: studentId,
-        academicYearId: academicYearId,
-      );
-      return;
-    }
-    final kept = latestKeptSheet(
-      await getIt<ListCachedDocumentsUseCase>()(
-        studentId: studentId,
-        academicYearId: academicYearId,
-      ),
-    );
-    if (!context.mounted) return;
-    if (kept == null) {
-      AppSnackBar.showWarning(context, l10n.enrollmentSheetOfflineNone);
-      return;
-    }
-    await showEditiqueRestitutionDialog(
-      context,
-      type: EditiqueDocumentType.enrollmentSheet,
-      title: l10n.editiqueViewerSheetTitle,
-      documentId: kept.documentId,
-      documentNumber: kept.documentNumber,
-      studentId: studentId,
-      academicYearId: academicYearId,
-    );
-  }
+  @override
+  State<EnrollmentSheetAction> createState() => _EnrollmentSheetActionState();
 
   /// La fiche la plus récente dont la tablette détient les octets ; une fiche
   /// remplacée n'est jamais préférée à sa remplaçante.
@@ -76,6 +45,58 @@ class EnrollmentSheetAction extends StatelessWidget {
         );
     return sheets.isEmpty ? null : sheets.first;
   }
+}
+
+class _EnrollmentSheetActionState extends State<EnrollmentSheetAction> {
+  /// Un second appui pendant l'ouverture n'émet pas une seconde fois.
+  bool _busy = false;
+
+  Future<void> _onPressed() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await _open();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _open() async {
+    final l10n = AppLocalizations.of(context)!;
+    final enrollmentId = widget.enrollmentId;
+    final studentId = widget.studentId;
+    final academicYearId = widget.academicYearId;
+    if (await getIt<ConnectivityService>().isOnline()) {
+      if (!mounted) return;
+      await showEditiqueEnrollmentSheetDialog(
+        context,
+        enrollmentId: enrollmentId,
+        studentId: studentId,
+        academicYearId: academicYearId,
+      );
+      return;
+    }
+    final kept = EnrollmentSheetAction.latestKeptSheet(
+      await getIt<ListCachedDocumentsUseCase>()(
+        studentId: studentId,
+        academicYearId: academicYearId,
+      ),
+    );
+    if (!mounted) return;
+    if (kept == null) {
+      AppSnackBar.showWarning(context, l10n.enrollmentSheetOfflineNone);
+      return;
+    }
+    await showEditiqueRestitutionDialog(
+      context,
+      type: EditiqueDocumentType.enrollmentSheet,
+      title: l10n.editiqueViewerSheetTitle,
+      documentId: kept.documentId,
+      documentNumber: kept.documentNumber,
+      studentId: studentId,
+      academicYearId: academicYearId,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +107,7 @@ class EnrollmentSheetAction extends StatelessWidget {
       child: EnrollmentJourneyPillButton(
         label: l10n.enrollmentSheetAction,
         icon: Icons.print_outlined,
-        onPressed: () => _open(context),
+        onPressed: _busy ? null : _onPressed,
       ),
     );
   }

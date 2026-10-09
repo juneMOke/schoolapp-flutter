@@ -12,7 +12,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// L'icône « Désactiver » d'une ligne élève de la composition des classes,
 /// avant « Transférer ». Le membre ne porte pas son inscription : elle se
 /// retrouve au geste.
-class ClassMemberSuspendButton extends StatelessWidget {
+class ClassMemberSuspendButton extends StatefulWidget {
   final String studentId;
   final String academicYearId;
   final String lastName;
@@ -30,15 +30,32 @@ class ClassMemberSuspendButton extends StatelessWidget {
     this.middleName,
   });
 
-  static const double _size = 32;
+  @override
+  State<ClassMemberSuspendButton> createState() =>
+      _ClassMemberSuspendButtonState();
+}
 
-  Future<void> _onPressed(BuildContext context) async {
+class _ClassMemberSuspendButtonState extends State<ClassMemberSuspendButton> {
+  /// Un second appui pendant la résolution n'ouvre pas une seconde modale.
+  bool _busy = false;
+
+  Future<void> _onPressed() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await _suspend();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _suspend() async {
     final l10n = AppLocalizations.of(context)!;
     final result = await getIt<ResolveSuspensionTargetUseCase>()(
-      studentId: studentId,
-      academicYearId: academicYearId,
+      studentId: widget.studentId,
+      academicYearId: widget.academicYearId,
     );
-    if (!context.mounted) return;
+    if (!mounted) return;
     final target = result.fold((_) => null, (t) => t);
     if (target == null) {
       AppSnackBar.showWarning(context, l10n.suspensionNoEnrollment);
@@ -47,10 +64,10 @@ class ClassMemberSuspendButton extends StatelessWidget {
     await SuspensionFlow.suspend(context, [
       SuspensionCandidate(
         target: target,
-        lastName: lastName,
-        middleName: middleName,
-        firstName: firstName,
-        classLabel: classLabel,
+        lastName: widget.lastName,
+        middleName: widget.middleName,
+        firstName: widget.firstName,
+        classLabel: widget.classLabel,
       ),
     ], doneMessage: (l10n, count) => l10n.suspensionDoneClasses(count));
   }
@@ -59,21 +76,27 @@ class ClassMemberSuspendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = AppLocalizations.of(
       context,
-    )!.suspensionMemberAction('$lastName $firstName');
+    )!.suspensionMemberAction('${widget.lastName} ${widget.firstName}');
     return SuspensionGate(
       child: Tooltip(
         message: label,
         child: IconButton(
-          onPressed: () => _onPressed(context),
-          icon: const Icon(Icons.person_remove_outlined, size: 15),
-          color: AppColors.textSecondary,
-          // Cible tactile ≥ 44 dp autour d'un rond de 32.
-          constraints: const BoxConstraints(
-            minWidth: AppDimensions.minTouchTarget,
-            minHeight: AppDimensions.minTouchTarget,
+          onPressed: _busy ? null : _onPressed,
+          icon: const Icon(
+            Icons.person_remove_outlined,
+            size: AppDimensions.insPaveMedallionIconSize,
           ),
+          color: AppColors.textSecondary,
+          // Un rond de 32 ; la cible tactile Material l'entoure.
           style: IconButton.styleFrom(
-            fixedSize: const Size.square(_size),
+            fixedSize: const Size.square(
+              AppDimensions.suspensionMemberButtonSize,
+            ),
+            minimumSize: const Size.square(
+              AppDimensions.suspensionMemberButtonSize,
+            ),
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.padded,
             shape: const CircleBorder(
               side: BorderSide(color: AppColors.border),
             ),

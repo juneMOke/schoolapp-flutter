@@ -36,6 +36,15 @@ class SuspensionSelectionCubit extends Cubit<SuspensionSelectionState> {
     );
   }
 
+  /// Ne garde que les inscriptions encore dans les résultats : une nouvelle
+  /// recherche ne laisse aucun élève coché qu'on ne voit plus.
+  void retain(Set<String> visibleIds) {
+    if (!state.active) return;
+    final kept = state.selected.intersection(visibleIds);
+    if (kept.length == state.selected.length) return;
+    emit(SuspensionSelectionState(active: true, selected: kept));
+  }
+
   /// Coche les éligibles de la page, ou les décoche s'ils l'étaient tous.
   void togglePage(Iterable<String> eligiblePageIds) {
     if (!state.active || eligiblePageIds.isEmpty) return;

@@ -44,17 +44,28 @@ class _FirstRegistrationSuspensionScopeState
       onChanged: () => context.read<EnrollmentLocalListBloc>().add(
         const LocalListRefreshRequested(),
       ),
-      child: BlocBuilder<SuspensionSelectionCubit, SuspensionSelectionState>(
-        builder: (context, selection) => EnrollmentRowSelectionScope(
-          selection: selection.active
-              ? EnrollmentRowSelection(
-                  selected: selection.selected,
-                  onToggle: (s) => context
-                      .read<SuspensionSelectionCubit>()
-                      .toggle(s.enrollmentId),
-                )
-              : null,
-          child: widget.child,
+      child: BlocListener<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+        listenWhen: (previous, current) =>
+            current.summariesStatus == EnrollmentLoadStatus.success &&
+            previous.lastSummariesQuery != current.lastSummariesQuery,
+        listener: (context, _) =>
+            context.read<SuspensionSelectionCubit>().retain({
+              for (final s
+                  in context.read<EnrollmentLocalListBloc>().loadedSummaries)
+                s.enrollmentId,
+            }),
+        child: BlocBuilder<SuspensionSelectionCubit, SuspensionSelectionState>(
+          builder: (context, selection) => EnrollmentRowSelectionScope(
+            selection: selection.active
+                ? EnrollmentRowSelection(
+                    selected: selection.selected,
+                    onToggle: (s) => context
+                        .read<SuspensionSelectionCubit>()
+                        .toggle(s.enrollmentId),
+                  )
+                : null,
+            child: widget.child,
+          ),
         ),
       ),
     ),
@@ -69,7 +80,10 @@ class FirstRegistrationSuspensionActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = context.watch<EnrollmentLocalListBloc>().state;
+    final (suspendedCount, showSuspended) = context.select(
+      (EnrollmentLocalListBloc b) =>
+          (b.state.suspendedCount, b.state.showSuspended),
+    );
     final selecting = context.select(
       (SuspensionSelectionCubit c) => c.state.active,
     );
@@ -78,10 +92,10 @@ class FirstRegistrationSuspensionActions extends StatelessWidget {
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        if (list.suspendedCount > 0)
+        if (suspendedCount > 0)
           ShowSuspendedToggle(
-            value: list.showSuspended,
-            count: list.suspendedCount,
+            value: showSuspended,
+            count: suspendedCount,
             onChanged: (show) => context.read<EnrollmentLocalListBloc>().add(
               LocalListShowSuspendedChanged(show),
             ),

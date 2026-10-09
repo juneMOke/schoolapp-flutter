@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -26,8 +27,6 @@ class SuspendedMembersSection extends StatelessWidget {
     required this.members,
     required this.classLabelOf,
   });
-
-  static const double _tileMinWidth = 280;
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +64,11 @@ class SuspendedMembersSection extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final columns = (constraints.maxWidth / _tileMinWidth)
-                    .floor()
-                    .clamp(1, 4);
+                final columns =
+                    (constraints.maxWidth /
+                            AppDimensions.suspendedMemberTileMinWidth)
+                        .floor()
+                        .clamp(1, 4);
                 final width =
                     (constraints.maxWidth - AppSpacing.md * (columns - 1)) /
                     columns;
@@ -78,12 +79,9 @@ class SuspendedMembersSection extends StatelessWidget {
                     for (final m in members)
                       SizedBox(
                         width: width,
-                        child: Opacity(
-                          opacity: 0.85,
-                          child: _Tile(
-                            member: m,
-                            classLabel: classLabelOf(m.classroomId),
-                          ),
+                        child: _Tile(
+                          member: m,
+                          classLabel: classLabelOf(m.classroomId),
                         ),
                       ),
                   ],
@@ -98,6 +96,8 @@ class SuspendedMembersSection extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
+  static const double _identityOpacity = 0.85;
+
   final SuspendedMember member;
   final String classLabel;
 
@@ -118,40 +118,50 @@ class _Tile extends StatelessWidget {
       firstName: member.firstName,
       classLabel: classLabel,
     );
+    // L'identité s'estompe, hors effectif ; « Réactiver » garde son contraste.
     return Row(
       children: [
-        PersonAvatar(
-          firstName: member.firstName,
-          lastName: member.lastName,
-          personId: s.studentId,
-          studentPhotoOf: s.studentId,
-        ),
-        const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                candidate.familyName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.titleSmall.copyWith(
-                  color: AppColors.textPrimary,
+          child: Opacity(
+            opacity: _identityOpacity,
+            child: Row(
+              children: [
+                PersonAvatar(
+                  firstName: member.firstName,
+                  lastName: member.lastName,
+                  personId: s.studentId,
+                  studentPhotoOf: s.studentId,
                 ),
-              ),
-              Text(
-                l10n.suspendedMemberLine(
-                  member.firstName,
-                  classLabel,
-                  s.suspendedAt,
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        candidate.familyName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.titleSmall.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        l10n.suspendedMemberLine(
+                          member.firstName,
+                          classLabel,
+                          s.suspendedAt,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         SuspensionGate(

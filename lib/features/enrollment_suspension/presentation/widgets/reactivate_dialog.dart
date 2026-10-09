@@ -92,10 +92,10 @@ class _Reminder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final reason = [
-      suspension.reason?.label(l10n),
-      suspension.precision,
-    ].whereType<String>().join(' · ');
+    final reason = l10n.suspensionReasonLine(
+      suspension.reason?.label(l10n) ?? 'none',
+      suspension.precision ?? 'none',
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -104,7 +104,7 @@ class _Reminder extends StatelessWidget {
           l10n.suspensionDate(suspension.suspendedAt),
         ),
         const SizedBox(height: AppSpacing.xs),
-        _line(l10n.reactivationReasonLabel, reason.isEmpty ? '—' : reason),
+        _line(l10n.reactivationReasonLabel, reason),
       ],
     );
   }

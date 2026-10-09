@@ -17,4 +17,13 @@ void main() {
     expect(cubit.state.active, isFalse);
     expect(cubit.state.selected, isEmpty);
   });
+
+  test('une nouvelle recherche élague ce qu\'on ne voit plus', () {
+    final cubit = SuspensionSelectionCubit()
+      ..start()
+      ..togglePage(['e1', 'e2', 'e3'])
+      ..retain({'e2', 'e9'});
+    expect(cubit.state.selected, {'e2'});
+    expect(cubit.state.active, isTrue);
+  });
 }

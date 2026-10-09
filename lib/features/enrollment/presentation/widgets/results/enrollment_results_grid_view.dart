@@ -59,9 +59,10 @@ class EnrollmentResultsGridView extends StatelessWidget {
           card = EnrollmentSuspensionMarks.dimmed(card);
         }
         if (selection == null) return card;
+        // La carte fixe la taille de la pile ; la case se pose dessus.
         return Stack(
           children: [
-            Positioned.fill(child: card),
+            card,
             Positioned(
               top: AppSpacing.xs,
               right: AppSpacing.xs,

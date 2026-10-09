@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Une action de dossier en pilule sur la barre sombre du parcours : contour
-/// clair, ou vert savane pour un retour à la normale ([positive]).
+/// clair, ou vert savane pour un retour à la normale ([positive]). Sous
+/// [AppBreakpoints.enrollmentJourneyActionLabelsMin], l'icône seule, le
+/// libellé en infobulle : la barre doit tenir sur une tablette en portrait.
 class EnrollmentJourneyPillButton extends StatelessWidget {
   final String label;
   final IconData icon;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool positive;
 
   const EnrollmentJourneyPillButton({
@@ -19,30 +23,52 @@ class EnrollmentJourneyPillButton extends StatelessWidget {
     this.positive = false,
   });
 
-  static const double _height = 40;
+  /// Alphas des surfaces « sur fond sombre ».
+  static const double _fill = 0.06;
+  static const double _outline = 0.35;
+  static const double _positiveFill = 0.35;
+  static const double _positiveOutline = 0.6;
+  static const double _outlineWidth = 1.5;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: _height,
-    child: OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textOnDark,
-        backgroundColor: positive
-            ? AppColors.success.withValues(alpha: 0.35)
-            : AppColors.textOnDark.withValues(alpha: 0.06),
-        side: BorderSide(
-          width: 1.5,
-          color: positive
-              ? AppColors.success.withValues(alpha: 0.6)
-              : AppColors.textOnDark.withValues(alpha: 0.35),
-        ),
-        shape: const StadiumBorder(),
-        textStyle: AppTypography.labelMedium,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+  Widget build(BuildContext context) {
+    final compact =
+        MediaQuery.sizeOf(context).width <
+        AppBreakpoints.enrollmentJourneyActionLabelsMin;
+    final style = OutlinedButton.styleFrom(
+      foregroundColor: AppColors.textOnDark,
+      backgroundColor: positive
+          ? AppColors.success.withValues(alpha: _positiveFill)
+          : AppColors.textOnDark.withValues(alpha: _fill),
+      side: BorderSide(
+        width: _outlineWidth,
+        color: positive
+            ? AppColors.success.withValues(alpha: _positiveOutline)
+            : AppColors.textOnDark.withValues(alpha: _outline),
       ),
-    ),
-  );
+      shape: compact ? const CircleBorder() : const StadiumBorder(),
+      textStyle: AppTypography.labelMedium,
+      minimumSize: const Size.square(AppDimensions.minTouchTarget),
+      padding: compact
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+    );
+    final iconWidget = Icon(icon, size: AppDimensions.suspensionIconSize);
+    if (compact) {
+      return Tooltip(
+        message: label,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: style,
+          child: Semantics(label: label, child: iconWidget),
+        ),
+      );
+    }
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: iconWidget,
+      label: Text(label),
+      style: style,
+    );
+  }
 }

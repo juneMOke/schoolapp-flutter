@@ -92,6 +92,10 @@ class AppBreakpoints {
   /// (« Désactiver ») tient à côté du nom et de « Transférer ».
   static const double classesMemberTileExtraActionMin = 360.0;
 
+  /// Largeur d'écran sous laquelle les actions de dossier de la barre sombre
+  /// passent en icône seule (Désactiver, Fiche d'inscription, Modifier).
+  static const double enrollmentJourneyActionLabelsMin = 1024.0;
+
   // Carte de cas disciplinaire — pied (frise + action). En deçà : empilement
   // vertical pour éviter tout débordement ; au-delà : frise et action en Row.
   static const double disciplinaryCardFooterStackMax = 480.0;

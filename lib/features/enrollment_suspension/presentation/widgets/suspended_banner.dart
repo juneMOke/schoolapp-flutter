@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -23,92 +24,96 @@ class SuspendedBanner extends StatelessWidget {
     required this.onReactivate,
   });
 
-  static const double _medallion = 30;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final reason = suspension.reason?.label(l10n);
-    final precision = suspension.precision;
-    final title =
-        StringBuffer(l10n.suspensionBannerTitle(suspension.suspendedAt))
-          ..write(reason == null ? '' : ' · $reason')
-          ..write(precision == null ? '' : ' — $precision')
-          ..write('.');
-    final refused = suspension.syncState == RecordSyncState.failed
-        ? suspension.syncError
-        : null;
+    final refused = suspension.syncState == RecordSyncState.failed;
+    final text = Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text:
+                '${l10n.suspensionBannerHeadline(suspension.suspendedAt, suspension.reason?.label(l10n) ?? _none, suspension.precision ?? _none)} ',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          TextSpan(text: l10n.suspensionBannerEffects),
+          if (refused)
+            TextSpan(
+              text: '\n${l10n.suspensionBannerRefused}',
+              style: const TextStyle(color: AppColors.error),
+            ),
+        ],
+      ),
+      style: AppTypography.bodySmall.copyWith(color: AppColors.suspendedInk),
+    );
+    final action = SuspensionGate(
+      child: EteeloButton.secondary(
+        label: l10n.reactivationConfirm,
+        icon: Icons.how_to_reg_outlined,
+        fullWidth: false,
+        onPressed: onReactivate,
+      ),
+    );
     return Semantics(
       liveRegion: true,
       child: EteeloDashedContainer(
         backgroundColor: AppColors.suspendedSurface,
         borderColor: AppColors.suspendedBorder,
         borderRadius: AppRadius.brMd,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md + 3,
-          vertical: AppSpacing.md,
-        ),
-        child: Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final identity = Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: _medallion,
-                  height: _medallion,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.suspendedInk,
-                  ),
-                  child: const Icon(
-                    Icons.person_remove_outlined,
-                    size: 15,
-                    color: AppColors.textOnDark,
-                  ),
-                ),
+                const _Medallion(),
                 const SizedBox(width: AppSpacing.md),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 220,
-                    maxWidth: 640,
-                  ),
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '$title ',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        TextSpan(text: l10n.suspensionBannerEffects),
-                        if (refused != null)
-                          TextSpan(
-                            text: '\n${l10n.suspensionBannerRefused(refused)}',
-                            style: const TextStyle(color: AppColors.error),
-                          ),
-                      ],
-                    ),
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.suspendedInk,
-                    ),
-                  ),
-                ),
+                Expanded(child: text),
               ],
-            ),
-            SuspensionGate(
-              child: EteeloButton.secondary(
-                label: l10n.reactivationConfirm,
-                icon: Icons.how_to_reg_outlined,
-                fullWidth: false,
-                onPressed: onReactivate,
-              ),
-            ),
-          ],
+            );
+            // Étroit : le bouton passe sous le texte, qui garde la largeur.
+            if (constraints.maxWidth < AppDimensions.suspensionBannerStackMax) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  identity,
+                  const SizedBox(height: AppSpacing.sm),
+                  action,
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: identity),
+                const SizedBox(width: AppSpacing.md),
+                action,
+              ],
+            );
+          },
         ),
       ),
     );
   }
+
+  /// La valeur `select` de l'ARB qui dit « absent ».
+  static const String _none = 'none';
+}
+
+class _Medallion extends StatelessWidget {
+  const _Medallion();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: AppDimensions.suspensionBannerMedallion,
+    height: AppDimensions.suspensionBannerMedallion,
+    decoration: const BoxDecoration(
+      shape: BoxShape.circle,
+      color: AppColors.suspendedInk,
+    ),
+    child: const Icon(
+      Icons.person_remove_outlined,
+      size: AppDimensions.insPaveMedallionIconSize,
+      color: AppColors.textOnDark,
+    ),
+  );
 }
