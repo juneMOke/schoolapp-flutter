@@ -216,6 +216,43 @@ void main() {
         expect(counts['ev-1'], 2, reason: 'SYNC_ERROR exclue du compte');
       },
     );
+
+    test('exclut les notes d\'un élève désactivé de la classe', () async {
+      await db.insert('ref_cours', {
+        'id': 'cours-x',
+        'classroom_id': 'class-x',
+        'ligne_bareme_id': 'lb',
+        'synced_at': 1,
+      });
+      final ev = evalRow().toMap()
+        ..['id'] = 'ev-x'
+        ..['cours_id'] = 'cours-x';
+      await db.insert('evaluation', ev);
+      for (final n in [('n1', 's1', 'ACTIVE'), ('n2', 's2', 'INACTIVE')]) {
+        await db.insert('ref_classroom_members', {
+          'id': 'm-${n.$2}',
+          'student_id': n.$2,
+          'classroom_id': 'class-x',
+          'academic_year_id': 'ay',
+          'student_first_name': 'P',
+          'student_last_name': 'N',
+          'status': n.$3,
+        });
+        await db.insert('note_evaluation', {
+          'id': n.$1,
+          'evaluation_id': 'ev-x',
+          'student_id': n.$2,
+          'points_obtenus': 10.0,
+          'statut': 'NOTEE',
+          'updated_at': 1,
+          'sync_status': 'SYNCED',
+        });
+      }
+
+      final counts = await local.notedCountByEvaluation(['ev-x']);
+
+      expect(counts['ev-x'], 1, reason: 'la note de s2 reste, sans compter');
+    });
   });
 
   group('réalignement post-ACK', () {

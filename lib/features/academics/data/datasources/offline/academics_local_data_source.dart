@@ -79,16 +79,25 @@ class AcademicsLocalDataSource {
   /// Les notes `SYNC_ERROR` (rejetées terminalement par le serveur) sont
   /// EXCLUES : elles ne doivent pas gonfler le taux et faire croire « saisie
   /// complète » alors que le serveur les a refusées.
+  ///
+  /// Les notes d'un élève **désactivé** (membre `INACTIVE` de la classe du
+  /// cours) sont exclues de même : l'effectif qui leur fait face ne le compte
+  /// plus. Elles restent en base, intactes.
   Future<Map<String, int>> notedCountByEvaluation(
     List<String> evaluationIds,
   ) async {
     if (evaluationIds.isEmpty) return const {};
     final placeholders = List.filled(evaluationIds.length, '?').join(',');
     final rows = await _db.rawQuery(
-      'SELECT evaluation_id AS eid, COUNT(*) AS n FROM $noteTable '
-      "WHERE evaluation_id IN ($placeholders) AND statut = 'NOTEE' "
-      "AND sync_status != '${SyncState.syncError.dbValue}' "
-      'GROUP BY evaluation_id',
+      'SELECT n.evaluation_id AS eid, COUNT(*) AS n FROM $noteTable n '
+      "WHERE n.evaluation_id IN ($placeholders) AND n.statut = 'NOTEE' "
+      "AND n.sync_status != '${SyncState.syncError.dbValue}' "
+      'AND NOT EXISTS (SELECT 1 FROM evaluation ev '
+      'JOIN ref_cours c ON c.id = ev.cours_id '
+      'JOIN ref_classroom_members m ON m.classroom_id = c.classroom_id '
+      'AND m.student_id = n.student_id '
+      "WHERE ev.id = n.evaluation_id AND m.status = 'INACTIVE') "
+      'GROUP BY n.evaluation_id',
       evaluationIds,
     );
     return {for (final r in rows) r['eid'] as String: (r['n'] as num).toInt()};
