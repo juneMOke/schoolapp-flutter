@@ -63,4 +63,36 @@ void main() {
       'e-done',
     );
   });
+
+  test('un élève transféré n\'est compté qu\'une fois, dans sa classe '
+      'courante', () async {
+    await insertMember(
+      db,
+      's1',
+      status: 'INACTIVE',
+      classroomId: 'class-A',
+      id: 'm-A',
+    );
+    await insertMember(db, 's1', classroomId: 'class-B', id: 'm-B');
+    await db.insert('classroom_transfers', {
+      'id': 't1',
+      'student_id': 's1',
+      'from_classroom_id': 'class-A',
+      'to_classroom_id': 'class-B',
+      'school_level_id': 'lvl',
+      'academic_year_id': kYear,
+      'transferred_at': 1,
+      'sync_status': 'SYNCED',
+    });
+    await EnrollmentSuspensionWriteDao(
+      db,
+    ).suspend([suspendGesture('s1')], schoolId: kSchool, nowMs: 1);
+
+    final members = await reader.suspendedMembers(
+      schoolId: kSchool,
+      academicYearId: kYear,
+    );
+
+    expect(members.single.classroomId, 'class-B');
+  });
 }

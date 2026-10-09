@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/local/enrollment_suspension_row.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/student_suspension.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/suspended_member.dart';
@@ -67,9 +68,10 @@ class EnrollmentSuspensionReadDao {
       'm.student_last_name AS member_last_name, '
       'm.student_middle_name AS member_middle_name '
       'FROM $table es '
+      // L'appartenance courante seule : un élève transféré garde une ligne
+      // d'historique dans la classe quittée.
       'JOIN ref_classroom_members m '
-      'ON m.student_id = es.student_id '
-      'AND m.academic_year_id = es.academic_year_id '
+      'ON m.id = ${EnrollmentSuspensionSql.currentMemberId('es.student_id', 'es.academic_year_id')} '
       'WHERE es.school_id = ? AND es.academic_year_id = ? '
       'AND es.reactivated_at IS NULL '
       'ORDER BY m.student_last_name, m.student_first_name',

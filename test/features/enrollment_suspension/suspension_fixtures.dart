@@ -45,10 +45,12 @@ Future<void> insertMember(
   String student, {
   String status = 'ACTIVE',
   String year = kYear,
+  String classroomId = 'class-1',
+  String? id,
 }) => db.insert('ref_classroom_members', {
-  'id': 'm-$student-$year',
+  'id': id ?? 'm-$student-$year',
   'student_id': student,
-  'classroom_id': 'class-1',
+  'classroom_id': classroomId,
   'academic_year_id': year,
   'student_first_name': 'Prénom $student',
   'student_last_name': 'Nom $student',

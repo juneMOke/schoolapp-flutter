@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
+import 'package:school_app_flutter/features/enrollment_suspension/data/local/enrollment_suspension_write_dao.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../features/enrollment_suspension/suspension_fixtures.dart';
@@ -25,49 +26,93 @@ void main() {
         'updated_at': 1,
       });
 
-  test('project : INACTIVE si ouverte, ACTIVE sinon, sans condition', () async {
+  /// Un élève transféré de A vers B : la ligne A reste, `INACTIVE`, comme
+  /// historique ; B est son appartenance courante.
+  Future<void> transferred(String student) async {
+    await insertMember(
+      db,
+      student,
+      status: 'INACTIVE',
+      classroomId: 'class-A',
+      id: 'm-$student-A',
+    );
+    await insertMember(db, student, classroomId: 'class-B', id: 'm-$student-B');
+    await db.insert('classroom_transfers', {
+      'id': 't-$student',
+      'student_id': student,
+      'from_classroom_id': 'class-A',
+      'to_classroom_id': 'class-B',
+      'school_level_id': 'lvl',
+      'academic_year_id': kYear,
+      'transferred_at': 1,
+      'sync_status': 'SYNCED',
+    });
+  }
+
+  test('project : INACTIVE si ouverte, ACTIVE sinon', () async {
     await insertMember(db, 's1');
     await insertMember(db, 's2', status: 'INACTIVE');
     await period('s1');
 
-    await EnrollmentSuspensionSql.project(db, ['s1', 's2']);
+    await EnrollmentSuspensionSql.project(db, [('s1', kYear), ('s2', kYear)]);
 
     expect(await memberStatus(db, 's1'), 'INACTIVE');
     expect(await memberStatus(db, 's2'), 'ACTIVE');
   });
 
-  test('project ne touche que l\'année de la période', () async {
+  test('project ne touche pas les membres d\'une autre année', () async {
     await insertMember(db, 's1');
-    await insertMember(db, 's1', year: 'year-0');
+    await insertMember(db, 's1', year: 'year-0', status: 'INACTIVE');
     await period('s1');
 
-    await EnrollmentSuspensionSql.project(db, ['s1']);
+    await EnrollmentSuspensionSql.project(db, [('s1', kYear)]);
 
     expect(await memberStatus(db, 's1'), 'INACTIVE');
-    expect(await memberStatus(db, 's1', year: 'year-0'), 'ACTIVE');
+    expect(await memberStatus(db, 's1', year: 'year-0'), 'INACTIVE');
   });
 
-  test('après un pull de membres : un élève sans période garde le statut '
-      'du serveur', () async {
-    await insertMember(db, 's1', status: 'INACTIVE');
-    await insertMember(db, 's2');
-    await period('s2');
+  test('élève transféré : seule la classe courante bouge, la classe quittée '
+      'reste INACTIVE', () async {
+    await transferred('s1');
+    Future<String?> statusIn(String classroom) async =>
+        (await db.query(
+              'ref_classroom_members',
+              columns: ['status'],
+              where: 'student_id = ? AND classroom_id = ?',
+              whereArgs: ['s1', classroom],
+            )).single['status']
+            as String?;
 
-    await EnrollmentSuspensionSql.reapplyAfterMemberPull(db, ['s1', 's2']);
+    await period('s1');
+    await EnrollmentSuspensionSql.project(db, [('s1', kYear)]);
+    expect(await statusIn('class-A'), 'INACTIVE');
+    expect(await statusIn('class-B'), 'INACTIVE');
 
-    expect(await memberStatus(db, 's1'), 'INACTIVE');
-    expect(await memberStatus(db, 's2'), 'INACTIVE');
+    await db.delete('enrollment_suspensions');
+    await EnrollmentSuspensionSql.project(db, [('s1', kYear)]);
+    expect(await statusIn('class-A'), 'INACTIVE');
+    expect(await statusIn('class-B'), 'ACTIVE');
   });
 
   test(
-    'après un pull de membres : une période fermée rend l\'élève actif',
+    'après un pull de membres : seul un geste en file reprend la main',
     () async {
       await insertMember(db, 's1', status: 'INACTIVE');
+      await insertMember(db, 's2');
+      // s1 : période synchronisée et fermée, le serveur dit INACTIVE → on garde.
       await period('s1', reactivatedAt: '2026-10-09T08:00:00Z');
+      // s2 : désactivé hors ligne, pas encore envoyé.
+      await EnrollmentSuspensionWriteDao(
+        db,
+      ).suspend([suspendGesture('s2')], schoolId: kSchool, nowMs: 1);
+      await db.update('ref_classroom_members', {
+        'status': 'ACTIVE',
+      }, where: "student_id = 's2'");
 
-      await EnrollmentSuspensionSql.reapplyAfterMemberPull(db, ['s1']);
+      await EnrollmentSuspensionSql.reapplyAfterMemberPull(db, ['s1', 's2']);
 
-      expect(await memberStatus(db, 's1'), 'ACTIVE');
+      expect(await memberStatus(db, 's1'), 'INACTIVE');
+      expect(await memberStatus(db, 's2'), 'INACTIVE');
     },
   );
 

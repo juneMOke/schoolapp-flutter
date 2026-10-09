@@ -136,6 +136,7 @@ class EnrollmentSuspensionOutboxHandler implements OutboxSyncHandler {
     if (failure.isTransient) return OutboxDispatchResult.retry(failure.reason);
     await _sync.undoRefused(
       gesture,
+      schoolId: _currentUser.schoolId ?? '',
       code: failure.storedCode,
       reason: failure.reason,
       nowMs: _now(),

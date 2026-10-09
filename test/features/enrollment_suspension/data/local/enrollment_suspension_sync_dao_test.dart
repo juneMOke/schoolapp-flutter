@@ -37,7 +37,7 @@ void main() {
   });
   tearDown(() => db.close());
 
-  test('le flux écrit les périodes et projette les membres', () async {
+  test('le flux écrit les périodes et laisse les membres au serveur', () async {
     final written = await sync.applyPulled(
       [_pulled('s1'), _pulled('s2', reactivatedAt: '2026-10-02T08:00:00Z')],
       schoolId: kSchool,
@@ -45,7 +45,8 @@ void main() {
     );
 
     expect(written, 2);
-    expect(await memberStatus(db, 's1'), 'INACTIVE');
+    // Le serveur projette lui-même ; le flux des membres apporte le statut.
+    expect(await memberStatus(db, 's1'), 'ACTIVE');
     expect(await memberStatus(db, 's2'), 'ACTIVE');
     expect(
       (await reader.latestFor(enrollmentOf('s1')))!.syncState,
@@ -106,4 +107,47 @@ void main() {
 
     expect(await memberStatus(db, 's1'), 'INACTIVE');
   });
+
+  test(
+    'un refus efface le curseur du flux : le prochain pull relit tout',
+    () async {
+      await db.insert('sync_meta', {
+        'resource': 'enrollment_suspensions@$kSchool',
+        'cursor': 'opaque',
+        'synced_at': 1,
+      });
+      await EnrollmentSuspensionWriteDao(
+        db,
+      ).suspend([suspendGesture('s1')], schoolId: kSchool, nowMs: 1);
+
+      await sync.undoRefused(
+        suspendGesture('s1'),
+        schoolId: kSchool,
+        code: 'HTTP_403',
+        reason: 'refus',
+        nowMs: 2,
+      );
+
+      expect(await db.query('sync_meta'), isEmpty);
+      expect(await memberStatus(db, 's1'), 'ACTIVE');
+    },
+  );
+
+  test(
+    'une entrée empoisonnée ne fait plus sauter l\'inscription au flux',
+    () async {
+      await EnrollmentSuspensionWriteDao(
+        db,
+      ).suspend([suspendGesture('s1')], schoolId: kSchool, nowMs: 1);
+      await db.update('outbox', {'status': 'SYNC_ERROR'});
+
+      final written = await sync.applyPulled(
+        [_pulled('s1', reactivatedAt: '2026-10-02T08:00:00Z')],
+        schoolId: kSchool,
+        nowMs: 2,
+      );
+
+      expect(written, 1);
+    },
+  );
 }

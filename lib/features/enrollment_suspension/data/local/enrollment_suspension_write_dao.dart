@@ -23,7 +23,7 @@ class EnrollmentSuspensionWriteDao {
   const EnrollmentSuspensionWriteDao(this._db);
 
   static const String table = EnrollmentSuspensionRow.table;
-  static const String aggregateType = 'ENROLLMENT_SUSPENSION';
+  static const String aggregateType = EnrollmentSuspensionSql.aggregateType;
 
   static String entryId(String gestureId) => '$aggregateType:$gestureId';
 
@@ -35,7 +35,7 @@ class EnrollmentSuspensionWriteDao {
     required int nowMs,
   }) => _db.transaction((txn) async {
     final applied = <String>{};
-    final students = <String>{};
+    final students = <(String, String)>{};
     for (final g in gestures) {
       assert(g.op == SuspensionGestureOp.suspend);
       if (await _openPeriod(txn, g.enrollmentId) != null) continue;
@@ -53,7 +53,7 @@ class EnrollmentSuspensionWriteDao {
       });
       await _enqueue(txn, g, schoolId: schoolId, nowMs: nowMs);
       applied.add(g.enrollmentId);
-      students.add(g.studentId);
+      students.add((g.studentId, g.academicYearId));
     }
     await EnrollmentSuspensionSql.project(txn, students);
     return applied;
@@ -67,7 +67,7 @@ class EnrollmentSuspensionWriteDao {
     required int nowMs,
   }) => _db.transaction((txn) async {
     final applied = <String>{};
-    final students = <String>{};
+    final students = <(String, String)>{};
     for (final g in gestures) {
       assert(g.op == SuspensionGestureOp.reactivate);
       final open = await _openPeriod(txn, g.enrollmentId);
@@ -85,7 +85,7 @@ class EnrollmentSuspensionWriteDao {
       );
       await _enqueue(txn, g, schoolId: schoolId, nowMs: nowMs);
       applied.add(g.enrollmentId);
-      students.add(open.studentId);
+      students.add((open.studentId, open.academicYearId));
     }
     await EnrollmentSuspensionSql.project(txn, students);
     return applied;
