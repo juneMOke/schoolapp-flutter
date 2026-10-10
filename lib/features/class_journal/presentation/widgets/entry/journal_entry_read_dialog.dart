@@ -39,14 +39,11 @@ class JournalEntryReadDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final fields = line.entry?.fields ?? JournalFields.empty;
-    final empty = JournalEntryDetails.filledOf(fields).isEmpty;
+    final empty =
+        JournalEntryDetails.filledOf(fields).isEmpty && line.chapter == null;
     final body = EteeloDialogBody(
       header: EteeloDialogDarkHeader(
-        eyebrow: l10n.journalEntryEyebrow(
-          journalRankLabel(line, l10n),
-          journalSlotRange(line, l10n),
-          date,
-        ),
+        eyebrow: journalEntryEyebrow(line, date, l10n),
         title: l10n.journalEntryTitle(line.subjectLabel, line.classroomLabel),
         onClose: () => Navigator.of(context).pop(),
       ),
@@ -70,12 +67,20 @@ class JournalEntryReadDialog extends StatelessWidget {
         ),
       ),
       footer: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: EteeloButton.secondary(
-            label: l10n.journalClose,
-            onPressed: () => Navigator.of(context).pop(),
-            fullWidth: false,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.md,
+            AppSpacing.xl,
+            AppSpacing.lg,
+          ),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: EteeloButton.secondary(
+              label: l10n.journalClose,
+              onPressed: () => Navigator.of(context).pop(),
+              fullWidth: false,
+            ),
           ),
         ),
       ],

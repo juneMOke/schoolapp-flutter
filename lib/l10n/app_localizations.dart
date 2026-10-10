@@ -24752,7 +24752,7 @@ abstract class AppLocalizations {
   /// No description provided for @journalEmptyNext.
   ///
   /// In en, this message translates to:
-  /// **'{date}'**
+  /// **'Go to {date}'**
   String journalEmptyNext(DateTime date);
 
   /// No description provided for @journalLoading.
@@ -24914,7 +24914,7 @@ abstract class AppLocalizations {
   /// No description provided for @subMenuClassJournal.
   ///
   /// In en, this message translates to:
-  /// **'My journal'**
+  /// **'Class journal'**
   String get subMenuClassJournal;
 
   /// No description provided for @journalTeacherLabel.
@@ -24952,6 +24952,58 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get journalClose;
+
+  /// No description provided for @journalNoTeacherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No teacher'**
+  String get journalNoTeacherTitle;
+
+  /// No description provided for @journalNoTeacherMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The school has no teacher recorded yet: there is no journal to read.'**
+  String get journalNoTeacherMessage;
+
+  /// No description provided for @journalEntryEyebrowNoSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed period · {date}'**
+  String journalEntryEyebrowNoSlot(DateTime date);
+
+  /// No description provided for @journalSavedNoSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Session saved'**
+  String get journalSavedNoSlot;
+
+  /// No description provided for @journalLineSemanticsNoSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed period, {subject} {classroom}, {status}'**
+  String journalLineSemanticsNoSlot(
+    String subject,
+    String classroom,
+    String status,
+  );
+
+  /// No description provided for @journalFieldSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {value}'**
+  String journalFieldSemantics(String label, String value);
+
+  /// No description provided for @journalRejectedNoticeNoCode.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this entry. Correct it, then save again.'**
+  String get journalRejectedNoticeNoCode;
+
+  /// No description provided for @journalChapterUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter not available on this tablet'**
+  String get journalChapterUnavailable;
 }
 
 class _AppLocalizationsDelegate

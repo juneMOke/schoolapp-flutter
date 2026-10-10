@@ -15969,7 +15969,7 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     final String dateString = dateDateFormat.format(date);
 
-    return '$dateString';
+    return 'Aller au $dateString';
   }
 
   @override
@@ -16072,7 +16072,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get subMenuClassJournal => 'Mon journal';
+  String get subMenuClassJournal => 'Journal de classe';
 
   @override
   String get journalTeacherLabel => 'Professeur';
@@ -16092,4 +16092,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get journalClose => 'Fermer';
+
+  @override
+  String get journalNoTeacherTitle => 'Aucun professeur';
+
+  @override
+  String get journalNoTeacherMessage =>
+      'L\'école n\'a encore aucun professeur enregistré : il n\'y a pas de journal à lire.';
+
+  @override
+  String journalEntryEyebrowNoSlot(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Créneau retiré · $dateString';
+  }
+
+  @override
+  String get journalSavedNoSlot => 'Séance enregistrée';
+
+  @override
+  String journalLineSemanticsNoSlot(
+    String subject,
+    String classroom,
+    String status,
+  ) {
+    return 'Créneau retiré, $subject $classroom, $status';
+  }
+
+  @override
+  String journalFieldSemantics(String label, String value) {
+    return '$label : $value';
+  }
+
+  @override
+  String get journalRejectedNoticeNoCode =>
+      'Le serveur a refusé cette saisie. Corrigez-la, puis enregistrez à nouveau.';
+
+  @override
+  String get journalChapterUnavailable =>
+      'Chapitre indisponible sur cette tablette';
 }

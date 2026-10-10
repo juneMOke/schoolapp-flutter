@@ -78,8 +78,11 @@ class JournalLine extends Equatable {
 
   bool get isFilled => status == JournalStatus.filled;
 
+  /// Le rang d'un créneau disparu de la grille : après tous les autres.
+  static const int unknownSlotOrder = 1 << 30;
+
   /// Le rang du créneau, pour trier ; une ligne sans créneau va en fin.
-  int get order => slot?.order ?? 1 << 30;
+  int get order => slot?.order ?? unknownSlotOrder;
 
   JournalLine withBreakBefore(JournalBreak? pause) => JournalLine(
     timeSlotId: timeSlotId,

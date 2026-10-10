@@ -17,10 +17,14 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Une page du journal : l'en-tête du jour, toujours visible, puis la zone
 /// d'état — squelette, feuille (large) ou cartes (étroit), vide, erreur.
 class JournalView extends StatelessWidget {
-  /// Ouvre la saisie d'une séance ; `null` : lecture seule.
+  /// Ouvre une séance (saisie, ou lecture seule) ; `null` : rien ne s'ouvre.
   final ValueChanged<JournalLine>? onOpen;
 
-  const JournalView({super.key, this.onOpen});
+  /// Les séances s'ouvrent en saisie : l'aide « Touchez une séance pour la
+  /// remplir » n'a de sens qu'alors.
+  final bool editable;
+
+  const JournalView({super.key, this.onOpen, this.editable = false});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +58,11 @@ class JournalView extends StatelessWidget {
                 failure: failure,
                 onRetry: () => context.read<JournalDayCubit>().show(date),
               ),
-            JournalDayReady(:final day) => _ReadyBody(day: day, onOpen: onOpen),
+            JournalDayReady(:final day) => _ReadyBody(
+              day: day,
+              onOpen: onOpen,
+              editable: editable,
+            ),
           },
         ),
       ],
@@ -65,8 +73,9 @@ class JournalView extends StatelessWidget {
 class _ReadyBody extends StatelessWidget {
   final JournalDay day;
   final ValueChanged<JournalLine>? onOpen;
+  final bool editable;
 
-  const _ReadyBody({required this.day, this.onOpen});
+  const _ReadyBody({required this.day, required this.editable, this.onOpen});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +96,7 @@ class _ReadyBody extends StatelessWidget {
               ? JournalSheet(lines: day.lines, onOpen: onOpen)
               : JournalCardList(lines: day.lines, onOpen: onOpen),
         ),
-        if (onOpen != null) ...[
+        if (editable) ...[
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.journalHelp,

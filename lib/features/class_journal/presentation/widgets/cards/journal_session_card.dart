@@ -29,6 +29,7 @@ class JournalSessionCard extends StatelessWidget {
     return Semantics(
       button: onTap != null,
       label: journalLineSemantics(line, l10n),
+      onTap: onTap,
       excludeSemantics: true,
       child: Material(
         color: AppColors.surfaceRaised,

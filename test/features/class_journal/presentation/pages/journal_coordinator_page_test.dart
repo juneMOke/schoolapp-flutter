@@ -68,7 +68,12 @@ void main() {
   testWidgets('la direction : le choix d\'un professeur, en ligne', (
     tester,
   ) async {
-    await pump(tester, const ['academics.course.read', 'teacher.read']);
+    // Gabarit FULL_SCHOOL_ACCESS : la direction écrit AUSSI le programme.
+    await pump(tester, const [
+      'academics.course.read',
+      'academics.programme.write',
+      'teacher.read',
+    ]);
 
     expect(find.byType(JournalDirectionPage), findsOneWidget);
     verify(() => teachers.load()).called(1);

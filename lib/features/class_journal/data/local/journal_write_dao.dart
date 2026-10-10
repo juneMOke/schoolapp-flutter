@@ -14,15 +14,27 @@ class JournalWriteDao {
 
   const JournalWriteDao(this._db);
 
-  /// Enregistre la saisie de [entry] (horodatée par `clientUpdatedAt`) et la
-  /// met en file ; elle remplace une saisie de la même séance encore en
-  /// attente. Vider une séance passe par ici, champs vides et sans chapitre.
-  Future<void> save(
-    JournalEntry entry, {
+  /// Enregistre la saisie de [draft] et la met en file ; elle remplace une
+  /// saisie de la même séance encore en attente. Vider une séance passe par
+  /// ici, champs vides et sans chapitre. Rend l'entrée telle que rangée.
+  ///
+  /// L'horloge (`clientUpdatedAt`) ne recule jamais pour une séance : une
+  /// tablette dont l'heure a reculé verrait sinon sa saisie jugée plus
+  /// ancienne que la précédente, et effacée par l'accusé.
+  Future<JournalEntry> save(
+    JournalEntry draft, {
     required String? schoolId,
     required int nowMs,
     String? authorId,
   }) => _db.transaction((txn) async {
+    final entry = draft.withClock(
+      await _monotonicClock(
+        txn,
+        draft.id,
+        draft.clientUpdatedAt ??
+            DateTime.fromMillisecondsSinceEpoch(nowMs, isUtc: true),
+      ),
+    );
     final columns = {
       ...JournalRowMapper.fieldColumns(
         chapitreId: entry.chapitreId,
@@ -58,5 +70,26 @@ class JournalWriteDao {
       nowMs: nowMs,
       authorId: authorId,
     );
+    return entry;
   });
+
+  static Future<DateTime> _monotonicClock(
+    DatabaseExecutor txn,
+    String id,
+    DateTime now,
+  ) async {
+    final row = (await txn.query(
+      JournalTables.entry,
+      columns: ['client_updated_at'],
+      where: 'id = ?',
+      whereArgs: [id],
+    )).firstOrNull;
+    final last = switch (row?['client_updated_at']) {
+      final String iso => DateTime.tryParse(iso),
+      _ => null,
+    };
+    return last != null && !now.isAfter(last)
+        ? last.add(const Duration(milliseconds: 1))
+        : now;
+  }
 }

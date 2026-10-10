@@ -25,6 +25,10 @@ class JournalTeachersState extends Equatable {
 class JournalTeachersCubit extends Cubit<JournalTeachersState> {
   final JournalDirectionRepository _direction;
 
+  /// Le jour lu en dernier : le journal du professeur suivant s'ouvre au même
+  /// jour, pour comparer deux professeurs.
+  DateTime? lastDate;
+
   JournalTeachersCubit(this._direction) : super(const JournalTeachersState());
 
   Future<void> load() async {

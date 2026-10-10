@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -26,7 +27,7 @@ class JournalBreakBand extends StatelessWidget {
         l10n.journalBreak(journalHhmm(pause.start), journalHhmm(pause.end)),
         style: AppTypography.labelSmall.copyWith(
           color: AppColors.textSecondary,
-          letterSpacing: 1,
+          letterSpacing: AppDimensions.journalEyebrowLetterSpacing,
         ),
       ),
     );

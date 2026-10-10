@@ -6,8 +6,8 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_day.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_line.dart';
-import 'package:school_app_flutter/features/class_journal/domain/entities/journal_read_line.dart';
 import 'package:school_app_flutter/features/class_journal/domain/repositories/journal_direction_repository.dart';
+import 'package:school_app_flutter/features/class_journal/domain/services/journal_chapter_refs.dart';
 import 'package:school_app_flutter/features/class_journal/domain/services/journal_status_rule.dart';
 import 'package:school_app_flutter/features/class_journal/domain/usecases/journal_day_loader.dart';
 import 'package:school_app_flutter/features/course_programme/domain/repositories/programme_repository.dart';
@@ -19,16 +19,19 @@ import 'package:school_app_flutter/features/course_programme/domain/repositories
 class LoadTeacherJournalDayUseCase implements JournalDayLoader {
   final String teacherId;
   final JournalDirectionRepository _direction;
-  final ProgrammeRepository _programme;
+
+  /// Les programmes lus en ligne, retenus pour la vie de ce professeur à
+  /// l'écran : une page suivante ne les relit pas.
+  final JournalChapterRefs _chapters;
   final Clock _now;
 
-  const LoadTeacherJournalDayUseCase({
+  LoadTeacherJournalDayUseCase({
     required this.teacherId,
     required JournalDirectionRepository direction,
     required ProgrammeRepository programme,
     Clock now = systemClock,
   }) : _direction = direction,
-       _programme = programme,
+       _chapters = JournalChapterRefs(programme, remember: true),
        _now = now;
 
   @override
@@ -42,7 +45,10 @@ class LoadTeacherJournalDayUseCase implements JournalDayLoader {
   }) async => (await _direction.dayOf(teacherId, date)).fold(
     (failure) async => Left(failure),
     (lines) async {
-      final chapters = await _chaptersOf(lines);
+      final chapters = await _chapters.of({
+        for (final line in lines)
+          if (line.entry?.chapitreId != null) line.coursId,
+      });
       final today = this.today();
       return Right(
         JournalDay(
@@ -62,36 +68,17 @@ class LoadTeacherJournalDayUseCase implements JournalDayLoader {
                   date: date,
                   today: today,
                 ),
-                chapter: chapters[line.entry?.chapitreId],
+                chapter: switch (chapters[line.entry?.chapitreId]) {
+                  final ref? => JournalChapterTag(
+                    number: ref.number,
+                    title: ref.title,
+                  ),
+                  null => null,
+                },
               ),
           ],
         ),
       );
     },
   );
-
-  /// Les chapitres cités, lus dans le programme en ligne de leur cours : leur
-  /// numéro est leur rang. Un programme illisible laisse la séance sans
-  /// étiquette.
-  Future<Map<String, JournalChapterTag>> _chaptersOf(
-    List<JournalReadLine> lines,
-  ) async {
-    final cours = {
-      for (final line in lines)
-        if (line.entry?.chapitreId != null) line.coursId,
-    };
-    final tags = <String, JournalChapterTag>{};
-    for (final coursId in cours) {
-      (await _programme.loadProgramme(coursId)).fold((_) {}, (programme) {
-        final rows = programme.chapitres;
-        for (var i = 0; i < rows.length; i++) {
-          tags[rows[i].chapitre.id] = JournalChapterTag(
-            number: i + 1,
-            title: rows[i].chapitre.titre,
-          );
-        }
-      });
-    }
-    return tags;
-  }
 }

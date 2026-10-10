@@ -44,6 +44,20 @@ class ProgrammeSyncDao {
         : ChapitreServerState.unknown;
   }
 
+  /// Le serveur a-t-il refusé la dernière fiche de [chapitreId] (« à
+  /// corriger ») ? Tant qu'elle n'est pas corrigée, ce qui le cite attend en
+  /// vain.
+  Future<bool> isRejected(String chapitreId) async {
+    final rows = await _db.query(
+      ProgrammeTables.chapitre,
+      columns: ['1'],
+      where: 'id = ? AND sync_status = ?',
+      whereArgs: [chapitreId, SyncState.syncError.dbValue],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
   /// Un des [chapitreIds] n'est-il pas encore connu du serveur ? (Une
   /// évaluation qui le cite doit l'attendre.)
   Future<bool> anyUnknown(List<String> chapitreIds) async {

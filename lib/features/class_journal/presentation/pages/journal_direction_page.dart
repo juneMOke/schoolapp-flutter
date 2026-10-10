@@ -5,10 +5,12 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_day_cubit.dart';
+import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_day_state.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_teacher_day_cubit.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_teachers_cubit.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/direction/journal_teacher_picker.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/entry/journal_entry_read_dialog.dart';
+import 'package:school_app_flutter/features/class_journal/presentation/widgets/journal_page_title.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/journal_view.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/journal_year_gate.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/states/journal_states.dart';
@@ -22,37 +24,54 @@ class JournalDirectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AppPageBackground(
     scrollable: true,
-    child: BlocBuilder<JournalTeachersCubit, JournalTeachersState>(
-      buildWhen: (prev, curr) =>
-          prev.failure != curr.failure || prev.selectedId != curr.selectedId,
-      builder: (context, state) {
-        final failure = state.failure;
-        if (failure != null) {
-          return JournalFailureView(
-            failure: failure,
-            onRetry: context.read<JournalTeachersCubit>().load,
-          );
-        }
-        final teacherId = state.selectedId;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const JournalTeacherPicker(),
-            const SizedBox(height: AppSpacing.lg),
-            if (teacherId == null)
-              const _PickTeacher()
-            else
-              BlocProvider<JournalDayCubit>(
-                key: ValueKey(teacherId),
-                create: (_) =>
-                    GetIt.instance<JournalTeacherDayCubit>(param1: teacherId),
-                child: const _TeacherJournal(),
-              ),
-          ],
-        );
-      },
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const JournalPageTitle(),
+        BlocBuilder<JournalTeachersCubit, JournalTeachersState>(
+          buildWhen: (prev, curr) =>
+              prev.failure != curr.failure ||
+              prev.selectedId != curr.selectedId ||
+              prev.loading != curr.loading ||
+              prev.teachers.isEmpty != curr.teachers.isEmpty,
+          builder: (context, state) => _body(context, state),
+        ),
+      ],
     ),
   );
+
+  Widget _body(BuildContext context, JournalTeachersState state) {
+    final cubit = context.read<JournalTeachersCubit>();
+    final failure = state.failure;
+    if (failure != null) {
+      return JournalFailureView(failure: failure, onRetry: cubit.load);
+    }
+    if (state.loading) return const JournalSkeleton();
+    if (state.teachers.isEmpty) return const _NoTeacher();
+    final teacherId = state.selectedId;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const JournalTeacherPicker(),
+        const SizedBox(height: AppSpacing.lg),
+        if (teacherId == null)
+          const _PickTeacher()
+        else
+          BlocProvider<JournalDayCubit>(
+            key: ValueKey(teacherId),
+            create: (_) => GetIt.instance<JournalTeacherDayCubit>(
+              param1: teacherId,
+              param2: cubit.lastDate,
+            ),
+            child: BlocListener<JournalDayCubit, JournalDayState>(
+              listenWhen: (prev, curr) => prev.date != curr.date,
+              listener: (context, day) => cubit.lastDate = day.date,
+              child: const _TeacherJournal(),
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 class _TeacherJournal extends StatelessWidget {
@@ -66,7 +85,23 @@ class _TeacherJournal extends StatelessWidget {
       child: JournalView(
         onOpen: (line) =>
             showJournalEntryReadDialog(context, line, cubit.state.date),
+        editable: false,
       ),
+    );
+  }
+}
+
+class _NoTeacher extends StatelessWidget {
+  const _NoTeacher();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return EteeloEmptyResult(
+      label: l10n.journalNoTeacherTitle,
+      description: l10n.journalNoTeacherMessage,
+      medallionIcon: Icons.group_off_rounded,
+      fullWidthCard: true,
     );
   }
 }

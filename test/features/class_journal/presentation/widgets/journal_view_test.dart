@@ -1,5 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -96,6 +97,25 @@ void main() {
 
     await tester.tap(find.text('Renseignée'));
     expect(opened.single.coursId, 'maths-7a');
+  });
+
+  testWidgets('une séance s\'active au lecteur d\'écran et se lit en entier', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await pump(
+      tester,
+      JournalDayReady(day: dayWith(), date: today, today: today),
+      onOpen: (_) {},
+    );
+
+    final node = tester.getSemantics(
+      find.bySemanticsLabel(
+        RegExp(r'^1re heure.*Objectif d.apprentissage : O'),
+      ),
+    );
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    handle.dispose();
   });
 
   testWidgets('étroit : des cartes', (tester) async {

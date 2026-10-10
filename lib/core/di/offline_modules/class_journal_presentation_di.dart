@@ -77,8 +77,9 @@ void registerClassJournalPresentation(GetIt getIt) {
     ..registerFactory(
       () => JournalTeachersCubit(getIt<JournalDirectionRepository>()),
     )
-    ..registerFactoryParam<JournalTeacherDayCubit, String, void>(
-      (teacherId, _) => JournalTeacherDayCubit(
+    ..registerFactoryParam<JournalTeacherDayCubit, String, DateTime?>(
+      (teacherId, date) => JournalTeacherDayCubit(
+        initialDate: date,
         load: LoadTeacherJournalDayUseCase(
           teacherId: teacherId,
           direction: getIt<JournalDirectionRepository>(),

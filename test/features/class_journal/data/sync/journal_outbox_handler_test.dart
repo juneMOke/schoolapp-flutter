@@ -40,6 +40,7 @@ void main() {
   late _MockApi api;
   late List<String> evicted;
   late ChapitreServerState chapitreState;
+  late bool chapitreRejected;
   late JournalOutboxHandler handler;
   final user = CurrentUserContext()..set('u-1', schoolId: 's-1');
   const extras = <String, dynamic>{};
@@ -94,11 +95,13 @@ void main() {
     api = _MockApi();
     evicted = [];
     chapitreState = ChapitreServerState.known;
+    chapitreRejected = false;
     await JournalWriteDao(db).save(entry, schoolId: 's-1', nowMs: 1);
     handler = JournalOutboxHandler(
       api: api,
       dao: JournalSyncDao(db),
       chapitreState: (_) async => chapitreState,
+      chapitreRejected: (_) async => chapitreRejected,
       evictCours: (coursId) async => evicted.add(coursId),
       currentUser: user,
       extras: extras,
@@ -133,19 +136,61 @@ void main() {
     verifyNever(() => api.saveEntry(any(), any()));
   });
 
-  test('chapitre parti de la tablette : l\'entrée part détachée', () async {
-    chapitreState = ChapitreServerState.gone;
-    when(
-      () => api.saveEntry(extras, any()),
-    ).thenAnswer((_) async => ackOf(chapitreId: null));
+  test('chapitre refusé : la séance est à corriger, sans réseau', () async {
+    chapitreState = ChapitreServerState.unknown;
+    chapitreRejected = true;
 
-    await handler.dispatch(outboxEntry);
+    final result = await handler.dispatch(outboxEntry);
 
-    final body =
-        verify(() => api.saveEntry(extras, captureAny())).captured.single
-            as Map<String, dynamic>;
-    expect((body['entry'] as Map)['chapitreId'], isNull);
-    expect((await stored()).chapitreId, isNull);
+    expect(result.outcome, OutboxDispatchOutcome.failed);
+    expect((await stored()).rejectionCode, kJournalChapitreRejectedCode);
+    verifyNever(() => api.saveEntry(any(), any()));
+  });
+
+  test(
+    'chapitre absent de la tablette : l\'entrée part telle quelle',
+    () async {
+      chapitreState = ChapitreServerState.gone;
+      when(() => api.saveEntry(extras, any())).thenAnswer((_) async => ackOf());
+
+      await handler.dispatch(outboxEntry);
+
+      final body =
+          verify(() => api.saveEntry(extras, captureAny())).captured.single
+              as Map<String, dynamic>;
+      expect((body['entry'] as Map)['chapitreId'], 'ch-1');
+    },
+  );
+
+  test(
+    'chapitre absent que le serveur n\'a jamais vu : renvoi détaché',
+    () async {
+      chapitreState = ChapitreServerState.gone;
+      final bodies = <Map<String, dynamic>>[];
+      when(() => api.saveEntry(extras, any())).thenAnswer((invocation) async {
+        final body = invocation.positionalArguments[1] as Map<String, dynamic>;
+        bodies.add(body);
+        if ((body['entry'] as Map)['chapitreId'] != null) {
+          throw _dio(409, detailCode: 'CHAPITRE_NOT_YET_SYNCED');
+        }
+        return ackOf(chapitreId: null);
+      });
+
+      final result = await handler.dispatch(outboxEntry);
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect(bodies, hasLength(2));
+      expect((await stored()).chapitreId, isNull);
+    },
+  );
+
+  test('404 : le cours n\'existe plus, la séance quitte la tablette', () async {
+    when(() => api.saveEntry(extras, any())).thenThrow(_dio(404));
+
+    final result = await handler.dispatch(outboxEntry);
+
+    expect(result.outcome, OutboxDispatchOutcome.acked);
+    expect(await JournalDao(db).entriesOfCours({'c-1'}), isEmpty);
   });
 
   test('409 CHAPITRE_NOT_YET_SYNCED : une attente, pas un refus', () async {

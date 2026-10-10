@@ -20,9 +20,14 @@ class JournalSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final sheet = DecoratedBox(
-          decoration: BoxDecoration(
+        // La bordure se peint PAR-DESSUS : en décoration, le fond plein de
+        // l'en-tête la recouvrirait.
+        final sheet = Container(
+          decoration: const BoxDecoration(
             color: AppColors.surfaceRaised,
+            borderRadius: AppRadius.brLg,
+          ),
+          foregroundDecoration: BoxDecoration(
             borderRadius: AppRadius.brLg,
             border: Border.all(color: AppColors.journalLine),
           ),

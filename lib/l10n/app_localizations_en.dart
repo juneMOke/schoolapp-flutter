@@ -15858,7 +15858,7 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     final String dateString = dateDateFormat.format(date);
 
-    return '$dateString';
+    return 'Go to $dateString';
   }
 
   @override
@@ -15961,7 +15961,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get subMenuClassJournal => 'My journal';
+  String get subMenuClassJournal => 'Class journal';
 
   @override
   String get journalTeacherLabel => 'Teacher';
@@ -15981,4 +15981,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journalClose => 'Close';
+
+  @override
+  String get journalNoTeacherTitle => 'No teacher';
+
+  @override
+  String get journalNoTeacherMessage =>
+      'The school has no teacher recorded yet: there is no journal to read.';
+
+  @override
+  String journalEntryEyebrowNoSlot(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Removed period · $dateString';
+  }
+
+  @override
+  String get journalSavedNoSlot => 'Session saved';
+
+  @override
+  String journalLineSemanticsNoSlot(
+    String subject,
+    String classroom,
+    String status,
+  ) {
+    return 'Removed period, $subject $classroom, $status';
+  }
+
+  @override
+  String journalFieldSemantics(String label, String value) {
+    return '$label: $value';
+  }
+
+  @override
+  String get journalRejectedNoticeNoCode =>
+      'The server refused this entry. Correct it, then save again.';
+
+  @override
+  String get journalChapterUnavailable =>
+      'Chapter not available on this tablet';
 }

@@ -190,6 +190,69 @@ void main() {
   });
 
   test(
+    'une page plus ancienne ne fait pas reculer une ligne synchronisée',
+    () async {
+      await JournalPullWriter(db).apply([
+        const JournalEntryDto(
+          id: 'e-1',
+          coursId: 'c-1',
+          date: '2026-10-12',
+          timeSlotId: 's-1',
+          fields: JournalFields(objectif: 'Récent', contenu: 'C'),
+          clientUpdatedAt: sent,
+          serverUpdatedAt: '2026-10-12T10:00:00.000Z',
+        ),
+      ], nowMs: 1);
+
+      final written = await JournalPullWriter(
+        db,
+      ).apply([serverDto(objectif: 'Ancien')], nowMs: 2);
+
+      expect(written, 0);
+      expect((await stored()).fields.objectif, 'Récent');
+    },
+  );
+
+  test('l\'horloge d\'une séance ne recule jamais', () async {
+    await writer.save(entry, schoolId: 'school', nowMs: 1);
+
+    final later = await writer.save(
+      JournalEntry(
+        id: 'e-1',
+        coursId: 'c-1',
+        date: DateTime(2026, 10, 12),
+        timeSlotId: 's-1',
+        fields: const JournalFields(objectif: 'O', contenu: 'C'),
+        clientUpdatedAt: DateTime.utc(2026, 10, 1),
+      ),
+      schoolId: 'school',
+      nowMs: 2,
+    );
+
+    expect(later.clientUpdatedAt!.isAfter(DateTime.parse(sent)), isTrue);
+    expect((await stored()).clientUpdatedAt, later.clientUpdatedAt);
+  });
+
+  test('une horloge envoyée nulle se compare sans argument nul', () async {
+    await JournalPullWriter(db).apply([
+      const JournalEntryDto(
+        id: 'e-1',
+        coursId: 'c-1',
+        date: '2026-10-12',
+        timeSlotId: 's-1',
+        fields: JournalFields.empty,
+      ),
+    ], nowMs: 1);
+
+    expect(
+      await JournalSyncDao(
+        db,
+      ).markRejected('e-1', sentClientUpdatedAt: null, code: 'X', nowMs: 2),
+      isTrue,
+    );
+  });
+
+  test(
     'purge d\'un cours : ses entrées et ses saisies en attente partent',
     () async {
       await writer.save(entry, schoolId: 'school', nowMs: 1);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -85,11 +86,12 @@ class _DateLabel extends StatelessWidget {
           l10n.journalDateEyebrow.toUpperCase(),
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textSecondary,
-            letterSpacing: 1,
+            letterSpacing: AppDimensions.journalEyebrowLetterSpacing,
           ),
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        Wrap(
+          spacing: AppSpacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
               l10n.journalHeaderDate(date),
@@ -97,15 +99,13 @@ class _DateLabel extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            if (isToday) ...[
-              const SizedBox(width: AppSpacing.sm),
+            if (isToday)
               Text(
                 l10n.journalTodayMarker,
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.bleuArdoise,
                 ),
               ),
-            ],
           ],
         ),
       ],

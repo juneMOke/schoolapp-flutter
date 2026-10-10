@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
-import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/class_journal/data/local/journal_dao.dart';
 import 'package:school_app_flutter/features/class_journal/data/local/journal_write_dao.dart';
@@ -52,7 +51,7 @@ class JournalRepositoryImpl implements JournalRepository {
     String? chapitreId,
   }) async {
     final nowMs = _now();
-    final entry = JournalEntry(
+    final draft = JournalEntry(
       id: JournalIds.entryId(key),
       coursId: key.coursId,
       date: key.date,
@@ -60,11 +59,11 @@ class JournalRepositoryImpl implements JournalRepository {
       chapitreId: chapitreId,
       fields: fields,
       clientUpdatedAt: DateTime.fromMillisecondsSinceEpoch(nowMs, isUtc: true),
-      syncState: RecordSyncState.pending,
     );
+    final JournalEntry entry;
     try {
-      await _writer.save(
-        entry,
+      entry = await _writer.save(
+        draft,
         schoolId: _currentUser.schoolId,
         authorId: _currentUser.uid,
         nowMs: nowMs,

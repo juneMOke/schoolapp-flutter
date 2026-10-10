@@ -32,7 +32,7 @@ class JournalPullWriter {
   ) async {
     final local = (await txn.query(
       JournalTables.entry,
-      columns: ['sync_status', 'client_updated_at'],
+      columns: ['sync_status', 'client_updated_at', 'server_updated_at'],
       where: 'id = ?',
       whereArgs: [dto.id],
       limit: 1,
@@ -47,7 +47,16 @@ class JournalPullWriter {
       });
       return true;
     }
-    if (local['sync_status'] != SyncState.synced.dbValue &&
+    final synced = local['sync_status'] == SyncState.synced.dbValue;
+    // Une page tirée avant un accusé ne ramène pas la ligne en arrière.
+    if (synced &&
+        isNewerClock(
+          local['server_updated_at'] as String?,
+          dto.serverUpdatedAt,
+        )) {
+      return false;
+    }
+    if (!synced &&
         !isNewerClock(dto.clientUpdatedAt, local['client_updated_at'])) {
       // La saisie locale est la plus récente : elle partira.
       await txn.update(

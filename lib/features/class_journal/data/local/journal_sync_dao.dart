@@ -28,8 +28,8 @@ class JournalSyncDao {
         await txn.update(
           JournalTables.entry,
           JournalPullWriter.syncedColumnsOf(dto, nowMs: nowMs),
-          where: 'id = ? AND client_updated_at IS ?',
-          whereArgs: [dto.id, sentClientUpdatedAt],
+          where: 'id = ? AND ${_sameClock(sentClientUpdatedAt)}',
+          whereArgs: [dto.id, ?sentClientUpdatedAt],
         ) >
         0;
     if (!unchanged) {
@@ -57,10 +57,20 @@ class JournalSyncDao {
           'sync_error_code': code,
           'updated_at': nowMs,
         },
-        where: 'id = ? AND client_updated_at IS ?',
-        whereArgs: [entryId, sentClientUpdatedAt],
+        where: 'id = ? AND ${_sameClock(sentClientUpdatedAt)}',
+        whereArgs: [entryId, ?sentClientUpdatedAt],
       ) >
       0;
+
+  /// Le cours de l'entrée n'existe plus au serveur (404) : elle quitte la
+  /// tablette, rien n'est à corriger.
+  Future<void> remove(String entryId) =>
+      _db.delete(JournalTables.entry, where: 'id = ?', whereArgs: [entryId]);
+
+  /// La ligne porte-t-elle encore l'horloge envoyée ? Une horloge nulle se
+  /// teste par `IS NULL` : sqflite refuse un `null` dans les arguments.
+  static String _sameClock(String? sent) =>
+      sent == null ? 'client_updated_at IS NULL' : 'client_updated_at = ?';
 
   /// L'entrée de file de [entryId] a-t-elle été remplacée par une saisie plus
   /// récente depuis l'envoi de celle créée à [sentCreatedAt] ?

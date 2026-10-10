@@ -101,6 +101,14 @@ void main() {
     expect(find.text('Vider la séance'), findsNothing);
   });
 
+  testWidgets('hors programme s\'affiche tel quel, pas l\'invite du choix', (
+    tester,
+  ) async {
+    await pump(tester, lineWith());
+
+    expect(find.text('— Hors programme / séance libre'), findsOneWidget);
+  });
+
   testWidgets('enregistrer sans objectif ni contenu : les deux messages', (
     tester,
   ) async {

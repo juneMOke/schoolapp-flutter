@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_entry.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_fields.dart';
+import 'package:school_app_flutter/features/class_journal/domain/entities/journal_line.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
 
 /// Ce que le journal reprend du programme : il n'invente pas le contenu
@@ -46,6 +47,7 @@ abstract final class JournalPrefill {
   ) {
     final byDate = a.date.compareTo(b.date);
     if (byDate != 0) return byDate > 0;
-    return (slotOrder[a.timeSlotId] ?? 0) > (slotOrder[b.timeSlotId] ?? 0);
+    return (slotOrder[a.timeSlotId] ?? JournalLine.unknownSlotOrder) >
+        (slotOrder[b.timeSlotId] ?? JournalLine.unknownSlotOrder);
   }
 }

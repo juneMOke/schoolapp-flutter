@@ -14,11 +14,16 @@ class JournalDay extends Equatable {
   /// Le prochain jour où le professeur a cours ; `null` s'il n'y en a pas.
   final DateTime? nextCourseDay;
 
+  /// Le rang de chaque créneau de la grille de l'école, par id — pour ranger
+  /// deux séances d'un même jour, y compris d'autres jours que celui-ci.
+  final Map<String, int> slotOrder;
+
   const JournalDay({
     required this.date,
     required this.lines,
     this.pageNumber,
     this.nextCourseDay,
+    this.slotOrder = const {},
   });
 
   bool get isEmpty => lines.isEmpty;
@@ -28,5 +33,11 @@ class JournalDay extends Equatable {
   bool get isComplete => lines.isNotEmpty && filledCount == lines.length;
 
   @override
-  List<Object?> get props => [date, lines, pageNumber, nextCourseDay];
+  List<Object?> get props => [
+    date,
+    lines,
+    pageNumber,
+    nextCourseDay,
+    slotOrder,
+  ];
 }

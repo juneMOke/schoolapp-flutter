@@ -15,6 +15,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// hors programme), une aide selon le cas, et « Reprendre du chapitre »
 /// quand un changement de chapitre n'a rien écrasé.
 class JournalChapterBlock extends StatelessWidget {
+  /// La valeur de « Hors programme » dans la liste : le sélecteur n'affiche
+  /// pas une valeur nulle, il montrerait son invite au lieu du choix fait.
+  static const String _offSyllabus = '';
+
   const JournalChapterBlock({super.key});
 
   @override
@@ -43,12 +47,21 @@ class JournalChapterBlock extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              EteeloSelectInput<String?>(
+              EteeloSelectInput<String>(
                 label: l10n.journalChapterLabel,
-                value: state.chapitreId,
+                value: state.chapitreId ?? _offSyllabus,
                 enabled: !state.isBusy,
                 items: [
-                  EteeloSelectItem(value: null, label: l10n.journalChapterNone),
+                  EteeloSelectItem(
+                    value: _offSyllabus,
+                    label: l10n.journalChapterNone,
+                  ),
+                  if (state.chapitreId case final id?
+                      when !state.chapters.any((c) => c.id == id))
+                    EteeloSelectItem(
+                      value: id,
+                      label: l10n.journalChapterUnavailable,
+                    ),
                   for (var i = 0; i < state.chapters.length; i++)
                     EteeloSelectItem(
                       value: state.chapters[i].id,
@@ -62,7 +75,9 @@ class JournalChapterBlock extends StatelessWidget {
                       ),
                     ),
                 ],
-                onChanged: cubit.selectChapter,
+                onChanged: (value) => cubit.selectChapter(
+                  value == null || value == _offSyllabus ? null : value,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(

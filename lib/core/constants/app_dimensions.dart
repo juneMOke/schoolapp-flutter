@@ -808,4 +808,6 @@ class AppDimensions {
   static const journalFieldMinWidth = 260.0;
   static const journalTagIconSize = 12.0;
   static const journalNavIconSize = 18.0;
+  static const journalEyebrowLetterSpacing = 1.0;
+  static const journalFieldSkeletonHeight = 64.0;
 }

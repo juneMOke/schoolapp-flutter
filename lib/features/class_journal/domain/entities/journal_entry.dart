@@ -47,6 +47,18 @@ class JournalEntry extends Equatable {
 
   bool get isRejected => syncState == RecordSyncState.failed;
 
+  /// La même saisie, horodatée [clock] et en attente d'envoi.
+  JournalEntry withClock(DateTime clock) => JournalEntry(
+    id: id,
+    coursId: coursId,
+    date: date,
+    timeSlotId: timeSlotId,
+    chapitreId: chapitreId,
+    fields: fields,
+    clientUpdatedAt: clock.toUtc(),
+    syncState: RecordSyncState.pending,
+  );
+
   @override
   List<Object?> get props => [
     id,

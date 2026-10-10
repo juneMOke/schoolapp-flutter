@@ -73,6 +73,7 @@ void registerClassJournal(GetIt getIt) {
       api: getIt<JournalSyncApi>(),
       dao: getIt<JournalSyncDao>(),
       chapitreState: (id) => getIt<ProgrammeSyncDao>().chapitreState(id),
+      chapitreRejected: (id) => getIt<ProgrammeSyncDao>().isRejected(id),
       evictCours: (coursId) => getIt<CoursEviction>().evict(coursId),
       currentUser: getIt<CurrentUserContext>(),
       extras: requiredAuth,

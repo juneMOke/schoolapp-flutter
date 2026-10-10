@@ -26,6 +26,8 @@ void main() {
   final tuesday = DateTime(2026, 10, 13);
   const year = AcademicYear(id: 'ay', name: '2026-2027', current: true);
 
+  setUpAll(() => registerFallbackValue(DateTime(2000)));
+
   setUp(() {
     direction = _MockDirection();
     programme = _MockProgramme();
@@ -93,6 +95,38 @@ void main() {
     expect(day.lines.last.status, JournalStatus.missing);
     expect(day.pageNumber, isNull);
   });
+
+  test(
+    'le programme d\'un cours n\'est lu qu\'une fois par professeur',
+    () async {
+      when(() => direction.dayOf('t', any())).thenAnswer(
+        (invocation) async => Right([
+          JournalReadLine(
+            coursId: 'c-1',
+            subjectLabel: 'Maths',
+            classroomLabel: '7e A',
+            slot: kSchoolSlots.first,
+            timeSlotId: 's1',
+            inTimetable: true,
+            entry: entryOf(
+              coursId: 'c-1',
+              date: invocation.positionalArguments[1] as DateTime,
+              slot: 's1',
+              chapitreId: 'ch',
+            ),
+          ),
+        ]),
+      );
+      when(() => programme.loadProgramme('c-1')).thenAnswer(
+        (_) async => const Right(Programme(coursId: 'c-1', chapitres: [])),
+      );
+
+      await load(tuesday, year: year);
+      await load(DateTime(2026, 10, 12), year: year);
+
+      verify(() => programme.loadProgramme('c-1')).called(1);
+    },
+  );
 
   test('un échec de lecture en ligne remonte tel quel', () async {
     when(

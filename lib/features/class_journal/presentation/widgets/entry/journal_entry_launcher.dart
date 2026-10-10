@@ -19,12 +19,8 @@ Future<void> openJournalEntry(BuildContext context, JournalLine line) async {
   final dayState = dayCubit.state;
   if (dayState is! JournalDayReady) return;
   final day = dayState.day;
-  final slotOrder = {
-    for (final l in day.lines)
-      if (l.slot case final slot?) slot.id: slot.order,
-  };
   final cubit = GetIt.instance<JournalEntryCubit>()
-    ..open(line, date: day.date, slotOrder: slotOrder);
+    ..open(line, date: day.date, slotOrder: day.slotOrder);
   final outcome = await showDialog<JournalEntryStatus>(
     context: context,
     barrierDismissible: false,
@@ -49,7 +45,7 @@ Future<void> openJournalEntry(BuildContext context, JournalLine line) async {
     context,
     outcome == JournalEntryStatus.cleared
         ? l10n.journalCleared
-        : l10n.journalSaved(journalRankLabel(line, l10n)),
+        : journalSavedMessage(line, l10n),
   );
   await dayCubit.refresh();
 }

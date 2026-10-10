@@ -48,6 +48,16 @@ void main() {
     });
   });
 
+  test('une rentrée lue d\'un instant UTC compte dès son premier jour', () {
+    for (final iso in ['2026-10-05T00:00:00Z', '2026-10-04T23:00:00Z']) {
+      final utc = JournalCalendar(
+        courseDays: const {Weekday.mon, Weekday.wed},
+        yearStart: DateTime.parse(iso),
+      );
+      expect(utc.pageNumber(DateTime(2026, 10, 5)), 1, reason: iso);
+    }
+  });
+
   test('le dimanche n\'est jamais un jour de cours', () {
     expect(JournalCalendar.weekdayOf(DateTime(2026, 10, 11)), isNull);
     expect(JournalCalendar.weekdayOf(DateTime(2026, 10, 12)), Weekday.mon);

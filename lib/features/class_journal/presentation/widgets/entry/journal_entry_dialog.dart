@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_line.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_entry_cubit.dart';
@@ -30,13 +32,13 @@ class JournalEntryDialog extends StatelessWidget {
     final entry = line.entry;
     final body = EteeloDialogBody(
       header: EteeloDialogDarkHeader(
-        eyebrow: l10n.journalEntryEyebrow(
-          journalRankLabel(line, l10n),
-          journalSlotRange(line, l10n),
-          date,
-        ),
+        eyebrow: journalEntryEyebrow(line, date, l10n),
         title: l10n.journalEntryTitle(line.subjectLabel, line.classroomLabel),
-        onClose: () => Navigator.of(context).pop(),
+        onClose: () {
+          if (!context.read<JournalEntryCubit>().state.isBusy) {
+            Navigator.of(context).pop();
+          }
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -47,15 +49,17 @@ class JournalEntryDialog extends StatelessWidget {
               prev.failure != curr.failure,
           builder: (context, state) {
             if (state.status == JournalEntryStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
+              return const _FormSkeleton();
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (entry != null && entry.isRejected)
-                  EteeloNotice.error(
-                    l10n.journalRejectedNotice(entry.rejectionCode ?? ''),
-                  ),
+                  EteeloNotice.error(switch (entry.rejectionCode) {
+                    final code? when code.isNotEmpty =>
+                      l10n.journalRejectedNotice(code),
+                    _ => l10n.journalRejectedNoticeNoCode,
+                  }),
                 if (state.failure != null)
                   EteeloNotice.error(l10n.journalSaveFailed),
                 const JournalChapterBlock(),
@@ -68,6 +72,31 @@ class JournalEntryDialog extends StatelessWidget {
       ),
       footer: [JournalEntryFooter(canClear: entry != null && !entry.isBlank)],
     );
-    return JournalDialogFrame(child: body);
+    // Le retour système ne ferme pas pendant une écriture : elle aboutirait
+    // sans toast ni relecture de la page.
+    return BlocBuilder<JournalEntryCubit, JournalEntryState>(
+      buildWhen: (prev, curr) => prev.isBusy != curr.isBusy,
+      builder: (context, state) => PopScope(
+        canPop: !state.isBusy,
+        child: JournalDialogFrame(child: body),
+      ),
+    );
   }
+}
+
+/// L'attente du préremplissage : la forme du bloc chapitre et des champs.
+class _FormSkeleton extends StatelessWidget {
+  const _FormSkeleton();
+
+  @override
+  Widget build(BuildContext context) => const Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      EteeloSkeletonBox(height: AppDimensions.journalFieldSkeletonHeight),
+      SizedBox(height: AppSpacing.lg),
+      EteeloSkeletonBox(height: AppDimensions.journalFieldSkeletonHeight),
+      SizedBox(height: AppSpacing.md),
+      EteeloSkeletonBox(height: AppDimensions.journalFieldSkeletonHeight),
+    ],
+  );
 }

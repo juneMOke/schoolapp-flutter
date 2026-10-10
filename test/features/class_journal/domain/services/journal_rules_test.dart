@@ -105,6 +105,31 @@ void main() {
     });
   });
 
+  test('séance n : un créneau disparu se range en fin de journée', () {
+    final d = DateTime(2026, 10, 12);
+    final numbers = JournalSeanceNumbers.of(
+      [
+        entryOf(
+          id: 'retired',
+          coursId: 'c',
+          date: d,
+          slot: 'gone',
+          chapitreId: 'ch',
+        ),
+        entryOf(
+          id: 'second',
+          coursId: 'c',
+          date: d,
+          slot: 's2',
+          chapitreId: 'ch',
+        ),
+      ],
+      slotOrder: {for (final s in kSchoolSlots) s.id: s.order},
+    );
+
+    expect(numbers, {'second': 1, 'retired': 2});
+  });
+
   group('récréation', () {
     test('un trou de la grille de l\'école entre les deux séances', () {
       final pause = JournalBreaks.between(

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_day.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_day_sources.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_entry.dart';
@@ -80,6 +81,19 @@ void main() {
       expect(last.breakBefore, isNull);
     },
   );
+
+  test('un vidage refusé reste visible, même hors emploi du temps', () {
+    final refused = entryOf(
+      coursId: 'physique-6b',
+      date: wednesday,
+      slot: 's2',
+      fields: JournalFields.empty,
+      syncState: RecordSyncState.failed,
+    );
+
+    final line = compose(entries: [refused]).lines[1];
+    expect(line.status, JournalStatus.rejected);
+  });
 
   test('une entrée vidée ne ressuscite pas une séance retirée', () {
     final cleared = entryOf(

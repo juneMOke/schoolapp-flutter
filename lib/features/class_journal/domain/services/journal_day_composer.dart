@@ -69,7 +69,8 @@ abstract final class JournalDayComposer {
       lines.add(lineOf(row.timeSlot.id, cell.coursId, course, scheduled: true));
     }
     for (final MapEntry(:key, value: entry) in onDate.entries) {
-      if (seen.contains(key) || entry.isBlank) continue;
+      // Un vidage refusé reste visible : le refus prime.
+      if (seen.contains(key) || (entry.isBlank && !entry.isRejected)) continue;
       lines.add(
         lineOf(
           entry.timeSlotId,
@@ -86,6 +87,7 @@ abstract final class JournalDayComposer {
       lines: _withBreaks(lines, schoolSlots),
       pageNumber: sources.calendar.pageNumber(date),
       nextCourseDay: sources.calendar.nextCourseDay(date),
+      slotOrder: slotOrder,
     );
   }
 

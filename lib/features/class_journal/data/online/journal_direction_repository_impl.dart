@@ -35,6 +35,9 @@ class JournalDirectionRepositoryImpl implements JournalDirectionRepository {
       return Right(await read());
     } on DioException catch (e) {
       return Left(ApiErrorParser.failureOf(e));
+    } catch (e) {
+      // Une réponse illisible ne doit pas laisser la page en chargement.
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

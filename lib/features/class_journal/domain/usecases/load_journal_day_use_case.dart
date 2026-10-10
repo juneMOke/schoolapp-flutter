@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/class_journal/domain/entities/journa
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_entry.dart';
 import 'package:school_app_flutter/features/class_journal/domain/repositories/journal_repository.dart';
 import 'package:school_app_flutter/features/class_journal/domain/services/journal_calendar.dart';
+import 'package:school_app_flutter/features/class_journal/domain/services/journal_chapter_refs.dart';
 import 'package:school_app_flutter/features/class_journal/domain/services/journal_day_composer.dart';
 import 'package:school_app_flutter/features/class_journal/domain/usecases/journal_day_loader.dart';
 import 'package:school_app_flutter/features/course_programme/domain/repositories/programme_repository.dart';
@@ -102,31 +103,13 @@ class LoadJournalDayUseCase implements JournalDayLoader {
         if (cell != null) cell.coursId,
   };
 
-  /// Les chapitres cités par les entrées de [date] : leur numéro est leur
-  /// rang dans le programme du cours. Un chapitre absent du programme
-  /// (supprimé) ne figure pas — la séance se lit hors programme.
+  /// Les chapitres cités par les entrées de [date] ; un chapitre absent du
+  /// programme (supprimé) ne figure pas — la séance se lit hors programme.
   Future<Map<String, JournalChapterRef>> _chaptersCitedOn(
     DateTime date,
     List<JournalEntry> entries,
-  ) async {
-    final cited = {
-      for (final e in entries)
-        if (e.date == date && e.chapitreId != null) e.coursId,
-    };
-    final refs = <String, JournalChapterRef>{};
-    for (final coursId in cited) {
-      final programme = await _programme.loadProgramme(coursId);
-      programme.fold((_) {}, (programme) {
-        final rows = programme.chapitres;
-        for (var i = 0; i < rows.length; i++) {
-          final chapitre = rows[i].chapitre;
-          refs[chapitre.id] = JournalChapterRef(
-            number: i + 1,
-            title: chapitre.titre,
-          );
-        }
-      });
-    }
-    return refs;
-  }
+  ) => JournalChapterRefs(_programme).of({
+    for (final e in entries)
+      if (e.date == date && e.chapitreId != null) e.coursId,
+  });
 }

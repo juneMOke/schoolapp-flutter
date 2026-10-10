@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -122,7 +124,7 @@ void main() {
     verifyNever(() => chapter(any()));
   });
 
-  test('un chapitre disparu du programme se lit hors programme', () async {
+  test('un chapitre absent de la tablette reste rattaché', () async {
     final cubit = await openOn(
       lineWith(
         fields: const JournalFields(objectif: 'O', contenu: 'C'),
@@ -130,8 +132,40 @@ void main() {
       ),
     );
 
-    expect(cubit.state.chapitreId, isNull);
+    expect(cubit.state.chapitreId, 'gone');
   });
+
+  test('séance déjà écrite : changer de chapitre n\'écrase rien', () async {
+    final cubit = await openOn(
+      lineWith(
+        fields: const JournalFields(objectif: 'Mien', contenu: 'Mien'),
+        chapitreId: 'ch-1',
+      ),
+    );
+
+    cubit.selectChapter('ch-2');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(cubit.state.fields.contenu, 'Mien');
+    expect(cubit.state.canApplyChapter, isTrue);
+  });
+
+  test(
+    'une frappe pendant la lecture du chapitre n\'est pas écrasée',
+    () async {
+      final slow = Completer<Chapitre?>();
+      when(() => chapter('ch-1')).thenAnswer((_) => slow.future);
+      final cubit = await openOn(lineWith());
+
+      cubit.selectChapter('ch-1');
+      cubit.updateField(JournalField.contenu, 'Tapé entre-temps');
+      slow.complete(planned);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state.fields.contenu, 'Tapé entre-temps');
+      expect(cubit.state.canApplyChapter, isTrue);
+    },
+  );
 
   test('saisie intacte : changer de chapitre le recopie', () async {
     final cubit = await openOn(lineWith());

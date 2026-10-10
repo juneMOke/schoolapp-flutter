@@ -10,30 +10,31 @@ import 'package:school_app_flutter/features/class_journal/presentation/pages/jou
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/entry/journal_entry_launcher.dart';
 import 'package:school_app_flutter/features/course_programme/presentation/widgets/common/programme_write_gate.dart';
 
-/// « Mon journal » selon qui regarde :
+/// Le journal de classe selon qui regarde :
+/// - la direction (`teacher.read`) : le journal d'un professeur, lu en ligne,
+///   en lecture seule. Elle détient aussi `academics.programme.write`
+///   (gabarit `FULL_SCHOOL_ACCESS`) : c'est `teacher.read`, absent du gabarit
+///   `TEACHER`, qui la distingue ;
 /// - le professeur (`academics.programme.write`) : son journal, sur la
 ///   tablette, ses séances s'ouvrent en saisie ;
-/// - la direction (`teacher.read`, sans écriture) : le journal d'un
-///   professeur, lu en ligne, en lecture seule ;
 /// - sinon : son journal en lecture seule.
 class JournalCoordinatorPage extends StatelessWidget {
   const JournalCoordinatorPage({super.key});
 
   @override
   Widget build(BuildContext context) => PermissionHoldingBuilder(
-    requires: ProgrammeWriteGate.requires,
-    builder: (context, write) {
-      if (write == PermissionHolding.granted) {
-        return const _OwnJournal(editable: true);
+    requires: const [Perm.teacherRead],
+    builder: (context, read) {
+      if (read == PermissionHolding.granted) {
+        return BlocProvider<JournalTeachersCubit>(
+          create: (_) => GetIt.instance<JournalTeachersCubit>()..load(),
+          child: const JournalDirectionPage(),
+        );
       }
       return PermissionHoldingBuilder(
-        requires: const [Perm.teacherRead],
-        builder: (context, read) => read == PermissionHolding.granted
-            ? BlocProvider<JournalTeachersCubit>(
-                create: (_) => GetIt.instance<JournalTeachersCubit>()..load(),
-                child: const JournalDirectionPage(),
-              )
-            : const _OwnJournal(editable: false),
+        requires: ProgrammeWriteGate.requires,
+        builder: (context, write) =>
+            _OwnJournal(editable: write == PermissionHolding.granted),
       );
     },
   );

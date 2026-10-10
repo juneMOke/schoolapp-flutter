@@ -23,7 +23,7 @@ class JournalEntryFooter extends StatelessWidget {
       builder: (context, state) {
         final cubit = context.read<JournalEntryCubit>();
         final busy = state.isBusy;
-        return Wrap(
+        final actions = Wrap(
           alignment: WrapAlignment.spaceBetween,
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: AppSpacing.md,
@@ -60,6 +60,15 @@ class JournalEntryFooter extends StatelessWidget {
               ],
             ),
           ],
+        );
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.md,
+            AppSpacing.xl,
+            AppSpacing.lg,
+          ),
+          child: SizedBox(width: double.infinity, child: actions),
         );
       },
     );
