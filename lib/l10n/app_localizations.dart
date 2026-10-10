@@ -24916,6 +24916,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My journal'**
   String get subMenuClassJournal;
+
+  /// No description provided for @journalTeacherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get journalTeacherLabel;
+
+  /// No description provided for @journalTeacherPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a teacher'**
+  String get journalTeacherPlaceholder;
+
+  /// No description provided for @journalPickTeacherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a teacher'**
+  String get journalPickTeacherTitle;
+
+  /// No description provided for @journalPickTeacherMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Their class journal shows here, day by day, read only.'**
+  String get journalPickTeacherMessage;
+
+  /// No description provided for @journalEntryNotFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Session not filled in yet.'**
+  String get journalEntryNotFilled;
+
+  /// No description provided for @journalClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get journalClose;
 }
 
 class _AppLocalizationsDelegate

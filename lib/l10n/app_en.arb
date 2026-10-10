@@ -9522,5 +9522,11 @@
   "journalSaveFailed": "The session could not be saved on this tablet. Try again.",
   "journalRejectedNotice": "The server refused this entry ({code}). Correct it, then save again.",
   "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}},
-  "subMenuClassJournal": "My journal"
+  "subMenuClassJournal": "My journal",
+  "journalTeacherLabel": "Teacher",
+  "journalTeacherPlaceholder": "Choose a teacher",
+  "journalPickTeacherTitle": "Choose a teacher",
+  "journalPickTeacherMessage": "Their class journal shows here, day by day, read only.",
+  "journalEntryNotFilled": "Session not filled in yet.",
+  "journalClose": "Close"
 }

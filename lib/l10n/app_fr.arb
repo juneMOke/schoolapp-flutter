@@ -9830,5 +9830,11 @@
   "journalSaveFailed": "La séance n'a pas pu être enregistrée sur la tablette. Réessayez.",
   "journalRejectedNotice": "Le serveur a refusé cette saisie ({code}). Corrigez-la, puis enregistrez à nouveau.",
   "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}},
-  "subMenuClassJournal": "Mon journal"
+  "subMenuClassJournal": "Mon journal",
+  "journalTeacherLabel": "Professeur",
+  "journalTeacherPlaceholder": "Choisir un professeur",
+  "journalPickTeacherTitle": "Choisissez un professeur",
+  "journalPickTeacherMessage": "Son journal de classe s'affiche ici, jour par jour, en lecture seule.",
+  "journalEntryNotFilled": "Séance pas encore renseignée.",
+  "journalClose": "Fermer"
 }

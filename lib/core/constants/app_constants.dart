@@ -1342,6 +1342,13 @@ class AppConstants {
   static const String academicsCoursChapitresEndpoint =
       '/api/v1/academics/cours/{coursId}/chapitres';
 
+  /// **GET** = la journée d'un professeur dans son journal (`teacherId`,
+  /// `date`), en ligne — la lecture de la direction.
+  static const String academicsJournalEndpoint = '/api/v1/academics/journal';
+
+  /// **GET** = les enseignants de l'école, par nom (`teacher.read`).
+  static const String teachersEndpoint = '/api/v1/teachers';
+
   /// **GET** = un chapitre entier, en ligne (lecture de la direction).
   static const String academicsChapitreEndpoint =
       '/api/v1/academics/chapitres/{chapitreId}';

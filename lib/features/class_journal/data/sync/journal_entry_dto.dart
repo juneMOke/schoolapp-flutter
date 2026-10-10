@@ -1,5 +1,7 @@
+import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
+import 'package:school_app_flutter/features/class_journal/domain/entities/journal_entry.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_fields.dart';
 
 /// Une entrée du journal telle qu'elle descend (flux, ou entrée retenue
@@ -61,6 +63,21 @@ class JournalEntryDto {
       serverUpdatedAt: raw.instant('serverUpdatedAt'),
     );
   }
+
+  /// L'entrée telle que le serveur la détient — lue en ligne, donc
+  /// synchronisée.
+  JournalEntry toEntity() => JournalEntry(
+    id: id,
+    coursId: coursId,
+    date: DateOnlyJsonHelper.fromJson(date),
+    timeSlotId: timeSlotId,
+    chapitreId: chapitreId,
+    fields: fields,
+    clientUpdatedAt: switch (clientUpdatedAt) {
+      final String iso => DateTime.tryParse(iso),
+      null => null,
+    },
+  );
 }
 
 /// Une page du flux `academics.journal` d'un cours.

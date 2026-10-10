@@ -2,31 +2,40 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
-import 'package:school_app_flutter/features/class_journal/domain/usecases/load_journal_day_use_case.dart';
+import 'package:school_app_flutter/features/class_journal/domain/usecases/journal_day_loader.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_change_source.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_day_state.dart';
 
-/// La page du journal : un jour lu sur la tablette, la navigation jour par
-/// jour, et une relecture silencieuse à chaque signal ([JournalChangeSource]).
+/// La page du journal : un jour, la navigation jour par jour, et — pour une
+/// lecture locale — une relecture silencieuse à chaque signal
+/// ([JournalChangeSource]). La lecture en ligne de la direction n'a pas de
+/// signaux : [source] nul.
 class JournalDayCubit extends Cubit<JournalDayState> {
-  final LoadJournalDayUseCase _load;
-  final JournalChangeSource _source;
+  final JournalDayLoader _load;
+  final JournalChangeSource? _source;
   AcademicYear? _year;
   void Function()? _unwatch;
   var _seq = 0;
 
+  /// [initialDate] : le jour à ouvrir, aujourd'hui par défaut.
   JournalDayCubit({
-    required LoadJournalDayUseCase load,
-    required JournalChangeSource source,
+    required JournalDayLoader load,
+    JournalChangeSource? source,
+    DateTime? initialDate,
   }) : _load = load,
        _source = source,
-       super(JournalDayIdle(date: load.today(), today: load.today()));
+       super(
+         JournalDayIdle(date: initialDate ?? load.today(), today: load.today()),
+       );
 
-  /// Ouvre le journal sur aujourd'hui, une fois l'année scolaire connue.
+  /// Ouvre le journal, une fois l'année scolaire connue.
   Future<void> start(AcademicYear year) async {
     _year = year;
-    _unwatch ??= _source.watch(() => unawaited(refresh()));
-    unawaited(_source.pull());
+    final source = _source;
+    if (source != null) {
+      _unwatch ??= source.watch(() => unawaited(refresh()));
+      unawaited(source.pull());
+    }
     await show(state.date);
   }
 

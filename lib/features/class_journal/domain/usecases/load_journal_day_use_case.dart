@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/class_journal/domain/entities/journa
 import 'package:school_app_flutter/features/class_journal/domain/repositories/journal_repository.dart';
 import 'package:school_app_flutter/features/class_journal/domain/services/journal_calendar.dart';
 import 'package:school_app_flutter/features/class_journal/domain/services/journal_day_composer.dart';
+import 'package:school_app_flutter/features/class_journal/domain/usecases/journal_day_loader.dart';
 import 'package:school_app_flutter/features/course_programme/domain/repositories/programme_repository.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekly_timetable.dart';
 import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
@@ -18,7 +19,7 @@ import 'package:school_app_flutter/features/schedule/domain/repositories/schedul
 /// La page d'un jour, lue **sur la tablette** : l'emploi du temps actuel du
 /// professeur, ses cours (libellés), ses entrées et les chapitres qu'elles
 /// citent.
-class LoadJournalDayUseCase {
+class LoadJournalDayUseCase implements JournalDayLoader {
   final ScheduleRepository _schedule;
   final CourseRepository _courses;
   final JournalRepository _journal;
@@ -37,10 +38,11 @@ class LoadJournalDayUseCase {
        _programme = programme,
        _now = now;
 
-  /// Aujourd'hui, à l'heure de l'école.
+  @override
   DateTime today() =>
       SchoolTime.today(DateTime.fromMillisecondsSinceEpoch(_now()));
 
+  @override
   Future<Either<Failure, JournalDay>> call(
     DateTime date, {
     required AcademicYear year,

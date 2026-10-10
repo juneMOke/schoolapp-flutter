@@ -16073,4 +16073,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get subMenuClassJournal => 'Mon journal';
+
+  @override
+  String get journalTeacherLabel => 'Professeur';
+
+  @override
+  String get journalTeacherPlaceholder => 'Choisir un professeur';
+
+  @override
+  String get journalPickTeacherTitle => 'Choisissez un professeur';
+
+  @override
+  String get journalPickTeacherMessage =>
+      'Son journal de classe s\'affiche ici, jour par jour, en lecture seule.';
+
+  @override
+  String get journalEntryNotFilled => 'Séance pas encore renseignée.';
+
+  @override
+  String get journalClose => 'Fermer';
 }

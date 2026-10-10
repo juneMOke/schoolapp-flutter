@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_line.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_entry_cubit.dart';
@@ -13,6 +11,7 @@ import 'package:school_app_flutter/features/class_journal/presentation/helpers/j
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/entry/journal_chapter_block.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/entry/journal_entry_footer.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/widgets/entry/journal_fields_grid.dart';
+import 'package:school_app_flutter/features/class_journal/presentation/widgets/entry/journal_dialog_frame.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La modale de saisie d'une séance : le bloc chapitre, les sept champs du
@@ -69,19 +68,6 @@ class JournalEntryDialog extends StatelessWidget {
       ),
       footer: [JournalEntryFooter(canClear: entry != null && !entry.isBlank)],
     );
-    if (MediaQuery.sizeOf(context).width < AppDimensions.journalBreakpoint) {
-      return Dialog.fullscreen(child: body);
-    }
-    return Dialog(
-      insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      clipBehavior: Clip.antiAlias,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.journalModalWidth,
-        ),
-        child: body,
-      ),
-    );
+    return JournalDialogFrame(child: body);
   }
 }
