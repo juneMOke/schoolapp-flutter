@@ -156,6 +156,7 @@ void main() {
       expect(ids, contains(MenuConstants.presencesId));
       expect(ids, contains(MenuConstants.myCoursesId));
       expect(ids, contains(MenuConstants.timetableId));
+      expect(ids, contains(MenuConstants.classJournalId));
       expect(ids, contains(MenuConstants.resultatsClasseId));
       expect(ids, contains(MenuConstants.disciplinesListId));
 
@@ -429,6 +430,7 @@ void main() {
     test('aucun droit : toute route de module est refusée', () {
       expect(allows('/classes/organisation', const []), isFalse);
       expect(allows('/cours/my-courses', const []), isFalse);
+      expect(allows('/cours/class-journal', const []), isFalse);
       expect(allows('/resultats/resultats-classe', const []), isFalse);
     });
 

@@ -16070,4 +16070,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String journalRejectedNotice(String code) {
     return 'Le serveur a refusé cette saisie ($code). Corrigez-la, puis enregistrez à nouveau.';
   }
+
+  @override
+  String get subMenuClassJournal => 'Mon journal';
 }

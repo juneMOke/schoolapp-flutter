@@ -9521,5 +9521,6 @@
   "journalCleared": "Session cleared",
   "journalSaveFailed": "The session could not be saved on this tablet. Try again.",
   "journalRejectedNotice": "The server refused this entry ({code}). Correct it, then save again.",
-  "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}}
+  "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}},
+  "subMenuClassJournal": "My journal"
 }

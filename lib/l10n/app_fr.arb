@@ -9829,5 +9829,6 @@
   "journalCleared": "Séance vidée",
   "journalSaveFailed": "La séance n'a pas pu être enregistrée sur la tablette. Réessayez.",
   "journalRejectedNotice": "Le serveur a refusé cette saisie ({code}). Corrigez-la, puis enregistrez à nouveau.",
-  "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}}
+  "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}},
+  "subMenuClassJournal": "Mon journal"
 }

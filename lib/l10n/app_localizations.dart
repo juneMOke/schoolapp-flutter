@@ -24910,6 +24910,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server refused this entry ({code}). Correct it, then save again.'**
   String journalRejectedNotice(String code);
+
+  /// No description provided for @subMenuClassJournal.
+  ///
+  /// In en, this message translates to:
+  /// **'My journal'**
+  String get subMenuClassJournal;
 }
 
 class _AppLocalizationsDelegate

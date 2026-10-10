@@ -15959,4 +15959,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String journalRejectedNotice(String code) {
     return 'The server refused this entry ($code). Correct it, then save again.';
   }
+
+  @override
+  String get subMenuClassJournal => 'My journal';
 }

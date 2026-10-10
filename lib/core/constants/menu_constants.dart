@@ -116,6 +116,9 @@ class MenuConstants {
 
   /// « Mes cours » : le programme de chaque cours (chapitres).
   static const String courseProgrammeId = 'course-programme';
+
+  /// « Mon journal » : le journal de classe journalier du professeur.
+  static const String classJournalId = 'class-journal';
   static const String timetableId = 'timetable';
 
   static const String resultatsClasseId = 'resultats-classe';

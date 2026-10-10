@@ -343,6 +343,11 @@ class MenuFactory {
           route: AppRoutesNames.courseProgramme,
         ),
         SubMenuItem(
+          id: MenuConstants.classJournalId,
+          title: l10n.subMenuClassJournal,
+          route: AppRoutesNames.classJournal,
+        ),
+        SubMenuItem(
           id: MenuConstants.myCoursesId,
           title: l10n.subMenuMyCourses,
           route: AppRoutesNames.myCourses,

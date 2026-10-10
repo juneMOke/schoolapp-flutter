@@ -47,6 +47,8 @@ import 'package:school_app_flutter/features/course_programme/presentation/pages/
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_feature_scope.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_coordinator_page.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_feature_scope.dart';
+import 'package:school_app_flutter/features/class_journal/presentation/pages/journal_coordinator_page.dart';
+import 'package:school_app_flutter/features/class_journal/presentation/pages/journal_feature_scope.dart';
 import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_coordinator_page.dart';
 import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_feature_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
@@ -213,6 +215,7 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.disciplinesDashboardId ||
         state.selectedSubMenuId == MenuConstants.myCoursesId ||
         state.selectedSubMenuId == MenuConstants.timetableId ||
+        state.selectedSubMenuId == MenuConstants.classJournalId ||
         state.selectedSubMenuId == MenuConstants.resultatsClasseId ||
         state.selectedSubMenuId == MenuConstants.documentsStudentId ||
         state.selectedSubMenuId == MenuConstants.configurationSchoolId;
@@ -464,6 +467,8 @@ class _HomePageView extends StatelessWidget {
         );
       case MenuConstants.timetableId:
         return const ScheduleFeatureScope(child: ScheduleCoordinatorPage());
+      case MenuConstants.classJournalId:
+        return const JournalFeatureScope(child: JournalCoordinatorPage());
       case MenuConstants.resultatsClasseId:
         return const ResultatsFeatureScope(child: ResultatsCoordinatorPage());
       // Même page que la route hors coquille `/configuration/settings`, qui
