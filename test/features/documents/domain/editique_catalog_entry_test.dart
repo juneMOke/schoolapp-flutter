@@ -4,13 +4,14 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_d
 
 void main() {
   group('barème du catalogue', () {
-    test('couvre les cinq pièces scopées ÉLÈVE, sans doublon', () {
+    test('couvre les six pièces scopées ÉLÈVE, sans doublon', () {
       final types = EditiqueCatalogEntry.all
           .map((entry) => entry.type)
           .toList(growable: false);
 
       expect(types.toSet(), {
         EditiqueDocumentType.enrollmentAttestation,
+        EditiqueDocumentType.enrollmentSheet,
         EditiqueDocumentType.notePerception,
         EditiqueDocumentType.paymentReceipt,
         EditiqueDocumentType.accountStatement,
@@ -45,13 +46,16 @@ void main() {
     });
 
     test(
-      'range l attestation en Scolarité et les quatre autres en Finances',
+      'range l attestation et la fiche en Scolarité, les quatre autres en Finances',
       () {
         expect(
           EditiqueCatalogEntry.ofGroup(
             EditiqueCatalogGroup.scolarite,
           ).map((e) => e.type),
-          [EditiqueDocumentType.enrollmentAttestation],
+          [
+            EditiqueDocumentType.enrollmentAttestation,
+            EditiqueDocumentType.enrollmentSheet,
+          ],
         );
 
         expect(

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,6 +39,9 @@ class _MockEmitAccountStatementUseCase extends Mock
 
 class _MockEmitEnrollmentAttestationUseCase extends Mock
     implements EmitEnrollmentAttestationUseCase {}
+
+class _MockEmitEnrollmentSheetUseCase extends Mock
+    implements EmitEnrollmentSheetUseCase {}
 
 class _MockEmitNotePerceptionUseCase extends Mock
     implements EmitNotePerceptionUseCase {}
@@ -175,6 +179,7 @@ void main() {
     );
     _getIt.registerFactory<EditiqueDocumentBloc>(
       () => EditiqueDocumentBloc(
+        emitEnrollmentSheetUseCase: _MockEmitEnrollmentSheetUseCase(),
         emitEnrollmentAttestationUseCase:
             _MockEmitEnrollmentAttestationUseCase(),
         emitNotePerceptionUseCase: _MockEmitNotePerceptionUseCase(),
@@ -213,7 +218,7 @@ void main() {
   testWidgets('marque la nature de chaque pièce', (tester) async {
     await _pump(tester);
 
-    expect(find.text('Figé'), findsNWidgets(3));
+    expect(find.text('Figé'), findsNWidgets(4));
     expect(find.text('Horodaté'), findsNWidgets(2));
   });
 
@@ -225,8 +230,8 @@ void main() {
     expect(find.textContaining('Un reçu par versement'), findsOneWidget);
   });
 
-  // La garde qui évite un 404 : trois des quatre identifiants sont des uuid
-  // CLIENT avant l'acquittement serveur.
+  // La garde qui évite un 404 : les pièces clé-élève attendent l'élève. Les
+  // deux pièces clé-dossier (attestation, fiche) ont leur propre garde.
   testWidgets('éteint les pièces d un élève non synchronisé', (tester) async {
     await _pump(tester, eligibility: EditiqueEligibilityStatus.blocked);
 
@@ -240,6 +245,7 @@ void main() {
   testWidgets('éteint et explique les pièces hors ligne', (tester) async {
     await _pump(tester, syncStatus: SyncStatus.offline);
 
+    // La fiche, pièce de dossier, suit la garde de l'attestation.
     expect(find.textContaining('Hors connexion'), findsNWidgets(3));
   });
 
@@ -265,7 +271,8 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('Dossier introuvable'), findsOneWidget);
+    // L'attestation et la fiche d'inscription, les deux pièces de dossier.
+    expect(find.textContaining('Dossier introuvable'), findsNWidgets(2));
   });
 
   // Chaque émission d'une pièce horodatée brûle un numéro de séquence : l'appui
@@ -289,6 +296,13 @@ void main() {
     tester,
   ) async {
     await _pump(tester);
+    // La fiche d'inscription allonge la liste : le quitus, dernier, est plus
+    // bas.
+    await tester.scrollUntilVisible(
+      find.text('Générer maintenant').last,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
 
     await tester.tap(find.text('Générer maintenant').last);
     await tester.pump();

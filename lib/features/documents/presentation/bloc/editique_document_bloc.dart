@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_d
 import 'package:school_app_flutter/features/documents/domain/entities/editique_server_detail.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
@@ -31,6 +32,7 @@ part 'editique_document_state.dart';
 class EditiqueDocumentBloc
     extends Bloc<EditiqueDocumentEvent, EditiqueDocumentState> {
   final EmitEnrollmentAttestationUseCase _emitEnrollmentAttestationUseCase;
+  final EmitEnrollmentSheetUseCase _emitEnrollmentSheetUseCase;
   final EmitNotePerceptionUseCase _emitNotePerceptionUseCase;
   final EmitPaymentReceiptUseCase _emitPaymentReceiptUseCase;
   final EmitAccountStatementUseCase _emitAccountStatementUseCase;
@@ -39,12 +41,14 @@ class EditiqueDocumentBloc
 
   EditiqueDocumentBloc({
     required EmitEnrollmentAttestationUseCase emitEnrollmentAttestationUseCase,
+    required EmitEnrollmentSheetUseCase emitEnrollmentSheetUseCase,
     required EmitNotePerceptionUseCase emitNotePerceptionUseCase,
     required EmitPaymentReceiptUseCase emitPaymentReceiptUseCase,
     required EmitAccountStatementUseCase emitAccountStatementUseCase,
     required EmitFinancialClearanceUseCase emitFinancialClearanceUseCase,
     required RestituteDocumentUseCase restituteDocumentUseCase,
   }) : _emitEnrollmentAttestationUseCase = emitEnrollmentAttestationUseCase,
+       _emitEnrollmentSheetUseCase = emitEnrollmentSheetUseCase,
        _emitNotePerceptionUseCase = emitNotePerceptionUseCase,
        _emitPaymentReceiptUseCase = emitPaymentReceiptUseCase,
        _emitAccountStatementUseCase = emitAccountStatementUseCase,
@@ -57,6 +61,20 @@ class EditiqueDocumentBloc
         EditiqueDocumentType.enrollmentAttestation,
         () => _emitEnrollmentAttestationUseCase(
           EmitEnrollmentAttestationParams(
+            enrollmentId: event.enrollmentId,
+            studentId: event.studentId,
+            academicYearId: event.academicYearId,
+          ),
+        ),
+      ),
+    );
+
+    on<EditiqueEnrollmentSheetRequested>(
+      (event, emit) => _run(
+        emit,
+        EditiqueDocumentType.enrollmentSheet,
+        () => _emitEnrollmentSheetUseCase(
+          EmitEnrollmentSheetParams(
             enrollmentId: event.enrollmentId,
             studentId: event.studentId,
             academicYearId: event.academicYearId,

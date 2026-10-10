@@ -36,7 +36,12 @@ class EnrollmentLocalListBloc
   final GetLocalEnrollmentsUseCase _getEnrollments;
   final SearchLocalEnrollmentsUseCase _search;
 
+  /// Les lignes montrées de la dernière requête résolue, triées.
   List<EnrollmentSummary> _cache = const <EnrollmentSummary>[];
+
+  /// Toutes ses lignes, désactivés compris : la bascule « Afficher les
+  /// désactivés » recompose [_cache] sans relire la base.
+  List<EnrollmentSummary> _all = const <EnrollmentSummary>[];
 
   // Générations de chargement : le transformer par défaut du bloc étant
   // `concurrent`, plusieurs `_load` peuvent voler en parallèle. Chaque `_load`
@@ -66,6 +71,7 @@ class EnrollmentLocalListBloc
     on<LocalListResetRequested>(_onReset);
     on<LocalListRefreshRequested>(_onRefresh);
     on<LocalListPageRequested>(_onPage);
+    on<LocalListShowSuspendedChanged>(_onShowSuspended);
     on<LocalListByStatusRequested>(_onByStatus);
     on<LocalListByStudentNameRequested>(_onByStudentName);
     on<LocalListByStudentNamesAndDateOfBirthRequested>(
@@ -86,7 +92,34 @@ class EnrollmentLocalListBloc
   ) {
     _loadGeneration++; // invalide tout _load en vol (ne clobberera pas le reset)
     _cache = const <EnrollmentSummary>[];
+    _all = const <EnrollmentSummary>[];
     emit(const EnrollmentLocalListState.initial());
+  }
+
+  void _onShowSuspended(
+    LocalListShowSuspendedChanged event,
+    Emitter<EnrollmentLocalListState> emit,
+  ) {
+    final last = state.lastSummariesQuery;
+    if (last == null || state.summariesStatus != EnrollmentLoadStatus.success) {
+      emit(state.copyWith(showSuspended: event.show));
+      return;
+    }
+    _cache = EnrollmentLocalListProjector.visible(
+      _all,
+      showSuspended: event.show,
+    );
+    final pageData = EnrollmentLocalListProjector.paginate(
+      _cache,
+      page: 0,
+      size: last.size,
+    );
+    emit(
+      _successState(
+        last.copyWithPage(pageData.page),
+        pageData,
+      ).copyWith(showSuspended: event.show),
+    );
   }
 
   Future<void> _onRefresh(
@@ -238,7 +271,9 @@ class EnrollmentLocalListBloc
     emit,
     EnrollmentSummariesQuery(
       type: EnrollmentSummaryQueryType.byAcademicInfo,
-      academicInfoSource: AcademicInfoSource.currentYearEnrolled,
+      academicInfoSource: event.includeSuspended
+          ? AcademicInfoSource.currentYearEnrolledWithSuspended
+          : AcademicInfoSource.currentYearEnrolled,
       status: '',
       academicYearId: event.academicYearId,
       page: event.page,
@@ -336,12 +371,16 @@ class EnrollmentLocalListBloc
         ),
       (
         EnrollmentSummaryQueryType.byAcademicInfo,
-        AcademicInfoSource.currentYearEnrolled,
+        AcademicInfoSource.currentYearEnrolled ||
+            AcademicInfoSource.currentYearEnrolledWithSuspended,
       ) =>
         (await _search.currentYearEnrolled(
           academicYearId: _nullIfEmpty(query.academicYearId),
           schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
           schoolLevelId: _nullIfEmpty(query.schoolLevelId),
+          includeSuspended:
+              query.academicInfoSource ==
+              AcademicInfoSource.currentYearEnrolledWithSuspended,
         )).map(
           (items) => EnrollmentLocalListProjector.project(
             items,
@@ -397,9 +436,11 @@ class EnrollmentLocalListBloc
         // une pagination ou un rebuild ressortirait des données périmées sous
         // l'identité de la requête échouée).
         _cache = const <EnrollmentSummary>[];
+        _all = const <EnrollmentSummary>[];
         emit(
           state.copyWith(
             summariesStatus: EnrollmentLoadStatus.failure,
+            suspendedCount: 0,
             summaries: const <EnrollmentSummary>[],
             summariesTotalElements: 0,
             summariesTotalPages: 0,
@@ -415,13 +456,21 @@ class EnrollmentLocalListBloc
         // ici, `_cache` sert un ordre global — à la pagination comme à l'export
         // (`loadedSummaries`).
         final ordered = EnrollmentLocalListProjector.sortByName(projected);
-        _cache = ordered;
-        final pageData = EnrollmentLocalListProjector.paginate(
+        _all = ordered;
+        _cache = EnrollmentLocalListProjector.visible(
           ordered,
+          showSuspended: state.showSuspended,
+        );
+        final pageData = EnrollmentLocalListProjector.paginate(
+          _cache,
           page: query.page,
           size: query.size,
         );
-        emit(_successState(query.copyWithPage(pageData.page), pageData));
+        emit(
+          _successState(query.copyWithPage(pageData.page), pageData).copyWith(
+            suspendedCount: ordered.where((s) => s.isSuspended).length,
+          ),
+        );
       },
     );
   }

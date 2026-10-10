@@ -29,6 +29,7 @@ LocalEnrollmentListItem _item({
   OfflineEnrollmentStatus status = OfflineEnrollmentStatus.inProgress,
   EnrollmentType type = EnrollmentType.newEnrollment,
   SyncState syncState = SyncState.pendingSync,
+  DateTime? suspendedAt,
 }) => LocalEnrollmentListItem(
   enrollmentId: enrollmentId,
   studentId: studentId ?? 's-$enrollmentId',
@@ -42,6 +43,8 @@ LocalEnrollmentListItem _item({
   matriculationNumber: null,
   enrollmentDate: '2025-09-01',
   syncState: syncState,
+  academicYearId: 'y1',
+  suspendedAt: suspendedAt,
 );
 
 ReenrollmentCandidate _candidate({
@@ -755,5 +758,68 @@ void main() {
 
       await bloc.close();
     });
+  });
+
+  group('élèves désactivés', () {
+    setUp(() {
+      when(() => getLocal(status: any(named: 'status'))).thenAnswer(
+        (_) async => Right([
+          _item(enrollmentId: 'e1', lastName: 'Ilunga'),
+          _item(
+            enrollmentId: 'e2',
+            lastName: 'Kabongo',
+            suspendedAt: DateTime(2026, 10, 2),
+          ),
+        ]),
+      );
+    });
+
+    blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+      'montrés par défaut, avec leur compte',
+      build: build,
+      act: (bloc) =>
+          bloc.add(const LocalListByStatusRequested(status: 'COMPLETED')),
+      skip: 1,
+      expect: () => [
+        isA<EnrollmentLocalListState>()
+            .having(ids, 'ids', ['e1', 'e2'])
+            .having((s) => s.suspendedCount, 'suspendedCount', 1),
+      ],
+    );
+
+    blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+      'masqués à la demande, mais comptés',
+      build: build,
+      act: (bloc) => bloc
+        ..add(const LocalListShowSuspendedChanged(false))
+        ..add(const LocalListByStatusRequested(status: 'COMPLETED')),
+      skip: 2,
+      expect: () => [
+        isA<EnrollmentLocalListState>()
+            .having(ids, 'ids', ['e1'])
+            .having((s) => s.suspendedCount, 'suspendedCount', 1)
+            .having((s) => s.summariesTotalElements, 'total', 1),
+      ],
+    );
+
+    blocTest<EnrollmentLocalListBloc, EnrollmentLocalListState>(
+      'la bascule les montre sans relire la base',
+      build: build,
+      act: (bloc) async {
+        bloc
+          ..add(const LocalListShowSuspendedChanged(false))
+          ..add(const LocalListByStatusRequested(status: 'COMPLETED'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const LocalListShowSuspendedChanged(true));
+      },
+      skip: 3,
+      expect: () => [
+        isA<EnrollmentLocalListState>()
+            .having(ids, 'ids', ['e1', 'e2'])
+            .having((s) => s.showSuspended, 'showSuspended', true),
+      ],
+      verify: (_) =>
+          verify(() => getLocal(status: any(named: 'status'))).called(1),
+    );
   });
 }

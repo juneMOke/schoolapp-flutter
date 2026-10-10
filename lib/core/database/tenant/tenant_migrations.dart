@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/academics_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
+import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/enrollment_suspension_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
 import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.dart';
@@ -15,6 +17,7 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 part 'tenant_migrations_evaluation.dart';
 part 'tenant_migrations_presence.dart';
 part 'tenant_migrations_programme.dart';
+part 'tenant_migrations_suspension.dart';
 
 /// Escalier d'un fichier d'ÉCOLE (`school_<id>.db`).
 ///
@@ -82,6 +85,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(62)) {
     await _evaluationSujet(db);
   }
+  if (upTo(63)) {
+    await _createTables(db, enrollmentSuspensionTables);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -90,7 +96,13 @@ Future<void> migrateDeviceDatabase(
   DatabaseExecutor db,
   int oldVersion, {
   int newVersion = AppConstants.offlineDbSchemaVersion,
-}) async {}
+}) async {
+  bool upTo(int version) => oldVersion < version && version <= newVersion;
+
+  if (upTo(63)) {
+    await _admitEnrollmentSheetInEditiqueCache(db);
+  }
+}
 
 /// v51 — `enrollments.annual_matriculation_number`.
 ///

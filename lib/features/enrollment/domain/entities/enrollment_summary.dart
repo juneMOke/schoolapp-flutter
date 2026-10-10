@@ -39,6 +39,14 @@ class EnrollmentSummary extends Equatable {
   final String? schoolLevelName;
   final String? schoolLevelGroupName;
 
+  /// Année de l'inscription — connue de la seule lecture LOCALE.
+  final String? academicYearId;
+
+  /// Début de la période de désactivation ouverte (lecture LOCALE) ; `null`
+  /// si l'élève n'est pas désactivé. [suspensionReason] : code du motif.
+  final DateTime? suspendedAt;
+  final String? suspensionReason;
+
   const EnrollmentSummary({
     required this.enrollmentId,
     required this.enrollmentCode,
@@ -49,7 +57,19 @@ class EnrollmentSummary extends Equatable {
     this.schoolLevelId,
     this.schoolLevelName,
     this.schoolLevelGroupName,
+    this.academicYearId,
+    this.suspendedAt,
+    this.suspensionReason,
   });
+
+  /// L'élève est désactivé : toujours inscrit, mis de côté.
+  bool get isSuspended => suspendedAt != null;
+
+  /// Seul un dossier complété, tiré de la base locale, se désactive.
+  bool get isSuspendable =>
+      status == 'COMPLETED' &&
+      enrollmentId.isNotEmpty &&
+      academicYearId != null;
 
   /// Vrai pour un brouillon local du wizard offline (non finalisé, non
   /// synchronisé) : la ligne est repérée « Brouillon » et son tap reprend le
@@ -89,5 +109,8 @@ class EnrollmentSummary extends Equatable {
     schoolLevelId,
     schoolLevelName,
     schoolLevelGroupName,
+    academicYearId,
+    suspendedAt,
+    suspensionReason,
   ];
 }

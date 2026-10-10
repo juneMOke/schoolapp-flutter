@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
@@ -22,6 +23,9 @@ class MockEmitPaymentReceiptUseCase extends Mock
 
 class MockEmitEnrollmentAttestationUseCase extends Mock
     implements EmitEnrollmentAttestationUseCase {}
+
+class MockEmitEnrollmentSheetUseCase extends Mock
+    implements EmitEnrollmentSheetUseCase {}
 
 class MockEmitNotePerceptionUseCase extends Mock
     implements EmitNotePerceptionUseCase {}
@@ -60,6 +64,7 @@ Future<void> _pumpLoading(WidgetTester tester, {required Size size}) async {
       home: Scaffold(
         body: BlocProvider<EditiqueDocumentBloc>(
           create: (_) => EditiqueDocumentBloc(
+            emitEnrollmentSheetUseCase: MockEmitEnrollmentSheetUseCase(),
             emitEnrollmentAttestationUseCase:
                 MockEmitEnrollmentAttestationUseCase(),
             emitNotePerceptionUseCase: MockEmitNotePerceptionUseCase(),
@@ -228,6 +233,7 @@ Future<MockEmitPaymentReceiptUseCase> _pumpFailure(
         body: BlocProvider<EditiqueDocumentBloc>(
           create: (_) {
             bloc = EditiqueDocumentBloc(
+              emitEnrollmentSheetUseCase: MockEmitEnrollmentSheetUseCase(),
               emitEnrollmentAttestationUseCase:
                   MockEmitEnrollmentAttestationUseCase(),
               emitNotePerceptionUseCase: MockEmitNotePerceptionUseCase(),

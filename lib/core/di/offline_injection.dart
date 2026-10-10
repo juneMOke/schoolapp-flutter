@@ -44,6 +44,7 @@ import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_
 import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/boutique_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_offline_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/enrollment_suspension_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/student_photo_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/expense_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/documents_offline_di.dart';
@@ -334,6 +335,7 @@ void registerOfflineModules(GetIt getIt) {
   registerCourseProgramme(getIt); // Programme de cours — après academics
   registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
   registerStudentPhoto(getIt); // Photo de l'élève — après l'inscription
+  registerEnrollmentSuspension(getIt); // Désactivation — après les classes
 }
 
 /// Plan de synchronisation par profil (ADR-015 F2).

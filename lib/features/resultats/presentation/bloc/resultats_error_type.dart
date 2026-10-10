@@ -9,6 +9,10 @@ enum ResultatsErrorType {
   network,
   notFound,
   validation,
+
+  /// L'élève est désactivé (422 `STUDENT_SUSPENDED`) : ses résultats ne sont
+  /// pas calculés. Réessayer n'y changerait rien.
+  studentSuspended,
   // HTTP 403 -> UnauthorizedFailure -> forbidden (convention projet). Pas de
   // valeur `unauthorized` : elle ne serait jamais émise par les BLoCs.
   forbidden,

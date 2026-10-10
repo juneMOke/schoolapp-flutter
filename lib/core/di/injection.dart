@@ -158,6 +158,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/restitute_
 import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
@@ -1021,6 +1022,10 @@ Future<void> configureDependencies({
     () => EmitEnrollmentAttestationUseCase(getIt<EditiqueRepository>()),
   );
 
+  getIt.registerFactory<EmitEnrollmentSheetUseCase>(
+    () => EmitEnrollmentSheetUseCase(getIt<EditiqueRepository>()),
+  );
+
   getIt.registerFactory<EmitNotePerceptionUseCase>(
     () => EmitNotePerceptionUseCase(getIt<EditiqueRepository>()),
   );
@@ -1045,6 +1050,7 @@ Future<void> configureDependencies({
     () => EditiqueDocumentBloc(
       emitEnrollmentAttestationUseCase:
           getIt<EmitEnrollmentAttestationUseCase>(),
+      emitEnrollmentSheetUseCase: getIt<EmitEnrollmentSheetUseCase>(),
       emitNotePerceptionUseCase: getIt<EmitNotePerceptionUseCase>(),
       emitPaymentReceiptUseCase: getIt<EmitPaymentReceiptUseCase>(),
       emitAccountStatementUseCase: getIt<EmitAccountStatementUseCase>(),

@@ -114,6 +114,12 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
   'enrollments': TombstoneTarget(
     table: 'enrollments',
     syncStatusColumn: 'sync_status',
+    // Les périodes de désactivation partent avec l'inscription.
+    children: {'enrollment_suspensions': 'enrollment_id'},
+  ),
+  'enrollment_suspensions': TombstoneTarget(
+    table: 'enrollment_suspensions',
+    syncStatusColumn: 'sync_status',
   ),
   'students': TombstoneTarget(
     table: 'students',

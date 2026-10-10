@@ -1,4 +1,5 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
 import 'package:school_app_flutter/core/offline/db_batching.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
@@ -79,6 +80,7 @@ class ClassroomLocalDataSource {
   /// Upsert transactionnel (par lots) d'une page de membres pullés (CF2, flux
   /// `classroom-members` — indépendant des classes). `synced_at` posé sur
   /// chaque ligne touchée (fraîcheur ADR-002). `REPLACE` sur la PK = idempotent.
+  /// Le statut tiré cède à la désactivation locale de l'élève, s'il en a une.
   Future<void> upsertMembers({
     required List<ClassroomMemberDto> members,
     required int syncedAt,
@@ -96,6 +98,12 @@ class ClassroomLocalDataSource {
           );
         }
         await batch.commit(noResult: true);
+        // Le `REPLACE` vient d'écraser le statut : une désactivation posée
+        // hors ligne et pas encore envoyée le reprend.
+        await EnrollmentSuspensionSql.reapplyAfterMemberPull(
+          txn,
+          chunk.map((m) => m.studentId),
+        );
       },
     );
   }
@@ -332,6 +340,9 @@ class ClassroomLocalDataSource {
   /// sur l'ordre physique. Le tri répond d'ailleurs à « quelle ligne a changé en
   /// dernier », jamais à « laquelle est active ».
   ///
+  /// Un élève **désactivé** n'a plus de ligne `ACTIVE` : son appartenance
+  /// courante répond alors, pour que ses statistiques passées restent justes.
+  ///
   /// Le filtre rend donc le cas nominal univoque. **Le tri reste** : rien en SQL
   /// n'impose l'unicité, et un filet dont on a mesuré la faiblesse vaut mieux
   /// que pas de filet.
@@ -343,8 +354,8 @@ class ClassroomLocalDataSource {
       'SELECT $_composedClassroomExpr AS classroom_id '
       'FROM $membersTable m '
       'WHERE m.student_id = ? AND m.academic_year_id = ? '
-      "AND m.status = 'ACTIVE' "
-      'ORDER BY m.updated_at DESC LIMIT 1',
+      'AND ${EnrollmentSuspensionSql.activeOrSuspendedCurrent('m')} '
+      "ORDER BY (m.status = 'ACTIVE') DESC, m.updated_at DESC LIMIT 1",
       [studentId, academicYearId],
     );
     if (rows.isEmpty) return null;

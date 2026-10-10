@@ -300,6 +300,40 @@ void main() {
       expect(id, isNull);
     });
 
+    test('un élève désactivé garde sa classe pour ses statistiques', () async {
+      await upsertDelta(
+        members: [
+          const ClassroomMemberDto(
+            id: 'm-susp',
+            studentId: 'stu-susp',
+            classroomId: 'cls-susp',
+            academicYearId: yearId,
+            studentFirstName: 'S',
+            studentLastName: 'S',
+            studentGender: 'MALE',
+            status: 'INACTIVE',
+          ),
+        ],
+        syncedAt: 1000,
+      );
+      await db.insert('enrollment_suspensions', {
+        'id': 'p-susp',
+        'school_id': 'school',
+        'enrollment_id': 'e-susp',
+        'student_id': 'stu-susp',
+        'academic_year_id': yearId,
+        'suspended_at': '2026-10-02T08:00:00Z',
+        'updated_at': 1,
+      });
+
+      final id = await dao.getCurrentClassroomId(
+        studentId: 'stu-susp',
+        academicYearId: yearId,
+      );
+
+      expect(id, 'cls-susp');
+    });
+
     test('renvoie la classe du miroir en l\'absence de transfert', () async {
       await upsertDelta(
         members: [member(id: 'm1', first: 'A', last: 'A')],

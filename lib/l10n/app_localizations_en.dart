@@ -15376,4 +15376,328 @@ class AppLocalizationsEn extends AppLocalizations {
   String chapitreFormObjectifLabel(int numero) {
     return 'Objective $numero';
   }
+
+  @override
+  String get suspensionBadge => 'Deactivated';
+
+  @override
+  String get suspensionToggleLabel => 'Show deactivated';
+
+  @override
+  String get suspensionStartSelection => 'Deactivate students';
+
+  @override
+  String suspensionSelectionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students selected',
+      one: '1 student selected',
+      zero: 'Select the students to deactivate',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionSelectionHint =>
+      'Only completed files can be deactivated.';
+
+  @override
+  String get suspensionSelectAllPage => 'Select all (page)';
+
+  @override
+  String get suspensionUnselectAllPage => 'Unselect all (page)';
+
+  @override
+  String get suspensionCancel => 'Cancel';
+
+  @override
+  String suspensionConfirmSelection(int count) {
+    return 'Deactivate ($count)';
+  }
+
+  @override
+  String suspensionSelectStudent(String name) {
+    return 'Select $name';
+  }
+
+  @override
+  String get suspensionDialogEyebrow => 'Temporary suspension';
+
+  @override
+  String suspensionDialogTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Deactivate $count students',
+      one: 'Deactivate the student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String suspensionDialogInfoLead(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Effective today, $dateString.';
+  }
+
+  @override
+  String get suspensionDialogInfoBody =>
+      'The student leaves the roll calls, grade entry, billing and debt recovery. Their file, grades and payments are kept, and they can be reactivated at any time.';
+
+  @override
+  String get suspensionReasonLabel => 'Reason (optional)';
+
+  @override
+  String get suspensionReasonNone => 'No reason';
+
+  @override
+  String get suspensionReasonMedical => 'Medical reason';
+
+  @override
+  String get suspensionReasonFamily => 'Family reason';
+
+  @override
+  String get suspensionReasonDisciplinary => 'Disciplinary measure';
+
+  @override
+  String get suspensionReasonProlongedAbsence => 'Prolonged absence';
+
+  @override
+  String get suspensionReasonOther => 'Other';
+
+  @override
+  String get suspensionPrecisionLabel => 'Details (optional)';
+
+  @override
+  String get suspensionPrecisionHint => 'e.g. back after the holidays';
+
+  @override
+  String suspensionConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Deactivate $count students',
+      one: 'Deactivate',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionBusy => 'Deactivating…';
+
+  @override
+  String suspensionDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students deactivated',
+      one: 'Student deactivated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionWriteFailed =>
+      'Nothing was changed: the tablet could not save the action. Your input is kept.';
+
+  @override
+  String suspensionStudentsSummary(int count, String names) {
+    return '$count students · $names';
+  }
+
+  @override
+  String suspensionClassLabel(String name) {
+    return 'Class $name';
+  }
+
+  @override
+  String suspensionSince(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'since $dateString';
+  }
+
+  @override
+  String reactivationDialogTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Reactivate $count students',
+      one: 'Reactivate the student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reactivationSinceLabel => 'Deactivated on';
+
+  @override
+  String get reactivationReasonLabel => 'Reason';
+
+  @override
+  String get reactivationInfo =>
+      'The student reappears right away in their class, the roll calls, grade entry and billing.';
+
+  @override
+  String get reactivationConfirm => 'Reactivate';
+
+  @override
+  String get reactivationBusy => 'Reactivating…';
+
+  @override
+  String reactivationDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students reactivated',
+      one: 'Student reactivated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String suspensionDate(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String suspensionBannerHeadline(
+    DateTime date,
+    String reason,
+    String precision,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '',
+      'other': ' · $reason',
+    });
+    String _temp1 = intl.Intl.selectLogic(precision, {
+      'none': '',
+      'other': ' — $precision',
+    });
+    return 'Student deactivated since $dateString$_temp0$_temp1.';
+  }
+
+  @override
+  String get suspensionBannerEffects =>
+      'Hidden from roll calls, grade entry, billing and debt recovery.';
+
+  @override
+  String get suspensionBannerRefused =>
+      'The server refused the reactivation: the student stays deactivated. Try again, or contact the administrator.';
+
+  @override
+  String suspensionMemberAction(String name) {
+    return 'Deactivate $name';
+  }
+
+  @override
+  String suspensionDoneClasses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students deactivated · removed from the headcount',
+      one: 'Student deactivated · removed from the headcount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionNoEnrollment =>
+      'This student\'s enrollment file is not on the tablet: sync before deactivating them.';
+
+  @override
+  String suspendedSectionTitle(int count) {
+    return 'Deactivated students · $count';
+  }
+
+  @override
+  String get suspendedSectionSubtitle =>
+      'Out of the class headcount until they are reactivated.';
+
+  @override
+  String suspendedMemberLine(
+    String firstName,
+    String classroom,
+    DateTime date,
+  ) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$firstName · $classroom · since $dateString';
+  }
+
+  @override
+  String get suspensionInsightTitle => 'Deactivated students';
+
+  @override
+  String suspensionInsightBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count students are temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.',
+      one:
+          '1 student is temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get suspensionInsightAction => 'Manage deactivated students';
+
+  @override
+  String get editiqueViewerSheetTitle => 'Enrollment form';
+
+  @override
+  String get documentsHintSheet =>
+      'The signed enrollment file: identity, schooling, guardians and fees. One form in force; correcting the file seals a new one.';
+
+  @override
+  String get enrollmentSheetAction => 'Enrollment form';
+
+  @override
+  String get enrollmentSheetOfflineNone =>
+      'Offline: no enrollment form is kept on the tablet for this student.';
+
+  @override
+  String suspensionReasonLine(String reason, String precision) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '—',
+      'other': '$reason',
+    });
+    String _temp1 = intl.Intl.selectLogic(precision, {
+      'none': '',
+      'other': ' · $precision',
+    });
+    return '$_temp0$_temp1';
+  }
+
+  @override
+  String suspensionBadgeTooltip(String reason, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'none': '',
+      'other': '$reason · ',
+    });
+    return '${_temp0}since $dateString';
+  }
+
+  @override
+  String get resultatsErrorSuspendedTitle => 'Deactivated student';
+
+  @override
+  String get resultatsErrorSuspendedMessage =>
+      'Their results are not computed while they are deactivated. Reactivate them from their enrollment file to see them again.';
 }

@@ -149,6 +149,12 @@ const ModuleAccess kStudentPhotoWriteAccess = ModuleAccess([
   Perm.studentPhotoWrite,
 ]);
 
+/// Désactiver ou réactiver un élève inscrit (`POST /sync/enrollment-suspensions`).
+/// Masquée sans elle : le geste part par l'outbox, où un 403 est terminal.
+const ModuleAccess kEnrollmentSuspendAccess = ModuleAccess([
+  Perm.enrollmentSuspend,
+]);
+
 /// Créer ou modifier la fiche d'un agent (`POST /sync/staff-members`). Poser
 /// un contrat et verser une pièce ont leurs propres droits.
 const ModuleAccess kStaffWriteAccess = ModuleAccess([Perm.hrStaffWrite]);
@@ -245,6 +251,7 @@ const Map<String, ModuleAccess> kGuardedWriteActions = {
   'enregistrer une dépense': kExpenseWriteAccess,
   'retirer une dépense': kExpenseWithdrawAccess,
   'photographier un élève': kStudentPhotoWriteAccess,
+  'désactiver ou réactiver un élève': kEnrollmentSuspendAccess,
 };
 
 /// **Source unique** du mapping sous-module → permissions requises.

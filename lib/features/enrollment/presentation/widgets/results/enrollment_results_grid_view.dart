@@ -3,7 +3,10 @@ import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_pagination_bar.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_row_selection.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_result_card.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_suspension_marks.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentResultsGridView extends StatelessWidget {
   final List<EnrollmentSummary> enrollments;
@@ -43,9 +46,33 @@ class EnrollmentResultsGridView extends StatelessWidget {
       itemCount: enrollments.length,
       itemBuilder: (context, index) {
         final enrollment = enrollments[index];
-        return EnrollmentResultCard(
+        final selection = EnrollmentRowSelectionScope.of(context);
+        final eligible = EnrollmentRowSelection.isEligible(enrollment);
+        Widget card = EnrollmentResultCard(
           enrollment: enrollment,
-          onTap: () => onViewRequested(enrollment),
+          // En mode sélection, toucher une carte éligible la coche.
+          onTap: selection == null
+              ? () => onViewRequested(enrollment)
+              : () => eligible ? selection.onToggle(enrollment) : null,
+        );
+        if (enrollment.isSuspended) {
+          card = EnrollmentSuspensionMarks.dimmed(card);
+        }
+        if (selection == null) return card;
+        // La carte fixe la taille de la pile ; la case se pose dessus.
+        return Stack(
+          children: [
+            card,
+            Positioned(
+              top: AppSpacing.xs,
+              right: AppSpacing.xs,
+              child: EnrollmentSuspensionMarks.checkbox(
+                enrollment,
+                selection,
+                AppLocalizations.of(context)!,
+              ),
+            ),
+          ],
         );
       },
     );

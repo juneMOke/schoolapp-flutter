@@ -201,6 +201,18 @@ class EnrollmentLocalListProjector {
     );
   }
 
+  /// Les lignes à montrer : sans les élèves désactivés quand on les masque.
+  /// Masqués, ils restent inscrits.
+  static List<EnrollmentSummary> visible(
+    List<EnrollmentSummary> all, {
+    required bool showSuspended,
+  }) => showSuspended
+      ? all
+      : [
+          for (final s in all)
+            if (!s.isSuspended) s,
+        ];
+
   /// Découpe la page [page] (bornée) d'une liste déjà filtrée/projetée.
   ///
   /// Le bornage lui-même vit dans [ClientSidePaginator] : le Contrôle des frais

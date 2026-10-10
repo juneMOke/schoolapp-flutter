@@ -40,6 +40,10 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
   /// Ouvre le dossier d'un élève depuis la liste nominative.
   final void Function(DayEnrollmentEntry entry)? onEntryTap;
 
+  /// Élèves désactivés de l'année, et l'écran où ils se gèrent.
+  final int suspendedCount;
+  final VoidCallback? onOpenSuspended;
+
   const EnrollmentDashboardSuccessView({
     super.key,
     required this.stats,
@@ -48,6 +52,8 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
     this.onLevelTap,
     this.onOpenPreRegistrations,
     this.onEntryTap,
+    this.suspendedCount = 0,
+    this.onOpenSuspended,
   });
 
   @override
@@ -141,6 +147,8 @@ class EnrollmentDashboardSuccessView extends StatelessWidget {
           child: EnrollmentInsightsSection(
             stats: stats,
             onOpenPreRegistrations: onOpenPreRegistrations,
+            suspendedCount: suspendedCount,
+            onOpenSuspended: onOpenSuspended,
           ),
         ),
       ],

@@ -41,10 +41,12 @@ class SearchLocalEnrollmentsUseCase {
     String? academicYearId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    bool includeSuspended = false,
   }) => _repository.searchCurrentYearEnrolledByAcademicInfo(
     academicYearId: academicYearId,
     schoolLevelId: schoolLevelId,
     schoolLevelGroupId: schoolLevelGroupId,
+    includeSuspended: includeSuspended,
   );
 
   /// Recherche **Première inscription** : dossiers de l'année [academicYearId]

@@ -48,6 +48,13 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
   final ValueChanged<ClassroomMemberReassignIntent> onTransferTap;
   final VoidCallback onRetry;
 
+  /// Posé dans la synthèse, avant le sélecteur Grille/Liste (bascule
+  /// « Afficher les désactivés »).
+  final Widget? summaryAccessory;
+
+  /// Posé sous la synthèse (section « Élèves désactivés »).
+  final Widget? afterSummary;
+
   const ClassesOrganisationSplitResults({
     super.key,
     required this.classroomsStatus,
@@ -60,6 +67,8 @@ class ClassesOrganisationSplitResults extends StatefulWidget {
     required this.errorMessage,
     required this.onTransferTap,
     required this.onRetry,
+    this.summaryAccessory,
+    this.afterSummary,
   });
 
   @override
@@ -129,8 +138,13 @@ class _ClassesOrganisationSplitResultsState
           femaleCount: femaleTotal,
           layout: _layout,
           onLayoutChanged: (value) => setState(() => _layout = value),
+          accessory: widget.summaryAccessory,
         ),
         const SizedBox(height: AppDimensions.spacingL),
+        if (widget.afterSummary != null) ...[
+          widget.afterSummary!,
+          const SizedBox(height: AppDimensions.spacingM),
+        ],
         if (widget.unassignedEnrollments.isNotEmpty) ...[
           ClassesOrganisationUnassignedMembersSection(
             count: widget.unassignedEnrollments.length,
@@ -167,6 +181,7 @@ class _SummaryBand extends StatelessWidget {
   final int femaleCount;
   final _ClassroomLayout layout;
   final ValueChanged<_ClassroomLayout> onLayoutChanged;
+  final Widget? accessory;
 
   const _SummaryBand({
     required this.headcount,
@@ -175,6 +190,7 @@ class _SummaryBand extends StatelessWidget {
     required this.femaleCount,
     required this.layout,
     required this.onLayoutChanged,
+    this.accessory,
   });
 
   @override
@@ -241,6 +257,10 @@ class _SummaryBand extends StatelessWidget {
             children: [
               Expanded(child: kpis),
               const SizedBox(width: AppDimensions.spacingM),
+              if (accessory != null) ...[
+                accessory!,
+                const SizedBox(width: AppDimensions.spacingS),
+              ],
               toggle,
             ],
           );
@@ -250,7 +270,11 @@ class _SummaryBand extends StatelessWidget {
           children: [
             kpis,
             const SizedBox(height: AppDimensions.spacingM),
-            toggle,
+            Wrap(
+              spacing: AppDimensions.spacingS,
+              runSpacing: AppDimensions.spacingS,
+              children: [?accessory, toggle],
+            ),
           ],
         );
       },

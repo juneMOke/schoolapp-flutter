@@ -31,6 +31,14 @@ abstract class EditiqueRepository {
     String? academicYearId,
   });
 
+  /// Fiche d'inscription (FI). Une seule en vigueur : re-servie à contenu
+  /// inchangé, rescellée sinon.
+  Future<Either<Failure, EditiqueDocument>> emitEnrollmentSheet({
+    required String enrollmentId,
+    String? studentId,
+    String? academicYearId,
+  });
+
   /// Note de perception annuelle (NP). Archivée et idempotente.
   Future<Either<Failure, EditiqueDocument>> emitNotePerception({
     required String studentId,

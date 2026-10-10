@@ -24181,6 +24181,358 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Objective {numero}'**
   String chapitreFormObjectifLabel(int numero);
+
+  /// No description provided for @suspensionBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated'**
+  String get suspensionBadge;
+
+  /// No description provided for @suspensionToggleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show deactivated'**
+  String get suspensionToggleLabel;
+
+  /// No description provided for @suspensionStartSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate students'**
+  String get suspensionStartSelection;
+
+  /// No description provided for @suspensionSelectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Select the students to deactivate} =1{1 student selected} other{{count} students selected}}'**
+  String suspensionSelectionCount(int count);
+
+  /// No description provided for @suspensionSelectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only completed files can be deactivated.'**
+  String get suspensionSelectionHint;
+
+  /// No description provided for @suspensionSelectAllPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all (page)'**
+  String get suspensionSelectAllPage;
+
+  /// No description provided for @suspensionUnselectAllPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unselect all (page)'**
+  String get suspensionUnselectAllPage;
+
+  /// No description provided for @suspensionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get suspensionCancel;
+
+  /// No description provided for @suspensionConfirmSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate ({count})'**
+  String suspensionConfirmSelection(int count);
+
+  /// No description provided for @suspensionSelectStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {name}'**
+  String suspensionSelectStudent(String name);
+
+  /// No description provided for @suspensionDialogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary suspension'**
+  String get suspensionDialogEyebrow;
+
+  /// No description provided for @suspensionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Deactivate the student} other{Deactivate {count} students}}'**
+  String suspensionDialogTitle(int count);
+
+  /// No description provided for @suspensionDialogInfoLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective today, {date}.'**
+  String suspensionDialogInfoLead(DateTime date);
+
+  /// No description provided for @suspensionDialogInfoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The student leaves the roll calls, grade entry, billing and debt recovery. Their file, grades and payments are kept, and they can be reactivated at any time.'**
+  String get suspensionDialogInfoBody;
+
+  /// No description provided for @suspensionReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get suspensionReasonLabel;
+
+  /// No description provided for @suspensionReasonNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No reason'**
+  String get suspensionReasonNone;
+
+  /// No description provided for @suspensionReasonMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical reason'**
+  String get suspensionReasonMedical;
+
+  /// No description provided for @suspensionReasonFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family reason'**
+  String get suspensionReasonFamily;
+
+  /// No description provided for @suspensionReasonDisciplinary.
+  ///
+  /// In en, this message translates to:
+  /// **'Disciplinary measure'**
+  String get suspensionReasonDisciplinary;
+
+  /// No description provided for @suspensionReasonProlongedAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Prolonged absence'**
+  String get suspensionReasonProlongedAbsence;
+
+  /// No description provided for @suspensionReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get suspensionReasonOther;
+
+  /// No description provided for @suspensionPrecisionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Details (optional)'**
+  String get suspensionPrecisionLabel;
+
+  /// No description provided for @suspensionPrecisionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. back after the holidays'**
+  String get suspensionPrecisionHint;
+
+  /// No description provided for @suspensionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Deactivate} other{Deactivate {count} students}}'**
+  String suspensionConfirm(int count);
+
+  /// No description provided for @suspensionBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivating…'**
+  String get suspensionBusy;
+
+  /// No description provided for @suspensionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Student deactivated} other{{count} students deactivated}}'**
+  String suspensionDone(int count);
+
+  /// No description provided for @suspensionWriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was changed: the tablet could not save the action. Your input is kept.'**
+  String get suspensionWriteFailed;
+
+  /// No description provided for @suspensionStudentsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} students · {names}'**
+  String suspensionStudentsSummary(int count, String names);
+
+  /// No description provided for @suspensionClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {name}'**
+  String suspensionClassLabel(String name);
+
+  /// No description provided for @suspensionSince.
+  ///
+  /// In en, this message translates to:
+  /// **'since {date}'**
+  String suspensionSince(DateTime date);
+
+  /// No description provided for @reactivationDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Reactivate the student} other{Reactivate {count} students}}'**
+  String reactivationDialogTitle(int count);
+
+  /// No description provided for @reactivationSinceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated on'**
+  String get reactivationSinceLabel;
+
+  /// No description provided for @reactivationReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reactivationReasonLabel;
+
+  /// No description provided for @reactivationInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'The student reappears right away in their class, the roll calls, grade entry and billing.'**
+  String get reactivationInfo;
+
+  /// No description provided for @reactivationConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate'**
+  String get reactivationConfirm;
+
+  /// No description provided for @reactivationBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivating…'**
+  String get reactivationBusy;
+
+  /// No description provided for @reactivationDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Student reactivated} other{{count} students reactivated}}'**
+  String reactivationDone(int count);
+
+  /// No description provided for @suspensionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String suspensionDate(DateTime date);
+
+  /// No description provided for @suspensionBannerHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Student deactivated since {date}{reason, select, none{} other{ · {reason}}}{precision, select, none{} other{ — {precision}}}.'**
+  String suspensionBannerHeadline(
+    DateTime date,
+    String reason,
+    String precision,
+  );
+
+  /// No description provided for @suspensionBannerEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden from roll calls, grade entry, billing and debt recovery.'**
+  String get suspensionBannerEffects;
+
+  /// No description provided for @suspensionBannerRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the reactivation: the student stays deactivated. Try again, or contact the administrator.'**
+  String get suspensionBannerRefused;
+
+  /// No description provided for @suspensionMemberAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate {name}'**
+  String suspensionMemberAction(String name);
+
+  /// No description provided for @suspensionDoneClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Student deactivated · removed from the headcount} other{{count} students deactivated · removed from the headcount}}'**
+  String suspensionDoneClasses(int count);
+
+  /// No description provided for @suspensionNoEnrollment.
+  ///
+  /// In en, this message translates to:
+  /// **'This student\'s enrollment file is not on the tablet: sync before deactivating them.'**
+  String get suspensionNoEnrollment;
+
+  /// No description provided for @suspendedSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated students · {count}'**
+  String suspendedSectionTitle(int count);
+
+  /// No description provided for @suspendedSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of the class headcount until they are reactivated.'**
+  String get suspendedSectionSubtitle;
+
+  /// No description provided for @suspendedMemberLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{firstName} · {classroom} · since {date}'**
+  String suspendedMemberLine(String firstName, String classroom, DateTime date);
+
+  /// No description provided for @suspensionInsightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated students'**
+  String get suspensionInsightTitle;
+
+  /// No description provided for @suspensionInsightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student is temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.} other{{count} students are temporarily deactivated: still enrolled, but out of the headcount, roll calls, grades and debt recovery.}}'**
+  String suspensionInsightBody(int count);
+
+  /// No description provided for @suspensionInsightAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage deactivated students'**
+  String get suspensionInsightAction;
+
+  /// No description provided for @editiqueViewerSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment form'**
+  String get editiqueViewerSheetTitle;
+
+  /// No description provided for @documentsHintSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'The signed enrollment file: identity, schooling, guardians and fees. One form in force; correcting the file seals a new one.'**
+  String get documentsHintSheet;
+
+  /// No description provided for @enrollmentSheetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment form'**
+  String get enrollmentSheetAction;
+
+  /// No description provided for @enrollmentSheetOfflineNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: no enrollment form is kept on the tablet for this student.'**
+  String get enrollmentSheetOfflineNone;
+
+  /// No description provided for @suspensionReasonLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, none{—} other{{reason}}}{precision, select, none{} other{ · {precision}}}'**
+  String suspensionReasonLine(String reason, String precision);
+
+  /// No description provided for @suspensionBadgeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, none{} other{{reason} · }}since {date}'**
+  String suspensionBadgeTooltip(String reason, DateTime date);
+
+  /// No description provided for @resultatsErrorSuspendedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated student'**
+  String get resultatsErrorSuspendedTitle;
+
+  /// No description provided for @resultatsErrorSuspendedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Their results are not computed while they are deactivated. Reactivate them from their enrollment file to see them again.'**
+  String get resultatsErrorSuspendedMessage;
 }
 
 class _AppLocalizationsDelegate

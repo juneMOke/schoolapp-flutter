@@ -29,6 +29,13 @@ class LocalEnrollmentListItem extends Equatable {
   final String? schoolLevelName;
   final String? schoolLevelGroupName;
 
+  final String? academicYearId;
+
+  /// Début de la période de désactivation ouverte ; `null` si l'élève n'est
+  /// pas désactivé. [suspensionReason] est le code du motif, s'il y en a un.
+  final DateTime? suspendedAt;
+  final String? suspensionReason;
+
   const LocalEnrollmentListItem({
     required this.enrollmentId,
     required this.studentId,
@@ -46,6 +53,9 @@ class LocalEnrollmentListItem extends Equatable {
     this.schoolLevelGroupId,
     this.schoolLevelName,
     this.schoolLevelGroupName,
+    this.academicYearId,
+    this.suspendedAt,
+    this.suspensionReason,
   });
 
   String get fullName => '$firstName $lastName';
@@ -68,5 +78,8 @@ class LocalEnrollmentListItem extends Equatable {
     schoolLevelGroupId,
     schoolLevelName,
     schoolLevelGroupName,
+    academicYearId,
+    suspendedAt,
+    suspensionReason,
   ];
 }

@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/components/status/sync_state_icon.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_status.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_status_badge.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_suspension_marks.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class EnrollmentResultCard extends StatelessWidget {
@@ -118,6 +119,15 @@ class EnrollmentResultCard extends StatelessWidget {
               ),
       ),
       chips: [
+        if (enrollment.isSuspended)
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 140),
+            child: EnrollmentSuspensionMarks.badge(
+              enrollment,
+              l10n,
+              size: StatusBadgeSize.small,
+            ),
+          ),
         // Brouillon local repris depuis le listing : badge « Brouillon » borné
         // (le Wrap des chips impose des contraintes non bornées → le `Flexible`
         // interne du badge casserait sinon).

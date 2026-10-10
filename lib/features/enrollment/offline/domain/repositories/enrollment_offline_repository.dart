@@ -295,6 +295,7 @@ abstract class EnrollmentOfflineRepository {
     String? academicYearId,
     String? schoolLevelId,
     String? schoolLevelGroupId,
+    bool includeSuspended = false,
   });
 
   /// Recherche de **réinscription** : le vivier N-1 (cohorte locale filtrée par

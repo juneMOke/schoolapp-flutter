@@ -9,6 +9,14 @@ enum EditiqueDocumentType {
   /// Attestation d'inscription — `POST /enrollments/{enrollmentId}/attestation`.
   enrollmentAttestation('AI'),
 
+  /// Fiche d'inscription — `POST /enrollments/{enrollmentId}/sheet`.
+  ///
+  /// Une seule fiche en vigueur par (élève, année) : contenu inchangé, le
+  /// serveur re-sert la même pièce ; contenu changé, il annule l'ancienne et en
+  /// scelle une nouvelle (« Annule et remplace »). Hors du delta éditique : la
+  /// tablette ne garde que celles qu'elle a demandées.
+  enrollmentSheet('FI'),
+
   /// Note de perception annuelle — `POST /finance/students/{studentId}/note-perception`.
   notePerception('NP'),
 
@@ -53,6 +61,7 @@ enum EditiqueDocumentType {
   /// laisser de trace de la première.
   bool get isArchived =>
       this == enrollmentAttestation ||
+      this == enrollmentSheet ||
       this == notePerception ||
       this == paymentReceipt ||
       this == saleReceipt;

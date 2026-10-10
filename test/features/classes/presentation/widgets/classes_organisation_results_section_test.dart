@@ -25,6 +25,8 @@ import 'package:school_app_flutter/features/enrollment/domain/entities/gender.da
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../enrollment_suspension/suspension_test_module.dart';
+
 class MockClassroomBloc extends MockBloc<ClassroomEvent, ClassroomState>
     implements ClassroomBloc {}
 
@@ -104,6 +106,7 @@ void main() {
   ];
 
   setUp(() {
+    addTearDown(registerInertSuspensionModule());
     classroomBloc = MockClassroomBloc();
     when(() => classroomBloc.state).thenReturn(const ClassroomState());
     whenListen(

@@ -336,6 +336,12 @@ class AppConstants {
   //    à CHAQUE appel. Un rejeu après échec crée une seconde pièce numérotée.
   static const String emitEnrollmentAttestationEndpoint =
       '/api/v1/enrollments/{enrollmentId}/attestation';
+
+  /// Fiche d'inscription scellée (`FI`) : une seule en vigueur par (élève,
+  /// année). Contenu inchangé ⇒ le serveur ressert la même pièce ; changé ⇒ il
+  /// annule l'ancienne et en scelle une nouvelle (« Annule et remplace »).
+  static const String emitEnrollmentSheetEndpoint =
+      '/api/v1/enrollments/{enrollmentId}/sheet';
   static const String emitNotePerceptionEndpoint =
       '/api/v1/finance/students/{studentId}/note-perception';
   static const String emitPaymentReceiptEndpoint =
@@ -803,7 +809,11 @@ class AppConstants {
   // sujet en sous-agrégat LWW (`duree_minutes`, `programme_json`, `consignes`,
   // `sujet_*`), `publication_json`, et la table `evaluation_copie_log`.
   // Additif. Palier d'école.
-  static const int offlineDbSchemaVersion = 62;
+  // v63 (2026-10-08) : la désactivation d'élèves — `enrollment_suspensions`
+  // (miroir du flux `enrollment.suspensions` et geste en attente), création
+  // pure, palier d'école ; et le cache éditique (`device.db`) admet la fiche
+  // d'inscription `FI`, table reconstruite avec copie, palier d'appareil.
+  static const int offlineDbSchemaVersion = 63;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1206,6 +1216,21 @@ class AppConstants {
   ///    applicatif. Indispensable au dénominateur d'assiduité par intervalles.
   static const String syncClassroomTransfersEndpoint =
       '/api/v1/sync/classroom-transfers';
+
+  /// Désactivation d'élèves (flux `enrollment.suspensions`) :
+  ///  - **POST** = désactiver, geste identifié par son uuid, rejouable ; le
+  ///    corps rendu est l'état canonique de l'inscription
+  ///    (`enrollment.suspend`). 409 `ENROLLMENT_NOT_YET_SYNCED` = attente,
+  ///    422 = refus terminal ;
+  ///  - **GET** = pull KEYSET des périodes de l'année, ouvertes et fermées
+  ///    (`enrollment.read`).
+  static const String syncEnrollmentSuspensionsEndpoint =
+      '/api/v1/sync/enrollment-suspensions';
+
+  /// Réactiver un élève désactivé : ferme la période ouverte de l'inscription,
+  /// quelle que soit la tablette qui l'a posée (`enrollment.suspend`).
+  static const String syncEnrollmentReactivationsEndpoint =
+      '/api/v1/sync/enrollment-suspensions/reactivations';
 
   /// Volet Discipline offline (contrat openapi_discipline_sync 1.1.0) :
   ///  - **POST** = push de l'agrégat `{case, comments[]}` (upsert 200) : le FAIT

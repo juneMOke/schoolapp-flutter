@@ -98,6 +98,8 @@ class _DocumentsPageState extends State<DocumentsPage> {
                             surname: request.surname,
                             schoolLevelGroupId: request.schoolLevelGroupId,
                             schoolLevelId: request.schoolLevelId,
+                            // Leurs pièces restent éditables.
+                            includeSuspended: true,
                           ),
                         ),
                   ),

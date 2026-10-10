@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_consultation_actions.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/suspension/consultation_suspension.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -428,44 +429,58 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
         final hasUnvalidatedCorrection =
             _isCompletedReedition &&
             _localReadOnly!.enrollment.syncState == SyncState.draft;
-        return EnrollmentJourneyScaffold(
-          modeLabel: _buildJourneyModeLabel(l10n),
-          studentDisplayName: _localDraftDisplayName(detail, l10n),
-          currentStep: _currentStep,
-          avatar: enrollmentPhotoAvatar(detail),
-          onExitRequested: hasUnvalidatedCorrection
-              ? _confirmReeditionExit
-              : null,
-          // Bouton PLEIN (terre cuite) et non un texte sur la barre sombre :
-          // c'est la seule porte de sortie de la lecture seule, et un libellé
-          // posé sur un dégradé bleu se lit comme un titre, pas comme une
-          // action — le guichet ne le voyait pas.
-          action: _canReedit
-              ? PermissionGate.access(
-                  kEnrollmentSubmitAccess,
-                  child: EteeloButton.primary(
-                    label: l10n.enrollmentReeditAction,
-                    icon: Icons.edit_outlined,
-                    fullWidth: false,
-                    onPressed: _enterReedition,
-                  ),
-                )
-              : null,
-          body: EnrollmentDetailContentShell(
-            child: EnrollmentStepperScope(
-              enrollmentDetail: detail,
-              detailIntent: _effectiveIntent,
-              detailPolicy: _isCompletedReedition
-                  ? _policy
-                  : const LocalConsultationDetailPolicy(),
-              onStepChanged: _onStepChanged,
-              correctionOffered: _canReedit,
+        final candidate = consultationCandidate(_localReadOnly!);
+        return ConsultationSuspensionScope(
+          enrollmentId: candidate.target.enrollmentId,
+          child: EnrollmentJourneyScaffold(
+            modeLabel: _buildJourneyModeLabel(l10n),
+            studentDisplayName: _localDraftDisplayName(detail, l10n),
+            currentStep: _currentStep,
+            avatar: enrollmentPhotoAvatar(detail),
+            onExitRequested: hasUnvalidatedCorrection
+                ? _confirmReeditionExit
+                : null,
+            // Bouton PLEIN (terre cuite) et non un texte sur la barre sombre :
+            // c'est la seule porte de sortie de la lecture seule, et un libellé
+            // posé sur un dégradé bleu se lit comme un titre, pas comme une
+            // action — le guichet ne le voyait pas.
+            action: EnrollmentConsultationActions(
+              candidate: candidate,
+              offersSuspension: _offersSuspension,
+              offersSheet: _offersSheet,
+              onReedit: _canReedit ? _enterReedition : null,
+            ),
+            body: EnrollmentDetailContentShell(
+              child: EnrollmentStepperScope(
+                enrollmentDetail: detail,
+                detailIntent: _effectiveIntent,
+                detailPolicy: _isCompletedReedition
+                    ? _policy
+                    : const LocalConsultationDetailPolicy(),
+                onStepChanged: _onStepChanged,
+                correctionOffered: _canReedit,
+                statusBanner: ConsultationSuspendedBanner(candidate: candidate),
+              ),
             ),
           ),
         );
       },
     );
   }
+
+  /// « Désactiver » n'est offert qu'en consultation d'un dossier complété
+  /// ouvert depuis Première inscription — ni en correction, ni en
+  /// réinscription ou pré-inscription.
+  /// La fiche d'inscription : tout dossier complété consulté, quel qu'en
+  /// soit le type.
+  bool get _offersSheet =>
+      !_isCompletedReedition &&
+      _localReadOnly?.enrollment.status == OfflineEnrollmentStatus.completed;
+
+  bool get _offersSuspension =>
+      !_isCompletedReedition &&
+      _isFirstRegistrationListing &&
+      _localReadOnly?.enrollment.status == OfflineEnrollmentStatus.completed;
 
   /// Première inscription : la page attend l'agrégat local (chargé via
   /// [LoadLocalEnrollmentDetail]). Le succès bascule `_localReadOnly`

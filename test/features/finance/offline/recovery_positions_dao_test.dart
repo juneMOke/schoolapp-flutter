@@ -180,6 +180,24 @@ void main() {
   });
 
   group('le périmètre', () {
+    test('un élève désactivé sort du recouvrement, dû et encaissé', () async {
+      await charge('c1', 's1', 'TUITION');
+      await charge('c2', 's2', 'TUITION', paid: 10000);
+      await db.insert('enrollment_suspensions', {
+        'id': 'p-s2',
+        'school_id': 'school-1',
+        'enrollment_id': 'e-s2',
+        'student_id': 's2',
+        'academic_year_id': 'ay-1',
+        'suspended_at': '2026-10-02T08:00:00Z',
+        'updated_at': 1,
+      });
+
+      final lines = await read(feeCodes: const ['TUITION']);
+
+      expect(lines.map((l) => l.studentId), ['s1']);
+    });
+
     test('la sélection borne les natures rendues', () async {
       await charge('c1', 's1', 'TUITION');
       await charge('c2', 's1', 'BOOKS');

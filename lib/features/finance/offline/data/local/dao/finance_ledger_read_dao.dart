@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
@@ -539,6 +540,9 @@ class FinanceLedgerReadDao {
   ///
   /// ⚠️ [feeCodes] vide rend une liste vide **sans requête** : un `IN ()` n'est
   /// pas du SQL valide, et l'écran interdit de toute façon une sélection vide.
+  ///
+  /// Les élèves **désactivés** sur l'année en sont exclus, des deux côtés du
+  /// taux (dû et encaissé) : ils sortent du recouvrement, comme au serveur.
   Future<List<LocalRecoveryLine>> getRecoveryPositions({
     required String academicYearId,
     required List<String> feeCodes,
@@ -549,7 +553,12 @@ class FinanceLedgerReadDao {
     // Aucun argument nullable n'est lié : le validateur de sqflite refuse
     // `null` en `whereArgs`, et le cycle absent retire sa clause plutôt que de
     // lier un `null` qui lèverait.
-    final args = <Object>[...feeCodes, academicYearId, ?schoolLevelGroupId];
+    final args = <Object>[
+      ...feeCodes,
+      academicYearId,
+      ?schoolLevelGroupId,
+      academicYearId,
+    ];
     final placeholders = List.filled(feeCodes.length, '?').join(', ');
     final cycleClause = schoolLevelGroupId == null
         ? ''
@@ -567,6 +576,7 @@ class FinanceLedgerReadDao {
       WHERE sc.fee_code IN ($placeholders)
         AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
         $cycleClause
+        AND NOT ${EnrollmentSuspensionSql.studentSuspended('sc.student_id', '?')}
       GROUP BY sc.student_id, sc.school_level_id, sc.fee_code, sc.currency
       ORDER BY sc.student_id, sc.school_level_id, sc.fee_code, sc.currency
       ''', args);

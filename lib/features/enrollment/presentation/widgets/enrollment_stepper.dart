@@ -32,6 +32,10 @@ class EnrollmentStepper extends StatefulWidget {
   /// plutôt qu'annoncer un dossier « non modifiable ».
   final bool correctionOffered;
 
+  /// Un état du dossier à dire avant tout, au-dessus du bandeau « Lecture
+  /// seule » d'une consultation (élève désactivé).
+  final Widget? statusBanner;
+
   const EnrollmentStepper({
     super.key,
     required this.enrollmentDetail,
@@ -40,6 +44,7 @@ class EnrollmentStepper extends StatefulWidget {
     required this.stepHandlers,
     this.onStepChanged,
     this.correctionOffered = false,
+    this.statusBanner,
   });
 
   @override
@@ -188,8 +193,15 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               // Dossier en consultation lecture seule → bandeau d'avis au-dessus
               // de chaque étape. Exclut le cas Frais-verrouillé-en-création.
               stepBanner: widget.detailPolicy.isReadOnlyConsultation
-                  ? EnrollmentReadOnlyBanner(
-                      correctionOffered: widget.correctionOffered,
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ?widget.statusBanner,
+                        EnrollmentReadOnlyBanner(
+                          correctionOffered: widget.correctionOffered,
+                        ),
+                      ],
                     )
                   : null,
               controls: controls,

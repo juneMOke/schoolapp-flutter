@@ -20,6 +20,14 @@ class EnrollmentLocalListState extends Equatable {
   final EnrollmentErrorType? summariesErrorType;
   final String? errorMessage;
 
+  /// Les élèves désactivés sont-ils montrés ? Oui par défaut ; la Première
+  /// inscription les masque à l'ouverture (bascule « Afficher les
+  /// désactivés »).
+  final bool showSuspended;
+
+  /// Élèves désactivés dans le résultat de la requête, montrés ou non.
+  final int suspendedCount;
+
   const EnrollmentLocalListState({
     required this.summariesStatus,
     required this.summaries,
@@ -31,6 +39,8 @@ class EnrollmentLocalListState extends Equatable {
     required this.lastSummariesQuery,
     required this.summariesErrorType,
     required this.errorMessage,
+    this.showSuspended = true,
+    this.suspendedCount = 0,
   });
 
   const EnrollmentLocalListState.initial()
@@ -43,7 +53,9 @@ class EnrollmentLocalListState extends Equatable {
       summariesQueryType = null,
       lastSummariesQuery = null,
       summariesErrorType = null,
-      errorMessage = null;
+      errorMessage = null,
+      showSuspended = true,
+      suspendedCount = 0;
 
   EnrollmentLocalListState copyWith({
     EnrollmentLoadStatus? summariesStatus,
@@ -56,6 +68,8 @@ class EnrollmentLocalListState extends Equatable {
     Object? lastSummariesQuery = _undefined,
     Object? summariesErrorType = _undefined,
     Object? errorMessage = _undefined,
+    bool? showSuspended,
+    int? suspendedCount,
   }) {
     return EnrollmentLocalListState(
       summariesStatus: summariesStatus ?? this.summariesStatus,
@@ -77,6 +91,8 @@ class EnrollmentLocalListState extends Equatable {
       errorMessage: identical(errorMessage, _undefined)
           ? this.errorMessage
           : errorMessage as String?,
+      showSuspended: showSuspended ?? this.showSuspended,
+      suspendedCount: suspendedCount ?? this.suspendedCount,
     );
   }
 
@@ -92,5 +108,7 @@ class EnrollmentLocalListState extends Equatable {
     lastSummariesQuery,
     summariesErrorType,
     errorMessage,
+    showSuspended,
+    suspendedCount,
   ];
 }

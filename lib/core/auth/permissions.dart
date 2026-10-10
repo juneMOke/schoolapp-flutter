@@ -27,6 +27,13 @@ enum Perm {
   enrollmentDelete('enrollment.delete'),
   enrollmentStatsRead('enrollment.stats.read'),
 
+  /// Désactiver ou réactiver un élève inscrit (`POST /sync/enrollment-suspensions`).
+  ///
+  /// Séparée de [enrollmentWrite] : suspendre retire l'élève des appels, des
+  /// notes et du recouvrement sans toucher à son dossier. Semée au secrétariat
+  /// et à la direction.
+  enrollmentSuspend('enrollment.suspend'),
+
   // ── Finances ──────────────────────────────────────────────────────────────
   // `charge` (créances), `payment` (caisse) et `grid` (grille tarifaire) sont
   // trois autorités distinctes : encaisser n'est pas réécrire les montants de

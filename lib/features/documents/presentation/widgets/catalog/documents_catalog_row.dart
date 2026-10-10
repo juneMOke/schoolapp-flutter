@@ -101,6 +101,15 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
           bloc: _bloc,
           dispatchOnOpen: !reopen,
         );
+      case EditiqueDocumentType.enrollmentSheet:
+        await showEditiqueEnrollmentSheetDialog(
+          context,
+          enrollmentId: intent.enrollmentId,
+          studentId: intent.studentId,
+          academicYearId: intent.academicYearId,
+          bloc: _bloc,
+          dispatchOnOpen: !reopen,
+        );
       case EditiqueDocumentType.notePerception:
         await showEditiqueNotePerceptionDialog(
           context,
@@ -137,17 +146,8 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
 
   /// Titre de la visionneuse pour ce type. Les cinq entrées d'émission le
   /// posent chacune ; la restitution, qui les traverse toutes, doit le choisir.
-  String _viewerTitle(AppLocalizations l10n) => switch (widget.entry.type) {
-    EditiqueDocumentType.enrollmentAttestation =>
-      l10n.editiqueViewerAttestationTitle,
-    EditiqueDocumentType.notePerception =>
-      l10n.editiqueViewerNotePerceptionTitle,
-    EditiqueDocumentType.paymentReceipt => l10n.editiqueViewerReceiptTitle,
-    EditiqueDocumentType.accountStatement => l10n.editiqueViewerStatementTitle,
-    EditiqueDocumentType.saleReceipt => l10n.editiqueViewerSaleReceiptTitle,
-    EditiqueDocumentType.financialClearance =>
-      l10n.editiqueViewerClearanceTitle,
-  };
+  String _viewerTitle(AppLocalizations l10n) =>
+      DocumentsCatalogLabels.titleOf(l10n, widget.entry.type);
 
   Future<bool> _confirm() async {
     final l10n = AppLocalizations.of(context)!;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -54,7 +55,7 @@ class ClassesOrganisationPendingDistributionCard extends StatelessWidget {
     final isOffline =
         context.watch<SyncStatusCubit>().state.status == SyncStatus.offline;
 
-    return ClassesOrganisationDashedContainer(
+    return EteeloDashedContainer(
       backgroundColor: AppColors.surfaceRaised,
       borderColor: AppColors.borderStrong.withValues(alpha: 0.45),
       child: Column(

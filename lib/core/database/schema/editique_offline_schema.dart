@@ -153,7 +153,7 @@ const TableSchema editiqueCacheEntriesTable = TableSchema(
         COALESCE(NULLIF(document_id, ''), NULLIF(document_number, ''))
           IS NOT NULL
       ),
-      CHECK (doc_type IN ('AI', 'NP', 'RC', 'BU'))
+      CHECK (doc_type IN ('AI', 'NP', 'RC', 'BU', 'FI'))
     )
   ''',
   createIndexSql: [

@@ -36,6 +36,10 @@ class ClassesOrganisationMemberTile extends StatefulWidget {
   final ClassesOrganisationMemberAction action;
   final ValueChanged<ClassroomMemberReassignIntent> onTransferTap;
 
+  /// Un geste de plus, posé avant l'action principale (« Désactiver »),
+  /// absent d'une ligne étroite.
+  final Widget? extraAction;
+
   const ClassesOrganisationMemberTile({
     required this.member,
     required this.classroomId,
@@ -44,6 +48,7 @@ class ClassesOrganisationMemberTile extends StatefulWidget {
     required this.action,
     required this.onTransferTap,
     this.enrollmentId,
+    this.extraAction,
     super.key,
   });
 
@@ -93,7 +98,15 @@ class _ClassesOrganisationMemberTileState
         // pas écraser le nom de l'élève.
         final compact =
             constraints.maxWidth < AppBreakpoints.classesMemberTileCompactMax;
-        return _buildTile(context, dimmed: dimmed, compact: compact);
+        final roomy =
+            constraints.maxWidth >=
+            AppBreakpoints.classesMemberTileExtraActionMin;
+        return _buildTile(
+          context,
+          dimmed: dimmed,
+          compact: compact,
+          roomy: roomy,
+        );
       },
     );
   }
@@ -102,6 +115,7 @@ class _ClassesOrganisationMemberTileState
     BuildContext context, {
     required bool dimmed,
     required bool compact,
+    required bool roomy,
   }) {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -171,6 +185,12 @@ class _ClassesOrganisationMemberTileState
                 gender: widget.member.studentGender,
               ),
               const SizedBox(width: AppDimensions.spacingS),
+              // Ligne étroite : la place va au nom ; le geste reste offert
+              // depuis la fiche de l'élève.
+              if (widget.extraAction != null && roomy) ...[
+                widget.extraAction!,
+                const SizedBox(width: AppDimensions.spacingXS),
+              ],
               _ActionButton(
                 action: widget.action,
                 loading: widget.isCurrentReassigningMember,

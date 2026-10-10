@@ -84,6 +84,11 @@ void main() {
     const NetworkFailure(): ResultatsErrorType.network,
     const NotFoundFailure(): ResultatsErrorType.notFound,
     const ValidationFailure(): ResultatsErrorType.validation,
+    // Un élève désactivé : refus métier propre, pas une validation générique.
+    const ApiValidationFailure(
+      code: ApiErrorCode.businessRule,
+      detailCode: 'STUDENT_SUSPENDED',
+    ): ResultatsErrorType.studentSuspended,
     const UnauthorizedFailure(): ResultatsErrorType.forbidden,
     const InvalidCredentialsFailure(): ResultatsErrorType.invalidCredentials,
     const ServerFailure(): ResultatsErrorType.server,

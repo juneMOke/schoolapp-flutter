@@ -27,6 +27,7 @@ const _secretariat = <String>[
   'enrollment.write',
   'enrollment.delete',
   'enrollment.stats.read',
+  'enrollment.suspend',
   'finance.charge.read',
   'finance.grid.read',
   'classroom.read',

@@ -28,6 +28,10 @@ enum EnrollmentSummaryQueryType {
 enum AcademicInfoSource {
   reenrollmentCohort,
   currentYearEnrolled,
+
+  /// Les inscrits de l'année, élèves désactivés compris (Documents : leurs
+  /// pièces restent éditables).
+  currentYearEnrolledWithSuspended,
   currentYearByStatus,
   preEnrollmentCohort,
 }

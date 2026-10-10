@@ -37,11 +37,16 @@ class EditiqueCatalogEntry {
   /// Les deux notions ne peuvent pas diverger — c'est ce qui rend un rejeu sûr.
   bool get isArchived => nature == EditiqueCatalogNature.fige;
 
-  /// Le barème des cinq pièces que le front sait émettre, dans l'ordre
+  /// Le barème des six pièces que le front sait émettre, dans l'ordre
   /// d'affichage du catalogue.
   static const List<EditiqueCatalogEntry> all = [
     EditiqueCatalogEntry(
       type: EditiqueDocumentType.enrollmentAttestation,
+      group: EditiqueCatalogGroup.scolarite,
+      nature: EditiqueCatalogNature.fige,
+    ),
+    EditiqueCatalogEntry(
+      type: EditiqueDocumentType.enrollmentSheet,
       group: EditiqueCatalogGroup.scolarite,
       nature: EditiqueCatalogNature.fige,
     ),
