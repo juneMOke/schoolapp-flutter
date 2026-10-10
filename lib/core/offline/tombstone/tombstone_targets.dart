@@ -206,6 +206,7 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
       'DELETE FROM chapitre_note WHERE cours_id = ?',
       'DELETE FROM chapitre_ressource WHERE cours_id = ?',
       'DELETE FROM chapitre WHERE cours_id = ?',
+      'DELETE FROM journal_seance WHERE cours_id = ?',
     ],
     // Sans cette purge, un cours réaffecté PUIS rendu reprendrait un curseur
     // périmé au lieu de rebootstraper, et perdrait en silence tout ce qui
@@ -214,6 +215,7 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
       'academics_evaluations',
       'academics_notes',
       'academics_chapitres',
+      'academics_journal',
     ],
   ),
   'academics_evaluations': TombstoneTarget(

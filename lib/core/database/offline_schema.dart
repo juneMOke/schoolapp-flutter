@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/database/schema/auth_offline_schema.dart
 import 'package:school_app_flutter/core/database/schema/boutique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/classroom_attendance_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/configuration_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/class_journal_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
@@ -122,4 +123,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...studentPhotoTables, // Photo de l'élève — miroir du flux et geste en attente
   ...courseProgrammeTables, // Cours ▸ Mes cours — le programme (chapitres)
   ...enrollmentSuspensionTables, // Inscriptions — désactivation d'élèves
+  ...classJournalTables, // Cours ▸ Mon journal — le journal de classe
 ];

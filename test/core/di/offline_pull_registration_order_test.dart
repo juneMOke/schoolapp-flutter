@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
 import 'package:school_app_flutter/features/documents/data/repositories/offline/editique_document_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/class_journal/data/repositories/journal_pull_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_pull_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/coordinator_payments_sync.dart';
@@ -361,6 +362,7 @@ void main() {
       kAcademicsEvaluationsResourcePrefix,
       kAcademicsNotesResourcePrefix,
       kAcademicsChapitresResourcePrefix,
+      kAcademicsJournalResourcePrefix,
       kEditiqueDocumentsResource,
       kBoutiqueSalesResource,
       kExpensesResource,

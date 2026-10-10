@@ -813,7 +813,9 @@ class AppConstants {
   // (miroir du flux `enrollment.suspensions` et geste en attente), création
   // pure, palier d'école ; et le cache éditique (`device.db`) admet la fiche
   // d'inscription `FI`, table reconstruite avec copie, palier d'appareil.
-  static const int offlineDbSchemaVersion = 63;
+  // v64 (2026-10-10) : le journal de classe (`journal_seance`). Création pure.
+  // Palier d'école.
+  static const int offlineDbSchemaVersion = 64;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1324,6 +1326,13 @@ class AppConstants {
   /// **DELETE** = la retirer.
   static const String syncAcademicsChapitreRessourceEndpoint =
       '/api/v1/sync/academics/chapitres/{chapitreId}/ressources/{ressourceId}';
+
+  /// Journal de classe — **GET** = delta keyset des entrées d'un cours
+  /// (`coursId`, `cursor`, `limit`) ; **POST** = envoi d'une entrée
+  /// `{authorId, entry}`, accusé `{entry, lwwOutcome}` (201 créée, 200 sinon).
+  /// Pas de `DELETE` : vider une séance envoie ses champs vides.
+  static const String syncAcademicsJournalEndpoint =
+      '/api/v1/sync/academics/journal';
 
   /// **GET** = les octets d'une ressource-document, à la demande (`ETag`).
   static const String academicsChapitreRessourceContentEndpoint =

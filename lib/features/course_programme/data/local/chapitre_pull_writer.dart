@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
+import 'package:school_app_flutter/core/offline/lww_clock.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
@@ -77,7 +78,7 @@ class ChapitrePullWriter {
     if (local['deleted_at'] != null) return false;
     final ordre = keepOrdre ? <String, Object?>{} : {'ordre': dto.ordre};
     if (local['sync_status'] != SyncState.synced.dbValue &&
-        !_isNewer(dto.clientUpdatedAt, local['client_updated_at'])) {
+        !isNewerClock(dto.clientUpdatedAt, local['client_updated_at'])) {
       // L'écriture locale est la plus récente : elle partira. Le serveur
       // la connaît désormais, et son rang s'applique.
       await txn.update(
@@ -121,13 +122,6 @@ class ChapitrePullWriter {
     'sync_error_code': null,
     'updated_at': nowMs,
   };
-
-  static bool _isNewer(String? server, Object? local) {
-    final s = server == null ? null : DateTime.tryParse(server);
-    final l = local is String ? DateTime.tryParse(local) : null;
-    if (s == null) return false;
-    return l == null || s.isAfter(l);
-  }
 
   /// Remplace les lignes `SYNCED` de [table] pour ce chapitre par [rows], sans
   /// toucher une ligne qui attend (ajout pas encore accusé, suppression).

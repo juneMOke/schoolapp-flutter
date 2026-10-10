@@ -130,6 +130,11 @@ abstract final class SyncPlanKeys {
   /// ⚠️ À déclarer au plan serveur sous cette clé : sans elle, le plan ne
   /// désigne jamais le flux.
   static const String academicsChapitres = 'academics.chapitres';
+
+  /// Le journal de classe : une entrée par séance datée, un curseur par cours.
+  /// ⚠️ À déclarer au plan serveur sous cette clé : sans elle, le plan ne
+  /// désigne jamais le flux.
+  static const String academicsJournal = 'academics.journal';
   static const String editiqueDocuments = 'editique.documents';
 
   /// Les ventes de la caisse boutique (ADR-020). **Jamais entraînée** : aucun
@@ -214,6 +219,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.academicsEvaluations: ['academics_evaluations'],
   SyncPlanKeys.academicsNotes: ['academics_notes'],
   SyncPlanKeys.academicsChapitres: ['academics_chapitres'],
+  SyncPlanKeys.academicsJournal: ['academics_journal'],
   SyncPlanKeys.editiqueDocuments: ['editique_documents'],
   SyncPlanKeys.boutiqueSales: ['boutique_sales'],
   SyncPlanKeys.expenseExpenses: ['expenses'],
@@ -301,6 +307,7 @@ Set<String> pullCompletionSubjectsOf(String resource) {
 /// | `academics_evaluations` | `academics_evaluations:<coursId>` |
 /// | `academics_notes` | `academics_notes:<coursId>` |
 /// | `academics_chapitres` | `academics_chapitres:<coursId>` |
+/// | `academics_journal` | `academics_journal:<coursId>` |
 /// | `academics_grades_referential` | `academics_grades_referential@<uid>` |
 /// | `schedule_sessions` | `schedule_sessions@<uid>` |
 /// | `editique_documents` | `editique_documents@<schoolId>` |
@@ -317,6 +324,7 @@ const Set<String> _kCursorKeyPrefixes = {
   'academics_evaluations',
   'academics_notes',
   'academics_chapitres',
+  'academics_journal',
   'academics_grades_referential',
   'schedule_sessions',
   'editique_documents',
