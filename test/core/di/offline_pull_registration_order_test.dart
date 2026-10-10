@@ -259,11 +259,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('trente-sept handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(37));
+    test('trente-huit handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(38));
       expect(
         order().toSet(),
-        hasLength(37),
+        hasLength(38),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -293,11 +293,11 @@ void main() {
       ]);
     });
 
-    // Les trente-cinq autres restent gouvernés par leur permission : sans cette
+    // Les trente-six autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
     test(
-      'les trente-cinq autres flux déclarent tous une exigence de lecture',
+      'les trente-six autres flux déclarent tous une exigence de lecture',
       () {
         final sansExigence = coordinator.registered
             .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
@@ -309,7 +309,7 @@ void main() {
         expect(sansExigence, isEmpty);
         expect(
           coordinator.registered.where((h) => !h.isBaseline),
-          hasLength(35),
+          hasLength(36),
         );
       },
     );
@@ -338,7 +338,7 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les trente-sept ressources attendues sont toutes enregistrées', () {
+  test('les trente-huit ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       kTombstonesResource,
       EnrollmentPullRepositoryImpl.referentialResource,
