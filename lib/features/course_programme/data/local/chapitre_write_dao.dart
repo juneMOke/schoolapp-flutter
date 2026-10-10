@@ -1,10 +1,10 @@
+import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/pending_evaluation_chapitres.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
-import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_purge.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
@@ -56,7 +56,7 @@ class ChapitreWriteDao {
         ...fiche,
       });
     }
-    await enqueueProgrammeGesture(
+    await enqueueOutboxGesture(
       txn,
       entryId: ProgrammeOutbox.chapitreEntry(chapitre.id),
       type: ProgrammeOutbox.chapitreType,
@@ -117,7 +117,7 @@ class ChapitreWriteDao {
           chapitreId: chapitreId,
         );
       }
-      await enqueueProgrammeGesture(
+      await enqueueOutboxGesture(
         txn,
         entryId: ProgrammeOutbox.chapitreEntry(chapitreId),
         type: ProgrammeOutbox.chapitreType,
@@ -145,7 +145,7 @@ class ChapitreWriteDao {
     String? authorId,
   }) => _db.transaction((txn) async {
     await ProgrammeTables.applyOrdre(txn, coursId, chapitreIds, nowMs: nowMs);
-    await enqueueProgrammeGesture(
+    await enqueueOutboxGesture(
       txn,
       entryId: ProgrammeOutbox.ordreEntry(coursId),
       type: ProgrammeOutbox.ordreType,

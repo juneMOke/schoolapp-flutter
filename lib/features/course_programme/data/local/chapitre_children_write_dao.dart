@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
-import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/chapitre_dto.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre_note.dart';
@@ -54,7 +54,7 @@ class ChapitreChildrenWriteDao {
       'sync_status': SyncState.pendingSync.dbValue,
       'updated_at': nowMs,
     });
-    await enqueueProgrammeGesture(
+    await enqueueOutboxGesture(
       txn,
       entryId: ProgrammeOutbox.noteEntry(note.id),
       type: ProgrammeOutbox.noteType,
@@ -76,7 +76,7 @@ class ChapitreChildrenWriteDao {
     if (row == null) return;
     final chapitreId = row['chapitre_id'] as String;
     await _retire(txn, ProgrammeTables.note, row, nowMs);
-    await enqueueProgrammeGesture(
+    await enqueueOutboxGesture(
       txn,
       entryId: ProgrammeOutbox.noteEntry(noteId),
       type: ProgrammeOutbox.noteType,
@@ -120,7 +120,7 @@ class ChapitreChildrenWriteDao {
         'sync_status': SyncState.pendingSync.dbValue,
         'updated_at': nowMs,
       });
-      await enqueueProgrammeGesture(
+      await enqueueOutboxGesture(
         txn,
         entryId: ProgrammeOutbox.ressourceEntry(ressource.id),
         type: ProgrammeOutbox.ressourceType,
@@ -147,7 +147,7 @@ class ChapitreChildrenWriteDao {
       if (row == null) return;
       await _retire(txn, ProgrammeTables.ressource, row, nowMs);
       final ressource = ChapitreRessourceRowMapper.toEntity(row);
-      await enqueueProgrammeGesture(
+      await enqueueOutboxGesture(
         txn,
         entryId: ProgrammeOutbox.ressourceEntry(ressourceId),
         type: ProgrammeOutbox.ressourceType,

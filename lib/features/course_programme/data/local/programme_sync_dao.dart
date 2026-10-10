@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_pull_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
@@ -71,7 +72,7 @@ class ProgrammeSyncDao {
   /// L'entrée [entryId] a-t-elle été remplacée par un geste plus récent
   /// depuis l'envoi de celle créée à [sentCreatedAt] ?
   Future<bool> entryReplaced(String entryId, int sentCreatedAt) =>
-      ProgrammeOutbox.replacedSince(_db, entryId, sentCreatedAt);
+      OutboxGestures.replacedSince(_db, entryId, sentCreatedAt);
 
   /// Accusé d'une fiche. Ligne inchangée depuis l'envoi : la fiche retenue
   /// s'applique (celle du serveur si la nôtre a été ignorée, plus ancienne).
@@ -166,7 +167,7 @@ class ProgrammeSyncDao {
     required int sentCreatedAt,
     required int nowMs,
   }) => _db.transaction((txn) async {
-    if (await ProgrammeOutbox.replacedSince(
+    if (await OutboxGestures.replacedSince(
       txn,
       ProgrammeOutbox.ordreEntry(coursId),
       sentCreatedAt,

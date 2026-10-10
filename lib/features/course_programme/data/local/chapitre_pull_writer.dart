@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
@@ -27,7 +28,7 @@ class ChapitrePullWriter {
       final ordrePending = <String, bool>{};
       for (final dto in chapitres) {
         final keepOrdre = ordrePending[dto.coursId] ??=
-            await ProgrammeOutbox.hasPending(
+            await OutboxGestures.hasPending(
               txn,
               type: ProgrammeOutbox.ordreType,
               aggregateId: dto.coursId,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
@@ -9,7 +10,6 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/cours_eviction.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
-import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_sync_dao.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_failure.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';

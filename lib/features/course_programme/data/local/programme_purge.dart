@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
@@ -30,7 +31,7 @@ class ProgrammePurge {
         ))
           row['id'] as String,
       ];
-      await ProgrammeOutbox.discard(txn, [ProgrammeOutbox.ordreEntry(coursId)]);
+      await OutboxGestures.discard(txn, [ProgrammeOutbox.ordreEntry(coursId)]);
       return removeChapitres(txn, ids);
     });
     await _blobs.deleteAll(files);
@@ -59,7 +60,7 @@ class ProgrammePurge {
           chapitreId: chapitreId,
         );
       }
-      await ProgrammeOutbox.discard(txn, [
+      await OutboxGestures.discard(txn, [
         ProgrammeOutbox.chapitreEntry(chapitreId),
       ]);
       await ProgrammeOutbox.discardChildren(txn, chapitreId);

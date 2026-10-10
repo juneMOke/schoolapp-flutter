@@ -1,10 +1,10 @@
+import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_rows.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_blobs.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox.dart';
-import 'package:school_app_flutter/features/course_programme/data/local/programme_outbox_writer.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/handlers/chapitre_child_outbox_handler.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_sync_api.dart';
