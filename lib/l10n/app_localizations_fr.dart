@@ -15985,4 +15985,89 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get journalErrorMessage =>
       'Le journal n\'a pas pu être lu sur cette tablette. Réessayez.';
+
+  @override
+  String journalEntryEyebrow(String rank, String slot, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$rank heure · $slot · $dateString';
+  }
+
+  @override
+  String journalEntryTitle(String subject, String classroom) {
+    return '$subject — $classroom';
+  }
+
+  @override
+  String get journalChapterLabel => 'Chapitre du programme';
+
+  @override
+  String get journalChapterNone => '— Hors programme / séance libre';
+
+  @override
+  String journalChapterOption(int number, String title, String statut) {
+    return '$number. $title ($statut)';
+  }
+
+  @override
+  String get journalChapterHelpLinked =>
+      'Objectif, contenu, stratégies et ressources sont repris du chapitre ; ajustez-les librement.';
+
+  @override
+  String get journalChapterHelpFree =>
+      'Séance hors programme : elle ne compte pas dans l\'avancement du programme.';
+
+  @override
+  String get journalChapterHelpEmpty =>
+      'Ce cours n\'a pas encore de chapitre : créez-le dans Cours ▸ Mes cours.';
+
+  @override
+  String get journalChapterApply => 'Reprendre du chapitre';
+
+  @override
+  String get journalFieldCbLabel => 'C.B — Compétence de base';
+
+  @override
+  String get journalFieldContenuLabel => 'Contenu — matière / sujet';
+
+  @override
+  String get journalPlaceholderObjectif => 'Être capable de…';
+
+  @override
+  String get journalPlaceholderRessources => 'Manuel p. 42, tableau…';
+
+  @override
+  String get journalPlaceholderObservation => 'À compléter après la séance…';
+
+  @override
+  String get journalRequiredObjectif => 'Indiquez l\'objectif de la séance.';
+
+  @override
+  String get journalRequiredContenu => 'Indiquez le contenu de la séance.';
+
+  @override
+  String get journalClear => 'Vider la séance';
+
+  @override
+  String get journalSave => 'Enregistrer';
+
+  @override
+  String journalSaved(String rank) {
+    return 'Séance de $rank heure enregistrée';
+  }
+
+  @override
+  String get journalCleared => 'Séance vidée';
+
+  @override
+  String get journalSaveFailed =>
+      'La séance n\'a pas pu être enregistrée sur la tablette. Réessayez.';
+
+  @override
+  String journalRejectedNotice(String code) {
+    return 'Le serveur a refusé cette saisie ($code). Corrigez-la, puis enregistrez à nouveau.';
+  }
 }

@@ -15874,4 +15874,89 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get journalErrorMessage =>
       'The journal could not be read on this tablet. Try again.';
+
+  @override
+  String journalEntryEyebrow(String rank, String slot, DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$rank · $slot · $dateString';
+  }
+
+  @override
+  String journalEntryTitle(String subject, String classroom) {
+    return '$subject — $classroom';
+  }
+
+  @override
+  String get journalChapterLabel => 'Syllabus chapter';
+
+  @override
+  String get journalChapterNone => '— Off syllabus / free session';
+
+  @override
+  String journalChapterOption(int number, String title, String statut) {
+    return '$number. $title ($statut)';
+  }
+
+  @override
+  String get journalChapterHelpLinked =>
+      'Objective, content, strategies and resources come from the chapter; adjust them freely.';
+
+  @override
+  String get journalChapterHelpFree =>
+      'Off-syllabus session: it does not count towards the syllabus progress.';
+
+  @override
+  String get journalChapterHelpEmpty =>
+      'This course has no chapter yet: create one in Courses ▸ My courses.';
+
+  @override
+  String get journalChapterApply => 'Reuse the chapter';
+
+  @override
+  String get journalFieldCbLabel => 'C.B — Core competency';
+
+  @override
+  String get journalFieldContenuLabel => 'Content — topic';
+
+  @override
+  String get journalPlaceholderObjectif => 'Be able to…';
+
+  @override
+  String get journalPlaceholderRessources => 'Textbook p. 42, board…';
+
+  @override
+  String get journalPlaceholderObservation => 'To complete after the session…';
+
+  @override
+  String get journalRequiredObjectif => 'Enter the session\'s objective.';
+
+  @override
+  String get journalRequiredContenu => 'Enter the session\'s content.';
+
+  @override
+  String get journalClear => 'Clear the session';
+
+  @override
+  String get journalSave => 'Save';
+
+  @override
+  String journalSaved(String rank) {
+    return '$rank session saved';
+  }
+
+  @override
+  String get journalCleared => 'Session cleared';
+
+  @override
+  String get journalSaveFailed =>
+      'The session could not be saved on this tablet. Try again.';
+
+  @override
+  String journalRejectedNotice(String code) {
+    return 'The server refused this entry ($code). Correct it, then save again.';
+  }
 }

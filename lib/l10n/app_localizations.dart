@@ -24778,6 +24778,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The journal could not be read on this tablet. Try again.'**
   String get journalErrorMessage;
+
+  /// No description provided for @journalEntryEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{rank} · {slot} · {date}'**
+  String journalEntryEyebrow(String rank, String slot, DateTime date);
+
+  /// No description provided for @journalEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{subject} — {classroom}'**
+  String journalEntryTitle(String subject, String classroom);
+
+  /// No description provided for @journalChapterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Syllabus chapter'**
+  String get journalChapterLabel;
+
+  /// No description provided for @journalChapterNone.
+  ///
+  /// In en, this message translates to:
+  /// **'— Off syllabus / free session'**
+  String get journalChapterNone;
+
+  /// No description provided for @journalChapterOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{number}. {title} ({statut})'**
+  String journalChapterOption(int number, String title, String statut);
+
+  /// No description provided for @journalChapterHelpLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Objective, content, strategies and resources come from the chapter; adjust them freely.'**
+  String get journalChapterHelpLinked;
+
+  /// No description provided for @journalChapterHelpFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Off-syllabus session: it does not count towards the syllabus progress.'**
+  String get journalChapterHelpFree;
+
+  /// No description provided for @journalChapterHelpEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no chapter yet: create one in Courses ▸ My courses.'**
+  String get journalChapterHelpEmpty;
+
+  /// No description provided for @journalChapterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse the chapter'**
+  String get journalChapterApply;
+
+  /// No description provided for @journalFieldCbLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'C.B — Core competency'**
+  String get journalFieldCbLabel;
+
+  /// No description provided for @journalFieldContenuLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Content — topic'**
+  String get journalFieldContenuLabel;
+
+  /// No description provided for @journalPlaceholderObjectif.
+  ///
+  /// In en, this message translates to:
+  /// **'Be able to…'**
+  String get journalPlaceholderObjectif;
+
+  /// No description provided for @journalPlaceholderRessources.
+  ///
+  /// In en, this message translates to:
+  /// **'Textbook p. 42, board…'**
+  String get journalPlaceholderRessources;
+
+  /// No description provided for @journalPlaceholderObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete after the session…'**
+  String get journalPlaceholderObservation;
+
+  /// No description provided for @journalRequiredObjectif.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the session\'s objective.'**
+  String get journalRequiredObjectif;
+
+  /// No description provided for @journalRequiredContenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the session\'s content.'**
+  String get journalRequiredContenu;
+
+  /// No description provided for @journalClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the session'**
+  String get journalClear;
+
+  /// No description provided for @journalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get journalSave;
+
+  /// No description provided for @journalSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{rank} session saved'**
+  String journalSaved(String rank);
+
+  /// No description provided for @journalCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Session cleared'**
+  String get journalCleared;
+
+  /// No description provided for @journalSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The session could not be saved on this tablet. Try again.'**
+  String get journalSaveFailed;
+
+  /// No description provided for @journalRejectedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this entry ({code}). Correct it, then save again.'**
+  String journalRejectedNotice(String code);
 }
 
 class _AppLocalizationsDelegate
