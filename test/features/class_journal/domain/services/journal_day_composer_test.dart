@@ -62,8 +62,24 @@ void main() {
     expect(line.scheduled, isFalse);
     expect(line.subjectLabel, 'Physique');
     expect(line.entry, orphan);
-    expect(day.lines.map((l) => l.slot.id), ['s1', 's2', 's4']);
+    expect(day.lines.map((l) => l.timeSlotId), ['s1', 's2', 's4']);
   });
+
+  test(
+    'un créneau disparu de la grille : la séance reste, en fin de journée',
+    () {
+      final day = compose(
+        entries: [
+          entryOf(coursId: 'physique-6b', date: wednesday, slot: 'retired'),
+        ],
+      );
+
+      final last = day.lines.last;
+      expect(last.timeSlotId, 'retired');
+      expect(last.slot, isNull);
+      expect(last.breakBefore, isNull);
+    },
+  );
 
   test('une entrée vidée ne ressuscite pas une séance retirée', () {
     final cleared = entryOf(

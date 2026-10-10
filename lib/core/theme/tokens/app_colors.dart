@@ -600,4 +600,26 @@ class AppColors {
 
   /// Contour pointillé des surfaces « désactivé ».
   static const suspendedBorder = Color(0xFFD9D3C6);
+
+  // ── Journal de classe (Cours ▸ Mon journal) — le style « Cahier » ─────────
+  /// Filets et bordures de la feuille, comme les lignes d'un cahier.
+  static const journalLine = Color(0xFFB9CCDB);
+
+  /// Fond de l'en-tête de colonnes ; son encre est le bleu ardoise (8,16:1).
+  static const journalHead = Color(0xFFEEF4F8);
+
+  /// La marge rouge, à droite de la colonne Heure.
+  static const journalMargin = Color(0xFFD99A8A);
+
+  /// La réglure horizontale d'une ligne : bleu ardoise à 9 %.
+  static const journalRuling = Color(0x171B4D6B);
+
+  /// Les rayures de la récréation : or doux à 8 %.
+  static const journalBreakStripe = Color(0x14D9A24E);
+
+  /// Le bloc « chapitre » de la modale : fond crème, bord sable, et l'encre
+  /// de son aide (6,35:1 sur le fond).
+  static const journalChapterSurface = Color(0xFFFBF6EF);
+  static const journalChapterBorder = Color(0xFFEAD9C6);
+  static const journalChapterInk = Color(0xFF6B5836);
 }

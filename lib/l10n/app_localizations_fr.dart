@@ -15805,4 +15805,184 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get resultatsErrorSuspendedMessage =>
       'Ses résultats ne sont pas calculés tant qu\'il est désactivé. Réactivez-le depuis sa fiche d\'inscription pour les retrouver.';
+
+  @override
+  String get journalDateEyebrow => 'Date';
+
+  @override
+  String journalHeaderDate(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get journalTodayMarker => '● aujourd\'hui';
+
+  @override
+  String get journalPreviousDay => 'Jour précédent';
+
+  @override
+  String get journalNextDay => 'Jour suivant';
+
+  @override
+  String get journalToday => 'Aujourd\'hui';
+
+  @override
+  String journalCounterValue(int filled, int total) {
+    return '$filled/$total';
+  }
+
+  @override
+  String journalCounterLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'séances renseignées',
+      one: 'séance renseignée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journalPageNumber(int number) {
+    return 'N° $number';
+  }
+
+  @override
+  String get journalColumnHour => 'Heure';
+
+  @override
+  String get journalColumnBranch => 'Branche';
+
+  @override
+  String get journalColumnCb => 'C.B';
+
+  @override
+  String get journalColumnCbTooltip => 'Compétence de base';
+
+  @override
+  String get journalColumnObjectif => 'Objectif d\'apprentissage';
+
+  @override
+  String get journalColumnContenu => 'Contenu';
+
+  @override
+  String get journalColumnContenuSub => 'Matière / Sujet';
+
+  @override
+  String get journalColumnStrategie => 'Stratégie d\'intervention';
+
+  @override
+  String get journalColumnRessources => 'Ressources';
+
+  @override
+  String get journalColumnEvaluation => 'Évaluation';
+
+  @override
+  String get journalColumnObservation => 'Observation';
+
+  @override
+  String journalRank(int rank) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rank,
+      locale: localeName,
+      other: '${rank}e',
+      one: '1re',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String journalSlotRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String journalBreak(String start, String end) {
+    return '$start – $end · Récréation';
+  }
+
+  @override
+  String get journalStatusFilled => 'Renseignée';
+
+  @override
+  String get journalStatusToPrepare => 'À préparer';
+
+  @override
+  String get journalStatusMissing => 'Non renseignée';
+
+  @override
+  String get journalStatusRejected => 'À corriger';
+
+  @override
+  String journalChapterTag(int number, int seance) {
+    return 'Chap. $number · séance $seance';
+  }
+
+  @override
+  String journalChapterTagShort(int number) {
+    return 'Chap. $number';
+  }
+
+  @override
+  String get journalOffTimetable => 'Hors emploi du temps actuel';
+
+  @override
+  String journalLineSemantics(
+    String rank,
+    String subject,
+    String classroom,
+    String status,
+  ) {
+    return '$rank heure, $subject $classroom, $status';
+  }
+
+  @override
+  String journalCourseTitle(String subject, String classroom) {
+    return '$subject · $classroom';
+  }
+
+  @override
+  String get journalEmptyCell => '—';
+
+  @override
+  String get journalEmptyTitle => 'Aucun cours ce jour';
+
+  @override
+  String journalEmptyMessage(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Aucune séance n\'est prévue à l\'emploi du temps le $dateString. Le journal se remplit à partir de vos séances du jour.';
+  }
+
+  @override
+  String journalEmptyNext(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get journalLoading => 'Chargement du journal';
+
+  @override
+  String get journalHelp =>
+      'Touchez une séance pour la remplir. Rattachez-la à un chapitre du programme pour en reprendre le contenu.';
+
+  @override
+  String get journalErrorTitle => 'Journal illisible';
+
+  @override
+  String get journalErrorMessage =>
+      'Le journal n\'a pas pu être lu sur cette tablette. Réessayez.';
 }

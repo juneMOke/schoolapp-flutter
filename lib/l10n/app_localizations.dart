@@ -24533,6 +24533,251 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Their results are not computed while they are deactivated. Reactivate them from their enrollment file to see them again.'**
   String get resultatsErrorSuspendedMessage;
+
+  /// No description provided for @journalDateEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get journalDateEyebrow;
+
+  /// No description provided for @journalHeaderDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String journalHeaderDate(DateTime date);
+
+  /// No description provided for @journalTodayMarker.
+  ///
+  /// In en, this message translates to:
+  /// **'● today'**
+  String get journalTodayMarker;
+
+  /// No description provided for @journalPreviousDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous day'**
+  String get journalPreviousDay;
+
+  /// No description provided for @journalNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Next day'**
+  String get journalNextDay;
+
+  /// No description provided for @journalToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get journalToday;
+
+  /// No description provided for @journalCounterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{filled}/{total}'**
+  String journalCounterValue(int filled, int total);
+
+  /// No description provided for @journalCounterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{session filled in} other{sessions filled in}}'**
+  String journalCounterLabel(int count);
+
+  /// No description provided for @journalPageNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {number}'**
+  String journalPageNumber(int number);
+
+  /// No description provided for @journalColumnHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get journalColumnHour;
+
+  /// No description provided for @journalColumnBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get journalColumnBranch;
+
+  /// No description provided for @journalColumnCb.
+  ///
+  /// In en, this message translates to:
+  /// **'C.B'**
+  String get journalColumnCb;
+
+  /// No description provided for @journalColumnCbTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Core competency'**
+  String get journalColumnCbTooltip;
+
+  /// No description provided for @journalColumnObjectif.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning objective'**
+  String get journalColumnObjectif;
+
+  /// No description provided for @journalColumnContenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get journalColumnContenu;
+
+  /// No description provided for @journalColumnContenuSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Topic'**
+  String get journalColumnContenuSub;
+
+  /// No description provided for @journalColumnStrategie.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching strategy'**
+  String get journalColumnStrategie;
+
+  /// No description provided for @journalColumnRessources.
+  ///
+  /// In en, this message translates to:
+  /// **'Resources'**
+  String get journalColumnRessources;
+
+  /// No description provided for @journalColumnEvaluation.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment'**
+  String get journalColumnEvaluation;
+
+  /// No description provided for @journalColumnObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation'**
+  String get journalColumnObservation;
+
+  /// No description provided for @journalRank.
+  ///
+  /// In en, this message translates to:
+  /// **'P{rank}'**
+  String journalRank(int rank);
+
+  /// No description provided for @journalSlotRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String journalSlotRange(String start, String end);
+
+  /// No description provided for @journalBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end} · Break'**
+  String journalBreak(String start, String end);
+
+  /// No description provided for @journalStatusFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled in'**
+  String get journalStatusFilled;
+
+  /// No description provided for @journalStatusToPrepare.
+  ///
+  /// In en, this message translates to:
+  /// **'To prepare'**
+  String get journalStatusToPrepare;
+
+  /// No description provided for @journalStatusMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not filled in'**
+  String get journalStatusMissing;
+
+  /// No description provided for @journalStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'To correct'**
+  String get journalStatusRejected;
+
+  /// No description provided for @journalChapterTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Ch. {number} · session {seance}'**
+  String journalChapterTag(int number, int seance);
+
+  /// No description provided for @journalChapterTagShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Ch. {number}'**
+  String journalChapterTagShort(int number);
+
+  /// No description provided for @journalOffTimetable.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer on the timetable'**
+  String get journalOffTimetable;
+
+  /// No description provided for @journalLineSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{rank}, {subject} {classroom}, {status}'**
+  String journalLineSemantics(
+    String rank,
+    String subject,
+    String classroom,
+    String status,
+  );
+
+  /// No description provided for @journalCourseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{subject} · {classroom}'**
+  String journalCourseTitle(String subject, String classroom);
+
+  /// No description provided for @journalEmptyCell.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get journalEmptyCell;
+
+  /// No description provided for @journalEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes this day'**
+  String get journalEmptyTitle;
+
+  /// No description provided for @journalEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No session is scheduled on {date}. The journal fills in from the day\'s sessions.'**
+  String journalEmptyMessage(DateTime date);
+
+  /// No description provided for @journalEmptyNext.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String journalEmptyNext(DateTime date);
+
+  /// No description provided for @journalLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the journal'**
+  String get journalLoading;
+
+  /// No description provided for @journalHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a session to fill it in. Link it to a chapter of the syllabus to reuse its content.'**
+  String get journalHelp;
+
+  /// No description provided for @journalErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal unreadable'**
+  String get journalErrorTitle;
+
+  /// No description provided for @journalErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The journal could not be read on this tablet. Try again.'**
+  String get journalErrorMessage;
 }
 
 class _AppLocalizationsDelegate

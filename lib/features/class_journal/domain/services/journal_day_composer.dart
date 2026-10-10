@@ -14,7 +14,8 @@ import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.d
 /// actuel **et** les entrées déjà saisies à cette date. L'emploi du temps ne
 /// garde pas d'historique : sans la seconde moitié, un changement d'emploi du
 /// temps ferait disparaître des pages déjà écrites. Une entrée vidée, elle,
-/// ne ressuscite pas une séance retirée.
+/// ne ressuscite pas une séance retirée. Une entrée dont le créneau a
+/// disparu de la grille reste lisible, en fin de journée.
 abstract final class JournalDayComposer {
   static JournalDay compose(
     JournalDaySources sources, {
@@ -35,14 +36,15 @@ abstract final class JournalDayComposer {
     );
 
     JournalLine lineOf(
-      TimeSlot slot,
+      String timeSlotId,
       String coursId,
       JournalCourse? course, {
       required bool scheduled,
     }) {
-      final entry = onDate[_key(coursId, slot.id)];
+      final entry = onDate[_key(coursId, timeSlotId)];
       return JournalLine(
-        slot: slot,
+        timeSlotId: timeSlotId,
+        slot: slotById[timeSlotId],
         coursId: coursId,
         subjectLabel: course?.subjectLabel ?? '',
         classroomLabel: course?.classroomLabel ?? '',
@@ -64,21 +66,20 @@ abstract final class JournalDayComposer {
         subjectLabel: cell.subjectLabel,
         classroomLabel: cell.classroomLabel,
       );
-      lines.add(lineOf(row.timeSlot, cell.coursId, course, scheduled: true));
+      lines.add(lineOf(row.timeSlot.id, cell.coursId, course, scheduled: true));
     }
     for (final MapEntry(:key, value: entry) in onDate.entries) {
-      final slot = slotById[entry.timeSlotId];
-      if (seen.contains(key) || entry.isBlank || slot == null) continue;
+      if (seen.contains(key) || entry.isBlank) continue;
       lines.add(
         lineOf(
-          slot,
+          entry.timeSlotId,
           entry.coursId,
           sources.courses[entry.coursId],
           scheduled: false,
         ),
       );
     }
-    lines.sort((a, b) => a.slot.order.compareTo(b.slot.order));
+    lines.sort((a, b) => a.order.compareTo(b.order));
 
     return JournalDay(
       date: date,
@@ -110,14 +111,12 @@ abstract final class JournalDayComposer {
     List<TimeSlot> schoolSlots,
   ) => [
     for (var i = 0; i < lines.length; i++)
-      i == 0
-          ? lines[i]
-          : lines[i].withBreakBefore(
-              JournalBreaks.between(
-                schoolSlots,
-                before: lines[i - 1].slot,
-                after: lines[i].slot,
-              ),
-            ),
+      switch ((i == 0 ? null : lines[i - 1].slot, lines[i].slot)) {
+        (final TimeSlot before, final TimeSlot after) =>
+          lines[i].withBreakBefore(
+            JournalBreaks.between(schoolSlots, before: before, after: after),
+          ),
+        _ => lines[i],
+      },
   ];
 }

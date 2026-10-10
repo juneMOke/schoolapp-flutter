@@ -37,7 +37,11 @@ class JournalBreak extends Equatable {
 
 /// Une ligne de la feuille du jour : une séance, et ce qui y a été saisi.
 class JournalLine extends Equatable {
-  final TimeSlot slot;
+  final String timeSlotId;
+
+  /// `null` : une séance écrite dont le créneau a disparu de la grille de
+  /// l'école depuis — elle reste lisible, rangée en fin de journée.
+  final TimeSlot? slot;
   final String coursId;
 
   /// La branche (matière) du cours.
@@ -57,6 +61,7 @@ class JournalLine extends Equatable {
   final JournalBreak? breakBefore;
 
   const JournalLine({
+    required this.timeSlotId,
     required this.slot,
     required this.coursId,
     required this.subjectLabel,
@@ -69,11 +74,15 @@ class JournalLine extends Equatable {
   });
 
   JournalSeanceKey keyOn(DateTime date) =>
-      JournalSeanceKey(coursId: coursId, date: date, timeSlotId: slot.id);
+      JournalSeanceKey(coursId: coursId, date: date, timeSlotId: timeSlotId);
 
   bool get isFilled => status == JournalStatus.filled;
 
+  /// Le rang du créneau, pour trier ; une ligne sans créneau va en fin.
+  int get order => slot?.order ?? 1 << 30;
+
   JournalLine withBreakBefore(JournalBreak? pause) => JournalLine(
+    timeSlotId: timeSlotId,
     slot: slot,
     coursId: coursId,
     subjectLabel: subjectLabel,
@@ -87,6 +96,7 @@ class JournalLine extends Equatable {
 
   @override
   List<Object?> get props => [
+    timeSlotId,
     slot,
     coursId,
     subjectLabel,

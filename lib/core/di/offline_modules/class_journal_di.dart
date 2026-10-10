@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/di/offline_modules/class_journal_presentation_di.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -77,6 +78,8 @@ void registerClassJournal(GetIt getIt) {
       extras: requiredAuth,
     ),
   );
+
+  registerClassJournalPresentation(getIt);
 
   // ── Descente (après le pull cours, qui range les cours itérés) ──
   getIt<PullCoordinator>().registerHandler(

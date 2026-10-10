@@ -787,4 +787,25 @@ class AppDimensions {
 
   /// Largeur minimale d'une tuile de la section « Élèves désactivés ».
   static const suspendedMemberTileMinWidth = 280.0;
+
+  /// Le journal de classe (spec Mon journal) : point de rupture feuille /
+  /// cartes (largeur du contenu), largeur minimale de la feuille et de ses
+  /// deux premières colonnes, réglure, marge, lisérés, boutons de navigation,
+  /// colonne des libellés d'une carte, modale de saisie.
+  static const journalBreakpoint = 900.0;
+  static const journalSheetMinWidth = 1180.0;
+  static const journalHourColumn = 74.0;
+  static const journalBranchColumn = 150.0;
+  static const journalRuleSpacing = 22.0;
+  static const journalMarginStroke = 2.0;
+  static const journalHeadStroke = 2.0;
+  static const journalClassStripe = 3.0;
+  static const journalCardStripe = 4.0;
+  static const journalNavButton = 40.0;
+  static const journalCardLabelColumn = 110.0;
+  static const journalCardMinHeight = 56.0;
+  static const journalModalWidth = 720.0;
+  static const journalFieldMinWidth = 260.0;
+  static const journalTagIconSize = 12.0;
+  static const journalNavIconSize = 18.0;
 }
