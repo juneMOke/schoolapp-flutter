@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/offline/lww_outcome.dart';
 import 'package:school_app_flutter/features/course_programme/data/local/chapitre_fiche_codec.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/chapitre_dto.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/push/programme_push_op.dart';
@@ -97,7 +98,7 @@ class ChapitreFicheAck {
     }
     return ChapitreFicheAck(
       chapitre: chapitre,
-      ignored: json['verdict'] == 'IGNORED',
+      ignored: LwwOutcome.fromWire(json['lwwOutcome']) == LwwOutcome.superseded,
     );
   }
 }
