@@ -25170,7 +25170,7 @@ abstract class AppLocalizations {
   /// No description provided for @communicationReachSentShort.
   ///
   /// In en, this message translates to:
-  /// **'{reached} of {total} messages'**
+  /// **'{total, plural, =1{{reached} of 1 message} other{{reached} of {total} messages}}'**
   String communicationReachSentShort(int reached, int total);
 
   /// No description provided for @communicationToday.
@@ -25848,8 +25848,8 @@ abstract class AppLocalizations {
   /// No description provided for @communicationStudentSearchFailed.
   ///
   /// In en, this message translates to:
-  /// **'The search failed. Check the connection, then type again.'**
-  String get communicationStudentSearchFailed;
+  /// **'The search failed. {reason}'**
+  String communicationStudentSearchFailed(String reason);
 
   /// No description provided for @communicationStudentNoMatch.
   ///
@@ -25938,7 +25938,7 @@ abstract class AppLocalizations {
   /// No description provided for @communicationReachHeadline.
   ///
   /// In en, this message translates to:
-  /// **'{reachable} of {total} messages reachable'**
+  /// **'{total, plural, =1{{reachable} of 1 message reachable} other{{reachable} of {total} messages reachable}}'**
   String communicationReachHeadline(int reachable, int total);
 
   /// No description provided for @communicationReachDetail.
@@ -26231,8 +26231,8 @@ abstract class AppLocalizations {
   /// No description provided for @communicationTemplateSaveFailed.
   ///
   /// In en, this message translates to:
-  /// **'The template could not be saved. Check the connection, then try again.'**
-  String get communicationTemplateSaveFailed;
+  /// **'The template could not be saved. {reason}'**
+  String communicationTemplateSaveFailed(String reason);
 
   /// No description provided for @communicationTemplateNeedsText.
   ///
@@ -26261,14 +26261,50 @@ abstract class AppLocalizations {
   /// No description provided for @communicationTemplateDeleteFailed.
   ///
   /// In en, this message translates to:
-  /// **'The template could not be deleted.'**
-  String get communicationTemplateDeleteFailed;
+  /// **'The template could not be deleted. {reason}'**
+  String communicationTemplateDeleteFailed(String reason);
 
   /// No description provided for @communicationCancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get communicationCancel;
+
+  /// No description provided for @communicationReasonNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the connection, then try again.'**
+  String get communicationReasonNetwork;
+
+  /// No description provided for @communicationReasonForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account does not have this permission.'**
+  String get communicationReasonForbidden;
+
+  /// No description provided for @communicationReasonServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not process the request. Try again in a moment.'**
+  String get communicationReasonServer;
+
+  /// No description provided for @communicationReachFailedBecause.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach unavailable. {reason}'**
+  String communicationReachFailedBecause(String reason);
+
+  /// No description provided for @communicationJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} · {second}'**
+  String communicationJoin(String first, String second);
+
+  /// No description provided for @communicationListJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second}'**
+  String communicationListJoin(String first, String second);
 }
 
 class _AppLocalizationsDelegate

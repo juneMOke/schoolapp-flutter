@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/audience_student.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/audience/audience_student_search_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/communication_failure_text.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le mode « Élèves » : une recherche (deux lettres au moins, huit
@@ -30,7 +31,11 @@ class StudentSelector extends StatefulWidget {
 }
 
 class _StudentSelectorState extends State<StudentSelector> {
-  final _query = TextEditingController();
+  /// Repart de la recherche en cours : revenir au mode « Élèves » montre la
+  /// requête qui a produit les résultats affichés.
+  late final _query = TextEditingController(
+    text: context.read<AudienceStudentSearchCubit>().state.query,
+  );
 
   @override
   void dispose() {
@@ -101,7 +106,7 @@ class _StudentSelectorState extends State<StudentSelector> {
         ? l10n.communicationStudentUnnamed
         : student.displayName;
     final room = student.classroomLabel;
-    return room == null ? name : '$name · $room';
+    return room == null ? name : l10n.communicationJoin(name, room);
   }
 }
 
@@ -120,10 +125,11 @@ class _Results extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     if (state.tooShort) return const SizedBox.shrink();
+    final failure = state.failure;
     final message = state.loading
         ? l10n.communicationStudentSearching
-        : state.failure != null
-        ? l10n.communicationStudentSearchFailed
+        : failure != null
+        ? l10n.communicationStudentSearchFailed(l10n.failureReason(failure))
         : state.results.isEmpty
         ? l10n.communicationStudentNoMatch(state.query.trim())
         : null;

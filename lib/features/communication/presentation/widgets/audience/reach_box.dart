@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_audience.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_reach.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/audience/announcement_reach_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/communication_failure_text.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/states/communication_error_action.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'encart de portée, sous le sélecteur : combien de messages partiraient,
@@ -40,23 +43,7 @@ class ReachBox extends StatelessWidget {
             color: AppColors.textSecondary,
           ),
           ReachStatus.loading when reach == null => const _Skeleton(),
-          ReachStatus.failure => Row(
-            children: [
-              Expanded(
-                child: _Line(
-                  icon: Icons.cloud_off_outlined,
-                  text: l10n.communicationReachFailed,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              EteeloButton.ghost(
-                label: l10n.communicationRetry,
-                icon: Icons.refresh,
-                onPressed: onRetry,
-                fullWidth: false,
-              ),
-            ],
-          ),
+          ReachStatus.failure => _Failure(state: state, onRetry: onRetry),
           _ => _Counts(
             reach: reach!,
             overdue: state.audience is OverdueAudience,
@@ -64,6 +51,44 @@ class ReachBox extends StatelessWidget {
           ),
         },
       ),
+    );
+  }
+}
+
+/// Une portée illisible : pourquoi, et l'action de sa famille — jamais
+/// « Réessayer » sur un refus de droit.
+class _Failure extends StatelessWidget {
+  final AnnouncementReachState state;
+  final VoidCallback onRetry;
+
+  const _Failure({required this.state, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final failure = state.failure;
+    final action = failure == null
+        ? null
+        : communicationErrorAction(
+            context,
+            EteeloErrorType.fromFailure(failure),
+            onRetry: onRetry,
+          );
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: AppSpacing.sm,
+      children: [
+        _Line(
+          icon: Icons.cloud_off_outlined,
+          text: failure == null
+              ? l10n.communicationReachFailed
+              : l10n.communicationReachFailedBecause(
+                  l10n.failureReason(failure),
+                ),
+          color: AppColors.textSecondary,
+        ),
+        ?action,
+      ],
     );
   }
 }
@@ -84,7 +109,7 @@ class _Counts extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final unreachable = reach.unreachableMessages;
     return Opacity(
-      opacity: refreshing ? 0.6 : 1,
+      opacity: refreshing ? AppDimensions.communicationRefreshingOpacity : 1,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -145,11 +170,12 @@ class _Line extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Icon(icon, size: 18, color: color),
+      Icon(icon, size: AppDimensions.communicationInlineIconSize, color: color),
       const SizedBox(width: AppSpacing.sm),
-      Expanded(
+      Flexible(
         child: Text(
           text,
           style: AppTypography.bodySmall.copyWith(color: color),
@@ -168,9 +194,15 @@ class _Skeleton extends StatelessWidget {
     child: const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        EteeloSkeletonBox(width: 220, height: 16),
+        EteeloSkeletonBox(
+          width: AppDimensions.communicationReachSkeletonWidth,
+          height: AppDimensions.communicationReachSkeletonHeight,
+        ),
         SizedBox(height: AppSpacing.sm),
-        EteeloSkeletonBox(width: 160, height: 12),
+        EteeloSkeletonBox(
+          width: AppDimensions.communicationReachSkeletonSubWidth,
+          height: AppDimensions.communicationReachSkeletonSubHeight,
+        ),
       ],
     ),
   );

@@ -16135,7 +16135,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String communicationReachSentShort(int reached, int total) {
-    return '$reached of $total messages';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$reached of $total messages',
+      one: '$reached of 1 message',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -16542,8 +16548,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communicationStudentSearching => 'Searching…';
 
   @override
-  String get communicationStudentSearchFailed =>
-      'The search failed. Check the connection, then type again.';
+  String communicationStudentSearchFailed(String reason) {
+    return 'The search failed. $reason';
+  }
 
   @override
   String communicationStudentNoMatch(String query) {
@@ -16594,7 +16601,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String communicationReachHeadline(int reachable, int total) {
-    return '$reachable of $total messages reachable';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$reachable of $total messages reachable',
+      one: '$reachable of 1 message reachable',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -16809,8 +16822,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communicationTemplateSaved => 'Template saved';
 
   @override
-  String get communicationTemplateSaveFailed =>
-      'The template could not be saved. Check the connection, then try again.';
+  String communicationTemplateSaveFailed(String reason) {
+    return 'The template could not be saved. $reason';
+  }
 
   @override
   String get communicationTemplateNeedsText =>
@@ -16827,9 +16841,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communicationTemplateDeleted => 'Template deleted';
 
   @override
-  String get communicationTemplateDeleteFailed =>
-      'The template could not be deleted.';
+  String communicationTemplateDeleteFailed(String reason) {
+    return 'The template could not be deleted. $reason';
+  }
 
   @override
   String get communicationCancel => 'Cancel';
+
+  @override
+  String get communicationReasonNetwork =>
+      'Check the connection, then try again.';
+
+  @override
+  String get communicationReasonForbidden =>
+      'Your account does not have this permission.';
+
+  @override
+  String get communicationReasonServer =>
+      'The server could not process the request. Try again in a moment.';
+
+  @override
+  String communicationReachFailedBecause(String reason) {
+    return 'Reach unavailable. $reason';
+  }
+
+  @override
+  String communicationJoin(String first, String second) {
+    return '$first · $second';
+  }
+
+  @override
+  String communicationListJoin(String first, String second) {
+    return '$first, $second';
+  }
 }

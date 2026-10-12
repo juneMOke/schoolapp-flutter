@@ -43,7 +43,7 @@ class EditorGestures {
       final confirmed = await showAnnouncementConfirmDialog(
         context,
         state: cubit.state,
-        reach: reach.reach,
+        reach: reach.settledFor(cubit.state.content.audience),
         now: now(),
       );
       if (!confirmed || !context.mounted) return false;

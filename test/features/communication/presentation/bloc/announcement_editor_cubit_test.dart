@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -82,7 +84,9 @@ void main() {
   test(
     'brouillon enregistré : l\'issue le dit, la copie serveur est gardée',
     () async {
-      createAnswers(() => announcement(id: 'uuid', title: 'T', version: 1));
+      createAnswers(
+        () => announcement(id: 'uuid', title: 'T', body: '', version: 1),
+      );
       final cubit = fresh()..setTitle('T');
       await cubit.saveDraft();
       expect(cubit.state.outcome, AnnouncementEditorOutcome.draftSaved);
@@ -200,5 +204,123 @@ void main() {
     );
     expect(cubit.state.sendMode, AnnouncementSendMode.scheduled);
     expect(cubit.state.scheduledAt, at);
+  });
+
+  test('taper pendant un geste ne rouvre pas la barre', () async {
+    final pending = Completer<Either<Failure, Announcement>>();
+    when(
+      () => repo.create(
+        id: any(named: 'id'),
+        content: any(named: 'content'),
+        academicYearId: any(named: 'academicYearId'),
+      ),
+    ).thenAnswer((_) => pending.future);
+    final cubit = fresh()..setTitle('T');
+    final saving = cubit.saveDraft();
+    cubit.setBody('frappe en vol');
+    expect(cubit.state.busy, AnnouncementEditorBusy.saving);
+    expect(cubit.state.inputLocked, isTrue);
+    pending.complete(Right(announcement(id: 'uuid', title: 'T', body: '')));
+    await saving;
+  });
+
+  group(
+    'réponse perdue puis refus NOT_EDITABLE : on juge sur l\'état relu',
+    () {
+      test('déjà programmé à cette heure : l\'issue « programmé »', () async {
+        final at = DateTime.utc(2026, 10, 13, 6, 30);
+        final draft = announcement(id: 'a', title: 'T', body: 'B', version: 2);
+        when(
+          () => repo.schedule('a', scheduledAt: at, version: 2),
+        ).thenAnswer((_) async => Left(_refused('ANNOUNCEMENT_NOT_EDITABLE')));
+        when(() => repo.get('a')).thenAnswer(
+          (_) async => Right(
+            announcement(
+              id: 'a',
+              title: 'T',
+              body: 'B',
+              status: AnnouncementStatus.scheduled,
+              scheduledAt: at,
+              version: 3,
+            ),
+          ),
+        );
+        final cubit = AnnouncementEditorCubit.edit(
+          announcement: draft,
+          writer: AnnouncementWriter(repo),
+          now: () => now,
+        )..setSendMode(AnnouncementSendMode.scheduled);
+        await cubit.submit();
+        expect(cubit.state.outcome, AnnouncementEditorOutcome.scheduled);
+        expect(cubit.state.isLocked, isFalse);
+      });
+
+      test('repassé en brouillon entre-temps : relu, pas verrouillé', () async {
+        final scheduled = announcement(
+          id: 'a',
+          status: AnnouncementStatus.scheduled,
+          scheduledAt: now.add(const Duration(hours: 2)),
+          version: 2,
+        );
+        when(
+          () => repo.unschedule('a', version: 2),
+        ).thenAnswer((_) async => Left(_refused('ANNOUNCEMENT_NOT_EDITABLE')));
+        when(
+          () => repo.get('a'),
+        ).thenAnswer((_) async => Right(announcement(id: 'a', version: 3)));
+        final cubit = AnnouncementEditorCubit.edit(
+          announcement: scheduled,
+          writer: AnnouncementWriter(repo),
+          now: () => now,
+        )..setTitle('Autre titre');
+        await cubit.saveDraft();
+        expect(cubit.state.notice, AnnouncementEditorNotice.reloaded);
+        expect(cubit.state.isLocked, isFalse);
+      });
+
+      test(
+        'relecture impossible : le bandeau d\'échec, pas « relu »',
+        () async {
+          final current = announcement(id: 'a', version: 2);
+          when(
+            () => repo.update('a', any(), version: 2),
+          ).thenAnswer((_) async => Left(_refused('ANNOUNCEMENT_STALE')));
+          when(
+            () => repo.get('a'),
+          ).thenAnswer((_) async => const Left(NetworkFailure()));
+          final cubit = AnnouncementEditorCubit.edit(
+            announcement: current,
+            writer: AnnouncementWriter(repo),
+            now: () => now,
+          )..setTitle('X');
+          await cubit.saveDraft();
+          expect(cubit.state.notice, isNull);
+          expect(cubit.state.failedGesture, AnnouncementEditorBusy.saving);
+        },
+      );
+    },
+  );
+
+  test('l\'avis « relu » s\'efface au geste suivant', () async {
+    final current = announcement(id: 'a', version: 2);
+    when(
+      () => repo.update('a', any(), version: 2),
+    ).thenAnswer((_) async => Left(_refused('ANNOUNCEMENT_STALE')));
+    when(
+      () => repo.get('a'),
+    ).thenAnswer((_) async => Right(announcement(id: 'a', version: 3)));
+    when(() => repo.update('a', any(), version: 3)).thenAnswer(
+      (_) async => Right(announcement(id: 'a', title: 'X', version: 4)),
+    );
+    final cubit = AnnouncementEditorCubit.edit(
+      announcement: current,
+      writer: AnnouncementWriter(repo),
+      now: () => now,
+    )..setTitle('X');
+    await cubit.saveDraft();
+    expect(cubit.state.notice, AnnouncementEditorNotice.reloaded);
+    await cubit.saveDraft();
+    expect(cubit.state.notice, isNull);
+    expect(cubit.state.outcome, AnnouncementEditorOutcome.draftSaved);
   });
 }

@@ -92,4 +92,23 @@ void main() {
     expect(c.state.tooShort, isTrue);
     verifyZeroInteractions(repo);
   });
+
+  test('une lecture en vol ne s\'impose pas à la nouvelle audience', () async {
+    final slowA = Completer<Either<Failure, AnnouncementReach>>();
+    when(
+      () => repo.reach(const LevelsAudience(['a'])),
+    ).thenAnswer((_) => slowA.future);
+    when(
+      () => repo.reach(const LevelsAudience(['b'])),
+    ).thenAnswer((_) async => const Right(reach));
+    final c = cubit()..update(const LevelsAudience(['a']));
+    await _settle();
+    c.update(const LevelsAudience(['b']));
+    slowA.complete(const Right(reach));
+    await _settle();
+    await _settle();
+    expect(c.state.audience, const LevelsAudience(['b']));
+    expect(c.state.settledFor(const LevelsAudience(['b'])), reach);
+    expect(c.state.settledFor(const LevelsAudience(['a'])), isNull);
+  });
 }

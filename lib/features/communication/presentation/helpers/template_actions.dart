@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_template.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/templates/announcement_templates_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/communication_failure_text.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/templates/template_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -64,7 +65,10 @@ class TemplateActions {
     if (failure == null) {
       AppSnackBar.showSuccess(context, l10n.communicationTemplateDeleted);
     } else {
-      AppSnackBar.showError(context, l10n.communicationTemplateDeleteFailed);
+      AppSnackBar.showError(
+        context,
+        l10n.communicationTemplateDeleteFailed(l10n.failureReason(failure)),
+      );
     }
   }
 }

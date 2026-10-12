@@ -18,7 +18,9 @@ class AnnouncementDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final flow = context.read<CommunicationFlowCubit>();
     final content = screen.announcement.content;
+    // Le détail défile lui-même, l'aperçu collant à droite.
     return AppPageBackground(
+      scrollable: false,
       child: AnnouncementDetailScreen(
         announcement: screen.announcement,
         schoolName: context.read<SchoolIdentityCubit>().state.school?.name,

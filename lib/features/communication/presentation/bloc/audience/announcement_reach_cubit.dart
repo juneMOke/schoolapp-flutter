@@ -32,6 +32,11 @@ class AnnouncementReachState extends Equatable {
   /// ne bloque rien.
   bool get whatsappDisabled => reach?.whatsappEnabled == false;
 
+  /// La portée lue pour [target] exactement — `null` pendant un calcul ou pour
+  /// une autre audience : un récapitulatif n'annonce jamais un chiffre périmé.
+  AnnouncementReach? settledFor(AnnouncementAudience target) =>
+      status == ReachStatus.ready && audience == target ? reach : null;
+
   @override
   List<Object?> get props => [status, audience, reach, failure];
 }
@@ -52,12 +57,10 @@ class AnnouncementReachCubit extends Cubit<AnnouncementReachState> {
     : super(const AnnouncementReachState());
 
   void update(AnnouncementAudience audience) {
-    if (audience == state.audience && state.status != ReachStatus.failure) {
-      return;
-    }
     _timer?.cancel();
+    // Toute lecture déjà partie vaut pour une audience qui n'est plus celle-ci.
+    _ticket++;
     if (audience.isEmpty) {
-      _ticket++;
       emit(AnnouncementReachState(audience: audience));
       return;
     }

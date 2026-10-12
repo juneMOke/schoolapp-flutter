@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/communication/domain/entities/announ
 import 'package:school_app_flutter/features/communication/domain/services/announcement_validation.dart';
 import 'package:school_app_flutter/features/communication/domain/services/announcement_variables.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/announcement_labels.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/category_picker.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/counted_text_field.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_section_card.dart';
@@ -77,7 +78,7 @@ class _ContentSectionState extends State<ContentSection> {
     final l10n = AppLocalizations.of(context)!;
     final state = widget.state;
     final content = state.content;
-    final locked = state.isLocked;
+    final locked = state.inputLocked;
     final overdue = content.audience is OverdueAudience;
     return EditorSectionCard(
       number: 1,
@@ -144,8 +145,8 @@ class _ContentSectionState extends State<ContentSection> {
     );
     if (unknown.isNotEmpty) {
       return l10n.communicationUnknownVariable(
-        unknown.join(', '),
-        AnnouncementVariable.values.map((v) => v.token).join(', '),
+        l10n.listOf(unknown),
+        l10n.listOf(AnnouncementVariable.values.map((v) => v.token)),
       );
     }
     if (s.content.body.trim().isEmpty) return l10n.communicationBodyRequired;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
@@ -60,17 +61,20 @@ class _ScheduleFieldsState extends State<ScheduleFields> {
     final wall = _wall;
     _time.text = l10n.communicationClock(wall);
     final today = SchoolTime.today(widget.now);
+    final day = DateTime(wall.year, wall.month, wall.day);
     final enabled = widget.onChanged != null;
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.md,
       children: [
         SizedBox(
-          width: 200,
+          width: AppDimensions.communicationScheduleDateWidth,
           child: EteeloDateInput(
             label: l10n.communicationScheduleDate,
-            value: DateTime(wall.year, wall.month, wall.day),
-            firstDate: today,
+            value: day,
+            // Un programmé rouvert après son heure garde une date passée : le
+            // calendrier doit pouvoir l'afficher.
+            firstDate: day.isBefore(today) ? day : today,
             lastDate: DateTime(today.year + 1, today.month, today.day),
             enabled: enabled,
             errorText: widget.errorText,
@@ -80,7 +84,7 @@ class _ScheduleFieldsState extends State<ScheduleFields> {
           ),
         ),
         SizedBox(
-          width: 140,
+          width: AppDimensions.communicationScheduleTimeWidth,
           child: EteeloTextInput(
             controller: _time,
             label: l10n.communicationScheduleTime,

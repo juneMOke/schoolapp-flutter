@@ -13,9 +13,9 @@ import 'package:school_app_flutter/features/communication/presentation/bloc/audi
 import 'package:school_app_flutter/features/communication/presentation/bloc/communication_flow_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_factory.dart';
-import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/templates/announcement_templates_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/helpers/announcement_outcome_messages.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/communication_failure_text.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/announcement_editor_screen.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
@@ -74,34 +74,40 @@ class AnnouncementEditorPage extends StatelessWidget {
           create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
       ],
+      // Pas de défilement de page : l'éditeur défile lui-même, sous une barre
+      // d'actions collante. Le `Builder` donne aux gestes un contexte sous les
+      // fournisseurs ci-dessus.
       child: AppPageBackground(
-        child: AnnouncementEditorScreen(
-          schoolName: context.read<SchoolIdentityCubit>().state.school?.name,
-          groups:
-              context
-                  .read<AcademicYearContextBloc>()
-                  .state
-                  .context
-                  ?.schoolLevelGroups ??
-              const [],
-          onBack: flow.showList,
-          onSaveAsTemplate:
-              PermissionGate.allowsAccess(
+        scrollable: false,
+        child: Builder(
+          builder: (context) => AnnouncementEditorScreen(
+            schoolName: context.read<SchoolIdentityCubit>().state.school?.name,
+            groups:
+                context
+                    .read<AcademicYearContextBloc>()
+                    .state
+                    .context
+                    ?.schoolLevelGroups ??
+                const [],
+            onBack: flow.showList,
+            onSaveAsTemplate:
+                PermissionGate.allowsAccess(
+                  context,
+                  kAnnouncementTemplateWriteAccess,
+                )
+                ? () => _saveAsTemplate(context)
+                : null,
+            onDone: (outcome, announcement) {
+              context.read<AnnouncementsCubit>().upsert(announcement);
+              AppSnackBar.showSuccess(
                 context,
-                kAnnouncementTemplateWriteAccess,
-              )
-              ? (state) => _saveAsTemplate(context, state)
-              : null,
-          onDone: (outcome, announcement) {
-            context.read<AnnouncementsCubit>().upsert(announcement);
-            AppSnackBar.showSuccess(
-              context,
-              AppLocalizations.of(
-                context,
-              )!.outcomeMessage(outcome, announcement, DateTime.now()),
-            );
-            flow.showList();
-          },
+                AppLocalizations.of(
+                  context,
+                )!.outcomeMessage(outcome, announcement, DateTime.now()),
+              );
+              flow.showList();
+            },
+          ),
         ),
       ),
     );
@@ -109,12 +115,10 @@ class AnnouncementEditorPage extends StatelessWidget {
 
   /// « Enregistrer comme modèle » : titre et message requis, l'éditeur reste
   /// ouvert.
-  static Future<void> _saveAsTemplate(
-    BuildContext context,
-    AnnouncementEditorState state,
-  ) async {
+  static Future<void> _saveAsTemplate(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final content = state.content;
+    // Lu au moment du geste : c'est la saisie à l'écran qui devient modèle.
+    final content = context.read<AnnouncementEditorCubit>().state.content;
     if (content.title.trim().isEmpty || content.body.trim().isEmpty) {
       AppSnackBar.showWarning(context, l10n.communicationTemplateNeedsText);
       return;
@@ -129,7 +133,10 @@ class AnnouncementEditorPage extends StatelessWidget {
     if (failure == null) {
       AppSnackBar.showSuccess(context, l10n.communicationTemplateSaved);
     } else {
-      AppSnackBar.showError(context, l10n.communicationTemplateSaveFailed);
+      AppSnackBar.showError(
+        context,
+        l10n.communicationTemplateSaveFailed(l10n.failureReason(failure)),
+      );
     }
   }
 }

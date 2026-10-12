@@ -114,7 +114,7 @@ class AnnouncementWriter {
     AnnouncementProgress? onStep,
   }) async {
     if (current == null) {
-      return _tap(
+      final created = _tap(
         await _repository.create(
           id: id,
           content: content,
@@ -122,9 +122,18 @@ class AnnouncementWriter {
         ),
         onStep,
       );
+      final draft = created.fold((_) => null, (value) => value);
+      // Un `POST` rejoué rend le brouillon EXISTANT, avec le texte du premier
+      // essai : la saisie corrigée depuis passe par un `PUT`, sans quoi c'est
+      // l'ancien texte qui partirait.
+      if (draft == null || draft.content.sameAs(content)) return created;
+      return _tap(
+        await _repository.update(draft.id, content, version: draft.version),
+        onStep,
+      );
     }
     var announcement = current;
-    final changed = announcement.content != content;
+    final changed = !announcement.content.sameAs(content);
     // `PUT` n'accepte qu'un brouillon ou un programmé : un échec redevient
     // brouillon avant d'être réécrit, un programmé quand on le veut brouillon.
     final unschedule = switch (announcement.status) {

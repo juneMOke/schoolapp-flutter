@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/communication_failure_text.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/states/communication_error_action.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Erreur d'une zone de résultats du module (règle n° 10) : une anatomie,
 /// quatre tonalités. Le module est en ligne : réseau (Réessayer), 401 (se
@@ -27,9 +23,7 @@ class CommunicationResultsErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final type = EteeloErrorType.fromFailure(failure);
-    final incident = failure is ApiErrorDetails
-        ? (failure as ApiErrorDetails).incidentId
-        : null;
+    final incident = incidentOf(failure);
     return EteeloErrorResult(
       type: type,
       title: switch (type) {
@@ -45,32 +39,13 @@ class CommunicationResultsErrorState extends StatelessWidget {
         EteeloErrorType.forbidden => l10n.communicationErrorForbidden,
         _ => l10n.communicationErrorServer,
       },
-      primaryAction: switch (type) {
-        EteeloErrorType.forbidden => EteeloButton.secondary(
-          label: l10n.communicationErrorContactAdmin,
-          icon: Icons.mail_outline,
-          onPressed: () =>
-              launchUrl(Uri(scheme: 'mailto', path: AppConstants.supportEmail)),
-          fullWidth: false,
-        ),
-        EteeloErrorType.unauthorized => EteeloButton.primary(
-          label: l10n.communicationErrorReconnect,
-          icon: Icons.login,
-          onPressed: () =>
-              context.read<AuthBloc>().add(const AuthLogoutRequested()),
-          fullWidth: false,
-        ),
-        _ => EteeloButton.primary(
-          label: l10n.communicationRetry,
-          icon: Icons.refresh,
-          onPressed: onRetry,
-          fullWidth: false,
-        ),
-      },
-      incidentCodeLabel:
-          type == EteeloErrorType.server &&
-              incident != null &&
-              incident.trim().isNotEmpty
+      primaryAction: communicationErrorAction(
+        context,
+        type,
+        onRetry: onRetry,
+        prominent: true,
+      ),
+      incidentCodeLabel: type == EteeloErrorType.server && incident != null
           ? l10n.communicationErrorIncident(incident)
           : null,
     );

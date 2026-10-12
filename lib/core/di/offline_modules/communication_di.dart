@@ -64,10 +64,7 @@ void registerCommunication(GetIt getIt) {
     ..registerLazySingleton<OwnerScopedValue<AnnouncementFilters>>(
       () => OwnerScopedValue(
         const AnnouncementFilters(),
-        owner: () {
-          final user = getIt<CurrentUserContext>();
-          return '${user.uid}@${user.schoolId}';
-        },
+        owner: () => getIt<CurrentUserContext>().ownerKey,
       ),
     )
     // Chaque ouverture de l'éditeur tire un cubit neuf de cette fabrique.
@@ -93,10 +90,7 @@ void registerCommunication(GetIt getIt) {
     // page Communiqués.
     ..registerLazySingleton<PendingAnnouncementSeed>(
       () => PendingAnnouncementSeed(
-        owner: () {
-          final user = getIt<CurrentUserContext>();
-          return '${user.uid}@${user.schoolId}';
-        },
+        owner: () => getIt<CurrentUserContext>().ownerKey,
       ),
     )
     ..registerFactory(

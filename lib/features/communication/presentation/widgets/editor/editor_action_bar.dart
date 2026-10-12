@@ -106,8 +106,16 @@ class EditorActionBar extends StatelessWidget {
           }
           return Row(
             children: [
-              ...secondary,
-              const Spacer(),
+              // Les gestes secondaires passent à la ligne plutôt que de pousser
+              // les deux principaux hors de l'écran.
+              Expanded(
+                child: Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: secondary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
               draft,
               const SizedBox(width: AppSpacing.sm),
               submit,

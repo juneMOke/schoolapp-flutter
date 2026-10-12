@@ -32,7 +32,7 @@ class AudienceSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<AnnouncementEditorCubit>();
-    final locked = state.isLocked;
+    final locked = state.inputLocked;
     final selections = state.selections;
     return EditorSectionCard(
       number: 2,

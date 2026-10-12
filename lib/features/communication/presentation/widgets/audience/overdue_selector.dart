@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
@@ -57,7 +58,7 @@ class OverdueSelector extends StatelessWidget {
           runSpacing: AppSpacing.md,
           children: [
             SizedBox(
-              width: 280,
+              width: AppDimensions.communicationOverdueFeeWidth,
               child: EteeloSelectInput<String>(
                 label: l10n.communicationOverdueFee,
                 value: selections.feeCode ?? _all,
@@ -79,7 +80,7 @@ class OverdueSelector extends StatelessWidget {
             ),
             if (selectedNature != null && selectedNature.tranches.isNotEmpty)
               SizedBox(
-                width: 240,
+                width: AppDimensions.communicationOverdueTrancheWidth,
                 child: EteeloSelectInput<String>(
                   label: l10n.communicationOverdueTranche,
                   value: selections.tariffCode ?? _all,

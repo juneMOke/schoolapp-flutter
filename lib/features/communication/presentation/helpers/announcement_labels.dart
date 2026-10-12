@@ -84,6 +84,10 @@ extension AnnouncementLabels on AppLocalizations {
       if (reach != null)
         communicationReachSentShort(reach.reachableMessages, reach.messages),
       ...announcement.content.channels.map(channelLabel),
-    ].join(' · ');
+    ].reduce(communicationJoin);
   }
+
+  /// Une énumération : « WhatsApp, Portail ».
+  String listOf(Iterable<String> items) =>
+      items.isEmpty ? '' : items.reduce(communicationListJoin);
 }

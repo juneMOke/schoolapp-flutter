@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_status.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/communication_flow_cubit.dart';
 
@@ -17,7 +16,8 @@ void main() {
   test('deux « Nouveau » de suite ouvrent deux éditeurs distincts', () {
     final flow = CommunicationFlowCubit()..openNew();
     final first = flow.state;
-    flow.openNew(seed: const AnnouncementContent(title: 'Copie'));
+    // Même graine : seule la session distingue les deux ouvertures.
+    flow.openNew();
     expect(flow.state, isNot(first));
     flow.showList();
     expect(flow.state, isA<CommunicationListScreen>());

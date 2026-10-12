@@ -29,7 +29,10 @@ void main() {
     () async {
       when(
         () => repo.create(id: 'uuid', content: content, academicYearId: 'y-1'),
-      ).thenAnswer((_) async => Right(announcement(id: 'uuid', version: 1)));
+      ).thenAnswer(
+        (_) async =>
+            Right(announcement(id: 'uuid', title: 'T', body: 'B', version: 1)),
+      );
       when(() => repo.send('uuid', version: 1)).thenAnswer(
         (_) async => Right(
           announcement(id: 'uuid', status: AnnouncementStatus.sent, version: 2),
@@ -213,4 +216,50 @@ void main() {
       () => repo.update(any(), any(), version: any(named: 'version')),
     );
   });
+
+  test(
+    'POST rejoué : le brouillon existant porte l\'ancien texte, un PUT le corrige',
+    () async {
+      when(
+        () => repo.create(id: 'uuid', content: content, academicYearId: null),
+      ).thenAnswer(
+        (_) async => Right(
+          announcement(id: 'uuid', title: 'Ancien', body: 'B', version: 1),
+        ),
+      );
+      when(() => repo.update('uuid', content, version: 1)).thenAnswer(
+        (_) async =>
+            Right(announcement(id: 'uuid', title: 'T', body: 'B', version: 2)),
+      );
+      when(() => repo.send('uuid', version: 2)).thenAnswer(
+        (_) async =>
+            Right(announcement(id: 'uuid', status: AnnouncementStatus.sent)),
+      );
+      final steps = <int>[];
+      await writer.send(
+        id: 'uuid',
+        content: content,
+        onStep: (a) => steps.add(a.version),
+      );
+      verifyInOrder([
+        () => repo.update('uuid', content, version: 1),
+        () => repo.send('uuid', version: 2),
+      ]);
+      expect(steps, [1, 2]);
+    },
+  );
+
+  test(
+    'contenu « égal » au rognage et à l\'ordre des canaux près : aucun PUT',
+    () async {
+      final current = announcement(title: 'T', body: 'B');
+      final result = await writer.saveDraft(
+        id: current.id,
+        content: const AnnouncementContent(title: ' T ', body: 'B\n'),
+        current: current,
+      );
+      expect(result, Right(current));
+      verifyZeroInteractions(repo);
+    },
+  );
 }

@@ -85,8 +85,8 @@ class CountedTextField extends StatelessWidget {
               Text(
                 '$count / $maxLength',
                 softWrap: false,
-                style: AppTextStyles.moneyTabular.copyWith(
-                  fontSize: 12,
+                style: AppTextStyles.caption.copyWith(
+                  fontFeatures: AppTextStyles.tabularFigures,
                   color: warn ? AppColors.ambreInk : AppColors.textMuted,
                 ),
               ),

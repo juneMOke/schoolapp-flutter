@@ -46,7 +46,16 @@ class AnnouncementsPage extends StatelessWidget {
           },
         ),
       ],
-      child: _AnnouncementsFlow(academicYearId: yearId),
+      // Le contexte académique peut arriver après le montage (route directe,
+      // rafraîchissement) : la liste se recharge sur l'année enfin connue.
+      child: BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
+        listenWhen: (prev, curr) =>
+            prev.context?.academicYear.id != curr.context?.academicYear.id,
+        listener: (context, state) => context.read<AnnouncementsCubit>().load(
+          academicYearId: state.context?.academicYear.id,
+        ),
+        child: _AnnouncementsFlow(academicYearId: yearId),
+      ),
     );
   }
 }

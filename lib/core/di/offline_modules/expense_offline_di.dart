@@ -105,12 +105,8 @@ void registerExpenseOffline(GetIt getIt) {
   // BLoC — les cubits restent des factories (règle n°2). Scopé au compte et à
   // l'école : la période d'une autre session n'a rien à faire ici.
   getIt.registerLazySingleton<ExpensePeriodMemory>(
-    () => ExpensePeriodMemory(
-      owner: () {
-        final user = getIt<CurrentUserContext>();
-        return '${user.uid}@${user.schoolId}';
-      },
-    ),
+    () =>
+        ExpensePeriodMemory(owner: () => getIt<CurrentUserContext>().ownerKey),
   );
   getIt.registerFactory<ExpenseSnapshotSource>(
     () => ExpenseSnapshotSource(

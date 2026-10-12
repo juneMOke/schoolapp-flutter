@@ -51,7 +51,7 @@ class AnnouncementMetaGrid extends StatelessWidget {
       ),
       (
         l10n.communicationChannelsLabel,
-        announcement.content.channels.map(l10n.channelLabel).join(', '),
+        l10n.listOf(announcement.content.channels.map(l10n.channelLabel)),
       ),
     ];
     return CommunicationCard(

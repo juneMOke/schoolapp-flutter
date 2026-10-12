@@ -70,7 +70,7 @@ class _ConfirmDialog extends StatelessWidget {
           ),
           _Row(
             label: l10n.communicationChannelsLabel,
-            value: state.content.channels.map(l10n.channelLabel).join(', '),
+            value: l10n.listOf(state.content.channels.map(l10n.channelLabel)),
           ),
           _Row(
             label: l10n.communicationSendLabel,
@@ -128,7 +128,7 @@ class _Row extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 130,
+          width: AppDimensions.communicationConfirmLabelWidth,
           child: Text(
             label,
             style: AppTypography.labelMedium.copyWith(

@@ -32,6 +32,10 @@ class CurrentUserContext {
     _schoolId = (schoolId != null && schoolId.isNotEmpty) ? schoolId : null;
   }
 
+  /// La clé du « propriétaire » d'une mémoire de session : le compte ET
+  /// l'école. Une valeur posée sous une autre clé ne vaut plus.
+  String get ownerKey => '$_uid@$_schoolId';
+
   void clear() {
     _uid = null;
     _schoolId = null;

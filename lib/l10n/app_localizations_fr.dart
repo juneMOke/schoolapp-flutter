@@ -16246,7 +16246,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String communicationReachSentShort(int reached, int total) {
-    return '$reached messages sur $total';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$reached messages sur $total',
+      one: '$reached message sur 1',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -16661,8 +16667,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get communicationStudentSearching => 'Recherche…';
 
   @override
-  String get communicationStudentSearchFailed =>
-      'La recherche n\'a pas abouti. Vérifiez la connexion, puis retapez.';
+  String communicationStudentSearchFailed(String reason) {
+    return 'La recherche n\'a pas abouti. $reason';
+  }
 
   @override
   String communicationStudentNoMatch(String query) {
@@ -16714,7 +16721,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String communicationReachHeadline(int reachable, int total) {
-    return '$reachable messages joignables sur $total';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$reachable messages joignables sur $total',
+      one: '$reachable message joignable sur 1',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -16929,8 +16942,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get communicationTemplateSaved => 'Modèle enregistré';
 
   @override
-  String get communicationTemplateSaveFailed =>
-      'Le modèle n\'a pas pu être enregistré. Vérifiez la connexion, puis recommencez.';
+  String communicationTemplateSaveFailed(String reason) {
+    return 'Le modèle n\'a pas pu être enregistré. $reason';
+  }
 
   @override
   String get communicationTemplateNeedsText =>
@@ -16947,9 +16961,36 @@ class AppLocalizationsFr extends AppLocalizations {
   String get communicationTemplateDeleted => 'Modèle supprimé';
 
   @override
-  String get communicationTemplateDeleteFailed =>
-      'Le modèle n\'a pas pu être supprimé.';
+  String communicationTemplateDeleteFailed(String reason) {
+    return 'Le modèle n\'a pas pu être supprimé. $reason';
+  }
 
   @override
   String get communicationCancel => 'Annuler';
+
+  @override
+  String get communicationReasonNetwork =>
+      'Vérifiez la connexion, puis recommencez.';
+
+  @override
+  String get communicationReasonForbidden => 'Votre compte n\'a pas ce droit.';
+
+  @override
+  String get communicationReasonServer =>
+      'Le serveur n\'a pas pu traiter la demande. Réessayez dans un instant.';
+
+  @override
+  String communicationReachFailedBecause(String reason) {
+    return 'Portée indisponible. $reason';
+  }
+
+  @override
+  String communicationJoin(String first, String second) {
+    return '$first · $second';
+  }
+
+  @override
+  String communicationListJoin(String first, String second) {
+    return '$first, $second';
+  }
 }

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/communication/domain/entities/announ
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_template.dart';
 import 'package:school_app_flutter/features/communication/domain/services/announcement_variables.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/communication_failure_text.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/category_picker.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/counted_text_field.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/variable_insert_bar.dart';
@@ -154,7 +155,7 @@ class _TemplateFormDialogState extends State<_TemplateFormDialog> {
           if (failure != null) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
-              l10n.communicationTemplateSaveFailed,
+              l10n.communicationTemplateSaveFailed(l10n.failureReason(failure)),
               style: AppTypography.bodySmall.copyWith(color: AppColors.error),
             ),
           ],

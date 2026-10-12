@@ -38,6 +38,17 @@ class AnnouncementContent extends Equatable {
     channels: channels ?? this.channels,
   );
 
+  /// Le même contenu **tel que le serveur le garde** : titre et message
+  /// rognés, canaux sans ordre. Deux contenus « égaux » ici n'ont pas besoin
+  /// d'un `PUT`.
+  bool sameAs(AnnouncementContent other) =>
+      category == other.category &&
+      title.trim() == other.title.trim() &&
+      body.trim() == other.body.trim() &&
+      audience == other.audience &&
+      channels.toSet().length == other.channels.toSet().length &&
+      channels.toSet().containsAll(other.channels);
+
   @override
   List<Object?> get props => [category, title, body, audience, channels];
 }

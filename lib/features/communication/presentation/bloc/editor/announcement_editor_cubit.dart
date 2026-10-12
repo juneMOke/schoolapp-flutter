@@ -1,26 +1,25 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement.dart';
-import 'package:school_app_flutter/features/communication/domain/entities/announcement_audience.dart';
-import 'package:school_app_flutter/features/communication/domain/entities/audience_student.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_category.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_channel.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
-import 'package:school_app_flutter/features/communication/domain/entities/announcement_status.dart';
-import 'package:school_app_flutter/features/communication/domain/services/announcement_refusal.dart';
 import 'package:school_app_flutter/features/communication/domain/services/announcement_validation.dart';
 import 'package:school_app_flutter/features/communication/domain/usecases/announcement_writer.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/audience_editing.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/audience_selections.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/editor_initial_state.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/editor_refusals.dart';
 
 /// L'éditeur d'un communiqué : nouveau, brouillon, programmé ou échec.
 ///
 /// Il ne juge que ce que la tablette sait juger (champs vides, variables,
 /// moment passé) ; le reste, c'est le serveur qui le dit, et l'éditeur le
 /// range sous le champ qu'il désigne ou dans le bandeau.
-class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
+class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState>
+    with AudienceEditing {
   final AnnouncementWriter _writer;
   final DateTime Function() _now;
   final String? _academicYearId;
@@ -42,7 +41,7 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
     String? academicYearId,
     DateTime Function() now = DateTime.now,
   }) => AnnouncementEditorCubit._(
-    _initial(id: id, content: seed, now: now()),
+    initialEditorState(id: id, content: seed, now: now()),
     writer: writer,
     now: now,
     academicYearId: academicYearId,
@@ -55,7 +54,7 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
     bool readOnly = false,
     DateTime Function() now = DateTime.now,
   }) => AnnouncementEditorCubit._(
-    _initial(
+    initialEditorState(
       id: announcement.id,
       content: announcement.content,
       now: now(),
@@ -67,37 +66,6 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
     academicYearId: announcement.academicYearId,
   );
 
-  static AnnouncementEditorState _initial({
-    required String id,
-    required AnnouncementContent content,
-    required DateTime now,
-    Announcement? announcement,
-    bool readOnly = false,
-  }) {
-    final scheduled = announcement?.status == AnnouncementStatus.scheduled
-        ? announcement?.scheduledAt
-        : null;
-    return AnnouncementEditorState(
-      id: id,
-      announcement: announcement,
-      content: content,
-      selections: AudienceSelections.of(content.audience),
-      sendMode: scheduled == null
-          ? AnnouncementSendMode.now
-          : AnnouncementSendMode.scheduled,
-      scheduledAt: scheduled ?? defaultScheduleFor(now),
-      issues: AnnouncementValidation.issuesOf(content),
-      readOnly: readOnly,
-    );
-  }
-
-  /// Le lendemain, 07:30 à l'heure de l'école.
-  static DateTime defaultScheduleFor(DateTime now) => SchoolTime.instantAt(
-    day: SchoolTime.today(now).add(const Duration(days: 1)),
-    hour: 7,
-    minute: 30,
-  );
-
   // ── Saisie ──
 
   void setCategory(AnnouncementCategory category) =>
@@ -107,29 +75,8 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
 
   void setBody(String body) => _edit(state.content.copyWith(body: body));
 
-  void setAudienceMode(AudienceMode mode) =>
-      _select(state.selections.withMode(mode));
-
-  void toggleLevel(String id) => _select(state.selections.toggleLevel(id));
-
-  void toggleClassroom(String id) =>
-      _select(state.selections.toggleClassroom(id));
-
-  void toggleClassrooms(List<String> ids) =>
-      _select(state.selections.toggleClassrooms(ids));
-
-  void addStudent(AudienceStudent student) =>
-      _select(state.selections.addStudent(student));
-
-  void removeStudent(String id) => _select(state.selections.removeStudent(id));
-
-  void setOverdueFee(String? feeCode, {String? tariffCode}) =>
-      _select(state.selections.withFee(feeCode, tariffCode: tariffCode));
-
-  void setOverdueDays(int days) =>
-      _select(state.selections.withOverdueDays(days));
-
-  void _select(AudienceSelections selections) => _emitEdited(
+  @override
+  void selectAudience(AudienceSelections selections) => _emitEdited(
     state.copyWith(
       selections: selections,
       content: state.content.copyWith(audience: selections.audience),
@@ -160,9 +107,15 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
       _emitEdited(state.copyWith(content: content));
 
   /// Une frappe efface ce que le serveur avait refusé : son verdict valait
-  /// pour l'ancien texte.
-  void _emitEdited(AnnouncementEditorState next) =>
-      emit(next.copyWith(issues: _issuesOf(next), serverFields: const {}));
+  /// pour l'ancien texte. Le geste en cours, lui, survit : sans quoi la barre
+  /// se réactiverait en plein envoi et un second appui partirait en parallèle.
+  void _emitEdited(AnnouncementEditorState next) => emit(
+    next.copyWith(
+      issues: _issuesOf(next),
+      serverFields: const {},
+      busy: state.busy,
+    ),
+  );
 
   List<AnnouncementIssue> _issuesOf(AnnouncementEditorState s) =>
       AnnouncementValidation.issuesOf(
@@ -268,7 +221,9 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
     Future<Either<Failure, Announcement>> Function() call,
   ) async {
     if (state.busy != null || state.isLocked) return;
-    emit(state.copyWith(busy: busy));
+    // Un nouvel essai efface l'avis de relecture : il parlait de l'essai
+    // précédent.
+    emit(state.copyWith(busy: busy, clearNotice: true));
     final result = await call();
     if (isClosed) return;
     await result.fold(
@@ -278,39 +233,21 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
     );
   }
 
-  /// Un refus de champ va sous le champ ; une version périmée ou un
-  /// communiqué déjà parti fait relire l'état serveur, saisie conservée.
+  /// Une version périmée ou un communiqué parti fait relire l'état serveur,
+  /// saisie conservée ; le reste se range sous le champ ou au bandeau.
   Future<void> _refused(Failure failure, AnnouncementEditorBusy gesture) async {
-    final refusal = AnnouncementRefusal.of(failure);
-    if (refusal == AnnouncementRefusal.stale ||
-        refusal == AnnouncementRefusal.notEditable) {
-      final fresh = await _writer.reload(state.id);
-      if (isClosed) return;
-      final announcement = fresh.fold((_) => null, (value) => value);
-      final locked =
-          refusal == AnnouncementRefusal.notEditable ||
-          (announcement != null && !announcement.status.canSend);
-      emit(
-        state.copyWith(
-          announcement: announcement,
-          notice: locked
-              ? AnnouncementEditorNotice.notEditable
-              : AnnouncementEditorNotice.reloaded,
-          refusal: refusal,
-        ),
-      );
+    if (!EditorRefusals.needsReload(failure)) {
+      emit(EditorRefusals.refused(state, failure, gesture));
       return;
     }
-    final fields = AnnouncementRefusal.fieldsOf(failure);
+    final fresh = await _writer.reload(state.id);
+    if (isClosed) return;
     emit(
-      state.copyWith(
-        showErrors: true,
-        serverFields: fields,
-        // Un refus nommé sur un champ se lit sous le champ : le bandeau reste
-        // aux échecs qui ne désignent rien à corriger dans la saisie.
-        failure: fields.isEmpty ? failure : null,
-        failedGesture: fields.isEmpty ? gesture : null,
-        refusal: refusal,
+      EditorRefusals.afterReload(
+        state,
+        failure,
+        gesture,
+        fresh.fold((_) => null, (value) => value),
       ),
     );
   }

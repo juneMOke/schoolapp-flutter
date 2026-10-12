@@ -87,6 +87,10 @@ class AnnouncementEditorState extends Equatable {
   bool get isLocked =>
       readOnly || notice == AnnouncementEditorNotice.notEditable;
 
+  /// Les champs ne se touchent pas pendant un geste : ce qui partirait ne
+  /// serait plus ce qu'on voit.
+  bool get inputLocked => isLocked || busy != null;
+
   /// Les manques à montrer, champ par champ.
   bool hasIssueOn(AnnouncementField field) =>
       serverFields.contains(field) ||
@@ -107,6 +111,7 @@ class AnnouncementEditorState extends Equatable {
     AnnouncementRefusal? refusal,
     AnnouncementEditorNotice? notice,
     AnnouncementEditorOutcome? outcome,
+    bool clearNotice = false,
   }) => AnnouncementEditorState(
     id: id,
     announcement: announcement ?? this.announcement,
@@ -123,7 +128,7 @@ class AnnouncementEditorState extends Equatable {
     failure: failure,
     failedGesture: failedGesture,
     refusal: refusal,
-    notice: notice ?? this.notice,
+    notice: clearNotice ? notice : notice ?? this.notice,
     outcome: outcome,
     readOnly: readOnly,
   );

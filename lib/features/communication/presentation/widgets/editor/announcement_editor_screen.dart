@@ -39,7 +39,7 @@ class AnnouncementEditorScreen extends StatefulWidget {
   final bool confirmBeforeSending;
 
   /// « Enregistrer comme modèle », `null` sans le droit d'écrire les modèles.
-  final ValueChanged<AnnouncementEditorState>? onSaveAsTemplate;
+  final VoidCallback? onSaveAsTemplate;
 
   const AnnouncementEditorScreen({
     super.key,
@@ -113,9 +113,7 @@ class _AnnouncementEditorScreenState extends State<AnnouncementEditorScreen> {
               onDraft: context.read<AnnouncementEditorCubit>().saveDraft,
               onSubmit: _submit,
               onCancel: _gestures.cancel,
-              onSaveAsTemplate: widget.onSaveAsTemplate == null
-                  ? null
-                  : () => widget.onSaveAsTemplate!(state),
+              onSaveAsTemplate: widget.onSaveAsTemplate,
             ),
         ],
       ),

@@ -853,6 +853,29 @@ class AppDimensions {
   /// Pastille d'un mode de ciblage ou d'une catégorie : cible ≥ 44 dp.
   static const communicationChoiceMinHeight = 44.0;
 
+  /// Icône d'une ligne d'encart (portée, avertissements).
+  static const communicationInlineIconSize = 18.0;
+
+  /// Champs de la programmation : date, heure.
+  static const communicationScheduleDateWidth = 200.0;
+  static const communicationScheduleTimeWidth = 140.0;
+
+  /// Sélecteurs du mode Retards : nature, tranche.
+  static const communicationOverdueFeeWidth = 280.0;
+  static const communicationOverdueTrancheWidth = 240.0;
+
+  /// Colonne des libellés du récapitulatif d'envoi.
+  static const communicationConfirmLabelWidth = 130.0;
+
+  /// Squelette de l'encart de portée : deux barres.
+  static const communicationReachSkeletonWidth = 220.0;
+  static const communicationReachSkeletonHeight = 16.0;
+  static const communicationReachSkeletonSubWidth = 160.0;
+  static const communicationReachSkeletonSubHeight = 12.0;
+
+  /// Une portée en cours de recalcul reste lisible, estompée.
+  static const communicationRefreshingOpacity = 0.6;
+
   /// Ligne d'un élève proposé par la recherche : cible ≥ 48 dp.
   static const communicationStudentRowMinHeight = 48.0;
 }

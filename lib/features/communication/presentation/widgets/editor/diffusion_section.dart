@@ -35,7 +35,7 @@ class DiffusionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final locked = state.isLocked;
+    final locked = state.inputLocked;
     final scheduled = state.sendMode == AnnouncementSendMode.scheduled;
     return EditorSectionCard(
       number: number,

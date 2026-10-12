@@ -142,6 +142,10 @@ void main() {
         academicYearId: any(named: 'academicYearId'),
       ),
     ).thenAnswer((_) async => Right(announcement(id: 'uuid')));
+    // Le brouillon créé ne porte pas encore la saisie : un PUT la rattrape.
+    when(
+      () => repo.update('uuid', any(), version: any(named: 'version')),
+    ).thenAnswer((_) async => Right(announcement(id: 'uuid', version: 2)));
     when(() => repo.send('uuid', version: any(named: 'version'))).thenAnswer(
       (_) async =>
           Right(announcement(id: 'uuid', status: AnnouncementStatus.sent)),

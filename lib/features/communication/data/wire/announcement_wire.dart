@@ -24,7 +24,12 @@ abstract final class AnnouncementWire {
     final id = raw.text('id');
     final status = AnnouncementStatus.fromWire(raw.text('status'));
     final audience = AudienceWire.fromJson(raw['audience']);
-    if (id == null || status == null || audience == null) return null;
+    final version = raw.integer('version');
+    // Sans version, chaque geste suivant serait refusé pour version périmée :
+    // la ligne est illisible, pas « version 0 ».
+    if (id == null || status == null || audience == null || version == null) {
+      return null;
+    }
     return Announcement(
       id: id,
       academicYearId: raw.text('academicYearId'),
@@ -44,7 +49,7 @@ abstract final class AnnouncementWire {
       updatedAt: _instant(raw, 'updatedAt'),
       lastSendError: raw.text('lastSendError'),
       reachAtSend: ReachWire.fromJson(raw['reachAtSend']),
-      version: raw.integer('version') ?? 0,
+      version: version,
     );
   }
 
