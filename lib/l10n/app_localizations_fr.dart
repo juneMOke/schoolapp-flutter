@@ -16391,4 +16391,224 @@ class AppLocalizationsFr extends AppLocalizations {
   String communicationDateSent(String when) {
     return 'Envoyé $when';
   }
+
+  @override
+  String get communicationBackToList => 'Communiqués';
+
+  @override
+  String get communicationEditTitle => 'Modifier le communiqué';
+
+  @override
+  String get communicationSectionContent => 'Contenu';
+
+  @override
+  String get communicationSectionContentHint => 'Ce que les parents liront';
+
+  @override
+  String get communicationSectionDiffusion => 'Diffusion';
+
+  @override
+  String get communicationSectionDiffusionHint => 'Par où, et quand';
+
+  @override
+  String get communicationCategoryLabel => 'Catégorie du communiqué';
+
+  @override
+  String get communicationTitleLabel => 'Titre';
+
+  @override
+  String get communicationTitlePlaceholder =>
+      'Ex. Réunion des parents du 2e trimestre';
+
+  @override
+  String get communicationTitleRequired => 'Donnez un titre au communiqué.';
+
+  @override
+  String get communicationBodyLabel => 'Message';
+
+  @override
+  String get communicationBodyPlaceholder => 'Chers parents, …';
+
+  @override
+  String get communicationBodyHint =>
+      'Les champs insérés sont remplacés pour chaque élève, au moment de l\'envoi.';
+
+  @override
+  String get communicationBodyRequired => 'Écrivez le message.';
+
+  @override
+  String get communicationBodyRefused =>
+      'Le serveur a refusé ce message. Vérifiez-le, puis recommencez.';
+
+  @override
+  String communicationUnknownVariable(String tokens, String allowed) {
+    return 'Champ inconnu : $tokens. Seuls $allowed sont remplacés.';
+  }
+
+  @override
+  String get communicationInsert => 'Insérer';
+
+  @override
+  String get communicationAmountOnlyOverdue =>
+      'Le montant dû n\'existe qu\'en mode Retards de paiement.';
+
+  @override
+  String get communicationAmountMisplaced =>
+      'Le montant dû n\'est connu qu\'en mode Retards de paiement : retirez-le, ou choisissez ce mode.';
+
+  @override
+  String get communicationChannelsLabel => 'Canaux';
+
+  @override
+  String get communicationNoChannel =>
+      'Activez au moins un canal de diffusion.';
+
+  @override
+  String get communicationSendLabel => 'Envoi';
+
+  @override
+  String get communicationSendNow => 'Maintenant';
+
+  @override
+  String get communicationSendLater => 'Programmer';
+
+  @override
+  String get communicationScheduleDate => 'Date';
+
+  @override
+  String get communicationScheduleTime => 'Heure';
+
+  @override
+  String get communicationScheduleNotFuture =>
+      'Choisissez un moment dans le futur.';
+
+  @override
+  String communicationScheduleHint(String when) {
+    return 'Envoi automatique $when (heure de Kinshasa).';
+  }
+
+  @override
+  String communicationScheduledBanner(String when) {
+    return 'Programmé $when. Modifiable jusqu\'à l\'heure d\'envoi.';
+  }
+
+  @override
+  String communicationFailedBanner(String reason) {
+    return 'L\'envoi programmé a échoué : $reason. Corrigez si besoin, puis envoyez ou reprogrammez.';
+  }
+
+  @override
+  String get communicationFailedNoReason => 'cause non précisée';
+
+  @override
+  String get communicationNoticeReloaded =>
+      'Ce communiqué a changé entre-temps : sa dernière version a été relue, votre saisie est conservée. Vérifiez, puis recommencez.';
+
+  @override
+  String get communicationNoticeLocked =>
+      'Ce communiqué est déjà parti ou a été annulé : il ne se modifie plus.';
+
+  @override
+  String get communicationSaveAsTemplate => 'Enregistrer comme modèle';
+
+  @override
+  String get communicationDelete => 'Supprimer';
+
+  @override
+  String get communicationCancelSending => 'Annuler l\'envoi';
+
+  @override
+  String get communicationSaveDraft => 'Brouillon';
+
+  @override
+  String get communicationSend => 'Envoyer';
+
+  @override
+  String get communicationSchedule => 'Programmer';
+
+  @override
+  String get communicationSending => 'Envoi…';
+
+  @override
+  String get communicationKeep => 'Garder';
+
+  @override
+  String get communicationDeleteTitle => 'Supprimer ce brouillon ?';
+
+  @override
+  String get communicationDeleteMessage =>
+      'Il disparaîtra de la liste. Aucun parent n\'a été prévenu.';
+
+  @override
+  String get communicationCancelSendingTitle => 'Annuler l\'envoi ?';
+
+  @override
+  String get communicationCancelSendingMessage =>
+      'Le communiqué ne partira pas et disparaîtra de la liste.';
+
+  @override
+  String get communicationFailureSaveTitle =>
+      'L\'enregistrement n\'a pas abouti';
+
+  @override
+  String get communicationFailureSendTitle => 'L\'envoi n\'a pas abouti';
+
+  @override
+  String get communicationFailureScheduleTitle =>
+      'La programmation n\'a pas abouti';
+
+  @override
+  String get communicationFailureCancelTitle => 'L\'annulation n\'a pas abouti';
+
+  @override
+  String get communicationFailureNetwork =>
+      'La tablette n\'a pas pu joindre le serveur. Votre saisie est conservée, et réessayer ne préviendra jamais deux fois les familles.';
+
+  @override
+  String get communicationFailureForbidden =>
+      'Votre compte n\'a pas le droit d\'envoyer de communiqué.';
+
+  @override
+  String get communicationFailureServer =>
+      'Le serveur n\'a pas pu traiter la demande. Aucun parent n\'a été notifié.';
+
+  @override
+  String get communicationRefusalChannelDisabled =>
+      'WhatsApp n\'est pas encore activé pour votre école. Le brouillon reste enregistré ; l\'envoi sera possible dès l\'activation.';
+
+  @override
+  String get communicationRefusalNoRecipient =>
+      'Aucun message ne peut partir : aucun tuteur de ces élèves n\'a de numéro valide.';
+
+  @override
+  String get communicationRefusalIncomplete =>
+      'Le communiqué est incomplet. Vérifiez chaque section.';
+
+  @override
+  String get communicationToastDraft => 'Brouillon enregistré';
+
+  @override
+  String communicationToastScheduled(String when) {
+    return 'Communiqué programmé · $when';
+  }
+
+  @override
+  String get communicationToastScheduledNoDate => 'Communiqué programmé';
+
+  @override
+  String communicationToastSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Communiqué envoyé : $count messages',
+      one: 'Communiqué envoyé : 1 message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communicationToastSentNoCount => 'Communiqué envoyé';
+
+  @override
+  String get communicationToastCancelled => 'Communiqué retiré de la liste';
 }

@@ -16277,4 +16277,221 @@ class AppLocalizationsEn extends AppLocalizations {
   String communicationDateSent(String when) {
     return 'Sent $when';
   }
+
+  @override
+  String get communicationBackToList => 'Announcements';
+
+  @override
+  String get communicationEditTitle => 'Edit announcement';
+
+  @override
+  String get communicationSectionContent => 'Content';
+
+  @override
+  String get communicationSectionContentHint => 'What parents will read';
+
+  @override
+  String get communicationSectionDiffusion => 'Delivery';
+
+  @override
+  String get communicationSectionDiffusionHint => 'How, and when';
+
+  @override
+  String get communicationCategoryLabel => 'Announcement category';
+
+  @override
+  String get communicationTitleLabel => 'Title';
+
+  @override
+  String get communicationTitlePlaceholder =>
+      'E.g. Second-term parents meeting';
+
+  @override
+  String get communicationTitleRequired => 'Give the announcement a title.';
+
+  @override
+  String get communicationBodyLabel => 'Message';
+
+  @override
+  String get communicationBodyPlaceholder => 'Dear parents, …';
+
+  @override
+  String get communicationBodyHint =>
+      'Inserted fields are replaced for each student when sending.';
+
+  @override
+  String get communicationBodyRequired => 'Write the message.';
+
+  @override
+  String get communicationBodyRefused =>
+      'The server refused this message. Check it, then try again.';
+
+  @override
+  String communicationUnknownVariable(String tokens, String allowed) {
+    return 'Unknown field: $tokens. Only $allowed are replaced.';
+  }
+
+  @override
+  String get communicationInsert => 'Insert';
+
+  @override
+  String get communicationAmountOnlyOverdue =>
+      'The amount due only exists for overdue payments.';
+
+  @override
+  String get communicationAmountMisplaced =>
+      'The amount due is only known for overdue payments: remove it, or pick that mode.';
+
+  @override
+  String get communicationChannelsLabel => 'Channels';
+
+  @override
+  String get communicationNoChannel => 'Turn on at least one channel.';
+
+  @override
+  String get communicationSendLabel => 'Sending';
+
+  @override
+  String get communicationSendNow => 'Now';
+
+  @override
+  String get communicationSendLater => 'Schedule';
+
+  @override
+  String get communicationScheduleDate => 'Date';
+
+  @override
+  String get communicationScheduleTime => 'Time';
+
+  @override
+  String get communicationScheduleNotFuture => 'Choose a time in the future.';
+
+  @override
+  String communicationScheduleHint(String when) {
+    return 'Sent automatically $when (Kinshasa time).';
+  }
+
+  @override
+  String communicationScheduledBanner(String when) {
+    return 'Scheduled $when. Editable until it is sent.';
+  }
+
+  @override
+  String communicationFailedBanner(String reason) {
+    return 'The scheduled sending failed: $reason. Fix it if needed, then send or reschedule.';
+  }
+
+  @override
+  String get communicationFailedNoReason => 'no reason given';
+
+  @override
+  String get communicationNoticeReloaded =>
+      'This announcement changed in the meantime: its latest version was reloaded and your input kept. Check, then try again.';
+
+  @override
+  String get communicationNoticeLocked =>
+      'This announcement has already been sent or cancelled: it can no longer be edited.';
+
+  @override
+  String get communicationSaveAsTemplate => 'Save as template';
+
+  @override
+  String get communicationDelete => 'Delete';
+
+  @override
+  String get communicationCancelSending => 'Cancel sending';
+
+  @override
+  String get communicationSaveDraft => 'Draft';
+
+  @override
+  String get communicationSend => 'Send';
+
+  @override
+  String get communicationSchedule => 'Schedule';
+
+  @override
+  String get communicationSending => 'Sending…';
+
+  @override
+  String get communicationKeep => 'Keep';
+
+  @override
+  String get communicationDeleteTitle => 'Delete this draft?';
+
+  @override
+  String get communicationDeleteMessage =>
+      'It will disappear from the list. No parent was notified.';
+
+  @override
+  String get communicationCancelSendingTitle => 'Cancel sending?';
+
+  @override
+  String get communicationCancelSendingMessage =>
+      'The announcement will not be sent and will disappear from the list.';
+
+  @override
+  String get communicationFailureSaveTitle => 'Saving failed';
+
+  @override
+  String get communicationFailureSendTitle => 'Sending failed';
+
+  @override
+  String get communicationFailureScheduleTitle => 'Scheduling failed';
+
+  @override
+  String get communicationFailureCancelTitle => 'Cancelling failed';
+
+  @override
+  String get communicationFailureNetwork =>
+      'The tablet could not reach the server. Your input is kept, and retrying will never notify families twice.';
+
+  @override
+  String get communicationFailureForbidden =>
+      'Your account is not allowed to send announcements.';
+
+  @override
+  String get communicationFailureServer =>
+      'The server could not process the request. No parent was notified.';
+
+  @override
+  String get communicationRefusalChannelDisabled =>
+      'WhatsApp is not yet enabled for your school. The draft stays saved; sending will be possible once enabled.';
+
+  @override
+  String get communicationRefusalNoRecipient =>
+      'No message can be sent: none of these students\' guardians has a valid number.';
+
+  @override
+  String get communicationRefusalIncomplete =>
+      'The announcement is incomplete. Check each section.';
+
+  @override
+  String get communicationToastDraft => 'Draft saved';
+
+  @override
+  String communicationToastScheduled(String when) {
+    return 'Announcement scheduled · $when';
+  }
+
+  @override
+  String get communicationToastScheduledNoDate => 'Announcement scheduled';
+
+  @override
+  String communicationToastSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Announcement sent: $count messages',
+      one: 'Announcement sent: 1 message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communicationToastSentNoCount => 'Announcement sent';
+
+  @override
+  String get communicationToastCancelled =>
+      'Announcement removed from the list';
 }

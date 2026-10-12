@@ -72,4 +72,15 @@ class SchoolTime {
       wall.microsecond,
     ).subtract(offset);
   }
+
+  /// L'instant UTC qui se lit « [day] à [hour]:[minute] » à Kinshasa — un
+  /// rendez-vous fixé à l'heure de l'école (un envoi programmé à 07:30).
+  ///
+  /// [day] n'est lu que par ses champs de calendrier.
+  static DateTime instantAt({
+    required DateTime day,
+    required int hour,
+    required int minute,
+  }) =>
+      DateTime.utc(day.year, day.month, day.day, hour, minute).subtract(offset);
 }

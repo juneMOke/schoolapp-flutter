@@ -12,7 +12,10 @@ import 'package:school_app_flutter/features/communication/domain/repositories/an
 import 'package:school_app_flutter/features/communication/domain/repositories/announcement_repository.dart';
 import 'package:school_app_flutter/features/communication/domain/repositories/announcement_template_repository.dart';
 import 'package:school_app_flutter/features/communication/domain/services/announcement_filters.dart';
+import 'package:school_app_flutter/features/communication/domain/usecases/announcement_writer.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/announcements_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_factory.dart';
+import 'package:uuid/uuid.dart';
 
 /// Les communiqués aux parents — **en ligne seulement** : ni table locale, ni
 /// outbox, ni flux `/sync`. Rangé avec les branches parce que c'est le seul
@@ -35,6 +38,10 @@ void registerCommunication(GetIt getIt) {
       ),
     );
 
+  getIt.registerFactory(
+    () => AnnouncementWriter(getIt<AnnouncementRepository>()),
+  );
+
   // ── Écrans : cubits en fabrique, jamais singleton ──
   getIt
     // Les filtres de la liste survivent à la navigation pendant la session,
@@ -46,6 +53,13 @@ void registerCommunication(GetIt getIt) {
           final user = getIt<CurrentUserContext>();
           return '${user.uid}@${user.schoolId}';
         },
+      ),
+    )
+    // Chaque ouverture de l'éditeur tire un cubit neuf de cette fabrique.
+    ..registerFactory(
+      () => AnnouncementEditorFactory(
+        writer: getIt<AnnouncementWriter>(),
+        uuid: getIt<Uuid>(),
       ),
     )
     ..registerFactory(

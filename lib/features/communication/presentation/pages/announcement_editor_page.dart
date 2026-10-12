@@ -1,0 +1,58 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/announcements_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/communication_flow_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_factory.dart';
+import 'package:school_app_flutter/features/communication/presentation/helpers/announcement_outcome_messages.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/editor/announcement_editor_screen.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// L'éditeur, monté par la page Communiqués : un cubit neuf par ouverture.
+/// Au bout d'un geste abouti, retour à la liste mise à jour, et un toast.
+class AnnouncementEditorPage extends StatelessWidget {
+  final CommunicationEditorScreen screen;
+  final String? academicYearId;
+
+  const AnnouncementEditorPage({
+    super.key,
+    required this.screen,
+    required this.academicYearId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final factory = GetIt.instance<AnnouncementEditorFactory>();
+    final existing = screen.announcement;
+    final canSend = PermissionGate.allowsAccess(
+      context,
+      kAnnouncementSendAccess,
+    );
+    final flow = context.read<CommunicationFlowCubit>();
+    return BlocProvider<AnnouncementEditorCubit>(
+      create: (_) => existing == null
+          ? factory.create(seed: screen.seed, academicYearId: academicYearId)
+          : factory.edit(existing, readOnly: !canSend),
+      child: AppPageBackground(
+        child: AnnouncementEditorScreen(
+          onBack: flow.showList,
+          onDone: (outcome, announcement) {
+            context.read<AnnouncementsCubit>().upsert(announcement);
+            AppSnackBar.showSuccess(
+              context,
+              AppLocalizations.of(
+                context,
+              )!.outcomeMessage(outcome, announcement, DateTime.now()),
+            );
+            flow.showList();
+          },
+        ),
+      ),
+    );
+  }
+}

@@ -25394,6 +25394,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sent {when}'**
   String communicationDateSent(String when);
+
+  /// No description provided for @communicationBackToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get communicationBackToList;
+
+  /// No description provided for @communicationEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit announcement'**
+  String get communicationEditTitle;
+
+  /// No description provided for @communicationSectionContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get communicationSectionContent;
+
+  /// No description provided for @communicationSectionContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What parents will read'**
+  String get communicationSectionContentHint;
+
+  /// No description provided for @communicationSectionDiffusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get communicationSectionDiffusion;
+
+  /// No description provided for @communicationSectionDiffusionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How, and when'**
+  String get communicationSectionDiffusionHint;
+
+  /// No description provided for @communicationCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement category'**
+  String get communicationCategoryLabel;
+
+  /// No description provided for @communicationTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get communicationTitleLabel;
+
+  /// No description provided for @communicationTitlePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. Second-term parents meeting'**
+  String get communicationTitlePlaceholder;
+
+  /// No description provided for @communicationTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the announcement a title.'**
+  String get communicationTitleRequired;
+
+  /// No description provided for @communicationBodyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get communicationBodyLabel;
+
+  /// No description provided for @communicationBodyPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear parents, …'**
+  String get communicationBodyPlaceholder;
+
+  /// No description provided for @communicationBodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Inserted fields are replaced for each student when sending.'**
+  String get communicationBodyHint;
+
+  /// No description provided for @communicationBodyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the message.'**
+  String get communicationBodyRequired;
+
+  /// No description provided for @communicationBodyRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this message. Check it, then try again.'**
+  String get communicationBodyRefused;
+
+  /// No description provided for @communicationUnknownVariable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown field: {tokens}. Only {allowed} are replaced.'**
+  String communicationUnknownVariable(String tokens, String allowed);
+
+  /// No description provided for @communicationInsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert'**
+  String get communicationInsert;
+
+  /// No description provided for @communicationAmountOnlyOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount due only exists for overdue payments.'**
+  String get communicationAmountOnlyOverdue;
+
+  /// No description provided for @communicationAmountMisplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount due is only known for overdue payments: remove it, or pick that mode.'**
+  String get communicationAmountMisplaced;
+
+  /// No description provided for @communicationChannelsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Channels'**
+  String get communicationChannelsLabel;
+
+  /// No description provided for @communicationNoChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on at least one channel.'**
+  String get communicationNoChannel;
+
+  /// No description provided for @communicationSendLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending'**
+  String get communicationSendLabel;
+
+  /// No description provided for @communicationSendNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get communicationSendNow;
+
+  /// No description provided for @communicationSendLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get communicationSendLater;
+
+  /// No description provided for @communicationScheduleDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get communicationScheduleDate;
+
+  /// No description provided for @communicationScheduleTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get communicationScheduleTime;
+
+  /// No description provided for @communicationScheduleNotFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time in the future.'**
+  String get communicationScheduleNotFuture;
+
+  /// No description provided for @communicationScheduleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent automatically {when} (Kinshasa time).'**
+  String communicationScheduleHint(String when);
+
+  /// No description provided for @communicationScheduledBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled {when}. Editable until it is sent.'**
+  String communicationScheduledBanner(String when);
+
+  /// No description provided for @communicationFailedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'The scheduled sending failed: {reason}. Fix it if needed, then send or reschedule.'**
+  String communicationFailedBanner(String reason);
+
+  /// No description provided for @communicationFailedNoReason.
+  ///
+  /// In en, this message translates to:
+  /// **'no reason given'**
+  String get communicationFailedNoReason;
+
+  /// No description provided for @communicationNoticeReloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'This announcement changed in the meantime: its latest version was reloaded and your input kept. Check, then try again.'**
+  String get communicationNoticeReloaded;
+
+  /// No description provided for @communicationNoticeLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This announcement has already been sent or cancelled: it can no longer be edited.'**
+  String get communicationNoticeLocked;
+
+  /// No description provided for @communicationSaveAsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as template'**
+  String get communicationSaveAsTemplate;
+
+  /// No description provided for @communicationDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get communicationDelete;
+
+  /// No description provided for @communicationCancelSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel sending'**
+  String get communicationCancelSending;
+
+  /// No description provided for @communicationSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get communicationSaveDraft;
+
+  /// No description provided for @communicationSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get communicationSend;
+
+  /// No description provided for @communicationSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get communicationSchedule;
+
+  /// No description provided for @communicationSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get communicationSending;
+
+  /// No description provided for @communicationKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get communicationKeep;
+
+  /// No description provided for @communicationDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this draft?'**
+  String get communicationDeleteTitle;
+
+  /// No description provided for @communicationDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will disappear from the list. No parent was notified.'**
+  String get communicationDeleteMessage;
+
+  /// No description provided for @communicationCancelSendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel sending?'**
+  String get communicationCancelSendingTitle;
+
+  /// No description provided for @communicationCancelSendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The announcement will not be sent and will disappear from the list.'**
+  String get communicationCancelSendingMessage;
+
+  /// No description provided for @communicationFailureSaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving failed'**
+  String get communicationFailureSaveTitle;
+
+  /// No description provided for @communicationFailureSendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending failed'**
+  String get communicationFailureSendTitle;
+
+  /// No description provided for @communicationFailureScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduling failed'**
+  String get communicationFailureScheduleTitle;
+
+  /// No description provided for @communicationFailureCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling failed'**
+  String get communicationFailureCancelTitle;
+
+  /// No description provided for @communicationFailureNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The tablet could not reach the server. Your input is kept, and retrying will never notify families twice.'**
+  String get communicationFailureNetwork;
+
+  /// No description provided for @communicationFailureForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not allowed to send announcements.'**
+  String get communicationFailureForbidden;
+
+  /// No description provided for @communicationFailureServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not process the request. No parent was notified.'**
+  String get communicationFailureServer;
+
+  /// No description provided for @communicationRefusalChannelDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp is not yet enabled for your school. The draft stays saved; sending will be possible once enabled.'**
+  String get communicationRefusalChannelDisabled;
+
+  /// No description provided for @communicationRefusalNoRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'No message can be sent: none of these students\' guardians has a valid number.'**
+  String get communicationRefusalNoRecipient;
+
+  /// No description provided for @communicationRefusalIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'The announcement is incomplete. Check each section.'**
+  String get communicationRefusalIncomplete;
+
+  /// No description provided for @communicationToastDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get communicationToastDraft;
+
+  /// No description provided for @communicationToastScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement scheduled · {when}'**
+  String communicationToastScheduled(String when);
+
+  /// No description provided for @communicationToastScheduledNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement scheduled'**
+  String get communicationToastScheduledNoDate;
+
+  /// No description provided for @communicationToastSent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Announcement sent: 1 message} other{Announcement sent: {count} messages}}'**
+  String communicationToastSent(int count);
+
+  /// No description provided for @communicationToastSentNoCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement sent'**
+  String get communicationToastSentNoCount;
+
+  /// No description provided for @communicationToastCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement removed from the list'**
+  String get communicationToastCancelled;
 }
 
 class _AppLocalizationsDelegate
