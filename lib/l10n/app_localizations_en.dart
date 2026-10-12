@@ -16761,4 +16761,75 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get communicationDetailPersonalised =>
       'Fields in braces were personalised for each student.';
+
+  @override
+  String get subMenuAnnouncementTemplates => 'Templates';
+
+  @override
+  String get communicationTemplatesSubtitle =>
+      'Ready-to-reuse texts: category, title and message, with their inserted fields.';
+
+  @override
+  String get communicationTemplatePickTitle => 'Start from a template';
+
+  @override
+  String get communicationTemplatePickSubtitle =>
+      'The draft takes the category, title and message; audience and channels remain to be chosen.';
+
+  @override
+  String get communicationTemplatesLoading => 'Loading templates';
+
+  @override
+  String get communicationTemplatesEmptyTitle => 'No templates yet';
+
+  @override
+  String get communicationTemplatesEmptyMessage =>
+      'Save the announcements you send often: payment reminder, meeting, closure…';
+
+  @override
+  String get communicationTemplateCreate => 'Create a template';
+
+  @override
+  String get communicationTemplateEditTitle => 'Edit the template';
+
+  @override
+  String get communicationTemplateUse => 'Use';
+
+  @override
+  String get communicationTemplateEdit => 'Edit';
+
+  @override
+  String get communicationTemplateSave => 'Save';
+
+  @override
+  String get communicationTemplateHint =>
+      'Tip: leave markers to fill in, such as [date] or [place].';
+
+  @override
+  String get communicationTemplateSaved => 'Template saved';
+
+  @override
+  String get communicationTemplateSaveFailed =>
+      'The template could not be saved. Check the connection, then try again.';
+
+  @override
+  String get communicationTemplateNeedsText =>
+      'A template needs a title and a message.';
+
+  @override
+  String get communicationTemplateDeleteTitle => 'Delete this template?';
+
+  @override
+  String get communicationTemplateDeleteMessage =>
+      'Announcements already sent are not affected.';
+
+  @override
+  String get communicationTemplateDeleted => 'Template deleted';
+
+  @override
+  String get communicationTemplateDeleteFailed =>
+      'The template could not be deleted.';
+
+  @override
+  String get communicationCancel => 'Cancel';
 }

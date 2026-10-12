@@ -38,6 +38,9 @@ class AnnouncementEditorScreen extends StatefulWidget {
   /// Faux : l'envoi part sans récapitulatif.
   final bool confirmBeforeSending;
 
+  /// « Enregistrer comme modèle », `null` sans le droit d'écrire les modèles.
+  final ValueChanged<AnnouncementEditorState>? onSaveAsTemplate;
+
   const AnnouncementEditorScreen({
     super.key,
     required this.onBack,
@@ -46,6 +49,7 @@ class AnnouncementEditorScreen extends StatefulWidget {
     this.groups = const [],
     this.schoolName,
     this.confirmBeforeSending = true,
+    this.onSaveAsTemplate,
   });
 
   @override
@@ -109,6 +113,9 @@ class _AnnouncementEditorScreenState extends State<AnnouncementEditorScreen> {
               onDraft: context.read<AnnouncementEditorCubit>().saveDraft,
               onSubmit: _submit,
               onCancel: _gestures.cancel,
+              onSaveAsTemplate: widget.onSaveAsTemplate == null
+                  ? null
+                  : () => widget.onSaveAsTemplate!(state),
             ),
         ],
       ),

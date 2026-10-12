@@ -21,6 +21,8 @@ import 'package:school_app_flutter/features/communication/presentation/bloc/audi
 import 'package:school_app_flutter/features/communication/presentation/bloc/audience/audience_referential_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/audience/audience_student_search_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_factory.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/pending_announcement_seed.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/templates/announcement_templates_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:uuid/uuid.dart';
 
@@ -83,6 +85,19 @@ void registerCommunication(GetIt getIt) {
     )
     ..registerFactory(
       () => AudienceReferentialCubit(getIt<AudienceReferentialRepository>()),
+    )
+    ..registerFactory(
+      () => AnnouncementTemplatesCubit(getIt<AnnouncementTemplateRepository>()),
+    )
+    // « Utiliser » un modèle depuis le menu Modèles : le brouillon attend la
+    // page Communiqués.
+    ..registerLazySingleton<PendingAnnouncementSeed>(
+      () => PendingAnnouncementSeed(
+        owner: () {
+          final user = getIt<CurrentUserContext>();
+          return '${user.uid}@${user.schoolId}';
+        },
+      ),
     )
     ..registerFactory(
       () => AnnouncementsCubit(

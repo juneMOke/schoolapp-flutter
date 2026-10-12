@@ -261,6 +261,11 @@ class MenuFactory {
           title: l10n.subMenuAnnouncements,
           route: AppRoutesNames.communicationAnnouncements,
         ),
+        SubMenuItem(
+          id: MenuConstants.communicationTemplatesId,
+          title: l10n.subMenuAnnouncementTemplates,
+          route: AppRoutesNames.communicationTemplates,
+        ),
       ],
     );
   }

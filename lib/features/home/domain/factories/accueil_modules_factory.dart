@@ -278,6 +278,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.communicationAnnouncementsId,
           title: l10n.subMenuAnnouncements,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.communicationTemplatesId,
+          title: l10n.subMenuAnnouncementTemplates,
+        ),
       ],
     );
   }

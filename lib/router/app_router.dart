@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/auth/presentation/pages/reset_passwo
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
+import 'package:school_app_flutter/features/communication/presentation/pages/announcement_templates_page.dart';
 import 'package:school_app_flutter/features/communication/presentation/pages/announcements_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_dashboard_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_feature_scope.dart';
@@ -467,6 +468,10 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.communicationAnnouncements,
       builder: (context, state) => const AnnouncementsPage(),
+    ),
+    GoRoute(
+      path: AppRoutesNames.communicationTemplates,
+      builder: (context, state) => const AnnouncementTemplatesPage(),
     ),
     // Ressources humaines : le fichier du personnel, le Pointage et la Paie,
     // chacun son cubit, monté par sa page.

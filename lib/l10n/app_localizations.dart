@@ -26143,6 +26143,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fields in braces were personalised for each student.'**
   String get communicationDetailPersonalised;
+
+  /// No description provided for @subMenuAnnouncementTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Templates'**
+  String get subMenuAnnouncementTemplates;
+
+  /// No description provided for @communicationTemplatesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready-to-reuse texts: category, title and message, with their inserted fields.'**
+  String get communicationTemplatesSubtitle;
+
+  /// No description provided for @communicationTemplatePickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from a template'**
+  String get communicationTemplatePickTitle;
+
+  /// No description provided for @communicationTemplatePickSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The draft takes the category, title and message; audience and channels remain to be chosen.'**
+  String get communicationTemplatePickSubtitle;
+
+  /// No description provided for @communicationTemplatesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading templates'**
+  String get communicationTemplatesLoading;
+
+  /// No description provided for @communicationTemplatesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No templates yet'**
+  String get communicationTemplatesEmptyTitle;
+
+  /// No description provided for @communicationTemplatesEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the announcements you send often: payment reminder, meeting, closure…'**
+  String get communicationTemplatesEmptyMessage;
+
+  /// No description provided for @communicationTemplateCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a template'**
+  String get communicationTemplateCreate;
+
+  /// No description provided for @communicationTemplateEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the template'**
+  String get communicationTemplateEditTitle;
+
+  /// No description provided for @communicationTemplateUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get communicationTemplateUse;
+
+  /// No description provided for @communicationTemplateEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get communicationTemplateEdit;
+
+  /// No description provided for @communicationTemplateSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get communicationTemplateSave;
+
+  /// No description provided for @communicationTemplateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: leave markers to fill in, such as [date] or [place].'**
+  String get communicationTemplateHint;
+
+  /// No description provided for @communicationTemplateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Template saved'**
+  String get communicationTemplateSaved;
+
+  /// No description provided for @communicationTemplateSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The template could not be saved. Check the connection, then try again.'**
+  String get communicationTemplateSaveFailed;
+
+  /// No description provided for @communicationTemplateNeedsText.
+  ///
+  /// In en, this message translates to:
+  /// **'A template needs a title and a message.'**
+  String get communicationTemplateNeedsText;
+
+  /// No description provided for @communicationTemplateDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this template?'**
+  String get communicationTemplateDeleteTitle;
+
+  /// No description provided for @communicationTemplateDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements already sent are not affected.'**
+  String get communicationTemplateDeleteMessage;
+
+  /// No description provided for @communicationTemplateDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Template deleted'**
+  String get communicationTemplateDeleted;
+
+  /// No description provided for @communicationTemplateDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The template could not be deleted.'**
+  String get communicationTemplateDeleteFailed;
+
+  /// No description provided for @communicationCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get communicationCancel;
 }
 
 class _AppLocalizationsDelegate

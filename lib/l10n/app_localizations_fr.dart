@@ -16881,4 +16881,75 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get communicationDetailPersonalised =>
       'Les champs entre accolades ont été personnalisés pour chaque élève.';
+
+  @override
+  String get subMenuAnnouncementTemplates => 'Modèles';
+
+  @override
+  String get communicationTemplatesSubtitle =>
+      'Des textes prêts à réutiliser : catégorie, titre et message, avec leurs champs insérés.';
+
+  @override
+  String get communicationTemplatePickTitle => 'Partir d\'un modèle';
+
+  @override
+  String get communicationTemplatePickSubtitle =>
+      'Le brouillon reprend la catégorie, le titre et le message ; l\'audience et les canaux restent à choisir.';
+
+  @override
+  String get communicationTemplatesLoading => 'Chargement des modèles';
+
+  @override
+  String get communicationTemplatesEmptyTitle => 'Aucun modèle pour l\'instant';
+
+  @override
+  String get communicationTemplatesEmptyMessage =>
+      'Enregistrez les communiqués que vous envoyez souvent : rappel de paiement, réunion, fermeture…';
+
+  @override
+  String get communicationTemplateCreate => 'Créer un modèle';
+
+  @override
+  String get communicationTemplateEditTitle => 'Modifier le modèle';
+
+  @override
+  String get communicationTemplateUse => 'Utiliser';
+
+  @override
+  String get communicationTemplateEdit => 'Modifier';
+
+  @override
+  String get communicationTemplateSave => 'Enregistrer';
+
+  @override
+  String get communicationTemplateHint =>
+      'Astuce : laissez des repères à compléter, comme [date] ou [lieu].';
+
+  @override
+  String get communicationTemplateSaved => 'Modèle enregistré';
+
+  @override
+  String get communicationTemplateSaveFailed =>
+      'Le modèle n\'a pas pu être enregistré. Vérifiez la connexion, puis recommencez.';
+
+  @override
+  String get communicationTemplateNeedsText =>
+      'Un modèle demande un titre et un message.';
+
+  @override
+  String get communicationTemplateDeleteTitle => 'Supprimer ce modèle ?';
+
+  @override
+  String get communicationTemplateDeleteMessage =>
+      'Les communiqués déjà envoyés ne sont pas touchés.';
+
+  @override
+  String get communicationTemplateDeleted => 'Modèle supprimé';
+
+  @override
+  String get communicationTemplateDeleteFailed =>
+      'Le modèle n\'a pas pu être supprimé.';
+
+  @override
+  String get communicationCancel => 'Annuler';
 }

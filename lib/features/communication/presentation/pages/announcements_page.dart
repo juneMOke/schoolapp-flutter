@@ -6,10 +6,14 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/announcements_cubit.dart';
+import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/communication_flow_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/pending_announcement_seed.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/templates/announcement_templates_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/pages/announcement_detail_page.dart';
 import 'package:school_app_flutter/features/communication/presentation/pages/announcement_editor_page.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/list/announcements_list_screen.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/templates/templates_screen.dart';
 
 /// Communication ▸ Communiqués : la liste, l'éditeur et le détail, dans la
 /// même page. La liste et ses filtres survivent au passage par les autres.
@@ -31,8 +35,15 @@ class AnnouncementsPage extends StatelessWidget {
               GetIt.instance<AnnouncementsCubit>()
                 ..load(academicYearId: yearId),
         ),
+        // Un modèle « utilisé » depuis le menu Modèles ouvre son brouillon
+        // dès l'arrivée.
         BlocProvider<CommunicationFlowCubit>(
-          create: (_) => CommunicationFlowCubit(),
+          create: (_) {
+            final flow = CommunicationFlowCubit();
+            final seed = GetIt.instance<PendingAnnouncementSeed>().take();
+            if (seed != null) flow.openNew(seed: seed);
+            return flow;
+          },
         ),
       ],
       child: _AnnouncementsFlow(academicYearId: yearId),
@@ -46,30 +57,50 @@ class _AnnouncementsFlow extends StatelessWidget {
   const _AnnouncementsFlow({required this.academicYearId});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
-    builder: (context, screen) {
-      final flow = context.read<CommunicationFlowCubit>();
-      return switch (screen) {
-        CommunicationDetailScreen() => AnnouncementDetailPage(screen: screen),
-        CommunicationEditorScreen() => AnnouncementEditorPage(
-          key: ValueKey(screen.session),
-          screen: screen,
-          academicYearId: academicYearId,
-        ),
-        _ => AppPageBackground(
-          scrollable: true,
-          child: AnnouncementsListScreen(
-            onOpen: flow.open,
-            // Sans le droit d'envoyer, rien ne se rédige : la liste se lit.
-            onCreate:
-                PermissionGate.allowsAccess(context, kAnnouncementSendAccess)
-                ? flow.openNew
-                : null,
-          ),
-        ),
-      };
-    },
-  );
+  Widget build(BuildContext context) =>
+      BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
+        builder: (context, screen) {
+          final flow = context.read<CommunicationFlowCubit>();
+          // Sans le droit d'envoyer, rien ne se rédige : la liste se lit.
+          final canSend = PermissionGate.allowsAccess(
+            context,
+            kAnnouncementSendAccess,
+          );
+          return switch (screen) {
+            CommunicationTemplatePickScreen() => BlocProvider(
+              create: (_) =>
+                  GetIt.instance<AnnouncementTemplatesCubit>()..load(),
+              child: AppPageBackground(
+                scrollable: true,
+                child: TemplatesScreen(
+                  onBack: flow.showList,
+                  onUse: (template) => flow.openNew(
+                    seed: AnnouncementContent(
+                      category: template.category,
+                      title: template.title,
+                      body: template.body,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            CommunicationDetailScreen() => AnnouncementDetailPage(
+              screen: screen,
+            ),
+            CommunicationEditorScreen() => AnnouncementEditorPage(
+              key: ValueKey(screen.session),
+              screen: screen,
+              academicYearId: academicYearId,
+            ),
+            CommunicationListScreen() => AppPageBackground(
+              scrollable: true,
+              child: AnnouncementsListScreen(
+                onOpen: flow.open,
+                onCreate: canSend ? flow.openNew : null,
+                onUseTemplate: canSend ? flow.pickTemplate : null,
+              ),
+            ),
+          };
+        },
+      );
 }

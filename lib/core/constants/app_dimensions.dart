@@ -835,11 +835,8 @@ class AppDimensions {
   static const communicationPhoneHeight = 580.0;
   static const communicationPhoneRadius = 40.0;
 
-  /// Largeur maximale d'une carte de modèle (grille auto-remplie).
-  static const communicationTemplateCardMaxExtent = 300.0;
-
-  /// Hauteur d'une carte de modèle.
-  static const communicationTemplateCardHeight = 236.0;
+  /// Largeur minimale d'une carte de modèle (grille auto-remplie, 260+).
+  static const communicationTemplateCardMinWidth = 260.0;
 
   /// Modale de confirmation d'envoi.
   static const communicationConfirmModalMaxWidth = 520.0;

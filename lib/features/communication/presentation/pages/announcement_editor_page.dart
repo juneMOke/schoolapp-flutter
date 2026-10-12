@@ -13,6 +13,8 @@ import 'package:school_app_flutter/features/communication/presentation/bloc/audi
 import 'package:school_app_flutter/features/communication/presentation/bloc/communication_flow_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_factory.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/templates/announcement_templates_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/helpers/announcement_outcome_messages.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/announcement_editor_screen.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
@@ -65,6 +67,9 @@ class AnnouncementEditorPage extends StatelessWidget {
         BlocProvider<AudienceStudentSearchCubit>(
           create: (_) => getIt<AudienceStudentSearchCubit>(),
         ),
+        BlocProvider<AnnouncementTemplatesCubit>(
+          create: (_) => getIt<AnnouncementTemplatesCubit>(),
+        ),
         BlocProvider<FeeSectionTitlesCubit>(
           create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
@@ -80,6 +85,13 @@ class AnnouncementEditorPage extends StatelessWidget {
                   ?.schoolLevelGroups ??
               const [],
           onBack: flow.showList,
+          onSaveAsTemplate:
+              PermissionGate.allowsAccess(
+                context,
+                kAnnouncementTemplateWriteAccess,
+              )
+              ? (state) => _saveAsTemplate(context, state)
+              : null,
           onDone: (outcome, announcement) {
             context.read<AnnouncementsCubit>().upsert(announcement);
             AppSnackBar.showSuccess(
@@ -93,5 +105,31 @@ class AnnouncementEditorPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// « Enregistrer comme modèle » : titre et message requis, l'éditeur reste
+  /// ouvert.
+  static Future<void> _saveAsTemplate(
+    BuildContext context,
+    AnnouncementEditorState state,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final content = state.content;
+    if (content.title.trim().isEmpty || content.body.trim().isEmpty) {
+      AppSnackBar.showWarning(context, l10n.communicationTemplateNeedsText);
+      return;
+    }
+    final templates = context.read<AnnouncementTemplatesCubit>();
+    final failure = await templates.create(
+      category: content.category,
+      title: content.title,
+      body: content.body,
+    );
+    if (!context.mounted) return;
+    if (failure == null) {
+      AppSnackBar.showSuccess(context, l10n.communicationTemplateSaved);
+    } else {
+      AppSnackBar.showError(context, l10n.communicationTemplateSaveFailed);
+    }
   }
 }

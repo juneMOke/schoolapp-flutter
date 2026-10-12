@@ -110,6 +110,9 @@ class MenuConstants {
   static const String communicationAnnouncementsId =
       'communication-communiques';
 
+  /// Les modèles de communiqué de l'école.
+  static const String communicationTemplatesId = 'communication-modeles';
+
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';
   static const String classesListId = 'classes-list';

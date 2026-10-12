@@ -361,6 +361,11 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     MenuConstants.communicationAnnouncementsId: ModuleAccess([
       Perm.communicationAnnouncementRead,
     ]),
+    // Les modèles se lisent avec le même droit ; les écrire est gardé à part
+    // ([kAnnouncementTemplateWriteAccess]).
+    MenuConstants.communicationTemplatesId: ModuleAccess([
+      Perm.communicationAnnouncementRead,
+    ]),
   },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),
