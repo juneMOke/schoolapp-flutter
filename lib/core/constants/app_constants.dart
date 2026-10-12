@@ -1376,4 +1376,34 @@ class AppConstants {
   /// lié à un enseignant. → `ref_recurring_sessions`.
   static const String syncScheduleSessionsEndpoint =
       '/api/v1/sync/schedule/sessions';
+
+  // ── Communication — communiqués aux parents (en ligne seulement) ──
+  // Le statut ne bouge que par une route de geste ; `PUT` ne touche que le
+  // contenu. Chaque geste porte la `version` vue et rend le communiqué entier.
+
+  /// **GET** = les communiqués de l'année (`academicYearId`, annulés exclus) ;
+  /// **POST** = un brouillon dont l'`id` est un UUID de la tablette.
+  static const String announcementsEndpoint = '/api/v1/announcements';
+
+  /// **GET** = un communiqué ; **PUT** = son contenu.
+  static const String announcementEndpoint = '/api/v1/announcements/{id}';
+
+  /// **POST** = un geste (`schedule`, `unschedule`, `send`, `cancel`).
+  static const String announcementGestureEndpoint =
+      '/api/v1/announcements/{id}/{gesture}';
+
+  /// **POST** `{audience}` = la portée à l'instant, et `whatsappEnabled`.
+  static const String announcementReachEndpoint = '/api/v1/announcements/reach';
+
+  /// **GET** `?q=` = huit élèves actifs au plus (deux caractères au moins).
+  static const String announcementAudienceStudentsEndpoint =
+      '/api/v1/announcements/audience/students';
+
+  /// **GET** / **POST** = les modèles de l'école.
+  static const String announcementTemplatesEndpoint =
+      '/api/v1/announcement-templates';
+
+  /// **PUT** / **DELETE** = un modèle.
+  static const String announcementTemplateEndpoint =
+      '/api/v1/announcement-templates/{id}';
 }

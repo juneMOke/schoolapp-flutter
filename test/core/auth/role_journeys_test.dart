@@ -40,6 +40,10 @@ const _secretariat = <String>[
   'editique.read',
   'editique.write',
   'editique.cancel',
+  // Les communiqués aux parents (V180) : rédiger, envoyer, tenir les modèles.
+  'communication.announcement.read',
+  'communication.announcement.send',
+  'communication.template.write',
 ];
 
 /// ⚠️ Elle tient la caisse boutique, et le seul droit boutique qui lui manque

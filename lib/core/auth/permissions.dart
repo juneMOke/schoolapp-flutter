@@ -107,6 +107,16 @@ enum Perm {
   expensePay('expense.pay'),
   expenseReopen('expense.reopen'),
 
+  // ── Communication ───────────────────────────────────────────────────────
+  // Les communiqués aux parents (WhatsApp). Lire n'est pas envoyer : la
+  // portée et la liste se consultent sans pouvoir prévenir une seule famille.
+  // Les modèles sont une troisième autorité — les réécrire change ce que toute
+  // l'école enverra ensuite. Semées sur la Direction et le Secrétariat par la
+  // migration serveur V180, effectives à la reconnexion.
+  communicationAnnouncementRead('communication.announcement.read'),
+  communicationAnnouncementSend('communication.announcement.send'),
+  communicationTemplateWrite('communication.template.write'),
+
   // ── Ressources humaines ────────────────────────────────────────────────────
   // Le fichier du personnel. Trois autorités, arrêtées avec le back le
   // 2026-09-29 : tenir les fiches (`staff`), voir et poser les contrats et leurs

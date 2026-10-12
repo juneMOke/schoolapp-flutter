@@ -33,6 +33,9 @@ void main() {
     Perm.boutiqueCatalogWrite: 'boutique.catalog.write',
     Perm.boutiqueSaleRead: 'boutique.sale.read',
     Perm.boutiqueSaleWrite: 'boutique.sale.write',
+    Perm.communicationAnnouncementRead: 'communication.announcement.read',
+    Perm.communicationAnnouncementSend: 'communication.announcement.send',
+    Perm.communicationTemplateWrite: 'communication.template.write',
     Perm.expenseRead: 'expense.read',
     Perm.expenseWrite: 'expense.write',
     Perm.expenseDelete: 'expense.delete',
@@ -159,7 +162,11 @@ void main() {
       // (SECRETARY, DIRECTOR, SUPER_ADMIN — migration back V161).
       // 76 → 77 : `enrollment.suspend`, désactiver ou réactiver un élève
       // (SECRETARY, DIRECTOR — migration back V170).
-      expect(Perm.values, hasLength(77));
+      // 77 → 80 : les trois droits des communiqués aux parents
+      // (`communication.announcement.read`, `.send`,
+      // `communication.template.write`), semés sur SECRETARY et DIRECTOR par
+      // la migration back V180.
+      expect(Perm.values, hasLength(80));
     },
   );
 

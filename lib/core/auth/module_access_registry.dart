@@ -225,6 +225,20 @@ const ModuleAccess kExpenseReopenAccess = ModuleAccess([Perm.expenseReopen]);
 /// jour où le back sème ces droits (lots C0→C3)**, en même temps que la copie
 /// du template dans `role_journeys_test.dart`, et pas avant.
 
+/// Rédiger, programmer, envoyer ou annuler un communiqué aux parents
+/// (`/api/v1/announcements`, en ligne). L'envoi est irréversible et ne passe
+/// par aucun circuit de validation : masquer le geste est le seul garde-fou
+/// de la tablette.
+const ModuleAccess kAnnouncementSendAccess = ModuleAccess([
+  Perm.communicationAnnouncementSend,
+]);
+
+/// Créer, modifier ou supprimer un modèle de communiqué. Une autorité à part :
+/// réécrire un modèle change ce que toute l'école enverra ensuite.
+const ModuleAccess kAnnouncementTemplateWriteAccess = ModuleAccess([
+  Perm.communicationTemplateWrite,
+]);
+
 /// Publier le sujet, le corrigé ou les notes d'une évaluation aux parents :
 /// l'enseignant du cours, ou la direction pour toute l'école.
 const ModuleAccess kEvaluationPublishAccess = ModuleAccess([
@@ -252,6 +266,8 @@ const Map<String, ModuleAccess> kGuardedWriteActions = {
   'retirer une dépense': kExpenseWithdrawAccess,
   'photographier un élève': kStudentPhotoWriteAccess,
   'désactiver ou réactiver un élève': kEnrollmentSuspendAccess,
+  'envoyer un communiqué aux parents': kAnnouncementSendAccess,
+  'tenir les modèles de communiqué': kAnnouncementTemplateWriteAccess,
 };
 
 /// **Source unique** du mapping sous-module → permissions requises.
