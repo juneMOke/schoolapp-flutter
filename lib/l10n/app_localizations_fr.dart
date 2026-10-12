@@ -16871,4 +16871,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communicationConfirmSendNow => 'Envoyer maintenant';
+
+  @override
+  String get communicationDuplicate => 'Dupliquer';
+
+  @override
+  String get communicationDetailMessages => 'Messages partis';
+
+  @override
+  String get communicationDetailPersonalised =>
+      'Les champs entre accolades ont été personnalisés pour chaque élève.';
 }

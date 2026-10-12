@@ -16751,4 +16751,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communicationConfirmSendNow => 'Send now';
+
+  @override
+  String get communicationDuplicate => 'Duplicate';
+
+  @override
+  String get communicationDetailMessages => 'Messages sent';
+
+  @override
+  String get communicationDetailPersonalised =>
+      'Fields in braces were personalised for each student.';
 }

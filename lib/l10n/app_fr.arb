@@ -10063,5 +10063,8 @@
   "communicationConfirmImmediate": "Immédiat",
   "communicationConfirmIrreversible": "Un communiqué envoyé ne peut plus être modifié ni retiré.",
   "communicationConfirmEdit": "Modifier",
-  "communicationConfirmSendNow": "Envoyer maintenant"
+  "communicationConfirmSendNow": "Envoyer maintenant",
+  "communicationDuplicate": "Dupliquer",
+  "communicationDetailMessages": "Messages partis",
+  "communicationDetailPersonalised": "Les champs entre accolades ont été personnalisés pour chaque élève."
 }

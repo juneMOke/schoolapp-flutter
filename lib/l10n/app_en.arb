@@ -9755,5 +9755,8 @@
   "communicationConfirmImmediate": "Immediately",
   "communicationConfirmIrreversible": "A sent announcement can no longer be edited or withdrawn.",
   "communicationConfirmEdit": "Edit",
-  "communicationConfirmSendNow": "Send now"
+  "communicationConfirmSendNow": "Send now",
+  "communicationDuplicate": "Duplicate",
+  "communicationDetailMessages": "Messages sent",
+  "communicationDetailPersonalised": "Fields in braces were personalised for each student."
 }

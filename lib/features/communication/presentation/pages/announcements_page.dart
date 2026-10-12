@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/announcements_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/communication_flow_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/pages/announcement_detail_page.dart';
 import 'package:school_app_flutter/features/communication/presentation/pages/announcement_editor_page.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/list/announcements_list_screen.dart';
 
@@ -45,31 +46,30 @@ class _AnnouncementsFlow extends StatelessWidget {
   const _AnnouncementsFlow({required this.academicYearId});
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
-        builder: (context, screen) {
-          final flow = context.read<CommunicationFlowCubit>();
-          return switch (screen) {
-            CommunicationEditorScreen() => AnnouncementEditorPage(
-              key: ValueKey(screen.session),
-              screen: screen,
-              academicYearId: academicYearId,
-            ),
-            _ => AppPageBackground(
-              scrollable: true,
-              child: AnnouncementsListScreen(
-                onOpen: flow.open,
-                // Sans le droit d'envoyer, rien ne se rédige : la liste se lit.
-                onCreate:
-                    PermissionGate.allowsAccess(
-                      context,
-                      kAnnouncementSendAccess,
-                    )
-                    ? flow.openNew
-                    : null,
-              ),
-            ),
-          };
-        },
-      );
+  Widget build(
+    BuildContext context,
+  ) => BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
+    builder: (context, screen) {
+      final flow = context.read<CommunicationFlowCubit>();
+      return switch (screen) {
+        CommunicationDetailScreen() => AnnouncementDetailPage(screen: screen),
+        CommunicationEditorScreen() => AnnouncementEditorPage(
+          key: ValueKey(screen.session),
+          screen: screen,
+          academicYearId: academicYearId,
+        ),
+        _ => AppPageBackground(
+          scrollable: true,
+          child: AnnouncementsListScreen(
+            onOpen: flow.open,
+            // Sans le droit d'envoyer, rien ne se rédige : la liste se lit.
+            onCreate:
+                PermissionGate.allowsAccess(context, kAnnouncementSendAccess)
+                ? flow.openNew
+                : null,
+          ),
+        ),
+      };
+    },
+  );
 }

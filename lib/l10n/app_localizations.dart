@@ -26125,6 +26125,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send now'**
   String get communicationConfirmSendNow;
+
+  /// No description provided for @communicationDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get communicationDuplicate;
+
+  /// No description provided for @communicationDetailMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages sent'**
+  String get communicationDetailMessages;
+
+  /// No description provided for @communicationDetailPersonalised.
+  ///
+  /// In en, this message translates to:
+  /// **'Fields in braces were personalised for each student.'**
+  String get communicationDetailPersonalised;
 }
 
 class _AppLocalizationsDelegate
