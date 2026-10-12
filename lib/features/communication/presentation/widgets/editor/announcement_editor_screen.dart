@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement.dart';
-import 'package:school_app_flutter/features/communication/domain/entities/announcement_status.dart';
+import 'package:school_app_flutter/features/communication/domain/entities/announcement_channel.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/announcement_reach_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
-import 'package:school_app_flutter/features/communication/presentation/bloc/audience/announcement_reach_cubit.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/audience/audience_section.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_back_bar.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_page_header.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/editor/content_section.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/editor/diffusion_section.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_action_bar.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_banners.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_failure_banner.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_form.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_gestures.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/preview/announcement_preview_panel.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -22,18 +20,23 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 typedef EditorDone =
     void Function(AnnouncementEditorOutcome outcome, Announcement announcement);
 
-/// L'éditeur : sections numérotées au-dessus, barre d'actions collante.
-class AnnouncementEditorScreen extends StatelessWidget {
+enum _EditorTab { write, preview }
+
+/// L'éditeur : les sections, l'aperçu parent et la barre d'actions collante.
+///
+/// ≥ 1000 dp, l'aperçu est un panneau collant à droite ; en deçà, une
+/// bascule « Rédiger · Aperçu parent » montre l'un ou l'autre.
+class AnnouncementEditorScreen extends StatefulWidget {
   final VoidCallback onBack;
   final EditorDone onDone;
   final DateTime Function() now;
 
   /// Les cycles et niveaux de l'année, pour le ciblage.
   final List<SchoolLevelGroupBundle> groups;
+  final String? schoolName;
 
-  /// Avant un envoi ou une programmation : la confirmation. `true` pour
-  /// poursuivre. Sans elle, l'envoi part tout de suite.
-  final Future<bool> Function(BuildContext context)? confirmSubmit;
+  /// Faux : l'envoi part sans récapitulatif.
+  final bool confirmBeforeSending;
 
   const AnnouncementEditorScreen({
     super.key,
@@ -41,8 +44,29 @@ class AnnouncementEditorScreen extends StatelessWidget {
     required this.onDone,
     this.now = DateTime.now,
     this.groups = const [],
-    this.confirmSubmit,
+    this.schoolName,
+    this.confirmBeforeSending = true,
   });
+
+  @override
+  State<AnnouncementEditorScreen> createState() =>
+      _AnnouncementEditorScreenState();
+}
+
+class _AnnouncementEditorScreenState extends State<AnnouncementEditorScreen> {
+  var _tab = _EditorTab.write;
+
+  EditorGestures get _gestures => EditorGestures(
+    context,
+    now: widget.now,
+    confirmBeforeSending: widget.confirmBeforeSending,
+  );
+
+  Future<void> _submit() async {
+    final incomplete = await _gestures.submit();
+    // En mode étroit, un manque se corrige dans « Rédiger ».
+    if (incomplete && mounted) setState(() => _tab = _EditorTab.write);
+  }
 
   @override
   Widget build(BuildContext context) => MultiBlocListener(
@@ -52,7 +76,9 @@ class AnnouncementEditorScreen extends StatelessWidget {
             curr.outcome != null && prev.outcome != curr.outcome,
         listener: (context, state) {
           final announcement = state.announcement;
-          if (announcement != null) onDone(state.outcome!, announcement);
+          if (announcement != null) {
+            widget.onDone(state.outcome!, announcement);
+          }
         },
       ),
       // La portée suit l'audience ; le cubit attend un court silence.
@@ -68,14 +94,12 @@ class AnnouncementEditorScreen extends StatelessWidget {
       builder: (context, state) => Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: _Form(
-                state: state,
-                onBack: onBack,
-                now: now(),
-                groups: groups,
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) =>
+                  constraints.maxWidth >=
+                      AppDimensions.communicationEditorWideMinWidth
+                  ? _wide(state)
+                  : _narrow(state),
             ),
           ),
           // En lecture seule, aucun geste à offrir.
@@ -83,106 +107,85 @@ class AnnouncementEditorScreen extends StatelessWidget {
             EditorActionBar(
               state: state,
               onDraft: context.read<AnnouncementEditorCubit>().saveDraft,
-              onSubmit: () => _submit(context),
-              onCancel: () => _cancel(context, state),
+              onSubmit: _submit,
+              onCancel: _gestures.cancel,
             ),
         ],
       ),
     ),
   );
 
-  Future<void> _submit(BuildContext context) async {
-    final cubit = context.read<AnnouncementEditorCubit>();
-    if (!cubit.validateForSubmit()) return;
-    final confirm = confirmSubmit;
-    if (confirm != null && !await confirm(context)) return;
-    if (!context.mounted) return;
-    await cubit.submit();
-  }
+  Widget _form(AnnouncementEditorState state) => EditorForm(
+    state: state,
+    onBack: widget.onBack,
+    now: widget.now(),
+    groups: widget.groups,
+  );
 
-  Future<void> _cancel(
-    BuildContext context,
-    AnnouncementEditorState state,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final draft = state.announcement?.status == AnnouncementStatus.draft;
-    final confirmed = await showAppConfirmationDialog(
-      context: context,
-      title: draft
-          ? l10n.communicationDeleteTitle
-          : l10n.communicationCancelSendingTitle,
-      message: draft
-          ? l10n.communicationDeleteMessage
-          : l10n.communicationCancelSendingMessage,
-      confirmLabel: draft
-          ? l10n.communicationDelete
-          : l10n.communicationCancelSending,
-      cancelLabel: l10n.communicationKeep,
-      isDestructive: true,
-    );
-    if (!confirmed || !context.mounted) return;
-    await context.read<AnnouncementEditorCubit>().cancel();
-  }
-}
-
-class _Form extends StatelessWidget {
-  final AnnouncementEditorState state;
-  final VoidCallback onBack;
-  final DateTime now;
-  final List<SchoolLevelGroupBundle> groups;
-
-  const _Form({
-    required this.state,
-    required this.onBack,
-    required this.now,
-    required this.groups,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<AnnouncementEditorCubit>();
-    final failure = state.failure;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        CommunicationBackBar(onBack: state.busy == null ? onBack : null),
-        const SizedBox(height: AppSpacing.md),
-        CommunicationPageHeader(
-          eyebrow: l10n.menuCommunication,
-          title: state.isNew
-              ? l10n.communicationNew
-              : l10n.communicationEditTitle,
+  Widget _preview(AnnouncementEditorState state) =>
+      BlocBuilder<AnnouncementReachCubit, AnnouncementReachState>(
+        buildWhen: (prev, curr) =>
+            prev.whatsappDisabled != curr.whatsappDisabled,
+        builder: (context, reach) => AnnouncementPreviewPanel(
+          content: state.content,
+          schoolName: widget.schoolName,
+          channelOff:
+              reach.whatsappDisabled ||
+              !state.content.channels.contains(AnnouncementChannel.whatsapp),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        EditorStatusBanner(state: state, now: now),
-        if (failure != null) ...[
-          EditorFailureBanner(
-            failure: failure,
-            gesture: state.failedGesture,
-            refusal: state.refusal,
-            onRetry: cubit.retry,
+      );
+
+  Widget _wide(AnnouncementEditorState state) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: _form(state),
+        ),
+      ),
+      Container(
+        width: AppDimensions.communicationPreviewPanelWidth + 2 * AppSpacing.lg,
+        decoration: const BoxDecoration(
+          border: Border(left: BorderSide(color: AppColors.border)),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: _preview(state),
+        ),
+      ),
+    ],
+  );
+
+  Widget _narrow(AnnouncementEditorState state) {
+    final l10n = AppLocalizations.of(context)!;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SegmentedTabFilter<_EditorTab>(
+            expand: true,
+            semanticsLabel: l10n.communicationPreviewTitle,
+            options: [
+              SegmentedTabOption(
+                label: l10n.communicationTabWrite,
+                value: _EditorTab.write,
+                icon: Icons.edit_outlined,
+              ),
+              SegmentedTabOption(
+                label: l10n.communicationPreviewTitle,
+                value: _EditorTab.preview,
+                icon: Icons.smartphone_outlined,
+              ),
+            ],
+            selected: _tab,
+            onSelected: (tab) => setState(() => _tab = tab),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
+          if (_tab == _EditorTab.write) _form(state) else _preview(state),
         ],
-        ContentSection(
-          state: state,
-          onCategory: cubit.setCategory,
-          onTitle: cubit.setTitle,
-          onBody: cubit.setBody,
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        AudienceSection(state: state, groups: groups),
-        const SizedBox(height: AppSpacing.lg),
-        DiffusionSection(
-          number: 3,
-          state: state,
-          now: now,
-          onToggleChannel: cubit.toggleChannel,
-          onSendMode: cubit.setSendMode,
-          onScheduledAt: cubit.setScheduledAt,
-        ),
-      ],
+      ),
     );
   }
 }

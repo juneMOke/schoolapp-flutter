@@ -16634,4 +16634,121 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get communicationReachNoOverdue =>
       'No student is overdue on these fees. If your tariffs have no due date, no charge is ever overdue.';
+
+  @override
+  String get communicationPreviewTitle => 'Parent preview';
+
+  @override
+  String get communicationTabWrite => 'Write';
+
+  @override
+  String get communicationPreviewReadingPage => 'Reading page';
+
+  @override
+  String get communicationPreviewSampleNote =>
+      'Example for one family: inserted fields are replaced for each student.';
+
+  @override
+  String get communicationPreviewChannelOff => 'Channel off';
+
+  @override
+  String get communicationPreviewEmptyBody => 'The message will appear here.';
+
+  @override
+  String communicationPreviewSignature(String school) {
+    return 'The management · $school';
+  }
+
+  @override
+  String get communicationSampleGuardian => 'Mrs Kabongo';
+
+  @override
+  String get communicationSampleSchool => 'Your school';
+
+  @override
+  String get communicationSampleStudent => 'Grâce KABONGO';
+
+  @override
+  String get communicationSampleClassroom => '6e A';
+
+  @override
+  String get communicationSampleAmount => '85 USD + 20,000 CDF';
+
+  @override
+  String communicationWhatsappTemplate(
+    String guardian,
+    String school,
+    String student,
+    String title,
+  ) {
+    return 'Hello $guardian, $school has sent you an announcement about $student: “$title”. Tap the button below to read it in full.';
+  }
+
+  @override
+  String get communicationWhatsappFooter => 'Sent via ETEELO CONNECT';
+
+  @override
+  String get communicationWhatsappButton => 'Read the announcement';
+
+  @override
+  String get communicationWhatsappBusiness => 'Business account';
+
+  @override
+  String get communicationConfirmEyebrow => 'Check before sending';
+
+  @override
+  String communicationConfirmSendTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Send $count messages?',
+      one: 'Send 1 message?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communicationConfirmScheduleTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Schedule $count messages?',
+      one: 'Schedule 1 message?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communicationConfirmSendTitleUnknown => 'Send this announcement?';
+
+  @override
+  String get communicationConfirmScheduleTitleUnknown =>
+      'Schedule this announcement?';
+
+  @override
+  String get communicationConfirmRecipients => 'Recipients';
+
+  @override
+  String communicationConfirmRecipientsValue(String audience, int students) {
+    String _temp0 = intl.Intl.pluralLogic(
+      students,
+      locale: localeName,
+      other: '$students students',
+      one: '1 student',
+    );
+    return '$audience · $_temp0';
+  }
+
+  @override
+  String get communicationConfirmImmediate => 'Immediately';
+
+  @override
+  String get communicationConfirmIrreversible =>
+      'A sent announcement can no longer be edited or withdrawn.';
+
+  @override
+  String get communicationConfirmEdit => 'Edit';
+
+  @override
+  String get communicationConfirmSendNow => 'Send now';
 }

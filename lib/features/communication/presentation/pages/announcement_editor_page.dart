@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/communication/presentation/bloc/edit
 import 'package:school_app_flutter/features/communication/presentation/helpers/announcement_outcome_messages.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/announcement_editor_screen.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
+import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'éditeur, monté par la page Communiqués : un cubit neuf par ouverture.
@@ -70,6 +71,7 @@ class AnnouncementEditorPage extends StatelessWidget {
       ],
       child: AppPageBackground(
         child: AnnouncementEditorScreen(
+          schoolName: context.read<SchoolIdentityCubit>().state.school?.name,
           groups:
               context
                   .read<AcademicYearContextBloc>()

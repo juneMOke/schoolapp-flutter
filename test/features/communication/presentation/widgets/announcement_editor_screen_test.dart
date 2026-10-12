@@ -84,11 +84,14 @@ void main() {
 
   Future<List<AnnouncementEditorOutcome>> pump(
     WidgetTester tester,
-    AnnouncementEditorCubit cubit,
-  ) async {
-    tester.view.physicalSize = const Size(1200, 1600);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
+    AnnouncementEditorCubit cubit, {
+    bool keepSize = false,
+  }) async {
+    if (!keepSize) {
+      tester.view.physicalSize = const Size(1400, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+    }
     final outcomes = <AnnouncementEditorOutcome>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -158,6 +161,10 @@ void main() {
 
     await tester.tap(find.text('Envoyer'));
     await tester.pumpAndSettle();
+    // Le récapitulatif d'abord : la portée, puis le geste irréversible.
+    expect(find.text('Envoyer 113 messages ?'), findsOneWidget);
+    await tester.tap(find.text('Envoyer maintenant'));
+    await tester.pumpAndSettle();
     expect(outcomes, [AnnouncementEditorOutcome.sent]);
   });
 
@@ -223,6 +230,36 @@ void main() {
       ).called(1);
     },
   );
+
+  testWidgets('aperçu : le gabarit WhatsApp, puis la page de lecture', (
+    tester,
+  ) async {
+    final cubit = fresh()
+      ..setTitle('Réunion')
+      ..setBody('Bonjour {eleve} ({classe}).');
+    await pump(tester, cubit);
+    expect(
+      find.textContaining(
+        'vous adresse un communiqué concernant Grâce KABONGO',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Lire le communiqué'), findsOneWidget);
+    await tester.tap(find.text('Page de lecture'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bonjour Grâce KABONGO (6e A).'), findsOneWidget);
+  });
+
+  testWidgets('écran étroit : bascule Rédiger · Aperçu parent', (tester) async {
+    tester.view.physicalSize = const Size(700, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pump(tester, fresh(), keepSize: true);
+    expect(find.text('Lire le communiqué'), findsNothing);
+    await tester.tap(find.text('Aperçu parent'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lire le communiqué'), findsOneWidget);
+  });
 
   testWidgets('lecture seule : aucune action', (tester) async {
     final cubit = AnnouncementEditorCubit.edit(

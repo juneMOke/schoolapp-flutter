@@ -16754,4 +16754,121 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get communicationReachNoOverdue =>
       'Aucun élève en retard sur ces frais. Si vos tarifs n\'ont pas d\'échéance, aucune créance n\'est jamais en retard.';
+
+  @override
+  String get communicationPreviewTitle => 'Aperçu parent';
+
+  @override
+  String get communicationTabWrite => 'Rédiger';
+
+  @override
+  String get communicationPreviewReadingPage => 'Page de lecture';
+
+  @override
+  String get communicationPreviewSampleNote =>
+      'Exemple pour une famille : les champs insérés sont remplacés pour chaque élève.';
+
+  @override
+  String get communicationPreviewChannelOff => 'Canal désactivé';
+
+  @override
+  String get communicationPreviewEmptyBody => 'Le message apparaîtra ici.';
+
+  @override
+  String communicationPreviewSignature(String school) {
+    return 'La Direction · $school';
+  }
+
+  @override
+  String get communicationSampleGuardian => 'Mme Kabongo';
+
+  @override
+  String get communicationSampleSchool => 'Votre école';
+
+  @override
+  String get communicationSampleStudent => 'Grâce KABONGO';
+
+  @override
+  String get communicationSampleClassroom => '6e A';
+
+  @override
+  String get communicationSampleAmount => '85 USD + 20 000 CDF';
+
+  @override
+  String communicationWhatsappTemplate(
+    String guardian,
+    String school,
+    String student,
+    String title,
+  ) {
+    return 'Bonjour $guardian, $school vous adresse un communiqué concernant $student : « $title ». Touchez le bouton ci-dessous pour le lire en entier.';
+  }
+
+  @override
+  String get communicationWhatsappFooter => 'Envoyé via ETEELO CONNECT';
+
+  @override
+  String get communicationWhatsappButton => 'Lire le communiqué';
+
+  @override
+  String get communicationWhatsappBusiness => 'Compte professionnel';
+
+  @override
+  String get communicationConfirmEyebrow => 'Vérifier avant envoi';
+
+  @override
+  String communicationConfirmSendTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Envoyer $count messages ?',
+      one: 'Envoyer 1 message ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communicationConfirmScheduleTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Programmer $count messages ?',
+      one: 'Programmer 1 message ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communicationConfirmSendTitleUnknown => 'Envoyer ce communiqué ?';
+
+  @override
+  String get communicationConfirmScheduleTitleUnknown =>
+      'Programmer ce communiqué ?';
+
+  @override
+  String get communicationConfirmRecipients => 'Destinataires';
+
+  @override
+  String communicationConfirmRecipientsValue(String audience, int students) {
+    String _temp0 = intl.Intl.pluralLogic(
+      students,
+      locale: localeName,
+      other: '$students élèves',
+      one: '1 élève',
+    );
+    return '$audience · $_temp0';
+  }
+
+  @override
+  String get communicationConfirmImmediate => 'Immédiat';
+
+  @override
+  String get communicationConfirmIrreversible =>
+      'Un communiqué envoyé ne peut plus être modifié ni retiré.';
+
+  @override
+  String get communicationConfirmEdit => 'Modifier';
+
+  @override
+  String get communicationConfirmSendNow => 'Envoyer maintenant';
 }

@@ -25958,6 +25958,173 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No student is overdue on these fees. If your tariffs have no due date, no charge is ever overdue.'**
   String get communicationReachNoOverdue;
+
+  /// No description provided for @communicationPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent preview'**
+  String get communicationPreviewTitle;
+
+  /// No description provided for @communicationTabWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get communicationTabWrite;
+
+  /// No description provided for @communicationPreviewReadingPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading page'**
+  String get communicationPreviewReadingPage;
+
+  /// No description provided for @communicationPreviewSampleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Example for one family: inserted fields are replaced for each student.'**
+  String get communicationPreviewSampleNote;
+
+  /// No description provided for @communicationPreviewChannelOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel off'**
+  String get communicationPreviewChannelOff;
+
+  /// No description provided for @communicationPreviewEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The message will appear here.'**
+  String get communicationPreviewEmptyBody;
+
+  /// No description provided for @communicationPreviewSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'The management · {school}'**
+  String communicationPreviewSignature(String school);
+
+  /// No description provided for @communicationSampleGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Mrs Kabongo'**
+  String get communicationSampleGuardian;
+
+  /// No description provided for @communicationSampleSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Your school'**
+  String get communicationSampleSchool;
+
+  /// No description provided for @communicationSampleStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Grâce KABONGO'**
+  String get communicationSampleStudent;
+
+  /// No description provided for @communicationSampleClassroom.
+  ///
+  /// In en, this message translates to:
+  /// **'6e A'**
+  String get communicationSampleClassroom;
+
+  /// No description provided for @communicationSampleAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'85 USD + 20,000 CDF'**
+  String get communicationSampleAmount;
+
+  /// No description provided for @communicationWhatsappTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello {guardian}, {school} has sent you an announcement about {student}: “{title}”. Tap the button below to read it in full.'**
+  String communicationWhatsappTemplate(
+    String guardian,
+    String school,
+    String student,
+    String title,
+  );
+
+  /// No description provided for @communicationWhatsappFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent via ETEELO CONNECT'**
+  String get communicationWhatsappFooter;
+
+  /// No description provided for @communicationWhatsappButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the announcement'**
+  String get communicationWhatsappButton;
+
+  /// No description provided for @communicationWhatsappBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Business account'**
+  String get communicationWhatsappBusiness;
+
+  /// No description provided for @communicationConfirmEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Check before sending'**
+  String get communicationConfirmEyebrow;
+
+  /// No description provided for @communicationConfirmSendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Send 1 message?} other{Send {count} messages?}}'**
+  String communicationConfirmSendTitle(int count);
+
+  /// No description provided for @communicationConfirmScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Schedule 1 message?} other{Schedule {count} messages?}}'**
+  String communicationConfirmScheduleTitle(int count);
+
+  /// No description provided for @communicationConfirmSendTitleUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this announcement?'**
+  String get communicationConfirmSendTitleUnknown;
+
+  /// No description provided for @communicationConfirmScheduleTitleUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule this announcement?'**
+  String get communicationConfirmScheduleTitleUnknown;
+
+  /// No description provided for @communicationConfirmRecipients.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients'**
+  String get communicationConfirmRecipients;
+
+  /// No description provided for @communicationConfirmRecipientsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{audience} · {students, plural, =1{1 student} other{{students} students}}'**
+  String communicationConfirmRecipientsValue(String audience, int students);
+
+  /// No description provided for @communicationConfirmImmediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediately'**
+  String get communicationConfirmImmediate;
+
+  /// No description provided for @communicationConfirmIrreversible.
+  ///
+  /// In en, this message translates to:
+  /// **'A sent announcement can no longer be edited or withdrawn.'**
+  String get communicationConfirmIrreversible;
+
+  /// No description provided for @communicationConfirmEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get communicationConfirmEdit;
+
+  /// No description provided for @communicationConfirmSendNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Send now'**
+  String get communicationConfirmSendNow;
 }
 
 class _AppLocalizationsDelegate
