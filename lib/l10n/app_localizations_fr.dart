@@ -16611,4 +16611,147 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get communicationToastCancelled => 'Communiqué retiré de la liste';
+
+  @override
+  String get communicationSectionAudience => 'Destinataires';
+
+  @override
+  String get communicationSectionAudienceHint =>
+      'Les tuteurs des élèves ciblés reçoivent chacun un message par élève';
+
+  @override
+  String get communicationAudienceModeLabel => 'Mode de ciblage';
+
+  @override
+  String get communicationAudienceModeLevels => 'Niveaux';
+
+  @override
+  String get communicationAudienceModeClassrooms => 'Classes';
+
+  @override
+  String get communicationAudienceModeStudents => 'Élèves';
+
+  @override
+  String get communicationAudienceSchoolHint =>
+      'Tous les élèves inscrits de l\'année en cours, élèves désactivés exclus.';
+
+  @override
+  String get communicationAudienceNeedLevel => 'Choisissez au moins un niveau.';
+
+  @override
+  String get communicationAudienceNeedClassroom =>
+      'Choisissez au moins une classe.';
+
+  @override
+  String get communicationAudienceNeedStudent =>
+      'Choisissez au moins un élève.';
+
+  @override
+  String get communicationNoClassroom =>
+      'Aucune classe sur cette tablette pour l\'année en cours.';
+
+  @override
+  String get communicationStudentSearchLabel => 'Rechercher un élève';
+
+  @override
+  String get communicationStudentSearchPlaceholder =>
+      'Nom, post-nom, prénom ou classe (2 lettres au moins)';
+
+  @override
+  String get communicationStudentSearching => 'Recherche…';
+
+  @override
+  String get communicationStudentSearchFailed =>
+      'La recherche n\'a pas abouti. Vérifiez la connexion, puis retapez.';
+
+  @override
+  String communicationStudentNoMatch(String query) {
+    return 'Aucun élève ne correspond à « $query ».';
+  }
+
+  @override
+  String get communicationStudentRemove => 'Retirer';
+
+  @override
+  String get communicationStudentUnnamed => 'Élève sélectionné';
+
+  @override
+  String get communicationOverdueFee => 'Frais';
+
+  @override
+  String get communicationOverdueAllFees => 'Tous les frais';
+
+  @override
+  String get communicationOverdueTranche => 'Tranche';
+
+  @override
+  String get communicationOverdueAllTranches => 'Toutes les tranches';
+
+  @override
+  String get communicationOverdueSince => 'Échu depuis';
+
+  @override
+  String get communicationOverdueAnyAge => 'Tout';
+
+  @override
+  String communicationOverdueMoreThan(int days) {
+    return 'Plus de $days j';
+  }
+
+  @override
+  String get communicationOverdueRecomputed =>
+      'La liste est recalculée à l\'envoi : une famille qui a payé entre-temps ne reçoit rien.';
+
+  @override
+  String get communicationReachInvalid =>
+      'Choisissez au moins un destinataire.';
+
+  @override
+  String get communicationReachLoading => 'Calcul de la portée';
+
+  @override
+  String get communicationReachFailed => 'Portée indisponible pour l\'instant.';
+
+  @override
+  String communicationReachHeadline(int reachable, int total) {
+    return '$reachable messages joignables sur $total';
+  }
+
+  @override
+  String communicationReachDetail(int students, int guardians) {
+    String _temp0 = intl.Intl.pluralLogic(
+      students,
+      locale: localeName,
+      other: '$students élèves',
+      one: '1 élève',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      guardians,
+      locale: localeName,
+      other: '$guardians tuteurs',
+      one: '1 tuteur',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String communicationReachUnreachable(int messages, int guardians) {
+    String _temp0 = intl.Intl.pluralLogic(
+      messages,
+      locale: localeName,
+      other: '$messages messages ne partiront pas',
+      one: '1 message ne partira pas',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      guardians,
+      locale: localeName,
+      other: '$guardians tuteurs n\'ont',
+      one: '1 tuteur n\'a',
+    );
+    return '$_temp0 : $_temp1 pas de numéro valide.';
+  }
+
+  @override
+  String get communicationReachNoOverdue =>
+      'Aucun élève en retard sur ces frais. Si vos tarifs n\'ont pas d\'échéance, aucune créance n\'est jamais en retard.';
 }

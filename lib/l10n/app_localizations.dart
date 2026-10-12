@@ -25760,6 +25760,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Announcement removed from the list'**
   String get communicationToastCancelled;
+
+  /// No description provided for @communicationSectionAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients'**
+  String get communicationSectionAudience;
+
+  /// No description provided for @communicationSectionAudienceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each targeted student\'s guardians receive one message per student'**
+  String get communicationSectionAudienceHint;
+
+  /// No description provided for @communicationAudienceModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Targeting mode'**
+  String get communicationAudienceModeLabel;
+
+  /// No description provided for @communicationAudienceModeLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels'**
+  String get communicationAudienceModeLevels;
+
+  /// No description provided for @communicationAudienceModeClassrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get communicationAudienceModeClassrooms;
+
+  /// No description provided for @communicationAudienceModeStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get communicationAudienceModeStudents;
+
+  /// No description provided for @communicationAudienceSchoolHint.
+  ///
+  /// In en, this message translates to:
+  /// **'All students enrolled this year, deactivated students excluded.'**
+  String get communicationAudienceSchoolHint;
+
+  /// No description provided for @communicationAudienceNeedLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one level.'**
+  String get communicationAudienceNeedLevel;
+
+  /// No description provided for @communicationAudienceNeedClassroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one class.'**
+  String get communicationAudienceNeedClassroom;
+
+  /// No description provided for @communicationAudienceNeedStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one student.'**
+  String get communicationAudienceNeedStudent;
+
+  /// No description provided for @communicationNoClassroom.
+  ///
+  /// In en, this message translates to:
+  /// **'No class on this tablet for the current year.'**
+  String get communicationNoClassroom;
+
+  /// No description provided for @communicationStudentSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a student'**
+  String get communicationStudentSearchLabel;
+
+  /// No description provided for @communicationStudentSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name, middle name, first name or class (at least 2 letters)'**
+  String get communicationStudentSearchPlaceholder;
+
+  /// No description provided for @communicationStudentSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching…'**
+  String get communicationStudentSearching;
+
+  /// No description provided for @communicationStudentSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The search failed. Check the connection, then type again.'**
+  String get communicationStudentSearchFailed;
+
+  /// No description provided for @communicationStudentNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches “{query}”.'**
+  String communicationStudentNoMatch(String query);
+
+  /// No description provided for @communicationStudentRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get communicationStudentRemove;
+
+  /// No description provided for @communicationStudentUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected student'**
+  String get communicationStudentUnnamed;
+
+  /// No description provided for @communicationOverdueFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get communicationOverdueFee;
+
+  /// No description provided for @communicationOverdueAllFees.
+  ///
+  /// In en, this message translates to:
+  /// **'All fees'**
+  String get communicationOverdueAllFees;
+
+  /// No description provided for @communicationOverdueTranche.
+  ///
+  /// In en, this message translates to:
+  /// **'Instalment'**
+  String get communicationOverdueTranche;
+
+  /// No description provided for @communicationOverdueAllTranches.
+  ///
+  /// In en, this message translates to:
+  /// **'All instalments'**
+  String get communicationOverdueAllTranches;
+
+  /// No description provided for @communicationOverdueSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue for'**
+  String get communicationOverdueSince;
+
+  /// No description provided for @communicationOverdueAnyAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get communicationOverdueAnyAge;
+
+  /// No description provided for @communicationOverdueMoreThan.
+  ///
+  /// In en, this message translates to:
+  /// **'Over {days} days'**
+  String communicationOverdueMoreThan(int days);
+
+  /// No description provided for @communicationOverdueRecomputed.
+  ///
+  /// In en, this message translates to:
+  /// **'The list is recomputed when sending: a family that has paid in the meantime receives nothing.'**
+  String get communicationOverdueRecomputed;
+
+  /// No description provided for @communicationReachInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one recipient.'**
+  String get communicationReachInvalid;
+
+  /// No description provided for @communicationReachLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Computing reach'**
+  String get communicationReachLoading;
+
+  /// No description provided for @communicationReachFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach unavailable for now.'**
+  String get communicationReachFailed;
+
+  /// No description provided for @communicationReachHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'{reachable} of {total} messages reachable'**
+  String communicationReachHeadline(int reachable, int total);
+
+  /// No description provided for @communicationReachDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{students, plural, =1{1 student} other{{students} students}} · {guardians, plural, =1{1 guardian} other{{guardians} guardians}}'**
+  String communicationReachDetail(int students, int guardians);
+
+  /// No description provided for @communicationReachUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'{messages, plural, =1{1 message will not be sent} other{{messages} messages will not be sent}}: {guardians, plural, =1{1 guardian has} other{{guardians} guardians have}} no valid number.'**
+  String communicationReachUnreachable(int messages, int guardians);
+
+  /// No description provided for @communicationReachNoOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'No student is overdue on these fees. If your tariffs have no due date, no charge is ever overdue.'**
+  String get communicationReachNoOverdue;
 }
 
 class _AppLocalizationsDelegate

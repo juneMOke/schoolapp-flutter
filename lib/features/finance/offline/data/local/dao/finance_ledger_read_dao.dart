@@ -332,6 +332,19 @@ class FinanceLedgerReadDao {
     return rows.map((r) => FeeTariffLocalModel.fromMap(r).toEntity()).toList();
   }
 
+  /// Toute la grille d'une **année**, tous niveaux et cycles confondus (un
+  /// tarif sans année vaut pour toutes) : de quoi nommer les natures et les
+  /// tranches que l'école facture, sans viser un niveau.
+  Future<List<LocalFeeTariff>> getTariffsForYear(String academicYearId) async {
+    final rows = await _db.query(
+      'ref_fee_tariffs',
+      where: 'academic_year_id = ? OR academic_year_id IS NULL',
+      whereArgs: [academicYearId],
+      orderBy: 'fee_code ASC, code ASC',
+    );
+    return rows.map((r) => FeeTariffLocalModel.fromMap(r).toEntity()).toList();
+  }
+
   /// Position des élèves [studentIds] sur le frais [feeCode] (Contrôle des
   /// frais) : attendu, miroir serveur et **payé en attente composé à la
   /// lecture** — mêmes règles que [getChargesByStudent], une seule requête.

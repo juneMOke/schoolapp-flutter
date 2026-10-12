@@ -211,6 +211,9 @@ class FinanceLocalDao {
     schoolLevelGroupId: schoolLevelGroupId,
   );
 
+  Future<List<LocalFeeTariff>> getTariffsForYear(String academicYearId) =>
+      _read.getTariffsForYear(academicYearId);
+
   Future<List<LocalFeeChargeAggregate>> getFeeChargeAggregates({
     required String academicYearId,
     required String feeCode,

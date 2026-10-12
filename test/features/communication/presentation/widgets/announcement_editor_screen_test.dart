@@ -1,27 +1,86 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/communication/domain/entities/announcement_audience.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_status.dart';
+import 'package:school_app_flutter/features/communication/domain/entities/audience_referential.dart';
+import 'package:school_app_flutter/features/communication/domain/repositories/announcement_audience_repository.dart';
 import 'package:school_app_flutter/features/communication/domain/repositories/announcement_repository.dart';
+import 'package:school_app_flutter/features/communication/domain/repositories/audience_referential_repository.dart';
 import 'package:school_app_flutter/features/communication/domain/usecases/announcement_writer.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/announcement_reach_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/audience_referential_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/audience_student_search_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/announcement_editor_screen.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../communication_fixtures.dart';
 
 class _MockRepository extends Mock implements AnnouncementRepository {}
 
+class _MockAudience extends Mock implements AnnouncementAudienceRepository {}
+
+class _MockReferential extends Mock implements AudienceReferentialRepository {}
+
+class _MockTitles extends MockCubit<FeeSectionTitlesState>
+    implements FeeSectionTitlesCubit {}
+
+const _groups = [
+  SchoolLevelGroupBundle(
+    group: SchoolLevelGroup(id: 'g-1', name: 'Primaire', code: 'P'),
+    levels: [
+      SchoolLevel(
+        id: 'l-6',
+        name: '6ème primaire',
+        code: '6P',
+        displayOrder: 6,
+        splitIntoClassrooms: true,
+      ),
+    ],
+  ),
+];
+
 void main() {
   late _MockRepository repo;
+  late _MockAudience audience;
+  late _MockReferential referential;
+  late _MockTitles titles;
   final now = DateTime.utc(2026, 10, 12, 9);
 
-  setUpAll(() => registerFallbackValue(const AnnouncementContent()));
-  setUp(() => repo = _MockRepository());
+  setUpAll(() {
+    registerFallbackValue(const AnnouncementContent());
+    registerFallbackValue(const SchoolAudience());
+  });
+  setUp(() {
+    repo = _MockRepository();
+    audience = _MockAudience();
+    referential = _MockReferential();
+    titles = _MockTitles();
+    when(() => titles.state).thenReturn(const FeeSectionTitlesState());
+    when(
+      () => audience.reach(any()),
+    ).thenAnswer((_) async => const Right(reach));
+    when(() => referential.load(any())).thenAnswer(
+      (_) async => const Right(
+        AudienceReferential(
+          classrooms: [
+            AudienceClassroom(id: 'c-a', name: '6e A', levelId: 'l-6'),
+            AudienceClassroom(id: 'c-b', name: '6e B', levelId: 'l-6'),
+          ],
+        ),
+      ),
+    );
+  });
 
   Future<List<AnnouncementEditorOutcome>> pump(
     WidgetTester tester,
@@ -37,10 +96,24 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         locale: const Locale('fr'),
         home: Scaffold(
-          body: BlocProvider.value(
-            value: cubit,
+          body: MultiBlocProvider(
+            providers: [
+              BlocProvider.value(value: cubit),
+              BlocProvider(
+                create: (_) =>
+                    AnnouncementReachCubit(audience)
+                      ..update(cubit.state.content.audience),
+              ),
+              BlocProvider(
+                create: (_) =>
+                    AudienceReferentialCubit(referential)..load('y-1'),
+              ),
+              BlocProvider(create: (_) => AudienceStudentSearchCubit(audience)),
+              BlocProvider<FeeSectionTitlesCubit>.value(value: titles),
+            ],
             child: AnnouncementEditorScreen(
               now: () => now,
+              groups: _groups,
               onBack: () {},
               onDone: (outcome, _) => outcomes.add(outcome),
             ),
@@ -129,6 +202,27 @@ void main() {
     expect(find.text('Programmer'), findsWidgets);
     expect(find.text("Annuler l'envoi"), findsOneWidget);
   });
+
+  testWidgets(
+    'cibler des classes : le niveau les coche toutes, la portée suit',
+    (tester) async {
+      final cubit = fresh();
+      await pump(tester, cubit);
+      expect(find.text('113 messages joignables sur 120'), findsOneWidget);
+      await tester.tap(find.text('Classes'));
+      await tester.pumpAndSettle();
+      expect(find.text('Choisissez au moins un destinataire.'), findsOneWidget);
+      await tester.tap(find.text('6ème primaire'));
+      await tester.pumpAndSettle();
+      expect(
+        cubit.state.content.audience,
+        const ClassroomsAudience(['c-a', 'c-b']),
+      );
+      verify(
+        () => audience.reach(const ClassroomsAudience(['c-a', 'c-b'])),
+      ).called(1);
+    },
+  );
 
   testWidgets('lecture seule : aucune action', (tester) async {
     final cubit = AnnouncementEditorCubit.edit(

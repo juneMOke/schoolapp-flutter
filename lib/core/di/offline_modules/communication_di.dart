@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/helpers/owner_scoped_value.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/classes/domain/repositories/offline/classroom_offline_repository.dart';
+import 'package:school_app_flutter/features/communication/data/local/audience_referential_repository_impl.dart';
 import 'package:school_app_flutter/features/communication/data/online/announcement_api.dart';
 import 'package:school_app_flutter/features/communication/data/online/announcement_audience_api.dart';
 import 'package:school_app_flutter/features/communication/data/online/announcement_template_api.dart';
@@ -11,10 +13,15 @@ import 'package:school_app_flutter/features/communication/data/repositories/anno
 import 'package:school_app_flutter/features/communication/domain/repositories/announcement_audience_repository.dart';
 import 'package:school_app_flutter/features/communication/domain/repositories/announcement_repository.dart';
 import 'package:school_app_flutter/features/communication/domain/repositories/announcement_template_repository.dart';
+import 'package:school_app_flutter/features/communication/domain/repositories/audience_referential_repository.dart';
 import 'package:school_app_flutter/features/communication/domain/services/announcement_filters.dart';
 import 'package:school_app_flutter/features/communication/domain/usecases/announcement_writer.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/announcements_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/announcement_reach_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/audience_referential_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/audience_student_search_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_factory.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
 import 'package:uuid/uuid.dart';
 
 /// Les communiqués aux parents — **en ligne seulement** : ni table locale, ni
@@ -38,9 +45,15 @@ void registerCommunication(GetIt getIt) {
       ),
     );
 
-  getIt.registerFactory(
-    () => AnnouncementWriter(getIt<AnnouncementRepository>()),
-  );
+  getIt
+    ..registerFactory(() => AnnouncementWriter(getIt<AnnouncementRepository>()))
+    // Le ciblage se lit sur la tablette : classes et grille de l'année.
+    ..registerLazySingleton<AudienceReferentialRepository>(
+      () => AudienceReferentialRepositoryImpl(
+        classrooms: getIt<ClassroomOfflineRepository>(),
+        finance: getIt<FinanceOfflineRepository>(),
+      ),
+    );
 
   // ── Écrans : cubits en fabrique, jamais singleton ──
   getIt
@@ -61,6 +74,15 @@ void registerCommunication(GetIt getIt) {
         writer: getIt<AnnouncementWriter>(),
         uuid: getIt<Uuid>(),
       ),
+    )
+    ..registerFactory(
+      () => AnnouncementReachCubit(getIt<AnnouncementAudienceRepository>()),
+    )
+    ..registerFactory(
+      () => AudienceStudentSearchCubit(getIt<AnnouncementAudienceRepository>()),
+    )
+    ..registerFactory(
+      () => AudienceReferentialCubit(getIt<AudienceReferentialRepository>()),
     )
     ..registerFactory(
       () => AnnouncementsCubit(

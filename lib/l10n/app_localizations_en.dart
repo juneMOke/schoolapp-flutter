@@ -16494,4 +16494,144 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get communicationToastCancelled =>
       'Announcement removed from the list';
+
+  @override
+  String get communicationSectionAudience => 'Recipients';
+
+  @override
+  String get communicationSectionAudienceHint =>
+      'Each targeted student\'s guardians receive one message per student';
+
+  @override
+  String get communicationAudienceModeLabel => 'Targeting mode';
+
+  @override
+  String get communicationAudienceModeLevels => 'Levels';
+
+  @override
+  String get communicationAudienceModeClassrooms => 'Classes';
+
+  @override
+  String get communicationAudienceModeStudents => 'Students';
+
+  @override
+  String get communicationAudienceSchoolHint =>
+      'All students enrolled this year, deactivated students excluded.';
+
+  @override
+  String get communicationAudienceNeedLevel => 'Choose at least one level.';
+
+  @override
+  String get communicationAudienceNeedClassroom => 'Choose at least one class.';
+
+  @override
+  String get communicationAudienceNeedStudent => 'Choose at least one student.';
+
+  @override
+  String get communicationNoClassroom =>
+      'No class on this tablet for the current year.';
+
+  @override
+  String get communicationStudentSearchLabel => 'Search for a student';
+
+  @override
+  String get communicationStudentSearchPlaceholder =>
+      'Last name, middle name, first name or class (at least 2 letters)';
+
+  @override
+  String get communicationStudentSearching => 'Searching…';
+
+  @override
+  String get communicationStudentSearchFailed =>
+      'The search failed. Check the connection, then type again.';
+
+  @override
+  String communicationStudentNoMatch(String query) {
+    return 'No student matches “$query”.';
+  }
+
+  @override
+  String get communicationStudentRemove => 'Remove';
+
+  @override
+  String get communicationStudentUnnamed => 'Selected student';
+
+  @override
+  String get communicationOverdueFee => 'Fee';
+
+  @override
+  String get communicationOverdueAllFees => 'All fees';
+
+  @override
+  String get communicationOverdueTranche => 'Instalment';
+
+  @override
+  String get communicationOverdueAllTranches => 'All instalments';
+
+  @override
+  String get communicationOverdueSince => 'Overdue for';
+
+  @override
+  String get communicationOverdueAnyAge => 'Any time';
+
+  @override
+  String communicationOverdueMoreThan(int days) {
+    return 'Over $days days';
+  }
+
+  @override
+  String get communicationOverdueRecomputed =>
+      'The list is recomputed when sending: a family that has paid in the meantime receives nothing.';
+
+  @override
+  String get communicationReachInvalid => 'Choose at least one recipient.';
+
+  @override
+  String get communicationReachLoading => 'Computing reach';
+
+  @override
+  String get communicationReachFailed => 'Reach unavailable for now.';
+
+  @override
+  String communicationReachHeadline(int reachable, int total) {
+    return '$reachable of $total messages reachable';
+  }
+
+  @override
+  String communicationReachDetail(int students, int guardians) {
+    String _temp0 = intl.Intl.pluralLogic(
+      students,
+      locale: localeName,
+      other: '$students students',
+      one: '1 student',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      guardians,
+      locale: localeName,
+      other: '$guardians guardians',
+      one: '1 guardian',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String communicationReachUnreachable(int messages, int guardians) {
+    String _temp0 = intl.Intl.pluralLogic(
+      messages,
+      locale: localeName,
+      other: '$messages messages will not be sent',
+      one: '1 message will not be sent',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      guardians,
+      locale: localeName,
+      other: '$guardians guardians have',
+      one: '1 guardian has',
+    );
+    return '$_temp0: $_temp1 no valid number.';
+  }
+
+  @override
+  String get communicationReachNoOverdue =>
+      'No student is overdue on these fees. If your tariffs have no due date, no charge is ever overdue.';
 }

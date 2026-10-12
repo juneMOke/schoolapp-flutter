@@ -33,6 +33,14 @@ extension AnnouncementLabels on AppLocalizations {
     AnnouncementStatus.cancelled => communicationStatusCancelled,
   };
 
+  String audienceModeLabel(AudienceMode mode) => switch (mode) {
+    AudienceMode.school => communicationAudienceSchool,
+    AudienceMode.levels => communicationAudienceModeLevels,
+    AudienceMode.classrooms => communicationAudienceModeClassrooms,
+    AudienceMode.students => communicationAudienceModeStudents,
+    AudienceMode.overdue => communicationAudienceOverdue,
+  };
+
   String channelLabel(AnnouncementChannel channel) => switch (channel) {
     AnnouncementChannel.whatsapp => communicationChannelWhatsapp,
   };

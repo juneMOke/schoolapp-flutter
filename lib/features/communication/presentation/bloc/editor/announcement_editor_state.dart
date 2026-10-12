@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/communication/domain/entities/announ
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
 import 'package:school_app_flutter/features/communication/domain/services/announcement_refusal.dart';
 import 'package:school_app_flutter/features/communication/domain/services/announcement_validation.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/audience_selections.dart';
 
 /// Maintenant, ou à l'heure choisie.
 enum AnnouncementSendMode { now, scheduled }
@@ -30,6 +31,10 @@ class AnnouncementEditorState extends Equatable {
   /// La copie serveur, `null` tant que le brouillon n'est pas créé.
   final Announcement? announcement;
   final AnnouncementContent content;
+
+  /// Les sélections de chaque mode de ciblage ; `content.audience` est celle
+  /// du mode actif.
+  final AudienceSelections selections;
   final AnnouncementSendMode sendMode;
 
   /// L'instant UTC choisi pour un envoi programmé.
@@ -61,6 +66,7 @@ class AnnouncementEditorState extends Equatable {
     required this.id,
     required this.content,
     required this.scheduledAt,
+    required this.selections,
     this.announcement,
     this.sendMode = AnnouncementSendMode.now,
     this.issues = const [],
@@ -89,6 +95,7 @@ class AnnouncementEditorState extends Equatable {
   AnnouncementEditorState copyWith({
     Announcement? announcement,
     AnnouncementContent? content,
+    AudienceSelections? selections,
     AnnouncementSendMode? sendMode,
     DateTime? scheduledAt,
     List<AnnouncementIssue>? issues,
@@ -104,6 +111,7 @@ class AnnouncementEditorState extends Equatable {
     id: id,
     announcement: announcement ?? this.announcement,
     content: content ?? this.content,
+    selections: selections ?? this.selections,
     sendMode: sendMode ?? this.sendMode,
     scheduledAt: scheduledAt ?? this.scheduledAt,
     issues: issues ?? this.issues,
@@ -125,6 +133,7 @@ class AnnouncementEditorState extends Equatable {
     id,
     announcement,
     content,
+    selections,
     sendMode,
     scheduledAt,
     issues,

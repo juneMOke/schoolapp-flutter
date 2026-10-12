@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_audience.dart';
+import 'package:school_app_flutter/features/communication/domain/entities/audience_student.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_category.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_channel.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
@@ -12,6 +13,7 @@ import 'package:school_app_flutter/features/communication/domain/services/announ
 import 'package:school_app_flutter/features/communication/domain/services/announcement_validation.dart';
 import 'package:school_app_flutter/features/communication/domain/usecases/announcement_writer.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/editor/audience_selections.dart';
 
 /// L'éditeur d'un communiqué : nouveau, brouillon, programmé ou échec.
 ///
@@ -79,6 +81,7 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
       id: id,
       announcement: announcement,
       content: content,
+      selections: AudienceSelections.of(content.audience),
       sendMode: scheduled == null
           ? AnnouncementSendMode.now
           : AnnouncementSendMode.scheduled,
@@ -104,8 +107,34 @@ class AnnouncementEditorCubit extends Cubit<AnnouncementEditorState> {
 
   void setBody(String body) => _edit(state.content.copyWith(body: body));
 
-  void setAudience(AnnouncementAudience audience) =>
-      _edit(state.content.copyWith(audience: audience));
+  void setAudienceMode(AudienceMode mode) =>
+      _select(state.selections.withMode(mode));
+
+  void toggleLevel(String id) => _select(state.selections.toggleLevel(id));
+
+  void toggleClassroom(String id) =>
+      _select(state.selections.toggleClassroom(id));
+
+  void toggleClassrooms(List<String> ids) =>
+      _select(state.selections.toggleClassrooms(ids));
+
+  void addStudent(AudienceStudent student) =>
+      _select(state.selections.addStudent(student));
+
+  void removeStudent(String id) => _select(state.selections.removeStudent(id));
+
+  void setOverdueFee(String? feeCode, {String? tariffCode}) =>
+      _select(state.selections.withFee(feeCode, tariffCode: tariffCode));
+
+  void setOverdueDays(int days) =>
+      _select(state.selections.withOverdueDays(days));
+
+  void _select(AudienceSelections selections) => _emitEdited(
+    state.copyWith(
+      selections: selections,
+      content: state.content.copyWith(audience: selections.audience),
+    ),
+  );
 
   void toggleChannel(AnnouncementChannel channel) {
     final channels = state.content.channels;

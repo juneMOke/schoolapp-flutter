@@ -339,6 +339,11 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   );
 
   @override
+  Future<Either<Failure, List<LocalFeeTariff>>> getFeeTariffsForYear(
+    String academicYearId,
+  ) => _guard(() => _dao.getTariffsForYear(academicYearId));
+
+  @override
   Future<Either<Failure, List<LocalFeeChargeAggregate>>>
   getFeeChargeAggregates({
     required String academicYearId,

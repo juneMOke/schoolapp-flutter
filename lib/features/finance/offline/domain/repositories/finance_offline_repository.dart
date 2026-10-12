@@ -195,6 +195,12 @@ abstract class FinanceOfflineRepository {
     String? schoolLevelGroupId,
   });
 
+  /// Toute la grille d'une année, tous niveaux confondus — les natures et les
+  /// tranches que l'école facture (ciblage des retards de paiement).
+  Future<Either<Failure, List<LocalFeeTariff>>> getFeeTariffsForYear(
+    String academicYearId,
+  );
+
   /// Position des élèves [studentIds] sur le frais [feeCode] : attendu, payé
   /// (miroir + encaissements non remontés) et reste composé.
   Future<Either<Failure, List<LocalFeeChargeAggregate>>>

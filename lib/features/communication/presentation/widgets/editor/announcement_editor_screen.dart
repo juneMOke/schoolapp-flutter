@@ -6,6 +6,8 @@ import 'package:school_app_flutter/features/communication/domain/entities/announ
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_status.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
+import 'package:school_app_flutter/features/communication/presentation/bloc/audience/announcement_reach_cubit.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/audience/audience_section.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_back_bar.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_page_header.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/content_section.dart';
@@ -13,6 +15,7 @@ import 'package:school_app_flutter/features/communication/presentation/widgets/e
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_action_bar.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_banners.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_failure_banner.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce qui a abouti, et le communiqué tel que le serveur l'a rendu.
@@ -25,6 +28,9 @@ class AnnouncementEditorScreen extends StatelessWidget {
   final EditorDone onDone;
   final DateTime Function() now;
 
+  /// Les cycles et niveaux de l'année, pour le ciblage.
+  final List<SchoolLevelGroupBundle> groups;
+
   /// Avant un envoi ou une programmation : la confirmation. `true` pour
   /// poursuivre. Sans elle, l'envoi part tout de suite.
   final Future<bool> Function(BuildContext context)? confirmSubmit;
@@ -34,11 +40,13 @@ class AnnouncementEditorScreen extends StatelessWidget {
     required this.onBack,
     required this.onDone,
     this.now = DateTime.now,
+    this.groups = const [],
     this.confirmSubmit,
   });
 
   @override
-  Widget build(BuildContext context) =>
+  Widget build(BuildContext context) => MultiBlocListener(
+    listeners: [
       BlocListener<AnnouncementEditorCubit, AnnouncementEditorState>(
         listenWhen: (prev, curr) =>
             curr.outcome != null && prev.outcome != curr.outcome,
@@ -46,27 +54,42 @@ class AnnouncementEditorScreen extends StatelessWidget {
           final announcement = state.announcement;
           if (announcement != null) onDone(state.outcome!, announcement);
         },
-        child: BlocBuilder<AnnouncementEditorCubit, AnnouncementEditorState>(
-          builder: (context, state) => Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: _Form(state: state, onBack: onBack, now: now()),
-                ),
+      ),
+      // La portée suit l'audience ; le cubit attend un court silence.
+      BlocListener<AnnouncementEditorCubit, AnnouncementEditorState>(
+        listenWhen: (prev, curr) =>
+            prev.content.audience != curr.content.audience,
+        listener: (context, state) => context
+            .read<AnnouncementReachCubit>()
+            .update(state.content.audience),
+      ),
+    ],
+    child: BlocBuilder<AnnouncementEditorCubit, AnnouncementEditorState>(
+      builder: (context, state) => Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: _Form(
+                state: state,
+                onBack: onBack,
+                now: now(),
+                groups: groups,
               ),
-              // En lecture seule, aucun geste à offrir.
-              if (!state.readOnly)
-                EditorActionBar(
-                  state: state,
-                  onDraft: context.read<AnnouncementEditorCubit>().saveDraft,
-                  onSubmit: () => _submit(context),
-                  onCancel: () => _cancel(context, state),
-                ),
-            ],
+            ),
           ),
-        ),
-      );
+          // En lecture seule, aucun geste à offrir.
+          if (!state.readOnly)
+            EditorActionBar(
+              state: state,
+              onDraft: context.read<AnnouncementEditorCubit>().saveDraft,
+              onSubmit: () => _submit(context),
+              onCancel: () => _cancel(context, state),
+            ),
+        ],
+      ),
+    ),
+  );
 
   Future<void> _submit(BuildContext context) async {
     final cubit = context.read<AnnouncementEditorCubit>();
@@ -106,8 +129,14 @@ class _Form extends StatelessWidget {
   final AnnouncementEditorState state;
   final VoidCallback onBack;
   final DateTime now;
+  final List<SchoolLevelGroupBundle> groups;
 
-  const _Form({required this.state, required this.onBack, required this.now});
+  const _Form({
+    required this.state,
+    required this.onBack,
+    required this.now,
+    required this.groups,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -143,8 +172,10 @@ class _Form extends StatelessWidget {
           onBody: cubit.setBody,
         ),
         const SizedBox(height: AppSpacing.lg),
+        AudienceSection(state: state, groups: groups),
+        const SizedBox(height: AppSpacing.lg),
         DiffusionSection(
-          number: 2,
+          number: 3,
           state: state,
           now: now,
           onToggleChannel: cubit.toggleChannel,

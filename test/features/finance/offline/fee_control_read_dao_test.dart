@@ -135,6 +135,26 @@ void main() {
     });
   });
 
+  group('getTariffsForYear', () {
+    test(
+      'toute la grille de l\'année, sans-année comprise, par nature',
+      () async {
+        await insertTariff('t-tr', 'TRANSPORT', level: null, group: 'g-1');
+        await insertTariff('t-tu', 'TUITION', level: 'lvl-2');
+        await insertTariff('t-null', 'BOOKS', year: null);
+        await insertTariff('t-other', 'CANTINE', year: 'ay-2');
+
+        final tariffs = await dao.getTariffsForYear('ay-1');
+
+        expect(tariffs.map((t) => t.feeCode), [
+          'BOOKS',
+          'TRANSPORT',
+          'TUITION',
+        ]);
+      },
+    );
+  });
+
   group('getFeeChargeAggregates', () {
     test('liste vide d\'élèves → aucune requête, aucun résultat', () async {
       await insertCharge('c1', 's1', 'TUITION');
