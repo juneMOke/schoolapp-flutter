@@ -810,4 +810,52 @@ class AppDimensions {
   static const journalNavIconSize = 18.0;
   static const journalEyebrowLetterSpacing = 1.0;
   static const journalFieldSkeletonHeight = 64.0;
+
+  // ── Communication — communiqués aux parents ──
+  /// En deçà, la date et le statut d'une ligne passent sous sa méta.
+  static const communicationRowWideMinWidth = 720.0;
+
+  /// Médaillon de catégorie d'une ligne (38–40 dp, rayon 12).
+  static const communicationMedallionSize = 40.0;
+
+  /// Médaillon de l'en-tête du détail.
+  static const communicationHeroMedallionSize = 48.0;
+
+  /// Au-delà, l'éditeur pose l'aperçu en panneau collant à droite.
+  static const communicationEditorWideMinWidth = 1000.0;
+
+  /// En deçà, les boutons de la barre d'actions passent en pleine largeur.
+  static const communicationEditorCompactMaxWidth = 720.0;
+
+  /// Largeur du panneau d'aperçu (grille 1fr | 320).
+  static const communicationPreviewPanelWidth = 320.0;
+
+  /// Le téléphone de l'aperçu : 300 × 580, rayon 40.
+  static const communicationPhoneWidth = 300.0;
+  static const communicationPhoneHeight = 580.0;
+  static const communicationPhoneRadius = 40.0;
+
+  /// Largeur maximale d'une carte de modèle (grille auto-remplie).
+  static const communicationTemplateCardMaxExtent = 300.0;
+
+  /// Hauteur d'une carte de modèle.
+  static const communicationTemplateCardHeight = 236.0;
+
+  /// Modale de confirmation d'envoi.
+  static const communicationConfirmModalMaxWidth = 520.0;
+
+  /// Modale de création ou de modification d'un modèle.
+  static const communicationTemplateModalMaxWidth = 620.0;
+
+  /// Colonne d'une méta du détail (grille auto-remplie, 170 dp).
+  static const communicationMetaItemMinWidth = 170.0;
+
+  /// Lignes visibles du champ Message.
+  static const communicationMessageLines = 8;
+
+  /// Pastille d'un mode de ciblage ou d'une catégorie : cible ≥ 44 dp.
+  static const communicationChoiceMinHeight = 44.0;
+
+  /// Ligne d'un élève proposé par la recherche : cible ≥ 48 dp.
+  static const communicationStudentRowMinHeight = 48.0;
 }

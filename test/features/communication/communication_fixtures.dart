@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_audience.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_category.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_reach.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_status.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Un adaptateur Dio qui rend [body] avec [status] et garde la requête.
 class RecordingAdapter implements HttpClientAdapter {
@@ -109,4 +111,12 @@ const reach = AnnouncementReach(
   guardiansWithoutPhone: 6,
   studentsUnreachable: 4,
   whatsappEnabled: true,
+);
+
+/// L'hôte d'un écran du module : localisations françaises, un `Scaffold`.
+Widget communicationHost(Widget child) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  locale: const Locale('fr'),
+  home: Scaffold(body: SingleChildScrollView(child: child)),
 );

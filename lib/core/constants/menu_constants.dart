@@ -41,6 +41,10 @@ class MenuConstants {
   /// en V1, et le ranger sous Finances laisserait croire le contraire.
   static const String expenseMenuId = 'depenses';
 
+  /// La communication aux parents — les communiqués et leurs modèles. Un menu
+  /// propre : ce n'est ni de la scolarité ni de la caisse.
+  static const String communicationMenuId = 'communication';
+
   /// Les ressources humaines — le fichier central des agents de l'école, puis
   /// le Pointage, et plus tard la Paie, qui le lisent. Un menu propre : un
   /// agent n'est ni un élève ni une écriture de caisse.
@@ -101,6 +105,10 @@ class MenuConstants {
   /// La Paie du personnel : le livre du mois, les bulletins, les avances et
   /// l'historique.
   static const String hrPayrollId = 'paie';
+
+  /// Les communiqués aux parents : rédiger, programmer, envoyer, consulter.
+  static const String communicationAnnouncementsId =
+      'communication-communiques';
 
   static const String classesDashboardId = 'classes-dashboard';
   static const String organisationId = 'organisation';

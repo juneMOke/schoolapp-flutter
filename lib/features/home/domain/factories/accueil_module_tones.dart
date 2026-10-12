@@ -78,6 +78,8 @@ class AccueilModuleTones {
     MenuConstants.coursesMenuId: _bleuArdoise,
     MenuConstants.resultatsMenuId: _terreFoncee,
     MenuConstants.disciplinesMenuId: _bleuProfond,
+    // Parler aux familles : la terre, pour rompre avec les Disciplines.
+    MenuConstants.communicationMenuId: _terreFoncee,
     MenuConstants.configurationMenuId: _bleuArdoiseB,
   };
 

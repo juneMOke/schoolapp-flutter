@@ -68,6 +68,8 @@ class AppRoutesNames {
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseDashboardId}';
   static const String expenseRegister =
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseRegisterId}';
+  static const String communicationAnnouncements =
+      '/${MenuConstants.communicationMenuId}/${MenuConstants.communicationAnnouncementsId}';
   static const String expenseQueue =
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseQueueId}';
   static const String hrStaffFile =

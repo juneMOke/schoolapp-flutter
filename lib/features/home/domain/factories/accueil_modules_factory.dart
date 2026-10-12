@@ -41,6 +41,7 @@ class AccueilModulesFactory {
       _cours(l10n),
       _resultats(l10n),
       _disciplines(l10n),
+      _communication(l10n),
       _configuration(l10n),
     ];
 
@@ -257,6 +258,25 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.hrPayrollId,
           title: l10n.subMenuPayroll,
+        ),
+      ],
+    );
+  }
+
+  /// La communication aux parents — les communiqués.
+  static AccueilModule _communication(AppLocalizations l10n) {
+    const menuId = MenuConstants.communicationMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuCommunication,
+      description: l10n.accueilModuleCommunicationDescription,
+      icon: Icons.campaign_outlined,
+      tone: AccueilModuleTones.of(menuId),
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.communicationAnnouncementsId,
+          title: l10n.subMenuAnnouncements,
         ),
       ],
     );

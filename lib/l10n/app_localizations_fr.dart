@@ -16134,4 +16134,261 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get journalChapterUnavailable =>
       'Chapitre indisponible sur cette tablette';
+
+  @override
+  String get menuCommunication => 'Communication';
+
+  @override
+  String get subMenuAnnouncements => 'Communiqués';
+
+  @override
+  String get accueilModuleCommunicationDescription =>
+      'Informez les parents par WhatsApp : réunions, fermetures, rappels de paiement.';
+
+  @override
+  String get communicationListSubtitle =>
+      'Rédigez les communiqués aux parents et diffusez-les maintenant ou à l\'heure choisie.';
+
+  @override
+  String get communicationCategoryInfo => 'Information';
+
+  @override
+  String get communicationCategoryUrgent => 'Urgent';
+
+  @override
+  String get communicationCategoryEvent => 'Événement';
+
+  @override
+  String get communicationCategoryAdministrative => 'Administratif';
+
+  @override
+  String get communicationStatusDraft => 'Brouillon';
+
+  @override
+  String get communicationStatusScheduled => 'Programmé';
+
+  @override
+  String get communicationStatusSent => 'Envoyé';
+
+  @override
+  String get communicationStatusFailed => 'Échec d\'envoi';
+
+  @override
+  String get communicationStatusCancelled => 'Annulé';
+
+  @override
+  String get communicationGroupDrafts => 'Brouillons';
+
+  @override
+  String get communicationGroupScheduled => 'Programmés';
+
+  @override
+  String get communicationGroupSent => 'Envoyés';
+
+  @override
+  String get communicationGroupFailed => 'Échecs';
+
+  @override
+  String communicationGroupHeader(String label, int count) {
+    return '$label · $count';
+  }
+
+  @override
+  String get communicationChannelWhatsapp => 'WhatsApp';
+
+  @override
+  String get communicationVariableStudent => 'Nom de l\'élève';
+
+  @override
+  String get communicationVariableClassroom => 'Classe';
+
+  @override
+  String get communicationVariableAmount => 'Montant dû';
+
+  @override
+  String get communicationAudienceSchool => 'Toute l\'école';
+
+  @override
+  String communicationAudienceLevelsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count niveaux',
+      one: '1 niveau',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communicationAudienceClassroomsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '1 classe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communicationAudienceStudentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communicationAudienceOverdue => 'Retards de paiement';
+
+  @override
+  String communicationReachSentShort(int reached, int total) {
+    return '$reached messages sur $total';
+  }
+
+  @override
+  String get communicationToday => 'aujourd\'hui';
+
+  @override
+  String get communicationTomorrow => 'demain';
+
+  @override
+  String get communicationYesterday => 'hier';
+
+  @override
+  String communicationDayAtTime(String day, String time) {
+    return '$day · $time';
+  }
+
+  @override
+  String communicationDatePlanned(String when) {
+    return 'Prévu $when';
+  }
+
+  @override
+  String communicationDateEdited(String when) {
+    return 'Modifié $when';
+  }
+
+  @override
+  String get communicationSearchLabel => 'Rechercher';
+
+  @override
+  String get communicationSearchPlaceholder =>
+      'Rechercher dans les titres et messages';
+
+  @override
+  String get communicationFilterStatus => 'Statut';
+
+  @override
+  String get communicationFilterCategory => 'Catégorie';
+
+  @override
+  String communicationFilterShown(int shown, int total) {
+    return '$shown sur $total';
+  }
+
+  @override
+  String communicationFilterClear(int count) {
+    return 'Effacer ($count)';
+  }
+
+  @override
+  String get communicationFilterClearAll => 'Effacer les filtres';
+
+  @override
+  String get communicationUntitled => 'Sans titre';
+
+  @override
+  String get communicationLoading => 'Chargement des communiqués';
+
+  @override
+  String get communicationErrorNetworkTitle => 'Connexion impossible';
+
+  @override
+  String get communicationErrorNetwork =>
+      'Les communiqués se lisent en ligne. Vérifiez la connexion de la tablette, puis réessayez.';
+
+  @override
+  String get communicationErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get communicationErrorUnauthorized =>
+      'Reconnectez-vous pour continuer.';
+
+  @override
+  String get communicationErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get communicationErrorForbidden =>
+      'Votre compte n\'a pas accès aux communiqués. Si c\'est une erreur, contactez l\'administrateur.';
+
+  @override
+  String get communicationErrorServerTitle => 'Le serveur n\'a pas répondu';
+
+  @override
+  String get communicationErrorServer =>
+      'Une erreur est survenue côté serveur. Réessayez dans un instant.';
+
+  @override
+  String get communicationErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String get communicationErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get communicationRetry => 'Réessayer';
+
+  @override
+  String communicationErrorIncident(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get communicationEmptyTitle => 'Aucun communiqué pour l\'instant';
+
+  @override
+  String get communicationEmptyMessage =>
+      'Rédigez un premier communiqué pour informer les parents : réunion, fermeture, rappel de paiement…';
+
+  @override
+  String get communicationEmptyFilteredTitle =>
+      'Aucun communiqué ne correspond';
+
+  @override
+  String get communicationEmptyFilteredMessage =>
+      'Modifiez la recherche ou retirez des filtres.';
+
+  @override
+  String get communicationNew => 'Nouveau communiqué';
+
+  @override
+  String get communicationFromTemplate => 'Partir d\'un modèle';
+
+  @override
+  String get communicationTemplateButton => 'Modèle';
+
+  @override
+  String communicationDateShort(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMEd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String communicationClock(DateTime time) {
+    final intl.DateFormat timeDateFormat = intl.DateFormat.Hm(localeName);
+    final String timeString = timeDateFormat.format(time);
+
+    return '$timeString';
+  }
+
+  @override
+  String communicationDateSent(String when) {
+    return 'Envoyé $when';
+  }
 }

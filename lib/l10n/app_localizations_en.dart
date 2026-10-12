@@ -16023,4 +16023,258 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get journalChapterUnavailable =>
       'Chapter not available on this tablet';
+
+  @override
+  String get menuCommunication => 'Communication';
+
+  @override
+  String get subMenuAnnouncements => 'Announcements';
+
+  @override
+  String get accueilModuleCommunicationDescription =>
+      'Inform parents on WhatsApp: meetings, closures, payment reminders.';
+
+  @override
+  String get communicationListSubtitle =>
+      'Write announcements to parents and send them now or at a chosen time.';
+
+  @override
+  String get communicationCategoryInfo => 'Information';
+
+  @override
+  String get communicationCategoryUrgent => 'Urgent';
+
+  @override
+  String get communicationCategoryEvent => 'Event';
+
+  @override
+  String get communicationCategoryAdministrative => 'Administrative';
+
+  @override
+  String get communicationStatusDraft => 'Draft';
+
+  @override
+  String get communicationStatusScheduled => 'Scheduled';
+
+  @override
+  String get communicationStatusSent => 'Sent';
+
+  @override
+  String get communicationStatusFailed => 'Sending failed';
+
+  @override
+  String get communicationStatusCancelled => 'Cancelled';
+
+  @override
+  String get communicationGroupDrafts => 'Drafts';
+
+  @override
+  String get communicationGroupScheduled => 'Scheduled';
+
+  @override
+  String get communicationGroupSent => 'Sent';
+
+  @override
+  String get communicationGroupFailed => 'Failed';
+
+  @override
+  String communicationGroupHeader(String label, int count) {
+    return '$label · $count';
+  }
+
+  @override
+  String get communicationChannelWhatsapp => 'WhatsApp';
+
+  @override
+  String get communicationVariableStudent => 'Student name';
+
+  @override
+  String get communicationVariableClassroom => 'Class';
+
+  @override
+  String get communicationVariableAmount => 'Amount due';
+
+  @override
+  String get communicationAudienceSchool => 'Whole school';
+
+  @override
+  String communicationAudienceLevelsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count levels',
+      one: '1 level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communicationAudienceClassroomsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '1 class',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String communicationAudienceStudentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get communicationAudienceOverdue => 'Overdue payments';
+
+  @override
+  String communicationReachSentShort(int reached, int total) {
+    return '$reached of $total messages';
+  }
+
+  @override
+  String get communicationToday => 'today';
+
+  @override
+  String get communicationTomorrow => 'tomorrow';
+
+  @override
+  String get communicationYesterday => 'yesterday';
+
+  @override
+  String communicationDayAtTime(String day, String time) {
+    return '$day · $time';
+  }
+
+  @override
+  String communicationDatePlanned(String when) {
+    return 'Planned $when';
+  }
+
+  @override
+  String communicationDateEdited(String when) {
+    return 'Edited $when';
+  }
+
+  @override
+  String get communicationSearchLabel => 'Search';
+
+  @override
+  String get communicationSearchPlaceholder => 'Search titles and messages';
+
+  @override
+  String get communicationFilterStatus => 'Status';
+
+  @override
+  String get communicationFilterCategory => 'Category';
+
+  @override
+  String communicationFilterShown(int shown, int total) {
+    return '$shown of $total';
+  }
+
+  @override
+  String communicationFilterClear(int count) {
+    return 'Clear ($count)';
+  }
+
+  @override
+  String get communicationFilterClearAll => 'Clear filters';
+
+  @override
+  String get communicationUntitled => 'Untitled';
+
+  @override
+  String get communicationLoading => 'Loading announcements';
+
+  @override
+  String get communicationErrorNetworkTitle => 'No connection';
+
+  @override
+  String get communicationErrorNetwork =>
+      'Announcements are read online. Check the tablet connection, then try again.';
+
+  @override
+  String get communicationErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get communicationErrorUnauthorized => 'Sign in again to continue.';
+
+  @override
+  String get communicationErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get communicationErrorForbidden =>
+      'Your account cannot access announcements. If this is a mistake, contact the administrator.';
+
+  @override
+  String get communicationErrorServerTitle => 'The server did not respond';
+
+  @override
+  String get communicationErrorServer =>
+      'A server error occurred. Try again in a moment.';
+
+  @override
+  String get communicationErrorContactAdmin => 'Contact the administrator';
+
+  @override
+  String get communicationErrorReconnect => 'Sign in again';
+
+  @override
+  String get communicationRetry => 'Try again';
+
+  @override
+  String communicationErrorIncident(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get communicationEmptyTitle => 'No announcements yet';
+
+  @override
+  String get communicationEmptyMessage =>
+      'Write a first announcement to inform parents: meeting, closure, payment reminder…';
+
+  @override
+  String get communicationEmptyFilteredTitle => 'No matching announcement';
+
+  @override
+  String get communicationEmptyFilteredMessage =>
+      'Change the search or remove filters.';
+
+  @override
+  String get communicationNew => 'New announcement';
+
+  @override
+  String get communicationFromTemplate => 'Start from a template';
+
+  @override
+  String get communicationTemplateButton => 'Template';
+
+  @override
+  String communicationDateShort(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMEd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String communicationClock(DateTime time) {
+    final intl.DateFormat timeDateFormat = intl.DateFormat.Hm(localeName);
+    final String timeString = timeDateFormat.format(time);
+
+    return '$timeString';
+  }
+
+  @override
+  String communicationDateSent(String when) {
+    return 'Sent $when';
+  }
 }

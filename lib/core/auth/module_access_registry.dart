@@ -355,6 +355,13 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // régler sont gardés geste par geste.
     MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
   },
+  MenuConstants.communicationMenuId: {
+    // Lire suffit à ouvrir la liste et le détail ; écrire et envoyer sont
+    // gardés geste par geste ([kAnnouncementSendAccess]).
+    MenuConstants.communicationAnnouncementsId: ModuleAccess([
+      Perm.communicationAnnouncementRead,
+    ]),
+  },
   MenuConstants.classesMenuId: {
     MenuConstants.classesDashboardId: ModuleAccess([Perm.classroomStatsRead]),
     MenuConstants.organisationId: ModuleAccess([Perm.classroomRead]),

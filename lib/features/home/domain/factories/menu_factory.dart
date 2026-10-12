@@ -35,6 +35,7 @@ class MenuFactory {
       _createCoursesMenu(l10n),
       _createResultatsMenu(l10n),
       _createDocumentsMenu(l10n),
+      _createCommunicationMenu(l10n),
       _createConfigurationMenu(l10n),
     ];
 
@@ -248,6 +249,22 @@ class MenuFactory {
 
   /// Menu Ressources humaines. Le fichier du personnel d'abord, puis le
   /// Pointage qui le lit, puis la Paie qui lit les deux.
+  /// Menu Communication — les communiqués aux parents, puis leurs modèles.
+  static MenuItem _createCommunicationMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.communicationMenuId,
+      title: l10n.menuCommunication,
+      icon: Icons.campaign_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.communicationAnnouncementsId,
+          title: l10n.subMenuAnnouncements,
+          route: AppRoutesNames.communicationAnnouncements,
+        ),
+      ],
+    );
+  }
+
   static MenuItem _createHrMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.hrMenuId,

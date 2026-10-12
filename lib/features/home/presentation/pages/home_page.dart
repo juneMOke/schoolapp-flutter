@@ -31,6 +31,7 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_s
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_feature_scope.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
+import 'package:school_app_flutter/features/communication/presentation/pages/announcements_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_dashboard_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_feature_scope.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_queue_page.dart';
@@ -208,6 +209,7 @@ class _HomePageView extends StatelessWidget {
         state.selectedSubMenuId == MenuConstants.expenseDashboardId ||
         state.selectedSubMenuId == MenuConstants.expenseRegisterId ||
         state.selectedSubMenuId == MenuConstants.expenseQueueId ||
+        state.selectedSubMenuId == MenuConstants.communicationAnnouncementsId ||
         state.selectedSubMenuId == MenuConstants.organisationId ||
         state.selectedSubMenuId == MenuConstants.classesListId ||
         state.selectedSubMenuId == MenuConstants.presencesId ||
@@ -375,6 +377,8 @@ class _HomePageView extends StatelessWidget {
       // emplacement du switch : une clé par sous-menu, sinon Flutter recycle
       // l'Element et le pull de montage ne rejoue pas en passant de l'un à
       // l'autre.
+      case MenuConstants.communicationAnnouncementsId:
+        return const AnnouncementsPage();
       case MenuConstants.expenseDashboardId:
         return const ExpenseFeatureScope(
           key: ValueKey(MenuConstants.expenseDashboardId),
