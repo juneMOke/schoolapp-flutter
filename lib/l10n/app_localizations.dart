@@ -25509,6 +25509,12 @@ abstract class AppLocalizations {
   /// **'The amount due is only known for overdue payments: remove it, or pick that mode.'**
   String get communicationAmountMisplaced;
 
+  /// No description provided for @communicationAmountInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the amount due in the message, not the title: the title is shown as is in the WhatsApp message.'**
+  String get communicationAmountInTitle;
+
   /// No description provided for @communicationChannelsLabel.
   ///
   /// In en, this message translates to:

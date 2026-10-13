@@ -53,6 +53,17 @@ void main() {
     );
   });
 
+  test('{montant} au titre : refusé même en retards de paiement', () {
+    final content = complete.copyWith(
+      title: 'Reste {montant}',
+      audience: const OverdueAudience(),
+    );
+    expect(AnnouncementValidation.issuesOf(content), [
+      AnnouncementIssue.amountInTitle,
+    ]);
+    expect(AnnouncementValidation.amountMisplaced(content), isFalse);
+  });
+
   test('variable inconnue, au titre comme au message', () {
     expect(
       AnnouncementValidation.issuesOf(complete.copyWith(title: 'Le {jour}')),

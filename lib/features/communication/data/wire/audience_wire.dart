@@ -55,8 +55,9 @@ abstract final class AudienceWire {
     );
   }
 
-  /// Un élève de la recherche (ou de l'audience rendue) : nom en trois
-  /// parties, et sa classe. Sans identifiant ni nom, il est écarté.
+  /// Un élève de la recherche (`AnnouncementStudentHit`) : nom en trois
+  /// parties — le post-nom s'appelle `surname` sur le fil —, et sa classe,
+  /// sinon son niveau. Sans identifiant ni nom, il est écarté.
   static AudienceStudent? studentOf(Object? raw) {
     if (raw is! Map) return null;
     final id = raw.text('id');
@@ -65,12 +66,9 @@ abstract final class AudienceWire {
     return AudienceStudent(
       id: id,
       lastName: lastName,
-      middleName: raw.text('middleName'),
+      middleName: raw.text('surname'),
       firstName: raw.text('firstName'),
-      classroomLabel:
-          raw.text('classroomLabel') ??
-          raw.text('classroomName') ??
-          raw.text('levelLabel'),
+      classroomLabel: raw.text('classroomName') ?? raw.text('levelName'),
     );
   }
 }

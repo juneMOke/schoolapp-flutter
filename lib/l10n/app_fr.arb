@@ -9947,6 +9947,7 @@
   "communicationInsert": "Insérer",
   "communicationAmountOnlyOverdue": "Le montant dû n'existe qu'en mode Retards de paiement.",
   "communicationAmountMisplaced": "Le montant dû n'est connu qu'en mode Retards de paiement : retirez-le, ou choisissez ce mode.",
+  "communicationAmountInTitle": "Le montant dû se place dans le message, pas dans le titre : le titre part en clair dans le WhatsApp.",
   "communicationChannelsLabel": "Canaux",
   "communicationNoChannel": "Activez au moins un canal de diffusion.",
   "communicationSendLabel": "Envoi",

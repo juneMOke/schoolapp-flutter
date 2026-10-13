@@ -111,14 +111,34 @@ void main() {
 
   test('recherche d\'élèves : la saisie rognée en q', () async {
     final adapter = RecordingAdapter([
-      {'id': 's-1', 'lastName': 'KABONGO', 'classroomLabel': '6e A'},
+      {
+        'id': 's-1',
+        'firstName': 'Grâce',
+        'lastName': 'KABONGO',
+        'surname': 'Mbuyi',
+        'classroomName': '6e A',
+        'levelName': '6e',
+      },
+      {
+        'id': 's-3',
+        'firstName': 'Paul',
+        'lastName': 'ILUNGA',
+        'surname': 'Kasa',
+        'classroomName': null,
+        'levelName': '5e',
+      },
       {'id': 's-2'},
     ]);
     final found = await AnnouncementAudienceApi(
       dioWith(adapter),
       extras,
     ).searchStudents(' kab ');
-    expect(found.single.classroomLabel, '6e A');
+    expect(found.map((s) => s.displayName), [
+      'KABONGO Mbuyi Grâce',
+      'ILUNGA Kasa Paul',
+    ]);
+    // Sans classe, le niveau.
+    expect(found.map((s) => s.classroomLabel), ['6e A', '5e']);
     expect(adapter.last.queryParameters, {'q': 'kab'});
   });
 

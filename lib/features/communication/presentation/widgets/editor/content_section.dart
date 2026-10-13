@@ -131,12 +131,16 @@ class _ContentSectionState extends State<ContentSection> {
     );
   }
 
-  static String? _titleError(
-    AppLocalizations l10n,
-    AnnouncementEditorState s,
-  ) => s.hasIssueOn(AnnouncementField.title)
-      ? l10n.communicationTitleRequired
-      : null;
+  /// Le montant au titre se signale dès qu'il est tapé, comme l'ambre du
+  /// message : le serveur refuserait même le brouillon.
+  static String? _titleError(AppLocalizations l10n, AnnouncementEditorState s) {
+    if (AnnouncementValidation.amountInTitle(s.content)) {
+      return l10n.communicationAmountInTitle;
+    }
+    return s.hasIssueOn(AnnouncementField.title)
+        ? l10n.communicationTitleRequired
+        : null;
+  }
 
   static String? _bodyError(AppLocalizations l10n, AnnouncementEditorState s) {
     if (!s.hasIssueOn(AnnouncementField.body)) return null;

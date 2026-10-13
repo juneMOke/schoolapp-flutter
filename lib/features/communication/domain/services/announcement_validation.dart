@@ -31,6 +31,7 @@ enum AnnouncementIssue {
   bodyMissing(AnnouncementField.body),
   unknownVariable(AnnouncementField.body),
   amountOutsideOverdue(AnnouncementField.body),
+  amountInTitle(AnnouncementField.title),
   audienceEmpty(AnnouncementField.audience),
   noChannel(AnnouncementField.channels),
   scheduleNotFuture(AnnouncementField.scheduledAt);
@@ -61,6 +62,7 @@ abstract final class AnnouncementValidation {
       if (AnnouncementVariables.unknownIn('${content.title} $body').isNotEmpty)
         AnnouncementIssue.unknownVariable,
       if (amountMisplaced(content)) AnnouncementIssue.amountOutsideOverdue,
+      if (amountInTitle(content)) AnnouncementIssue.amountInTitle,
       if (content.audience.isEmpty) AnnouncementIssue.audienceEmpty,
       if (content.channels.isEmpty) AnnouncementIssue.noChannel,
       if (scheduledAt != null &&
@@ -70,11 +72,19 @@ abstract final class AnnouncementValidation {
     ];
   }
 
-  /// `{montant}` hors du mode Retards de paiement : le serveur le refuse, et
-  /// l'éditeur l'annonce en ambre dès qu'il apparaît.
+  /// `{montant}` dans le message hors du mode Retards de paiement : le serveur
+  /// le refuse, et l'éditeur l'annonce en ambre dès qu'il apparaît.
   static bool amountMisplaced(AnnouncementContent content) =>
       content.audience is! OverdueAudience &&
       AnnouncementVariables.usedIn(
-        '${content.title} ${content.body}',
+        content.body,
+      ).contains(AnnouncementVariable.amount);
+
+  /// `{montant}` dans le titre, quel que soit le mode : le titre part en clair
+  /// dans le WhatsApp, le montant reste derrière le lien. Refusé dès le
+  /// brouillon.
+  static bool amountInTitle(AnnouncementContent content) =>
+      AnnouncementVariables.usedIn(
+        content.title,
       ).contains(AnnouncementVariable.amount);
 }

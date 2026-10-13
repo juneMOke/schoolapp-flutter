@@ -16349,6 +16349,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The amount due is only known for overdue payments: remove it, or pick that mode.';
 
   @override
+  String get communicationAmountInTitle =>
+      'Put the amount due in the message, not the title: the title is shown as is in the WhatsApp message.';
+
+  @override
   String get communicationChannelsLabel => 'Channels';
 
   @override

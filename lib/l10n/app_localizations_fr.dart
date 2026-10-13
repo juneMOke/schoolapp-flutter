@@ -16463,6 +16463,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le montant dû n\'est connu qu\'en mode Retards de paiement : retirez-le, ou choisissez ce mode.';
 
   @override
+  String get communicationAmountInTitle =>
+      'Le montant dû se place dans le message, pas dans le titre : le titre part en clair dans le WhatsApp.';
+
+  @override
   String get communicationChannelsLabel => 'Canaux';
 
   @override

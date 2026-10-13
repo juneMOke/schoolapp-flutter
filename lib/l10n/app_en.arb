@@ -9639,6 +9639,7 @@
   "communicationInsert": "Insert",
   "communicationAmountOnlyOverdue": "The amount due only exists for overdue payments.",
   "communicationAmountMisplaced": "The amount due is only known for overdue payments: remove it, or pick that mode.",
+  "communicationAmountInTitle": "Put the amount due in the message, not the title: the title is shown as is in the WhatsApp message.",
   "communicationChannelsLabel": "Channels",
   "communicationNoChannel": "Turn on at least one channel.",
   "communicationSendLabel": "Sending",
