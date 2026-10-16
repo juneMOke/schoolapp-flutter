@@ -290,6 +290,12 @@ abstract class AppLocalizations {
   /// **'ETEELO CONNECT'**
   String get schoolApp;
 
+  /// No description provided for @browserTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{page} · ETEELO CONNECT'**
+  String browserTabTitle(String page);
+
   /// No description provided for @splashBrandPrimary.
   ///
   /// In en, this message translates to:

@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_cache_
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/web/clean_urls.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
@@ -35,6 +36,7 @@ import 'package:school_app_flutter/features/student_photo/presentation/registry/
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
+  useCleanWebUrls();
   runApp(const MyApp());
   // Web : retirer le pré-splash HTML une fois le 1er frame Flutter peint
   // (évite le trou bleu entre l'attache de la vue et le premier rendu).
@@ -330,7 +332,8 @@ class _MyAppState extends State<MyApp> {
             ],
             locale: const Locale('fr'),
             supportedLocales: AppLocalizations.supportedLocales,
-            title: 'ETEELO CONNECT',
+            onGenerateTitle: (context) =>
+                AppLocalizations.of(context)!.schoolApp,
             theme: AppTheme.light,
             routerConfig: _router,
             // Bandeau global au-dessus de toutes les routes : dégradation de

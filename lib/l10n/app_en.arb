@@ -45,6 +45,10 @@
   "showPassword": "Show",
   "hidePassword": "Hide",
   "schoolApp": "ETEELO CONNECT",
+  "browserTabTitle": "{page} · ETEELO CONNECT",
+  "@browserTabTitle": {
+    "placeholders": { "page": { "type": "String" } }
+  },
   "splashBrandPrimary": "ETEELO",
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplify your school management",

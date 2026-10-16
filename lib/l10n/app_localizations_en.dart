@@ -112,6 +112,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolApp => 'ETEELO CONNECT';
 
   @override
+  String browserTabTitle(String page) {
+    return '$page · ETEELO CONNECT';
+  }
+
+  @override
   String get splashBrandPrimary => 'ETEELO';
 
   @override

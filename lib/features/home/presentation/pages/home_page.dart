@@ -59,6 +59,7 @@ import 'package:school_app_flutter/features/schedule/presentation/pages/schedule
 import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_feature_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/shell_tab_title.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -114,7 +115,7 @@ class HomePage extends StatelessWidget {
             permissions: state.permissions,
           ),
         ),
-        child: const _HomePageView(),
+        child: const ShellTabTitle(child: _HomePageView()),
       ),
     );
   }
