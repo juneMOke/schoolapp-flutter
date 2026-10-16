@@ -40,10 +40,19 @@ class ChapitreRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // La largeur de la LIGNE : menu latéral ouvert, l'écran en surestime la
+    // place et laissait Modifier / Supprimer déborder.
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildRow(
+        context,
+        compact: constraints.maxWidth < ProgrammeLayout.compactRowBelow,
+      ),
+    );
+  }
+
+  Widget _buildRow(BuildContext context, {required bool compact}) {
     final l10n = AppLocalizations.of(context)!;
     final chapitre = row.chapitre;
-    final compact =
-        MediaQuery.sizeOf(context).width < ProgrammeLayout.compactRowBelow;
     final resume = chapitre.resume?.trim() ?? '';
     return Semantics(
       button: true,

@@ -68,9 +68,17 @@ class _ScheduleViewState extends State<ScheduleView> {
 
   @override
   Widget build(BuildContext context) {
-    // Choix explicite s'il existe, sinon défaut selon la largeur disponible.
-    final mode =
-        _mode ?? defaultScheduleViewMode(MediaQuery.sizeOf(context).width);
+    // Choix explicite s'il existe, sinon défaut selon la largeur REÇUE — celle
+    // de la zone de contenu, menu latéral déduit, pas celle de l'écran.
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildView(
+        context,
+        _mode ?? defaultScheduleViewMode(constraints.maxWidth),
+      ),
+    );
+  }
+
+  Widget _buildView(BuildContext context, ScheduleViewMode mode) {
     return BlocBuilder<TimetableBloc, TimetableState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||

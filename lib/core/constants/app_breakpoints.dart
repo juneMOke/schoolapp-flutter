@@ -56,11 +56,6 @@ class AppBreakpoints {
   // Facturation — seuils responsive dédiés (spec §00 : occupation de l'espace).
   // Au-delà : la page détail élargit son contenu et juxtapose Paiements | Frais.
   static const double financeDetailTwoColMin = navigationCompactMax; // 1024
-  // Dashboard stats : juxtapose Évolution | Répartition par frais au-delà.
-  static const double financeStatsTwoColMin = 1100.0;
-  // Section par type de frais : 2 colonnes / 3 colonnes (valeurs conservées).
-  static const double financeStatsFeeTypeTwoColMin = 640.0;
-  static const double financeStatsFeeTypeThreeColMin = 980.0;
   // Pied de modale : en deçà, les deux boutons s'empilent (sinon Row).
   static const double financeModalFooterRowMin = 360.0;
   // Barre d'encaissement de la page « Encaisser un paiement » : au-delà, le
@@ -95,10 +90,6 @@ class AppBreakpoints {
   /// Largeur d'écran sous laquelle les actions de dossier de la barre sombre
   /// passent en icône seule (Désactiver, Fiche d'inscription, Modifier).
   static const double enrollmentJourneyActionLabelsMin = 1024.0;
-
-  // Carte de cas disciplinaire — pied (frise + action). En deçà : empilement
-  // vertical pour éviter tout débordement ; au-delà : frise et action en Row.
-  static const double disciplinaryCardFooterStackMax = 480.0;
 
   // Tableau de bord des présences (Disciplines) — la paire 1fr/1fr
   // (Jour/Top classes) passe en colonne sous ce seuil.

@@ -24,16 +24,17 @@ class ConfigurationFieldGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final columns = width < AppBreakpoints.configurationCompactMax
-        ? 1
-        : width < AppBreakpoints.configurationGridMax
-        ? 2
-        : wideColumns;
-
+    // La largeur REÇUE, pas celle de l'écran : la grille vit aussi dans des
+    // modales et des panneaux, où quatre colonnes « d'écran large » donnaient
+    // des champs de 160 dp.
     return LayoutBuilder(
       builder: (context, constraints) {
         final available = constraints.maxWidth;
+        final columns = available < AppBreakpoints.configurationCompactMax
+            ? 1
+            : available < AppBreakpoints.configurationGridMax
+            ? 2
+            : wideColumns;
         final gaps = AppSpacing.md * (columns - 1);
         final itemWidth = columns == 1
             ? available

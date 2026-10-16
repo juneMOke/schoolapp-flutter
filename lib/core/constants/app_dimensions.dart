@@ -1,8 +1,7 @@
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 class AppDimensions {
-  static const sidebarWidth = 280.0;
-  static const sidebarCollapsedWidth = 84.0;
+  // Largeurs du menu latéral : `AppTheme.sidebarWidth` / `sidebarCollapsedWidth`.
   // Aligné sur AppTheme.topBarHeight (source unique de la hauteur de barre).
   static const topBarHeight = 68.0;
   static const pagePadding = 24.0;
