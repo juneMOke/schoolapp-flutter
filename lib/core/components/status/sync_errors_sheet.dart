@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
 import 'package:school_app_flutter/core/components/status/outbox_errors_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_errors_body.dart';
 import 'package:school_app_flutter/core/components/status/sync_incomplete_read_band.dart';
@@ -11,7 +12,6 @@ import 'package:school_app_flutter/core/components/status/sync_status_state.dart
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/pull_diagnostic.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
@@ -39,13 +39,8 @@ Future<void> showSyncErrorsSheet(BuildContext context) async {
   // existe aussi hors connexion.
   final showDiagnostics = await _isSuperAdmin();
   if (!context.mounted) return;
-  await showModalBottomSheet<void>(
+  await showEteeloAdaptiveSheet<void>(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: AppColors.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: AppRadius.card),
-    ),
     builder: (sheetContext) => MultiBlocProvider(
       providers: [
         // `.value` : la racine reste propriétaire du cubit, la feuille ne le

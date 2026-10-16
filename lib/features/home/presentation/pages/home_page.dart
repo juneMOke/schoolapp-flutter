@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:school_app_flutter/core/components/keyboard/route_key_shortcut.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/selection/desktop_selection_area.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -146,21 +148,34 @@ class _HomePageView extends StatelessWidget {
           previous.currentTitle != current.currentTitle ||
           previous.selectedMenuId != current.selectedMenuId ||
           previous.selectedSubMenuId != current.selectedSubMenuId,
+      // Ctrl+B (⌘+B) replie et déplie le menu latéral, comme dans un éditeur.
       builder: (context, state) {
-        return Row(
-          children: [
-            const Sidebar(),
-            Expanded(
-              child: Column(
-                children: [
-                  const TopBar(isCompact: false),
-                  Expanded(
-                    child: _buildMainContent(context, state, isCompact: false),
-                  ),
-                ],
-              ),
-            ),
+        return RouteKeyShortcut(
+          activators: const [
+            SingleActivator(LogicalKeyboardKey.keyB, control: true),
+            SingleActivator(LogicalKeyboardKey.keyB, meta: true),
           ],
+          onPressed: () =>
+              context.read<NavigationBloc>().add(const SidebarToggled()),
+          child: Row(
+            children: [
+              const Sidebar(),
+              Expanded(
+                child: Column(
+                  children: [
+                    const TopBar(isCompact: false),
+                    Expanded(
+                      child: _buildMainContent(
+                        context,
+                        state,
+                        isCompact: false,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

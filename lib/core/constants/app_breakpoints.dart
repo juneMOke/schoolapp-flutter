@@ -17,6 +17,9 @@ class AppBreakpoints {
   // popover y serait à la fois trop étroit pour lire un libellé entier et trop
   // bas pour être atteint au pouce.
   static const double selectPopoverMin = detailCompactMax;
+  // Feuille du bas ⇄ modale centrée (`showEteeloAdaptiveSheet`) : le même seuil
+  // que le sélecteur, pour qu'une même largeur donne la même forme à tout.
+  static const double adaptiveSheetDialogMin = selectPopoverMin;
 
   /// Assistant de mise en service — deux bascules seulement.
   ///
