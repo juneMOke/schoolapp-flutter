@@ -567,6 +567,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get configurationFeeEdit => 'Modifier le frais';
+
+  @override
+  String get configurationFeeDelete => 'Supprimer le frais';
+
+  @override
   String configurationFeeSaved(String label) {
     return 'Frais « $label » enregistré';
   }

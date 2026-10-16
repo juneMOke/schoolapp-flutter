@@ -566,6 +566,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get configurationFeeEdit => 'Edit fee';
+
+  @override
+  String get configurationFeeDelete => 'Delete fee';
+
+  @override
   String configurationFeeSaved(String label) {
     return 'Fee \"$label\" saved';
   }

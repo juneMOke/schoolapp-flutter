@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -157,7 +158,7 @@ class EnrollmentJourneyAppBar extends StatelessWidget
   }
 }
 
-class _JourneyIconButton extends StatefulWidget {
+class _JourneyIconButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
@@ -169,34 +170,25 @@ class _JourneyIconButton extends StatefulWidget {
   });
 
   @override
-  State<_JourneyIconButton> createState() => _JourneyIconButtonState();
-}
-
-class _JourneyIconButtonState extends State<_JourneyIconButton> {
-  bool _isHovered = false;
-
-  @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: widget.tooltip,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
-        child: GestureDetector(
-          onTap: widget.onPressed,
-          child: AnimatedContainer(
-            duration: AppMotion.fast,
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.textOnDark.withValues(
-                alpha: _isHovered ? 0.18 : 0.10,
-              ),
-              borderRadius: AppRadius.brSm,
+      message: tooltip,
+      child: EteeloActivatable(
+        onActivate: onPressed,
+        builder: (context, highlight) => AnimatedContainer(
+          duration: AppMotion.fast,
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: AppColors.textOnDark.withValues(
+              alpha: highlight.hovered ? 0.18 : 0.10,
             ),
-            child: Icon(widget.icon, size: 22, color: AppColors.textOnDark),
+            borderRadius: AppRadius.brSm,
+            border: highlight.focused
+                ? Border.all(color: AppColors.textOnDark, width: 2)
+                : null,
           ),
+          child: Icon(icon, size: 22, color: AppColors.textOnDark),
         ),
       ),
     );

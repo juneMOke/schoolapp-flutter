@@ -575,6 +575,8 @@
       }
     }
   },
+  "configurationFeeEdit": "Modifier le frais",
+  "configurationFeeDelete": "Supprimer le frais",
   "configurationFeeSaved": "Frais « {label} » enregistré",
   "@configurationFeeSaved": {
     "description": "Toast d'ajout ou de mise à jour d'un frais",

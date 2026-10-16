@@ -32,7 +32,9 @@ class PresenceMonthCloseDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final notMarked = notMarkedWarning;
+    void submit() => Navigator.of(context).pop(true);
     return EteeloFormDialog(
+      onSubmit: submit,
       title: title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,7 +73,7 @@ class PresenceMonthCloseDialog extends StatelessWidget {
         EteeloButton.primary(
           label: confirmLabel,
           icon: Icons.lock,
-          onPressed: () => Navigator.of(context).pop(true),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

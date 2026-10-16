@@ -86,7 +86,9 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
     final preview = widget.preview(_variables) ?? line;
     final unit = widget.settings.of(currency).childAllowanceInCents;
     String money(int cents) => PayrollLabels.money(cents, currency);
+    void submit() => Navigator.of(context).pop(_variables);
     return EteeloFormDialog(
+      onSubmit: submit,
       eyebrow: widget.name,
       title: l10n.payrollVarsTitle,
       body: Column(
@@ -182,7 +184,7 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
         ),
         EteeloButton.primary(
           label: l10n.payrollSave,
-          onPressed: () => Navigator.of(context).pop(_variables),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

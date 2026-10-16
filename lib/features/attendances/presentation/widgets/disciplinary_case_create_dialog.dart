@@ -690,6 +690,7 @@ class _DisciplinaryCaseCreateDialogState
           ),
           if (!isLoading)
             IconButton(
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
               icon: const Icon(Icons.close),
               onPressed: () => Navigator.pop(context),
             ),

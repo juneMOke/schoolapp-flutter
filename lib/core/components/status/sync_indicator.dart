@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/components/status/last_sync_label.dart';
@@ -54,9 +55,14 @@ class SyncIndicator extends StatelessWidget {
     final isNeutral = appearance.color == AppColors.textMuted;
     final relative = _relativeLastSync(l10n);
 
-    final bgColor = isNeutral
-        ? AppColors.surfaceAlt
-        : appearance.color.withValues(alpha: 0.12);
+    // Au survol, le fond se densifie ; au focus clavier, un bord à la
+    // couleur du statut — la pastille est la porte du détail de synchro.
+    Color bgColor(ActivatableHighlight highlight) {
+      if (isNeutral) {
+        return highlight.hovered ? AppColors.border : AppColors.surfaceAlt;
+      }
+      return appearance.color.withValues(alpha: highlight.hovered ? 0.2 : 0.12);
+    }
 
     final label = relative == null
         ? appearance.label
@@ -77,23 +83,23 @@ class SyncIndicator extends StatelessWidget {
       ),
     );
 
-    final pill = DecoratedBox(
+    Widget pill(ActivatableHighlight highlight) => DecoratedBox(
       decoration: BoxDecoration(
-        color: bgColor,
+        color: bgColor(highlight),
         borderRadius: BorderRadius.circular(999),
+        border: highlight.focused
+            ? Border.all(color: appearance.color, width: 2)
+            : null,
       ),
       child: content,
     );
 
-    if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: pill,
-      );
-    }
+    if (onTap == null) return pill(const ActivatableHighlight());
 
-    return pill;
+    return EteeloActivatable(
+      onActivate: onTap,
+      builder: (context, highlight) => pill(highlight),
+    );
   }
 
   /// Texte relatif depuis [lastSyncAtMs], `null` si aucune synchro connue.

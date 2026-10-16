@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -95,22 +96,25 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
 
   // ── Styles dynamiques ──────────────────────────────────────────────────────
 
-  Color _borderColor(String? resolvedErrorText) {
+  /// Le champ s'allume pendant le calendrier ET au focus clavier : c'est le
+  /// même anneau que celui des champs texte.
+  Color _borderColor(String? resolvedErrorText, bool active) {
     if (_dimmed) return AppColors.stateDisabled;
     if (resolvedErrorText != null && resolvedErrorText.isNotEmpty) {
       return AppColors.error;
     }
-    if (_isPickerOpen) return AppColors.bleuArdoise;
+    if (active) return AppColors.bleuArdoise;
     return AppColors.border;
   }
 
-  double _borderWidth() => _isPickerOpen ? _focusBorderWidth : _restBorderWidth;
+  double _borderWidth(bool active) =>
+      active ? _focusBorderWidth : _restBorderWidth;
 
-  double _horizontalPadding() =>
-      _isPickerOpen ? _focusHorizontalPadding : _restHorizontalPadding;
+  double _horizontalPadding(bool active) =>
+      active ? _focusHorizontalPadding : _restHorizontalPadding;
 
-  BoxShadow? _focusRing() {
-    if (!_isPickerOpen) return null;
+  BoxShadow? _focusRing(bool active) {
+    if (!active) return null;
     return const BoxShadow(
       color: AppColors.stateFocus,
       blurRadius: 0,
@@ -229,48 +233,53 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
       button: true,
       enabled: _interactive,
       readOnly: widget.readOnly,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        height: _fieldHeight,
-        padding: EdgeInsets.symmetric(horizontal: _horizontalPadding()),
-        decoration: BoxDecoration(
-          color: _backgroundColor(),
-          borderRadius: AppRadius.brSm,
-          border: Border.all(
-            color: _borderColor(resolvedErrorText),
-            width: _borderWidth(),
-          ),
-          boxShadow: [if (_focusRing() != null) _focusRing()!],
-        ),
-        child: GestureDetector(
-          onTap: _interactive ? () => _pickDate(state) : null,
-          behavior: HitTestBehavior.opaque,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  displayText ?? (widget.placeholder ?? ''),
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: displayText != null
-                        ? (_dimmed
-                              ? AppColors.textMuted
-                              : AppColors.textPrimary)
-                        : AppColors.textMuted,
-                    height: 1.3,
+      child: EteeloActivatable(
+        onActivate: _interactive ? () => _pickDate(state) : null,
+        builder: (context, highlight) {
+          final active = _isPickerOpen || highlight.focused;
+          final focusRing = _focusRing(active);
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            height: _fieldHeight,
+            padding: EdgeInsets.symmetric(
+              horizontal: _horizontalPadding(active),
+            ),
+            decoration: BoxDecoration(
+              color: _backgroundColor(),
+              borderRadius: AppRadius.brSm,
+              border: Border.all(
+                color: _borderColor(resolvedErrorText, active),
+                width: _borderWidth(active),
+              ),
+              boxShadow: [?focusRing],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    displayText ?? (widget.placeholder ?? ''),
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: displayText != null
+                          ? (_dimmed
+                                ? AppColors.textMuted
+                                : AppColors.textPrimary)
+                          : AppColors.textMuted,
+                      height: 1.3,
+                    ),
                   ),
                 ),
-              ),
-              Icon(
-                Icons.calendar_today_rounded,
-                size: 16,
-                color: _dimmed
-                    ? AppColors.stateDisabled
-                    : AppColors.bleuArdoise,
-              ),
-            ],
-          ),
-        ),
+                Icon(
+                  Icons.calendar_today_rounded,
+                  size: 16,
+                  color: _dimmed
+                      ? AppColors.stateDisabled
+                      : AppColors.bleuArdoise,
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

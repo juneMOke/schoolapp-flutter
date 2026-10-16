@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -22,6 +23,10 @@ class EteeloFormDialog extends StatelessWidget {
   /// Largeur maximale ; celle des modales de saisie par défaut.
   final double maxWidth;
 
+  /// L'action principale, telle que son bouton la porte (nulle quand il est
+  /// désactivé) : Ctrl+Entrée la déclenche, cf. [EteeloSubmitShortcut].
+  final VoidCallback? onSubmit;
+
   const EteeloFormDialog({
     super.key,
     required this.title,
@@ -30,6 +35,7 @@ class EteeloFormDialog extends StatelessWidget {
     this.eyebrow,
     this.leading,
     this.maxWidth = AppDimensions.formDialogMaxWidth,
+    this.onSubmit,
   });
 
   /// Ouvre [dialog] ; rend la valeur passée à `Navigator.pop`.
@@ -43,57 +49,60 @@ class EteeloFormDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: AppColors.surfaceRaised,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: maxWidth,
-          maxHeight: AppDimensions.formDialogMaxHeight,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: EteeloDialogBody(
-            minPinnedHeight: AppDimensions.formDialogMaxHeight / 2,
-            header: Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (eyebrow != null) ...[
+      child: EteeloSubmitShortcut(
+        onSubmit: onSubmit,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: maxWidth,
+            maxHeight: AppDimensions.formDialogMaxHeight,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: EteeloDialogBody(
+              minPinnedHeight: AppDimensions.formDialogMaxHeight / 2,
+              header: Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (eyebrow != null) ...[
+                      Text(
+                        eyebrow.toUpperCase(),
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.textMutedAa,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                    ],
                     Text(
-                      eyebrow.toUpperCase(),
-                      style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.textMutedAa,
+                      title,
+                      style: AppTypography.titleLarge.copyWith(
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
                   ],
-                  Text(
-                    title,
-                    style: AppTypography.titleLarge.copyWith(
-                      color: AppColors.textPrimary,
+                ),
+              ),
+              body: body,
+              footer: [
+                const SizedBox(height: AppSpacing.lg),
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: AppSpacing.sm,
+                  spacing: AppSpacing.sm,
+                  children: [
+                    ?leading,
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: actions,
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
-            body: body,
-            footer: [
-              const SizedBox(height: AppSpacing.lg),
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                runSpacing: AppSpacing.sm,
-                spacing: AppSpacing.sm,
-                children: [
-                  ?leading,
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: actions,
-                  ),
-                ],
-              ),
-            ],
           ),
         ),
       ),

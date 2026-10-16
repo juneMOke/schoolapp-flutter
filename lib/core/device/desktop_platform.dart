@@ -19,3 +19,7 @@ bool get isDesktopPlatform =>
 /// Bluetooth : poste de bureau (le paquet n'y parle que BLE, ou rien) et
 /// navigateur (aucun Bluetooth, et le paquet y lève sur `Platform`).
 bool get printsTicketsThroughSpooler => kIsWeb || isDesktopPlatform;
+
+/// Clavier physique attendu : poste de bureau et navigateur. Entrée y valide
+/// là où, sur la tablette, le clavier virtuel enchaîne les champs.
+bool get expectsPhysicalKeyboard => kIsWeb || isDesktopPlatform;

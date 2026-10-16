@@ -107,7 +107,9 @@ class _TemplateFormDialogState extends State<_TemplateFormDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final failure = _failure;
+    final VoidCallback? submit = _saving ? null : _save;
     return EteeloFormDialog(
+      onSubmit: submit,
       maxWidth: AppDimensions.communicationTemplateModalMaxWidth,
       title: widget.template == null
           ? l10n.communicationTemplateCreate
@@ -171,7 +173,7 @@ class _TemplateFormDialogState extends State<_TemplateFormDialog> {
           label: l10n.communicationTemplateSave,
           icon: Icons.save_outlined,
           isLoading: _saving,
-          onPressed: _saving ? null : _save,
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

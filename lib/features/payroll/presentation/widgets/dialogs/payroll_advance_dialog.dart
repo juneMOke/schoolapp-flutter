@@ -131,7 +131,9 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
             null)
           member,
     ];
+    final submit = _submit;
     return EteeloFormDialog(
+      onSubmit: submit,
       title: l10n.payrollAdvanceTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -239,7 +241,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
         ),
         EteeloButton.primary(
           label: l10n.payrollAdvanceTitle,
-          onPressed: _submit,
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

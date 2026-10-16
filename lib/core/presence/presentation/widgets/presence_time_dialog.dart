@@ -88,7 +88,11 @@ class _PresenceTimeDialogState extends State<PresenceTimeDialog> {
     final l10n = AppLocalizations.of(context)!;
     final time = _time;
     final schedule = widget.schedule;
+    final VoidCallback? submit = time == null
+        ? null
+        : () => Navigator.of(context).pop(PresenceTimeChoice(time));
     return EteeloFormDialog(
+      onSubmit: submit,
       title: widget.title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -148,9 +152,7 @@ class _PresenceTimeDialogState extends State<PresenceTimeDialog> {
         EteeloButton.primary(
           label: l10n.presenceMarkSave,
           icon: Icons.check,
-          onPressed: time == null
-              ? null
-              : () => Navigator.of(context).pop(PresenceTimeChoice(time)),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

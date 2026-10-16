@@ -575,6 +575,8 @@
       }
     }
   },
+  "configurationFeeEdit": "Edit fee",
+  "configurationFeeDelete": "Delete fee",
   "configurationFeeSaved": "Fee \"{label}\" saved",
   "@configurationFeeSaved": {
     "description": "Toast after adding or updating a fee",

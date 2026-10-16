@@ -133,7 +133,11 @@ class AppConfirmationDialog extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
+                // Entrée confirme une action ordinaire ; une action
+                // destructrice garde le focus sur « Annuler » : une touche
+                // pressée par réflexe ne détruit rien.
                 child: OutlinedButton.icon(
+                  autofocus: isDestructive,
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, AppDimensions.minTouchTarget),
                     side: const BorderSide(color: AppColors.borderStrong),
@@ -154,6 +158,7 @@ class AppConfirmationDialog extends StatelessWidget {
               const SizedBox(width: AppDimensions.spacingS),
               Expanded(
                 child: FilledButton.icon(
+                  autofocus: !isDestructive,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, AppDimensions.minTouchTarget),
                     backgroundColor: resolvedConfirmButtonColor,

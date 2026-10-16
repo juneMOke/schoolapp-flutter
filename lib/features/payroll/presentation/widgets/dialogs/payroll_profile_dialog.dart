@@ -64,7 +64,9 @@ class _PayrollProfileDialogState extends State<PayrollProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    void submit() => Navigator.of(context).pop(_profile);
     return EteeloFormDialog(
+      onSubmit: submit,
       eyebrow: widget.name,
       title: l10n.payrollProfileTitle,
       body: Column(
@@ -109,7 +111,7 @@ class _PayrollProfileDialogState extends State<PayrollProfileDialog> {
         ),
         EteeloButton.primary(
           label: l10n.payrollSave,
-          onPressed: () => Navigator.of(context).pop(_profile),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

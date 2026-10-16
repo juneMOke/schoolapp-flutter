@@ -91,7 +91,9 @@ class _PayrollPayDialogState extends State<PayrollPayDialog> {
     final refusal = _tried
         ? DisbursePayrollUseCase.refusalOf(widget.view, _draft)
         : null;
+    final submit = _submit;
     return EteeloFormDialog(
+      onSubmit: submit,
       eyebrow: widget.name,
       title: l10n.payrollPayTitle,
       body: Column(
@@ -155,7 +157,7 @@ class _PayrollPayDialogState extends State<PayrollPayDialog> {
         EteeloButton.primary(
           label: l10n.payrollPay,
           icon: _icon(_mode),
-          onPressed: _submit,
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

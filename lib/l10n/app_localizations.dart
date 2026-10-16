@@ -956,6 +956,18 @@ abstract class AppLocalizations {
   /// **'Fee \"{label}\" deleted'**
   String configurationFeeDeleted(String label);
 
+  /// No description provided for @configurationFeeEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit fee'**
+  String get configurationFeeEdit;
+
+  /// No description provided for @configurationFeeDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete fee'**
+  String get configurationFeeDelete;
+
   /// Toast after adding or updating a fee
   ///
   /// In en, this message translates to:

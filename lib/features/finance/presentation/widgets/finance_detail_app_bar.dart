@@ -49,6 +49,7 @@ class FinanceDetailAppBar extends StatelessWidget
         child: Align(
           alignment: Alignment.centerLeft,
           child: IconButton.filledTonal(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onPressed: () => _goBack(context),
             style: IconButton.styleFrom(
               backgroundColor: AppColors.bleuArdoise.withValues(alpha: 0.10),

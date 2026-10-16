@@ -208,10 +208,12 @@ class _SettingsTariffsPanelState extends State<SettingsTariffsPanel> {
                       style: AppTypography.money,
                     ),
                     IconButton(
+                      tooltip: l10n.configurationTariffEdit,
                       onPressed: _writing ? null : () => _edit(tariff),
                       icon: const Icon(Icons.edit_outlined, size: 18),
                     ),
                     IconButton(
+                      tooltip: l10n.configurationTariffDelete,
                       onPressed: _writing ? null : () => _delete(tariff),
                       icon: const Icon(Icons.delete_outline_rounded, size: 18),
                     ),

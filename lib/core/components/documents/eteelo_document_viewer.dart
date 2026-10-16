@@ -280,6 +280,7 @@ class DocumentViewerHeader extends StatelessWidget {
             ),
           ),
           IconButton(
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
             onPressed: onClose,
             icon: const Icon(Icons.close_rounded),
             color: AppColors.textMuted,
