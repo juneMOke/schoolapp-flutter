@@ -272,7 +272,7 @@ class _NoteField extends StatelessWidget {
       borderSide: BorderSide(color: c, width: w),
     );
     return SizedBox(
-      width: 150,
+      width: AppDimensions.saisieNoteFieldWidth,
       child: TextField(
         controller: controller,
         focusNode: focusNode,

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/selection/desktop_selection_area.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -251,17 +252,7 @@ class _HomePageView extends StatelessWidget {
         isCompact ? AppDimensions.spacingM : AppDimensions.spacingL,
       ),
       // Bureau : contenu plafonné à 1180 dp et centré ; compact : pleine largeur.
-      child: isCompact
-          ? content
-          : Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppDimensions.detailContentMaxWidth,
-                ),
-                child: content,
-              ),
-            ),
+      child: isCompact ? content : ContentMaxWidth(child: content),
     );
   }
 

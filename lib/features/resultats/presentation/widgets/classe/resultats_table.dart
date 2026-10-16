@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -74,18 +75,21 @@ class _ResultatsTableState extends State<ResultatsTable> {
         border: Border.all(color: AppColors.border),
         boxShadow: AppElevation.shadowCard,
       ),
-      child: Column(
-        children: [
-          _header(l10n, sousPeriodes.length),
-          for (final ligne in lignes)
-            ResultatsTableRow(
-              ligne: ligne,
-              seuil: seuil,
-              classroomLabel: widget.classroomLabel,
-              sousPeriodeCount: sousPeriodes.length,
-              onTap: ligne.nonClasse ? null : () => widget.onOpenLigne(ligne),
-            ),
-        ],
+      child: EteeloMinWidthScroll(
+        minWidth: resultatsTableMinWidth(sousPeriodes.length),
+        child: Column(
+          children: [
+            _header(l10n, sousPeriodes.length),
+            for (final ligne in lignes)
+              ResultatsTableRow(
+                ligne: ligne,
+                seuil: seuil,
+                classroomLabel: widget.classroomLabel,
+                sousPeriodeCount: sousPeriodes.length,
+                onTap: ligne.nonClasse ? null : () => widget.onOpenLigne(ligne),
+              ),
+          ],
+        ),
       ),
     );
   }

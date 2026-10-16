@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/selection/desktop_selection_area.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -56,15 +57,7 @@ class AppPageBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.detailContentMaxWidth,
-        ),
-        child: DesktopSelectionArea(child: child),
-      ),
-    );
+    final content = ContentMaxWidth(child: DesktopSelectionArea(child: child));
 
     final body = style == AppPageBackgroundStyle.flat
         ? DecoratedBox(

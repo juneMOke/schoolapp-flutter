@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_results_section.dart';
@@ -32,40 +33,34 @@ class ClassesOrganisationPageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final cycle = _selectedCycle(cycles, selectedCycleId);
 
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.detailContentMaxWidth,
+    return ContentMaxWidth(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(
+          AppDimensions.spacingL,
+          0,
+          AppDimensions.spacingL,
+          AppDimensions.spacingL,
         ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            AppDimensions.spacingL,
-            0,
-            AppDimensions.spacingL,
-            AppDimensions.spacingL,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClassesOrganisationSearchForm(
-                schoolYear: schoolYear,
-                cycles: cycles,
-                selectedCycleId: selectedCycleId,
-                selectedLevelId: selectedLevel?.key,
-                onCycleChanged: onCycleChanged,
-                onLevelChanged: onLevelChanged,
-              ),
-              const SizedBox(height: AppDimensions.spacingL),
-              ClassesOrganisationResultsSection(
-                selectedCycle: cycle,
-                selectedLevel: selectedLevel,
-                isDistributing: isDistributing,
-                onDistributionRequested: onDistributionRequested,
-                onTransferTap: onTransferTap,
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClassesOrganisationSearchForm(
+              schoolYear: schoolYear,
+              cycles: cycles,
+              selectedCycleId: selectedCycleId,
+              selectedLevelId: selectedLevel?.key,
+              onCycleChanged: onCycleChanged,
+              onLevelChanged: onLevelChanged,
+            ),
+            const SizedBox(height: AppDimensions.spacingL),
+            ClassesOrganisationResultsSection(
+              selectedCycle: cycle,
+              selectedLevel: selectedLevel,
+              isDistributing: isDistributing,
+              onDistributionRequested: onDistributionRequested,
+              onTransferTap: onTransferTap,
+            ),
+          ],
         ),
       ),
     );

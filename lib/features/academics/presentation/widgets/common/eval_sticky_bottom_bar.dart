@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
 /// Barre collante en bas des pages d'une évaluation, placée dans le
@@ -26,16 +26,7 @@ class EvalStickyBottomBar extends StatelessWidget {
         // Sans lui, l'Align remplirait la contrainte lâche du
         // bottomNavigationBar (toute la hauteur d'écran) et masquerait le
         // corps + pousserait les toasts flottants hors écran.
-        child: Align(
-          alignment: Alignment.topCenter,
-          heightFactor: 1.0,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppDimensions.detailContentMaxWidth,
-            ),
-            child: child,
-          ),
-        ),
+        child: ContentMaxWidth(heightFactor: 1.0, child: child),
       ),
     );
   }

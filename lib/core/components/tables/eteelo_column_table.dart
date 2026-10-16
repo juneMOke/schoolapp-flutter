@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -27,7 +28,8 @@ class EteeloColumns extends StatelessWidget {
 
 /// Un tableau à colonnes fixes (récapitulatifs du Pointage et de l'appel,
 /// livre de paie, avances, historique) : un en-tête gris, des lignes
-/// filetées, et un défilement horizontal sous [minWidth].
+/// filetées, et un défilement horizontal sous [minWidth]
+/// ([EteeloMinWidthScroll]).
 class EteeloColumnTable extends StatelessWidget {
   final double minWidth;
   final List<double?> widths;
@@ -53,43 +55,36 @@ class EteeloColumnTable extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) => SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SizedBox(
-        width: constraints.maxWidth < minWidth
-            ? minWidth
-            : constraints.maxWidth,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: const BoxDecoration(
-                color: AppColors.surfaceAlt,
-                borderRadius: AppRadius.brSm,
-              ),
-              child: EteeloColumns(
-                widths: widths,
-                cells: [
-                  for (final (index, text) in headers.indexed)
-                    Text(
-                      text.toUpperCase(),
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: endAligned.contains(index)
-                          ? TextAlign.end
-                          : TextAlign.start,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.textMutedAa,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            for (var index = 0; index < rowCount; index++) row(context, index),
-            ?footer,
-          ],
+  Widget build(BuildContext context) => EteeloMinWidthScroll(
+    minWidth: minWidth,
+    child: Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: const BoxDecoration(
+            color: AppColors.surfaceAlt,
+            borderRadius: AppRadius.brSm,
+          ),
+          child: EteeloColumns(
+            widths: widths,
+            cells: [
+              for (final (index, text) in headers.indexed)
+                Text(
+                  text.toUpperCase(),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: endAligned.contains(index)
+                      ? TextAlign.end
+                      : TextAlign.start,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.textMutedAa,
+                  ),
+                ),
+            ],
+          ),
         ),
-      ),
+        for (var index = 0; index < rowCount; index++) row(context, index),
+        ?footer,
+      ],
     ),
   );
 }

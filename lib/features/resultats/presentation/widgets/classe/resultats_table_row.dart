@@ -16,6 +16,21 @@ const int kResultatsPeriodFlex = 3;
 const int kResultatsMoyenneFlex = 4;
 const double kResultatsChevronColWidth = 26;
 
+/// Largeur minimale d'une part de flex : l'élève garde ~160 dp pour son nom,
+/// une sous-période ~96 dp pour « 14,5 / 20 ».
+const double kResultatsFlexUnitMinWidth = 32;
+
+/// Sous cette largeur, la table défile au lieu d'écraser ses colonnes — elle
+/// grandit d'une colonne par sous-période.
+double resultatsTableMinWidth(int sousPeriodeCount) =>
+    kResultatsRankColWidth +
+    kResultatsChevronColWidth +
+    AppSpacing.md * 2 +
+    kResultatsFlexUnitMinWidth *
+        (kResultatsEleveFlex +
+            kResultatsPeriodFlex * sousPeriodeCount +
+            kResultatsMoyenneFlex);
+
 /// Une ligne élève de la table (spec §4). Non classé → cellules « — », badge
 /// « Non classé », ligne **non cliquable** (pas de chevron). Classé → chevron +
 /// [onTap] vers la vue focus. Rang top 3 en or doux.

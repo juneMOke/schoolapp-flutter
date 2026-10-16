@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -45,20 +46,27 @@ class RecouvrementSimulationTable extends StatelessWidget {
       children: [
         EteeloKpiBand(cards: _cards(l10n)),
         const SizedBox(height: AppDimensions.spacingM),
-        _Header(),
-        for (final row in simulation.rows)
-          _Row(
-            row: row,
-            criticalPercent: criticalPercent,
-            label: labels.labelFor(
-              row.schoolLevelId,
-              l10n,
-              withGroup: showCycleInLabels,
-            ),
-            onTap: row.targeted > 0 && onGroupTapped != null
-                ? () => onGroupTapped!(row.schoolLevelId)
-                : null,
+        EteeloMinWidthScroll(
+          minWidth: AppDimensions.recouvrementSimTableMinWidth,
+          child: Column(
+            children: [
+              _Header(),
+              for (final row in simulation.rows)
+                _Row(
+                  row: row,
+                  criticalPercent: criticalPercent,
+                  label: labels.labelFor(
+                    row.schoolLevelId,
+                    l10n,
+                    withGroup: showCycleInLabels,
+                  ),
+                  onTap: row.targeted > 0 && onGroupTapped != null
+                      ? () => onGroupTapped!(row.schoolLevelId)
+                      : null,
+                ),
+            ],
           ),
+        ),
       ],
     );
   }
