@@ -48,9 +48,6 @@ class AppTheme {
     colorScheme: _lightColorScheme,
     scaffoldBackgroundColor: AppColors.surface,
     splashFactory: NoSplash.splashFactory,
-    // Plus dense sur un poste de bureau, où l'on vise à la souris ; inchangé
-    // sur la tablette (densité standard sur Android et iOS).
-    visualDensity: VisualDensity.adaptivePlatformDensity,
     hoverColor: AppColors.stateHover,
     focusColor: AppColors.stateFocus,
     // La barre se saisit à la souris : la seule façon de faire défiler un

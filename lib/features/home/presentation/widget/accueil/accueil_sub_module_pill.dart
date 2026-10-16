@@ -71,45 +71,45 @@ class AccueilSubModulePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Semantics(
-      button: true,
-      label: l10n.accueilSubModuleSemantics(moduleTitle, subModule.label),
-      child: EteeloActivatable(
-        onActivate: () => _navigate(context),
-        builder: (context, highlight) => AnimatedContainer(
-          duration: AppMotion.fast,
-          curve: AppMotion.outCurve,
-          constraints: const BoxConstraints(
-            minHeight: AccueilUiTokens.blocPillMinHeight,
+    return EteeloActivatable(
+      semanticLabel: l10n.accueilSubModuleSemantics(
+        moduleTitle,
+        subModule.label,
+      ),
+      onActivate: () => _navigate(context),
+      builder: (context, highlight) => AnimatedContainer(
+        duration: AppMotion.fast,
+        curve: AppMotion.outCurve,
+        constraints: const BoxConstraints(
+          minHeight: AccueilUiTokens.blocPillMinHeight,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AccueilUiTokens.blocPillPaddingH,
+        ),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.accueilBlocInkMain.withValues(
+            alpha: _veil(highlight),
           ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AccueilUiTokens.blocPillPaddingH,
-          ),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.accueilBlocInkMain.withValues(
-              alpha: _veil(highlight),
-            ),
-            borderRadius: AppRadius.brPill,
-            border: Border.all(color: _borderColor(highlight)),
-          ),
-          child: ExcludeSemantics(
-            child: Text(
-              subModule.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: AccueilUiTokens.blocPillFontSize,
-                fontWeight: subModule.isDashboard
-                    ? FontWeight.w600
-                    : FontWeight.w500,
-                // Crème pour le tableau de bord sur TOUS les pavés, encre
-                // principale pour les autres — jamais l'accent (§03).
-                color: subModule.isDashboard
-                    ? AppColors.accueilBlocAccentCreme
-                    : AppColors.accueilBlocInkMain,
-              ),
+          borderRadius: AppRadius.brPill,
+          border: Border.all(color: _borderColor(highlight)),
+        ),
+        child: ExcludeSemantics(
+          child: Text(
+            subModule.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: AccueilUiTokens.blocPillFontSize,
+              fontWeight: subModule.isDashboard
+                  ? FontWeight.w600
+                  : FontWeight.w500,
+              // Crème pour le tableau de bord sur TOUS les pavés, encre
+              // principale pour les autres — jamais l'accent (§03).
+              color: subModule.isDashboard
+                  ? AppColors.accueilBlocAccentCreme
+                  : AppColors.accueilBlocInkMain,
             ),
           ),
         ),

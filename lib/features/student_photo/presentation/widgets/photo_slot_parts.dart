@@ -22,31 +22,28 @@ class PhotoSlotEmptyCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: semanticLabel,
-      child: EteeloActivatable(
-        onActivate: onTap,
-        builder: (context, highlight) {
-          final color = highlight.any
-              ? AppColors.bleuArdoise
-              : AppColors.borderStrong;
-          return CustomPaint(
-            painter: _DashedCirclePainter(
+    return EteeloActivatable(
+      semanticLabel: semanticLabel,
+      onActivate: onTap,
+      builder: (context, highlight) {
+        final color = highlight.any
+            ? AppColors.bleuArdoise
+            : AppColors.borderStrong;
+        return CustomPaint(
+          painter: _DashedCirclePainter(
+            color: color,
+            fill: highlight.any ? AppColors.stateHover : AppColors.surfaceAlt,
+          ),
+          child: SizedBox.square(
+            dimension: AppDimensions.photoSlotCircle,
+            child: Icon(
+              Icons.photo_camera_outlined,
+              size: AppSpacing.xxl,
               color: color,
-              fill: highlight.any ? AppColors.stateHover : AppColors.surfaceAlt,
             ),
-            child: SizedBox.square(
-              dimension: AppDimensions.photoSlotCircle,
-              child: Icon(
-                Icons.photo_camera_outlined,
-                size: AppSpacing.xxl,
-                color: color,
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

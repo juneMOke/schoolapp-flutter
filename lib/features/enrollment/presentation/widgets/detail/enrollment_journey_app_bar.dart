@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -185,7 +186,10 @@ class _JourneyIconButton extends StatelessWidget {
             ),
             borderRadius: AppRadius.brSm,
             border: highlight.focused
-                ? Border.all(color: AppColors.textOnDark, width: 2)
+                ? Border.all(
+                    color: AppColors.textOnDark,
+                    width: AppDimensions.focusRingWidth,
+                  )
                 : null,
           ),
           child: Icon(icon, size: 22, color: AppColors.textOnDark),

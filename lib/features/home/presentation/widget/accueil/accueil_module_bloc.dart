@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
@@ -146,18 +147,17 @@ class _AccueilModuleBlocState extends State<AccueilModuleBloc> {
     return Semantics(
       button: true,
       label: l10n.accueilModuleCardSemantics(module.title, module.entry.label),
-      child: FocusableActionDetector(
-        mouseCursor: SystemMouseCursors.click,
-        onShowFocusHighlight: (value) => setState(() => _isFocused = value),
-        actions: {
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (_) => _openEntryPage(),
-          ),
+      child: EteeloActivatable(
+        onActivate: _openEntryPage,
+        // Le focus de la zone d'entrée se rend au niveau du pavé entier
+        // (élévation, anneau) : il remonte dans l'état du pavé.
+        onHighlightChanged: (highlight) {
+          if (_isFocused != highlight.focused) {
+            setState(() => _isFocused = highlight.focused);
+          }
         },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _openEntryPage,
-          child: ExcludeSemantics(
+        builder: (context, highlight) {
+          return ExcludeSemantics(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -181,8 +181,8 @@ class _AccueilModuleBlocState extends State<AccueilModuleBloc> {
                 ),
               ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

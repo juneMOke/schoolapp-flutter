@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -37,6 +38,10 @@ enum SyncStatus {
 ///   après le libellé de statut (" · il y a N min") quand connu — absent tant
 ///   qu'aucune synchro n'a encore ramené de données.
 class SyncIndicator extends StatelessWidget {
+  /// Voile de la teinte du statut, au repos puis au survol.
+  static const double _restFillAlpha = 0.12;
+  static const double _hoverFillAlpha = 0.2;
+
   final SyncStatus status;
   final int? lastSyncAtMs;
   final VoidCallback? onTap;
@@ -61,7 +66,9 @@ class SyncIndicator extends StatelessWidget {
       if (isNeutral) {
         return highlight.hovered ? AppColors.border : AppColors.surfaceAlt;
       }
-      return appearance.color.withValues(alpha: highlight.hovered ? 0.2 : 0.12);
+      return appearance.color.withValues(
+        alpha: highlight.hovered ? _hoverFillAlpha : _restFillAlpha,
+      );
     }
 
     final label = relative == null
@@ -88,7 +95,10 @@ class SyncIndicator extends StatelessWidget {
         color: bgColor(highlight),
         borderRadius: BorderRadius.circular(999),
         border: highlight.focused
-            ? Border.all(color: appearance.color, width: 2)
+            ? Border.all(
+                color: appearance.color,
+                width: AppDimensions.focusRingWidth,
+              )
             : null,
       ),
       child: content,
@@ -97,6 +107,7 @@ class SyncIndicator extends StatelessWidget {
     if (onTap == null) return pill(const ActivatableHighlight());
 
     return EteeloActivatable(
+      semanticLabel: label,
       onActivate: onTap,
       builder: (context, highlight) => pill(highlight),
     );

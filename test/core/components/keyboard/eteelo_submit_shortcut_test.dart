@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_submit_shortcut.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 
 void main() {
   Future<void> pump(WidgetTester tester, VoidCallback? onSubmit) {

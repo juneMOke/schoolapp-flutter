@@ -78,6 +78,7 @@ class DocumentsCatalogPage extends StatelessWidget {
         ),
       ],
       child: AppPageBackground(
+        selectableText: true,
         appBar: StudentDetailAppBar(
           fullName: _fullName(context),
           eyebrow: _eyebrow(context),

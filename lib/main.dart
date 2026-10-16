@@ -34,9 +34,11 @@ import 'package:school_app_flutter/core/components/avatars/person_photo_source.d
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
 
 void main() async {
+  // Avant tout : le moteur fige la stratégie d'adresse au premier accès à
+  // l'historique du navigateur.
+  useCleanWebUrls();
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
-  useCleanWebUrls();
   runApp(const MyApp());
   // Web : retirer le pré-splash HTML une fois le 1er frame Flutter peint
   // (évite le trou bleu entre l'attache de la vue et le premier rendu).

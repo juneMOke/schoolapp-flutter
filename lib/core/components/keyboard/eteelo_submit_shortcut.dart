@@ -23,10 +23,23 @@ class EteeloSubmitShortcut extends StatelessWidget {
     required this.child,
   });
 
+  /// Sans répétition : Ctrl+Entrée maintenue n'envoie qu'une fois.
   static const List<ShortcutActivator> activators = [
-    SingleActivator(LogicalKeyboardKey.enter, control: true),
-    SingleActivator(LogicalKeyboardKey.numpadEnter, control: true),
-    SingleActivator(LogicalKeyboardKey.enter, meta: true),
+    SingleActivator(
+      LogicalKeyboardKey.enter,
+      control: true,
+      includeRepeats: false,
+    ),
+    SingleActivator(
+      LogicalKeyboardKey.numpadEnter,
+      control: true,
+      includeRepeats: false,
+    ),
+    SingleActivator(
+      LogicalKeyboardKey.enter,
+      meta: true,
+      includeRepeats: false,
+    ),
   ];
 
   @override

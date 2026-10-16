@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -88,43 +89,36 @@ class EnrollmentStepperLayout extends StatelessWidget {
                     horizontal: AppTheme.defaultPadding,
                     vertical: roomy ? AppTheme.defaultPadding : AppSpacing.sm,
                   ),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: _stepCardMaxWidth,
-                      ),
-                      child: AnimatedSwitcher(
-                        duration: reduceMotion
-                            ? Duration.zero
-                            : AppMotion.stepIn,
-                        switchInCurve: Curves.easeOutCubic,
-                        switchOutCurve: Curves.easeInCubic,
-                        transitionBuilder: (child, animation) {
-                          if (reduceMotion) return child;
-                          // etStepIn : fondu + glissement translateY 10 → 0.
-                          return FadeTransition(
-                            opacity: animation,
-                            child: AnimatedBuilder(
-                              animation: animation,
-                              builder: (context, inner) => Transform.translate(
-                                offset: Offset(0, (1 - animation.value) * 10),
-                                child: inner,
-                              ),
-                              child: child,
+                  child: ContentMaxWidth(
+                    maxWidth: _stepCardMaxWidth,
+                    child: AnimatedSwitcher(
+                      duration: reduceMotion ? Duration.zero : AppMotion.stepIn,
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, animation) {
+                        if (reduceMotion) return child;
+                        // etStepIn : fondu + glissement translateY 10 → 0.
+                        return FadeTransition(
+                          opacity: animation,
+                          child: AnimatedBuilder(
+                            animation: animation,
+                            builder: (context, inner) => Transform.translate(
+                              offset: Offset(0, (1 - animation.value) * 10),
+                              child: inner,
                             ),
-                          );
-                        },
-                        child: StepPageCard(
-                          key: ValueKey(currentStep),
-                          eyebrow: stepEyebrow,
-                          title: stepTitle,
-                          subtitle: stepSubtitle,
-                          accentColor: stepAccentColor,
-                          icon: stepIcon,
-                          banner: stepBanner,
-                          child: stepContent,
-                        ),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: StepPageCard(
+                        key: ValueKey(currentStep),
+                        eyebrow: stepEyebrow,
+                        title: stepTitle,
+                        subtitle: stepSubtitle,
+                        accentColor: stepAccentColor,
+                        icon: stepIcon,
+                        banner: stepBanner,
+                        child: stepContent,
                       ),
                     ),
                   ),

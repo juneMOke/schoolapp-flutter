@@ -36,10 +36,14 @@ class AppDimensions {
   static const documentsTableMinWidth = 560.0;
 
   // Feuille devenue modale sur écran large (`showEteeloAdaptiveSheet`) : la
-  // largeur d'une liste de reprise lisible, et la part d'écran qu'elle peut
-  // occuper en hauteur — celle des autres modales de détail.
+  // largeur d'une liste de reprise lisible.
   static const adaptiveSheetDialogMaxWidth = 560.0;
-  static const adaptiveSheetDialogHeightRatio = 0.88;
+  // Part de la hauteur d'écran qu'une modale de détail peut occuper (les
+  // `* 0.88` encore écrits en dur dans les modales de facturation y migreront).
+  static const dialogMaxHeightRatio = 0.88;
+
+  // Anneau de focus clavier des zones cliquables maison (EteeloActivatable).
+  static const focusRingWidth = 2.0;
   // Largeur de lecture plus resserrée pour la page de facturation (spec §00 :
   // contenu plafonné à 880 dp), centrée et responsive.
   static const facturationContentMaxWidth = 880.0;

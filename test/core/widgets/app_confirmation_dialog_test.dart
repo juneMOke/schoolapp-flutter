@@ -42,4 +42,44 @@ void main() {
   testWidgets('action destructrice : Entrée annule', (tester) async {
     expect(await answerWithEnter(tester, isDestructive: true), isFalse);
   });
+
+  testWidgets('une Entrée maintenue ne confirme pas d’elle-même', (
+    tester,
+  ) async {
+    var answered = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            autofocus: true,
+            onPressed: () async {
+              await showAppConfirmationDialog(
+                context: context,
+                title: 'Titre',
+                message: 'Message',
+                confirmLabel: 'Confirmer',
+                cancelLabel: 'Annuler',
+              );
+              answered = true;
+            },
+            child: const Text('ouvrir'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // L'appui ouvre la modale ; la répétition de la touche gardée enfoncée
+    // tombe sur « Confirmer », qui a le focus.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppConfirmationDialog), findsOneWidget);
+    expect(answered, isFalse);
+  });
 }

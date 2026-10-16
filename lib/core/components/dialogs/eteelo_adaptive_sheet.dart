@@ -38,7 +38,7 @@ Future<T?> showEteeloAdaptiveSheet<T>({
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.adaptiveSheetDialogMaxWidth,
-          maxHeight: size.height * AppDimensions.adaptiveSheetDialogHeightRatio,
+          maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
         ),
         child: builder(dialogContext),
       ),

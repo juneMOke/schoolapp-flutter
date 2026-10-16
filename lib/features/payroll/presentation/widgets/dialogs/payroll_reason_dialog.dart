@@ -66,9 +66,8 @@ class _PayrollReasonDialogState extends State<PayrollReasonDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final hint = widget.hint;
-    final submit = _confirm;
     return EteeloFormDialog(
-      onSubmit: submit,
+      onSubmit: _confirm,
       title: widget.title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -103,12 +102,12 @@ class _PayrollReasonDialogState extends State<PayrollReasonDialog> {
         widget.destructive
             ? EteeloButton.danger(
                 label: widget.confirmLabel,
-                onPressed: submit,
+                onPressed: _confirm,
                 fullWidth: false,
               )
             : EteeloButton.primary(
                 label: widget.confirmLabel,
-                onPressed: submit,
+                onPressed: _confirm,
                 fullWidth: false,
               ),
       ],

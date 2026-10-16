@@ -1,4 +1,4 @@
-import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/components/keyboard/activate_shortcuts.dart';
 import 'package:flutter/widgets.dart';
 
 /// Ce qu'une zone activable montre d'elle-même : le survol de la souris et le
@@ -29,12 +29,24 @@ class EteeloActivatable extends StatefulWidget {
   final FocusNode? focusNode;
   final bool autofocus;
 
+  /// Annoncé par le lecteur d'écran, avec le rôle de bouton et son état
+  /// (actif / inactif). `null` : l'appelant pose ses propres `Semantics`
+  /// (en-tête de tri, champ date, qui annoncent aussi une valeur).
+  final String? semanticLabel;
+
+  /// Prévenu à chaque changement de survol ou de focus, pour qui doit
+  /// l'afficher HORS du [builder] (l'anneau d'un pavé qui contient d'autres
+  /// zones focalisables).
+  final ValueChanged<ActivatableHighlight>? onHighlightChanged;
+
   const EteeloActivatable({
     super.key,
     required this.onActivate,
     required this.builder,
     this.focusNode,
     this.autofocus = false,
+    this.semanticLabel,
+    this.onHighlightChanged,
   });
 
   @override
@@ -42,31 +54,36 @@ class EteeloActivatable extends StatefulWidget {
 }
 
 class _EteeloActivatableState extends State<EteeloActivatable> {
-  /// Explicites : sur le web, Espace défile par défaut au lieu d'activer.
-  static const Map<ShortcutActivator, Intent> _shortcuts = {
-    SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-    SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
-    SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-  };
-
   bool _hovered = false;
   bool _focused = false;
 
   void _activate() => widget.onActivate?.call();
 
   void _setHovered(bool value) {
-    if (_hovered != value) setState(() => _hovered = value);
+    if (_hovered == value) return;
+    setState(() => _hovered = value);
+    _notify();
   }
+
+  void _setFocused(bool value) {
+    if (_focused == value) return;
+    setState(() => _focused = value);
+    _notify();
+  }
+
+  void _notify() => widget.onHighlightChanged?.call(
+    ActivatableHighlight(hovered: _hovered, focused: _focused),
+  );
 
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onActivate != null;
-    return FocusableActionDetector(
+    final detector = FocusableActionDetector(
       enabled: enabled,
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       mouseCursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
-      shortcuts: _shortcuts,
+      shortcuts: kActivateOncePerPress,
       actions: {
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
@@ -75,9 +92,7 @@ class _EteeloActivatableState extends State<EteeloActivatable> {
           },
         ),
       },
-      onShowFocusHighlight: (value) {
-        if (_focused != value) setState(() => _focused = value);
-      },
+      onShowFocusHighlight: _setFocused,
       // Le survol se lit sur la souris elle-même, pas sur le mode de
       // surbrillance : une tablette à souris branchée reste en mode
       // « tactile » tant qu'on n'a pas cliqué.
@@ -96,6 +111,14 @@ class _EteeloActivatableState extends State<EteeloActivatable> {
           ),
         ),
       ),
+    );
+    final label = widget.semanticLabel;
+    if (label == null) return detector;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: detector,
     );
   }
 }

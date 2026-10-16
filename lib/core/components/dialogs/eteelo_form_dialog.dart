@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_submit_shortcut.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';

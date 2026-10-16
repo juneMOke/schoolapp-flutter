@@ -162,6 +162,7 @@ class _DisciplinaryStudentDetailPageState
               : null;
 
           return AppPageBackground(
+            selectableText: true,
             scrollable: false,
             appBar: StudentDetailAppBar(
               fullName: _studentFullName(l10n),

@@ -74,4 +74,27 @@ void main() {
     expect(activations, 0);
     expect(seen.every((h) => !h.any), isTrue);
   });
+
+  testWidgets('onHighlightChanged suit le focus clavier, sans décalage', (
+    tester,
+  ) async {
+    final changes = <ActivatableHighlight>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: EteeloActivatable(
+              onActivate: () {},
+              onHighlightChanged: changes.add,
+              builder: (context, highlight) =>
+                  const SizedBox.square(dimension: 40),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(changes.single.focused, isTrue);
+  });
 }

@@ -20,6 +20,10 @@ class AppPageBackground extends StatelessWidget {
   final AppPageBackgroundStyle style;
   final Color flatBackgroundColor;
 
+  /// Fiche en lecture : le texte se sélectionne et se copie sur bureau et
+  /// navigateur (cf. [DesktopSelectionArea], qui dit pourquoi pas partout).
+  final bool selectableText;
+
   const AppPageBackground({
     super.key,
     required this.child,
@@ -30,6 +34,7 @@ class AppPageBackground extends StatelessWidget {
     this.bottomNavigationBar,
     this.style = AppPageBackgroundStyle.decorated,
     this.flatBackgroundColor = AppColors.surface,
+    this.selectableText = false,
   });
 
   double _horizontalPadding(BuildContext context) {
@@ -57,7 +62,9 @@ class AppPageBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = ContentMaxWidth(child: DesktopSelectionArea(child: child));
+    final content = ContentMaxWidth(
+      child: selectableText ? DesktopSelectionArea(child: child) : child,
+    );
 
     final body = style == AppPageBackgroundStyle.flat
         ? DecoratedBox(

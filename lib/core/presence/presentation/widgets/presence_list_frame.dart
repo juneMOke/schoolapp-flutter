@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -30,32 +31,14 @@ class PresenceListFrame extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final width =
-          constraints.maxWidth < AppDimensions.presenceMarkListMinWidth
-          ? AppDimensions.presenceMarkListMinWidth
-          : constraints.maxWidth;
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: width,
-          child: Column(
-            children: [
-              _Header(
-                person: personColumn,
-                times: timesColumn,
-                hours: hoursColumn,
-              ),
-              for (final row in rows) ...[
-                const SizedBox(height: AppSpacing.sm),
-                row,
-              ],
-            ],
-          ),
-        ),
-      );
-    },
+  Widget build(BuildContext context) => EteeloMinWidthScroll(
+    minWidth: AppDimensions.presenceMarkListMinWidth,
+    child: Column(
+      children: [
+        _Header(person: personColumn, times: timesColumn, hours: hoursColumn),
+        for (final row in rows) ...[const SizedBox(height: AppSpacing.sm), row],
+      ],
+    ),
   );
 }
 
