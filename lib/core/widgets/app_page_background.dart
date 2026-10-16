@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/selection/desktop_selection_area.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
@@ -61,7 +62,7 @@ class AppPageBackground extends StatelessWidget {
         constraints: const BoxConstraints(
           maxWidth: AppDimensions.detailContentMaxWidth,
         ),
-        child: child,
+        child: DesktopSelectionArea(child: child),
       ),
     );
 

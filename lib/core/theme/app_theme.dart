@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/extensions/status_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -47,6 +48,28 @@ class AppTheme {
     colorScheme: _lightColorScheme,
     scaffoldBackgroundColor: AppColors.surface,
     splashFactory: NoSplash.splashFactory,
+    // Plus dense sur un poste de bureau, où l'on vise à la souris ; inchangé
+    // sur la tablette (densité standard sur Android et iOS).
+    visualDensity: VisualDensity.adaptivePlatformDensity,
+    hoverColor: AppColors.stateHover,
+    focusColor: AppColors.stateFocus,
+    // La barre se saisit à la souris : la seule façon de faire défiler un
+    // tableau large sans molette horizontale (cf. AppScrollBehavior). Elle
+    // n'apparaît que sur bureau et navigateur (MaterialScrollBehavior).
+    scrollbarTheme: ScrollbarThemeData(
+      interactive: true,
+      radius: AppRadius.sm,
+      thickness: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.hovered)
+            ? AppDimensions.scrollbarHoverThickness
+            : AppDimensions.scrollbarThickness,
+      ),
+      thumbColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.dragged)
+            ? AppColors.textMuted
+            : AppColors.borderStrong,
+      ),
+    ),
     textTheme: const TextTheme(
       displayLarge: AppTypography.displayLarge,
       displayMedium: AppTypography.displayMedium,

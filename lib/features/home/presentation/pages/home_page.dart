@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:school_app_flutter/core/components/selection/desktop_selection_area.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:flutter/material.dart';
@@ -238,7 +239,9 @@ class _HomePageView extends StatelessWidget {
       children: [
         _buildBreadcrumb(context, state),
         const SizedBox(height: AppDimensions.spacingL),
-        Expanded(child: _buildContentArea(context, state)),
+        Expanded(
+          child: DesktopSelectionArea(child: _buildContentArea(context, state)),
+        ),
       ],
     );
 

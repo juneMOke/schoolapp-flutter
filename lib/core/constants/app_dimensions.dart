@@ -21,6 +21,11 @@ class AppDimensions {
   static const detailHeroAvatarSize = 64.0;
   static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
+
+  // Barre de défilement (bureau, navigateur) : fine au repos, élargie au
+  // survol pour se saisir sans viser au pixel.
+  static const scrollbarThickness = 6.0;
+  static const scrollbarHoverThickness = 10.0;
   // Largeur de lecture plus resserrée pour la page de facturation (spec §00 :
   // contenu plafonné à 880 dp), centrée et responsive.
   static const facturationContentMaxWidth = 880.0;

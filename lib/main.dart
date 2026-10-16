@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/theme/app_scroll_behavior.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
@@ -39,20 +39,6 @@ void main() async {
   // Web : retirer le pré-splash HTML une fois le 1er frame Flutter peint
   // (évite le trou bleu entre l'attache de la vue et le premier rendu).
   WidgetsBinding.instance.addPostFrameCallback((_) => removeWebSplashLoader());
-}
-
-class AppScrollBehavior extends MaterialScrollBehavior {
-  const AppScrollBehavior();
-
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.stylus,
-    PointerDeviceKind.invertedStylus,
-    PointerDeviceKind.trackpad,
-    PointerDeviceKind.unknown,
-  };
 }
 
 class MyApp extends StatefulWidget {
