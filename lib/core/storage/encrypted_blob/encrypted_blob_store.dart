@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_directory.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/blob_files.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_read.dart';
 
@@ -58,7 +59,7 @@ export 'package:school_app_flutter/core/storage/encrypted_blob/blob_read.dart';
 class EncryptedBlobStore {
   final BlobKeyService _keyService;
   final BlobCipherOffloader _cipher;
-  final BlobDirectory _files;
+  final BlobFiles _files;
 
   /// Prévenu quand la clé s'est révélée neuve, donc quand tous les fichiers
   /// viennent d'être effacés. L'index qui les décrit doit partir avec eux :
@@ -86,13 +87,16 @@ class EncryptedBlobStore {
     required BlobKeyService keyService,
     BlobCipherOffloader? cipher,
     Future<Directory> Function()? baseDirectory,
+    BlobFiles? files,
     Future<void> Function()? onKeyRotated,
   }) : _keyService = keyService,
        _cipher = cipher ?? offloadBlobCipher,
-       _files = BlobDirectory(
-         name: directoryName,
-         baseDirectory: baseDirectory ?? getApplicationSupportDirectory,
-       ),
+       _files =
+           files ??
+           BlobDirectory(
+             name: directoryName,
+             baseDirectory: baseDirectory ?? getApplicationSupportDirectory,
+           ),
        _onKeyRotated = onKeyRotated ?? _noKeyRotationHandler;
 
   static Future<void> _noKeyRotationHandler() async {}
@@ -120,9 +124,7 @@ class EncryptedBlobStore {
           entryId: id,
         ),
       );
-      final dir = await _files.ensure();
-      final pending = BlobDirectory.pendingFile(dir, id);
-      await pending.writeAsBytes(sealed.bytes, flush: true);
+      await _files.writePending(id, sealed.bytes);
       return StoredBlob(
         sha256Hex: sealed.sha256Hex,
         clearSizeBytes: sealed.clearSizeBytes,
@@ -142,11 +144,7 @@ class EncryptedBlobStore {
   Future<bool> commit(String id) async {
     if (!BlobDirectory.isSafeId(id)) return false;
     try {
-      final dir = await _files.resolve();
-      final pending = BlobDirectory.pendingFile(dir, id);
-      if (!await pending.exists()) return false;
-      await pending.rename(BlobDirectory.sealedFile(dir, id).path);
-      return true;
+      return await _files.commit(id);
     } catch (_) {
       return false;
     }
@@ -156,8 +154,7 @@ class EncryptedBlobStore {
   Future<void> discard(String id) async {
     if (!BlobDirectory.isSafeId(id)) return;
     try {
-      final dir = await _files.resolve();
-      await BlobDirectory.quietlyDelete(BlobDirectory.pendingFile(dir, id));
+      await _files.discardPending(id);
     } catch (_) {
       // Répertoire introuvable : il n'y a rien à abandonner.
     }
@@ -172,14 +169,12 @@ class EncryptedBlobStore {
   Future<BlobRead> read(String id) async {
     if (!BlobDirectory.isSafeId(id)) return const BlobGone();
 
-    final File file;
     try {
       // L'absence se constate SANS toucher au secure storage ni créer quoi que
       // ce soit : la DI offline est câblée avant l'authentification, et un
       // profil qui n'a droit à aucune pièce (RG-012-4) ne doit pas se voir
       // fabriquer une clé de cache et un répertoire pour avoir ouvert un écran.
-      file = BlobDirectory.sealedFile(await _files.resolve(), id);
-      if (!await file.exists()) return const BlobGone();
+      if (!await _files.sealedExists(id)) return const BlobGone();
     } catch (_) {
       return const BlobUnavailable();
     }
@@ -191,7 +186,11 @@ class EncryptedBlobStore {
       // répertoire, et prévient l'index que les pièces qu'il décrit n'existent
       // plus.
       key = await _resolveKey();
-      sealed = await file.readAsBytes();
+      // Retirée entre-temps (clé neuve, magasin effacé) : comme une lecture
+      // de fichier disparu, un échec, pas un verdict.
+      sealed =
+          await _files.readSealed(id) ??
+          (throw StateError('Pièce retirée pendant la lecture'));
     } catch (_) {
       // Keystore encore verrouillé au démarrage, descripteurs épuisés, disque
       // qui ne répond pas : la pièce est très probablement intacte. Ne rien
@@ -227,10 +226,8 @@ class EncryptedBlobStore {
   Future<bool> delete(String id) async {
     if (!BlobDirectory.isSafeId(id)) return false;
     try {
-      final dir = await _files.resolve();
-      await BlobDirectory.quietlyDelete(BlobDirectory.sealedFile(dir, id));
-      await BlobDirectory.quietlyDelete(BlobDirectory.pendingFile(dir, id));
-      return !await BlobDirectory.sealedFile(dir, id).exists();
+      await _files.delete(id);
+      return !await _files.sealedExists(id);
     } catch (_) {
       return false;
     }

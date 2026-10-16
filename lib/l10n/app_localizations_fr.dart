@@ -146,6 +146,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de charger les données de l\'application. Vérifiez votre connexion, puis réessayez.';
 
   @override
+  String get webOfflineTitle => 'Connexion requise';
+
+  @override
+  String get webOfflineMessage =>
+      'La version web fonctionne uniquement en ligne. Vérifiez votre connexion : l\'application reprendra d\'elle-même dès son retour.';
+
+  @override
   String get splashErrorRetry => 'Réessayer';
 
   @override

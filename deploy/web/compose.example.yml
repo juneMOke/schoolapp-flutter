@@ -1,0 +1,20 @@
+# Exemple de service à ajouter au compose du serveur, à côté de l'API.
+# À adapter : nom d'hôte, réseau Traefik, résolveur de certificats.
+#
+# Même hôte que l'API (recommandé, pas de CORS) : le routeur de l'API garde
+# `Host(...) && PathPrefix(`/api`)`, plus prioritaire, et celui-ci prend le reste.
+services:
+  eteelo-web:
+    image: eteelo-web:1.0.0
+    restart: unless-stopped
+    networks: [traefik]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.eteelo-web.rule=Host(`app.example.com`)
+      - traefik.http.routers.eteelo-web.entrypoints=websecure
+      - traefik.http.routers.eteelo-web.tls.certresolver=letsencrypt
+      - traefik.http.services.eteelo-web.loadbalancer.server.port=80
+
+networks:
+  traefik:
+    external: true

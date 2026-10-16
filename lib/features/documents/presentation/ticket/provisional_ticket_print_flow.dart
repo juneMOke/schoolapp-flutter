@@ -164,9 +164,9 @@ Future<void> printProvisionalTicketWithFallback(
     closeAfterPrint: true,
     // ⚠️ **Jamais le spouleur ici sur tablette.** Sur le parc ETEELO la
     // NT-8003DD lui est invisible : l'impression d'un ticket est thermique, et
-    // le PDF n'est que le filet (AM-11). Le poste de bureau, sans thermique
-    // Bluetooth, n'a QUE le spouleur.
-    onPrint: () => isDesktopPlatform
+    // le PDF n'est que le filet (AM-11). Le poste de bureau et le navigateur,
+    // sans thermique Bluetooth, n'ont QUE le spouleur.
+    onPrint: () => printsTicketsThroughSpooler
         ? sendTicketToSystemPrinter(
             model: model,
             cutNotice: cutNotice,

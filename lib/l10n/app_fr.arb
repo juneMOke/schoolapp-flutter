@@ -67,6 +67,8 @@
   },
   "splashErrorTitle": "Connexion impossible",
   "splashErrorMessage": "Impossible de charger les données de l'application. Vérifiez votre connexion, puis réessayez.",
+  "webOfflineTitle": "Connexion requise",
+  "webOfflineMessage": "La version web fonctionne uniquement en ligne. Vérifiez votre connexion : l'application reprendra d'elle-même dès son retour.",
   "splashErrorRetry": "Réessayer",
   "accueilUnknownRightsTitle": "Droits non connus",
   "@accueilUnknownRightsTitle": {

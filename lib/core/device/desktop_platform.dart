@@ -14,3 +14,8 @@ bool get isDesktopPlatform =>
     !kIsWeb &&
     (defaultTargetPlatform == TargetPlatform.windows ||
         defaultTargetPlatform == TargetPlatform.linux);
+
+/// Le ticket 80 mm sort par le spouleur du système, jamais par une thermique
+/// Bluetooth : poste de bureau (le paquet n'y parle que BLE, ou rien) et
+/// navigateur (aucun Bluetooth, et le paquet y lève sur `Platform`).
+bool get printsTicketsThroughSpooler => kIsWeb || isDesktopPlatform;
