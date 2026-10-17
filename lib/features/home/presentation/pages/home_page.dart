@@ -203,35 +203,9 @@ class _HomePageView extends StatelessWidget {
     NavigationState state, {
     required bool isCompact,
   }) {
-    final hidePageBreadcrumb =
-        state.selectedSubMenuId == MenuConstants.accueilId ||
-        state.selectedSubMenuId == MenuConstants.inscriptionsDashboardId ||
-        state.selectedSubMenuId == MenuConstants.financesDashboardId ||
-        state.selectedSubMenuId == MenuConstants.classesDashboardId ||
-        state.selectedSubMenuId == MenuConstants.preInscriptionsId ||
-        state.selectedSubMenuId == MenuConstants.reInscriptionsId ||
-        state.selectedSubMenuId == MenuConstants.premiereInscriptionId ||
-        state.selectedSubMenuId == MenuConstants.facturationsId ||
-        state.selectedSubMenuId == MenuConstants.recouvrementDashboardId ||
-        state.selectedSubMenuId == MenuConstants.recouvrementControlId ||
-        state.selectedSubMenuId == MenuConstants.boutiqueAchatsId ||
-        state.selectedSubMenuId == MenuConstants.boutiqueHistoriqueId ||
-        state.selectedSubMenuId == MenuConstants.expenseDashboardId ||
-        state.selectedSubMenuId == MenuConstants.expenseRegisterId ||
-        state.selectedSubMenuId == MenuConstants.expenseQueueId ||
-        state.selectedSubMenuId == MenuConstants.communicationAnnouncementsId ||
-        state.selectedSubMenuId == MenuConstants.communicationTemplatesId ||
-        state.selectedSubMenuId == MenuConstants.organisationId ||
-        state.selectedSubMenuId == MenuConstants.classesListId ||
-        state.selectedSubMenuId == MenuConstants.presencesId ||
-        state.selectedSubMenuId == MenuConstants.disciplinesListId ||
-        state.selectedSubMenuId == MenuConstants.disciplinesDashboardId ||
-        state.selectedSubMenuId == MenuConstants.myCoursesId ||
-        state.selectedSubMenuId == MenuConstants.timetableId ||
-        state.selectedSubMenuId == MenuConstants.classJournalId ||
-        state.selectedSubMenuId == MenuConstants.resultatsClasseId ||
-        state.selectedSubMenuId == MenuConstants.documentsStudentId ||
-        state.selectedSubMenuId == MenuConstants.configurationSchoolId;
+    final hidePageBreadcrumb = _fullBleedSubMenuIds.contains(
+      state.selectedSubMenuId,
+    );
 
     // Pages plein-cadre (sans fil d'Ariane) : elles peignent déjà leur propre
     // fond Kuba et gèrent padding + centrage via AppPageBackground. On leur
@@ -529,3 +503,43 @@ class _HomePageView extends StatelessWidget {
     }
   }
 }
+
+/// Sous-menus « plein cadre » : leur page peint elle-même son fond et sa
+/// largeur via `AppPageBackground`. La coquille ne leur ajoute ni fil d'Ariane,
+/// ni padding, ni colonne centrée — sinon le padding est doublé, le contenu
+/// tombe sous 1180 dp et le fond s'arrête dans une boîte au lieu de couvrir le
+/// volet.
+const Set<String> _fullBleedSubMenuIds = {
+  MenuConstants.accueilId,
+  MenuConstants.inscriptionsDashboardId,
+  MenuConstants.financesDashboardId,
+  MenuConstants.classesDashboardId,
+  MenuConstants.preInscriptionsId,
+  MenuConstants.reInscriptionsId,
+  MenuConstants.premiereInscriptionId,
+  MenuConstants.facturationsId,
+  MenuConstants.recouvrementDashboardId,
+  MenuConstants.recouvrementControlId,
+  MenuConstants.boutiqueAchatsId,
+  MenuConstants.boutiqueHistoriqueId,
+  MenuConstants.expenseDashboardId,
+  MenuConstants.expenseRegisterId,
+  MenuConstants.expenseQueueId,
+  MenuConstants.communicationAnnouncementsId,
+  MenuConstants.communicationTemplatesId,
+  MenuConstants.organisationId,
+  MenuConstants.classesListId,
+  MenuConstants.presencesId,
+  MenuConstants.disciplinesListId,
+  MenuConstants.disciplinesDashboardId,
+  MenuConstants.myCoursesId,
+  MenuConstants.timetableId,
+  MenuConstants.classJournalId,
+  MenuConstants.resultatsClasseId,
+  MenuConstants.documentsStudentId,
+  MenuConstants.configurationSchoolId,
+  MenuConstants.hrStaffFileId,
+  MenuConstants.hrStaffAttendanceId,
+  MenuConstants.hrPayrollId,
+  MenuConstants.courseProgrammeId,
+};

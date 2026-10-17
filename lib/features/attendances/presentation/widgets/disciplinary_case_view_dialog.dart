@@ -43,7 +43,7 @@ class _DisciplinaryCaseViewDialogState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return DisciplinaryCaseDialogShell(
-      maxWidth: 600,
+      maxWidth: AppDimensions.disciplinaryViewDialogMaxWidth,
       child: BlocBuilder<DisciplinaryCaseBloc, DisciplinaryCaseState>(
         buildWhen: (prev, curr) =>
             prev.detailStatus != curr.detailStatus ||

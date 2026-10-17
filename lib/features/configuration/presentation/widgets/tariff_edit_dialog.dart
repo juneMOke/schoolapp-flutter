@@ -100,6 +100,10 @@ class _TariffEditDialogState extends State<TariffEditDialog> {
     ];
 
     return Dialog(
+      constraints: const BoxConstraints(
+        minWidth: AppDimensions.dialogMinWidth,
+        maxWidth: AppDimensions.settingsFormDialogMaxWidth,
+      ),
       child: EteeloDialogBody(
         header: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),

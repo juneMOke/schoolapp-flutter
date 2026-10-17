@@ -45,7 +45,9 @@ class BoutiqueClearCartDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
+        constraints: const BoxConstraints(
+          maxWidth: AppDimensions.boutiqueDialogMaxWidth,
+        ),
         child: EteeloDialogBody(
           header: EteeloDialogDarkHeader(
             eyebrow: l10n.boutiqueClearEyebrow,

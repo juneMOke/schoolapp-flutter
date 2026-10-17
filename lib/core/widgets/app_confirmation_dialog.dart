@@ -68,6 +68,10 @@ class AppConfirmationDialog extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shadowColor: Colors.transparent,
+        constraints: const BoxConstraints(
+          minWidth: AppDimensions.dialogMinWidth,
+          maxWidth: AppDimensions.confirmationDialogMaxWidth,
+        ),
         insetPadding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingL,
           vertical: AppDimensions.spacingL,

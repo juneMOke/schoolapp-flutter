@@ -38,6 +38,24 @@ class AppDimensions {
   // Feuille devenue modale sur écran large (`showEteeloAdaptiveSheet`) : la
   // largeur d'une liste de reprise lisible.
   static const adaptiveSheetDialogMaxWidth = 560.0;
+  // Plancher Material d'une modale : `Dialog` le perd dès qu'on lui passe ses
+  // propres contraintes.
+  static const dialogMinWidth = 280.0;
+  // Confirmation et issue d'une écriture : un message à lire d'un seul regard.
+  // Sans plafond, `AlertDialog` (largeur intrinsèque) étale un long message
+  // sur une seule ligne de ~1000 dp sur desktop.
+  static const confirmationDialogMaxWidth = 480.0;
+  // Formulaire de paramétrage (tarif) : deux selects et un montant.
+  static const settingsFormDialogMaxWidth = 560.0;
+  // Largeurs de modales jusque-là écrites en littéral dans leur fichier.
+  static const disciplinaryCommentsDialogMaxWidth = 480.0;
+  static const disciplinaryCommentsDialogMaxHeight = 600.0;
+  static const disciplinaryViewDialogMaxWidth = 600.0;
+  static const evalCreationModalMaxWidth = 500.0;
+  static const coursReleveModalMaxWidth = 520.0;
+  static const enrollmentDuplicateDialogMaxWidth = 480.0;
+  static const boutiqueDialogMaxWidth = 420.0;
+  static const boutiqueBeneficiaryDialogMaxWidth = 520.0;
   // Part de la hauteur d'écran qu'une modale de détail peut occuper (les
   // `* 0.88` encore écrits en dur dans les modales de facturation y migreront).
   static const dialogMaxHeightRatio = 0.88;

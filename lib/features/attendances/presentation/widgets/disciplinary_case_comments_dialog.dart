@@ -60,7 +60,10 @@ class _DisciplinaryCaseCommentsDialogState
     final l10n = AppLocalizations.of(context)!;
     return Dialog(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480, maxHeight: 600),
+        constraints: const BoxConstraints(
+          maxWidth: AppDimensions.disciplinaryCommentsDialogMaxWidth,
+          maxHeight: AppDimensions.disciplinaryCommentsDialogMaxHeight,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.spacingL),
           child: EteeloDialogBody(
