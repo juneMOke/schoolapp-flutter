@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart'
     as core_avatar;
 import 'package:school_app_flutter/core/components/tables/index.dart';
@@ -101,6 +102,7 @@ class _DocumentsDataTableState extends State<DocumentsDataTable> {
         // n'a pas de barre de résultats, et son compte vit dans le pied
         // ci-dessus.
         tone: ListingTones.table,
+        minWidth: AppDimensions.documentsTableMinWidth,
       ),
     );
   }

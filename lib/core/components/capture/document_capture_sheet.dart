@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
 import 'package:school_app_flutter/core/capture/captured_document.dart';
 import 'package:school_app_flutter/core/capture/document_capture_policy.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -19,13 +20,8 @@ Future<DocumentCaptureMode?> showDocumentCaptureSheet(
   bool cameraUnavailable = false,
   required DocumentCapturePolicy policy,
 }) {
-  return showModalBottomSheet<DocumentCaptureMode>(
+  return showEteeloAdaptiveSheet<DocumentCaptureMode>(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: AppColors.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: AppRadius.card),
-    ),
     builder: (_) => DocumentCaptureSheet(
       title: title,
       cameraUnavailable: cameraUnavailable,

@@ -45,6 +45,10 @@
   "showPassword": "Show",
   "hidePassword": "Hide",
   "schoolApp": "ETEELO CONNECT",
+  "browserTabTitle": "{page} · ETEELO CONNECT",
+  "@browserTabTitle": {
+    "placeholders": { "page": { "type": "String" } }
+  },
   "splashBrandPrimary": "ETEELO",
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplify your school management",
@@ -575,6 +579,8 @@
       }
     }
   },
+  "configurationFeeEdit": "Edit fee",
+  "configurationFeeDelete": "Delete fee",
   "configurationFeeSaved": "Fee \"{label}\" saved",
   "@configurationFeeSaved": {
     "description": "Toast after adding or updating a fee",

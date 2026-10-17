@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_field.dart';
@@ -240,6 +241,53 @@ void main() {
     await _enterNames(tester);
     expect(_searchButton(tester).onPressed, isNotNull);
   });
+
+  testWidgets('identité : Entrée sur le dernier champ lance la recherche', (
+    tester,
+  ) async {
+    ClassesListSearchRequest? captured;
+    await _pump(tester, onSearch: (request) => captured = request);
+    await _switchToIdentity(tester);
+
+    await tester.enterText(find.byType(TextField).at(2), 'Marie');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    expect(captured?.firstName, 'Marie');
+  });
+
+  testWidgets(
+    'identité : sur tablette, « suivant » enchaîne sans lancer la recherche',
+    (tester) async {
+      ClassesListSearchRequest? captured;
+      await _pump(tester, onSearch: (request) => captured = request);
+      await _switchToIdentity(tester);
+
+      await tester.enterText(find.byType(TextField).at(0), 'Kabongo');
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pumpAndSettle();
+
+      expect(captured, isNull);
+    },
+  );
+
+  testWidgets(
+    'identité : au clavier physique, Entrée lance depuis n\'importe quel champ',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      ClassesListSearchRequest? captured;
+      await _pump(tester, onSearch: (request) => captured = request);
+      await _switchToIdentity(tester);
+
+      await tester.enterText(find.byType(TextField).at(0), 'Kabongo');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(captured?.lastName, 'Kabongo');
+      debugDefaultTargetPlatformOverride = null;
+    },
+  );
 
   testWidgets('identité : le niveau choisi dans l\'autre mode ne part pas', (
     tester,

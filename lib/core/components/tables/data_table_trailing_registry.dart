@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -45,81 +46,56 @@ class DataTableTrailingRegistry {
   }
 }
 
-class _DefaultTrailingIconButton extends StatefulWidget {
+class _DefaultTrailingIconButton extends StatelessWidget {
   final DataTableTrailingSpec spec;
   final IconData icon;
 
   const _DefaultTrailingIconButton({required this.spec, required this.icon});
 
   @override
-  State<_DefaultTrailingIconButton> createState() =>
-      _DefaultTrailingIconButtonState();
-}
-
-class _DefaultTrailingIconButtonState
-    extends State<_DefaultTrailingIconButton> {
-  bool _isHovered = false;
-  bool _isFocused = false;
-
-  @override
   Widget build(BuildContext context) {
-    final isEnabled = widget.spec.enabled && widget.spec.onTap != null;
-    final tooltip = widget.spec.tooltip;
-    final semanticLabel = widget.spec.semanticLabel ?? tooltip;
+    final isEnabled = spec.enabled && spec.onTap != null;
+    final tooltip = spec.tooltip;
+    final semanticLabel = spec.semanticLabel ?? tooltip;
+    const slotSize =
+        EteeloDataTableTheme.trailingSlotWidth -
+        (EteeloDataTableTheme.focusRingOffset * 2);
 
     final button = Semantics(
       button: true,
       enabled: isEnabled,
       label: semanticLabel,
-      child: FocusableActionDetector(
-        onShowFocusHighlight: (value) {
-          if (_isFocused == value) return;
-          setState(() => _isFocused = value);
-        },
-        child: MouseRegion(
-          onEnter: (_) => isEnabled ? setState(() => _isHovered = true) : null,
-          onExit: (_) => isEnabled ? setState(() => _isHovered = false) : null,
-          child: AnimatedContainer(
-            duration: AppMotion.fast,
-            padding: const EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
-            width:
-                EteeloDataTableTheme.trailingSlotWidth -
-                (EteeloDataTableTheme.focusRingOffset * 2),
-            height:
-                EteeloDataTableTheme.trailingSlotWidth -
-                (EteeloDataTableTheme.focusRingOffset * 2),
-            decoration: BoxDecoration(
-              color: isEnabled
-                  ? (_isHovered
-                        ? EteeloDataTableTheme.headerSortActiveColor
-                        : EteeloDataTableTheme.headerSortActiveColor.withValues(
-                            alpha: 0.08,
-                          ))
-                  : AppColors.stateDisabled.withValues(alpha: 0.12),
-              borderRadius: AppRadius.brSm,
-              border: _isFocused
-                  ? Border.all(
-                      color: EteeloDataTableTheme.focusRingColor,
-                      width: EteeloDataTableTheme.focusRingWidth,
-                    )
-                  : null,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: AppRadius.brSm,
-                onTap: isEnabled ? widget.spec.onTap : null,
-                child: Icon(
-                  widget.icon,
-                  size: 16,
-                  color: isEnabled
-                      ? (_isHovered
-                            ? AppColors.textOnDark
-                            : EteeloDataTableTheme.headerSortActiveColor)
-                      : AppColors.stateDisabled,
-                ),
-              ),
-            ),
+      child: EteeloActivatable(
+        onActivate: isEnabled ? spec.onTap : null,
+        builder: (context, highlight) => AnimatedContainer(
+          duration: AppMotion.fast,
+          padding: const EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
+          width: slotSize,
+          height: slotSize,
+          decoration: BoxDecoration(
+            color: isEnabled
+                ? (highlight.hovered
+                      ? EteeloDataTableTheme.headerSortActiveColor
+                      : EteeloDataTableTheme.headerSortActiveColor.withValues(
+                          alpha: 0.08,
+                        ))
+                : AppColors.stateDisabled.withValues(alpha: 0.12),
+            borderRadius: AppRadius.brSm,
+            border: highlight.focused
+                ? Border.all(
+                    color: EteeloDataTableTheme.focusRingColor,
+                    width: EteeloDataTableTheme.focusRingWidth,
+                  )
+                : null,
+          ),
+          child: Icon(
+            icon,
+            size: 16,
+            color: isEnabled
+                ? (highlight.hovered
+                      ? AppColors.textOnDark
+                      : EteeloDataTableTheme.headerSortActiveColor)
+                : AppColors.stateDisabled,
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
@@ -53,6 +54,49 @@ void main() {
       );
 
       expect(fieldDecoration(tester).color, equals(AppColors.surfaceAlt));
+    });
+
+    testWidgets(
+      'au clavier : Tab allume le champ, Entrée ouvre le calendrier',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: EteeloDateInput(label: 'Date', onChanged: (_) {}),
+            ),
+          ),
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+        expect(
+          fieldDecoration(tester).border!.top.color,
+          AppColors.bleuArdoise,
+        );
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pumpAndSettle();
+        expect(find.byType(DatePickerDialog), findsOneWidget);
+      },
+    );
+
+    testWidgets('lecture seule : hors de la tabulation', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EteeloDateInput(
+              label: 'Date',
+              readOnly: true,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(find.byType(DatePickerDialog), findsNothing);
     });
   });
 }

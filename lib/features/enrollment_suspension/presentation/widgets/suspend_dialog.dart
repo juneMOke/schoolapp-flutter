@@ -61,9 +61,12 @@ class _SuspendDialogState extends State<SuspendDialog> {
           Navigator.of(context).pop((state as SuspensionGestureDone).count),
       builder: (context, state) {
         final busy = state is SuspensionGestureBusy;
+        // Le bouton en chargement ignore le clic : le raccourci aussi.
+        final VoidCallback? submit = busy ? null : _submit;
         return PopScope(
           canPop: !busy,
           child: EteeloFormDialog(
+            onSubmit: submit,
             eyebrow: l10n.suspensionDialogEyebrow,
             title: l10n.suspensionDialogTitle(count),
             body: Column(
@@ -123,7 +126,7 @@ class _SuspendDialogState extends State<SuspendDialog> {
                 icon: Icons.person_remove_outlined,
                 isLoading: busy,
                 loadingLabel: l10n.suspensionBusy,
-                onPressed: _submit,
+                onPressed: submit,
                 fullWidth: false,
               ),
             ],

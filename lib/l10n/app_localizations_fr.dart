@@ -113,6 +113,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get schoolApp => 'ETEELO CONNECT';
 
   @override
+  String browserTabTitle(String page) {
+    return '$page · ETEELO CONNECT';
+  }
+
+  @override
   String get splashBrandPrimary => 'ETEELO';
 
   @override
@@ -565,6 +570,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String configurationFeeDeleted(String label) {
     return 'Frais « $label » supprimé';
   }
+
+  @override
+  String get configurationFeeEdit => 'Modifier le frais';
+
+  @override
+  String get configurationFeeDelete => 'Supprimer le frais';
 
   @override
   String configurationFeeSaved(String label) {

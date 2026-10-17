@@ -75,7 +75,11 @@ class _PresenceReportDialogState extends State<PresenceReportDialog> {
         value: '$value',
       ),
     );
+    void submit() => Navigator.of(
+      context,
+    ).pop(PresenceReportChoice(markRemaining: _marks && unmarked > 0));
     return EteeloFormDialog(
+      onSubmit: submit,
       eyebrow: widget.eyebrow,
       title: widget.title,
       body: Column(
@@ -136,9 +140,7 @@ class _PresenceReportDialogState extends State<PresenceReportDialog> {
         EteeloButton.primary(
           label: widget.confirmLabel,
           icon: Icons.task_alt,
-          onPressed: () => Navigator.of(
-            context,
-          ).pop(PresenceReportChoice(markRemaining: _marks && unmarked > 0)),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

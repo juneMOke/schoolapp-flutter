@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/listing_tones.dart';
@@ -39,15 +40,8 @@ class StaffAgentTable extends StatelessWidget {
   static const double _minTableWidth = 760;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      if (constraints.maxWidth >= _minTableWidth) return _table(context);
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(width: _minTableWidth, child: _table(context)),
-      );
-    },
-  );
+  Widget build(BuildContext context) =>
+      EteeloMinWidthScroll(minWidth: _minTableWidth, child: _table(context));
 
   Widget _table(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

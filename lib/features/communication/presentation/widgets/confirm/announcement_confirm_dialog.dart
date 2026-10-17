@@ -46,7 +46,9 @@ class _ConfirmDialog extends StatelessWidget {
     final count = reach?.reachableMessages;
     final unreachable = reach?.unreachableMessages ?? 0;
     final audience = l10n.audienceSummary(state.content.audience);
+    void submit() => Navigator.of(context).pop(true);
     return EteeloFormDialog(
+      onSubmit: submit,
       eyebrow: l10n.communicationConfirmEyebrow,
       maxWidth: AppDimensions.communicationConfirmModalMaxWidth,
       title: switch ((scheduled, count)) {
@@ -107,7 +109,7 @@ class _ConfirmDialog extends StatelessWidget {
               ? l10n.communicationSchedule
               : l10n.communicationConfirmSendNow,
           icon: scheduled ? Icons.schedule_send_outlined : Icons.send_outlined,
-          onPressed: () => Navigator.of(context).pop(true),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

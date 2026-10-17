@@ -1,8 +1,7 @@
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 class AppDimensions {
-  static const sidebarWidth = 280.0;
-  static const sidebarCollapsedWidth = 84.0;
+  // Largeurs du menu latéral : `AppTheme.sidebarWidth` / `sidebarCollapsedWidth`.
   // Aligné sur AppTheme.topBarHeight (source unique de la hauteur de barre).
   static const topBarHeight = 68.0;
   static const pagePadding = 24.0;
@@ -21,6 +20,30 @@ class AppDimensions {
   static const detailHeroAvatarSize = 64.0;
   static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
+
+  // Barre de défilement (bureau, navigateur) : fine au repos, élargie au
+  // survol pour se saisir sans viser au pixel.
+  static const scrollbarThickness = 6.0;
+  static const scrollbarHoverThickness = 10.0;
+
+  // Simulation de renvoi (Recouvrement) : 18 parts de flex à ~36 dp — le
+  // libellé de classe garde ~180 dp, chaque effectif ~72 dp. En deçà, la
+  // table défile plutôt que de rogner les chiffres.
+  static const recouvrementSimTableMinWidth = 680.0;
+
+  // Documents élève : trois colonnes de nom à ~140 dp, plus l'avatar et l'œil.
+  // En deçà, la liste défile plutôt que de rogner Nom / Post-nom / Prénom.
+  static const documentsTableMinWidth = 560.0;
+
+  // Feuille devenue modale sur écran large (`showEteeloAdaptiveSheet`) : la
+  // largeur d'une liste de reprise lisible.
+  static const adaptiveSheetDialogMaxWidth = 560.0;
+  // Part de la hauteur d'écran qu'une modale de détail peut occuper (les
+  // `* 0.88` encore écrits en dur dans les modales de facturation y migreront).
+  static const dialogMaxHeightRatio = 0.88;
+
+  // Anneau de focus clavier des zones cliquables maison (EteeloActivatable).
+  static const focusRingWidth = 2.0;
   // Largeur de lecture plus resserrée pour la page de facturation (spec §00 :
   // contenu plafonné à 880 dp), centrée et responsive.
   static const facturationContentMaxWidth = 880.0;
@@ -771,6 +794,10 @@ class AppDimensions {
   static const sujetDureeOtherWidth = 120.0;
   static const sujetCadreRubriqueMaxWidth = 420.0;
   static const publicationRowTextMaxWidth = 520.0;
+
+  /// Saisie des notes en mode Tableau (spec §8) : le champ note tient « 12,25 »
+  /// et son suffixe « /100 » sans rogner.
+  static const saisieNoteFieldWidth = 150.0;
 
   // ── Désactivation d'élèves ────────────────────────────────────────────────
   /// Icône inline des gestes de désactivation (bandeau, modales, barre).

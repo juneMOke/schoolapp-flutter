@@ -67,6 +67,7 @@ class _PayrollReasonDialogState extends State<PayrollReasonDialog> {
     final l10n = AppLocalizations.of(context)!;
     final hint = widget.hint;
     return EteeloFormDialog(
+      onSubmit: _confirm,
       title: widget.title,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

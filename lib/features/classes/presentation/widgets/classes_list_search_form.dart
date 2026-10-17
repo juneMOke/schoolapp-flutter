@@ -275,6 +275,7 @@ class _ClassesListSearchFormState extends State<ClassesListSearchForm> {
         surnameLabel: l10n.surname,
         enabled: !widget.isSearching,
         onChanged: _onNameChanged,
+        onSubmitted: _submit,
       );
     }
 

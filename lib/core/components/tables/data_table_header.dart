@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
@@ -83,7 +83,7 @@ class DataTableHeader extends StatelessWidget {
   }
 }
 
-class _DataTableHeaderCell extends StatefulWidget {
+class _DataTableHeaderCell extends StatelessWidget {
   final DataTableColumnDef column;
   final int columnIndex;
   final int? activeSortColumn;
@@ -101,33 +101,25 @@ class _DataTableHeaderCell extends StatefulWidget {
   });
 
   @override
-  State<_DataTableHeaderCell> createState() => _DataTableHeaderCellState();
-}
-
-class _DataTableHeaderCellState extends State<_DataTableHeaderCell> {
-  bool _isFocused = false;
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final sortIndex = widget.column.sortIndex ?? widget.columnIndex;
-    final isSortable = widget.column.sortable && widget.onSortChanged != null;
-    final isActive = widget.activeSortColumn == sortIndex;
+    final sortIndex = column.sortIndex ?? columnIndex;
+    final isSortable = column.sortable && onSortChanged != null;
+    final isActive = activeSortColumn == sortIndex;
     final sortStateLabel = isActive
-        ? (widget.sortAscending
+        ? (sortAscending
               ? l10n.dataTableSortAscending
               : l10n.dataTableSortDescending)
         : l10n.dataTableSortNone;
 
     final label = Text(
-      widget.column.label.toUpperCase(),
+      column.label.toUpperCase(),
       overflow: TextOverflow.ellipsis,
       style: EteeloDataTableTheme.headerLabelStyle.copyWith(
         color: isActive
-            ? (widget.tone?.headerInkSorted ??
+            ? (tone?.headerInkSorted ??
                   EteeloDataTableTheme.headerSortActiveColor)
-            : (widget.tone?.headerInk ??
-                  EteeloDataTableTheme.headerSortInactiveColor),
+            : (tone?.headerInk ?? EteeloDataTableTheme.headerSortInactiveColor),
       ),
     );
 
@@ -138,37 +130,21 @@ class _DataTableHeaderCellState extends State<_DataTableHeaderCell> {
       );
     }
 
+    void sort() => onSortChanged!(sortIndex, isActive ? !sortAscending : true);
+
     return Semantics(
       header: true,
       button: true,
       focusable: true,
-      label: widget.column.label,
+      label: column.label,
       value: sortStateLabel,
-      child: FocusableActionDetector(
-        onShowFocusHighlight: (value) {
-          if (_isFocused == value) return;
-          setState(() => _isFocused = value);
-        },
-        shortcuts: const <ShortcutActivator, Intent>{
-          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
-          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
-        },
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (_) {
-              widget.onSortChanged!(
-                sortIndex,
-                isActive ? !widget.sortAscending : true,
-              );
-              return null;
-            },
-          ),
-        },
-        child: AnimatedContainer(
+      child: EteeloActivatable(
+        onActivate: sort,
+        builder: (context, highlight) => AnimatedContainer(
           duration: AppMotion.fast,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            border: _isFocused
+            border: highlight.focused
                 ? Border.all(
                     color: EteeloDataTableTheme.focusRingColor,
                     width: EteeloDataTableTheme.focusRingWidth,
@@ -176,44 +152,32 @@ class _DataTableHeaderCellState extends State<_DataTableHeaderCell> {
                 : null,
           ),
           padding: const EdgeInsets.all(EteeloDataTableTheme.focusRingOffset),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(6),
-              onTap: () => widget.onSortChanged!(
-                sortIndex,
-                isActive ? !widget.sortAscending : true,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
-                child: Row(
-                  children: [
-                    Expanded(child: label),
-                    const SizedBox(width: 2),
-                    AnimatedSwitcher(
-                      duration: AppMotion.standard,
-                      switchInCurve: AppMotion.outCurve,
-                      switchOutCurve: AppMotion.inCurve,
-                      child: Icon(
-                        key: ValueKey(
-                          'sort-$sortIndex-${widget.sortAscending}-$isActive',
-                        ),
-                        isActive
-                            ? (widget.sortAscending
-                                  ? Icons.keyboard_arrow_up_rounded
-                                  : Icons.keyboard_arrow_down_rounded)
-                            : Icons.unfold_more_rounded,
-                        size: 12,
-                        color: isActive
-                            ? (widget.tone?.headerInkSorted ??
-                                  EteeloDataTableTheme.headerSortActiveColor)
-                            : (widget.tone?.headerInk ??
-                                  EteeloDataTableTheme.headerSortInactiveColor),
-                      ),
-                    ),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+            child: Row(
+              children: [
+                Expanded(child: label),
+                const SizedBox(width: 2),
+                AnimatedSwitcher(
+                  duration: AppMotion.standard,
+                  switchInCurve: AppMotion.outCurve,
+                  switchOutCurve: AppMotion.inCurve,
+                  child: Icon(
+                    key: ValueKey('sort-$sortIndex-$sortAscending-$isActive'),
+                    isActive
+                        ? (sortAscending
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded)
+                        : Icons.unfold_more_rounded,
+                    size: 12,
+                    color: isActive
+                        ? (tone?.headerInkSorted ??
+                              EteeloDataTableTheme.headerSortActiveColor)
+                        : (tone?.headerInk ??
+                              EteeloDataTableTheme.headerSortInactiveColor),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -9,7 +10,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le cercle vide de l'emplacement : un pointillé qui se lit « à remplir »,
 /// et qui est lui-même le bouton caméra.
-class PhotoSlotEmptyCircle extends StatefulWidget {
+class PhotoSlotEmptyCircle extends StatelessWidget {
   final VoidCallback? onTap;
   final String semanticLabel;
 
@@ -20,42 +21,29 @@ class PhotoSlotEmptyCircle extends StatefulWidget {
   });
 
   @override
-  State<PhotoSlotEmptyCircle> createState() => _PhotoSlotEmptyCircleState();
-}
-
-class _PhotoSlotEmptyCircleState extends State<PhotoSlotEmptyCircle> {
-  bool _hover = false;
-
-  @override
   Widget build(BuildContext context) {
-    final color = _hover ? AppColors.bleuArdoise : AppColors.borderStrong;
-    return Semantics(
-      button: true,
-      label: widget.semanticLabel,
-      child: MouseRegion(
-        cursor: widget.onTap == null
-            ? MouseCursor.defer
-            : SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: CustomPaint(
-            painter: _DashedCirclePainter(
+    return EteeloActivatable(
+      semanticLabel: semanticLabel,
+      onActivate: onTap,
+      builder: (context, highlight) {
+        final color = highlight.any
+            ? AppColors.bleuArdoise
+            : AppColors.borderStrong;
+        return CustomPaint(
+          painter: _DashedCirclePainter(
+            color: color,
+            fill: highlight.any ? AppColors.stateHover : AppColors.surfaceAlt,
+          ),
+          child: SizedBox.square(
+            dimension: AppDimensions.photoSlotCircle,
+            child: Icon(
+              Icons.photo_camera_outlined,
+              size: AppSpacing.xxl,
               color: color,
-              fill: _hover ? AppColors.stateHover : AppColors.surfaceAlt,
-            ),
-            child: SizedBox.square(
-              dimension: AppDimensions.photoSlotCircle,
-              child: Icon(
-                Icons.photo_camera_outlined,
-                size: AppSpacing.xxl,
-                color: color,
-              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

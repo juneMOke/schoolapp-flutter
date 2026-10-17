@@ -92,6 +92,7 @@ class _PayrollPayDialogState extends State<PayrollPayDialog> {
         ? DisbursePayrollUseCase.refusalOf(widget.view, _draft)
         : null;
     return EteeloFormDialog(
+      onSubmit: _submit,
       eyebrow: widget.name,
       title: l10n.payrollPayTitle,
       body: Column(

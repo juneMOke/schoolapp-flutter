@@ -194,6 +194,11 @@ class DataTableViewConfig {
   /// formules de dérivation d'un écran. Cf. [DataTableTone].
   final DataTableTone? tone;
 
+  /// Largeur sous laquelle en-tête et lignes défilent horizontalement au lieu
+  /// d'écraser leurs colonnes (`EteeloMinWidthScroll`) ; la pagination reste
+  /// en place. `null` — le défaut — : la table suit la largeur reçue.
+  final double? minWidth;
+
   const DataTableViewConfig({
     required this.columns,
     this.isLoading = false,
@@ -208,6 +213,7 @@ class DataTableViewConfig {
     this.density = DataTableDensity.comfortable,
     this.semanticsLabel,
     this.tone,
+    this.minWidth,
   });
 }
 

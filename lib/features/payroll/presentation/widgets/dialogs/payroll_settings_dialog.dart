@@ -106,7 +106,9 @@ class _PayrollSettingsDialogState extends State<PayrollSettingsDialog> {
         capitalization: EteeloTextCapitalization.none,
       ),
     );
+    void submit() => Navigator.of(context).pop(_settings);
     return EteeloFormDialog(
+      onSubmit: submit,
       title: l10n.payrollSettingsTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -157,7 +159,7 @@ class _PayrollSettingsDialogState extends State<PayrollSettingsDialog> {
         ),
         EteeloButton.primary(
           label: l10n.payrollSave,
-          onPressed: () => Navigator.of(context).pop(_settings),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/components/status/last_sync_label.dart';
@@ -36,6 +38,10 @@ enum SyncStatus {
 ///   après le libellé de statut (" · il y a N min") quand connu — absent tant
 ///   qu'aucune synchro n'a encore ramené de données.
 class SyncIndicator extends StatelessWidget {
+  /// Voile de la teinte du statut, au repos puis au survol.
+  static const double _restFillAlpha = 0.12;
+  static const double _hoverFillAlpha = 0.2;
+
   final SyncStatus status;
   final int? lastSyncAtMs;
   final VoidCallback? onTap;
@@ -54,9 +60,16 @@ class SyncIndicator extends StatelessWidget {
     final isNeutral = appearance.color == AppColors.textMuted;
     final relative = _relativeLastSync(l10n);
 
-    final bgColor = isNeutral
-        ? AppColors.surfaceAlt
-        : appearance.color.withValues(alpha: 0.12);
+    // Au survol, le fond se densifie ; au focus clavier, un bord à la
+    // couleur du statut — la pastille est la porte du détail de synchro.
+    Color bgColor(ActivatableHighlight highlight) {
+      if (isNeutral) {
+        return highlight.hovered ? AppColors.border : AppColors.surfaceAlt;
+      }
+      return appearance.color.withValues(
+        alpha: highlight.hovered ? _hoverFillAlpha : _restFillAlpha,
+      );
+    }
 
     final label = relative == null
         ? appearance.label
@@ -77,23 +90,27 @@ class SyncIndicator extends StatelessWidget {
       ),
     );
 
-    final pill = DecoratedBox(
+    Widget pill(ActivatableHighlight highlight) => DecoratedBox(
       decoration: BoxDecoration(
-        color: bgColor,
+        color: bgColor(highlight),
         borderRadius: BorderRadius.circular(999),
+        border: highlight.focused
+            ? Border.all(
+                color: appearance.color,
+                width: AppDimensions.focusRingWidth,
+              )
+            : null,
       ),
       child: content,
     );
 
-    if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: pill,
-      );
-    }
+    if (onTap == null) return pill(const ActivatableHighlight());
 
-    return pill;
+    return EteeloActivatable(
+      semanticLabel: label,
+      onActivate: onTap,
+      builder: (context, highlight) => pill(highlight),
+    );
   }
 
   /// Texte relatif depuis [lastSyncAtMs], `null` si aucune synchro connue.

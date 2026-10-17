@@ -328,10 +328,12 @@ class _FeeRow extends StatelessWidget {
             ],
           ),
           IconButton(
+            tooltip: l10n.configurationFeeEdit,
             onPressed: onEdit,
             icon: const Icon(Icons.edit_outlined, size: 18),
           ),
           IconButton(
+            tooltip: l10n.configurationFeeDelete,
             onPressed: onDelete,
             icon: const Icon(Icons.delete_outline_rounded, size: 18),
           ),

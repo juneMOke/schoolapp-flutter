@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/theme/app_scroll_behavior.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_cache_
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/web/clean_urls.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
@@ -33,26 +34,15 @@ import 'package:school_app_flutter/core/components/avatars/person_photo_source.d
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
 
 void main() async {
+  // Avant tout : le moteur fige la stratégie d'adresse au premier accès à
+  // l'historique du navigateur.
+  useCleanWebUrls();
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   runApp(const MyApp());
   // Web : retirer le pré-splash HTML une fois le 1er frame Flutter peint
   // (évite le trou bleu entre l'attache de la vue et le premier rendu).
   WidgetsBinding.instance.addPostFrameCallback((_) => removeWebSplashLoader());
-}
-
-class AppScrollBehavior extends MaterialScrollBehavior {
-  const AppScrollBehavior();
-
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.stylus,
-    PointerDeviceKind.invertedStylus,
-    PointerDeviceKind.trackpad,
-    PointerDeviceKind.unknown,
-  };
 }
 
 class MyApp extends StatefulWidget {
@@ -344,7 +334,8 @@ class _MyAppState extends State<MyApp> {
             ],
             locale: const Locale('fr'),
             supportedLocales: AppLocalizations.supportedLocales,
-            title: 'ETEELO CONNECT',
+            onGenerateTitle: (context) =>
+                AppLocalizations.of(context)!.schoolApp,
             theme: AppTheme.light,
             routerConfig: _router,
             // Bandeau global au-dessus de toutes les routes : dégradation de

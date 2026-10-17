@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
@@ -279,6 +280,7 @@ class FacturationDetailPage extends StatelessWidget {
         ),
       ],
       child: AppPageBackground(
+        selectableText: true,
         appBar: StudentDetailAppBar(
           fullName: studentFullName,
           eyebrow: '${l10n.facturationDetailEyebrow} · ${_classLabel(l10n)}',
@@ -299,130 +301,118 @@ class FacturationDetailPage extends StatelessWidget {
                 ? AppDimensions.detailContentMaxWidth
                 : AppDimensions.facturationContentMaxWidth;
 
-            return Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: contentMaxWidth),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final compact =
-                        constraints.maxWidth <
-                        AppDimensions.detailCompactBreakpoint;
-                    final twoCol =
-                        constraints.maxWidth >=
-                        AppBreakpoints.financeDetailTwoColMin;
-                    final blockSpacing = compact
-                        ? AppDimensions.spacingM
-                        : AppDimensions.detailSectionSpacing;
+            return ContentMaxWidth(
+              maxWidth: contentMaxWidth,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact =
+                      constraints.maxWidth <
+                      AppDimensions.detailCompactBreakpoint;
+                  final twoCol =
+                      constraints.maxWidth >=
+                      AppBreakpoints.financeDetailTwoColMin;
+                  final blockSpacing = compact
+                      ? AppDimensions.spacingM
+                      : AppDimensions.detailSectionSpacing;
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BlocBuilder<StudentChargesBloc, StudentChargesState>(
-                          buildWhen: (prev, curr) =>
-                              prev.status != curr.status ||
-                              prev.studentCharges != curr.studentCharges,
-                          builder: (context, state) {
-                            final hasCharges =
-                                state.status == StudentChargesStatus.success &&
-                                state.studentCharges.isNotEmpty;
-                            final charges = state.studentCharges;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BlocBuilder<StudentChargesBloc, StudentChargesState>(
+                        buildWhen: (prev, curr) =>
+                            prev.status != curr.status ||
+                            prev.studentCharges != curr.studentCharges,
+                        builder: (context, state) {
+                          final hasCharges =
+                              state.status == StudentChargesStatus.success &&
+                              state.studentCharges.isNotEmpty;
+                          final charges = state.studentCharges;
 
-                            // Sommes PAR DEVISE. Un élève peut devoir en
-                            // dollars et en francs : additionner les deux
-                            // donnerait un chiffre que personne ne peut
-                            // vérifier, étiqueté avec la première devise venue.
-                            //
-                            // Déjà payé & reste COMPOSÉS (miroir serveur +
-                            // encaissements de ce poste non remontés), FRONT §5.
-                            final totalDue = charges.expectedBag;
-                            final alreadyPaid = charges.paidTotalBag;
-                            final remaining = charges.remainingBag;
+                          // Sommes PAR DEVISE. Un élève peut devoir en
+                          // dollars et en francs : additionner les deux
+                          // donnerait un chiffre que personne ne peut
+                          // vérifier, étiqueté avec la première devise venue.
+                          //
+                          // Déjà payé & reste COMPOSÉS (miroir serveur +
+                          // encaissements de ce poste non remontés), FRONT §5.
+                          final totalDue = charges.expectedBag;
+                          final alreadyPaid = charges.paidTotalBag;
+                          final remaining = charges.remainingBag;
 
-                            // Tuiles de synthèse affichées directement sur la page
-                            // (l'identité élève + classe vit déjà dans l'AppBar).
-                            return FinanceDetailKpiBand(
-                              hasCharges: hasCharges,
-                              totalDue: totalDue,
-                              alreadyPaid: alreadyPaid,
-                              remaining: remaining,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: AppDimensions.spacingS),
-                        FacturationDetailStatementBar(
-                          studentId: intent.studentId,
-                          academicYearId: intent.academicYearId,
-                        ),
-                        SizedBox(height: blockSpacing),
-                        // Identité inconnue — lien profond ouvert sans
-                        // `extra` : on n'affiche pas un solde sans pouvoir dire
-                        // à qui il appartient. Une classe manquante, elle, ne
-                        // justifie rien de tel : elle ne sert qu'au sur-titre.
-                        if (!intent.hasStudentIdentity)
-                          FinanceContextErrorCard(
-                            title: l10n.facturationDetailContextErrorTitle,
-                            message: l10n.facturationDetailContextErrorMessage,
-                            icon: Icons.report_problem_outlined,
-                            accent: AppColors.warning,
-                            accentSoft: AppColors.warning.withValues(
-                              alpha: 0.14,
-                            ),
-                            borderColor: AppColors.warning.withValues(
-                              alpha: 0.2,
-                            ),
-                          )
-                        else
-                          FacturationDetailDataLoader(
-                            intent: intent,
-                            child: Builder(
-                              builder: (blocContext) {
-                                final payments =
-                                    FacturationDetailPaymentsSection(
-                                      studentId: intent.studentId,
-                                      academicYearId: intent.academicYearId,
-                                      onCreatePaymentRequested: () =>
-                                          _openCreatePayment(blocContext),
-                                      onViewPaymentRequested: (payment) =>
-                                          _openPaymentDetail(
-                                            blocContext,
-                                            payment,
-                                          ),
-                                    );
-                                final charges = FacturationDetailChargesSection(
-                                  studentId: intent.studentId,
-                                  academicYearId: intent.academicYearId,
-                                  onViewChargeRequested: (charge) =>
-                                      _openChargeDetail(blocContext, charge),
-                                );
+                          // Tuiles de synthèse affichées directement sur la page
+                          // (l'identité élève + classe vit déjà dans l'AppBar).
+                          return FinanceDetailKpiBand(
+                            hasCharges: hasCharges,
+                            totalDue: totalDue,
+                            alreadyPaid: alreadyPaid,
+                            remaining: remaining,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: AppDimensions.spacingS),
+                      FacturationDetailStatementBar(
+                        studentId: intent.studentId,
+                        academicYearId: intent.academicYearId,
+                      ),
+                      SizedBox(height: blockSpacing),
+                      // Identité inconnue — lien profond ouvert sans
+                      // `extra` : on n'affiche pas un solde sans pouvoir dire
+                      // à qui il appartient. Une classe manquante, elle, ne
+                      // justifie rien de tel : elle ne sert qu'au sur-titre.
+                      if (!intent.hasStudentIdentity)
+                        FinanceContextErrorCard(
+                          title: l10n.facturationDetailContextErrorTitle,
+                          message: l10n.facturationDetailContextErrorMessage,
+                          icon: Icons.report_problem_outlined,
+                          accent: AppColors.warning,
+                          accentSoft: AppColors.warning.withValues(alpha: 0.14),
+                          borderColor: AppColors.warning.withValues(alpha: 0.2),
+                        )
+                      else
+                        FacturationDetailDataLoader(
+                          intent: intent,
+                          child: Builder(
+                            builder: (blocContext) {
+                              final payments = FacturationDetailPaymentsSection(
+                                studentId: intent.studentId,
+                                academicYearId: intent.academicYearId,
+                                onCreatePaymentRequested: () =>
+                                    _openCreatePayment(blocContext),
+                                onViewPaymentRequested: (payment) =>
+                                    _openPaymentDetail(blocContext, payment),
+                              );
+                              final charges = FacturationDetailChargesSection(
+                                studentId: intent.studentId,
+                                academicYearId: intent.academicYearId,
+                                onViewChargeRequested: (charge) =>
+                                    _openChargeDetail(blocContext, charge),
+                              );
 
-                                // Grand écran : Paiements et Frais côte à côte.
-                                if (twoCol) {
-                                  return Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(child: payments),
-                                      SizedBox(width: blockSpacing),
-                                      Expanded(child: charges),
-                                    ],
-                                  );
-                                }
-                                return Column(
+                              // Grand écran : Paiements et Frais côte à côte.
+                              if (twoCol) {
+                                return Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    payments,
-                                    SizedBox(height: blockSpacing),
-                                    charges,
+                                    Expanded(child: payments),
+                                    SizedBox(width: blockSpacing),
+                                    Expanded(child: charges),
                                   ],
                                 );
-                              },
-                            ),
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  payments,
+                                  SizedBox(height: blockSpacing),
+                                  charges,
+                                ],
+                              );
+                            },
                           ),
-                      ],
-                    );
-                  },
-                ),
+                        ),
+                    ],
+                  );
+                },
               ),
             );
           },

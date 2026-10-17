@@ -294,6 +294,7 @@ class _FirstRegistrationSearchFormState
         surnameLabel: l10n.surname,
         enabled: !widget.isLoading,
         onChanged: _onNameChanged,
+        onSubmitted: _submit,
       );
     }
 

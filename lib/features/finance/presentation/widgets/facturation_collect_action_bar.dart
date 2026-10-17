@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -81,58 +82,53 @@ class FacturationCollectActionBar extends StatelessWidget {
           // `heightFactor` : posé dans le `bottomNavigationBar`, un `Align`
           // sans lui remplirait la contrainte lâche du Scaffold — toute la
           // hauteur d'écran — et masquerait le corps de la page.
-          child: Align(
-            alignment: Alignment.topCenter,
+          child: ContentMaxWidth(
             heightFactor: 1,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppDimensions.facturationContentMaxWidth,
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Gel READ_ONLY (ADR-010) : le tick de fraîcheur (5 min) peut
-                  // basculer le mode PENDANT la saisie — l'argent ne part pas
-                  // d'une session gelée.
-                  final button = SessionWriteGate(
-                    child: EteeloButton.primary(
-                      label:
-                          actionLabel ??
-                          (hasTotal
-                              ? l10n.facturationCreatePaymentCollectAmountAction(
-                                  totalLabel,
-                                )
-                              : l10n.facturationDetailCollectPaymentAction),
-                      icon: actionIcon,
-                      size: EteeloButtonSize.regular,
-                      fullWidth:
-                          constraints.maxWidth <
-                          AppBreakpoints.financeCollectBarRowMin,
-                      onPressed: onCollect,
-                    ),
-                  );
+            maxWidth: AppDimensions.facturationContentMaxWidth,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Gel READ_ONLY (ADR-010) : le tick de fraîcheur (5 min) peut
+                // basculer le mode PENDANT la saisie — l'argent ne part pas
+                // d'une session gelée.
+                final button = SessionWriteGate(
+                  child: EteeloButton.primary(
+                    label:
+                        actionLabel ??
+                        (hasTotal
+                            ? l10n.facturationCreatePaymentCollectAmountAction(
+                                totalLabel,
+                              )
+                            : l10n.facturationDetailCollectPaymentAction),
+                    icon: actionIcon,
+                    size: EteeloButtonSize.regular,
+                    fullWidth:
+                        constraints.maxWidth <
+                        AppBreakpoints.financeCollectBarRowMin,
+                    onPressed: onCollect,
+                  ),
+                );
 
-                  if (constraints.maxWidth <
-                      AppBreakpoints.financeCollectBarRowMin) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        total,
-                        const SizedBox(height: AppDimensions.spacingM),
-                        button,
-                      ],
-                    );
-                  }
-
-                  return Row(
+                if (constraints.maxWidth <
+                    AppBreakpoints.financeCollectBarRowMin) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(child: total),
-                      const SizedBox(width: AppDimensions.spacingM),
+                      total,
+                      const SizedBox(height: AppDimensions.spacingM),
                       button,
                     ],
                   );
-                },
-              ),
+                }
+
+                return Row(
+                  children: [
+                    Expanded(child: total),
+                    const SizedBox(width: AppDimensions.spacingM),
+                    button,
+                  ],
+                );
+              },
             ),
           ),
         ),

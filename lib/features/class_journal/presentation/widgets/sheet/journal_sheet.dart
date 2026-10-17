@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -18,48 +19,38 @@ class JournalSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // La bordure se peint PAR-DESSUS : en décoration, le fond plein de
-        // l'en-tête la recouvrirait.
-        final sheet = Container(
-          decoration: const BoxDecoration(
-            color: AppColors.surfaceRaised,
-            borderRadius: AppRadius.brLg,
-          ),
-          foregroundDecoration: BoxDecoration(
-            borderRadius: AppRadius.brLg,
-            border: Border.all(color: AppColors.journalLine),
-          ),
-          child: ClipRRect(
-            borderRadius: AppRadius.brLg,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const JournalSheetHeader(),
-                for (final line in lines) ...[
-                  if (line.breakBefore case final pause?)
-                    JournalBreakBand(pause: pause),
-                  JournalSheetRow(
-                    line: line,
-                    onTap: onOpen == null ? null : () => onOpen!(line),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        );
-        if (constraints.maxWidth >= AppDimensions.journalSheetMinWidth) {
-          return sheet;
-        }
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: AppDimensions.journalSheetMinWidth,
-            child: sheet,
-          ),
-        );
-      },
+    // La bordure se peint PAR-DESSUS : en décoration, le fond plein de
+    // l'en-tête la recouvrirait.
+    final sheet = Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.brLg,
+      ),
+      foregroundDecoration: BoxDecoration(
+        borderRadius: AppRadius.brLg,
+        border: Border.all(color: AppColors.journalLine),
+      ),
+      child: ClipRRect(
+        borderRadius: AppRadius.brLg,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const JournalSheetHeader(),
+            for (final line in lines) ...[
+              if (line.breakBefore case final pause?)
+                JournalBreakBand(pause: pause),
+              JournalSheetRow(
+                line: line,
+                onTap: onOpen == null ? null : () => onOpen!(line),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+    return EteeloMinWidthScroll(
+      minWidth: AppDimensions.journalSheetMinWidth,
+      child: sheet,
     );
   }
 }

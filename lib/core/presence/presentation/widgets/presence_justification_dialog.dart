@@ -99,7 +99,9 @@ class _PresenceJustificationDialogState<R extends Object>
     final l10n = AppLocalizations.of(context)!;
     final tone = PresenceTone.of(widget.status);
     final reason = _reason;
+    final VoidCallback? submit = reason == null ? null : () => _save(reason);
     return EteeloFormDialog(
+      onSubmit: submit,
       eyebrow: _eyebrow(l10n),
       title: l10n.presenceMarkJustifyTitle(widget.name),
       body: Column(
@@ -163,7 +165,7 @@ class _PresenceJustificationDialogState<R extends Object>
         EteeloButton.primary(
           label: l10n.presenceMarkSave,
           icon: Icons.check,
-          onPressed: reason == null ? null : () => _save(reason),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

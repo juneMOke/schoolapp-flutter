@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/tables/data_table_header.dart
 import 'package:school_app_flutter/core/components/tables/data_table_loading_state.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_row_item.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
@@ -72,26 +73,33 @@ class DataTableView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DataTableHeader(
-              columns: config.columns,
-              activeSortColumn: config.sortColumnIndex,
-              sortAscending: config.sortAscending,
-              onSortChanged: config.onSortChanged,
-              showLeadingSlot: showLeadingSlot,
-              showTrailingSlot: showTrailingSlot,
-              density: config.density,
-              tone: config.tone,
-            ),
-            const Divider(
-              height: EteeloDataTableTheme.separatorThickness,
-              thickness: EteeloDataTableTheme.separatorThickness,
-              color: EteeloDataTableTheme.separatorColor,
-            ),
-            AnimatedSwitcher(
-              duration: AppMotion.standard,
-              switchInCurve: AppMotion.outCurve,
-              switchOutCurve: AppMotion.inCurve,
-              child: content,
+            _scrollable(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DataTableHeader(
+                    columns: config.columns,
+                    activeSortColumn: config.sortColumnIndex,
+                    sortAscending: config.sortAscending,
+                    onSortChanged: config.onSortChanged,
+                    showLeadingSlot: showLeadingSlot,
+                    showTrailingSlot: showTrailingSlot,
+                    density: config.density,
+                    tone: config.tone,
+                  ),
+                  const Divider(
+                    height: EteeloDataTableTheme.separatorThickness,
+                    thickness: EteeloDataTableTheme.separatorThickness,
+                    color: EteeloDataTableTheme.separatorColor,
+                  ),
+                  AnimatedSwitcher(
+                    duration: AppMotion.standard,
+                    switchInCurve: AppMotion.outCurve,
+                    switchOutCurve: AppMotion.inCurve,
+                    child: content,
+                  ),
+                ],
+              ),
             ),
             if (config.footer != null)
               const Divider(
@@ -105,6 +113,12 @@ class DataTableView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _scrollable(Widget table) {
+    final minWidth = config.minWidth;
+    if (minWidth == null) return table;
+    return EteeloMinWidthScroll(minWidth: minWidth, child: table);
   }
 
   Widget _buildStateContent(

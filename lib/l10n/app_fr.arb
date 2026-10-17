@@ -45,6 +45,11 @@
   "showPassword": "Afficher",
   "hidePassword": "Masquer",
   "schoolApp": "ETEELO CONNECT",
+  "browserTabTitle": "{page} · ETEELO CONNECT",
+  "@browserTabTitle": {
+    "description": "Titre de l'onglet du navigateur : l'écran affiché, puis l'application.",
+    "placeholders": { "page": { "type": "String" } }
+  },
   "splashBrandPrimary": "ETEELO",
   "splashBrandSecondary": "CONNECT",
   "splashTagline": "Simplifier la gestion de votre école",
@@ -575,6 +580,8 @@
       }
     }
   },
+  "configurationFeeEdit": "Modifier le frais",
+  "configurationFeeDelete": "Supprimer le frais",
   "configurationFeeSaved": "Frais « {label} » enregistré",
   "@configurationFeeSaved": {
     "description": "Toast d'ajout ou de mise à jour d'un frais",

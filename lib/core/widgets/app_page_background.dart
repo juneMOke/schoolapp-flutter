@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
+import 'package:school_app_flutter/core/components/selection/desktop_selection_area.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
@@ -18,6 +20,10 @@ class AppPageBackground extends StatelessWidget {
   final AppPageBackgroundStyle style;
   final Color flatBackgroundColor;
 
+  /// Fiche en lecture : le texte se sélectionne et se copie sur bureau et
+  /// navigateur (cf. [DesktopSelectionArea], qui dit pourquoi pas partout).
+  final bool selectableText;
+
   const AppPageBackground({
     super.key,
     required this.child,
@@ -28,6 +34,7 @@ class AppPageBackground extends StatelessWidget {
     this.bottomNavigationBar,
     this.style = AppPageBackgroundStyle.decorated,
     this.flatBackgroundColor = AppColors.surface,
+    this.selectableText = false,
   });
 
   double _horizontalPadding(BuildContext context) {
@@ -55,14 +62,8 @@ class AppPageBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.detailContentMaxWidth,
-        ),
-        child: child,
-      ),
+    final content = ContentMaxWidth(
+      child: selectableText ? DesktopSelectionArea(child: child) : child,
     );
 
     final body = style == AppPageBackgroundStyle.flat

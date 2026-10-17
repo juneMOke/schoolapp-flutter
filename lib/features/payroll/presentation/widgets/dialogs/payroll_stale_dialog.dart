@@ -54,7 +54,9 @@ class PayrollStaleDialog extends StatelessWidget {
             PayrollFingerprinter.digestLines(current),
             server.lines,
           );
+    void submit() => Navigator.of(context).pop(true);
     return EteeloFormDialog(
+      onSubmit: submit,
       title: l10n.payrollStaleTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,7 +97,7 @@ class PayrollStaleDialog extends StatelessWidget {
         EteeloButton.primary(
           label: l10n.payrollStaleRefresh,
           icon: Icons.sync,
-          onPressed: () => Navigator.of(context).pop(true),
+          onPressed: submit,
           fullWidth: false,
         ),
       ],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -84,7 +85,7 @@ class _PhotoSessionView extends StatelessWidget {
               body: SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: _body(context, state),
+                  child: ContentMaxWidth(child: _body(context, state)),
                 ),
               ),
             ),

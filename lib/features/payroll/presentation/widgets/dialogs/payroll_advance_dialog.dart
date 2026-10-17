@@ -132,6 +132,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
           member,
     ];
     return EteeloFormDialog(
+      onSubmit: _submit,
       title: l10n.payrollAdvanceTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

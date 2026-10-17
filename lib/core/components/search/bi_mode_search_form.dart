@@ -293,6 +293,7 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
         surnameLabel: l10n.surname,
         enabled: !widget.isLoading,
         onChanged: _onNameChanged,
+        onSubmitted: _submit,
       );
     }
 

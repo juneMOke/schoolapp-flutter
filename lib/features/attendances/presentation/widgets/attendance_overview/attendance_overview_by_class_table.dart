@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -90,17 +91,11 @@ class _AttendanceOverviewByClassTableState
 
     return AttendanceOverviewCard(
       title: l10n.attendanceOverviewByClassTitle,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final table = _buildTable(context, l10n);
-          // En largeur contrainte, on autorise le defilement horizontal pour
-          // ne jamais ecraser les cellules.
-          if (constraints.maxWidth >= _kMinTableWidth) return table;
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(width: _kMinTableWidth, child: table),
-          );
-        },
+      // En largeur contrainte, le tableau défile horizontalement pour ne
+      // jamais écraser les cellules.
+      child: EteeloMinWidthScroll(
+        minWidth: _kMinTableWidth,
+        child: _buildTable(context, l10n),
       ),
     );
   }

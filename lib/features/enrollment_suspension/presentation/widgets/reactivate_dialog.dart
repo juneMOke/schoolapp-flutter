@@ -39,9 +39,16 @@ class ReactivateDialog extends StatelessWidget {
           Navigator.of(context).pop((state as SuspensionGestureDone).count),
       builder: (context, state) {
         final busy = state is SuspensionGestureBusy;
+        // Le bouton en chargement ignore le clic : le raccourci aussi.
+        final VoidCallback? submit = busy
+            ? null
+            : () => context.read<SuspensionGestureCubit>().reactivate([
+                for (final c in candidates) c.target,
+              ]);
         return PopScope(
           canPop: !busy,
           child: EteeloFormDialog(
+            onSubmit: submit,
             eyebrow: l10n.suspensionDialogEyebrow,
             title: l10n.reactivationDialogTitle(count),
             body: Column(
@@ -70,9 +77,7 @@ class ReactivateDialog extends StatelessWidget {
                 icon: Icons.how_to_reg_outlined,
                 isLoading: busy,
                 loadingLabel: l10n.reactivationBusy,
-                onPressed: () => context
-                    .read<SuspensionGestureCubit>()
-                    .reactivate([for (final c in candidates) c.target]),
+                onPressed: submit,
                 fullWidth: false,
               ),
             ],

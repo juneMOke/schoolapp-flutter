@@ -116,6 +116,7 @@ class StudentDetailAppBar extends StatelessWidget
             hoverColor: _white(0.08),
             icon: Icons.arrow_back_rounded,
             iconSize: 22,
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onTap: () => _onExit(context),
           ),
         ),
@@ -176,6 +177,7 @@ class StudentDetailAppBar extends StatelessWidget
               hoverColor: _white(0.08),
               icon: Icons.close_rounded,
               iconSize: 20,
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
               onTap: () => _onExit(context),
             ),
           ),
@@ -324,6 +326,10 @@ class _SquareIconButton extends StatelessWidget {
   final Color hoverColor;
   final IconData icon;
   final double iconSize;
+
+  /// Obligatoire : une icône seule ne dit rien à la souris ni au lecteur
+  /// d'écran.
+  final String tooltip;
   final VoidCallback onTap;
 
   const _SquareIconButton({
@@ -332,22 +338,26 @@ class _SquareIconButton extends StatelessWidget {
     required this.hoverColor,
     required this.icon,
     required this.iconSize,
+    required this.tooltip,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Material(
-        color: baseColor,
-        borderRadius: AppRadius.brSm,
-        child: InkWell(
+    return Tooltip(
+      message: tooltip,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Material(
+          color: baseColor,
           borderRadius: AppRadius.brSm,
-          hoverColor: hoverColor,
-          onTap: onTap,
-          child: Icon(icon, size: iconSize, color: AppColors.textOnDark),
+          child: InkWell(
+            borderRadius: AppRadius.brSm,
+            hoverColor: hoverColor,
+            onTap: onTap,
+            child: Icon(icon, size: iconSize, color: AppColors.textOnDark),
+          ),
         ),
       ),
     );

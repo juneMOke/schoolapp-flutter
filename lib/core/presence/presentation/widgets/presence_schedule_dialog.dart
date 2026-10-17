@@ -52,7 +52,11 @@ class _PresenceScheduleDialogState extends State<PresenceScheduleDialog> {
     final draft = start == null
         ? null
         : PresenceSchedule(start: start, toleranceMinutes: _tolerance);
+    final VoidCallback? submit = draft == null || _unchanged(draft)
+        ? null
+        : () => Navigator.of(context).pop(draft);
     return EteeloFormDialog(
+      onSubmit: widget.editable ? submit : null,
       title: l10n.presenceMarkSettingsTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -128,9 +132,7 @@ class _PresenceScheduleDialogState extends State<PresenceScheduleDialog> {
           EteeloButton.primary(
             label: l10n.presenceMarkSave,
             icon: Icons.check,
-            onPressed: draft == null || _unchanged(draft)
-                ? null
-                : () => Navigator.of(context).pop(draft),
+            onPressed: submit,
             fullWidth: false,
           ),
       ],

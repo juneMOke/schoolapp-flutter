@@ -290,6 +290,12 @@ abstract class AppLocalizations {
   /// **'ETEELO CONNECT'**
   String get schoolApp;
 
+  /// No description provided for @browserTabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{page} · ETEELO CONNECT'**
+  String browserTabTitle(String page);
+
   /// No description provided for @splashBrandPrimary.
   ///
   /// In en, this message translates to:
@@ -955,6 +961,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fee \"{label}\" deleted'**
   String configurationFeeDeleted(String label);
+
+  /// No description provided for @configurationFeeEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit fee'**
+  String get configurationFeeEdit;
+
+  /// No description provided for @configurationFeeDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete fee'**
+  String get configurationFeeDelete;
 
   /// Toast after adding or updating a fee
   ///

@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
@@ -1991,14 +1992,16 @@ void main() {
     Finder eye() => find.byIcon(Icons.visibility_outlined);
 
     /// L'état désarmé se lit sur le **geste**, jamais sur une teinte : le socle
-    /// coupe `InkWell.onTap` quand la ligne ne peut pas ouvrir. Un œil gris qui
-    /// répondrait quand même est exactement le défaut visé.
+    /// coupe `EteeloActivatable.onActivate` quand la ligne ne peut pas ouvrir.
+    /// Un œil gris qui répondrait quand même est exactement le défaut visé.
     bool enabled(WidgetTester tester) =>
         tester
-            .widget<InkWell>(
-              find.ancestor(of: eye(), matching: find.byType(InkWell)).first,
+            .widget<EteeloActivatable>(
+              find
+                  .ancestor(of: eye(), matching: find.byType(EteeloActivatable))
+                  .first,
             )
-            .onTap !=
+            .onActivate !=
         null;
 
     testWidgets('une ligne complète porte un œil actif, et il ouvre', (

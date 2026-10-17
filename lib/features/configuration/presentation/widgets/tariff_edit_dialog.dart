@@ -122,6 +122,7 @@ class _TariffEditDialogState extends State<TariffEditDialog> {
                 ),
               ),
               IconButton(
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded),
               ),
