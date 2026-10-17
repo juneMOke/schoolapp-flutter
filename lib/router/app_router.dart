@@ -60,6 +60,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_f
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
+import 'package:school_app_flutter/router/return_location.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_page.dart';
@@ -166,6 +167,11 @@ class AppRouter {
     AcademicYearContextBloc academicYearContextBloc,
   ) {
     final notifier = RouterNotifier(authBloc, academicYearContextBloc);
+    // Vrai jusqu'à la première session ouverte de ce lancement : seule
+    // l'adresse d'ouverture (F5, favori, lien collé) mérite d'être rendue. Une
+    // déconnexion passe elle aussi par `loading` — sans ce verrou, l'agent
+    // suivant hériterait de la page du précédent.
+    var isColdStart = true;
 
     return GoRouter(
       initialLocation: '/splash',
@@ -173,16 +179,23 @@ class AppRouter {
       // Sans lui, chaque rafraîchissement du routeur reconstruit les pages
       // empilées SANS leur `extra` (cf. [InMemoryExtraCodec]).
       extraCodec: InMemoryExtraCodec(),
-      redirect: (context, state) => resolveRedirect(
-        authStatus: authBloc.state.status,
-        permissions: authBloc.state.permissions,
-        academicYearBlocksNavigation:
-            academicYearContextBloc.state.blocksNavigation,
-        academicYearHasBlockingFailure:
-            academicYearContextBloc.state.hasBlockingFailure,
-        matchedLocation: state.matchedLocation,
-        location: state.uri,
-      ),
+      redirect: (context, state) {
+        final redirect = resolveRedirect(
+          authStatus: authBloc.state.status,
+          permissions: authBloc.state.permissions,
+          academicYearBlocksNavigation:
+              academicYearContextBloc.state.blocksNavigation,
+          academicYearHasBlockingFailure:
+              academicYearContextBloc.state.hasBlockingFailure,
+          matchedLocation: state.matchedLocation,
+          location: state.uri,
+          isColdStart: isColdStart,
+        );
+        if (authBloc.state.status == AuthStatus.authenticated) {
+          isColdStart = false;
+        }
+        return redirect;
+      },
       routes: buildRoutes(),
     );
   }
@@ -202,6 +215,7 @@ class AppRouter {
     required bool academicYearHasBlockingFailure,
     required String matchedLocation,
     required Uri location,
+    bool isColdStart = false,
   }) {
     final isAuthenticated = authStatus == AuthStatus.authenticated;
     final isAuthLoading =
@@ -214,12 +228,24 @@ class AppRouter {
       AppRoutesNames.configurationPath,
     );
 
+    // L'adresse demandée au démarrage (F5, favori, lien collé) : déjà en
+    // attente si l'on est sur le parcours d'entrée, sinon — au démarrage
+    // seulement, cf. [isColdStart] — l'adresse courante elle-même.
+    // Cf. `return_location.dart`.
+    final pendingReturn = isOnSplash || isOnAuthFlow
+        ? pendingReturnLocation(location)
+        : isColdStart
+        ? sanitizeReturnLocation(location.toString())
+        : null;
+
     if (isAuthLoading) {
-      return isOnSplash ? null : '/splash';
+      return isOnSplash ? null : withReturnLocation('/splash', pendingReturn);
     }
 
     if (!isAuthenticated) {
-      return isOnAuthFlow ? null : '/login';
+      if (isOnAuthFlow) return null;
+      // Session expirée au rechargement : la connexion hérite de l'adresse.
+      return withReturnLocation('/login', pendingReturn);
     }
 
     // ── La porte de l'assistant de mise en service ──────────────────────────
@@ -239,17 +265,32 @@ class AppRouter {
       return canAccessLocation(location, permissions) ? null : '/splash';
     }
 
+    // Retenir sur le splash garde l'adresse en attente seulement si l'on vient
+    // du parcours d'entrée : un contexte qui se recharge en pleine session
+    // (changement d'école) ne doit pas ramener sur une page de l'école d'avant.
+    final splashHold = withReturnLocation(
+      '/splash',
+      isOnAuthFlow || isColdStart ? pendingReturn : null,
+    );
+
     if (academicYearBlocksNavigation) {
-      return isOnSplash ? null : '/splash';
+      return isOnSplash ? null : splashHold;
     }
 
     // Échec de la résolution du contexte académique : retenir sur le splash
     // (ErrorView + retry) au lieu d'éjecter vers /home sans données.
     if (academicYearHasBlockingFailure) {
-      return isOnSplash ? null : '/splash';
+      return isOnSplash ? null : splashHold;
     }
 
-    if (isOnAuthFlow || isOnSplash) return '/home';
+    if (isOnAuthFlow || isOnSplash) {
+      // La garde de permission s'applique à l'adresse rendue comme à toute
+      // autre : un lien profond ne contourne pas ADR-014 §2.9.
+      final target = pendingReturn;
+      return target != null && canAccessLocation(Uri.parse(target), permissions)
+          ? target
+          : '/home';
+    }
 
     // Garde de permission (ADR-014 §2.9) : masquer une tuile ne suffit pas. Un
     // lien profond, une restauration d'état ou un retour arrière atteignent la
