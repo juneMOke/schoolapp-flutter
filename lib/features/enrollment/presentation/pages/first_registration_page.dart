@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab_location.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -170,10 +169,10 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
   }
 
   void _openNewEnrollment(BuildContext context) {
-    context.go(
-      '${EnrollmentConstants.enrollmentDetailRoute}/new',
-      extra: const EnrollmentDetailIntent.newFirstRegistration(),
-    );
+    // L'intention voyage aussi dans la requête : sans elle, un rechargement
+    // de la page relirait `/new` comme une pré-inscription.
+    const intent = EnrollmentDetailIntent.newFirstRegistration();
+    context.go(intent.toLocation(), extra: intent);
   }
 
   void _onResetSearch() {

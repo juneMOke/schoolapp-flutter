@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -9,12 +8,12 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense.dart
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_queue_cubit.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_navigation.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Les gestes de la file, orchestrés.
 ///
@@ -59,7 +58,10 @@ class ExpenseQueueActions {
       // à `false`) : ce cas est inatteignable, et il est écrit pour que le
       // `switch` reste exhaustif si la décision change un jour.
       case ExpenseDetailShortcut():
-        context.go(AppRoutesNames.expenseRegister);
+        openExpenseRegister(
+          context,
+          title: AppLocalizations.of(context)!.subMenuExpenseRegister,
+        );
       case ExpenseDetailGesture(:final gesture, :final note):
         await applyGesture(latest, gesture, note: note);
     }
