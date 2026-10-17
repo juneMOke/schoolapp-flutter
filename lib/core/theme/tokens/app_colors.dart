@@ -53,6 +53,10 @@ class AppColors {
   static const stateHover = Color(0x0F1B4D6B);
   static const statePressed = Color(0x1F1B4D6B);
   static const stateFocus = Color(0x331B4D6B);
+  // Focus clavier sur une surface sombre (barre latérale, barres d'en-tête) :
+  // `stateFocus`, bleu ardoise à 20 %, y disparaît. Blanc cassé à 24 %, nettement
+  // au-dessus du survol (6 %) et de l'appui (10 %) des mêmes surfaces.
+  static const stateFocusOnDark = Color(0x3DFAFAF7);
   static const stateDisabled = border;
 
   // Buttons / FAB

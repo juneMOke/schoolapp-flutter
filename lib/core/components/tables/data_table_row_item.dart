@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
@@ -52,6 +53,14 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
         ? EteeloDataTableTheme.rowEvenBackground
         : (widget.tone?.zebra ?? EteeloDataTableTheme.rowOddBackground);
 
+    // La ligne est un bouton au clavier dès qu'elle s'ouvre : une étape de
+    // Tab, Entrée/Espace, et le même liseré que le survol quand elle a le
+    // focus. Sans action de ligne (seul l'œil agit), elle reste hors de la
+    // tabulation — l'œil y est déjà.
+    //
+    // Le survol reste lu ici, et pas sur [EteeloActivatable] : une ligne
+    // inerte s'éclaire aussi sous la souris (repère de lecture), et le
+    // curseur main y signale l'œil.
     return MouseRegion(
       cursor: hasTap ? SystemMouseCursors.click : MouseCursor.defer,
       onEnter: (_) => setState(() => _isHovered = true),
@@ -59,56 +68,88 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
         _isHovered = false;
         _isPressed = false;
       }),
-      child: GestureDetector(
-        onTap: widget.row.onTap,
-        onTapDown: (_) => setState(() => _isPressed = true),
-        onTapUp: (_) => setState(() => _isPressed = false),
-        onTapCancel: () => setState(() => _isPressed = false),
-        child: AnimatedContainer(
-          duration: EteeloDataTableTheme.rowHoverDuration,
-          height: widget.density.rowHeight,
-          padding: const EdgeInsets.symmetric(
-            horizontal: EteeloDataTableTheme.rowHorizontalPadding,
-          ),
-          decoration: BoxDecoration(
-            color: isActive
-                ? EteeloDataTableTheme.rowHoverBackground
-                : baseRowBackground,
-            border: Border(
-              left: BorderSide(
-                color: isActive
-                    ? EteeloDataTableTheme.rowHoverLeadingBorder
-                    : Colors.transparent,
-                width: EteeloDataTableTheme.rowLeadingBorderWidth,
-              ),
+      child: Listener(
+        onPointerDown: (_) => setState(() => _isPressed = true),
+        onPointerUp: (_) => setState(() => _isPressed = false),
+        onPointerCancel: (_) => setState(() => _isPressed = false),
+        // Rôle de bouton sans libellé propre : les cellules se lisent déjà
+        // (nom, montants, statut) — un libellé les doublerait.
+        child: Semantics(
+          button: widget.row.onTap != null,
+          enabled: widget.row.onTap != null ? true : null,
+          child: EteeloActivatable(
+            onActivate: widget.row.onTap,
+            builder: (context, highlight) => _buildRow(
+              isActive: isActive || highlight.focused,
+              focused: highlight.focused,
+              hasLeading: hasLeading,
+              hasTrailing: hasTrailing,
+              baseRowBackground: baseRowBackground,
             ),
           ),
-          child: Row(
-            children: [
-              if (hasLeading) ...[
-                SizedBox(
-                  width: EteeloDataTableTheme.leadingSlotWidth,
-                  child: widget.row.leading,
-                ),
-                const SizedBox(width: EteeloDataTableTheme.slotGap),
-              ],
-              ..._buildCells(),
-              if (hasTrailing) ...[
-                const SizedBox(width: EteeloDataTableTheme.slotGap),
-                SizedBox(
-                  width: EteeloDataTableTheme.trailingSlotWidth,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: DataTableTrailingWidget(
-                      spec: widget.row.trailing,
-                      customBuilders: widget.trailingBuilders,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRow({
+    required bool isActive,
+    required bool focused,
+    required bool hasLeading,
+    required bool hasTrailing,
+    required Color baseRowBackground,
+  }) {
+    return AnimatedContainer(
+      duration: EteeloDataTableTheme.rowHoverDuration,
+      height: widget.density.rowHeight,
+      padding: const EdgeInsets.symmetric(
+        horizontal: EteeloDataTableTheme.rowHorizontalPadding,
+      ),
+      foregroundDecoration: focused
+          ? BoxDecoration(
+              border: Border.all(
+                color: EteeloDataTableTheme.focusRingColor,
+                width: EteeloDataTableTheme.focusRingWidth,
+              ),
+            )
+          : null,
+      decoration: BoxDecoration(
+        color: isActive
+            ? EteeloDataTableTheme.rowHoverBackground
+            : baseRowBackground,
+        border: Border(
+          left: BorderSide(
+            color: isActive
+                ? EteeloDataTableTheme.rowHoverLeadingBorder
+                : Colors.transparent,
+            width: EteeloDataTableTheme.rowLeadingBorderWidth,
           ),
         ),
+      ),
+      child: Row(
+        children: [
+          if (hasLeading) ...[
+            SizedBox(
+              width: EteeloDataTableTheme.leadingSlotWidth,
+              child: widget.row.leading,
+            ),
+            const SizedBox(width: EteeloDataTableTheme.slotGap),
+          ],
+          ..._buildCells(),
+          if (hasTrailing) ...[
+            const SizedBox(width: EteeloDataTableTheme.slotGap),
+            SizedBox(
+              width: EteeloDataTableTheme.trailingSlotWidth,
+              child: Align(
+                alignment: Alignment.center,
+                child: DataTableTrailingWidget(
+                  spec: widget.row.trailing,
+                  customBuilders: widget.trailingBuilders,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

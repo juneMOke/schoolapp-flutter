@@ -25,6 +25,7 @@ class SidebarHeaderCollapsed extends StatelessWidget {
         toggled: false,
         child: ExcludeSemantics(
           child: InkWell(
+            focusColor: AppColors.stateFocusOnDark,
             onTap: () =>
                 context.read<NavigationBloc>().add(const SidebarToggled()),
             borderRadius: AppRadius.brSm,

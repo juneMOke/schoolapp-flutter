@@ -53,7 +53,10 @@ class PresenceCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: actions.cycle,
-        child: DecoratedBox(
+        // `Ink`, pas `DecoratedBox` : le dégradé se peint sur le `Material`,
+        // sous l'encre — un `DecoratedBox` le peignait par-dessus et cachait
+        // le survol comme le focus.
+        child: Ink(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,

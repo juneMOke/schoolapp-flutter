@@ -81,6 +81,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                 ? widget.isMenuOpened
                 : null,
             child: InkWell(
+              focusColor: AppColors.stateFocusOnDark,
               borderRadius: AppRadius.brMd,
               hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
               splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
@@ -190,6 +191,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
               label: subMenu.title,
               selected: subMenu.isActive,
               child: InkWell(
+                focusColor: AppColors.stateFocusOnDark,
                 borderRadius: AppRadius.brSm,
                 hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
                 splashColor: AppColors.textOnDark.withValues(alpha: 0.1),

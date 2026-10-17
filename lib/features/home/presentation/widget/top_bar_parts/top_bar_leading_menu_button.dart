@@ -33,6 +33,7 @@ class TopBarLeadingMenuButton extends StatelessWidget {
             ),
           ),
           child: InkWell(
+            focusColor: AppColors.stateFocusOnDark,
             borderRadius: BorderRadius.circular(
               HomeNavigationUiTokens.topBarActionRadius,
             ),

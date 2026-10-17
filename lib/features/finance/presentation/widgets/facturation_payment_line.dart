@@ -35,6 +35,7 @@ class FacturationPaymentLine extends StatefulWidget {
 class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
   static const double _medallionSize = 40;
   bool _hovered = false;
+  bool _focused = false;
 
   /// Le nom du payeur, ou la mention d'un versement encaissé sans le nommer.
   ///
@@ -69,25 +70,29 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
         ? null
         : paymentCorrectionBadge(widget.payment.correction, l10n);
 
+    final lit = _hovered || _focused;
     return Material(
       color: Colors.transparent,
       borderRadius: AppRadius.brMd,
       child: InkWell(
         onTap: widget.onTap,
         onHover: (value) => setState(() => _hovered = value),
+        // Le focus clavier allume la ligne comme la souris : le fond opaque
+        // ci-dessous masque l'encre de focus de l'`InkWell`.
+        onFocusChange: (value) => setState(() => _focused = value),
         borderRadius: AppRadius.brMd,
         child: AnimatedContainer(
           duration: AppMotion.micro,
           curve: Curves.easeOut,
-          transform: Matrix4.translationValues(0, _hovered ? -1 : 0, 0),
+          transform: Matrix4.translationValues(0, lit ? -1 : 0, 0),
           padding: const EdgeInsets.all(AppDimensions.spacingM),
           decoration: BoxDecoration(
-            color: _hovered ? AppColors.stateHover : AppColors.surfaceRaised,
+            color: lit ? AppColors.stateHover : AppColors.surfaceRaised,
             borderRadius: AppRadius.brMd,
             border: Border.all(
-              color: _hovered ? AppColors.billingHelpBorder : AppColors.border,
+              color: lit ? AppColors.billingHelpBorder : AppColors.border,
             ),
-            boxShadow: _hovered
+            boxShadow: lit
                 ? const [
                     BoxShadow(
                       color: AppColors.financeDetailShadow,

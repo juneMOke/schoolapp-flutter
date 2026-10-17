@@ -112,16 +112,22 @@ class EteeloColumnTableRow extends StatelessWidget {
         fontFeatures: const [FontFeature.tabularFigures()],
       );
 
+  // Le fond est porté par le `Material` et non par le `Container` : l'encre
+  // de l'`InkWell` (survol, focus, appui) se peint SOUS l'enfant, et un fond
+  // opaque posé dessus la masquait — la ligne ne réagissait plus à rien.
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: background,
-        border: const Border(bottom: BorderSide(color: AppColors.border)),
+  Widget build(BuildContext context) => Material(
+    type: background == null ? MaterialType.transparency : MaterialType.canvas,
+    color: background,
+    child: InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: AppColors.border)),
+        ),
+        child: EteeloColumns(widths: widths, cells: cells),
       ),
-      child: EteeloColumns(widths: widths, cells: cells),
     ),
   );
 }
