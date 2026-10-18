@@ -110,13 +110,26 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final number = _expense.number;
+    // Grand écran : la fiche s'élargit et porte le fil en colonne (cf.
+    // `ExpenseDetailBody`). Ailleurs elle garde sa largeur de lecture, le fil
+    // en pied — une modale élargie sur une seule colonne n'apporterait que des
+    // lignes plus longues. Passé à `Dialog` lui-même : la M3 le plafonne
+    // sinon à 560, quoi qu'on mette dessous.
+    final maxWidth =
+        MediaQuery.sizeOf(context).width >=
+            AppDimensions.expenseDetailDialogWideMaxWidth +
+                2 * AppDimensions.spacingL
+        ? AppDimensions.expenseDetailDialogWideMaxWidth
+        : AppDimensions.expenseDetailDialogMaxWidth;
     return Dialog(
       insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
+      constraints: BoxConstraints(
+        minWidth: AppDimensions.dialogMinWidth,
+        maxWidth: maxWidth,
+      ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.expenseDetailDialogMaxWidth,
-        ),
+        constraints: BoxConstraints(maxWidth: maxWidth),
         child: EteeloDialogBody(
           header: ExpenseDialogHeader(
             eyebrow: number == null

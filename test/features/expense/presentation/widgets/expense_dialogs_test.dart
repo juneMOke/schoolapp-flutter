@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/expense/domain/services/expense_mone
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_chain.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_panel.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -690,5 +692,49 @@ void main() {
     // L'horloge seule laisserait croire que le geste a eu lieu.
     expect(find.text('non envoyé'), findsOneWidget);
     expect(find.text("en attente d'envoi"), findsNothing);
+  });
+
+  group('fiche sur grand écran', () {
+    // La VUE, pas seulement la surface : la modale décide de sa largeur sur
+    // `MediaQuery`, qui suit la vue de test.
+    Future<void> openDetail(WidgetTester tester, Size size) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await _pumpHost(
+        tester,
+        (context) => showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader(_rate),
+          thread: const [],
+        ),
+      );
+    }
+
+    testWidgets('le fil passe en colonne, à côté des faits', (tester) async {
+      await openDetail(tester, const Size(1440, 1000));
+
+      final thread = tester.getTopLeft(find.byType(ExpenseThreadPanel));
+      final status = tester.getTopLeft(find.byType(ExpenseChain));
+      expect(thread.dx, greaterThan(status.dx));
+      expect(thread.dy, lessThan(status.dy + 400));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('écran moyen : la fiche garde sa largeur, le fil en pied', (
+      tester,
+    ) async {
+      await openDetail(tester, const Size(900, 1600));
+
+      final thread = tester.getTopLeft(find.byType(ExpenseThreadPanel));
+      final status = tester.getTopLeft(find.byType(ExpenseChain));
+      expect(thread.dy, greaterThan(status.dy));
+      expect(
+        tester.getSize(find.byType(ExpenseThreadPanel)).width,
+        lessThanOrEqualTo(560),
+      );
+    });
   });
 }

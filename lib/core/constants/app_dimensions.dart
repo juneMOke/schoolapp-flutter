@@ -557,6 +557,11 @@ class AppDimensions {
   /// Modales : formulaire 600, fiche 560.
   static const expenseFormDialogMaxWidth = 600.0;
   static const expenseDetailDialogMaxWidth = 560.0;
+
+  /// Sur grand écran, la fiche s'élargit pour porter le fil en colonne, à
+  /// côté des faits (cf. `AppBreakpoints.expenseDetailTwoColMin`).
+  static const expenseDetailDialogWideMaxWidth = 960.0;
+  static const expenseDetailThreadColumnWidth = 340.0;
   static const expenseDetailMedallionSize = 44.0;
   static const expenseDetailMedallionIconSize = 22.0;
   static const expenseDetailLabelWidth = 150.0;

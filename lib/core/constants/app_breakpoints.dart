@@ -80,6 +80,9 @@ class AppBreakpoints {
   // zone de la page (sous la barre latérale) : 420 de panier + 24 d'écart
   // laissent au catalogue au moins ~530 dp, deux tuiles d'articles.
   static const double boutiqueSideCartMin = financeDetailTwoColMin; // 1024
+  // Fiche d'une dépense : le fil passe en colonne quand le corps de la
+  // modale dépasse ~820 dp — 340 de fil, 480 de faits au moins.
+  static const double expenseDetailTwoColMin = 820.0;
   // Composition des classes — vue répartie.
   // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
   // en deçà, le basculeur passe dessous.
