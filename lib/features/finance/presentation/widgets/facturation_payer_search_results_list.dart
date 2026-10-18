@@ -60,7 +60,9 @@ class _PayerRow extends StatelessWidget {
         child: InkWell(
           onTap: onSelected,
           borderRadius: AppRadius.brMd,
-          child: Container(
+          // `Ink`, pas `Container` : un fond opaque peint par-dessus l'encre
+          // cacherait le survol et le focus clavier de la ligne.
+          child: Ink(
             padding: const EdgeInsets.all(AppDimensions.spacingM),
             decoration: BoxDecoration(
               color: AppColors.surface,

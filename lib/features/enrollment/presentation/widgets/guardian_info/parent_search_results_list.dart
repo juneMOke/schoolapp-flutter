@@ -54,61 +54,69 @@ class ParentSearchResultsList extends StatelessWidget {
 
         final isSelected = selectable && selectedParentId == parent.id;
 
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => onSelected(parent),
-            borderRadius: AppRadius.brMd,
-            child: Container(
-              padding: const EdgeInsets.all(AppDimensions.spacingM),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: AppRadius.brMd,
-                border: Border.all(
-                  color: isSelected ? AppColors.bleuArdoise : AppColors.border,
-                  width: isSelected ? 2 : 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fullName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodyStrong.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        // Un tuteur sans numéro se dit, il ne se laisse pas
-                        // en blanc : dans une liste de résultats, une ligne
-                        // vide se lit comme un chargement qui n'a pas abouti.
-                        Text(
-                          (parent.phoneNumber ?? '').trim().isEmpty
-                              ? l10n.guardianPhoneNumberAbsent
-                              : parent.phoneNumber!,
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    selectable
-                        ? (isSelected
-                              ? Icons.check_circle_rounded
-                              : Icons.radio_button_unchecked_rounded)
-                        : Icons.chevron_right_rounded,
+        // `Ink`, pas `Container` : un fond opaque peint par-dessus l'encre
+        // cacherait le survol et le focus clavier de la ligne.
+        return Semantics(
+          button: true,
+          selected: selectable ? isSelected : null,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => onSelected(parent),
+              borderRadius: AppRadius.brMd,
+              child: Ink(
+                padding: const EdgeInsets.all(AppDimensions.spacingM),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: AppRadius.brMd,
+                  border: Border.all(
                     color: isSelected
                         ? AppColors.bleuArdoise
-                        : AppColors.textSecondary,
+                        : AppColors.border,
+                    width: isSelected ? 2 : 1,
                   ),
-                ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            fullName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bodyStrong.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Un tuteur sans numéro se dit, il ne se laisse pas
+                          // en blanc : dans une liste de résultats, une ligne
+                          // vide se lit comme un chargement qui n'a pas abouti.
+                          Text(
+                            (parent.phoneNumber ?? '').trim().isEmpty
+                                ? l10n.guardianPhoneNumberAbsent
+                                : parent.phoneNumber!,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      selectable
+                          ? (isSelected
+                                ? Icons.check_circle_rounded
+                                : Icons.radio_button_unchecked_rounded)
+                          : Icons.chevron_right_rounded,
+                      color: isSelected
+                          ? AppColors.bleuArdoise
+                          : AppColors.textSecondary,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

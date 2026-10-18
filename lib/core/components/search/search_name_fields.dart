@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
@@ -14,7 +15,8 @@ import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 ///
 /// Entrée lance la recherche ([onSubmitted]) : depuis le dernier champ sur la
 /// tablette — « suivant » y enchaîne les deux premiers —, depuis n'importe
-/// lequel au clavier physique.
+/// lequel au clavier physique. Ctrl+F ou « / » placent le curseur dans le
+/// premier champ.
 class SearchNameFields extends StatelessWidget {
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
@@ -74,14 +76,16 @@ class SearchNameFields extends StatelessWidget {
           );
         }
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            field(lastNameController, lastNameLabel),
-            field(surnameController, surnameLabel),
-            field(firstNameController, firstNameLabel, last: true),
-          ],
+        return SearchFocusShortcut(
+          child: Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: [
+              field(lastNameController, lastNameLabel),
+              field(surnameController, surnameLabel),
+              field(firstNameController, firstNameLabel, last: true),
+            ],
+          ),
         );
       },
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/article_family.dart';
@@ -37,20 +38,27 @@ class BoutiqueSearchBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 46,
-          child: TextField(
+        // Ctrl+F ou « / » y placent le curseur, Échap le vide.
+        SearchFocusShortcut(
+          child: ClearOnEscape(
             controller: controller,
-            enabled: enabled,
-            onChanged: onQueryChanged,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              hintText: l10n.boutiqueSearchPlaceholder,
-              prefixIcon: const Icon(Icons.search, size: 18),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+            onCleared: onQueryChanged,
+            child: SizedBox(
+              height: 46,
+              child: TextField(
+                controller: controller,
+                enabled: enabled,
+                onChanged: onQueryChanged,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: l10n.boutiqueSearchPlaceholder,
+                  prefixIcon: const Icon(Icons.search, size: 18),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
@@ -11,6 +12,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// Le champ suit [text] : « Tout afficher » doit aussi le vider, sinon il
 /// montrerait une recherche que le calcul ne connaît plus.
+///
+/// Au clavier : Ctrl+F ou « / » y placent le curseur, Échap le vide.
 class EteeloSearchToolbar extends StatefulWidget {
   final String text;
   final String label;
@@ -70,12 +73,18 @@ class _EteeloSearchToolbarState extends State<EteeloSearchToolbar> {
             minWidth: AppDimensions.searchToolbarMinWidth,
             maxWidth: AppDimensions.searchToolbarMaxWidth,
           ),
-          child: EteeloTextInput(
-            controller: _search,
-            label: widget.label,
-            placeholder: widget.placeholder,
-            capitalization: EteeloTextCapitalization.none,
-            onChanged: widget.onTextChanged,
+          child: SearchFocusShortcut(
+            child: ClearOnEscape(
+              controller: _search,
+              onCleared: widget.onTextChanged,
+              child: EteeloTextInput(
+                controller: _search,
+                label: widget.label,
+                placeholder: widget.placeholder,
+                capitalization: EteeloTextCapitalization.none,
+                onChanged: widget.onTextChanged,
+              ),
+            ),
           ),
         ),
         ...widget.filters,

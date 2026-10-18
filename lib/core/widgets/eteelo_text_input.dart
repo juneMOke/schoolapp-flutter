@@ -45,6 +45,12 @@ class EteeloTextInput extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onTap;
   final FocusNode? focusNode;
+
+  /// Prend le focus à l'ouverture de l'écran ou de la modale. Réservé au
+  /// clavier physique (`expectsPhysicalKeyboard`) : sur la tablette, il
+  /// ferait monter le clavier virtuel sur la moitié de l'écran.
+  final bool autofocus;
+
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
   final int? minLines;
@@ -80,6 +86,7 @@ class EteeloTextInput extends StatefulWidget {
     this.onSubmitted,
     this.onTap,
     this.focusNode,
+    this.autofocus = false,
     this.textInputAction,
     this.autofillHints,
     this.minLines,
@@ -347,6 +354,7 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
     final field = TextField(
       controller: widget.controller,
       focusNode: _focusNode,
+      autofocus: widget.autofocus,
       keyboardType: _textInputType,
       readOnly: widget.readOnly,
       enabled: widget.enabled,

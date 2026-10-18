@@ -34,6 +34,7 @@ class EteeloPhoneInput extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final FocusNode? focusNode;
+  final bool autofocus;
   final TextInputAction? textInputAction;
   final PhoneCountry country;
 
@@ -51,6 +52,7 @@ class EteeloPhoneInput extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.focusNode,
+    this.autofocus = false,
     this.textInputAction,
     this.country = PhoneCountry.congoDrc,
     this.dialCodeSemanticLabel,
@@ -155,6 +157,7 @@ class _EteeloPhoneInputState extends State<EteeloPhoneInput> {
       enabled: widget.enabled,
       errorText: widget.errorText,
       focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
       textInputAction: widget.textInputAction,
       keyboardType: EteeloTextInputType.phone,
       placeholder: _foreign ? null : widget.country.exampleNationalNumber,
@@ -166,7 +169,11 @@ class _EteeloPhoneInputState extends State<EteeloPhoneInput> {
           NationalNumberInputFormatter(widget.country),
       ],
       onChanged: _handleFieldChanged,
-      onSubmitted: (_) => widget.onSubmitted?.call(widget.controller.text),
+      // `null` sans appelant : le champ garde alors l'enchaînement par défaut
+      // (Entrée passe au champ suivant au clavier physique).
+      onSubmitted: widget.onSubmitted == null
+          ? null
+          : (_) => widget.onSubmitted?.call(widget.controller.text),
       prefix: PhoneDialCodeBox(
         country: widget.country,
         semanticLabel: widget.dialCodeSemanticLabel,

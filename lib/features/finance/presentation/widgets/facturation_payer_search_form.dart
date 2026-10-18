@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/search/search_hint_pill.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -204,6 +205,8 @@ class _FacturationPayerSearchFormState
           controller: _phoneController,
           required: true,
           dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
+          // Au clavier physique, on tape dès l'ouverture de la modale.
+          autofocus: expectsPhysicalKeyboard,
           textInputAction: TextInputAction.search,
           onSubmitted: (_) => _submit(),
         ),
@@ -225,6 +228,8 @@ class _FacturationPayerSearchFormState
               label: field.$1,
               controller: field.$2,
               textInputAction: field.$3,
+              autofocus:
+                  field.$2 == _lastNameController && expectsPhysicalKeyboard,
               onSubmitted: (_) => _submit(),
             ),
           ),
