@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/web/new_tab.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -190,25 +192,35 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
               button: true,
               label: subMenu.title,
               selected: subMenu.isActive,
-              child: InkWell(
-                focusColor: AppColors.stateFocusOnDark,
-                borderRadius: AppRadius.brSm,
-                hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
-                splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
-                highlightColor: AppColors.textOnDark.withValues(alpha: 0.08),
-                onTap: () {
-                  context.read<NavigationBloc>().add(
-                    SubMenuItemSelected(
-                      menuId: widget.menu.id,
-                      subMenuId: subMenu.id,
-                      title: subMenu.title,
-                    ),
-                  );
-                  if (widget.closeDrawerOnSubMenuSelection) {
-                    Navigator.of(context).maybePop();
-                  }
-                },
-                child: SidebarSubMenuItemContainer(subMenu: subMenu),
+              // Web : Ctrl+clic ou clic molette ouvrent l'écran dans un nouvel
+              // onglet — il a son adresse depuis que la coquille en donne une
+              // à chaque sous-menu.
+              child: MiddleClickOpensTab(
+                path: AppRoutesNames.homeSubMenuPath(subMenu.id),
+                child: InkWell(
+                  focusColor: AppColors.stateFocusOnDark,
+                  borderRadius: AppRadius.brSm,
+                  hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
+                  splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
+                  highlightColor: AppColors.textOnDark.withValues(alpha: 0.08),
+                  onTap: () {
+                    if (NewTab.requestedByModifier) {
+                      NewTab.open(AppRoutesNames.homeSubMenuPath(subMenu.id));
+                      return;
+                    }
+                    context.read<NavigationBloc>().add(
+                      SubMenuItemSelected(
+                        menuId: widget.menu.id,
+                        subMenuId: subMenu.id,
+                        title: subMenu.title,
+                      ),
+                    );
+                    if (widget.closeDrawerOnSubMenuSelection) {
+                      Navigator.of(context).maybePop();
+                    }
+                  },
+                  child: SidebarSubMenuItemContainer(subMenu: subMenu),
+                ),
               ),
             ),
           );
