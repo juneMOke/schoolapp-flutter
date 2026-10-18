@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -129,15 +130,20 @@ class _ExpenseQueueBatchBarState extends State<ExpenseQueueBatchBar> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        EteeloTextInput(
-          controller: _reason,
-          label: l10n.expenseQueueBatchReasonLabel(widget.count),
-          placeholder: l10n.expenseQueueBatchReasonHint,
-          maxLines: 2,
-          errorText: _missing ? l10n.expenseRefusalReasonMissing : null,
-          onChanged: (_) {
-            if (_missing) setState(() => _missing = false);
-          },
+        // Ctrl+Entrée refuse le lot, comme le bouton (le motif reste exigé).
+        EteeloSubmitShortcut(
+          autofocus: false,
+          onSubmit: _confirm,
+          child: EteeloTextInput(
+            controller: _reason,
+            label: l10n.expenseQueueBatchReasonLabel(widget.count),
+            placeholder: l10n.expenseQueueBatchReasonHint,
+            maxLines: 2,
+            errorText: _missing ? l10n.expenseRefusalReasonMissing : null,
+            onChanged: (_) {
+              if (_missing) setState(() => _missing = false);
+            },
+          ),
         ),
         const SizedBox(height: AppDimensions.spacingM),
         Wrap(

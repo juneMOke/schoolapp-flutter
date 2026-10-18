@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -51,6 +52,8 @@ class EteeloTextInput extends StatefulWidget {
   /// ferait monter le clavier virtuel sur la moitié de l'écran.
   final bool autofocus;
 
+  /// `null` sur un champ d'une ligne sans [onSubmitted] : Entrée passe au
+  /// champ suivant au clavier physique (`physicalKeyboardNextAction`).
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
   final int? minLines;
@@ -115,6 +118,12 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
   late bool _ownsFocusNode;
 
   bool get _isSingleLine => widget.maxLines == 1 && widget.minLines == null;
+
+  TextInputAction? get _effectiveTextInputAction =>
+      widget.textInputAction ??
+      (_isSingleLine && widget.onSubmitted == null
+          ? physicalKeyboardNextAction
+          : null);
 
   bool get _hasEditingFocus =>
       _focusNode.hasFocus && widget.enabled && !widget.readOnly;
@@ -364,7 +373,7 @@ class _EteeloTextInputState extends State<EteeloTextInput> {
         state.didChange(value);
         widget.onChanged?.call(value);
       },
-      textInputAction: widget.textInputAction,
+      textInputAction: _effectiveTextInputAction,
       autofillHints: widget.autofillHints,
       inputFormatters: _effectiveInputFormatters,
       textCapitalization: _keyboardCapitalization,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -722,6 +723,11 @@ class _FacturationCreatePaymentViewState
     // taux s'applique réellement quelque part — sinon la barre annoncerait « À
     // percevoir » sur un versement où rien n'a bougé d'unité.
     final converted = hasConversion(settlement, _model.entries);
+    final VoidCallback? onCollect = !canCollect
+        ? null
+        : correction == null
+        ? () => _onCollect(l10n)
+        : _onCorrect;
 
     return PopScope(
       // Bloque le retour système / `maybePop` : toute sortie passe par
@@ -732,75 +738,77 @@ class _FacturationCreatePaymentViewState
         if (didPop) return;
         _requestClose();
       },
-      child: AppPageBackground(
-        appBar: StudentDetailAppBar(
-          fullName: studentFullName(widget.intent, l10n),
-          eyebrow:
-              '${l10n.facturationCreatePaymentEyebrow} · '
-              '${classLabel(widget.intent, l10n)}',
-          firstName: widget.intent.firstName,
-          lastName: widget.intent.lastName,
-          studentId: widget.intent.studentId,
-          fallbackRoute: AppRoutesNames.facturationDetailPath(
+      // Ctrl+Entrée encaisse depuis n'importe quel montant — le geste
+      // passe par la même confirmation que le bouton.
+      child: EteeloSubmitShortcut(
+        autofocus: false,
+        onSubmit: widget.intent.hasDisplayContext ? onCollect : null,
+        child: AppPageBackground(
+          appBar: StudentDetailAppBar(
+            fullName: studentFullName(widget.intent, l10n),
+            eyebrow:
+                '${l10n.facturationCreatePaymentEyebrow} · '
+                '${classLabel(widget.intent, l10n)}',
+            firstName: widget.intent.firstName,
+            lastName: widget.intent.lastName,
             studentId: widget.intent.studentId,
-            academicYearId: widget.intent.academicYearId,
-          ),
-          // Une saisie en cours ne se perd pas sur un tap : la flèche passe par
-          // la même confirmation que le retour système.
-          onExit: _requestClose,
-        ),
-        // Sans contexte d'affichage il n'y a pas de saisie sous la barre :
-        // proposer d'encaisser sous une carte d'erreur n'a aucun sens.
-        bottomNavigationBar: widget.intent.hasDisplayContext
-            ? FacturationCollectActionBar(
-                totalLabel: converted
-                    ? bagLabel(tenderBagOf(settlement, _model.entries))
-                    : bagLabel(allocations),
-                settledLabel: converted ? bagLabel(allocations) : null,
-                actionLabel: correction == null
-                    ? null
-                    : l10n.paymentCorrectionSubmit,
-                actionIcon: correction == null
-                    ? Icons.account_balance_wallet_outlined
-                    : Icons.repeat_rounded,
-                onCollect: !canCollect
-                    ? null
-                    : correction == null
-                    ? () => _onCollect(l10n)
-                    : _onCorrect,
-              )
-            : null,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            // Largeur de lecture de la Facturation : un formulaire étalé sur
-            // 1180 dp éloigne les libellés de leurs champs.
-            constraints: const BoxConstraints(
-              maxWidth: AppDimensions.facturationContentMaxWidth,
+            fallbackRoute: AppRoutesNames.facturationDetailPath(
+              studentId: widget.intent.studentId,
+              academicYearId: widget.intent.academicYearId,
             ),
-            child: correction == null
-                ? _body(l10n, settlement)
-                : MultiBlocListener(
-                    listeners: [
-                      BlocListener<
-                        PaymentCorrectionCubit,
-                        PaymentCorrectionState
-                      >(
-                        listenWhen: (a, b) => a.phase != b.phase,
-                        listener: (_, state) => _onCorrectionState(state),
-                      ),
-                      BlocListener<
-                        PaymentCorrectionTargetCubit,
-                        PaymentCorrectionTargetState
-                      >(
-                        listenWhen: (a, b) =>
-                            a.target != b.target ||
-                            a.targetCharges != b.targetCharges,
-                        listener: (_, state) => _onTargetState(state),
-                      ),
-                    ],
-                    child: _body(l10n, settlement, unchanged: unchanged),
-                  ),
+            // Une saisie en cours ne se perd pas sur un tap : la flèche passe par
+            // la même confirmation que le retour système.
+            onExit: _requestClose,
+          ),
+          // Sans contexte d'affichage il n'y a pas de saisie sous la barre :
+          // proposer d'encaisser sous une carte d'erreur n'a aucun sens.
+          bottomNavigationBar: widget.intent.hasDisplayContext
+              ? FacturationCollectActionBar(
+                  totalLabel: converted
+                      ? bagLabel(tenderBagOf(settlement, _model.entries))
+                      : bagLabel(allocations),
+                  settledLabel: converted ? bagLabel(allocations) : null,
+                  actionLabel: correction == null
+                      ? null
+                      : l10n.paymentCorrectionSubmit,
+                  actionIcon: correction == null
+                      ? Icons.account_balance_wallet_outlined
+                      : Icons.repeat_rounded,
+                  onCollect: onCollect,
+                )
+              : null,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              // Largeur de lecture de la Facturation : un formulaire étalé sur
+              // 1180 dp éloigne les libellés de leurs champs.
+              constraints: const BoxConstraints(
+                maxWidth: AppDimensions.facturationContentMaxWidth,
+              ),
+              child: correction == null
+                  ? _body(l10n, settlement)
+                  : MultiBlocListener(
+                      listeners: [
+                        BlocListener<
+                          PaymentCorrectionCubit,
+                          PaymentCorrectionState
+                        >(
+                          listenWhen: (a, b) => a.phase != b.phase,
+                          listener: (_, state) => _onCorrectionState(state),
+                        ),
+                        BlocListener<
+                          PaymentCorrectionTargetCubit,
+                          PaymentCorrectionTargetState
+                        >(
+                          listenWhen: (a, b) =>
+                              a.target != b.target ||
+                              a.targetCharges != b.targetCharges,
+                          listener: (_, state) => _onTargetState(state),
+                        ),
+                      ],
+                      child: _body(l10n, settlement, unchanged: unchanged),
+                    ),
+            ),
           ),
         ),
       ),
