@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_row_view.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_keys.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_person_heading.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row_controls.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_status_segment.dart';
@@ -79,41 +80,45 @@ class PresenceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tone = PresenceTone.of(row.status);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.brMd,
-        border: Border(
-          left: BorderSide(
-            color: tone.color,
-            width: AppDimensions.presenceMarkAccentWidth,
+    return PresenceKeys(
+      row: row,
+      actions: actions,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.brMd,
+          border: Border(
+            left: BorderSide(
+              color: tone.color,
+              width: AppDimensions.presenceMarkAccentWidth,
+            ),
+          ),
+          gradient: LinearGradient(
+            colors: [tone.soft, AppColors.surfaceRaised],
+            stops: const [0, AppDimensions.presenceMarkRowTintStop],
           ),
         ),
-        gradient: LinearGradient(
-          colors: [tone.soft, AppColors.surfaceRaised],
-          stops: const [0, AppDimensions.presenceMarkRowTintStop],
+        child: PresenceRowLayout(
+          person: PresencePersonHeading(row: row, trailing: badge),
+          status: PresenceStatusSegment(
+            status: row.status,
+            onChoose: actions.choose,
+          ),
+          times: !row.status.hasArrival
+              ? const SizedBox.shrink()
+              : times ??
+                    PresenceTimeButton(
+                      label: l10n.presenceMarkArrival,
+                      time: row.arrival,
+                      onTap: () => actions.editArrival(),
+                    ),
+          hours: hours,
+          late: _LateCell(row: row, onJustify: () => actions.justify()),
+          action: PresenceRetryButton(row: row, onRetry: actions.retry),
         ),
-      ),
-      child: PresenceRowLayout(
-        person: PresencePersonHeading(row: row, trailing: badge),
-        status: PresenceStatusSegment(
-          status: row.status,
-          onChoose: actions.choose,
-        ),
-        times: !row.status.hasArrival
-            ? const SizedBox.shrink()
-            : times ??
-                  PresenceTimeButton(
-                    label: l10n.presenceMarkArrival,
-                    time: row.arrival,
-                    onTap: () => actions.editArrival(),
-                  ),
-        hours: hours,
-        late: _LateCell(row: row, onJustify: () => actions.justify()),
-        action: PresenceRetryButton(row: row, onRetry: actions.retry),
       ),
     );
   }
