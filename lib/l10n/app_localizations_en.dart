@@ -9100,6 +9100,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nothing was collected at the counter. Widen the period, or open the shop to collect.';
 
   @override
+  String get boutiqueHistoryPickTitle => 'No sale selected';
+
+  @override
+  String get boutiqueHistoryPickMessage =>
+      'Pick a sale in the list to see its details here.';
+
+  @override
   String get boutiqueHistoryPayerUnknown => 'Payer not recorded';
 
   @override

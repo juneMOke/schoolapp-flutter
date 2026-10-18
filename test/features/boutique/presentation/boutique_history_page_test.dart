@@ -98,8 +98,11 @@ void main() {
     ),
   ).thenAnswer((_) async => Right(sales));
 
-  Future<void> pumpPage(WidgetTester tester) async {
-    await tester.binding.setSurfaceSize(const Size(900, 1400));
+  Future<void> pumpPage(
+    WidgetTester tester, {
+    Size size = const Size(900, 1400),
+  }) async {
+    await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
@@ -236,5 +239,56 @@ void main() {
     // guichet.
     expect(find.text('Historique illisible'), findsOneWidget);
     expect(find.textContaining('caisse locale'), findsOneWidget);
+  });
+
+  group('grand écran : la fiche à côté de la liste', () {
+    setUp(() {
+      final getSaleDetail = _MockGetSaleDetail();
+      when(
+        () => getSaleDetail(any()),
+      ).thenAnswer((_) async => const Left(NotFoundFailure()));
+      GetIt.I.registerFactory<GetBoutiqueSaleDetailUseCase>(
+        () => getSaleDetail,
+      );
+      GetIt.I.registerFactory<MarkSaleTicketPrintedUseCase>(
+        () => _MockMarkPrinted(),
+      );
+      GetIt.I.registerFactory<ClaimSaleReceiptUseCase>(
+        () => _MockClaimReceipt(),
+      );
+    });
+
+    testWidgets('avant tout choix, la place de la fiche le dit', (
+      tester,
+    ) async {
+      answer([_sale(id: 's-1')]);
+      await pumpPage(tester, size: const Size(1400, 1000));
+
+      expect(find.text('Aucune vente choisie'), findsOneWidget);
+      expect(find.byType(BoutiqueSaleDetailPage), findsNothing);
+    });
+
+    testWidgets('choisir une vente ouvre sa fiche À CÔTÉ, la liste reste', (
+      tester,
+    ) async {
+      answer([_sale(id: 's-1'), _sale(id: 's-2')]);
+      await pumpPage(tester, size: const Size(1400, 1000));
+
+      await tester.tap(find.byType(BoutiqueHistorySaleTile).last);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BoutiqueSaleDetailPage), findsOneWidget);
+      expect(find.byType(BoutiqueHistorySaleTile), findsNWidgets(2));
+      final tile = tester.widget<BoutiqueHistorySaleTile>(
+        find.byType(BoutiqueHistorySaleTile).last,
+      );
+      expect(tile.selected, isTrue);
+      expect(
+        tester.getTopLeft(find.byType(BoutiqueSaleDetailPage)).dx,
+        greaterThan(
+          tester.getTopLeft(find.byType(BoutiqueHistorySaleTile).last).dx,
+        ),
+      );
+    });
   });
 }

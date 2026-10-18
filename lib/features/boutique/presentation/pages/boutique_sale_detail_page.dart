@@ -44,10 +44,15 @@ class BoutiqueSaleDetailPage extends StatelessWidget {
   /// déclaré, et l'imprimer par son identifiant ne dirait rien à personne.
   final Map<String, String> levelLabels;
 
+  /// Vrai dans le panneau de l'historique (grand écran) : ni fond ni barre —
+  /// l'historique les porte déjà —, la référence de la vente en titre.
+  final bool embedded;
+
   const BoutiqueSaleDetailPage({
     super.key,
     required this.saleId,
     required this.levelLabels,
+    this.embedded = false,
   });
 
   /// Ouvre la fiche. Rend quand elle se referme.
@@ -70,14 +75,15 @@ class BoutiqueSaleDetailPage extends StatelessWidget {
       claimReceipt: getIt<ClaimSaleReceiptUseCase>(),
       saleId: saleId,
     )..load(),
-    child: _SaleDetailView(levelLabels: levelLabels),
+    child: _SaleDetailView(levelLabels: levelLabels, embedded: embedded),
   );
 }
 
 class _SaleDetailView extends StatefulWidget {
   final Map<String, String> levelLabels;
+  final bool embedded;
 
-  const _SaleDetailView({required this.levelLabels});
+  const _SaleDetailView({required this.levelLabels, required this.embedded});
 
   @override
   State<_SaleDetailView> createState() => _SaleDetailViewState();
@@ -184,47 +190,66 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
       builder: (context, state) {
         final detail = state.detail;
 
+        final title = detail == null
+            ? l10n.boutiqueSaleDetailTitle
+            : _referenceOf(detail, l10n);
+        final content = switch (state.status) {
+          SaleDetailStatus.initial || SaleDetailStatus.loading => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          // Une vente ouverte depuis la liste existe. Si elle a disparu,
+          // l'écran le DIT : une fiche vide ferait croire à une vente sans
+          // article.
+          // ⚠️ La disparition d'une vente n'est PAS une panne de lecture :
+          // « historique illisible » ferait réessayer indéfiniment une
+          // lecture qui répond correctement qu'il n'y a rien.
+          SaleDetailStatus.failure when state.failure is NotFoundFailure =>
+            EteeloEmptyResult(
+              label: l10n.boutiqueSaleDetailNotFoundTitle,
+              description: l10n.boutiqueSaleDetailNotFound,
+              medallionIcon: Icons.search_off_rounded,
+            ),
+          SaleDetailStatus.failure => BoutiqueResultsErrorState(
+            failure: state.failure!,
+            surface: BoutiqueErrorSurface.history,
+            onRetry: () => context.read<SaleDetailCubit>().load(),
+          ),
+          SaleDetailStatus.ready => _Body(
+            detail: detail!,
+            isPrinting: _isPrinting,
+            isClaiming: _isClaiming,
+            onPrintTicket: () => _printTicket(detail),
+            onOpenReceipt: () => _openReceipt(detail),
+            onClaimReceipt: _claimReceipt,
+          ),
+        };
+
+        if (widget.embedded) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.bleuProfond,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingM),
+              content,
+            ],
+          );
+        }
+
         return AppPageBackground(
           appBar: ModuleTopBar(
             eyebrow: l10n.boutiqueSaleDetailEyebrow,
-            title: detail == null
-                ? l10n.boutiqueSaleDetailTitle
-                : _referenceOf(detail, l10n),
+            title: title,
             onBack: () => Navigator.of(context).maybePop(),
             backTooltip: l10n.boutiqueSaleDetailBack,
           ),
-          child: switch (state.status) {
-            SaleDetailStatus.initial ||
-            SaleDetailStatus.loading => const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            // Une vente ouverte depuis la liste existe. Si elle a disparu,
-            // l'écran le DIT : une fiche vide ferait croire à une vente sans
-            // article.
-            // ⚠️ La disparition d'une vente n'est PAS une panne de lecture :
-            // « historique illisible » ferait réessayer indéfiniment une
-            // lecture qui répond correctement qu'il n'y a rien.
-            SaleDetailStatus.failure when state.failure is NotFoundFailure =>
-              EteeloEmptyResult(
-                label: l10n.boutiqueSaleDetailNotFoundTitle,
-                description: l10n.boutiqueSaleDetailNotFound,
-                medallionIcon: Icons.search_off_rounded,
-              ),
-            SaleDetailStatus.failure => BoutiqueResultsErrorState(
-              failure: state.failure!,
-              surface: BoutiqueErrorSurface.history,
-              onRetry: () => context.read<SaleDetailCubit>().load(),
-            ),
-            SaleDetailStatus.ready => _Body(
-              detail: detail!,
-              isPrinting: _isPrinting,
-              isClaiming: _isClaiming,
-              onPrintTicket: () => _printTicket(detail),
-              onOpenReceipt: () => _openReceipt(detail),
-              onClaimReceipt: _claimReceipt,
-            ),
-          },
+          child: content,
         );
       },
     );

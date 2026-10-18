@@ -9174,6 +9174,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Rien n\'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.';
 
   @override
+  String get boutiqueHistoryPickTitle => 'Aucune vente choisie';
+
+  @override
+  String get boutiqueHistoryPickMessage =>
+      'Choisissez une vente dans la liste pour voir sa fiche ici.';
+
+  @override
   String get boutiqueHistoryPayerUnknown => 'Payeur non renseigné';
 
   @override

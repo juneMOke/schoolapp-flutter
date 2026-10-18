@@ -18,10 +18,14 @@ class BoutiqueHistorySaleTile extends StatelessWidget {
   /// qu'on retrouve sa vente d'un doigt.
   final VoidCallback onTap;
 
+  /// La vente dont la fiche est ouverte à côté (grand écran).
+  final bool selected;
+
   const BoutiqueHistorySaleTile({
     super.key,
     required this.sale,
     required this.onTap,
+    this.selected = false,
   });
 
   @override
@@ -34,6 +38,7 @@ class BoutiqueHistorySaleTile extends StatelessWidget {
 
     return Semantics(
       button: true,
+      selected: selected,
       child: Material(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -44,7 +49,12 @@ class BoutiqueHistorySaleTile extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimensions.spacingM),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(
+                color: selected ? AppColors.bleuArdoise : AppColors.border,
+                width: selected
+                    ? AppDimensions.selectedTileBorderWidth
+                    : AppDimensions.tileBorderWidth,
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

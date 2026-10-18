@@ -33,6 +33,13 @@ class AppDimensions {
   /// Colonne du montant et des gestes d'une fiche de vente, sur grand écran.
   static const saleDetailSideColumnWidth = 380.0;
 
+  /// Liste de l'historique Boutique, la fiche de la vente à côté.
+  static const boutiqueHistoryListWidth = 440.0;
+
+  /// Bordure d'une tuile de liste, au repos et quand sa fiche est ouverte.
+  static const tileBorderWidth = 1.0;
+  static const selectedTileBorderWidth = 2.0;
+
   /// Largeur de lecture d'une carte de dossier disciplinaire : deux colonnes
   /// dès ~940 dp de contenu.
   static const disciplinaryCaseCardMinWidth = 460.0;

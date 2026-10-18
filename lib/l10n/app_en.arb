@@ -5957,6 +5957,8 @@
   "boutiqueHistoryPendingBadge": "Pending",
   "boutiqueHistoryEmptyTitle": "No sale in this period",
   "boutiqueHistoryEmptyMessage": "Nothing was collected at the counter. Widen the period, or open the shop to collect.",
+  "boutiqueHistoryPickTitle": "No sale selected",
+  "boutiqueHistoryPickMessage": "Pick a sale in the list to see its details here.",
   "boutiqueHistoryPayerUnknown": "Payer not recorded",
   "boutiqueHistoryTotalLabel": "Total collected",
   "boutiqueHistorySaleTime": "{time} · {reference}",

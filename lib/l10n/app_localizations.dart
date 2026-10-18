@@ -14550,6 +14550,18 @@ abstract class AppLocalizations {
   /// **'Nothing was collected at the counter. Widen the period, or open the shop to collect.'**
   String get boutiqueHistoryEmptyMessage;
 
+  /// No description provided for @boutiqueHistoryPickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sale selected'**
+  String get boutiqueHistoryPickTitle;
+
+  /// No description provided for @boutiqueHistoryPickMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a sale in the list to see its details here.'**
+  String get boutiqueHistoryPickMessage;
+
   /// No description provided for @boutiqueHistoryPayerUnknown.
   ///
   /// In en, this message translates to:

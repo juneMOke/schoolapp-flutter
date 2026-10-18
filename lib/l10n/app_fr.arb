@@ -6029,6 +6029,8 @@
   "boutiqueHistoryPendingBadge": "En attente",
   "boutiqueHistoryEmptyTitle": "Aucune vente sur cette période",
   "boutiqueHistoryEmptyMessage": "Rien n'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.",
+  "boutiqueHistoryPickTitle": "Aucune vente choisie",
+  "boutiqueHistoryPickMessage": "Choisissez une vente dans la liste pour voir sa fiche ici.",
   "boutiqueHistoryPayerUnknown": "Payeur non renseigné",
   "boutiqueHistoryTotalLabel": "Total encaissé",
   "boutiqueHistorySaleTime": "{time} · {reference}",
