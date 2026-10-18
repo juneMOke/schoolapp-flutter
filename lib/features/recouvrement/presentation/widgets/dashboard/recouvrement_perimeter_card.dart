@@ -98,7 +98,7 @@ class RecouvrementPerimeterCard extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               final wide =
-                  constraints.maxWidth >= AppBreakpoints.feeControlTableWideMin;
+                  constraints.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
               // Étroit : les pastilles s'enroulent et le périmètre passe
               // dessous, pleine largeur. Large : alignés en bas, le périmètre
               // borné pour que les pastilles gardent la place qui compte.

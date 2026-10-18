@@ -21,6 +21,22 @@ class AppDimensions {
   static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
 
+  /// Plafond des écrans de LISTE (tableaux à 6–8 colonnes) : sur un écran de
+  /// 1920, la largeur de lecture de 1180 y laissait ~460 dp vides pendant que
+  /// les colonnes se serraient. Une fiche ou un formulaire reste à 1180.
+  static const listingContentMaxWidth = 1440.0;
+
+  /// Colonne du panier à côté du catalogue, sur grand écran : la largeur d'un
+  /// téléphone confortable — celle pour laquelle le panneau est dessiné.
+  static const boutiqueCartColumnWidth = 420.0;
+
+  /// Colonne du montant et des gestes d'une fiche de vente, sur grand écran.
+  static const saleDetailSideColumnWidth = 380.0;
+
+  /// Largeur de lecture d'une carte de dossier disciplinaire : deux colonnes
+  /// dès ~940 dp de contenu.
+  static const disciplinaryCaseCardMinWidth = 460.0;
+
   // Barre de défilement (bureau, navigateur) : fine au repos, élargie au
   // survol pour se saisir sans viser au pixel.
   static const scrollbarThickness = 6.0;

@@ -46,6 +46,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      maxWidth: AppDimensions.listingContentMaxWidth,
       child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status || prev.context != curr.context,

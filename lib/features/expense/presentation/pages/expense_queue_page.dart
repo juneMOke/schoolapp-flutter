@@ -44,6 +44,7 @@ class ExpenseQueueScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
+    maxWidth: AppDimensions.listingContentMaxWidth,
     child: BlocBuilder<ExpenseQueueCubit, ExpenseQueueState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||

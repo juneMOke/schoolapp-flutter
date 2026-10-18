@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -38,6 +39,7 @@ class PayrollScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
+    maxWidth: AppDimensions.listingContentMaxWidth,
     child: BlocConsumer<PayrollCubit, PayrollState>(
       listenWhen: (previous, current) =>
           current.notice != null && previous.notice != current.notice,

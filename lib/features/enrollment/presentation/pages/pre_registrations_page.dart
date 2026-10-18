@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -48,6 +49,7 @@ class _PreRegistrationsPageState extends State<PreRegistrationsPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      maxWidth: AppDimensions.listingContentMaxWidth,
       scrollable: true,
       child: EnrollmentListingPageScaffold(
         readyKey: 'pre-reg-content',

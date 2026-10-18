@@ -51,6 +51,7 @@ class _FacturationPageState extends State<FacturationPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      maxWidth: AppDimensions.listingContentMaxWidth,
       // Posée hors du `BlocBuilder` : la sortie reste offerte même quand le
       // contexte académique charge ou échoue.
       appBar: widget.standalone ? const FacturationTopBar() : null,

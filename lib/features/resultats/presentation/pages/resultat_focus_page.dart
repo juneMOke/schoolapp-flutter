@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -120,36 +121,62 @@ class _ResultatFocusView extends StatelessWidget {
 
   Widget _success(BuildContext context, ResultatFocus focus) {
     final bulletin = focus.bulletinParDomaine;
-    final sections = <Widget>[
-      ResultatFocusProgression(
-        progression: focus.progression,
-        deltaPts: focus.deltaPts,
-        seuil: ResultatBulletinDomaine.defautSeuil,
-      ),
-      if (focus.topMatieres.isNotEmpty || focus.bottomMatieres.isNotEmpty)
-        ResultatFocusMatieres(
-          topMatieres: focus.topMatieres,
-          bottomMatieres: focus.bottomMatieres,
-        ),
-      const ResultatBulletinOfficielCard(),
-      if (bulletin != null)
-        ResultatBulletinDomaine(
-          bulletin: bulletin,
-          periodeLongLabel: args.periodeLabel,
-        )
-      else
-        const _NonClasseNote(),
-      ResultatFocusSynthese(synthese: focus.synthese),
-    ];
+    final progression = ResultatFocusProgression(
+      progression: focus.progression,
+      deltaPts: focus.deltaPts,
+      seuil: ResultatBulletinDomaine.defautSeuil,
+    );
+    final matieres =
+        focus.topMatieres.isNotEmpty || focus.bottomMatieres.isNotEmpty
+        ? ResultatFocusMatieres(
+            topMatieres: focus.topMatieres,
+            bottomMatieres: focus.bottomMatieres,
+          )
+        : null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < sections.length; i++) ...[
-          if (i > 0) const SizedBox(height: AppSpacing.md),
-          sections[i],
-        ],
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Grand écran : la progression et les matières sont deux cartes
+        // courtes — côte à côte plutôt qu'étirées sur 1180 dp. Le bulletin,
+        // lui, est un tableau : il garde toute la largeur.
+        final sideBySide =
+            matieres != null &&
+            constraints.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
+        final sections = <Widget>[
+          if (sideBySide)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: progression),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(child: matieres),
+              ],
+            )
+          else ...[
+            progression,
+            ?matieres,
+          ],
+          const ResultatBulletinOfficielCard(),
+          if (bulletin != null)
+            ResultatBulletinDomaine(
+              bulletin: bulletin,
+              periodeLongLabel: args.periodeLabel,
+            )
+          else
+            const _NonClasseNote(),
+          ResultatFocusSynthese(synthese: focus.synthese),
+        ];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < sections.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppSpacing.md),
+              sections[i],
+            ],
+          ],
+        );
+      },
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -45,6 +46,7 @@ class StaffFileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
+    maxWidth: AppDimensions.listingContentMaxWidth,
     child: BlocBuilder<StaffFileCubit, StaffFileState>(
       buildWhen: (previous, current) => previous != current,
       builder: _body,

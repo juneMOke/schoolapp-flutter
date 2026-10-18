@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab_location.dart';
@@ -53,6 +54,7 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
         AppBreakpoints.enrollmentInlineCreateMin;
 
     return AppPageBackground(
+      maxWidth: AppDimensions.listingContentMaxWidth,
       scrollable: true,
       // Gel READ_ONLY (ADR-010) : ouvrir un nouveau dossier est une écriture.
       floatingActionButton: useInlineCreate

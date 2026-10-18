@@ -24,6 +24,10 @@ class AppPageBackground extends StatelessWidget {
   /// navigateur (cf. [DesktopSelectionArea], qui dit pourquoi pas partout).
   final bool selectableText;
 
+  /// Plafond du contenu : la largeur de lecture par défaut, ou
+  /// [AppDimensions.listingContentMaxWidth] pour un écran de liste.
+  final double maxWidth;
+
   const AppPageBackground({
     super.key,
     required this.child,
@@ -35,6 +39,7 @@ class AppPageBackground extends StatelessWidget {
     this.style = AppPageBackgroundStyle.decorated,
     this.flatBackgroundColor = AppColors.surface,
     this.selectableText = false,
+    this.maxWidth = AppDimensions.detailContentMaxWidth,
   });
 
   double _horizontalPadding(BuildContext context) {
@@ -63,6 +68,7 @@ class AppPageBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = ContentMaxWidth(
+      maxWidth: maxWidth,
       child: selectableText ? DesktopSelectionArea(child: child) : child,
     );
 
