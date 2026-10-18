@@ -133,4 +133,23 @@ void main() {
       expect(redirectFor(detail, blocking: true), '/splash');
     });
   });
+
+  group('écrans de la coquille', () {
+    const facturations = '/home/facturations';
+
+    test('F5 sur un écran de la coquille y ramène', () {
+      final splash = redirectFor(
+        facturations,
+        status: AuthStatus.initial,
+        isColdStart: true,
+      );
+      expect(splash, withReturnLocation('/splash', facturations));
+      expect(redirectFor(splash!), facturations);
+    });
+
+    test('un écran hors des droits renvoie à l\'Accueil', () {
+      expect(redirectFor(facturations, permissions: teacher), '/home');
+      expect(redirectFor(facturations), isNull);
+    });
+  });
 }

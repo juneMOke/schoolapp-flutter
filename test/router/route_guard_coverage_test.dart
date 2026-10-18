@@ -30,6 +30,10 @@ void main() {
     '/home':
         'coquille et grille d\'accueil — elles se filtrent elles-mêmes, et '
         'c\'est la seule porte qui reste quand tout le reste est masqué',
+    '/home/:subMenuId':
+        'écran de la coquille — gardé par son second segment, l\'identifiant '
+        'de sous-menu (cf. test dédié ci-dessous) ; un identifiant inconnu '
+        'retombe sur l\'Accueil',
     '/dev/components': 'galerie de composants, kDebugMode uniquement',
     '/dev/ticket-print': 'banc de calage thermique, kDebugMode uniquement',
   };
@@ -113,6 +117,15 @@ void main() {
       canAccessLocation(Uri.parse('/enrollments/detail/e-1'), const [
         'enrollment.read',
       ]),
+      isTrue,
+    );
+  });
+
+  test('un écran de la coquille est gardé par son sous-menu', () {
+    final facturations = Uri.parse('/home/facturations');
+    expect(canAccessLocation(facturations, const <String>[]), isFalse);
+    expect(
+      canAccessLocation(facturations, const ['finance.charge.read']),
       isTrue,
     );
   });

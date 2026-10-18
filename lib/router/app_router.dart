@@ -354,11 +354,28 @@ class AppRouter {
       name: AppRoutesNames.photoSession,
       builder: (context, state) => const PhotoSessionPage(),
     ),
+    // La coquille : `/home` (Accueil) et `/home/{sousMenu}` (chaque écran du
+    // menu). Les deux routes rendent la MÊME page — même clé — : passer de
+    // l'une à l'autre met la coquille à jour au lieu d'en empiler une
+    // seconde, et son état (menu ouvert, saisie en cours) survit. C'est ce
+    // qui donne à chaque écran son adresse : Précédent / Suivant du
+    // navigateur, F5 et lien partagé y mènent.
     GoRoute(
-      path: '/home',
+      path: AppRoutesNames.homePath,
       name: AppRoutesNames.home,
-      builder: (context, state) =>
-          HomePage(initialSubMenuId: state.uri.queryParameters['subMenuId']),
+      // Ancienne forme `?subMenuId=` : ramenée à l'adresse canonique.
+      redirect: (context, state) {
+        final subMenuId = state.uri.queryParameters['subMenuId']?.trim();
+        if (subMenuId == null || subMenuId.isEmpty) return null;
+        return AppRoutesNames.homeSubMenuPath(subMenuId);
+      },
+      pageBuilder: (context, state) => _shellPage(null),
+    ),
+    GoRoute(
+      path: AppRoutesNames.homeSubMenuRoute,
+      name: AppRoutesNames.homeSubMenu,
+      pageBuilder: (context, state) =>
+          _shellPage(state.pathParameters['subMenuId']),
     ),
     ShellRoute(
       builder: (context, state, child) {
@@ -637,6 +654,13 @@ class AppRouter {
         builder: (context, state) => const TicketPrintBenchPage(),
       ),
   ];
+
+  static const _shellPageKey = ValueKey<String>('home-shell');
+
+  static Page<void> _shellPage(String? subMenuId) => MaterialPage<void>(
+    key: _shellPageKey,
+    child: HomePage(subMenuId: subMenuId),
+  );
 
   static bool _hasRequiredPathParameters(
     GoRouterState state,

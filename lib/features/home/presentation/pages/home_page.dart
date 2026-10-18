@@ -57,6 +57,7 @@ import 'package:school_app_flutter/features/schedule/presentation/pages/schedule
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_toggle_shortcut.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/shell_location_sync.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell_tab_title.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/top_bar.dart';
@@ -64,9 +65,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 
 class HomePage extends StatelessWidget {
-  final String? initialSubMenuId;
+  /// L'écran porté par l'adresse (`/home/{sousMenu}`) ; `null` : l'Accueil.
+  final String? subMenuId;
 
-  const HomePage({super.key, this.initialSubMenuId});
+  const HomePage({super.key, this.subMenuId});
 
   @override
   Widget build(BuildContext context) {
@@ -77,26 +79,7 @@ class HomePage extends StatelessWidget {
           l10n,
           permissions: context.read<AuthBloc>().state.permissions,
         );
-        final initialSubMenuId = this.initialSubMenuId?.trim();
-        if (initialSubMenuId == null || initialSubMenuId.isEmpty) {
-          return bloc;
-        }
-
-        for (final menu in bloc.state.menuItems) {
-          for (final subMenu in menu.subMenus) {
-            if (subMenu.id == initialSubMenuId) {
-              bloc.add(
-                SubMenuItemSelected(
-                  menuId: menu.id,
-                  subMenuId: subMenu.id,
-                  title: subMenu.title,
-                ),
-              );
-              return bloc;
-            }
-          }
-        }
-
+        ShellLocationSync.select(bloc, subMenuId?.trim(), l10n);
         return bloc;
       },
       // Le refresh est le seul canal par lequel un changement de droits
@@ -113,7 +96,10 @@ class HomePage extends StatelessWidget {
             permissions: state.permissions,
           ),
         ),
-        child: const ShellTabTitle(child: _HomePageView()),
+        child: ShellLocationSync(
+          subMenuId: subMenuId,
+          child: const ShellTabTitle(child: _HomePageView()),
+        ),
       ),
     );
   }

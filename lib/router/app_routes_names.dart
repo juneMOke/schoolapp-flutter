@@ -4,6 +4,22 @@ class AppRoutesNames {
   static const String splash = 'splash';
   static const String login = 'login';
   static const String home = 'home';
+  static const String homePath = '/home';
+
+  /// Un écran de la coquille : `/home/{sousMenu}`.
+  ///
+  /// Le second segment EST l'identifiant de sous-menu — la garde de
+  /// permission (`canAccessLocation`) s'y applique donc sans déclaration
+  /// propre. L'Accueil reste `/home` nu.
+  static const String homeSubMenu = 'home-sub-menu';
+  static const String homeSubMenuRoute = '/home/:subMenuId';
+
+  static String homeSubMenuPath(String? subMenuId) =>
+      subMenuId == null ||
+          subMenuId.isEmpty ||
+          subMenuId == MenuConstants.accueilId
+      ? homePath
+      : '$homePath/$subMenuId';
 
   /// La séance photo d'une classe, plein écran (hors coquille).
   static const String photoSession = 'photo-session';
