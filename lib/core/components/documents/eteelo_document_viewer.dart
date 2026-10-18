@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_pdf_preview.dart';
@@ -303,6 +304,11 @@ class DocumentViewerFooter extends StatelessWidget {
   final VoidCallback? onShare;
   final VoidCallback onClose;
 
+  /// Sur le web, « partager » un PDF le **télécharge** : il n'y a pas de
+  /// feuille de partage, le navigateur enregistre le fichier. Le bouton dit
+  /// donc ce qu'il fait.
+  final bool sharingDownloads;
+
   const DocumentViewerFooter({
     super.key,
     this.canShare = true,
@@ -310,6 +316,7 @@ class DocumentViewerFooter extends StatelessWidget {
     required this.onPrint,
     required this.onShare,
     required this.onClose,
+    this.sharingDownloads = kIsWeb,
   });
 
   @override
@@ -334,8 +341,12 @@ class DocumentViewerFooter extends StatelessWidget {
             ),
           if (canShare)
             EteeloButton.secondary(
-              label: l10n.documentViewerShareLabel,
-              icon: Icons.share_outlined,
+              label: sharingDownloads
+                  ? l10n.documentViewerDownloadLabel
+                  : l10n.documentViewerShareLabel,
+              icon: sharingDownloads
+                  ? Icons.download_rounded
+                  : Icons.share_outlined,
               onPressed: onShare,
               fullWidth: false,
             ),

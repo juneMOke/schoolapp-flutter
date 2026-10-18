@@ -12963,6 +12963,12 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get documentViewerShareLabel;
 
+  /// No description provided for @documentViewerDownloadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get documentViewerDownloadLabel;
+
   /// No description provided for @documentViewerCloseLabel.
   ///
   /// In en, this message translates to:

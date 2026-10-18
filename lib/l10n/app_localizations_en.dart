@@ -8123,6 +8123,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentViewerShareLabel => 'Share';
 
   @override
+  String get documentViewerDownloadLabel => 'Download';
+
+  @override
   String get documentViewerCloseLabel => 'Close';
 
   @override

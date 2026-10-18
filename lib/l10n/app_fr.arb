@@ -5548,6 +5548,10 @@
   "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée.",
   "documentViewerPrintLabel": "Imprimer",
   "documentViewerShareLabel": "Partager",
+  "documentViewerDownloadLabel": "Télécharger",
+  "@documentViewerDownloadLabel": {
+    "description": "Sur le web, le partage d'un PDF le télécharge : le bouton le dit."
+  },
   "documentViewerCloseLabel": "Fermer",
   "documentViewerActionFailed": "L'action n'a pas pu aboutir sur cet appareil.",
   "documentViewerRenderFailedTitle": "Aperçu indisponible",
