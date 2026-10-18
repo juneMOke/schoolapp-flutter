@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_row_view.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_keys.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_person_heading.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row_controls.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -41,37 +42,44 @@ class PresenceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final tone = PresenceTone.of(row.status);
     final unmarked = row.status == PresenceStatus.none;
-    return Material(
-      color: AppColors.surfaceRaised,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.brLg,
-        side: BorderSide(
-          color: unmarked ? tone.border : tone.color,
-          width: AppDimensions.presenceMarkBorderWidth,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: actions.cycle,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [tone.soft, AppColors.surfaceRaised],
-            ),
+    return PresenceKeys(
+      row: row,
+      actions: actions,
+      child: Material(
+        color: AppColors.surfaceRaised,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.brLg,
+          side: BorderSide(
+            color: unmarked ? tone.border : tone.color,
+            width: AppDimensions.presenceMarkBorderWidth,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                PresencePersonHeading(row: row, trailing: badge),
-                const SizedBox(height: AppSpacing.md),
-                _StatusBlock(row: row, schedule: schedule),
-                const SizedBox(height: AppSpacing.md),
-                _Footer(row: row, actions: actions, timeExtras: timeExtras),
-              ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: actions.cycle,
+          // `Ink`, pas `DecoratedBox` : le dégradé se peint sur le `Material`,
+          // sous l'encre — un `DecoratedBox` le peignait par-dessus et cachait
+          // le survol comme le focus.
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [tone.soft, AppColors.surfaceRaised],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PresencePersonHeading(row: row, trailing: badge),
+                  const SizedBox(height: AppSpacing.md),
+                  _StatusBlock(row: row, schedule: schedule),
+                  const SizedBox(height: AppSpacing.md),
+                  _Footer(row: row, actions: actions, timeExtras: timeExtras),
+                ],
+              ),
             ),
           ),
         ),

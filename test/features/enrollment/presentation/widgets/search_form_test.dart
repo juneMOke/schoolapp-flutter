@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select/eteelo_select_field.dart';
@@ -100,5 +101,32 @@ void main() {
     expect(lastCommand.lastName, 'Dupont');
     expect(lastCommand.surname, 'Alain');
     expect(lastCommand.status, notifiedStatus);
+  });
+
+  testWidgets('au clavier physique, Entrée lance la recherche', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    final dispatched = <EnrollmentSearchCommand>[];
+    await tester.pumpWidget(
+      buildHarness(
+        SearchForm(
+          academicYearId: '2025',
+          status: 'IN_PROGRESS',
+          isLoading: false,
+          dispatch: dispatched.add,
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField).at(0), 'Jean');
+    await tester.enterText(find.byType(TextField).at(1), 'Dupont');
+    await tester.enterText(find.byType(TextField).at(2), 'Alain');
+    // Depuis le PREMIER champ : au clavier physique, chacun lance.
+    await tester.showKeyboard(find.byType(TextField).at(0));
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pump();
+    debugDefaultTargetPlatformOverride = null;
+
+    final command = dispatched.single as StandardSearchCommand;
+    expect(command.lastName, 'Dupont');
   });
 }

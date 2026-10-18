@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -48,7 +49,7 @@ Future<Evaluation?> showEvalCreationModal(
               clipBehavior: Clip.antiAlias,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: 500,
+                  maxWidth: AppDimensions.evalCreationModalMaxWidth,
                   maxHeight: size.height * 0.88,
                 ),
                 child: Column(

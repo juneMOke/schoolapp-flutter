@@ -24,6 +24,7 @@ class TopBarLogoutButton extends StatelessWidget {
           side: BorderSide(color: AppColors.textOnDark.withValues(alpha: 0.14)),
         ),
         child: InkWell(
+          focusColor: AppColors.stateFocusOnDark,
           borderRadius: BorderRadius.circular(
             HomeNavigationUiTokens.topBarActionRadius,
           ),

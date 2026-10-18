@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -74,16 +75,21 @@ class _ExpenseThreadComposerState extends State<ExpenseThreadComposer> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            EteeloTextInput(
-              controller: _body,
-              label: l10n.expenseThreadComposerLabel,
-              placeholder: l10n.expenseThreadComposerHint,
-              maxLines: 2,
-              enabled: !_sending,
-              errorText: _failed ? l10n.expenseThreadSendFailed : null,
-              onChanged: (_) {
-                if (_failed) setState(() => _failed = false);
-              },
+            // Ctrl+Entrée envoie ; Entrée seule va à la ligne.
+            EteeloSubmitShortcut(
+              autofocus: false,
+              onSubmit: _sending ? null : _send,
+              child: EteeloTextInput(
+                controller: _body,
+                label: l10n.expenseThreadComposerLabel,
+                placeholder: l10n.expenseThreadComposerHint,
+                maxLines: 2,
+                enabled: !_sending,
+                errorText: _failed ? l10n.expenseThreadSendFailed : null,
+                onChanged: (_) {
+                  if (_failed) setState(() => _failed = false);
+                },
+              ),
             ),
             const SizedBox(height: AppDimensions.spacingS),
             Align(

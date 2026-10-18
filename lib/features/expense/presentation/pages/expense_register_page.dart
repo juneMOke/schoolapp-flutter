@@ -32,6 +32,7 @@ class ExpenseRegisterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
+    maxWidth: AppDimensions.listingContentMaxWidth,
     child: BlocBuilder<ExpenseRegisterCubit, ExpenseRegisterState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -10,6 +9,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_queue_cubit.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_navigation.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_queue_state.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_state.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_queue_actions.dart';
@@ -22,7 +22,6 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/queue/e
 import 'package:school_app_flutter/features/expense/presentation/widgets/states/expense_queue_empty_state.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/states/expense_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Dépenses ▸ Validations — la file des demandes en attente.
 ///
@@ -45,6 +44,7 @@ class ExpenseQueueScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
+    maxWidth: AppDimensions.listingContentMaxWidth,
     child: BlocBuilder<ExpenseQueueCubit, ExpenseQueueState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||
@@ -84,7 +84,10 @@ class ExpenseQueueScreen extends StatelessWidget {
         if (view.isEmpty)
           ExpenseQueueEmptyState(
             approvedToPay: view.approvedTotal.count,
-            onOpenRegister: () => context.go(AppRoutesNames.expenseRegister),
+            onOpenRegister: () => openExpenseRegister(
+              context,
+              title: AppLocalizations.of(context)!.subMenuExpenseRegister,
+            ),
           )
         else
           ExpenseQueueList(
@@ -122,7 +125,10 @@ class ExpenseQueueScreen extends StatelessWidget {
           view: view,
           onGesture: actions.applyGesture,
           onOpen: actions.open,
-          onOpenRegister: () => context.go(AppRoutesNames.expenseRegister),
+          onOpenRegister: () => openExpenseRegister(
+            context,
+            title: AppLocalizations.of(context)!.subMenuExpenseRegister,
+          ),
         ),
       ],
     );

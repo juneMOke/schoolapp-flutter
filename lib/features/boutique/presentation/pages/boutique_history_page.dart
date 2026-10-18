@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -113,6 +114,9 @@ class _HistoryView extends StatefulWidget {
 }
 
 class _HistoryViewState extends State<_HistoryView> {
+  /// La vente dont la fiche est ouverte à côté de la liste (grand écran).
+  String? _selectedSaleId;
+
   @override
   void initState() {
     super.initState();
@@ -141,6 +145,16 @@ class _HistoryViewState extends State<_HistoryView> {
     bloc.add(BoutiqueHistoryRequested(widget.academicYearId));
   }
 
+  /// Grand écran : la fiche s'ouvre à côté, sans quitter la liste.
+  ///
+  /// La liste n'est PAS relue ici, contrairement au retour d'une fiche en
+  /// page : la relecture repasse par le squelette, et la liste clignoterait à
+  /// chaque vente choisie.
+  void _selectSale(String saleId) {
+    if (_selectedSaleId == saleId) return;
+    setState(() => _selectedSaleId = saleId);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -149,44 +163,104 @@ class _HistoryViewState extends State<_HistoryView> {
       builder: (context, state) {
         final bloc = context.read<BoutiqueHistoryBloc>();
 
-        return AppPageBackground(
-          appBar: ModuleTopBar(
-            eyebrow: l10n.boutiqueHistoryEyebrow,
-            title: l10n.boutiqueHistoryTitle,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              BoutiqueHistoryFilter(
-                selected: state.period,
-                // Inerte pendant la lecture : changer de fenêtre sous une
-                // requête en vol laisserait arriver la réponse de la précédente
-                // par-dessus.
-                enabled: state.status != HistoryStatus.loading,
-                onChanged: (period) => bloc.add(
-                  BoutiqueHistoryPeriodChanged(
-                    academicYearId: widget.academicYearId,
-                    period: period,
-                  ),
-                ),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Grand écran : la liste à gauche, la fiche à droite — retrouver
+            // une vente puis la suivante ne fait plus d'aller-retour de page.
+            final split =
+                constraints.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
+            final list = _listColumn(context, state, bloc, split: split);
+            return AppPageBackground(
+              maxWidth: split
+                  ? AppDimensions.listingContentMaxWidth
+                  : AppDimensions.detailContentMaxWidth,
+              scrollable: !split,
+              appBar: ModuleTopBar(
+                eyebrow: l10n.boutiqueHistoryEyebrow,
+                title: l10n.boutiqueHistoryTitle,
               ),
-              const SizedBox(height: AppDimensions.spacingM),
-              _Body(
-                state: state,
-                onRetry: () =>
-                    bloc.add(BoutiqueHistoryRequested(widget.academicYearId)),
-                onOpenSale: (sale) => _openSale(context, sale.id),
-              ),
-            ],
-          ),
+              child: split
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          width: AppDimensions.boutiqueHistoryListWidth,
+                          child: SingleChildScrollView(child: list),
+                        ),
+                        const SizedBox(width: AppDimensions.spacingL),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: _selectedPane(l10n),
+                          ),
+                        ),
+                      ],
+                    )
+                  : list,
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget _selectedPane(AppLocalizations l10n) {
+    final saleId = _selectedSaleId;
+    if (saleId == null) {
+      return EteeloEmptyResult(
+        label: l10n.boutiqueHistoryPickTitle,
+        description: l10n.boutiqueHistoryPickMessage,
+        medallionIcon: Icons.receipt_long_outlined,
+      );
+    }
+    // Une clé par vente : changer de vente recrée la fiche et son cubit, au
+    // lieu de montrer la précédente sous le titre de la nouvelle.
+    return BoutiqueSaleDetailPage(
+      key: ValueKey(saleId),
+      saleId: saleId,
+      levelLabels: widget.levelLabels,
+      embedded: true,
+    );
+  }
+
+  Widget _listColumn(
+    BuildContext context,
+    BoutiqueHistoryState state,
+    BoutiqueHistoryBloc bloc, {
+    required bool split,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        BoutiqueHistoryFilter(
+          selected: state.period,
+          // Inerte pendant la lecture : changer de fenêtre sous une
+          // requête en vol laisserait arriver la réponse de la précédente
+          // par-dessus.
+          enabled: state.status != HistoryStatus.loading,
+          onChanged: (period) => bloc.add(
+            BoutiqueHistoryPeriodChanged(
+              academicYearId: widget.academicYearId,
+              period: period,
+            ),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingM),
+        _Body(
+          state: state,
+          selectedSaleId: split ? _selectedSaleId : null,
+          onRetry: () =>
+              bloc.add(BoutiqueHistoryRequested(widget.academicYearId)),
+          onOpenSale: (sale) =>
+              split ? _selectSale(sale.id) : _openSale(context, sale.id),
+        ),
+      ],
     );
   }
 }
 
 class _Body extends StatelessWidget {
   final BoutiqueHistoryState state;
+  final String? selectedSaleId;
   final VoidCallback onRetry;
   final void Function(SaleHistoryEntry sale) onOpenSale;
 
@@ -194,6 +268,7 @@ class _Body extends StatelessWidget {
     required this.state,
     required this.onRetry,
     required this.onOpenSale,
+    this.selectedSaleId,
   });
 
   @override
@@ -234,7 +309,11 @@ class _Body extends StatelessWidget {
         // page, et une vue défilante imbriquée lèverait sous une contrainte de
         // hauteur non bornée.
         for (final sale in state.sales) ...[
-          BoutiqueHistorySaleTile(sale: sale, onTap: () => onOpenSale(sale)),
+          BoutiqueHistorySaleTile(
+            sale: sale,
+            selected: sale.id == selectedSaleId,
+            onTap: () => onOpenSale(sale),
+          ),
           const SizedBox(height: AppDimensions.spacingS),
         ],
       ],

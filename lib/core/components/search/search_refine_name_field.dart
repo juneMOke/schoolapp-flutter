@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -30,13 +31,16 @@ class SearchRefineNameField extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return EteeloTextInput(
-      controller: controller,
-      label: l10n.searchRefineByNameLabel,
-      placeholder: l10n.searchRefineByNamePlaceholder,
-      enabled: enabled,
-      textInputAction: TextInputAction.search,
-      onSubmitted: onSubmitted,
+    // Ctrl+F ou « / » : seul champ texte du mode « Par classe ».
+    return SearchFocusShortcut(
+      child: EteeloTextInput(
+        controller: controller,
+        label: l10n.searchRefineByNameLabel,
+        placeholder: l10n.searchRefineByNamePlaceholder,
+        enabled: enabled,
+        textInputAction: TextInputAction.search,
+        onSubmitted: onSubmitted,
+      ),
     );
   }
 }

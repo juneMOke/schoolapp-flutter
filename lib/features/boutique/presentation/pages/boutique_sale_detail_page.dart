@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
@@ -43,10 +44,15 @@ class BoutiqueSaleDetailPage extends StatelessWidget {
   /// déclaré, et l'imprimer par son identifiant ne dirait rien à personne.
   final Map<String, String> levelLabels;
 
+  /// Vrai dans le panneau de l'historique (grand écran) : ni fond ni barre —
+  /// l'historique les porte déjà —, la référence de la vente en titre.
+  final bool embedded;
+
   const BoutiqueSaleDetailPage({
     super.key,
     required this.saleId,
     required this.levelLabels,
+    this.embedded = false,
   });
 
   /// Ouvre la fiche. Rend quand elle se referme.
@@ -69,14 +75,15 @@ class BoutiqueSaleDetailPage extends StatelessWidget {
       claimReceipt: getIt<ClaimSaleReceiptUseCase>(),
       saleId: saleId,
     )..load(),
-    child: _SaleDetailView(levelLabels: levelLabels),
+    child: _SaleDetailView(levelLabels: levelLabels, embedded: embedded),
   );
 }
 
 class _SaleDetailView extends StatefulWidget {
   final Map<String, String> levelLabels;
+  final bool embedded;
 
-  const _SaleDetailView({required this.levelLabels});
+  const _SaleDetailView({required this.levelLabels, required this.embedded});
 
   @override
   State<_SaleDetailView> createState() => _SaleDetailViewState();
@@ -183,47 +190,66 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
       builder: (context, state) {
         final detail = state.detail;
 
+        final title = detail == null
+            ? l10n.boutiqueSaleDetailTitle
+            : _referenceOf(detail, l10n);
+        final content = switch (state.status) {
+          SaleDetailStatus.initial || SaleDetailStatus.loading => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          // Une vente ouverte depuis la liste existe. Si elle a disparu,
+          // l'écran le DIT : une fiche vide ferait croire à une vente sans
+          // article.
+          // ⚠️ La disparition d'une vente n'est PAS une panne de lecture :
+          // « historique illisible » ferait réessayer indéfiniment une
+          // lecture qui répond correctement qu'il n'y a rien.
+          SaleDetailStatus.failure when state.failure is NotFoundFailure =>
+            EteeloEmptyResult(
+              label: l10n.boutiqueSaleDetailNotFoundTitle,
+              description: l10n.boutiqueSaleDetailNotFound,
+              medallionIcon: Icons.search_off_rounded,
+            ),
+          SaleDetailStatus.failure => BoutiqueResultsErrorState(
+            failure: state.failure!,
+            surface: BoutiqueErrorSurface.history,
+            onRetry: () => context.read<SaleDetailCubit>().load(),
+          ),
+          SaleDetailStatus.ready => _Body(
+            detail: detail!,
+            isPrinting: _isPrinting,
+            isClaiming: _isClaiming,
+            onPrintTicket: () => _printTicket(detail),
+            onOpenReceipt: () => _openReceipt(detail),
+            onClaimReceipt: _claimReceipt,
+          ),
+        };
+
+        if (widget.embedded) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.bleuProfond,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingM),
+              content,
+            ],
+          );
+        }
+
         return AppPageBackground(
           appBar: ModuleTopBar(
             eyebrow: l10n.boutiqueSaleDetailEyebrow,
-            title: detail == null
-                ? l10n.boutiqueSaleDetailTitle
-                : _referenceOf(detail, l10n),
+            title: title,
             onBack: () => Navigator.of(context).maybePop(),
             backTooltip: l10n.boutiqueSaleDetailBack,
           ),
-          child: switch (state.status) {
-            SaleDetailStatus.initial ||
-            SaleDetailStatus.loading => const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            // Une vente ouverte depuis la liste existe. Si elle a disparu,
-            // l'écran le DIT : une fiche vide ferait croire à une vente sans
-            // article.
-            // ⚠️ La disparition d'une vente n'est PAS une panne de lecture :
-            // « historique illisible » ferait réessayer indéfiniment une
-            // lecture qui répond correctement qu'il n'y a rien.
-            SaleDetailStatus.failure when state.failure is NotFoundFailure =>
-              EteeloEmptyResult(
-                label: l10n.boutiqueSaleDetailNotFoundTitle,
-                description: l10n.boutiqueSaleDetailNotFound,
-                medallionIcon: Icons.search_off_rounded,
-              ),
-            SaleDetailStatus.failure => BoutiqueResultsErrorState(
-              failure: state.failure!,
-              surface: BoutiqueErrorSurface.history,
-              onRetry: () => context.read<SaleDetailCubit>().load(),
-            ),
-            SaleDetailStatus.ready => _Body(
-              detail: detail!,
-              isPrinting: _isPrinting,
-              isClaiming: _isClaiming,
-              onPrintTicket: () => _printTicket(detail),
-              onOpenReceipt: () => _openReceipt(detail),
-              onClaimReceipt: _claimReceipt,
-            ),
-          },
+          child: content,
         );
       },
     );
@@ -260,86 +286,143 @@ class _Body extends StatelessWidget {
     final sale = detail.sale.sale;
     final payerName = _payerNameOf(detail);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _AmountBanner(detail: detail),
-        const SizedBox(height: AppDimensions.spacingM),
-        if (sale.syncStatus == 'PENDING_SYNC') ...[
-          _Notice(
+    final banner = _AmountBanner(detail: detail);
+    final pending = sale.syncStatus == 'PENDING_SYNC'
+        ? _Notice(
             icon: Icons.cloud_upload_outlined,
             color: AppColors.warning,
             text: l10n.boutiqueSaleDetailPendingNotice,
+          )
+        : null;
+    final info = _Card(
+      child: Column(
+        children: [
+          // La ligne RESTE, même anonyme : on a ouvert ce détail POUR
+          // savoir, et une ligne absente laisserait croire à un oubli
+          // d'affichage. Le ticket, lui, escamote son bloc — une pièce
+          // remise au client et un écran de consultation n'ont pas le même
+          // lecteur ni le même enjeu.
+          _InfoRow(
+            icon: Icons.person_outline_rounded,
+            label: l10n.boutiqueSaleDetailPayer,
+            value: payerName.isEmpty
+                ? l10n.boutiqueHistoryPayerUnknown
+                : payerName,
+            muted: payerName.isEmpty,
           ),
-          const SizedBox(height: AppDimensions.spacingM),
+          if ((sale.payerPhoneNumber ?? '').trim().isNotEmpty)
+            _InfoRow(
+              icon: Icons.phone_outlined,
+              label: l10n.boutiqueSaleDetailPhone,
+              value: sale.payerPhoneNumber!,
+            ),
+          _InfoRow(
+            icon: Icons.schedule_outlined,
+            label: l10n.boutiqueSaleDetailSoldAt,
+            value: _dateTimeOf(sale.soldAt),
+          ),
+          // « Encaissé par » : sur une caisse tenue à plusieurs, c'est la
+          // seule ligne qui dit QUI a pris l'argent. Le nom vient du
+          // serveur ou de la session au moment de la vente — jamais de
+          // l'utilisateur courant, qui n'est pas forcément le même.
+          _InfoRow(
+            icon: Icons.badge_outlined,
+            label: l10n.boutiqueSaleDetailCollectedBy,
+            value: (sale.collectedByName ?? '').trim().isEmpty
+                ? l10n.boutiqueSaleDetailCollectedByUnknown
+                : sale.collectedByName!,
+            muted: (sale.collectedByName ?? '').trim().isEmpty,
+          ),
+          _InfoRow(
+            icon: Icons.receipt_long_outlined,
+            label: l10n.boutiqueSaleDetailReceipt,
+            value:
+                sale.receiptNumber ??
+                ProvisionalSaleReference.of(detail.sale.id),
+          ),
         ],
-        _Card(
-          child: Column(
-            children: [
-              // La ligne RESTE, même anonyme : on a ouvert ce détail POUR
-              // savoir, et une ligne absente laisserait croire à un oubli
-              // d'affichage. Le ticket, lui, escamote son bloc — une pièce
-              // remise au client et un écran de consultation n'ont pas le même
-              // lecteur ni le même enjeu.
-              _InfoRow(
-                icon: Icons.person_outline_rounded,
-                label: l10n.boutiqueSaleDetailPayer,
-                value: payerName.isEmpty
-                    ? l10n.boutiqueHistoryPayerUnknown
-                    : payerName,
-                muted: payerName.isEmpty,
-              ),
-              if ((sale.payerPhoneNumber ?? '').trim().isNotEmpty)
-                _InfoRow(
-                  icon: Icons.phone_outlined,
-                  label: l10n.boutiqueSaleDetailPhone,
-                  value: sale.payerPhoneNumber!,
-                ),
-              _InfoRow(
-                icon: Icons.schedule_outlined,
-                label: l10n.boutiqueSaleDetailSoldAt,
-                value: _dateTimeOf(sale.soldAt),
-              ),
-              // « Encaissé par » : sur une caisse tenue à plusieurs, c'est la
-              // seule ligne qui dit QUI a pris l'argent. Le nom vient du
-              // serveur ou de la session au moment de la vente — jamais de
-              // l'utilisateur courant, qui n'est pas forcément le même.
-              _InfoRow(
-                icon: Icons.badge_outlined,
-                label: l10n.boutiqueSaleDetailCollectedBy,
-                value: (sale.collectedByName ?? '').trim().isEmpty
-                    ? l10n.boutiqueSaleDetailCollectedByUnknown
-                    : sale.collectedByName!,
-                muted: (sale.collectedByName ?? '').trim().isEmpty,
-              ),
-              _InfoRow(
-                icon: Icons.receipt_long_outlined,
-                label: l10n.boutiqueSaleDetailReceipt,
-                value:
-                    sale.receiptNumber ??
-                    ProvisionalSaleReference.of(detail.sale.id),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spacingM),
+      ),
+    );
+    final lines = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         _SectionTitle(label: l10n.boutiqueSaleDetailLines),
         const SizedBox(height: AppDimensions.spacingS),
         _Card(
           padding: EdgeInsets.zero,
           child: BoutiqueSaleDetailLines(lines: detail.sale.lines),
         ),
-        const SizedBox(height: AppDimensions.spacingL),
-        _Actions(
-          detail: detail,
-          isPrinting: isPrinting,
-          isClaiming: isClaiming,
-          onPrintTicket: onPrintTicket,
-          onOpenReceipt: onOpenReceipt,
-          onClaimReceipt: onClaimReceipt,
-        ),
-        const SizedBox(height: AppDimensions.spacingXL),
       ],
+    );
+    final actions = _Actions(
+      detail: detail,
+      isPrinting: isPrinting,
+      isClaiming: isClaiming,
+      onPrintTicket: onPrintTicket,
+      onOpenReceipt: onOpenReceipt,
+      onClaimReceipt: onClaimReceipt,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Grand écran : la vente à gauche (qui, quand, quoi), le montant et
+        // les gestes à droite. En une colonne de 1180, chaque libellé
+        // finissait à 1100 dp de sa valeur et les boutons s'étiraient.
+        if (constraints.maxWidth >= AppBreakpoints.financeDetailTwoColMin) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppDimensions.spacingXL),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      info,
+                      const SizedBox(height: AppDimensions.spacingM),
+                      lines,
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppDimensions.spacingL),
+                SizedBox(
+                  width: AppDimensions.saleDetailSideColumnWidth,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      banner,
+                      if (pending != null) ...[
+                        const SizedBox(height: AppDimensions.spacingM),
+                        pending,
+                      ],
+                      const SizedBox(height: AppDimensions.spacingL),
+                      actions,
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            banner,
+            const SizedBox(height: AppDimensions.spacingM),
+            if (pending != null) ...[
+              pending,
+              const SizedBox(height: AppDimensions.spacingM),
+            ],
+            info,
+            const SizedBox(height: AppDimensions.spacingM),
+            lines,
+            const SizedBox(height: AppDimensions.spacingL),
+            actions,
+            const SizedBox(height: AppDimensions.spacingXL),
+          ],
+        );
+      },
     );
   }
 

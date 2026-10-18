@@ -143,7 +143,9 @@ void main() {
 
   Future<void> pumpPage(
     WidgetTester tester, {
-    Size size = const Size(1400, 1200),
+    // Tablette : sous 1024 dp, le panier a sa page. Le grand écran, où il
+    // vit en colonne, a son propre groupe ci-dessous.
+    Size size = const Size(900, 1200),
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -258,7 +260,7 @@ void main() {
     expect(find.byType(BoutiqueArticleCard), findsNothing);
   });
 
-  group('le panier vit AILLEURS', () {
+  group('sur tablette, le panier vit AILLEURS', () {
     testWidgets('le catalogue ne porte NI panneau NI total', (tester) async {
       // Le panier a sa page. Le laisser aussi en colonne ferait deux
       // compositions du même panier, qui divergeraient sur les règles portant
@@ -312,6 +314,37 @@ void main() {
 
       expect(find.byType(BoutiqueCartPage), findsNothing);
       expect(countOnCartButton('1'), findsOneWidget);
+    });
+  });
+
+  group('grand écran : le panier à côté du catalogue', () {
+    const wide = Size(1400, 1200);
+
+    testWidgets('un seul panier, en colonne, et plus de bouton dans la barre', (
+      tester,
+    ) async {
+      await pumpPage(tester, size: wide);
+
+      expect(find.byType(BoutiqueCartPanel), findsOneWidget);
+      expect(find.byType(BoutiqueCartButton), findsNothing);
+      // À DROITE du catalogue, pas dessous.
+      final panel = tester.getTopLeft(find.byType(BoutiqueCartPanel));
+      final card = tester.getTopLeft(find.byType(BoutiqueArticleCard));
+      expect(panel.dx, greaterThan(card.dx));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('ajouter pose la ligne dans la colonne, sans changer de page', (
+      tester,
+    ) async {
+      await pumpPage(tester, size: wide);
+
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BoutiqueCartPage), findsNothing);
+      expect(find.text('Prix à résoudre'), findsOneWidget);
+      expect(find.textContaining('1 ligne sans niveau'), findsOneWidget);
     });
   });
 

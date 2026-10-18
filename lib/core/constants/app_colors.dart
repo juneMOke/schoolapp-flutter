@@ -27,6 +27,7 @@ class AppColors {
   static const stateHover = tokens.AppColors.stateHover;
   static const statePressed = tokens.AppColors.statePressed;
   static const stateFocus = tokens.AppColors.stateFocus;
+  static const stateFocusOnDark = tokens.AppColors.stateFocusOnDark;
   static const stateDisabled = tokens.AppColors.stateDisabled;
   static const fabBackground = tokens.AppColors.fabBackground;
 

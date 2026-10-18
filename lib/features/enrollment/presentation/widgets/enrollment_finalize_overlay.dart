@@ -122,6 +122,10 @@ class _EnrollmentFinalizeOverlayState
           backgroundColor: AppColors.surfaceRaised,
           surfaceTintColor: Colors.transparent,
           clipBehavior: Clip.antiAlias,
+          constraints: const BoxConstraints(
+            minWidth: AppDimensions.dialogMinWidth,
+            maxWidth: AppDimensions.confirmationDialogMaxWidth,
+          ),
           insetPadding: const EdgeInsets.symmetric(
             horizontal: AppDimensions.spacingL,
             vertical: AppDimensions.spacingXL,

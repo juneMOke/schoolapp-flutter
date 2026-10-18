@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -377,6 +378,7 @@ class _MoneyField extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      textInputAction: physicalKeyboardNextAction,
       style: AppTextStyles.moneyTabular.copyWith(color: AppColors.textPrimary),
       onChanged: (_) => onEdited(),
       decoration: financeInputDecoration(

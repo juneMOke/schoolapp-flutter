@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
@@ -108,5 +109,35 @@ void main() {
     await basculer(tester, 'Par numéro');
 
     expect(find.text('816939060'), findsWidgets);
+  });
+
+  group('ouverture au clavier physique', () {
+    bool phoneFocused(WidgetTester tester) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.byType(TextField),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .focusNode
+        .hasFocus;
+
+    testWidgets('sur un poste de bureau, on tape le numéro sans cliquer', (
+      tester,
+    ) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      await pumpForm(tester);
+      final focused = phoneFocused(tester);
+      debugDefaultTargetPlatformOverride = null;
+
+      expect(focused, isTrue);
+    });
+
+    testWidgets('sur la tablette, le clavier virtuel ne monte pas tout seul', (
+      tester,
+    ) async {
+      await pumpForm(tester);
+      expect(phoneFocused(tester), isFalse);
+    });
   });
 }

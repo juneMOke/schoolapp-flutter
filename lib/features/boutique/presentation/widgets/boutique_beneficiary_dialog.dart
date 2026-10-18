@@ -72,7 +72,7 @@ class _BoutiqueBeneficiaryDialogState extends State<BoutiqueBeneficiaryDialog> {
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: 520,
+          maxWidth: AppDimensions.boutiqueBeneficiaryDialogMaxWidth,
           maxHeight: size.height * 0.82,
         ),
         child: EteeloDialogBody(

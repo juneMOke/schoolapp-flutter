@@ -56,7 +56,9 @@ class EnrollmentDuplicateDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
+        constraints: const BoxConstraints(
+          maxWidth: AppDimensions.enrollmentDuplicateDialogMaxWidth,
+        ),
         child: EteeloDialogBody(
           // Pied à deux boutons (~78 dp) sous un en-tête de 86 : au-dessous de
           // ce seuil, tout rejoint le défilement plutôt que de déborder.

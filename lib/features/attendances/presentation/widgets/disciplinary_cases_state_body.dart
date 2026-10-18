@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
@@ -104,26 +105,24 @@ class DisciplinaryCasesStateBody extends StatelessWidget {
     );
   }
 
+  /// Grille et non pile : sur un grand écran, une carte de 1180 dp collait son
+  /// contenu à gauche et rejetait ses gestes à l'extrême droite. Deux colonnes
+  /// dès que deux cartes tiennent à leur largeur de lecture.
   Widget _list() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < cases.length; i++)
-          Padding(
-            padding: EdgeInsets.only(
-              bottom: i == cases.length - 1 ? 0 : AppDimensions.spacingM,
-            ),
-            child: DisciplinaryCaseCard(
-              caseData: cases[i],
-              commentCount: commentCounts[cases[i].id] ?? 0,
-              onAdvance: onAdvance == null ? null : () => onAdvance!(cases[i]),
-              onDismiss: onDismiss == null ? null : () => onDismiss!(cases[i]),
-              onOpenComments: onOpenComments == null
-                  ? null
-                  : () => onOpenComments!(cases[i]),
-            ),
-          ),
-      ],
+    return EteeloGridView(
+      padding: EdgeInsets.zero,
+      spacing: AppDimensions.spacingM,
+      minItemWidth: AppDimensions.disciplinaryCaseCardMinWidth,
+      itemCount: cases.length,
+      itemBuilder: (context, i) => DisciplinaryCaseCard(
+        caseData: cases[i],
+        commentCount: commentCounts[cases[i].id] ?? 0,
+        onAdvance: onAdvance == null ? null : () => onAdvance!(cases[i]),
+        onDismiss: onDismiss == null ? null : () => onDismiss!(cases[i]),
+        onOpenComments: onOpenComments == null
+            ? null
+            : () => onOpenComments!(cases[i]),
+      ),
     );
   }
 }

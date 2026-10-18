@@ -173,6 +173,7 @@ class _SquareIconButton extends StatelessWidget {
       color: AppColors.textOnDark.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
+        focusColor: AppColors.stateFocusOnDark,
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: SizedBox(

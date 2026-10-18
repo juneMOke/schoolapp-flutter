@@ -50,6 +50,7 @@ import 'package:school_app_flutter/features/configuration/presentation/pages/con
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 // Debug import — uniquement accédé via kDebugMode
@@ -60,6 +61,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_f
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_list_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
+import 'package:school_app_flutter/router/return_location.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_page.dart';
@@ -166,6 +168,11 @@ class AppRouter {
     AcademicYearContextBloc academicYearContextBloc,
   ) {
     final notifier = RouterNotifier(authBloc, academicYearContextBloc);
+    // Vrai jusqu'à la première session ouverte de ce lancement : seule
+    // l'adresse d'ouverture (F5, favori, lien collé) mérite d'être rendue. Une
+    // déconnexion passe elle aussi par `loading` — sans ce verrou, l'agent
+    // suivant hériterait de la page du précédent.
+    var isColdStart = true;
 
     return GoRouter(
       initialLocation: '/splash',
@@ -173,16 +180,23 @@ class AppRouter {
       // Sans lui, chaque rafraîchissement du routeur reconstruit les pages
       // empilées SANS leur `extra` (cf. [InMemoryExtraCodec]).
       extraCodec: InMemoryExtraCodec(),
-      redirect: (context, state) => resolveRedirect(
-        authStatus: authBloc.state.status,
-        permissions: authBloc.state.permissions,
-        academicYearBlocksNavigation:
-            academicYearContextBloc.state.blocksNavigation,
-        academicYearHasBlockingFailure:
-            academicYearContextBloc.state.hasBlockingFailure,
-        matchedLocation: state.matchedLocation,
-        location: state.uri,
-      ),
+      redirect: (context, state) {
+        final redirect = resolveRedirect(
+          authStatus: authBloc.state.status,
+          permissions: authBloc.state.permissions,
+          academicYearBlocksNavigation:
+              academicYearContextBloc.state.blocksNavigation,
+          academicYearHasBlockingFailure:
+              academicYearContextBloc.state.hasBlockingFailure,
+          matchedLocation: state.matchedLocation,
+          location: state.uri,
+          isColdStart: isColdStart,
+        );
+        if (authBloc.state.status == AuthStatus.authenticated) {
+          isColdStart = false;
+        }
+        return redirect;
+      },
       routes: buildRoutes(),
     );
   }
@@ -202,6 +216,7 @@ class AppRouter {
     required bool academicYearHasBlockingFailure,
     required String matchedLocation,
     required Uri location,
+    bool isColdStart = false,
   }) {
     final isAuthenticated = authStatus == AuthStatus.authenticated;
     final isAuthLoading =
@@ -214,12 +229,24 @@ class AppRouter {
       AppRoutesNames.configurationPath,
     );
 
+    // L'adresse demandée au démarrage (F5, favori, lien collé) : déjà en
+    // attente si l'on est sur le parcours d'entrée, sinon — au démarrage
+    // seulement, cf. [isColdStart] — l'adresse courante elle-même.
+    // Cf. `return_location.dart`.
+    final pendingReturn = isOnSplash || isOnAuthFlow
+        ? pendingReturnLocation(location)
+        : isColdStart
+        ? sanitizeReturnLocation(location.toString())
+        : null;
+
     if (isAuthLoading) {
-      return isOnSplash ? null : '/splash';
+      return isOnSplash ? null : withReturnLocation('/splash', pendingReturn);
     }
 
     if (!isAuthenticated) {
-      return isOnAuthFlow ? null : '/login';
+      if (isOnAuthFlow) return null;
+      // Session expirée au rechargement : la connexion hérite de l'adresse.
+      return withReturnLocation('/login', pendingReturn);
     }
 
     // ── La porte de l'assistant de mise en service ──────────────────────────
@@ -239,17 +266,32 @@ class AppRouter {
       return canAccessLocation(location, permissions) ? null : '/splash';
     }
 
+    // Retenir sur le splash garde l'adresse en attente seulement si l'on vient
+    // du parcours d'entrée : un contexte qui se recharge en pleine session
+    // (changement d'école) ne doit pas ramener sur une page de l'école d'avant.
+    final splashHold = withReturnLocation(
+      '/splash',
+      isOnAuthFlow || isColdStart ? pendingReturn : null,
+    );
+
     if (academicYearBlocksNavigation) {
-      return isOnSplash ? null : '/splash';
+      return isOnSplash ? null : splashHold;
     }
 
     // Échec de la résolution du contexte académique : retenir sur le splash
     // (ErrorView + retry) au lieu d'éjecter vers /home sans données.
     if (academicYearHasBlockingFailure) {
-      return isOnSplash ? null : '/splash';
+      return isOnSplash ? null : splashHold;
     }
 
-    if (isOnAuthFlow || isOnSplash) return '/home';
+    if (isOnAuthFlow || isOnSplash) {
+      // La garde de permission s'applique à l'adresse rendue comme à toute
+      // autre : un lien profond ne contourne pas ADR-014 §2.9.
+      final target = pendingReturn;
+      return target != null && canAccessLocation(Uri.parse(target), permissions)
+          ? target
+          : '/home';
+    }
 
     // Garde de permission (ADR-014 §2.9) : masquer une tuile ne suffit pas. Un
     // lien profond, une restauration d'état ou un retour arrière atteignent la
@@ -313,11 +355,28 @@ class AppRouter {
       name: AppRoutesNames.photoSession,
       builder: (context, state) => const PhotoSessionPage(),
     ),
+    // La coquille : `/home` (Accueil) et `/home/{sousMenu}` (chaque écran du
+    // menu). Les deux routes rendent la MÊME page — même clé — : passer de
+    // l'une à l'autre met la coquille à jour au lieu d'en empiler une
+    // seconde, et son état (menu ouvert, saisie en cours) survit. C'est ce
+    // qui donne à chaque écran son adresse : Précédent / Suivant du
+    // navigateur, F5 et lien partagé y mènent.
     GoRoute(
-      path: '/home',
+      path: AppRoutesNames.homePath,
       name: AppRoutesNames.home,
-      builder: (context, state) =>
-          HomePage(initialSubMenuId: state.uri.queryParameters['subMenuId']),
+      // Ancienne forme `?subMenuId=` : ramenée à l'adresse canonique.
+      redirect: (context, state) {
+        final subMenuId = state.uri.queryParameters['subMenuId']?.trim();
+        if (subMenuId == null || subMenuId.isEmpty) return null;
+        return AppRoutesNames.homeSubMenuPath(subMenuId);
+      },
+      pageBuilder: (context, state) => _shellPage(null),
+    ),
+    GoRoute(
+      path: AppRoutesNames.homeSubMenuRoute,
+      name: AppRoutesNames.homeSubMenu,
+      pageBuilder: (context, state) =>
+          _shellPage(state.pathParameters['subMenuId']),
     ),
     ShellRoute(
       builder: (context, state, child) {
@@ -334,6 +393,8 @@ class AppRouter {
         ),
         GoRoute(
           path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+          // Précédent du navigateur : même question que le retour système.
+          onExit: RouteExitGuard.onExit,
           builder: (context, state) {
             final enrollmentId = state.pathParameters['enrollmentId']!;
             final intent = EnrollmentDetailIntent.fromRouteContext(
@@ -392,6 +453,9 @@ class AppRouter {
                 // ici — les redirects de la pile matchée sont tous joués.
                 GoRoute(
                   path: 'encaissement',
+                  // Précédent du navigateur pendant un encaissement : retenu
+                  // (cf. `RouteExitGuard`).
+                  onExit: RouteExitGuard.onExit,
                   builder: (context, state) {
                     final studentId = state.pathParameters['studentId'] ?? '';
                     final academicYearId =
@@ -596,6 +660,13 @@ class AppRouter {
         builder: (context, state) => const TicketPrintBenchPage(),
       ),
   ];
+
+  static const _shellPageKey = ValueKey<String>('home-shell');
+
+  static Page<void> _shellPage(String? subMenuId) => MaterialPage<void>(
+    key: _shellPageKey,
+    child: HomePage(subMenuId: subMenuId),
+  );
 
   static bool _hasRequiredPathParameters(
     GoRouterState state,

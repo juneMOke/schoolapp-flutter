@@ -121,7 +121,9 @@ class DisciplinaryCasesTable extends StatelessWidget {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(AppDimensions.spacingM),
                     onTap: () => onViewCase(caseData),
-                    child: Container(
+                    // `Ink` : la surface se peint sous l'encre, qui reste
+                    // visible au survol et au focus.
+                    child: Ink(
                       padding: const EdgeInsets.all(AppDimensions.spacingM),
                       decoration: BoxDecoration(
                         color: AppColors.disciplinaryDetailInfoSurface,

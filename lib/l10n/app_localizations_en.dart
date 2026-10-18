@@ -8123,6 +8123,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentViewerShareLabel => 'Share';
 
   @override
+  String get documentViewerDownloadLabel => 'Download';
+
+  @override
   String get documentViewerCloseLabel => 'Close';
 
   @override
@@ -9095,6 +9098,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get boutiqueHistoryEmptyMessage =>
       'Nothing was collected at the counter. Widen the period, or open the shop to collect.';
+
+  @override
+  String get boutiqueHistoryPickTitle => 'No sale selected';
+
+  @override
+  String get boutiqueHistoryPickMessage =>
+      'Pick a sale in the list to see its details here.';
 
   @override
   String get boutiqueHistoryPayerUnknown => 'Payer not recorded';

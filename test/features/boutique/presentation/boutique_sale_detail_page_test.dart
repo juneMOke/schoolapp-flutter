@@ -78,8 +78,12 @@ void main() {
 
   tearDown(() => GetIt.I.reset());
 
-  Future<void> pumpDetail(WidgetTester tester, {SaleDetail? detail}) async {
-    await tester.binding.setSurfaceSize(const Size(900, 1600));
+  Future<void> pumpDetail(
+    WidgetTester tester, {
+    SaleDetail? detail,
+    Size size = const Size(900, 1600),
+  }) async {
+    await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     when(() => getDetail(any())).thenAnswer(
@@ -285,5 +289,26 @@ void main() {
 
     expect(find.text('Vente introuvable'), findsOneWidget);
     expect(find.text('Historique illisible'), findsNothing);
+  });
+
+  testWidgets('grand écran : la vente à gauche, le montant à droite', (
+    tester,
+  ) async {
+    await pumpDetail(tester, detail: _detail(), size: const Size(1400, 1200));
+
+    final payer = tester.getTopLeft(find.text('Ndombo Lelo Willy'));
+    final total = tester.getTopLeft(find.text('TOTAL À ENCAISSER'));
+    expect(total.dx, greaterThan(payer.dx), reason: 'colonne de droite');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tablette : une seule colonne, le montant en tête', (
+    tester,
+  ) async {
+    await pumpDetail(tester, detail: _detail());
+
+    final payer = tester.getTopLeft(find.text('Ndombo Lelo Willy'));
+    final total = tester.getTopLeft(find.text('TOTAL À ENCAISSER'));
+    expect(total.dy, lessThan(payer.dy));
   });
 }

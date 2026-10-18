@@ -5548,6 +5548,10 @@
   "syncErrorsHeldSubtitle": "Ces écritures sont conservées et repartiront dès que leur condition sera levée.",
   "documentViewerPrintLabel": "Imprimer",
   "documentViewerShareLabel": "Partager",
+  "documentViewerDownloadLabel": "Télécharger",
+  "@documentViewerDownloadLabel": {
+    "description": "Sur le web, le partage d'un PDF le télécharge : le bouton le dit."
+  },
   "documentViewerCloseLabel": "Fermer",
   "documentViewerActionFailed": "L'action n'a pas pu aboutir sur cet appareil.",
   "documentViewerRenderFailedTitle": "Aperçu indisponible",
@@ -6025,6 +6029,8 @@
   "boutiqueHistoryPendingBadge": "En attente",
   "boutiqueHistoryEmptyTitle": "Aucune vente sur cette période",
   "boutiqueHistoryEmptyMessage": "Rien n'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.",
+  "boutiqueHistoryPickTitle": "Aucune vente choisie",
+  "boutiqueHistoryPickMessage": "Choisissez une vente dans la liste pour voir sa fiche ici.",
   "boutiqueHistoryPayerUnknown": "Payeur non renseigné",
   "boutiqueHistoryTotalLabel": "Total encaissé",
   "boutiqueHistorySaleTime": "{time} · {reference}",

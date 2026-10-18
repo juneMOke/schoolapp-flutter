@@ -49,13 +49,23 @@ class ExpenseThreadPanel extends StatelessWidget {
               color: AppColors.bleuArdoise,
             ),
             const SizedBox(width: AppDimensions.spacingS),
-            Text(l10n.expenseThreadTitle, style: AppTextStyles.bodyStrong),
+            // Souples : en colonne, à côté des faits, le fil n'a que ~320 dp.
+            Flexible(
+              child: Text(
+                l10n.expenseThreadTitle,
+                style: AppTextStyles.bodyStrong,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (thread != null) ...[
               const SizedBox(width: AppDimensions.spacingS),
-              Text(
-                l10n.expenseThreadCount(thread.length),
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted,
+              Flexible(
+                child: Text(
+                  l10n.expenseThreadCount(thread.length),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

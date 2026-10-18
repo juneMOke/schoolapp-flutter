@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/arrow_navigable_results.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -45,6 +46,16 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
   /// Derniers critères validés : le bouton « Réessayer » de l'état d'erreur
   /// les rejoue tels quels, sans obliger à ressaisir.
   ParentSearchCriteria? _lastCriteria;
+
+  /// Relie le formulaire aux résultats : ↓ depuis un champ descend sur la
+  /// première ligne, puis ↑/↓ parcourent la liste.
+  final _results = FocusNode(debugLabel: 'searchResults');
+
+  @override
+  void dispose() {
+    _results.dispose();
+    super.dispose();
+  }
 
   void _search(ParentSearchCriteria criteria) {
     _lastCriteria = criteria;
@@ -113,27 +124,33 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
           // (défaut H-1).
           bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
           footer: const [],
-          body: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Seul l'état de chargement compte ici : `buildWhen` évite de
-              // reconstruire le formulaire (et sa saisie en cours) à chaque
-              // arrivée de résultats.
-              BlocBuilder<ParentSearchBloc, ParentSearchState>(
-                buildWhen: (prev, curr) =>
-                    (prev is ParentSearchLoading) !=
-                    (curr is ParentSearchLoading),
-                builder: (context, state) => ParentSearchForm(
-                  onSearch: _search,
-                  isSearching: state is ParentSearchLoading,
+          body: SearchToResultsShortcut(
+            anchor: _results,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Seul l'état de chargement compte ici : `buildWhen` évite de
+                // reconstruire le formulaire (et sa saisie en cours) à chaque
+                // arrivée de résultats.
+                BlocBuilder<ParentSearchBloc, ParentSearchState>(
+                  buildWhen: (prev, curr) =>
+                      (prev is ParentSearchLoading) !=
+                      (curr is ParentSearchLoading),
+                  builder: (context, state) => ParentSearchForm(
+                    onSearch: _search,
+                    isSearching: state is ParentSearchLoading,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppDimensions.spacingL),
-              const Divider(height: 1, color: AppColors.border),
-              const SizedBox(height: AppDimensions.spacingL),
-              _buildResults(l10n),
-            ],
+                const SizedBox(height: AppDimensions.spacingL),
+                const Divider(height: 1, color: AppColors.border),
+                const SizedBox(height: AppDimensions.spacingL),
+                ArrowNavigableResults(
+                  anchor: _results,
+                  child: _buildResults(l10n),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
@@ -37,7 +38,7 @@ Future<void> showCoursReleveModal(
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: 520,
+          maxWidth: AppDimensions.coursReleveModalMaxWidth,
           maxHeight: size.height * 0.88,
         ),
         child: _ReleveContent(

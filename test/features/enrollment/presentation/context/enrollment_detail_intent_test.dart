@@ -144,5 +144,19 @@ void main() {
         expect(intent.studentId, isNull);
       },
     );
+
+    test('première inscription : un rechargement relit le bon parcours sans '
+        'extra — la page passe par toLocation()', () {
+      const sent = EnrollmentDetailIntent.newFirstRegistration();
+      final uri = Uri.parse(sent.toLocation());
+
+      final reread = EnrollmentDetailIntent.fromRouteContext(
+        enrollmentId: uri.pathSegments.last,
+        queryParameters: uri.queryParameters,
+      );
+
+      expect(reread.origin, EnrollmentDetailOrigin.newFirstRegistration);
+      expect(reread.enrollmentId, 'new');
+    });
   });
 }

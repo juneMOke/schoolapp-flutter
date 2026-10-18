@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -138,12 +139,19 @@ class _ExpenseRegisterFiltersCardState
                 constraints: const BoxConstraints(
                   maxWidth: AppDimensions.expenseFormDialogMaxWidth,
                 ),
-                child: EteeloTextInput(
-                  controller: _search,
-                  label: l10n.expenseSearchLabel,
-                  placeholder: l10n.expenseSearchPlaceholder,
-                  capitalization: EteeloTextCapitalization.none,
-                  onChanged: widget.onTextChanged,
+                // Ctrl+F ou « / » y placent le curseur, Échap le vide.
+                child: SearchFocusShortcut(
+                  child: ClearOnEscape(
+                    controller: _search,
+                    onCleared: widget.onTextChanged,
+                    child: EteeloTextInput(
+                      controller: _search,
+                      label: l10n.expenseSearchLabel,
+                      placeholder: l10n.expenseSearchPlaceholder,
+                      capitalization: EteeloTextCapitalization.none,
+                      onChanged: widget.onTextChanged,
+                    ),
+                  ),
                 ),
               ),
             ],

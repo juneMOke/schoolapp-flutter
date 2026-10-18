@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -89,15 +90,20 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
             ],
           ),
           const SizedBox(height: AppDimensions.spacingS),
-          EteeloTextInput(
-            controller: _reason,
-            label: l10n.expenseRefusalReasonLabel,
-            placeholder: l10n.expenseRefusalReasonHint,
-            maxLines: 2,
-            errorText: _missing ? l10n.expenseRefusalReasonMissing : null,
-            onChanged: (_) {
-              if (_missing) setState(() => _missing = false);
-            },
+          // Ctrl+Entrée refuse, comme le bouton (le motif reste exigé).
+          EteeloSubmitShortcut(
+            autofocus: false,
+            onSubmit: _confirm,
+            child: EteeloTextInput(
+              controller: _reason,
+              label: l10n.expenseRefusalReasonLabel,
+              placeholder: l10n.expenseRefusalReasonHint,
+              maxLines: 2,
+              errorText: _missing ? l10n.expenseRefusalReasonMissing : null,
+              onChanged: (_) {
+                if (_missing) setState(() => _missing = false);
+              },
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           Wrap(

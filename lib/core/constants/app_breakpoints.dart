@@ -70,10 +70,19 @@ class AppBreakpoints {
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.
   //
-  // ⚠️ Plafond dur : `AppPageBackground` borne son contenu à
-  // `AppDimensions.detailContentMaxWidth` (1180) — un seuil au-delà rendrait la
-  // disposition large **inatteignable**, quelle que soit la taille de l'écran.
-  static const double feeControlTableWideMin = financeDetailTwoColMin; // 1024
+  // Mesuré sur le CONTENU, déjà amputé de la barre latérale (280) et des
+  // marges (48) : à 1024 il fallait un écran de 1352 px, et un poste en 1280
+  // restait en disposition étroite (952 dp de contenu). À 900, une colonne de
+  // montant garde ~130 dp — « 1 250 000,00 FC » tient sans ellipse (mesuré
+  // par `fee_control_data_table_wide_test`).
+  static const double feeControlTableWideMin = 900.0;
+  // Caisse boutique : panier en colonne à côté du catalogue. Mesuré sur la
+  // zone de la page (sous la barre latérale) : 420 de panier + 24 d'écart
+  // laissent au catalogue au moins ~530 dp, deux tuiles d'articles.
+  static const double boutiqueSideCartMin = financeDetailTwoColMin; // 1024
+  // Fiche d'une dépense : le fil passe en colonne quand le corps de la
+  // modale dépasse ~820 dp — 340 de fil, 480 de faits au moins.
+  static const double expenseDetailTwoColMin = 820.0;
   // Composition des classes — vue répartie.
   // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
   // en deçà, le basculeur passe dessous.

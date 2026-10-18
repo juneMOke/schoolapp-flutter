@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/search/search_hint_pill.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -201,6 +202,8 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
           controller: _phoneController,
           required: true,
           dialCodeSemanticLabel: l10n.phoneNumberCountryCodeLabel,
+          // Au clavier physique, on tape dès l'ouverture de la modale.
+          autofocus: expectsPhysicalKeyboard,
           textInputAction: TextInputAction.search,
           onSubmitted: (_) => _submit(),
         ),
@@ -217,6 +220,7 @@ class _ParentSearchFormState extends State<ParentSearchForm> {
             label: l10n.lastName,
             controller: _lastNameController,
             required: true,
+            autofocus: expectsPhysicalKeyboard,
             textInputAction: TextInputAction.next,
             onSubmitted: (_) => _submit(),
           ),

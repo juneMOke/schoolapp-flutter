@@ -13,13 +13,19 @@ import 'package:flutter/widgets.dart';
 /// groupe, sans fuir vers la page d'en dessous.
 ///
 /// [onSubmit] nul (action principale désactivée) ⇒ le raccourci ne fait rien.
+///
+/// Hors modale (page, panneau en ligne), [autofocus] vaut `false` : le
+/// raccourci répond dès que le focus est dans un des champs, sans le voler à
+/// l'écran à l'ouverture.
 class EteeloSubmitShortcut extends StatelessWidget {
   final VoidCallback? onSubmit;
+  final bool autofocus;
   final Widget child;
 
   const EteeloSubmitShortcut({
     super.key,
     required this.onSubmit,
+    this.autofocus = true,
     required this.child,
   });
 
@@ -51,7 +57,7 @@ class EteeloSubmitShortcut extends StatelessWidget {
           for (final activator in activators) activator: onSubmit,
       },
       child: Focus(
-        autofocus: true,
+        autofocus: autofocus,
         skipTraversal: true,
         child: FocusTraversalGroup(child: child),
       ),

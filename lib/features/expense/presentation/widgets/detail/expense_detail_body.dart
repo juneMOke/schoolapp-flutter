@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -72,7 +73,7 @@ class ExpenseDetailBody extends StatelessWidget {
         expense.number ?? l10n.expenseDetailNumberPending,
       ),
     ];
-    return Column(
+    final facts = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ExpenseDetailBanner(expense: expense, type: type, reader: reader),
@@ -111,19 +112,51 @@ class ExpenseDetailBody extends StatelessWidget {
             value: rows[i].$2,
             last: i == rows.length - 1,
           ),
-        Container(
-          margin: const EdgeInsets.only(top: AppDimensions.spacingL),
-          padding: const EdgeInsets.only(top: AppDimensions.spacingM),
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: ExpenseThreadPanel(
-            messages: thread,
-            accountId: accountId,
-            onSend: onSend,
-          ),
-        ),
       ],
+    );
+    final threadPanel = ExpenseThreadPanel(
+      messages: thread,
+      accountId: accountId,
+      onSend: onSend,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Grand écran : le fil en colonne, à côté des faits. En pied, il
+        // obligeait à faire défiler toute la fiche pour lire la discussion —
+        // celle qui explique souvent la décision à prendre.
+        if (constraints.maxWidth >= AppBreakpoints.expenseDetailTwoColMin) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: facts),
+              const SizedBox(width: AppDimensions.spacingL),
+              Container(
+                width: AppDimensions.expenseDetailThreadColumnWidth,
+                padding: const EdgeInsets.only(left: AppDimensions.spacingL),
+                decoration: const BoxDecoration(
+                  border: Border(left: BorderSide(color: AppColors.border)),
+                ),
+                child: threadPanel,
+              ),
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            facts,
+            Container(
+              margin: const EdgeInsets.only(top: AppDimensions.spacingL),
+              padding: const EdgeInsets.only(top: AppDimensions.spacingM),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
+              child: threadPanel,
+            ),
+          ],
+        );
+      },
     );
   }
 }

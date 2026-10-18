@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -53,12 +55,14 @@ class _SearchFormState extends State<SearchForm> {
           )
         : null;
 
-    return SearchFormResponsiveView(
-      title: l10n.searchStudents,
-      subtitle: widget.subtitle,
-      icon: Icons.search_rounded,
-      fields: _buildFields(l10n, statusDropdown),
-      actions: _buildActionButtons(l10n),
+    return SearchFocusShortcut(
+      child: SearchFormResponsiveView(
+        title: l10n.searchStudents,
+        subtitle: widget.subtitle,
+        icon: Icons.search_rounded,
+        fields: _buildFields(l10n, statusDropdown),
+        actions: _buildActionButtons(l10n),
+      ),
     );
   }
 
@@ -69,18 +73,24 @@ class _SearchFormState extends State<SearchForm> {
         label: l10n.firstName,
         placeholder: l10n.firstNameExample,
         onChanged: (_) => _onFieldChanged(),
+        textInputAction: _nameAction(last: false),
+        onSubmitted: _nameSubmit(last: false),
       ),
       EteeloTextInput(
         controller: _lastNameController,
         label: l10n.lastName,
         placeholder: l10n.lastNameExample,
         onChanged: (_) => _onFieldChanged(),
+        textInputAction: _nameAction(last: false),
+        onSubmitted: _nameSubmit(last: false),
       ),
       EteeloTextInput(
         controller: _surnameController,
         label: l10n.surname,
         placeholder: l10n.surnameExample,
         onChanged: (_) => _onFieldChanged(),
+        textInputAction: _nameAction(last: true),
+        onSubmitted: _nameSubmit(last: true),
       ),
       EteeloDateInput(
         label: l10n.dateOfBirth,
@@ -147,6 +157,17 @@ class _SearchFormState extends State<SearchForm> {
       },
     );
   }
+
+  /// Même convention que `SearchNameFields` : sur la tablette, « suivant »
+  /// enchaîne les noms et le dernier lance la recherche ; au clavier physique,
+  /// Entrée la lance depuis n'importe lequel.
+  TextInputAction _nameAction({required bool last}) =>
+      last || expectsPhysicalKeyboard
+      ? TextInputAction.search
+      : TextInputAction.next;
+
+  ValueChanged<String>? _nameSubmit({required bool last}) =>
+      last || expectsPhysicalKeyboard ? (_) => _performSearch() : null;
 
   void _onFieldChanged() {
     setState(() {});

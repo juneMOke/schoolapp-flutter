@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -12,6 +13,7 @@ import 'package:school_app_flutter/features/boutique/presentation/pages/boutique
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_button.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_line_tile.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_view.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_catalog_body.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_search_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
@@ -168,48 +170,84 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
       builder: (context, state) {
         final bloc = context.read<BoutiqueBloc>();
 
-        return AppPageBackground(
-          // Le panier vit dans la barre, hors du défilement : une caisse dont
-          // le panier disparaît sous le catalogue fait recompter le guichet.
-          appBar: ModuleTopBar(
-            eyebrow: l10n.boutiqueEyebrow,
-            title: l10n.boutiqueTitle,
-            action: BoutiqueCartButton(
-              articleCount: state.cart.articleCount,
-              onPressed: () => _openCart(context),
+        final catalogue = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BoutiqueSearchBar(
+              controller: widget.searchController,
+              selectedFamily: state.familyFilter,
+              // Inerte pendant le chargement : filtrer un squelette apprend au
+              // guichet que la recherche ne marche pas.
+              enabled: state.status == BoutiqueStatus.ready,
+              onQueryChanged: (q) => bloc.add(BoutiqueQueryChanged(q)),
+              onFamilyChanged: (f) => bloc.add(BoutiqueFamilyFilterChanged(f)),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BoutiqueSearchBar(
-                controller: widget.searchController,
-                selectedFamily: state.familyFilter,
-                // Inerte pendant le chargement : filtrer un squelette apprend au
-                // guichet que la recherche ne marche pas.
-                enabled: state.status == BoutiqueStatus.ready,
-                onQueryChanged: (q) => bloc.add(BoutiqueQueryChanged(q)),
-                onFamilyChanged: (f) =>
-                    bloc.add(BoutiqueFamilyFilterChanged(f)),
+            const SizedBox(height: AppDimensions.spacingM),
+            BoutiqueCatalogBody(
+              state: state,
+              onAddArticle: (article) =>
+                  bloc.add(BoutiqueArticleAdded(article)),
+              onRemoveArticle: (article) =>
+                  bloc.add(BoutiqueArticleDecremented(article)),
+              onResetFilters: () {
+                widget.searchController.clear();
+                bloc.add(const BoutiqueFiltersReset());
+              },
+              onRetry: () =>
+                  bloc.add(BoutiqueCatalogRequested(widget.academicYearId)),
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            const _GridReminderBanner(),
+          ],
+        );
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Grand écran : le panier à côté du catalogue, chacun son
+            // défilement — le total reste sous les yeux pendant qu'on ajoute.
+            final sideCart =
+                constraints.maxWidth >= AppBreakpoints.boutiqueSideCartMin;
+            return AppPageBackground(
+              maxWidth: sideCart
+                  ? AppDimensions.listingContentMaxWidth
+                  : AppDimensions.detailContentMaxWidth,
+              scrollable: !sideCart,
+              // Le panier vit dans la barre, hors du défilement : une caisse
+              // dont le panier disparaît sous le catalogue fait recompter le
+              // guichet. En colonne, il est déjà là.
+              appBar: ModuleTopBar(
+                eyebrow: l10n.boutiqueEyebrow,
+                title: l10n.boutiqueTitle,
+                action: sideCart
+                    ? null
+                    : BoutiqueCartButton(
+                        articleCount: state.cart.articleCount,
+                        onPressed: () => _openCart(context),
+                      ),
               ),
-              const SizedBox(height: AppDimensions.spacingM),
-              BoutiqueCatalogBody(
-                state: state,
-                onAddArticle: (article) =>
-                    bloc.add(BoutiqueArticleAdded(article)),
-                onRemoveArticle: (article) =>
-                    bloc.add(BoutiqueArticleDecremented(article)),
-                onResetFilters: () {
-                  widget.searchController.clear();
-                  bloc.add(const BoutiqueFiltersReset());
-                },
-                onRetry: () =>
-                    bloc.add(BoutiqueCatalogRequested(widget.academicYearId)),
-              ),
-              const SizedBox(height: AppDimensions.spacingM),
-              const _GridReminderBanner(),
-            ],
-          ),
+              child: sideCart
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(child: catalogue),
+                        ),
+                        const SizedBox(width: AppDimensions.spacingL),
+                        SizedBox(
+                          width: AppDimensions.boutiqueCartColumnWidth,
+                          child: SingleChildScrollView(
+                            child: BoutiqueCartView(
+                              academicYearId: widget.academicYearId,
+                              levels: widget.levels,
+                              embedded: true,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : catalogue,
+            );
+          },
         );
       },
     );

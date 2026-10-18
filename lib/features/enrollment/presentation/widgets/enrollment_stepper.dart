@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_offline_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -177,34 +178,44 @@ class _EnrollmentStepperState extends State<EnrollmentStepper> {
               },
             );
 
-            return EnrollmentStepperLayout(
-              stepTitles: breadcrumbTitles,
-              currentStep: currentStep,
-              progress: progress,
-              onStepTap: (target) =>
-                  _onBreadcrumbStepTap(flowBloc, target, currentStep),
-              stepTitle: stepTitles[currentStep],
-              stepSubtitle: stepCardSubtitles[currentStep],
-              stepContent: stepContents[currentStep],
-              stepEyebrow:
-                  '${l10n.stepIndicator(currentStep + 1, stepTitles.length)} · ${breadcrumbTitles[currentStep]}',
-              stepAccentColor: _stepAccentColor(currentWizardStep),
-              stepIcon: _stepIcon(currentWizardStep),
-              // Dossier en consultation lecture seule → bandeau d'avis au-dessus
-              // de chaque étape. Exclut le cas Frais-verrouillé-en-création.
-              stepBanner: widget.detailPolicy.isReadOnlyConsultation
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ?widget.statusBanner,
-                        EnrollmentReadOnlyBanner(
-                          correctionOffered: widget.correctionOffered,
-                        ),
-                      ],
-                    )
-                  : null,
-              controls: controls,
+            // Ctrl+Entrée = « Suivant », depuis n'importe quel champ de
+            // l'étape. Jamais « Valider l'inscription » : ce bouton-là passe
+            // par les gardes de permission et de session, qu'un raccourci
+            // contournerait.
+            final continuesByKeyboard =
+                controls.canContinue && !(flowState.isLast && showSaveAction);
+            return EteeloSubmitShortcut(
+              autofocus: false,
+              onSubmit: continuesByKeyboard ? controls.onContinue : null,
+              child: EnrollmentStepperLayout(
+                stepTitles: breadcrumbTitles,
+                currentStep: currentStep,
+                progress: progress,
+                onStepTap: (target) =>
+                    _onBreadcrumbStepTap(flowBloc, target, currentStep),
+                stepTitle: stepTitles[currentStep],
+                stepSubtitle: stepCardSubtitles[currentStep],
+                stepContent: stepContents[currentStep],
+                stepEyebrow:
+                    '${l10n.stepIndicator(currentStep + 1, stepTitles.length)} · ${breadcrumbTitles[currentStep]}',
+                stepAccentColor: _stepAccentColor(currentWizardStep),
+                stepIcon: _stepIcon(currentWizardStep),
+                // Dossier en consultation lecture seule → bandeau d'avis au-dessus
+                // de chaque étape. Exclut le cas Frais-verrouillé-en-création.
+                stepBanner: widget.detailPolicy.isReadOnlyConsultation
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ?widget.statusBanner,
+                          EnrollmentReadOnlyBanner(
+                            correctionOffered: widget.correctionOffered,
+                          ),
+                        ],
+                      )
+                    : null,
+                controls: controls,
+              ),
             );
           },
         );

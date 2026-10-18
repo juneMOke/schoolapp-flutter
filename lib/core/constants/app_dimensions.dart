@@ -21,6 +21,29 @@ class AppDimensions {
   static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
 
+  /// Plafond des écrans de LISTE (tableaux à 6–8 colonnes) : sur un écran de
+  /// 1920, la largeur de lecture de 1180 y laissait ~460 dp vides pendant que
+  /// les colonnes se serraient. Une fiche ou un formulaire reste à 1180.
+  static const listingContentMaxWidth = 1440.0;
+
+  /// Colonne du panier à côté du catalogue, sur grand écran : la largeur d'un
+  /// téléphone confortable — celle pour laquelle le panneau est dessiné.
+  static const boutiqueCartColumnWidth = 420.0;
+
+  /// Colonne du montant et des gestes d'une fiche de vente, sur grand écran.
+  static const saleDetailSideColumnWidth = 380.0;
+
+  /// Liste de l'historique Boutique, la fiche de la vente à côté.
+  static const boutiqueHistoryListWidth = 440.0;
+
+  /// Bordure d'une tuile de liste, au repos et quand sa fiche est ouverte.
+  static const tileBorderWidth = 1.0;
+  static const selectedTileBorderWidth = 2.0;
+
+  /// Largeur de lecture d'une carte de dossier disciplinaire : deux colonnes
+  /// dès ~940 dp de contenu.
+  static const disciplinaryCaseCardMinWidth = 460.0;
+
   // Barre de défilement (bureau, navigateur) : fine au repos, élargie au
   // survol pour se saisir sans viser au pixel.
   static const scrollbarThickness = 6.0;
@@ -38,6 +61,24 @@ class AppDimensions {
   // Feuille devenue modale sur écran large (`showEteeloAdaptiveSheet`) : la
   // largeur d'une liste de reprise lisible.
   static const adaptiveSheetDialogMaxWidth = 560.0;
+  // Plancher Material d'une modale : `Dialog` le perd dès qu'on lui passe ses
+  // propres contraintes.
+  static const dialogMinWidth = 280.0;
+  // Confirmation et issue d'une écriture : un message à lire d'un seul regard.
+  // Sans plafond, `AlertDialog` (largeur intrinsèque) étale un long message
+  // sur une seule ligne de ~1000 dp sur desktop.
+  static const confirmationDialogMaxWidth = 480.0;
+  // Formulaire de paramétrage (tarif) : deux selects et un montant.
+  static const settingsFormDialogMaxWidth = 560.0;
+  // Largeurs de modales jusque-là écrites en littéral dans leur fichier.
+  static const disciplinaryCommentsDialogMaxWidth = 480.0;
+  static const disciplinaryCommentsDialogMaxHeight = 600.0;
+  static const disciplinaryViewDialogMaxWidth = 600.0;
+  static const evalCreationModalMaxWidth = 500.0;
+  static const coursReleveModalMaxWidth = 520.0;
+  static const enrollmentDuplicateDialogMaxWidth = 480.0;
+  static const boutiqueDialogMaxWidth = 420.0;
+  static const boutiqueBeneficiaryDialogMaxWidth = 520.0;
   // Part de la hauteur d'écran qu'une modale de détail peut occuper (les
   // `* 0.88` encore écrits en dur dans les modales de facturation y migreront).
   static const dialogMaxHeightRatio = 0.88;
@@ -516,6 +557,11 @@ class AppDimensions {
   /// Modales : formulaire 600, fiche 560.
   static const expenseFormDialogMaxWidth = 600.0;
   static const expenseDetailDialogMaxWidth = 560.0;
+
+  /// Sur grand écran, la fiche s'élargit pour porter le fil en colonne, à
+  /// côté des faits (cf. `AppBreakpoints.expenseDetailTwoColMin`).
+  static const expenseDetailDialogWideMaxWidth = 960.0;
+  static const expenseDetailThreadColumnWidth = 340.0;
   static const expenseDetailMedallionSize = 44.0;
   static const expenseDetailMedallionIconSize = 22.0;
   static const expenseDetailLabelWidth = 150.0;

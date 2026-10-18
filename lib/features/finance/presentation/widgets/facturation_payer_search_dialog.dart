@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/arrow_navigable_results.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
@@ -59,6 +60,16 @@ class _FacturationPayerSearchDialogState
   /// Derniers critères validés : « Réessayer » les rejoue tels quels, sans
   /// obliger à ressaisir.
   PayerSearchCriteria? _lastCriteria;
+
+  /// Relie le formulaire aux résultats : ↓ depuis un champ descend sur la
+  /// première ligne, puis ↑/↓ parcourent la liste.
+  final _results = FocusNode(debugLabel: 'searchResults');
+
+  @override
+  void dispose() {
+    _results.dispose();
+    super.dispose();
+  }
 
   void _search(PayerSearchCriteria criteria) {
     _lastCriteria = criteria;
@@ -126,27 +137,33 @@ class _FacturationPayerSearchDialogState
           ),
           bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
           footer: const [],
-          body: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Seul l'état de chargement compte ici : `buildWhen` évite de
-              // reconstruire le formulaire (et sa saisie en cours) à chaque
-              // arrivée de résultats.
-              BlocBuilder<PayerSearchBloc, PayerSearchState>(
-                buildWhen: (prev, curr) =>
-                    (prev is PayerSearchLoading) !=
-                    (curr is PayerSearchLoading),
-                builder: (context, state) => FacturationPayerSearchForm(
-                  onSearch: _search,
-                  isSearching: state is PayerSearchLoading,
+          body: SearchToResultsShortcut(
+            anchor: _results,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Seul l'état de chargement compte ici : `buildWhen` évite de
+                // reconstruire le formulaire (et sa saisie en cours) à chaque
+                // arrivée de résultats.
+                BlocBuilder<PayerSearchBloc, PayerSearchState>(
+                  buildWhen: (prev, curr) =>
+                      (prev is PayerSearchLoading) !=
+                      (curr is PayerSearchLoading),
+                  builder: (context, state) => FacturationPayerSearchForm(
+                    onSearch: _search,
+                    isSearching: state is PayerSearchLoading,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppDimensions.spacingL),
-              const Divider(height: 1, color: AppColors.border),
-              const SizedBox(height: AppDimensions.spacingL),
-              _buildResults(l10n),
-            ],
+                const SizedBox(height: AppDimensions.spacingL),
+                const Divider(height: 1, color: AppColors.border),
+                const SizedBox(height: AppDimensions.spacingL),
+                ArrowNavigableResults(
+                  anchor: _results,
+                  child: _buildResults(l10n),
+                ),
+              ],
+            ),
           ),
         ),
       ),

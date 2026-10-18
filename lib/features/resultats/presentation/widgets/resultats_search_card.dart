@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -123,27 +124,31 @@ class _ResultatsSearchCardState extends State<ResultatsSearchCard> {
         children: [
           _header(l10n),
           const SizedBox(height: AppSpacing.lg),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = constraints.maxWidth;
-              return Column(
-                children: [
-                  if (_mode == ResultatsSearchMode.eleve) ...[
-                    _autoFitRow(_nameFields(l10n), maxWidth),
-                    const SizedBox(height: _gap),
-                  ],
-                  _autoFitRow(
-                    _cascadeFields(
-                      l10n,
-                      classroomOptions: classroomOptions,
-                      levelOptions: levelOptions,
-                      classroomEnabled: classroomEnabled,
+          // Ctrl+F ou « / » : premier critère du mode actif (le nom en mode
+          // élève, le cycle en mode classe).
+          SearchFocusShortcut(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxWidth = constraints.maxWidth;
+                return Column(
+                  children: [
+                    if (_mode == ResultatsSearchMode.eleve) ...[
+                      _autoFitRow(_nameFields(l10n), maxWidth),
+                      const SizedBox(height: _gap),
+                    ],
+                    _autoFitRow(
+                      _cascadeFields(
+                        l10n,
+                        classroomOptions: classroomOptions,
+                        levelOptions: levelOptions,
+                        classroomEnabled: classroomEnabled,
+                      ),
+                      maxWidth,
                     ),
-                    maxWidth,
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Align(
@@ -230,7 +235,8 @@ class _ResultatsSearchCardState extends State<ResultatsSearchCard> {
       controller: _prenomController,
       label: l10n.resultatsFieldFirstName,
       onChanged: (_) => setState(() {}),
-      textInputAction: TextInputAction.done,
+      textInputAction: TextInputAction.search,
+      onSubmitted: (_) => _submitIfReady(),
     ),
   ];
 
@@ -284,6 +290,19 @@ class _ResultatsSearchCardState extends State<ResultatsSearchCard> {
       ],
     ),
   ];
+
+  /// Entrée sur le dernier nom : même garde que le bouton.
+  void _submitIfReady() {
+    final cycle = ClassesListSearchFormLogic.findCycle(
+      widget.cycleOptions,
+      _selectedCycleId,
+    );
+    final level = ClassesListSearchFormLogic.findLevel(
+      cycle?.levels ?? const <ClassesListLevelOption>[],
+      _selectedLevelKey,
+    );
+    if (_canSubmit(cycle, level)) _submit(cycle!, level!);
+  }
 
   void _onModeChanged(ResultatsSearchMode mode) {
     if (mode == _mode) {

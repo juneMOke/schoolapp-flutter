@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -300,5 +301,42 @@ void main() {
     // sait pas remplacer — mais il n'est plus couvert par personne.
     expect(collectEnabled(tester), isFalse);
     expect(find.textContaining('9 chiffres'), findsOneWidget);
+  });
+
+  group('Ctrl+Entrée', () {
+    Future<void> ctrlEnter(WidgetTester tester) async {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('depuis un champ, ouvre la même confirmation que le bouton', (
+      tester,
+    ) async {
+      await ouvrir(tester);
+      await remplirIdentite(tester);
+      await cocherLePremierFrais(tester);
+      await tester.tap(champParLibelle('Nom'));
+      await tester.pump();
+
+      await ctrlEnter(tester);
+
+      expect(find.byType(Dialog), findsOneWidget);
+    });
+
+    testWidgets('CTA éteint : Ctrl+Entrée ne fait rien', (tester) async {
+      await ouvrir(tester);
+      await remplirIdentite(tester);
+      await cocherLePremierFrais(tester);
+      await saisirTelephone(tester, '81');
+      await tester.tap(champParLibelle('Nom'));
+      await tester.pump();
+      expect(collectEnabled(tester), isFalse);
+
+      await ctrlEnter(tester);
+
+      expect(find.byType(Dialog), findsNothing);
+    });
   });
 }
