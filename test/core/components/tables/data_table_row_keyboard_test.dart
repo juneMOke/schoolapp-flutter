@@ -70,7 +70,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(EteeloActivatable)),
-      containsSemantics(
+      isSemantics(
         isButton: true,
         isEnabled: true,
         isFocusable: true,

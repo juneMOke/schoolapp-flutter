@@ -30,7 +30,7 @@ void main() {
                 },
                 child: Column(
                   children: [
-                    TextField(key: const Key('other')),
+                    const TextField(key: Key('other')),
                     TickerMode(
                       enabled: visible,
                       child: SearchFocusShortcut(
