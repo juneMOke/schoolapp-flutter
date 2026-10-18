@@ -50,6 +50,7 @@ import 'package:school_app_flutter/features/configuration/presentation/pages/con
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 // Debug import — uniquement accédé via kDebugMode
@@ -392,6 +393,8 @@ class AppRouter {
         ),
         GoRoute(
           path: '${EnrollmentConstants.enrollmentDetailRoute}/:enrollmentId',
+          // Précédent du navigateur : même question que le retour système.
+          onExit: RouteExitGuard.onExit,
           builder: (context, state) {
             final enrollmentId = state.pathParameters['enrollmentId']!;
             final intent = EnrollmentDetailIntent.fromRouteContext(
@@ -450,6 +453,9 @@ class AppRouter {
                 // ici — les redirects de la pile matchée sont tous joués.
                 GoRoute(
                   path: 'encaissement',
+                  // Précédent du navigateur pendant un encaissement : retenu
+                  // (cf. `RouteExitGuard`).
+                  onExit: RouteExitGuard.onExit,
                   builder: (context, state) {
                     final studentId = state.pathParameters['studentId'] ?? '';
                     final academicYearId =

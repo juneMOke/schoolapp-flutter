@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/enrollment_offline_enums.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:go_router/go_router.dart';
@@ -748,23 +749,27 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
     }
     if (_exitDialogOpen) return;
     _exitDialogOpen = true;
-    final l10n = AppLocalizations.of(context)!;
     try {
-      final confirmed = await showAppConfirmationDialog(
-        context: context,
-        title: l10n.wizardExitConfirmTitle,
-        message: l10n.wizardExitConfirmMessage,
-        confirmLabel: l10n.wizardExitConfirmAction,
-        cancelLabel: l10n.wizardExitStayAction,
-        isDestructive: true,
-        headerIcon: Icons.logout_rounded,
-        confirmIcon: Icons.logout_rounded,
-      );
+      final confirmed = await _confirmWizardExit();
       if (!mounted || !confirmed) return;
       _leaveJourney();
     } finally {
       _exitDialogOpen = false;
     }
+  }
+
+  Future<bool> _confirmWizardExit() {
+    final l10n = AppLocalizations.of(context)!;
+    return showAppConfirmationDialog(
+      context: context,
+      title: l10n.wizardExitConfirmTitle,
+      message: l10n.wizardExitConfirmMessage,
+      confirmLabel: l10n.wizardExitConfirmAction,
+      cancelLabel: l10n.wizardExitStayAction,
+      isDestructive: true,
+      headerIcon: Icons.logout_rounded,
+      confirmIcon: Icons.logout_rounded,
+    );
   }
 
   void _leaveJourney() {
@@ -778,14 +783,21 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   /// (geste/bouton Android) passe par la même confirmation que les boutons de
   /// l'app bar. `context.pop()` de GoRouter (déclenché après confirmation)
   /// n'emprunte pas `maybePop` → il n'est pas re-intercepté.
+  ///
+  /// [RouteExitGuard] porte la même question pour ce que `PopScope` ne voit
+  /// pas : Précédent du navigateur, lien, fermeture de l'onglet.
   Widget _wrapWithExitGuard(Widget child) {
-    return PopScope(
-      canPop: !_needsExitConfirmation,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        _onExitRequested();
-      },
-      child: child,
+    return RouteExitGuard(
+      hasUnsavedWork: () => _needsExitConfirmation,
+      confirmExit: _confirmWizardExit,
+      child: PopScope(
+        canPop: !_needsExitConfirmation,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _onExitRequested();
+        },
+        child: child,
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 class EnrollmentNavigationHelper {
@@ -23,6 +24,9 @@ class EnrollmentNavigationHelper {
   ///  - `go` depuis le bouton de création (pile déclarative remplacée) : rien à
   ///    dépiler, l'accueil est reconstruit à neuf par la redirection.
   static void leaveWizardToListing(BuildContext context) {
+    // Sortie décidée par le parcours (succès, sortie déjà confirmée) : la
+    // garde de la page n'a pas à reposer la question.
+    RouteExitGuard.release(context);
     if (context.canPop()) {
       context.pop();
       return;
