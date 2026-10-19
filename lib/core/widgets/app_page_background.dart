@@ -115,8 +115,20 @@ class AppPageBackground extends StatelessWidget {
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
-      bottomNavigationBar: bottomNavigationBar,
+      bottomNavigationBar: _aboveKeyboard(context, bottomNavigationBar),
       body: body,
+    );
+  }
+
+  /// Une barre basse (total à encaisser, « Enregistrer ») reste au-dessus du
+  /// clavier : le `Scaffold` la pose au bas de l'écran, où le clavier la
+  /// couvre — l'agent tapait un montant sans voir le total. Le corps se
+  /// rétrécit d'autant, rien n'est recouvert.
+  static Widget? _aboveKeyboard(BuildContext context, Widget? bar) {
+    if (bar == null) return null;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: bar,
     );
   }
 

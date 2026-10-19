@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/keyboard/shortcuts_help.dart';
+import 'package:school_app_flutter/core/layout/shell_chrome.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_back_handler.dart';
@@ -50,9 +51,11 @@ class _ShellLayoutState extends State<ShellLayout> {
                 isCompact: mode.isDrawer,
                 child: KeyedSubtree(
                   key: _screenKey,
-                  child: ShellScreen(
-                    subMenuId: state.selectedSubMenuId,
-                    title: state.currentTitle,
+                  child: ShellChrome(
+                    child: ShellScreen(
+                      subMenuId: state.selectedSubMenuId,
+                      title: state.currentTitle,
+                    ),
                   ),
                 ),
               );

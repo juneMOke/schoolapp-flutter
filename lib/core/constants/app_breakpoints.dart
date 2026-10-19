@@ -166,6 +166,11 @@ class AppBreakpoints {
   // Tableau de bord des présences (Disciplines) — la paire 1fr/1fr
   // (Jour/Top classes) passe en colonne sous ce seuil.
   static const double attendanceOverviewTwoColMin = 880.0;
+
+  /// Saisie de notes, mode Focus, en paysage : le pavé passe à côté de la
+  /// note au lieu d'en dessous — sans quoi une tablette de 600 dp de haut
+  /// défilait à chaque élève.
+  static const double saisieFocusSideBySideMin = 720.0;
   // Paire large Évolution(2fr)/Motifs(1fr) : reste côte à côte plus haut, pour
   // que le donut Motifs (1fr) ait assez de place avant de s'empiler.
   static const double attendanceOverviewWideTwoColMin = 920.0;

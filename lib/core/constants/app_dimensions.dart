@@ -662,6 +662,11 @@ class AppDimensions {
   /// Largeur plancher d'une carte de la grille : autant de colonnes que
   /// possible, pour des cartes d'environ 220 à 262 dp, entièrement tactiles.
   static const presenceMarkCardMinWidth = 220.0;
+
+  // Saisie de notes, mode Focus : la carte d'un élève, puis côte à côte en
+  // paysage (note et navigation | pavé).
+  static const saisieFocusCardMaxWidth = 560.0;
+  static const saisieFocusSideBySideMaxWidth = 880.0;
   static const presenceMarkAvatarSize = 44.0;
   static const presenceMarkMedallionSize = 46.0;
   static const presenceMarkMedallionIconSize = 24.0;

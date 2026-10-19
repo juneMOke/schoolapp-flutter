@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/shell_chrome.dart';
+import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
+import 'package:school_app_flutter/core/components/buttons/eteelo_fab_location.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_cart_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_grid_reminder_banner.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_button.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_line_tile.dart';
@@ -198,7 +201,7 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
                   bloc.add(BoutiqueCatalogRequested(widget.academicYearId)),
             ),
             const SizedBox(height: AppDimensions.spacingM),
-            const _GridReminderBanner(),
+            const BoutiqueGridReminderBanner(),
           ],
         );
 
@@ -208,6 +211,10 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
             // défilement — le total reste sous les yeux pendant qu'on ajoute.
             final sideCart =
                 constraints.maxWidth >= AppBreakpoints.boutiqueSideCartMin;
+            // Dans la coquille, sa barre d'en-tête nomme déjà l'écran : pas
+            // de seconde barre, et le panier passe en bouton flottant — il
+            // reste hors du défilement, compte compris.
+            final inShell = ShellChrome.wraps(context);
             return AppPageBackground(
               width: sideCart
                   ? PageContentWidth.wide
@@ -216,16 +223,33 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
               // Le panier vit dans la barre, hors du défilement : une caisse
               // dont le panier disparaît sous le catalogue fait recompter le
               // guichet. En colonne, il est déjà là.
-              appBar: ModuleTopBar(
-                eyebrow: l10n.boutiqueEyebrow,
-                title: l10n.boutiqueTitle,
-                action: sideCart
-                    ? null
-                    : BoutiqueCartButton(
-                        articleCount: state.cart.articleCount,
-                        onPressed: () => _openCart(context),
-                      ),
-              ),
+              appBar: inShell
+                  ? null
+                  : ModuleTopBar(
+                      eyebrow: l10n.boutiqueEyebrow,
+                      title: l10n.boutiqueTitle,
+                      action: sideCart
+                          ? null
+                          : BoutiqueCartButton(
+                              articleCount: state.cart.articleCount,
+                              onPressed: () => _openCart(context),
+                            ),
+                    ),
+              floatingActionButton: inShell && !sideCart
+                  ? EteeloFab(
+                      label: l10n.boutiqueOpenCart,
+                      tooltip: state.cart.articleCount == 0
+                          ? null
+                          : l10n.boutiqueOpenCartWithCount(
+                              state.cart.articleCount,
+                            ),
+                      icon: Icons.shopping_bag_outlined,
+                      badgeCount: state.cart.articleCount,
+                      onPressed: () => _openCart(context),
+                    )
+                  : null,
+              floatingActionButtonLocation:
+                  const EndFloatEdgeOffsetFabLocation(),
               child: sideCart
                   ? Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -251,46 +275,6 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
           },
         );
       },
-    );
-  }
-}
-
-/// Le rappel des deux invariants, sous le catalogue.
-///
-/// **Il n'est pas décoratif** : c'est la formulation utilisateur de I-1 et I-2.
-/// Le guichet doit savoir que le prix n'est pas négociable *avant* qu'une
-/// famille le lui demande.
-class _GridReminderBanner extends StatelessWidget {
-  const _GridReminderBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.vertSavane.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.vertSavane.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.shield_outlined,
-            size: 18,
-            color: AppColors.vertSavane,
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          Expanded(
-            child: Text(
-              l10n.boutiqueGridReminder,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

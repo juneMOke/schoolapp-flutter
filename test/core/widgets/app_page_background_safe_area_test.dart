@@ -55,4 +55,27 @@ void main() {
 
     expect(rect.top, statusBar + kToolbarHeight + AppDimensions.spacingL);
   });
+
+  testWidgets('la barre basse reste au-dessus du clavier', (tester) async {
+    tester.view.physicalSize = screen;
+    tester.view.devicePixelRatio = 1;
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: AppPageBackground(
+          scrollable: false,
+          bottomNavigationBar: SizedBox(key: Key('bar'), height: 64),
+          child: SizedBox.expand(key: Key('c')),
+        ),
+      ),
+    );
+
+    final bar = tester.getRect(find.byKey(const Key('bar')));
+    expect(bar.bottom, screen.height - 300);
+    expect(
+      tester.getRect(find.byKey(const Key('c'))).bottom,
+      lessThanOrEqualTo(bar.top),
+    );
+  });
 }
