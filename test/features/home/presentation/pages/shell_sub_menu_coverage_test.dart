@@ -23,7 +23,7 @@ import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 void main() {
   test('chaque sous-menu offert par la barre a son écran dans la coquille', () {
     final source = File(
-      'lib/features/home/presentation/pages/home_page.dart',
+      'lib/features/home/presentation/widget/shell/shell_screen.dart',
     ).readAsStringSync();
 
     final rendered = RegExp(

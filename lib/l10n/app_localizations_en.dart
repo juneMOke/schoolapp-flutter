@@ -2808,6 +2808,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pageUnderConstruction => 'This page is under development';
 
   @override
+  String get shellBackAgainToExit => 'Press Back again to exit';
+
+  @override
   String get preRegistrations => 'Pre-Registrations';
 
   @override

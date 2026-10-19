@@ -54,8 +54,17 @@ abstract final class AppSnackBar {
   }
 
   /// Affiche un [SnackBar] d'information.
-  static void showInfo(BuildContext context, String message) {
-    _show(context, message: message, variant: _AppSnackBarVariant.info);
+  static void showInfo(
+    BuildContext context,
+    String message, {
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    _show(
+      context,
+      message: message,
+      variant: _AppSnackBarVariant.info,
+      duration: duration,
+    );
   }
 
   /// Affiche un [SnackBar] listant les erreurs de validation.

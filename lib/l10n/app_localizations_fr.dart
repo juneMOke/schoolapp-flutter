@@ -2822,6 +2822,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette page est en cours de développement';
 
   @override
+  String get shellBackAgainToExit =>
+      'Appuyez de nouveau sur Retour pour quitter';
+
+  @override
   String get preRegistrations => 'Pré-Inscriptions';
 
   @override
