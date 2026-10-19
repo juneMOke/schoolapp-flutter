@@ -153,6 +153,9 @@ class EnrollmentEntriesSection extends StatelessWidget {
         emptyLabel: l10n.enrollmentDashboardEntriesEmpty,
         semanticsLabel: l10n.enrollmentDashboardEntriesTitle,
         density: DataTableDensity.compact,
+        // Téléphone : une carte par entrée, titrée par l'élève.
+        phoneLayout: DataTablePhoneLayout.cards,
+        cardTitleColumn: 1,
         columns: [
           // Une date tient plus large qu'une heure.
           singleDay

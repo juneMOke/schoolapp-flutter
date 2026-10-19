@@ -11,10 +11,15 @@ class EteeloMinWidthScroll extends StatelessWidget {
   final double minWidth;
   final Widget child;
 
+  /// Le défilement horizontal, pour qui doit en suivre la position (colonne
+  /// figée d'`EteeloColumnTable`).
+  final ScrollController? controller;
+
   const EteeloMinWidthScroll({
     super.key,
     required this.minWidth,
     required this.child,
+    this.controller,
   });
 
   @override
@@ -25,6 +30,7 @@ class EteeloMinWidthScroll extends StatelessWidget {
       // Déjà dans un défilement horizontal : la largeur suffit.
       if (!constraints.hasBoundedWidth) return sized;
       return SingleChildScrollView(
+        controller: controller,
         scrollDirection: Axis.horizontal,
         child: sized,
       );

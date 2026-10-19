@@ -165,22 +165,12 @@ class FinanceTillReceiptsSection extends StatelessWidget {
         // ne porte qu'un `flex`. Les rapports sont donc tenus, les planchers
         // non — à l'étroit, la colonne Élève rétrécira sous ses 150 dp.
         //
-        // ## Écart assumé : la table COMPRIME, elle ne DÉFILE pas
-        //
-        // La spec veut, sur écran étroit, un « scroll horizontal » avec la
-        // pagination conservée. La table du socle répartit ses colonnes en
-        // `Expanded` : elle ne déborde jamais, elle serre. L'écran reste donc
-        // correct sur l'appareil visé — une tablette autour de 1280 dp — mais
-        // sur un téléphone les colonnes se tassent au lieu de défiler, et c'est
-        // la ligne secondaire du croisement qui en souffre la première (d'où
-        // son infobulle, qui la rend lisible malgré la coupe).
-        //
-        // **Ajourné, pas oublié.** Le défilement demande un minimum par colonne
-        // dans `DataTableColumnDef` et un défilement horizontal dans la vue :
-        // un chantier de socle sur un composant partagé par beaucoup d'écrans,
-        // qui attend de savoir si quelqu'un ouvre vraiment cet écran sur un
-        // téléphone. À ne pas bricoler ici — une table qui défilerait sur ce
-        // seul écran divergerait de toutes les autres.
+        // Sur un téléphone, la table passe en cartes titrées par l'élève :
+        // comprimées, ses cinq colonnes coupaient le montant (~40 dp à
+        // 360). Le défilement horizontal de la spec reste écarté — une seule
+        // table qui défilerait divergerait de toutes les autres.
+        phoneLayout: DataTablePhoneLayout.cards,
+        cardTitleColumn: 2,
         columns: [
           DataTableColumnDef(
             label: l10n.financeTillReceiptsColumnDate,

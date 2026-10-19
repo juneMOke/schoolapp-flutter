@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_cell_content.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
@@ -167,53 +167,10 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
           ? widget.row.cells[index]
           : const DataTableCellSpec(text: '');
 
-      final hasSecondary =
-          cell.secondaryText != null && cell.secondaryText!.isNotEmpty;
-
       widgets.add(
         Expanded(
           flex: column.flex,
-          child: cell.child != null
-              ? Align(
-                  alignment: Alignment.centerLeft,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: cell.child,
-                  ),
-                )
-              : hasSecondary
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    EteeloOverflowText(
-                      cell.text.isNotEmpty ? cell.text : '—',
-                      textAlign: cell.textAlign,
-                      style: _resolveCellStyle(cell.variant, cell.color),
-                    ),
-                    const SizedBox(height: 2),
-                    _maybeExplained(
-                      cell.secondaryTooltip,
-                      Text(
-                        cell.secondaryText!,
-                        textAlign: cell.textAlign,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _resolveCellStyle(
-                          cell.secondaryVariant,
-                          cell.secondaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              : EteeloOverflowText(
-                  cell.text.isNotEmpty ? cell.text : '—',
-                  textAlign: cell.textAlign,
-                  style: _resolveCellStyle(cell.variant, cell.color),
-                ),
+          child: DataTableCellContent(cell: cell),
         ),
       );
 
@@ -224,26 +181,4 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
 
     return widgets;
   }
-
-  TextStyle _resolveCellStyle(
-    DataTableCellTextVariant variant, [
-    Color? color,
-  ]) {
-    final style = switch (variant) {
-      DataTableCellTextVariant.strong => EteeloDataTableTheme.cellStrongStyle,
-      DataTableCellTextVariant.mono => EteeloDataTableTheme.cellMonoStyle,
-      DataTableCellTextVariant.regular => EteeloDataTableTheme.cellRegularStyle,
-    };
-    return color == null ? style : style.copyWith(color: color);
-  }
-
-  /// Enrobe la ligne secondaire d'une explication, quand il y en a une.
-  ///
-  /// [Tooltip] porte aussi l'étiquette d'accessibilité : l'explication est
-  /// **lue**, pas seulement survolée — une mention qui ne s'obtient qu'à la
-  /// souris n'existe pas sur une tablette.
-  static Widget _maybeExplained(String? tooltip, Widget child) =>
-      tooltip == null || tooltip.isEmpty
-      ? child
-      : Tooltip(message: tooltip, child: child);
 }
