@@ -9550,6 +9550,14 @@
   "journalRejectedNotice": "The server refused this entry ({code}). Correct it, then save again.",
   "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}},
   "subMenuClassJournal": "Class journal",
+  "journalTeachersTitle": "Teachers",
+  "@journalTeachersTitle": {
+    "description": "Titre de la colonne des professeurs du journal côté direction, sur grand écran."
+  },
+  "journalTeacherFilter": "Filter teachers",
+  "@journalTeacherFilter": {
+    "description": "Filtre de la colonne des professeurs du journal côté direction."
+  },
   "journalTeacherLabel": "Teacher",
   "journalTeacherPlaceholder": "Choose a teacher",
   "journalPickTeacherTitle": "Choose a teacher",

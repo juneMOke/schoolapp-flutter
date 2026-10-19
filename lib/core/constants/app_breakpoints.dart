@@ -102,6 +102,9 @@ class AppBreakpoints {
   // Communiqués : au-delà, la liste et le communiqué ouvert côte à côte — le
   // détail garde son aperçu collant à droite.
   static const double announcementsSplitMin = 1500.0;
+  // Journal, direction : au-delà, les professeurs en colonne à gauche (300)
+  // et la feuille du jour à droite, assez large pour rester une feuille.
+  static const double journalDirectionSplitMin = 1260.0;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.

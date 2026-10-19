@@ -16006,6 +16006,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuClassJournal => 'Class journal';
 
   @override
+  String get journalTeachersTitle => 'Teachers';
+
+  @override
+  String get journalTeacherFilter => 'Filter teachers';
+
+  @override
   String get journalTeacherLabel => 'Teacher';
 
   @override

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/class_journal/presentation/widgets/direction/journal_teacher_list.dart';
+import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -23,43 +27,52 @@ class JournalDirectionPage extends StatelessWidget {
   const JournalDirectionPage({super.key});
 
   @override
-  Widget build(BuildContext context) => AppPageBackground(
-    scrollable: true,
-    width: PageContentWidth.wide,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const JournalPageTitle(),
-        BlocBuilder<JournalTeachersCubit, JournalTeachersState>(
-          buildWhen: (prev, curr) =>
-              prev.failure != curr.failure ||
-              prev.selectedId != curr.selectedId ||
-              prev.loading != curr.loading ||
-              prev.teachers.isEmpty != curr.teachers.isEmpty,
-          builder: (context, state) => _body(context, state),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      // Grand écran : les professeurs en colonne, chacune son défilement.
+      final split =
+          constraints.maxWidth >= AppBreakpoints.journalDirectionSplitMin;
+      final body = BlocBuilder<JournalTeachersCubit, JournalTeachersState>(
+        buildWhen: (prev, curr) =>
+            prev.failure != curr.failure ||
+            prev.selectedId != curr.selectedId ||
+            prev.loading != curr.loading ||
+            prev.teachers.isEmpty != curr.teachers.isEmpty,
+        builder: (context, state) => _body(context, state, split: split),
+      );
+      return AppPageBackground(
+        scrollable: !split,
+        width: PageContentWidth.wide,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const JournalPageTitle(),
+            if (split) Expanded(child: body) else body,
+          ],
         ),
-      ],
-    ),
+      );
+    },
   );
 
-  Widget _body(BuildContext context, JournalTeachersState state) {
+  Widget _body(
+    BuildContext context,
+    JournalTeachersState state, {
+    required bool split,
+  }) {
     final cubit = context.read<JournalTeachersCubit>();
     final failure = state.failure;
+    // Colonnes : la page ne défile plus, ces états-là défilent seuls.
+    Widget scroll(Widget child) =>
+        split ? SingleChildScrollView(child: child) : child;
     if (failure != null) {
-      return JournalFailureView(failure: failure, onRetry: cubit.load);
+      return scroll(JournalFailureView(failure: failure, onRetry: cubit.load));
     }
-    if (state.loading) return const JournalSkeleton();
-    if (state.teachers.isEmpty) return const _NoTeacher();
+    if (state.loading) return scroll(const JournalSkeleton());
+    if (state.teachers.isEmpty) return scroll(const _NoTeacher());
     final teacherId = state.selectedId;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const JournalTeacherPicker(),
-        const SizedBox(height: AppSpacing.lg),
-        if (teacherId == null)
-          const _PickTeacher()
-        else
-          BlocProvider<JournalDayCubit>(
+    final journal = teacherId == null
+        ? const _PickTeacher()
+        : BlocProvider<JournalDayCubit>(
             key: ValueKey(teacherId),
             create: (_) => GetIt.instance<JournalTeacherDayCubit>(
               param1: teacherId,
@@ -70,7 +83,20 @@ class JournalDirectionPage extends StatelessWidget {
               listener: (context, day) => cubit.lastDate = day.date,
               child: const _TeacherJournal(),
             ),
-          ),
+          );
+    if (split) {
+      return MasterDetailLayout(
+        masterWidth: AppDimensions.journalTeacherListWidth,
+        master: const JournalTeacherList(),
+        detail: SingleChildScrollView(child: journal),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const JournalTeacherPicker(),
+        const SizedBox(height: AppSpacing.lg),
+        journal,
       ],
     );
   }

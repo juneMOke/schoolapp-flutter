@@ -43,6 +43,9 @@ class AppDimensions {
   /// Les Communiqués, plus larges : chaque ligne porte un extrait du message.
   static const announcementsListWidth = 480.0;
 
+  /// La colonne des professeurs du journal côté direction.
+  static const journalTeacherListWidth = 300.0;
+
   /// Bordure d'une tuile de liste, au repos et quand sa fiche est ouverte.
   static const tileBorderWidth = 1.0;
   static const selectedTileBorderWidth = 2.0;

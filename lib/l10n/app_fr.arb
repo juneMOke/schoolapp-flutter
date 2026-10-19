@@ -9862,6 +9862,14 @@
   "journalRejectedNotice": "Le serveur a refusé cette saisie ({code}). Corrigez-la, puis enregistrez à nouveau.",
   "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}},
   "subMenuClassJournal": "Journal de classe",
+  "journalTeachersTitle": "Professeurs",
+  "@journalTeachersTitle": {
+    "description": "Titre de la colonne des professeurs du journal côté direction, sur grand écran."
+  },
+  "journalTeacherFilter": "Filtrer les professeurs",
+  "@journalTeacherFilter": {
+    "description": "Filtre de la colonne des professeurs du journal côté direction."
+  },
   "journalTeacherLabel": "Professeur",
   "journalTeacherPlaceholder": "Choisir un professeur",
   "journalPickTeacherTitle": "Choisissez un professeur",

@@ -24989,6 +24989,18 @@ abstract class AppLocalizations {
   /// **'Class journal'**
   String get subMenuClassJournal;
 
+  /// Titre de la colonne des professeurs du journal côté direction, sur grand écran.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers'**
+  String get journalTeachersTitle;
+
+  /// Filtre de la colonne des professeurs du journal côté direction.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter teachers'**
+  String get journalTeacherFilter;
+
   /// No description provided for @journalTeacherLabel.
   ///
   /// In en, this message translates to:
