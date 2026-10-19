@@ -124,10 +124,19 @@ class AppPageBackground extends StatelessWidget {
   /// clavier : le `Scaffold` la pose au bas de l'écran, où le clavier la
   /// couvre — l'agent tapait un montant sans voir le total. Le corps se
   /// rétrécit d'autant, rien n'est recouvert.
+  ///
+  /// Sauf quand le clavier ne laisse presque rien (téléphone en paysage) :
+  /// la saisie passe alors avant le total.
   static Widget? _aboveKeyboard(BuildContext context, Widget? bar) {
     if (bar == null) return null;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final visible = MediaQuery.sizeOf(context).height - keyboard;
+    final lift = visible >= AppBreakpoints.bottomBarAboveKeyboardMinVisible
+        ? keyboard
+        : 0.0;
+    // Toujours le même `Padding` : ouvrir le clavier ne remonte pas la barre.
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      padding: EdgeInsets.only(bottom: lift),
       child: bar,
     );
   }

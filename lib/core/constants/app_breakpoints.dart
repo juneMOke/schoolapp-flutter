@@ -30,6 +30,12 @@ class AppBreakpoints {
   /// ~230 dp de champ sur un téléphone.
   static const double formDialogFullscreenMax = detailCompactMax;
 
+  /// Hauteur restée visible au-dessus du clavier sous laquelle une barre
+  /// basse (`AppPageBackground`) ne le suit plus : sur un téléphone en
+  /// paysage, barre d'en-tête et barre basse ne laisseraient rien à la
+  /// saisie.
+  static const double bottomBarAboveKeyboardMinVisible = 320.0;
+
   /// Fenêtre sous laquelle la barre latérale s'ouvre repliée (rail), tant que
   /// l'utilisateur n'a rien choisi : à 1 280, ses 280 dp laissaient au
   /// contenu moins de 1 000 dp.
