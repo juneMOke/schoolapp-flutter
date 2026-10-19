@@ -2818,6 +2818,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeSidebarNavigationLabel => 'Navigation principale';
 
   @override
+  String get searchCollapsedEdit => 'Modifier la recherche';
+
+  @override
+  String get searchCollapsedLabel => 'Recherche';
+
+  @override
   String get pageUnderConstruction =>
       'Cette page est en cours de développement';
 

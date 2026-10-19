@@ -2367,6 +2367,8 @@
   "homeOpenNavigationDrawerTooltip": "Open menu",
   "homeSidebarFooterLabel": "School dashboard",
   "homeSidebarNavigationLabel": "Main navigation",
+  "searchCollapsedEdit": "Edit search",
+  "searchCollapsedLabel": "Search",
   "pageUnderConstruction": "This page is under development",
   "shellBackAgainToExit": "Press Back again to exit",
   "preRegistrations": "Pre-Registrations",

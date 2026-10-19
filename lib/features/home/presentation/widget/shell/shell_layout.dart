@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/home/presentation/widget/shell/shell
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_content_frame.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_drawer.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_navigation_mode.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_pull_to_sync.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_screen.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_toggle_shortcut.dart';
@@ -46,15 +47,17 @@ class _ShellLayoutState extends State<ShellLayout> {
                 previous.selectedMenuId != current.selectedMenuId ||
                 previous.selectedSubMenuId != current.selectedSubMenuId,
             builder: (context, state) {
-              final content = ShellContentFrame(
-                state: state,
-                isCompact: mode.isDrawer,
-                child: KeyedSubtree(
-                  key: _screenKey,
-                  child: ShellChrome(
-                    child: ShellScreen(
-                      subMenuId: state.selectedSubMenuId,
-                      title: state.currentTitle,
+              final content = ShellPullToSync(
+                child: ShellContentFrame(
+                  state: state,
+                  isCompact: mode.isDrawer,
+                  child: KeyedSubtree(
+                    key: _screenKey,
+                    child: ShellChrome(
+                      child: ShellScreen(
+                        subMenuId: state.selectedSubMenuId,
+                        title: state.currentTitle,
+                      ),
                     ),
                   ),
                 ),

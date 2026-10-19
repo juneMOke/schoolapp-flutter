@@ -1,35 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/search/bi_mode_search_labels.dart';
+import 'package:school_app_flutter/core/components/search/search_collapsed_summary.dart';
 import 'package:school_app_flutter/core/components/search/search_form_actions.dart';
 import 'package:school_app_flutter/core/components/search/search_level_mode_fields.dart';
 import 'package:school_app_flutter/core/components/search/search_mode_switch.dart';
 import 'package:school_app_flutter/core/components/search/search_models.dart';
 import 'package:school_app_flutter/core/components/search/search_name_fields.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Libellés **propres à la feature** de la carte de recherche bi-mode.
-///
-/// Tout ce qui est commun aux quatre modules — la bascule, ses aides, les noms
-/// des champs d'identité, les actions — vient directement d'[AppLocalizations].
-/// Un même geste ne doit pas s'appeler « Par classe » ici et « Par cycle et
-/// niveau » ailleurs.
-class BiModeSearchLabels {
-  final String title;
-  final String helpBanner;
-  final String cycleLabel;
-  final String levelLabel;
-  final String levelPlaceholder;
-
-  const BiModeSearchLabels({
-    required this.title,
-    required this.helpBanner,
-    required this.cycleLabel,
-    required this.levelLabel,
-    required this.levelPlaceholder,
-  });
-}
+export 'package:school_app_flutter/core/components/search/bi_mode_search_labels.dart';
 
 /// Carte de recherche bi-mode : **par classe** (cycle → niveau) ou **par
 /// identité** (nom, post-nom, prénom), au choix d'une bascule.
@@ -74,6 +57,9 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
   /// sélection. Tant qu'on est là, le mode par défaut peut encore suivre le
   /// référentiel ; après, il n'appartient plus qu'à l'utilisateur.
   bool _isPristine = true;
+
+  /// Repliée en résumé après une recherche, sur un téléphone seulement.
+  bool _collapsed = false;
   String? _selectedGroupId;
   String? _selectedLevelKey;
 
@@ -167,6 +153,7 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
     // ce qui distingue une bascule d'un simple pliage de deux formulaires.
     final isIdentity = _mode == SearchMode.identity;
     final option = isIdentity ? null : _selectedOption;
+    if (_isPhone) setState(() => _collapsed = true);
 
     widget.onSearch(
       SearchRequest(
@@ -201,6 +188,22 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
       _selectedGroupId = null;
       _selectedLevelKey = null;
     });
+  }
+
+  bool get _isPhone =>
+      MediaQuery.sizeOf(context).width < AppBreakpoints.detailCompactMax;
+
+  /// Les critères envoyés, en une ligne — ceux du mode actif seulement.
+  String get _criteria {
+    if (_mode == SearchMode.identity) {
+      return [
+        _lastNameController,
+        _surnameController,
+        _firstNameController,
+      ].map((c) => c.text.trim()).where((t) => t.isNotEmpty).join(' ');
+    }
+    final refine = _refineNameController.text.trim();
+    return [?_selectedOption?.label, if (refine.isNotEmpty) refine].join(' · ');
   }
 
   void _onModeChanged(SearchMode mode) {
@@ -255,30 +258,35 @@ class _BiModeSearchFormState extends State<BiModeSearchForm> {
       surfaceColor: ListingTones.formulaireFond,
       borderColor: ListingTones.formulaireBord,
       bodyPadding: const EdgeInsets.all(AppDimensions.spacingL - 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SearchModeSwitch(
-            selected: _mode,
-            onChanged: _onModeChanged,
-            enabled: !widget.isLoading,
-          ),
-          const SizedBox(height: AppDimensions.spacingL),
-          _fields(l10n),
-          const SizedBox(height: AppDimensions.spacingM),
-          Align(
-            alignment: Alignment.centerRight,
-            child: SearchFormActions(
-              isLoading: widget.isLoading,
-              canSearch: _canSearch,
-              onClear: _reset,
-              onSearch: _submit,
-              clearLabel: l10n.clear,
-              searchLabel: l10n.search,
+      child: _collapsed && _isPhone
+          ? SearchCollapsedSummary(
+              criteria: _criteria,
+              onEdit: () => setState(() => _collapsed = false),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SearchModeSwitch(
+                  selected: _mode,
+                  onChanged: _onModeChanged,
+                  enabled: !widget.isLoading,
+                ),
+                const SizedBox(height: AppDimensions.spacingL),
+                _fields(l10n),
+                const SizedBox(height: AppDimensions.spacingM),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: SearchFormActions(
+                    isLoading: widget.isLoading,
+                    canSearch: _canSearch,
+                    onClear: _reset,
+                    onSearch: _submit,
+                    clearLabel: l10n.clear,
+                    searchLabel: l10n.search,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 

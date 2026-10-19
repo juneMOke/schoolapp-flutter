@@ -2311,6 +2311,8 @@
   "homeOpenNavigationDrawerTooltip": "Ouvrir le menu",
   "homeSidebarFooterLabel": "Tableau de bord scolaire",
   "homeSidebarNavigationLabel": "Navigation principale",
+  "searchCollapsedEdit": "Modifier la recherche",
+  "searchCollapsedLabel": "Recherche",
   "pageUnderConstruction": "Cette page est en cours de développement",
   "shellBackAgainToExit": "Appuyez de nouveau sur Retour pour quitter",
   "preRegistrations": "Pré-Inscriptions",

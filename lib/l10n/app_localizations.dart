@@ -4322,6 +4322,18 @@ abstract class AppLocalizations {
   /// **'Main navigation'**
   String get homeSidebarNavigationLabel;
 
+  /// No description provided for @searchCollapsedEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit search'**
+  String get searchCollapsedEdit;
+
+  /// No description provided for @searchCollapsedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchCollapsedLabel;
+
   /// No description provided for @pageUnderConstruction.
   ///
   /// In en, this message translates to:
