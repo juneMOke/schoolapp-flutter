@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -69,9 +70,8 @@ class EteeloColumnTable extends StatelessWidget {
             widths: widths,
             cells: [
               for (final (index, text) in headers.indexed)
-                Text(
+                EteeloOverflowText(
                   text.toUpperCase(),
-                  overflow: TextOverflow.ellipsis,
                   textAlign: endAligned.contains(index)
                       ? TextAlign.end
                       : TextAlign.start,

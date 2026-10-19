@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
@@ -187,11 +188,9 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    EteeloOverflowText(
                       cell.text.isNotEmpty ? cell.text : '—',
                       textAlign: cell.textAlign,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: _resolveCellStyle(cell.variant, cell.color),
                     ),
                     const SizedBox(height: 2),
@@ -210,10 +209,9 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
                     ),
                   ],
                 )
-              : Text(
+              : EteeloOverflowText(
                   cell.text.isNotEmpty ? cell.text : '—',
                   textAlign: cell.textAlign,
-                  overflow: TextOverflow.ellipsis,
                   style: _resolveCellStyle(cell.variant, cell.color),
                 ),
         ),
