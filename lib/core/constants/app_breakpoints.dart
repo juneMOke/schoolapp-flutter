@@ -111,6 +111,9 @@ class AppBreakpoints {
   // Contrôle des frais (largeur reçue) : au-delà, l'aperçu d'un élève s'ancre
   // à droite du tableau, qui garde ses ~900 dp de disposition large.
   static const double feeControlDockedSheetMin = 1400.0;
+  // Récapitulatif d'une inscription (largeur de sa carte) : au-delà, l'élève
+  // et sa famille à gauche, sa scolarité et ses frais à droite.
+  static const double enrollmentSummaryTwoColumnMin = 900.0;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.
