@@ -9,6 +9,8 @@ void main() {
     WidgetTester tester, {
     required SyncStatus status,
     int? lastSyncAtMs,
+    bool iconOnly = false,
+    VoidCallback? onTap,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -16,7 +18,14 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: SyncIndicator(status: status, lastSyncAtMs: lastSyncAtMs),
+          body: Center(
+            child: SyncIndicator(
+              status: status,
+              lastSyncAtMs: lastSyncAtMs,
+              iconOnly: iconOnly,
+              onTap: onTap,
+            ),
+          ),
         ),
       ),
     );
@@ -108,6 +117,39 @@ void main() {
       // état en permanence, l'ambre ou le rouge l'accuseraient d'une panne.
       final icon = tester.widget<Icon>(find.byIcon(Icons.cloud_done_outlined));
       expect(icon.color, AppColors.textMuted);
+    });
+  });
+
+  group('icône seule (téléphone)', () {
+    testWidgets('le libellé passe en infobulle, l\'icône reste', (
+      tester,
+    ) async {
+      await pumpIndicator(
+        tester,
+        status: SyncStatus.offline,
+        lastSyncAtMs: msAgo(const Duration(minutes: 12)),
+        iconOnly: true,
+      );
+
+      expect(find.textContaining('Il y a 12 min'), findsNothing);
+      expect(find.byTooltip('Hors ligne · Il y a 12 min'), findsOneWidget);
+    });
+
+    testWidgets('cible tactile de 48 dp, et toujours ouvrable', (tester) async {
+      var taps = 0;
+      await pumpIndicator(
+        tester,
+        status: SyncStatus.syncConflict,
+        iconOnly: true,
+        onTap: () => taps++,
+      );
+
+      final target = tester.getRect(find.byType(SyncIndicator));
+      expect(target.width, greaterThanOrEqualTo(48));
+      expect(target.height, greaterThanOrEqualTo(48));
+      // Au bord de la cible, hors de la pastille visible : l'appui porte.
+      await tester.tapAt(target.topLeft + const Offset(2, 2));
+      expect(taps, 1);
     });
   });
 }

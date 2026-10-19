@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/components/app_bars/dark_bar_parts.dart';
+import 'package:school_app_flutter/core/components/app_bars/student_detail_avatar_badge.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
-import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
+
+export 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar_pill.dart';
 
 /// AppBar sombre des dossiers élève — Inscription, Facturation, Discipline,
 /// Documents.
@@ -25,6 +25,9 @@ class StudentDetailAppBar extends StatelessWidget
   static const double _closeSize = 40;
   static const double _dividerHeight = 2;
 
+  /// Part de la largeur que la pastille de synthèse peut prendre.
+  static const double _trailingMaxShare = 0.4;
+
   final String fullName;
   final String eyebrow;
   final String firstName;
@@ -39,7 +42,8 @@ class StudentDetailAppBar extends StatelessWidget
   /// Croix de fermeture à l'extrême droite, en plus du retour.
   ///
   /// Réservée aux dossiers dont on « sort » (Facturation) ; ailleurs, la
-  /// flèche de retour est la seule sortie.
+  /// flèche de retour est la seule sortie. Jamais sur un téléphone : elle y
+  /// doublerait la flèche au prix du nom.
   final bool showCloseButton;
 
   /// Remplace la sortie par défaut (retour, sinon [fallbackRoute]).
@@ -95,6 +99,14 @@ class StudentDetailAppBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    // Téléphone : la flèche suffit pour sortir, et le nom passe avant la
+    // photo — à 360 dp, retour + avatar + pastille + croix ne laissaient
+    // plus de place au nom de l'élève.
+    final showClose =
+        showCloseButton && width >= AppBreakpoints.detailCompactMax;
+    final showAvatar = width >= AppBreakpoints.phoneNarrowMax;
+    final trailing = this.trailing;
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
@@ -105,12 +117,12 @@ class StudentDetailAppBar extends StatelessWidget
       toolbarHeight: AppDimensions.topBarHeight,
       titleSpacing: AppDimensions.spacingS,
       leadingWidth: AppDimensions.spacingM + _backSize + AppDimensions.spacingS,
-      flexibleSpace: const _KubaTopBarBackground(),
+      flexibleSpace: const KubaTopBarBackground(),
       leading: Padding(
         padding: const EdgeInsets.only(left: AppDimensions.spacingM),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: _SquareIconButton(
+          child: DarkBarIconButton(
             size: _backSize,
             baseColor: _white(0.10),
             hoverColor: _white(0.08),
@@ -123,38 +135,16 @@ class StudentDetailAppBar extends StatelessWidget
       ),
       title: Row(
         children: [
-          _AvatarBadge(
-            initials: _initials,
-            size: _avatarSize,
-            studentId: studentId,
-          ),
-          const SizedBox(width: AppDimensions.spacingM),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  eyebrow.toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.orDoux,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  fullName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.titleLarge.copyWith(
-                    color: AppColors.textOnDark,
-                  ),
-                ),
-              ],
+          if (showAvatar) ...[
+            StudentDetailAvatarBadge(
+              initials: _initials,
+              size: _avatarSize,
+              studentId: studentId,
             ),
+            const SizedBox(width: AppDimensions.spacingM),
+          ],
+          Expanded(
+            child: DarkBarHeading(eyebrow: eyebrow, title: fullName),
           ),
         ],
       ),
@@ -162,16 +152,24 @@ class StudentDetailAppBar extends StatelessWidget
         if (trailing != null)
           Padding(
             padding: EdgeInsets.only(
-              right: showCloseButton
+              right: showClose
                   ? AppDimensions.spacingS
                   : AppDimensions.spacingM,
             ),
-            child: Center(child: trailing),
+            // La synthèse s'abrège plutôt que d'effacer le nom.
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: width * _trailingMaxShare,
+                ),
+                child: trailing,
+              ),
+            ),
           ),
-        if (showCloseButton)
+        if (showClose)
           Padding(
             padding: const EdgeInsets.only(right: AppDimensions.spacingM),
-            child: _SquareIconButton(
+            child: DarkBarIconButton(
               size: _closeSize,
               baseColor: _white(0.06),
               hoverColor: _white(0.08),
@@ -182,184 +180,20 @@ class StudentDetailAppBar extends StatelessWidget
             ),
           ),
       ],
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(_dividerHeight),
-        child: _GoldDivider(height: _dividerHeight),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(_dividerHeight),
+        child: GoldDivider(height: _dividerHeight, colors: _dividerColors),
       ),
     );
   }
+
+  /// Liseré or-doux en halo centré (opacité .55).
+  static final List<Color> _dividerColors = [
+    AppColors.orDoux.withValues(alpha: 0),
+    AppColors.orDoux.withValues(alpha: 0.55),
+    AppColors.orDoux.withValues(alpha: 0),
+  ];
 
   static Color _white(double opacity) =>
       AppColors.textOnDark.withValues(alpha: opacity);
-}
-
-/// Pastille de synthèse posée dans [StudentDetailAppBar].
-///
-/// [alert] porte la lecture : une synthèse qui appelle une action (solde dû,
-/// cas ouverts) se pose plus franchement qu'une synthèse rassurante.
-class StudentDetailAppBarPill extends StatelessWidget {
-  final Color accent;
-  final IconData icon;
-  final String label;
-  final bool alert;
-
-  const StudentDetailAppBarPill({
-    super.key,
-    required this.accent,
-    required this.icon,
-    required this.label,
-    required this.alert,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
-        vertical: AppDimensions.spacingXS + 2,
-      ),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: alert ? 0.20 : 0.26),
-        borderRadius: AppRadius.brPill,
-        border: Border.all(
-          color: accent.withValues(alpha: alert ? 0.50 : 0.40),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: AppColors.textOnDark),
-          const SizedBox(width: AppDimensions.spacingXS),
-          Text(
-            label,
-            style: AppTextStyles.bodyStrong.copyWith(
-              color: AppColors.textOnDark,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Fond de la barre : dégradé 100° Bleu Profond → Bleu Ardoise + filigrane Kuba.
-class _KubaTopBarBackground extends StatelessWidget {
-  const _KubaTopBarBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [AppColors.bleuProfond, AppColors.bleuArdoise],
-        ),
-      ),
-      child: Stack(fit: StackFit.expand, children: [KubaPatternLayer()]),
-    );
-  }
-}
-
-/// Liseré or-doux (dégradé horizontal, opacité .55) sous la barre.
-class _GoldDivider extends StatelessWidget {
-  final double height;
-
-  const _GoldDivider({required this.height});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.orDoux.withValues(alpha: 0),
-            AppColors.orDoux.withValues(alpha: 0.55),
-            AppColors.orDoux.withValues(alpha: 0),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Avatar rond à initiales sur fond blanc translucide — ou la photo de
-/// l'élève, quand il en a une.
-class _AvatarBadge extends StatelessWidget {
-  final String initials;
-  final double size;
-  final String? studentId;
-
-  const _AvatarBadge({
-    required this.initials,
-    required this.size,
-    this.studentId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final badge = Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.textOnDark.withValues(alpha: 0.16),
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        initials,
-        style: AppTextStyles.bodyStrong.copyWith(
-          color: AppColors.textOnDark,
-          fontSize: 15,
-        ),
-      ),
-    );
-    return PersonPhotoOr(personId: studentId, size: size, fallback: badge);
-  }
-}
-
-/// Bouton carré (retour / fermer) sur fond blanc translucide, état survol géré.
-class _SquareIconButton extends StatelessWidget {
-  final double size;
-  final Color baseColor;
-  final Color hoverColor;
-  final IconData icon;
-  final double iconSize;
-
-  /// Obligatoire : une icône seule ne dit rien à la souris ni au lecteur
-  /// d'écran.
-  final String tooltip;
-  final VoidCallback onTap;
-
-  const _SquareIconButton({
-    required this.size,
-    required this.baseColor,
-    required this.hoverColor,
-    required this.icon,
-    required this.iconSize,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: Material(
-          color: baseColor,
-          borderRadius: AppRadius.brSm,
-          child: InkWell(
-            borderRadius: AppRadius.brSm,
-            hoverColor: hoverColor,
-            onTap: onTap,
-            child: Icon(icon, size: iconSize, color: AppColors.textOnDark),
-          ),
-        ),
-      ),
-    );
-  }
 }

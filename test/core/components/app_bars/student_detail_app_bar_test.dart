@@ -89,4 +89,45 @@ void main() {
     expect(find.text('2 cas ouverts'), findsOneWidget);
     expect(find.byIcon(Icons.error_outline), findsOneWidget);
   });
+
+  group('téléphone 360 dp', () {
+    Future<void> pumpPhone(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(360, 740);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(
+        tester,
+        showCloseButton: true,
+        trailing: const StudentDetailAppBarPill(
+          accent: AppColors.error,
+          icon: Icons.account_balance_wallet_outlined,
+          label: 'Solde dû 1 250 000 CDF',
+          alert: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('ni croix ni avatar : le nom garde sa place', (tester) async {
+      await pumpPhone(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
+      expect(find.text('KD'), findsNothing);
+      expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+      expect(
+        tester.getSize(find.text('Kabongo Mwamba Daniel')).width,
+        greaterThan(100),
+      );
+    });
+
+    testWidgets('la pastille s\'abrège au lieu de déborder', (tester) async {
+      await pumpPhone(tester);
+
+      expect(
+        tester.getSize(find.byType(StudentDetailAppBarPill)).width,
+        lessThanOrEqualTo(360 * 0.4),
+      );
+    });
+  });
 }

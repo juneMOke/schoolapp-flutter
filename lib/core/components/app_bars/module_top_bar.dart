@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/components/app_bars/dark_bar_parts.dart';
 
 /// La barre du haut d'un écran de module qui porte sa propre barre — elle
 /// **ne défile pas**.
@@ -41,6 +41,13 @@ class ModuleTopBar extends StatelessWidget implements PreferredSizeWidget {
   static const double _dividerHeight = 2;
   static const double _backSize = 42;
 
+  /// Liseré qui s'éteint vers la droite — la même séparation que sur les
+  /// dossiers, sans leur halo centré.
+  static final List<Color> _dividerColors = [
+    AppColors.orDoux.withValues(alpha: 0.55),
+    AppColors.orDoux.withValues(alpha: 0.15),
+  ];
+
   /// Hauteur de la barre, liseré compris — pour la barre qui l'enveloppe.
   static const Size barSize = Size.fromHeight(
     AppDimensions.topBarHeight + _dividerHeight,
@@ -61,46 +68,25 @@ class ModuleTopBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: AppDimensions.topBarHeight,
       titleSpacing: onBack == null ? AppDimensions.spacingM : 0,
       leadingWidth: AppDimensions.spacingM + _backSize + AppDimensions.spacingS,
-      flexibleSpace: const _KubaTopBarBackground(),
+      flexibleSpace: const KubaTopBarBackground(),
       leading: onBack == null
           ? null
           : Padding(
               padding: const EdgeInsets.only(left: AppDimensions.spacingM),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: _SquareIconButton(
+                child: DarkBarIconButton(
                   size: _backSize,
                   icon: Icons.arrow_back_rounded,
+                  iconSize: 22,
+                  baseColor: AppColors.textOnDark.withValues(alpha: 0.10),
+                  borderRadius: AppRadius.brMd,
                   tooltip: backTooltip,
                   onTap: onBack!,
                 ),
               ),
             ),
-      title: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            eyebrow.toUpperCase(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.labelSmall.copyWith(
-              color: AppColors.orDoux,
-              letterSpacing: 1.2,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.titleLarge.copyWith(
-              color: AppColors.textOnDark,
-            ),
-          ),
-        ],
-      ),
+      title: DarkBarHeading(eyebrow: eyebrow, title: title),
       actions: [
         if (action != null)
           Padding(
@@ -108,81 +94,10 @@ class ModuleTopBar extends StatelessWidget implements PreferredSizeWidget {
             child: Center(child: action),
           ),
       ],
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(_dividerHeight),
-        child: _GoldDivider(height: _dividerHeight),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(_dividerHeight),
+        child: GoldDivider(height: _dividerHeight, colors: _dividerColors),
       ),
     );
-  }
-}
-
-/// Bleu Profond → Bleu Ardoise, texturé Kuba : la TopBar applicative, reprise
-/// telle quelle pour que l'écran n'ait pas l'air d'un autre logiciel.
-class _KubaTopBarBackground extends StatelessWidget {
-  const _KubaTopBarBackground();
-
-  @override
-  Widget build(BuildContext context) => const DecoratedBox(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.centerLeft,
-        end: Alignment.centerRight,
-        colors: [AppColors.bleuProfond, AppColors.bleuArdoise],
-      ),
-    ),
-    child: Stack(fit: StackFit.expand, children: [KubaPatternLayer()]),
-  );
-}
-
-/// Liseré or-doux sous la barre — la même séparation que sur les dossiers.
-class _GoldDivider extends StatelessWidget {
-  final double height;
-
-  const _GoldDivider({required this.height});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: height,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          AppColors.orDoux.withValues(alpha: 0.55),
-          AppColors.orDoux.withValues(alpha: 0.15),
-        ],
-      ),
-    ),
-  );
-}
-
-class _SquareIconButton extends StatelessWidget {
-  final double size;
-  final IconData icon;
-  final String? tooltip;
-  final VoidCallback onTap;
-
-  const _SquareIconButton({
-    required this.size,
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final button = Material(
-      color: AppColors.textOnDark.withValues(alpha: 0.10),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        focusColor: AppColors.stateFocusOnDark,
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(icon, size: 22, color: AppColors.textOnDark),
-        ),
-      ),
-    );
-    return tooltip == null ? button : Tooltip(message: tooltip!, child: button);
   }
 }

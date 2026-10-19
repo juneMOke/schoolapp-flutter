@@ -70,8 +70,11 @@ void main() {
         .toList();
     final hasDrawer = scaffolds.any((scaffold) => scaffold.drawer != null);
     expect(hasDrawer, isTrue);
-    expect(find.byTooltip('Notifications'), findsOneWidget);
+    // La cloche n'ouvre encore rien : pas de place pour elle sur un téléphone.
+    expect(find.byTooltip('Notifications'), findsNothing);
     expect(find.byTooltip('Déconnexion'), findsNothing);
+    // La synchro en icône seule, son libellé en infobulle.
+    expect(find.byTooltip('À jour'), findsOneWidget);
     // Hamburger présent en compact, avec son tooltip i18n dédié.
     expect(find.byTooltip('Ouvrir le menu'), findsOneWidget);
   });

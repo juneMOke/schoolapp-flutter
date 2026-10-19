@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/components/controls/eteelo_activatable.d
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/components/status/last_sync_label.dart';
+import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// État de synchronisation globale de l'application.
@@ -46,11 +47,17 @@ class SyncIndicator extends StatelessWidget {
   final int? lastSyncAtMs;
   final VoidCallback? onTap;
 
+  /// Téléphone : l'icône seule, le libellé en infobulle (appui long) et pour
+  /// les lecteurs d'écran. Entière, la pastille (« Partiellement à jour · il
+  /// y a 12 min », ~190 dp) ne laissait qu'une cinquantaine de dp au titre.
+  final bool iconOnly;
+
   const SyncIndicator({
     super.key,
     required this.status,
     this.lastSyncAtMs,
     this.onTap,
+    this.iconOnly = false,
   });
 
   @override
@@ -75,20 +82,27 @@ class SyncIndicator extends StatelessWidget {
         ? appearance.label
         : '${appearance.label} · $relative';
 
-    final content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(appearance.icon, size: 16, color: appearance.color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: AppTypography.labelSmall.copyWith(color: appearance.color),
-          ),
-        ],
-      ),
-    );
+    final content = iconOnly
+        ? Padding(
+            padding: const EdgeInsets.all(AppDimensions.spacingS),
+            child: Icon(appearance.icon, size: 16, color: appearance.color),
+          )
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(appearance.icon, size: 16, color: appearance.color),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: appearance.color,
+                  ),
+                ),
+              ],
+            ),
+          );
 
     Widget pill(ActivatableHighlight highlight) => DecoratedBox(
       decoration: BoxDecoration(
@@ -104,13 +118,18 @@ class SyncIndicator extends StatelessWidget {
       child: content,
     );
 
-    if (onTap == null) return pill(const ActivatableHighlight());
+    // Téléphone : cible de 48 dp autour de la pastille ronde de 32.
+    Widget visual(ActivatableHighlight highlight) =>
+        iconOnly ? TouchTarget(child: pill(highlight)) : pill(highlight);
 
-    return EteeloActivatable(
-      semanticLabel: label,
-      onActivate: onTap,
-      builder: (context, highlight) => pill(highlight),
-    );
+    final indicator = onTap == null
+        ? visual(const ActivatableHighlight())
+        : EteeloActivatable(
+            semanticLabel: label,
+            onActivate: onTap,
+            builder: (context, highlight) => visual(highlight),
+          );
+    return iconOnly ? Tooltip(message: label, child: indicator) : indicator;
   }
 
   /// Texte relatif depuis [lastSyncAtMs], `null` si aucune synchro connue.
