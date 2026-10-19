@@ -152,4 +152,21 @@ void main() {
       expect(taps, 1);
     });
   });
+
+  testWidgets('icône seule et ouvrable : annoncée une fois, pas deux', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await pumpIndicator(
+      tester,
+      status: SyncStatus.syncConflict,
+      iconOnly: true,
+      onTap: () {},
+    );
+
+    final node = find.bySemanticsLabel(RegExp('Conflit'));
+    expect(node, findsOneWidget);
+    expect(tester.getSemantics(node).getSemanticsData().tooltip, isEmpty);
+    handle.dispose();
+  });
 }

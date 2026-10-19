@@ -20,11 +20,19 @@ class CheckableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Matériau transparent : l'encre se peindrait sinon SOUS le fond opaque
+    // de la carte qui porte la ligne, et l'appui ne se verrait pas.
+    // Hors du parcours clavier : la case reste l'arrêt de tabulation, sans
+    // second arrêt invisible pour le même geste.
     return MergeSemantics(
-      child: InkWell(
-        onTap: () => onChanged(!value),
-        borderRadius: AppRadius.brSm,
-        child: child,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          canRequestFocus: false,
+          onTap: () => onChanged(!value),
+          borderRadius: AppRadius.brSm,
+          child: child,
+        ),
       ),
     );
   }

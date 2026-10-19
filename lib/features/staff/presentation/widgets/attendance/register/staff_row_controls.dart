@@ -52,11 +52,18 @@ class StaffHoursStepper extends StatelessWidget {
           tooltip: l10n.staffAttendanceHoursLess,
           onPressed: value <= 0 ? null : () => onStep(-1),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          child: Text(
-            PresenceLabels.hours(l10n, value),
-            style: AppTypography.labelLarge,
+        // Le libellé se resserre plutôt que de pousser le « + » hors de sa
+        // colonne, où il ne recevrait plus les appuis.
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                PresenceLabels.hours(l10n, value),
+                style: AppTypography.labelLarge,
+              ),
+            ),
           ),
         ),
         PresenceSquareIconButton(

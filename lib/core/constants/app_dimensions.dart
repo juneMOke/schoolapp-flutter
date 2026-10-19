@@ -686,10 +686,14 @@ class AppDimensions {
   static const presenceMarkAccentWidth = 4.0;
 
   /// La vue liste : largeur plancher avant défilement, et ses colonnes.
-  static const presenceMarkListMinWidth = 900.0;
+  static const presenceMarkListMinWidth = 960.0;
   static const presenceMarkColStatus = 262.0;
   static const presenceMarkColTimes = 168.0;
-  static const presenceMarkColHours = 96.0;
+
+  /// Pas à pas des heures du pointage : « − » et « + » à 48 dp de cible,
+  /// autour de « 10 h 30 ». À 96, le « + » débordait sur la colonne retard,
+  /// et la part débordée ne recevait plus les appuis.
+  static const presenceMarkColHours = 160.0;
   static const presenceMarkColAction = 40.0;
 
   /// Les modales du pointage.

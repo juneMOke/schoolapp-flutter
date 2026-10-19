@@ -42,6 +42,7 @@ class SyncIndicator extends StatelessWidget {
   /// Voile de la teinte du statut, au repos puis au survol.
   static const double _restFillAlpha = 0.12;
   static const double _hoverFillAlpha = 0.2;
+  static const double _iconSize = 16;
 
   final SyncStatus status;
   final int? lastSyncAtMs;
@@ -85,14 +86,18 @@ class SyncIndicator extends StatelessWidget {
     final content = iconOnly
         ? Padding(
             padding: const EdgeInsets.all(AppDimensions.spacingS),
-            child: Icon(appearance.icon, size: 16, color: appearance.color),
+            child: Icon(
+              appearance.icon,
+              size: _iconSize,
+              color: appearance.color,
+            ),
           )
         : Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(appearance.icon, size: 16, color: appearance.color),
+                Icon(appearance.icon, size: _iconSize, color: appearance.color),
                 const SizedBox(width: 4),
                 Text(
                   label,
@@ -129,7 +134,14 @@ class SyncIndicator extends StatelessWidget {
             onActivate: onTap,
             builder: (context, highlight) => visual(highlight),
           );
-    return iconOnly ? Tooltip(message: label, child: indicator) : indicator;
+    if (!iconOnly) return indicator;
+    // Ouvrable, la pastille se nomme déjà au lecteur d'écran : l'infobulle
+    // doublerait l'annonce (« Conflit, Conflit, bouton »).
+    return Tooltip(
+      message: label,
+      excludeFromSemantics: onTap != null,
+      child: indicator,
+    );
   }
 
   /// Texte relatif depuis [lastSyncAtMs], `null` si aucune synchro connue.

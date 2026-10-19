@@ -56,4 +56,17 @@ void main() {
       ),
     );
   });
+
+  testWidgets('un seul arrêt de tabulation : la case', (tester) async {
+    await pump(tester, value: false);
+    final row = tester.widget<InkWell>(
+      find
+          .descendant(
+            of: find.byType(CheckableRow),
+            matching: find.byType(InkWell),
+          )
+          .first,
+    );
+    expect(row.canRequestFocus, isFalse);
+  });
 }
