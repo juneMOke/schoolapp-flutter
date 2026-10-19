@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -88,32 +89,38 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
         constraints: const BoxConstraints(
           maxWidth: AppDimensions.expenseFormDialogMaxWidth,
         ),
-        child: EteeloDialogBody(
-          header: ExpenseDialogHeader(
-            eyebrow: edit ? l10n.expenseFormEditEyebrow : l10n.expenseNewAction,
-            title: edit ? widget.seed.title : l10n.expenseFormCreateTitle,
-            subtitle: edit
-                ? l10n.expenseFormEditSubtitle(
-                    widget.seed.number ?? l10n.expenseNumberPending,
-                  )
-                : l10n.expenseFormCreateSubtitle,
-            onClose: () => Navigator.of(context).pop(),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppDimensions.spacingL,
-              AppDimensions.spacingS,
-              AppDimensions.spacingL,
-              AppDimensions.spacingM,
+        child: EteeloSubmitShortcut(
+          onSubmit: widget.types.isEmpty ? null : _submit,
+          onCancel: () => Navigator.of(context).pop(),
+          child: EteeloDialogBody(
+            header: ExpenseDialogHeader(
+              eyebrow: edit
+                  ? l10n.expenseFormEditEyebrow
+                  : l10n.expenseNewAction,
+              title: edit ? widget.seed.title : l10n.expenseFormCreateTitle,
+              subtitle: edit
+                  ? l10n.expenseFormEditSubtitle(
+                      widget.seed.number ?? l10n.expenseNumberPending,
+                    )
+                  : l10n.expenseFormCreateSubtitle,
+              onClose: () => Navigator.of(context).pop(),
             ),
-            child: _fields(l10n),
-          ),
-          footer: [
-            ExpenseFormFooter(
-              isEdit: edit,
-              onSubmit: widget.types.isEmpty ? null : _submit,
+            body: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppDimensions.spacingL,
+                AppDimensions.spacingS,
+                AppDimensions.spacingL,
+                AppDimensions.spacingM,
+              ),
+              child: _fields(l10n),
             ),
-          ],
+            footer: [
+              ExpenseFormFooter(
+                isEdit: edit,
+                onSubmit: widget.types.isEmpty ? null : _submit,
+              ),
+            ],
+          ),
         ),
       ),
     );

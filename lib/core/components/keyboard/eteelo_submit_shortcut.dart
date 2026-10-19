@@ -14,17 +14,24 @@ import 'package:flutter/widgets.dart';
 ///
 /// [onSubmit] nul (action principale désactivée) ⇒ le raccourci ne fait rien.
 ///
+/// [onCancel] lie Échap à la fermeture : une modale ouverte avec
+/// `barrierDismissible: false` (une saisie à ne pas perdre sur un clic à côté)
+/// n'y répond pas d'elle-même — Flutter n'écoute Échap que si le scrim ferme.
+/// Le geste vaut alors la croix de l'en-tête, rien de plus.
+///
 /// Hors modale (page, panneau en ligne), [autofocus] vaut `false` : le
 /// raccourci répond dès que le focus est dans un des champs, sans le voler à
 /// l'écran à l'ouverture.
 class EteeloSubmitShortcut extends StatelessWidget {
   final VoidCallback? onSubmit;
+  final VoidCallback? onCancel;
   final bool autofocus;
   final Widget child;
 
   const EteeloSubmitShortcut({
     super.key,
     required this.onSubmit,
+    this.onCancel,
     this.autofocus = true,
     required this.child,
   });
@@ -48,13 +55,20 @@ class EteeloSubmitShortcut extends StatelessWidget {
     ),
   ];
 
+  static const ShortcutActivator cancelActivator = SingleActivator(
+    LogicalKeyboardKey.escape,
+    includeRepeats: false,
+  );
+
   @override
   Widget build(BuildContext context) {
     final onSubmit = this.onSubmit;
+    final onCancel = this.onCancel;
     return CallbackShortcuts(
       bindings: {
         if (onSubmit != null)
           for (final activator in activators) activator: onSubmit,
+        cancelActivator: ?onCancel,
       },
       child: Focus(
         autofocus: autofocus,

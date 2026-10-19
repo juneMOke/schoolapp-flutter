@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/components/labels/form_section_label.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
@@ -90,7 +91,7 @@ class _ChapitreFormDialogState extends State<ChapitreFormDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final body = EteeloDialogBody(
+    final form = EteeloDialogBody(
       header: EteeloDialogDarkHeader(
         eyebrow: l10n.chapitreFormEyebrow(
           widget.cours.brancheNom,
@@ -106,6 +107,11 @@ class _ChapitreFormDialogState extends State<ChapitreFormDialog> {
         child: _groups(l10n),
       ),
       footer: [_Footer(isNew: _model.isNew, onSubmit: _submit)],
+    );
+    final body = EteeloSubmitShortcut(
+      onSubmit: _submit,
+      onCancel: () => Navigator.of(context).pop(),
+      child: form,
     );
     if (MediaQuery.sizeOf(context).width < ProgrammeLayout.compactRowBelow) {
       return Dialog.fullscreen(child: body);

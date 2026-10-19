@@ -57,4 +57,59 @@ void main() {
     await ctrlEnter(tester);
     expect(tester.takeException(), isNull);
   });
+
+  group('Échap', () {
+    Future<void> openDialog(
+      WidgetTester tester, {
+      required bool cancels,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) => Dialog(
+                  child: EteeloSubmitShortcut(
+                    onSubmit: null,
+                    onCancel: cancels
+                        ? () => Navigator.of(dialogContext).pop()
+                        : null,
+                    child: const TextField(),
+                  ),
+                ),
+              ),
+              child: const Text('ouvrir'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('ouvrir'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('ferme une modale dont le scrim ne ferme pas', (tester) async {
+      await openDialog(tester, cancels: true);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsNothing);
+    });
+
+    testWidgets('ferme aussi depuis un champ', (tester) async {
+      await openDialog(tester, cancels: true);
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsNothing);
+    });
+
+    testWidgets('sans onCancel, la modale reste ouverte', (tester) async {
+      await openDialog(tester, cancels: false);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsOneWidget);
+    });
+  });
 }

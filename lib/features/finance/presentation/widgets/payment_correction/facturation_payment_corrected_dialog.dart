@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -44,43 +45,47 @@ class FacturationPaymentCorrectedDialog extends StatelessWidget {
         constraints: const BoxConstraints(
           maxWidth: AppDimensions.facturationModalMaxWidth,
         ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppDimensions.spacingL),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const EteeloResultMedallion(kind: EteeloResultKind.success),
-              const SizedBox(height: AppDimensions.spacingM),
-              Text(
-                l10n.paymentCorrectionCorrectedDone,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyStrong.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.spacingS),
-              Text(
-                l10n.paymentCorrectionSavedOnTablet,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              if (replacement != null) ...[
+        child: EteeloSubmitShortcut(
+          onSubmit: null,
+          onCancel: () => Navigator.of(context).pop(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppDimensions.spacingL),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const EteeloResultMedallion(kind: EteeloResultKind.success),
                 const SizedBox(height: AppDimensions.spacingM),
-                BlocProvider<TicketPrintStatusCubit>(
-                  create: (_) =>
-                      getIt<TicketPrintStatusCubit>()..load(replacement),
-                  child: FacturationTicketPrintRow(paymentId: replacement),
+                Text(
+                  l10n.paymentCorrectionCorrectedDone,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodyStrong.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.spacingS),
+                Text(
+                  l10n.paymentCorrectionSavedOnTablet,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                if (replacement != null) ...[
+                  const SizedBox(height: AppDimensions.spacingM),
+                  BlocProvider<TicketPrintStatusCubit>(
+                    create: (_) =>
+                        getIt<TicketPrintStatusCubit>()..load(replacement),
+                    child: FacturationTicketPrintRow(paymentId: replacement),
+                  ),
+                ],
+                const SizedBox(height: AppDimensions.spacingL),
+                FilledButton(
+                  key: const ValueKey('payment-correction-corrected-close'),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.facturationPaymentCloseLabel),
                 ),
               ],
-              const SizedBox(height: AppDimensions.spacingL),
-              FilledButton(
-                key: const ValueKey('payment-correction-corrected-close'),
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.facturationPaymentCloseLabel),
-              ),
-            ],
+            ),
           ),
         ),
       ),
