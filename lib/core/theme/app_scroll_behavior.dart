@@ -14,6 +14,10 @@ import 'package:flutter/material.dart';
 /// tableau plus large que l'écran n'offrirait à la souris aucune prise sur
 /// ses colonnes cachées. On l'ajoute donc sur l'horizontal, sur bureau (et
 /// sur le navigateur d'un bureau) ; la tablette garde son doigt.
+///
+/// Sur bureau, la barre verticale reste affichée : à la souris, c'est le seul
+/// signe qu'une page ou une liste continue sous le bord de la fenêtre
+/// (Material ne la montre qu'au défilement ou au survol de sa piste).
 class AppScrollBehavior extends MaterialScrollBehavior {
   const AppScrollBehavior();
 
@@ -23,12 +27,15 @@ class AppScrollBehavior extends MaterialScrollBehavior {
     Widget child,
     ScrollableDetails details,
   ) {
-    final horizontal =
-        axisDirectionToAxis(details.direction) == Axis.horizontal;
-    if (horizontal && _isDesktop(getPlatform(context))) {
-      return Scrollbar(controller: details.controller, child: child);
+    if (!_isDesktop(getPlatform(context))) {
+      return super.buildScrollbar(context, child, details);
     }
-    return super.buildScrollbar(context, child, details);
+    final vertical = axisDirectionToAxis(details.direction) == Axis.vertical;
+    return Scrollbar(
+      controller: details.controller,
+      thumbVisibility: vertical,
+      child: child,
+    );
   }
 
   static bool _isDesktop(TargetPlatform platform) => switch (platform) {
