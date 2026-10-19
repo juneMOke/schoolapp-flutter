@@ -41,6 +41,10 @@ class FacturationCollectActionBar extends StatelessWidget {
   final String? actionLabel;
   final IconData actionIcon;
 
+  /// Plafond de la barre : celui du contenu de la page au-dessus, pour que le
+  /// bouton s'aligne sur son bord droit.
+  final double maxWidth;
+
   const FacturationCollectActionBar({
     super.key,
     required this.totalLabel,
@@ -48,6 +52,7 @@ class FacturationCollectActionBar extends StatelessWidget {
     this.settledLabel,
     this.actionLabel,
     this.actionIcon = Icons.account_balance_wallet_outlined,
+    this.maxWidth = AppDimensions.facturationContentMaxWidth,
   });
 
   @override
@@ -84,7 +89,7 @@ class FacturationCollectActionBar extends StatelessWidget {
           // hauteur d'écran — et masquerait le corps de la page.
           child: ContentMaxWidth(
             heightFactor: 1,
-            maxWidth: AppDimensions.facturationContentMaxWidth,
+            maxWidth: maxWidth,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 // Gel READ_ONLY (ADR-010) : le tick de fraîcheur (5 min) peut

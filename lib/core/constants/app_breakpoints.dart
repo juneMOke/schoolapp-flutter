@@ -93,6 +93,9 @@ class AppBreakpoints {
   // sous le total et prend toute la largeur — le CTA d'un guichet ne se
   // discute pas avec un montant pour quelques dizaines de dp.
   static const double financeCollectBarRowMin = 640.0;
+  // Encaissement (page plein écran, hors coquille) : au-delà, les créances à
+  // gauche, le payeur et la date en colonne à droite.
+  static const double paymentTwoColumnMin = expanded;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.

@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:school_app_flutter/core/components/app_bars/student_detail_app_bar.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
@@ -28,6 +27,7 @@ import 'package:school_app_flutter/features/finance/presentation/helpers/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_context_error_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_action_bar.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_layout.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_charges_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_confirm_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_date_section.dart';
@@ -790,15 +790,19 @@ class _FacturationCreatePaymentViewState
                         ? Icons.account_balance_wallet_outlined
                         : Icons.repeat_rounded,
                     onCollect: onCollect,
+                    maxWidth: FacturationCreatePaymentLayout.maxWidthFor(
+                      context,
+                    ),
                   )
                 : null,
             child: Align(
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 // Largeur de lecture de la Facturation : un formulaire étalé sur
-                // 1180 dp éloigne les libellés de leurs champs.
-                constraints: const BoxConstraints(
-                  maxWidth: AppDimensions.facturationContentMaxWidth,
+                // 1180 dp éloigne les libellés de leurs champs. Sur grand écran,
+                // deux colonnes de lecture (cf. `FacturationCreatePaymentLayout`).
+                constraints: BoxConstraints(
+                  maxWidth: FacturationCreatePaymentLayout.maxWidthFor(context),
                 ),
                 child: correction == null
                     ? _body(l10n, settlement)
@@ -851,15 +855,13 @@ class _FacturationCreatePaymentViewState
     }
 
     final correction = widget.intent.correction;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return FacturationCreatePaymentLayout(
+      header: [
         if (correction != null) ...[
           FacturationPaymentCorrectionOriginCard(
             amounts: correction.originAmounts,
             paidAt: correction.originPaidAt,
           ),
-          const SizedBox(height: AppDimensions.detailSectionSpacing),
           BlocBuilder<
             PaymentCorrectionTargetCubit,
             PaymentCorrectionTargetState
@@ -889,129 +891,125 @@ class _FacturationCreatePaymentViewState
                       context.read<PaymentCorrectionTargetCubit>().reset(),
                 ),
           ),
-          const SizedBox(height: AppDimensions.detailSectionSpacing),
-        ],
-        FinanceSectionCard(
-          backgroundColor: AppColors.surfaceRaised,
-          borderColor: AppColors.border,
-          child: FacturationCreatePaymentPayerSection(
-            lastNameController: _payer.lastName,
-            firstNameController: _payer.firstName,
-            middleNameController: _payer.middleName,
-            phoneController: _payer.phone,
-            onPickPayer: _pickPayer,
-            phoneErrorText: _payer.phoneErrorText(l10n),
-            readOnly: _collectInFlight,
-          ),
-        ),
-        const SizedBox(height: AppDimensions.detailSectionSpacing),
-        // La date a sa propre section : elle ne dit rien de qui paie, et la
-        // loger sous l'identité du payeur obligeait à expliquer en commentaire
-        // pourquoi elle échappait à la mention « facultatif » qui la précédait.
-        FinanceSectionCard(
-          backgroundColor: AppColors.surfaceRaised,
-          borderColor: AppColors.border,
-          child: FacturationCreatePaymentDateSection(
-            paidAt: _model.paidDay,
-            firstPaidAt: _firstSelectableDay,
-            lastPaidAt: _model.today,
-            onPaidAtChanged: _collectInFlight
-                ? null
-                : (day) => _act(() => _model.paidDayChanged(day)),
-            readOnly: _collectInFlight,
-          ),
-        ),
-        const SizedBox(height: AppDimensions.detailSectionSpacing),
-        FacturationCreatePaymentChargesSection(
-          // Un modèle neuf (D1) reconstruit toute la section : aucune ligne ne
-          // doit garder les champs d'un modèle libéré.
-          key: ObjectKey(_model),
-          groups: _model.groups,
-          schoolTitleOf: widget.sectionTitles.titleOf,
-          onGroupToggle: _collectInFlight
-              ? null
-              : (group, value) => _act(() => _model.groupToggle(group, value)),
-          onGroupSettleAll: _collectInFlight
-              ? null
-              : (group) => _act(() => _model.groupSettleAll(group)),
-          onGroupAmountEdited: _collectInFlight
-              ? null
-              : (group) => _act(() => _model.groupAmountEdited(group)),
-          onGroupTenderEdited: _collectInFlight
-              ? null
-              : (group) => _act(() => _model.groupTenderEdited(group)),
-          onGroupToggleExpanded: _collectInFlight
-              ? null
-              : (group) => _act(() => _model.groupToggleExpanded(group)),
-          onGroupTenderCurrencyChanged: _collectInFlight
-              ? null
-              : (group, currency) => _act(
-                  () => _model.groupTenderCurrencyChanged(group, currency),
-                ),
-          groupCurrencyOptionsOf: (group) =>
-              settlement.optionsFor(group.currency),
-          groupRateLabelOf: (group) => _groupRateLabel(settlement, group),
-          groupChangeLabelOf: (group) =>
-              _groupChangeLabel(settlement, group, l10n),
-          onToggle: _collectInFlight
-              ? null
-              : (entry, value) => _act(() => _model.toggle(entry, value)),
-          onSettleAll: _collectInFlight
-              ? null
-              : (entry) => _act(() => _model.settleAll(entry)),
-          // Le taux vit au-dessus des lignes : il est le même pour toutes
-          // celles d'une même paire, et l'écrire deux fois en ferait deux.
-          settlement: TenderSettlementSection(
-            pairs: _ratePairs(settlement),
-            enabled: !_collectInFlight,
-            // ⚠️ L'absence de taux se dit **quand elle est vraie**, jamais
-            // parce qu'aucune conversion n'est encore choisie. Le mesurer sur
-            // les paires converties faisait annoncer « aucun taux paramétré »
-            // sur un guichet qui venait d'en recevoir deux — le message le plus
-            // trompeur possible, puisqu'il désigne le paramétrage alors que
-            // tout est en place.
-            explainWhenUnavailable: hasNoConvertibleCharge(
-              settlement,
-              _model.entries,
-            ),
-          ),
-          currencyOptionsOf: (entry) =>
-              settlement.optionsFor(entry.charge.currency),
-          onTenderCurrencyChanged: _collectInFlight
-              ? null
-              : (entry, currency) =>
-                    _act(() => _model.tenderCurrencyChanged(entry, currency)),
-          onAllocationEdited: _collectInFlight
-              ? null
-              : (entry) => _act(() => _model.allocationEdited(entry)),
-          onTenderEdited: _collectInFlight
-              ? null
-              : (entry) => _act(() => _model.tenderEdited(entry)),
-          rateLabelOf: (entry) => lineRateLabel(lineOf(settlement, entry)),
-          changeLabelOf: (entry) =>
-              lineChangeLabel(lineOf(settlement, entry), l10n),
-        ),
-        if (correction != null) ...[
-          const SizedBox(height: AppDimensions.detailSectionSpacing),
-          FacturationPaymentCorrectionReasonCard(
-            reason: _correctionReason,
-            onReasonSelected: (reason) =>
-                setState(() => _correctionReason = reason),
-            detailController: _correctionDetail,
-            cashMoved: _cashMoved,
-            onCashMovedChanged: (value) => setState(() => _cashMoved = value),
-            gapLabel: correctionGapLabel(
-              settledBagOf(settlement, _model.entries),
-              correction.originAmounts,
-            ),
-            unchanged: unchanged,
-            failure: context.select<PaymentCorrectionCubit, String?>(
-              (cubit) => cubit.state.failure?.message,
-            ),
-            enabled: !_collectInFlight,
-          ),
         ],
       ],
+      payer: FinanceSectionCard(
+        backgroundColor: AppColors.surfaceRaised,
+        borderColor: AppColors.border,
+        child: FacturationCreatePaymentPayerSection(
+          lastNameController: _payer.lastName,
+          firstNameController: _payer.firstName,
+          middleNameController: _payer.middleName,
+          phoneController: _payer.phone,
+          onPickPayer: _pickPayer,
+          phoneErrorText: _payer.phoneErrorText(l10n),
+          readOnly: _collectInFlight,
+        ),
+      ),
+      // La date a sa propre section : elle ne dit rien de qui paie, et la
+      // loger sous l'identité du payeur obligeait à expliquer en commentaire
+      // pourquoi elle échappait à la mention « facultatif » qui la précédait.
+      date: FinanceSectionCard(
+        backgroundColor: AppColors.surfaceRaised,
+        borderColor: AppColors.border,
+        child: FacturationCreatePaymentDateSection(
+          paidAt: _model.paidDay,
+          firstPaidAt: _firstSelectableDay,
+          lastPaidAt: _model.today,
+          onPaidAtChanged: _collectInFlight
+              ? null
+              : (day) => _act(() => _model.paidDayChanged(day)),
+          readOnly: _collectInFlight,
+        ),
+      ),
+      charges: FacturationCreatePaymentChargesSection(
+        // Un modèle neuf (D1) reconstruit toute la section : aucune ligne ne
+        // doit garder les champs d'un modèle libéré.
+        key: ObjectKey(_model),
+        groups: _model.groups,
+        schoolTitleOf: widget.sectionTitles.titleOf,
+        onGroupToggle: _collectInFlight
+            ? null
+            : (group, value) => _act(() => _model.groupToggle(group, value)),
+        onGroupSettleAll: _collectInFlight
+            ? null
+            : (group) => _act(() => _model.groupSettleAll(group)),
+        onGroupAmountEdited: _collectInFlight
+            ? null
+            : (group) => _act(() => _model.groupAmountEdited(group)),
+        onGroupTenderEdited: _collectInFlight
+            ? null
+            : (group) => _act(() => _model.groupTenderEdited(group)),
+        onGroupToggleExpanded: _collectInFlight
+            ? null
+            : (group) => _act(() => _model.groupToggleExpanded(group)),
+        onGroupTenderCurrencyChanged: _collectInFlight
+            ? null
+            : (group, currency) => _act(
+                () => _model.groupTenderCurrencyChanged(group, currency),
+              ),
+        groupCurrencyOptionsOf: (group) =>
+            settlement.optionsFor(group.currency),
+        groupRateLabelOf: (group) => _groupRateLabel(settlement, group),
+        groupChangeLabelOf: (group) =>
+            _groupChangeLabel(settlement, group, l10n),
+        onToggle: _collectInFlight
+            ? null
+            : (entry, value) => _act(() => _model.toggle(entry, value)),
+        onSettleAll: _collectInFlight
+            ? null
+            : (entry) => _act(() => _model.settleAll(entry)),
+        // Le taux vit au-dessus des lignes : il est le même pour toutes
+        // celles d'une même paire, et l'écrire deux fois en ferait deux.
+        settlement: TenderSettlementSection(
+          pairs: _ratePairs(settlement),
+          enabled: !_collectInFlight,
+          // ⚠️ L'absence de taux se dit **quand elle est vraie**, jamais
+          // parce qu'aucune conversion n'est encore choisie. Le mesurer sur
+          // les paires converties faisait annoncer « aucun taux paramétré »
+          // sur un guichet qui venait d'en recevoir deux — le message le plus
+          // trompeur possible, puisqu'il désigne le paramétrage alors que
+          // tout est en place.
+          explainWhenUnavailable: hasNoConvertibleCharge(
+            settlement,
+            _model.entries,
+          ),
+        ),
+        currencyOptionsOf: (entry) =>
+            settlement.optionsFor(entry.charge.currency),
+        onTenderCurrencyChanged: _collectInFlight
+            ? null
+            : (entry, currency) =>
+                  _act(() => _model.tenderCurrencyChanged(entry, currency)),
+        onAllocationEdited: _collectInFlight
+            ? null
+            : (entry) => _act(() => _model.allocationEdited(entry)),
+        onTenderEdited: _collectInFlight
+            ? null
+            : (entry) => _act(() => _model.tenderEdited(entry)),
+        rateLabelOf: (entry) => lineRateLabel(lineOf(settlement, entry)),
+        changeLabelOf: (entry) =>
+            lineChangeLabel(lineOf(settlement, entry), l10n),
+      ),
+      footer: correction == null
+          ? null
+          : FacturationPaymentCorrectionReasonCard(
+              reason: _correctionReason,
+              onReasonSelected: (reason) =>
+                  setState(() => _correctionReason = reason),
+              detailController: _correctionDetail,
+              cashMoved: _cashMoved,
+              onCashMovedChanged: (value) => setState(() => _cashMoved = value),
+              gapLabel: correctionGapLabel(
+                settledBagOf(settlement, _model.entries),
+                correction.originAmounts,
+              ),
+              unchanged: unchanged,
+              failure: context.select<PaymentCorrectionCubit, String?>(
+                (cubit) => cubit.state.failure?.message,
+              ),
+              enabled: !_collectInFlight,
+            ),
     );
   }
 }

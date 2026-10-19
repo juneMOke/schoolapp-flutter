@@ -90,6 +90,11 @@ class AppDimensions {
   // Largeur de lecture plus resserrée pour la page de facturation (spec §00 :
   // contenu plafonné à 880 dp), centrée et responsive.
   static const facturationContentMaxWidth = 880.0;
+
+  /// Encaissement sur deux colonnes : les créances gardent ~880 dp, la
+  /// colonne du payeur et de la date 400 (cf. `FacturationCreatePaymentLayout`).
+  static const paymentTwoColumnMaxWidth = 1320.0;
+  static const paymentSideColumnWidth = 400.0;
   // Largeur fixe des modales de facturation (spec §00 : centrées, défilables).
   static const facturationModalMaxWidth = 520.0;
   // Sur-couche d'encaissement 2 étapes (Confirmation → Résultat) : largeur 440.
