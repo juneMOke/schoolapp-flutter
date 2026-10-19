@@ -17051,4 +17051,50 @@ class AppLocalizationsFr extends AppLocalizations {
   String communicationListJoin(String first, String second) {
     return '$first, $second';
   }
+
+  @override
+  String get shortcutsHelpTitle => 'Raccourcis clavier';
+
+  @override
+  String get shortcutsHelpSearch => 'Aller à la recherche';
+
+  @override
+  String get shortcutsHelpSidebar => 'Replier ou déplier le menu';
+
+  @override
+  String get shortcutsHelpCreate => 'Nouveau (dossier, dépense, communiqué)';
+
+  @override
+  String get shortcutsHelpRefresh => 'Actualiser l\'écran';
+
+  @override
+  String get shortcutsHelpPrint => 'Imprimer la pièce affichée';
+
+  @override
+  String get shortcutsHelpRows => 'Passer d\'une ligne à l\'autre';
+
+  @override
+  String get shortcutsHelpOpen => 'Ouvrir la ligne';
+
+  @override
+  String get shortcutsHelpSubmit => 'Valider un formulaire';
+
+  @override
+  String get shortcutsHelpClose => 'Fermer une fenêtre';
+
+  @override
+  String get shortcutsHelpNewTab =>
+      'Ouvrir un écran du menu dans un nouvel onglet (web)';
+
+  @override
+  String get shortcutsHelpThis => 'Afficher cette aide';
+
+  @override
+  String get shortcutsKeyEnter => 'Entrée';
+
+  @override
+  String get shortcutsKeyEscape => 'Échap';
+
+  @override
+  String get shortcutsKeyClick => 'clic';
 }

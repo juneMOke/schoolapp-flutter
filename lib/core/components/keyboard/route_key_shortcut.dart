@@ -19,12 +19,17 @@ class RouteKeyShortcut extends StatefulWidget {
   /// imprimable (« / ») doit s'y écrire, pas déclencher le raccourci.
   final bool ignoreWhileTyping;
 
+  /// Relu à chaque touche : faux, la touche passe son chemin (session gelée,
+  /// geste indisponible).
+  final bool Function()? isEnabled;
+
   const RouteKeyShortcut({
     super.key,
     required this.activators,
     required this.onPressed,
     required this.child,
     this.ignoreWhileTyping = false,
+    this.isEnabled,
   });
 
   @override
@@ -50,6 +55,7 @@ class _RouteKeyShortcutState extends State<RouteKeyShortcut> {
     if (route != null && !route.isCurrent) return false;
     if (!TickerMode.valuesOf(context).enabled) return false;
     if (widget.ignoreWhileTyping && isEditingText) return false;
+    if (widget.isEnabled?.call() == false) return false;
     final keyboard = HardwareKeyboard.instance;
     for (final activator in widget.activators) {
       if (activator.accepts(event, keyboard)) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
@@ -70,7 +71,20 @@ class _FacturationPageState extends State<FacturationPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         _split = constraints.maxWidth >= AppBreakpoints.facturationSplitMin;
-        return _page(context);
+        // F5 relit la dernière recherche — une fois une recherche lancée.
+        return PageActionShortcut(
+          action: PageAction.refresh,
+          onInvoke: () => context.read<EnrollmentLocalListBloc>().add(
+            const LocalListRefreshRequested(),
+          ),
+          isAllowed: () =>
+              context
+                  .read<EnrollmentLocalListBloc>()
+                  .state
+                  .summariesQueryType ==
+              EnrollmentSummaryQueryType.byAcademicInfo,
+          child: _page(context),
+        );
       },
     );
   }

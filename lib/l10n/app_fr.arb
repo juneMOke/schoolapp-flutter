@@ -10147,5 +10147,65 @@
   "communicationJoin": "{first} · {second}",
   "@communicationJoin": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
   "communicationListJoin": "{first}, {second}",
-  "@communicationListJoin": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}}
+  "@communicationListJoin": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
+  "shortcutsHelpTitle": "Raccourcis clavier",
+  "@shortcutsHelpTitle": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpSearch": "Aller à la recherche",
+  "@shortcutsHelpSearch": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpSidebar": "Replier ou déplier le menu",
+  "@shortcutsHelpSidebar": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpCreate": "Nouveau (dossier, dépense, communiqué)",
+  "@shortcutsHelpCreate": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpRefresh": "Actualiser l'écran",
+  "@shortcutsHelpRefresh": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpPrint": "Imprimer la pièce affichée",
+  "@shortcutsHelpPrint": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpRows": "Passer d'une ligne à l'autre",
+  "@shortcutsHelpRows": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpOpen": "Ouvrir la ligne",
+  "@shortcutsHelpOpen": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpSubmit": "Valider un formulaire",
+  "@shortcutsHelpSubmit": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpClose": "Fermer une fenêtre",
+  "@shortcutsHelpClose": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpNewTab": "Ouvrir un écran du menu dans un nouvel onglet (web)",
+  "@shortcutsHelpNewTab": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsHelpThis": "Afficher cette aide",
+  "@shortcutsHelpThis": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsKeyEnter": "Entrée",
+  "@shortcutsKeyEnter": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsKeyEscape": "Échap",
+  "@shortcutsKeyEscape": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "shortcutsKeyClick": "clic",
+  "@shortcutsKeyClick": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  }
 }

@@ -26407,6 +26407,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{first}, {second}'**
   String communicationListJoin(String first, String second);
+
+  /// No description provided for @shortcutsHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get shortcutsHelpTitle;
+
+  /// No description provided for @shortcutsHelpSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the search'**
+  String get shortcutsHelpSearch;
+
+  /// No description provided for @shortcutsHelpSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse or expand the menu'**
+  String get shortcutsHelpSidebar;
+
+  /// No description provided for @shortcutsHelpCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'New (enrollment, expense, announcement)'**
+  String get shortcutsHelpCreate;
+
+  /// No description provided for @shortcutsHelpRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the screen'**
+  String get shortcutsHelpRefresh;
+
+  /// No description provided for @shortcutsHelpPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the document shown'**
+  String get shortcutsHelpPrint;
+
+  /// No description provided for @shortcutsHelpRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Move from one row to the next'**
+  String get shortcutsHelpRows;
+
+  /// No description provided for @shortcutsHelpOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the row'**
+  String get shortcutsHelpOpen;
+
+  /// No description provided for @shortcutsHelpSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a form'**
+  String get shortcutsHelpSubmit;
+
+  /// No description provided for @shortcutsHelpClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close a window'**
+  String get shortcutsHelpClose;
+
+  /// No description provided for @shortcutsHelpNewTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a menu screen in a new tab (web)'**
+  String get shortcutsHelpNewTab;
+
+  /// No description provided for @shortcutsHelpThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this help'**
+  String get shortcutsHelpThis;
+
+  /// No description provided for @shortcutsKeyEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get shortcutsKeyEnter;
+
+  /// No description provided for @shortcutsKeyEscape.
+  ///
+  /// In en, this message translates to:
+  /// **'Esc'**
+  String get shortcutsKeyEscape;
+
+  /// No description provided for @shortcutsKeyClick.
+  ///
+  /// In en, this message translates to:
+  /// **'click'**
+  String get shortcutsKeyClick;
 }
 
 class _AppLocalizationsDelegate

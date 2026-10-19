@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
@@ -103,13 +104,19 @@ class _ExpenseRegisterFiltersCardState
                 onNext: widget.onNext,
                 onCurrent: widget.onCurrent,
               ),
+              // Ctrl+N vit sous la même garde que le bouton : sans le droit
+              // d'écrire, ni l'un ni l'autre.
               PermissionGate.access(
                 kExpenseWriteAccess,
-                child: EteeloButton.primary(
-                  label: l10n.expenseNewAction,
-                  icon: Icons.add,
-                  onPressed: widget.onCreate,
-                  fullWidth: false,
+                child: PageActionShortcut(
+                  action: PageAction.create,
+                  onInvoke: widget.onCreate,
+                  child: EteeloButton.primary(
+                    label: l10n.expenseNewAction,
+                    icon: Icons.add,
+                    onPressed: widget.onCreate,
+                    fullWidth: false,
+                  ),
                 ),
               ),
             ],
