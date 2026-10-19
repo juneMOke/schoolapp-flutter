@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/cours_notation_detail_page.dart';
@@ -62,11 +63,9 @@ class _ProgrammeCoordinatorPageState extends State<ProgrammeCoordinatorPage> {
   @override
   Widget build(BuildContext context) {
     final cours = _cours;
-    return PopScope(
+    return ScreenBackScope(
       canPop: cours == null,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _back();
-      },
+      onBack: _back,
       child: AnimatedSwitcher(
         duration: AppMotion.standard,
         switchInCurve: AppMotion.outCurve,

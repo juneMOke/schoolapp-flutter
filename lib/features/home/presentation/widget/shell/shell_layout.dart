@@ -106,13 +106,17 @@ class _ShellLayoutState extends State<ShellLayout> {
                 const TopBar(isCompact: false),
                 // La barre d'en-tête a consommé la marge du haut, la barre
                 // latérale celle de gauche : l'écran ne les compte pas une
-                // seconde fois.
+                // seconde fois. Lu SOUS le `Scaffold` (`Builder`), qui a déjà
+                // retiré le clavier : relu au-dessus, il était retiré deux
+                // fois et la page s'écrasait dès qu'un champ prenait le focus.
                 Expanded(
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    removeLeft: true,
-                    child: content,
+                  child: Builder(
+                    builder: (context) => MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      removeLeft: true,
+                      child: content,
+                    ),
                   ),
                 ),
               ],

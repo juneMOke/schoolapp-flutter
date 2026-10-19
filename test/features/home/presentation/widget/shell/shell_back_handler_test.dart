@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_back_handler.dart';
@@ -18,17 +19,20 @@ void main() {
   late int systemPops;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  setUp(() {
-    systemPops = 0;
+  setUp(() => systemPops = 0);
+
+  Future<void> pumpShell(
+    WidgetTester tester, {
+    Widget body = const Text('écran'),
+  }) async {
+    // Né DANS le test : créé dans `setUp`, hors de la zone de `testWidgets`,
+    // ses écouteurs (la fenêtre de sortie) ne seraient jamais servis sous
+    // `pump()`.
     bloc = NavigationBloc(
       AppLocalizationsFr(),
       permissions: Perm.values.map((p) => p.wire).toList(),
     );
-  });
-
-  tearDown(() => bloc.close());
-
-  Future<void> pumpShell(WidgetTester tester) async {
+    addTearDown(bloc.close);
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (call) async {
@@ -54,7 +58,7 @@ void main() {
             child: Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(child: Text('menu')),
-              body: const Text('écran'),
+              body: body,
             ),
           ),
         ),
@@ -139,5 +143,42 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
 
     expect(systemPops, 1);
+  });
+
+  testWidgets('un écran à niveaux remonte d\'un niveau, sans quitter', (
+    tester,
+  ) async {
+    var levelBacks = 0;
+    await pumpShell(
+      tester,
+      body: ScreenBackScope(
+        canPop: false,
+        onBack: () => levelBacks++,
+        child: const Text('détail'),
+      ),
+    );
+    selectFacturation();
+    await tester.pumpAndSettle();
+
+    await back(tester);
+
+    // Un seul des deux gardiens agit : le niveau, pas le retour à l'Accueil.
+    expect(levelBacks, 1);
+    expect(bloc.state.selectedSubMenuId, MenuConstants.facturationsId);
+  });
+
+  testWidgets('quitter l\'Accueil referme la fenêtre de sortie', (
+    tester,
+  ) async {
+    await pumpShell(tester);
+    await back(tester); // prévient
+    selectFacturation();
+    await tester.pumpAndSettle();
+    await back(tester); // revient à l'Accueil
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+
+    expect(systemPops, 0);
   });
 }
