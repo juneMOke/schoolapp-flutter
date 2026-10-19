@@ -76,6 +76,7 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
         // (nom, montants, statut) — un libellé les doublerait.
         child: Semantics(
           button: widget.row.onTap != null,
+          selected: widget.row.selected ? true : null,
           enabled: widget.row.onTap != null ? true : null,
           child: EteeloActivatable(
             onActivate: widget.row.onTap,
@@ -114,12 +115,14 @@ class _DataTableRowItemState extends State<DataTableRowItem> {
             )
           : null,
       decoration: BoxDecoration(
-        color: isActive
+        color: widget.row.selected
+            ? EteeloDataTableTheme.rowSelectedBackground
+            : isActive
             ? EteeloDataTableTheme.rowHoverBackground
             : baseRowBackground,
         border: Border(
           left: BorderSide(
-            color: isActive
+            color: isActive || widget.row.selected
                 ? EteeloDataTableTheme.rowHoverLeadingBorder
                 : Colors.transparent,
             width: EteeloDataTableTheme.rowLeadingBorderWidth,

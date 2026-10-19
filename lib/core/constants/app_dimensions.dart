@@ -36,8 +36,9 @@ class AppDimensions {
   /// Colonne du montant et des gestes d'une fiche de vente, sur grand écran.
   static const saleDetailSideColumnWidth = 380.0;
 
-  /// Liste de l'historique Boutique, la fiche de la vente à côté.
-  static const boutiqueHistoryListWidth = 440.0;
+  /// La liste d'un écran liste + fiche (cf. `MasterDetailLayout`) : l'historique
+  /// Boutique, la Facturation…
+  static const masterListWidth = 440.0;
 
   /// Bordure d'une tuile de liste, au repos et quand sa fiche est ouverte.
   static const tileBorderWidth = 1.0;

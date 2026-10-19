@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -179,20 +180,9 @@ class _HistoryViewState extends State<_HistoryView> {
                 title: l10n.boutiqueHistoryTitle,
               ),
               child: split
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(
-                          width: AppDimensions.boutiqueHistoryListWidth,
-                          child: SingleChildScrollView(child: list),
-                        ),
-                        const SizedBox(width: AppDimensions.spacingL),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: _selectedPane(l10n),
-                          ),
-                        ),
-                      ],
+                  ? MasterDetailLayout(
+                      master: list,
+                      detail: SingleChildScrollView(child: _selectedPane(l10n)),
                     )
                   : list,
             );

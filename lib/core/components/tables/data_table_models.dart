@@ -118,6 +118,9 @@ class DataTableRowSpec {
   final DataTableTrailingSpec trailing;
   final VoidCallback? onTap;
 
+  /// La fiche de cette ligne est ouverte à côté de la liste.
+  final bool selected;
+
   const DataTableRowSpec({
     required this.id,
     required this.displayName,
@@ -125,6 +128,7 @@ class DataTableRowSpec {
     this.leading,
     this.trailing = const DataTableTrailingSpec(),
     this.onTap,
+    this.selected = false,
   });
 }
 

@@ -44,6 +44,10 @@ class EteeloDataTableTheme {
   static const Color rowOddBackground = AppColors.surfaceRaised;
   static const Color rowHoverBackground = AppColors.stateHover;
   static const Color rowHoverLeadingBorder = AppColors.bleuArdoise;
+
+  /// Ligne dont la fiche est ouverte à côté (liste + fiche) : le liseré du
+  /// survol reste posé, sur le fond pressé.
+  static const Color rowSelectedBackground = AppColors.statePressed;
   static const double rowLeadingBorderWidth = 3;
 
   // Cells
