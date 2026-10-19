@@ -2971,6 +2971,22 @@
   "facturationSearchHint": "Enter First name, Last name, Surname and/or Cycle/Level to filter results.",
   "facturationSearchInvitationTitle": "No search in progress",
   "facturationSearchInvitationMessage": "Enter a name or level above to display matching students.",
+  "communicationPickAnnouncementTitle": "Pick an announcement",
+  "@communicationPickAnnouncementTitle": {
+    "description": "Volet de droite des Communiqués sur grand écran, tant qu'aucun communiqué n'est ouvert."
+  },
+  "communicationPickAnnouncementMessage": "Its message, audience and delivery show here, next to the list.",
+  "@communicationPickAnnouncementMessage": {
+    "description": "Sous-titre du volet vide des Communiqués."
+  },
+  "facturationPickStudentTitle": "Pick a student",
+  "@facturationPickStudentTitle": {
+    "description": "Volet de droite de la Facturation sur grand écran, tant qu'aucun élève n'est choisi."
+  },
+  "facturationPickStudentMessage": "Their billing shows here, next to the list: fees, payments and balance.",
+  "@facturationPickStudentMessage": {
+    "description": "Sous-titre du volet vide de la Facturation."
+  },
   "facturationViewChargesLabel": "View charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "No student matches these criteria. Update the form and try again.",
@@ -9032,6 +9048,14 @@
   "classPresenceTabRegister": "Today's register",
   "classPresenceTabRegisterSubtitle": "{marked} / {total} students",
   "@classPresenceTabRegisterSubtitle": {"placeholders": {"marked": {"type": "int"}, "total": {"type": "int"}}},
+  "classPresenceStudentListTitle": "Students in the class",
+  "@classPresenceStudentListTitle": {
+    "description": "Colonne des élèves de la fiche mensuelle, sur grand écran."
+  },
+  "classPresenceStudentListFilter": "Filter students",
+  "@classPresenceStudentListFilter": {
+    "description": "Filtre de la colonne des élèves de la fiche mensuelle."
+  },
   "classPresenceTabStudent": "Monthly sheet",
   "classPresenceTabStudentSubtitle": "Per student · {month}",
   "@classPresenceTabStudentSubtitle": {"placeholders": {"month": {"type": "String"}}},
@@ -9534,6 +9558,14 @@
   "journalRejectedNotice": "The server refused this entry ({code}). Correct it, then save again.",
   "@journalRejectedNotice": {"placeholders": {"code": {"type": "String"}}},
   "subMenuClassJournal": "Class journal",
+  "journalTeachersTitle": "Teachers",
+  "@journalTeachersTitle": {
+    "description": "Titre de la colonne des professeurs du journal côté direction, sur grand écran."
+  },
+  "journalTeacherFilter": "Filter teachers",
+  "@journalTeacherFilter": {
+    "description": "Filtre de la colonne des professeurs du journal côté direction."
+  },
   "journalTeacherLabel": "Teacher",
   "journalTeacherPlaceholder": "Choose a teacher",
   "journalPickTeacherTitle": "Choose a teacher",
@@ -9803,5 +9835,20 @@
   "communicationJoin": "{first} · {second}",
   "@communicationJoin": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
   "communicationListJoin": "{first}, {second}",
-  "@communicationListJoin": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}}
+  "@communicationListJoin": {"placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}},
+  "shortcutsHelpTitle": "Keyboard shortcuts",
+  "shortcutsHelpSearch": "Go to the search",
+  "shortcutsHelpSidebar": "Collapse or expand the menu",
+  "shortcutsHelpCreate": "New (enrollment, expense, announcement)",
+  "shortcutsHelpRefresh": "Refresh the screen",
+  "shortcutsHelpPrint": "Print the document shown",
+  "shortcutsHelpRows": "Move from one row to the next",
+  "shortcutsHelpOpen": "Open the row",
+  "shortcutsHelpSubmit": "Submit a form",
+  "shortcutsHelpClose": "Close a window",
+  "shortcutsHelpNewTab": "Open a menu screen in a new tab (web)",
+  "shortcutsHelpThis": "Show this help",
+  "shortcutsKeyEnter": "Enter",
+  "shortcutsKeyEscape": "Esc",
+  "shortcutsKeyClick": "click"
 }

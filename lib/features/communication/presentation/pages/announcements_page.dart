@@ -1,6 +1,14 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
+import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -66,50 +74,125 @@ class _AnnouncementsFlow extends StatelessWidget {
   const _AnnouncementsFlow({required this.academicYearId});
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
-        builder: (context, screen) {
-          final flow = context.read<CommunicationFlowCubit>();
-          // Sans le droit d'envoyer, rien ne se rédige : la liste se lit.
-          final canSend = PermissionGate.allowsAccess(
-            context,
-            kAnnouncementSendAccess,
-          );
-          return switch (screen) {
-            CommunicationTemplatePickScreen() => BlocProvider(
-              create: (_) =>
-                  GetIt.instance<AnnouncementTemplatesCubit>()..load(),
-              child: AppPageBackground(
-                scrollable: true,
-                child: TemplatesScreen(
-                  onBack: flow.showList,
-                  onUse: (template) => flow.openNew(
-                    seed: AnnouncementContent(
-                      category: template.category,
-                      title: template.title,
-                      body: template.body,
+  Widget build(BuildContext context) => PageActionShortcut(
+    // Ctrl+N : un nouveau communiqué, depuis la liste, avec le droit d'envoyer.
+    action: PageAction.create,
+    onInvoke: context.read<CommunicationFlowCubit>().openNew,
+    isAllowed: () {
+      final screen = context.read<CommunicationFlowCubit>().state;
+      return (screen is CommunicationListScreen ||
+              screen is CommunicationDetailScreen) &&
+          PermissionGate.allowsAccess(context, kAnnouncementSendAccess);
+    },
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final split = _detailFitsBesideList(context, constraints.maxWidth);
+        return BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
+          builder: (context, screen) {
+            final flow = context.read<CommunicationFlowCubit>();
+            // Sans le droit d'envoyer, rien ne se rédige : la liste se lit.
+            final canSend = PermissionGate.allowsAccess(
+              context,
+              kAnnouncementSendAccess,
+            );
+            if (split &&
+                (screen is CommunicationListScreen ||
+                    screen is CommunicationDetailScreen)) {
+              return _inbox(
+                context,
+                detail: screen is CommunicationDetailScreen ? screen : null,
+                canSend: canSend,
+              );
+            }
+            return switch (screen) {
+              CommunicationTemplatePickScreen() => BlocProvider(
+                create: (_) =>
+                    GetIt.instance<AnnouncementTemplatesCubit>()..load(),
+                child: AppPageBackground(
+                  scrollable: true,
+                  child: TemplatesScreen(
+                    onBack: flow.showList,
+                    onUse: (template) => flow.openNew(
+                      seed: AnnouncementContent(
+                        category: template.category,
+                        title: template.title,
+                        body: template.body,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            CommunicationDetailScreen() => AnnouncementDetailPage(
-              screen: screen,
-            ),
-            CommunicationEditorScreen() => AnnouncementEditorPage(
-              key: ValueKey(screen.session),
-              screen: screen,
-              academicYearId: academicYearId,
-            ),
-            CommunicationListScreen() => AppPageBackground(
-              scrollable: true,
-              child: AnnouncementsListScreen(
-                onOpen: flow.open,
-                onCreate: canSend ? flow.openNew : null,
-                onUseTemplate: canSend ? flow.pickTemplate : null,
+              CommunicationDetailScreen() => AnnouncementDetailPage(
+                screen: screen,
               ),
-            ),
-          };
-        },
-      );
+              CommunicationEditorScreen() => AnnouncementEditorPage(
+                key: ValueKey(screen.session),
+                screen: screen,
+                academicYearId: academicYearId,
+              ),
+              CommunicationListScreen() => AppPageBackground(
+                width: PageContentWidth.wide,
+                scrollable: true,
+                child: AnnouncementsListScreen(
+                  onOpen: flow.open,
+                  onCreate: canSend ? flow.openNew : null,
+                  onUseTemplate: canSend ? flow.pickTemplate : null,
+                ),
+              ),
+            };
+          },
+        );
+      },
+    ),
+  );
+
+  /// La liste et le détail côte à côte seulement si le détail garde la
+  /// largeur où son aperçu reste collé à droite : en deçà, il passerait sous
+  /// le message, et la colonne ne ferait que l'étrangler.
+  static bool _detailFitsBesideList(BuildContext context, double available) {
+    final content = math.min(
+      available - 2 * AppDimensions.spacingL,
+      PageContentWidth.wide.maxWidthIn(context),
+    );
+    final detail =
+        content - AppDimensions.announcementsListWidth - AppDimensions.spacingL;
+    return detail >= AppDimensions.communicationEditorWideMinWidth;
+  }
+
+  /// Grand écran : la liste à gauche, le communiqué ouvert à droite — on lit
+  /// l'un après l'autre sans repasser par la liste.
+  Widget _inbox(
+    BuildContext context, {
+    required CommunicationDetailScreen? detail,
+    required bool canSend,
+  }) {
+    final flow = context.read<CommunicationFlowCubit>();
+    final l10n = AppLocalizations.of(context)!;
+    return AppPageBackground(
+      width: PageContentWidth.wide,
+      scrollable: false,
+      child: MasterDetailLayout(
+        masterWidth: AppDimensions.announcementsListWidth,
+        master: AnnouncementsListScreen(
+          onOpen: flow.open,
+          onCreate: canSend ? flow.openNew : null,
+          onUseTemplate: canSend ? flow.pickTemplate : null,
+          selectedId: detail?.announcement.id,
+        ),
+        detail: detail == null
+            ? SingleChildScrollView(
+                child: EteeloEmptyResult(
+                  label: l10n.communicationPickAnnouncementTitle,
+                  description: l10n.communicationPickAnnouncementMessage,
+                  medallionIcon: Icons.campaign_outlined,
+                ),
+              )
+            : AnnouncementDetailPage(
+                key: ValueKey(detail.announcement.id),
+                screen: detail,
+                embedded: true,
+              ),
+      ),
+    );
+  }
 }

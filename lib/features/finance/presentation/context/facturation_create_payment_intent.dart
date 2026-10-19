@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_correction_context.dart';
 
@@ -16,6 +17,18 @@ class FacturationCreatePaymentIntent extends Equatable {
   /// l'origine et encaisse son remplaçant en un seul geste.
   final FacturationPaymentCorrectionContext? correction;
 
+  /// Appelé dès que l'encaissement (ou la correction) est écrit, avant que la
+  /// page ne se referme : la fiche relit ses listes.
+  ///
+  /// Pas le résultat de `push` : un rafraîchissement du routeur (droits
+  /// relus par la synchronisation) recrée la route empilée avec une nouvelle
+  /// attente, et l'ancienne ne se dénoue jamais (go_router #128122) — la
+  /// fiche garderait des soldes périmés et rouvrirait un encaissement dessus.
+  /// L'intention, elle, survit au rafraîchissement (`InMemoryExtraCodec`).
+  ///
+  /// Hors de l'égalité : c'est un canal de retour, pas une donnée.
+  final VoidCallback? onWritten;
+
   const FacturationCreatePaymentIntent({
     required this.studentId,
     required this.academicYearId,
@@ -26,6 +39,7 @@ class FacturationCreatePaymentIntent extends Equatable {
     required this.levelGroupName,
     required this.studentCharges,
     this.correction,
+    this.onWritten,
   });
 
   const FacturationCreatePaymentIntent.invalid({
@@ -69,6 +83,7 @@ class FacturationCreatePaymentIntent extends Equatable {
     levelGroupName: levelGroupName,
     studentCharges: studentCharges,
     correction: correction,
+    onWritten: onWritten,
   );
 
   static FacturationCreatePaymentIntent fromRouteContext({

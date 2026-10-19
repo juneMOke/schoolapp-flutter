@@ -53,6 +53,9 @@ static void my_application_activate(GApplication* application) {
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+  // Au centre de l'écran, et non dans un coin : c'est la première chose
+  // qu'on voit du logiciel.
+  gtk_window_set_position(window, GTK_WIN_POS_CENTER);
   // Taille plancher : l'interface est pensée pour une tablette en paysage,
   // et ses écrans débordent en deçà.
   GdkGeometry min_size = {};

@@ -1,4 +1,7 @@
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:school_app_flutter/core/components/keyboard/shortcuts_help.dart';
+import 'package:school_app_flutter/features/home/data/sidebar_preference_store.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -73,11 +76,19 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Lu ici, pas dans `create` : un fournisseur ne s'abonne pas à la taille.
+    final sidebarExpanded =
+        MediaQuery.sizeOf(context).width >=
+        AppBreakpoints.sidebarExpandedDefaultMin;
     return BlocProvider(
       create: (context) {
         final bloc = NavigationBloc(
           l10n,
           permissions: context.read<AuthBloc>().state.permissions,
+          sidebarExpanded: sidebarExpanded,
+          sidebarPreference: getIt.isRegistered<SidebarPreferenceStore>()
+              ? getIt<SidebarPreferenceStore>()
+              : null,
         );
         ShellLocationSync.select(bloc, subMenuId?.trim(), l10n);
         return bloc;
@@ -134,25 +145,27 @@ class _HomePageView extends StatelessWidget {
           previous.selectedMenuId != current.selectedMenuId ||
           previous.selectedSubMenuId != current.selectedSubMenuId,
       builder: (context, state) {
-        return SidebarToggleShortcut(
-          child: Row(
-            children: [
-              const Sidebar(),
-              Expanded(
-                child: Column(
-                  children: [
-                    const TopBar(isCompact: false),
-                    Expanded(
-                      child: _buildMainContent(
-                        context,
-                        state,
-                        isCompact: false,
+        return ShortcutsHelpShortcut(
+          child: SidebarToggleShortcut(
+            child: Row(
+              children: [
+                const Sidebar(),
+                Expanded(
+                  child: Column(
+                    children: [
+                      const TopBar(isCompact: false),
+                      Expanded(
+                        child: _buildMainContent(
+                          context,
+                          state,
+                          isCompact: false,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

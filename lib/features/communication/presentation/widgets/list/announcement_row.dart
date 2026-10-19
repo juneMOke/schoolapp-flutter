@@ -25,51 +25,59 @@ class AnnouncementRow extends StatelessWidget {
   /// Un filet au-dessus de la ligne — absent sur la première d'une carte.
   final bool divided;
 
+  /// Ouvert à côté de la liste (grand écran) : la ligne reste marquée.
+  final bool selected;
+
   const AnnouncementRow({
     super.key,
     required this.announcement,
     required this.now,
     required this.onOpen,
     this.divided = true,
+    this.selected = false,
   });
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onOpen,
-    hoverColor: AppColors.stateHover,
-    child: Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        border: divided
-            ? const Border(top: BorderSide(color: AppColors.border))
-            : null,
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide =
-              constraints.maxWidth >=
-              AppDimensions.communicationRowWideMinWidth;
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AnnouncementMedallion(category: announcement.content.category),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _Body(
-                  announcement: announcement,
-                  trailingBelow: wide ? null : _Trailing(announcement, now),
-                ),
-              ),
-              if (wide) ...[
+  Widget build(BuildContext context) => Semantics(
+    selected: selected ? true : null,
+    child: InkWell(
+      onTap: onOpen,
+      hoverColor: AppColors.stateHover,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.statePressed : null,
+          border: divided
+              ? const Border(top: BorderSide(color: AppColors.border))
+              : null,
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide =
+                constraints.maxWidth >=
+                AppDimensions.communicationRowWideMinWidth;
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnnouncementMedallion(category: announcement.content.category),
                 const SizedBox(width: AppSpacing.md),
-                _Trailing(announcement, now, alignEnd: true),
+                Expanded(
+                  child: _Body(
+                    announcement: announcement,
+                    trailingBelow: wide ? null : _Trailing(announcement, now),
+                  ),
+                ),
+                if (wide) ...[
+                  const SizedBox(width: AppSpacing.md),
+                  _Trailing(announcement, now, alignEnd: true),
+                ],
               ],
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     ),
   );

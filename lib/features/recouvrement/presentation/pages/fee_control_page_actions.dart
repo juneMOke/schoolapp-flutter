@@ -33,14 +33,11 @@ Future<void> openStudentSheet(
   FeeControlRow row,
   String academicYearId,
 ) async {
-  final l10n = AppLocalizations.of(context)!;
   final selection = context.read<FeeControlSelectionCubit>();
   final bloc = context.read<FeeControlBloc>();
   // Lus AVANT la modale : elle s'ouvre sur le navigateur racine, hors de portée
   // des blocs de la page.
   final titles = context.read<FeeSectionTitlesCubit>().state;
-  final name =
-      '${row.summary.student.lastName} ${row.summary.student.firstName}';
 
   final openRecord = await showDialog<bool>(
     context: context,
@@ -54,15 +51,8 @@ Future<void> openStudentSheet(
             rate: bloc.state.lastQuery?.rate,
             marked: state.marked.contains(row.studentId),
             onToggleMark: () {
-              final wasMarked = state.marked.contains(row.studentId);
-              selection.toggleMark(row.studentId);
               Navigator.of(dialogContext).pop(false);
-              AppSnackBar.showInfo(
-                context,
-                wasMarked
-                    ? l10n.feeControlSheetUnmarked(name)
-                    : l10n.feeControlSheetMarked(name),
-              );
+              toggleStudentMark(context, row, selection: selection);
             },
             onOpenRecord: () => Navigator.of(dialogContext).pop(true),
           ),
@@ -71,6 +61,29 @@ Future<void> openStudentSheet(
 
   if (openRecord != true || !context.mounted) return;
   openFinancialRecord(context, row, academicYearId);
+}
+
+/// Porte l'élève sur la liste des renvois, ou l'en retire, et le dit.
+///
+/// [selection] : passé quand l'appel vient d'une modale, hors de portée des
+/// blocs de la page.
+void toggleStudentMark(
+  BuildContext context,
+  FeeControlRow row, {
+  FeeControlSelectionCubit? selection,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  final cubit = selection ?? context.read<FeeControlSelectionCubit>();
+  final wasMarked = cubit.state.marked.contains(row.studentId);
+  cubit.toggleMark(row.studentId);
+  final name =
+      '${row.summary.student.lastName} ${row.summary.student.firstName}';
+  AppSnackBar.showInfo(
+    context,
+    wasMarked
+        ? l10n.feeControlSheetUnmarked(name)
+        : l10n.feeControlSheetMarked(name),
+  );
 }
 
 /// Ajoute les élèves cochés à la liste de travail des renvois.

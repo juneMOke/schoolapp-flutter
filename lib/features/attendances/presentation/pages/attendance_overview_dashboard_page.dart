@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
@@ -63,6 +64,7 @@ class _AttendanceOverviewDashboardPageState
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
+      width: PageContentWidth.wide,
       scrollable: true,
       child: BlocBuilder<AttendanceOverviewBloc, AttendanceOverviewState>(
         buildWhen: (prev, curr) =>

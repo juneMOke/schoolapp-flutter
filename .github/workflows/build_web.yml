@@ -73,7 +73,10 @@ jobs:
 
       - name: Build web
         run: |
-          flutter build web --release \
+          # `--no-web-resources-cdn` : CanvasKit et ses polices de secours
+          # servis par notre serveur, pas par gstatic.com — même réseau,
+          # même disponibilité que l'application.
+          flutter build web --release --no-web-resources-cdn \
             --build-name "${{ steps.version.outputs.build_name }}" \
             --build-number "${{ steps.version.outputs.build_number }}" \
             --dart-define=APP_ENV="${{ inputs.environment }}" \

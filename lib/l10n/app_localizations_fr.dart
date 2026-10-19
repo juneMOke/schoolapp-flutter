@@ -4171,6 +4171,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Saisissez un nom ou un niveau ci-dessus pour afficher les élèves correspondants.';
 
   @override
+  String get communicationPickAnnouncementTitle => 'Choisissez un communiqué';
+
+  @override
+  String get communicationPickAnnouncementMessage =>
+      'Son message, son audience et sa diffusion s\'affichent ici, à côté de la liste.';
+
+  @override
+  String get facturationPickStudentTitle => 'Choisissez un élève';
+
+  @override
+  String get facturationPickStudentMessage =>
+      'Sa facturation s\'affiche ici, à côté de la liste : frais, versements et solde.';
+
+  @override
   String get facturationViewChargesLabel => 'Voir les charges';
 
   @override
@@ -14361,6 +14375,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get classPresenceStudentListTitle => 'Élèves de la classe';
+
+  @override
+  String get classPresenceStudentListFilter => 'Filtrer les élèves';
+
+  @override
   String get classPresenceTabStudent => 'Fiche mensuelle';
 
   @override
@@ -16103,6 +16123,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get subMenuClassJournal => 'Journal de classe';
 
   @override
+  String get journalTeachersTitle => 'Professeurs';
+
+  @override
+  String get journalTeacherFilter => 'Filtrer les professeurs';
+
+  @override
   String get journalTeacherLabel => 'Professeur';
 
   @override
@@ -17025,4 +17051,50 @@ class AppLocalizationsFr extends AppLocalizations {
   String communicationListJoin(String first, String second) {
     return '$first, $second';
   }
+
+  @override
+  String get shortcutsHelpTitle => 'Raccourcis clavier';
+
+  @override
+  String get shortcutsHelpSearch => 'Aller à la recherche';
+
+  @override
+  String get shortcutsHelpSidebar => 'Replier ou déplier le menu';
+
+  @override
+  String get shortcutsHelpCreate => 'Nouveau (dossier, dépense, communiqué)';
+
+  @override
+  String get shortcutsHelpRefresh => 'Actualiser l\'écran';
+
+  @override
+  String get shortcutsHelpPrint => 'Imprimer la pièce affichée';
+
+  @override
+  String get shortcutsHelpRows => 'Passer d\'une ligne à l\'autre';
+
+  @override
+  String get shortcutsHelpOpen => 'Ouvrir la ligne';
+
+  @override
+  String get shortcutsHelpSubmit => 'Valider un formulaire';
+
+  @override
+  String get shortcutsHelpClose => 'Fermer une fenêtre';
+
+  @override
+  String get shortcutsHelpNewTab =>
+      'Ouvrir un écran du menu dans un nouvel onglet (web)';
+
+  @override
+  String get shortcutsHelpThis => 'Afficher cette aide';
+
+  @override
+  String get shortcutsKeyEnter => 'Entrée';
+
+  @override
+  String get shortcutsKeyEscape => 'Échap';
+
+  @override
+  String get shortcutsKeyClick => 'clic';
 }

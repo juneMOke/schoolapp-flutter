@@ -26,6 +26,9 @@ class AppDimensions {
   /// les colonnes se serraient. Une fiche ou un formulaire reste à 1180.
   static const listingContentMaxWidth = 1440.0;
 
+  /// Le même plafond sur un écran de 1920 et plus (cf. `PageContentWidth`).
+  static const wideContentMaxWidthXL = 1760.0;
+
   /// Colonne du panier à côté du catalogue, sur grand écran : la largeur d'un
   /// téléphone confortable — celle pour laquelle le panneau est dessiné.
   static const boutiqueCartColumnWidth = 420.0;
@@ -33,8 +36,24 @@ class AppDimensions {
   /// Colonne du montant et des gestes d'une fiche de vente, sur grand écran.
   static const saleDetailSideColumnWidth = 380.0;
 
-  /// Liste de l'historique Boutique, la fiche de la vente à côté.
-  static const boutiqueHistoryListWidth = 440.0;
+  /// La liste d'un écran liste + fiche (cf. `MasterDetailLayout`) : l'historique
+  /// Boutique, la Facturation…
+  static const masterListWidth = 440.0;
+
+  /// Les Communiqués, plus larges : chaque ligne porte un extrait du message.
+  static const announcementsListWidth = 480.0;
+
+  /// La colonne des professeurs du journal côté direction.
+  static const journalTeacherListWidth = 300.0;
+
+  /// La colonne des élèves de la fiche mensuelle des présences.
+  static const studentMonthListWidth = 300.0;
+
+  /// L'aperçu d'un élève ancré à droite du tableau du contrôle des frais.
+  static const feeControlDockedSheetWidth = 400.0;
+
+  /// La fiche d'un agent lue d'un bloc, sur deux colonnes.
+  static const staffFileViewMaxWidth = 1320.0;
 
   /// Bordure d'une tuile de liste, au repos et quand sa fiche est ouverte.
   static const tileBorderWidth = 1.0;
@@ -79,8 +98,7 @@ class AppDimensions {
   static const enrollmentDuplicateDialogMaxWidth = 480.0;
   static const boutiqueDialogMaxWidth = 420.0;
   static const boutiqueBeneficiaryDialogMaxWidth = 520.0;
-  // Part de la hauteur d'écran qu'une modale de détail peut occuper (les
-  // `* 0.88` encore écrits en dur dans les modales de facturation y migreront).
+  // Part de la hauteur d'écran qu'une modale de détail peut occuper.
   static const dialogMaxHeightRatio = 0.88;
 
   // Anneau de focus clavier des zones cliquables maison (EteeloActivatable).
@@ -88,6 +106,11 @@ class AppDimensions {
   // Largeur de lecture plus resserrée pour la page de facturation (spec §00 :
   // contenu plafonné à 880 dp), centrée et responsive.
   static const facturationContentMaxWidth = 880.0;
+
+  /// Encaissement sur deux colonnes : les créances gardent ~880 dp, la
+  /// colonne du payeur et de la date 400 (cf. `FacturationCreatePaymentLayout`).
+  static const paymentTwoColumnMaxWidth = 1320.0;
+  static const paymentSideColumnWidth = 400.0;
   // Largeur fixe des modales de facturation (spec §00 : centrées, défilables).
   static const facturationModalMaxWidth = 520.0;
   // Sur-couche d'encaissement 2 étapes (Confirmation → Résultat) : largeur 440.
@@ -864,9 +887,11 @@ class AppDimensions {
   /// Le journal de classe (spec Mon journal) : point de rupture feuille /
   /// cartes (largeur du contenu), largeur minimale de la feuille et de ses
   /// deux premières colonnes, réglure, marge, lisérés, boutons de navigation,
-  /// colonne des libellés d'une carte, modale de saisie.
+  /// colonne des libellés d'une carte, modale de saisie. La feuille ne
+  /// s'affiche qu'au-delà du point de rupture : son minimum lui est égal, sans
+  /// quoi elle défilerait sur un portable 1 280 barre latérale ouverte.
   static const journalBreakpoint = 900.0;
-  static const journalSheetMinWidth = 1180.0;
+  static const journalSheetMinWidth = journalBreakpoint;
   static const journalHourColumn = 74.0;
   static const journalBranchColumn = 150.0;
   static const journalRuleSpacing = 22.0;

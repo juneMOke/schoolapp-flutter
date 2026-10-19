@@ -29,6 +29,9 @@ class FeeControlDataTable extends StatelessWidget {
   final ValueChanged<FeeControlRow> onRowTapped;
   final ValueChanged<FeeControlRow> onSelectionToggled;
 
+  /// L'élève dont l'aperçu est ancré à côté du tableau : sa ligne reste marquée.
+  final String? openedStudentId;
+
   final bool isLoading;
   final bool isError;
   final String? loadingLabel;
@@ -51,6 +54,7 @@ class FeeControlDataTable extends StatelessWidget {
     required this.onViewRequested,
     required this.onRowTapped,
     required this.onSelectionToggled,
+    this.openedStudentId,
     this.totalCount,
     this.isLoading = false,
     this.isError = false,
@@ -85,6 +89,7 @@ class FeeControlDataTable extends StatelessWidget {
             onViewRequested: onViewRequested,
             onRowTapped: onRowTapped,
             onSelectionToggled: onSelectionToggled,
+            openedStudentId: openedStudentId,
           ),
           config: DataTableViewConfig(
             columns: FeeControlTableLayout.columns(l10n, wide: wide),

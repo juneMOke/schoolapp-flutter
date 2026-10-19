@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 class ClassesPageHero extends StatelessWidget {
   final String title;
@@ -46,7 +47,8 @@ class ClassesPageHero extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isCompact = constraints.maxWidth < 720;
+          final isCompact =
+              constraints.maxWidth < AppBreakpoints.pageHeroRowMin;
           return isCompact
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

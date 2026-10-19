@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_line.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_day_cubit.dart';
@@ -18,6 +19,7 @@ class JournalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AppPageBackground(
     scrollable: true,
+    width: PageContentWidth.wide,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

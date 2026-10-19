@@ -35,6 +35,9 @@ class FacturationDataTable extends StatefulWidget {
   final String Function(int current, int total)? pageLabelBuilder;
   final int pageSize;
 
+  /// Ligne marquée : sa fiche est ouverte à côté de la liste.
+  final String? selectedStudentId;
+
   const FacturationDataTable({
     super.key,
     required this.summaries,
@@ -52,6 +55,7 @@ class FacturationDataTable extends StatefulWidget {
     this.onNextPage,
     this.pageLabelBuilder,
     this.pageSize = AppConstants.enrollmentDefaultPageSize,
+    this.selectedStudentId,
   });
 
   @override
@@ -167,6 +171,10 @@ class _FacturationDataTableState extends State<FacturationDataTable> {
               tooltip: l10n.facturationViewChargesLabel,
               onTap: () => widget.onViewRequested(summary),
             ),
+            // La ligne entière ouvre la fiche : à la souris comme au clavier
+            // (Entrée), sans viser l'œil.
+            onTap: () => widget.onViewRequested(summary),
+            selected: summary.student.id == widget.selectedStudentId,
           ),
         )
         .toList(growable: false);

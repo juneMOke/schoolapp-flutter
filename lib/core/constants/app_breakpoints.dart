@@ -2,12 +2,44 @@ class AppBreakpoints {
   const AppBreakpoints._();
 
   // Global responsive breakpoints (single source of truth).
+
+  /// Paliers génériques de grand écran, mesurés sur la fenêtre ou sur la
+  /// largeur reçue. Les seuils propres à un écran s'y rattachent quand ils
+  /// disent la même chose (« assez large pour deux colonnes »).
+  static const double expanded = 1280.0;
+  static const double large = 1600.0;
+  static const double xlarge = 1920.0;
+
   static const double detailCompactMax = 760.0;
   static const double navigationCompactMax = 1024.0;
+
+  /// Fenêtre sous laquelle la barre latérale s'ouvre repliée (rail), tant que
+  /// l'utilisateur n'a rien choisi : à 1 280, ses 280 dp laissaient au
+  /// contenu moins de 1 000 dp.
+  static const double sidebarExpandedDefaultMin = 1366.0;
   static const double dataTableCardsMax = 600.0;
   static const double fabExtendedMinWidth = dataTableCardsMax;
   static const double tableFooterStackMax = 560.0;
   static const double dataTablePhoneMax = 390.0;
+
+  /// Téléphone étroit : marges de page resserrées en deçà.
+  static const double phoneNarrowMax = 420.0;
+
+  /// Modale de téléphone : marges latérales resserrées jusqu'à ce seuil.
+  static const double dialogCompactMax = 560.0;
+
+  /// Grille de champs d'un formulaire (sur la largeur de sa carte) : deux
+  /// colonnes au-delà de [formGridTwoColMin], trois au-delà de
+  /// [formGridThreeColMin].
+  static const double formGridTwoColMin = 560.0;
+  static const double formGridThreeColMin = 880.0;
+
+  /// En-tête de page à chiffres (Classes) : en deçà, le titre passe au-dessus
+  /// des chiffres au lieu de les serrer.
+  static const double pageHeroRowMin = 720.0;
+
+  /// Carte de réglage à trois champs (taux de change) : sur une ligne au-delà.
+  static const double settingsFieldsRowMin = 640.0;
   static const double enrollmentTableGridSwitchMax = dataTableCardsMax;
   static const double authWideMin = 800.0;
 
@@ -34,12 +66,7 @@ class AppBreakpoints {
   static const double loginSplitMin = 900.0;
   static const double loginStackedMin = 560.0;
   static const double formMediumMin = 860.0;
-  static const double formWideMin = 1280.0;
-
-  // Première inscription — au-delà (tablette paysage 1280×800+), l'action de
-  // création quitte le FAB flottant (qui masquait la pagination) pour devenir
-  // un bouton inline sous le tableau. Seuil dédié (découplé de formWideMin).
-  static const double enrollmentInlineCreateMin = formWideMin;
+  static const double formWideMin = expanded;
 
   // Étape Tuteurs — en-tête (titre + bouton « Ajouter un tuteur »). Au-delà :
   // titre et bouton sur une même ligne (Row). En deçà (téléphone) : empilés,
@@ -66,6 +93,27 @@ class AppBreakpoints {
   // sous le total et prend toute la largeur — le CTA d'un guichet ne se
   // discute pas avec un montant pour quelques dizaines de dp.
   static const double financeCollectBarRowMin = 640.0;
+  // Encaissement (page plein écran, hors coquille) : au-delà, les créances à
+  // gauche, le payeur et la date en colonne à droite.
+  static const double paymentTwoColumnMin = expanded;
+  // Facturation (largeur reçue) : au-delà, la fiche de l'élève s'ouvre à côté
+  // de la liste — 440 de liste, ~940 de fiche, assez pour ses deux colonnes.
+  static const double facturationSplitMin = 1400.0;
+  // Journal, direction : au-delà, les professeurs en colonne à gauche (300)
+  // et la feuille du jour à droite, assez large pour rester une feuille.
+  static const double journalDirectionSplitMin = 1260.0;
+  // Présences, fiche mensuelle (largeur de l'onglet) : au-delà, les élèves en
+  // colonne à gauche, la fiche du mois à droite.
+  static const double studentMonthSplitMin = 1100.0;
+  // Contrôle des frais (largeur reçue) : au-delà, l'aperçu d'un élève s'ancre
+  // à droite du tableau, qui garde ses ~900 dp de disposition large.
+  static const double feeControlDockedSheetMin = 1400.0;
+  // Récapitulatif d'une inscription (largeur de sa carte) : au-delà, l'élève
+  // et sa famille à gauche, sa scolarité et ses frais à droite.
+  static const double enrollmentSummaryTwoColumnMin = 900.0;
+  // Fiche d'un agent en consultation (fenêtre, page plein écran) : au-delà,
+  // la fiche entière sur deux colonnes, sans assistant à étapes.
+  static const double staffFileViewMin = expanded;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.

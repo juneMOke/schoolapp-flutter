@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_pdf_preview.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -125,7 +126,21 @@ class EteeloDocumentViewerView extends StatelessWidget {
 
   void _close(BuildContext context) => Navigator.of(context).maybePop();
 
+  /// Une impression à la fois : un second Ctrl+P (ou un double clic)
+  /// pendant les trente secondes d'une thermique sortirait deux papiers.
+  static bool _printing = false;
+
   Future<void> _print(BuildContext context) async {
+    if (_printing) return;
+    _printing = true;
+    try {
+      await _printOnce(context);
+    } finally {
+      _printing = false;
+    }
+  }
+
+  Future<void> _printOnce(BuildContext context) async {
     final print = onPrint;
     // Capturé AVANT l'await : l'impression peut durer — une trentaine de
     // secondes sur une thermique — et le contexte du dialogue a pu disparaître
@@ -189,47 +204,52 @@ class EteeloDocumentViewerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
     final preview = previewBuilder;
 
-    return Dialog(
-      backgroundColor: AppColors.surfaceRaised,
-      surfaceTintColor: Colors.transparent,
-      clipBehavior: Clip.antiAlias,
-      insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: AppDimensions.documentViewerMaxWidth,
-          maxHeight: maxHeight,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DocumentViewerHeader(
-              title: title,
-              subtitle: document.reference,
-              onClose: () => _close(context),
-            ),
-            const Divider(height: 1, color: AppColors.border),
-            Flexible(
-              child: preview == null
-                  ? EteeloPdfPreview(
-                      bytes: document.bytes,
-                      fileName: document.fileName,
-                    )
-                  : preview(context, document),
-            ),
-            const Divider(height: 1, color: AppColors.border),
-            DocumentViewerFooter(
-              canShare: canShare,
-              canPrint: canPrint,
-              onPrint: () => _print(context),
-              onShare: () => _share(context),
-              onClose: () => _close(context),
-            ),
-          ],
+    return PageActionShortcut(
+      action: PageAction.print,
+      onInvoke: canPrint ? () => _print(context) : null,
+      child: Dialog(
+        backgroundColor: AppColors.surfaceRaised,
+        surfaceTintColor: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: AppDimensions.documentViewerMaxWidth,
+            maxHeight: maxHeight,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DocumentViewerHeader(
+                title: title,
+                subtitle: document.reference,
+                onClose: () => _close(context),
+              ),
+              const Divider(height: 1, color: AppColors.border),
+              Flexible(
+                child: preview == null
+                    ? EteeloPdfPreview(
+                        bytes: document.bytes,
+                        fileName: document.fileName,
+                      )
+                    : preview(context, document),
+              ),
+              const Divider(height: 1, color: AppColors.border),
+              DocumentViewerFooter(
+                canShare: canShare,
+                canPrint: canPrint,
+                onPrint: () => _print(context),
+                onShare: () => _share(context),
+                onClose: () => _close(context),
+              ),
+            ],
+          ),
         ),
       ),
     );

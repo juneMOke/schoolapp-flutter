@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
@@ -9,7 +10,14 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 class EvalStickyBottomBar extends StatelessWidget {
   final Widget child;
 
-  const EvalStickyBottomBar({super.key, required this.child});
+  /// La largeur de la page au-dessus : la barre s'aligne sur ses bords.
+  final PageContentWidth width;
+
+  const EvalStickyBottomBar({
+    super.key,
+    required this.child,
+    this.width = PageContentWidth.reading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +34,11 @@ class EvalStickyBottomBar extends StatelessWidget {
         // Sans lui, l'Align remplirait la contrainte lâche du
         // bottomNavigationBar (toute la hauteur d'écran) et masquerait le
         // corps + pousserait les toasts flottants hors écran.
-        child: ContentMaxWidth(heightFactor: 1.0, child: child),
+        child: ContentMaxWidth(
+          heightFactor: 1.0,
+          maxWidth: width.maxWidthIn(context),
+          child: child,
+        ),
       ),
     );
   }

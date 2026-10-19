@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
@@ -112,9 +113,8 @@ class _DataTableHeaderCell extends StatelessWidget {
               : l10n.dataTableSortDescending)
         : l10n.dataTableSortNone;
 
-    final label = Text(
+    final label = EteeloOverflowText(
       column.label.toUpperCase(),
-      overflow: TextOverflow.ellipsis,
       style: EteeloDataTableTheme.headerLabelStyle.copyWith(
         color: isActive
             ? (tone?.headerInkSorted ??

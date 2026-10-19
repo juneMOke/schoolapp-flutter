@@ -105,76 +105,84 @@ class _AccordionHeader extends StatelessWidget {
       button: true,
       expanded: expanded,
       label: classroom.name,
-      child: InkWell(
-        onTap: onToggle,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [visual.soft, AppColors.surfaceRaised],
-              stops: const [0, 0.72],
+      // Un `Material` à soi, juste au-dessus : `Ink` peint sur le Material le
+      // plus proche, que les fonds opaques de la carte recouvraient — le
+      // dégradé disparaissait, et le survol avec.
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onToggle,
+          // `Ink` et non `Container` : un fond plein posé sous l'InkWell cachait
+          // le survol et le focus clavier.
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [visual.soft, AppColors.surfaceRaised],
+                stops: const [0, 0.72],
+              ),
             ),
-          ),
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              _GradeMedallion(identity: identity, visual: visual),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      classroom.name,
-                      style: AppTypography.titleMedium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.people_alt_outlined,
-                          size: 14,
-                          color: AppColors.textMuted,
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Row(
+              children: [
+                _GradeMedallion(identity: identity, visual: visual),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        classroom.name,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: AppColors.textPrimary,
                         ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Flexible(
-                          child: Text(
-                            l10n.myCoursesStudentCount(classroom.totalCount),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.people_alt_outlined,
+                            size: 14,
+                            color: AppColors.textMuted,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Flexible(
+                            child: Text(
+                              l10n.myCoursesStudentCount(classroom.totalCount),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              EteeloChip(
-                icon: Icons.auto_stories_outlined,
-                label: l10n.myCoursesClassCourseCount(group.courses.length),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              AnimatedRotation(
-                turns: expanded ? 0.5 : 0,
-                duration: AppMotion.standard,
-                curve: AppMotion.outCurve,
-                child: const Icon(
-                  Icons.expand_more_rounded,
-                  color: AppColors.bleuArdoise,
+                const SizedBox(width: AppSpacing.sm),
+                EteeloChip(
+                  icon: Icons.auto_stories_outlined,
+                  label: l10n.myCoursesClassCourseCount(group.courses.length),
                 ),
-              ),
-            ],
+                const SizedBox(width: AppSpacing.sm),
+                AnimatedRotation(
+                  turns: expanded ? 0.5 : 0,
+                  duration: AppMotion.standard,
+                  curve: AppMotion.outCurve,
+                  child: const Icon(
+                    Icons.expand_more_rounded,
+                    color: AppColors.bleuArdoise,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

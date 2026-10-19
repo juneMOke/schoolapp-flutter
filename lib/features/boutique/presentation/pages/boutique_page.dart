@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -208,9 +209,9 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
             final sideCart =
                 constraints.maxWidth >= AppBreakpoints.boutiqueSideCartMin;
             return AppPageBackground(
-              maxWidth: sideCart
-                  ? AppDimensions.listingContentMaxWidth
-                  : AppDimensions.detailContentMaxWidth,
+              width: sideCart
+                  ? PageContentWidth.wide
+                  : PageContentWidth.reading,
               scrollable: !sideCart,
               // Le panier vit dans la barre, hors du défilement : une caisse
               // dont le panier disparaît sous le catalogue fait recompter le

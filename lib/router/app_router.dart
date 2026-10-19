@@ -4,9 +4,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/enrollment_constants.dart';
-import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
-import 'package:school_app_flutter/features/attendances/presentation/pages/disciplinary_student_detail_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/forgot_password_email_page.dart';
@@ -34,10 +32,6 @@ import 'package:school_app_flutter/features/documents/presentation/pages/documen
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/first_registration_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_registrations_page.dart';
-import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
-import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
@@ -62,8 +56,11 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_l
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/router/return_location.dart';
+import 'package:school_app_flutter/router/route_parameters.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
+import 'package:school_app_flutter/router/student_record_routes.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_capture_support.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -104,7 +101,7 @@ class RouterNotifier extends ChangeNotifier {
     }
 
     _snapshot = nextSnapshot;
-    notifyListeners();
+    RouteExitGuard.duringRouterRefresh(notifyListeners);
   }
 
   @override
@@ -353,6 +350,10 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.photoSessionPath,
       name: AppRoutesNames.photoSession,
+      // Sans prise de vue possible (navigateur), l'adresse tapée ou un favori
+      // ne mènent pas à une séance qui échouerait à chaque photo.
+      redirect: (context, state) =>
+          photoCaptureSupported ? null : AppRoutesNames.homePath,
       builder: (context, state) => const PhotoSessionPage(),
     ),
     // La coquille : `/home` (Accueil) et `/home/{sousMenu}` (chaque écran du
@@ -361,8 +362,13 @@ class AppRouter {
     // seconde, et son état (menu ouvert, saisie en cours) survit. C'est ce
     // qui donne à chaque écran son adresse : Précédent / Suivant du
     // navigateur, F5 et lien partagé y mènent.
+    //
+    // Précédent y change d'écran sans changer de page : une fiche poussée
+    // par-dessus (agent, contrat) resterait affichée. `onExit` consulte sa
+    // garde, et la referme si l'on part.
     GoRoute(
       path: AppRoutesNames.homePath,
+      onExit: RouteExitGuard.onExit,
       name: AppRoutesNames.home,
       // Ancienne forme `?subMenuId=` : ramenée à l'adresse canonique.
       redirect: (context, state) {
@@ -375,6 +381,7 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.homeSubMenuRoute,
       name: AppRoutesNames.homeSubMenu,
+      onExit: RouteExitGuard.onExit,
       pageBuilder: (context, state) =>
           _shellPage(state.pathParameters['subMenuId']),
     ),
@@ -421,59 +428,7 @@ class AppRouter {
           path: AppRoutesNames.facturations,
           // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
           builder: (context, state) => const FacturationPage.fromRoute(),
-          routes: [
-            GoRoute(
-              path: 'detail/:studentId/:academicYearId',
-              redirect: (context, state) {
-                if (!_hasRequiredPathParameters(state, const [
-                  'studentId',
-                  'academicYearId',
-                ])) {
-                  return AppRoutesNames.facturations;
-                }
-                return null;
-              },
-              builder: (context, state) {
-                final studentId = state.pathParameters['studentId'] ?? '';
-                final academicYearId =
-                    state.pathParameters['academicYearId'] ?? '';
-
-                final intent = FacturationDetailIntent.fromRouteContext(
-                  studentId: studentId,
-                  academicYearId: academicYearId,
-                  extra: state.extra,
-                );
-
-                return FacturationDetailPage(intent: intent);
-              },
-              routes: [
-                // Encaissement : écran plein empilé SUR la fiche (`push`), qui
-                // rend `true` au succès pour que la fiche resynchronise ses
-                // listes. La garde de paramètres de la fiche s'applique aussi
-                // ici — les redirects de la pile matchée sont tous joués.
-                GoRoute(
-                  path: 'encaissement',
-                  // Précédent du navigateur pendant un encaissement : retenu
-                  // (cf. `RouteExitGuard`).
-                  onExit: RouteExitGuard.onExit,
-                  builder: (context, state) {
-                    final studentId = state.pathParameters['studentId'] ?? '';
-                    final academicYearId =
-                        state.pathParameters['academicYearId'] ?? '';
-
-                    final intent =
-                        FacturationCreatePaymentIntent.fromRouteContext(
-                          studentId: studentId,
-                          academicYearId: academicYearId,
-                          extra: state.extra,
-                        );
-
-                    return FacturationCreatePaymentPage(intent: intent);
-                  },
-                ),
-              ],
-            ),
-          ],
+          routes: [StudentRecordRoutes.facturationDetail()],
         ),
       ],
     ),
@@ -493,7 +448,8 @@ class AppRouter {
           // `extra` porte les critères quand l'écran est ouvert depuis le
           // tableau de bord ; vide, l'écran s'ouvre vierge comme par le menu.
           // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
-          builder: (context, state) => FeeControlPage.fromRoute(state.extra),
+          builder: (context, state) =>
+              FeeControlPage.fromRoute(state.extra, state.uri.queryParameters),
         ),
       ],
     ),
@@ -541,6 +497,10 @@ class AppRouter {
     // chacun son cubit, monté par sa page.
     GoRoute(
       path: AppRoutesNames.hrStaffFile,
+      // La fiche d'un agent et le formulaire de contrat sont poussés par-dessus
+      // (`Navigator`) : Précédent du navigateur quitte cette route, et consulte
+      // donc leur garde.
+      onExit: RouteExitGuard.onExit,
       builder: (context, state) => const StaffFilePage(),
     ),
     GoRoute(
@@ -582,31 +542,7 @@ class AppRouter {
           path: AppRoutesNames.presences,
           builder: (context, state) => const ClassPresencePage(),
         ),
-        GoRoute(
-          path: AppRoutesNames.disciplinaryStudentDetail,
-          redirect: (context, state) {
-            final studentId = state.pathParameters['studentId'] ?? '';
-            final academicYearId = state.pathParameters['academicYearId'] ?? '';
-
-            if (studentId.trim().isEmpty || academicYearId.trim().isEmpty) {
-              return AppRoutesNames.presences;
-            }
-
-            return null;
-          },
-          builder: (context, state) {
-            final studentId = state.pathParameters['studentId'] ?? '';
-            final academicYearId = state.pathParameters['academicYearId'] ?? '';
-
-            final intent = DisciplinaryStudentDetailIntent.fromRouteContext(
-              studentId: studentId,
-              academicYearId: academicYearId,
-              extra: state.extra,
-            );
-
-            return DisciplinaryStudentDetailPage(intent: intent);
-          },
-        ),
+        StudentRecordRoutes.disciplinaryDetail(),
       ],
     ),
     ShellRoute(
@@ -619,7 +555,7 @@ class AppRouter {
             GoRoute(
               path: 'catalogue/:studentId/:academicYearId',
               redirect: (context, state) {
-                if (!_hasRequiredPathParameters(state, const [
+                if (!hasRequiredPathParameters(state, const [
                   'studentId',
                   'academicYearId',
                 ])) {
@@ -667,17 +603,4 @@ class AppRouter {
     key: _shellPageKey,
     child: HomePage(subMenuId: subMenuId),
   );
-
-  static bool _hasRequiredPathParameters(
-    GoRouterState state,
-    List<String> keys,
-  ) {
-    for (final key in keys) {
-      final value = state.pathParameters[key] ?? '';
-      if (value.trim().isEmpty) {
-        return false;
-      }
-    }
-    return true;
-  }
 }

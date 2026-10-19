@@ -24,6 +24,10 @@ class StaffAgentBody extends StatelessWidget {
   /// champs de la fiche.
   final Map<int, Widget> appendices;
 
+  /// Consultation sur grand écran : les quatre étapes à la fois, sur deux
+  /// colonnes, au lieu d'une étape à la fois.
+  final bool wholeFile;
+
   const StaffAgentBody({
     super.key,
     required this.state,
@@ -31,24 +35,56 @@ class StaffAgentBody extends StatelessWidget {
     required this.today,
     required this.onChanged,
     this.appendices = const {},
+    this.wholeFile = false,
   });
+
+  Widget _step(int index) => switch (index) {
+    0 => StaffIdentityStep(state: state, onChanged: onChanged),
+    1 => StaffAddressStep(state: state, catalog: catalog, onChanged: onChanged),
+    2 => StaffJobStep(state: state, today: today, onChanged: onChanged),
+    _ => StaffDiplomasStep(state: state, onChanged: onChanged),
+  };
+
+  /// Une étape et ce qui la suit (contrats, pièces).
+  Widget _section(int index) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      KeyedSubtree(key: ValueKey('staff-step-$index'), child: _step(index)),
+      if (appendices[index] case final appendix?) ...[
+        const SizedBox(height: AppSpacing.lg),
+        appendix,
+      ],
+      const SizedBox(height: AppSpacing.lg),
+    ],
+  );
+
+  /// L'identité et l'adresse à gauche, le poste et les diplômes à droite.
+  Widget _wholeFile() => SingleChildScrollView(
+    padding: const EdgeInsets.all(AppSpacing.lg),
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: AppDimensions.staffFileViewMaxWidth,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: Column(children: [_section(0), _section(1)])),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(child: Column(children: [_section(2), _section(3)])),
+          ],
+        ),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
+    if (wholeFile) return _wholeFile();
     final l10n = AppLocalizations.of(context)!;
     final stepErrors = state.visibleErrors.keys
         .where((field) => field.step == state.step)
         .length;
-    final step = switch (state.step) {
-      0 => StaffIdentityStep(state: state, onChanged: onChanged),
-      1 => StaffAddressStep(
-        state: state,
-        catalog: catalog,
-        onChanged: onChanged,
-      ),
-      2 => StaffJobStep(state: state, today: today, onChanged: onChanged),
-      _ => StaffDiplomasStep(state: state, onChanged: onChanged),
-    };
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Center(
@@ -63,7 +99,7 @@ class StaffAgentBody extends StatelessWidget {
                 EteeloNotice.error(l10n.staffErrorsToFix(stepErrors)),
               KeyedSubtree(
                 key: ValueKey('staff-step-${state.step}'),
-                child: step,
+                child: _step(state.step),
               ),
               if (appendices[state.step] case final appendix?) ...[
                 const SizedBox(height: AppSpacing.lg),

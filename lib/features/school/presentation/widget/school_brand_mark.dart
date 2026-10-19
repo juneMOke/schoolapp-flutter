@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/helpers/image_decode_size.dart';
 import 'package:school_app_flutter/core/branding/eteelo_logo.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
@@ -91,6 +92,7 @@ class SchoolBrandMark extends StatelessWidget {
       logo.bytes,
       width: size,
       height: size,
+      cacheWidth: imageDecodeWidth(context, size),
       fit: BoxFit.contain,
       filterQuality: FilterQuality.medium,
       // Le sceau change quand l'école en dépose un nouveau : garder l'ancien à

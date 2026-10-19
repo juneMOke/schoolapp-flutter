@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 
 class FacturationDetailIntent extends Equatable {
   final String studentId;
@@ -69,6 +70,19 @@ class FacturationDetailIntent extends Equatable {
     levelName: levelName,
     levelGroupName: levelGroupName,
   );
+
+  /// La fiche rouverte par son adresse : l'identité relue en base locale
+  /// remplace celle que la navigation n'a pas pu passer.
+  FacturationDetailIntent withIdentity(StudentIdentity identity) =>
+      FacturationDetailIntent(
+        studentId: studentId,
+        academicYearId: academicYearId,
+        firstName: identity.firstName,
+        lastName: identity.lastName,
+        surname: identity.surname,
+        levelName: identity.levelName,
+        levelGroupName: identity.levelGroupName,
+      );
 
   static FacturationDetailIntent fromRouteContext({
     required String studentId,

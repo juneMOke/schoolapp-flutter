@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -44,7 +45,7 @@ class ExpenseQueueScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
-    maxWidth: AppDimensions.listingContentMaxWidth,
+    width: PageContentWidth.wide,
     child: BlocBuilder<ExpenseQueueCubit, ExpenseQueueState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||

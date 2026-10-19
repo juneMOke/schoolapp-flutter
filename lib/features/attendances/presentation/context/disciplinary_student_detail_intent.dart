@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 
 class DisciplinaryStudentDetailIntent extends Equatable {
   final String studentId;
@@ -55,6 +56,21 @@ class DisciplinaryStudentDetailIntent extends Equatable {
     levelGroupName: levelGroupName,
     classroomName: classroomName,
   );
+
+  /// Le dossier rouvert par son adresse : l'identité relue en base locale
+  /// remplace celle que la navigation n'a pas pu passer. La salle de classe
+  /// n'y figure pas : elle ne sert qu'au sur-titre.
+  DisciplinaryStudentDetailIntent withIdentity(StudentIdentity identity) =>
+      DisciplinaryStudentDetailIntent(
+        studentId: studentId,
+        studentFirstName: identity.firstName,
+        studentLastName: identity.lastName,
+        studentMiddleName: identity.surname.isEmpty ? null : identity.surname,
+        studentGender: identity.gender,
+        academicYearId: academicYearId,
+        levelName: identity.levelName,
+        levelGroupName: identity.levelGroupName,
+      );
 
   static DisciplinaryStudentDetailIntent fromRouteContext({
     required String studentId,

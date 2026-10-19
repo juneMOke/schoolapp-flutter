@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/helpers/support_contact.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -173,6 +174,7 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      width: PageContentWidth.wide,
       scrollable: true,
       bottomNavigationBar: _StickySaveBar(
         draft: _draft,
@@ -307,6 +309,7 @@ class _StickySaveBar extends StatelessWidget {
             state.rows.isNotEmpty;
         if (!ready) return const SizedBox.shrink();
         return EvalStickyBottomBar(
+          width: PageContentWidth.wide,
           child: SaisieSaveBar(
             draft: draft,
             isSaving: isSaving,

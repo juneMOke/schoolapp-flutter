@@ -418,7 +418,8 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
     // Deux devises se lisent côte à côte, jamais additionnées.
     final amount = intent.amounts.entries.map(MoneyFormat.format).join(' · ');
     final date = MaterialLocalizations.of(

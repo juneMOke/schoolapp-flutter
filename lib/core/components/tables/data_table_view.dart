@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/arrow_navigable_results.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_empty_state.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_error_state.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_footer_bar.dart';
@@ -148,26 +149,30 @@ class DataTableView extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
-      key: const ValueKey('data-table-rows'),
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: rows.length,
-      separatorBuilder: (_, _) => showRowDividers
-          ? const Divider(
-              height: EteeloDataTableTheme.separatorThickness,
-              thickness: EteeloDataTableTheme.separatorThickness,
-              color: EteeloDataTableTheme.separatorColor,
-            )
-          : const SizedBox.shrink(),
-      itemBuilder: (context, index) => DataTableRowItem(
-        key: ValueKey(rows[index].id),
-        row: rows[index],
-        columns: config.columns,
-        isEven: index.isEven,
-        trailingBuilders: trailingBuilders,
-        density: config.density,
-        tone: config.tone,
+    // Au clavier : ↑/↓ d'une ligne à l'autre, Entrée ouvre — sans une
+    // tabulation par ligne.
+    return ArrowNavigableRows(
+      child: ListView.separated(
+        key: const ValueKey('data-table-rows'),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: rows.length,
+        separatorBuilder: (_, _) => showRowDividers
+            ? const Divider(
+                height: EteeloDataTableTheme.separatorThickness,
+                thickness: EteeloDataTableTheme.separatorThickness,
+                color: EteeloDataTableTheme.separatorColor,
+              )
+            : const SizedBox.shrink(),
+        itemBuilder: (context, index) => DataTableRowItem(
+          key: ValueKey(rows[index].id),
+          row: rows[index],
+          columns: config.columns,
+          isEven: index.isEven,
+          trailingBuilders: trailingBuilders,
+          density: config.density,
+          tone: config.tone,
+        ),
       ),
     );
   }

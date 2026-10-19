@@ -1,7 +1,9 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/home/data/sidebar_preference_store.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -269,4 +271,79 @@ void main() {
           expect(bloc.state.selectedSubMenuId, MenuConstants.accueilId),
     );
   });
+
+  group('choix de la barre latérale gardé sur le poste', () {
+    late _MemoryStorage storage;
+
+    setUp(() => storage = _MemoryStorage());
+
+    NavigationBloc build({bool sidebarExpanded = true}) => NavigationBloc(
+      l10n,
+      permissions: _tousDroits,
+      sidebarExpanded: sidebarExpanded,
+      sidebarPreference: SidebarPreferenceStore(storage),
+    );
+
+    test('sans choix gardé, l\'ouverture par défaut tient', () async {
+      final bloc = build(sidebarExpanded: false);
+      await pumpEventQueue();
+      expect(bloc.state.isSidebarExpanded, isFalse);
+      await bloc.close();
+    });
+
+    test('le choix gardé l\'emporte sur la largeur', () async {
+      storage.values['ui.sidebar_expanded'] = 'true';
+      final bloc = build(sidebarExpanded: false);
+      await pumpEventQueue();
+      expect(bloc.state.isSidebarExpanded, isTrue);
+      await bloc.close();
+    });
+
+    test('un basculement pendant la relecture n\'est pas écrasé', () async {
+      storage.values['ui.sidebar_expanded'] = 'true';
+      // Ctrl+B avant que le choix gardé ne revienne.
+      final bloc = build()..add(const SidebarToggled());
+      await pumpEventQueue();
+      expect(bloc.state.isSidebarExpanded, isFalse);
+      expect(storage.values['ui.sidebar_expanded'], 'false');
+      await bloc.close();
+    });
+
+    test('replier la barre garde le choix', () async {
+      final bloc = build()..add(const SidebarToggled());
+      await pumpEventQueue();
+      expect(bloc.state.isSidebarExpanded, isFalse);
+      expect(storage.values['ui.sidebar_expanded'], 'false');
+      await bloc.close();
+    });
+  });
+}
+
+class _MemoryStorage extends Fake implements FlutterSecureStorage {
+  final values = <String, String>{};
+
+  @override
+  Future<String?> read({
+    required String key,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async => values[key];
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    if (value != null) values[key] = value;
+  }
 }

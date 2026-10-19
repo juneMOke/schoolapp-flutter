@@ -20,6 +20,33 @@ void main() {
   });
 
   _horizontalScrollbar();
+  _verticalScrollbar();
+}
+
+// Barre verticale : à la souris, elle seule dit que la page continue sous le
+// bord de la fenêtre — elle reste donc affichée sur bureau.
+void _verticalScrollbar() {
+  Future<void> pumpTall(WidgetTester tester) => tester.pumpWidget(
+    const MaterialApp(
+      scrollBehavior: AppScrollBehavior(),
+      home: Scaffold(
+        body: SingleChildScrollView(child: SizedBox(height: 3000)),
+      ),
+    ),
+  );
+
+  testWidgets('bureau : la barre verticale reste affichée', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    await pumpTall(tester);
+    final scrollbar = tester.widget<Scrollbar>(find.byType(Scrollbar));
+    expect(scrollbar.thumbVisibility, isTrue);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('tablette : aucune barre verticale', (tester) async {
+    await pumpTall(tester);
+    expect(find.byType(Scrollbar), findsNothing);
+  });
 }
 
 // Barre horizontale : sans elle, la souris n'a aucune prise sur les colonnes

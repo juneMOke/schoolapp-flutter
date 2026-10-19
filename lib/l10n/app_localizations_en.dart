@@ -4147,6 +4147,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a name or level above to display matching students.';
 
   @override
+  String get communicationPickAnnouncementTitle => 'Pick an announcement';
+
+  @override
+  String get communicationPickAnnouncementMessage =>
+      'Its message, audience and delivery show here, next to the list.';
+
+  @override
+  String get facturationPickStudentTitle => 'Pick a student';
+
+  @override
+  String get facturationPickStudentMessage =>
+      'Their billing shows here, next to the list: fees, payments and balance.';
+
+  @override
   String get facturationViewChargesLabel => 'View charges';
 
   @override
@@ -14265,6 +14279,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get classPresenceStudentListTitle => 'Students in the class';
+
+  @override
+  String get classPresenceStudentListFilter => 'Filter students';
+
+  @override
   String get classPresenceTabStudent => 'Monthly sheet';
 
   @override
@@ -15992,6 +16012,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subMenuClassJournal => 'Class journal';
 
   @override
+  String get journalTeachersTitle => 'Teachers';
+
+  @override
+  String get journalTeacherFilter => 'Filter teachers';
+
+  @override
   String get journalTeacherLabel => 'Teacher';
 
   @override
@@ -16906,4 +16932,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String communicationListJoin(String first, String second) {
     return '$first, $second';
   }
+
+  @override
+  String get shortcutsHelpTitle => 'Keyboard shortcuts';
+
+  @override
+  String get shortcutsHelpSearch => 'Go to the search';
+
+  @override
+  String get shortcutsHelpSidebar => 'Collapse or expand the menu';
+
+  @override
+  String get shortcutsHelpCreate => 'New (enrollment, expense, announcement)';
+
+  @override
+  String get shortcutsHelpRefresh => 'Refresh the screen';
+
+  @override
+  String get shortcutsHelpPrint => 'Print the document shown';
+
+  @override
+  String get shortcutsHelpRows => 'Move from one row to the next';
+
+  @override
+  String get shortcutsHelpOpen => 'Open the row';
+
+  @override
+  String get shortcutsHelpSubmit => 'Submit a form';
+
+  @override
+  String get shortcutsHelpClose => 'Close a window';
+
+  @override
+  String get shortcutsHelpNewTab => 'Open a menu screen in a new tab (web)';
+
+  @override
+  String get shortcutsHelpThis => 'Show this help';
+
+  @override
+  String get shortcutsKeyEnter => 'Enter';
+
+  @override
+  String get shortcutsKeyEscape => 'Esc';
+
+  @override
+  String get shortcutsKeyClick => 'click';
 }

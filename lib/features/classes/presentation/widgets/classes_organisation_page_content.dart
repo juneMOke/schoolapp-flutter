@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_organisation_models.dart';
@@ -33,7 +34,9 @@ class ClassesOrganisationPageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final cycle = _selectedCycle(cycles, selectedCycleId);
 
+    // La page est large (grille de classes) : le bloc suit son plafond.
     return ContentMaxWidth(
+      maxWidth: PageContentWidth.wide.maxWidthIn(context),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppDimensions.spacingL,

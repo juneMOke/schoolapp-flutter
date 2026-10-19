@@ -19,12 +19,17 @@ class RouteKeyShortcut extends StatefulWidget {
   /// imprimable (« / ») doit s'y écrire, pas déclencher le raccourci.
   final bool ignoreWhileTyping;
 
+  /// Relu à chaque touche : faux, la touche passe son chemin (session gelée,
+  /// geste indisponible).
+  final bool Function()? isEnabled;
+
   const RouteKeyShortcut({
     super.key,
     required this.activators,
     required this.onPressed,
     required this.child,
     this.ignoreWhileTyping = false,
+    this.isEnabled,
   });
 
   @override
@@ -46,10 +51,10 @@ class _RouteKeyShortcutState extends State<RouteKeyShortcut> {
 
   bool _handle(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
-    final route = ModalRoute.of(context);
-    if (route != null && !route.isCurrent) return false;
+    if (!_onTop(context)) return false;
     if (!TickerMode.valuesOf(context).enabled) return false;
     if (widget.ignoreWhileTyping && isEditingText) return false;
+    if (widget.isEnabled?.call() == false) return false;
     final keyboard = HardwareKeyboard.instance;
     for (final activator in widget.activators) {
       if (activator.accepts(event, keyboard)) {
@@ -58,6 +63,21 @@ class _RouteKeyShortcutState extends State<RouteKeyShortcut> {
       }
     }
     return false;
+  }
+
+  /// La route qui porte l'écran est au premier plan de son navigateur, et
+  /// ainsi de suite jusqu'à la racine. Un écran sous une `ShellRoute` vit
+  /// dans un navigateur imbriqué : une modale ouverte sur le navigateur
+  /// racine ne le rend pas « non courant » dans le sien.
+  static bool _onTop(BuildContext context) {
+    BuildContext? current = context;
+    while (current != null) {
+      final route = ModalRoute.of(current);
+      if (route == null) return true;
+      if (!route.isCurrent) return false;
+      current = route.navigator?.context;
+    }
+    return true;
   }
 
   @override

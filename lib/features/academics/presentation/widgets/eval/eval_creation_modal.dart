@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/academics/presentation/bloc/create_e
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_state.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/eval_creation_form.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 /// Ouvre la modale de création d'une évaluation (spec §1) : coque `Modal` 500 dp,
 /// en-tête bleu profond avec eyebrow « {branche} — {classe} », fermeture ✕ / voile
@@ -42,7 +43,9 @@ Future<Evaluation?> showEvalCreationModal(
             child: Dialog(
               backgroundColor: AppColors.surfaceRaised,
               insetPadding: EdgeInsets.symmetric(
-                horizontal: size.width <= 560 ? AppSpacing.md : AppSpacing.lg,
+                horizontal: size.width <= AppBreakpoints.dialogCompactMax
+                    ? AppSpacing.md
+                    : AppSpacing.lg,
                 vertical: AppSpacing.lg,
               ),
               shape: const RoundedRectangleBorder(borderRadius: AppRadius.brLg),
@@ -50,7 +53,7 @@ Future<Evaluation?> showEvalCreationModal(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: AppDimensions.evalCreationModalMaxWidth,
-                  maxHeight: size.height * 0.88,
+                  maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

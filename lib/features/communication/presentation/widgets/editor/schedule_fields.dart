@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_pickers.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -47,7 +48,7 @@ class _ScheduleFieldsState extends State<ScheduleFields> {
 
   Future<void> _pickTime() async {
     final wall = _wall;
-    final picked = await showTimePicker(
+    final picked = await showEteeloTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: wall.hour, minute: wall.minute),
     );

@@ -1,6 +1,6 @@
 # Image de la version web : nginx + build/web déjà construit.
 #
-#   flutter build web --release --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://…
+#   flutter build web --release --no-web-resources-cdn --dart-define=APP_ENV=prod --dart-define=API_BASE_URL=https://…
 #   docker build -f deploy/web/Dockerfile -t eteelo-web:<version> .
 #
 # Construit depuis la RACINE du dépôt (le contexte doit contenir build/web).

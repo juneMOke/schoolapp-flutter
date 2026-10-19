@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
@@ -78,7 +79,15 @@ class JournalEntryDialog extends StatelessWidget {
       buildWhen: (prev, curr) => prev.isBusy != curr.isBusy,
       builder: (context, state) => PopScope(
         canPop: !state.isBusy,
-        child: JournalDialogFrame(child: body),
+        child: JournalDialogFrame(
+          // Échap passe par le retour : il attend lui aussi la fin d'une
+          // écriture en cours.
+          child: EteeloSubmitShortcut(
+            onSubmit: null,
+            onCancel: () => Navigator.of(context).maybePop(),
+            child: body,
+          ),
+        ),
       ),
     );
   }

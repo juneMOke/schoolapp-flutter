@@ -6716,6 +6716,30 @@ abstract class AppLocalizations {
   /// **'Enter a name or level above to display matching students.'**
   String get facturationSearchInvitationMessage;
 
+  /// Volet de droite des Communiqués sur grand écran, tant qu'aucun communiqué n'est ouvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an announcement'**
+  String get communicationPickAnnouncementTitle;
+
+  /// Sous-titre du volet vide des Communiqués.
+  ///
+  /// In en, this message translates to:
+  /// **'Its message, audience and delivery show here, next to the list.'**
+  String get communicationPickAnnouncementMessage;
+
+  /// Volet de droite de la Facturation sur grand écran, tant qu'aucun élève n'est choisi.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a student'**
+  String get facturationPickStudentTitle;
+
+  /// Sous-titre du volet vide de la Facturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Their billing shows here, next to the list: fees, payments and balance.'**
+  String get facturationPickStudentMessage;
+
   /// No description provided for @facturationViewChargesLabel.
   ///
   /// In en, this message translates to:
@@ -22514,6 +22538,18 @@ abstract class AppLocalizations {
   /// **'{marked} / {total} students'**
   String classPresenceTabRegisterSubtitle(int marked, int total);
 
+  /// Colonne des élèves de la fiche mensuelle, sur grand écran.
+  ///
+  /// In en, this message translates to:
+  /// **'Students in the class'**
+  String get classPresenceStudentListTitle;
+
+  /// Filtre de la colonne des élèves de la fiche mensuelle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter students'**
+  String get classPresenceStudentListFilter;
+
   /// No description provided for @classPresenceTabStudent.
   ///
   /// In en, this message translates to:
@@ -24965,6 +25001,18 @@ abstract class AppLocalizations {
   /// **'Class journal'**
   String get subMenuClassJournal;
 
+  /// Titre de la colonne des professeurs du journal côté direction, sur grand écran.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers'**
+  String get journalTeachersTitle;
+
+  /// Filtre de la colonne des professeurs du journal côté direction.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter teachers'**
+  String get journalTeacherFilter;
+
   /// No description provided for @journalTeacherLabel.
   ///
   /// In en, this message translates to:
@@ -26359,6 +26407,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{first}, {second}'**
   String communicationListJoin(String first, String second);
+
+  /// No description provided for @shortcutsHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get shortcutsHelpTitle;
+
+  /// No description provided for @shortcutsHelpSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the search'**
+  String get shortcutsHelpSearch;
+
+  /// No description provided for @shortcutsHelpSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse or expand the menu'**
+  String get shortcutsHelpSidebar;
+
+  /// No description provided for @shortcutsHelpCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'New (enrollment, expense, announcement)'**
+  String get shortcutsHelpCreate;
+
+  /// No description provided for @shortcutsHelpRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh the screen'**
+  String get shortcutsHelpRefresh;
+
+  /// No description provided for @shortcutsHelpPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the document shown'**
+  String get shortcutsHelpPrint;
+
+  /// No description provided for @shortcutsHelpRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Move from one row to the next'**
+  String get shortcutsHelpRows;
+
+  /// No description provided for @shortcutsHelpOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the row'**
+  String get shortcutsHelpOpen;
+
+  /// No description provided for @shortcutsHelpSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a form'**
+  String get shortcutsHelpSubmit;
+
+  /// No description provided for @shortcutsHelpClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close a window'**
+  String get shortcutsHelpClose;
+
+  /// No description provided for @shortcutsHelpNewTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a menu screen in a new tab (web)'**
+  String get shortcutsHelpNewTab;
+
+  /// No description provided for @shortcutsHelpThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this help'**
+  String get shortcutsHelpThis;
+
+  /// No description provided for @shortcutsKeyEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get shortcutsKeyEnter;
+
+  /// No description provided for @shortcutsKeyEscape.
+  ///
+  /// In en, this message translates to:
+  /// **'Esc'**
+  String get shortcutsKeyEscape;
+
+  /// No description provided for @shortcutsKeyClick.
+  ///
+  /// In en, this message translates to:
+  /// **'click'**
+  String get shortcutsKeyClick;
 }
 
 class _AppLocalizationsDelegate

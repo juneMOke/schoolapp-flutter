@@ -89,7 +89,12 @@ class _HeadCell extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, textAlign: TextAlign.center, style: style),
+          // Une colonne étroite (feuille à sa largeur minimale) réduit le
+          // titre plutôt que de le couper en plein mot.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(label, textAlign: TextAlign.center, style: style),
+          ),
           if (subLabel case final sub?)
             Text(
               sub,

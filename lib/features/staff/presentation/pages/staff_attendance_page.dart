@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -36,6 +37,7 @@ class StaffAttendanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
+    width: PageContentWidth.wide,
     child: BlocConsumer<StaffAttendanceCubit, StaffAttendanceState>(
       listenWhen: (previous, current) =>
           current.notice != null && previous.notice != current.notice,

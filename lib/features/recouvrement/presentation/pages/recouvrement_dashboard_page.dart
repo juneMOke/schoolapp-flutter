@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -118,6 +119,7 @@ class _RecouvrementDashboardViewState
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      width: PageContentWidth.wide,
       child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status || prev.context != curr.context,

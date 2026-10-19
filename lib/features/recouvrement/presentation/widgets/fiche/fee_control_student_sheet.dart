@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/outlined_panel.dart';
+import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -50,6 +52,10 @@ class FeeControlStudentSheet extends StatelessWidget {
   /// du même élève empilés n'apprennent rien de plus.
   final VoidCallback onOpenRecord;
 
+  /// Ancré à droite du tableau (grand écran) plutôt qu'en modale : une
+  /// carte, avec sa croix [onClose].
+  final VoidCallback? onClose;
+
   const FeeControlStudentSheet({
     super.key,
     required this.row,
@@ -59,6 +65,21 @@ class FeeControlStudentSheet extends StatelessWidget {
     required this.onToggleMark,
     required this.onOpenRecord,
     this.sectionTitles = const FeeSectionTitlesState(),
+    this.onClose,
+  });
+
+  /// Le même aperçu, ancré à côté du tableau : on passe d'un élève au suivant
+  /// sans rouvrir de modale, le tableau toujours sous les yeux.
+  const FeeControlStudentSheet.docked({
+    super.key,
+    required this.row,
+    required this.tariffs,
+    required this.rate,
+    required this.marked,
+    required this.onToggleMark,
+    required this.onOpenRecord,
+    required VoidCallback this.onClose,
+    this.sectionTitles = const FeeSectionTitlesState(),
   });
 
   @override
@@ -67,64 +88,67 @@ class FeeControlStudentSheet extends StatelessWidget {
     final student = row.summary.student;
     final mixed = row.currencies.length > 1;
 
+    final body = EteeloDialogBody(
+      minPinnedHeight: AppDimensions.recouvrementStudentSheetMinPinned,
+      bodyPadding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.spacingM,
+      ),
+      header: _Header(
+        row: row,
+        name: '${student.lastName} ${student.firstName}',
+        onClose: onClose,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: AppDimensions.spacingS),
+          for (final charge in row.line.charges)
+            FeeControlFeeLine(
+              charge: charge,
+              tariffs: tariffs,
+              sectionTitles: sectionTitles,
+              rate: rate,
+            ),
+          if (mixed) ...[
+            const SizedBox(height: AppDimensions.spacingS),
+            Text(
+              l10n.feeControlSheetMixedNote,
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
+          ],
+          const SizedBox(height: AppDimensions.spacingS),
+        ],
+      ),
+      footer: [
+        EteeloButton.ghost(
+          label: l10n.feeControlSheetOpenRecord,
+          icon: Icons.open_in_new,
+          onPressed: onOpenRecord,
+          fullWidth: false,
+          size: EteeloButtonSize.compact,
+        ),
+        const SizedBox(width: AppDimensions.spacingS),
+        EteeloButton.primary(
+          label: marked
+              ? l10n.feeControlSheetUnmark
+              : l10n.feeControlMarkAction,
+          icon: Icons.person_off_outlined,
+          onPressed: onToggleMark,
+          fullWidth: false,
+          size: EteeloButtonSize.compact,
+        ),
+      ],
+    );
+    if (onClose != null) {
+      return OutlinedPanel(color: AppColors.surfaceRaised, child: body);
+    }
     return Dialog(
       child: ConstrainedBox(
         constraints: const BoxConstraints(
           maxWidth: AppDimensions.recouvrementStudentSheetMaxWidth,
           maxHeight: AppDimensions.recouvrementCallListMaxHeight,
         ),
-        child: EteeloDialogBody(
-          minPinnedHeight: AppDimensions.recouvrementStudentSheetMinPinned,
-          bodyPadding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingM,
-          ),
-          header: _Header(
-            row: row,
-            name: '${student.lastName} ${student.firstName}',
-          ),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppDimensions.spacingS),
-              for (final charge in row.line.charges)
-                FeeControlFeeLine(
-                  charge: charge,
-                  tariffs: tariffs,
-                  sectionTitles: sectionTitles,
-                  rate: rate,
-                ),
-              if (mixed) ...[
-                const SizedBox(height: AppDimensions.spacingS),
-                Text(
-                  l10n.feeControlSheetMixedNote,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-              const SizedBox(height: AppDimensions.spacingS),
-            ],
-          ),
-          footer: [
-            EteeloButton.ghost(
-              label: l10n.feeControlSheetOpenRecord,
-              icon: Icons.open_in_new,
-              onPressed: onOpenRecord,
-              fullWidth: false,
-              size: EteeloButtonSize.compact,
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            EteeloButton.primary(
-              label: marked
-                  ? l10n.feeControlSheetUnmark
-                  : l10n.feeControlMarkAction,
-              icon: Icons.person_off_outlined,
-              onPressed: onToggleMark,
-              fullWidth: false,
-              size: EteeloButtonSize.compact,
-            ),
-          ],
-        ),
+        child: body,
       ),
     );
   }
@@ -133,8 +157,9 @@ class FeeControlStudentSheet extends StatelessWidget {
 class _Header extends StatelessWidget {
   final FeeControlRow row;
   final String name;
+  final VoidCallback? onClose;
 
-  const _Header({required this.row, required this.name});
+  const _Header({required this.row, required this.name, this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -155,27 +180,42 @@ class _Header extends StatelessWidget {
         color: AppColors.surfaceAlt,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (eyebrow.isNotEmpty)
-            Text(
-              eyebrow.toUpperCase(),
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textMuted,
-                letterSpacing: 0.8,
-              ),
-            ),
-          Text(name, style: AppTextStyles.sectionTitle),
-          if (summary.enrollmentCode.isNotEmpty)
-            Text(
-              l10n.feeControlSheetDossier(summary.enrollmentCode),
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
+          Expanded(child: _identity(l10n, summary, eyebrow)),
+          if (onClose case final close?)
+            IconButton(
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: close,
             ),
         ],
       ),
     );
   }
+
+  Widget _identity(
+    AppLocalizations l10n,
+    EnrollmentSummary summary,
+    String eyebrow,
+  ) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (eyebrow.isNotEmpty)
+        Text(
+          eyebrow.toUpperCase(),
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.textMuted,
+            letterSpacing: 0.8,
+          ),
+        ),
+      Text(name, style: AppTextStyles.sectionTitle),
+      if (summary.enrollmentCode.isNotEmpty)
+        Text(
+          l10n.feeControlSheetDossier(summary.enrollmentCode),
+          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+        ),
+    ],
+  );
 }

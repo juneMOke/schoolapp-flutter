@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
+import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -37,6 +43,18 @@ class FacturationPage extends StatefulWidget {
 }
 
 class _FacturationPageState extends State<FacturationPage> {
+  /// Grand écran : la fiche ouverte à côté de la liste ; `null` = aucune.
+  FacturationDetailIntent? _selected;
+
+  /// La largeur reçue permet-elle la liste et la fiche côte à côte ? Relu à
+  /// chaque rendu : c'est lui qui décide, au clic, d'ouvrir à côté ou de
+  /// pousser la fiche.
+  bool _split = false;
+
+  /// La liste garde son état (critères saisis, tri) quand un redimensionnement
+  /// la fait passer de la page entière à sa colonne, et retour.
+  final _listKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -50,8 +68,32 @@ class _FacturationPageState extends State<FacturationPage> {
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _split = constraints.maxWidth >= AppBreakpoints.facturationSplitMin;
+        // F5 relit la dernière recherche — une fois une recherche lancée.
+        return PageActionShortcut(
+          action: PageAction.refresh,
+          onInvoke: () => context.read<EnrollmentLocalListBloc>().add(
+            const LocalListRefreshRequested(),
+          ),
+          isAllowed: () =>
+              context
+                  .read<EnrollmentLocalListBloc>()
+                  .state
+                  .summariesQueryType ==
+              EnrollmentSummaryQueryType.byAcademicInfo,
+          child: _page(context),
+        );
+      },
+    );
+  }
+
+  Widget _page(BuildContext context) {
     return AppPageBackground(
-      maxWidth: AppDimensions.listingContentMaxWidth,
+      width: PageContentWidth.wide,
+      // Liste + fiche : chacune défile dans sa colonne, la page non.
+      scrollable: !_split,
       // Posée hors du `BlocBuilder` : la sortie reste offerte même quand le
       // contexte académique charge ou échoue.
       appBar: widget.standalone ? const FacturationTopBar() : null,
@@ -81,50 +123,92 @@ class _FacturationPageState extends State<FacturationPage> {
             academicYearState.context?.schoolLevelGroups ?? const [],
           );
 
-          return AnimatedSwitcher(
-            duration: FinanceMotion.standard,
-            child: Column(
-              key: const ValueKey('facturation-content'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
-                  buildWhen: (prev, curr) =>
-                      prev.summariesStatus != curr.summariesStatus,
-                  builder: (context, enrollmentState) {
-                    return FacturationSearchForm(
-                      options: academicOptions,
-                      isLoading:
-                          enrollmentState.summariesStatus ==
-                          EnrollmentLoadStatus.loading,
-                      // Recherche 100 % locale des élèves FACTURABLES : ceux dont
-                      // l'inscription de l'année courante est finalisée
-                      // (SYNCED|PENDING_SYNC|SYNC_ERROR), et non le vivier de
-                      // réinscription.
-                      onSearch: (request) =>
-                          context.read<EnrollmentLocalListBloc>().add(
-                            LocalListByEnrolledAcademicInfoRequested(
-                              academicYearId:
-                                  academicYearState.context?.academicYear.id ??
-                                  '',
-                              firstName: request.firstName,
-                              lastName: request.lastName,
-                              surname: request.surname,
-                              schoolLevelGroupId: request.schoolLevelGroupId,
-                              schoolLevelId: request.schoolLevelId,
+          final list = KeyedSubtree(
+            key: _listKey,
+            child: AnimatedSwitcher(
+              duration: FinanceMotion.standard,
+              child: Column(
+                key: const ValueKey('facturation-content'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BlocBuilder<
+                    EnrollmentLocalListBloc,
+                    EnrollmentLocalListState
+                  >(
+                    buildWhen: (prev, curr) =>
+                        prev.summariesStatus != curr.summariesStatus,
+                    builder: (context, enrollmentState) {
+                      return FacturationSearchForm(
+                        options: academicOptions,
+                        isLoading:
+                            enrollmentState.summariesStatus ==
+                            EnrollmentLoadStatus.loading,
+                        // Recherche 100 % locale des élèves FACTURABLES : ceux dont
+                        // l'inscription de l'année courante est finalisée
+                        // (SYNCED|PENDING_SYNC|SYNC_ERROR), et non le vivier de
+                        // réinscription.
+                        onSearch: (request) =>
+                            context.read<EnrollmentLocalListBloc>().add(
+                              LocalListByEnrolledAcademicInfoRequested(
+                                academicYearId:
+                                    academicYearState
+                                        .context
+                                        ?.academicYear
+                                        .id ??
+                                    '',
+                                firstName: request.firstName,
+                                lastName: request.lastName,
+                                surname: request.surname,
+                                schoolLevelGroupId: request.schoolLevelGroupId,
+                                schoolLevelId: request.schoolLevelId,
+                              ),
                             ),
-                          ),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                FacturationStudentTable(
-                  onViewRequested: _onViewChargesRequested,
-                ),
-              ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  FacturationStudentTable(
+                    onViewRequested: _onViewChargesRequested,
+                    selectedStudentId: _split ? _selected?.studentId : null,
+                  ),
+                ],
+              ),
             ),
           );
+          if (!_split) return list;
+          return MasterDetailLayout(master: list, detail: _detailPane());
         },
       ),
+    );
+  }
+
+  /// La fiche choisie, ou l'invitation à en choisir une. Une clé par élève :
+  /// changer d'élève recrée ses BLoCs au lieu de nourrir ceux du précédent.
+  Widget _detailPane() {
+    final yearId = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context
+        ?.academicYear
+        .id;
+    // Une fiche ouverte sur une autre année (contexte changé depuis) ne
+    // s'affiche pas : son grand-livre n'est plus celui qu'on consulte.
+    final selected = _selected?.academicYearId == yearId ? _selected : null;
+    if (selected == null) {
+      final l10n = AppLocalizations.of(context)!;
+      return SingleChildScrollView(
+        child: EteeloEmptyResult(
+          label: l10n.facturationPickStudentTitle,
+          description: l10n.facturationPickStudentMessage,
+          medallionIcon: Icons.receipt_long_outlined,
+        ),
+      );
+    }
+    return FacturationDetailPage(
+      key: ValueKey('${selected.academicYearId}/${selected.studentId}'),
+      intent: selected,
+      embedded: true,
+      onClose: () => setState(() => _selected = null),
     );
   }
 
@@ -153,20 +237,25 @@ class _FacturationPageState extends State<FacturationPage> {
       searchedLevelId: levelId,
     );
 
+    final intent = FacturationDetailIntent(
+      studentId: summary.student.id,
+      academicYearId: academicYearId,
+      firstName: summary.student.firstName,
+      lastName: summary.student.lastName,
+      surname: summary.student.surname,
+      levelName: labels.levelName,
+      levelGroupName: labels.levelGroupName,
+    );
+    if (_split) {
+      setState(() => _selected = intent);
+      return;
+    }
     context.push(
       AppRoutesNames.facturationDetailPath(
         studentId: summary.student.id,
         academicYearId: academicYearId,
       ),
-      extra: FacturationDetailIntent(
-        studentId: summary.student.id,
-        academicYearId: academicYearId,
-        firstName: summary.student.firstName,
-        lastName: summary.student.lastName,
-        surname: summary.student.surname,
-        levelName: labels.levelName,
-        levelGroupName: labels.levelGroupName,
-      ),
+      extra: intent,
     );
   }
 }

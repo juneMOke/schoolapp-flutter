@@ -247,7 +247,8 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
     final resultActive = _phase != _Phase.confirm;
 
     return BlocListener<FinanceOfflineBloc, FinanceOfflineState>(

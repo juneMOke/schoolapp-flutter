@@ -80,8 +80,11 @@ void main() {
   testWidgets('HomePage renders desktop structure above mobile breakpoint', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
-    addTearDown(() async => tester.binding.setSurfaceSize(null));
+    // La vue elle-même : `setSurfaceSize` ne change pas `MediaQuery`, que lit
+    // l'ouverture par défaut de la barre.
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
     await tester.pumpWidget(buildHarness());
     await tester.pumpAndSettle();
@@ -93,6 +96,39 @@ void main() {
     expect(find.byTooltip('Replier le menu'), findsOneWidget);
     // Pas de hamburger en bureau (sidebar ancrée).
     expect(find.byTooltip('Ouvrir le menu'), findsNothing);
+  });
+
+  testWidgets('portable 1280 : la barre s\'ouvre repliée en rail', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(buildHarness());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Drawer), findsNothing);
+    expect(find.byTooltip('Étendre le menu'), findsOneWidget);
+    expect(find.byTooltip('Replier le menu'), findsNothing);
+  });
+
+  testWidgets('rail : un module ouvre ses écrans en menu flottant', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(buildHarness());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.bySemanticsLabel('Finances').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(MenuItemButton), findsWidgets);
+
+    expect(find.widgetWithText(MenuItemButton, 'Facturations'), findsOneWidget);
+    // La barre est restée repliée.
+    expect(find.byTooltip('Étendre le menu'), findsOneWidget);
   });
 
   testWidgets('HomePage renders mobile scaffold with drawer', (tester) async {

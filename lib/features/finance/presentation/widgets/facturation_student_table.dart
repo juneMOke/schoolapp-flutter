@@ -25,7 +25,14 @@ class FacturationStudentTable extends StatelessWidget {
   final void Function(EnrollmentSummary summary, String levelId)
   onViewRequested;
 
-  const FacturationStudentTable({super.key, required this.onViewRequested});
+  /// L'élève dont la fiche est ouverte à côté de la liste (grand écran).
+  final String? selectedStudentId;
+
+  const FacturationStudentTable({
+    super.key,
+    required this.onViewRequested,
+    this.selectedStudentId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +115,7 @@ class FacturationStudentTable extends StatelessWidget {
             pageLabelBuilder: (current, total) =>
                 l10n.paginationPageIndicator(current, total),
             onViewRequested: (s) => onViewRequested(s, levelId),
+            selectedStudentId: selectedStudentId,
           ),
         );
       },

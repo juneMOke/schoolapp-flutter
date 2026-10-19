@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -31,17 +33,21 @@ class ExpenseRegisterView extends StatelessWidget {
   const ExpenseRegisterView({super.key});
 
   @override
-  Widget build(BuildContext context) => AppPageBackground(
-    maxWidth: AppDimensions.listingContentMaxWidth,
-    child: BlocBuilder<ExpenseRegisterCubit, ExpenseRegisterState>(
-      buildWhen: (prev, curr) =>
-          prev.status != curr.status ||
-          prev.view != curr.view ||
-          prev.period != curr.period ||
-          prev.query != curr.query ||
-          prev.snapshot != curr.snapshot ||
-          prev.failure != curr.failure,
-      builder: _body,
+  Widget build(BuildContext context) => PageActionShortcut(
+    action: PageAction.refresh,
+    onInvoke: context.read<ExpenseRegisterCubit>().load,
+    child: AppPageBackground(
+      width: PageContentWidth.wide,
+      child: BlocBuilder<ExpenseRegisterCubit, ExpenseRegisterState>(
+        buildWhen: (prev, curr) =>
+            prev.status != curr.status ||
+            prev.view != curr.view ||
+            prev.period != curr.period ||
+            prev.query != curr.query ||
+            prev.snapshot != curr.snapshot ||
+            prev.failure != curr.failure,
+        builder: _body,
+      ),
     ),
   );
 

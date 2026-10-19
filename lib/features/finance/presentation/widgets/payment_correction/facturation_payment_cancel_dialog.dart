@@ -117,7 +117,9 @@ class _FacturationPaymentCancelDialogState
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.facturationModalMaxWidth,
-          maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+          maxHeight:
+              MediaQuery.sizeOf(context).height *
+              AppDimensions.dialogMaxHeightRatio,
         ),
         child: BlocBuilder<PaymentCorrectionCubit, PaymentCorrectionState>(
           buildWhen: (a, b) => a != b,

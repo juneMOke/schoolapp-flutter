@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_detail.dart'
@@ -100,41 +101,71 @@ class _SummaryStepState extends State<SummaryStep> {
           ],
           SummaryCompactHeader(enrollmentDetail: widget.enrollmentDetail),
           const SizedBox(height: AppDimensions.spacingM),
-          SummaryPersonalInfoSection(
-            enrollmentDetail: widget.enrollmentDetail,
-            onEditRequested: widget.onEditRequested,
+          LayoutBuilder(
+            builder: (context, constraints) => _sections(
+              twoColumns:
+                  constraints.maxWidth >=
+                  AppBreakpoints.enrollmentSummaryTwoColumnMin,
+            ),
           ),
-          const SizedBox(height: AppDimensions.spacingM),
-          SummaryAddressSection(
-            enrollmentDetail: widget.enrollmentDetail,
-            onEditRequested: widget.onEditRequested,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          SummaryPreviousAcademicSection(
-            enrollmentDetail: widget.enrollmentDetail,
-            onEditRequested: widget.onEditRequested,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          SummaryTargetAcademicSection(
-            enrollmentDetail: widget.enrollmentDetail,
-            onEditRequested: widget.onEditRequested,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          SummaryGuardiansSection(
-            parents: widget.enrollmentDetail.parentDetails,
-            onEditRequested: widget.onEditRequested,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          // Frais : section en lecture seule, sans bouton « Modifier ».
-          SummaryChargesSection(
-            canLoadCharges: _canLoadCharges,
-            onRetry: _requestCharges,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
           const SummaryValidationNotice(),
           const SizedBox(height: AppDimensions.spacingM),
         ],
       ),
     );
   }
+
+  /// Les six sections. Sur une carte large, deux colonnes — l'élève et sa
+  /// famille, puis sa scolarité et ses frais — au lieu de six blocs à faire
+  /// défiler ; sur tablette, l'ordre du parcours.
+  Widget _sections({required bool twoColumns}) {
+    final detail = widget.enrollmentDetail;
+    final onEdit = widget.onEditRequested;
+    final personal = SummaryPersonalInfoSection(
+      enrollmentDetail: detail,
+      onEditRequested: onEdit,
+    );
+    final address = SummaryAddressSection(
+      enrollmentDetail: detail,
+      onEditRequested: onEdit,
+    );
+    final previous = SummaryPreviousAcademicSection(
+      enrollmentDetail: detail,
+      onEditRequested: onEdit,
+    );
+    final target = SummaryTargetAcademicSection(
+      enrollmentDetail: detail,
+      onEditRequested: onEdit,
+    );
+    final guardians = SummaryGuardiansSection(
+      parents: detail.parentDetails,
+      onEditRequested: onEdit,
+    );
+    // Frais : section en lecture seule, sans bouton « Modifier ».
+    final charges = SummaryChargesSection(
+      canLoadCharges: _canLoadCharges,
+      onRetry: _requestCharges,
+    );
+    if (!twoColumns) {
+      return _stack([personal, address, previous, target, guardians, charges]);
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _stack([personal, address, guardians])),
+        const SizedBox(width: AppDimensions.spacingM),
+        Expanded(child: _stack([target, previous, charges])),
+      ],
+    );
+  }
+
+  static Widget _stack(List<Widget> sections) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (final section in sections) ...[
+        section,
+        const SizedBox(height: AppDimensions.spacingM),
+      ],
+    ],
+  );
 }

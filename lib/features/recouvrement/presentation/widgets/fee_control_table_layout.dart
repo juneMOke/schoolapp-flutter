@@ -84,6 +84,7 @@ class FeeControlTableLayout {
     required ValueChanged<FeeControlRow> onViewRequested,
     required ValueChanged<FeeControlRow> onRowTapped,
     required ValueChanged<FeeControlRow> onSelectionToggled,
+    String? openedStudentId,
   }) {
     return rows
         .map((row) {
@@ -123,6 +124,7 @@ class FeeControlTableLayout {
               size: core_avatar.AvatarSize.sm,
             ),
             onTap: () => onRowTapped(row),
+            selected: student.id == openedStudentId,
             cells: wide
                 ? [
                     _selectCell(row, selected, marked, onSelectionToggled),

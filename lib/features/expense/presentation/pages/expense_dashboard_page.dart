@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_dashboard_skeletons.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -40,6 +41,7 @@ class ExpenseDashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
+    width: PageContentWidth.wide,
     child: BlocBuilder<ExpenseDashboardCubit, ExpenseDashboardState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status ||

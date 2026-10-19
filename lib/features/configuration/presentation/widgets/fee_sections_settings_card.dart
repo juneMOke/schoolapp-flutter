@@ -266,12 +266,15 @@ class _FeeSectionsSettingsCardState extends State<FeeSectionsSettingsCard> {
         children: [
           ReorderableDragStartListener(
             index: index,
-            child: const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.xs),
-              child: Icon(
-                Icons.drag_indicator_rounded,
-                size: 18,
-                color: AppColors.textMuted,
+            child: const MouseRegion(
+              cursor: SystemMouseCursors.grab,
+              child: Padding(
+                padding: EdgeInsets.only(right: AppSpacing.xs),
+                child: Icon(
+                  Icons.drag_indicator_rounded,
+                  size: 18,
+                  color: AppColors.textMuted,
+                ),
               ),
             ),
           ),

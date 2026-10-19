@@ -396,7 +396,8 @@ class EditiqueDocumentDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
 
     return Dialog(
       backgroundColor: AppColors.surfaceRaised,

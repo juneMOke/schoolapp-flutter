@@ -84,13 +84,17 @@ class _RecouvrementCyclesSectionState extends State<RecouvrementCyclesSection> {
     final feeCode = query.feeCodes.firstOrNull;
     if (feeCode == null) return;
 
+    final intent = FeeControlIntent(
+      schoolLevelGroupId: groupId,
+      schoolLevelId: schoolLevelId,
+      feeCode: feeCode,
+    );
     context.push(
-      AppRoutesNames.recouvrementControl,
-      extra: FeeControlIntent(
-        schoolLevelGroupId: groupId,
-        schoolLevelId: schoolLevelId,
-        feeCode: feeCode,
-      ),
+      Uri(
+        path: AppRoutesNames.recouvrementControl,
+        queryParameters: intent.toQueryParameters(),
+      ).toString(),
+      extra: intent,
     );
   }
 

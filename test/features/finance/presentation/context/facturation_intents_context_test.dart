@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_charge_detail_intent.dart';
@@ -108,6 +109,30 @@ void main() {
       );
 
       expect(intent.hasDisplayContext, isTrue);
+    });
+  });
+
+  group('FacturationDetailIntent.withIdentity', () {
+    const identity = StudentIdentity(
+      studentId: 's1',
+      firstName: 'Grâce',
+      lastName: 'MBUYI',
+      surname: 'Kalala',
+      gender: 'FEMALE',
+      levelName: '5e A',
+      levelGroupName: 'Primaire',
+    );
+
+    test('rouverte par son adresse, la fiche sait de qui elle parle', () {
+      final intent = const FacturationDetailIntent.invalid(
+        studentId: 's1',
+        academicYearId: 'y1',
+      ).withIdentity(identity);
+      expect(intent.hasStudentIdentity, isTrue);
+      expect(intent.academicYearId, 'y1');
+      expect(intent.surname, 'Kalala');
+      expect(intent.levelName, '5e A');
+      expect(intent.levelGroupName, 'Primaire');
     });
   });
 }

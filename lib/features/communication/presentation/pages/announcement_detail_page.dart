@@ -12,34 +12,39 @@ import 'package:school_app_flutter/features/school/presentation/cubit/school_ide
 class AnnouncementDetailPage extends StatelessWidget {
   final CommunicationDetailScreen screen;
 
-  const AnnouncementDetailPage({super.key, required this.screen});
+  /// À côté de la liste (grand écran) : le détail seul, sans fond de page.
+  final bool embedded;
+
+  const AnnouncementDetailPage({
+    super.key,
+    required this.screen,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final flow = context.read<CommunicationFlowCubit>();
     final content = screen.announcement.content;
-    // Le détail défile lui-même, l'aperçu collant à droite.
-    return AppPageBackground(
-      scrollable: false,
-      child: AnnouncementDetailScreen(
-        announcement: screen.announcement,
-        schoolName: context.read<SchoolIdentityCubit>().state.school?.name,
-        onBack: flow.showList,
-        // Le double reprend catégorie, titre, message, audience et canaux :
-        // c'est un nouveau brouillon, sans lien avec l'envoyé.
-        onDuplicate:
-            PermissionGate.allowsAccess(context, kAnnouncementSendAccess)
-            ? () => flow.openNew(
-                seed: AnnouncementContent(
-                  category: content.category,
-                  title: content.title,
-                  body: content.body,
-                  audience: content.audience,
-                  channels: content.channels,
-                ),
-              )
-            : null,
-      ),
+    final detail = AnnouncementDetailScreen(
+      announcement: screen.announcement,
+      schoolName: context.read<SchoolIdentityCubit>().state.school?.name,
+      onBack: flow.showList,
+      // Le double reprend catégorie, titre, message, audience et canaux :
+      // c'est un nouveau brouillon, sans lien avec l'envoyé.
+      onDuplicate: PermissionGate.allowsAccess(context, kAnnouncementSendAccess)
+          ? () => flow.openNew(
+              seed: AnnouncementContent(
+                category: content.category,
+                title: content.title,
+                body: content.body,
+                audience: content.audience,
+                channels: content.channels,
+              ),
+            )
+          : null,
     );
+    if (embedded) return detail;
+    // Le détail défile lui-même, l'aperçu collant à droite.
+    return AppPageBackground(scrollable: false, child: detail);
   }
 }

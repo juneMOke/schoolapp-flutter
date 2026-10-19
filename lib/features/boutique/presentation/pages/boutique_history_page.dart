@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -171,29 +173,16 @@ class _HistoryViewState extends State<_HistoryView> {
                 constraints.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
             final list = _listColumn(context, state, bloc, split: split);
             return AppPageBackground(
-              maxWidth: split
-                  ? AppDimensions.listingContentMaxWidth
-                  : AppDimensions.detailContentMaxWidth,
+              width: split ? PageContentWidth.wide : PageContentWidth.reading,
               scrollable: !split,
               appBar: ModuleTopBar(
                 eyebrow: l10n.boutiqueHistoryEyebrow,
                 title: l10n.boutiqueHistoryTitle,
               ),
               child: split
-                  ? Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(
-                          width: AppDimensions.boutiqueHistoryListWidth,
-                          child: SingleChildScrollView(child: list),
-                        ),
-                        const SizedBox(width: AppDimensions.spacingL),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: _selectedPane(l10n),
-                          ),
-                        ),
-                      ],
+                  ? MasterDetailLayout(
+                      master: list,
+                      detail: SingleChildScrollView(child: _selectedPane(l10n)),
                     )
                   : list,
             );

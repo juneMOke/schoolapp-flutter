@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ex
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 /// Le taux de guichet, posé par la direction.
 ///
@@ -158,7 +159,8 @@ class _ExchangeRateSettingsCardState extends State<ExchangeRateSettingsCard> {
                   // Sur une tablette en paysage les trois champs tiennent sur
                   // une ligne ; en portrait ils s'empilent plutôt que de se
                   // comprimer à l'illisible.
-                  if (constraints.maxWidth < 640) {
+                  if (constraints.maxWidth <
+                      AppBreakpoints.settingsFieldsRowMin) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

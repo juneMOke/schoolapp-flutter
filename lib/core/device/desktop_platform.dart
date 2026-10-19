@@ -21,9 +21,24 @@ bool get isDesktopPlatform =>
 /// navigateur (aucun Bluetooth, et le paquet y lève sur `Platform`).
 bool get printsTicketsThroughSpooler => kIsWeb || isDesktopPlatform;
 
-/// Clavier physique attendu : poste de bureau et navigateur. Entrée y valide
-/// là où, sur la tablette, le clavier virtuel enchaîne les champs.
-bool get expectsPhysicalKeyboard => kIsWeb || isDesktopPlatform;
+/// Clavier physique attendu : poste de bureau, et navigateur d'un ordinateur.
+/// Entrée y valide là où, sur la tablette, le clavier virtuel enchaîne les
+/// champs.
+///
+/// Sur le web, `defaultTargetPlatform` est le système du navigateur : la
+/// version web ouverte sur une tablette ou un téléphone garde donc le
+/// parcours tactile (calendrier, pas d'autofocus qui ouvrirait le clavier).
+bool get expectsPhysicalKeyboard =>
+    isDesktopPlatform || (kIsWeb && _desktopOperatingSystem);
+
+bool get _desktopOperatingSystem => switch (defaultTargetPlatform) {
+  TargetPlatform.windows ||
+  TargetPlatform.linux ||
+  TargetPlatform.macOS => true,
+  TargetPlatform.android ||
+  TargetPlatform.iOS ||
+  TargetPlatform.fuchsia => false,
+};
 
 /// Action d'Entrée d'un champ d'une ligne qui ne valide rien : au clavier
 /// physique, passer au champ suivant. Sans elle, Flutter rend le focus et

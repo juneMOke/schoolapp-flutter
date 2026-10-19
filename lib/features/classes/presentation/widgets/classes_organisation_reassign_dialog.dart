@@ -99,7 +99,7 @@ class _ReassignDialogState extends State<_ReassignDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.sizeOf(context);
-    final maxHeight = size.height * 0.88;
+    final maxHeight = size.height * AppDimensions.dialogMaxHeightRatio;
     // Sur petit écran, on réduit les marges de la popin pour récupérer de la
     // largeur utile (sinon le contenu est trop comprimé).
     final inset = size.width <= AppBreakpoints.dataTablePhoneMax
