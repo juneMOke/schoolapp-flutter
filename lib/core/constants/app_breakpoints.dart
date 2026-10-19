@@ -108,6 +108,9 @@ class AppBreakpoints {
   // Présences, fiche mensuelle (largeur de l'onglet) : au-delà, les élèves en
   // colonne à gauche, la fiche du mois à droite.
   static const double studentMonthSplitMin = 1100.0;
+  // Contrôle des frais (largeur reçue) : au-delà, l'aperçu d'un élève s'ancre
+  // à droite du tableau, qui garde ses ~900 dp de disposition large.
+  static const double feeControlDockedSheetMin = 1400.0;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.

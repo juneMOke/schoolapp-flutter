@@ -202,4 +202,42 @@ void main() {
     expect(find.text('Retirer des renvois'), findsOneWidget);
     expect(find.text('Marquer à renvoyer'), findsNothing);
   });
+
+  testWidgets('ancrée à côté du tableau : pas de modale, une croix', (
+    tester,
+  ) async {
+    var closed = 0;
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            child: FeeControlStudentSheet.docked(
+              row: buildRow(),
+              tariffs: tTariffs,
+              rate: null,
+              marked: false,
+              onToggleMark: () => marks++,
+              onOpenRecord: () => records++,
+              onClose: () => closed++,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.text('NSIMBA Bope'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    expect(closed, 1);
+  });
 }

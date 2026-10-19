@@ -20,6 +20,9 @@ class FeeControlResultsSection extends StatelessWidget {
   final FeeControlState state;
   final ValueChanged<FeeControlRow> onViewRequested;
   final ValueChanged<FeeControlRow> onRowTapped;
+
+  /// L'élève dont l'aperçu est ancré à côté du tableau : sa ligne reste marquée.
+  final String? openedStudentId;
   final String? emptyLabel;
 
   /// Les titres que l'école donne aux natures : l'en-tête nomme les frais comme
@@ -31,6 +34,7 @@ class FeeControlResultsSection extends StatelessWidget {
     required this.state,
     required this.onViewRequested,
     required this.onRowTapped,
+    this.openedStudentId,
     this.emptyLabel,
     this.titles = const FeeSectionTitlesState(),
   });
@@ -92,6 +96,7 @@ class FeeControlResultsSection extends StatelessWidget {
                   l10n.paginationPageIndicator(current, total),
               onViewRequested: onViewRequested,
               onRowTapped: onRowTapped,
+              openedStudentId: openedStudentId,
               onSelectionToggled: (row) => context
                   .read<FeeControlSelectionCubit>()
                   .toggle(row.studentId),

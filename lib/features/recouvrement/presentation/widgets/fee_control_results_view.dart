@@ -25,6 +25,9 @@ class FeeControlResultsView extends StatelessWidget {
   final ValueChanged<FeeControlRow> onViewRequested;
   final ValueChanged<FeeControlRow> onRowTapped;
 
+  /// L'élève dont l'aperçu est ancré à côté du tableau : sa ligne reste marquée.
+  final String? openedStudentId;
+
   /// Mène à la Facturation. Si personne n'a payé, l'issue utile est
   /// d'encaisser, pas de re-chercher.
   final VoidCallback? onBilling;
@@ -37,6 +40,7 @@ class FeeControlResultsView extends StatelessWidget {
     super.key,
     required this.onViewRequested,
     required this.onRowTapped,
+    this.openedStudentId,
     this.onBilling,
     this.titles = const FeeSectionTitlesState(),
   });
@@ -142,6 +146,7 @@ class FeeControlResultsView extends StatelessWidget {
             ),
             onViewRequested: onViewRequested,
             onRowTapped: onRowTapped,
+            openedStudentId: openedStudentId,
           ),
         );
       },
