@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/selection/checkable_row.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -131,30 +132,35 @@ class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _AllocationCheckbox(
-                value: selected,
-                onChanged: () => onSelectedChanged(!selected),
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              Expanded(
-                child: Text(
-                  chargeDesignation(charge, l10n),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodyStrong.copyWith(
-                    color: AppColors.textPrimary,
+          // Toute la ligne coche le frais, pas seulement sa case de 20 dp.
+          CheckableRow(
+            value: selected,
+            onChanged: onSelectedChanged,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _AllocationCheckbox(
+                  value: selected,
+                  onChanged: () => onSelectedChanged(!selected),
+                ),
+                const SizedBox(width: AppDimensions.spacingS),
+                Expanded(
+                  child: Text(
+                    chargeDesignation(charge, l10n),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodyStrong.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppDimensions.spacingS),
-              _StatusBadge(
-                status: charge.status,
-                label: charge.status.localizedLabel(l10n),
-              ),
-            ],
+                const SizedBox(width: AppDimensions.spacingS),
+                _StatusBadge(
+                  status: charge.status,
+                  label: charge.status.localizedLabel(l10n),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingS),
           _StateLine(
@@ -224,8 +230,9 @@ class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                               vertical: AppDimensions.spacingXS,
                             ),
+                            // Cible padded (48 dp) : « Tout régler » se
+                            // touche au doigt, au guichet.
                             minimumSize: const Size(0, 0),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           child: Text(
                             l10n.facturationCreatePaymentSettleAllAction,

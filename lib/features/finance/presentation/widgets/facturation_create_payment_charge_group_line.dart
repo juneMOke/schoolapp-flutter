@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/selection/checkable_row.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -285,44 +286,49 @@ class _HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 24,
-          height: 24,
-          child: Checkbox(
-            value: selected,
-            onChanged: (value) => onSelectedChanged(value ?? false),
-            visualDensity: VisualDensity.compact,
+    // Toute la ligne coche le frais, pas seulement sa case de 24 dp.
+    return CheckableRow(
+      value: selected,
+      onChanged: onSelectedChanged,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: Checkbox(
+              value: selected,
+              onChanged: (value) => onSelectedChanged(value ?? false),
+              visualDensity: VisualDensity.compact,
+            ),
           ),
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodyStrong.copyWith(
-                  color: AppColors.textPrimary,
+          const SizedBox(width: AppDimensions.spacingS),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyStrong.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppDimensions.spacingXS),
-              Text(
-                trancheLabel,
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textMuted,
+                const SizedBox(height: AppDimensions.spacingXS),
+                Text(
+                  trancheLabel,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        FeeStatusBadge(label: statusLabel, visuals: statusVisuals),
-      ],
+          const SizedBox(width: AppDimensions.spacingS),
+          FeeStatusBadge(label: statusLabel, visuals: statusVisuals),
+        ],
+      ),
     );
   }
 }

@@ -671,7 +671,10 @@ class AppDimensions {
 
   /// Cible tactile standard du module : puces, flèches, segments.
   static const presenceMarkTapTarget = 44.0;
-  static const presenceMarkSegmentHeight = 40.0;
+
+  /// Segment P/R/A, heures, « Justifier » : la ligne d'appel se tape au
+  /// doigt, élève après élève — 48 dp, pas 40.
+  static const presenceMarkSegmentHeight = minTouchTarget;
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;
