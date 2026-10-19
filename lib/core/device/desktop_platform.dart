@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 /// Poste de bureau (Windows, Linux) : ni SQLCipher natif, ni Bluetooth
 /// Classic, ni prise de vue.
@@ -39,10 +38,3 @@ bool get _desktopOperatingSystem => switch (defaultTargetPlatform) {
   TargetPlatform.iOS ||
   TargetPlatform.fuchsia => false,
 };
-
-/// Action d'Entrée d'un champ d'une ligne qui ne valide rien : au clavier
-/// physique, passer au champ suivant. Sans elle, Flutter rend le focus et
-/// laisse l'utilisateur sans repère au milieu du formulaire. `null` sur la
-/// tablette : son clavier virtuel garde son comportement.
-TextInputAction? get physicalKeyboardNextAction =>
-    expectsPhysicalKeyboard ? TextInputAction.next : null;

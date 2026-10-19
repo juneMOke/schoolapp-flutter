@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 
-/// Au clavier physique, Entrée passe au champ suivant d'un formulaire.
+/// Entrée (clavier physique) ou « Suivant » (clavier virtuel) passe au champ
+/// suivant d'un formulaire.
 ///
 /// Flutter, par défaut, rend le focus : sur un poste, Entrée au milieu d'un
 /// formulaire laissait l'utilisateur sans curseur.
@@ -75,9 +76,13 @@ void main() {
     );
   });
 
-  testWidgets('la tablette garde son clavier virtuel inchangé', (tester) async {
-    expect(await actionOf(tester, field()), isNull);
-  });
+  testWidgets(
+    'tablette et téléphone : le clavier virtuel propose « Suivant »',
+    (tester) async {
+      // Sans action, Android pose « OK » et referme le clavier à chaque champ.
+      expect(await actionOf(tester, field()), TextInputAction.next);
+    },
+  );
 
   testWidgets('Entrée, au bureau, déplace le focus au champ suivant', (
     tester,

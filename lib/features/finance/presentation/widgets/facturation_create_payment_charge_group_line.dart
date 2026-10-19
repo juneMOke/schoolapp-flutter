@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -355,7 +354,7 @@ class _AmountRow extends StatelessWidget {
             controller: controller,
             readOnly: readOnly,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: physicalKeyboardNextAction,
+            textInputAction: TextInputAction.next,
             onChanged: (_) => onEdited(),
             decoration: InputDecoration(
               labelText: l10n.facturationCreatePaymentGroupAmountLabel,
@@ -397,7 +396,7 @@ class _TenderRow extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      textInputAction: physicalKeyboardNextAction,
+      textInputAction: TextInputAction.next,
       onChanged: (_) => onEdited(),
       decoration: InputDecoration(
         labelText: l10n.facturationCreatePaymentTenderAmountLabel,
