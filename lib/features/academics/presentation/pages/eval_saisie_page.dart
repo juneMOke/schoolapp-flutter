@@ -309,6 +309,7 @@ class _StickySaveBar extends StatelessWidget {
             state.rows.isNotEmpty;
         if (!ready) return const SizedBox.shrink();
         return EvalStickyBottomBar(
+          width: PageContentWidth.wide,
           child: SaisieSaveBar(
             draft: draft,
             isSaving: isSaving,

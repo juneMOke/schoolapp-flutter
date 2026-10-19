@@ -2,7 +2,6 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/home/data/sidebar_preference_store.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
@@ -297,6 +296,16 @@ void main() {
       final bloc = build(sidebarExpanded: false);
       await pumpEventQueue();
       expect(bloc.state.isSidebarExpanded, isTrue);
+      await bloc.close();
+    });
+
+    test('un basculement pendant la relecture n\'est pas écrasé', () async {
+      storage.values['ui.sidebar_expanded'] = 'true';
+      // Ctrl+B avant que le choix gardé ne revienne.
+      final bloc = build()..add(const SidebarToggled());
+      await pumpEventQueue();
+      expect(bloc.state.isSidebarExpanded, isFalse);
+      expect(storage.values['ui.sidebar_expanded'], 'false');
       await bloc.close();
     });
 

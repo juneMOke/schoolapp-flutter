@@ -108,7 +108,9 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
             // Parent = accordéon (état développé/réduit) ; feuille = null pour
             // n'exposer que bouton + sélectionné (pas de sémantique
             // d'interrupteur « désactivé » sur un simple lien, cf. spec §09).
-            expanded: widget.menu.subMenus.isNotEmpty
+            // En rail, l'accordéon n'existe pas : le menu flottant se dit
+            // de lui-même.
+            expanded: widget.menu.subMenus.isNotEmpty && widget.isExpanded
                 ? widget.isMenuOpened
                 : null,
             child: InkWell(

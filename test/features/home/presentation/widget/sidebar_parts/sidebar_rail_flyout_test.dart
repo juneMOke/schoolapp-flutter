@@ -4,11 +4,11 @@ import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_rail_flyout.dart';
 
 void main() {
-  final menu = MenuItem(
+  const menu = MenuItem(
     id: 'finances',
     title: 'Finances',
     icon: Icons.payments_outlined,
-    subMenus: const [
+    subMenus: [
       SubMenuItem(id: 'facturations', title: 'Facturations', route: '/f'),
       SubMenuItem(id: 'caisse', title: 'Caisse', route: '/c'),
     ],

@@ -70,7 +70,7 @@ class AppPageBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = ContentMaxWidth(
-      maxWidth: width.maxWidthFor(MediaQuery.sizeOf(context).width),
+      maxWidth: width.maxWidthIn(context),
       child: selectableText ? DesktopSelectionArea(child: child) : child,
     );
 

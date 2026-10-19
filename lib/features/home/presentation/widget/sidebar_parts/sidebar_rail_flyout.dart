@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/web/new_tab.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Barre repliée (rail) : les sous-menus d'un module s'ouvrent en menu
 /// flottant à droite de son icône, au lieu de redéployer toute la barre — le
@@ -40,11 +42,18 @@ class SidebarRailFlyout extends StatelessWidget {
       style: _style,
       menuChildren: [
         _Title(menu.title),
-        for (final subMenu in menu.subMenus)
-          MenuItemButton(
-            onPressed: () => onSelected(subMenu),
-            style: _itemStyle(selected: subMenu.isActive),
-            child: Text(subMenu.title),
+        for (final (index, subMenu) in menu.subMenus.indexed)
+          // Web : clic molette → nouvel onglet, comme dans la barre déployée.
+          MiddleClickOpensTab(
+            path: AppRoutesNames.homeSubMenuPath(subMenu.id),
+            child: MenuItemButton(
+              // Ouvert au clavier, le menu reçoit le focus sur son premier
+              // écran : les flèches le parcourent aussitôt.
+              autofocus: index == 0,
+              onPressed: () => onSelected(subMenu),
+              style: _itemStyle(selected: subMenu.isActive),
+              child: Text(subMenu.title),
+            ),
           ),
       ],
       builder: (context, controller, _) => builder(

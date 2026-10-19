@@ -13,6 +13,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   /// Garde le choix déployé / replié de la barre ; `null` : rien n'est gardé.
   final SidebarPreferenceStore? _sidebarPreference;
 
+  /// Vrai dès que l'utilisateur a basculé la barre : un choix gardé relu
+  /// après coup ne l'écrase pas.
+  bool _sidebarToggledByUser = false;
+
   /// [sidebarExpanded] : l'état d'ouverture tant que le choix gardé n'est pas
   /// relu — replié sur un écran étroit (cf. `sidebarExpandedDefaultMin`).
   NavigationBloc(
@@ -176,6 +180,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
 
   void _onSidebarToggled(SidebarToggled event, Emitter<NavigationState> emit) {
     final expanded = !state.isSidebarExpanded;
+    _sidebarToggledByUser = true;
     emit(state.copyWith(isSidebarExpanded: expanded));
     _sidebarPreference?.write(expanded: expanded);
   }
@@ -183,5 +188,8 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _onSidebarPreferenceRestored(
     SidebarPreferenceRestored event,
     Emitter<NavigationState> emit,
-  ) => emit(state.copyWith(isSidebarExpanded: event.expanded));
+  ) {
+    if (_sidebarToggledByUser) return;
+    emit(state.copyWith(isSidebarExpanded: event.expanded));
+  }
 }
