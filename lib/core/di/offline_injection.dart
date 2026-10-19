@@ -48,6 +48,7 @@ import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.
 import 'package:school_app_flutter/core/di/offline_modules/boutique_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/enrollment_suspension_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/student_identity_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/student_photo_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/expense_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/documents_offline_di.dart';
@@ -342,6 +343,7 @@ void registerOfflineModules(GetIt getIt) {
   ); // Dépenses — registre des frais de fonctionnement
   registerStaffOffline(getIt); // RH — fichier du personnel
   registerEnrollmentFinanceOffline(getIt); // branche A
+  registerStudentIdentity(getIt); // Fiches rouvertes par leur adresse
   registerClassroomAttendanceOffline(getIt); // branche B
   registerClassPresence(getIt); // Présences des élèves v2 — registre d'appel
   registerAcademicsOffline(getIt); // Notes / Cours (academics + schedule)
