@@ -14279,6 +14279,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get classPresenceStudentListTitle => 'Students in the class';
+
+  @override
+  String get classPresenceStudentListFilter => 'Filter students';
+
+  @override
   String get classPresenceTabStudent => 'Monthly sheet';
 
   @override

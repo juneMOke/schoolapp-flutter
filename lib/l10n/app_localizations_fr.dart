@@ -14375,6 +14375,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get classPresenceStudentListTitle => 'Élèves de la classe';
+
+  @override
+  String get classPresenceStudentListFilter => 'Filtrer les élèves';
+
+  @override
   String get classPresenceTabStudent => 'Fiche mensuelle';
 
   @override

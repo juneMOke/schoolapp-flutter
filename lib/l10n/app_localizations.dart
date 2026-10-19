@@ -22538,6 +22538,18 @@ abstract class AppLocalizations {
   /// **'{marked} / {total} students'**
   String classPresenceTabRegisterSubtitle(int marked, int total);
 
+  /// Colonne des élèves de la fiche mensuelle, sur grand écran.
+  ///
+  /// In en, this message translates to:
+  /// **'Students in the class'**
+  String get classPresenceStudentListTitle;
+
+  /// Filtre de la colonne des élèves de la fiche mensuelle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter students'**
+  String get classPresenceStudentListFilter;
+
   /// No description provided for @classPresenceTabStudent.
   ///
   /// In en, this message translates to:

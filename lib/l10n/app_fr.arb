@@ -9390,6 +9390,14 @@
   "classPresenceToastUnsupported": "Un motif de cette journée est inconnu de cette tablette : mettez l'application à jour avant de modifier l'appel.",
   "classPresenceTabRegister": "Registre du jour",
   "classPresenceTabRegisterSubtitle": "{marked} / {total} élèves",
+  "classPresenceStudentListTitle": "Élèves de la classe",
+  "@classPresenceStudentListTitle": {
+    "description": "Colonne des élèves de la fiche mensuelle, sur grand écran."
+  },
+  "classPresenceStudentListFilter": "Filtrer les \u00e9l\u00e8ves",
+  "@classPresenceStudentListFilter": {
+    "description": "Filtre de la colonne des élèves de la fiche mensuelle."
+  },
   "classPresenceTabStudent": "Fiche mensuelle",
   "classPresenceTabStudentSubtitle": "Par élève · {month}",
   "classPresenceTabRecap": "Récapitulatif du mois",

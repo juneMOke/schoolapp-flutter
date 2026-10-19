@@ -9048,6 +9048,14 @@
   "classPresenceTabRegister": "Today's register",
   "classPresenceTabRegisterSubtitle": "{marked} / {total} students",
   "@classPresenceTabRegisterSubtitle": {"placeholders": {"marked": {"type": "int"}, "total": {"type": "int"}}},
+  "classPresenceStudentListTitle": "Students in the class",
+  "@classPresenceStudentListTitle": {
+    "description": "Colonne des élèves de la fiche mensuelle, sur grand écran."
+  },
+  "classPresenceStudentListFilter": "Filter students",
+  "@classPresenceStudentListFilter": {
+    "description": "Filtre de la colonne des élèves de la fiche mensuelle."
+  },
   "classPresenceTabStudent": "Monthly sheet",
   "classPresenceTabStudentSubtitle": "Per student · {month}",
   "@classPresenceTabStudentSubtitle": {"placeholders": {"month": {"type": "String"}}},

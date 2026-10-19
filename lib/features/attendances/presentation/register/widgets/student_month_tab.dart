@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/components/selection/selectable_list_card.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
@@ -32,6 +35,47 @@ class StudentMonthTab extends StatelessWidget {
     final data = state.monthData;
     final sheet = state.studentMonth;
     final students = data?.students ?? const <ClassPresenceStudent>[];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Grand écran : les élèves en colonne — passer au suivant est un clic.
+        final split =
+            constraints.maxWidth >= AppBreakpoints.studentMonthSplitMin;
+        final month = _month(context, students: students, withPicker: !split);
+        if (!split) return month;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: AppDimensions.studentMonthListWidth,
+              child: SelectableListCard(
+                title: l10n.classPresenceStudentListTitle,
+                filterLabel: l10n.classPresenceStudentListFilter,
+                selectedId: sheet?.student.id,
+                items: [
+                  for (final s in students)
+                    SelectableListItem(id: s.id, label: s.fullName),
+                ],
+                onSelected: cubit.openStudent,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(child: month),
+          ],
+        );
+      },
+    );
+  }
+
+  /// La fiche du mois ; [withPicker] : la liste déroulante des élèves en tête,
+  /// quand ils ne sont pas déjà en colonne.
+  Widget _month(
+    BuildContext context, {
+    required List<ClassPresenceStudent> students,
+    required bool withPicker,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<ClassPresenceCubit>();
+    final sheet = state.studentMonth;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -41,28 +85,30 @@ class StudentMonthTab extends StatelessWidget {
           spacing: AppSpacing.lg,
           runSpacing: AppSpacing.md,
           children: [
-            PresencePersonPicker<ClassPresenceStudent>(
-              entries: [
-                for (final s in students)
-                  PresencePickerEntry(
-                    value: s,
-                    id: s.id,
-                    firstName: s.firstName,
-                    lastName: s.lastName,
-                    fullName: s.fullName,
-                  ),
-              ],
-              selectedId: sheet?.student.id,
-              showsStudentPhotos: true,
-              label: l10n.classPresenceTabStudent,
-              placeholder: l10n.classPresenceStudentPickerPlaceholder,
-              matches: (s, text) => SearchNormalizationHelper.containsAllWords([
-                s.lastName,
-                s.middleName,
-                s.firstName,
-              ], text),
-              onSelected: (s) => cubit.openStudent(s.id),
-            ),
+            if (withPicker)
+              PresencePersonPicker<ClassPresenceStudent>(
+                entries: [
+                  for (final s in students)
+                    PresencePickerEntry(
+                      value: s,
+                      id: s.id,
+                      firstName: s.firstName,
+                      lastName: s.lastName,
+                      fullName: s.fullName,
+                    ),
+                ],
+                selectedId: sheet?.student.id,
+                showsStudentPhotos: true,
+                label: l10n.classPresenceTabStudent,
+                placeholder: l10n.classPresenceStudentPickerPlaceholder,
+                matches: (s, text) =>
+                    SearchNormalizationHelper.containsAllWords([
+                      s.lastName,
+                      s.middleName,
+                      s.firstName,
+                    ], text),
+                onSelected: (s) => cubit.openStudent(s.id),
+              ),
             PresenceMonthNav(
               month: state.month,
               isCurrent: state.isCurrentMonth,
