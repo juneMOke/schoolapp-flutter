@@ -50,27 +50,33 @@ class DataTablePaginationBar extends StatelessWidget {
               icon: Icons.chevron_left_rounded,
               tooltip: l10n.previousPage,
             ),
-            Semantics(
-              container: true,
-              liveRegion: true,
-              label: defaultLabel,
-              child: Container(
-                height: AppDimensions.paginationButtonSize,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.paginationIndicatorHPadding,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.bleuArdoise,
-                  borderRadius: BorderRadius.circular(
-                    AppDimensions.paginationButtonRadius,
+            // Flexible : à l'étroit, l'indicateur s'abrège et les flèches
+            // restent à l'écran.
+            Flexible(
+              child: Semantics(
+                container: true,
+                liveRegion: true,
+                label: defaultLabel,
+                child: Container(
+                  height: AppDimensions.paginationButtonSize,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.paginationIndicatorHPadding,
                   ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  defaultLabel,
-                  style: AppTypography.labelMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.blancCasse,
+                  decoration: BoxDecoration(
+                    color: AppColors.bleuArdoise,
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.paginationButtonRadius,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    defaultLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.blancCasse,
+                    ),
                   ),
                 ),
               ),

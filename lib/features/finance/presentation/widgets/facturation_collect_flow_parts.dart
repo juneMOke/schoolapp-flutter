@@ -48,19 +48,25 @@ class CollectStepHeader extends StatelessWidget {
               children: [
                 Expanded(
                   child: Row(
+                    // Flexibles : sur un téléphone, les libellés d'étape
+                    // s'abrègent au lieu de pousser la croix hors de la barre.
                     children: [
-                      _StepPill(
-                        index: 1,
-                        label: confirmLabel,
-                        done: resultActive,
-                        active: !resultActive,
+                      Flexible(
+                        child: _StepPill(
+                          index: 1,
+                          label: confirmLabel,
+                          done: resultActive,
+                          active: !resultActive,
+                        ),
                       ),
                       _StepConnector(active: resultActive),
-                      _StepPill(
-                        index: 2,
-                        label: resultLabel,
-                        done: false,
-                        active: resultActive,
+                      Flexible(
+                        child: _StepPill(
+                          index: 2,
+                          label: resultLabel,
+                          done: false,
+                          active: resultActive,
+                        ),
                       ),
                     ],
                   ),

@@ -276,9 +276,13 @@ class _PaymentCancelledBadge extends StatelessWidget {
         children: [
           Icon(icon, size: 13, color: AppColors.textMuted),
           const SizedBox(width: AppDimensions.spacingXS),
-          Text(
-            label ?? l10n.facturationPaymentCancelledBadge,
-            style: AppTextStyles.badge.copyWith(color: AppColors.textMuted),
+          Flexible(
+            child: Text(
+              label ?? l10n.facturationPaymentCancelledBadge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.badge.copyWith(color: AppColors.textMuted),
+            ),
           ),
         ],
       ),

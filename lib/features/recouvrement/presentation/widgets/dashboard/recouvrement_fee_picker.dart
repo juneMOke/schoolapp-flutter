@@ -193,15 +193,21 @@ class _FeeChip extends StatelessWidget {
                 color: active ? AppColors.bleuArdoise : AppColors.textMuted,
               ),
               const SizedBox(width: AppDimensions.spacingXS),
-              Text(
-                label,
-                style: active
-                    ? AppTextStyles.bodyStrong.copyWith(
-                        color: AppColors.bleuProfond,
-                      )
-                    : AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+              // Un intitulé de frais plus large que l'écran s'abrège : posé dans
+              // un `Wrap`, la pastille ne peut pas passer à la ligne.
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: active
+                      ? AppTextStyles.bodyStrong.copyWith(
+                          color: AppColors.bleuProfond,
+                        )
+                      : AppTextStyles.body.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                ),
               ),
               // Le symbole rend la conséquence du clic lisible AVANT le clic :
               // cocher un frais en francs à côté d'un frais en dollars ferme le

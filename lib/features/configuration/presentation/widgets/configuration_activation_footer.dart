@@ -47,7 +47,12 @@ class ConfigurationActivationFooter extends StatelessWidget {
             color: AppColors.surfaceRaised,
             border: Border(top: BorderSide(color: AppColors.border)),
           ),
-          child: Row(
+          // Retour et activation passent l'un sous l'autre sur un téléphone.
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: AppSpacing.sm,
+            spacing: AppSpacing.sm,
             children: [
               TextButton.icon(
                 onPressed: state.isActivating
@@ -58,7 +63,6 @@ class ConfigurationActivationFooter extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back_rounded, size: 18),
                 label: Text(l10n.configurationBack),
               ),
-              const Spacer(),
               FilledButton.icon(
                 // Actif seulement si les quatre contrôles passent, et fermé
                 // pendant l'activation : ce geste n'est pas idempotent, un

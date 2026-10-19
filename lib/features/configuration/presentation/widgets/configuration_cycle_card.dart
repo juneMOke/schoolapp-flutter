@@ -164,10 +164,12 @@ class _Header extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  l10n.configurationCycleClassroomsPerLevel,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textMuted,
+                Flexible(
+                  child: Text(
+                    l10n.configurationCycleClassroomsPerLevel,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
