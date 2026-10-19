@@ -110,6 +110,16 @@ class EvolutionLineChart extends StatelessWidget {
 
   static const double _leftAxisWidth = 36;
 
+  /// Une étiquette sur [step] ; le point mis en avant garde toujours la
+  /// sienne, et ses voisins trop proches s'effacent devant lui.
+  bool _showsLabel(int index, int step) {
+    if (points[index].isHighlighted) return true;
+    for (var i = 0; i < points.length; i++) {
+      if (points[i].isHighlighted && (i - index).abs() < step) return false;
+    }
+    return index % step == 0;
+  }
+
   Widget _chart({
     required double resolvedMinY,
     required double resolvedMaxY,
@@ -184,13 +194,16 @@ class EvolutionLineChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 24,
+                // Chaque point est visité : sans pas imposé, fl_chart filtre
+                // de son côté, et les deux filtres se multipliaient (deux
+                // étiquettes sur vingt points).
+                interval: 1,
                 getTitlesWidget: (value, meta) {
                   final idx = value.toInt();
                   if (idx < 0 || idx >= points.length) {
                     return const SizedBox.shrink();
                   }
-                  // Le point mis en avant garde toujours son étiquette.
-                  if (idx % labelStep != 0 && !points[idx].isHighlighted) {
+                  if (!_showsLabel(idx, labelStep)) {
                     return const SizedBox.shrink();
                   }
                   return Text(

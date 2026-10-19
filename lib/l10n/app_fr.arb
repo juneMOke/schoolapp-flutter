@@ -2312,7 +2312,14 @@
   "homeSidebarFooterLabel": "Tableau de bord scolaire",
   "homeSidebarNavigationLabel": "Navigation principale",
   "searchCollapsedEdit": "Modifier la recherche",
-  "searchCollapsedLabel": "Recherche",
+  "searchCollapsedSemantics": "Recherche : {criteria}",
+  "@searchCollapsedSemantics": {
+    "placeholders": {
+      "criteria": {
+        "type": "String"
+      }
+    }
+  },
   "pageUnderConstruction": "Cette page est en cours de développement",
   "shellBackAgainToExit": "Appuyez de nouveau sur Retour pour quitter",
   "preRegistrations": "Pré-Inscriptions",

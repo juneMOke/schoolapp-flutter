@@ -8,7 +8,7 @@ int chartLabelStep({
   required double width,
   required double minSpacing,
 }) {
-  if (count <= 1 || width <= 0) return 1;
+  if (count <= 1 || width <= 0 || !width.isFinite) return 1;
   final fitting = (width / minSpacing).floor();
   if (fitting <= 0) return count;
   return (count / fitting).ceil().clamp(1, count);

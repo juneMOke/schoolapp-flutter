@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -54,15 +55,12 @@ class FacturationDetailStatementBar extends StatelessWidget {
           );
         }
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: caption),
-            const SizedBox(width: AppDimensions.spacingM),
-            // Le libellé du bouton se resserre plutôt que de déborder quand la
-            // légende de fraîcheur est longue (7" en paysage).
-            Flexible(child: action),
-          ],
+        // Le libellé du bouton se resserre à sa borne plutôt que de déborder
+        // quand la légende de fraîcheur est longue (7" en paysage).
+        return LeadingTrailingRow(
+          gap: AppDimensions.spacingM,
+          leading: caption,
+          trailing: action,
         );
       },
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -106,36 +107,36 @@ class _FacturationTicketPrintRowState extends State<FacturationTicketPrintRow>
         border: Border.all(color: AppColors.border),
         borderRadius: AppRadius.brSm,
       ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.receipt_long_outlined,
-            size: AppDimensions.financeRowIconSize,
-            color: AppColors.bleuArdoise,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            // La mention dit l'ÉTAT, pas la consigne : « Imprimé le … » est la
-            // dernière impression connue de cette tablette, réécrite à chaque
-            // tirage. Une tablette qui n'a rien imprimé le dit sans prétendre
-            // savoir ce qu'ont fait les autres.
-            child: Text(
-              status.printedAt == null
-                  ? l10n.facturationPaymentTicketNotPrinted
-                  : l10n.facturationPaymentTicketPrintedAt(
-                      formatLocalDateTime(status.printedAt!),
-                    ),
-              style: AppTextStyles.body,
+      child: LeadingTrailingRow(
+        gap: widget.showAction ? AppSpacing.sm : 0,
+        leading: Row(
+          children: [
+            const Icon(
+              Icons.receipt_long_outlined,
+              size: AppDimensions.financeRowIconSize,
+              color: AppColors.bleuArdoise,
             ),
-          ),
-          if (widget.showAction) ...[
             const SizedBox(width: AppSpacing.sm),
-            // Le libellé dit LEQUEL des deux gestes on fait : sortir un papier
-            // qui n'existe pas encore, ou en refaire un.
-            // Flexible : à l'étroit, le libellé se resserre au lieu de pousser
-            // la ligne hors de la carte.
-            Flexible(
-              child: TextButton(
+            Expanded(
+              // La mention dit l'ÉTAT, pas la consigne : « Imprimé le … » est
+              // la dernière impression connue de cette tablette, réécrite à
+              // chaque tirage. Une tablette qui n'a rien imprimé le dit sans
+              // prétendre savoir ce qu'ont fait les autres.
+              child: Text(
+                status.printedAt == null
+                    ? l10n.facturationPaymentTicketNotPrinted
+                    : l10n.facturationPaymentTicketPrintedAt(
+                        formatLocalDateTime(status.printedAt!),
+                      ),
+                style: AppTextStyles.body,
+              ),
+            ),
+          ],
+        ),
+        // Le libellé dit LEQUEL des deux gestes on fait : sortir un papier qui
+        // n'existe pas encore, ou en refaire un.
+        trailing: widget.showAction
+            ? TextButton(
                 onPressed: printing
                     ? null
                     : () => printTicket(widget.paymentId),
@@ -146,10 +147,8 @@ class _FacturationTicketPrintRowState extends State<FacturationTicketPrintRow>
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ),
-          ],
-        ],
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }

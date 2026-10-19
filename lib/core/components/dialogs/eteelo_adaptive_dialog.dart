@@ -32,7 +32,7 @@ Future<T?> showEteeloAdaptiveDialog<T>({
 /// Centrée sur 360 dp, une modale gardait ses marges de part et d'autre :
 /// ~230 dp de champ, une page A4 de ~310 dp. Plein écran, sous les barres
 /// système, elle a toute la largeur.
-class EteeloAdaptiveDialog extends StatelessWidget {
+class EteeloAdaptiveDialog extends StatefulWidget {
   final Widget child;
 
   /// Bornes de la forme centrée ; sans effet en plein écran.
@@ -64,22 +64,36 @@ class EteeloAdaptiveDialog extends StatelessWidget {
       MediaQuery.sizeOf(context).width < AppBreakpoints.formDialogFullscreenMax;
 
   @override
+  State<EteeloAdaptiveDialog> createState() => _EteeloAdaptiveDialogState();
+}
+
+class _EteeloAdaptiveDialogState extends State<EteeloAdaptiveDialog> {
+  // Tourner le téléphone fait passer la modale de plein écran à centrée : les
+  // deux formes n'ont pas le même arbre. Sous cette clé, le contenu est
+  // DÉPLACÉ, pas remonté — la saisie et l'aperçu survivent à la rotation.
+  final _contentKey = GlobalKey(debugLabel: 'adaptive-dialog-content');
+
+  @override
   Widget build(BuildContext context) {
-    if (isFullscreen(context)) {
+    final content = KeyedSubtree(key: _contentKey, child: widget.child);
+    if (EteeloAdaptiveDialog.isFullscreen(context)) {
       return Dialog.fullscreen(
-        backgroundColor: backgroundColor,
-        child: SafeArea(child: child),
+        backgroundColor: widget.backgroundColor,
+        child: SafeArea(child: content),
       );
     }
     return Dialog(
-      backgroundColor: backgroundColor,
+      backgroundColor: widget.backgroundColor,
       surfaceTintColor: Colors.transparent,
-      clipBehavior: clipBehavior,
-      insetPadding: insetPadding,
-      shape: RoundedRectangleBorder(borderRadius: borderRadius),
+      clipBehavior: widget.clipBehavior,
+      insetPadding: widget.insetPadding,
+      shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-        child: child,
+        constraints: BoxConstraints(
+          maxWidth: widget.maxWidth,
+          maxHeight: widget.maxHeight,
+        ),
+        child: content,
       ),
     );
   }

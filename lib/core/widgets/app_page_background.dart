@@ -146,6 +146,9 @@ class AppPageBackground extends StatelessWidget {
   Widget _buildScrollableContent(BuildContext context, Widget content) {
     if (scrollable) {
       return SingleChildScrollView(
+        // Toujours défilable : sur un écran court (vide, en erreur), tirer
+        // vers le bas doit encore relancer la synchro (`ShellPullToSync`).
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: _contentPadding(context),
         child: content,
       );

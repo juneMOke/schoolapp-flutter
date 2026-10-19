@@ -4328,11 +4328,11 @@ abstract class AppLocalizations {
   /// **'Edit search'**
   String get searchCollapsedEdit;
 
-  /// No description provided for @searchCollapsedLabel.
+  /// No description provided for @searchCollapsedSemantics.
   ///
   /// In en, this message translates to:
-  /// **'Search'**
-  String get searchCollapsedLabel;
+  /// **'Search: {criteria}'**
+  String searchCollapsedSemantics(String criteria);
 
   /// No description provided for @pageUnderConstruction.
   ///

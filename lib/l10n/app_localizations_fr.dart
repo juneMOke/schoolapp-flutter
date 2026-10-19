@@ -2821,7 +2821,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchCollapsedEdit => 'Modifier la recherche';
 
   @override
-  String get searchCollapsedLabel => 'Recherche';
+  String searchCollapsedSemantics(String criteria) {
+    return 'Recherche : $criteria';
+  }
 
   @override
   String get pageUnderConstruction =>

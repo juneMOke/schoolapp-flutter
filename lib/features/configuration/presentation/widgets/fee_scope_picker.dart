@@ -44,9 +44,12 @@ class FeeScopePicker extends StatelessWidget {
           children: [
             Text(l10n.configurationFeeScope, style: AppTypography.labelMedium),
             const Text(' *', style: TextStyle(color: AppColors.error)),
-            const Spacer(),
-            if (!all)
-              Flexible(
+            // `Expanded` et non `Spacer` + `Flexible` : ces deux-là se
+            // partageaient la place, et le compteur décollait du bord.
+            if (all)
+              const Spacer()
+            else
+              Expanded(
                 child: Text(
                   l10n.configurationFeeScopeCount(
                     value.levelCatalogCodes.length,

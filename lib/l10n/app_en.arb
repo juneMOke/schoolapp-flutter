@@ -2368,7 +2368,14 @@
   "homeSidebarFooterLabel": "School dashboard",
   "homeSidebarNavigationLabel": "Main navigation",
   "searchCollapsedEdit": "Edit search",
-  "searchCollapsedLabel": "Search",
+  "searchCollapsedSemantics": "Search: {criteria}",
+  "@searchCollapsedSemantics": {
+    "placeholders": {
+      "criteria": {
+        "type": "String"
+      }
+    }
+  },
   "pageUnderConstruction": "This page is under development",
   "shellBackAgainToExit": "Press Back again to exit",
   "preRegistrations": "Pre-Registrations",

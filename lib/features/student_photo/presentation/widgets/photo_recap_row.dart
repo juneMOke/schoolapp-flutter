@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -80,46 +81,50 @@ class PhotoRecapRow extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         borderRadius: AppRadius.brMd,
       ),
-      child: Row(
-        children: [
-          draftPhoto != null
-              ? SlotPhoto(
-                  studentId: studentId,
-                  draft: draftPhoto,
-                  size: AppDimensions.photoRecapAvatar,
-                )
-              : PersonAvatar(
-                  firstName: firstName,
-                  lastName: lastName,
-                  personId: studentId,
-                  size: AppDimensions.photoRecapAvatar,
-                  studentPhotoOf: studentId,
-                ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.photoEyebrow,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: AppColors.textPrimary,
+      // Sur un téléphone, le libellé du bouton s'abrège à sa borne plutôt que
+      // d'écraser la mention à zéro ; sans droit, la mention a toute la place.
+      child: LeadingTrailingRow(
+        leading: Row(
+          children: [
+            draftPhoto != null
+                ? SlotPhoto(
+                    studentId: studentId,
+                    draft: draftPhoto,
+                    size: AppDimensions.photoRecapAvatar,
+                  )
+                : PersonAvatar(
+                    firstName: firstName,
+                    lastName: lastName,
+                    personId: studentId,
+                    size: AppDimensions.photoRecapAvatar,
+                    studentPhotoOf: studentId,
                   ),
-                ),
-                Text(
-                  hasPhoto ? l10n.photoRecapAdded : l10n.photoRecapMissing,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: hasPhoto ? AppColors.photoDone : AppColors.textMuted,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.photoEyebrow,
+                    style: AppTypography.titleSmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-              ],
+                  Text(
+                    hasPhoto ? l10n.photoRecapAdded : l10n.photoRecapMissing,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: hasPhoto
+                          ? AppColors.photoDone
+                          : AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (photoCaptureSupported)
-            // Flexible : sur un téléphone, le libellé du bouton se resserre
-            // plutôt que d'écraser la mention à zéro.
-            Flexible(
-              child: PermissionGate.access(
+          ],
+        ),
+        trailing: photoCaptureSupported
+            ? PermissionGate.access(
                 kStudentPhotoWriteAccess,
                 child: SessionWriteGate(
                   child: hasPhoto
@@ -136,9 +141,8 @@ class PhotoRecapRow extends StatelessWidget {
                           onPressed: open,
                         ),
                 ),
-              ),
-            ),
-        ],
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }

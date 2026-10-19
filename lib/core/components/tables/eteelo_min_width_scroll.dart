@@ -47,13 +47,19 @@ class _EteeloMinWidthScrollState extends State<EteeloMinWidthScroll> {
       final sized = SizedBox(width: widget.minWidth, child: widget.child);
       // Déjà dans un défilement horizontal : la largeur suffit.
       if (!constraints.hasBoundedWidth) return sized;
+      // L'ascenseur explicite remplace celui que le comportement de
+      // défilement pose au bureau : deux pouces sur un même contrôleur, deux
+      // cibles de glisser.
       return Scrollbar(
         controller: _controller,
         thumbVisibility: true,
-        child: SingleChildScrollView(
-          controller: _controller,
-          scrollDirection: Axis.horizontal,
-          child: sized,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            controller: _controller,
+            scrollDirection: Axis.horizontal,
+            child: sized,
+          ),
         ),
       );
     },

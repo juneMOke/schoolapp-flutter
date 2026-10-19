@@ -61,4 +61,14 @@ void main() {
     // haut et en bas ; la modale pose le sien, à l'intérieur.
     expect(tester.getSize(find.byType(Dialog)), const Size(360, 740));
   });
+
+  testWidgets('tourner le téléphone garde la saisie', (tester) async {
+    await fieldRect(tester, const Size(412, 915));
+    await tester.enterText(find.byKey(const Key('champ')), 'Interro 1');
+
+    tester.view.physicalSize = const Size(915, 412);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Interro 1'), findsOneWidget);
+  });
 }

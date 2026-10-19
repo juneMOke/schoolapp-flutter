@@ -27,7 +27,7 @@ class SearchCollapsedSummary extends StatelessWidget {
     // côté des critères sur 360 dp, texte agrandi.
     return Semantics(
       button: true,
-      label: '${l10n.searchCollapsedLabel} : $criteria',
+      label: l10n.searchCollapsedSemantics(criteria),
       hint: l10n.searchCollapsedEdit,
       excludeSemantics: true,
       child: InkWell(

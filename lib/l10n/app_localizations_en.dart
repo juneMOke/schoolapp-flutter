@@ -2808,7 +2808,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchCollapsedEdit => 'Edit search';
 
   @override
-  String get searchCollapsedLabel => 'Search';
+  String searchCollapsedSemantics(String criteria) {
+    return 'Search: $criteria';
+  }
 
   @override
   String get pageUnderConstruction => 'This page is under development';

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
@@ -27,7 +28,7 @@ void main() {
     when(() => cubit.syncNow()).thenAnswer((_) async {});
   });
 
-  Future<void> pullDown(WidgetTester tester) async {
+  Future<void> pullDown(WidgetTester tester, {int lines = 80}) async {
     await tester.pumpWidget(
       MaterialApp(
         home: BlocProvider<SyncStatusCubit>.value(
@@ -56,6 +57,13 @@ void main() {
     tester,
   ) async {
     await pullDown(tester);
+    verify(() => cubit.syncNow()).called(1);
+  });
+
+  testWidgets('écran court (vide, en erreur) : le geste marche encore', (
+    tester,
+  ) async {
+    await pullDown(tester, lines: 3);
     verify(() => cubit.syncNow()).called(1);
   });
 
