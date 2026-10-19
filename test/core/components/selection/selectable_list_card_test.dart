@@ -46,11 +46,11 @@ void main() {
     await pump(tester, 3);
     expect(
       tester.getSemantics(find.text('Élève 1')),
-      containsSemantics(isSelected: true, isButton: true),
+      isSemantics(isSelected: true, isButton: true),
     );
     expect(
       tester.getSemantics(find.text('Élève 2')),
-      containsSemantics(isSelected: false),
+      isSemantics(isSelected: false),
     );
   });
 
