@@ -11,8 +11,9 @@ class StudentIdentityDao {
   ///
   /// L'inscription est jointe par `LEFT JOIN` : un élève sans inscription
   /// cette année garde son nom, sans classe. Plusieurs inscriptions (une
-  /// annulée, celle qui vit) : la vivante d'abord, puis la plus récente, et
-  /// `e.id` rend le tri strict — deux lectures donnent la même classe.
+  /// annulée ou refusée, celle qui vit) : la vivante d'abord, puis la plus
+  /// récente, et `e.id` rend le tri strict — deux lectures donnent la même
+  /// classe.
   Future<StudentIdentityRow?> find({
     required String studentId,
     required String academicYearId,
@@ -28,7 +29,7 @@ class StudentIdentityDao {
       LEFT JOIN ref_school_level_groups slg
         ON slg.id = COALESCE(e.school_level_group_id, sl.level_group_id)
       WHERE s.id = ?
-      ORDER BY (e.status = 'CANCELLED') ASC, e.updated_at DESC, e.id ASC
+      ORDER BY (e.status IN ('CANCELLED', 'REJECTED')) ASC, e.updated_at DESC, e.id ASC
       LIMIT 1
       ''',
       [academicYearId, studentId],

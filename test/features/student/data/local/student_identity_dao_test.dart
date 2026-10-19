@@ -94,4 +94,14 @@ void main() {
       expect(identity.levelName, '5e A');
     },
   );
+
+  test('une inscription refusée cède aussi à celle qui vit', () async {
+    await enroll('e1', levelId: 'l1', updatedAt: 1);
+    await enroll('e2', levelId: 'l2', status: 'REJECTED', updatedAt: 9);
+    final identity = (await dao.find(
+      studentId: 's1',
+      academicYearId: 'y1',
+    ))!.toEntity();
+    expect(identity.levelName, '5e A');
+  });
 }
