@@ -24,11 +24,15 @@ class AnnouncementsListScreen extends StatelessWidget {
   final VoidCallback? onCreate;
   final VoidCallback? onUseTemplate;
 
+  /// Le communiqué ouvert à côté de la liste (grand écran).
+  final String? selectedId;
+
   const AnnouncementsListScreen({
     super.key,
     required this.onOpen,
     this.onCreate,
     this.onUseTemplate,
+    this.selectedId,
   });
 
   @override
@@ -98,7 +102,12 @@ class AnnouncementsListScreen extends StatelessWidget {
             onClearFilters: cubit.clearFilters,
           )
         else
-          AnnouncementGroupList(view: view, now: cubit.now(), onOpen: onOpen),
+          AnnouncementGroupList(
+            view: view,
+            now: cubit.now(),
+            onOpen: onOpen,
+            selectedId: selectedId,
+          ),
       ],
     );
   }

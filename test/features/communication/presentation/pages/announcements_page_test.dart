@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/acad
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_audience.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_category.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_content.dart';
+import 'package:school_app_flutter/features/communication/domain/entities/announcement_status.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_template.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/audience_referential.dart';
 import 'package:school_app_flutter/features/communication/domain/repositories/announcement_audience_repository.dart';
@@ -110,8 +111,11 @@ void main() {
 
   tearDown(() => getIt.reset());
 
-  Future<void> pump(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1400, 1000);
+  Future<void> pump(
+    WidgetTester tester, {
+    Size window = const Size(1400, 1000),
+  }) async {
+    tester.view.physicalSize = window;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final year = _Year();
@@ -197,5 +201,45 @@ void main() {
     ).called(1);
     await tester.pump();
     expect(find.text('Modèle enregistré'), findsOneWidget);
+  });
+
+  group('grand écran : la liste et le communiqué côte à côte', () {
+    setUp(() {
+      when(
+        () => announcements.list(academicYearId: any(named: 'academicYearId')),
+      ).thenAnswer(
+        (_) async => Right([
+          announcement(
+            id: 'sent-1',
+            status: AnnouncementStatus.sent,
+            title: 'Fête de l\'école',
+            sentAt: DateTime.utc(2026, 10, 10, 9),
+            reachAtSend: reach,
+          ),
+        ]),
+      );
+    });
+
+    testWidgets('sans communiqué ouvert, le volet y invite', (tester) async {
+      await pump(tester, window: const Size(1600, 1000));
+      expect(find.text('Choisissez un communiqué'), findsOneWidget);
+      expect(find.text('Fête de l\'école'), findsOneWidget);
+    });
+
+    testWidgets('un envoyé s\'ouvre à côté, la liste reste', (tester) async {
+      await pump(tester, window: const Size(1600, 1000));
+      await tester.tap(find.text('Fête de l\'école'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Choisissez un communiqué'), findsNothing);
+      // Le titre dans la liste, et dans le détail.
+      expect(find.text('Fête de l\'école'), findsAtLeastNWidgets(2));
+      expect(find.text('Nouveau communiqué'), findsWidgets);
+    });
+
+    testWidgets('écran moyen : la liste seule', (tester) async {
+      await pump(tester);
+      expect(find.text('Choisissez un communiqué'), findsNothing);
+    });
   });
 }

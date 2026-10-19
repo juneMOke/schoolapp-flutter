@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
+import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -67,8 +72,11 @@ class _AnnouncementsFlow extends StatelessWidget {
   const _AnnouncementsFlow({required this.academicYearId});
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final split =
+          constraints.maxWidth >= AppBreakpoints.announcementsSplitMin;
+      return BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
         builder: (context, screen) {
           final flow = context.read<CommunicationFlowCubit>();
           // Sans le droit d'envoyer, rien ne se rédige : la liste se lit.
@@ -76,6 +84,15 @@ class _AnnouncementsFlow extends StatelessWidget {
             context,
             kAnnouncementSendAccess,
           );
+          if (split &&
+              (screen is CommunicationListScreen ||
+                  screen is CommunicationDetailScreen)) {
+            return _inbox(
+              context,
+              detail: screen is CommunicationDetailScreen ? screen : null,
+              canSend: canSend,
+            );
+          }
           return switch (screen) {
             CommunicationTemplatePickScreen() => BlocProvider(
               create: (_) =>
@@ -114,4 +131,43 @@ class _AnnouncementsFlow extends StatelessWidget {
           };
         },
       );
+    },
+  );
+
+  /// Grand écran : la liste à gauche, le communiqué ouvert à droite — on lit
+  /// l'un après l'autre sans repasser par la liste.
+  Widget _inbox(
+    BuildContext context, {
+    required CommunicationDetailScreen? detail,
+    required bool canSend,
+  }) {
+    final flow = context.read<CommunicationFlowCubit>();
+    final l10n = AppLocalizations.of(context)!;
+    return AppPageBackground(
+      width: PageContentWidth.wide,
+      scrollable: false,
+      child: MasterDetailLayout(
+        masterWidth: AppDimensions.announcementsListWidth,
+        master: AnnouncementsListScreen(
+          onOpen: flow.open,
+          onCreate: canSend ? flow.openNew : null,
+          onUseTemplate: canSend ? flow.pickTemplate : null,
+          selectedId: detail?.announcement.id,
+        ),
+        detail: detail == null
+            ? SingleChildScrollView(
+                child: EteeloEmptyResult(
+                  label: l10n.communicationPickAnnouncementTitle,
+                  description: l10n.communicationPickAnnouncementMessage,
+                  medallionIcon: Icons.campaign_outlined,
+                ),
+              )
+            : AnnouncementDetailPage(
+                key: ValueKey(detail.announcement.id),
+                screen: detail,
+                embedded: true,
+              ),
+      ),
+    );
+  }
 }

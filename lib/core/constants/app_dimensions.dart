@@ -40,6 +40,9 @@ class AppDimensions {
   /// Boutique, la Facturation…
   static const masterListWidth = 440.0;
 
+  /// Les Communiqués, plus larges : chaque ligne porte un extrait du message.
+  static const announcementsListWidth = 480.0;
+
   /// Bordure d'une tuile de liste, au repos et quand sa fiche est ouverte.
   static const tileBorderWidth = 1.0;
   static const selectedTileBorderWidth = 2.0;

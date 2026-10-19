@@ -15,11 +15,15 @@ class AnnouncementGroupList extends StatelessWidget {
   final DateTime now;
   final ValueChanged<Announcement> onOpen;
 
+  /// Le communiqué ouvert à côté de la liste, marqué.
+  final String? selectedId;
+
   const AnnouncementGroupList({
     super.key,
     required this.view,
     required this.now,
     required this.onOpen,
+    this.selectedId,
   });
 
   @override
@@ -59,6 +63,7 @@ class AnnouncementGroupList extends StatelessWidget {
                     // Le premier filet est celui du cadre : on ne le double pas.
                     divided: index > 0,
                     onOpen: () => onOpen(item),
+                    selected: item.id == selectedId,
                   ),
               ],
             ),

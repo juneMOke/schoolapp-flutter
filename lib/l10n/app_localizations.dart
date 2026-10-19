@@ -6716,6 +6716,18 @@ abstract class AppLocalizations {
   /// **'Enter a name or level above to display matching students.'**
   String get facturationSearchInvitationMessage;
 
+  /// Volet de droite des Communiqués sur grand écran, tant qu'aucun communiqué n'est ouvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an announcement'**
+  String get communicationPickAnnouncementTitle;
+
+  /// Sous-titre du volet vide des Communiqués.
+  ///
+  /// In en, this message translates to:
+  /// **'Its message, audience and delivery show here, next to the list.'**
+  String get communicationPickAnnouncementMessage;
+
   /// Volet de droite de la Facturation sur grand écran, tant qu'aucun élève n'est choisi.
   ///
   /// In en, this message translates to:

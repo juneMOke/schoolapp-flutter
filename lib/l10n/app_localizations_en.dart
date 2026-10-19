@@ -4147,6 +4147,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a name or level above to display matching students.';
 
   @override
+  String get communicationPickAnnouncementTitle => 'Pick an announcement';
+
+  @override
+  String get communicationPickAnnouncementMessage =>
+      'Its message, audience and delivery show here, next to the list.';
+
+  @override
   String get facturationPickStudentTitle => 'Pick a student';
 
   @override

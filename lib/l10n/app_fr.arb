@@ -2917,6 +2917,14 @@
   "facturationSearchHint": "Renseignez le Prénom, Nom et Post-nom et/ou le Cycle/Niveau pour filtrer les résultats.",
   "facturationSearchInvitationTitle": "Aucune recherche en cours",
   "facturationSearchInvitationMessage": "Saisissez un nom ou un niveau ci-dessus pour afficher les élèves correspondants.",
+  "communicationPickAnnouncementTitle": "Choisissez un communiqué",
+  "@communicationPickAnnouncementTitle": {
+    "description": "Volet de droite des Communiqués sur grand écran, tant qu'aucun communiqué n'est ouvert."
+  },
+  "communicationPickAnnouncementMessage": "Son message, son audience et sa diffusion s'affichent ici, à côté de la liste.",
+  "@communicationPickAnnouncementMessage": {
+    "description": "Sous-titre du volet vide des Communiqués."
+  },
   "facturationPickStudentTitle": "Choisissez un élève",
   "@facturationPickStudentTitle": {
     "description": "Volet de droite de la Facturation sur grand écran, tant qu'aucun élève n'est choisi."
