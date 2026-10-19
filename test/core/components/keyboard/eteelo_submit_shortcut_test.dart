@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -110,6 +111,55 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.byType(Dialog), findsOneWidget);
+    });
+  });
+
+  group('au clavier physique', () {
+    tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    Future<void> pumpForm(WidgetTester tester) => tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: EteeloSubmitShortcut(
+            onSubmit: null,
+            child: Column(
+              children: [
+                TextField(readOnly: true, key: Key('lu')),
+                TextField(key: Key('nom')),
+                TextField(key: Key('prenom')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    bool focused(WidgetTester tester, String key) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.byKey(Key(key)),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .focusNode
+        .hasFocus;
+
+    testWidgets('bureau : le curseur est dans le premier champ saisissable', (
+      tester,
+    ) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      await pumpForm(tester);
+      await tester.pump();
+      expect(focused(tester, 'nom'), isTrue);
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('tablette : aucun champ, le clavier virtuel reste fermé', (
+      tester,
+    ) async {
+      await pumpForm(tester);
+      await tester.pump();
+      expect(focused(tester, 'nom'), isFalse);
     });
   });
 }

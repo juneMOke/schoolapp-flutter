@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 
 /// Ctrl+Entrée (⌘+Entrée sur Mac) valide une modale de saisie, depuis
 /// n'importe quel champ.
@@ -7,10 +8,11 @@ import 'package:flutter/widgets.dart';
 /// Pas Entrée seule : elle va à la ligne dans un champ multiligne et
 /// enverrait la saisie à mi-phrase.
 ///
-/// La modale prend le focus à l'ouverture, sans le donner à un champ (le
-/// clavier virtuel d'une tablette ne s'ouvre pas) : le raccourci répond
-/// aussitôt, et Tab mène au premier champ. Les champs sont parcourus en
-/// groupe, sans fuir vers la page d'en dessous.
+/// La modale prend le focus à l'ouverture. Sur la tablette, sans le donner à
+/// un champ (le clavier virtuel ne s'ouvre pas) : le raccourci répond
+/// aussitôt, et Tab mène au premier champ. Au clavier physique, le curseur
+/// est posé dans le premier champ texte : on tape sans viser. Les champs
+/// sont parcourus en groupe, sans fuir vers la page d'en dessous.
 ///
 /// [onSubmit] nul (action principale désactivée) ⇒ le raccourci ne fait rien.
 ///
@@ -22,7 +24,7 @@ import 'package:flutter/widgets.dart';
 /// Hors modale (page, panneau en ligne), [autofocus] vaut `false` : le
 /// raccourci répond dès que le focus est dans un des champs, sans le voler à
 /// l'écran à l'ouverture.
-class EteeloSubmitShortcut extends StatelessWidget {
+class EteeloSubmitShortcut extends StatefulWidget {
   final VoidCallback? onSubmit;
   final VoidCallback? onCancel;
   final bool autofocus;
@@ -61,19 +63,54 @@ class EteeloSubmitShortcut extends StatelessWidget {
   );
 
   @override
+  State<EteeloSubmitShortcut> createState() => _EteeloSubmitShortcutState();
+}
+
+class _EteeloSubmitShortcutState extends State<EteeloSubmitShortcut> {
+  final _scope = FocusNode(skipTraversal: true);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autofocus && expectsPhysicalKeyboard) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _focusFirstField());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scope.dispose();
+    super.dispose();
+  }
+
+  /// Le premier champ texte de la modale, dans l'ordre de tabulation.
+  void _focusFirstField() {
+    if (!mounted) return;
+    for (final node in _scope.traversalDescendants) {
+      final editable = node.context
+          ?.findAncestorStateOfType<EditableTextState>();
+      if (editable != null && !editable.widget.readOnly) {
+        node.requestFocus();
+        return;
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final onSubmit = this.onSubmit;
-    final onCancel = this.onCancel;
+    final onSubmit = widget.onSubmit;
+    final onCancel = widget.onCancel;
     return CallbackShortcuts(
       bindings: {
         if (onSubmit != null)
-          for (final activator in activators) activator: onSubmit,
-        cancelActivator: ?onCancel,
+          for (final activator in EteeloSubmitShortcut.activators)
+            activator: onSubmit,
+        EteeloSubmitShortcut.cancelActivator: ?onCancel,
       },
       child: Focus(
-        autofocus: autofocus,
-        skipTraversal: true,
-        child: FocusTraversalGroup(child: child),
+        focusNode: _scope,
+        autofocus: widget.autofocus,
+        child: FocusTraversalGroup(child: widget.child),
       ),
     );
   }
