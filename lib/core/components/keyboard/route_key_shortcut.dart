@@ -51,8 +51,7 @@ class _RouteKeyShortcutState extends State<RouteKeyShortcut> {
 
   bool _handle(KeyEvent event) {
     if (event is! KeyDownEvent) return false;
-    final route = ModalRoute.of(context);
-    if (route != null && !route.isCurrent) return false;
+    if (!_onTop(context)) return false;
     if (!TickerMode.valuesOf(context).enabled) return false;
     if (widget.ignoreWhileTyping && isEditingText) return false;
     if (widget.isEnabled?.call() == false) return false;
@@ -64,6 +63,21 @@ class _RouteKeyShortcutState extends State<RouteKeyShortcut> {
       }
     }
     return false;
+  }
+
+  /// La route qui porte l'écran est au premier plan de son navigateur, et
+  /// ainsi de suite jusqu'à la racine. Un écran sous une `ShellRoute` vit
+  /// dans un navigateur imbriqué : une modale ouverte sur le navigateur
+  /// racine ne le rend pas « non courant » dans le sien.
+  static bool _onTop(BuildContext context) {
+    BuildContext? current = context;
+    while (current != null) {
+      final route = ModalRoute.of(current);
+      if (route == null) return true;
+      if (!route.isCurrent) return false;
+      current = route.navigator?.context;
+    }
+    return true;
   }
 
   @override

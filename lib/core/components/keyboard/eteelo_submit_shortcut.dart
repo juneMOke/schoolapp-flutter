@@ -83,7 +83,9 @@ class _EteeloSubmitShortcutState extends State<EteeloSubmitShortcut> {
     super.dispose();
   }
 
-  /// Le premier champ texte de la modale, dans l'ordre de tabulation.
+  /// Le premier champ texte de la modale, dans l'ordre où ses champs sont
+  /// montés — celui de la lecture pour un formulaire en colonne. Un corps
+  /// chargé après coup (squelette d'abord) n'en reçoit aucun.
   void _focusFirstField() {
     if (!mounted) return;
     for (final node in _scope.traversalDescendants) {

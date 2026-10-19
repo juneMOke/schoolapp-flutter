@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
@@ -41,7 +42,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
     final rows = <(List<String>, String)>[
       (['Ctrl+F', '/'], l10n.shortcutsHelpSearch),
       (['Ctrl+B'], l10n.shortcutsHelpSidebar),
-      (['Ctrl+N'], l10n.shortcutsHelpCreate),
+      // Le navigateur garde Ctrl+N pour lui (nouvelle fenêtre).
+      if (!kIsWeb) (['Ctrl+N'], l10n.shortcutsHelpCreate),
       (['F5', 'Ctrl+R'], l10n.shortcutsHelpRefresh),
       (['Ctrl+P'], l10n.shortcutsHelpPrint),
       (['↑', '↓'], l10n.shortcutsHelpRows),

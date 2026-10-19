@@ -126,7 +126,21 @@ class EteeloDocumentViewerView extends StatelessWidget {
 
   void _close(BuildContext context) => Navigator.of(context).maybePop();
 
+  /// Une impression à la fois : un second Ctrl+P (ou un double clic)
+  /// pendant les trente secondes d'une thermique sortirait deux papiers.
+  static bool _printing = false;
+
   Future<void> _print(BuildContext context) async {
+    if (_printing) return;
+    _printing = true;
+    try {
+      await _printOnce(context);
+    } finally {
+      _printing = false;
+    }
+  }
+
+  Future<void> _printOnce(BuildContext context) async {
     final print = onPrint;
     // Capturé AVANT l'await : l'impression peut durer — une trentaine de
     // secondes sur une thermique — et le contexte du dialogue a pu disparaître
