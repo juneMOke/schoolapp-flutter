@@ -14,10 +14,12 @@ Future<T?> showEteeloAdaptiveDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   bool barrierDismissible = true,
+  Color? barrierColor,
 }) {
   return showDialog<T>(
     context: context,
     useSafeArea: false,
+    barrierColor: barrierColor,
     barrierDismissible:
         barrierDismissible && !EteeloAdaptiveDialog.isFullscreen(context),
     builder: builder,
@@ -43,6 +45,9 @@ class EteeloAdaptiveDialog extends StatelessWidget {
   final EdgeInsets? insetPadding;
   final Clip clipBehavior;
 
+  /// Arrondi de la forme centrée.
+  final BorderRadius borderRadius;
+
   const EteeloAdaptiveDialog({
     super.key,
     required this.child,
@@ -51,6 +56,7 @@ class EteeloAdaptiveDialog extends StatelessWidget {
     this.backgroundColor = AppColors.surfaceRaised,
     this.insetPadding,
     this.clipBehavior = Clip.none,
+    this.borderRadius = AppRadius.brCard,
   });
 
   /// La forme que prend la modale dans [context].
@@ -70,7 +76,7 @@ class EteeloAdaptiveDialog extends StatelessWidget {
       surfaceTintColor: Colors.transparent,
       clipBehavior: clipBehavior,
       insetPadding: insetPadding,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
+      shape: RoundedRectangleBorder(borderRadius: borderRadius),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
         child: child,

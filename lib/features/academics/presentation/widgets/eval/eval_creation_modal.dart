@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -26,7 +28,7 @@ Future<Evaluation?> showEvalCreationModal(
 }) {
   final size = MediaQuery.sizeOf(context);
   final l10n = AppLocalizations.of(context)!;
-  return showDialog<Evaluation>(
+  return showEteeloAdaptiveDialog<Evaluation>(
     context: context,
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.45),
     builder: (_) => BlocProvider<CreateEvaluationBloc>(
@@ -40,40 +42,31 @@ Future<Evaluation?> showEvalCreationModal(
             // POST : sinon la modale peut se fermer alors que la création est en
             // vol → évaluation créée mais non reflétée dans l'UI.
             canPop: !busy,
-            child: Dialog(
-              backgroundColor: AppColors.surfaceRaised,
+            // Téléphone : plein écran ; partout, en-tête ancré et corps qui
+            // défile, y compris clavier ouvert en paysage (`EteeloDialogBody`).
+            child: EteeloAdaptiveDialog(
               insetPadding: EdgeInsets.symmetric(
                 horizontal: size.width <= AppBreakpoints.dialogCompactMax
                     ? AppSpacing.md
                     : AppSpacing.lg,
                 vertical: AppSpacing.lg,
               ),
-              shape: const RoundedRectangleBorder(borderRadius: AppRadius.brLg),
+              borderRadius: AppRadius.brLg,
               clipBehavior: Clip.antiAlias,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: AppDimensions.evalCreationModalMaxWidth,
-                  maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
+              maxWidth: AppDimensions.evalCreationModalMaxWidth,
+              maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
+              child: EteeloDialogBody(
+                header: _Header(
+                  eyebrow: '$brancheNom — $classroomName',
+                  title: l10n.evalCreateTitle,
+                  canClose: !busy,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _Header(
-                      eyebrow: '$brancheNom — $classroomName',
-                      title: l10n.evalCreateTitle,
-                      canClose: !busy,
-                    ),
-                    Flexible(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: EvalCreationForm(
-                          detail: detail,
-                          classroomName: classroomName,
-                        ),
-                      ),
-                    ),
-                  ],
+                bodyPadding: const EdgeInsets.all(AppSpacing.lg),
+                body: EvalCreationForm(
+                  detail: detail,
+                  classroomName: classroomName,
                 ),
+                footer: const [],
               ),
             ),
           );

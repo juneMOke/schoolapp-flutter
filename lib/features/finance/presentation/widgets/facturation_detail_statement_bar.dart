@@ -59,7 +59,9 @@ class FacturationDetailStatementBar extends StatelessWidget {
           children: [
             Expanded(child: caption),
             const SizedBox(width: AppDimensions.spacingM),
-            action,
+            // Le libellé du bouton se resserre plutôt que de déborder quand la
+            // légende de fraîcheur est longue (7" en paysage).
+            Flexible(child: action),
           ],
         );
       },

@@ -172,7 +172,9 @@ class AppBreakpoints {
 
   /// Largeur d'écran sous laquelle les actions de dossier de la barre sombre
   /// passent en icône seule (Désactiver, Fiche d'inscription, Modifier).
-  static const double enrollmentJourneyActionLabelsMin = 1024.0;
+  /// Une 7" en paysage (960, rail compris) garde les libellés ; une 10" en
+  /// portrait (800) ne loge pas les trois à côté du nom.
+  static const double enrollmentJourneyActionLabelsMin = 900.0;
 
   // Tableau de bord des présences (Disciplines) — la paire 1fr/1fr
   // (Jour/Top classes) passe en colonne sous ce seuil.
