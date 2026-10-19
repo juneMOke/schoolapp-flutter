@@ -2971,6 +2971,14 @@
   "facturationSearchHint": "Enter First name, Last name, Surname and/or Cycle/Level to filter results.",
   "facturationSearchInvitationTitle": "No search in progress",
   "facturationSearchInvitationMessage": "Enter a name or level above to display matching students.",
+  "facturationPickStudentTitle": "Pick a student",
+  "@facturationPickStudentTitle": {
+    "description": "Volet de droite de la Facturation sur grand écran, tant qu'aucun élève n'est choisi."
+  },
+  "facturationPickStudentMessage": "Their billing shows here, next to the list: fees, payments and balance.",
+  "@facturationPickStudentMessage": {
+    "description": "Sous-titre du volet vide de la Facturation."
+  },
   "facturationViewChargesLabel": "View charges",
   "facturationActionsColumnLabel": "Actions",
   "facturationNoResultsDescription": "No student matches these criteria. Update the form and try again.",

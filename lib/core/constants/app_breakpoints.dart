@@ -96,6 +96,9 @@ class AppBreakpoints {
   // Encaissement (page plein écran, hors coquille) : au-delà, les créances à
   // gauche, le payeur et la date en colonne à droite.
   static const double paymentTwoColumnMin = expanded;
+  // Facturation (largeur reçue) : au-delà, la fiche de l'élève s'ouvre à côté
+  // de la liste — 440 de liste, ~940 de fiche, assez pour ses deux colonnes.
+  static const double facturationSplitMin = 1400.0;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.

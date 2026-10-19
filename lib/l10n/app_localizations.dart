@@ -6716,6 +6716,18 @@ abstract class AppLocalizations {
   /// **'Enter a name or level above to display matching students.'**
   String get facturationSearchInvitationMessage;
 
+  /// Volet de droite de la Facturation sur grand écran, tant qu'aucun élève n'est choisi.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a student'**
+  String get facturationPickStudentTitle;
+
+  /// Sous-titre du volet vide de la Facturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Their billing shows here, next to the list: fees, payments and balance.'**
+  String get facturationPickStudentMessage;
+
   /// No description provided for @facturationViewChargesLabel.
   ///
   /// In en, this message translates to:

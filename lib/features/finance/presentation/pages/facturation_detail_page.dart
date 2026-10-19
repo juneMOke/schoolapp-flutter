@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/layout/embedded_record_pane.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
@@ -38,7 +39,19 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 class FacturationDetailPage extends StatelessWidget {
   final FacturationDetailIntent intent;
 
-  const FacturationDetailPage({super.key, required this.intent});
+  /// Montrée à côté de la liste Facturation (grand écran) plutôt qu'en page
+  /// entière : même barre, même contenu, dans un volet (`EmbeddedRecordPane`).
+  final bool embedded;
+
+  /// Volet : la croix de la barre referme la fiche (la liste reste).
+  final VoidCallback? onClose;
+
+  const FacturationDetailPage({
+    super.key,
+    required this.intent,
+    this.embedded = false,
+    this.onClose,
+  });
 
   String _studentFullName(AppLocalizations l10n) {
     final fullName = [
@@ -237,10 +250,148 @@ class FacturationDetailPage extends StatelessWidget {
     );
   }
 
+  /// Totaux, relevé, paiements et frais : la fiche, sans sa barre.
+  Widget _content(AppLocalizations l10n) {
+    return LayoutBuilder(
+      builder: (context, available) {
+        // Grand écran : on élargit le contenu (1180) pour juxtaposer
+        // Paiements | Frais ; en dessous, largeur de lecture conservée (880).
+        final wide =
+            available.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
+        final contentMaxWidth = wide
+            ? AppDimensions.detailContentMaxWidth
+            : AppDimensions.facturationContentMaxWidth;
+
+        return ContentMaxWidth(
+          maxWidth: contentMaxWidth,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact =
+                  constraints.maxWidth < AppDimensions.detailCompactBreakpoint;
+              final twoCol =
+                  constraints.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
+              final blockSpacing = compact
+                  ? AppDimensions.spacingM
+                  : AppDimensions.detailSectionSpacing;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BlocBuilder<StudentChargesBloc, StudentChargesState>(
+                    buildWhen: (prev, curr) =>
+                        prev.status != curr.status ||
+                        prev.studentCharges != curr.studentCharges,
+                    builder: (context, state) {
+                      final hasCharges =
+                          state.status == StudentChargesStatus.success &&
+                          state.studentCharges.isNotEmpty;
+                      final charges = state.studentCharges;
+
+                      // Sommes PAR DEVISE. Un élève peut devoir en
+                      // dollars et en francs : additionner les deux
+                      // donnerait un chiffre que personne ne peut
+                      // vérifier, étiqueté avec la première devise venue.
+                      //
+                      // Déjà payé & reste COMPOSÉS (miroir serveur +
+                      // encaissements de ce poste non remontés), FRONT §5.
+                      final totalDue = charges.expectedBag;
+                      final alreadyPaid = charges.paidTotalBag;
+                      final remaining = charges.remainingBag;
+
+                      // Tuiles de synthèse affichées directement sur la page
+                      // (l'identité élève + classe vit déjà dans l'AppBar).
+                      return FinanceDetailKpiBand(
+                        hasCharges: hasCharges,
+                        totalDue: totalDue,
+                        alreadyPaid: alreadyPaid,
+                        remaining: remaining,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingS),
+                  FacturationDetailStatementBar(
+                    studentId: intent.studentId,
+                    academicYearId: intent.academicYearId,
+                  ),
+                  SizedBox(height: blockSpacing),
+                  // Identité inconnue — lien profond ouvert sans
+                  // `extra` : on n'affiche pas un solde sans pouvoir dire
+                  // à qui il appartient. Une classe manquante, elle, ne
+                  // justifie rien de tel : elle ne sert qu'au sur-titre.
+                  if (!intent.hasStudentIdentity)
+                    FinanceContextErrorCard(
+                      title: l10n.facturationDetailContextErrorTitle,
+                      message: l10n.facturationDetailContextErrorMessage,
+                      icon: Icons.report_problem_outlined,
+                      accent: AppColors.warning,
+                      accentSoft: AppColors.warning.withValues(alpha: 0.14),
+                      borderColor: AppColors.warning.withValues(alpha: 0.2),
+                    )
+                  else
+                    FacturationDetailDataLoader(
+                      intent: intent,
+                      child: Builder(
+                        builder: (blocContext) {
+                          final payments = FacturationDetailPaymentsSection(
+                            studentId: intent.studentId,
+                            academicYearId: intent.academicYearId,
+                            onCreatePaymentRequested: () =>
+                                _openCreatePayment(blocContext),
+                            onViewPaymentRequested: (payment) =>
+                                _openPaymentDetail(blocContext, payment),
+                          );
+                          final charges = FacturationDetailChargesSection(
+                            studentId: intent.studentId,
+                            academicYearId: intent.academicYearId,
+                            onViewChargeRequested: (charge) =>
+                                _openChargeDetail(blocContext, charge),
+                          );
+
+                          // Grand écran : Paiements et Frais côte à côte.
+                          if (twoCol) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: payments),
+                                SizedBox(width: blockSpacing),
+                                Expanded(child: charges),
+                              ],
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              payments,
+                              SizedBox(height: blockSpacing),
+                              charges,
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final studentFullName = _studentFullName(l10n);
+    final appBar = StudentDetailAppBar(
+      fullName: _studentFullName(l10n),
+      eyebrow: '${l10n.facturationDetailEyebrow} · ${_classLabel(l10n)}',
+      firstName: intent.firstName,
+      lastName: intent.lastName,
+      fallbackRoute: AppRoutesNames.facturations,
+      showCloseButton: true,
+      studentId: intent.studentId,
+      onExit: embedded ? onClose : null,
+      trailing: const _BillingBalanceAppBarPill(),
+    );
 
     return MultiBlocProvider(
       providers: [
@@ -276,145 +427,13 @@ class FacturationDetailPage extends StatelessWidget {
                 ..resolveForStudent(intent.studentId),
         ),
       ],
-      child: AppPageBackground(
-        selectableText: true,
-        appBar: StudentDetailAppBar(
-          fullName: studentFullName,
-          eyebrow: '${l10n.facturationDetailEyebrow} · ${_classLabel(l10n)}',
-          firstName: intent.firstName,
-          lastName: intent.lastName,
-          fallbackRoute: AppRoutesNames.facturations,
-          showCloseButton: true,
-          studentId: intent.studentId,
-          trailing: const _BillingBalanceAppBarPill(),
-        ),
-        child: LayoutBuilder(
-          builder: (context, available) {
-            // Grand écran : on élargit le contenu (1180) pour juxtaposer
-            // Paiements | Frais ; en dessous, largeur de lecture conservée (880).
-            final wide =
-                available.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
-            final contentMaxWidth = wide
-                ? AppDimensions.detailContentMaxWidth
-                : AppDimensions.facturationContentMaxWidth;
-
-            return ContentMaxWidth(
-              maxWidth: contentMaxWidth,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final compact =
-                      constraints.maxWidth <
-                      AppDimensions.detailCompactBreakpoint;
-                  final twoCol =
-                      constraints.maxWidth >=
-                      AppBreakpoints.financeDetailTwoColMin;
-                  final blockSpacing = compact
-                      ? AppDimensions.spacingM
-                      : AppDimensions.detailSectionSpacing;
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BlocBuilder<StudentChargesBloc, StudentChargesState>(
-                        buildWhen: (prev, curr) =>
-                            prev.status != curr.status ||
-                            prev.studentCharges != curr.studentCharges,
-                        builder: (context, state) {
-                          final hasCharges =
-                              state.status == StudentChargesStatus.success &&
-                              state.studentCharges.isNotEmpty;
-                          final charges = state.studentCharges;
-
-                          // Sommes PAR DEVISE. Un élève peut devoir en
-                          // dollars et en francs : additionner les deux
-                          // donnerait un chiffre que personne ne peut
-                          // vérifier, étiqueté avec la première devise venue.
-                          //
-                          // Déjà payé & reste COMPOSÉS (miroir serveur +
-                          // encaissements de ce poste non remontés), FRONT §5.
-                          final totalDue = charges.expectedBag;
-                          final alreadyPaid = charges.paidTotalBag;
-                          final remaining = charges.remainingBag;
-
-                          // Tuiles de synthèse affichées directement sur la page
-                          // (l'identité élève + classe vit déjà dans l'AppBar).
-                          return FinanceDetailKpiBand(
-                            hasCharges: hasCharges,
-                            totalDue: totalDue,
-                            alreadyPaid: alreadyPaid,
-                            remaining: remaining,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppDimensions.spacingS),
-                      FacturationDetailStatementBar(
-                        studentId: intent.studentId,
-                        academicYearId: intent.academicYearId,
-                      ),
-                      SizedBox(height: blockSpacing),
-                      // Identité inconnue — lien profond ouvert sans
-                      // `extra` : on n'affiche pas un solde sans pouvoir dire
-                      // à qui il appartient. Une classe manquante, elle, ne
-                      // justifie rien de tel : elle ne sert qu'au sur-titre.
-                      if (!intent.hasStudentIdentity)
-                        FinanceContextErrorCard(
-                          title: l10n.facturationDetailContextErrorTitle,
-                          message: l10n.facturationDetailContextErrorMessage,
-                          icon: Icons.report_problem_outlined,
-                          accent: AppColors.warning,
-                          accentSoft: AppColors.warning.withValues(alpha: 0.14),
-                          borderColor: AppColors.warning.withValues(alpha: 0.2),
-                        )
-                      else
-                        FacturationDetailDataLoader(
-                          intent: intent,
-                          child: Builder(
-                            builder: (blocContext) {
-                              final payments = FacturationDetailPaymentsSection(
-                                studentId: intent.studentId,
-                                academicYearId: intent.academicYearId,
-                                onCreatePaymentRequested: () =>
-                                    _openCreatePayment(blocContext),
-                                onViewPaymentRequested: (payment) =>
-                                    _openPaymentDetail(blocContext, payment),
-                              );
-                              final charges = FacturationDetailChargesSection(
-                                studentId: intent.studentId,
-                                academicYearId: intent.academicYearId,
-                                onViewChargeRequested: (charge) =>
-                                    _openChargeDetail(blocContext, charge),
-                              );
-
-                              // Grand écran : Paiements et Frais côte à côte.
-                              if (twoCol) {
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(child: payments),
-                                    SizedBox(width: blockSpacing),
-                                    Expanded(child: charges),
-                                  ],
-                                );
-                              }
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  payments,
-                                  SizedBox(height: blockSpacing),
-                                  charges,
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
-        ),
-      ),
+      child: embedded
+          ? EmbeddedRecordPane(header: appBar, child: _content(l10n))
+          : AppPageBackground(
+              selectableText: true,
+              appBar: appBar,
+              child: _content(l10n),
+            ),
     );
   }
 }

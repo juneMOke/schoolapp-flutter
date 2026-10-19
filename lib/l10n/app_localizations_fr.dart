@@ -4171,6 +4171,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Saisissez un nom ou un niveau ci-dessus pour afficher les élèves correspondants.';
 
   @override
+  String get facturationPickStudentTitle => 'Choisissez un élève';
+
+  @override
+  String get facturationPickStudentMessage =>
+      'Sa facturation s\'affiche ici, à côté de la liste : frais, versements et solde.';
+
+  @override
   String get facturationViewChargesLabel => 'Voir les charges';
 
   @override
