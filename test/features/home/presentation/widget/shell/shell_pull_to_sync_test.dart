@@ -34,12 +34,10 @@ void main() {
         home: BlocProvider<SyncStatusCubit>.value(
           value: cubit,
           child: ShellPullToSync(
-            // Défilement imbriqué, comme celui d'`AppPageBackground`.
-            child: Scaffold(
-              body: SingleChildScrollView(
-                child: Column(
-                  children: [for (var i = 0; i < 80; i++) Text('ligne $i')],
-                ),
+            // La page de production, son défilement sous son fond.
+            child: AppPageBackground(
+              child: Column(
+                children: [for (var i = 0; i < lines; i++) Text('ligne $i')],
               ),
             ),
           ),
