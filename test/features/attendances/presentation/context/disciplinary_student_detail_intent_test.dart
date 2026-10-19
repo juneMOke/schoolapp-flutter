@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 
 void main() {
@@ -89,5 +90,43 @@ void main() {
         expect(intent.hasDisplayContext, false);
       },
     );
+  });
+
+  group('withIdentity', () {
+    const identity = StudentIdentity(
+      studentId: 's1',
+      firstName: 'Grâce',
+      lastName: 'MBUYI',
+      surname: 'Kalala',
+      gender: 'FEMALE',
+      levelName: '5e A',
+      levelGroupName: 'Primaire',
+    );
+
+    test('le dossier rouvert par son adresse retrouve l’élève', () {
+      final intent = const DisciplinaryStudentDetailIntent.invalid(
+        studentId: 's1',
+        academicYearId: 'y1',
+      ).withIdentity(identity);
+      expect(intent.hasDisplayContext, isTrue);
+      expect(intent.studentMiddleName, 'Kalala');
+      expect(intent.studentGender, 'FEMALE');
+      expect(intent.levelName, '5e A');
+    });
+
+    test('un post-nom vide reste absent', () {
+      final intent =
+          const DisciplinaryStudentDetailIntent.invalid(
+            studentId: 's1',
+            academicYearId: 'y1',
+          ).withIdentity(
+            const StudentIdentity(
+              studentId: 's1',
+              firstName: 'A',
+              lastName: 'B',
+            ),
+          );
+      expect(intent.studentMiddleName, isNull);
+    });
   });
 }

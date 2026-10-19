@@ -41,9 +41,13 @@ class FeeControlPage extends StatelessWidget {
   const FeeControlPage({super.key, this.intent, this.standalone = false});
 
   /// L'écran tel que sa route le construit : hors de la coquille, donc avec sa
-  /// barre ; `extra` porte les critères du tableau de bord, s'il en a posé.
-  factory FeeControlPage.fromRoute(Object? extra) => FeeControlPage(
-    intent: FeeControlIntent.fromRouteExtra(extra),
+  /// barre ; `extra` ou l'adresse portent les critères du tableau de bord,
+  /// s'il en a posé.
+  factory FeeControlPage.fromRoute(
+    Object? extra, [
+    Map<String, String> queryParameters = const {},
+  ]) => FeeControlPage(
+    intent: FeeControlIntent.fromRoute(extra, queryParameters),
     standalone: true,
   );
 

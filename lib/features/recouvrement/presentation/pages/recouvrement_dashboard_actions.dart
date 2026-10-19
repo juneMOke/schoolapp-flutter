@@ -31,7 +31,7 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 /// ⚠️ On ne lui passe PAS le frais. `FeeControlIntent` exige un cycle et un
 /// niveau, et cette lecture-ci parle de toute l'école : il n'y en a aucun à
 /// donner. Passer un `extra` d'une autre forme serait pire que rien —
-/// `fromRouteExtra` le rendrait `null` sans un mot, et l'écran s'ouvrirait
+/// `FeeControlIntent.fromRoute` le rendrait `null` sans un mot, et l'écran s'ouvrirait
 /// vierge en laissant croire qu'il porte le frais désigné.
 ///
 /// L'utilisateur re-choisit donc son frais là-bas. C'est un clic de plus,

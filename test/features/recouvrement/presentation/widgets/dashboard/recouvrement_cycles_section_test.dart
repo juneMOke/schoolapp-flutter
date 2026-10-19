@@ -118,6 +118,9 @@ RecouvrementDashboardState ready(
 /// L'intention reçue par l'écran nominatif, quand l'œil a été emprunté.
 FeeControlIntent? pushedIntent;
 
+/// L'adresse de l'écran nominatif : elle seule survit à un rechargement.
+Map<String, String> pushedQuery = const {};
+
 Future<void> _pump(
   WidgetTester tester,
   RecouvrementDashboardState state, {
@@ -127,6 +130,7 @@ Future<void> _pump(
   bool settle = true,
 }) async {
   pushedIntent = null;
+  pushedQuery = const {};
   final bloc = MockRecouvrementDashboardBloc();
   whenListen(
     bloc,
@@ -154,7 +158,8 @@ Future<void> _pump(
       GoRoute(
         path: AppRoutesNames.recouvrementControl,
         builder: (context, routeState) {
-          pushedIntent = FeeControlIntent.fromRouteExtra(routeState.extra);
+          pushedIntent = FeeControlIntent.fromRoute(routeState.extra);
+          pushedQuery = routeState.uri.queryParameters;
           return const Scaffold(body: Text('ÉCRAN NOMINATIF'));
         },
       ),
@@ -413,6 +418,18 @@ void main() {
       // Le frais vient de `lastQuery` : ce sont les chiffres AFFICHÉS qui
       // ouvrent la liste, pas des critères qu'on aurait changés depuis.
       expect(pushedIntent!.feeCode, 'TUITION');
+    });
+
+    testWidgets('écrit le périmètre dans l\'adresse, rouvrable sans extra', (
+      tester,
+    ) async {
+      await _pump(tester, ready([levelRow('lvl-1', settled: 1, none: 1)]));
+
+      await tester.tap(find.byIcon(Icons.visibility_outlined));
+      await tester.pumpAndSettle();
+
+      // Onglet rechargé : `extra` est perdu, l'adresse suffit.
+      expect(FeeControlIntent.fromRoute(null, pushedQuery), pushedIntent);
     });
 
     testWidgets('se nomme : l\'infobulle dit quel niveau il ouvre', (

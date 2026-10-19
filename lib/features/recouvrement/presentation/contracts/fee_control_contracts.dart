@@ -277,10 +277,44 @@ class FeeControlIntent extends Equatable {
     required this.feeCode,
   });
 
-  /// Reconstruit l'intention depuis `extra` de la route. `null` dès qu'il n'y a
-  /// rien à reconstruire : l'écran s'ouvre alors vierge, comme par le menu.
-  static FeeControlIntent? fromRouteExtra(Object? extra) =>
-      extra is FeeControlIntent ? extra : null;
+  static const _groupKey = 'cycle';
+  static const _levelKey = 'level';
+  static const _classroomKey = 'classroom';
+  static const _feeKey = 'fee';
+
+  /// Le périmètre écrit dans l'adresse : un onglet rechargé ou un lien collé
+  /// rouvre la même liste, sans dépendre de `extra`, perdu au rechargement.
+  Map<String, String> toQueryParameters() => {
+    _groupKey: schoolLevelGroupId,
+    _levelKey: schoolLevelId,
+    _classroomKey: ?classroomId,
+    _feeKey: feeCode,
+  };
+
+  /// Reconstruit l'intention depuis la route : `extra` d'abord, l'adresse
+  /// ensuite. `null` dès qu'il n'y a rien à reconstruire : l'écran s'ouvre
+  /// alors vierge, comme par le menu.
+  static FeeControlIntent? fromRoute(
+    Object? extra, [
+    Map<String, String> queryParameters = const {},
+  ]) {
+    if (extra is FeeControlIntent) return extra;
+    String? read(String key) {
+      final value = queryParameters[key]?.trim() ?? '';
+      return value.isEmpty ? null : value;
+    }
+
+    final group = read(_groupKey);
+    final level = read(_levelKey);
+    final fee = read(_feeKey);
+    if (group == null || level == null || fee == null) return null;
+    return FeeControlIntent(
+      schoolLevelGroupId: group,
+      schoolLevelId: level,
+      classroomId: read(_classroomKey),
+      feeCode: fee,
+    );
+  }
 
   @override
   List<Object?> get props => [
