@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/wizard/wizard_breadcrumb.dart';
 import 'package:school_app_flutter/core/components/wizard/wizard_step_progression.dart';
@@ -122,6 +123,11 @@ class _StaffAgentViewState extends State<StaffAgentView> {
         final canWrite = PermissionGate.allows(context, const [
           Perm.hrStaffWrite,
         ]);
+        // Consultation sur grand écran : la fiche entière d'un coup d'œil.
+        // La modification reprend l'assistant, étape par étape.
+        final wholeFile =
+            state.mode == StaffAgentMode.view &&
+            MediaQuery.sizeOf(context).width >= AppBreakpoints.staffFileViewMin;
         // Précédent du navigateur : la page est poussée au-dessus du fichier
         // du personnel, dont la route consulte cette garde (`onExit`).
         return RouteExitGuard(
@@ -144,25 +150,27 @@ class _StaffAgentViewState extends State<StaffAgentView> {
                         ? cubit.startEdit
                         : null,
                   ),
-                  WizardBreadcrumb(
-                    titles: [
-                      l10n.staffStepIdentity,
-                      l10n.staffStepAddress,
-                      l10n.staffStepJob,
-                      l10n.staffStepDocuments,
-                    ],
-                    currentStep: state.step,
-                    progress: (state.step + 1) / StaffAgentState.stepCount,
-                    progression: WizardStepProgression(
-                      stepCount: StaffAgentState.stepCount,
+                  if (!wholeFile)
+                    WizardBreadcrumb(
+                      titles: [
+                        l10n.staffStepIdentity,
+                        l10n.staffStepAddress,
+                        l10n.staffStepJob,
+                        l10n.staffStepDocuments,
+                      ],
                       currentStep: state.step,
-                      maxStep: state.reached,
+                      progress: (state.step + 1) / StaffAgentState.stepCount,
+                      progression: WizardStepProgression(
+                        stepCount: StaffAgentState.stepCount,
+                        currentStep: state.step,
+                        maxStep: state.reached,
+                      ),
+                      errorSteps: state.visibleErrorSteps,
+                      onStepTap: cubit.goTo,
                     ),
-                    errorSteps: state.visibleErrorSteps,
-                    onStepTap: cubit.goTo,
-                  ),
                   Expanded(
                     child: StaffAgentBody(
+                      wholeFile: wholeFile,
                       state: state,
                       catalog: _catalog,
                       today: widget.today,

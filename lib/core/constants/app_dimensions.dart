@@ -52,6 +52,9 @@ class AppDimensions {
   /// L'aperçu d'un élève ancré à droite du tableau du contrôle des frais.
   static const feeControlDockedSheetWidth = 400.0;
 
+  /// La fiche d'un agent lue d'un bloc, sur deux colonnes.
+  static const staffFileViewMaxWidth = 1320.0;
+
   /// Bordure d'une tuile de liste, au repos et quand sa fiche est ouverte.
   static const tileBorderWidth = 1.0;
   static const selectedTileBorderWidth = 2.0;

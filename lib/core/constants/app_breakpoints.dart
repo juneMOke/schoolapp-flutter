@@ -111,6 +111,9 @@ class AppBreakpoints {
   // Récapitulatif d'une inscription (largeur de sa carte) : au-delà, l'élève
   // et sa famille à gauche, sa scolarité et ses frais à droite.
   static const double enrollmentSummaryTwoColumnMin = 900.0;
+  // Fiche d'un agent en consultation (fenêtre, page plein écran) : au-delà,
+  // la fiche entière sur deux colonnes, sans assistant à étapes.
+  static const double staffFileViewMin = expanded;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.
