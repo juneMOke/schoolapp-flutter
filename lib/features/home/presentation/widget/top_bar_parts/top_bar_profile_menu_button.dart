@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -40,7 +41,13 @@ class TopBarProfileMenuButton extends StatelessWidget {
 
     return PopupMenuButton<String>(
       tooltip: l10n.homeUserMenuTooltip,
-      onSelected: (value) {
+      onSelected: (value) async {
+        // Déconnexion ou réglages : l'écran affiché disparaît, sa saisie en
+        // cours pose la question d'abord.
+        if (value != 'profile' &&
+            (!await RouteExitGuard.mayLeave(context) || !context.mounted)) {
+          return;
+        }
         switch (value) {
           case 'logout':
             context.read<AuthBloc>().add(const AuthLogoutRequested());

@@ -364,11 +364,12 @@ class AppRouter {
     // navigateur, F5 et lien partagé y mènent.
     //
     // Précédent y change d'écran sans changer de page : une fiche poussée
-    // par-dessus (agent, contrat) resterait affichée. `onExit` consulte sa
-    // garde, et la referme si l'on part.
+    // par-dessus (agent, contrat) resterait affichée, et l'écran quitté
+    // perdrait sa saisie. `onExit` consulte leurs gardes, et referme la fiche
+    // si l'on part.
     GoRoute(
       path: AppRoutesNames.homePath,
-      onExit: RouteExitGuard.onExit,
+      onExit: RouteExitGuard.onExitOfPage(_shellPageKey),
       name: AppRoutesNames.home,
       // Ancienne forme `?subMenuId=` : ramenée à l'adresse canonique.
       redirect: (context, state) {
@@ -381,7 +382,7 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.homeSubMenuRoute,
       name: AppRoutesNames.homeSubMenu,
-      onExit: RouteExitGuard.onExit,
+      onExit: RouteExitGuard.onExitOfPage(_shellPageKey),
       pageBuilder: (context, state) =>
           _shellPage(state.pathParameters['subMenuId']),
     ),
@@ -458,6 +459,8 @@ class AppRouter {
     // du module (I-4) commencerait à se défaire par le partage d'un scope.
     GoRoute(
       path: AppRoutesNames.boutiqueAchats,
+      // Précédent du navigateur : le panier en cours pose la question.
+      onExit: RouteExitGuard.onExit,
       builder: (context, state) => const BoutiquePage(),
     ),
     GoRoute(
@@ -487,6 +490,8 @@ class AppRouter {
     // Communication : en ligne seulement, aucun scope à hydrater.
     GoRoute(
       path: AppRoutesNames.communicationAnnouncements,
+      // Précédent du navigateur : un communiqué en rédaction pose la question.
+      onExit: RouteExitGuard.onExit,
       builder: (context, state) => const AnnouncementsPage(),
     ),
     GoRoute(

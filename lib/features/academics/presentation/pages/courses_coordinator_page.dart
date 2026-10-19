@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_detail_args.dart';
@@ -24,13 +25,19 @@ class _CoursesCoordinatorPageState extends State<CoursesCoordinatorPage> {
 
   void _backToList() => setState(() => _openArgs = null);
 
+  /// Retour système : une saisie de notes en cours, plus bas, pose d'abord
+  /// la question.
+  Future<void> _systemBack() async {
+    if (await RouteExitGuard.mayLeave(context) && mounted) _backToList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final open = _openArgs;
     // Retour système : depuis le détail, revenir à la liste (et non à l'Accueil).
     return ScreenBackScope(
       canPop: open == null,
-      onBack: _backToList,
+      onBack: _systemBack,
       child: AnimatedSwitcher(
         duration: AppMotion.standard,
         switchInCurve: AppMotion.outCurve,

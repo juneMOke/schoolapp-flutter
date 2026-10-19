@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/web/new_tab.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -72,12 +73,23 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
       NewTab.open(AppRoutesNames.homeSubMenuPath(subMenu.id));
       return;
     }
+    _select(
+      menuId: widget.menu.id,
+      subMenuId: subMenu.id,
+      title: subMenu.title,
+    );
+  }
+
+  /// Change d'écran. L'écran quitté disparaît dès la sélection, avant que
+  /// l'adresse ne change : sa saisie en cours pose la question d'abord.
+  Future<void> _select({
+    required String menuId,
+    required String subMenuId,
+    required String title,
+  }) async {
+    if (!await RouteExitGuard.mayLeave(context) || !mounted) return;
     context.read<NavigationBloc>().add(
-      SubMenuItemSelected(
-        menuId: widget.menu.id,
-        subMenuId: subMenu.id,
-        title: subMenu.title,
-      ),
+      SubMenuItemSelected(menuId: menuId, subMenuId: subMenuId, title: title),
     );
     if (widget.closeDrawerOnSubMenuSelection) {
       Navigator.of(context).maybePop();
@@ -126,22 +138,18 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                   toggleFlyout();
                   return;
                 }
-                final bloc = context.read<NavigationBloc>();
                 // Item feuille (ex. Accueil) : on sélectionne directement
                 // l'écran (pas d'accordéon) et, en mode tiroir, on le ferme.
                 if (widget.menu.isLeaf) {
-                  bloc.add(
-                    SubMenuItemSelected(
-                      menuId: widget.menu.id,
-                      subMenuId: widget.menu.id,
-                      title: widget.menu.title,
-                    ),
+                  _select(
+                    menuId: widget.menu.id,
+                    subMenuId: widget.menu.id,
+                    title: widget.menu.title,
                   );
-                  if (widget.closeDrawerOnSubMenuSelection) {
-                    Navigator.of(context).maybePop();
-                  }
                 } else {
-                  bloc.add(MenuItemSelected(widget.menu.id));
+                  context.read<NavigationBloc>().add(
+                    MenuItemSelected(widget.menu.id),
+                  );
                 }
               },
               child: AnimatedContainer(

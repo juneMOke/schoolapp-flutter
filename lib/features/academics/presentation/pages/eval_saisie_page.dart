@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/helpers/support_contact.dart';
+import 'package:school_app_flutter/core/navigation/discard_changes_confirmation.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -171,8 +173,34 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
     }
   }
 
+  /// Retour au détail : des notes non enregistrées posent d'abord la
+  /// question.
+  Future<void> _back() async {
+    if (await RouteExitGuard.mayLeave(context) && mounted) widget.onBack();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Le brouillon ne vit que dans cette page : Précédent, F5 ou un autre
+    // écran du menu le perdraient sans un mot. La garde suit le brouillon
+    // (`beforeunload` armé dès la première note), la page ne se reconstruit
+    // pas à chaque frappe.
+    return ListenableBuilder(
+      listenable: _draft,
+      builder: (context, page) => RouteExitGuard(
+        hasUnsavedWork: () => _draft.dirty,
+        isBusy: () => _isSaving,
+        confirmExit: () => confirmDiscardChanges(
+          context,
+          message: AppLocalizations.of(context)!.evalSaisieDiscardMessage,
+        ),
+        child: page!,
+      ),
+      child: _page(),
+    );
+  }
+
+  Widget _page() {
     return AppPageBackground(
       width: PageContentWidth.wide,
       scrollable: true,
@@ -198,7 +226,7 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
                 brancheNom: widget.args.brancheNom,
                 classroomName: widget.args.classroomName,
                 evalName: evalDisplayName(context, widget.args.eval),
-                onBack: widget.onBack,
+                onBack: _back,
                 backLabel: l10n.evalSaisieBack,
                 subPage: l10n.evalSaisiePageTitle,
               ),
@@ -244,7 +272,7 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
       primaryAction: EteeloButton.primary(
         label: l10n.evalDetailBack,
         icon: Icons.arrow_back_rounded,
-        onPressed: widget.onBack,
+        onPressed: _back,
         fullWidth: false,
       ),
     );

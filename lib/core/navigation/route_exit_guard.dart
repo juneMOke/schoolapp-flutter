@@ -48,11 +48,46 @@ class RouteExitGuard extends StatefulWidget {
   /// ([GoRouterState.pageKey]) et celles des pages poussées par-dessus sans
   /// route (`Navigator.push` : fiche d'un agent, puis son contrat). La plus
   /// haute qui a une saisie pose la question ; une réponse vaut pour toutes.
-  static FutureOr<bool> onExit(BuildContext context, GoRouterState state) {
-    final guards = [
+  static FutureOr<bool> onExit(BuildContext context, GoRouterState state) =>
+      _consult([
+        for (final guard in _mounted.reversed)
+          if (!guard._released && guard._leftWith(state.pageKey)) guard,
+      ]);
+
+  /// [onExit] pour une route dont la page porte sa propre clé ([pageKey]) —
+  /// la coquille, une seule page pour toutes ses adresses. GoRouter annonce
+  /// la clé de SA correspondance, pas celle de la page : sans cela, les
+  /// gardes des écrans de la coquille ne seraient jamais consultées quand
+  /// Précédent change d'écran.
+  static ExitCallback onExitOfPage(ValueKey<String> pageKey) =>
+      (context, state) => _consult([
+        for (final guard in _mounted.reversed)
+          if (!guard._released && guard._leftWith(pageKey)) guard,
+      ]);
+
+  /// Une sortie décidée **dans** la page, sans changer d'adresse d'abord :
+  /// un écran du menu latéral, le retour d'un écran à niveaux. Consulte les
+  /// gardes de la route de [context] — l'adresse ne change qu'après, quand
+  /// l'écran gardé a déjà disparu, et [onExit] n'aurait plus personne à qui
+  /// demander.
+  ///
+  /// Accordée après la question, la sortie lève ces gardes : le changement
+  /// d'adresse qui suit ne la repose pas. Sans saisie, rien n'est levé — si
+  /// l'écran reste finalement affiché, la saisie suivante est gardée.
+  static FutureOr<bool> mayLeave(BuildContext context) {
+    final route = ModalRoute.of(context);
+    return _consult([
       for (final guard in _mounted.reversed)
-        if (!guard._released && guard._leftWith(state.pageKey)) guard,
-    ];
+        if (!guard._released && guard._route == route) guard,
+    ], closePageless: false);
+  }
+
+  /// [closePageless] : la sortie emporte la route — ses pages sans route
+  /// doivent partir avec. Faux quand la page décide elle-même où aller.
+  static FutureOr<bool> _consult(
+    List<_RouteExitGuardState> guards, {
+    bool closePageless = true,
+  }) {
     if (guards.isEmpty) return true;
     if (guards.any((guard) => guard.widget.isBusy())) return false;
     // Un rafraîchissement du routeur n'est pas une sortie demandée : il
@@ -60,20 +95,19 @@ class RouteExitGuard extends StatefulWidget {
     // qui fait autorité (déconnexion, droit retiré). Aucune question.
     if (_routerRefreshing) return true;
     final dirty = guards.where((guard) => guard.widget.hasUnsavedWork());
-    if (dirty.isEmpty) return _leave(guards);
+    if (dirty.isEmpty) return !closePageless || _leave(guards, closePageless);
     return dirty.first._confirm().then(
-      (leave) => leave ? _leave(guards) : false,
+      (leave) => leave ? _leave(guards, closePageless) : false,
     );
   }
 
   /// Sortie accordée : les gardes se lèvent, et les pages sans route se
   /// referment — sans quoi elles resteraient affichées au-dessus d'une
   /// coquille dont l'adresse a changé.
-  static bool _leave(List<_RouteExitGuardState> guards) {
+  static bool _leave(List<_RouteExitGuardState> guards, bool closePageless) {
     for (final guard in guards) {
-      guard
-        .._release()
-        .._closeIfPageless();
+      guard._release();
+      if (closePageless) guard._closeIfPageless();
     }
     return true;
   }
@@ -128,6 +162,8 @@ class _RouteExitGuardState extends State<RouteExitGuard> {
     _released = true;
     setUnloadGuard(false, source: this);
   }
+
+  ModalRoute<Object?>? get _route => mounted ? ModalRoute.of(context) : null;
 
   /// La page de cette garde part avec la page [pageKey] : c'est elle, ou
   /// une page sans route poussée au-dessus.

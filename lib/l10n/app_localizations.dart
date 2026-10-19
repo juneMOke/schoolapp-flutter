@@ -19183,7 +19183,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Discard your changes?'**
-  String get staffDiscardTitle;
+  String get discardChangesTitle;
 
   /// Message de la confirmation d'abandon.
   ///
@@ -19195,13 +19195,37 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Discard'**
-  String get staffDiscardConfirm;
+  String get discardChangesConfirm;
 
   /// Revenir à la saisie.
   ///
   /// In en, this message translates to:
   /// **'Keep editing'**
-  String get staffDiscardKeep;
+  String get discardChangesKeep;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'What you entered will be lost.'**
+  String get discardChangesMessage;
+
+  /// No description provided for @evalSaisieDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The marks entered and not saved will be lost.'**
+  String get evalSaisieDiscardMessage;
+
+  /// No description provided for @boutiqueCartDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The current cart will be emptied.'**
+  String get boutiqueCartDiscardMessage;
+
+  /// No description provided for @communicationEditorDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The announcement being written is not saved. Your changes will be lost.'**
+  String get communicationEditorDiscardMessage;
 
   /// No description provided for @staffBlockContract.
   ///

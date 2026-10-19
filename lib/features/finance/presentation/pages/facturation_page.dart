@@ -176,7 +176,13 @@ class _FacturationPageState extends State<FacturationPage> {
             ),
           );
           if (!_split) return list;
-          return MasterDetailLayout(master: list, detail: _detailPane());
+          return MasterDetailLayout(
+            master: list,
+            detail: _detailPane(),
+            onCloseDetail: _selected == null
+                ? null
+                : () => setState(() => _selected = null),
+          );
         },
       ),
     );

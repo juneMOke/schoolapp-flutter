@@ -186,6 +186,9 @@ class _HistoryViewState extends State<_HistoryView> {
               child: split
                   ? MasterDetailLayout(
                       master: list,
+                      onCloseDetail: _selectedSaleId == null
+                          ? null
+                          : () => setState(() => _selectedSaleId = null),
                       detail: SingleChildScrollView(child: _selectedPane(l10n)),
                     )
                   : list,

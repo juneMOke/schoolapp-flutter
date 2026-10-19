@@ -12276,17 +12276,31 @@ class AppLocalizationsFr extends AppLocalizations {
       'La fiche n\'a pas pu être enregistrée sur la tablette. Réessayez.';
 
   @override
-  String get staffDiscardTitle => 'Abandonner les modifications ?';
+  String get discardChangesTitle => 'Abandonner les modifications ?';
 
   @override
   String get staffDiscardMessage =>
       'Les changements apportés à la fiche seront perdus.';
 
   @override
-  String get staffDiscardConfirm => 'Abandonner';
+  String get discardChangesConfirm => 'Abandonner';
 
   @override
-  String get staffDiscardKeep => 'Continuer la saisie';
+  String get discardChangesKeep => 'Continuer la saisie';
+
+  @override
+  String get discardChangesMessage => 'Ce que vous avez saisi sera perdu.';
+
+  @override
+  String get evalSaisieDiscardMessage =>
+      'Les notes saisies et non enregistrées seront perdues.';
+
+  @override
+  String get boutiqueCartDiscardMessage => 'Le panier en cours sera vidé.';
+
+  @override
+  String get communicationEditorDiscardMessage =>
+      'Le communiqué en cours de rédaction n\'est pas enregistré. Vos modifications seront perdues.';
 
   @override
   String get staffBlockContract => 'Contrat';
