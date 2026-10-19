@@ -50,9 +50,8 @@ Future<void> showEteeloDocumentViewer(
   previewBuilder,
 }) {
   FocusManager.instance.primaryFocus?.unfocus();
-  return showDialog<void>(
+  return showEteeloAdaptiveDialog<void>(
     context: context,
-    barrierDismissible: true,
     builder: (_) => EteeloDocumentViewerView(
       title: title,
       document: document,

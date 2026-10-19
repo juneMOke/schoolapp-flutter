@@ -3,6 +3,27 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 
+/// Ouvre une [EteeloAdaptiveDialog] — toujours par ici.
+///
+/// Sans `SafeArea` de route : en plein écran, la modale pose la sienne et
+/// couvre les bandes système ; celle de `showDialog` y laissait voir la page
+/// assombrie, et ces bandes restaient une barrière qui fermait la modale —
+/// et perdait la saisie — au premier toucher du bord. Plein écran, la
+/// barrière ne ferme donc jamais ; centrée, elle suit [barrierDismissible].
+Future<T?> showEteeloAdaptiveDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+}) {
+  return showDialog<T>(
+    context: context,
+    useSafeArea: false,
+    barrierDismissible:
+        barrierDismissible && !EteeloAdaptiveDialog.isFullscreen(context),
+    builder: builder,
+  );
+}
+
 /// Une modale centrée sur un grand écran, plein écran sur un téléphone
 /// (sous [AppBreakpoints.formDialogFullscreenMax]).
 ///

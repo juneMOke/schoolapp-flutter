@@ -15,10 +15,16 @@ class EteeloFrozenColumn extends InheritedWidget {
   /// Largeur de la colonne figée, dans la largeur plancher du tableau.
   final double width;
 
+  /// Le tableau défile de côté. Le relais reste posé quand il ne défile pas :
+  /// l'arbre ne change pas de forme au passage du seuil, et le défilement
+  /// n'est jamais recréé (deux défilements sur un même contrôleur).
+  final bool active;
+
   const EteeloFrozenColumn({
     super.key,
     required this.controller,
     required this.width,
+    required this.active,
     required super.child,
   });
 
@@ -26,9 +32,11 @@ class EteeloFrozenColumn extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<EteeloFrozenColumn>();
 
   /// Décalage courant : la colonne se pose à cette abscisse de sa rangée.
-  double get offset => controller.hasClients ? controller.offset : 0;
+  double get offset => controller.positions.length == 1 ? controller.offset : 0;
 
   @override
   bool updateShouldNotify(EteeloFrozenColumn oldWidget) =>
-      controller != oldWidget.controller || width != oldWidget.width;
+      controller != oldWidget.controller ||
+      width != oldWidget.width ||
+      active != oldWidget.active;
 }

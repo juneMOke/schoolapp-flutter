@@ -123,12 +123,17 @@ class DataTableCardItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppDimensions.spacingS),
-        Flexible(
+        // Toutes les valeurs calées à droite, texte comme pastille : sinon un
+        // texte suivait son libellé et une pastille filait au bord.
+        Expanded(
           flex: 2,
-          child: DataTableCellContent(
-            cell: cell,
-            childAlignment: Alignment.centerRight,
-            crossAxisAlignment: CrossAxisAlignment.end,
+          child: Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: DataTableCellContent(
+              cell: cell,
+              childAlignment: AlignmentDirectional.centerEnd,
+              crossAxisAlignment: CrossAxisAlignment.end,
+            ),
           ),
         ),
       ],

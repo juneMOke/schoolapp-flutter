@@ -7,7 +7,11 @@ import 'package:school_app_flutter/core/components/tables/eteelo_column_table.da
 void main() {
   const widths = <double?>[null, 200, 200, 200];
 
-  Future<void> pump(WidgetTester tester, {required bool frozen}) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    required bool frozen,
+    Widget agent = const Text('Mbuyi Jeanne'),
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -22,11 +26,11 @@ void main() {
               row: (context, _) => EteeloColumnTableRow(
                 widths: widths,
                 onTap: () {},
-                cells: const [
-                  Text('Mbuyi Jeanne'),
-                  Text('100'),
-                  Text('20'),
-                  Text('120'),
+                cells: [
+                  agent,
+                  const Text('100'),
+                  const Text('20'),
+                  const Text('120'),
                 ],
               ),
             ),
@@ -63,5 +67,40 @@ void main() {
     await scrollBy(tester, 300);
 
     expect(tester.getTopLeft(find.text('Mbuyi Jeanne')).dx, lessThan(before));
+  });
+
+  testWidgets('un agent sur deux lignes garde la hauteur de sa rangée', (
+    tester,
+  ) async {
+    const agent = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [Text('Mbuyi Jeanne'), Text('Vacataire')],
+    );
+    await pump(tester, frozen: false, agent: agent);
+    final free = tester.getSize(find.byType(EteeloColumnTableRow)).height;
+
+    await tester.pumpWidget(const SizedBox());
+    await pump(tester, frozen: true, agent: agent);
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(EteeloColumnTableRow)).height, free);
+  });
+
+  testWidgets('rien ne transparaît dans la marge à gauche de l\'agent', (
+    tester,
+  ) async {
+    await pump(tester, frozen: true);
+    await scrollBy(tester, 300);
+
+    final masks = find.descendant(
+      of: find.byType(EteeloColumnTableRow),
+      matching: find.byType(ColoredBox),
+    );
+    final left = tester
+        .widgetList(masks)
+        .map((w) => tester.getTopLeft(find.byWidget(w)).dx)
+        .reduce((a, b) => a < b ? a : b);
+    expect(left, lessThanOrEqualTo(0));
   });
 }

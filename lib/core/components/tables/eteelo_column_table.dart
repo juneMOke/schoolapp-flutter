@@ -19,11 +19,15 @@ class EteeloColumns extends StatelessWidget {
   /// Fond de la cellule figée : il masque les colonnes qui passent dessous.
   final Color frozenBackground;
 
+  /// Marge gauche de la rangée qui porte ces cellules, que le masque couvre.
+  final double frozenInset;
+
   const EteeloColumns({
     super.key,
     required this.widths,
     required this.cells,
     this.frozenBackground = AppColors.surfaceRaised,
+    this.frozenInset = AppSpacing.sm,
   }) : assert(widths.length == cells.length);
 
   Widget _sized(int index, Widget cell) => widths[index] == null
@@ -33,37 +37,46 @@ class EteeloColumns extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final frozen = EteeloFrozenColumn.maybeOf(context);
-    if (frozen == null) {
+    if (frozen == null || !frozen.active) {
       return Row(
         children: [for (final (i, cell) in cells.indexed) _sized(i, cell)],
       );
     }
-    return Stack(
+    // Disposée de droite à gauche, la rangée peint sa première cellule en
+    // DERNIER : translatée du décalage, elle passe par-dessus les montants,
+    // et reçoit les appuis la première. Aucune copie : la cellule reste
+    // celle qu'on lit et qu'on trouve, et elle seule donne sa hauteur.
+    return Row(
+      textDirection: TextDirection.rtl,
       children: [
-        Row(
-          children: [
-            // La place reste réservée : les autres colonnes ne bougent pas.
-            _sized(0, const SizedBox.shrink()),
-            for (final (i, cell) in cells.indexed.skip(1)) _sized(i, cell),
-          ],
-        ),
-        AnimatedBuilder(
-          animation: frozen.controller,
-          builder: (context, child) => Positioned(
-            left: frozen.offset,
-            top: 0,
-            bottom: 0,
-            width: frozen.width,
-            child: child!,
-          ),
-          child: ColoredBox(
-            color: frozenBackground,
-            child: Align(alignment: Alignment.centerLeft, child: cells.first),
-          ),
-        ),
+        for (var i = cells.length - 1; i > 0; i--) _sized(i, cells[i]),
+        _sized(0, _frozenLead(frozen)),
       ],
     );
   }
+
+  Widget _frozenLead(EteeloFrozenColumn frozen) => AnimatedBuilder(
+    animation: frozen.controller,
+    builder: (context, child) =>
+        Transform.translate(offset: Offset(frozen.offset, 0), child: child),
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Le masque déborde sur les marges de la rangée : sans lui, les
+        // montants transparaissaient sur ses 8 dp de gauche. ⚠️ Il suit la
+        // hauteur de la cellule figée : une colonne voisine plus haute
+        // qu'elle laisserait voir ce qui passe au-dessus et au-dessous.
+        Positioned(
+          left: -frozenInset,
+          top: -frozenInset,
+          bottom: -frozenInset,
+          right: 0,
+          child: ColoredBox(color: frozenBackground),
+        ),
+        Align(alignment: Alignment.centerLeft, child: cells.first),
+      ],
+    ),
+  );
 }
 
 /// Un tableau à colonnes fixes (récapitulatifs du Pointage et de l'appel,
@@ -161,13 +174,12 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
     );
     if (!widget.frozenFirstColumn) return table;
     return LayoutBuilder(
-      builder: (context, constraints) => constraints.maxWidth >= widget.minWidth
-          ? table
-          : EteeloFrozenColumn(
-              controller: _scroll,
-              width: _frozenWidth,
-              child: table,
-            ),
+      builder: (context, constraints) => EteeloFrozenColumn(
+        controller: _scroll,
+        width: _frozenWidth,
+        active: constraints.maxWidth < widget.minWidth,
+        child: table,
+      ),
     );
   }
 }
@@ -209,7 +221,11 @@ class EteeloColumnTableRow extends StatelessWidget {
         decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: AppColors.border)),
         ),
-        child: EteeloColumns(widths: widths, cells: cells),
+        child: EteeloColumns(
+          widths: widths,
+          cells: cells,
+          frozenBackground: background ?? AppColors.surfaceRaised,
+        ),
       ),
     ),
   );

@@ -42,7 +42,7 @@ class EteeloFormDialog extends StatelessWidget {
 
   /// Ouvre [dialog] ; rend la valeur passée à `Navigator.pop`.
   static Future<T?> show<T>(BuildContext context, Widget dialog) =>
-      showDialog<T>(context: context, builder: (_) => dialog);
+      showEteeloAdaptiveDialog<T>(context: context, builder: (_) => dialog);
 
   @override
   Widget build(BuildContext context) {

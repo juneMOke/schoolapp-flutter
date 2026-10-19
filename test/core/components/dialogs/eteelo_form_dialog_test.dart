@@ -51,4 +51,14 @@ void main() {
     expect(field.width, lessThan(AppDimensions.formDialogMaxWidth));
     expect(field.left, greaterThan(200));
   });
+
+  testWidgets('téléphone : la modale couvre aussi les bandes système', (
+    tester,
+  ) async {
+    await fieldRect(tester, const Size(360, 740));
+
+    // Sous le `SafeArea` de la route, la page assombrie restait visible en
+    // haut et en bas ; la modale pose le sien, à l'intérieur.
+    expect(tester.getSize(find.byType(Dialog)), const Size(360, 740));
+  });
 }

@@ -33,6 +33,14 @@ void main() {
                         DataTableCellSpec(text: 'Kabeya Ada'),
                         DataTableCellSpec(text: ''),
                         DataTableCellSpec(text: '1 250 000 CDF'),
+                        DataTableCellSpec(
+                          text: '',
+                          child: SizedBox(
+                            key: Key('pastille'),
+                            width: 40,
+                            height: 16,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -44,6 +52,7 @@ void main() {
                       DataTableColumnDef(label: 'Élève', flex: 2),
                       DataTableColumnDef(label: 'Source', flex: 1),
                       DataTableColumnDef(label: 'Montant', flex: 1),
+                      DataTableColumnDef(label: 'Mode', flex: 1),
                     ],
                   ),
                 ),
@@ -85,5 +94,14 @@ void main() {
     await pump(tester, width: 360, layout: DataTablePhoneLayout.table);
 
     expect(find.byType(DataTableCardItem), findsNothing);
+  });
+
+  testWidgets('texte et pastille se calent au même bord droit', (tester) async {
+    await pump(tester, width: 360);
+
+    expect(
+      tester.getTopRight(find.text('1 250 000 CDF')).dx,
+      tester.getTopRight(find.byKey(const Key('pastille'))).dx,
+    );
   });
 }
