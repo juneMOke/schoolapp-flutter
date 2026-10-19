@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_pickers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
@@ -94,7 +95,7 @@ class _DisciplinaryCaseCreateDialogState
 
   Future<void> _selectDate(BuildContext context) async {
     final baseTheme = Theme.of(context);
-    final picked = await showDatePicker(
+    final picked = await showEteeloDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2000),

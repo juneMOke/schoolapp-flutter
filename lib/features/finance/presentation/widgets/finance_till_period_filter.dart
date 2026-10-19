@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_pickers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -307,7 +308,7 @@ class _DateButton extends StatelessWidget {
         child: OutlinedButton.icon(
           onPressed: () async {
             final now = DateTime.now();
-            final picked = await showDatePicker(
+            final picked = await showEteeloDatePicker(
               context: context,
               initialDate: value ?? now,
               // Une caisse ne se lit pas dans le futur : rien n'y est encore

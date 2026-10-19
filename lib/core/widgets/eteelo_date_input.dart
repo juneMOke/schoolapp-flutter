@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_pickers.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -37,7 +38,7 @@ class EteeloDateInput extends StatefulWidget {
   final DateTime? lastDate;
   final DateTime? initialPickerDate;
 
-  /// Paramètres optionnels passés au [showDatePicker] natif.
+  /// Paramètres optionnels passés au sélecteur ([showEteeloDatePicker]).
   final Locale? locale;
   final String? helpText;
   final String? cancelText;
@@ -132,7 +133,7 @@ class _EteeloDateInputState extends State<EteeloDateInput> {
 
     setState(() => _isPickerOpen = true);
 
-    final picked = await showDatePicker(
+    final picked = await showEteeloDatePicker(
       context: context,
       initialDate: widget.value ?? widget.initialPickerDate ?? DateTime.now(),
       firstDate: widget.firstDate ?? DateTime(1900),
