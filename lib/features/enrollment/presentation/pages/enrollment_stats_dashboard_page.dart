@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/suspension/suspended_count_builder.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -120,6 +121,7 @@ class _EnrollmentStatsDashboardPageState
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      width: PageContentWidth.wide,
       scrollable: true,
       child: BlocBuilder<EnrollmentStatsBloc, EnrollmentStatsState>(
         buildWhen: (prev, curr) =>

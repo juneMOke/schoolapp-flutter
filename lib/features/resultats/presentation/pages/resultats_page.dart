@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -113,6 +114,7 @@ class _ResultatsPageState extends State<ResultatsPage> {
               : eleveState.status == EleveSearchStatus.loading;
 
           return AppPageBackground(
+            width: PageContentWidth.wide,
             scrollable: true,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

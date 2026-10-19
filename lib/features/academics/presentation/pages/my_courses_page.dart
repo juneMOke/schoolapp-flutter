@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/helpers/support_contact.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -41,6 +42,7 @@ class _MyCoursesPageState extends State<MyCoursesPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
+      width: PageContentWidth.wide,
       scrollable: true,
       child: BlocBuilder<CourseBloc, CourseState>(
         buildWhen: (prev, curr) =>

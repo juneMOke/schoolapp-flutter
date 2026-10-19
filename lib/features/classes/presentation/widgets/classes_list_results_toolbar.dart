@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 class ClassesListResultsToolbar extends StatelessWidget {
   final String summary;
@@ -39,7 +40,8 @@ class ClassesListResultsToolbar extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isCompact = constraints.maxWidth < 760;
+          final isCompact =
+              constraints.maxWidth < AppBreakpoints.detailCompactMax;
           final exportButton = _ExportButton(
             canExport: canExport,
             onPressed: onExportPressed,

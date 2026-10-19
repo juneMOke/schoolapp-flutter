@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/components/buttons/primary_action_placement.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab_location.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -47,14 +47,11 @@ class _FirstRegistrationPageState extends State<FirstRegistrationPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Tablette paysage (1280×800+) : le FAB flottant masquait la pagination en
-    // bas de tableau. On le remplace par un bouton inline rendu sous le tableau.
-    final useInlineCreate =
-        MediaQuery.sizeOf(context).width >=
-        AppBreakpoints.enrollmentInlineCreateMin;
+    // Grand écran : le bouton inline rendu sous le tableau remplace le FAB.
+    final useInlineCreate = primaryActionInPage(context);
 
     return AppPageBackground(
-      maxWidth: AppDimensions.listingContentMaxWidth,
+      width: PageContentWidth.wide,
       scrollable: true,
       // Gel READ_ONLY (ADR-010) : ouvrir un nouveau dossier est une écriture.
       floatingActionButton: useInlineCreate

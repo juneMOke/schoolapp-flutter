@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -179,7 +180,7 @@ class _FeeControlViewState extends State<_FeeControlView> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
-      maxWidth: AppDimensions.listingContentMaxWidth,
+      width: PageContentWidth.wide,
       // Posée hors du `BlocBuilder` : la sortie reste offerte même quand le
       // contexte académique charge ou échoue.
       appBar: widget.standalone ? const RecouvrementControlTopBar() : null,

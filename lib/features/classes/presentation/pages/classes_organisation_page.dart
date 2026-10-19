@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -51,6 +52,7 @@ class _ClassesOrganisationPageState extends State<ClassesOrganisationPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
+      width: PageContentWidth.wide,
       // Deux gestes distincts sur le BLoC offline, donc DEUX listeners séparés :
       //  - TRANSFERT (A→B) : OFFLINE, événement + outbox → toast « en attente
       //    de synchro » (acquis en local, la synchro suivra) ;

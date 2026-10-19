@@ -189,7 +189,8 @@ class EteeloDocumentViewerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
     final preview = previewBuilder;
 
     return Dialog(

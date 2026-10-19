@@ -127,7 +127,8 @@ class _ClassesOrganisationDistributionResultDialogState
 
   @override
   Widget build(BuildContext context) {
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
 
     return BlocListener<ClassroomBloc, ClassroomState>(
       listenWhen: (previous, current) =>

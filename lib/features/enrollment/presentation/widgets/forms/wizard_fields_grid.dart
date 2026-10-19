@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 /// Un champ posé dans une [WizardFieldsGrid].
 ///
@@ -36,8 +37,8 @@ class WizardFieldsGrid extends StatelessWidget {
 
   /// Seuils de colonnes (sur la largeur disponible à l'intérieur de la carte).
   static int columnsForWidth(double width) {
-    if (width >= 880) return 3;
-    if (width >= 560) return 2;
+    if (width >= AppBreakpoints.formGridThreeColMin) return 3;
+    if (width >= AppBreakpoints.formGridTwoColMin) return 2;
     return 1;
   }
 

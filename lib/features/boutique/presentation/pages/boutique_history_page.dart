@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -171,9 +172,7 @@ class _HistoryViewState extends State<_HistoryView> {
                 constraints.maxWidth >= AppBreakpoints.financeDetailTwoColMin;
             final list = _listColumn(context, state, bloc, split: split);
             return AppPageBackground(
-              maxWidth: split
-                  ? AppDimensions.listingContentMaxWidth
-                  : AppDimensions.detailContentMaxWidth,
+              width: split ? PageContentWidth.wide : PageContentWidth.reading,
               scrollable: !split,
               appBar: ModuleTopBar(
                 eyebrow: l10n.boutiqueHistoryEyebrow,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
@@ -45,6 +46,7 @@ class _FinanceStatsDashboardPageState extends State<FinanceStatsDashboardPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
+      width: PageContentWidth.wide,
       scrollable: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

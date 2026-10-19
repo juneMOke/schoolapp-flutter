@@ -144,7 +144,8 @@ class FacturationChargeDetailDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final maxHeight =
+        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
     final status = intent.chargeStatus;
     final remaining = (intent.expectedAmountInCents - intent.amountPaidInCents)
         .clamp(0.0, double.infinity);

@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/m
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 /// Mode de tri du relevé (spec §6).
 enum _ReleveSort { ranking, alpha }
@@ -31,7 +32,9 @@ Future<void> showCoursReleveModal(
     builder: (_) => Dialog(
       backgroundColor: AppColors.surfaceRaised,
       insetPadding: EdgeInsets.symmetric(
-        horizontal: size.width <= 390 ? AppSpacing.md : AppSpacing.lg,
+        horizontal: size.width <= AppBreakpoints.dataTablePhoneMax
+            ? AppSpacing.md
+            : AppSpacing.lg,
         vertical: AppSpacing.lg,
       ),
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brLg),
@@ -39,7 +42,7 @@ Future<void> showCoursReleveModal(
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.coursReleveModalMaxWidth,
-          maxHeight: size.height * 0.88,
+          maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
         ),
         child: _ReleveContent(
           brancheNom: brancheNom,

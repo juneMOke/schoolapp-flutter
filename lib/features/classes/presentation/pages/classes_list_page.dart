@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
@@ -68,7 +68,7 @@ class _ClassesListPageState extends State<ClassesListPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return AppPageBackground(
-      maxWidth: AppDimensions.listingContentMaxWidth,
+      width: PageContentWidth.wide,
       child: MultiBlocListener(
         listeners: [
           // Consultation offline-first (CF3) : dès que l'année courante est

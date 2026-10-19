@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/resu
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_counter_filters.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_responsive_mode.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 export 'package:school_app_flutter/features/enrollment/presentation/widgets/results/enrollment_results_bar_models.dart';
 
@@ -85,7 +86,7 @@ class EnrollmentResultsBar extends StatelessWidget {
               final left = _buildCounterAndFilters(l10n, filters);
               final right = _buildActions(l10n);
               final canStayOnSingleLine =
-                  constraints.maxWidth >= 760 &&
+                  constraints.maxWidth >= AppBreakpoints.detailCompactMax &&
                   (filters.length <= 2 || !_hasStructuredSort);
 
               if (canStayOnSingleLine) {

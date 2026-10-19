@@ -26,6 +26,9 @@ class AppDimensions {
   /// les colonnes se serraient. Une fiche ou un formulaire reste à 1180.
   static const listingContentMaxWidth = 1440.0;
 
+  /// Le même plafond sur un écran de 1920 et plus (cf. `PageContentWidth`).
+  static const wideContentMaxWidthXL = 1760.0;
+
   /// Colonne du panier à côté du catalogue, sur grand écran : la largeur d'un
   /// téléphone confortable — celle pour laquelle le panneau est dessiné.
   static const boutiqueCartColumnWidth = 420.0;
@@ -79,8 +82,7 @@ class AppDimensions {
   static const enrollmentDuplicateDialogMaxWidth = 480.0;
   static const boutiqueDialogMaxWidth = 420.0;
   static const boutiqueBeneficiaryDialogMaxWidth = 520.0;
-  // Part de la hauteur d'écran qu'une modale de détail peut occuper (les
-  // `* 0.88` encore écrits en dur dans les modales de facturation y migreront).
+  // Part de la hauteur d'écran qu'une modale de détail peut occuper.
   static const dialogMaxHeightRatio = 0.88;
 
   // Anneau de focus clavier des zones cliquables maison (EteeloActivatable).

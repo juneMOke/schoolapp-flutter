@@ -24,6 +24,10 @@ class CoursBackBar extends StatelessWidget {
   /// Cran courant ; par défaut « {branche} · {classe} ».
   final String? crumb;
 
+  /// L'action principale de la page, à droite du fil — sur grand écran, à la
+  /// place du bouton flottant (cf. `primaryActionInPage`).
+  final Widget? trailing;
+
   const CoursBackBar({
     super.key,
     required this.brancheNom,
@@ -31,6 +35,7 @@ class CoursBackBar extends StatelessWidget {
     required this.onBack,
     this.backLabel,
     this.crumb,
+    this.trailing,
   });
 
   @override
@@ -40,7 +45,7 @@ class CoursBackBar extends StatelessWidget {
 
     // Le bouton de retour porte déjà le cran parent : le fil d'Ariane n'affiche
     // donc que le cran courant pour éviter la redite.
-    return Wrap(
+    final trail = Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -61,6 +66,15 @@ class CoursBackBar extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+      ],
+    );
+    final trailing = this.trailing;
+    if (trailing == null) return trail;
+    return Row(
+      children: [
+        Expanded(child: trail),
+        const SizedBox(width: AppSpacing.md),
+        trailing,
       ],
     );
   }

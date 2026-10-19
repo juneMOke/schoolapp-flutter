@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -46,7 +47,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
   @override
   Widget build(BuildContext context) {
     return AppPageBackground(
-      maxWidth: AppDimensions.listingContentMaxWidth,
+      width: PageContentWidth.wide,
       child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
         buildWhen: (prev, curr) =>
             prev.status != curr.status || prev.context != curr.context,

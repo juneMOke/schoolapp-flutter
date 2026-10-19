@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/components/buttons/primary_action_placement.dart';
 import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -60,10 +62,11 @@ class ProgrammePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final inPage = primaryActionInPage(context);
     return ProgrammeFeedbackListener(
       child: AppPageBackground(
         scrollable: true,
-        floatingActionButton: _fab(context),
+        floatingActionButton: inPage ? null : _createAction(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -72,6 +75,7 @@ class ProgrammePage extends StatelessWidget {
               classroomName: cours.classroomName,
               backLabel: l10n.programmeBackToCourses,
               onBack: onBack,
+              trailing: inPage ? _createAction(context, inPage: true) : null,
             ),
             const SizedBox(height: AppSpacing.xl),
             BlocBuilder<ProgrammeCubit, ProgrammeState>(
@@ -96,7 +100,7 @@ class ProgrammePage extends StatelessWidget {
 
   /// « Nouveau chapitre » : seulement quand le programme a déjà un chapitre —
   /// vide, l'appel à l'action est dans l'état vide.
-  Widget _fab(BuildContext context) {
+  Widget _createAction(BuildContext context, {bool inPage = false}) {
     final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<ProgrammeCubit, ProgrammeState>(
       buildWhen: (prev, curr) =>
@@ -112,11 +116,18 @@ class ProgrammePage extends StatelessWidget {
           return const SizedBox.shrink();
         }
         return ProgrammeWriteGate(
-          child: EteeloFab(
-            label: l10n.programmeFabNewChapitre,
-            icon: Icons.add_rounded,
-            onPressed: () => _create(context),
-          ),
+          child: inPage
+              ? EteeloButton.primary(
+                  label: l10n.programmeFabNewChapitre,
+                  icon: Icons.add_rounded,
+                  fullWidth: false,
+                  onPressed: () => _create(context),
+                )
+              : EteeloFab(
+                  label: l10n.programmeFabNewChapitre,
+                  icon: Icons.add_rounded,
+                  onPressed: () => _create(context),
+                ),
         );
       },
     );

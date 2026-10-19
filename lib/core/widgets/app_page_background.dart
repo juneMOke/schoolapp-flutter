@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/selection/desktop_selection_area.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/core/widgets/page_background_halos.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 
 enum AppPageBackgroundStyle { decorated, flat }
 
@@ -25,8 +27,8 @@ class AppPageBackground extends StatelessWidget {
   final bool selectableText;
 
   /// Plafond du contenu : la largeur de lecture par défaut, ou
-  /// [AppDimensions.listingContentMaxWidth] pour un écran de liste.
-  final double maxWidth;
+  /// [PageContentWidth.wide] pour une liste, un tableau, un tableau de bord.
+  final PageContentWidth width;
 
   const AppPageBackground({
     super.key,
@@ -39,12 +41,12 @@ class AppPageBackground extends StatelessWidget {
     this.style = AppPageBackgroundStyle.decorated,
     this.flatBackgroundColor = AppColors.surface,
     this.selectableText = false,
-    this.maxWidth = AppDimensions.detailContentMaxWidth,
+    this.width = PageContentWidth.reading,
   });
 
   double _horizontalPadding(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    if (width < 420) {
+    if (width < AppBreakpoints.phoneNarrowMax) {
       return AppDimensions.spacingM;
     }
     return AppDimensions.spacingL;
@@ -68,7 +70,7 @@ class AppPageBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = ContentMaxWidth(
-      maxWidth: maxWidth,
+      maxWidth: width.maxWidthFor(MediaQuery.sizeOf(context).width),
       child: selectableText ? DesktopSelectionArea(child: child) : child,
     );
 

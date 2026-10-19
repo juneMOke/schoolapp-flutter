@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/components/buttons/primary_action_placement.dart';
 import 'package:school_app_flutter/core/helpers/support_contact.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -200,10 +202,11 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
   }
 
   Widget _courseScaffold(BuildContext context) {
+    final inPage = primaryActionInPage(context);
     return AppPageBackground(
       key: const ValueKey<String>('course-detail'),
       scrollable: true,
-      floatingActionButton: _fab(context),
+      floatingActionButton: inPage ? null : _createAction(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -211,6 +214,7 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
             brancheNom: widget.args.brancheNom,
             classroomName: widget.args.classroomName,
             onBack: widget.onBack,
+            trailing: inPage ? _createAction(context, inPage: true) : null,
           ),
           const SizedBox(height: AppSpacing.xl),
           BlocBuilder<CoursNotationBloc, CoursNotationState>(
@@ -242,7 +246,8 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
     );
   }
 
-  Widget _fab(BuildContext context) {
+  /// « Nouvelle évaluation » : flottante, ou dans le fil sur grand écran.
+  Widget _createAction(BuildContext context, {bool inPage = false}) {
     final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<CoursNotationBloc, CoursNotationState>(
       buildWhen: (prev, curr) =>
@@ -259,16 +264,23 @@ class _CoursNotationDetailViewState extends State<_CoursNotationDetailView> {
         return PermissionGate(
           requires: const [Perm.academicsGradeWrite],
           child: SessionWriteGate(
-            child: FloatingActionButton.extended(
-              // Pas de hero : la coquille bascule entre plusieurs Scaffolds
-              // (liste ↔ cours ↔ évaluation) via AnimatedSwitcher.
-              heroTag: null,
-              onPressed: () => _openCreateModal(detail),
-              backgroundColor: AppColors.terreCuite,
-              foregroundColor: AppColors.textOnDark,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.evalCreateTitle),
-            ),
+            child: inPage
+                ? EteeloButton.primary(
+                    label: l10n.evalCreateTitle,
+                    icon: Icons.add_rounded,
+                    fullWidth: false,
+                    onPressed: () => _openCreateModal(detail),
+                  )
+                : FloatingActionButton.extended(
+                    // Pas de hero : la coquille bascule entre plusieurs Scaffolds
+                    // (liste ↔ cours ↔ évaluation) via AnimatedSwitcher.
+                    heroTag: null,
+                    onPressed: () => _openCreateModal(detail),
+                    backgroundColor: AppColors.terreCuite,
+                    foregroundColor: AppColors.textOnDark,
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(l10n.evalCreateTitle),
+                  ),
           ),
         );
       },
