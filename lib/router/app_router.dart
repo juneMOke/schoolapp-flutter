@@ -100,7 +100,7 @@ class RouterNotifier extends ChangeNotifier {
     }
 
     _snapshot = nextSnapshot;
-    notifyListeners();
+    RouteExitGuard.duringRouterRefresh(notifyListeners);
   }
 
   @override
@@ -357,8 +357,13 @@ class AppRouter {
     // seconde, et son état (menu ouvert, saisie en cours) survit. C'est ce
     // qui donne à chaque écran son adresse : Précédent / Suivant du
     // navigateur, F5 et lien partagé y mènent.
+    //
+    // Précédent y change d'écran sans changer de page : une fiche poussée
+    // par-dessus (agent, contrat) resterait affichée. `onExit` consulte sa
+    // garde, et la referme si l'on part.
     GoRoute(
       path: AppRoutesNames.homePath,
+      onExit: RouteExitGuard.onExit,
       name: AppRoutesNames.home,
       // Ancienne forme `?subMenuId=` : ramenée à l'adresse canonique.
       redirect: (context, state) {
@@ -371,6 +376,7 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.homeSubMenuRoute,
       name: AppRoutesNames.homeSubMenu,
+      onExit: RouteExitGuard.onExit,
       pageBuilder: (context, state) =>
           _shellPage(state.pathParameters['subMenuId']),
     ),

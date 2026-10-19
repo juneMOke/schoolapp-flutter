@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/web/unload_guard.dart';
@@ -42,8 +43,55 @@ class RouteExitGuard extends StatefulWidget {
   static final List<_RouteExitGuardState> _mounted = [];
 
   /// À poser sur la [GoRoute] de la page protégée.
-  static FutureOr<bool> onExit(BuildContext context, GoRouterState state) =>
-      _mounted.isEmpty ? true : _mounted.last._decide();
+  ///
+  /// Consulte les gardes que cette sortie emporte : celle de la page quittée
+  /// ([GoRouterState.pageKey]) et celles des pages poussées par-dessus sans
+  /// route (`Navigator.push` : fiche d'un agent, puis son contrat). La plus
+  /// haute qui a une saisie pose la question ; une réponse vaut pour toutes.
+  static FutureOr<bool> onExit(BuildContext context, GoRouterState state) {
+    final guards = [
+      for (final guard in _mounted.reversed)
+        if (!guard._released && guard._leftWith(state.pageKey)) guard,
+    ];
+    if (guards.isEmpty) return true;
+    if (guards.any((guard) => guard.widget.isBusy())) return false;
+    // Un rafraîchissement du routeur n'est pas une sortie demandée : il
+    // recrée la page empilée (go_router #128122), ou applique une redirection
+    // qui fait autorité (déconnexion, droit retiré). Aucune question.
+    if (_routerRefreshing) return true;
+    final dirty = guards.where((guard) => guard.widget.hasUnsavedWork());
+    if (dirty.isEmpty) return _leave(guards);
+    return dirty.first._confirm().then(
+      (leave) => leave ? _leave(guards) : false,
+    );
+  }
+
+  /// Sortie accordée : les gardes se lèvent, et les pages sans route se
+  /// referment — sans quoi elles resteraient affichées au-dessus d'une
+  /// coquille dont l'adresse a changé.
+  static bool _leave(List<_RouteExitGuardState> guards) {
+    for (final guard in guards) {
+      guard
+        .._release()
+        .._closeIfPageless();
+    }
+    return true;
+  }
+
+  static bool _routerRefreshing = false;
+
+  /// Notifie le routeur ([notify]) en signalant aux gardes que les sorties
+  /// qui suivent viennent de ce rafraîchissement, jusqu'à l'image suivante.
+  static void duringRouterRefresh(VoidCallback notify) {
+    _routerRefreshing = true;
+    try {
+      notify();
+    } finally {
+      SchedulerBinding.instance
+        ..addPostFrameCallback((_) => _routerRefreshing = false)
+        ..ensureVisualUpdate();
+    }
+  }
 
   /// La page part d'elle-même : la prochaine sortie passe sans question.
   ///
@@ -81,21 +129,29 @@ class _RouteExitGuardState extends State<RouteExitGuard> {
     setUnloadGuard(false, source: this);
   }
 
-  Future<bool> _decide() async {
-    if (_released) return true;
-    if (widget.isBusy()) return false;
-    if (!widget.hasUnsavedWork()) return true;
-    // Une question à la fois : Précédent tapé deux fois ne superpose pas
-    // deux popins.
+  /// La page de cette garde part avec la page [pageKey] : c'est elle, ou
+  /// une page sans route poussée au-dessus.
+  bool _leftWith(ValueKey<String> pageKey) {
+    final settings = ModalRoute.of(context)?.settings;
+    return settings is! Page || settings.key == pageKey;
+  }
+
+  /// Une question à la fois : Précédent tapé deux fois ne superpose pas deux
+  /// popins.
+  Future<bool> _confirm() async {
     if (_asking) return false;
     _asking = true;
     try {
-      final leave = await widget.confirmExit();
-      if (leave) _release();
-      return leave;
+      return await widget.confirmExit();
     } finally {
       _asking = false;
     }
+  }
+
+  void _closeIfPageless() {
+    final route = ModalRoute.of(context);
+    if (route == null || route.settings is Page || !route.isActive) return;
+    route.navigator?.removeRoute(route);
   }
 
   @override

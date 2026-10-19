@@ -23,9 +23,14 @@ void main() {
     answer = false;
   });
 
+  late ValueNotifier<int> refresh;
+
   Future<void> pump(WidgetTester tester) async {
+    refresh = ValueNotifier<int>(0);
+    addTearDown(refresh.dispose);
     router = GoRouter(
       initialLocation: '/',
+      refreshListenable: refresh,
       routes: [
         GoRoute(path: '/', builder: (_, _) => const Text('liste')),
         GoRoute(
@@ -109,5 +114,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(asked, 0);
     expect(onForm(), isFalse);
+  });
+
+  group('rafraîchissement du routeur', () {
+    // Droits relus par la synchronisation : go_router recrée la page empilée
+    // et consulte `onExit` alors que personne ne part (go_router #128122).
+    testWidgets('sans le signaler, la garde poserait la question', (
+      tester,
+    ) async {
+      dirty = true;
+      await pump(tester);
+      refresh.value++;
+      await tester.pumpAndSettle();
+      expect(asked, 1);
+    });
+
+    testWidgets('signalé, il ne demande rien et garde la saisie', (
+      tester,
+    ) async {
+      dirty = true;
+      await pump(tester);
+      RouteExitGuard.duringRouterRefresh(() => refresh.value++);
+      await tester.pumpAndSettle();
+      expect(asked, 0);
+      expect(onForm(), isTrue);
+    });
+
+    testWidgets('l’image suivante, Précédent redemande', (tester) async {
+      dirty = true;
+      await pump(tester);
+      RouteExitGuard.duringRouterRefresh(() => refresh.value++);
+      await tester.pumpAndSettle();
+      await back(tester);
+      expect(asked, 1);
+    });
   });
 }
