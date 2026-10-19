@@ -22,11 +22,20 @@ Future<T?> showEteeloAdaptiveSheet<T>({
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
+      // Sous la barre d'état quand la feuille monte haut, au-dessus du clavier
+      // et de la barre gestuelle : sans cela, un champ de la feuille se
+      // tapait à l'aveugle et son pied passait sous la barre système.
+      useSafeArea: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: AppRadius.card),
       ),
-      builder: builder,
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+        ),
+        child: SafeArea(top: false, child: builder(sheetContext)),
+      ),
     );
   }
   return showDialog<T>(

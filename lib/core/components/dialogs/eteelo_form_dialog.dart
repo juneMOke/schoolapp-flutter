@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -11,6 +12,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 /// élèves, Paie : un surtitre, un titre, un corps défilant et des actions
 /// ancrées. Toutes ont une saisie ou une case : elles passent par
 /// [EteeloDialogBody], qui tient au clavier ouvert en paysage.
+///
+/// Sur un téléphone (sous [AppBreakpoints.formDialogFullscreenMax]), la
+/// modale prend tout l'écran.
 class EteeloFormDialog extends StatelessWidget {
   final String? eyebrow;
   final String title;
@@ -44,68 +48,84 @@ class EteeloFormDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eyebrow = this.eyebrow;
-    final leading = this.leading;
-    return Dialog(
-      backgroundColor: AppColors.surfaceRaised,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      child: EteeloSubmitShortcut(
-        onSubmit: onSubmit,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: maxWidth,
-            maxHeight: AppDimensions.formDialogMaxHeight,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: EteeloDialogBody(
-              minPinnedHeight: AppDimensions.formDialogMaxHeight / 2,
-              header: Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (eyebrow != null) ...[
-                      Text(
-                        eyebrow.toUpperCase(),
-                        style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.textMutedAa,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                    ],
-                    Text(
-                      title,
-                      style: AppTypography.titleLarge.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              body: body,
-              footer: [
-                const SizedBox(height: AppSpacing.lg),
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  runSpacing: AppSpacing.sm,
-                  spacing: AppSpacing.sm,
-                  children: [
-                    ?leading,
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: actions,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+    final fullscreen =
+        MediaQuery.sizeOf(context).width <
+        AppBreakpoints.formDialogFullscreenMax;
+    final content = EteeloSubmitShortcut(
+      onSubmit: onSubmit,
+      child: Padding(
+        padding: EdgeInsets.all(fullscreen ? AppSpacing.lg : AppSpacing.xl),
+        child: EteeloDialogBody(
+          minPinnedHeight: AppDimensions.formDialogMaxHeight / 2,
+          header: _header(),
+          body: body,
+          footer: _footer(),
         ),
       ),
     );
+    if (fullscreen) {
+      // Téléphone : tout l'écran, sous les barres système.
+      return Dialog.fullscreen(
+        backgroundColor: AppColors.surfaceRaised,
+        child: SafeArea(child: content),
+      );
+    }
+    return Dialog(
+      backgroundColor: AppColors.surfaceRaised,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxWidth,
+          maxHeight: AppDimensions.formDialogMaxHeight,
+        ),
+        child: content,
+      ),
+    );
   }
+
+  Widget _header() {
+    final eyebrow = this.eyebrow;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (eyebrow != null) ...[
+            Text(
+              eyebrow.toUpperCase(),
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.textMutedAa,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
+          Text(
+            title,
+            style: AppTypography.titleLarge.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _footer() => [
+    const SizedBox(height: AppSpacing.lg),
+    Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: AppSpacing.sm,
+      spacing: AppSpacing.sm,
+      children: [
+        ?leading,
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: actions,
+        ),
+      ],
+    ),
+  ];
 }

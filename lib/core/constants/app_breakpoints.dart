@@ -25,6 +25,11 @@ class AppBreakpoints {
   /// l'ancien seuil de 1 024 les en privait.
   static const double sideBySideMin = 976.0;
 
+  /// Fenêtre sous laquelle une modale de saisie (`EteeloFormDialog`) prend
+  /// tout l'écran : centrée, elle gardait 40 dp de marge par côté, soit
+  /// ~230 dp de champ sur un téléphone.
+  static const double formDialogFullscreenMax = detailCompactMax;
+
   /// Fenêtre sous laquelle la barre latérale s'ouvre repliée (rail), tant que
   /// l'utilisateur n'a rien choisi : à 1 280, ses 280 dp laissaient au
   /// contenu moins de 1 000 dp.
