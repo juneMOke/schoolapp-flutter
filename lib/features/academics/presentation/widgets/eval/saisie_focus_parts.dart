@@ -46,17 +46,22 @@ class _ThreadSquare extends StatelessWidget {
     final fill = statut == StatutNote.enAttente
         ? AppColors.surfaceAlt
         : noteStatutVisual(statut).color;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 14,
-        height: 14,
-        decoration: BoxDecoration(
-          color: fill,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: isCurrent ? AppColors.bleuProfond : AppColors.border,
-            width: isCurrent ? 2 : 1,
+    // Le curseur dit que le carré mène à l'élève ; au clavier, la saisie
+    // passe d'un élève au suivant par ses propres flèches.
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            color: fill,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: isCurrent ? AppColors.bleuProfond : AppColors.border,
+              width: isCurrent ? 2 : 1,
+            ),
           ),
         ),
       ),

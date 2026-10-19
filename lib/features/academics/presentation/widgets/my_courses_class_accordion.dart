@@ -107,7 +107,9 @@ class _AccordionHeader extends StatelessWidget {
       label: classroom.name,
       child: InkWell(
         onTap: onToggle,
-        child: Container(
+        // `Ink` et non `Container` : un fond plein posé sous l'InkWell cachait
+        // le survol et le focus clavier.
+        child: Ink(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
