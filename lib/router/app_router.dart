@@ -60,6 +60,7 @@ import 'package:school_app_flutter/router/route_parameters.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/router/student_record_routes.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_capture_support.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_page.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -349,6 +350,10 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.photoSessionPath,
       name: AppRoutesNames.photoSession,
+      // Sans prise de vue possible (navigateur), l'adresse tapée ou un favori
+      // ne mènent pas à une séance qui échouerait à chaque photo.
+      redirect: (context, state) =>
+          photoCaptureSupported ? null : AppRoutesNames.homePath,
       builder: (context, state) => const PhotoSessionPage(),
     ),
     // La coquille : `/home` (Accueil) et `/home/{sousMenu}` (chaque écran du

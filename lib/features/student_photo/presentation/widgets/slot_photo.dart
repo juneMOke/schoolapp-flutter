@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/helpers/image_decode_size.dart';
 import 'package:school_app_flutter/core/components/avatars/person_photo_avatar.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -41,6 +42,7 @@ class SlotPhoto extends StatelessWidget {
                 draft,
                 width: inner,
                 height: inner,
+                cacheWidth: imageDecodeWidth(context, inner),
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => SizedBox.square(dimension: inner),
               ),
