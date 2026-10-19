@@ -25,17 +25,32 @@ class ArrowNavigableResults extends StatelessWidget {
     focusNode: anchor,
     canRequestFocus: false,
     skipTraversal: true,
-    child: Shortcuts(
-      shortcuts: const {
-        SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
-          TraversalDirection.down,
-        ),
-        SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
-          TraversalDirection.up,
-        ),
-      },
-      child: FocusTraversalGroup(child: child),
-    ),
+    child: ArrowNavigableRows(child: child),
+  );
+}
+
+/// ↑/↓ passent d'une ligne à la suivante dans [child] : les lignes d'un
+/// tableau, d'une liste de résultats. Une ligne qui s'ouvre est un bouton —
+/// Entrée l'ouvre.
+///
+/// Le déplacement est directionnel : depuis une ligne, la plus proche en
+/// dessous (la ligne elle-même, plus haute que l'œil qu'elle contient).
+class ArrowNavigableRows extends StatelessWidget {
+  final Widget child;
+
+  const ArrowNavigableRows({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) => Shortcuts(
+    shortcuts: const {
+      SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
+        TraversalDirection.down,
+      ),
+      SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
+        TraversalDirection.up,
+      ),
+    },
+    child: FocusTraversalGroup(child: child),
   );
 }
 
