@@ -62,7 +62,6 @@ class FacturationDetailPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     final chargesBloc = context.read<StudentChargesBloc>();
-    final paymentsBloc = context.read<PaymentsBloc>();
 
     if (chargesBloc.state.status != StudentChargesStatus.success) {
       messenger.showSnackBar(
@@ -109,7 +108,7 @@ class FacturationDetailPage extends StatelessWidget {
     // Écran plein empilé sur la fiche (spec MODALE-12 devenue une page) : le
     // contexte d'affichage et les créances RELUES voyagent dans `extra`, l'élève
     // et l'année dans le chemin — un lien profond reste résoluble.
-    final collected = await context.push<bool>(
+    await context.push<bool>(
       AppRoutesNames.facturationCreatePaymentPath(
         studentId: intent.studentId,
         academicYearId: intent.academicYearId,
@@ -123,29 +122,36 @@ class FacturationDetailPage extends StatelessWidget {
         levelName: intent.levelName,
         levelGroupName: intent.levelGroupName,
         studentCharges: charges,
+        // La page de saisie le rappelle dès l'écriture : la fiche relit ses
+        // listes sous l'écran de succès, sans dépendre du résultat de `push`.
+        onWritten: _ledgerReloader(context),
       ),
     );
+  }
 
-    // `true` = un encaissement a été écrit. Le rafraîchissement se fait ICI,
-    // après le retour : la page de saisie a déjà rendu son écran de succès, et
-    // un échec de rechargement ne doit pas le contredire.
-    //
-    // `context.mounted` garde les deux BLoCs : capturés avant la navigation,
-    // ils sont fermés avec la fiche — la nourrir d'un événement après coup
-    // lèverait au lieu de rafraîchir quoi que ce soit.
-    if (collected != true || !context.mounted) return;
-    paymentsBloc.add(
-      PaymentsRequested(
-        studentId: intent.studentId,
-        academicYearId: intent.academicYearId,
-      ),
-    );
-    chargesBloc.add(
-      StudentChargesByAcademicYearRequested(
-        studentId: intent.studentId,
-        academicYearId: intent.academicYearId,
-      ),
-    );
+  /// Relit versements et créances de la fiche.
+  ///
+  /// Les BLoCs sont capturés tout de suite : la relecture arrive après une
+  /// navigation, d'un contexte qui a pu disparaître — `context.mounted` les
+  /// garde, fermés avec la fiche.
+  VoidCallback _ledgerReloader(BuildContext context) {
+    final paymentsBloc = context.read<PaymentsBloc>();
+    final chargesBloc = context.read<StudentChargesBloc>();
+    return () {
+      if (!context.mounted) return;
+      paymentsBloc.add(
+        PaymentsRequested(
+          studentId: intent.studentId,
+          academicYearId: intent.academicYearId,
+        ),
+      );
+      chargesBloc.add(
+        StudentChargesByAcademicYearRequested(
+          studentId: intent.studentId,
+          academicYearId: intent.academicYearId,
+        ),
+      );
+    };
   }
 
   void _openChargeDetail(BuildContext context, StudentCharge charge) {
@@ -174,7 +180,7 @@ class FacturationDetailPage extends StatelessWidget {
 
   Future<void> _openPaymentDetail(BuildContext context, Payment payment) async {
     final chargesBloc = context.read<StudentChargesBloc>();
-    final paymentsBloc = context.read<PaymentsBloc>();
+    final reload = _ledgerReloader(context);
     // Détail d'un paiement ouvert en popin (spec §15), au-dessus de la page.
     final action = await showFacturationPaymentDetailDialog(
       context,
@@ -210,33 +216,24 @@ class FacturationDetailPage extends StatelessWidget {
 
     // Le détail se referme d'abord, puis le geste s'ouvre (spec §03) : une
     // modale sur une modale ne laisse plus voir la fiche qu'on corrige.
-    final bool written;
     if (action == FacturationPaymentDetailAction.cancel) {
-      written = await runFacturationPaymentCancel(context, payment: payment);
-    } else {
-      written = await runFacturationPaymentCorrection(
+      // L'annulation est une modale : on relit à son retour, seulement si le
+      // geste a été écrit.
+      final written = await runFacturationPaymentCancel(
         context,
-        detail: intent,
         payment: payment,
-        charges: chargesBloc.state.studentCharges,
       );
+      if (written) reload();
+      return;
     }
-
-    // Même règle que l'encaissement : on relit APRÈS le retour, et seulement
-    // si le geste a été écrit. Les BLoCs capturés avant la navigation sont
-    // fermés avec la fiche — d'où la garde.
-    if (!written || !context.mounted) return;
-    paymentsBloc.add(
-      PaymentsRequested(
-        studentId: intent.studentId,
-        academicYearId: intent.academicYearId,
-      ),
-    );
-    chargesBloc.add(
-      StudentChargesByAcademicYearRequested(
-        studentId: intent.studentId,
-        academicYearId: intent.academicYearId,
-      ),
+    // La correction passe par la page d'encaissement : elle relit la fiche
+    // dès l'écriture (cf. `FacturationCreatePaymentIntent.onWritten`).
+    await runFacturationPaymentCorrection(
+      context,
+      detail: intent,
+      payment: payment,
+      charges: chargesBloc.state.studentCharges,
+      onWritten: reload,
     );
   }
 

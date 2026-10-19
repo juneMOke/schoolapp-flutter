@@ -161,7 +161,7 @@ void main() {
     originPaidAt: DateTime.utc(2026, 9, 25, 12, 11, 41),
   );
 
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {VoidCallback? onWritten}) async {
     await tester.binding.setSurfaceSize(const Size(1280, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -177,19 +177,29 @@ void main() {
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: FacturationCreatePaymentView(
-            now: DateTime.utc(2026, 9, 26, 8),
-            intent: FacturationCreatePaymentIntent(
-              studentId: 'stu-1',
-              academicYearId: 'ay-1',
-              firstName: 'Gloredi',
-              lastName: 'Tshiala',
-              surname: 'Mbuyi',
-              levelName: '6e A',
-              levelGroupName: 'Secondaire',
-              studentCharges: const [charge],
-              correction: correction,
-            ),
+          // Empilée sur une page, comme sur la fiche : elle se referme au
+          // succès.
+          home: Navigator(
+            onGenerateInitialRoutes: (_, _) => [
+              MaterialPageRoute<void>(builder: (_) => const Text('fiche')),
+              MaterialPageRoute<void>(
+                builder: (_) => FacturationCreatePaymentView(
+                  now: DateTime.utc(2026, 9, 26, 8),
+                  intent: FacturationCreatePaymentIntent(
+                    studentId: 'stu-1',
+                    academicYearId: 'ay-1',
+                    firstName: 'Gloredi',
+                    lastName: 'Tshiala',
+                    surname: 'Mbuyi',
+                    levelName: '6e A',
+                    levelGroupName: 'Secondaire',
+                    studentCharges: const [charge],
+                    correction: correction,
+                    onWritten: onWritten,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -348,5 +358,29 @@ void main() {
     // Un succès LOCAL, et le ticket du remplaçant à imprimer.
     await tester.pump();
     expect(find.text('Versement corrigé'), findsOneWidget);
+  });
+
+  testWidgets('écrite, la correction prévient la fiche avant de se fermer', (
+    tester,
+  ) async {
+    var written = 0;
+    await open(tester, onWritten: () => written++);
+    await tester.enterText(amountField(), '50');
+    await tester.pump();
+    await choose(tester, PaymentCorrectionReason.wrongAmount);
+    await tester.tap(find.byWidget(cta(tester)));
+    await tester.pump();
+    await tester.pump();
+    expect(written, 0);
+
+    await tester.tap(
+      find.byKey(const ValueKey('payment-correction-corrected-close')),
+    );
+    await tester.pumpAndSettle();
+
+    // Pas le résultat de `push` : un rafraîchissement du routeur peut l'avoir
+    // orphelin (go_router #128122).
+    expect(written, 1);
+    expect(find.text('fiche'), findsOneWidget);
   });
 }

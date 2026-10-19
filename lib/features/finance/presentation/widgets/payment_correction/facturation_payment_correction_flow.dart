@@ -32,6 +32,7 @@ Future<bool> runFacturationPaymentCorrection(
   required FacturationDetailIntent detail,
   required Payment payment,
   required List<StudentCharge> charges,
+  VoidCallback? onWritten,
 }) async {
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context)!;
@@ -65,6 +66,7 @@ Future<bool> runFacturationPaymentCorrection(
         originAmounts: payment.amounts,
         originPaidAt: payment.paidAt,
       ),
+      onWritten: onWritten,
     ),
   );
   return corrected == true;
