@@ -83,4 +83,20 @@ void main() {
     expect(find.text(l10n.facturationPickStudentTitle), findsNothing);
     expect(find.text(l10n.facturationSearchInvitationTitle), findsOneWidget);
   });
+
+  testWidgets('redimensionner ne perd pas les critères saisis', (tester) async {
+    await pump(tester, const Size(1600, 1000));
+    final field = find.byType(EditableText).first;
+    await tester.enterText(field, 'Mbuyi');
+    await tester.pump();
+
+    tester.view.physicalSize = const Size(1200, 900);
+    await tester.pump();
+    expect(find.text(l10n.facturationPickStudentTitle), findsNothing);
+    expect(find.text('Mbuyi'), findsOneWidget);
+
+    tester.view.physicalSize = const Size(1600, 1000);
+    await tester.pump();
+    expect(find.text('Mbuyi'), findsOneWidget);
+  });
 }

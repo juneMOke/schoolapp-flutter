@@ -42,6 +42,12 @@ class FacturationCreatePaymentLayout extends StatelessWidget {
     width: AppDimensions.detailSectionSpacing,
   );
 
+  /// Un bloc et tous ses champs, à la place [order] du parcours clavier.
+  static Widget _ordered(double order, Widget child) => FocusTraversalOrder(
+    order: NumericFocusOrder(order),
+    child: FocusTraversalGroup(child: child),
+  );
+
   @override
   Widget build(BuildContext context) {
     final footer = this.footer;
@@ -59,33 +65,45 @@ class FacturationCreatePaymentLayout extends StatelessWidget {
         ],
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final card in header) ...[card, _gap],
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  charges,
-                  if (footer != null) ...[_gap, footer],
-                ],
+    // Au clavier, l'ordre du guichet reste celui de la tablette : la
+    // correction, puis le payeur et la date, puis les créances — et non un
+    // va-et-vient entre les colonnes par bandes horizontales.
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final card in header) ...[_ordered(0, card), _gap],
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _ordered(
+                  2,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      charges,
+                      if (footer != null) ...[_gap, footer],
+                    ],
+                  ),
+                ),
               ),
-            ),
-            _gap,
-            SizedBox(
-              width: AppDimensions.paymentSideColumnWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [payer, _gap, date],
+              _gap,
+              SizedBox(
+                width: AppDimensions.paymentSideColumnWidth,
+                child: _ordered(
+                  1,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [payer, _gap, date],
+                  ),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

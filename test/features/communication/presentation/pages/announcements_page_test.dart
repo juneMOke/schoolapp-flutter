@@ -221,13 +221,13 @@ void main() {
     });
 
     testWidgets('sans communiqué ouvert, le volet y invite', (tester) async {
-      await pump(tester, window: const Size(1600, 1000));
+      await pump(tester, window: const Size(2000, 1100));
       expect(find.text('Choisissez un communiqué'), findsOneWidget);
       expect(find.text('Fête de l\'école'), findsOneWidget);
     });
 
     testWidgets('un envoyé s\'ouvre à côté, la liste reste', (tester) async {
-      await pump(tester, window: const Size(1600, 1000));
+      await pump(tester, window: const Size(2000, 1100));
       await tester.tap(find.text('Fête de l\'école'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
@@ -239,6 +239,13 @@ void main() {
 
     testWidgets('écran moyen : la liste seule', (tester) async {
       await pump(tester);
+      expect(find.text('Choisissez un communiqué'), findsNothing);
+    });
+
+    testWidgets('1600 : le détail n\'aurait pas la place de son aperçu', (
+      tester,
+    ) async {
+      await pump(tester, window: const Size(1600, 1000));
       expect(find.text('Choisissez un communiqué'), findsNothing);
     });
   });

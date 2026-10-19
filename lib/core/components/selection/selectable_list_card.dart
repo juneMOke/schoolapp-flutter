@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/outlined_panel.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -77,12 +78,8 @@ class _SelectableListCardState extends State<SelectableListCard> {
   @override
   Widget build(BuildContext context) {
     final visible = _visible;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
-        borderRadius: AppRadius.brCard,
-        border: Border.all(color: AppColors.border),
-      ),
+    return OutlinedPanel(
+      color: AppColors.surfaceRaised,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -133,7 +130,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     final caption = item.caption;
     return Semantics(
-      selected: selected,
+      selected: selected ? true : null,
       button: true,
       child: EteeloActivatable(
         onActivate: onTap,

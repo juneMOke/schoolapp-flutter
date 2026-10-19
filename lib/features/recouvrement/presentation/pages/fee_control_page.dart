@@ -112,6 +112,15 @@ class _FeeControlViewState extends State<_FeeControlView> {
   /// L'élève dont l'aperçu est ancré ; `null` = aucun.
   String? _dockedStudentId;
 
+  /// Le contenu garde son état (périmètre saisi, tri) quand un
+  /// redimensionnement le fait passer dans sa colonne, et retour.
+  final _contentKey = GlobalKey();
+
+  void _closeDockedSheet(String studentId) {
+    if (!mounted || _dockedStudentId != studentId) return;
+    setState(() => _dockedStudentId = null);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -191,7 +200,10 @@ class _FeeControlViewState extends State<_FeeControlView> {
       builder: (context, constraints) {
         _docked =
             constraints.maxWidth >= AppBreakpoints.feeControlDockedSheetMin;
-        final content = _content(context);
+        final content = KeyedSubtree(
+          key: _contentKey,
+          child: _content(context),
+        );
         final studentId = _dockedStudentId;
         return AppPageBackground(
           width: PageContentWidth.wide,
@@ -222,8 +234,7 @@ class _FeeControlViewState extends State<_FeeControlView> {
                                   ?.academicYear
                                   .id ??
                               '',
-                          onClose: () =>
-                              setState(() => _dockedStudentId = null),
+                          onClose: () => _closeDockedSheet(studentId),
                         ),
                       ),
                     ],

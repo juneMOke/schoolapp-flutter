@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -5,7 +7,6 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -74,8 +75,7 @@ class _AnnouncementsFlow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final split =
-          constraints.maxWidth >= AppBreakpoints.announcementsSplitMin;
+      final split = _detailFitsBesideList(context, constraints.maxWidth);
       return BlocBuilder<CommunicationFlowCubit, CommunicationScreen>(
         builder: (context, screen) {
           final flow = context.read<CommunicationFlowCubit>();
@@ -133,6 +133,19 @@ class _AnnouncementsFlow extends StatelessWidget {
       );
     },
   );
+
+  /// La liste et le détail côte à côte seulement si le détail garde la
+  /// largeur où son aperçu reste collé à droite : en deçà, il passerait sous
+  /// le message, et la colonne ne ferait que l'étrangler.
+  static bool _detailFitsBesideList(BuildContext context, double available) {
+    final content = math.min(
+      available - 2 * AppDimensions.spacingL,
+      PageContentWidth.wide.maxWidthIn(context),
+    );
+    final detail =
+        content - AppDimensions.announcementsListWidth - AppDimensions.spacingL;
+    return detail >= AppDimensions.communicationEditorWideMinWidth;
+  }
 
   /// Grand écran : la liste à gauche, le communiqué ouvert à droite — on lit
   /// l'un après l'autre sans repasser par la liste.

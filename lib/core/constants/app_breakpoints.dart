@@ -99,9 +99,6 @@ class AppBreakpoints {
   // Facturation (largeur reçue) : au-delà, la fiche de l'élève s'ouvre à côté
   // de la liste — 440 de liste, ~940 de fiche, assez pour ses deux colonnes.
   static const double facturationSplitMin = 1400.0;
-  // Communiqués : au-delà, la liste et le communiqué ouvert côte à côte — le
-  // détail garde son aperçu collant à droite.
-  static const double announcementsSplitMin = 1500.0;
   // Journal, direction : au-delà, les professeurs en colonne à gauche (300)
   // et la feuille du jour à droite, assez large pour rester une feuille.
   static const double journalDirectionSplitMin = 1260.0;

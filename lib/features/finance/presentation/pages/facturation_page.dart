@@ -50,6 +50,10 @@ class _FacturationPageState extends State<FacturationPage> {
   /// pousser la fiche.
   bool _split = false;
 
+  /// La liste garde son état (critères saisis, tri) quand un redimensionnement
+  /// la fait passer de la page entière à sa colonne, et retour.
+  final _listKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -105,47 +109,56 @@ class _FacturationPageState extends State<FacturationPage> {
             academicYearState.context?.schoolLevelGroups ?? const [],
           );
 
-          final list = AnimatedSwitcher(
-            duration: FinanceMotion.standard,
-            child: Column(
-              key: const ValueKey('facturation-content'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BlocBuilder<EnrollmentLocalListBloc, EnrollmentLocalListState>(
-                  buildWhen: (prev, curr) =>
-                      prev.summariesStatus != curr.summariesStatus,
-                  builder: (context, enrollmentState) {
-                    return FacturationSearchForm(
-                      options: academicOptions,
-                      isLoading:
-                          enrollmentState.summariesStatus ==
-                          EnrollmentLoadStatus.loading,
-                      // Recherche 100 % locale des élèves FACTURABLES : ceux dont
-                      // l'inscription de l'année courante est finalisée
-                      // (SYNCED|PENDING_SYNC|SYNC_ERROR), et non le vivier de
-                      // réinscription.
-                      onSearch: (request) =>
-                          context.read<EnrollmentLocalListBloc>().add(
-                            LocalListByEnrolledAcademicInfoRequested(
-                              academicYearId:
-                                  academicYearState.context?.academicYear.id ??
-                                  '',
-                              firstName: request.firstName,
-                              lastName: request.lastName,
-                              surname: request.surname,
-                              schoolLevelGroupId: request.schoolLevelGroupId,
-                              schoolLevelId: request.schoolLevelId,
+          final list = KeyedSubtree(
+            key: _listKey,
+            child: AnimatedSwitcher(
+              duration: FinanceMotion.standard,
+              child: Column(
+                key: const ValueKey('facturation-content'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BlocBuilder<
+                    EnrollmentLocalListBloc,
+                    EnrollmentLocalListState
+                  >(
+                    buildWhen: (prev, curr) =>
+                        prev.summariesStatus != curr.summariesStatus,
+                    builder: (context, enrollmentState) {
+                      return FacturationSearchForm(
+                        options: academicOptions,
+                        isLoading:
+                            enrollmentState.summariesStatus ==
+                            EnrollmentLoadStatus.loading,
+                        // Recherche 100 % locale des élèves FACTURABLES : ceux dont
+                        // l'inscription de l'année courante est finalisée
+                        // (SYNCED|PENDING_SYNC|SYNC_ERROR), et non le vivier de
+                        // réinscription.
+                        onSearch: (request) =>
+                            context.read<EnrollmentLocalListBloc>().add(
+                              LocalListByEnrolledAcademicInfoRequested(
+                                academicYearId:
+                                    academicYearState
+                                        .context
+                                        ?.academicYear
+                                        .id ??
+                                    '',
+                                firstName: request.firstName,
+                                lastName: request.lastName,
+                                surname: request.surname,
+                                schoolLevelGroupId: request.schoolLevelGroupId,
+                                schoolLevelId: request.schoolLevelId,
+                              ),
                             ),
-                          ),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                FacturationStudentTable(
-                  onViewRequested: _onViewChargesRequested,
-                  selectedStudentId: _split ? _selected?.studentId : null,
-                ),
-              ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppDimensions.spacingM),
+                  FacturationStudentTable(
+                    onViewRequested: _onViewChargesRequested,
+                    selectedStudentId: _split ? _selected?.studentId : null,
+                  ),
+                ],
+              ),
             ),
           );
           if (!_split) return list;
@@ -158,7 +171,15 @@ class _FacturationPageState extends State<FacturationPage> {
   /// La fiche choisie, ou l'invitation à en choisir une. Une clé par élève :
   /// changer d'élève recrée ses BLoCs au lieu de nourrir ceux du précédent.
   Widget _detailPane() {
-    final selected = _selected;
+    final yearId = context
+        .read<AcademicYearContextBloc>()
+        .state
+        .context
+        ?.academicYear
+        .id;
+    // Une fiche ouverte sur une autre année (contexte changé depuis) ne
+    // s'affiche pas : son grand-livre n'est plus celui qu'on consulte.
+    final selected = _selected?.academicYearId == yearId ? _selected : null;
     if (selected == null) {
       final l10n = AppLocalizations.of(context)!;
       return SingleChildScrollView(
@@ -170,7 +191,7 @@ class _FacturationPageState extends State<FacturationPage> {
       );
     }
     return FacturationDetailPage(
-      key: ValueKey(selected.studentId),
+      key: ValueKey('${selected.academicYearId}/${selected.studentId}'),
       intent: selected,
       embedded: true,
       onClose: () => setState(() => _selected = null),

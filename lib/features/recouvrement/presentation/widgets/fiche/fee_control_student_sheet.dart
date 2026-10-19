@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/outlined_panel.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -140,14 +140,7 @@ class FeeControlStudentSheet extends StatelessWidget {
       ],
     );
     if (onClose != null) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
-          borderRadius: AppRadius.brCard,
-          border: Border.all(color: AppColors.border),
-        ),
-        child: ClipRRect(borderRadius: AppRadius.brCard, child: body),
-      );
+      return OutlinedPanel(color: AppColors.surfaceRaised, child: body);
     }
     return Dialog(
       child: ConstrainedBox(
