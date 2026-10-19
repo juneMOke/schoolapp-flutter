@@ -17,11 +17,24 @@ class Sidebar extends StatelessWidget {
   /// Utilisé en mode tiroir : la sidebar overlay est toujours déployée.
   final bool forceExpanded;
 
+  /// Force le rail (84), même si l'état bureau est déployé : la fenêtre est
+  /// trop étroite pour 280 dp de menu (cf. `ShellNavigationMode.rail`).
+  final bool forceCollapsed;
+
+  /// L'écusson du rail : déplier la barre par défaut ; en rail forcé, la
+  /// coquille y ouvre plutôt le menu complet en tiroir.
+  final VoidCallback? onExpandRequested;
+
   const Sidebar({
     super.key,
     this.closeDrawerOnSubMenuSelection = false,
     this.forceExpanded = false,
-  });
+    this.forceCollapsed = false,
+    this.onExpandRequested,
+  }) : assert(
+         !(forceExpanded && forceCollapsed),
+         'une barre ne peut être forcée dépliée ET repliée',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +47,8 @@ class Sidebar extends StatelessWidget {
       builder: (context, state) {
         // En mode tiroir (forceExpanded), la sidebar reste toujours déployée,
         // même si l'état bureau était replié.
-        final isExpanded = forceExpanded || state.isSidebarExpanded;
+        final isExpanded =
+            forceExpanded || (!forceCollapsed && state.isSidebarExpanded);
         return Semantics(
           container: true,
           label: l10n.homeSidebarNavigationLabel,
@@ -59,7 +73,10 @@ class Sidebar extends StatelessWidget {
                     children: [
                       FocusTraversalOrder(
                         order: const NumericFocusOrder(1),
-                        child: SidebarHeader(isExpanded: isExpanded),
+                        child: SidebarHeader(
+                          isExpanded: isExpanded,
+                          onExpandRequested: onExpandRequested,
+                        ),
                       ),
                       const SizedBox(height: AppDimensions.spacingXS + 2),
                       Expanded(

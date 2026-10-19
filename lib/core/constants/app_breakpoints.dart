@@ -13,6 +13,18 @@ class AppBreakpoints {
   static const double detailCompactMax = 760.0;
   static const double navigationCompactMax = 1024.0;
 
+  /// Fenêtre sous laquelle le menu de la coquille n'existe qu'en tiroir
+  /// (téléphone, 7" portrait). Entre ce seuil et [navigationCompactMax]
+  /// (10" portrait, 7" paysage), il reste à l'écran en rail de 84 dp : un
+  /// appui par navigation au lieu de deux.
+  static const double navigationDrawerMax = detailCompactMax;
+
+  /// Deux volets côte à côte (panier | catalogue, liste | détail) : 420 de
+  /// volet + 24 d'écart + ~530 pour l'autre. Tient dans les 1 000 dp qu'une
+  /// 10" paysage laisse au contenu barre latérale dépliée (1 280 − 280) —
+  /// l'ancien seuil de 1 024 les en privait.
+  static const double sideBySideMin = 976.0;
+
   /// Fenêtre sous laquelle la barre latérale s'ouvre repliée (rail), tant que
   /// l'utilisateur n'a rien choisi : à 1 280, ses 280 dp laissaient au
   /// contenu moins de 1 000 dp.
@@ -85,7 +97,7 @@ class AppBreakpoints {
 
   // Facturation — seuils responsive dédiés (spec §00 : occupation de l'espace).
   // Au-delà : la page détail élargit son contenu et juxtapose Paiements | Frais.
-  static const double financeDetailTwoColMin = navigationCompactMax; // 1024
+  static const double financeDetailTwoColMin = sideBySideMin;
   // Pied de modale : en deçà, les deux boutons s'empilent (sinon Row).
   static const double financeModalFooterRowMin = 360.0;
   // Barre d'encaissement de la page « Encaisser un paiement » : au-delà, le
@@ -127,7 +139,7 @@ class AppBreakpoints {
   // Caisse boutique : panier en colonne à côté du catalogue. Mesuré sur la
   // zone de la page (sous la barre latérale) : 420 de panier + 24 d'écart
   // laissent au catalogue au moins ~530 dp, deux tuiles d'articles.
-  static const double boutiqueSideCartMin = financeDetailTwoColMin; // 1024
+  static const double boutiqueSideCartMin = sideBySideMin;
   // Fiche d'une dépense : le fil passe en colonne quand le corps de la
   // modale dépasse ~820 dp — 340 de fil, 480 de faits au moins.
   static const double expenseDetailTwoColMin = 820.0;

@@ -56,9 +56,20 @@ class _ShellLayoutState extends State<ShellLayout> {
                   ),
                 ),
               );
-              return mode.isDrawer
-                  ? _drawerScaffold(content)
-                  : _sidebarScaffold(content);
+              return switch (mode) {
+                ShellNavigationMode.drawer => _drawerScaffold(content),
+                ShellNavigationMode.rail => _sidebarScaffold(
+                  content,
+                  rail: true,
+                ),
+                // Raccourcis (aide « ? », repli de la barre) au clavier
+                // physique : seuls les grands écrans en ont un.
+                ShellNavigationMode.sidebar => ShortcutsHelpShortcut(
+                  child: SidebarToggleShortcut(
+                    child: _sidebarScaffold(content, rail: false),
+                  ),
+                ),
+              };
             },
           );
         },
@@ -69,45 +80,50 @@ class _ShellLayoutState extends State<ShellLayout> {
   Widget _drawerScaffold(Widget content) {
     return Scaffold(
       key: _scaffoldKey,
-      drawerScrimColor: AppColors.bleuProfond.withValues(alpha: 0.4),
+      drawerScrimColor: _drawerScrim,
       appBar: const TopBar(isCompact: true),
       drawer: const ShellDrawer(),
       body: content,
     );
   }
 
-  /// Raccourcis (aide « ? », repli de la barre) au clavier physique : seuls
-  /// les grands écrans en ont un ; sur un téléphone, ils n'écoutent rien.
-  Widget _sidebarScaffold(Widget content) {
-    return ShortcutsHelpShortcut(
-      child: SidebarToggleShortcut(
-        child: Scaffold(
-          key: _scaffoldKey,
-          body: Row(
-            children: [
-              const Sidebar(),
-              Expanded(
-                child: Column(
-                  children: [
-                    const TopBar(isCompact: false),
-                    // La barre d'en-tête a consommé la marge du haut, la
-                    // barre latérale celle de gauche : l'écran ne les
-                    // compte pas une seconde fois.
-                    Expanded(
-                      child: MediaQuery.removePadding(
-                        context: context,
-                        removeTop: true,
-                        removeLeft: true,
-                        child: content,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+  /// [rail] : barre fixée en 84 dp, dont l'écusson ouvre le menu complet en
+  /// tiroir — le repli choisi au bureau n'y change rien.
+  Widget _sidebarScaffold(Widget content, {required bool rail}) {
+    return Scaffold(
+      key: _scaffoldKey,
+      drawerScrimColor: _drawerScrim,
+      drawer: rail ? const ShellDrawer() : null,
+      body: Row(
+        children: [
+          Sidebar(
+            forceCollapsed: rail,
+            onExpandRequested: rail ? _openDrawer : null,
           ),
-        ),
+          Expanded(
+            child: Column(
+              children: [
+                const TopBar(isCompact: false),
+                // La barre d'en-tête a consommé la marge du haut, la barre
+                // latérale celle de gauche : l'écran ne les compte pas une
+                // seconde fois.
+                Expanded(
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    removeLeft: true,
+                    child: content,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
+
+  static final _drawerScrim = AppColors.bleuProfond.withValues(alpha: 0.4);
 }

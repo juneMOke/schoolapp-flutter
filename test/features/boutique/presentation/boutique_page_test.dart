@@ -143,7 +143,7 @@ void main() {
 
   Future<void> pumpPage(
     WidgetTester tester, {
-    // Tablette : sous 1024 dp, le panier a sa page. Le grand écran, où il
+    // Tablette : sous 976 dp, le panier a sa page. Le grand écran, où il
     // vit en colonne, a son propre groupe ci-dessous.
     Size size = const Size(900, 1200),
   }) async {

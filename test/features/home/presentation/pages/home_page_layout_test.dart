@@ -79,7 +79,7 @@ void main() {
   testWidgets('HomePage compact : le hamburger ouvre le tiroir', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(900, 740));
+    await tester.binding.setSurfaceSize(const Size(700, 740));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(buildShellHarness());
@@ -102,10 +102,10 @@ void main() {
     expect(scaffoldState.isDrawerOpen, isTrue);
   });
 
-  testWidgets('HomePage keeps compact drawer below 1024 breakpoint', (
+  testWidgets('HomePage keeps compact drawer below 760 breakpoint', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(900, 740));
+    await tester.binding.setSurfaceSize(const Size(700, 740));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(buildShellHarness());
@@ -123,7 +123,7 @@ void main() {
   testWidgets(
     'HomePage compact : taper l\'entrée « Accueil » ferme le tiroir',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(900, 740));
+      await tester.binding.setSurfaceSize(const Size(700, 740));
       addTearDown(() async => tester.binding.setSurfaceSize(null));
 
       await tester.pumpWidget(buildShellHarness());
@@ -152,4 +152,50 @@ void main() {
       expect(scaffoldState.isDrawerOpen, isFalse);
     },
   );
+
+  group('rail entre 760 et 1024 (10" portrait, 7" paysage)', () {
+    Future<void> pumpRail(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 1280);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(buildShellHarness());
+      await tester.pumpAndSettle();
+    }
+
+    ScaffoldState shellScaffold(WidgetTester tester) => tester
+        .stateList<ScaffoldState>(find.byType(Scaffold))
+        .firstWhere((state) => state.hasDrawer);
+
+    testWidgets('le menu reste à l\'écran, sans hamburger', (tester) async {
+      await pumpRail(tester);
+
+      expect(find.byTooltip('Ouvrir le menu'), findsNothing);
+      expect(find.byTooltip('Étendre le menu'), findsOneWidget);
+      expect(shellScaffold(tester).isDrawerOpen, isFalse);
+    });
+
+    testWidgets('un module ouvre ses écrans en menu flottant', (tester) async {
+      await pumpRail(tester);
+
+      await tester.tap(find.bySemanticsLabel('Finances').first);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.widgetWithText(MenuItemButton, 'Facturations'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('l\'écusson ouvre le menu complet en tiroir', (tester) async {
+      await pumpRail(tester);
+
+      await tester.tap(find.byTooltip('Étendre le menu'));
+      await tester.pumpAndSettle();
+
+      expect(shellScaffold(tester).isDrawerOpen, isTrue);
+      // Le rail, lui, n'a pas été déplié derrière le tiroir.
+      expect(find.byTooltip('Replier le menu'), findsOneWidget);
+      expect(find.byTooltip('Étendre le menu'), findsOneWidget);
+    });
+  });
 }

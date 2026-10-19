@@ -9,7 +9,14 @@ import 'package:school_app_flutter/features/home/presentation/widget/sidebar_par
 class SidebarHeader extends StatelessWidget {
   final bool isExpanded;
 
-  const SidebarHeader({super.key, required this.isExpanded});
+  /// Cf. `Sidebar.onExpandRequested`.
+  final VoidCallback? onExpandRequested;
+
+  const SidebarHeader({
+    super.key,
+    required this.isExpanded,
+    this.onExpandRequested,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +48,7 @@ class SidebarHeader extends StatelessWidget {
         switchOutCurve: AppMotion.inCurve,
         child: isExpanded
             ? const SidebarHeaderExpanded()
-            : const SidebarHeaderCollapsed(),
+            : SidebarHeaderCollapsed(onExpandRequested: onExpandRequested),
       ),
     );
   }
