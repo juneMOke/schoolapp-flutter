@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
@@ -13,8 +12,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 /// ancrées. Toutes ont une saisie ou une case : elles passent par
 /// [EteeloDialogBody], qui tient au clavier ouvert en paysage.
 ///
-/// Sur un téléphone (sous [AppBreakpoints.formDialogFullscreenMax]), la
-/// modale prend tout l'écran.
+/// Sur un téléphone, la modale prend tout l'écran ([EteeloAdaptiveDialog]).
 class EteeloFormDialog extends StatelessWidget {
   final String? eyebrow;
   final String title;
@@ -48,37 +46,21 @@ class EteeloFormDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fullscreen =
-        MediaQuery.sizeOf(context).width <
-        AppBreakpoints.formDialogFullscreenMax;
-    final content = EteeloSubmitShortcut(
-      onSubmit: onSubmit,
-      child: Padding(
-        padding: EdgeInsets.all(fullscreen ? AppSpacing.lg : AppSpacing.xl),
-        child: EteeloDialogBody(
-          minPinnedHeight: AppDimensions.formDialogMaxHeight / 2,
-          header: _header(),
-          body: body,
-          footer: _footer(),
+    final fullscreen = EteeloAdaptiveDialog.isFullscreen(context);
+    return EteeloAdaptiveDialog(
+      maxWidth: maxWidth,
+      maxHeight: AppDimensions.formDialogMaxHeight,
+      child: EteeloSubmitShortcut(
+        onSubmit: onSubmit,
+        child: Padding(
+          padding: EdgeInsets.all(fullscreen ? AppSpacing.lg : AppSpacing.xl),
+          child: EteeloDialogBody(
+            minPinnedHeight: AppDimensions.formDialogMaxHeight / 2,
+            header: _header(),
+            body: body,
+            footer: _footer(),
+          ),
         ),
-      ),
-    );
-    if (fullscreen) {
-      // Téléphone : tout l'écran, sous les barres système.
-      return Dialog.fullscreen(
-        backgroundColor: AppColors.surfaceRaised,
-        child: SafeArea(child: content),
-      );
-    }
-    return Dialog(
-      backgroundColor: AppColors.surfaceRaised,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: maxWidth,
-          maxHeight: AppDimensions.formDialogMaxHeight,
-        ),
-        child: content,
       ),
     );
   }

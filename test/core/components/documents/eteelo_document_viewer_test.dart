@@ -212,4 +212,17 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('téléphone : plein écran, la page a toute la largeur', (
+    tester,
+  ) async {
+    await _pumpViewer(tester, size: const Size(360, 740));
+
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getSize(find.byType(Dialog)).width,
+      360,
+      reason: 'centrée, la page A4 n\'avait que ~310 dp',
+    );
+  });
 }
