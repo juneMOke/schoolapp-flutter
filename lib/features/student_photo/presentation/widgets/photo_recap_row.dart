@@ -116,22 +116,26 @@ class PhotoRecapRow extends StatelessWidget {
             ),
           ),
           if (photoCaptureSupported)
-            PermissionGate.access(
-              kStudentPhotoWriteAccess,
-              child: SessionWriteGate(
-                child: hasPhoto
-                    ? EteeloButton.ghost(
-                        label: l10n.photoRetake,
-                        icon: Icons.photo_camera_outlined,
-                        fullWidth: false,
-                        onPressed: open,
-                      )
-                    : EteeloButton.secondary(
-                        label: l10n.photoAddTooltip,
-                        icon: Icons.photo_camera_outlined,
-                        fullWidth: false,
-                        onPressed: open,
-                      ),
+            // Flexible : sur un téléphone, le libellé du bouton se resserre
+            // plutôt que d'écraser la mention à zéro.
+            Flexible(
+              child: PermissionGate.access(
+                kStudentPhotoWriteAccess,
+                child: SessionWriteGate(
+                  child: hasPhoto
+                      ? EteeloButton.ghost(
+                          label: l10n.photoRetake,
+                          icon: Icons.photo_camera_outlined,
+                          fullWidth: false,
+                          onPressed: open,
+                        )
+                      : EteeloButton.secondary(
+                          label: l10n.photoAddTooltip,
+                          icon: Icons.photo_camera_outlined,
+                          fullWidth: false,
+                          onPressed: open,
+                        ),
+                ),
               ),
             ),
         ],

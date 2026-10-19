@@ -132,12 +132,20 @@ class _FacturationTicketPrintRowState extends State<FacturationTicketPrintRow>
             const SizedBox(width: AppSpacing.sm),
             // Le libellé dit LEQUEL des deux gestes on fait : sortir un papier
             // qui n'existe pas encore, ou en refaire un.
-            TextButton(
-              onPressed: printing ? null : () => printTicket(widget.paymentId),
-              child: Text(
-                status.wasPrinted
-                    ? l10n.facturationPaymentReprintTicketAction
-                    : l10n.facturationPaymentPrintTicketAction,
+            // Flexible : à l'étroit, le libellé se resserre au lieu de pousser
+            // la ligne hors de la carte.
+            Flexible(
+              child: TextButton(
+                onPressed: printing
+                    ? null
+                    : () => printTicket(widget.paymentId),
+                child: Text(
+                  status.wasPrinted
+                      ? l10n.facturationPaymentReprintTicketAction
+                      : l10n.facturationPaymentPrintTicketAction,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ],

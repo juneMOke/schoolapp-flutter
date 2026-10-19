@@ -81,10 +81,14 @@ class ShowSuspendedToggle extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    l10n.suspensionToggleLabel,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
+                  Flexible(
+                    child: Text(
+                      l10n.suspensionToggleLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),

@@ -118,11 +118,15 @@ class _BackButton extends StatelessWidget {
                   color: AppColors.bleuArdoise,
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Text(
-                  label,
-                  style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.bleuArdoise,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: AppColors.bleuArdoise,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

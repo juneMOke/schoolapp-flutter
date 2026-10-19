@@ -206,9 +206,13 @@ class _SeverityChip extends StatelessWidget {
             color: color,
           ),
           const SizedBox(width: AppDimensions.spacingXS),
-          Text(
-            l10n.disciplinaryCaseSeverityChip(severity.getDisplayName(l10n)),
-            style: AppTextStyles.badge.copyWith(color: color),
+          Flexible(
+            child: Text(
+              l10n.disciplinaryCaseSeverityChip(severity.getDisplayName(l10n)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.badge.copyWith(color: color),
+            ),
           ),
         ],
       ),

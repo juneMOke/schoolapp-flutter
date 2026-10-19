@@ -99,10 +99,14 @@ class SyncIndicator extends StatelessWidget {
               children: [
                 Icon(appearance.icon, size: _iconSize, color: appearance.color),
                 const SizedBox(width: 4),
-                Text(
-                  label,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: appearance.color,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: appearance.color,
+                    ),
                   ),
                 ),
               ],
