@@ -49,19 +49,21 @@ class PresenceSquareIconButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: AppDimensions.presenceMarkIconButtonSize,
-    child: IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      iconSize: AppSpacing.lg + AppSpacing.xs,
-      color: color ?? AppColors.textSecondary,
-      icon: Icon(icon),
-      style: IconButton.styleFrom(
-        shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
-        side: const BorderSide(color: AppColors.border),
-      ),
+  Widget build(BuildContext context) => IconButton(
+    tooltip: tooltip,
+    onPressed: onPressed,
+    padding: EdgeInsets.zero,
+    iconSize: AppSpacing.lg + AppSpacing.xs,
+    color: color ?? AppColors.textSecondary,
+    icon: Icon(icon),
+    // Bouton de 36 dp, cible de 48 : le cadre reste discret, le doigt ne
+    // vise pas.
+    style: IconButton.styleFrom(
+      fixedSize: const Size.square(AppDimensions.presenceMarkIconButtonSize),
+      minimumSize: const Size.square(AppDimensions.presenceMarkIconButtonSize),
+      tapTargetSize: MaterialTapTargetSize.padded,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+      side: const BorderSide(color: AppColors.border),
     ),
   );
 }
@@ -116,7 +118,7 @@ class PresenceTimeButton extends StatelessWidget {
         borderRadius: AppRadius.brSm,
         child: Container(
           constraints: const BoxConstraints(
-            minHeight: AppDimensions.presenceMarkIconButtonSize,
+            minHeight: AppDimensions.presenceMarkSegmentHeight,
           ),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           decoration: BoxDecoration(
@@ -165,7 +167,7 @@ class PresenceJustifyButton extends StatelessWidget {
       borderRadius: AppRadius.brPill,
       child: Container(
         constraints: const BoxConstraints(
-          minHeight: AppDimensions.presenceMarkIconButtonSize,
+          minHeight: AppDimensions.presenceMarkSegmentHeight,
         ),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         decoration: BoxDecoration(

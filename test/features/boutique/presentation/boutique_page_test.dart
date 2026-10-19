@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
+import 'package:school_app_flutter/core/layout/shell_chrome.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
@@ -143,9 +145,10 @@ void main() {
 
   Future<void> pumpPage(
     WidgetTester tester, {
-    // Tablette : sous 1024 dp, le panier a sa page. Le grand écran, où il
+    // Tablette : sous 976 dp, le panier a sa page. Le grand écran, où il
     // vit en colonne, a son propre groupe ci-dessous.
     Size size = const Size(900, 1200),
+    bool inShell = false,
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -156,13 +159,15 @@ void main() {
           BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
           BlocProvider<AuthBloc>.value(value: authBloc),
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: Locale('fr'),
+          locale: const Locale('fr'),
           // Pas de scroll enveloppant : `AppPageBackground` porte déjà le
           // sien, et deux couches donnent une hauteur non bornée.
-          home: BoutiquePage(),
+          home: inShell
+              ? const ShellChrome(child: BoutiquePage())
+              : const BoutiquePage(),
         ),
       ),
     );
@@ -314,6 +319,34 @@ void main() {
 
       expect(find.byType(BoutiqueCartPage), findsNothing);
       expect(countOnCartButton('1'), findsOneWidget);
+    });
+  });
+
+  group('dans la coquille : une seule barre, le panier flotte', () {
+    // Tablette en paysage, 600 dp de haut : deux barres de titre en
+    // mangeaient ~140.
+    testWidgets('pas de seconde barre de titre', (tester) async {
+      await pumpPage(tester, inShell: true);
+
+      expect(find.byType(ModuleTopBar), findsNothing);
+      expect(find.byType(BoutiqueCartButton), findsNothing);
+    });
+
+    testWidgets('le panier flotte, son compte en pastille', (tester) async {
+      await pumpPage(tester, inShell: true);
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
+
+      final fab = find.byType(EteeloFab);
+      expect(fab, findsOneWidget);
+      expect(
+        find.descendant(of: fab, matching: find.text('1')),
+        findsOneWidget,
+      );
+
+      await tester.tap(fab);
+      await tester.pumpAndSettle();
+      expect(find.byType(BoutiqueCartPage), findsOneWidget);
     });
   });
 

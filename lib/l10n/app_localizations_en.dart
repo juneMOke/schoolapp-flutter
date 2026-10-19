@@ -2805,7 +2805,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSidebarNavigationLabel => 'Main navigation';
 
   @override
+  String get searchCollapsedEdit => 'Edit search';
+
+  @override
+  String searchCollapsedSemantics(String criteria) {
+    return 'Search: $criteria';
+  }
+
+  @override
   String get pageUnderConstruction => 'This page is under development';
+
+  @override
+  String get shellBackAgainToExit => 'Press Back again to exit';
 
   @override
   String get preRegistrations => 'Pre-Registrations';

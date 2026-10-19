@@ -147,10 +147,16 @@ class AttendanceOverviewSplitBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppDimensions.spacingS),
-              Text(
-                segment.label,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
+              // Posée dans un `Wrap` : un libellé trop long s'abrège, la
+              // valeur — ce qu'on vient lire — reste entière.
+              Flexible(
+                child: Text(
+                  segment.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(width: AppDimensions.spacingXS),

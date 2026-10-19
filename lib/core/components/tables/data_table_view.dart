@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/keyboard/arrow_navigable_results.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_card_item.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_empty_state.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_error_state.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_footer_bar.dart';
@@ -8,6 +9,7 @@ import 'package:school_app_flutter/core/components/tables/data_table_loading_sta
 import 'package:school_app_flutter/core/components/tables/data_table_row_item.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
@@ -51,17 +53,35 @@ class DataTableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (config.phoneLayout == DataTablePhoneLayout.table) {
+      return _buildTable(context, cards: false);
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildTable(
+        context,
+        cards: constraints.maxWidth < AppBreakpoints.dataTableCardsMax,
+      ),
+    );
+  }
+
+  Widget _buildTable(BuildContext context, {required bool cards}) {
     final l10n = AppLocalizations.of(context)!;
     final showLeadingSlot = rows.any((row) => row.leading != null);
     final showTrailingSlot = rows.any(
       (row) => row.trailing.type != DataTableTrailingType.none,
     );
 
-    final content = _buildStateContent(
-      context,
-      l10n,
-      showLeadingSlot,
-      showTrailingSlot,
+    final content = AnimatedSwitcher(
+      duration: AppMotion.standard,
+      switchInCurve: AppMotion.outCurve,
+      switchOutCurve: AppMotion.inCurve,
+      child: _buildStateContent(
+        context,
+        l10n,
+        showLeadingSlot,
+        showTrailingSlot,
+        cards: cards,
+      ),
     );
 
     return Semantics(
@@ -74,47 +94,44 @@ class DataTableView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _scrollable(
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DataTableHeader(
-                    columns: config.columns,
-                    activeSortColumn: config.sortColumnIndex,
-                    sortAscending: config.sortAscending,
-                    onSortChanged: config.onSortChanged,
-                    showLeadingSlot: showLeadingSlot,
-                    showTrailingSlot: showTrailingSlot,
-                    density: config.density,
-                    tone: config.tone,
-                  ),
-                  const Divider(
-                    height: EteeloDataTableTheme.separatorThickness,
-                    thickness: EteeloDataTableTheme.separatorThickness,
-                    color: EteeloDataTableTheme.separatorColor,
-                  ),
-                  AnimatedSwitcher(
-                    duration: AppMotion.standard,
-                    switchInCurve: AppMotion.outCurve,
-                    switchOutCurve: AppMotion.inCurve,
-                    child: content,
-                  ),
-                ],
+            // En cartes, chaque valeur porte son libellé : pas d'en-tête.
+            if (cards)
+              content
+            else
+              _scrollable(
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DataTableHeader(
+                      columns: config.columns,
+                      activeSortColumn: config.sortColumnIndex,
+                      sortAscending: config.sortAscending,
+                      onSortChanged: config.onSortChanged,
+                      showLeadingSlot: showLeadingSlot,
+                      showTrailingSlot: showTrailingSlot,
+                      density: config.density,
+                      tone: config.tone,
+                    ),
+                    _separator,
+                    content,
+                  ],
+                ),
               ),
-            ),
-            if (config.footer != null)
-              const Divider(
-                height: EteeloDataTableTheme.separatorThickness,
-                thickness: EteeloDataTableTheme.separatorThickness,
-                color: EteeloDataTableTheme.separatorColor,
-              ),
-            if (config.footer != null)
+            if (config.footer != null) ...[
+              _separator,
               DataTableFooterBar(config: config.footer!),
+            ],
           ],
         ),
       ),
     );
   }
+
+  static const _separator = Divider(
+    height: EteeloDataTableTheme.separatorThickness,
+    thickness: EteeloDataTableTheme.separatorThickness,
+    color: EteeloDataTableTheme.separatorColor,
+  );
 
   Widget _scrollable(Widget table) {
     final minWidth = config.minWidth;
@@ -126,8 +143,9 @@ class DataTableView extends StatelessWidget {
     BuildContext context,
     AppLocalizations l10n,
     bool showLeadingSlot,
-    bool showTrailingSlot,
-  ) {
+    bool showTrailingSlot, {
+    required bool cards,
+  }) {
     if (config.isLoading) {
       return DataTableLoadingState(
         key: const ValueKey('data-table-loading'),
@@ -157,22 +175,25 @@ class DataTableView extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: rows.length,
-        separatorBuilder: (_, _) => showRowDividers
-            ? const Divider(
-                height: EteeloDataTableTheme.separatorThickness,
-                thickness: EteeloDataTableTheme.separatorThickness,
-                color: EteeloDataTableTheme.separatorColor,
+        separatorBuilder: (_, _) =>
+            showRowDividers || cards ? _separator : const SizedBox.shrink(),
+        itemBuilder: (context, index) => cards
+            ? DataTableCardItem(
+                key: ValueKey(rows[index].id),
+                row: rows[index],
+                columns: config.columns,
+                trailingBuilders: trailingBuilders,
+                titleColumn: config.cardTitleColumn,
               )
-            : const SizedBox.shrink(),
-        itemBuilder: (context, index) => DataTableRowItem(
-          key: ValueKey(rows[index].id),
-          row: rows[index],
-          columns: config.columns,
-          isEven: index.isEven,
-          trailingBuilders: trailingBuilders,
-          density: config.density,
-          tone: config.tone,
-        ),
+            : DataTableRowItem(
+                key: ValueKey(rows[index].id),
+                row: rows[index],
+                columns: config.columns,
+                isEven: index.isEven,
+                trailingBuilders: trailingBuilders,
+                density: config.density,
+                tone: config.tone,
+              ),
       ),
     );
   }

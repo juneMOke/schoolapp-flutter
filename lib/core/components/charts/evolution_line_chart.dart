@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/chart_label_density.dart';
 import 'package:school_app_flutter/core/components/charts/chart_entrance.dart';
 import 'package:school_app_flutter/core/components/charts/line_chart_point.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -90,127 +91,170 @@ class EvolutionLineChart extends StatelessWidget {
 
     return SizedBox(
       height: AppDimensions.enrollmentStatsChartSectionHeight,
-      child: ChartEntrance(
-        builder: (context, motion) => LineChart(
-          LineChartData(
-            minX: 0,
-            maxX: (points.length - 1).toDouble(),
-            minY: resolvedMinY,
-            maxY: resolvedMaxY,
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: false,
-              horizontalInterval: gridInterval,
-              getDrawingHorizontalLine: (_) => const FlLine(
-                color: AppColors.enrollmentStatsChartGrid,
-                strokeWidth: 1,
-              ),
-            ),
-            extraLinesData: targetLine == null
-                ? const ExtraLinesData()
-                : ExtraLinesData(
-                    horizontalLines: [
-                      HorizontalLine(
-                        y: targetLine!,
-                        color: targetColor,
-                        strokeWidth: 1.3,
-                        dashArray: const [5, 4],
-                        label: targetLineLabel == null
-                            ? HorizontalLineLabel()
-                            : HorizontalLineLabel(
-                                show: true,
-                                alignment: Alignment.topRight,
-                                style: AppTextStyles.caption.copyWith(
-                                  color: targetColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                labelResolver: (_) => targetLineLabel!,
-                              ),
-                      ),
-                    ],
-                  ),
-            borderData: FlBorderData(show: false),
-            titlesData: FlTitlesData(
-              topTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              rightTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 36,
-                  interval: hasFixedDomain ? gridInterval : null,
-                  getTitlesWidget: (value, meta) => Text(
-                    (leftLabelFormatter ??
-                        NumberFormatterHelper.formatYAxisLabel)(value),
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textSecondary,
-                      fontFeatures: AppTextStyles.tabularFigures,
-                    ),
-                  ),
-                ),
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 24,
-                  getTitlesWidget: (value, meta) {
-                    final idx = value.toInt();
-                    if (idx < 0 || idx >= points.length) {
-                      return const SizedBox.shrink();
-                    }
-                    return Text(
-                      points[idx].label,
-                      style: AppTextStyles.caption.copyWith(
-                        color: points[idx].isHighlighted
-                            ? highlightColor
-                            : AppColors.textSecondary,
-                        fontWeight: points[idx].isHighlighted
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            lineBarsData: [
-              LineChartBarData(
-                spots: _sweptSpots(motion.progress),
-                isCurved: true,
-                color: lineColor,
-                barWidth: 2.5,
-                isStrokeCapRound: true,
-                dotData: FlDotData(
-                  show: true,
-                  checkToShowDot: (spot, _) =>
-                      points[spot.x.toInt()].isHighlighted,
-                  getDotPainter: (_, _, _, _) => FlDotCirclePainter(
-                    radius: 5,
-                    color: highlightColor,
-                    strokeWidth: 2,
-                    strokeColor: Colors.white,
-                  ),
-                ),
-                belowBarData: BarAreaData(
-                  show: true,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      lineColor.withValues(alpha: 0.18),
-                      lineColor.withValues(alpha: 0.0),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+      child: LayoutBuilder(
+        builder: (context, constraints) => _chart(
+          resolvedMinY: resolvedMinY,
+          resolvedMaxY: resolvedMaxY,
+          gridInterval: gridInterval,
+          hasFixedDomain: hasFixedDomain,
+          targetColor: targetColor,
+          labelStep: chartLabelStep(
+            count: points.length,
+            width: constraints.maxWidth - _leftAxisWidth,
+            minSpacing: AppDimensions.chartAxisLabelMinSpacing,
           ),
-          duration: motion.duration,
-          curve: motion.curve,
         ),
+      ),
+    );
+  }
+
+  static const double _leftAxisWidth = 36;
+
+  /// Une étiquette sur [step] ; le point mis en avant garde toujours la
+  /// sienne, et ses voisins trop proches s'effacent devant lui.
+  bool _showsLabel(int index, int step) {
+    if (points[index].isHighlighted) return true;
+    for (var i = 0; i < points.length; i++) {
+      if (points[i].isHighlighted && (i - index).abs() < step) return false;
+    }
+    return index % step == 0;
+  }
+
+  Widget _chart({
+    required double resolvedMinY,
+    required double resolvedMaxY,
+    required double gridInterval,
+    required bool hasFixedDomain,
+    required Color targetColor,
+    required int labelStep,
+  }) {
+    return ChartEntrance(
+      builder: (context, motion) => LineChart(
+        LineChartData(
+          minX: 0,
+          maxX: (points.length - 1).toDouble(),
+          minY: resolvedMinY,
+          maxY: resolvedMaxY,
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: gridInterval,
+            getDrawingHorizontalLine: (_) => const FlLine(
+              color: AppColors.enrollmentStatsChartGrid,
+              strokeWidth: 1,
+            ),
+          ),
+          extraLinesData: targetLine == null
+              ? const ExtraLinesData()
+              : ExtraLinesData(
+                  horizontalLines: [
+                    HorizontalLine(
+                      y: targetLine!,
+                      color: targetColor,
+                      strokeWidth: 1.3,
+                      dashArray: const [5, 4],
+                      label: targetLineLabel == null
+                          ? HorizontalLineLabel()
+                          : HorizontalLineLabel(
+                              show: true,
+                              alignment: Alignment.topRight,
+                              style: AppTextStyles.caption.copyWith(
+                                color: targetColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              labelResolver: (_) => targetLineLabel!,
+                            ),
+                    ),
+                  ],
+                ),
+          borderData: FlBorderData(show: false),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: _leftAxisWidth,
+                interval: hasFixedDomain ? gridInterval : null,
+                getTitlesWidget: (value, meta) => Text(
+                  (leftLabelFormatter ??
+                      NumberFormatterHelper.formatYAxisLabel)(value),
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                    fontFeatures: AppTextStyles.tabularFigures,
+                  ),
+                ),
+              ),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 24,
+                // Chaque point est visité : sans pas imposé, fl_chart filtre
+                // de son côté, et les deux filtres se multipliaient (deux
+                // étiquettes sur vingt points).
+                interval: 1,
+                getTitlesWidget: (value, meta) {
+                  final idx = value.toInt();
+                  if (idx < 0 || idx >= points.length) {
+                    return const SizedBox.shrink();
+                  }
+                  if (!_showsLabel(idx, labelStep)) {
+                    return const SizedBox.shrink();
+                  }
+                  return Text(
+                    points[idx].label,
+                    style: AppTextStyles.caption.copyWith(
+                      color: points[idx].isHighlighted
+                          ? highlightColor
+                          : AppColors.textSecondary,
+                      fontWeight: points[idx].isHighlighted
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          lineBarsData: [
+            LineChartBarData(
+              spots: _sweptSpots(motion.progress),
+              isCurved: true,
+              color: lineColor,
+              barWidth: 2.5,
+              isStrokeCapRound: true,
+              dotData: FlDotData(
+                show: true,
+                checkToShowDot: (spot, _) =>
+                    points[spot.x.toInt()].isHighlighted,
+                getDotPainter: (_, _, _, _) => FlDotCirclePainter(
+                  radius: 5,
+                  color: highlightColor,
+                  strokeWidth: 2,
+                  strokeColor: Colors.white,
+                ),
+              ),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    lineColor.withValues(alpha: 0.18),
+                    lineColor.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        duration: motion.duration,
+        curve: motion.curve,
       ),
     );
   }

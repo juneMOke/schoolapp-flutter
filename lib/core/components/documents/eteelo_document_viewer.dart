@@ -2,12 +2,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_pdf_preview.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -50,9 +50,8 @@ Future<void> showEteeloDocumentViewer(
   previewBuilder,
 }) {
   FocusManager.instance.primaryFocus?.unfocus();
-  return showDialog<void>(
+  return showEteeloAdaptiveDialog<void>(
     context: context,
-    barrierDismissible: true,
     builder: (_) => EteeloDocumentViewerView(
       title: title,
       document: document,
@@ -211,45 +210,39 @@ class EteeloDocumentViewerView extends StatelessWidget {
     return PageActionShortcut(
       action: PageAction.print,
       onInvoke: canPrint ? () => _print(context) : null,
-      child: Dialog(
-        backgroundColor: AppColors.surfaceRaised,
-        surfaceTintColor: Colors.transparent,
+      // Téléphone : plein écran — centrée, la page A4 n'avait que ~310 dp.
+      child: EteeloAdaptiveDialog(
         clipBehavior: Clip.antiAlias,
         insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-        shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: AppDimensions.documentViewerMaxWidth,
-            maxHeight: maxHeight,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DocumentViewerHeader(
-                title: title,
-                subtitle: document.reference,
-                onClose: () => _close(context),
-              ),
-              const Divider(height: 1, color: AppColors.border),
-              Flexible(
-                child: preview == null
-                    ? EteeloPdfPreview(
-                        bytes: document.bytes,
-                        fileName: document.fileName,
-                      )
-                    : preview(context, document),
-              ),
-              const Divider(height: 1, color: AppColors.border),
-              DocumentViewerFooter(
-                canShare: canShare,
-                canPrint: canPrint,
-                onPrint: () => _print(context),
-                onShare: () => _share(context),
-                onClose: () => _close(context),
-              ),
-            ],
-          ),
+        maxWidth: AppDimensions.documentViewerMaxWidth,
+        maxHeight: maxHeight,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DocumentViewerHeader(
+              title: title,
+              subtitle: document.reference,
+              onClose: () => _close(context),
+            ),
+            const Divider(height: 1, color: AppColors.border),
+            Flexible(
+              child: preview == null
+                  ? EteeloPdfPreview(
+                      bytes: document.bytes,
+                      fileName: document.fileName,
+                    )
+                  : preview(context, document),
+            ),
+            const Divider(height: 1, color: AppColors.border),
+            DocumentViewerFooter(
+              canShare: canShare,
+              canPrint: canPrint,
+              onPrint: () => _print(context),
+              onShare: () => _share(context),
+              onClose: () => _close(context),
+            ),
+          ],
         ),
       ),
     );

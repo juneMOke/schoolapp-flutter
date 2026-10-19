@@ -6,6 +6,8 @@ export 'data_table_density.dart';
 export 'eteelo_data_table_theme.dart';
 export 'data_table_header.dart';
 export 'data_table_row_item.dart';
+export 'data_table_card_item.dart';
+export 'data_table_cell_content.dart';
 export 'data_table_footer_bar.dart';
 export 'data_table_loading_state.dart';
 export 'data_table_empty_state.dart';

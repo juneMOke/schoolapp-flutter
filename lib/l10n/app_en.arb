@@ -2367,7 +2367,17 @@
   "homeOpenNavigationDrawerTooltip": "Open menu",
   "homeSidebarFooterLabel": "School dashboard",
   "homeSidebarNavigationLabel": "Main navigation",
+  "searchCollapsedEdit": "Edit search",
+  "searchCollapsedSemantics": "Search: {criteria}",
+  "@searchCollapsedSemantics": {
+    "placeholders": {
+      "criteria": {
+        "type": "String"
+      }
+    }
+  },
   "pageUnderConstruction": "This page is under development",
+  "shellBackAgainToExit": "Press Back again to exit",
   "preRegistrations": "Pre-Registrations",
   "searchStudents": "Search Students",
   "searchFormSubtitleFirstRegistration": "Filter the enrollments list",

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/features/resultats/presentation/helpers/resultat_focus_args.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultat_focus_page.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_page.dart';
@@ -29,20 +30,25 @@ class _ResultatsCoordinatorPageState extends State<ResultatsCoordinatorPage> {
   @override
   Widget build(BuildContext context) {
     final openFocus = _openFocus;
-    return IndexedStack(
-      sizing: StackFit.expand,
-      index: openFocus == null ? 0 : 1,
-      children: [
-        ResultatsPage(onOpenFocus: _openFocusView),
-        if (openFocus == null)
-          const SizedBox.shrink()
-        else
-          ResultatFocusPage(
-            key: ValueKey<String>('resultat-focus-${openFocus.studentId}'),
-            args: openFocus,
-            onBack: _backToClasse,
-          ),
-      ],
+    // Retour système : depuis la fiche d'un élève, revenir à la classe.
+    return ScreenBackScope(
+      canPop: openFocus == null,
+      onBack: _backToClasse,
+      child: IndexedStack(
+        sizing: StackFit.expand,
+        index: openFocus == null ? 0 : 1,
+        children: [
+          ResultatsPage(onOpenFocus: _openFocusView),
+          if (openFocus == null)
+            const SizedBox.shrink()
+          else
+            ResultatFocusPage(
+              key: ValueKey<String>('resultat-focus-${openFocus.studentId}'),
+              args: openFocus,
+              onBack: _backToClasse,
+            ),
+        ],
+      ),
     );
   }
 }

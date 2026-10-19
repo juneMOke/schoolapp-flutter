@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/documents/data/local/editique_cache_
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/web/clean_urls.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
@@ -353,13 +354,18 @@ class _MyAppState extends State<MyApp> {
             //
             // Sur le web, le tout sous le voile « Connexion requise » : la
             // version web est en ligne seulement.
-            builder: (context, child) => WebOnlineGate(
-              connectivity: getIt<ConnectivityService>(),
-              child: PersonPhotoScope(
-                source: getIt<StudentPhotoRegistry>(),
-                child: PaymentAnomalyBanner(
-                  child: SessionDegradationBanner(
-                    child: child ?? const SizedBox.shrink(),
+            //
+            // Le texte s'agrandit avec le réglage du système, jusqu'à ×1,3.
+            builder: (context, child) => MediaQuery.withClampedTextScaling(
+              maxScaleFactor: AppTypography.maxTextScaleFactor,
+              child: WebOnlineGate(
+                connectivity: getIt<ConnectivityService>(),
+                child: PersonPhotoScope(
+                  source: getIt<StudentPhotoRegistry>(),
+                  child: PaymentAnomalyBanner(
+                    child: SessionDegradationBanner(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),

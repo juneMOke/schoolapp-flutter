@@ -16,13 +16,30 @@ class EteeloFab extends StatelessWidget {
   /// Texte d'accessibilité. Par défaut = [label].
   final String? tooltip;
 
+  /// Compte posé en pastille sur l'icône (le panier) — visible aussi quand,
+  /// sur un téléphone, le libellé disparaît. Rien à zéro ni à `null`.
+  final int? badgeCount;
+
   const EteeloFab({
     super.key,
     required this.label,
     required this.icon,
     required this.onPressed,
     this.tooltip,
+    this.badgeCount,
   });
+
+  Widget _icon() {
+    final glyph = Icon(icon, size: AppDimensions.fabIconSize);
+    final count = badgeCount ?? 0;
+    if (count == 0) return glyph;
+    return Badge.count(
+      count: count,
+      backgroundColor: AppColors.orDoux,
+      textColor: AppColors.bleuProfond,
+      child: glyph,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +65,7 @@ class EteeloFab extends StatelessWidget {
         backgroundColor: bg,
         foregroundColor: fg,
         shape: const CircleBorder(),
-        child: Icon(icon, size: AppDimensions.fabIconSize),
+        child: _icon(),
       );
     }
 
@@ -82,7 +99,7 @@ class EteeloFab extends StatelessWidget {
         label: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: AppDimensions.fabIconSize),
+            _icon(),
             const SizedBox(width: AppDimensions.fabLabelGap),
             Text(label, style: AppTypography.labelLarge),
           ],

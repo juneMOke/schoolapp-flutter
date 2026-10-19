@@ -261,14 +261,17 @@ class _FeeFormState extends State<FeeForm> {
             onChanged: (scope) => setState(() => _scope = scope),
           ),
           const SizedBox(height: AppSpacing.lg),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          // Les deux boutons passent l'un sous l'autre sur un téléphone plutôt
+          // que de déborder.
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               TextButton(
                 onPressed: widget.onCancel,
                 child: Text(l10n.configurationFeeCancel),
               ),
-              const SizedBox(width: AppSpacing.sm),
               FilledButton(
                 onPressed: _isValid ? _submit : null,
                 style: FilledButton.styleFrom(

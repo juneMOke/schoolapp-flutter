@@ -51,17 +51,19 @@ class EnrollmentResultsCounterFilters extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.md),
-        Semantics(
-          liveRegion: true,
-          child: Text(
-            isLoading
-                ? l10n.loadingStudents
-                : l10n.enrollmentResultsCount(count),
-            // La barre est teintée, son texte reste neutre — mais LISIBLE :
-            // `textMuted` tombe à 3,16:1 sur une surface claire, et davantage
-            // encore sur le voile terre cuite de la barre (spec §03).
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+        Flexible(
+          child: Semantics(
+            liveRegion: true,
+            child: Text(
+              isLoading
+                  ? l10n.loadingStudents
+                  : l10n.enrollmentResultsCount(count),
+              // La barre est teintée, son texte reste neutre — mais LISIBLE :
+              // `textMuted` tombe à 3,16:1 sur une surface claire, et davantage
+              // encore sur le voile terre cuite de la barre (spec §03).
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
         ),

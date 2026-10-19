@@ -4322,11 +4322,29 @@ abstract class AppLocalizations {
   /// **'Main navigation'**
   String get homeSidebarNavigationLabel;
 
+  /// No description provided for @searchCollapsedEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit search'**
+  String get searchCollapsedEdit;
+
+  /// No description provided for @searchCollapsedSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Search: {criteria}'**
+  String searchCollapsedSemantics(String criteria);
+
   /// No description provided for @pageUnderConstruction.
   ///
   /// In en, this message translates to:
   /// **'This page is under development'**
   String get pageUnderConstruction;
+
+  /// No description provided for @shellBackAgainToExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Back again to exit'**
+  String get shellBackAgainToExit;
 
   /// No description provided for @preRegistrations.
   ///

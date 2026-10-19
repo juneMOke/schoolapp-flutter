@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_frozen_column.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -8,22 +9,73 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Une rangée de cellules aux largeurs partagées par l'en-tête et les lignes :
 /// `null` = la colonne qui prend le reste.
+///
+/// Sous un [EteeloFrozenColumn], la première cellule reste à l'écran quand le
+/// tableau défile de côté, posée sur [frozenBackground].
 class EteeloColumns extends StatelessWidget {
   final List<double?> widths;
   final List<Widget> cells;
 
-  const EteeloColumns({super.key, required this.widths, required this.cells})
-    : assert(widths.length == cells.length);
+  /// Fond de la cellule figée : il masque les colonnes qui passent dessous.
+  final Color frozenBackground;
+
+  /// Marge gauche de la rangée qui porte ces cellules, que le masque couvre.
+  final double frozenInset;
+
+  const EteeloColumns({
+    super.key,
+    required this.widths,
+    required this.cells,
+    this.frozenBackground = AppColors.surfaceRaised,
+    this.frozenInset = AppSpacing.sm,
+  }) : assert(widths.length == cells.length);
+
+  Widget _sized(int index, Widget cell) => widths[index] == null
+      ? Expanded(child: cell)
+      : SizedBox(width: widths[index], child: cell);
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      for (final (index, cell) in cells.indexed)
-        if (widths[index] == null)
-          Expanded(child: cell)
-        else
-          SizedBox(width: widths[index], child: cell),
-    ],
+  Widget build(BuildContext context) {
+    final frozen = EteeloFrozenColumn.maybeOf(context);
+    if (frozen == null || !frozen.active) {
+      return Row(
+        children: [for (final (i, cell) in cells.indexed) _sized(i, cell)],
+      );
+    }
+    // Disposée de droite à gauche, la rangée peint sa première cellule en
+    // DERNIER : translatée du décalage, elle passe par-dessus les montants,
+    // et reçoit les appuis la première. Aucune copie : la cellule reste
+    // celle qu'on lit et qu'on trouve, et elle seule donne sa hauteur.
+    return Row(
+      textDirection: TextDirection.rtl,
+      children: [
+        for (var i = cells.length - 1; i > 0; i--) _sized(i, cells[i]),
+        _sized(0, _frozenLead(frozen)),
+      ],
+    );
+  }
+
+  Widget _frozenLead(EteeloFrozenColumn frozen) => AnimatedBuilder(
+    animation: frozen.controller,
+    builder: (context, child) =>
+        Transform.translate(offset: Offset(frozen.offset, 0), child: child),
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Le masque déborde sur les marges de la rangée : sans lui, les
+        // montants transparaissaient sur ses 8 dp de gauche. ⚠️ Il suit la
+        // hauteur de la cellule figée : une colonne voisine plus haute
+        // qu'elle laisserait voir ce qui passe au-dessus et au-dessous.
+        Positioned(
+          left: -frozenInset,
+          top: -frozenInset,
+          bottom: -frozenInset,
+          right: 0,
+          child: ColoredBox(color: frozenBackground),
+        ),
+        Align(alignment: Alignment.centerLeft, child: cells.first),
+      ],
+    ),
   );
 }
 
@@ -31,7 +83,7 @@ class EteeloColumns extends StatelessWidget {
 /// livre de paie, avances, historique) : un en-tête gris, des lignes
 /// filetées, et un défilement horizontal sous [minWidth]
 /// ([EteeloMinWidthScroll]).
-class EteeloColumnTable extends StatelessWidget {
+class EteeloColumnTable extends StatefulWidget {
   final double minWidth;
   final List<double?> widths;
   final List<String> headers;
@@ -44,6 +96,10 @@ class EteeloColumnTable extends StatelessWidget {
   /// Une ligne de pied (total), facultative.
   final Widget? footer;
 
+  /// La première colonne (qui, de quoi) reste à l'écran quand le tableau
+  /// défile de côté (cf. [EteeloFrozenColumn]).
+  final bool frozenFirstColumn;
+
   const EteeloColumnTable({
     super.key,
     required this.minWidth,
@@ -53,40 +109,79 @@ class EteeloColumnTable extends StatelessWidget {
     required this.row,
     this.endAligned = const {},
     this.footer,
+    this.frozenFirstColumn = false,
   });
 
   @override
-  Widget build(BuildContext context) => EteeloMinWidthScroll(
-    minWidth: minWidth,
-    child: Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: const BoxDecoration(
-            color: AppColors.surfaceAlt,
-            borderRadius: AppRadius.brSm,
-          ),
-          child: EteeloColumns(
-            widths: widths,
-            cells: [
-              for (final (index, text) in headers.indexed)
-                EteeloOverflowText(
-                  text.toUpperCase(),
-                  textAlign: endAligned.contains(index)
-                      ? TextAlign.end
-                      : TextAlign.start,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.textMutedAa,
+  State<EteeloColumnTable> createState() => _EteeloColumnTableState();
+}
+
+class _EteeloColumnTableState extends State<EteeloColumnTable> {
+  final _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// La colonne figée dans la largeur plancher : la sienne, ou ce que les
+  /// autres laissent (moins les marges de la rangée).
+  double get _frozenWidth {
+    final own = widget.widths.first;
+    if (own != null) return own;
+    final others = widget.widths
+        .skip(1)
+        .fold<double>(0, (sum, width) => sum + (width ?? 0));
+    return widget.minWidth - others - 2 * AppSpacing.sm;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final table = EteeloMinWidthScroll(
+      minWidth: widget.minWidth,
+      controller: _scroll,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: const BoxDecoration(
+              color: AppColors.surfaceAlt,
+              borderRadius: AppRadius.brSm,
+            ),
+            child: EteeloColumns(
+              widths: widget.widths,
+              frozenBackground: AppColors.surfaceAlt,
+              cells: [
+                for (final (index, text) in widget.headers.indexed)
+                  EteeloOverflowText(
+                    text.toUpperCase(),
+                    textAlign: widget.endAligned.contains(index)
+                        ? TextAlign.end
+                        : TextAlign.start,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.textMutedAa,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-        for (var index = 0; index < rowCount; index++) row(context, index),
-        ?footer,
-      ],
-    ),
-  );
+          for (var index = 0; index < widget.rowCount; index++)
+            widget.row(context, index),
+          ?widget.footer,
+        ],
+      ),
+    );
+    if (!widget.frozenFirstColumn) return table;
+    return LayoutBuilder(
+      builder: (context, constraints) => EteeloFrozenColumn(
+        controller: _scroll,
+        width: _frozenWidth,
+        active: constraints.maxWidth < widget.minWidth,
+        child: table,
+      ),
+    );
+  }
 }
 
 /// Une ligne de [EteeloColumnTable] : filet bas, toucher facultatif.
@@ -126,7 +221,11 @@ class EteeloColumnTableRow extends StatelessWidget {
         decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: AppColors.border)),
         ),
-        child: EteeloColumns(widths: widths, cells: cells),
+        child: EteeloColumns(
+          widths: widths,
+          cells: cells,
+          frozenBackground: background ?? AppColors.surfaceRaised,
+        ),
       ),
     ),
   );

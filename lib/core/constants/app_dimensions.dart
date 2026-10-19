@@ -18,6 +18,10 @@ class AppDimensions {
   static const detailHeaderIconSize = 24.0;
   static const detailMiniIconSize = 16.0;
   static const detailHeroAvatarSize = 64.0;
+  // Graphique d'évolution : écart minimal entre deux étiquettes d'abscisse.
+  static const chartAxisLabelMinSpacing = 44.0;
+  // Écran de la coquille encore sans contenu (« en cours de développement »).
+  static const shellUnderConstructionIconSize = 64.0;
   static const detailBackButtonWidth = 220.0;
   static const detailContentMaxWidth = 1180.0;
 
@@ -660,6 +664,11 @@ class AppDimensions {
   /// Largeur plancher d'une carte de la grille : autant de colonnes que
   /// possible, pour des cartes d'environ 220 à 262 dp, entièrement tactiles.
   static const presenceMarkCardMinWidth = 220.0;
+
+  // Saisie de notes, mode Focus : la carte d'un élève, puis côte à côte en
+  // paysage (note et navigation | pavé).
+  static const saisieFocusCardMaxWidth = 560.0;
+  static const saisieFocusSideBySideMaxWidth = 880.0;
   static const presenceMarkAvatarSize = 44.0;
   static const presenceMarkMedallionSize = 46.0;
   static const presenceMarkMedallionIconSize = 24.0;
@@ -669,17 +678,24 @@ class AppDimensions {
 
   /// Cible tactile standard du module : puces, flèches, segments.
   static const presenceMarkTapTarget = 44.0;
-  static const presenceMarkSegmentHeight = 40.0;
+
+  /// Segment P/R/A, heures, « Justifier » : la ligne d'appel se tape au
+  /// doigt, élève après élève — 48 dp, pas 40.
+  static const presenceMarkSegmentHeight = minTouchTarget;
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;
   static const presenceMarkAccentWidth = 4.0;
 
   /// La vue liste : largeur plancher avant défilement, et ses colonnes.
-  static const presenceMarkListMinWidth = 900.0;
+  static const presenceMarkListMinWidth = 960.0;
   static const presenceMarkColStatus = 262.0;
   static const presenceMarkColTimes = 168.0;
-  static const presenceMarkColHours = 96.0;
+
+  /// Pas à pas des heures du pointage : « − » et « + » à 48 dp de cible,
+  /// autour de « 10 h 30 ». À 96, le « + » débordait sur la colonne retard,
+  /// et la part débordée ne recevait plus les appuis.
+  static const presenceMarkColHours = 160.0;
   static const presenceMarkColAction = 40.0;
 
   /// Les modales du pointage.

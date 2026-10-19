@@ -1,82 +1,9 @@
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
-import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
-import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
-import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
-import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
-    implements SyncStatusCubit {}
-
-class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
-    implements AuthBloc {}
-
-/// Tous les droits déclarés : ces tests portent sur la structure de la coquille
-/// (sidebar ancrée, tiroir, hamburger), pas sur le filtrage — couvert par
-/// `module_access_registry_test.dart`. Sans droits, l'arborescence se réduirait
-/// à l'Accueil et il n'y aurait plus de menu à replier.
-const _tousDroits = <String>[
-  'enrollment.read',
-  'enrollment.stats.read',
-  'finance.charge.read',
-  'finance.stats.read',
-  'classroom.read',
-  'classroom.stats.read',
-  'attendance.read',
-  'attendance.stats.read',
-  'discipline.read',
-  'academics.course.read',
-  'academics.result.read',
-  'schedule.read',
-  'editique.read',
-];
+import '../helpers/shell_harness.dart';
 
 void main() {
-  // La barre supérieure monte la pastille de synchro globale
-  // (BlocBuilder<SyncStatusCubit>) fournie à la racine en production ; ici on
-  // fournit un cubit mocké figé sur « synced ». L'`AuthBloc` est requis depuis
-  // ADR-014 : la coquille construit son arborescence sur ses permissions.
-  Widget buildHarness() {
-    final syncStatusCubit = _MockSyncStatusCubit();
-    whenListen(
-      syncStatusCubit,
-      const Stream<SyncStatusState>.empty(),
-      initialState: const SyncStatusState(status: SyncStatus.synced),
-    );
-
-    final authBloc = _MockAuthBloc();
-    const authState = AuthState(
-      status: AuthStatus.authenticated,
-      permissions: _tousDroits,
-    );
-    when(() => authBloc.state).thenReturn(authState);
-    whenListen(
-      authBloc,
-      const Stream<AuthState>.empty(),
-      initialState: authState,
-    );
-
-    return MaterialApp(
-      locale: const Locale('fr'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SyncStatusCubit>.value(value: syncStatusCubit),
-          BlocProvider<AuthBloc>.value(value: authBloc),
-        ],
-        child: const HomePage(),
-      ),
-    );
-  }
-
   testWidgets('HomePage renders desktop structure above mobile breakpoint', (
     tester,
   ) async {
@@ -86,7 +13,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(buildHarness());
+    await tester.pumpWidget(buildShellHarness());
     await tester.pumpAndSettle();
 
     expect(find.byType(Row), findsWidgets);
@@ -105,7 +32,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(buildHarness());
+    await tester.pumpWidget(buildShellHarness());
     await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsNothing);
@@ -119,7 +46,7 @@ void main() {
     tester.view.physicalSize = const Size(1280, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(buildHarness());
+    await tester.pumpWidget(buildShellHarness());
     await tester.pumpAndSettle();
 
     await tester.tap(find.bySemanticsLabel('Finances').first);
@@ -135,7 +62,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(360, 740));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(buildHarness());
+    await tester.pumpWidget(buildShellHarness());
     await tester.pumpAndSettle();
 
     final scaffolds = tester
@@ -143,8 +70,11 @@ void main() {
         .toList();
     final hasDrawer = scaffolds.any((scaffold) => scaffold.drawer != null);
     expect(hasDrawer, isTrue);
-    expect(find.byTooltip('Notifications'), findsOneWidget);
+    // La cloche n'ouvre encore rien : pas de place pour elle sur un téléphone.
+    expect(find.byTooltip('Notifications'), findsNothing);
     expect(find.byTooltip('Déconnexion'), findsNothing);
+    // La synchro en icône seule, son libellé en infobulle.
+    expect(find.byTooltip('À jour'), findsOneWidget);
     // Hamburger présent en compact, avec son tooltip i18n dédié.
     expect(find.byTooltip('Ouvrir le menu'), findsOneWidget);
   });
@@ -152,10 +82,10 @@ void main() {
   testWidgets('HomePage compact : le hamburger ouvre le tiroir', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(900, 740));
+    await tester.binding.setSurfaceSize(const Size(700, 740));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(buildHarness());
+    await tester.pumpWidget(buildShellHarness());
     await tester.pumpAndSettle();
 
     // La page d'accueil monte son propre Scaffold (AppPageBackground) dans le
@@ -175,13 +105,13 @@ void main() {
     expect(scaffoldState.isDrawerOpen, isTrue);
   });
 
-  testWidgets('HomePage keeps compact drawer below 1024 breakpoint', (
+  testWidgets('HomePage keeps compact drawer below 760 breakpoint', (
     tester,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(900, 740));
+    await tester.binding.setSurfaceSize(const Size(700, 740));
     addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(buildHarness());
+    await tester.pumpWidget(buildShellHarness());
     await tester.pumpAndSettle();
 
     final scaffolds = tester
@@ -196,10 +126,10 @@ void main() {
   testWidgets(
     'HomePage compact : taper l\'entrée « Accueil » ferme le tiroir',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(900, 740));
+      await tester.binding.setSurfaceSize(const Size(700, 740));
       addTearDown(() async => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(buildHarness());
+      await tester.pumpWidget(buildShellHarness());
       await tester.pumpAndSettle();
 
       final drawerScaffold = tester
@@ -225,4 +155,50 @@ void main() {
       expect(scaffoldState.isDrawerOpen, isFalse);
     },
   );
+
+  group('rail entre 760 et 1024 (10" portrait, 7" paysage)', () {
+    Future<void> pumpRail(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 1280);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(buildShellHarness());
+      await tester.pumpAndSettle();
+    }
+
+    ScaffoldState shellScaffold(WidgetTester tester) => tester
+        .stateList<ScaffoldState>(find.byType(Scaffold))
+        .firstWhere((state) => state.hasDrawer);
+
+    testWidgets('le menu reste à l\'écran, sans hamburger', (tester) async {
+      await pumpRail(tester);
+
+      expect(find.byTooltip('Ouvrir le menu'), findsNothing);
+      expect(find.byTooltip('Étendre le menu'), findsOneWidget);
+      expect(shellScaffold(tester).isDrawerOpen, isFalse);
+    });
+
+    testWidgets('un module ouvre ses écrans en menu flottant', (tester) async {
+      await pumpRail(tester);
+
+      await tester.tap(find.bySemanticsLabel('Finances').first);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.widgetWithText(MenuItemButton, 'Facturations'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('l\'écusson ouvre le menu complet en tiroir', (tester) async {
+      await pumpRail(tester);
+
+      await tester.tap(find.byTooltip('Étendre le menu'));
+      await tester.pumpAndSettle();
+
+      expect(shellScaffold(tester).isDrawerOpen, isTrue);
+      // Le rail, lui, n'a pas été déplié derrière le tiroir.
+      expect(find.byTooltip('Replier le menu'), findsOneWidget);
+      expect(find.byTooltip('Étendre le menu'), findsOneWidget);
+    });
+  });
 }

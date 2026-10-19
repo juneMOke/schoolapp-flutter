@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/layout/shell_chrome.dart';
 import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -175,10 +176,13 @@ class _HistoryViewState extends State<_HistoryView> {
             return AppPageBackground(
               width: split ? PageContentWidth.wide : PageContentWidth.reading,
               scrollable: !split,
-              appBar: ModuleTopBar(
-                eyebrow: l10n.boutiqueHistoryEyebrow,
-                title: l10n.boutiqueHistoryTitle,
-              ),
+              // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
+              appBar: ShellChrome.wraps(context)
+                  ? null
+                  : ModuleTopBar(
+                      eyebrow: l10n.boutiqueHistoryEyebrow,
+                      title: l10n.boutiqueHistoryTitle,
+                    ),
               child: split
                   ? MasterDetailLayout(
                       master: list,

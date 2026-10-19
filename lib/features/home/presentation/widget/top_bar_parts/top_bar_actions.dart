@@ -25,6 +25,7 @@ class TopBarActions extends StatelessWidget {
           builder: (context, state) => SyncIndicator(
             status: state.status,
             lastSyncAtMs: state.lastSyncAtMs,
+            iconOnly: isCompact,
             // Seul chemin de sortie de l'état terminal `SYNC_ERROR` : sans lui
             // la pastille « Conflit » est un cul-de-sac, l'écriture rejetée
             // étant invisible et non rejouable.
@@ -46,9 +47,11 @@ class TopBarActions extends StatelessWidget {
           ),
         ),
         const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
-        TopBarNotificationButton(onPressed: () {}),
-        const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
+        // La cloche n'ouvre encore rien : sur un téléphone, elle prendrait au
+        // titre la place d'un geste qui n'existe pas.
         if (!isCompact) ...[
+          TopBarNotificationButton(onPressed: () {}),
+          const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
           const TopBarLogoutButton(),
           const SizedBox(width: HomeNavigationUiTokens.topBarActionsGap),
           Container(

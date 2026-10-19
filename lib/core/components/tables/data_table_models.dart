@@ -203,6 +203,15 @@ class DataTableViewConfig {
   /// en place. `null` — le défaut — : la table suit la largeur reçue.
   final double? minWidth;
 
+  /// Rendu sous `AppBreakpoints.dataTableCardsMax` (téléphone) : les colonnes
+  /// telles quelles, ou une carte par ligne. Opt-in : une table qui a déjà sa
+  /// forme étroite (colonnes fusionnées, défilement voulu) la garde.
+  final DataTablePhoneLayout phoneLayout;
+
+  /// En cartes, la colonne qui titre la carte — l'élève plutôt que la date
+  /// qui ouvre la ligne de table.
+  final int cardTitleColumn;
+
   const DataTableViewConfig({
     required this.columns,
     this.isLoading = false,
@@ -218,7 +227,19 @@ class DataTableViewConfig {
     this.semanticsLabel,
     this.tone,
     this.minWidth,
+    this.phoneLayout = DataTablePhoneLayout.table,
+    this.cardTitleColumn = 0,
   });
+}
+
+/// Cf. [DataTableViewConfig.phoneLayout].
+enum DataTablePhoneLayout {
+  /// Les colonnes, comprimées (ou défilantes avec `minWidth`).
+  table,
+
+  /// Une carte par ligne : la première cellule en titre, les suivantes en
+  /// « libellé de colonne : valeur ». Sans en-tête, donc sans tri.
+  cards,
 }
 
 /// Interface abstraite pour une ligne de table de données.

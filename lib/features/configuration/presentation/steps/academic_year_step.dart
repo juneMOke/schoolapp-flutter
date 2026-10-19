@@ -179,12 +179,16 @@ class _YearBanner extends StatelessWidget {
                 color: pristine ? AppColors.vertSavane : AppColors.textMuted,
               ),
               const SizedBox(width: AppSpacing.xs),
-              Text(
-                pristine
-                    ? l10n.configurationYearProposed
-                    : l10n.configurationYearEdited,
-                style: AppTypography.bodySmall.copyWith(
-                  color: pristine ? AppColors.vertSavane : AppColors.textMuted,
+              Flexible(
+                child: Text(
+                  pristine
+                      ? l10n.configurationYearProposed
+                      : l10n.configurationYearEdited,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: pristine
+                        ? AppColors.vertSavane
+                        : AppColors.textMuted,
+                  ),
                 ),
               ),
             ],

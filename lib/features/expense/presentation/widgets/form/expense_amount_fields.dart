@@ -67,6 +67,7 @@ class ExpenseAmountFields extends StatelessWidget {
                     ? l10n.expenseFormAmountPlaceholderCdf
                     : l10n.expenseFormAmountPlaceholderUsd,
                 required: true,
+                keyboardType: EteeloTextInputType.number,
                 capitalization: EteeloTextCapitalization.none,
                 errorText: touched && cents == null
                     ? l10n.expenseFormAmountRequired

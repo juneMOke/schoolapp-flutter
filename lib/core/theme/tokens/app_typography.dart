@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 class AppTypography {
   AppTypography._();
 
+  /// Plafond de l'agrandissement du texte demandé par le système. Au-delà de
+  /// ×1,3, les hauteurs plancher (cartes KPI, bandeaux, catalogue) rognent le
+  /// texte sur un téléphone ; en deçà, le réglage de l'utilisateur est servi
+  /// tel quel.
+  static const double maxTextScaleFactor = 1.3;
+
   static const displayLarge = TextStyle(
     fontFamily: 'Lora',
     fontSize: 40,

@@ -52,6 +52,9 @@ class PayrollLedgerTable extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return EteeloColumnTable(
       minWidth: AppDimensions.payrollLedgerMinWidth,
+      // Sur une tablette en portrait, le livre défile de côté : l'agent reste
+      // à l'écran pendant que ses montants passent.
+      frozenFirstColumn: true,
       widths: _widths,
       endAligned: const {1, 2, 3, 4, 5},
       headers: [

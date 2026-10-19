@@ -29,6 +29,9 @@ class AppMotion {
   // suivant.
   static const Duration photoSavedAutoClose = Duration(milliseconds: 1400);
   static const Duration photoSessionAdvance = Duration(milliseconds: 1500);
+  // Retour Android à l'Accueil : le second appui dans cette fenêtre quitte
+  // l'app ; le message qui l'annonce reste affiché le même temps.
+  static const Duration exitConfirmWindow = Duration(seconds: 2);
 
   static const Curve inCurve = Curves.easeInCubic;
   static const Curve outCurve = Curves.easeOutCubic;

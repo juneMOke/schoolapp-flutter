@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/components/search/search_mode_switch.dart';
@@ -111,7 +112,10 @@ class _BoutiqueBeneficiaryDialogState extends State<BoutiqueBeneficiaryDialog> {
                     TextField(
                       key: _searchFieldKey,
                       controller: _queryController,
-                      autofocus: true,
+                      // Au clavier physique seulement : sur la tablette, le
+                      // clavier virtuel couvrait la moitié de la modale avant
+                      // même qu'on ait choisi le mode.
+                      autofocus: expectsPhysicalKeyboard,
                       decoration: InputDecoration(
                         labelText: l10n.boutiqueBeneficiarySearchLabel,
                         hintText: l10n.boutiqueBeneficiarySearchPlaceholder,

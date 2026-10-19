@@ -44,15 +44,21 @@ class FeeScopePicker extends StatelessWidget {
           children: [
             Text(l10n.configurationFeeScope, style: AppTypography.labelMedium),
             const Text(' *', style: TextStyle(color: AppColors.error)),
-            const Spacer(),
-            if (!all)
-              Text(
-                l10n.configurationFeeScopeCount(
-                  value.levelCatalogCodes.length,
-                  openCodes.length,
-                ),
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textMuted,
+            // `Expanded` et non `Spacer` + `Flexible` : ces deux-là se
+            // partageaient la place, et le compteur décollait du bord.
+            if (all)
+              const Spacer()
+            else
+              Expanded(
+                child: Text(
+                  l10n.configurationFeeScopeCount(
+                    value.levelCatalogCodes.length,
+                    openCodes.length,
+                  ),
+                  textAlign: TextAlign.end,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ),
           ],
@@ -164,10 +170,12 @@ class _CycleLevels extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                cycle.name,
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.textMuted,
+              Flexible(
+                child: Text(
+                  cycle.name,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

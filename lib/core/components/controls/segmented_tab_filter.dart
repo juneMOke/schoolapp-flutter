@@ -241,9 +241,18 @@ class SegmentedTabFilter<T> extends StatelessWidget {
       }
       tabs.add(expand ? Expanded(child: _buildTab(opt)) : _buildTab(opt));
     }
-    return Row(
+    final row = Row(
       mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
       children: tabs,
+    );
+    if (expand) return row;
+    // Plus d'onglets que de largeur (téléphone) : ils défilent de côté au
+    // lieu de déborder. Seulement sous une largeur bornée — un défilement
+    // horizontal n'a pas de sens dans une rangée qui s'étire.
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.hasBoundedWidth
+          ? SingleChildScrollView(scrollDirection: Axis.horizontal, child: row)
+          : row,
     );
   }
 

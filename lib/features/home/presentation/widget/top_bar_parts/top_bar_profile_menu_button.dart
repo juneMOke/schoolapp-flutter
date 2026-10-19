@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dar
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
+import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Menu du compte, à l'extrémité de la barre supérieure.
@@ -97,22 +98,25 @@ class TopBarProfileMenuButton extends StatelessWidget {
           ),
         ];
       },
-      child: Container(
-        width: HomeNavigationUiTokens.topBarActionSize - 4,
-        height: HomeNavigationUiTokens.topBarActionSize - 4,
-        decoration: BoxDecoration(
-          color: tokens.AppColors.textOnDark.withValues(alpha: 0.16),
-          borderRadius: BorderRadius.circular(
-            HomeNavigationUiTokens.topBarActionRadius,
+      // Pastille de 36 dp, cible de 48 : le menu s'ouvre au doigt sans viser.
+      child: TouchTarget(
+        child: Container(
+          width: HomeNavigationUiTokens.topBarActionSize - 4,
+          height: HomeNavigationUiTokens.topBarActionSize - 4,
+          decoration: BoxDecoration(
+            color: tokens.AppColors.textOnDark.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(
+              HomeNavigationUiTokens.topBarActionRadius,
+            ),
+            border: Border.all(
+              color: tokens.AppColors.textOnDark.withValues(alpha: 0.18),
+            ),
           ),
-          border: Border.all(
-            color: tokens.AppColors.textOnDark.withValues(alpha: 0.18),
+          child: const Icon(
+            Icons.person,
+            color: tokens.AppColors.textOnDark,
+            size: 20,
           ),
-        ),
-        child: const Icon(
-          Icons.person,
-          color: tokens.AppColors.textOnDark,
-          size: 20,
         ),
       ),
     );

@@ -89,11 +89,15 @@ class SummaryPreviousAcademicSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingS),
           Row(
             children: [
-              Text(
-                l10n.formerStudentLabel,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
+              // Le libellé passe à la ligne plutôt que de pousser la valeur
+              // hors de la carte sur un téléphone.
+              Flexible(
+                child: Text(
+                  l10n.formerStudentLabel,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               const SizedBox(width: AppDimensions.spacingS),
@@ -109,11 +113,15 @@ class SummaryPreviousAcademicSection extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingS),
           Row(
             children: [
-              Text(
-                l10n.yearValidated,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
+              // Le libellé passe à la ligne plutôt que de pousser la valeur
+              // hors de la carte sur un téléphone.
+              Flexible(
+                child: Text(
+                  l10n.yearValidated,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               const SizedBox(width: AppDimensions.spacingS),

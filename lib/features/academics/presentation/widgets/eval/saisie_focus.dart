@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -118,66 +120,96 @@ class _SaisieFocusState extends State<SaisieFocus> {
     final absence = draft.absenceOf(id);
     final statut = draft.statutFor(id);
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceRaised,
-            borderRadius: AppRadius.brCard,
-            border: Border.all(color: AppColors.border),
+    final entry = absence == null
+        ? SaisieNumpad(
+            enabled: widget.inputsEnabled,
+            onChar: (ch) => draft.appendNoteChar(id, ch),
+            onBackspace: () => draft.backspaceNote(id),
+          )
+        : _AbsencePlaceholder(statut: statut);
+    final summary = <Widget>[
+      _ProgressThread(draft: draft, current: index, onTap: _go),
+      const SizedBox(height: AppSpacing.md),
+      _Identity(student: student, position: index + 1, total: _total),
+      const SizedBox(height: AppSpacing.md),
+      _BigNote(draft: draft, id: id),
+    ];
+    final actions = <Widget>[
+      Row(
+        children: [
+          AbsenceToggle(
+            selected: absence,
+            enabled: widget.inputsEnabled,
+            size: 44,
+            onToggle: (a) => draft.toggleAbsence(id, a),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _ProgressThread(draft: draft, current: index, onTap: _go),
-              const SizedBox(height: AppSpacing.md),
-              _Identity(student: student, position: index + 1, total: _total),
-              const SizedBox(height: AppSpacing.md),
-              _BigNote(draft: draft, id: id),
-              const SizedBox(height: AppSpacing.md),
-              if (absence == null)
-                SaisieNumpad(
-                  enabled: widget.inputsEnabled,
-                  onChar: (ch) => draft.appendNoteChar(id, ch),
-                  onBackspace: () => draft.backspaceNote(id),
-                )
-              else
-                _AbsencePlaceholder(statut: statut),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  AbsenceToggle(
-                    selected: absence,
-                    enabled: widget.inputsEnabled,
-                    size: 44,
-                    onToggle: (a) => draft.toggleAbsence(id, a),
-                  ),
-                  const Spacer(),
-                  EteeloButton.ghost(
-                    label: l10n.evalFocusClear,
-                    icon: Icons.backspace_outlined,
-                    onPressed: widget.inputsEnabled
-                        ? () => draft.clearEntry(id)
-                        : null,
-                    fullWidth: false,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _NavRow(
-                index: index,
-                total: _total,
-                onPrev: _prev,
-                onNext: _next,
-              ),
-            ],
+          const Spacer(),
+          EteeloButton.ghost(
+            label: l10n.evalFocusClear,
+            icon: Icons.backspace_outlined,
+            onPressed: widget.inputsEnabled ? () => draft.clearEntry(id) : null,
+            fullWidth: false,
           ),
-        ),
+        ],
       ),
+      const SizedBox(height: AppSpacing.md),
+      _NavRow(index: index, total: _total, onPrev: _prev, onNext: _next),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sideBySide =
+            MediaQuery.orientationOf(context) == Orientation.landscape &&
+            constraints.maxWidth >= AppBreakpoints.saisieFocusSideBySideMin;
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: sideBySide
+                  ? AppDimensions.saisieFocusSideBySideMaxWidth
+                  : AppDimensions.saisieFocusCardMaxWidth,
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceRaised,
+                borderRadius: AppRadius.brCard,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: sideBySide
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ...summary,
+                              const SizedBox(height: AppSpacing.md),
+                              ...actions,
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.lg),
+                        Expanded(child: entry),
+                      ],
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ...summary,
+                        const SizedBox(height: AppSpacing.md),
+                        entry,
+                        const SizedBox(height: AppSpacing.md),
+                        ...actions,
+                      ],
+                    ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

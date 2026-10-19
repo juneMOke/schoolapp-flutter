@@ -56,15 +56,21 @@ class AppPageBackground extends StatelessWidget {
   /// pose PAR-DESSUS les derniers dp de la page, à droite — là où le pied de
   /// tableau range sa pagination. On lui réserve sa place plutôt que de le
   /// laisser masquer ce qu'il recouvre.
+  ///
+  /// La marge système (barre gestuelle, encoche en paysage, barre d'état sans
+  /// barre d'en-tête) s'y ajoute : Android 15 impose le bord à bord, et le
+  /// fond, lui, doit continuer de couvrir tout l'écran. Un `Scaffold` qui a
+  /// déjà posé une barre d'en-tête ou une barre basse a retiré la sienne.
   EdgeInsets _contentPadding(BuildContext context) {
     return EdgeInsets.fromLTRB(
-      _horizontalPadding(context),
-      AppDimensions.spacingL,
-      _horizontalPadding(context),
-      floatingActionButton == null
-          ? AppDimensions.spacingL
-          : AppDimensions.fabScrollClearance,
-    );
+          _horizontalPadding(context),
+          AppDimensions.spacingL,
+          _horizontalPadding(context),
+          floatingActionButton == null
+              ? AppDimensions.spacingL
+              : AppDimensions.fabScrollClearance,
+        ) +
+        MediaQuery.paddingOf(context);
   }
 
   @override
@@ -77,7 +83,9 @@ class AppPageBackground extends StatelessWidget {
     final body = style == AppPageBackgroundStyle.flat
         ? DecoratedBox(
             decoration: BoxDecoration(color: flatBackgroundColor),
-            child: _buildScrollableContent(context, content),
+            child: Builder(
+              builder: (context) => _buildScrollableContent(context, content),
+            ),
           )
         : DecoratedBox(
             decoration: const BoxDecoration(
@@ -94,7 +102,10 @@ class AppPageBackground extends StatelessWidget {
               children: [
                 const PageBackgroundHalos(),
                 const KubaPatternLayer(),
-                _buildScrollableContent(context, content),
+                Builder(
+                  builder: (context) =>
+                      _buildScrollableContent(context, content),
+                ),
               ],
             ),
           );
@@ -104,14 +115,40 @@ class AppPageBackground extends StatelessWidget {
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
-      bottomNavigationBar: bottomNavigationBar,
+      bottomNavigationBar: _aboveKeyboard(context, bottomNavigationBar),
       body: body,
     );
   }
 
+  /// Une barre basse (total à encaisser, « Enregistrer ») reste au-dessus du
+  /// clavier : le `Scaffold` la pose au bas de l'écran, où le clavier la
+  /// couvre — l'agent tapait un montant sans voir le total. Le corps se
+  /// rétrécit d'autant, rien n'est recouvert.
+  ///
+  /// Sauf quand le clavier ne laisse presque rien (téléphone en paysage) :
+  /// la saisie passe alors avant le total.
+  static Widget? _aboveKeyboard(BuildContext context, Widget? bar) {
+    if (bar == null) return null;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final visible = MediaQuery.sizeOf(context).height - keyboard;
+    final lift = visible >= AppBreakpoints.bottomBarAboveKeyboardMinVisible
+        ? keyboard
+        : 0.0;
+    // Toujours le même `Padding` : ouvrir le clavier ne remonte pas la barre.
+    return Padding(
+      padding: EdgeInsets.only(bottom: lift),
+      child: bar,
+    );
+  }
+
+  /// Appelé SOUS le `Scaffold` de la page (`Builder`) : la marge système y est
+  /// déjà amputée de ce que la barre d'en-tête ou la barre basse ont consommé.
   Widget _buildScrollableContent(BuildContext context, Widget content) {
     if (scrollable) {
       return SingleChildScrollView(
+        // Toujours défilable : sur un écran court (vide, en erreur), tirer
+        // vers le bas doit encore relancer la synchro (`ShellPullToSync`).
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: _contentPadding(context),
         child: content,
       );

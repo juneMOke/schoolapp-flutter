@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_detail_args.dart';
@@ -37,25 +38,30 @@ class _ScheduleCoordinatorPageState extends State<ScheduleCoordinatorPage> {
   @override
   Widget build(BuildContext context) {
     final open = _openArgs;
-    return AnimatedSwitcher(
-      duration: AppMotion.standard,
-      switchInCurve: AppMotion.outCurve,
-      switchOutCurve: AppMotion.inCurve,
-      child: open == null
-          ? PermissionGate(
-              key: const ValueKey<String>('schedule-timetable'),
-              requires: const [Perm.academicsCourseRead],
-              // Sans le droit : la même grille, sans cellule cliquable. Le
-              // `null` se propage déjà jusqu'aux chips et aux rangées, qui
-              // retirent d'elles-mêmes leur affordance.
-              fallback: const SchedulePage(),
-              child: SchedulePage(onOpenCourse: _openCourse),
-            )
-          : CoursNotationDetailPage(
-              key: ValueKey<String>('schedule-course-detail-${open.coursId}'),
-              args: open,
-              onBack: _backToTimetable,
-            ),
+    // Retour système : depuis un cours, revenir à l'emploi du temps.
+    return ScreenBackScope(
+      canPop: open == null,
+      onBack: _backToTimetable,
+      child: AnimatedSwitcher(
+        duration: AppMotion.standard,
+        switchInCurve: AppMotion.outCurve,
+        switchOutCurve: AppMotion.inCurve,
+        child: open == null
+            ? PermissionGate(
+                key: const ValueKey<String>('schedule-timetable'),
+                requires: const [Perm.academicsCourseRead],
+                // Sans le droit : la même grille, sans cellule cliquable. Le
+                // `null` se propage déjà jusqu'aux chips et aux rangées, qui
+                // retirent d'elles-mêmes leur affordance.
+                fallback: const SchedulePage(),
+                child: SchedulePage(onOpenCourse: _openCourse),
+              )
+            : CoursNotationDetailPage(
+                key: ValueKey<String>('schedule-course-detail-${open.coursId}'),
+                args: open,
+                onBack: _backToTimetable,
+              ),
+      ),
     );
   }
 }

@@ -38,25 +38,29 @@ class AttendanceOverviewDashboardHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppDimensions.spacingM),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.attendanceOverviewEyebrow,
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.textMuted,
+              // Dans un `Wrap` : le titre en Lora passe à la ligne sur un
+              // téléphone au lieu de déborder.
+              Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.attendanceOverviewEyebrow,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textMuted,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppDimensions.spacingXS),
-                  Text(
-                    l10n.attendanceOverviewTitle,
-                    style: AppTextStyles.totalAmountLora.copyWith(
-                      color: AppColors.bleuArdoise,
-                      fontSize: AppDimensions.financeStatsHeaderTitleFontSize,
+                    const SizedBox(height: AppDimensions.spacingXS),
+                    Text(
+                      l10n.attendanceOverviewTitle,
+                      style: AppTextStyles.totalAmountLora.copyWith(
+                        color: AppColors.bleuArdoise,
+                        fontSize: AppDimensions.financeStatsHeaderTitleFontSize,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

@@ -123,27 +123,35 @@ class _ContextItem extends StatelessWidget {
           child: Icon(icon, size: 18, color: AppColors.bleuArdoise),
         ),
         const SizedBox(width: AppDimensions.spacingS),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label.toUpperCase(),
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textMuted,
-                fontSize: 10,
-                letterSpacing: 0.5,
+        // Posé dans un `Wrap` : une valeur longue (nom de classe, période)
+        // s'abrège au lieu de déborder de l'écran.
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textMuted,
+                  fontSize: 10,
+                  letterSpacing: 0.5,
+                ),
               ),
-            ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            Text(
-              value,
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: AppColors.textPrimary,
-                fontFeatures: AppTextStyles.tabularFigures,
+              const SizedBox(height: AppDimensions.spacingXS),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodyStrong.copyWith(
+                  color: AppColors.textPrimary,
+                  fontFeatures: AppTextStyles.tabularFigures,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

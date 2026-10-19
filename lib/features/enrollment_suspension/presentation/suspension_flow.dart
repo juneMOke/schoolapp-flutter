@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/domain/entities/student_suspension.dart';
@@ -56,7 +57,7 @@ abstract final class SuspensionFlow {
   }
 
   static Future<int> _open(BuildContext context, Widget dialog) async {
-    final count = await showDialog<int>(
+    final count = await showEteeloAdaptiveDialog<int>(
       context: context,
       builder: (_) => BlocProvider(
         create: (_) => getIt<SuspensionGestureCubit>(),

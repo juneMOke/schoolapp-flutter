@@ -210,15 +210,16 @@ class _Summary extends StatelessWidget {
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.sm,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        // Le total passe sous le compte sur un téléphone.
+        Wrap(
+          spacing: AppSpacing.md,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
               l10n.configurationFeeCount(fees.length),
               style: AppTypography.labelLarge,
             ),
             if (totals.isNotEmpty) ...[
-              const SizedBox(width: AppSpacing.md),
               Text(
                 l10n.configurationFeeCatalogTotal(
                   // Une somme PAR devise, jamais entre elles : 100 USD et

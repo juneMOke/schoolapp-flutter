@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_detail_args.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/cours_notation_detail_page.dart';
@@ -26,20 +27,25 @@ class _CoursesCoordinatorPageState extends State<CoursesCoordinatorPage> {
   @override
   Widget build(BuildContext context) {
     final open = _openArgs;
-    return AnimatedSwitcher(
-      duration: AppMotion.standard,
-      switchInCurve: AppMotion.outCurve,
-      switchOutCurve: AppMotion.inCurve,
-      child: open == null
-          ? MyCoursesPage(
-              key: const ValueKey<String>('courses-list'),
-              onOpenCourse: _openCourse,
-            )
-          : CoursNotationDetailPage(
-              key: ValueKey<String>('courses-detail-${open.coursId}'),
-              args: open,
-              onBack: _backToList,
-            ),
+    // Retour système : depuis le détail, revenir à la liste (et non à l'Accueil).
+    return ScreenBackScope(
+      canPop: open == null,
+      onBack: _backToList,
+      child: AnimatedSwitcher(
+        duration: AppMotion.standard,
+        switchInCurve: AppMotion.outCurve,
+        switchOutCurve: AppMotion.inCurve,
+        child: open == null
+            ? MyCoursesPage(
+                key: const ValueKey<String>('courses-list'),
+                onOpenCourse: _openCourse,
+              )
+            : CoursNotationDetailPage(
+                key: ValueKey<String>('courses-detail-${open.coursId}'),
+                args: open,
+                onBack: _backToList,
+              ),
+      ),
     );
   }
 }

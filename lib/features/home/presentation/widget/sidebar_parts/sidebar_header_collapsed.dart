@@ -9,7 +9,10 @@ import 'package:school_app_flutter/features/school/presentation/widget/school_br
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class SidebarHeaderCollapsed extends StatelessWidget {
-  const SidebarHeaderCollapsed({super.key});
+  /// `null` : déplier la barre (et garder ce choix sur le poste).
+  final VoidCallback? onExpandRequested;
+
+  const SidebarHeaderCollapsed({super.key, this.onExpandRequested});
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +29,10 @@ class SidebarHeaderCollapsed extends StatelessWidget {
         child: ExcludeSemantics(
           child: InkWell(
             focusColor: AppColors.stateFocusOnDark,
-            onTap: () =>
-                context.read<NavigationBloc>().add(const SidebarToggled()),
+            onTap:
+                onExpandRequested ??
+                () =>
+                    context.read<NavigationBloc>().add(const SidebarToggled()),
             borderRadius: AppRadius.brSm,
             child: Tooltip(
               message: l10n.homeSidebarExpandTooltip,

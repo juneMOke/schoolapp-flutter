@@ -46,23 +46,40 @@ class CollectStepHeader extends StatelessWidget {
             ),
             child: Row(
               children: [
+                // Chaque étape bornée à 40 % de la barre : son libellé
+                // s'abrège sur un téléphone, et le trait garde la place
+                // restante (des `Flexible` la lui disputaient à parts égales).
                 Expanded(
-                  child: Row(
-                    children: [
-                      _StepPill(
-                        index: 1,
-                        label: confirmLabel,
-                        done: resultActive,
-                        active: !resultActive,
-                      ),
-                      _StepConnector(active: resultActive),
-                      _StepPill(
-                        index: 2,
-                        label: resultLabel,
-                        done: false,
-                        active: resultActive,
-                      ),
-                    ],
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      Widget step(Widget pill) => ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: constraints.maxWidth * 0.4,
+                        ),
+                        child: pill,
+                      );
+                      return Row(
+                        children: [
+                          step(
+                            _StepPill(
+                              index: 1,
+                              label: confirmLabel,
+                              done: resultActive,
+                              active: !resultActive,
+                            ),
+                          ),
+                          _StepConnector(active: resultActive),
+                          step(
+                            _StepPill(
+                              index: 2,
+                              label: resultLabel,
+                              done: false,
+                              active: resultActive,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 if (onClose != null)
