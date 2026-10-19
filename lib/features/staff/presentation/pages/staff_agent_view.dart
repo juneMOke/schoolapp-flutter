@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/components/wizard/wizard_breadcrumb.dart
 import 'package:school_app_flutter/core/components/wizard/wizard_step_progression.dart';
 import 'package:school_app_flutter/core/geo/address_geo_catalog.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/agent/sta
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_header.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_panel.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/documents/staff_dossier_panel.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_discard_confirmation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le corps de la page agent : en-tête, fil d'étapes, étape courante et pied.
@@ -57,18 +58,17 @@ class _StaffAgentViewState extends State<StaffAgentView> {
     }
   }
 
+  /// Une modification en cours serait perdue : la fiche se ferme ou le
+  /// navigateur la quitte sur ce seul critère.
+  bool _hasUnsavedWork(StaffAgentCubit cubit) =>
+      cubit.state.mode == StaffAgentMode.edit && cubit.hasChanges;
+
+  Future<bool> _confirmDiscard() => confirmStaffDiscard(context);
+
   Future<void> _leave(StaffAgentCubit cubit) async {
     final state = cubit.state;
-    if (state.mode == StaffAgentMode.edit && cubit.hasChanges) {
-      final l10n = AppLocalizations.of(context)!;
-      final discard = await showAppConfirmationDialog(
-        context: context,
-        title: l10n.staffDiscardTitle,
-        message: l10n.staffDiscardMessage,
-        confirmLabel: l10n.staffDiscardConfirm,
-        cancelLabel: l10n.staffDiscardKeep,
-        isDestructive: true,
-      );
+    if (_hasUnsavedWork(cubit)) {
+      final discard = await _confirmDiscard();
       if (!mounted || !discard) return;
       cubit.cancelEdit();
       return;
@@ -122,69 +122,76 @@ class _StaffAgentViewState extends State<StaffAgentView> {
         final canWrite = PermissionGate.allows(context, const [
           Perm.hrStaffWrite,
         ]);
-        return PopScope(
-          canPop: state.mode != StaffAgentMode.edit,
-          onPopInvokedWithResult: (didPop, _) {
-            if (!didPop) unawaited(_leave(cubit));
-          },
-          child: Scaffold(
-            backgroundColor: AppColors.surface,
-            body: Column(
-              children: [
-                StaffAgentHeader(
-                  state: state,
-                  kind: widget.kind,
-                  onBack: () => unawaited(_leave(cubit)),
-                  onEdit: state.mode == StaffAgentMode.view && canWrite
-                      ? cubit.startEdit
-                      : null,
-                ),
-                WizardBreadcrumb(
-                  titles: [
-                    l10n.staffStepIdentity,
-                    l10n.staffStepAddress,
-                    l10n.staffStepJob,
-                    l10n.staffStepDocuments,
-                  ],
-                  currentStep: state.step,
-                  progress: (state.step + 1) / StaffAgentState.stepCount,
-                  progression: WizardStepProgression(
-                    stepCount: StaffAgentState.stepCount,
-                    currentStep: state.step,
-                    maxStep: state.reached,
-                  ),
-                  errorSteps: state.visibleErrorSteps,
-                  onStepTap: cubit.goTo,
-                ),
-                Expanded(
-                  child: StaffAgentBody(
+        // Précédent du navigateur : la page est poussée au-dessus du fichier
+        // du personnel, dont la route consulte cette garde (`onExit`).
+        return RouteExitGuard(
+          hasUnsavedWork: () => _hasUnsavedWork(cubit),
+          confirmExit: _confirmDiscard,
+          child: PopScope(
+            canPop: state.mode != StaffAgentMode.edit,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) unawaited(_leave(cubit));
+            },
+            child: Scaffold(
+              backgroundColor: AppColors.surface,
+              body: Column(
+                children: [
+                  StaffAgentHeader(
                     state: state,
-                    catalog: _catalog,
-                    today: widget.today,
-                    onChanged: cubit.updateDraft,
-                    appendices: switch (state.member) {
-                      final member? when state.mode == StaffAgentMode.view => {
-                        2: StaffContractPanel(
-                          member: member,
-                          today: widget.today,
-                        ),
-                        3: StaffDossierPanel(
-                          member: member,
-                          today: widget.today,
-                        ),
-                      },
-                      _ => const {},
-                    },
+                    kind: widget.kind,
+                    onBack: () => unawaited(_leave(cubit)),
+                    onEdit: state.mode == StaffAgentMode.view && canWrite
+                        ? cubit.startEdit
+                        : null,
                   ),
-                ),
-                StaffAgentFooter(
-                  state: state,
-                  onPrevious: cubit.previous,
-                  onNext: cubit.next,
-                  onSave: () => unawaited(cubit.save()),
-                  onCancel: () => unawaited(_leave(cubit)),
-                ),
-              ],
+                  WizardBreadcrumb(
+                    titles: [
+                      l10n.staffStepIdentity,
+                      l10n.staffStepAddress,
+                      l10n.staffStepJob,
+                      l10n.staffStepDocuments,
+                    ],
+                    currentStep: state.step,
+                    progress: (state.step + 1) / StaffAgentState.stepCount,
+                    progression: WizardStepProgression(
+                      stepCount: StaffAgentState.stepCount,
+                      currentStep: state.step,
+                      maxStep: state.reached,
+                    ),
+                    errorSteps: state.visibleErrorSteps,
+                    onStepTap: cubit.goTo,
+                  ),
+                  Expanded(
+                    child: StaffAgentBody(
+                      state: state,
+                      catalog: _catalog,
+                      today: widget.today,
+                      onChanged: cubit.updateDraft,
+                      appendices: switch (state.member) {
+                        final member? when state.mode == StaffAgentMode.view =>
+                          {
+                            2: StaffContractPanel(
+                              member: member,
+                              today: widget.today,
+                            ),
+                            3: StaffDossierPanel(
+                              member: member,
+                              today: widget.today,
+                            ),
+                          },
+                        _ => const {},
+                      },
+                    ),
+                  ),
+                  StaffAgentFooter(
+                    state: state,
+                    onPrevious: cubit.previous,
+                    onNext: cubit.next,
+                    onSave: () => unawaited(cubit.save()),
+                    onCancel: () => unawaited(_leave(cubit)),
+                  ),
+                ],
+              ),
             ),
           ),
         );

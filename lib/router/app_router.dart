@@ -486,6 +486,10 @@ class AppRouter {
     // chacun son cubit, monté par sa page.
     GoRoute(
       path: AppRoutesNames.hrStaffFile,
+      // La fiche d'un agent et le formulaire de contrat sont poussés par-dessus
+      // (`Navigator`) : Précédent du navigateur quitte cette route, et consulte
+      // donc leur garde.
+      onExit: RouteExitGuard.onExit,
       builder: (context, state) => const StaffFilePage(),
     ),
     GoRoute(

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -16,6 +17,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/agent/sta
 import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_fields.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_kind_picker.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_step_style.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_discard_confirmation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que la page de contrat rend à son appelant.
@@ -113,6 +115,8 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
     Navigator.of(context).pop(StaffContractCancelledOnly(_draft.reason));
   }
 
+  Future<bool> _confirmDiscard() => confirmStaffDiscard(context);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -125,94 +129,101 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
             ),
           )
         : const <StaffContractField, String>{};
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      appBar: AppBar(
-        title: Text(
-          widget.correcting
-              ? l10n.staffContractCorrectTitle
-              : l10n.staffContractAddTitle,
+    // Précédent du navigateur : la page est poussée au-dessus du fichier du
+    // personnel, dont la route consulte cette garde (`onExit`).
+    return RouteExitGuard(
+      hasUnsavedWork: () => _draft != widget.initial,
+      confirmExit: _confirmDiscard,
+      child: Scaffold(
+        backgroundColor: AppColors.surface,
+        appBar: AppBar(
+          title: Text(
+            widget.correcting
+                ? l10n.staffContractCorrectTitle
+                : l10n.staffContractAddTitle,
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppDimensions.staffAgentBodyMaxWidth,
-            ),
-            child: StaffFormBlock(
-              title: l10n.staffBlockContract,
-              subtitle: l10n.staffBlockContractHint,
-              icon: Icons.handshake_outlined,
-              color: StaffStepStyle.of(2).color,
-              children: [
-                StaffContractKindPicker(
-                  selected: _draft.kind,
-                  // Re-toucher le statut choisi ne doit pas effacer le mode de
-                  // paiement déjà saisi.
-                  onChanged: (kind) {
-                    if (kind == _draft.kind) return;
-                    _change(
-                      (d) => d.copyWith(kind: () => kind, payMode: () => null),
-                    );
-                  },
-                ),
-                if (errors[StaffContractField.kind] case final error?)
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: Text(
-                      error,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.error,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppDimensions.staffAgentBodyMaxWidth,
+              ),
+              child: StaffFormBlock(
+                title: l10n.staffBlockContract,
+                subtitle: l10n.staffBlockContractHint,
+                icon: Icons.handshake_outlined,
+                color: StaffStepStyle.of(2).color,
+                children: [
+                  StaffContractKindPicker(
+                    selected: _draft.kind,
+                    // Re-toucher le statut choisi ne doit pas effacer le mode de
+                    // paiement déjà saisi.
+                    onChanged: (kind) {
+                      if (kind == _draft.kind) return;
+                      _change(
+                        (d) =>
+                            d.copyWith(kind: () => kind, payMode: () => null),
+                      );
+                    },
+                  ),
+                  if (errors[StaffContractField.kind] case final error?)
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.xs),
+                      child: Text(
+                        error,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.error,
+                        ),
                       ),
                     ),
+                  const SizedBox(height: AppSpacing.lg),
+                  StaffContractFields(
+                    draft: _draft,
+                    errors: errors,
+                    onChanged: _change,
                   ),
-                const SizedBox(height: AppSpacing.lg),
-                StaffContractFields(
-                  draft: _draft,
-                  errors: errors,
-                  onChanged: _change,
-                ),
-                if (widget.correcting)
-                  StaffSyncedTextInput(
-                    value: _draft.reason,
-                    label: l10n.staffFieldCorrectionReason,
-                    required: true,
-                    errorText: errors[StaffContractField.reason],
-                    keyboardType: EteeloTextInputType.multiline,
-                    onChanged: (v) => _change((d) => d.copyWith(reason: v)),
-                  ),
-              ],
+                  if (widget.correcting)
+                    StaffSyncedTextInput(
+                      value: _draft.reason,
+                      label: l10n.staffFieldCorrectionReason,
+                      required: true,
+                      errorText: errors[StaffContractField.reason],
+                      keyboardType: EteeloTextInputType.multiline,
+                      onChanged: (v) => _change((d) => d.copyWith(reason: v)),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          // Un `Wrap` et non une rangée : à 360 dp, les deux libellés de la
-          // correction ne tiennent pas côte à côte.
-          child: Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.sm,
-            children: [
-              if (widget.correcting)
-                EteeloButton.secondary(
-                  label: l10n.staffContractCancelOnly,
-                  onPressed: () => unawaited(_cancelOnly()),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            // Un `Wrap` et non une rangée : à 360 dp, les deux libellés de la
+            // correction ne tiennent pas côte à côte.
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.sm,
+              children: [
+                if (widget.correcting)
+                  EteeloButton.secondary(
+                    label: l10n.staffContractCancelOnly,
+                    onPressed: () => unawaited(_cancelOnly()),
+                    fullWidth: false,
+                  ),
+                EteeloButton.primary(
+                  label: widget.correcting
+                      ? l10n.staffContractCorrectSubmit
+                      : l10n.staffContractAddSubmit,
+                  icon: Icons.check,
+                  onPressed: _submit,
                   fullWidth: false,
                 ),
-              EteeloButton.primary(
-                label: widget.correcting
-                    ? l10n.staffContractCorrectSubmit
-                    : l10n.staffContractAddSubmit,
-                icon: Icons.check,
-                onPressed: _submit,
-                fullWidth: false,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
