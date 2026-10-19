@@ -157,4 +157,50 @@ Ordre proposé : **M1 + T1** (socle commun, coquille), puis T2, T3+M3, T4, M2+T5
 
 1. ~~**M7**~~ — **abandonné le 2026-10-19** : une barre basse tient 5 destinations, l'app a 13 modules hiérarchisés. Le téléphone garde le tiroir ; le retour Android (M1) et la barre d'en-tête allégée (M3) traitent le vrai problème.
 2. ~~**T2**~~ — **tranché le 2026-10-19 : la barre repliée existante** (84 dp, menu flottant des sous-menus depuis `54a6eca9`), pas de `NavigationRail` (sans hiérarchie, 3 à 7 destinations). Une seule navigation qui se replie selon la largeur : tiroir < 760, barre repliée 760-1024, barre dépliée au-delà.
-3. **Branche** — `feat/mobile-responsive` depuis `main`, créée avec `--no-track`.
+3. ~~**Branche**~~ — `feat/mobile-responsive`, créée depuis `feat/desktop-wide-screens` (qui fusionnera dans `main`), `--no-track`.
+
+---
+
+## 6. État — 2026-10-19
+
+Tous les lots retenus sont codés sur `feat/mobile-responsive` ; trois revues
+adversariales ont été menées (après M1+T1, M3+T3, T4+M4+M5, M6+T5+M2) et leurs
+constats confirmés corrigés, chacun avec son test de non-régression.
+
+| Lot | Commits | Ce qui est livré |
+|---|---|---|
+| M1 | `c86e0853` | texte ×1,3 max · marges système dans `AppPageBackground` · « Suivant » au clavier virtuel · pavé numérique du montant de dépense |
+| T1 | `c15cbb12` | une seule coquille (`widget/shell/*`), écran sous `GlobalKey` · retour Android : tiroir → niveau d'écran → Accueil → double appui |
+| T2 | `60c17257` | rail fixe 760-1024, l'écusson ouvre le menu complet · deux volets dès 976 dp |
+| M3 | `b6463003` | synchro en icône seule, cloche retirée en compact · `TouchTarget` · barre de dossier sans croix ni avatar sur téléphone · pièces des barres sombres partagées |
+| T3 | `974992ce` | `CheckableRow` au guichet · appel à 48 dp |
+| T4 | `be96b935` `9d6ad536` | barre basse au-dessus du clavier (si ≥ 320 dp visibles) · `ShellChrome` : boutique sans seconde barre, panier en FAB · Focus de notes côte à côte |
+| M4 | `9a7739e3` | `EteeloFormDialog` plein écran < 760 · feuille adaptative au clavier |
+| M5 | `f8047c70` | `DataTableView` en cartes (opt-in : reçus de caisse, entrées d'inscription) · colonne figée (livre de paie) |
+| M6 | `b4fbc6ca` `6e48d09b` | visionneuse plein écran · étiquettes de graphique espacées · recherche repliée · tirer pour synchroniser |
+| M2 | `ae99c017` `eff8e4b9` | ~30 sources de débordement corrigées |
+| T5 | `488d24be` | barre de relevé · ascenseur des tableaux défilants · libellés du dossier dès 900 · autofocus boutique · modale d'évaluation sur le socle |
+| Revues | `c7de107d` `37e5b097` `cb50bb1d` `4126471e` | registre de retour d'écran, clavier compté une fois, colonne figée, plein écran sans `SafeArea` de route, `LeadingTrailingRow`… |
+
+**Mesure finale** (sonde 360×740 sur `eff8e4b9`) : **87 → 1 débordement**, et
+ce dernier est un artefact de la sonde (un test qui fixe sa taille en pixels
+physiques sous le `devicePixelRatio` 3 de la sonde). Tests rouges à cette
+taille : 102 → 34, tous des attentes « grand écran » ou des finders hors écran.
+
+### Écarté ou reporté
+
+- **M7** — barre basse : abandonnée (§5).
+- **Facturation en cartes** : laissée en table — trois colonnes de noms courts
+  qui tiennent, et un tri que les cartes perdraient.
+- **Tri en mode carte** : l'en-tête disparaît avec ses flèches ; à ajouter si
+  un écran en cartes en a besoin.
+- **Densité des tableaux** (12 sp / 11 sp) et **encaissement en deux colonnes
+  à 1280** (T-M3) : décisions de design, non tranchées.
+- **Confirmations courtes en plein écran** : toute `EteeloFormDialog` passe en
+  plein écran sous 760, y compris les confirmations à deux boutons —
+  `AppConfirmationDialog` n'est pas concernée.
+- **Colonne figée** : son masque suit la hauteur de la cellule figée ; une
+  colonne voisine plus haute laisserait voir ce qui passe dessus/dessous.
+- Essais sur appareil réel : retour Android, bord à bord Android 15, clavier
+  qui pousse la barre basse, rotation d'une 10".
+
