@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_menu_item_parts.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/sidebar_parts/sidebar_rail_flyout.dart';
 
 class SidebarMenuItem extends StatefulWidget {
   final MenuItem menu;
@@ -56,6 +57,34 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
   }
 
   Widget _buildMenuItem() {
+    if (widget.isExpanded || widget.menu.isLeaf) return _menuTile();
+    return SidebarRailFlyout(
+      menu: widget.menu,
+      onSelected: _selectSubMenu,
+      builder: (context, toggle) => _menuTile(toggleFlyout: toggle),
+    );
+  }
+
+  /// Le sous-menu choisi, dans la barre ou dans le menu flottant du rail.
+  /// Ctrl+clic (web) l'ouvre dans un nouvel onglet.
+  void _selectSubMenu(SubMenuItem subMenu) {
+    if (NewTab.requestedByModifier) {
+      NewTab.open(AppRoutesNames.homeSubMenuPath(subMenu.id));
+      return;
+    }
+    context.read<NavigationBloc>().add(
+      SubMenuItemSelected(
+        menuId: widget.menu.id,
+        subMenuId: subMenu.id,
+        title: subMenu.title,
+      ),
+    );
+    if (widget.closeDrawerOnSubMenuSelection) {
+      Navigator.of(context).maybePop();
+    }
+  }
+
+  Widget _menuTile({VoidCallback? toggleFlyout}) {
     final isActive = widget.menu.isActive;
     final transparent = AppColors.surface.withValues(alpha: 0);
 
@@ -89,6 +118,12 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
               splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
               highlightColor: AppColors.textOnDark.withValues(alpha: 0.08),
               onTap: () {
+                // Rail : les sous-menus s'ouvrent en menu flottant, la barre
+                // reste repliée.
+                if (toggleFlyout != null) {
+                  toggleFlyout();
+                  return;
+                }
                 final bloc = context.read<NavigationBloc>();
                 // Item feuille (ex. Accueil) : on sélectionne directement
                 // l'écran (pas d'accordéon) et, en mode tiroir, on le ferme.
@@ -203,22 +238,7 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
                   hoverColor: AppColors.textOnDark.withValues(alpha: 0.06),
                   splashColor: AppColors.textOnDark.withValues(alpha: 0.1),
                   highlightColor: AppColors.textOnDark.withValues(alpha: 0.08),
-                  onTap: () {
-                    if (NewTab.requestedByModifier) {
-                      NewTab.open(AppRoutesNames.homeSubMenuPath(subMenu.id));
-                      return;
-                    }
-                    context.read<NavigationBloc>().add(
-                      SubMenuItemSelected(
-                        menuId: widget.menu.id,
-                        subMenuId: subMenu.id,
-                        title: subMenu.title,
-                      ),
-                    );
-                    if (widget.closeDrawerOnSubMenuSelection) {
-                      Navigator.of(context).maybePop();
-                    }
-                  },
+                  onTap: () => _selectSubMenu(subMenu),
                   child: SidebarSubMenuItemContainer(subMenu: subMenu),
                 ),
               ),

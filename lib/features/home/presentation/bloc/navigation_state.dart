@@ -22,6 +22,7 @@ class NavigationState extends Equatable {
   factory NavigationState.initial(
     AppLocalizations l10n, {
     required List<String>? permissions,
+    bool sidebarExpanded = true,
   }) {
     // Atterrissage post-connexion sur la page d'accueil (spec Accueil §00/§09) :
     // l'entrée feuille « Accueil » est l'item actif, le contenu affiché est la
@@ -36,7 +37,7 @@ class NavigationState extends Equatable {
       selectedMenuId: MenuConstants.accueilId,
       selectedSubMenuId: MenuConstants.accueilId,
       openedMenuId: MenuConstants.accueilId,
-      isSidebarExpanded: true,
+      isSidebarExpanded: sidebarExpanded,
       currentTitle: l10n.home,
     );
   }

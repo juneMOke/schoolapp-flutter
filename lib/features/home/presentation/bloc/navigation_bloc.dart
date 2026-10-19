@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/home/data/sidebar_preference_store.dart';
 import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
 import 'package:school_app_flutter/features/home/domain/factories/menu_factory.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -9,12 +10,35 @@ part 'navigation_event.dart';
 part 'navigation_state.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
-  NavigationBloc(AppLocalizations l10n, {required List<String>? permissions})
-    : super(NavigationState.initial(l10n, permissions: permissions)) {
+  /// Garde le choix déployé / replié de la barre ; `null` : rien n'est gardé.
+  final SidebarPreferenceStore? _sidebarPreference;
+
+  /// [sidebarExpanded] : l'état d'ouverture tant que le choix gardé n'est pas
+  /// relu — replié sur un écran étroit (cf. `sidebarExpandedDefaultMin`).
+  NavigationBloc(
+    AppLocalizations l10n, {
+    required List<String>? permissions,
+    bool sidebarExpanded = true,
+    SidebarPreferenceStore? sidebarPreference,
+  }) : _sidebarPreference = sidebarPreference,
+       super(
+         NavigationState.initial(
+           l10n,
+           permissions: permissions,
+           sidebarExpanded: sidebarExpanded,
+         ),
+       ) {
     on<MenuItemSelected>(_onMenuItemSelected);
     on<SubMenuItemSelected>(_onSubMenuItemSelected);
     on<SidebarToggled>(_onSidebarToggled);
+    on<SidebarPreferenceRestored>(_onSidebarPreferenceRestored);
     on<NavigationPermissionsChanged>(_onPermissionsChanged);
+    _restoreSidebarPreference();
+  }
+
+  Future<void> _restoreSidebarPreference() async {
+    final expanded = await _sidebarPreference?.read();
+    if (expanded != null && !isClosed) add(SidebarPreferenceRestored(expanded));
   }
 
   /// Reconstruit l'arborescence sur le nouvel ensemble de droits, en préservant
@@ -151,6 +175,13 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   }
 
   void _onSidebarToggled(SidebarToggled event, Emitter<NavigationState> emit) {
-    emit(state.copyWith(isSidebarExpanded: !state.isSidebarExpanded));
+    final expanded = !state.isSidebarExpanded;
+    emit(state.copyWith(isSidebarExpanded: expanded));
+    _sidebarPreference?.write(expanded: expanded);
   }
+
+  void _onSidebarPreferenceRestored(
+    SidebarPreferenceRestored event,
+    Emitter<NavigationState> emit,
+  ) => emit(state.copyWith(isSidebarExpanded: event.expanded));
 }

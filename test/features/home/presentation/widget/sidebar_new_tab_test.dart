@@ -94,8 +94,10 @@ void main() {
   });
 
   Future<void> openFinances(WidgetTester tester) async {
-    await tester.binding.setSurfaceSize(const Size(1400, 900));
-    addTearDown(() async => tester.binding.setSurfaceSize(null));
+    // La vue elle-même : `MediaQuery` décide de l'ouverture de la barre.
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(buildHarness());
     await tester.pumpAndSettle();
     await tester.tap(find.text('Finances').first);

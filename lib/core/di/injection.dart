@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/features/home/data/sidebar_preference_store.dart';
 import 'package:school_app_flutter/core/di/document_capture_di.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/di/offline_injection.dart';
@@ -258,6 +259,9 @@ Future<void> configureDependencies({
     () => defaultTargetPlatform == TargetPlatform.windows
         ? SerializedSecureStorage()
         : const FlutterSecureStorage(),
+  );
+  getIt.registerLazySingleton<SidebarPreferenceStore>(
+    () => SidebarPreferenceStore(getIt<FlutterSecureStorage>()),
   );
 
   // ── Socle offline (base chiffrée + outbox + moteur de synchro) ──────────────

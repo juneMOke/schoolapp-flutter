@@ -44,6 +44,17 @@ class SidebarToggled extends NavigationEvent {
   const SidebarToggled();
 }
 
+/// Le choix gardé sur ce poste (cf. `SidebarPreferenceStore`), relu après
+/// l'ouverture.
+class SidebarPreferenceRestored extends NavigationEvent {
+  final bool expanded;
+
+  const SidebarPreferenceRestored(this.expanded);
+
+  @override
+  List<Object?> get props => [expanded];
+}
+
 /// Les droits de la session ont changé (refresh porteur d'un nouvel ensemble,
 /// ADR-014 §5) : l'arborescence est reconstruite sur le nouveau périmètre.
 ///
