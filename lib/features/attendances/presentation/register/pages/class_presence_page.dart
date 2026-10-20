@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/navigation/bloc_location_tab.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
@@ -41,7 +42,18 @@ class ClassPresencePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<ClassPresenceCubit>(
     create: (_) => getIt<ClassPresenceCubit>(),
-    child: const ClassPresenceScreen(),
+    // L'onglet dans l'adresse : F5 le retrouve, Précédent y revient.
+    child:
+        BlocLocationTab<
+          ClassPresenceCubit,
+          ClassPresenceState,
+          ClassPresenceTab
+        >(
+          values: ClassPresenceTab.values,
+          tabOf: (state) => state.tab,
+          select: (cubit, tab) => cubit.setTab(tab),
+          child: const ClassPresenceScreen(),
+        ),
   );
 }
 

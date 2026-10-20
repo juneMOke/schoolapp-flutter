@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/disciplinary_student_detail_page.dart';
+import 'package:school_app_flutter/features/documents/presentation/context/documents_catalog_intent.dart';
+import 'package:school_app_flutter/features/documents/presentation/pages/documents_catalog_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_create_payment_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
@@ -12,7 +14,7 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/router/route_parameters.dart';
 
 /// Les fiches d'un élève qui ont une adresse : Facturation (et son
-/// encaissement), dossier disciplinaire.
+/// encaissement), catalogue des documents, dossier disciplinaire.
 ///
 /// La navigation leur passe l'identité de l'élève par `extra`. Une adresse
 /// rechargée, collée ou ouverte au Ctrl+clic n'en a pas : la fiche relit
@@ -94,6 +96,31 @@ abstract final class StudentRecordRoutes {
           studentId: studentId,
           academicYearId: academicYearId,
         );
+
+  /// `catalogue/:studentId/:academicYearId`, sous la liste Documents.
+  static GoRoute documentsCatalog() => GoRoute(
+    path: 'catalogue/:studentId/:academicYearId',
+    redirect: (context, state) => hasRequiredPathParameters(state, _ids)
+        ? null
+        : AppRoutesNames.documentsStudents,
+    builder: (context, state) {
+      final intent = DocumentsCatalogIntent.fromRouteContext(
+        studentId: _studentId(state),
+        academicYearId: _yearId(state),
+        extra: state.extra,
+      );
+      if (intent.hasDisplayContext) {
+        return DocumentsCatalogPage(intent: intent);
+      }
+      return StudentIdentityGate(
+        studentId: intent.studentId,
+        academicYearId: intent.academicYearId,
+        builder: (identity) => DocumentsCatalogPage(
+          intent: identity == null ? intent : intent.withIdentity(identity),
+        ),
+      );
+    },
+  );
 
   /// Le dossier disciplinaire d'un élève.
   static GoRoute disciplinaryDetail() => GoRoute(

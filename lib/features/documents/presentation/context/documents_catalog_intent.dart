@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 
 /// Contexte d'ouverture du catalogue de pièces d'un élève.
 ///
@@ -52,6 +53,21 @@ class DocumentsCatalogIntent extends Equatable {
     levelName: levelName,
     levelGroupName: levelGroupName,
   );
+
+  /// L'identité relue en base locale (lien profond, onglet rechargé) :
+  /// l'en-tête se peint. La référence de dossier ne s'y lit pas —
+  /// l'attestation reste indisponible, signalée comme telle.
+  DocumentsCatalogIntent withIdentity(StudentIdentity identity) =>
+      DocumentsCatalogIntent(
+        studentId: studentId,
+        academicYearId: academicYearId,
+        enrollmentId: enrollmentId,
+        firstName: identity.firstName,
+        lastName: identity.lastName,
+        surname: identity.surname,
+        levelName: identity.levelName,
+        levelGroupName: identity.levelGroupName,
+      );
 
   /// Recompose l'intention depuis la route. `extra` est perdu au rechargement
   /// d'un lien profond : on retombe alors sur les deux seuls identifiants du

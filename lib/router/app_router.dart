@@ -25,8 +25,6 @@ import 'package:school_app_flutter/features/staff/presentation/pages/staff_atten
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_file_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
-import 'package:school_app_flutter/features/documents/presentation/context/documents_catalog_intent.dart';
-import 'package:school_app_flutter/features/documents/presentation/pages/documents_catalog_page.dart';
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_feature_scope.dart';
@@ -56,7 +54,6 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_l
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_organisation_page.dart';
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/router/return_location.dart';
-import 'package:school_app_flutter/router/route_parameters.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/router/student_record_routes.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
@@ -556,29 +553,7 @@ class AppRouter {
         GoRoute(
           path: AppRoutesNames.documentsStudents,
           builder: (context, state) => const DocumentsPage(),
-          routes: [
-            GoRoute(
-              path: 'catalogue/:studentId/:academicYearId',
-              redirect: (context, state) {
-                if (!hasRequiredPathParameters(state, const [
-                  'studentId',
-                  'academicYearId',
-                ])) {
-                  return AppRoutesNames.documentsStudents;
-                }
-                return null;
-              },
-              builder: (context, state) {
-                final intent = DocumentsCatalogIntent.fromRouteContext(
-                  studentId: state.pathParameters['studentId'] ?? '',
-                  academicYearId: state.pathParameters['academicYearId'] ?? '',
-                  extra: state.extra,
-                );
-
-                return DocumentsCatalogPage(intent: intent);
-              },
-            ),
-          ],
+          routes: [StudentRecordRoutes.documentsCatalog()],
         ),
       ],
     ),

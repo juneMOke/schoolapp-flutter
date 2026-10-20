@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/navigation/bloc_location_tab.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -28,7 +29,18 @@ class StaffAttendancePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<StaffAttendanceCubit>(
     create: (_) => getIt<StaffAttendanceCubit>()..load(),
-    child: const StaffAttendanceScreen(),
+    // L'onglet dans l'adresse : F5 le retrouve, Précédent y revient.
+    child:
+        BlocLocationTab<
+          StaffAttendanceCubit,
+          StaffAttendanceState,
+          StaffAttendanceTab
+        >(
+          values: StaffAttendanceTab.values,
+          tabOf: (state) => state.tab,
+          select: (cubit, tab) => cubit.setTab(tab),
+          child: const StaffAttendanceScreen(),
+        ),
   );
 }
 

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
-import 'package:school_app_flutter/features/finance/presentation/pages/facturation_detail_page.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
@@ -17,9 +15,11 @@ import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_page_helpers.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_split_selection.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_search_form.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_split_detail_pane.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_student_table.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -43,8 +43,10 @@ class FacturationPage extends StatefulWidget {
 }
 
 class _FacturationPageState extends State<FacturationPage> {
-  /// Grand écran : la fiche ouverte à côté de la liste ; `null` = aucune.
-  FacturationDetailIntent? _selected;
+  /// Grand écran : la fiche ouverte à côté de la liste, tenue dans l'adresse.
+  late final FacturationSplitSelection _selection;
+
+  FacturationDetailIntent? get _selected => _selection.selected;
 
   /// La largeur reçue permet-elle la liste et la fiche côte à côte ? Relu à
   /// chaque rendu : c'est lui qui décide, au clic, d'ouvrir à côté ou de
@@ -55,9 +57,21 @@ class _FacturationPageState extends State<FacturationPage> {
   /// la fait passer de la page entière à sa colonne, et retour.
   final _listKey = GlobalKey();
 
+  void _onSelectionChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _selection.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    _selection = FacturationSplitSelection(GoRouter.maybeOf(context))
+      ..addListener(_onSelectionChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<AcademicYearContextBloc>().add(
@@ -178,44 +192,28 @@ class _FacturationPageState extends State<FacturationPage> {
           if (!_split) return list;
           return MasterDetailLayout(
             master: list,
-            detail: _detailPane(),
-            onCloseDetail: _selected == null
-                ? null
-                : () => setState(() => _selected = null),
+            detail: FacturationSplitDetailPane(
+              selected: _selectedThisYear(),
+              onClose: _selection.clear,
+            ),
+            onCloseDetail: _selected == null ? null : _selection.clear,
           );
         },
       ),
     );
   }
 
-  /// La fiche choisie, ou l'invitation à en choisir une. Une clé par élève :
-  /// changer d'élève recrée ses BLoCs au lieu de nourrir ceux du précédent.
-  Widget _detailPane() {
+  /// La fiche choisie, si elle est de l'année consultée : une fiche ouverte
+  /// sur une autre année (contexte changé depuis) ne s'affiche pas — son
+  /// grand-livre n'est plus celui qu'on consulte.
+  FacturationDetailIntent? _selectedThisYear() {
     final yearId = context
         .read<AcademicYearContextBloc>()
         .state
         .context
         ?.academicYear
         .id;
-    // Une fiche ouverte sur une autre année (contexte changé depuis) ne
-    // s'affiche pas : son grand-livre n'est plus celui qu'on consulte.
-    final selected = _selected?.academicYearId == yearId ? _selected : null;
-    if (selected == null) {
-      final l10n = AppLocalizations.of(context)!;
-      return SingleChildScrollView(
-        child: EteeloEmptyResult(
-          label: l10n.facturationPickStudentTitle,
-          description: l10n.facturationPickStudentMessage,
-          medallionIcon: Icons.receipt_long_outlined,
-        ),
-      );
-    }
-    return FacturationDetailPage(
-      key: ValueKey('${selected.academicYearId}/${selected.studentId}'),
-      intent: selected,
-      embedded: true,
-      onClose: () => setState(() => _selected = null),
-    );
+    return _selected?.academicYearId == yearId ? _selected : null;
   }
 
   /// Navigue vers la page de détail facturation avec le contexte d'affichage.
@@ -253,7 +251,7 @@ class _FacturationPageState extends State<FacturationPage> {
       levelGroupName: labels.levelGroupName,
     );
     if (_split) {
-      setState(() => _selected = intent);
+      _selection.select(intent);
       return;
     }
     context.push(

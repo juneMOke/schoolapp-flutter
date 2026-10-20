@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_degradation_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/reflected_records_parser.dart';
 import 'package:school_app_flutter/router/app_router.dart';
 import 'package:school_app_flutter/core/components/avatars/person_photo_source.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
@@ -340,7 +341,9 @@ class _MyAppState extends State<MyApp> {
             onGenerateTitle: (context) =>
                 AppLocalizations.of(context)!.schoolApp,
             theme: AppTheme.light,
-            routerConfig: _router,
+            // Les fiches en lecture ouvertes par `push` prennent leur adresse
+            // (F5, favori) ; l'encaissement jamais.
+            routerConfig: ReflectedRecordsParser.configOf(_router),
             // Bandeau global au-dessus de toutes les routes : dégradation de
             // session offline (ADR-010 D-08). Le bandeau « données en cache »
             // de l'ex-bootstrap est retiré (plus de distinction local/distant
