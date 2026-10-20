@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/classes/presentation/helpers/classes_grid_layout.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
@@ -323,16 +324,8 @@ class _ClassroomsView extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final columns = width >= AppBreakpoints.classesGridThreeColMin
-            ? 3
-            : width >= AppBreakpoints.classesGridTwoColMin
-            ? 2
-            : 1;
-        const gap = AppDimensions.spacingM;
-        final cardWidth = columns <= 1
-            ? width
-            : (width - (columns - 1) * gap) / columns;
+        const gap = ClassesGridLayout.gap;
+        final cardWidth = ClassesGridLayout.cardWidthFor(constraints.maxWidth);
 
         return Wrap(
           spacing: gap,

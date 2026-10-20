@@ -115,7 +115,7 @@ class _FacturationPayerSearchDialogState
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.facturationPayerSearchModalMaxWidth,
-          maxHeight: size.height * 0.85,
+          maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
         ),
         child: EteeloDialogBody(
           // Seul l'en-tête reste ancré. Il pèse 86 dp ; sous ce seuil (paysage

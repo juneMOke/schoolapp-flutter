@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -64,24 +65,12 @@ class EnrollmentInsightsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppDimensions.spacingM),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            const gap = AppDimensions.spacingM;
-            const min = AppDimensions.enrollmentDashboardInsightMinWidth;
-            final columns = ((constraints.maxWidth + gap) / (min + gap))
-                .floor()
-                .clamp(1, cards.length);
-            final width =
-                (constraints.maxWidth - gap * (columns - 1)) / columns;
-
-            return Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: [
-                for (final card in cards) SizedBox(width: width, child: card),
-              ],
-            );
-          },
+        EteeloGridView(
+          itemCount: cards.length,
+          itemBuilder: (_, index) => cards[index],
+          padding: EdgeInsets.zero,
+          spacing: AppDimensions.spacingM,
+          minItemWidth: AppDimensions.enrollmentDashboardInsightMinWidth,
         ),
       ],
     );

@@ -203,8 +203,14 @@ class EteeloDocumentViewerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
+    final screen = MediaQuery.sizeOf(context);
+    final maxHeight = screen.height * AppDimensions.dialogMaxHeightRatio;
+    final maxWidth = (screen.width * AppDimensions.documentViewerWidthRatio)
+        .clamp(
+          AppDimensions.documentViewerMaxWidth,
+          AppDimensions.documentViewerWideMaxWidth,
+        )
+        .toDouble();
     final preview = previewBuilder;
 
     return PageActionShortcut(
@@ -214,7 +220,7 @@ class EteeloDocumentViewerView extends StatelessWidget {
       child: EteeloAdaptiveDialog(
         clipBehavior: Clip.antiAlias,
         insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-        maxWidth: AppDimensions.documentViewerMaxWidth,
+        maxWidth: maxWidth,
         maxHeight: maxHeight,
         child: Column(
           mainAxisSize: MainAxisSize.min,

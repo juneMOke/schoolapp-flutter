@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/chart_height.dart';
 import 'package:school_app_flutter/core/components/charts/chart_label_density.dart';
 import 'package:school_app_flutter/core/components/charts/chart_entrance.dart';
 import 'package:school_app_flutter/core/components/charts/line_chart_point.dart';
@@ -89,10 +90,13 @@ class EvolutionLineChart extends StatelessWidget {
         : (resolvedMaxY / 4).clamp(1.0, double.infinity);
     final Color targetColor = targetLineColor ?? AppColors.terreCuite;
 
-    return SizedBox(
-      height: AppDimensions.enrollmentStatsChartSectionHeight,
-      child: LayoutBuilder(
-        builder: (context, constraints) => _chart(
+    return LayoutBuilder(
+      builder: (context, constraints) => SizedBox(
+        height: ChartHeight.forWidth(
+          constraints.maxWidth,
+          min: AppDimensions.enrollmentStatsChartSectionHeight,
+        ),
+        child: _chart(
           resolvedMinY: resolvedMinY,
           resolvedMaxY: resolvedMaxY,
           gridInterval: gridInterval,

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -202,27 +203,36 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             // Un `Wrap` et non une rangée : à 360 dp, les deux libellés de la
-            // correction ne tiennent pas côte à côte.
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.sm,
-              children: [
-                if (widget.correcting)
-                  EteeloButton.secondary(
-                    label: l10n.staffContractCancelOnly,
-                    onPressed: () => unawaited(_cancelOnly()),
-                    fullWidth: false,
-                  ),
-                EteeloButton.primary(
-                  label: widget.correcting
-                      ? l10n.staffContractCorrectSubmit
-                      : l10n.staffContractAddSubmit,
-                  icon: Icons.check,
-                  onPressed: _submit,
-                  fullWidth: false,
+            // correction ne tiennent pas côte à côte. Plafonné comme le corps.
+            child: ContentMaxWidth(
+              maxWidth: AppDimensions.staffAgentBodyMaxWidth,
+              heightFactor: 1,
+              // Toute la largeur plafonnée : `spaceBetween` écarte les
+              // boutons aux deux bords du formulaire, pas de l'écran.
+              child: SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  spacing: AppSpacing.md,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    if (widget.correcting)
+                      EteeloButton.secondary(
+                        label: l10n.staffContractCancelOnly,
+                        onPressed: () => unawaited(_cancelOnly()),
+                        fullWidth: false,
+                      ),
+                    EteeloButton.primary(
+                      label: widget.correcting
+                          ? l10n.staffContractCorrectSubmit
+                          : l10n.staffContractAddSubmit,
+                      icon: Icons.check,
+                      onPressed: _submit,
+                      fullWidth: false,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

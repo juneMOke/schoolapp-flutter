@@ -170,6 +170,9 @@ class AppBreakpoints {
   // Grille de cartes de classe : 2 colonnes / 3 colonnes.
   static const double classesGridTwoColMin = 700.0;
   static const double classesGridThreeColMin = 1080.0;
+  // Quatre colonnes sur grand écran : à trois, une page de 1 760 donnait des
+  // cartes de classe de ~580 dp.
+  static const double classesGridFourColMin = 1440.0;
   // Cascade Cycle/Niveau : au-delà, les 2 selects côte à côte ; en deçà, empilés.
   static const double classesCascadeRowMin = 520.0;
   // Tuile élève : en deçà, le bouton d'action passe en icône seule (+ tooltip).

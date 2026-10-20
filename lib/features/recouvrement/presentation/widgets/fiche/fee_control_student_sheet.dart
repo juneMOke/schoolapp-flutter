@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/widgets/outlined_panel.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
@@ -144,9 +145,10 @@ class FeeControlStudentSheet extends StatelessWidget {
     }
     return Dialog(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           maxWidth: AppDimensions.recouvrementStudentSheetMaxWidth,
-          maxHeight: AppDimensions.recouvrementCallListMaxHeight,
+          // Une longue liste ne se coupe plus à 620 sur un grand écran.
+          maxHeight: DialogHeight.ofWindow(context),
         ),
         child: body,
       ),

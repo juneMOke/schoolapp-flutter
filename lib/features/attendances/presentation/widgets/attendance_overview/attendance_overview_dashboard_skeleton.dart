@@ -85,9 +85,7 @@ class _GhostKpiBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const gap = AppDimensions.spacingM;
-    final columns = EteeloKpiBand.columnsFor(maxWidth, 4);
-    final cardWidth = ((maxWidth - gap * (columns - 1)) / columns)
-        .floorToDouble();
+    final cardWidth = EteeloKpiBand.cardWidthFor(maxWidth, 4);
 
     return Wrap(
       spacing: gap,

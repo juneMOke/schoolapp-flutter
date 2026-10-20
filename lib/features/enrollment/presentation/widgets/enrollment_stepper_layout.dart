@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
@@ -50,7 +51,8 @@ class EnrollmentStepperLayout extends StatelessWidget {
   // Largeur max de la carte d'étape : large, bornée sur très grand écran (au-delà
   // elle reste centrée). Les champs s'organisent en 1/2/3 colonnes selon la
   // largeur disponible (voir WizardFieldsGrid) → carte large, hauteur modérée.
-  static const double _stepCardMaxWidth = 1100;
+  static const double _stepCardMaxWidth =
+      AppDimensions.enrollmentStepCardMaxWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +79,7 @@ class EnrollmentStepperLayout extends StatelessWidget {
                   progress: progress,
                   onStepTap: onStepTap,
                   compact: density.usesCompactBreadcrumb,
+                  contentMaxWidth: _stepCardMaxWidth,
                 ),
                 SizedBox(height: roomy ? AppSpacing.md : AppSpacing.xs),
               ],

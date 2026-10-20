@@ -132,11 +132,18 @@ class AppDimensions {
   // large que les modales de saisie — une page A4 portrait doit rester lisible
   // sans zoom sur tablette paysage (1280×800 dp de référence).
   static const documentViewerMaxWidth = 760.0;
+
+  /// Sur grand écran, la visionneuse s'élargit avec la fenêtre (part
+  /// [documentViewerWidthRatio]), jusqu'à [documentViewerWideMaxWidth] : une
+  /// page A4 tenait à 760 dp sur un écran de 2 560.
+  static const documentViewerWidthRatio = 0.6;
+  static const documentViewerWideMaxWidth = 1100.0;
   // Hauteur du gabarit de page pendant la préparation du document :
   // proportion A4 approchée à la largeur de la visionneuse.
   static const documentViewerSkeletonHeight = 420.0;
   // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
   static const searchFieldMinWidth = 170.0;
+  static const searchFieldMaxWidth = 360.0;
   static const searchFieldGap = 10.0;
   // Largeur max de la carte d'invitation « avant recherche » (centrée).
   static const searchInvitationMaxWidth = 620.0;
@@ -267,7 +274,17 @@ class AppDimensions {
   // Enrollment stats dashboard tokens
   static const enrollmentStatsKpiCardHeight = 104.0;
   static const enrollmentStatsKpiCardMinWidth = 148.0;
+
+  /// Plafond d'une carte KPI : sur 1 760 dp de page, trois cartes en
+  /// prenaient ~575 chacune — un chiffre perdu dans un pavé vide. Au-delà,
+  /// la bande s'arrête et laisse la place à droite.
+  static const kpiCardMaxWidth = 420.0;
   static const enrollmentStatsChartSectionHeight = 220.0;
+
+  /// Un graphique gagne en hauteur avec sa largeur (`ChartHeight`) : à hauteur
+  /// fixe, 1 760 × 220 faisait une bande plate de 8 pour 1.
+  static const chartHeightToWidthRatio = 0.22;
+  static const chartMaxHeight = 360.0;
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;
 
@@ -396,7 +413,6 @@ class AppDimensions {
 
   // Aperçu nominatif d'un groupe visé (spec §7).
   static const recouvrementCallListMaxWidth = 720.0;
-  static const recouvrementCallListMaxHeight = 620.0;
   static const recouvrementCallListSpinner = 16.0;
 
   // Aperçu nominatif d'un élève — la fiche qui désagrège ses frais.
@@ -532,6 +548,9 @@ class AppDimensions {
   /// Lectures & alertes : cartes qui s'enroulent, jamais rendues « pour remplir
   /// la ligne » — chacune a sa condition.
   static const enrollmentDashboardInsightMinWidth = 250.0;
+
+  /// Carte « ce que les chiffres veulent dire » de la caisse (`flex 1 1 260`).
+  static const financeTillInsightMinWidth = 260.0;
   static const enrollmentDashboardInsightBadgeSize = 28.0;
 
   // ── Dépenses (spec « Dépenses ▸ Frais de fonctionnement ») ────────────────
@@ -709,6 +728,16 @@ class AppDimensions {
   /// Les modales du pointage.
   static const formDialogMaxWidth = 480.0;
   static const formDialogMaxHeight = 640.0;
+
+  /// Carte d'étape de l'assistant d'inscription : large, bornée sur très
+  /// grand écran ; la barre d'étapes et le pied s'alignent sur elle.
+  static const enrollmentStepCardMaxWidth = 1100.0;
+
+  /// Sur un grand écran, une modale de saisie grandit avec la fenêtre (part
+  /// [formDialogHeightRatio]) jusqu'à [formDialogTallMaxHeight] : un long
+  /// formulaire défilait dans 640 dp sur un écran de 1 440 de haut.
+  static const formDialogHeightRatio = 0.8;
+  static const formDialogTallMaxHeight = 900.0;
 
   /// Fiche mensuelle : sélecteur d'agent et calendrier.
   static const presenceMarkPickerWidth = 340.0;

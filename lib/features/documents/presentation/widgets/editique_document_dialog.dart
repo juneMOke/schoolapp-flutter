@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:printing/printing.dart';
+import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -396,8 +397,7 @@ class EditiqueDocumentDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
+    final maxHeight = DialogHeight.ofWindow(context);
 
     return Dialog(
       backgroundColor: AppColors.surfaceRaised,

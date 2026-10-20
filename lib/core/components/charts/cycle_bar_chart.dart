@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/chart_height.dart';
 import 'package:school_app_flutter/core/components/charts/bar_chart_item.dart';
 import 'package:school_app_flutter/core/components/charts/chart_entrance.dart';
 import 'package:school_app_flutter/core/components/charts/cycle_bar_chart_geometry.dart';
@@ -145,186 +146,200 @@ class CycleBarChart extends StatelessWidget {
             styleOf: _bottomLabelStyle,
           )
         : AppDimensions.enrollmentStatsChartBottomTitleHeight;
-    final chartHeight =
-        AppDimensions.enrollmentStatsChartSectionHeight +
-        (bottomReservedSize -
-            AppDimensions.enrollmentStatsChartBottomTitleHeight);
+    // La hauteur suit la largeur offerte (`ChartHeight`), plus ce que les
+    // libellés pivotés prennent.
+    return LayoutBuilder(
+      builder: (context, outer) {
+        final chartHeight =
+            ChartHeight.forWidth(
+              outer.maxWidth,
+              min: AppDimensions.enrollmentStatsChartSectionHeight,
+            ) +
+            (bottomReservedSize -
+                AppDimensions.enrollmentStatsChartBottomTitleHeight);
 
-    return SizedBox(
-      height: chartHeight,
-      // La largeur des barres se déduit du pas, donc de la largeur offerte :
-      // il faut l'avoir mesurée avant de construire le tracé.
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final barWidth = cycleBarWidth(
-            barCount: items.length,
-            availableWidth: constraints.maxWidth,
-            axisWidth: axisWidth,
-          );
+        return SizedBox(
+          height: chartHeight,
+          // La largeur des barres se déduit du pas, donc de la largeur offerte :
+          // il faut l'avoir mesurée avant de construire le tracé.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final barWidth = cycleBarWidth(
+                barCount: items.length,
+                availableWidth: constraints.maxWidth,
+                axisWidth: axisWidth,
+              );
 
-          // Le plancher est donné en dp ; les barres, elles, se mesurent dans
-          // l'unité des données. On convertit donc avec la hauteur réellement
-          // offerte au tracé — sans quoi le même plancher vaudrait deux choses
-          // différentes sur deux graphiques de hauteurs différentes.
-          final plotHeight = chartHeight - bottomReservedSize;
-          final minToY = (minimumBarHeight <= 0 || plotHeight <= 0)
-              ? 0.0
-              : topY * (minimumBarHeight / plotHeight);
-          return ChartEntrance(
-            builder: (context, motion) => BarChart(
-              BarChartData(
-                maxY: topY,
-                barTouchData: BarTouchData(
-                  enabled: !showValueLabels,
-                  handleBuiltInTouches: !showValueLabels,
-                  touchTooltipData: BarTouchTooltipData(
-                    // Transparent sous une étiquette permanente : c'est un
-                    // montant posé sur la barre, pas une bulle.
-                    getTooltipColor: (group) => _labelsAlways(group.x.toInt())
-                        ? Colors.transparent
-                        : AppColors.surfaceDark,
-                    tooltipRoundedRadius: 8,
-                    tooltipPadding: showValueLabels
-                        ? EdgeInsets.zero
-                        : const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+              // Le plancher est donné en dp ; les barres, elles, se mesurent dans
+              // l'unité des données. On convertit donc avec la hauteur réellement
+              // offerte au tracé — sans quoi le même plancher vaudrait deux choses
+              // différentes sur deux graphiques de hauteurs différentes.
+              final plotHeight = chartHeight - bottomReservedSize;
+              final minToY = (minimumBarHeight <= 0 || plotHeight <= 0)
+                  ? 0.0
+                  : topY * (minimumBarHeight / plotHeight);
+              return ChartEntrance(
+                builder: (context, motion) => BarChart(
+                  BarChartData(
+                    maxY: topY,
+                    barTouchData: BarTouchData(
+                      enabled: !showValueLabels,
+                      handleBuiltInTouches: !showValueLabels,
+                      touchTooltipData: BarTouchTooltipData(
+                        // Transparent sous une étiquette permanente : c'est un
+                        // montant posé sur la barre, pas une bulle.
+                        getTooltipColor: (group) =>
+                            _labelsAlways(group.x.toInt())
+                            ? Colors.transparent
+                            : AppColors.surfaceDark,
+                        tooltipRoundedRadius: 8,
+                        tooltipPadding: showValueLabels
+                            ? EdgeInsets.zero
+                            : const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                        fitInsideVertically: true,
+                        fitInsideHorizontally: true,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final item = items[group.x.toInt()];
+                          // ⚠️ **L'étiquette lit la valeur de l'ITEM, jamais
+                          // `rod.toY`.** Les deux ne sont pas le même nombre depuis
+                          // qu'un plancher existe : une barre de 300 sous un maximum
+                          // à 7 000 000 est dessinée à 91 145 pour rester visible, et
+                          // une étiquette prise sur la géométrie annonçait « 91 K »
+                          // là où l'école avait encaissé 300. Sur un écran d'argent,
+                          // un chiffre faux est pire qu'une barre invisible.
+                          //
+                          // Le plancher est une décision de DESSIN ; l'étiquette est
+                          // une donnée. Elles n'ont pas à passer par la même valeur.
+                          final value = item.value;
+                          if (_labelsAlways(group.x.toInt())) {
+                            // Étiquette permanente : valeur seule ; couleur dédiée si
+                            // fournie (sinon couleur de la barre).
+                            return BarTooltipItem(
+                              (valueLabelFormatter ??
+                                  NumberFormatterHelper.formatYAxisLabel)(
+                                value,
+                              ),
+                              AppTextStyles.caption.copyWith(
+                                color:
+                                    valueLabelColorBuilder?.call(
+                                      group.x.toInt(),
+                                    ) ??
+                                    item.color,
+                                fontWeight: FontWeight.w700,
+                                fontFeatures: AppTextStyles.tabularFigures,
+                              ),
+                            );
+                          }
+                          return BarTooltipItem(
+                            '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(value)}',
+                            AppTextStyles.caption.copyWith(
+                              color: AppColors.textOnDark,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: (topY / gridDivisions).clamp(
+                        1,
+                        double.infinity,
+                      ),
+                      getDrawingHorizontalLine: (_) => const FlLine(
+                        color: AppColors.enrollmentStatsChartGrid,
+                        strokeWidth: 1,
+                      ),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    titlesData: FlTitlesData(
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: showLeftAxis,
+                          reservedSize: axisWidth,
+                          getTitlesWidget: (value, meta) => Text(
+                            NumberFormatterHelper.formatYAxisLabel(value),
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textSecondary,
+                              fontFeatures: AppTextStyles.tabularFigures,
+                            ),
                           ),
-                    fitInsideVertically: true,
-                    fitInsideHorizontally: true,
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final item = items[group.x.toInt()];
-                      // ⚠️ **L'étiquette lit la valeur de l'ITEM, jamais
-                      // `rod.toY`.** Les deux ne sont pas le même nombre depuis
-                      // qu'un plancher existe : une barre de 300 sous un maximum
-                      // à 7 000 000 est dessinée à 91 145 pour rester visible, et
-                      // une étiquette prise sur la géométrie annonçait « 91 K »
-                      // là où l'école avait encaissé 300. Sur un écran d'argent,
-                      // un chiffre faux est pire qu'une barre invisible.
-                      //
-                      // Le plancher est une décision de DESSIN ; l'étiquette est
-                      // une donnée. Elles n'ont pas à passer par la même valeur.
-                      final value = item.value;
-                      if (_labelsAlways(group.x.toInt())) {
-                        // Étiquette permanente : valeur seule ; couleur dédiée si
-                        // fournie (sinon couleur de la barre).
-                        return BarTooltipItem(
-                          (valueLabelFormatter ??
-                              NumberFormatterHelper.formatYAxisLabel)(value),
-                          AppTextStyles.caption.copyWith(
-                            color:
-                                valueLabelColorBuilder?.call(group.x.toInt()) ??
-                                item.color,
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: AppTextStyles.tabularFigures,
-                          ),
-                        );
-                      }
-                      return BarTooltipItem(
-                        '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(value)}',
-                        AppTextStyles.caption.copyWith(
-                          color: AppColors.textOnDark,
-                          fontWeight: FontWeight.w600,
                         ),
-                      );
-                    },
-                  ),
-                ),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: (topY / gridDivisions).clamp(
-                    1,
-                    double.infinity,
-                  ),
-                  getDrawingHorizontalLine: (_) => const FlLine(
-                    color: AppColors.enrollmentStatsChartGrid,
-                    strokeWidth: 1,
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: showLeftAxis,
-                      reservedSize: axisWidth,
-                      getTitlesWidget: (value, meta) => Text(
-                        NumberFormatterHelper.formatYAxisLabel(value),
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textSecondary,
-                          fontFeatures: AppTextStyles.tabularFigures,
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: bottomReservedSize,
+                          getTitlesWidget: (value, meta) {
+                            final idx = value.toInt();
+                            if (idx < 0 || idx >= items.length) {
+                              return const SizedBox.shrink();
+                            }
+                            final label = Text(
+                              items[idx].label,
+                              style: _bottomLabelStyle(idx),
+                              textAlign: TextAlign.center,
+                              maxLines: verticalBottomLabels ? 1 : null,
+                              overflow: verticalBottomLabels
+                                  ? TextOverflow.ellipsis
+                                  : TextOverflow.clip,
+                            );
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                top: AppDimensions.spacingXS,
+                              ),
+                              child: verticalBottomLabels
+                                  ? RotatedBox(quarterTurns: 1, child: label)
+                                  : label,
+                            );
+                          },
                         ),
                       ),
                     ),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: bottomReservedSize,
-                      getTitlesWidget: (value, meta) {
-                        final idx = value.toInt();
-                        if (idx < 0 || idx >= items.length) {
-                          return const SizedBox.shrink();
-                        }
-                        final label = Text(
-                          items[idx].label,
-                          style: _bottomLabelStyle(idx),
-                          textAlign: TextAlign.center,
-                          maxLines: verticalBottomLabels ? 1 : null,
-                          overflow: verticalBottomLabels
-                              ? TextOverflow.ellipsis
-                              : TextOverflow.clip,
-                        );
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                            top: AppDimensions.spacingXS,
-                          ),
-                          child: verticalBottomLabels
-                              ? RotatedBox(quarterTurns: 1, child: label)
-                              : label,
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                barGroups: [
-                  for (int i = 0; i < items.length; i++)
-                    BarChartGroupData(
-                      x: i,
-                      showingTooltipIndicators: _labelsAlways(i)
-                          ? const [0]
-                          : const [],
-                      barRods: [
-                        BarChartRodData(
-                          // Zéro reste zéro : le plancher ne s'applique qu'à
-                          // une valeur réellement encaissée.
-                          toY: motion.lerpValue(
-                            items[i].value <= 0
-                                ? items[i].value
-                                : (items[i].value < minToY
-                                      ? minToY
-                                      : items[i].value),
-                          ),
-                          color: items[i].color,
-                          width: barWidth,
-                          borderRadius: BorderRadius.circular(barRadius),
+                    barGroups: [
+                      for (int i = 0; i < items.length; i++)
+                        BarChartGroupData(
+                          x: i,
+                          showingTooltipIndicators: _labelsAlways(i)
+                              ? const [0]
+                              : const [],
+                          barRods: [
+                            BarChartRodData(
+                              // Zéro reste zéro : le plancher ne s'applique qu'à
+                              // une valeur réellement encaissée.
+                              toY: motion.lerpValue(
+                                items[i].value <= 0
+                                    ? items[i].value
+                                    : (items[i].value < minToY
+                                          ? minToY
+                                          : items[i].value),
+                              ),
+                              color: items[i].color,
+                              width: barWidth,
+                              borderRadius: BorderRadius.circular(barRadius),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                ],
-              ),
-              duration: motion.duration,
-              curve: motion.curve,
-            ),
-          );
-        },
-      ),
+                    ],
+                  ),
+                  duration: motion.duration,
+                  curve: motion.curve,
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

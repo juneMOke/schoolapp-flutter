@@ -91,7 +91,7 @@ class _ParentSearchDialogState extends State<_ParentSearchDialog> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.guardianSearchModalMaxWidth,
-          maxHeight: size.height * 0.85,
+          maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
         ),
         child: EteeloDialogBody(
           // Seul l'en-tête reste ancré — titre et croix de fermeture ne

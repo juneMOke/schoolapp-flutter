@@ -137,7 +137,7 @@ class _GuardianPhoneConflictDialogState
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.guardianSearchModalMaxWidth,
-          maxHeight: size.height * 0.85,
+          maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
         ),
         child: EteeloDialogBody(
           // Pied à deux boutons (~72 dp) sous un en-tête de 86 : au-dessous de

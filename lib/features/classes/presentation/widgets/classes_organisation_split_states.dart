@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/classes/presentation/helpers/classes_grid_layout.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -29,16 +29,10 @@ class ClassesOrganisationClassroomsSkeleton extends StatelessWidget {
       child: ExcludeSemantics(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final columns = width >= AppBreakpoints.classesGridThreeColMin
-                ? 3
-                : width >= AppBreakpoints.classesGridTwoColMin
-                ? 2
-                : 1;
-            const gap = AppDimensions.spacingM;
-            final cardWidth = columns <= 1
-                ? width
-                : (width - (columns - 1) * gap) / columns;
+            const gap = ClassesGridLayout.gap;
+            final cardWidth = ClassesGridLayout.cardWidthFor(
+              constraints.maxWidth,
+            );
 
             return Wrap(
               spacing: gap,

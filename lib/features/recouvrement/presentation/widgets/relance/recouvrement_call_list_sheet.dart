@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -40,9 +41,10 @@ class RecouvrementCallListSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           maxWidth: AppDimensions.recouvrementCallListMaxWidth,
-          maxHeight: AppDimensions.recouvrementCallListMaxHeight,
+          // Une longue liste ne se coupe plus à 620 sur un grand écran.
+          maxHeight: DialogHeight.ofWindow(context),
         ),
         child: BlocBuilder<RecouvrementCallListCubit, RecouvrementCallListState>(
           builder: (context, state) => Column(

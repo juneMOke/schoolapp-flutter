@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
@@ -418,8 +419,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
+    final maxHeight = DialogHeight.ofWindow(context);
     // Deux devises se lisent côte à côte, jamais additionnées.
     final amount = intent.amounts.entries.map(MoneyFormat.format).join(' · ');
     final date = MaterialLocalizations.of(

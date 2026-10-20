@@ -59,10 +59,8 @@ class FinanceTillCashBoxes extends StatelessWidget {
   /// Quand la rangée ne tient pas, les tuiles s'enroulent **à largeur égale** :
   /// un rapport de largeurs n'a plus de sens sur plusieurs rangs, où les tuiles
   /// ne se comparent plus du regard.
-  static double _wrappedWidth(double maxWidth, int count, double spacing) {
-    final columns = EteeloKpiBand.columnsFor(maxWidth, count);
-    return ((maxWidth - spacing * (columns - 1)) / columns).floorToDouble();
-  }
+  static double _wrappedWidth(double maxWidth, int count, double spacing) =>
+      EteeloKpiBand.cardWidthFor(maxWidth, count);
 
   @override
   Widget build(BuildContext context) {
@@ -88,11 +86,20 @@ class FinanceTillCashBoxes extends StatelessWidget {
 
           final available = constraints.maxWidth - gutters;
           final basisTotal = cashBoxBasis * blocks.length + counterBasis;
+          // Sur une rangée, au prorata des gabarits — plafonné comme toute
+          // carte KPI : deux caisses ne s'étirent pas sur 1 700 dp.
+          const max = AppDimensions.kpiCardMaxWidth;
           final cashWidth = fitsOneRow
-              ? (available * cashBoxBasis / basisTotal).floorToDouble()
+              ? (available * cashBoxBasis / basisTotal)
+                    .floorToDouble()
+                    .clamp(0, max)
+                    .toDouble()
               : _wrappedWidth(constraints.maxWidth, count, spacing);
           final counterWidth = fitsOneRow
-              ? (available * counterBasis / basisTotal).floorToDouble()
+              ? (available * counterBasis / basisTotal)
+                    .floorToDouble()
+                    .clamp(0, max * counterBasis / cashBoxBasis)
+                    .toDouble()
               : cashWidth;
 
           return Column(

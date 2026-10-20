@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
@@ -49,7 +50,7 @@ class EteeloFormDialog extends StatelessWidget {
     final fullscreen = EteeloAdaptiveDialog.isFullscreen(context);
     return EteeloAdaptiveDialog(
       maxWidth: maxWidth,
-      maxHeight: AppDimensions.formDialogMaxHeight,
+      maxHeight: DialogHeight.ofForm(context),
       child: EteeloSubmitShortcut(
         onSubmit: onSubmit,
         child: Padding(

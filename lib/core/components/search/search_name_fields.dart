@@ -51,8 +51,12 @@ class SearchNameFields extends StatelessWidget {
       builder: (context, constraints) {
         final available = constraints.maxWidth;
         final threeUp = available >= (minFieldWidth * 3) + (spacing * 2);
+        // Plafonnés : sur une page large, trois champs de ~570 dp
+        // n'aidaient pas à saisir un nom de 12 lettres.
         final fieldWidth = threeUp
-            ? (available - (spacing * 2)) / 3
+            ? ((available - (spacing * 2)) / 3)
+                  .clamp(0, AppDimensions.searchFieldMaxWidth)
+                  .toDouble()
             : available;
 
         Widget field(
