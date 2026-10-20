@@ -33,7 +33,11 @@ import 'dart:math';
 /// anciens sortent.
 class InMemoryExtraCodec extends Codec<Object?, Object?> {
   InMemoryExtraCodec({this.capacity = 64, int? session})
-    : _session = session ?? Random().nextInt(1 << 32);
+    : _session = session ?? Random().nextInt(_sessionRange);
+
+  /// Borne du jeton. Écrite en clair : `1 << 32` vaut 0 sur le web, où les
+  /// décalages se font sur 32 bits — `nextInt(0)` levait au démarrage.
+  static const int _sessionRange = 0x7FFFFFFF;
 
   final int capacity;
   final int _session;
