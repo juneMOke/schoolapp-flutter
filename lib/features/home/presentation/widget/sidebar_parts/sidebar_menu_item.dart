@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/web/new_tab.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/features/home/presentation/helpers/screen_exit.dart';
 import 'package:school_app_flutter/features/home/domain/entity/menu_item.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
@@ -80,14 +80,14 @@ class _SidebarMenuItemState extends State<SidebarMenuItem> {
     );
   }
 
-  /// Change d'écran. L'écran quitté disparaît dès la sélection, avant que
-  /// l'adresse ne change : sa saisie en cours pose la question d'abord.
+  /// Change d'écran — la saisie en cours de l'écran quitté pose la question
+  /// d'abord (`mayLeaveScreenFor`).
   Future<void> _select({
     required String menuId,
     required String subMenuId,
     required String title,
   }) async {
-    if (!await RouteExitGuard.mayLeave(context) || !mounted) return;
+    if (!await mayLeaveScreenFor(context, subMenuId) || !mounted) return;
     context.read<NavigationBloc>().add(
       SubMenuItemSelected(menuId: menuId, subMenuId: subMenuId, title: title),
     );

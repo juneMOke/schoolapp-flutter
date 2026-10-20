@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/navigation/screen_back_registry.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/features/home/presentation/helpers/screen_exit.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell_location_sync.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -55,7 +56,7 @@ class _ShellBackHandlerState extends State<ShellBackHandler> {
     super.dispose();
   }
 
-  void _onBack(bool didPop, Object? _) {
+  Future<void> _onBack(bool didPop, Object? _) async {
     if (didPop) return;
     final scaffold = widget.scaffoldKey.currentState;
     if (scaffold != null && scaffold.isDrawerOpen) {
@@ -65,6 +66,11 @@ class _ShellBackHandlerState extends State<ShellBackHandler> {
     if (_screens.handleBack()) return;
     final bloc = context.read<NavigationBloc>();
     if (bloc.state.selectedSubMenuId != MenuConstants.accueilId) {
+      // Retour à l'Accueil : la saisie de l'écran quitté demande d'abord.
+      if (!await mayLeaveScreenFor(context, MenuConstants.accueilId) ||
+          !mounted) {
+        return;
+      }
       ShellLocationSync.select(bloc, null, AppLocalizations.of(context)!);
       return;
     }
