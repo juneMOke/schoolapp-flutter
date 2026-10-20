@@ -243,6 +243,8 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
         }
 
         return AppPageBackground(
+          // Référence de vente, montants : se copient à la souris.
+          selectableText: true,
           appBar: ModuleTopBar(
             eyebrow: l10n.boutiqueSaleDetailEyebrow,
             title: title,

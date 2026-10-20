@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/web/text_file_download.dart';
 import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
@@ -95,6 +96,18 @@ Future<void> _exportChargeStatement(
     currency: intent.currency,
   );
 
+  // Sur le web, un fichier : le presse-papiers d'un navigateur ne sert à rien
+  // pour ouvrir le relevé dans un tableur.
+  if (canDownloadTextFiles) {
+    downloadTextFile(
+      fileName: l10n.facturationChargeStatementFileName,
+      content: csv,
+    );
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.facturationChargeStatementDownloaded)),
+    );
+    return;
+  }
   await Clipboard.setData(ClipboardData(text: csv));
   if (!context.mounted) {
     return;
@@ -223,7 +236,9 @@ class FacturationChargeDetailDialogView extends StatelessWidget {
               // Ce geste copie le relevé dans le presse-papiers — il n'imprime
               // rien et ne télécharge rien. Libellé et glyphe disent désormais
               // ce qu'il fait.
-              secondaryLabel: l10n.facturationCopyStatementLabel,
+              secondaryLabel: canDownloadTextFiles
+                  ? l10n.facturationDownloadStatementLabel
+                  : l10n.facturationCopyStatementLabel,
               secondaryIcon: Icons.content_copy_outlined,
               onSecondary: () => _onCopyStatement(context),
               primaryLabel: l10n.facturationPaymentCloseLabel,

@@ -17009,4 +17009,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appUpdateReload => 'Reload';
+
+  @override
+  String get classesListDownloadCsv => 'Download as CSV';
+
+  @override
+  String get classesListExportDownloaded => 'Export downloaded.';
+
+  @override
+  String get classesListExportFileName => 'classes-export.csv';
+
+  @override
+  String get facturationDownloadStatementLabel => 'Download statement';
+
+  @override
+  String get facturationChargeStatementDownloaded => 'Statement downloaded';
+
+  @override
+  String get facturationChargeStatementFileName => 'fee-statement.csv';
 }

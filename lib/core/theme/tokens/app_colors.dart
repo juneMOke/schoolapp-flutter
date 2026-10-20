@@ -59,6 +59,11 @@ class AppColors {
   static const stateFocusOnDark = Color(0x3DFAFAF7);
   static const stateDisabled = border;
 
+  /// Anneau de focus clavier d'un bouton : opaque, séparé du bouton par un
+  /// liseré de [surface]. Le voile `stateFocus` (20 %) restait sous le
+  /// contraste de 3:1 qu'un indicateur de focus doit tenir.
+  static const focusRing = bleuArdoise;
+
   // Buttons / FAB
   static const fabBackground = Color(0xFFA64F25);
 

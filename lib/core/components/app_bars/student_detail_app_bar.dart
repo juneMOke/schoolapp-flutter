@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/web/browser_tab_title.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/components/app_bars/dark_bar_parts.dart';
 import 'package:school_app_flutter/core/components/app_bars/student_detail_avatar_badge.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -98,11 +100,19 @@ class StudentDetailAppBar extends StatelessWidget
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    // La largeur reçue, pas celle de l'écran : posée dans un volet à côté
-    // de sa liste (`EmbeddedRecordPane`), la barre n'a que celle du volet.
-    builder: (context, constraints) => _bar(context, constraints.maxWidth),
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    // L'onglet du navigateur nomme l'élève tant que sa fiche est ouverte.
+    return BrowserTabTitle(
+      title: l10n.browserTabTitle(fullName),
+      fallback: l10n.schoolApp,
+      child: LayoutBuilder(
+        // La largeur reçue, pas celle de l'écran : posée dans un volet à côté
+        // de sa liste (`EmbeddedRecordPane`), la barre n'a que celle du volet.
+        builder: (context, constraints) => _bar(context, constraints.maxWidth),
+      ),
+    );
+  }
 
   Widget _bar(BuildContext context, double width) {
     // Téléphone : la flèche suffit pour sortir, et le nom passe avant la

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/web/text_file_download.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -103,8 +104,12 @@ class _ExportButton extends StatelessWidget {
           // téléchargé. Le libellé ET le glyphe le disent, sans quoi le bouton
           // promet une pièce que personne ne recevra.
           icon: Icons.content_copy_rounded,
-          label: l10n.classesListCopyCsv,
-          tooltip: l10n.classesListCopyCsv,
+          label: canDownloadTextFiles
+              ? l10n.classesListDownloadCsv
+              : l10n.classesListCopyCsv,
+          tooltip: canDownloadTextFiles
+              ? l10n.classesListDownloadCsv
+              : l10n.classesListCopyCsv,
         ),
       ),
     );

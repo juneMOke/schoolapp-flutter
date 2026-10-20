@@ -10241,5 +10241,29 @@
   "appUpdateReload": "Recharger",
   "@appUpdateReload": {
     "description": "Bandeau web : recharger la page pour charger la nouvelle version."
+  },
+  "classesListDownloadCsv": "Télécharger en CSV",
+  "@classesListDownloadCsv": {
+    "description": "Web : télécharger l'export de la liste en fichier CSV."
+  },
+  "classesListExportDownloaded": "Export téléchargé.",
+  "@classesListExportDownloaded": {
+    "description": "Web : l'export CSV de la liste a été téléchargé."
+  },
+  "classesListExportFileName": "export-classes.csv",
+  "@classesListExportFileName": {
+    "description": "Nom du fichier CSV de l'export de la liste (web)."
+  },
+  "facturationDownloadStatementLabel": "Télécharger le relevé",
+  "@facturationDownloadStatementLabel": {
+    "description": "Web : télécharger le relevé d'un frais en CSV."
+  },
+  "facturationChargeStatementDownloaded": "Relevé téléchargé",
+  "@facturationChargeStatementDownloaded": {
+    "description": "Web : le relevé CSV d'un frais a été téléchargé."
+  },
+  "facturationChargeStatementFileName": "releve-frais.csv",
+  "@facturationChargeStatementFileName": {
+    "description": "Nom du fichier CSV du relevé d'un frais (web)."
   }
 }

@@ -26551,6 +26551,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reload'**
   String get appUpdateReload;
+
+  /// No description provided for @classesListDownloadCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Download as CSV'**
+  String get classesListDownloadCsv;
+
+  /// No description provided for @classesListExportDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Export downloaded.'**
+  String get classesListExportDownloaded;
+
+  /// No description provided for @classesListExportFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'classes-export.csv'**
+  String get classesListExportFileName;
+
+  /// No description provided for @facturationDownloadStatementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download statement'**
+  String get facturationDownloadStatementLabel;
+
+  /// No description provided for @facturationChargeStatementDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement downloaded'**
+  String get facturationChargeStatementDownloaded;
+
+  /// No description provided for @facturationChargeStatementFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'fee-statement.csv'**
+  String get facturationChargeStatementFileName;
 }
 
 class _AppLocalizationsDelegate

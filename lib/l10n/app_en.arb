@@ -9866,5 +9866,11 @@
   "shortcutsKeyEscape": "Esc",
   "shortcutsKeyClick": "click",
   "appUpdateAvailable": "A new version of the application is available.",
-  "appUpdateReload": "Reload"
+  "appUpdateReload": "Reload",
+  "classesListDownloadCsv": "Download as CSV",
+  "classesListExportDownloaded": "Export downloaded.",
+  "classesListExportFileName": "classes-export.csv",
+  "facturationDownloadStatementLabel": "Download statement",
+  "facturationChargeStatementDownloaded": "Statement downloaded",
+  "facturationChargeStatementFileName": "fee-statement.csv"
 }
