@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/tap_target_height.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
@@ -56,12 +57,12 @@ class PresenceSquareIconButton extends StatelessWidget {
     iconSize: AppSpacing.lg + AppSpacing.xs,
     color: color ?? AppColors.textSecondary,
     icon: Icon(icon),
-    // Bouton de 36 dp, cible de 48 : le cadre reste discret, le doigt ne
-    // vise pas.
+    // Bouton de 36 dp, cible de 48 au doigt (cible du thème : `padded` sur
+    // une plateforme tactile, ajustée au bouton à la souris) — le cadre reste
+    // discret, le doigt ne vise pas.
     style: IconButton.styleFrom(
       fixedSize: const Size.square(AppDimensions.presenceMarkIconButtonSize),
       minimumSize: const Size.square(AppDimensions.presenceMarkIconButtonSize),
-      tapTargetSize: MaterialTapTargetSize.padded,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
       side: const BorderSide(color: AppColors.border),
     ),
@@ -117,9 +118,7 @@ class PresenceTimeButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: AppRadius.brSm,
         child: Container(
-          constraints: const BoxConstraints(
-            minHeight: AppDimensions.presenceMarkSegmentHeight,
-          ),
+          constraints: BoxConstraints(minHeight: TapTargetHeight.of(context)),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: AppRadius.brSm,
@@ -166,9 +165,7 @@ class PresenceJustifyButton extends StatelessWidget {
       onTap: row.canJustify ? onTap : null,
       borderRadius: AppRadius.brPill,
       child: Container(
-        constraints: const BoxConstraints(
-          minHeight: AppDimensions.presenceMarkSegmentHeight,
-        ),
+        constraints: BoxConstraints(minHeight: TapTargetHeight.of(context)),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
         decoration: BoxDecoration(
           color: tone.soft,

@@ -268,14 +268,14 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
                           child: SingleChildScrollView(child: catalogue),
                         ),
                         const SizedBox(width: AppDimensions.spacingL),
+                        // Hauteur bornée : le panier défile en lui-même,
+                        // son pied (total, « Encaisser ») reste en bas.
                         SizedBox(
                           width: AppDimensions.boutiqueCartColumnWidth,
-                          child: SingleChildScrollView(
-                            child: BoutiqueCartView(
-                              academicYearId: widget.academicYearId,
-                              levels: widget.levels,
-                              embedded: true,
-                            ),
+                          child: BoutiqueCartView(
+                            academicYearId: widget.academicYearId,
+                            levels: widget.levels,
+                            embedded: true,
                           ),
                         ),
                       ],

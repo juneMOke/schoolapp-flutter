@@ -62,20 +62,21 @@ class _ShellLayoutState extends State<ShellLayout> {
                   ),
                 ),
               );
-              return switch (mode) {
-                ShellNavigationMode.drawer => _drawerScaffold(content),
-                ShellNavigationMode.rail => _sidebarScaffold(
-                  content,
-                  rail: true,
+              if (mode == ShellNavigationMode.drawer) {
+                return _drawerScaffold(content);
+              }
+              // Raccourcis (aide « ? », Ctrl+B) dès que le menu tient à
+              // l'écran : une fenêtre de navigateur de 900 a un clavier.
+              // En rail, Ctrl+B ouvre le menu complet. Même arbre dans les
+              // deux formes : passer de l'une à l'autre ne remonte pas
+              // l'écran.
+              final rail = mode == ShellNavigationMode.rail;
+              return ShortcutsHelpShortcut(
+                child: SidebarToggleShortcut(
+                  onToggle: rail ? _openDrawer : null,
+                  child: _sidebarScaffold(content, rail: rail),
                 ),
-                // Raccourcis (aide « ? », repli de la barre) au clavier
-                // physique : seuls les grands écrans en ont un.
-                ShellNavigationMode.sidebar => ShortcutsHelpShortcut(
-                  child: SidebarToggleShortcut(
-                    child: _sidebarScaffold(content, rail: false),
-                  ),
-                ),
-              };
+              );
             },
           );
         },

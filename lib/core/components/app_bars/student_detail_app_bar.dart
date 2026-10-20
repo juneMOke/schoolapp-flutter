@@ -98,8 +98,13 @@ class StudentDetailAppBar extends StatelessWidget
   }
 
   @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
+  Widget build(BuildContext context) => LayoutBuilder(
+    // La largeur reçue, pas celle de l'écran : posée dans un volet à côté
+    // de sa liste (`EmbeddedRecordPane`), la barre n'a que celle du volet.
+    builder: (context, constraints) => _bar(context, constraints.maxWidth),
+  );
+
+  Widget _bar(BuildContext context, double width) {
     // Téléphone : la flèche suffit pour sortir, et le nom passe avant la
     // photo — à 360 dp, retour + avatar + pastille + croix ne laissaient
     // plus de place au nom de l'élève.

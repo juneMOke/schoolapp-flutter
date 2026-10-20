@@ -60,4 +60,14 @@ void main() {
     // L'origine d'une correction reste au-dessus des deux colonnes.
     expect(rectOf(tester, 'origine').bottom, lessThanOrEqualTo(charges.top));
   });
+
+  testWidgets('fenêtre de navigateur de 1 100 : déjà deux colonnes', (
+    tester,
+  ) async {
+    await pump(tester, const Size(1100, 760));
+    expect(
+      rectOf(tester, 'payeur').left,
+      greaterThan(rectOf(tester, 'creances').right),
+    );
+  });
 }

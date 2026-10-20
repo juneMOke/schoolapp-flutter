@@ -196,6 +196,10 @@ class AppDimensions {
   static const classesMemberTileMinWidth = 280.0;
   static const minTouchTarget = 48.0;
 
+  /// Commande répétée ligne après ligne, à la souris : la hauteur d'un
+  /// segment de bureau. Au doigt, [minTouchTarget] (`TapTargetHeight`).
+  static const pointerControlHeight = 40.0;
+
   /// Sélecteur d'imprimante thermique du ticket provisoire. Étroit à dessein :
   /// il ne porte qu'un nom et une adresse MAC par ligne, et s'ouvre par-dessus
   /// la modale d'encaissement (440) — le déborder le ferait lire comme un
@@ -679,16 +683,15 @@ class AppDimensions {
   /// Cible tactile standard du module : puces, flèches, segments.
   static const presenceMarkTapTarget = 44.0;
 
-  /// Segment P/R/A, heures, « Justifier » : la ligne d'appel se tape au
-  /// doigt, élève après élève — 48 dp, pas 40.
-  static const presenceMarkSegmentHeight = minTouchTarget;
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;
   static const presenceMarkAccentWidth = 4.0;
 
-  /// La vue liste : largeur plancher avant défilement, et ses colonnes.
-  static const presenceMarkListMinWidth = 960.0;
+  /// La vue liste : largeur plancher avant défilement — sans la colonne des
+  /// heures prestées, ajoutée quand elle s'affiche (pointage du personnel) —
+  /// et ses colonnes.
+  static const presenceMarkListMinWidth = 800.0;
   static const presenceMarkColStatus = 262.0;
   static const presenceMarkColTimes = 168.0;
 

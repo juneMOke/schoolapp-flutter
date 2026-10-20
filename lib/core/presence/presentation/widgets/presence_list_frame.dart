@@ -32,7 +32,9 @@ class PresenceListFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => EteeloMinWidthScroll(
-    minWidth: AppDimensions.presenceMarkListMinWidth,
+    minWidth:
+        AppDimensions.presenceMarkListMinWidth +
+        (hoursColumn == null ? 0 : AppDimensions.presenceMarkColHours),
     child: Column(
       children: [
         _Header(person: personColumn, times: timesColumn, hours: hoursColumn),
