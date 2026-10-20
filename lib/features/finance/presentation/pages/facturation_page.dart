@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/navigation/location_query.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/layout/master_detail_layout.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -57,6 +58,19 @@ class _FacturationPageState extends State<FacturationPage> {
   /// la fait passer de la page entière à sa colonne, et retour.
   final _listKey = GlobalKey();
 
+  bool _selectionBound = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_selectionBound) return;
+    _selectionBound = true;
+    // Dans l'adresse seulement quand la Facturation EST l'écran de base :
+    // poussée depuis le Recouvrement, la sélection reste en mémoire.
+    _selection = FacturationSplitSelection(LocationQuery.ownedBy(context))
+      ..addListener(_onSelectionChanged);
+  }
+
   void _onSelectionChanged() {
     if (mounted) setState(() {});
   }
@@ -70,8 +84,6 @@ class _FacturationPageState extends State<FacturationPage> {
   @override
   void initState() {
     super.initState();
-    _selection = FacturationSplitSelection(GoRouter.maybeOf(context))
-      ..addListener(_onSelectionChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<AcademicYearContextBloc>().add(

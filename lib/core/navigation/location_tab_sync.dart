@@ -35,10 +35,16 @@ class LocationTabSync<T extends Enum> extends StatefulWidget {
 class _LocationTabSyncState<T extends Enum> extends State<LocationTabSync<T>> {
   GoRouter? _router;
 
+  bool _bound = false;
+
   @override
-  void initState() {
-    super.initState();
-    _router = GoRouter.maybeOf(context)
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_bound) return;
+    _bound = true;
+    // L'écran de base seulement : poussé par-dessus une autre page, il
+    // n'a pas d'adresse à lui.
+    _router = LocationQuery.ownedBy(context)
       ?..routerDelegate.addListener(_followLocation);
     // Après le premier rendu : l'écran a monté son état d'onglet. Une
     // adresse nue ne le change pas — l'écran ouvre l'onglet qu'il veut.

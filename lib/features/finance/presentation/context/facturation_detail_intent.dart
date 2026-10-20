@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/navigation/student_record_intent.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 
-class FacturationDetailIntent extends Equatable {
+class FacturationDetailIntent extends Equatable implements StudentRecordIntent {
+  @override
   final String studentId;
+  @override
   final String academicYearId;
   final String firstName;
   final String lastName;
@@ -58,19 +61,6 @@ class FacturationDetailIntent extends Equatable {
   bool get hasStudentIdentity =>
       firstName.trim().isNotEmpty && lastName.trim().isNotEmpty;
 
-  FacturationDetailIntent withRouteParams({
-    required String studentId,
-    required String academicYearId,
-  }) => FacturationDetailIntent(
-    studentId: studentId,
-    academicYearId: academicYearId,
-    firstName: firstName,
-    lastName: lastName,
-    surname: surname,
-    levelName: levelName,
-    levelGroupName: levelGroupName,
-  );
-
   /// La fiche rouverte par son adresse : l'identité relue en base locale
   /// remplace celle que la navigation n'a pas pu passer.
   FacturationDetailIntent withIdentity(StudentIdentity identity) =>
@@ -88,19 +78,16 @@ class FacturationDetailIntent extends Equatable {
     required String studentId,
     required String academicYearId,
     Object? extra,
-  }) {
-    if (extra is FacturationDetailIntent) {
-      return extra.withRouteParams(
+  }) =>
+      extraForRecord<FacturationDetailIntent>(
+        extra,
+        studentId: studentId,
+        academicYearId: academicYearId,
+      ) ??
+      FacturationDetailIntent.invalid(
         studentId: studentId,
         academicYearId: academicYearId,
       );
-    }
-
-    return FacturationDetailIntent.invalid(
-      studentId: studentId,
-      academicYearId: academicYearId,
-    );
-  }
 
   @override
   List<Object?> get props => [

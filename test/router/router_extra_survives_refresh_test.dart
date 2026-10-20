@@ -99,6 +99,14 @@ void main() {
     // Redémarrage à froid : état restauré, registre vide.
     test('un identifiant inconnu rend null, comme avant', () {
       expect(InMemoryExtraCodec().decode({'inMemoryExtra': 42}), isNull);
+      // Après un F5 : l'état d'une autre session ne rend jamais l'objet de
+      // celle-ci, même à identifiant égal.
+      final before = InMemoryExtraCodec(session: 1);
+      final after = InMemoryExtraCodec(session: 2);
+      final encoded = before.encode('élève X');
+      after.encode('élève Y');
+      expect(after.decode(encoded), isNull);
+      expect(before.decode(encoded), 'élève X');
       expect(InMemoryExtraCodec().decode('texte'), isNull);
     });
   });

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/navigation/leave_replayed_route.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/attendances/presentation/context/disciplinary_student_detail_intent.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/disciplinary_student_detail_page.dart';
@@ -74,13 +75,23 @@ abstract final class StudentRecordRoutes {
       studentId: _studentId(state),
       academicYearId: _yearId(state),
     ),
-    builder: (context, state) => FacturationCreatePaymentPage(
-      intent: FacturationCreatePaymentIntent.fromRouteContext(
+    builder: (context, state) {
+      final intent = FacturationCreatePaymentIntent.fromRouteContext(
         studentId: _studentId(state),
         academicYearId: _yearId(state),
         extra: state.extra,
-      ),
-    ),
+      );
+      // Rejoué par l'historique : déjà écrit, ou sans ses créances (F5).
+      if (intent.isSpent || !intent.hasDisplayContext) {
+        return LeaveReplayedRoute(
+          fallbackLocation: AppRoutesNames.facturationDetailPath(
+            studentId: intent.studentId,
+            academicYearId: intent.academicYearId,
+          ),
+        );
+      }
+      return FacturationCreatePaymentPage(intent: intent);
+    },
   );
 
   /// `null` quand l'encaissement a ses créances ; sinon l'adresse de la fiche,

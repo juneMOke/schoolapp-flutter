@@ -1,12 +1,16 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/navigation/student_record_intent.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 
-class DisciplinaryStudentDetailIntent extends Equatable {
+class DisciplinaryStudentDetailIntent extends Equatable
+    implements StudentRecordIntent {
+  @override
   final String studentId;
   final String studentFirstName;
   final String studentLastName;
   final String? studentMiddleName;
   final String studentGender;
+  @override
   final String academicYearId;
   final String levelName;
   final String levelGroupName;
@@ -42,21 +46,6 @@ class DisciplinaryStudentDetailIntent extends Equatable {
   bool get hasDisplayContext =>
       studentFirstName.trim().isNotEmpty && studentLastName.trim().isNotEmpty;
 
-  DisciplinaryStudentDetailIntent withRouteParams({
-    required String studentId,
-    required String academicYearId,
-  }) => DisciplinaryStudentDetailIntent(
-    studentId: studentId,
-    studentFirstName: studentFirstName,
-    studentLastName: studentLastName,
-    studentMiddleName: studentMiddleName,
-    studentGender: studentGender,
-    academicYearId: academicYearId,
-    levelName: levelName,
-    levelGroupName: levelGroupName,
-    classroomName: classroomName,
-  );
-
   /// Le dossier rouvert par son adresse : l'identité relue en base locale
   /// remplace celle que la navigation n'a pas pu passer. La salle de classe
   /// n'y figure pas : elle ne sert qu'au sur-titre.
@@ -76,19 +65,16 @@ class DisciplinaryStudentDetailIntent extends Equatable {
     required String studentId,
     required String academicYearId,
     Object? extra,
-  }) {
-    if (extra is DisciplinaryStudentDetailIntent) {
-      return extra.withRouteParams(
+  }) =>
+      extraForRecord<DisciplinaryStudentDetailIntent>(
+        extra,
+        studentId: studentId,
+        academicYearId: academicYearId,
+      ) ??
+      DisciplinaryStudentDetailIntent.invalid(
         studentId: studentId,
         academicYearId: academicYearId,
       );
-    }
-
-    return DisciplinaryStudentDetailIntent.invalid(
-      studentId: studentId,
-      academicYearId: academicYearId,
-    );
-  }
 
   @override
   List<Object?> get props => [

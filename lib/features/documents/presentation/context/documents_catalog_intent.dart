@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/navigation/student_record_intent.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_identity.dart';
 
 /// Contexte d'ouverture du catalogue de pièces d'un élève.
@@ -12,8 +13,10 @@ import 'package:school_app_flutter/features/student/domain/entities/student_iden
 /// l'attestation d'inscription (AI), et elle ne figure pas dans le chemin. Un
 /// lien profond ouvre donc un catalogue où l'attestation est indisponible —
 /// signalé comme tel, jamais tenté à l'aveugle sur une chaîne vide.
-class DocumentsCatalogIntent extends Equatable {
+class DocumentsCatalogIntent extends Equatable implements StudentRecordIntent {
+  @override
   final String studentId;
+  @override
   final String academicYearId;
   final String enrollmentId;
   final String firstName;
@@ -40,20 +43,6 @@ class DocumentsCatalogIntent extends Equatable {
   /// Vrai quand l'attestation d'inscription est adressable.
   bool get hasEnrollmentRef => enrollmentId.trim().isNotEmpty;
 
-  DocumentsCatalogIntent withRouteParams({
-    required String studentId,
-    required String academicYearId,
-  }) => DocumentsCatalogIntent(
-    studentId: studentId,
-    academicYearId: academicYearId,
-    enrollmentId: enrollmentId,
-    firstName: firstName,
-    lastName: lastName,
-    surname: surname,
-    levelName: levelName,
-    levelGroupName: levelGroupName,
-  );
-
   /// L'identité relue en base locale (lien profond, onglet rechargé) :
   /// l'en-tête se peint. La référence de dossier ne s'y lit pas —
   /// l'attestation reste indisponible, signalée comme telle.
@@ -76,18 +65,16 @@ class DocumentsCatalogIntent extends Equatable {
     required String studentId,
     required String academicYearId,
     Object? extra,
-  }) {
-    if (extra is DocumentsCatalogIntent) {
-      return extra.withRouteParams(
+  }) =>
+      extraForRecord<DocumentsCatalogIntent>(
+        extra,
+        studentId: studentId,
+        academicYearId: academicYearId,
+      ) ??
+      DocumentsCatalogIntent(
         studentId: studentId,
         academicYearId: academicYearId,
       );
-    }
-    return DocumentsCatalogIntent(
-      studentId: studentId,
-      academicYearId: academicYearId,
-    );
-  }
 
   @override
   List<Object?> get props => [

@@ -10,7 +10,9 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 /// (essayé puis écarté) : un ENCAISSEMENT ne reçoit jamais d'adresse propre —
 /// chaque `push` deviendrait une entrée d'historique, et Suivant rouvrirait un
 /// encaissement déjà écrit sur ses anciens soldes. Poussé sur une fiche, il
-/// garde celle de la fiche ; aucune entrée nouvelle.
+/// garde l'adresse de la fiche. (L'historique du navigateur garde quand même
+/// sa trace — go_router enregistre la pile — d'où l'encaissement « consommé »
+/// qui ne se rouvre plus, cf. `FacturationCreatePaymentIntent.isSpent`.)
 ///
 /// Ces fiches se reconstruisent depuis leurs identifiants quand l'`extra` de la
 /// navigation manque (`StudentRecordRoutes`, catalogue des documents).
@@ -57,12 +59,22 @@ class ReflectedRecordsParser extends RouteInformationParser<RouteMatchList> {
   ///
   /// Un écran poussé PAR-DESSUS une fiche (encaissement) ne la masque pas : il
   /// n'a pas d'adresse, la barre garde celle de la fiche.
+  ///
+  /// Une fiche poussée sous une `ShellRoute` (le scope d'une fonctionnalité)
+  /// est rangée DANS la correspondance de la coquille : on y descend.
   @visibleForTesting
-  static Uri? reflectedUri(RouteMatchList configuration) {
-    for (final match in configuration.matches.reversed) {
+  static Uri? reflectedUri(RouteMatchList configuration) =>
+      _reflectedIn(configuration.matches);
+
+  static Uri? _reflectedIn(List<RouteMatchBase> matches) {
+    for (final match in matches.reversed) {
       if (match is ImperativeRouteMatch &&
           reflectedPaths.contains(match.matches.fullPath)) {
         return match.matches.uri;
+      }
+      if (match is ShellRouteMatch) {
+        final nested = _reflectedIn(match.matches);
+        if (nested != null) return nested;
       }
     }
     return null;

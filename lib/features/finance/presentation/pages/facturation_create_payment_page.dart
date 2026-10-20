@@ -616,7 +616,9 @@ class _FacturationCreatePaymentViewState
     if (outcome == FacturationCollectOutcome.succeeded) {
       // `pop()` (pas `maybePop`) pour ne pas déclencher la confirmation de
       // sortie : il n'y a plus rien à perdre.
-      widget.intent.onWritten?.call();
+      widget.intent
+        ..markSpent()
+        ..onWritten?.call();
       RouteExitGuard.release(context);
       Navigator.of(context).pop(true);
     }
@@ -690,7 +692,9 @@ class _FacturationCreatePaymentViewState
           replacementPaymentId: state.outcome?.replacementPaymentId,
         );
         if (!mounted) return;
-        widget.intent.onWritten?.call();
+        widget.intent
+          ..markSpent()
+          ..onWritten?.call();
         RouteExitGuard.release(context);
         Navigator.of(context).pop(true);
       case PaymentCorrectionPhase.failed:

@@ -65,6 +65,11 @@ class _MyAppState extends State<MyApp> {
   late final SchoolIdentityCubit _schoolIdentityCubit;
   late final GoRouter _router;
 
+  /// Créée une fois : un analyseur neuf à chaque reconstruction ferait
+  /// invalider au `Router` une analyse en cours.
+  late final RouterConfig<Object> _routerConfig =
+      ReflectedRecordsParser.configOf(_router);
+
   @override
   void initState() {
     super.initState();
@@ -343,7 +348,7 @@ class _MyAppState extends State<MyApp> {
             theme: AppTheme.light,
             // Les fiches en lecture ouvertes par `push` prennent leur adresse
             // (F5, favori) ; l'encaissement jamais.
-            routerConfig: ReflectedRecordsParser.configOf(_router),
+            routerConfig: _routerConfig,
             // Bandeau global au-dessus de toutes les routes : dégradation de
             // session offline (ADR-010 D-08). Le bandeau « données en cache »
             // de l'ex-bootstrap est retiré (plus de distinction local/distant

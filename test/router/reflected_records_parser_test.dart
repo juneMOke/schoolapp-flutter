@@ -14,17 +14,24 @@ void main() {
       initialLocation: '/home/facturations',
       routes: [
         GoRoute(path: '/home/:ecran', builder: (_, _) => const Text('liste')),
-        GoRoute(
-          path: '/finances/facturations',
-          builder: (_, _) => const Text('liste seule'),
+        // Comme dans l'application : les fiches vivent sous le scope de
+        // leur fonctionnalité (`ShellRoute`).
+        ShellRoute(
+          builder: (_, _, child) => child,
           routes: [
             GoRoute(
-              path: 'detail/:studentId/:academicYearId',
-              builder: (_, _) => const Text('fiche'),
+              path: '/finances/facturations',
+              builder: (_, _) => const Text('liste seule'),
               routes: [
                 GoRoute(
-                  path: 'encaissement',
-                  builder: (_, _) => const Text('encaissement'),
+                  path: 'detail/:studentId/:academicYearId',
+                  builder: (_, _) => const Text('fiche'),
+                  routes: [
+                    GoRoute(
+                      path: 'encaissement',
+                      builder: (_, _) => const Text('encaissement'),
+                    ),
+                  ],
                 ),
               ],
             ),
