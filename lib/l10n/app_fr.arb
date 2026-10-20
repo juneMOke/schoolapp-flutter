@@ -8569,21 +8569,37 @@
   "@staffSaveError": {
     "description": "Échec d'écriture locale."
   },
-  "staffDiscardTitle": "Abandonner les modifications ?",
-  "@staffDiscardTitle": {
+  "discardChangesTitle": "Abandonner les modifications ?",
+  "@discardChangesTitle": {
     "description": "Titre de la confirmation d'abandon."
   },
   "staffDiscardMessage": "Les changements apportés à la fiche seront perdus.",
   "@staffDiscardMessage": {
     "description": "Message de la confirmation d'abandon."
   },
-  "staffDiscardConfirm": "Abandonner",
-  "@staffDiscardConfirm": {
+  "discardChangesConfirm": "Abandonner",
+  "@discardChangesConfirm": {
     "description": "Confirmer l'abandon."
   },
-  "staffDiscardKeep": "Continuer la saisie",
-  "@staffDiscardKeep": {
+  "discardChangesKeep": "Continuer la saisie",
+  "@discardChangesKeep": {
     "description": "Revenir à la saisie."
+  },
+  "discardChangesMessage": "Ce que vous avez saisi sera perdu.",
+  "@discardChangesMessage": {
+    "description": "Message générique de la confirmation d'abandon d'une saisie."
+  },
+  "evalSaisieDiscardMessage": "Les notes saisies et non enregistrées seront perdues.",
+  "@evalSaisieDiscardMessage": {
+    "description": "Confirmation d'abandon : notes non enregistrées."
+  },
+  "boutiqueCartDiscardMessage": "Le panier en cours sera vidé.",
+  "@boutiqueCartDiscardMessage": {
+    "description": "Confirmation d'abandon : panier boutique non encaissé."
+  },
+  "communicationEditorDiscardMessage": "Le communiqué en cours de rédaction n'est pas enregistré. Vos modifications seront perdues.",
+  "@communicationEditorDiscardMessage": {
+    "description": "Confirmation d'abandon : communiqué non enregistré."
   },
   "staffBlockContract": "Contrat",
   "@staffBlockContract": {
@@ -10217,5 +10233,37 @@
   "shortcutsKeyClick": "clic",
   "@shortcutsKeyClick": {
     "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "appUpdateAvailable": "Une nouvelle version de l'application est disponible.",
+  "@appUpdateAvailable": {
+    "description": "Bandeau web : une nouvelle version a été déployée depuis l'ouverture de l'onglet."
+  },
+  "appUpdateReload": "Recharger",
+  "@appUpdateReload": {
+    "description": "Bandeau web : recharger la page pour charger la nouvelle version."
+  },
+  "classesListDownloadCsv": "Télécharger en CSV",
+  "@classesListDownloadCsv": {
+    "description": "Web : télécharger l'export de la liste en fichier CSV."
+  },
+  "classesListExportDownloaded": "Export téléchargé.",
+  "@classesListExportDownloaded": {
+    "description": "Web : l'export CSV de la liste a été téléchargé."
+  },
+  "classesListExportFileName": "export-classes.csv",
+  "@classesListExportFileName": {
+    "description": "Nom du fichier CSV de l'export de la liste (web)."
+  },
+  "facturationDownloadStatementLabel": "Télécharger le relevé",
+  "@facturationDownloadStatementLabel": {
+    "description": "Web : télécharger le relevé d'un frais en CSV."
+  },
+  "facturationChargeStatementDownloaded": "Relevé téléchargé",
+  "@facturationChargeStatementDownloaded": {
+    "description": "Web : le relevé CSV d'un frais a été téléchargé."
+  },
+  "facturationChargeStatementFileName": "releve-frais.csv",
+  "@facturationChargeStatementFileName": {
+    "description": "Nom du fichier CSV du relevé d'un frais (web)."
   }
 }

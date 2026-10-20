@@ -12189,16 +12189,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'The record could not be saved on this tablet. Try again.';
 
   @override
-  String get staffDiscardTitle => 'Discard your changes?';
+  String get discardChangesTitle => 'Discard your changes?';
 
   @override
   String get staffDiscardMessage => 'The changes to this record will be lost.';
 
   @override
-  String get staffDiscardConfirm => 'Discard';
+  String get discardChangesConfirm => 'Discard';
 
   @override
-  String get staffDiscardKeep => 'Keep editing';
+  String get discardChangesKeep => 'Keep editing';
+
+  @override
+  String get discardChangesMessage => 'What you entered will be lost.';
+
+  @override
+  String get evalSaisieDiscardMessage =>
+      'The marks entered and not saved will be lost.';
+
+  @override
+  String get boutiqueCartDiscardMessage => 'The current cart will be emptied.';
+
+  @override
+  String get communicationEditorDiscardMessage =>
+      'The announcement being written is not saved. Your changes will be lost.';
 
   @override
   String get staffBlockContract => 'Contract';
@@ -16988,4 +17002,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcutsKeyClick => 'click';
+
+  @override
+  String get appUpdateAvailable =>
+      'A new version of the application is available.';
+
+  @override
+  String get appUpdateReload => 'Reload';
+
+  @override
+  String get classesListDownloadCsv => 'Download as CSV';
+
+  @override
+  String get classesListExportDownloaded => 'Export downloaded.';
+
+  @override
+  String get classesListExportFileName => 'classes-export.csv';
+
+  @override
+  String get facturationDownloadStatementLabel => 'Download statement';
+
+  @override
+  String get facturationChargeStatementDownloaded => 'Statement downloaded';
+
+  @override
+  String get facturationChargeStatementFileName => 'fee-statement.csv';
 }

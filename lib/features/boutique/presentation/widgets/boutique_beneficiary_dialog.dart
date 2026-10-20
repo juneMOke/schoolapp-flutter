@@ -74,7 +74,7 @@ class _BoutiqueBeneficiaryDialogState extends State<BoutiqueBeneficiaryDialog> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: AppDimensions.boutiqueBeneficiaryDialogMaxWidth,
-          maxHeight: size.height * 0.82,
+          maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
         ),
         child: EteeloDialogBody(
           // Seul l'en-tête reste ancré : en paysage clavier ouvert, figer aussi

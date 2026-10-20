@@ -12276,17 +12276,31 @@ class AppLocalizationsFr extends AppLocalizations {
       'La fiche n\'a pas pu être enregistrée sur la tablette. Réessayez.';
 
   @override
-  String get staffDiscardTitle => 'Abandonner les modifications ?';
+  String get discardChangesTitle => 'Abandonner les modifications ?';
 
   @override
   String get staffDiscardMessage =>
       'Les changements apportés à la fiche seront perdus.';
 
   @override
-  String get staffDiscardConfirm => 'Abandonner';
+  String get discardChangesConfirm => 'Abandonner';
 
   @override
-  String get staffDiscardKeep => 'Continuer la saisie';
+  String get discardChangesKeep => 'Continuer la saisie';
+
+  @override
+  String get discardChangesMessage => 'Ce que vous avez saisi sera perdu.';
+
+  @override
+  String get evalSaisieDiscardMessage =>
+      'Les notes saisies et non enregistrées seront perdues.';
+
+  @override
+  String get boutiqueCartDiscardMessage => 'Le panier en cours sera vidé.';
+
+  @override
+  String get communicationEditorDiscardMessage =>
+      'Le communiqué en cours de rédaction n\'est pas enregistré. Vos modifications seront perdues.';
 
   @override
   String get staffBlockContract => 'Contrat';
@@ -17109,4 +17123,29 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shortcutsKeyClick => 'clic';
+
+  @override
+  String get appUpdateAvailable =>
+      'Une nouvelle version de l\'application est disponible.';
+
+  @override
+  String get appUpdateReload => 'Recharger';
+
+  @override
+  String get classesListDownloadCsv => 'Télécharger en CSV';
+
+  @override
+  String get classesListExportDownloaded => 'Export téléchargé.';
+
+  @override
+  String get classesListExportFileName => 'export-classes.csv';
+
+  @override
+  String get facturationDownloadStatementLabel => 'Télécharger le relevé';
+
+  @override
+  String get facturationChargeStatementDownloaded => 'Relevé téléchargé';
+
+  @override
+  String get facturationChargeStatementFileName => 'releve-frais.csv';
 }

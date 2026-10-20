@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/web/app_update/app_update_scope.dart';
 import 'package:school_app_flutter/core/theme/app_scroll_behavior.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
@@ -24,12 +25,14 @@ import 'package:school_app_flutter/core/web/clean_urls.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
+import 'package:school_app_flutter/features/auth/presentation/tab_session/tab_session_sync.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_degradation_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/reflected_records_parser.dart';
 import 'package:school_app_flutter/router/app_router.dart';
 import 'package:school_app_flutter/core/components/avatars/person_photo_source.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/registry/student_photo_registry.dart';
@@ -61,6 +64,11 @@ class _MyAppState extends State<MyApp> {
   late final PaymentAnomaliesCubit _paymentAnomaliesCubit;
   late final SchoolIdentityCubit _schoolIdentityCubit;
   late final GoRouter _router;
+
+  /// Créée une fois : un analyseur neuf à chaque reconstruction ferait
+  /// invalider au `Router` une analyse en cours.
+  late final RouterConfig<Object> _routerConfig =
+      ReflectedRecordsParser.configOf(_router);
 
   @override
   void initState() {
@@ -338,7 +346,9 @@ class _MyAppState extends State<MyApp> {
             onGenerateTitle: (context) =>
                 AppLocalizations.of(context)!.schoolApp,
             theme: AppTheme.light,
-            routerConfig: _router,
+            // Les fiches en lecture ouvertes par `push` prennent leur adresse
+            // (F5, favori) ; l'encaissement jamais.
+            routerConfig: _routerConfig,
             // Bandeau global au-dessus de toutes les routes : dégradation de
             // session offline (ADR-010 D-08). Le bandeau « données en cache »
             // de l'ex-bootstrap est retiré (plus de distinction local/distant
@@ -353,18 +363,24 @@ class _MyAppState extends State<MyApp> {
             // demandent pas gardent leurs initiales.
             //
             // Sur le web, le tout sous le voile « Connexion requise » : la
-            // version web est en ligne seulement.
+            // version web est en ligne seulement. Un nouveau déploiement s'y
+            // annonce par un bandeau « Recharger », et les onglets d'un même
+            // navigateur, qui partagent la session, se tiennent d'accord.
             //
             // Le texte s'agrandit avec le réglage du système, jusqu'à ×1,3.
             builder: (context, child) => MediaQuery.withClampedTextScaling(
               maxScaleFactor: AppTypography.maxTextScaleFactor,
               child: WebOnlineGate(
                 connectivity: getIt<ConnectivityService>(),
-                child: PersonPhotoScope(
-                  source: getIt<StudentPhotoRegistry>(),
-                  child: PaymentAnomalyBanner(
-                    child: SessionDegradationBanner(
-                      child: child ?? const SizedBox.shrink(),
+                child: AppUpdateScope(
+                  child: TabSessionSync(
+                    child: PersonPhotoScope(
+                      source: getIt<StudentPhotoRegistry>(),
+                      child: PaymentAnomalyBanner(
+                        child: SessionDegradationBanner(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
+                      ),
                     ),
                   ),
                 ),

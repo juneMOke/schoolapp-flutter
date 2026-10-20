@@ -18,6 +18,9 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <!-- Le pré-splash s'affiche avant que Flutter ne pose la sienne : sans elle,
+       un téléphone le rendait dans une fenêtre de 980 px. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Gestion scolaire : inscriptions, caisse, recouvrement, présences, notes et paie.">
 
   <!-- iOS meta tags & icons -->
@@ -29,8 +32,10 @@
   <!-- Couleur de marque (Bleu Profond) pour la chrome du navigateur. -->
   <meta name="theme-color" content="#0E2D42">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <!-- Favicon : 16 px pour les onglets ordinaires, 32 px pour les écrans
+       denses (sinon flou). -->
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"/>
 
   <title>ETEELO CONNECT</title>
   <link rel="manifest" href="manifest.json">
@@ -112,6 +117,33 @@
     @media (prefers-reduced-motion: reduce) {
       #splash-loader .symbol .arc { animation: none; }
     }
+    /* Chargement lent ou échoué : un mot et de quoi réessayer, au lieu d'un
+       arc qui tourne sans fin (ou d'un écran bleu vide). */
+    #splash-loader .notice {
+      margin-top: 24px;
+      max-width: 320px;
+      padding: 0 16px;
+      text-align: center;
+      font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: rgba(250, 250, 247, 0.86);
+    }
+    #splash-loader .notice[hidden] { display: none; }
+    #splash-loader .notice button {
+      margin-top: 12px;
+      padding: 8px 20px;
+      border: 0;
+      border-radius: 999px;
+      background: #D9A24E;
+      color: #0E2D42;
+      font: 600 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      cursor: pointer;
+    }
+    #splash-loader .notice button:focus-visible {
+      outline: 2px solid #FAFAF7;
+      outline-offset: 2px;
+    }
+    #splash-loader.failed .bar { display: none; }
+    #splash-loader.failed .symbol .arc { animation: none; }
   </style>
 </head>
 <body>
@@ -127,15 +159,31 @@
       </g>
     </svg>
     <div class="bar"></div>
+    <div class="notice" id="splash-slow" role="status" hidden>
+      Le chargement prend plus de temps que prévu. La connexion est peut-être lente.
+    </div>
+    <div class="notice" id="splash-failure" role="alert" hidden>
+      L'application n'a pas pu se charger. Vérifiez la connexion, puis réessayez.
+      <br><button type="button" onclick="window.location.reload()">Réessayer</button>
+    </div>
   </div>
 
-  <script src="flutter_bootstrap.js" async></script>
+  <noscript>
+    <p style="color:#FAFAF7;text-align:center;font-family:system-ui,sans-serif;padding:24px;">
+      ETEELO CONNECT a besoin de JavaScript. Activez-le dans votre navigateur.
+    </p>
+  </noscript>
+
+  <script src="flutter_bootstrap.js" async onerror="window.showSplashFailure && window.showSplashFailure()"></script>
 
   <script>
     // Le retrait du pré-splash est piloté par Dart (addPostFrameCallback), donc
     // APRÈS le premier frame Flutter peint → raccord sans trou bleu. On expose
-    // juste la fonction de disparition (idempotente), avec un filet de sécurité
-    // si Dart ne démarre jamais.
+    // la fonction de disparition (idempotente).
+    //
+    // Pas de retrait d'office : sur une connexion lente (plusieurs Mo à
+    // télécharger), il laissait un écran bleu vide. Le pré-splash reste, dit
+    // au bout de 12 s que c'est long, et dit l'échec quand il y en a un.
     window.removeSplashLoader = function () {
       var loader = document.getElementById('splash-loader');
       if (!loader || loader.dataset.removing) return;
@@ -145,7 +193,18 @@
         if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
       }, 320);
     };
-    setTimeout(window.removeSplashLoader, 10000);
+    window.showSplashFailure = function () {
+      var loader = document.getElementById('splash-loader');
+      if (!loader || loader.dataset.removing) return;
+      loader.classList.add('failed');
+      document.getElementById('splash-slow').hidden = true;
+      document.getElementById('splash-failure').hidden = false;
+    };
+    setTimeout(function () {
+      var loader = document.getElementById('splash-loader');
+      if (!loader || loader.dataset.removing || loader.classList.contains('failed')) return;
+      document.getElementById('splash-slow').hidden = false;
+    }, 12000);
   </script>
 </body>
 </html>

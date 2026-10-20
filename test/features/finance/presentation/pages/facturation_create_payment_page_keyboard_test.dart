@@ -96,6 +96,7 @@ void main() {
     Size(640, 360), // petit téléphone paysage — 218 dp de débordement
     Size(731, 411), // téléphone paysage — 167 dp de débordement
     Size(800, 600), // petite tablette
+    Size(1100, 700), // fenêtre de navigateur, deux colonnes
     Size(1280, 800), // tablette paysage (cible du projet)
   ];
 

@@ -19183,7 +19183,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Discard your changes?'**
-  String get staffDiscardTitle;
+  String get discardChangesTitle;
 
   /// Message de la confirmation d'abandon.
   ///
@@ -19195,13 +19195,37 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Discard'**
-  String get staffDiscardConfirm;
+  String get discardChangesConfirm;
 
   /// Revenir à la saisie.
   ///
   /// In en, this message translates to:
   /// **'Keep editing'**
-  String get staffDiscardKeep;
+  String get discardChangesKeep;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'What you entered will be lost.'**
+  String get discardChangesMessage;
+
+  /// No description provided for @evalSaisieDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The marks entered and not saved will be lost.'**
+  String get evalSaisieDiscardMessage;
+
+  /// No description provided for @boutiqueCartDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The current cart will be emptied.'**
+  String get boutiqueCartDiscardMessage;
+
+  /// No description provided for @communicationEditorDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The announcement being written is not saved. Your changes will be lost.'**
+  String get communicationEditorDiscardMessage;
 
   /// No description provided for @staffBlockContract.
   ///
@@ -26515,6 +26539,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'click'**
   String get shortcutsKeyClick;
+
+  /// No description provided for @appUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of the application is available.'**
+  String get appUpdateAvailable;
+
+  /// No description provided for @appUpdateReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get appUpdateReload;
+
+  /// No description provided for @classesListDownloadCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Download as CSV'**
+  String get classesListDownloadCsv;
+
+  /// No description provided for @classesListExportDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Export downloaded.'**
+  String get classesListExportDownloaded;
+
+  /// No description provided for @classesListExportFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'classes-export.csv'**
+  String get classesListExportFileName;
+
+  /// No description provided for @facturationDownloadStatementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download statement'**
+  String get facturationDownloadStatementLabel;
+
+  /// No description provided for @facturationChargeStatementDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement downloaded'**
+  String get facturationChargeStatementDownloaded;
+
+  /// No description provided for @facturationChargeStatementFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'fee-statement.csv'**
+  String get facturationChargeStatementFileName;
 }
 
 class _AppLocalizationsDelegate

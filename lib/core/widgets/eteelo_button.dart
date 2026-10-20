@@ -104,19 +104,28 @@ class _EteeloButtonState extends State<EteeloButton> {
   void initState() {
     super.initState();
     _focusNode = FocusNode()..addListener(_onFocusChanged);
+    FocusManager.instance.addHighlightModeListener(_onHighlightModeChanged);
   }
 
   @override
   void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_onHighlightModeChanged);
     _focusNode
       ..removeListener(_onFocusChanged)
       ..dispose();
     super.dispose();
   }
 
+  void _onHighlightModeChanged(FocusHighlightMode _) => _onFocusChanged();
+
+  /// L'anneau ne s'allume qu'au clavier : un clic de souris donne aussi le
+  /// focus au bouton, et l'anneau restait allumé sous le curseur.
   void _onFocusChanged() {
     if (!mounted) return;
-    setState(() => _isFocused = _focusNode.hasFocus);
+    final focused =
+        _focusNode.hasFocus &&
+        FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+    if (focused != _isFocused) setState(() => _isFocused = focused);
   }
 
   // No-op pendant le chargement → conserve l'apparence "active".
@@ -137,13 +146,12 @@ class _EteeloButtonState extends State<EteeloButton> {
       curve: AppMotion.outCurve,
       decoration: BoxDecoration(
         borderRadius: _focusBorderRadius,
+        // Anneau de 2 dp, détaché du bouton par 2 dp de surface : visible sur
+        // un bouton plein comme sur un bouton contour.
         boxShadow: _isFocused
             ? const [
-                BoxShadow(
-                  color: AppColors.stateFocus,
-                  blurRadius: 0,
-                  spreadRadius: 2,
-                ),
+                BoxShadow(color: AppColors.focusRing, spreadRadius: 4),
+                BoxShadow(color: AppColors.surface, spreadRadius: 2),
               ]
             : const [],
       ),

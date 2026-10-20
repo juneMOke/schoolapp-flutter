@@ -7,6 +7,12 @@ class AppBreakpoints {
   /// largeur reçue. Les seuils propres à un écran s'y rattachent quand ils
   /// disent la même chose (« assez large pour deux colonnes »).
   static const double expanded = 1280.0;
+
+  /// Fenêtre de bureau moyenne : au-dessus de la plus grande tablette en
+  /// portrait (1 024, où l'on garde l'ordre au pouce), au-dessous d'un
+  /// portable. Une fenêtre de navigateur de 1 100 n'a pas à attendre 1 280
+  /// pour recevoir deux volets d'une page plein écran.
+  static const double wideWindow = 1100.0;
   static const double large = 1600.0;
   static const double xlarge = 1920.0;
 
@@ -117,8 +123,11 @@ class AppBreakpoints {
   // discute pas avec un montant pour quelques dizaines de dp.
   static const double financeCollectBarRowMin = 640.0;
   // Encaissement (page plein écran, hors coquille) : au-delà, les créances à
-  // gauche, le payeur et la date en colonne à droite.
-  static const double paymentTwoColumnMin = expanded;
+  // gauche, le payeur et la date en colonne à droite. Au-dessus d'une grande
+  // tablette portrait (1 024, payeur d'abord, au pouce) : une fenêtre de
+  // navigateur de 1 100 restait sinon sur une colonne de 880, et ~650 dp
+  // suffisent aux créances.
+  static const double paymentTwoColumnMin = wideWindow;
   // Facturation (largeur reçue) : au-delà, la fiche de l'élève s'ouvre à côté
   // de la liste — 440 de liste, ~940 de fiche, assez pour ses deux colonnes.
   static const double facturationSplitMin = 1400.0;
@@ -136,7 +145,7 @@ class AppBreakpoints {
   static const double enrollmentSummaryTwoColumnMin = 900.0;
   // Fiche d'un agent en consultation (fenêtre, page plein écran) : au-delà,
   // la fiche entière sur deux colonnes, sans assistant à étapes.
-  static const double staffFileViewMin = expanded;
+  static const double staffFileViewMin = wideWindow;
   // Contrôle des frais — table à 7 colonnes (identité + attendu/payé/reste +
   // statut). En deçà, les colonnes de montant seraient tronquées par l'ellipse :
   // on replie sur 3 colonnes et Attendu/Payé passent en ligne secondaire.
@@ -161,6 +170,9 @@ class AppBreakpoints {
   // Grille de cartes de classe : 2 colonnes / 3 colonnes.
   static const double classesGridTwoColMin = 700.0;
   static const double classesGridThreeColMin = 1080.0;
+  // Quatre colonnes sur grand écran : à trois, une page de 1 760 donnait des
+  // cartes de classe de ~580 dp.
+  static const double classesGridFourColMin = 1440.0;
   // Cascade Cycle/Niveau : au-delà, les 2 selects côte à côte ; en deçà, empilés.
   static const double classesCascadeRowMin = 520.0;
   // Tuile élève : en deçà, le bouton d'action passe en icône seule (+ tooltip).

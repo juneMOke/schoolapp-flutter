@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/charts/chart_height.dart';
 import 'package:school_app_flutter/core/components/charts/bar_chart_item.dart';
 import 'package:school_app_flutter/core/components/charts/cycle_bar_chart.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -75,36 +76,41 @@ class ExpenseEvolutionCard extends StatelessWidget {
           if (!drawable)
             ExpenseSectionNote(text: l10n.expenseEvolutionNoRate)
           else
-            SizedBox(
-              height: AppDimensions.expenseChartHeight,
-              child: Semantics(
-                container: true,
-                label: l10n.expenseEvolutionA11y(periodDetail),
-                child: CycleBarChart(
-                  items: [
-                    for (final point in points)
-                      BarChartItem(
-                        label: _label(l10n, point.bucket),
-                        value: _value(point, readable, single) / 100,
-                        color: point.bucket.highlighted
-                            ? AppColors.terreCuite
-                            : AppColors.terreCuiteMuted,
-                      ),
-                  ],
-                  highlightedIndexes: {
-                    for (var i = 0; i < points.length; i++)
-                      if (points[i].bucket.highlighted) i,
-                  },
-                  showValueLabels: points.length <= 10,
-                  labelHighlightedBars: true,
-                  showLeftAxis: false,
-                  gridDivisions: 2,
-                  verticalBottomLabels: points.length > 16,
-                  valueLabelFormatter: (value) => readable || single == null
-                      ? ExpenseMoneyText.usdCompact((value * 100).round())
-                      : MoneyFormat.compact(
-                          Money((value * 100).round(), single),
+            LayoutBuilder(
+              builder: (context, constraints) => SizedBox(
+                height: ChartHeight.forWidth(
+                  constraints.maxWidth,
+                  min: AppDimensions.expenseChartHeight,
+                ),
+                child: Semantics(
+                  container: true,
+                  label: l10n.expenseEvolutionA11y(periodDetail),
+                  child: CycleBarChart(
+                    items: [
+                      for (final point in points)
+                        BarChartItem(
+                          label: _label(l10n, point.bucket),
+                          value: _value(point, readable, single) / 100,
+                          color: point.bucket.highlighted
+                              ? AppColors.terreCuite
+                              : AppColors.terreCuiteMuted,
                         ),
+                    ],
+                    highlightedIndexes: {
+                      for (var i = 0; i < points.length; i++)
+                        if (points[i].bucket.highlighted) i,
+                    },
+                    showValueLabels: points.length <= 10,
+                    labelHighlightedBars: true,
+                    showLeftAxis: false,
+                    gridDivisions: 2,
+                    verticalBottomLabels: points.length > 16,
+                    valueLabelFormatter: (value) => readable || single == null
+                        ? ExpenseMoneyText.usdCompact((value * 100).round())
+                        : MoneyFormat.compact(
+                            Money((value * 100).round(), single),
+                          ),
+                  ),
                 ),
               ),
             ),

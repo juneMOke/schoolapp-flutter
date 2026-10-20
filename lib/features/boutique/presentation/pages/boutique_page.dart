@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/navigation/bloc_exit_guard.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -40,7 +41,16 @@ class BoutiquePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<BoutiqueBloc>(
     create: (_) => getIt<BoutiqueBloc>(),
-    child: const _BoutiqueView(),
+    // Le panier ne vit que dans ce bloc : quitter l'écran (Précédent, F5,
+    // autre écran du menu) le viderait sans un mot. Une vente encaissée
+    // n'est plus une saisie — le panier reste affiché jusqu'à la suivante.
+    child: BlocExitGuard<BoutiqueBloc, BoutiqueState>(
+      hasUnsavedWork: (state) =>
+          !state.cart.isEmpty && state.recordedSale == null,
+      isBusy: (state) => state.isCollecting,
+      discardMessage: AppLocalizations.of(context)!.boutiqueCartDiscardMessage,
+      child: const _BoutiqueView(),
+    ),
   );
 }
 
@@ -258,14 +268,14 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
                           child: SingleChildScrollView(child: catalogue),
                         ),
                         const SizedBox(width: AppDimensions.spacingL),
+                        // Hauteur bornée : le panier défile en lui-même,
+                        // son pied (total, « Encaisser ») reste en bas.
                         SizedBox(
                           width: AppDimensions.boutiqueCartColumnWidth,
-                          child: SingleChildScrollView(
-                            child: BoutiqueCartView(
-                              academicYearId: widget.academicYearId,
-                              levels: widget.levels,
-                              embedded: true,
-                            ),
+                          child: BoutiqueCartView(
+                            academicYearId: widget.academicYearId,
+                            levels: widget.levels,
+                            embedded: true,
                           ),
                         ),
                       ],

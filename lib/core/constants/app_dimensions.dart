@@ -132,11 +132,18 @@ class AppDimensions {
   // large que les modales de saisie — une page A4 portrait doit rester lisible
   // sans zoom sur tablette paysage (1280×800 dp de référence).
   static const documentViewerMaxWidth = 760.0;
+
+  /// Sur grand écran, la visionneuse s'élargit avec la fenêtre (part
+  /// [documentViewerWidthRatio]), jusqu'à [documentViewerWideMaxWidth] : une
+  /// page A4 tenait à 760 dp sur un écran de 2 560.
+  static const documentViewerWidthRatio = 0.6;
+  static const documentViewerWideMaxWidth = 1100.0;
   // Hauteur du gabarit de page pendant la préparation du document :
   // proportion A4 approchée à la largeur de la visionneuse.
   static const documentViewerSkeletonHeight = 420.0;
   // Largeur min d'un champ de la recherche bi-mode (auto-fit 3→1 colonne).
   static const searchFieldMinWidth = 170.0;
+  static const searchFieldMaxWidth = 360.0;
   static const searchFieldGap = 10.0;
   // Largeur max de la carte d'invitation « avant recherche » (centrée).
   static const searchInvitationMaxWidth = 620.0;
@@ -195,6 +202,14 @@ class AppDimensions {
   static const classesReassignModalMaxWidth = 480.0;
   static const classesMemberTileMinWidth = 280.0;
   static const minTouchTarget = 48.0;
+
+  /// Commande répétée ligne après ligne, à la souris : la hauteur d'un
+  /// segment de bureau. Au doigt, [minTouchTarget] (`TapTargetHeight`).
+  static const pointerControlHeight = 40.0;
+
+  /// Colonne du panier de la caisse boutique : sous cette hauteur, le pied
+  /// (total, manques, « Encaisser ») ne tient plus épinglé — tout défile.
+  static const boutiqueCartPinnedFooterMinHeight = 420.0;
 
   /// Sélecteur d'imprimante thermique du ticket provisoire. Étroit à dessein :
   /// il ne porte qu'un nom et une adresse MAC par ligne, et s'ouvre par-dessus
@@ -259,7 +274,17 @@ class AppDimensions {
   // Enrollment stats dashboard tokens
   static const enrollmentStatsKpiCardHeight = 104.0;
   static const enrollmentStatsKpiCardMinWidth = 148.0;
+
+  /// Plafond d'une carte KPI : sur 1 760 dp de page, trois cartes en
+  /// prenaient ~575 chacune — un chiffre perdu dans un pavé vide. Au-delà,
+  /// la bande s'arrête et laisse la place à droite.
+  static const kpiCardMaxWidth = 420.0;
   static const enrollmentStatsChartSectionHeight = 220.0;
+
+  /// Un graphique gagne en hauteur avec sa largeur (`ChartHeight`) : à hauteur
+  /// fixe, 1 760 × 220 faisait une bande plate de 8 pour 1.
+  static const chartHeightToWidthRatio = 0.22;
+  static const chartMaxHeight = 360.0;
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;
 
@@ -388,7 +413,6 @@ class AppDimensions {
 
   // Aperçu nominatif d'un groupe visé (spec §7).
   static const recouvrementCallListMaxWidth = 720.0;
-  static const recouvrementCallListMaxHeight = 620.0;
   static const recouvrementCallListSpinner = 16.0;
 
   // Aperçu nominatif d'un élève — la fiche qui désagrège ses frais.
@@ -524,6 +548,9 @@ class AppDimensions {
   /// Lectures & alertes : cartes qui s'enroulent, jamais rendues « pour remplir
   /// la ligne » — chacune a sa condition.
   static const enrollmentDashboardInsightMinWidth = 250.0;
+
+  /// Carte « ce que les chiffres veulent dire » de la caisse (`flex 1 1 260`).
+  static const financeTillInsightMinWidth = 260.0;
   static const enrollmentDashboardInsightBadgeSize = 28.0;
 
   // ── Dépenses (spec « Dépenses ▸ Frais de fonctionnement ») ────────────────
@@ -679,16 +706,16 @@ class AppDimensions {
   /// Cible tactile standard du module : puces, flèches, segments.
   static const presenceMarkTapTarget = 44.0;
 
-  /// Segment P/R/A, heures, « Justifier » : la ligne d'appel se tape au
-  /// doigt, élève après élève — 48 dp, pas 40.
-  static const presenceMarkSegmentHeight = minTouchTarget;
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;
   static const presenceMarkAccentWidth = 4.0;
 
-  /// La vue liste : largeur plancher avant défilement, et ses colonnes.
-  static const presenceMarkListMinWidth = 960.0;
+  /// La vue liste : largeur plancher avant défilement, et ses colonnes. Sous
+  /// ~880, le nom de l'élève n'avait plus qu'une centaine de dp (« KABONGO
+  /// MUTOMBO » coupé) ; le pointage, avec sa colonne des heures, garde 960.
+  static const presenceMarkListMinWidth = 880.0;
+  static const presenceMarkListWithHoursMinWidth = 960.0;
   static const presenceMarkColStatus = 262.0;
   static const presenceMarkColTimes = 168.0;
 
@@ -701,6 +728,16 @@ class AppDimensions {
   /// Les modales du pointage.
   static const formDialogMaxWidth = 480.0;
   static const formDialogMaxHeight = 640.0;
+
+  /// Carte d'étape de l'assistant d'inscription : large, bornée sur très
+  /// grand écran ; la barre d'étapes et le pied s'alignent sur elle.
+  static const enrollmentStepCardMaxWidth = 1100.0;
+
+  /// Sur un grand écran, une modale de saisie grandit avec la fenêtre (part
+  /// [formDialogHeightRatio]) jusqu'à [formDialogTallMaxHeight] : un long
+  /// formulaire défilait dans 640 dp sur un écran de 1 440 de haut.
+  static const formDialogHeightRatio = 0.8;
+  static const formDialogTallMaxHeight = 900.0;
 
   /// Fiche mensuelle : sélecteur d'agent et calendrier.
   static const presenceMarkPickerWidth = 340.0;

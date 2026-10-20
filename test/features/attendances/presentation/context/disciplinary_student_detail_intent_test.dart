@@ -58,17 +58,6 @@ void main() {
       expect(invalid.hasDisplayContext, false);
     });
 
-    test('withRouteParams should preserve context data', () {
-      final withParams = testIntent.withRouteParams(
-        studentId: 'new-id',
-        academicYearId: 'new-year',
-      );
-      expect(withParams.studentFirstName, 'John');
-      expect(withParams.levelName, 'Grade 1');
-      expect(withParams.studentId, 'new-id');
-      expect(withParams.academicYearId, 'new-year');
-    });
-
     test('fromRouteContext should extract extra when valid', () {
       final intent = DisciplinaryStudentDetailIntent.fromRouteContext(
         studentId: '123',

@@ -8369,22 +8369,26 @@
   "@staffSaveError": {
     "description": "Échec d'écriture locale."
   },
-  "staffDiscardTitle": "Discard your changes?",
-  "@staffDiscardTitle": {
+  "discardChangesTitle": "Discard your changes?",
+  "@discardChangesTitle": {
     "description": "Titre de la confirmation d'abandon."
   },
   "staffDiscardMessage": "The changes to this record will be lost.",
   "@staffDiscardMessage": {
     "description": "Message de la confirmation d'abandon."
   },
-  "staffDiscardConfirm": "Discard",
-  "@staffDiscardConfirm": {
+  "discardChangesConfirm": "Discard",
+  "@discardChangesConfirm": {
     "description": "Confirmer l'abandon."
   },
-  "staffDiscardKeep": "Keep editing",
-  "@staffDiscardKeep": {
+  "discardChangesKeep": "Keep editing",
+  "@discardChangesKeep": {
     "description": "Revenir à la saisie."
   },
+  "discardChangesMessage": "What you entered will be lost.",
+  "evalSaisieDiscardMessage": "The marks entered and not saved will be lost.",
+  "boutiqueCartDiscardMessage": "The current cart will be emptied.",
+  "communicationEditorDiscardMessage": "The announcement being written is not saved. Your changes will be lost.",
   "staffBlockContract": "Contract",
   "staffBlockContractHint": "Dated periods: a new contract takes effect on a date, without rewriting the previous one.",
   "staffContractAdd": "New contract",
@@ -9860,5 +9864,13 @@
   "shortcutsHelpThis": "Show this help",
   "shortcutsKeyEnter": "Enter",
   "shortcutsKeyEscape": "Esc",
-  "shortcutsKeyClick": "click"
+  "shortcutsKeyClick": "click",
+  "appUpdateAvailable": "A new version of the application is available.",
+  "appUpdateReload": "Reload",
+  "classesListDownloadCsv": "Download as CSV",
+  "classesListExportDownloaded": "Export downloaded.",
+  "classesListExportFileName": "classes-export.csv",
+  "facturationDownloadStatementLabel": "Download statement",
+  "facturationChargeStatementDownloaded": "Statement downloaded",
+  "facturationChargeStatementFileName": "fee-statement.csv"
 }

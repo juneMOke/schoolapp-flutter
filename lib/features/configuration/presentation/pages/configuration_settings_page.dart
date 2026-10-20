@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/navigation/location_tab_sync.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -50,6 +51,16 @@ class _ConfigurationSettingsPageState extends State<ConfigurationSettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // L'onglet dans l'adresse : F5 le retrouve, Précédent y revient.
+    return LocationTabSync<ConfigurationSettingsTab>(
+      values: ConfigurationSettingsTab.values,
+      current: _tab,
+      onLocationTab: (tab) => setState(() => _tab = tab),
+      child: _content(context, l10n),
+    );
+  }
+
+  Widget _content(BuildContext context, AppLocalizations l10n) {
     return BlocProvider<SchoolIdentityFormCubit>(
       create: (_) => getIt<SchoolIdentityFormCubit>()..load(),
       child: Builder(

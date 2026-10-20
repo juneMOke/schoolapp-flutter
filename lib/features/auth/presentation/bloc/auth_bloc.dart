@@ -61,6 +61,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthResetPasswordRequested>(_onAuthResetPasswordRequested);
     on<AuthFreshnessTick>(_onFreshnessTick);
     on<AuthSessionRevoked>(_onSessionRevoked);
+    on<AuthSessionEndedElsewhere>(_onSessionEndedElsewhere);
     on<AuthRefreshExpired>(_onRefreshExpired);
     _revocationSub = _revocationBus?.stream.listen(
       (_) => add(const AuthSessionRevoked()),
@@ -361,6 +362,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     _stopFreshnessTimer();
     // La session a déjà été wipée par le guardian (après flush, D-11).
+    emit(const AuthState(status: AuthStatus.unauthenticated));
+  }
+
+  void _onSessionEndedElsewhere(
+    AuthSessionEndedElsewhere event,
+    Emitter<AuthState> emit,
+  ) {
+    if (state.status != AuthStatus.authenticated) return;
+    _stopFreshnessTimer();
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 

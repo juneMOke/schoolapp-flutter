@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:math';
 
 /// Garde les `extra` de navigation EN MÉMOIRE quand go_router sérialise sa
 /// pile.
@@ -20,21 +21,33 @@ import 'dart:convert';
 /// par un identifiant ; relire l'identifiant rend l'objet d'origine. Même objet,
 /// même identifiant : le registre ne grossit pas à chaque rafraîchissement.
 ///
+/// Chaque registre a son jeton de session, écrit à côté de l'identifiant :
+/// après un F5, l'historique du navigateur garde les états de la session
+/// d'avant, dont les identifiants recommencent à 0 dans le nouveau registre —
+/// sans jeton, Précédent rouvrait une fiche avec l'`extra` d'un autre élève.
+///
 /// ⚠️ **Mémoire seulement.** Un redémarrage à froid (état restauré par le
 /// système) retrouve un registre vide et rend `null` — exactement le
 /// comportement d'avant, que les pages gèrent déjà (carte de contexte
 /// indisponible). Le registre est borné : au-delà de [capacity], les plus
 /// anciens sortent.
 class InMemoryExtraCodec extends Codec<Object?, Object?> {
-  InMemoryExtraCodec({this.capacity = 64});
+  InMemoryExtraCodec({this.capacity = 64, int? session})
+    : _session = session ?? Random().nextInt(_sessionRange);
+
+  /// Borne du jeton. Écrite en clair : `1 << 32` vaut 0 sur le web, où les
+  /// décalages se font sur 32 bits — `nextInt(0)` levait au démarrage.
+  static const int _sessionRange = 0x7FFFFFFF;
 
   final int capacity;
+  final int _session;
 
   final LinkedHashMap<int, Object> _byId = LinkedHashMap<int, Object>();
   final Map<Object, int> _idOf = Map<Object, int>.identity();
   int _nextId = 0;
 
   static const String _key = 'inMemoryExtra';
+  static const String _sessionKey = 'inMemoryExtraSession';
 
   Object? _encode(Object? extra) {
     if (extra == null) return null;
@@ -49,11 +62,14 @@ class InMemoryExtraCodec extends Codec<Object?, Object?> {
       final evicted = _byId.remove(oldest);
       if (evicted != null) _idOf.remove(evicted);
     }
-    return <String, Object?>{_key: id};
+    return <String, Object?>{_key: id, _sessionKey: _session};
   }
 
   Object? _decode(Object? encoded) {
     if (encoded is! Map) return null;
+    // Un état d'une autre session (avant F5) : son identifiant ne désigne
+    // rien ici.
+    if (encoded[_sessionKey] != _session) return null;
     final id = encoded[_key];
     if (id is! int) return null;
     return _byId[id];

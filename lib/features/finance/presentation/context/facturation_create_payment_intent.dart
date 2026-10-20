@@ -1,10 +1,14 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/navigation/student_record_intent.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_payment_correction_context.dart';
 
-class FacturationCreatePaymentIntent extends Equatable {
+class FacturationCreatePaymentIntent extends Equatable
+    implements StudentRecordIntent {
+  @override
   final String studentId;
+  @override
   final String academicYearId;
   final String firstName;
   final String lastName;
@@ -70,38 +74,33 @@ class FacturationCreatePaymentIntent extends Equatable {
       .where((c) => c.status != StudentChargeStatus.paid)
       .toList();
 
-  FacturationCreatePaymentIntent withRouteParams({
-    required String studentId,
-    required String academicYearId,
-  }) => FacturationCreatePaymentIntent(
-    studentId: studentId,
-    academicYearId: academicYearId,
-    firstName: firstName,
-    lastName: lastName,
-    surname: surname,
-    levelName: levelName,
-    levelGroupName: levelGroupName,
-    studentCharges: studentCharges,
-    correction: correction,
-    onWritten: onWritten,
-  );
+  /// Les encaissements écrits, par intention — hors de l'égalité, comme
+  /// [onWritten].
+  static final Expando<bool> _spent = Expando<bool>('encaissement écrit');
+
+  /// L'encaissement est écrit : cette intention ne doit plus en ouvrir un.
+  ///
+  /// Le navigateur garde la pile dans son historique, et Précédent ou Suivant
+  /// la rejouent : sans ce marqueur, l'encaissement se rouvrirait sur ses
+  /// anciennes créances, comme si rien n'avait été payé.
+  void markSpent() => _spent[this] = true;
+
+  bool get isSpent => _spent[this] ?? false;
 
   static FacturationCreatePaymentIntent fromRouteContext({
     required String studentId,
     required String academicYearId,
     Object? extra,
-  }) {
-    if (extra is FacturationCreatePaymentIntent) {
-      return extra.withRouteParams(
+  }) =>
+      extraForRecord<FacturationCreatePaymentIntent>(
+        extra,
+        studentId: studentId,
+        academicYearId: academicYearId,
+      ) ??
+      FacturationCreatePaymentIntent.invalid(
         studentId: studentId,
         academicYearId: academicYearId,
       );
-    }
-    return FacturationCreatePaymentIntent.invalid(
-      studentId: studentId,
-      academicYearId: academicYearId,
-    );
-  }
 
   @override
   List<Object?> get props => [

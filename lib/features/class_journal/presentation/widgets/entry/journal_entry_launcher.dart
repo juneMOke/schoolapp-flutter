@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_line.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_day_cubit.dart';
@@ -21,7 +22,7 @@ Future<void> openJournalEntry(BuildContext context, JournalLine line) async {
   final day = dayState.day;
   final cubit = GetIt.instance<JournalEntryCubit>()
     ..open(line, date: day.date, slotOrder: day.slotOrder);
-  final outcome = await showDialog<JournalEntryStatus>(
+  final outcome = await showEteeloAdaptiveDialog<JournalEntryStatus>(
     context: context,
     barrierDismissible: false,
     builder: (_) => BlocProvider<JournalEntryCubit>.value(

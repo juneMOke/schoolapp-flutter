@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/wizard/wizard_step_progression.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -32,6 +33,11 @@ class WizardBreadcrumb extends StatelessWidget {
   /// Étapes à montrer en erreur (après une tentative).
   final Set<int> errorSteps;
 
+  /// Plafond du contenu (progression et étapes), centré ; le fond reste de
+  /// toute la largeur. `null` : toute la largeur. Sur un écran de 2 560, cinq
+  /// étapes s'écartaient de ~500 dp au-dessus d'une carte de 1 100.
+  final double? contentMaxWidth;
+
   const WizardBreadcrumb({
     super.key,
     required this.titles,
@@ -41,6 +47,7 @@ class WizardBreadcrumb extends StatelessWidget {
     this.compact = false,
     this.progression,
     this.errorSteps = const <int>{},
+    this.contentMaxWidth,
   });
 
   @override
@@ -62,27 +69,41 @@ class WizardBreadcrumb extends StatelessWidget {
         color: AppColors.surfaceRaised,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
-      child: compact
-          ? progressBar
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                progressBar,
-                const SizedBox(height: AppSpacing.md),
-                _StepRow(
-                  titles: titles,
-                  progression:
-                      progression ??
-                      WizardStepProgression.linear(
-                        stepCount: titles.length,
-                        currentStep: currentStep,
-                      ),
-                  errorSteps: errorSteps,
-                  reduceMotion: reduceMotion,
-                  onStepTap: onStepTap,
-                ),
-              ],
-            ),
+      child: _capped(
+        compact
+            ? progressBar
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  progressBar,
+                  const SizedBox(height: AppSpacing.md),
+                  _StepRow(
+                    titles: titles,
+                    progression:
+                        progression ??
+                        WizardStepProgression.linear(
+                          stepCount: titles.length,
+                          currentStep: currentStep,
+                        ),
+                    errorSteps: errorSteps,
+                    reduceMotion: reduceMotion,
+                    onStepTap: onStepTap,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _capped(Widget content) {
+    final max = contentMaxWidth;
+    if (max == null) return content;
+    // Toute la largeur plafonnée : la progression et les étapes s'étirent
+    // jusqu'au plafond, pas à leur largeur propre.
+    return ContentMaxWidth(
+      maxWidth: max,
+      heightFactor: 1,
+      child: SizedBox(width: double.infinity, child: content),
     );
   }
 }

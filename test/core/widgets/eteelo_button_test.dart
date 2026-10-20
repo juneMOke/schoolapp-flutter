@@ -108,7 +108,15 @@ void main() {
       expect(tapCount, 0);
     });
 
-    testWidgets('focus affiche un ring de focus', (tester) async {
+    testWidgets('focus clavier : un anneau opaque, détaché du bouton', (
+      tester,
+    ) async {
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTraditional;
+      addTearDown(
+        () => FocusManager.instance.highlightStrategy =
+            FocusHighlightStrategy.automatic,
+      );
       await pumpButton(
         tester,
         EteeloButton.primary(label: 'Continuer', onPressed: () {}),
@@ -129,8 +137,33 @@ void main() {
       );
       final afterDecoration = after.decoration! as BoxDecoration;
       expect(afterDecoration.boxShadow, isNotEmpty);
-      expect(afterDecoration.boxShadow!.first.color, AppColors.stateFocus);
-      expect(afterDecoration.boxShadow!.first.spreadRadius, 2);
+      expect(afterDecoration.boxShadow!.first.color, AppColors.focusRing);
+      expect(afterDecoration.boxShadow!.first.spreadRadius, 4);
+      expect(afterDecoration.boxShadow!.last.color, AppColors.surface);
+    });
+
+    testWidgets('focus au toucher ou au clic : pas d\'anneau', (tester) async {
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTouch;
+      addTearDown(
+        () => FocusManager.instance.highlightStrategy =
+            FocusHighlightStrategy.automatic,
+      );
+      await pumpButton(
+        tester,
+        EteeloButton.primary(label: 'Continuer', onPressed: () {}),
+      );
+      tester
+          .widget<ElevatedButton>(find.byType(ElevatedButton))
+          .focusNode
+          ?.requestFocus();
+      await tester.pumpAndSettle();
+      final decoration =
+          tester
+                  .widget<AnimatedContainer>(find.byType(AnimatedContainer))
+                  .decoration!
+              as BoxDecoration;
+      expect(decoration.boxShadow, isEmpty);
     });
 
     testWidgets('size regular prend toute la largeur et hauteur 48', (

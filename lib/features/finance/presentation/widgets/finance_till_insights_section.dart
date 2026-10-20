@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -49,23 +50,18 @@ class FinanceTillInsightsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppDimensions.spacingM),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            const spacing = AppDimensions.spacingM;
-            // Deux colonnes dès que 260 dp tiennent deux fois : la spec donne
-            // `flex 1 1 260` à chaque carte.
-            final twoUp = constraints.maxWidth >= 260 * 2 + spacing;
-            final width = twoUp
-                ? (constraints.maxWidth - spacing) / 2
-                : constraints.maxWidth;
-
-            return Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: [
-                for (final card in _cards(context, l10n))
-                  SizedBox(width: width, child: card),
-              ],
+        // Autant de colonnes que de cartes de 260 dp tiennent : la spec donne
+        // `flex 1 1 260` à chaque carte. Limitée à deux, une page de 1 760
+        // les étirait sur 870 dp.
+        Builder(
+          builder: (context) {
+            final cards = _cards(context, l10n);
+            return EteeloGridView(
+              itemCount: cards.length,
+              itemBuilder: (_, index) => cards[index],
+              padding: EdgeInsets.zero,
+              spacing: AppDimensions.spacingM,
+              minItemWidth: AppDimensions.financeTillInsightMinWidth,
             );
           },
         ),

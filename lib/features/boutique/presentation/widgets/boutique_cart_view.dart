@@ -247,6 +247,7 @@ class _BoutiqueCartViewState extends State<BoutiqueCartView> {
         final bloc = context.read<BoutiqueBloc>();
 
         return BoutiqueCartPanel(
+          pinFooter: widget.embedded,
           cart: state.cart,
           levels: widget.levels,
           rates: state.rates,

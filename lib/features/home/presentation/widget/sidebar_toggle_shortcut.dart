@@ -8,9 +8,11 @@ import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bl
 /// comme dans un éditeur — où que soit le focus, tant qu'aucune modale n'est
 /// ouverte par-dessus.
 class SidebarToggleShortcut extends StatelessWidget {
+  /// Le geste à la place du repli : en rail, ouvrir le menu complet.
+  final VoidCallback? onToggle;
   final Widget child;
 
-  const SidebarToggleShortcut({super.key, required this.child});
+  const SidebarToggleShortcut({super.key, this.onToggle, required this.child});
 
   static const List<SingleActivator> activators = [
     SingleActivator(LogicalKeyboardKey.keyB, control: true),
@@ -20,7 +22,9 @@ class SidebarToggleShortcut extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RouteKeyShortcut(
     activators: activators,
-    onPressed: () => context.read<NavigationBloc>().add(const SidebarToggled()),
+    onPressed:
+        onToggle ??
+        () => context.read<NavigationBloc>().add(const SidebarToggled()),
     child: child,
   );
 }

@@ -66,6 +66,9 @@ void main() {
     ),
   );
 
+  var backs = 0;
+  setUp(() => backs = 0);
+
   Widget host() => MaterialApp(
     locale: const Locale('fr'),
     localizationsDelegates: const [
@@ -75,8 +78,49 @@ void main() {
       GlobalCupertinoLocalizations.delegate,
     ],
     supportedLocales: AppLocalizations.supportedLocales,
-    home: EvalSaisiePage(args: args, onBack: () {}),
+    home: EvalSaisiePage(args: args, onBack: () => backs++),
   );
+
+  group('retour avec des notes non enregistrées', () {
+    Future<void> enterOneMark(WidgetTester tester) async {
+      when(() => mockGet('e1')).thenAnswer(
+        (_) async => const Right<Failure, List<NoteEleve>>([
+          NoteEleve(studentId: 's1', firstName: 'Daniel', lastName: 'Kabongo'),
+        ]),
+      );
+      tester.view.physicalSize = const Size(1200, 1800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(host());
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '8');
+      await tester.pump();
+      await tester.tap(find.text("Retour à l'évaluation"));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('la question est posée ; « continuer » garde la saisie', (
+      tester,
+    ) async {
+      await enterOneMark(tester);
+      expect(
+        find.text('Les notes saisies et non enregistrées seront perdues.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Continuer la saisie'));
+      await tester.pumpAndSettle();
+      expect(backs, 0);
+      expect(find.text('8'), findsOneWidget);
+    });
+
+    testWidgets('« abandonner » revient au détail', (tester) async {
+      await enterOneMark(tester);
+      await tester.tap(find.text('Abandonner'));
+      await tester.pumpAndSettle();
+      expect(backs, 1);
+    });
+  });
 
   testWidgets(
     'enregistrement de 2 lignes (réponses instantanées) : les deux sont '

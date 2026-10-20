@@ -126,10 +126,15 @@ abstract final class ExpenseRegisterQuery {
 
   /// `DEP-0412` → 412 ; sans numéro → le plus grand rang (en tête).
   static int _numberRank(String? number) {
-    if (number == null) return 1 << 62;
+    if (number == null) return _unnumberedRank;
     final digits = RegExp(r'(\d+)$').firstMatch(number)?.group(1);
     return digits == null ? 0 : int.tryParse(digits) ?? 0;
   }
+
+  /// Le plus grand entier exact des deux côtés : `1 << 62` valait 0 sur le
+  /// web (décalages sur 32 bits) et y renvoyait les dépenses sans numéro en
+  /// queue de registre.
+  static const int _unnumberedRank = 0x1FFFFFFFFFFFFF;
 
   static String _haystack(Expense expense, ExpenseType? type) => [
     expense.title,

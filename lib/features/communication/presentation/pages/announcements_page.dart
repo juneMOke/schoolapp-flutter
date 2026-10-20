@@ -173,6 +173,7 @@ class _AnnouncementsFlow extends StatelessWidget {
       scrollable: false,
       child: MasterDetailLayout(
         masterWidth: AppDimensions.announcementsListWidth,
+        onCloseDetail: detail == null ? null : flow.showList,
         master: AnnouncementsListScreen(
           onOpen: flow.open,
           onCreate: canSend ? flow.openNew : null,

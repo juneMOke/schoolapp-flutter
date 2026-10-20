@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/buttons/stepper_actions_bar.dart';
@@ -58,16 +59,22 @@ class EnrollmentStepperControls extends StatelessWidget {
         color: AppColors.surfaceRaised,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
+      // Le fond de toute la largeur, les boutons alignés sur la carte d'étape.
       child: SafeArea(
         top: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Téléphone : barre ultra-compacte en icônes seules (évite l'overflow
-            // des 3 boutons label+icône + indicateur sur une seule ligne).
-            final compact =
-                constraints.maxWidth < AppBreakpoints.stepperControlsCompactMax;
-            return compact ? _buildCompactBar(l10n) : _buildRegularBar(l10n);
-          },
+        child: ContentMaxWidth(
+          maxWidth: AppDimensions.enrollmentStepCardMaxWidth,
+          heightFactor: 1,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Téléphone : barre ultra-compacte en icônes seules (évite l'overflow
+              // des 3 boutons label+icône + indicateur sur une seule ligne).
+              final compact =
+                  constraints.maxWidth <
+                  AppBreakpoints.stepperControlsCompactMax;
+              return compact ? _buildCompactBar(l10n) : _buildRegularBar(l10n);
+            },
+          ),
         ),
       ),
     );

@@ -28,6 +28,19 @@ class EteeloKpiBand extends StatelessWidget {
     return columns;
   }
 
+  /// Largeur d'une carte pour [count] cartes dans [width] : la colonne de
+  /// [columnsFor], plafonnée à [AppDimensions.kpiCardMaxWidth]. Partagée par
+  /// les squelettes, qui restent iso-grille.
+  static double cardWidthFor(double width, int count) {
+    const spacing = AppDimensions.spacingM;
+    final columns = columnsFor(width, count);
+    // Arrondi à l'inférieur : évite qu'un sur-pixel flottant fasse passer la
+    // dernière carte à la ligne suivante quand elles tiennent juste.
+    final column = ((width - spacing * (columns - 1)) / columns)
+        .floorToDouble();
+    return column.clamp(0, AppDimensions.kpiCardMaxWidth).toDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (cards.isEmpty) return const SizedBox.shrink();
@@ -35,14 +48,8 @@ class EteeloKpiBand extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const spacing = AppDimensions.spacingM;
-        final available = constraints.maxWidth;
-
         // Auto-fill (sémantique CSS `minmax(min, 1fr)`), paliers harmonieux.
-        final columns = columnsFor(available, cards.length);
-        // Arrondi à l'inférieur : évite qu'un sur-pixel flottant fasse passer la
-        // dernière carte à la ligne suivante quand elles tiennent juste.
-        final cardWidth = ((available - spacing * (columns - 1)) / columns)
-            .floorToDouble();
+        final cardWidth = cardWidthFor(constraints.maxWidth, cards.length);
 
         return Wrap(
           spacing: spacing,

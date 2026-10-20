@@ -22,6 +22,22 @@ void main() {
   testWidgets('l’onglet porte l’écran ouvert puis le nom de l’application', (
     tester,
   ) async {
+    final labels = <String>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'SystemChrome.setApplicationSwitcherDescription') {
+          labels.add((call.arguments as Map)['label'] as String);
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
     final bloc = _MockNavigationBloc();
     when(() => bloc.state).thenReturn(_state);
     when(() => bloc.stream).thenAnswer((_) => const Stream.empty());
@@ -38,10 +54,7 @@ void main() {
       ),
     );
 
-    expect(
-      tester.widget<Title>(find.byType(Title).last).title,
-      'Facturation · ETEELO CONNECT',
-    );
+    expect(labels.last, 'Facturation · ETEELO CONNECT');
   });
 
   testWidgets('quitter la coquille rend le nom de l’application à l’onglet', (

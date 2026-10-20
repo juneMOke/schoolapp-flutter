@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
@@ -247,8 +248,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
+    final maxHeight = DialogHeight.ofWindow(context);
     final resultActive = _phase != _Phase.confirm;
 
     return BlocListener<FinanceOfflineBloc, FinanceOfflineState>(

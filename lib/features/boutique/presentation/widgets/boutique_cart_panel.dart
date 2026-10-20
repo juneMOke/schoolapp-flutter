@@ -54,7 +54,13 @@ class BoutiqueCartPanel extends StatelessWidget {
     this.rates = const [],
     this.onTenderCurrencyChanged,
     this.onTenderedChanged,
+    this.pinFooter = false,
   });
+
+  /// Vrai dans la colonne de la caisse sur grand écran, de hauteur bornée :
+  /// les lignes défilent, le pied reste en bas. Sur un écran de 768, cinq
+  /// lignes et le payeur poussaient sinon « Encaisser » sous le pli.
+  final bool pinFooter;
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +74,8 @@ class BoutiqueCartPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: _layout(
+        [
           Row(
             children: [
               const Icon(
@@ -137,16 +141,50 @@ class BoutiqueCartPanel extends StatelessWidget {
             onCurrencyChanged: onTenderCurrencyChanged,
             onTenderedChanged: onTenderedChanged,
           ),
-          // Le pied reste en place même sur un panier vide, avec « 0.00 $ » :
-          // il montre où sera le bouton, plutôt que d'apparaître d'un coup sous
-          // le doigt au premier article.
-          BoutiqueCartFooter(
-            cart: cart,
-            onCollect: onCollect,
-            onClear: onClear,
-          ),
         ],
+        // Le pied reste en place même sur un panier vide, avec « 0.00 $ » :
+        // il montre où sera le bouton, plutôt que d'apparaître d'un coup sous
+        // le doigt au premier article.
+        BoutiqueCartFooter(cart: cart, onCollect: onCollect, onClear: onClear),
       ),
+    );
+  }
+
+  /// Le contenu, puis le pied. [pinFooter] : le contenu défile seul, le total
+  /// et « Encaisser » restent sous les yeux — tant que la colonne est assez
+  /// haute pour les tenir ; plus basse (fenêtre basse, clavier ouvert sur le
+  /// payeur), tout défile, comme sur la page du panier.
+  Widget _layout(List<Widget> content, Widget footer) {
+    if (!pinFooter) return _stacked(content, footer);
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          constraints.maxHeight <
+              AppDimensions.boutiqueCartPinnedFooterMinHeight
+          ? SingleChildScrollView(child: _stacked(content, footer))
+          : _pinned(content, footer),
+    );
+  }
+
+  static Widget _stacked(List<Widget> content, Widget footer) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
+    children: [...content, footer],
+  );
+
+  static Widget _pinned(List<Widget> content, Widget footer) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: content,
+            ),
+          ),
+        ),
+        footer,
+      ],
     );
   }
 }

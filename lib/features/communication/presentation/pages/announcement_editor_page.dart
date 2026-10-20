@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -16,6 +17,7 @@ import 'package:school_app_flutter/features/communication/presentation/bloc/edit
 import 'package:school_app_flutter/features/communication/presentation/bloc/templates/announcement_templates_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/helpers/announcement_outcome_messages.dart';
 import 'package:school_app_flutter/features/communication/presentation/helpers/communication_failure_text.dart';
+import 'package:school_app_flutter/features/communication/presentation/widgets/editor/announcement_editor_exit_guard.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/announcement_editor_screen.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
@@ -77,40 +79,54 @@ class AnnouncementEditorPage extends StatelessWidget {
       // Pas de défilement de page : l'éditeur défile lui-même, sous une barre
       // d'actions collante. Le `Builder` donne aux gestes un contexte sous les
       // fournisseurs ci-dessus.
-      child: AppPageBackground(
-        scrollable: false,
-        child: Builder(
-          builder: (context) => AnnouncementEditorScreen(
-            schoolName: context.read<SchoolIdentityCubit>().state.school?.name,
-            groups:
-                context
-                    .read<AcademicYearContextBloc>()
-                    .state
-                    .context
-                    ?.schoolLevelGroups ??
-                const [],
-            onBack: flow.showList,
-            onSaveAsTemplate:
-                PermissionGate.allowsAccess(
+      child: AnnouncementEditorExitGuard(
+        child: AppPageBackground(
+          scrollable: false,
+          child: Builder(
+            builder: (context) => AnnouncementEditorScreen(
+              schoolName: context
+                  .read<SchoolIdentityCubit>()
+                  .state
+                  .school
+                  ?.name,
+              groups:
+                  context
+                      .read<AcademicYearContextBloc>()
+                      .state
+                      .context
+                      ?.schoolLevelGroups ??
+                  const [],
+              onBack: () => _leave(context, flow),
+              onSaveAsTemplate:
+                  PermissionGate.allowsAccess(
+                    context,
+                    kAnnouncementTemplateWriteAccess,
+                  )
+                  ? () => _saveAsTemplate(context)
+                  : null,
+              onDone: (outcome, announcement) {
+                context.read<AnnouncementsCubit>().upsert(announcement);
+                AppSnackBar.showSuccess(
                   context,
-                  kAnnouncementTemplateWriteAccess,
-                )
-                ? () => _saveAsTemplate(context)
-                : null,
-            onDone: (outcome, announcement) {
-              context.read<AnnouncementsCubit>().upsert(announcement);
-              AppSnackBar.showSuccess(
-                context,
-                AppLocalizations.of(
-                  context,
-                )!.outcomeMessage(outcome, announcement, DateTime.now()),
-              );
-              flow.showList();
-            },
+                  AppLocalizations.of(
+                    context,
+                  )!.outcomeMessage(outcome, announcement, DateTime.now()),
+                );
+                flow.showList();
+              },
+            ),
           ),
         ),
       ),
     );
+  }
+
+  /// Retour à la liste : une rédaction en cours pose d'abord la question.
+  static Future<void> _leave(
+    BuildContext context,
+    CommunicationFlowCubit flow,
+  ) async {
+    if (await RouteExitGuard.mayLeave(context)) flow.showList();
   }
 
   /// « Enregistrer comme modèle » : titre et message requis, l'éditeur reste

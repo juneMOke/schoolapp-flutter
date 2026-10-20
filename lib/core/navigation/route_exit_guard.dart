@@ -48,32 +48,84 @@ class RouteExitGuard extends StatefulWidget {
   /// ([GoRouterState.pageKey]) et celles des pages poussées par-dessus sans
   /// route (`Navigator.push` : fiche d'un agent, puis son contrat). La plus
   /// haute qui a une saisie pose la question ; une réponse vaut pour toutes.
-  static FutureOr<bool> onExit(BuildContext context, GoRouterState state) {
-    final guards = [
+  static FutureOr<bool> onExit(BuildContext context, GoRouterState state) =>
+      _consult([
+        for (final guard in _mounted.reversed)
+          if (!guard._released && guard._leftWith(state.pageKey)) guard,
+      ]);
+
+  /// [onExit] pour une route dont la page porte sa propre clé ([pageKey]) —
+  /// la coquille, une seule page pour toutes ses adresses. GoRouter annonce
+  /// la clé de SA correspondance, pas celle de la page : sans cela, les
+  /// gardes des écrans de la coquille ne seraient jamais consultées quand
+  /// Précédent change d'écran.
+  static ExitCallback onExitOfPage(ValueKey<String> pageKey) =>
+      (context, state) => _consult([
+        for (final guard in _mounted.reversed)
+          if (!guard._released && guard._leftWith(pageKey)) guard,
+      ], refreshFirst: true);
+
+  /// Une sortie décidée **dans** la page, sans changer d'adresse d'abord :
+  /// un écran du menu latéral, le retour d'un écran à niveaux. Consulte les
+  /// gardes de la route de [context] — l'adresse ne change qu'après, quand
+  /// l'écran gardé a déjà disparu, et [onExit] n'aurait plus personne à qui
+  /// demander.
+  ///
+  /// Accordée après la question, la sortie lève ces gardes : le changement
+  /// d'adresse qui suit ne la repose pas. Sans saisie, rien n'est levé ; et
+  /// une garde levée dont l'écran reste finalement affiché (déconnexion
+  /// échouée) se réarme à l'image suivante.
+  static FutureOr<bool> mayLeave(BuildContext context) {
+    final route = ModalRoute.of(context);
+    return _consult([
       for (final guard in _mounted.reversed)
-        if (!guard._released && guard._leftWith(state.pageKey)) guard,
+        if (!guard._released && guard._route == route) guard,
+    ], closePageless: false);
+  }
+
+  /// [closePageless] : la sortie emporte la route — ses pages sans route
+  /// doivent partir avec. Faux quand la page décide elle-même où aller.
+  ///
+  /// [refreshFirst] : une redirection du routeur passe avant une écriture en
+  /// vol. Dans la coquille, l'écriture (un envoi, des notes) n'a pas d'issue
+  /// incertaine à protéger, et la retenir laisserait l'utilisateur sans
+  /// session : rien ne relance la redirection ensuite.
+  static FutureOr<bool> _consult(
+    List<_RouteExitGuardState> candidates, {
+    bool closePageless = true,
+    bool refreshFirst = false,
+  }) {
+    // Une garde démontée (écran déjà remplacé) n'a plus rien à protéger.
+    final guards = [
+      for (final guard in candidates)
+        if (guard.mounted) guard,
     ];
     if (guards.isEmpty) return true;
-    if (guards.any((guard) => guard.widget.isBusy())) return false;
     // Un rafraîchissement du routeur n'est pas une sortie demandée : il
     // recrée la page empilée (go_router #128122), ou applique une redirection
     // qui fait autorité (déconnexion, droit retiré). Aucune question.
+    if (refreshFirst && _routerRefreshing) return true;
+    if (guards.any((guard) => guard.widget.isBusy())) return false;
     if (_routerRefreshing) return true;
     final dirty = guards.where((guard) => guard.widget.hasUnsavedWork());
-    if (dirty.isEmpty) return _leave(guards);
+    if (dirty.isEmpty) return !closePageless || _leave(guards, closePageless);
     return dirty.first._confirm().then(
-      (leave) => leave ? _leave(guards) : false,
+      (leave) => leave ? _leave(guards, closePageless) : false,
     );
   }
 
   /// Sortie accordée : les gardes se lèvent, et les pages sans route se
   /// referment — sans quoi elles resteraient affichées au-dessus d'une
   /// coquille dont l'adresse a changé.
-  static bool _leave(List<_RouteExitGuardState> guards) {
-    for (final guard in guards) {
-      guard
-        .._release()
-        .._closeIfPageless();
+  static bool _leave(List<_RouteExitGuardState> guards, bool closePageless) {
+    // La réponse arrive après la question : l'écran a pu partir entre-temps.
+    for (final guard in guards.where((guard) => guard.mounted)) {
+      guard._release();
+      if (closePageless) {
+        guard._closeIfPageless();
+      } else {
+        guard._rearmIfStillShown();
+      }
     }
     return true;
   }
@@ -129,6 +181,8 @@ class _RouteExitGuardState extends State<RouteExitGuard> {
     setUnloadGuard(false, source: this);
   }
 
+  ModalRoute<Object?>? get _route => mounted ? ModalRoute.of(context) : null;
+
   /// La page de cette garde part avec la page [pageKey] : c'est elle, ou
   /// une page sans route poussée au-dessus.
   bool _leftWith(ValueKey<String> pageKey) {
@@ -148,10 +202,29 @@ class _RouteExitGuardState extends State<RouteExitGuard> {
     }
   }
 
+  /// Referme ce que la sortie emporte : les pages sans route poussées
+  /// au-dessus de celle de la garde (le panier au-dessus de la boutique, dans
+  /// une coquille qui reste), puis la sienne si elle est sans route.
   void _closeIfPageless() {
     final route = ModalRoute.of(context);
-    if (route == null || route.settings is Page || !route.isActive) return;
-    route.navigator?.removeRoute(route);
+    if (route == null || !route.isActive) return;
+    final navigator = route.navigator;
+    if (navigator == null) return;
+    if (!route.isCurrent) {
+      navigator.popUntil((top) => top == route || top.settings is Page);
+    }
+    if (route.settings is! Page && route.isActive) navigator.removeRoute(route);
+  }
+
+  /// Levée par une sortie décidée dans la page : si l'écran est encore là à
+  /// l'image suivante, la sortie n'a pas eu lieu — la garde reprend.
+  void _rearmIfStillShown() {
+    SchedulerBinding.instance
+      ..addPostFrameCallback((_) {
+        if (!mounted || !_released) return;
+        setState(() => _released = false);
+      })
+      ..ensureVisualUpdate();
   }
 
   @override

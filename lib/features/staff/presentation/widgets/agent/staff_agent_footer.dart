@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -66,7 +68,16 @@ class StaffAgentFooter extends StatelessWidget {
         color: AppColors.surfaceRaised,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: SafeArea(top: false, child: Row(children: actions)),
+      // Plafonné comme le corps de l'assistant : sur un écran large, les
+      // boutons restent sous le formulaire au lieu de partir aux bords.
+      child: SafeArea(
+        top: false,
+        child: ContentMaxWidth(
+          maxWidth: AppDimensions.staffAgentBodyMaxWidth,
+          heightFactor: 1,
+          child: Row(children: actions),
+        ),
+      ),
     );
   }
 }

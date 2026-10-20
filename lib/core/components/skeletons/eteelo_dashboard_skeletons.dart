@@ -52,10 +52,10 @@ class EteeloKpiBandSkeleton extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const gap = AppDimensions.spacingM;
-        final columns = EteeloKpiBand.columnsFor(constraints.maxWidth, count);
-        final cardWidth =
-            ((constraints.maxWidth - gap * (columns - 1)) / columns)
-                .floorToDouble();
+        final cardWidth = EteeloKpiBand.cardWidthFor(
+          constraints.maxWidth,
+          count,
+        );
 
         return Wrap(
           spacing: gap,

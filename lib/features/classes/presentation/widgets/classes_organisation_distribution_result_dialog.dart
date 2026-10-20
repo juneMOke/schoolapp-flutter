@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -127,8 +128,7 @@ class _ClassesOrganisationDistributionResultDialogState
 
   @override
   Widget build(BuildContext context) {
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * AppDimensions.dialogMaxHeightRatio;
+    final maxHeight = DialogHeight.ofWindow(context);
 
     return BlocListener<ClassroomBloc, ClassroomState>(
       listenWhen: (previous, current) =>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/web/text_file_download.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -285,6 +286,16 @@ class _ClassesListPageState extends State<ClassesListPage> {
         return;
       }
 
+      // Sur le web, un fichier : le presse-papiers d'un navigateur ne sert à
+      // rien pour ouvrir l'export dans un tableur.
+      if (canDownloadTextFiles) {
+        downloadTextFile(
+          fileName: l10n.classesListExportFileName,
+          content: csv,
+        );
+        AppSnackBar.showSuccess(context, l10n.classesListExportDownloaded);
+        return;
+      }
       await Clipboard.setData(ClipboardData(text: csv));
       if (!mounted) {
         return;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -18,7 +19,7 @@ Future<void> showJournalEntryReadDialog(
   BuildContext context,
   JournalLine line,
   DateTime date,
-) => showDialog<void>(
+) => showEteeloAdaptiveDialog<void>(
   context: context,
   builder: (_) => JournalEntryReadDialog(line: line, date: date),
 );

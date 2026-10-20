@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -144,4 +145,11 @@ Future<void> sendTicketToSystemPrinter({
 /// Proposition initiale de la boîte de dialogue — jamais une contrainte : c'est
 /// le média annoncé par `onLayout` qui décide de la composition. A4 est le
 /// papier de bureau par défaut de la cible.
-const PdfPageFormat _initialFormat = PdfPageFormat.a4;
+///
+/// Sauf dans un navigateur : il n'annonce pas le média, `onLayout` n'y est
+/// appelé qu'une fois, avec ce format-ci. Composé en A4 puis imprimé sur une
+/// thermique, le ticket ressortait réduit, illisible : on le compose donc au
+/// rouleau de 80 mm, le papier des caisses.
+final PdfPageFormat _initialFormat = kIsWeb
+    ? PdfPageFormat.roll80
+    : PdfPageFormat.a4;

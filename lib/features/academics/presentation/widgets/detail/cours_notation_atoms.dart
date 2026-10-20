@@ -48,34 +48,38 @@ class _NotationPulseDotState extends State<NotationPulseDot>
       height: widget.size,
       decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
     );
-    return SizedBox(
-      width: widget.size,
-      height: widget.size,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final t = _controller.value;
-          return Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              if (_controller.isAnimating)
-                Opacity(
-                  opacity: (1 - t) * 0.45,
-                  child: Container(
-                    width: widget.size * (1 + t * 1.6),
-                    height: widget.size * (1 + t * 1.6),
-                    decoration: BoxDecoration(
-                      color: widget.color,
-                      shape: BoxShape.circle,
+    // Sa propre couche : le halo tourne sans fin tant que l'écran est ouvert,
+    // et ne doit pas faire repeindre la page autour à chaque image.
+    return RepaintBoundary(
+      child: SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final t = _controller.value;
+            return Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                if (_controller.isAnimating)
+                  Opacity(
+                    opacity: (1 - t) * 0.45,
+                    child: Container(
+                      width: widget.size * (1 + t * 1.6),
+                      height: widget.size * (1 + t * 1.6),
+                      decoration: BoxDecoration(
+                        color: widget.color,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
-                ),
-              child!,
-            ],
-          );
-        },
-        child: dot,
+                child!,
+              ],
+            );
+          },
+          child: dot,
+        ),
       ),
     );
   }
