@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/web/new_tab.dart';
+import 'package:school_app_flutter/features/home/presentation/helpers/accueil_navigation.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module_tone.dart';
-import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_ui_tokens.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -36,16 +36,8 @@ class AccueilSubModulePill extends StatelessWidget {
     required this.moduleTitle,
   });
 
-  void _navigate(BuildContext context) {
-    final target = subModule.target;
-    context.read<NavigationBloc>().add(
-      SubMenuItemSelected(
-        menuId: target.menuId,
-        subMenuId: target.subMenuId,
-        title: target.title,
-      ),
-    );
-  }
+  void _navigate(BuildContext context) =>
+      openAccueilTarget(context, subModule.target);
 
   /// Voile de fond. Le survol éclaircit les deux rangs de la même valeur — et
   /// cette valeur est plafonnée : un voile clair fait BAISSER le contraste du
@@ -71,6 +63,13 @@ class AccueilSubModulePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    return MiddleClickOpensTab(
+      path: accueilTargetPath(subModule.target),
+      child: _pill(context, l10n),
+    );
+  }
+
+  Widget _pill(BuildContext context, AppLocalizations l10n) {
     return EteeloActivatable(
       semanticLabel: l10n.accueilSubModuleSemantics(
         moduleTitle,

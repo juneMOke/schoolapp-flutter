@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/web/new_tab.dart';
+import 'package:school_app_flutter/features/home/presentation/helpers/accueil_navigation.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/home/domain/entity/accueil_module.dart';
-import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_module_bloc_parts.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_sub_module_pill.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/accueil/accueil_ui_tokens.dart';
@@ -37,16 +37,8 @@ class _AccueilModuleBlocState extends State<AccueilModuleBloc> {
   bool _isHovered = false;
   bool _isFocused = false;
 
-  void _openEntryPage() {
-    final target = widget.module.entry.target;
-    context.read<NavigationBloc>().add(
-      SubMenuItemSelected(
-        menuId: target.menuId,
-        subMenuId: target.subMenuId,
-        title: target.title,
-      ),
-    );
-  }
+  void _openEntryPage() =>
+      openAccueilTarget(context, widget.module.entry.target);
 
   @override
   Widget build(BuildContext context) {
@@ -147,42 +139,47 @@ class _AccueilModuleBlocState extends State<AccueilModuleBloc> {
     return Semantics(
       button: true,
       label: l10n.accueilModuleCardSemantics(module.title, module.entry.label),
-      child: EteeloActivatable(
-        onActivate: _openEntryPage,
-        // Le focus de la zone d'entrée se rend au niveau du pavé entier
-        // (élévation, anneau) : il remonte dans l'état du pavé.
-        onHighlightChanged: (highlight) {
-          if (_isFocused != highlight.focused) {
-            setState(() => _isFocused = highlight.focused);
-          }
-        },
-        builder: (context, highlight) {
-          return ExcludeSemantics(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AccueilModuleBlocHeaderRow(
-                  module: module,
-                  isHovered: _isHovered,
-                  pageCountLabel: l10n.accueilModulePageCount(module.pageCount),
-                ),
-                const SizedBox(height: AccueilUiTokens.blocDescriptionGapTop),
-                Expanded(
-                  child: Text(
-                    module.description,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: AccueilUiTokens.blocDescriptionFontSize,
-                      fontWeight: FontWeight.w400,
-                      height: AccueilUiTokens.blocDescriptionHeight,
-                      color: AppColors.accueilBlocInkBody,
+      child: MiddleClickOpensTab(
+        path: accueilTargetPath(module.entry.target),
+        child: EteeloActivatable(
+          onActivate: _openEntryPage,
+          // Le focus de la zone d'entrée se rend au niveau du pavé entier
+          // (élévation, anneau) : il remonte dans l'état du pavé.
+          onHighlightChanged: (highlight) {
+            if (_isFocused != highlight.focused) {
+              setState(() => _isFocused = highlight.focused);
+            }
+          },
+          builder: (context, highlight) {
+            return ExcludeSemantics(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AccueilModuleBlocHeaderRow(
+                    module: module,
+                    isHovered: _isHovered,
+                    pageCountLabel: l10n.accueilModulePageCount(
+                      module.pageCount,
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(height: AccueilUiTokens.blocDescriptionGapTop),
+                  Expanded(
+                    child: Text(
+                      module.description,
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: AccueilUiTokens.blocDescriptionFontSize,
+                        fontWeight: FontWeight.w400,
+                        height: AccueilUiTokens.blocDescriptionHeight,
+                        color: AppColors.accueilBlocInkBody,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
