@@ -17123,4 +17123,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shortcutsKeyClick => 'clic';
+
+  @override
+  String get appUpdateAvailable =>
+      'Une nouvelle version de l\'application est disponible.';
+
+  @override
+  String get appUpdateReload => 'Recharger';
 }

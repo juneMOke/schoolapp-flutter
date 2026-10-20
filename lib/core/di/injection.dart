@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/web/app_update/app_update_cubit.dart';
+import 'package:school_app_flutter/core/web/app_update/deployed_build_source.dart';
 import 'package:school_app_flutter/features/home/data/sidebar_preference_store.dart';
 import 'package:school_app_flutter/core/di/document_capture_di.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
@@ -262,6 +265,18 @@ Future<void> configureDependencies({
   );
   getIt.registerLazySingleton<SidebarPreferenceStore>(
     () => SidebarPreferenceStore(getIt<FlutterSecureStorage>()),
+  );
+
+  // Web : la version déployée, lue à côté de la page (même hôte, sans
+  // authentification) — un onglet ouvert des jours apprend qu'il a vieilli.
+  getIt.registerLazySingleton<DeployedBuildSource>(
+    () => HttpDeployedBuildSource(dio: Dio(), base: Uri.base),
+  );
+  getIt.registerFactory<AppUpdateCubit>(
+    () => AppUpdateCubit(
+      source: getIt<DeployedBuildSource>(),
+      ticks: Stream<void>.periodic(AppConstants.webVersionCheckInterval),
+    ),
   );
 
   // ── Socle offline (base chiffrée + outbox + moteur de synchro) ──────────────

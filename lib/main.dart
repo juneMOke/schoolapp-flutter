@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/web/app_update/app_update_scope.dart';
 import 'package:school_app_flutter/core/theme/app_scroll_behavior.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
@@ -24,6 +25,7 @@ import 'package:school_app_flutter/core/web/clean_urls.dart';
 import 'package:school_app_flutter/core/web/splash_loader.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
+import 'package:school_app_flutter/features/auth/presentation/tab_session/tab_session_sync.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
@@ -353,18 +355,24 @@ class _MyAppState extends State<MyApp> {
             // demandent pas gardent leurs initiales.
             //
             // Sur le web, le tout sous le voile « Connexion requise » : la
-            // version web est en ligne seulement.
+            // version web est en ligne seulement. Un nouveau déploiement s'y
+            // annonce par un bandeau « Recharger », et les onglets d'un même
+            // navigateur, qui partagent la session, se tiennent d'accord.
             //
             // Le texte s'agrandit avec le réglage du système, jusqu'à ×1,3.
             builder: (context, child) => MediaQuery.withClampedTextScaling(
               maxScaleFactor: AppTypography.maxTextScaleFactor,
               child: WebOnlineGate(
                 connectivity: getIt<ConnectivityService>(),
-                child: PersonPhotoScope(
-                  source: getIt<StudentPhotoRegistry>(),
-                  child: PaymentAnomalyBanner(
-                    child: SessionDegradationBanner(
-                      child: child ?? const SizedBox.shrink(),
+                child: AppUpdateScope(
+                  child: TabSessionSync(
+                    child: PersonPhotoScope(
+                      source: getIt<StudentPhotoRegistry>(),
+                      child: PaymentAnomalyBanner(
+                        child: SessionDegradationBanner(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
+                      ),
                     ),
                   ),
                 ),

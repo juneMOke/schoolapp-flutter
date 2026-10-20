@@ -84,6 +84,27 @@ void main() {
     sessionManager: mockSessionManager,
   );
 
+  group('AuthSessionEndedElsewhere', () {
+    blocTest<AuthBloc, AuthState>(
+      'session de cet onglet terminée dans un autre : retour à la connexion, '
+      'sans rien effacer',
+      build: buildBloc,
+      seed: () =>
+          const AuthState(status: AuthStatus.authenticated, user: tUser),
+      act: (bloc) => bloc.add(const AuthSessionEndedElsewhere()),
+      expect: () => const [AuthState(status: AuthStatus.unauthenticated)],
+      verify: (_) => verifyNever(() => mockSessionManager.wipeSession()),
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'sans session : rien',
+      build: buildBloc,
+      seed: () => const AuthState(status: AuthStatus.unauthenticated),
+      act: (bloc) => bloc.add(const AuthSessionEndedElsewhere()),
+      expect: () => const <AuthState>[],
+    );
+  });
+
   group('AuthCheckRequested', () {
     blocTest<AuthBloc, AuthState>(
       'emits [loading, authenticated] when session exists',

@@ -9864,5 +9864,7 @@
   "shortcutsHelpThis": "Show this help",
   "shortcutsKeyEnter": "Enter",
   "shortcutsKeyEscape": "Esc",
-  "shortcutsKeyClick": "click"
+  "shortcutsKeyClick": "click",
+  "appUpdateAvailable": "A new version of the application is available.",
+  "appUpdateReload": "Reload"
 }

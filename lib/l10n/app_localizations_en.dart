@@ -17002,4 +17002,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcutsKeyClick => 'click';
+
+  @override
+  String get appUpdateAvailable =>
+      'A new version of the application is available.';
+
+  @override
+  String get appUpdateReload => 'Reload';
 }

@@ -10233,5 +10233,13 @@
   "shortcutsKeyClick": "clic",
   "@shortcutsKeyClick": {
     "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
+  "appUpdateAvailable": "Une nouvelle version de l'application est disponible.",
+  "@appUpdateAvailable": {
+    "description": "Bandeau web : une nouvelle version a été déployée depuis l'ouverture de l'onglet."
+  },
+  "appUpdateReload": "Recharger",
+  "@appUpdateReload": {
+    "description": "Bandeau web : recharger la page pour charger la nouvelle version."
   }
 }

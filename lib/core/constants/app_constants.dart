@@ -1406,4 +1406,12 @@ class AppConstants {
   /// **PUT** / **DELETE** = un modèle.
   static const String announcementTemplateEndpoint =
       '/api/v1/announcement-templates/{id}';
+
+  /// **GET** (web, même hôte que l'application) = la version déployée,
+  /// écrite par `flutter build web` : `{version, build_number, …}`.
+  static const String webVersionManifestPath = 'version.json';
+
+  /// Cadence à laquelle un onglet ouvert regarde si une nouvelle version a été
+  /// déployée : un poste de caisse reste ouvert des jours.
+  static const Duration webVersionCheckInterval = Duration(minutes: 10);
 }

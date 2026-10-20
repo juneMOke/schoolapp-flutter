@@ -26539,6 +26539,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'click'**
   String get shortcutsKeyClick;
+
+  /// No description provided for @appUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of the application is available.'**
+  String get appUpdateAvailable;
+
+  /// No description provided for @appUpdateReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get appUpdateReload;
 }
 
 class _AppLocalizationsDelegate

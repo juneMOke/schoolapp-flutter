@@ -37,6 +37,15 @@ class AuthSessionRevoked extends AuthEvent {
   const AuthSessionRevoked();
 }
 
+/// Web : la session de cet onglet a pris fin dans un autre — déconnexion, ou
+/// connexion d'un autre agent dans le stockage partagé du navigateur. Rien à
+/// effacer (l'autre onglet l'a fait, ou y a écrit SA session) : l'onglet
+/// revient à la connexion au lieu de signer ses requêtes avec le jeton d'un
+/// autre agent.
+class AuthSessionEndedElsewhere extends AuthEvent {
+  const AuthSessionEndedElsewhere();
+}
+
 /// Le refresh token est expiré/rejeté (D-07/§7.2) : reconnexion interactive
 /// obligatoire.
 class AuthRefreshExpired extends AuthEvent {

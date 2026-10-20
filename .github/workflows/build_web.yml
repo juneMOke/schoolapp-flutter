@@ -76,7 +76,10 @@ jobs:
           # `--no-web-resources-cdn` : CanvasKit et ses polices de secours
           # servis par notre serveur, pas par gstatic.com — même réseau,
           # même disponibilité que l'application.
-          flutter build web --release --no-web-resources-cdn \
+          # `--source-maps` : une trace d'erreur de production se relit
+          # contre le code Dart. Les cartes sont archivées à part, jamais
+          # servies (cf. Package).
+          flutter build web --release --no-web-resources-cdn --source-maps \
             --build-name "${{ steps.version.outputs.build_name }}" \
             --build-number "${{ steps.version.outputs.build_number }}" \
             --dart-define=APP_ENV="${{ inputs.environment }}" \
@@ -89,6 +92,17 @@ jobs:
           for f in sqlite3.wasm sqflite_sw.js; do
             test -s "build/web/$f" || { echo "build/web/$f absent." >&2; exit 1; }
           done
+          # `version.json` : l'onglet ouvert y lit qu'une nouvelle version est
+          # déployée. Le démarrage n'enregistre aucun service worker
+          # (`web/flutter_bootstrap.js`) : il attendait jusqu'à 4 s à chaque
+          # visite.
+          test -s build/web/version.json || { echo "version.json absent." >&2; exit 1; }
+          # (Le chargeur contient le mot `serviceWorkerSettings` ; seul un appel
+          # `load({serviceWorkerSettings: {…}})` enregistrerait le service worker.)
+          if grep -qE 'serviceWorkerSettings:[[:space:]]*\{' build/web/flutter_bootstrap.js; then
+            echo "flutter_bootstrap.js enregistre un service worker." >&2
+            exit 1
+          fi
           # En-tête « \0asm » : une page d'erreur GitHub téléchargée à la
           # place du binaire s'est déjà vue.
           MAGIC="$(head -c 4 build/web/sqlite3.wasm | od -An -tx1 | tr -d ' \n')"
@@ -99,7 +113,14 @@ jobs:
 
       - name: Package
         run: |
-          mkdir -p build/dist
+          mkdir -p build/dist build/sourcemaps
+          # Les cartes de sources quittent le site servi : elles livreraient
+          # le code source à quiconque ouvre les outils du navigateur.
+          (cd build/web && find . -name '*.map' > ../sourcemaps.list)
+          if [[ -s build/sourcemaps.list ]]; then
+            tar -C build/web -czf build/sourcemaps/sourcemaps.tar.gz -T build/sourcemaps.list
+          fi
+          find build/web -name '*.map' -delete
           tar -C build/web -czf "build/dist/eteelo-web-${{ steps.version.outputs.build_name }}-${{ inputs.environment }}.tar.gz" .
 
       - name: Upload web archive
@@ -107,4 +128,12 @@ jobs:
         with:
           name: web-${{ inputs.environment }}-${{ github.sha }}
           path: build/dist/*.tar.gz
+          retention-days: 30
+
+      - name: Upload source maps
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-sourcemaps-${{ inputs.environment }}-${{ github.sha }}
+          path: build/sourcemaps/sourcemaps.tar.gz
+          if-no-files-found: warn
           retention-days: 30
