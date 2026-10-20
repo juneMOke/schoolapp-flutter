@@ -73,7 +73,7 @@ class _ShellLayoutState extends State<ShellLayout> {
               final rail = mode == ShellNavigationMode.rail;
               return ShortcutsHelpShortcut(
                 child: SidebarToggleShortcut(
-                  onToggle: rail ? _openDrawer : null,
+                  onToggle: rail ? _toggleDrawer : null,
                   child: _sidebarScaffold(content, rail: rail),
                 ),
               );
@@ -135,6 +135,14 @@ class _ShellLayoutState extends State<ShellLayout> {
   }
 
   void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
+
+  /// Ctrl+B en rail : ouvre le menu complet, ou le referme — une bascule,
+  /// comme le repli de la barre.
+  void _toggleDrawer() {
+    final scaffold = _scaffoldKey.currentState;
+    if (scaffold == null) return;
+    scaffold.isDrawerOpen ? scaffold.closeDrawer() : scaffold.openDrawer();
+  }
 
   static final _drawerScrim = AppColors.bleuProfond.withValues(alpha: 0.4);
 }

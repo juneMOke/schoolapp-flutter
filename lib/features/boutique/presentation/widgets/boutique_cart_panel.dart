@@ -151,15 +151,27 @@ class BoutiqueCartPanel extends StatelessWidget {
   }
 
   /// Le contenu, puis le pied. [pinFooter] : le contenu défile seul, le total
-  /// et « Encaisser » restent sous les yeux.
+  /// et « Encaisser » restent sous les yeux — tant que la colonne est assez
+  /// haute pour les tenir ; plus basse (fenêtre basse, clavier ouvert sur le
+  /// payeur), tout défile, comme sur la page du panier.
   Widget _layout(List<Widget> content, Widget footer) {
-    if (!pinFooter) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [...content, footer],
-      );
-    }
+    if (!pinFooter) return _stacked(content, footer);
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          constraints.maxHeight <
+              AppDimensions.boutiqueCartPinnedFooterMinHeight
+          ? SingleChildScrollView(child: _stacked(content, footer))
+          : _pinned(content, footer),
+    );
+  }
+
+  static Widget _stacked(List<Widget> content, Widget footer) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    mainAxisSize: MainAxisSize.min,
+    children: [...content, footer],
+  );
+
+  static Widget _pinned(List<Widget> content, Widget footer) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

@@ -200,6 +200,10 @@ class AppDimensions {
   /// segment de bureau. Au doigt, [minTouchTarget] (`TapTargetHeight`).
   static const pointerControlHeight = 40.0;
 
+  /// Colonne du panier de la caisse boutique : sous cette hauteur, le pied
+  /// (total, manques, « Encaisser ») ne tient plus épinglé — tout défile.
+  static const boutiqueCartPinnedFooterMinHeight = 420.0;
+
   /// Sélecteur d'imprimante thermique du ticket provisoire. Étroit à dessein :
   /// il ne porte qu'un nom et une adresse MAC par ligne, et s'ouvre par-dessus
   /// la modale d'encaissement (440) — le déborder le ferait lire comme un
@@ -688,10 +692,11 @@ class AppDimensions {
   static const presenceMarkBorderWidth = 2.0;
   static const presenceMarkAccentWidth = 4.0;
 
-  /// La vue liste : largeur plancher avant défilement — sans la colonne des
-  /// heures prestées, ajoutée quand elle s'affiche (pointage du personnel) —
-  /// et ses colonnes.
-  static const presenceMarkListMinWidth = 800.0;
+  /// La vue liste : largeur plancher avant défilement, et ses colonnes. Sous
+  /// ~880, le nom de l'élève n'avait plus qu'une centaine de dp (« KABONGO
+  /// MUTOMBO » coupé) ; le pointage, avec sa colonne des heures, garde 960.
+  static const presenceMarkListMinWidth = 880.0;
+  static const presenceMarkListWithHoursMinWidth = 960.0;
   static const presenceMarkColStatus = 262.0;
   static const presenceMarkColTimes = 168.0;
 
