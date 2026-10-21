@@ -17027,4 +17027,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationChargeStatementFileName => 'fee-statement.csv';
+
+  @override
+  String get localDataRecoveryTitle => 'Local data unreadable';
+
+  @override
+  String get localDataRecoveryMessage =>
+      'The data stored on this device can no longer be decrypted: its key is gone from the system keyring. If the keyring is only locked, unlock it and try again. Otherwise, erase the local data: the app will start from scratch and resync everything from the server.';
+
+  @override
+  String get localDataRecoveryRetry => 'Try again';
+
+  @override
+  String get localDataRecoveryReset => 'Erase local data';
+
+  @override
+  String get localDataRecoveryConfirmTitle => 'Erase local data?';
+
+  @override
+  String get localDataRecoveryConfirmMessage =>
+      'Operations entered on this device and not yet sent to the server will be lost. You will need to sign in again.';
+
+  @override
+  String get localDataRecoveryConfirmCancel => 'Cancel';
+
+  @override
+  String get localDataRecoveryConfirmErase => 'Erase';
+
+  @override
+  String get localDataRecoveryResetFailed =>
+      'Erasing failed. Close the app and try again.';
 }

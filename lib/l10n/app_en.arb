@@ -9872,5 +9872,14 @@
   "classesListExportFileName": "classes-export.csv",
   "facturationDownloadStatementLabel": "Download statement",
   "facturationChargeStatementDownloaded": "Statement downloaded",
-  "facturationChargeStatementFileName": "fee-statement.csv"
+  "facturationChargeStatementFileName": "fee-statement.csv",
+  "localDataRecoveryTitle": "Local data unreadable",
+  "localDataRecoveryMessage": "The data stored on this device can no longer be decrypted: its key is gone from the system keyring. If the keyring is only locked, unlock it and try again. Otherwise, erase the local data: the app will start from scratch and resync everything from the server.",
+  "localDataRecoveryRetry": "Try again",
+  "localDataRecoveryReset": "Erase local data",
+  "localDataRecoveryConfirmTitle": "Erase local data?",
+  "localDataRecoveryConfirmMessage": "Operations entered on this device and not yet sent to the server will be lost. You will need to sign in again.",
+  "localDataRecoveryConfirmCancel": "Cancel",
+  "localDataRecoveryConfirmErase": "Erase",
+  "localDataRecoveryResetFailed": "Erasing failed. Close the app and try again."
 }

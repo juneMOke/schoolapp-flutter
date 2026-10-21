@@ -26587,6 +26587,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'fee-statement.csv'**
   String get facturationChargeStatementFileName;
+
+  /// No description provided for @localDataRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local data unreadable'**
+  String get localDataRecoveryTitle;
+
+  /// No description provided for @localDataRecoveryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The data stored on this device can no longer be decrypted: its key is gone from the system keyring. If the keyring is only locked, unlock it and try again. Otherwise, erase the local data: the app will start from scratch and resync everything from the server.'**
+  String get localDataRecoveryMessage;
+
+  /// No description provided for @localDataRecoveryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get localDataRecoveryRetry;
+
+  /// No description provided for @localDataRecoveryReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase local data'**
+  String get localDataRecoveryReset;
+
+  /// No description provided for @localDataRecoveryConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase local data?'**
+  String get localDataRecoveryConfirmTitle;
+
+  /// No description provided for @localDataRecoveryConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations entered on this device and not yet sent to the server will be lost. You will need to sign in again.'**
+  String get localDataRecoveryConfirmMessage;
+
+  /// No description provided for @localDataRecoveryConfirmCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get localDataRecoveryConfirmCancel;
+
+  /// No description provided for @localDataRecoveryConfirmErase.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase'**
+  String get localDataRecoveryConfirmErase;
+
+  /// No description provided for @localDataRecoveryResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Erasing failed. Close the app and try again.'**
+  String get localDataRecoveryResetFailed;
 }
 
 class _AppLocalizationsDelegate

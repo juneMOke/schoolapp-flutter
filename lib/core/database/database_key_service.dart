@@ -30,6 +30,12 @@ class DatabaseKeyService {
   Future<String> getOrCreateSchoolKey(String schoolId) =>
       _getOrCreate(schoolKeyStorageKey(schoolId));
 
+  /// Vrai si [schoolId] a une clé — sans en générer une.
+  Future<bool> hasSchoolKey(String schoolId) async {
+    final value = await _storage.read(key: schoolKeyStorageKey(schoolId));
+    return value != null && value.isNotEmpty;
+  }
+
   /// Clé de la base unique d'avant l'éclatement, ou `null` si ce poste n'en a
   /// jamais eu — ou l'a déjà transférée.
   Future<String?> readLegacyKey() async {

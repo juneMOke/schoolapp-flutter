@@ -16,6 +16,8 @@ import 'package:school_app_flutter/core/components/status/sync_status_state.dart
 import 'package:school_app_flutter/core/components/status/web_online_gate.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/components/startup/local_data_recovery_app.dart';
+import 'package:school_app_flutter/core/database/tenant/unreadable_device_database.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_session_guard.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/pre_enrollments_school_guard.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_document_cache.dart';
@@ -42,11 +44,35 @@ void main() async {
   // l'historique du navigateur.
   useCleanWebUrls();
   WidgetsFlutterBinding.ensureInitialized();
-  await configureDependencies();
-  runApp(const MyApp());
+  await _start();
   // Web : retirer le pré-splash HTML une fois le 1er frame Flutter peint
   // (évite le trou bleu entre l'attache de la vue et le premier rendu).
   WidgetsBinding.instance.addPostFrameCallback((_) => removeWebSplashLoader());
+}
+
+/// Câble les dépendances puis monte l'application — ou, si la base de
+/// l'appareil ne s'ouvre plus sous sa clé, l'écran de secours, d'où l'on
+/// repasse ici.
+Future<void> _start() async {
+  try {
+    await configureDependencies();
+  } on UnreadableDeviceDatabaseException catch (error) {
+    debugPrint('$error');
+    // L'injection s'est arrêtée à mi-chemin : la recommencer exige un
+    // conteneur vide.
+    await getIt.reset();
+    runApp(
+      LocalDataRecoveryApp(
+        onRetry: _start,
+        onReset: () async {
+          await error.discardUnreadableFiles();
+          await _start();
+        },
+      ),
+    );
+    return;
+  }
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

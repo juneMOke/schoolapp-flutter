@@ -17148,4 +17148,34 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationChargeStatementFileName => 'releve-frais.csv';
+
+  @override
+  String get localDataRecoveryTitle => 'Données locales illisibles';
+
+  @override
+  String get localDataRecoveryMessage =>
+      'Les données enregistrées sur cet appareil ne peuvent plus être déchiffrées : leur clé a disparu du trousseau du système. Si le trousseau est seulement verrouillé, déverrouillez-le puis réessayez. Sinon, effacez les données locales : l\'application repartira de zéro et resynchronisera tout depuis le serveur.';
+
+  @override
+  String get localDataRecoveryRetry => 'Réessayer';
+
+  @override
+  String get localDataRecoveryReset => 'Effacer les données locales';
+
+  @override
+  String get localDataRecoveryConfirmTitle => 'Effacer les données locales ?';
+
+  @override
+  String get localDataRecoveryConfirmMessage =>
+      'Les opérations saisies sur cet appareil et pas encore envoyées au serveur seront perdues. Vous devrez vous reconnecter.';
+
+  @override
+  String get localDataRecoveryConfirmCancel => 'Annuler';
+
+  @override
+  String get localDataRecoveryConfirmErase => 'Effacer';
+
+  @override
+  String get localDataRecoveryResetFailed =>
+      'L\'effacement a échoué. Fermez l\'application et réessayez.';
 }

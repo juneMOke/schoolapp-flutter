@@ -10265,5 +10265,17 @@
   "facturationChargeStatementFileName": "releve-frais.csv",
   "@facturationChargeStatementFileName": {
     "description": "Nom du fichier CSV du relevé d'un frais (web)."
-  }
+  },
+  "localDataRecoveryTitle": "Données locales illisibles",
+  "@localDataRecoveryTitle": {
+    "description": "Titre de l'écran de secours au démarrage quand la base locale ne s'ouvre plus sous la clé du trousseau."
+  },
+  "localDataRecoveryMessage": "Les données enregistrées sur cet appareil ne peuvent plus être déchiffrées : leur clé a disparu du trousseau du système. Si le trousseau est seulement verrouillé, déverrouillez-le puis réessayez. Sinon, effacez les données locales : l'application repartira de zéro et resynchronisera tout depuis le serveur.",
+  "localDataRecoveryRetry": "Réessayer",
+  "localDataRecoveryReset": "Effacer les données locales",
+  "localDataRecoveryConfirmTitle": "Effacer les données locales ?",
+  "localDataRecoveryConfirmMessage": "Les opérations saisies sur cet appareil et pas encore envoyées au serveur seront perdues. Vous devrez vous reconnecter.",
+  "localDataRecoveryConfirmCancel": "Annuler",
+  "localDataRecoveryConfirmErase": "Effacer",
+  "localDataRecoveryResetFailed": "L'effacement a échoué. Fermez l'application et réessayez."
 }
