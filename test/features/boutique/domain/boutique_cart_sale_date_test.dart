@@ -21,8 +21,8 @@ String _key() => 'k${_n++}';
 
 /// Le jour de la vente, porté par le panier (BQ-19).
 void main() {
-  // Mardi 21 octobre 2026, 14 h 30 au guichet.
-  final now = DateTime(2026, 10, 21, 14, 30, 5, 120);
+  // Mardi 21 octobre 2026, 14 h 30 au guichet — à Kinshasa (UTC+1).
+  final now = DateTime.utc(2026, 10, 21, 13, 30, 5, 120);
 
   setUp(() => _n = 0);
 
@@ -41,14 +41,15 @@ void main() {
       // Minuit ferait de toutes les ventes antidatées d'un même jour des
       // ventes simultanées, et le ticket imprimerait une heure inventée.
       final cart = const BoutiqueCart().withSaleDate(DateTime(2026, 10, 19));
-      expect(cart.soldAtFor(now), DateTime(2026, 10, 19, 14, 30, 5, 120));
+      expect(cart.soldAtFor(now), DateTime.utc(2026, 10, 19, 13, 30, 5, 120));
       expect(cart.isBackdatedAt(now), isTrue);
     });
 
     test('le panier passé minuit sans choix n\'est PAS antidaté', () {
       // Composé à 23 h 58, encaissé à 0 h 01 : c'est `null` qui protège.
       const cart = BoutiqueCart();
-      final afterMidnight = DateTime(2026, 10, 22, 0, 1);
+      // 0 h 01 le 22 à Kinshasa = 23 h 01 UTC le 21.
+      final afterMidnight = DateTime.utc(2026, 10, 21, 23, 1);
       expect(cart.isBackdatedAt(afterMidnight), isFalse);
       expect(cart.soldAtFor(afterMidnight), afterMidnight);
     });
@@ -59,6 +60,15 @@ void main() {
       DateTime(2026, 10, 19, 17, 45),
     );
     expect(cart.saleDate, DateTime(2026, 10, 19));
+  });
+
+  test('le jour se lit à KINSHASA, pas à l\'heure de la tablette', () {
+    // 23 h 30 UTC le 20 = 0 h 30 le 21 à l'école : le 20 est déjà « hier ».
+    final lateUtc = DateTime.utc(2026, 10, 20, 23, 30);
+    final cart = const BoutiqueCart().withSaleDate(DateTime(2026, 10, 20));
+    expect(cart.isBackdatedAt(lateUtc), isTrue);
+    // Relue à Kinshasa, la vente tombe le 20 à 0 h 30 — le jour choisi.
+    expect(cart.soldAtFor(lateUtc), DateTime.utc(2026, 10, 19, 23, 30));
   });
 
   test('isFutureAt : seul un jour postérieur l\'est', () {

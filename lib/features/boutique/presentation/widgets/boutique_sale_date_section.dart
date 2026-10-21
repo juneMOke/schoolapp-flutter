@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart' as tokens;
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -43,7 +44,7 @@ class BoutiqueSaleDateSection extends StatelessWidget {
   /// sur une plage vide, et `showDatePicker` lève.
   static DateTime firstSelectableDay(DateTime? yearStart, DateTime today) {
     if (yearStart == null) {
-      return DateTime(today.year - 1, today.month, today.day);
+      return SchoolTime.oneYearBefore(today);
     }
     final start = _dayOf(yearStart);
     return start.isAfter(today) ? today : start;
@@ -52,7 +53,8 @@ class BoutiqueSaleDateSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final today = _dayOf(now());
+    // Le jour de l'ÉCOLE, pas celui de la tablette (cf. [SchoolTime]).
+    final today = SchoolTime.today(now());
     final chosen = saleDate;
     final isBackdated = chosen != null && chosen.isBefore(today);
 

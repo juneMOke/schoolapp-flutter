@@ -26,7 +26,8 @@ Widget _app(Widget child) => MaterialApp(
 
 /// Le champ « Date de la vente » en tête du panier (BQ-19).
 void main() {
-  final today = DateTime(2026, 10, 21, 14, 30);
+  // 14 h 30 à Kinshasa.
+  final today = DateTime.utc(2026, 10, 21, 13, 30);
 
   Future<List<DateTime?>> pump(
     WidgetTester tester, {

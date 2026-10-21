@@ -49,8 +49,8 @@ const _polo = BoutiqueArticle(
 /// Elle part dans `soldAt` — l'heure MÉTIER, celle sur laquelle le serveur
 /// range la vente dans la caisse d'un jour. Rien d'autre ne change sur le fil.
 void main() {
-  // Mardi 21 octobre 2026, 14 h 30, heure du guichet.
-  final collectedAt = DateTime(2026, 10, 21, 14, 30, 5);
+  // Mardi 21 octobre 2026, 14 h 30 à Kinshasa (UTC+1).
+  final collectedAt = DateTime.utc(2026, 10, 21, 13, 30, 5);
 
   late Database db;
   late _MockDevice device;
@@ -110,14 +110,7 @@ void main() {
       academicYearId: 'ay-1',
     );
 
-    final expected = DateTime(
-      2026,
-      10,
-      19,
-      14,
-      30,
-      5,
-    ).toUtc().toIso8601String();
+    final expected = DateTime.utc(2026, 10, 19, 13, 30, 5).toIso8601String();
     expect((await pushedSale())['soldAt'], expected);
     expect((await db.query('boutique_sales')).single['sold_at'], expected);
     // Le ticket imprime `RecordedSale.sale.soldAt` : c'est lui qui doit porter

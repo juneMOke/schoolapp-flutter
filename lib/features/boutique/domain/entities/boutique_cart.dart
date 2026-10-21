@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -314,10 +315,12 @@ class BoutiqueCart extends Equatable {
   );
 
   /// Vrai si le jour choisi précède celui de [now] : la vente est antidatée.
+  ///
+  /// « Aujourd'hui » est le jour **de l'école** ([SchoolTime]), jamais celui de
+  /// la tablette : un poste réglé en UTC changerait de jour une heure trop tôt.
   bool isBackdatedAt(DateTime now) {
     final date = saleDate;
-    return date != null &&
-        date.isBefore(DateTime(now.year, now.month, now.day));
+    return date != null && date.isBefore(SchoolTime.today(now));
   }
 
   /// Vrai si le jour choisi est postérieur à celui de [now].
@@ -326,7 +329,7 @@ class BoutiqueCart extends Equatable {
   /// choix et l'encaissement peut le produire. Le dépôt refuse alors d'écrire.
   bool isFutureAt(DateTime now) {
     final date = saleDate;
-    return date != null && date.isAfter(DateTime(now.year, now.month, now.day));
+    return date != null && date.isAfter(SchoolTime.today(now));
   }
 
   /// L'heure **métier** de la vente : le jour choisi, à l'heure réelle de
@@ -335,18 +338,13 @@ class BoutiqueCart extends Equatable {
   ///
   /// L'heure réelle et non minuit : deux ventes antidatées au même jour restent
   /// ordonnées comme elles ont été faites, et le ticket imprime une heure vraie.
+  /// Composée à l'heure **murale de l'école** ([SchoolTime.composeInstant]),
+  /// comme la date d'encaissement d'un versement : relue à Kinshasa, la vente
+  /// tombe exactement le jour choisi, quel que soit le fuseau du poste.
   DateTime soldAtFor(DateTime now) {
     final date = saleDate;
     if (date == null || !isBackdatedAt(now)) return now;
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      now.hour,
-      now.minute,
-      now.second,
-      now.millisecond,
-    );
+    return SchoolTime.composeInstant(day: date, now: now);
   }
 
   /// Vide tout — lignes, payeur **et** jour choisi. C'est « Vider le panier »
