@@ -17,7 +17,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/sale_histor
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_history_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_filter.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_sale_tile.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_tile.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/states/boutique_results_error_state.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
@@ -305,7 +305,7 @@ class _Body extends StatelessWidget {
         // page, et une vue défilante imbriquée lèverait sous une contrainte de
         // hauteur non bornée.
         for (final sale in state.sales) ...[
-          BoutiqueHistorySaleTile(
+          BoutiqueSaleTile(
             sale: sale,
             selected: sale.id == selectedSaleId,
             onTap: () => onOpenSale(sale),

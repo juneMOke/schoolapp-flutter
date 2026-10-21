@@ -21,7 +21,7 @@ import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutiqu
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_history_sale_tile.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -145,7 +145,7 @@ void main() {
 
     await pumpPage(tester);
 
-    expect(find.byType(BoutiqueHistorySaleTile), findsNWidgets(2));
+    expect(find.byType(BoutiqueSaleTile), findsNWidgets(2));
     // Le total NOMME la fenêtre qu'il additionne.
     expect(find.textContaining('Total encaissé'), findsOneWidget);
     expect(find.textContaining('Aujourd\'hui'), findsWidgets);
@@ -203,7 +203,7 @@ void main() {
     GetIt.I.registerFactory<ClaimSaleReceiptUseCase>(() => _MockClaimReceipt());
 
     await pumpPage(tester);
-    await tester.tap(find.byType(BoutiqueHistorySaleTile));
+    await tester.tap(find.byType(BoutiqueSaleTile));
     await tester.pumpAndSettle();
 
     expect(find.byType(BoutiqueSaleDetailPage), findsOneWidget);
@@ -274,20 +274,18 @@ void main() {
       answer([_sale(id: 's-1'), _sale(id: 's-2')]);
       await pumpPage(tester, size: const Size(1400, 1000));
 
-      await tester.tap(find.byType(BoutiqueHistorySaleTile).last);
+      await tester.tap(find.byType(BoutiqueSaleTile).last);
       await tester.pumpAndSettle();
 
       expect(find.byType(BoutiqueSaleDetailPage), findsOneWidget);
-      expect(find.byType(BoutiqueHistorySaleTile), findsNWidgets(2));
-      final tile = tester.widget<BoutiqueHistorySaleTile>(
-        find.byType(BoutiqueHistorySaleTile).last,
+      expect(find.byType(BoutiqueSaleTile), findsNWidgets(2));
+      final tile = tester.widget<BoutiqueSaleTile>(
+        find.byType(BoutiqueSaleTile).last,
       );
       expect(tile.selected, isTrue);
       expect(
         tester.getTopLeft(find.byType(BoutiqueSaleDetailPage)).dx,
-        greaterThan(
-          tester.getTopLeft(find.byType(BoutiqueHistorySaleTile).last).dx,
-        ),
+        greaterThan(tester.getTopLeft(find.byType(BoutiqueSaleTile).last).dx),
       );
     });
   });

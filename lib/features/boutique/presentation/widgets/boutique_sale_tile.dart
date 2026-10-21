@@ -10,7 +10,7 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 ///
 /// Le montant est **exact**, jamais arrondi : c'est de l'argent encaissé, et un
 /// guichet qui rapproche sa caisse compte au centime.
-class BoutiqueHistorySaleTile extends StatelessWidget {
+class BoutiqueSaleTile extends StatelessWidget {
   final SaleHistoryEntry sale;
 
   /// Ouvre la fiche de la vente. La ligne EST le geste : au guichet, un chevron
@@ -21,7 +21,7 @@ class BoutiqueHistorySaleTile extends StatelessWidget {
   /// La vente dont la fiche est ouverte à côté (grand écran).
   final bool selected;
 
-  const BoutiqueHistorySaleTile({
+  const BoutiqueSaleTile({
     super.key,
     required this.sale,
     required this.onTap,
