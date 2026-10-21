@@ -1,18 +1,18 @@
 # BOUTIQUE_TABLEAU_DE_BORD_PLAN.md — date de vente & tableau de bord
 
-> **Statut :** plan émis le 2026-10-21 · BQ-19 codé (branche
-> `feat/boutique-sale-date`, non commité).
+> **Statut :** plan émis le 2026-10-21 · BQ-19 livré (branche
+> `feat/boutique-sale-date`, `3f2b0fdc`).
 >
 > | Lot | Objet | Dépend du back |
 > |---|---|---|
 > | BQ-19 ✅ | Date de la vente au panier | non (R10 améliore le RV, ne bloque pas) |
-> | BQ-20 | Données du tableau de bord (API, modèles, dépôt) | **R8, R9** |
+> | BQ-20 | Données du tableau de bord (API, modèles, dépôt) | contrat figé ; R8/R9 = lots back B2/B3 |
 > | BQ-21 | Écran : en-tête, période, tuiles, encart provisoires | R8 |
 > | BQ-22 | Analyses : recettes dans le temps, familles, top articles | R8 |
 > | BQ-23 | Élèves concernés | R9 |
 > | BQ-24 | Dernières ventes (local) → fiche de vente existante | non |
 > | BQ-25 | États : squelettes, vides, erreurs 4 types, hors-ligne | R8 |
-> | BQ-26 | Navigation : Historique remplacé par Tableau de bord | non (en dernier) |
+> | BQ-26 | Navigation : Historique remplacé par Tableau de bord | B2 + B3 **en production** |
 > | BQ-27 | Revue adversariale | — |
 >
 > **Origine :** `Boutique - Spec module & tableau de bord (standalone).html`
@@ -114,6 +114,20 @@ scolaire active** à **aujourd'hui**.
   squelette plein écran. **Hors-ligne :** dernière réponse mise en cache par
   fenêtre (table locale, schéma +1), datée dans l'en-tête ; sans cache ⇒ erreur
   réseau, l'encart provisoires restant visible.
+
+### Ce que la réponse du back change (2026-10-21)
+
+- **Familles** lues par `ArticleFamily.fromWire` (valeurs françaises) ; une
+  valeur inconnue ne doit pas faire tomber la réponse.
+- **Heure par heure** : 24 seaux reçus, le front retire les heures vides en
+  tête et en queue (pas de fenêtre 7 h → 16 h figée).
+- **Delta** : `previous*` vaut 0 avant la rentrée ⇒ delta masqué (règle déjà
+  prévue). ⚠️ Une fenêtre précédente qui **chevauche** la rentrée compare
+  quelques jours à une semaine pleine ⇒ le front masque aussi le delta quand
+  `from − n` précède l'ouverture de l'année (il la connaît).
+- **Élèves sans classe** : `classLabel` nul ⇒ ligne « Sans classe » ; ils ne
+  sont pas filtrables par le menu classe (absents de `classes[]`).
+- **Périmètre** : toutes les ventes de l'école, pour tout `boutique.sale.read`.
 
 ## 4. BQ-26 — Navigation, en dernier
 

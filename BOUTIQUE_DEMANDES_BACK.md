@@ -439,6 +439,26 @@ session : passer par `git worktree` pour ce travail.
 
 # Deuxième vague — tableau de bord & date de vente (émise le 2026-10-21)
 
+> ## ✅ RÉPONDU LE 2026-10-21 — R8, R9, R10 acceptés, R11 noté
+>
+> Réponse du back : https://claude.ai/artifact/WDC127MVbLsxerVovYYZw3 (contrat
+> **figé** ; une objection se règle en commentaire sur ce doc, avant B2).
+>
+> | # | Statut | Écart avec la demande |
+> |---|---|---|
+> | R8 | ✅ lot B2 | familles `UNIFORME`/`FOURNITURES`/`ACTIVITES`/`ACTES` (l'exemple JSON ci-dessous était faux, `ArticleFamily.wire` est juste) · `HOUR` = 24 seaux denses `T00`→`T23` · `previous*` borné à l'année scolaire (0 avant la rentrée) · fenêtre vide = 200, `byCurrency: []` |
+> | R9 | ✅ lot B3 | `classId`/`classLabel` **nullables** (élève non placé ; absent de `classes[]`, présent dans `items`) · `q` plié en Java, sans `unaccent` · `size` ≤ 100 · élèves désactivés comptés |
+> | R10 | ✅ lot B1 (V183) | tel que demandé ; les RV déjà scellés ne sont pas rescellés |
+> | R11 | noté | aucune permission ajoutée |
+>
+> Tranché aussi : aucun filtre par caissier (toute `boutique.sale.read` voit toute
+> l'école) ; aucune vente boutique ne s'annule. **R8 et R9 en production avant
+> BQ-26.**
+>
+> Question front sur R9 (commentaire du 2026-10-21) : `totalElements`, tri et
+> pagination sont calculés **après** les filtres article, classe et `q` — seul
+> `classes[]` l'est avant. Une page n'est jamais à moitié vide, sauf la dernière.
+
 > **Émetteur :** front · **Destinataire :** back (`eteelo-backend`, `main` à
 > `bf1fe293`).
 >
