@@ -6098,6 +6098,255 @@
   "boutiqueHistoryErrorServerTitle": "Historique illisible",
   "boutiqueHistoryErrorServer": "La caisse locale n'a pas pu être lue. Réessayez ; les ventes ne sont pas perdues — elles sont écrites en base, c'est leur relecture qui a échoué.",
   "boutiqueHistoryErrorNetwork": "L'historique se lit en local et n'a pas besoin du réseau. Réessayez ; s'il ne revient pas, c'est la base locale qui est en cause.",
+  "boutiqueDashboardEyebrow": "Boutique ▸ Tableau de bord",
+  "boutiqueDashboardTitle": "Tableau de bord",
+  "boutiqueDashboardSubtitleToday": "Ventes au comptant d'aujourd'hui · {day}",
+  "@boutiqueDashboardSubtitleToday": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardSubtitleRange": "Ventes au comptant sur {days} jours · du {from} au {to}",
+  "@boutiqueDashboardSubtitleRange": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardPeriodToday": "Aujourd'hui",
+  "boutiqueDashboardPeriodSevenDays": "7 jours",
+  "boutiqueDashboardPeriodThirtyDays": "30 jours",
+  "boutiqueDashboardPeriodA11y": "Période du tableau de bord",
+  "boutiqueDashboardOpenTill": "Ouvrir la caisse",
+  "boutiqueDashboardCachedBadge": "Hors ligne — chiffres du {date}",
+  "@boutiqueDashboardCachedBadge": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardProvisionalTitle": "{count, plural, one{1 ticket provisoire en attente de synchronisation} other{{count} tickets provisoires en attente de synchronisation}}",
+  "@boutiqueDashboardProvisionalTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardProvisionalMessage": "Encaissés sur ce poste pour {amounts}. Ils sont comptés ici ; le reçu scellé sera émis au retour du réseau.",
+  "@boutiqueDashboardProvisionalMessage": {
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardKpiRevenue": "Recettes",
+  "boutiqueDashboardKpiSales": "Ventes",
+  "boutiqueDashboardKpiAverageBasket": "Panier moyen",
+  "boutiqueDashboardKpiArticles": "Articles vendus",
+  "boutiqueDashboardKpiPrevious": "vs {amounts} la période précédente",
+  "@boutiqueDashboardKpiPrevious": {
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardKpiDelta": "{delta} vs période précédente",
+  "@boutiqueDashboardKpiDelta": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardKpiNone": "—",
+  "boutiqueDashboardChartHourly": "Recettes heure par heure",
+  "boutiqueDashboardChartDaily": "Recettes jour par jour",
+  "boutiqueDashboardChartSubtitle": "Ce qui a été vendu, au jour de la vente",
+  "boutiqueDashboardChartA11y": "{title} : {count} barres, maximum {amount} ({label})",
+  "@boutiqueDashboardChartA11y": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardHourLabel": "{hour} h",
+  "@boutiqueDashboardHourLabel": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardCurrencyA11y": "Devise affichée",
+  "boutiqueDashboardFamiliesTitle": "Par famille",
+  "boutiqueDashboardFamiliesSubtitle": "Ce que pèse chaque famille du catalogue",
+  "boutiqueDashboardFamilyMeta": "{percent} % du total · {count, plural, one{1 article} other{{count} articles}}",
+  "@boutiqueDashboardFamilyMeta": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardFamilyUnknown": "Autre",
+  "boutiqueDashboardTopTitle": "Articles les plus vendus",
+  "boutiqueDashboardTopSubtitle": "Classés par quantité · touchez un article pour voir les élèves",
+  "boutiqueDashboardTopQuantity": "× {count}",
+  "@boutiqueDashboardTopQuantity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardTopA11y": "Voir les élèves ayant reçu {article}",
+  "@boutiqueDashboardTopA11y": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardFooterNote": "Les ventes boutique sont réglées comptant : elles n'entrent ni dans l'attendu ni dans le taux de recouvrement, et n'apparaissent pas sur le relevé de l'élève.",
+  "boutiqueDashboardEmptyTitleToday": "Aucune vente aujourd'hui",
+  "boutiqueDashboardEmptyTitleRange": "Aucune vente sur {days} jours",
+  "@boutiqueDashboardEmptyTitleRange": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardEmptyWiden": "Rien d'encaissé sur cette période. Élargissez à 30 jours ou ouvrez la caisse pour enregistrer une vente.",
+  "boutiqueDashboardEmptyFirst": "Les ventes apparaîtront ici dès le premier reçu.",
+  "boutiqueDashboardErrorServerTitle": "Chiffres indisponibles",
+  "boutiqueDashboardErrorServer": "Le serveur n'a pas pu calculer les chiffres de la boutique. Réessayez ; aucune vente n'est perdue.",
+  "boutiqueDashboardErrorNetwork": "Les chiffres de la boutique se calculent sur le serveur, et aucune photo n'est encore gardée sur ce poste. Réessayez une fois la connexion revenue.",
+  "boutiqueBeneficiariesTitle": "Élèves concernés",
+  "boutiqueBeneficiariesSubtitleAll": "Bénéficiaires des achats · {count, plural, one{1 élève} other{{count} élèves}}",
+  "@boutiqueBeneficiariesSubtitleAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSubtitleArticle": "Ont reçu « {article} » · {count, plural, one{1 élève} other{{count} élèves}}",
+  "@boutiqueBeneficiariesSubtitleArticle": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSearchLabel": "Élève",
+  "boutiqueBeneficiariesSearchHint": "Chercher un élève…",
+  "boutiqueBeneficiariesArticleLabel": "Article",
+  "boutiqueBeneficiariesClassLabel": "Classe",
+  "boutiqueBeneficiariesAllArticles": "Tous les articles",
+  "boutiqueBeneficiariesAllClasses": "Toutes les classes",
+  "boutiqueBeneficiariesNoClass": "Sans classe",
+  "boutiqueBeneficiariesLastPurchase": "{classLabel} · dernier achat {date}",
+  "@boutiqueBeneficiariesLastPurchase": {
+    "placeholders": {
+      "classLabel": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesArticleChip": "{quantity}× {label}",
+  "@boutiqueBeneficiariesArticleChip": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSizes": "T. {sizes}",
+  "@boutiqueBeneficiariesSizes": {
+    "placeholders": {
+      "sizes": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesShowAll": "Voir les {count} élèves",
+  "@boutiqueBeneficiariesShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesCollapse": "Réduire",
+  "boutiqueBeneficiariesLoadMore": "Charger la suite",
+  "boutiqueBeneficiariesWalkIn": "{count, plural, one{1 achat sans élève désigné (niveau choisi à la caisse) n'est pas listé ici.} other{{count} achats sans élève désigné (niveau choisi à la caisse) ne sont pas listés ici.}}",
+  "@boutiqueBeneficiariesWalkIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesPartial": "Hors ligne : recherche faite sur les {count} élèves gardés sur ce poste, la liste complète reviendra avec le réseau.",
+  "@boutiqueBeneficiariesPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesEmptyTitle": "Aucun élève ne correspond",
+  "boutiqueBeneficiariesEmptyFiltered": "Aucun élève ne correspond sur cette période : {filters}.",
+  "@boutiqueBeneficiariesEmptyFiltered": {
+    "placeholders": {
+      "filters": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesEmptyNone": "Aucun achat de la période ne désigne un élève.",
+  "boutiqueBeneficiariesReset": "Réinitialiser les filtres",
+  "boutiqueLatestSalesTitle": "Dernières ventes",
+  "boutiqueLatestSalesSubtitle": "Les six derniers reçus de la période — touchez-en un pour le revoir ou le réimprimer",
+  "boutiqueLatestSalesNewSale": "Nouvelle vente",
+  "boutiqueLatestSalesEmpty": "Aucun reçu sur cette période.",
+  "boutiqueLatestSalesError": "Les dernières ventes n'ont pas pu être lues sur ce poste.",
   "boutiqueClearEyebrow": "Boutique ▸ Panier",
   "boutiqueClearTitle": "Vider le panier ?",
   "boutiqueClearMessage": "Les lignes composées et l'identité du payeur seront effacées. Rien n'a encore été encaissé — il n'y a donc rien à annuler côté argent.",

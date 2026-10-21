@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:school_app_flutter/features/boutique/data/dashboard/boutique_dashboard_api.dart';
 import 'package:school_app_flutter/features/boutique/data/dashboard/boutique_dashboard_cache_dao.dart';
@@ -269,5 +271,21 @@ void _registerDashboard(GetIt getIt) {
   getIt.registerFactory<GetBoutiqueProvisionalSalesUseCase>(
     () =>
         GetBoutiqueProvisionalSalesUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  // `registerFactory`, jamais singleton : la période et les filtres
+  // appartiennent à l'écran ouvert.
+  getIt.registerFactory<BoutiqueDashboardBloc>(
+    () => BoutiqueDashboardBloc(
+      getStats: getIt<GetBoutiqueStatsUseCase>(),
+      getProvisional: getIt<GetBoutiqueProvisionalSalesUseCase>(),
+      getLatest: getIt<GetBoutiqueLatestSalesUseCase>(),
+      preference: getIt<DashboardPeriodPreference>(),
+    ),
+  );
+  getIt.registerFactory<BoutiqueBeneficiariesCubit>(
+    () => BoutiqueBeneficiariesCubit(
+      getBeneficiaries: getIt<GetBoutiqueBeneficiariesUseCase>(),
+      getCatalog: getIt<GetBoutiqueCatalogUseCase>(),
+    ),
   );
 }
