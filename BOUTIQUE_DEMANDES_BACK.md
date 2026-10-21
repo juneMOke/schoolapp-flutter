@@ -433,3 +433,182 @@ long et d'un diagnostic plus pauvre.
 
 ⚠ L'arbre de travail du back est partagé et a déjà changé de branche en cours de
 session : passer par `git worktree` pour ce travail.
+
+---
+---
+
+# Deuxième vague — tableau de bord & date de vente (émise le 2026-10-21)
+
+> **Émetteur :** front · **Destinataire :** back (`eteelo-backend`, `main` à
+> `bf1fe293`).
+>
+> **Origine :** `Boutique - Spec module & tableau de bord (standalone).html`
+> (scratch, 2026-10-21). Comme la précédente, cette spec **invente son API**
+> (`GET /api/v1/boutique/stats`, `/beneficiaires`, `/ventes`, montants en dollars
+> décimaux, mono-devise). On en garde les **questions** ; le contrat ci-dessous
+> est réécrit dans les conventions déjà servies par `GET /finance-stats/till` :
+> centimes, **par devise jamais additionnées**, journée bornée dans le fuseau de
+> l'école, `from`/`to` inclus.
+>
+> Plan front correspondant : `BOUTIQUE_TABLEAU_DE_BORD_PLAN.md`.
+
+| # | Objet | Bloquant pour |
+|---|---|---|
+| R8 | `GET /api/v1/boutique/stats` — chiffres, série, familles, top articles | BQ-22, BQ-23 |
+| R9 | `GET /api/v1/boutique/beneficiaries` — « qui a reçu quoi » | BQ-24 |
+| R10 | Le RV imprime la **date de la vente** (`soldAt`) à côté de sa date d'émission | rien (le ticket thermique la porte déjà) |
+| R11 | Information : l'antidatage devient un geste **volontaire** du guichet | rien |
+
+**Ce qui n'est PAS demandé :** une route « dernières ventes » ni une route de
+reçu reconstruit. Le poste détient déjà toutes les ventes de l'année
+(`GET /sync/boutique/sales`) et leur fiche, réimpression comprise ; il lit les
+dernières ventes **en local**, ce qui lui montre aussi celles qui ne sont pas
+encore parties.
+
+---
+
+## R8 — `GET /api/v1/boutique/stats`
+
+### Ce qui est demandé
+
+```
+GET /api/v1/boutique/stats?from=2026-10-15&to=2026-10-21&academicYearId=<uuid>
+```
+
+- `from` / `to` : `YYYY-MM-DD`, **inclus tous les deux** (`from == to` = une
+  journée), au plus 366 jours, bornes inversées ⇒ 400 — exactement les règles de
+  `finance-stats/till?period=custom`. Le front calcule ses fenêtres glissantes
+  (aujourd'hui, 7 jours, 30 jours) ; le serveur n'a pas à connaître ce vocabulaire.
+- Découpage sur **`soldAt`** dans le fuseau de l'école (comme `BoutiqueTillService`).
+- `previous` : **la même largeur, juste avant** (`[from − n, from − 1]`), calculée
+  par le serveur pour que le client ne fasse pas deux appels.
+- Permission : `boutique.sale.read`.
+
+```jsonc
+{
+  "from": "2026-10-15", "to": "2026-10-21", "timeZone": "Africa/Kinshasa",
+  "granularity": "DAY",               // "HOUR" quand from == to
+  "saleCount": 61,     "previousSaleCount": 55,     // reçus, toutes devises
+  "articleCount": 97,  "previousArticleCount": 88,  // Σ quantités
+  "byCurrency": [{
+    "currency": "USD",
+    "revenue": 128400,  "previousRevenue": 110200,  // centimes, Σ lignes
+    "saleCount": 58,    "previousSaleCount": 53,     // ventes ayant ≥ 1 ligne dans cette devise
+    "buckets": [ { "key": "2026-10-15", "total": 18600 }, … ],   // HOUR : "2026-10-21T07"
+    "families": [ { "family": "UNIFORM", "amount": 74200, "quantity": 41 }, … ]
+  }],
+  "topArticles": [      // top 5 par QUANTITÉ, toutes devises
+    { "articleId": "…", "label": "Journal de classe", "family": "SUPPLIES",
+      "quantity": 22, "amounts": [ { "amount": 11000, "currency": "USD" } ] }
+  ]
+}
+```
+
+### Les choix, et pourquoi
+
+- **Vendu, pas perçu.** Les montants sont ceux des **lignes** (devise du
+  catalogue). Ce qui est entré dans le tiroir, devise reçue, c'est déjà
+  `finance-stats/till` (`encaisse[].summary.boutique`). Les deux écrans ne
+  répondent pas à la même question ; les mélanger reproduirait le défaut que
+  `till` a corrigé en séparant `encaisse[]` et `impute[]`.
+- **`buckets[]` dense** : un seau par jour (ou par heure) de la fenêtre, **zéros
+  compris**, dimanches compris. C'est le front qui décide de retirer un
+  dimanche **vide** — une école qui vend le dimanche garde sa barre, sans
+  paramètre d'école à inventer (question ouverte §20 de la spec, fermée ainsi).
+- **Panier moyen par devise** (`revenue / saleCount` de la devise) : un panier
+  moyen additionnant francs et dollars n'existe pas. C'est pour cela que
+  `saleCount` figure aussi dans chaque bloc.
+- **Top par quantité**, pas par montant : un retrait de dossier à 15 $ ne doit
+  pas masquer vingt-deux journaux de classe. Égalité ⇒ libellé.
+- Un article retiré du catalogue garde son libellé (recopié sur la ligne) et sa
+  famille (jointure sur `boutique_articles`, qui n'est jamais supprimé — à
+  confirmer).
+
+## R9 — `GET /api/v1/boutique/beneficiaries`
+
+```
+GET /api/v1/boutique/beneficiaries?from=&to=&academicYearId=
+    &articleId=<uuid?>&classId=<uuid?>&q=<texte?>&page=0&size=50
+```
+
+**Une ligne par élève bénéficiaire, pas par vente.** Un parent qui achète pour
+trois enfants produit trois lignes ; un élève servi deux fois en produit une,
+qui cumule.
+
+```jsonc
+{
+  "totalElements": 38, "page": 0, "size": 50,
+  "classes": [ { "id": "…", "label": "6e A" }, … ],  // classes présentes AVANT filtre classe/q
+  "walkInLineCount": 7,     // lignes sans élève désigné, exclues de la liste
+  "items": [{
+    "studentId": "…", "fullName": "KABONGO Daniel", "classId": "…", "classLabel": "6e A",
+    "lastPurchaseAt": "2026-10-21T09:42:00Z",
+    "amounts": [ { "amount": 2000, "currency": "USD" } ],   // Σ des lignes DONT IL EST BÉNÉFICIAIRE
+    "articles": [ { "articleId": "…", "label": "Polo Lacoste", "family": "UNIFORM",
+                    "quantity": 2, "sizes": ["M"] } ]
+  }]
+}
+```
+
+- **`amounts` = ses lignes**, jamais le total du reçu : le payeur a pu acheter
+  pour d'autres.
+- **`articleId` filtre aussi le contenu** : avec un article, `articles[]` et
+  `amounts` ne portent que lui. Sans cela « qui a déjà son polo ? » afficherait
+  des totaux qui mentent sur la question posée.
+- `q` : contient, **insensible à la casse ET aux accents** (`unaccent`) — le
+  `LOWER()` de SQLite ne plie pas les accents, c'est pour ça que la recherche est
+  côté serveur.
+- `classes[]` : les classes présentes dans la fenêtre (et l'article s'il y en a
+  un), **avant** les filtres classe et `q` — c'est la liste du menu déroulant ;
+  calculée après, elle se viderait dès qu'on choisit une classe.
+- Classe = **l'inscription de l'élève dans `academicYearId`**, pas celle du jour
+  de la vente (un élève changé de section se cherche dans sa classe actuelle).
+- Tri : `lastPurchaseAt` décroissant, puis nom.
+- Permission : `boutique.sale.read`. ⚠ Cette route **nomme des élèves et ce
+  qu'ils ont reçu** : elle ne doit pas être ouverte à `editique.read` ni à rien
+  de plus large (même raisonnement que l'exclusion du `RV` du delta éditique).
+
+## R10 — Le RV porte la date de la vente
+
+### Le fait
+
+La caisse permet désormais de **choisir la date de la vente**, de l'ouverture
+de l'année scolaire jusqu'à aujourd'hui (un cahier de caisse rattrapé le
+lendemain, une coupure de courant). Cette date part dans `soldAt` — rien ne
+change au contrat de push — et la caisse du jour (`GET /boutique/till`) la range
+déjà au bon jour.
+
+Mais le RV imprime `LocalDate.now(clock)` (`BoutiqueDocumentService.java:117`) :
+une vente du lundi saisie le mardi sort « mardi » sur la pièce scellée, alors que
+le ticket thermique remis au même client dit « lundi ».
+
+### Ce qui est demandé
+
+Ajouter au `RecuDeVenteCorps` une ligne **« Vente du {jour} »**, `soldAt` lu dans
+le fuseau de l'école, **à côté** de la date d'émission, qui reste celle du
+serveur et reste la seule signée comme date de la pièce. N'imprimer la ligne que
+si le jour de vente diffère du jour d'émission.
+
+### Pourquoi l'objection du commentaire ne tient plus telle quelle
+
+Le commentaire refuse une date contrôlée par le client parce qu'une tablette à
+la pile morte ferait sceller « 12 mars 2019 ». Deux réponses :
+
+1. **Le précédent existe** : `POST /finance/payments/{id}/receipt/backdated`
+   scelle déjà un reçu « daté du jour du paiement ». La date métier d'une pièce
+   n'est donc pas un tabou, à condition de la distinguer de la date d'émission.
+2. **Borner plutôt que taire** : si `soldAt` tombe hors de l'année scolaire de la
+   vente (ou au-delà de `now + 5 min`, déjà clampé), le RV n'imprime pas la ligne
+   et la vente lève une anomalie `SOLD_AT_OUT_OF_YEAR` — **sans** refuser la
+   vente, l'argent est encaissé. Le front borne déjà le sélecteur à l'année ;
+   seule une horloge déréglée peut tomber dehors.
+
+## R11 — Information : l'antidatage devient un geste volontaire
+
+Complète R7 (`ClientClockGuard` ne borne que le futur). Jusqu'ici un `soldAt`
+passé ne pouvait venir que d'une saisie hors ligne ou d'une horloge en retard.
+Désormais le caissier peut **choisir** une date antérieure, dans l'année
+scolaire. Aucune distinction de rôle côté front : aucune permission ne la
+porterait côté serveur, et une garde que le serveur n'impose pas n'en est pas
+une. Le jour où une clôture de caisse existera, une vente antidatée dans une
+journée déjà close sera la première question — c'est R7, en plus fréquent.
