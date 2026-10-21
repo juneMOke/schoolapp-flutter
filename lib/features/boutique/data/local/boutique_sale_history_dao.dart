@@ -8,7 +8,8 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 
-/// Lecture de la caisse : les ventes d'une fenêtre, la plus récente en tête.
+/// Lecture locale des ventes : celles d'une fenêtre, la plus récente en tête,
+/// leurs tickets provisoires, et une vente entière pour sa fiche.
 ///
 /// **Aucune écriture ici.** L'historique regarde l'argent, il n'y touche pas.
 class BoutiqueSaleHistoryDao {
@@ -16,27 +17,16 @@ class BoutiqueSaleHistoryDao {
 
   const BoutiqueSaleHistoryDao(this._db);
 
-  /// Les ventes de l'école, de l'année et de la fenêtre.
+  /// Les ventes de l'école et de l'année dans `[fromBound, toBound[`, la plus
+  /// récente en tête, au plus [limit].
   ///
   /// Le compte d'articles vient d'une sous-requête agrégée et non d'une
   /// jointure : joindre les lignes dupliquerait la vente autant de fois qu'elle
-  /// a d'articles, et le total de la fenêtre se compterait plusieurs fois.
+  /// a d'articles.
   ///
   /// Le scope école n'est pas décoratif : la conception « une tablette, une
   /// école » a déjà produit dix flux à curseur nu, et l'omettre montrerait au
   /// guichet la caisse de l'établissement voisin.
-  Future<List<SaleHistoryEntry>> salesSince({
-    required String schoolId,
-    required String academicYearId,
-    required String soldAtBound,
-  }) => salesBetween(
-    schoolId: schoolId,
-    academicYearId: academicYearId,
-    fromBound: soldAtBound,
-  );
-
-  /// Les ventes de `[fromBound, toBound[`, la plus récente en tête, au plus
-  /// [limit].
   ///
   /// Les bornes sont mises en forme par [SoldAtBound] : `sold_at` mêle deux
   /// formats, et seul un préfixe sans suffixe se compare juste aux deux.

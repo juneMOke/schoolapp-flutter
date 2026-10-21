@@ -4,15 +4,10 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/sales_history_period.dart';
 
-/// L'historique des ventes du guichet — **lecture locale seule**.
+/// Les ventes enregistrées sur le poste — **lecture locale seule** : les
+/// dernières, les tickets provisoires, et la fiche d'une vente.
 abstract class BoutiqueHistoryRepository {
-  Future<Either<Failure, List<SaleHistoryEntry>>> salesOfPeriod({
-    required String academicYearId,
-    required SalesHistoryPeriod period,
-  });
-
   /// Les [limit] dernières ventes de [window], provisoires comprises — lues
   /// ici et non au serveur : le poste les détient toutes, et c'est ce qui lui
   /// montre aussi celles qui ne sont pas encore parties.

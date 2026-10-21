@@ -75,12 +75,17 @@ class MenuConstants {
   /// qu'une redondance.
   static const String recouvrementControlId = 'recouvrement-controle';
 
-  /// Le guichet : catalogue, panier, encaissement.
+  /// Le tableau de bord : combien la boutique a vendu, quoi, et à quels
+  /// élèves. Premier sous-menu — il remplace l'ancien historique des ventes.
+  static const String boutiqueDashboardId = 'boutique-tableau-de-bord';
+
+  /// Le guichet — la caisse : catalogue, panier, encaissement. L'identifiant
+  /// garde son ancien nom (« achats ») : c'est l'adresse des favoris.
   static const String boutiqueAchatsId = 'boutique-achats';
 
-  /// Les ventes déjà encaissées, lues **en local seulement** : l'historique
-  /// d'une caisse doit se consulter le jour où le réseau manque.
-  static const String boutiqueHistoriqueId = 'boutique-historique';
+  /// L'ancien historique des ventes, retiré : son adresse ne sert plus qu'à
+  /// rediriger un favori vers le tableau de bord.
+  static const String boutiqueLegacyHistoryId = 'boutique-historique';
 
   /// Tableau de bord des dépenses : combien, sur quoi, ce qui reste à régler.
   static const String expenseDashboardId = 'depenses-tableau-de-bord';

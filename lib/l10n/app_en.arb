@@ -1113,13 +1113,9 @@
   "@menuBoutique": {
     "description": "Shop till menu title"
   },
-  "subMenuBoutiquePurchases": "Purchases",
-  "@subMenuBoutiquePurchases": {
+  "subMenuBoutiqueTill": "Till",
+  "@subMenuBoutiqueTill": {
     "description": "Shop till counter sub-menu title"
-  },
-  "subMenuBoutiqueHistory": "History",
-  "@subMenuBoutiqueHistory": {
-    "description": "Shop sales history sub-menu title"
   },
   "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
@@ -2319,7 +2315,7 @@
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
   "accueilModuleFeeControlDescription": "For a given fee: who has settled it, who has paid only part of it, who has paid nothing.",
-  "accueilModuleBoutiqueDescription": "Cash sales of school items, and the counter's collection history.",
+  "accueilModuleBoutiqueDescription": "Cash till for school items, and sales follow-up.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
   "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
   "accueilModuleResultatsDescription": "Percentages by period, for a whole class or a single student.",
@@ -5974,39 +5970,11 @@
       }
     }
   },
-  "boutiqueHistoryEyebrow": "Shop ▸ History",
-  "boutiqueHistoryTitle": "Sales history",
-  "boutiqueHistoryPeriodDay": "Today",
-  "boutiqueHistoryPeriodWeek": "This week",
-  "boutiqueHistoryPeriodMonth": "This month",
-  "boutiqueHistoryPeriodYear": "This year",
-  "boutiqueHistorySaleCount": "{count, plural, one{1 sale} other{{count} sales}}",
   "boutiqueHistoryArticleCount": "{count, plural, one{1 item} other{{count} items}}",
-  "boutiqueHistoryPendingNotice": "{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}",
   "boutiqueHistoryPendingBadge": "Pending",
-  "boutiqueHistoryEmptyTitle": "No sale in this period",
-  "boutiqueHistoryEmptyMessage": "Nothing was collected at the counter. Widen the period, or open the shop to collect.",
-  "boutiqueHistoryPickTitle": "No sale selected",
-  "boutiqueHistoryPickMessage": "Pick a sale in the list to see its details here.",
   "boutiqueHistoryPayerUnknown": "Payer not recorded",
-  "boutiqueHistoryTotalLabel": "Total collected",
   "boutiqueHistorySaleTime": "{time} · {reference}",
-  "boutiqueHistoryProvisional": "provisional ticket",
-  "@boutiqueHistorySaleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "@boutiqueHistoryArticleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@boutiqueHistoryPendingNotice": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -6023,9 +5991,9 @@
       }
     }
   },
-  "boutiqueHistoryErrorServerTitle": "History unreadable",
-  "boutiqueHistoryErrorServer": "The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.",
-  "boutiqueHistoryErrorNetwork": "History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
+  "boutiqueHistoryErrorServerTitle": "Unreadable sale",
+  "boutiqueHistoryErrorServer": "The sale could not be read back on this device. Try again; it is not lost — it is written to the database, reading it back failed.",
+  "boutiqueHistoryErrorNetwork": "A sale is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
   "boutiqueDashboardEyebrow": "Shop ▸ Dashboard",
   "boutiqueDashboardTitle": "Dashboard",
   "boutiqueDashboardSubtitleToday": "Cash sales today · {day}",

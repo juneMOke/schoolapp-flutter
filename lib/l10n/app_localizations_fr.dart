@@ -1077,10 +1077,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuBoutique => 'Boutique';
 
   @override
-  String get subMenuBoutiquePurchases => 'Achats';
-
-  @override
-  String get subMenuBoutiqueHistory => 'Historiques';
+  String get subMenuBoutiqueTill => 'Caisse';
 
   @override
   String get subMenuOrganization => 'Composition\ndes classes';
@@ -2747,7 +2744,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModuleBoutiqueDescription =>
-      'Vente au comptant d\'articles scolaires, et historique des encaissements du guichet.';
+      'Caisse au comptant des articles de l\'école et suivi des ventes.';
 
   @override
   String get accueilModuleClassesDescription =>
@@ -9149,35 +9146,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueSuccessDone => 'Terminer';
 
   @override
-  String get boutiqueHistoryEyebrow => 'Boutique ▸ Historiques';
-
-  @override
-  String get boutiqueHistoryTitle => 'Historique des ventes';
-
-  @override
-  String get boutiqueHistoryPeriodDay => 'Aujourd\'hui';
-
-  @override
-  String get boutiqueHistoryPeriodWeek => 'Cette semaine';
-
-  @override
-  String get boutiqueHistoryPeriodMonth => 'Ce mois';
-
-  @override
-  String get boutiqueHistoryPeriodYear => 'Cette année';
-
-  @override
-  String boutiqueHistorySaleCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ventes',
-      one: '1 vente',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String boutiqueHistoryArticleCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -9189,38 +9157,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String boutiqueHistoryPendingNotice(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ventes ne sont pas encore parties au serveur.',
-      one: '1 vente n\'est pas encore partie au serveur.',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get boutiqueHistoryPendingBadge => 'En attente';
 
   @override
-  String get boutiqueHistoryEmptyTitle => 'Aucune vente sur cette période';
-
-  @override
-  String get boutiqueHistoryEmptyMessage =>
-      'Rien n\'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.';
-
-  @override
-  String get boutiqueHistoryPickTitle => 'Aucune vente choisie';
-
-  @override
-  String get boutiqueHistoryPickMessage =>
-      'Choisissez une vente dans la liste pour voir sa fiche ici.';
-
-  @override
   String get boutiqueHistoryPayerUnknown => 'Payeur non renseigné';
-
-  @override
-  String get boutiqueHistoryTotalLabel => 'Total encaissé';
 
   @override
   String boutiqueHistorySaleTime(String time, String reference) {
@@ -9228,18 +9168,15 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get boutiqueHistoryProvisional => 'ticket provisoire';
-
-  @override
-  String get boutiqueHistoryErrorServerTitle => 'Historique illisible';
+  String get boutiqueHistoryErrorServerTitle => 'Vente illisible';
 
   @override
   String get boutiqueHistoryErrorServer =>
-      'La caisse locale n\'a pas pu être lue. Réessayez ; les ventes ne sont pas perdues — elles sont écrites en base, c\'est leur relecture qui a échoué.';
+      'La vente n\'a pas pu être relue sur ce poste. Réessayez ; elle n\'est pas perdue — elle est écrite en base, c\'est sa relecture qui a échoué.';
 
   @override
   String get boutiqueHistoryErrorNetwork =>
-      'L\'historique se lit en local et n\'a pas besoin du réseau. Réessayez ; s\'il ne revient pas, c\'est la base locale qui est en cause.';
+      'Une vente se relit en local et n\'a pas besoin du réseau. Réessayez ; si elle ne revient pas, c\'est la base locale qui est en cause.';
 
   @override
   String get boutiqueDashboardEyebrow => 'Boutique ▸ Tableau de bord';

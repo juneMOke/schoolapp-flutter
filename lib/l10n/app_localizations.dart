@@ -1733,14 +1733,8 @@ abstract class AppLocalizations {
   /// Shop till counter sub-menu title
   ///
   /// In en, this message translates to:
-  /// **'Purchases'**
-  String get subMenuBoutiquePurchases;
-
-  /// Shop sales history sub-menu title
-  ///
-  /// In en, this message translates to:
-  /// **'History'**
-  String get subMenuBoutiqueHistory;
+  /// **'Till'**
+  String get subMenuBoutiqueTill;
 
   /// Organization sub-menu title
   ///
@@ -4217,7 +4211,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModuleBoutiqueDescription.
   ///
   /// In en, this message translates to:
-  /// **'Cash sales of school items, and the counter\'s collection history.'**
+  /// **'Cash till for school items, and sales follow-up.'**
   String get accueilModuleBoutiqueDescription;
 
   /// No description provided for @accueilModuleClassesDescription.
@@ -14538,59 +14532,11 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get boutiqueSuccessDone;
 
-  /// No description provided for @boutiqueHistoryEyebrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Shop ▸ History'**
-  String get boutiqueHistoryEyebrow;
-
-  /// No description provided for @boutiqueHistoryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sales history'**
-  String get boutiqueHistoryTitle;
-
-  /// No description provided for @boutiqueHistoryPeriodDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get boutiqueHistoryPeriodDay;
-
-  /// No description provided for @boutiqueHistoryPeriodWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'This week'**
-  String get boutiqueHistoryPeriodWeek;
-
-  /// No description provided for @boutiqueHistoryPeriodMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'This month'**
-  String get boutiqueHistoryPeriodMonth;
-
-  /// No description provided for @boutiqueHistoryPeriodYear.
-  ///
-  /// In en, this message translates to:
-  /// **'This year'**
-  String get boutiqueHistoryPeriodYear;
-
-  /// No description provided for @boutiqueHistorySaleCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, one{1 sale} other{{count} sales}}'**
-  String boutiqueHistorySaleCount(int count);
-
   /// No description provided for @boutiqueHistoryArticleCount.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, one{1 item} other{{count} items}}'**
   String boutiqueHistoryArticleCount(int count);
-
-  /// No description provided for @boutiqueHistoryPendingNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}'**
-  String boutiqueHistoryPendingNotice(int count);
 
   /// No description provided for @boutiqueHistoryPendingBadge.
   ///
@@ -14598,41 +14544,11 @@ abstract class AppLocalizations {
   /// **'Pending'**
   String get boutiqueHistoryPendingBadge;
 
-  /// No description provided for @boutiqueHistoryEmptyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No sale in this period'**
-  String get boutiqueHistoryEmptyTitle;
-
-  /// No description provided for @boutiqueHistoryEmptyMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing was collected at the counter. Widen the period, or open the shop to collect.'**
-  String get boutiqueHistoryEmptyMessage;
-
-  /// No description provided for @boutiqueHistoryPickTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No sale selected'**
-  String get boutiqueHistoryPickTitle;
-
-  /// No description provided for @boutiqueHistoryPickMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick a sale in the list to see its details here.'**
-  String get boutiqueHistoryPickMessage;
-
   /// No description provided for @boutiqueHistoryPayerUnknown.
   ///
   /// In en, this message translates to:
   /// **'Payer not recorded'**
   String get boutiqueHistoryPayerUnknown;
-
-  /// No description provided for @boutiqueHistoryTotalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Total collected'**
-  String get boutiqueHistoryTotalLabel;
 
   /// No description provided for @boutiqueHistorySaleTime.
   ///
@@ -14640,28 +14556,22 @@ abstract class AppLocalizations {
   /// **'{time} · {reference}'**
   String boutiqueHistorySaleTime(String time, String reference);
 
-  /// No description provided for @boutiqueHistoryProvisional.
-  ///
-  /// In en, this message translates to:
-  /// **'provisional ticket'**
-  String get boutiqueHistoryProvisional;
-
   /// No description provided for @boutiqueHistoryErrorServerTitle.
   ///
   /// In en, this message translates to:
-  /// **'History unreadable'**
+  /// **'Unreadable sale'**
   String get boutiqueHistoryErrorServerTitle;
 
   /// No description provided for @boutiqueHistoryErrorServer.
   ///
   /// In en, this message translates to:
-  /// **'The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.'**
+  /// **'The sale could not be read back on this device. Try again; it is not lost — it is written to the database, reading it back failed.'**
   String get boutiqueHistoryErrorServer;
 
   /// No description provided for @boutiqueHistoryErrorNetwork.
   ///
   /// In en, this message translates to:
-  /// **'History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.'**
+  /// **'A sale is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.'**
   String get boutiqueHistoryErrorNetwork;
 
   /// No description provided for @boutiqueDashboardEyebrow.

@@ -25,9 +25,7 @@ import 'package:school_app_flutter/features/boutique/domain/repositories/boutiqu
 import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_receipt_repository.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
-import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_history_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
-import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_history_bloc.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_pull_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/ticket/sale_ticket_composer.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_write_dao.dart';
@@ -134,9 +132,9 @@ void registerBoutiqueOffline(GetIt getIt) {
     () => RecordBoutiqueSaleUseCase(getIt<BoutiqueSaleRepository>()),
   );
 
-  // ── Historique de caisse ────────────────────────────────────────────────
-  // Lecture LOCALE seule : une caisse se consulte le jour où le réseau manque,
-  // et c'est aussi ce qui rend les ventes non encore parties visibles ici.
+  // ── Ventes du poste (lecture locale) ────────────────────────────────────
+  // Lecture LOCALE seule : la fiche d'une vente se rouvre le jour où le réseau
+  // manque, et c'est aussi ce qui rend les ventes non encore parties visibles.
   getIt.registerLazySingleton<BoutiqueSaleHistoryDao>(
     () => BoutiqueSaleHistoryDao(getIt<Database>()),
   );
@@ -146,9 +144,6 @@ void registerBoutiqueOffline(GetIt getIt) {
       currentUser: getIt<CurrentUserContext>(),
       now: DateTime.now,
     ),
-  );
-  getIt.registerFactory<GetBoutiqueSalesHistoryUseCase>(
-    () => GetBoutiqueSalesHistoryUseCase(getIt<BoutiqueHistoryRepository>()),
   );
   getIt.registerFactory<GetBoutiqueSaleDetailUseCase>(
     () => GetBoutiqueSaleDetailUseCase(getIt<BoutiqueHistoryRepository>()),
@@ -172,14 +167,6 @@ void registerBoutiqueOffline(GetIt getIt) {
   );
   getIt.registerFactory<ClaimSaleReceiptUseCase>(
     () => ClaimSaleReceiptUseCase(getIt<BoutiqueReceiptRepository>()),
-  );
-  // `registerFactory`, jamais singleton : la fenêtre choisie appartient à
-  // l'écran ouvert, et un bloc partagé ferait revenir la période d'une visite
-  // précédente.
-  getIt.registerFactory<BoutiqueHistoryBloc>(
-    () => BoutiqueHistoryBloc(
-      getHistory: getIt<GetBoutiqueSalesHistoryUseCase>(),
-    ),
   );
 
   _registerDashboard(getIt);

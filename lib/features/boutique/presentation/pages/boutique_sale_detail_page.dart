@@ -212,7 +212,7 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
             ),
           SaleDetailStatus.failure => BoutiqueResultsErrorState(
             failure: state.failure!,
-            surface: BoutiqueErrorSurface.history,
+            surface: BoutiqueErrorSurface.localSales,
             onRetry: () => context.read<SaleDetailCubit>().load(),
           ),
           SaleDetailStatus.ready => _Body(

@@ -7,7 +7,6 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/sales_history_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_history_repository.dart';
 
 /// Lecture locale de la caisse.
@@ -104,27 +103,6 @@ class BoutiqueHistoryRepositoryImpl implements BoutiqueHistoryRepository {
       // Une base illisible n'est pas « aucun ticket en attente » : le dire
       // ferait croire au guichet que tout est parti.
       return Left(StorageFailure('Tickets provisoires illisibles : $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<SaleHistoryEntry>>> salesOfPeriod({
-    required String academicYearId,
-    required SalesHistoryPeriod period,
-  }) async {
-    try {
-      final rows = await _dao.salesSince(
-        schoolId: _currentUser.schoolId ?? '',
-        academicYearId: academicYearId,
-        soldAtBound: period.boundFor(_now()),
-      );
-      return Right(rows);
-    } catch (e) {
-      // Une lecture d'affichage ne remonte pas d'exception nue : l'écran a un
-      // état d'erreur, et une base illisible n'est pas une caisse vide — dire
-      // « aucune vente » à un guichet qui vient d'en encaisser trois serait
-      // pire qu'une erreur.
-      return Left(StorageFailure('Historique boutique illisible : $e'));
     }
   }
 }

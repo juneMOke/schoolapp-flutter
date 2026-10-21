@@ -62,10 +62,10 @@ void main() {
   tearDown(() async => db.close());
 
   Future<List<String>> idsSince(String bound, {String school = 'E1'}) async {
-    final rows = await dao.salesSince(
+    final rows = await dao.salesBetween(
       schoolId: school,
       academicYearId: 'ay-1',
-      soldAtBound: bound,
+      fromBound: bound,
     );
     return [for (final row in rows) row.id];
   }
@@ -139,10 +139,10 @@ void main() {
       await _insertLine(db, id: 'l-1', saleId: 's-1', quantity: 2);
       await _insertLine(db, id: 'l-2', saleId: 's-1', quantity: 3);
 
-      final rows = await dao.salesSince(
+      final rows = await dao.salesBetween(
         schoolId: 'E1',
         academicYearId: 'ay-1',
-        soldAtBound: '2026-08-30T00:00:00',
+        fromBound: '2026-08-30T00:00:00',
       );
 
       expect(rows, hasLength(1));
@@ -155,10 +155,10 @@ void main() {
     // une vente muette disparaîtrait de la caisse du jour.
     await _insertSale(db, id: 's-vide', soldAt: '2026-08-30T09:00:00Z');
 
-    final rows = await dao.salesSince(
+    final rows = await dao.salesBetween(
       schoolId: 'E1',
       academicYearId: 'ay-1',
-      soldAtBound: '2026-08-30T00:00:00',
+      fromBound: '2026-08-30T00:00:00',
     );
 
     expect(rows.single.articleCount, 0);
@@ -176,10 +176,10 @@ void main() {
       payerFirstName: 'Willy',
     );
 
-    final rows = await dao.salesSince(
+    final rows = await dao.salesBetween(
       schoolId: 'E1',
       academicYearId: 'ay-1',
-      soldAtBound: '2026-08-30T00:00:00',
+      fromBound: '2026-08-30T00:00:00',
     );
 
     expect(rows.single.payerName, 'Ndombo Lelo Willy');
@@ -197,10 +197,10 @@ void main() {
         payerFirstName: 'Willy',
       );
 
-      final rows = await dao.salesSince(
+      final rows = await dao.salesBetween(
         schoolId: 'E1',
         academicYearId: 'ay-1',
-        soldAtBound: '2026-08-30T00:00:00',
+        fromBound: '2026-08-30T00:00:00',
       );
 
       expect(rows.single.payerName, 'Ndombo Lelo Willy');
@@ -313,10 +313,10 @@ void main() {
       syncStatus: 'PENDING_SYNC',
     );
 
-    final rows = await dao.salesSince(
+    final rows = await dao.salesBetween(
       schoolId: 'E1',
       academicYearId: 'ay-1',
-      soldAtBound: '2026-08-30T00:00:00',
+      fromBound: '2026-08-30T00:00:00',
     );
 
     expect(rows.single.isPending, isTrue);

@@ -1075,8 +1075,7 @@
   "menuRecouvrement": "Recouvrement",
   "subMenuFeeControl": "Contrôle par frais",
   "menuBoutique": "Boutique",
-  "subMenuBoutiquePurchases": "Achats",
-  "subMenuBoutiqueHistory": "Historiques",
+  "subMenuBoutiqueTill": "Caisse",
   "subMenuOrganization": "Composition\ndes classes",
   "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
@@ -2263,7 +2262,7 @@
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
   "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
   "accueilModuleFeeControlDescription": "Pour un frais donné, qui l'a soldé, qui n'a versé qu'une part, qui n'a rien versé.",
-  "accueilModuleBoutiqueDescription": "Vente au comptant d'articles scolaires, et historique des encaissements du guichet.",
+  "accueilModuleBoutiqueDescription": "Caisse au comptant des articles de l'école et suivi des ventes.",
   "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
   "accueilModuleCoursDescription": "Emploi du temps de la semaine et suivi de vos cours.",
   "accueilModuleResultatsDescription": "Pourcentages par période, par classe entière ou pour un élève précis.",
@@ -6046,39 +6045,11 @@
       }
     }
   },
-  "boutiqueHistoryEyebrow": "Boutique ▸ Historiques",
-  "boutiqueHistoryTitle": "Historique des ventes",
-  "boutiqueHistoryPeriodDay": "Aujourd'hui",
-  "boutiqueHistoryPeriodWeek": "Cette semaine",
-  "boutiqueHistoryPeriodMonth": "Ce mois",
-  "boutiqueHistoryPeriodYear": "Cette année",
-  "boutiqueHistorySaleCount": "{count, plural, one{1 vente} other{{count} ventes}}",
   "boutiqueHistoryArticleCount": "{count, plural, one{1 article} other{{count} articles}}",
-  "boutiqueHistoryPendingNotice": "{count, plural, one{1 vente n'est pas encore partie au serveur.} other{{count} ventes ne sont pas encore parties au serveur.}}",
   "boutiqueHistoryPendingBadge": "En attente",
-  "boutiqueHistoryEmptyTitle": "Aucune vente sur cette période",
-  "boutiqueHistoryEmptyMessage": "Rien n'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.",
-  "boutiqueHistoryPickTitle": "Aucune vente choisie",
-  "boutiqueHistoryPickMessage": "Choisissez une vente dans la liste pour voir sa fiche ici.",
   "boutiqueHistoryPayerUnknown": "Payeur non renseigné",
-  "boutiqueHistoryTotalLabel": "Total encaissé",
   "boutiqueHistorySaleTime": "{time} · {reference}",
-  "boutiqueHistoryProvisional": "ticket provisoire",
-  "@boutiqueHistorySaleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "@boutiqueHistoryArticleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@boutiqueHistoryPendingNotice": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -6095,9 +6066,9 @@
       }
     }
   },
-  "boutiqueHistoryErrorServerTitle": "Historique illisible",
-  "boutiqueHistoryErrorServer": "La caisse locale n'a pas pu être lue. Réessayez ; les ventes ne sont pas perdues — elles sont écrites en base, c'est leur relecture qui a échoué.",
-  "boutiqueHistoryErrorNetwork": "L'historique se lit en local et n'a pas besoin du réseau. Réessayez ; s'il ne revient pas, c'est la base locale qui est en cause.",
+  "boutiqueHistoryErrorServerTitle": "Vente illisible",
+  "boutiqueHistoryErrorServer": "La vente n'a pas pu être relue sur ce poste. Réessayez ; elle n'est pas perdue — elle est écrite en base, c'est sa relecture qui a échoué.",
+  "boutiqueHistoryErrorNetwork": "Une vente se relit en local et n'a pas besoin du réseau. Réessayez ; si elle ne revient pas, c'est la base locale qui est en cause.",
   "boutiqueDashboardEyebrow": "Boutique ▸ Tableau de bord",
   "boutiqueDashboardTitle": "Tableau de bord",
   "boutiqueDashboardSubtitleToday": "Ventes au comptant d'aujourd'hui · {day}",

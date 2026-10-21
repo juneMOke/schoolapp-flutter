@@ -1069,10 +1069,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuBoutique => 'Shop';
 
   @override
-  String get subMenuBoutiquePurchases => 'Purchases';
-
-  @override
-  String get subMenuBoutiqueHistory => 'History';
+  String get subMenuBoutiqueTill => 'Till';
 
   @override
   String get subMenuOrganization => 'Class\ncomposition';
@@ -2734,7 +2731,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accueilModuleBoutiqueDescription =>
-      'Cash sales of school items, and the counter\'s collection history.';
+      'Cash till for school items, and sales follow-up.';
 
   @override
   String get accueilModuleClassesDescription =>
@@ -9074,35 +9071,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueSuccessDone => 'Done';
 
   @override
-  String get boutiqueHistoryEyebrow => 'Shop ▸ History';
-
-  @override
-  String get boutiqueHistoryTitle => 'Sales history';
-
-  @override
-  String get boutiqueHistoryPeriodDay => 'Today';
-
-  @override
-  String get boutiqueHistoryPeriodWeek => 'This week';
-
-  @override
-  String get boutiqueHistoryPeriodMonth => 'This month';
-
-  @override
-  String get boutiqueHistoryPeriodYear => 'This year';
-
-  @override
-  String boutiqueHistorySaleCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count sales',
-      one: '1 sale',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String boutiqueHistoryArticleCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -9114,38 +9082,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String boutiqueHistoryPendingNotice(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count sales have not reached the server yet.',
-      one: '1 sale has not reached the server yet.',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get boutiqueHistoryPendingBadge => 'Pending';
 
   @override
-  String get boutiqueHistoryEmptyTitle => 'No sale in this period';
-
-  @override
-  String get boutiqueHistoryEmptyMessage =>
-      'Nothing was collected at the counter. Widen the period, or open the shop to collect.';
-
-  @override
-  String get boutiqueHistoryPickTitle => 'No sale selected';
-
-  @override
-  String get boutiqueHistoryPickMessage =>
-      'Pick a sale in the list to see its details here.';
-
-  @override
   String get boutiqueHistoryPayerUnknown => 'Payer not recorded';
-
-  @override
-  String get boutiqueHistoryTotalLabel => 'Total collected';
 
   @override
   String boutiqueHistorySaleTime(String time, String reference) {
@@ -9153,18 +9093,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get boutiqueHistoryProvisional => 'provisional ticket';
-
-  @override
-  String get boutiqueHistoryErrorServerTitle => 'History unreadable';
+  String get boutiqueHistoryErrorServerTitle => 'Unreadable sale';
 
   @override
   String get boutiqueHistoryErrorServer =>
-      'The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.';
+      'The sale could not be read back on this device. Try again; it is not lost — it is written to the database, reading it back failed.';
 
   @override
   String get boutiqueHistoryErrorNetwork =>
-      'History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.';
+      'A sale is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.';
 
   @override
   String get boutiqueDashboardEyebrow => 'Shop ▸ Dashboard';

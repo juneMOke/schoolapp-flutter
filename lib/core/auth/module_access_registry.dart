@@ -325,10 +325,11 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // et l'écran doit dire « catalogue non communiqué » — pas rester
     // inatteignable. Un écran fermé n'apprend rien ; un écran qui nomme le
     // droit manquant, si.
-    MenuConstants.boutiqueAchatsId: ModuleAccess([Perm.boutiqueSaleRead]),
-    // L'historique lit les MÊMES ventes, en local : même droit. Le distinguer
+    // Le tableau de bord lit les MÊMES ventes — au serveur, sous la même
+    // permission, qui est aussi celle de R8 et R9 : même droit. Le distinguer
     // n'inventerait qu'une permission que le serveur ne connaît pas.
-    MenuConstants.boutiqueHistoriqueId: ModuleAccess([Perm.boutiqueSaleRead]),
+    MenuConstants.boutiqueDashboardId: ModuleAccess([Perm.boutiqueSaleRead]),
+    MenuConstants.boutiqueAchatsId: ModuleAccess([Perm.boutiqueSaleRead]),
   },
   MenuConstants.expenseMenuId: {
     // Les deux écrans lisent la MÊME liste locale : même droit. Écrire et

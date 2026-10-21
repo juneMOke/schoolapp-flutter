@@ -77,8 +77,10 @@ class AppRoutesNames {
 
   static const String boutiqueAchats =
       '/boutique/${MenuConstants.boutiqueAchatsId}';
-  static const String boutiqueHistorique =
-      '/boutique/${MenuConstants.boutiqueHistoriqueId}';
+  static const String boutiqueDashboard =
+      '/boutique/${MenuConstants.boutiqueDashboardId}';
+  static const String boutiqueLegacyHistory =
+      '/boutique/${MenuConstants.boutiqueLegacyHistoryId}';
 
   static const String expenseDashboard =
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseDashboardId}';
