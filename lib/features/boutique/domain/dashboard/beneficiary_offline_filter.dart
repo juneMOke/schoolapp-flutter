@@ -32,6 +32,7 @@ abstract final class BeneficiaryOfflineFilter {
       walkInLineCount: cached.walkInLineCount,
       items: items,
       cachedAt: cached.cachedAt,
+      partial: cached.totalElements > cached.items.length,
     );
   }
 }

@@ -107,6 +107,10 @@ class BoutiqueSaleHistoryDao {
   /// encore acceptées** — en file ou en échec : les tickets provisoires que le
   /// tableau de bord ajoute aux chiffres du serveur.
   ///
+  /// `SYNC_ERROR` (refus terminal) compte aussi, délibérément : l'argent est
+  /// entré dans le tiroir et le reste, même si le serveur ne le comptera
+  /// jamais. L'écran le montre au même titre que les tickets en file.
+  ///
   /// La famille vient du catalogue local, en jointure **gauche** : un article
   /// retiré du catalogue garde sa ligne et son argent, sans famille.
   Future<List<ProvisionalSaleLine>> provisionalLines({

@@ -24,6 +24,10 @@ class BoutiqueBeneficiariesPage extends Equatable {
   /// Quand le serveur a répondu, si la page vient du cache hors ligne.
   final DateTime? cachedAt;
 
+  /// Vrai quand la page est une recherche hors ligne rejouée sur une photo
+  /// qui ne portait pas tous les élèves : « aucun élève » n'y prouve rien.
+  final bool partial;
+
   const BoutiqueBeneficiariesPage({
     required this.totalElements,
     required this.page,
@@ -32,6 +36,7 @@ class BoutiqueBeneficiariesPage extends Equatable {
     this.walkInLineCount = 0,
     this.items = const [],
     this.cachedAt,
+    this.partial = false,
   });
 
   bool get hasMore => (page + 1) * size < totalElements;
@@ -47,6 +52,7 @@ class BoutiqueBeneficiariesPage extends Equatable {
         walkInLineCount: next.walkInLineCount,
         items: [...items, ...next.items],
         cachedAt: next.cachedAt,
+        partial: next.partial,
       );
 
   BoutiqueBeneficiariesPage cached(DateTime at) => BoutiqueBeneficiariesPage(
@@ -57,6 +63,7 @@ class BoutiqueBeneficiariesPage extends Equatable {
     walkInLineCount: walkInLineCount,
     items: items,
     cachedAt: at,
+    partial: partial,
   );
 
   @override
@@ -68,5 +75,6 @@ class BoutiqueBeneficiariesPage extends Equatable {
     walkInLineCount,
     items,
     cachedAt,
+    partial,
   ];
 }

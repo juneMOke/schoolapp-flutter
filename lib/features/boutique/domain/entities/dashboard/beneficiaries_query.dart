@@ -6,8 +6,9 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 /// Les filtres sont **cumulatifs**, et tous facultatifs : sans eux, la liste est
 /// celle de tous les bénéficiaires de la fenêtre.
 class BeneficiariesQuery extends Equatable {
-  /// Le plafond du serveur est 100 ; 50 suffit à couvrir une classe.
-  static const int defaultPageSize = 50;
+  /// Le plafond du serveur. Une page large, c'est aussi une photo hors ligne
+  /// plus complète : c'est la première page qui se garde.
+  static const int defaultPageSize = 100;
 
   final String academicYearId;
   final DashboardWindow window;
@@ -36,16 +37,6 @@ class BeneficiariesQuery extends Equatable {
       articleId == null &&
       classId == null &&
       (search == null || search!.trim().isEmpty);
-
-  BeneficiariesQuery nextPage() => BeneficiariesQuery(
-    academicYearId: academicYearId,
-    window: window,
-    articleId: articleId,
-    classId: classId,
-    search: search,
-    page: page + 1,
-    size: size,
-  );
 
   @override
   List<Object?> get props => [

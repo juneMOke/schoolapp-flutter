@@ -166,6 +166,33 @@ void main() {
     expect(buckets.firstWhere((b) => b.total > 0).key, '2026-10-21T10');
   });
 
+  test('deux familles inconnues du client ne s\'écrasent pas', () {
+    final merged = ProvisionalStatsMerger.merge(
+      _stats(
+        byCurrency: const [
+          BoutiqueCurrencyStats(
+            currency: 'USD',
+            revenue: 300,
+            previousRevenue: 0,
+            saleCount: 2,
+            previousSaleCount: 0,
+            buckets: [BoutiqueStatsBucket(key: '2026-10-21', total: 300)],
+            families: [
+              BoutiqueFamilyAmount(family: null, amount: 100, quantity: 1),
+              BoutiqueFamilyAmount(family: null, amount: 200, quantity: 1),
+            ],
+          ),
+        ],
+      ),
+      ProvisionalSales([_line(family: null, total: 50)]),
+    );
+    expect(merged.blockOf('USD')!.families.map((f) => f.amount), [
+      100,
+      200,
+      50,
+    ]);
+  });
+
   test('une famille inconnue se range en dernier, sans disparaître', () {
     final merged = ProvisionalStatsMerger.merge(
       _stats(),

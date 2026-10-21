@@ -87,13 +87,31 @@ class BoutiqueDashboardRepositoryImpl implements BoutiqueDashboardRepository {
         query.page,
         query.size,
       );
-      return (model.toJson(), model.toEntity());
+      // La réponse de R9 ne dit pas sa fenêtre : la photo la porte, sans quoi
+      // « aujourd'hui » montrerait hors ligne les élèves servis avant-hier.
+      return (
+        {..._windowOf(query.window), 'response': model.toJson()},
+        model.toEntity(),
+      );
     },
-    fromCache: (payload, at) => BeneficiaryOfflineFilter.apply(
-      BoutiqueBeneficiariesPageModel.fromJson(payload).toEntity().cached(at),
-      query,
-    ),
+    fromCache: (payload, at) {
+      final window = _windowOf(query.window);
+      if (payload['from'] != window['from'] || payload['to'] != window['to']) {
+        return null;
+      }
+      return BeneficiaryOfflineFilter.apply(
+        BoutiqueBeneficiariesPageModel.fromJson(
+          payload['response'] as Map<String, dynamic>,
+        ).toEntity().cached(at),
+        query,
+      );
+    },
   );
+
+  static Map<String, String> _windowOf(DashboardWindow window) => {
+    'from': StatsBucketKeys.dayKey(window.from),
+    'to': StatsBucketKeys.dayKey(window.to),
+  };
 
   /// Le chemin commun : réseau, photo en cas de succès, repli en cas de
   /// coupure.
@@ -137,10 +155,16 @@ class BoutiqueDashboardRepositoryImpl implements BoutiqueDashboardRepository {
       }
       return Right(value);
     } on DioException catch (e) {
-      final failure = e.error is Failure
-          ? e.error as Failure
-          : const NetworkFailure('Network error occurred');
-      return failure is NetworkFailure ? offline(failure) : Left(failure);
+      if (e.error is Failure) {
+        final failure = e.error as Failure;
+        return failure is NetworkFailure ? offline(failure) : Left(failure);
+      }
+      // Sans réponse : une coupure, la photo a sa place. Avec une réponse que
+      // l'intercepteur n'a pas classée (route renommée, 405, 410…), c'est une
+      // erreur — une vieille photo la masquerait.
+      return e.response == null
+          ? offline(const NetworkFailure('Network error occurred'))
+          : const Left(ServerFailure('Unexpected response'));
     } catch (_) {
       // `fromJson` lève sur une réponse sans fenêtre ni compteurs : mieux vaut
       // dire « erreur » que montrer un tableau de bord vide.

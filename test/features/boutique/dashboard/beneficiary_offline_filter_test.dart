@@ -64,6 +64,8 @@ void main() {
     final page = BeneficiaryOfflineFilter.apply(cached, query())!;
     expect(page.totalElements, 3);
     expect(page.hasMore, isFalse);
+    // La photo ne portait que 3 élèves sur 120 : le résultat est partiel.
+    expect(page.partial, isTrue);
     expect(page.cachedAt, cached.cachedAt);
   });
 

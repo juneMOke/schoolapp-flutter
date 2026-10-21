@@ -153,6 +153,23 @@ void main() {
   });
 
   test(
+    'une réponse HTTP non classée ne se cache pas derrière la photo',
+    () async {
+      stubStats(() async => _stats());
+      await repo.stats(academicYearId: 'ay-1', window: window);
+      final options = RequestOptions(path: '/api/v1/boutique/stats');
+      stubStats(
+        () async => throw DioException(
+          requestOptions: options,
+          response: Response(requestOptions: options, statusCode: 410),
+        ),
+      );
+      final result = await repo.stats(academicYearId: 'ay-1', window: window);
+      expect(result.fold((f) => f, (_) => null), isA<ServerFailure>());
+    },
+  );
+
+  test(
     'une réponse illisible est une erreur serveur, pas un écran vide',
     () async {
       stubStats(() async => throw const FormatException('x'));
@@ -197,7 +214,7 @@ void main() {
           null,
           null,
           0,
-          50,
+          100,
         ),
       ).called(1);
     });
@@ -216,6 +233,20 @@ void main() {
         expect(page.cachedAt, fetchedAt);
       },
     );
+
+    test('la photo d\'une autre fenêtre n\'est pas servie', () async {
+      stubPage();
+      await repo.beneficiaries(query());
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+      final tomorrow = BeneficiariesQuery(
+        academicYearId: 'ay-1',
+        window: DashboardWindow(
+          from: DateTime(2026, 10, 16),
+          to: DateTime(2026, 10, 22),
+        ),
+      );
+      expect((await repo.beneficiaries(tomorrow)).isLeft(), isTrue);
+    });
 
     test('une page filtrée ne remplace pas la photo sans filtre', () async {
       stubPage();

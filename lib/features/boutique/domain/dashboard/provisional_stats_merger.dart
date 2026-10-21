@@ -105,23 +105,48 @@ abstract final class ProvisionalStatsMerger {
     List<BoutiqueFamilyAmount> families,
     List<ProvisionalSaleLine> lines,
   ) {
-    final merged = <ArticleFamily?, BoutiqueFamilyAmount>{
-      for (final family in families) family.family: family,
-    };
+    final merged = [...families];
+    // Les lignes sans famille (article retiré du catalogue local) font UNE
+    // entrée à part : jamais fondues dans une famille que le serveur a servie
+    // et que ce client ne connaît pas — deux inconnues ne sont pas la même.
+    BoutiqueFamilyAmount? orphans;
     for (final line in lines) {
-      final current =
-          merged[line.family] ??
-          BoutiqueFamilyAmount(family: line.family, amount: 0, quantity: 0);
-      merged[line.family] = current.plus(
+      final family = line.family;
+      if (family == null) {
+        orphans =
+            (orphans ??
+                    const BoutiqueFamilyAmount(
+                      family: null,
+                      amount: 0,
+                      quantity: 0,
+                    ))
+                .plus(amount: line.lineTotal, quantity: line.quantity);
+        continue;
+      }
+      final index = merged.indexWhere((entry) => entry.family == family);
+      final current = index < 0
+          ? BoutiqueFamilyAmount(family: family, amount: 0, quantity: 0)
+          : merged[index];
+      final next = current.plus(
         amount: line.lineTotal,
         quantity: line.quantity,
       );
+      if (index < 0) {
+        merged.add(next);
+      } else {
+        merged[index] = next;
+      }
     }
-    // L'ordre du catalogue, comme le serveur ; l'inconnu en dernier.
-    return merged.values.toList()..sort(
-      (a, b) => (a.family?.index ?? ArticleFamily.values.length).compareTo(
-        b.family?.index ?? ArticleFamily.values.length,
-      ),
-    );
+    if (orphans != null) merged.add(orphans);
+    // L'ordre du catalogue, comme le serveur ; l'inconnu en dernier. Le tri est
+    // stable : les inconnues gardent leur ordre d'arrivée.
+    int rank(BoutiqueFamilyAmount entry) =>
+        entry.family?.index ?? ArticleFamily.values.length;
+    final ranked = [for (var i = 0; i < merged.length; i++) (i, merged[i])]
+      ..sort((a, b) {
+        final byRank = rank(a.$2).compareTo(rank(b.$2));
+        return byRank != 0 ? byRank : a.$1.compareTo(b.$1);
+      });
+    return [for (final entry in ranked) entry.$2];
   }
 }
