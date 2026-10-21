@@ -114,6 +114,7 @@ class _BoutiqueViewState extends State<_BoutiqueView> {
         return _CatalogueScope(
           academicYearId: academicYearId,
           levels: _levelsOf(academicYearState),
+          academicYearStart: academicYearState.context?.academicYear.startDate,
           searchController: _searchController,
         );
       },
@@ -139,11 +140,13 @@ class _BoutiqueViewState extends State<_BoutiqueView> {
 class _CatalogueScope extends StatefulWidget {
   final String academicYearId;
   final List<BoutiqueLevelOption> levels;
+  final DateTime? academicYearStart;
   final TextEditingController searchController;
 
   const _CatalogueScope({
     required this.academicYearId,
     required this.levels,
+    required this.academicYearStart,
     required this.searchController,
   });
 
@@ -174,6 +177,7 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
     bloc: context.read<BoutiqueBloc>(),
     academicYearId: widget.academicYearId,
     levels: widget.levels,
+    academicYearStart: widget.academicYearStart,
   );
 
   @override
@@ -275,6 +279,7 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
                           child: BoutiqueCartView(
                             academicYearId: widget.academicYearId,
                             levels: widget.levels,
+                            academicYearStart: widget.academicYearStart,
                             embedded: true,
                           ),
                         ),

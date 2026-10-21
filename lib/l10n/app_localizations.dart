@@ -14244,6 +14244,24 @@ abstract class AppLocalizations {
   /// **'Confirm the sale'**
   String get boutiqueConfirmTitle;
 
+  /// No description provided for @boutiqueSaleDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale date'**
+  String get boutiqueSaleDateLabel;
+
+  /// No description provided for @boutiqueSaleDateBackdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Backdated sale — this date will be printed on the ticket.'**
+  String get boutiqueSaleDateBackdated;
+
+  /// No description provided for @boutiqueConfirmDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get boutiqueConfirmDate;
+
   /// No description provided for @boutiqueConfirmPayer.
   ///
   /// In en, this message translates to:

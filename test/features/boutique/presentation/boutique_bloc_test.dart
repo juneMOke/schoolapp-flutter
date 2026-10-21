@@ -251,6 +251,34 @@ void main() {
     );
   });
 
+  group('date de la vente', () {
+    blocTest<BoutiqueBloc, BoutiqueState>(
+      'le jour choisi est posé sur le panier, réduit au jour',
+      build: build,
+      act: (bloc) =>
+          bloc.add(BoutiqueSaleDateChanged(DateTime(2026, 10, 19, 9, 15))),
+      expect: () => [
+        isA<BoutiqueState>().having(
+          (s) => s.cart.saleDate,
+          'saleDate',
+          DateTime(2026, 10, 19),
+        ),
+      ],
+    );
+
+    blocTest<BoutiqueBloc, BoutiqueState>(
+      '« Nouvelle vente » repose aujourd\'hui',
+      build: build,
+      seed: () => BoutiqueState(
+        cart: const BoutiqueCart().withSaleDate(DateTime(2026, 10, 19)),
+      ),
+      act: (bloc) => bloc.add(const BoutiqueNewSaleStarted()),
+      expect: () => [
+        isA<BoutiqueState>().having((s) => s.cart.saleDate, 'saleDate', null),
+      ],
+    );
+  });
+
   group('payeur et répertoire', () {
     blocTest<BoutiqueBloc, BoutiqueState>(
       'un numéro TROP COURT ne déclenche aucune recherche',

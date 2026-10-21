@@ -8969,6 +8969,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueConfirmTitle => 'Confirmer la vente';
 
   @override
+  String get boutiqueSaleDateLabel => 'Date de la vente';
+
+  @override
+  String get boutiqueSaleDateBackdated =>
+      'Vente antidatée — la date figurera sur le ticket.';
+
+  @override
+  String get boutiqueConfirmDate => 'Date';
+
+  @override
   String get boutiqueConfirmPayer => 'Payeur';
 
   @override

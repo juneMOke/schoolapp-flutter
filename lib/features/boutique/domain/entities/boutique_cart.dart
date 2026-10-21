@@ -21,10 +21,20 @@ class BoutiqueCart extends Equatable {
   /// devise où c'est tarifé, c'est-à-dire l'écran d'avant.
   final Map<String, CartTender> tenders;
 
+  /// Le jour de la vente quand le guichet l'a **choisi** ; `null` = aujourd'hui.
+  ///
+  /// `null` et non « la date du jour figée à l'ouverture du panier » : un
+  /// panier composé à 23 h 58 et encaissé à 0 h 01 serait sinon antidaté sans
+  /// que personne ne l'ait voulu. Seul un choix explicite fige un jour.
+  ///
+  /// Un jour, sans heure : l'heure est celle de l'encaissement ([soldAtFor]).
+  final DateTime? saleDate;
+
   const BoutiqueCart({
     this.lines = const [],
     this.payer = const CartPayer(),
     this.tenders = const {},
+    this.saleDate,
   });
 
   /// Le règlement retenu pour cette devise de catalogue.
@@ -243,8 +253,12 @@ class BoutiqueCart extends Equatable {
     (line) => line.copyWith(size: size, clearSize: size == null),
   );
 
-  BoutiqueCart withPayer(CartPayer payer) =>
-      BoutiqueCart(lines: lines, payer: payer, tenders: tenders);
+  BoutiqueCart withPayer(CartPayer payer) => BoutiqueCart(
+    lines: lines,
+    payer: payer,
+    tenders: tenders,
+    saleDate: saleDate,
+  );
 
   /// Pose la devise dans laquelle cette part du panier est réglée.
   ///
@@ -260,7 +274,12 @@ class BoutiqueCart extends Equatable {
     } else {
       next[pivot] = CartTender(currency: target);
     }
-    return BoutiqueCart(lines: lines, payer: payer, tenders: next);
+    return BoutiqueCart(
+      lines: lines,
+      payer: payer,
+      tenders: next,
+      saleDate: saleDate,
+    );
   }
 
   /// Pose ce que le client a **tendu** pour cette part du panier.
@@ -275,11 +294,64 @@ class BoutiqueCart extends Equatable {
     next[pivot] = cents == null
         ? current.copyWith(clearTendered: true)
         : current.copyWith(tenderedCents: cents);
-    return BoutiqueCart(lines: lines, payer: payer, tenders: next);
+    return BoutiqueCart(
+      lines: lines,
+      payer: payer,
+      tenders: next,
+      saleDate: saleDate,
+    );
   }
 
-  /// Vide tout — lignes **et** payeur. C'est « Vider le panier » du pied, et
-  /// c'est aussi ce que fait « Nouvelle vente » après un encaissement.
+  /// Pose le jour de la vente — `null` le ramène à aujourd'hui.
+  ///
+  /// Réduit au jour : une heure portée ici serait une heure inventée, l'heure
+  /// réelle n'existant qu'au moment d'encaisser.
+  BoutiqueCart withSaleDate(DateTime? date) => BoutiqueCart(
+    lines: lines,
+    payer: payer,
+    tenders: tenders,
+    saleDate: date == null ? null : DateTime(date.year, date.month, date.day),
+  );
+
+  /// Vrai si le jour choisi précède celui de [now] : la vente est antidatée.
+  bool isBackdatedAt(DateTime now) {
+    final date = saleDate;
+    return date != null &&
+        date.isBefore(DateTime(now.year, now.month, now.day));
+  }
+
+  /// Vrai si le jour choisi est postérieur à celui de [now].
+  ///
+  /// Le sélecteur ne le propose pas ; seule une horloge qui recule entre le
+  /// choix et l'encaissement peut le produire. Le dépôt refuse alors d'écrire.
+  bool isFutureAt(DateTime now) {
+    final date = saleDate;
+    return date != null && date.isAfter(DateTime(now.year, now.month, now.day));
+  }
+
+  /// L'heure **métier** de la vente : le jour choisi, à l'heure réelle de
+  /// l'encaissement ([now]). Sans jour choisi — ou le jour même —, [now] tel
+  /// quel.
+  ///
+  /// L'heure réelle et non minuit : deux ventes antidatées au même jour restent
+  /// ordonnées comme elles ont été faites, et le ticket imprime une heure vraie.
+  DateTime soldAtFor(DateTime now) {
+    final date = saleDate;
+    if (date == null || !isBackdatedAt(now)) return now;
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      now.hour,
+      now.minute,
+      now.second,
+      now.millisecond,
+    );
+  }
+
+  /// Vide tout — lignes, payeur **et** jour choisi. C'est « Vider le panier »
+  /// du pied, et c'est aussi ce que fait « Nouvelle vente » après un
+  /// encaissement : la vente suivante repart d'aujourd'hui.
   BoutiqueCart cleared() => const BoutiqueCart();
 
   /// ⚠️ **Les règlements des devises disparues sont retirés.** Vider la
@@ -296,6 +368,7 @@ class BoutiqueCart extends Equatable {
         for (final entry in tenders.entries)
           if (present.contains(entry.key)) entry.key: entry.value,
       },
+      saleDate: saleDate,
     );
   }
 
@@ -306,5 +379,5 @@ class BoutiqueCart extends Equatable {
       ]);
 
   @override
-  List<Object?> get props => [lines, payer, tenders];
+  List<Object?> get props => [lines, payer, tenders, saleDate];
 }

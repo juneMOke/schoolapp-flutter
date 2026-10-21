@@ -27,3 +27,12 @@ String formatIsoDay(String day) {
   if (match == null) return day;
   return '${match.group(3)}/${match.group(2)}/${match.group(1)}';
 }
+
+/// `JJ/MM/AAAA` d'un jour du calendrier — **lu brut**, sans fuseau.
+///
+/// Un jour choisi au sélecteur n'est pas un instant : le ramener au fuseau
+/// local le décalerait d'un jour sur une machine à l'ouest de son origine.
+String formatLocalDay(DateTime day) {
+  String two(int value) => value.toString().padLeft(2, '0');
+  return '${two(day.day)}/${two(day.month)}/${day.year}';
+}

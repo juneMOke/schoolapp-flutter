@@ -134,6 +134,16 @@ class BoutiquePayerChanged extends BoutiqueEvent {
   List<Object?> get props => [payer];
 }
 
+/// Le jour de la vente, choisi au guichet. `null` = aujourd'hui.
+class BoutiqueSaleDateChanged extends BoutiqueEvent {
+  final DateTime? date;
+
+  const BoutiqueSaleDateChanged(this.date);
+
+  @override
+  List<Object?> get props => [date];
+}
+
 /// « Utiliser » le payeur reconnu au répertoire.
 class BoutiquePayerFromDirectoryUsed extends BoutiqueEvent {
   final BoutiquePayer payer;
