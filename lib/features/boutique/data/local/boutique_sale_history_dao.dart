@@ -1,4 +1,7 @@
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
+import 'package:school_app_flutter/features/boutique/data/local/sold_at_bound.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/article_family.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sale_line.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -26,6 +29,23 @@ class BoutiqueSaleHistoryDao {
     required String schoolId,
     required String academicYearId,
     required String soldAtBound,
+  }) => salesBetween(
+    schoolId: schoolId,
+    academicYearId: academicYearId,
+    fromBound: soldAtBound,
+  );
+
+  /// Les ventes de `[fromBound, toBound[`, la plus récente en tête, au plus
+  /// [limit].
+  ///
+  /// Les bornes sont mises en forme par [SoldAtBound] : `sold_at` mêle deux
+  /// formats, et seul un préfixe sans suffixe se compare juste aux deux.
+  Future<List<SaleHistoryEntry>> salesBetween({
+    required String schoolId,
+    required String academicYearId,
+    required String fromBound,
+    String? toBound,
+    int? limit,
   }) async {
     final rows = await _db.rawQuery(
       '''
@@ -61,9 +81,11 @@ class BoutiqueSaleHistoryDao {
       WHERE s.school_id = ?
         AND s.academic_year_id = ?
         AND s.sold_at >= ?
+        ${toBound == null ? '' : 'AND s.sold_at < ?'}
       ORDER BY s.sold_at DESC
+      ${limit == null ? '' : 'LIMIT $limit'}
       ''',
-      [schoolId, academicYearId, soldAtBound],
+      [schoolId, academicYearId, fromBound, ?toBound],
     );
 
     return [
@@ -78,6 +100,54 @@ class BoutiqueSaleHistoryDao {
           syncStatus: row['sync_status'] as String,
           articleCount: (row['article_count'] as num?)?.toInt() ?? 0,
         ),
+    ];
+  }
+
+  /// Les lignes des ventes de `[fromBound, toBound[` que le serveur n'a **pas
+  /// encore acceptées** — en file ou en échec : les tickets provisoires que le
+  /// tableau de bord ajoute aux chiffres du serveur.
+  ///
+  /// La famille vient du catalogue local, en jointure **gauche** : un article
+  /// retiré du catalogue garde sa ligne et son argent, sans famille.
+  Future<List<ProvisionalSaleLine>> provisionalLines({
+    required String schoolId,
+    required String academicYearId,
+    required String fromBound,
+    required String toBound,
+  }) async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT
+        s.id AS sale_id,
+        s.sold_at AS sold_at,
+        l.currency AS currency,
+        l.line_total_in_cents AS line_total,
+        l.quantity AS quantity,
+        a.family AS family
+      FROM boutique_sales s
+      JOIN boutique_sale_lines l ON l.sale_id = s.id
+      LEFT JOIN ref_boutique_articles a ON a.id = l.article_id
+      WHERE s.school_id = ?
+        AND s.academic_year_id = ?
+        AND s.sync_status <> 'SYNCED'
+        AND s.sold_at >= ?
+        AND s.sold_at < ?
+      ORDER BY s.sold_at ASC, l.position ASC
+      ''',
+      [schoolId, academicYearId, fromBound, toBound],
+    );
+
+    return [
+      for (final row in rows)
+        if (DateTime.tryParse(row['sold_at'] as String) case final soldAt?)
+          ProvisionalSaleLine(
+            saleId: row['sale_id'] as String,
+            soldAt: soldAt.toUtc(),
+            currency: row['currency'] as String,
+            lineTotal: (row['line_total'] as num).toInt(),
+            quantity: (row['quantity'] as num).toInt(),
+            family: ArticleFamily.fromWire(row['family']),
+          ),
     ];
   }
 

@@ -815,7 +815,9 @@ class AppConstants {
   // d'inscription `FI`, table reconstruite avec copie, palier d'appareil.
   // v64 (2026-10-10) : le journal de classe (`journal_seance`). Création pure.
   // Palier d'école.
-  static const int offlineDbSchemaVersion = 64;
+  // v65 (2026-10-21) : la photo hors ligne du tableau de bord de la boutique
+  // (`boutique_dashboard_cache`). Création pure, sans reprise. Palier d'école.
+  static const int offlineDbSchemaVersion = 65;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1018,6 +1020,17 @@ class AppConstants {
   /// `CATALOG_UNRESOLVABLE`), fenêtre `since` — écran de contrôle, hors V1.
   static const String boutiqueSaleAnomaliesEndpoint =
       '/api/v1/boutique/sales/anomalies';
+
+  /// Tableau de bord de la boutique (R8) : recettes, série, familles et top
+  /// articles d'une fenêtre `from`/`to` incluse, **par devise de catalogue**,
+  /// découpée sur `soldAt` dans le fuseau de l'école. `boutique.sale.read`.
+  static const String boutiqueStatsEndpoint = '/api/v1/boutique/stats';
+
+  /// « Qui a reçu quoi » (R9) : une ligne par élève bénéficiaire, filtrable
+  /// par article, classe et nom, paginée. `boutique.sale.read` **seule** : la
+  /// route nomme des élèves et ce qu'ils ont reçu.
+  static const String boutiqueBeneficiariesEndpoint =
+      '/api/v1/boutique/beneficiaries';
 
   // ── Offline sync — Dépenses (registre des frais de fonctionnement) ──
   /// Registre des dépenses :

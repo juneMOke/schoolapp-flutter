@@ -1,3 +1,14 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:school_app_flutter/features/boutique/data/dashboard/boutique_dashboard_api.dart';
+import 'package:school_app_flutter/features/boutique/data/dashboard/boutique_dashboard_cache_dao.dart';
+import 'package:school_app_flutter/features/boutique/data/dashboard/dashboard_period_store.dart';
+import 'package:school_app_flutter/features/boutique/data/repositories/boutique_dashboard_repository_impl.dart';
+import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_dashboard_repository.dart';
+import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_beneficiaries_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_latest_sales_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -169,6 +180,8 @@ void registerBoutiqueOffline(GetIt getIt) {
     ),
   );
 
+  _registerDashboard(getIt);
+
   getIt.registerFactoryParam<BeneficiaryPickerCubit, String, void>(
     (academicYearId, _) => BeneficiaryPickerCubit(
       search: getIt<SearchLocalEnrollmentsUseCase>(),
@@ -217,5 +230,44 @@ void registerBoutiqueOffline(GetIt getIt) {
           .studentEnrollmentDependency(studentId, academicYearId),
       extras: getIt<Map<String, dynamic>>(),
     ),
+  );
+}
+
+/// Le tableau de bord : chiffres **serveur** (avec photo hors ligne datée) et
+/// lectures **locales** (tickets provisoires, dernières ventes).
+void _registerDashboard(GetIt getIt) {
+  getIt.registerLazySingleton<BoutiqueDashboardApi>(
+    () => BoutiqueDashboardApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<BoutiqueDashboardCacheDao>(
+    () => BoutiqueDashboardCacheDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<BoutiqueDashboardRepository>(
+    () => BoutiqueDashboardRepositoryImpl(
+      api: getIt<BoutiqueDashboardApi>(),
+      cache: getIt<BoutiqueDashboardCacheDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerLazySingleton<DashboardPeriodPreference>(
+    () => DashboardPeriodStore(
+      storage: getIt<FlutterSecureStorage>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  getIt.registerFactory<GetBoutiqueStatsUseCase>(
+    () => GetBoutiqueStatsUseCase(getIt<BoutiqueDashboardRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueBeneficiariesUseCase>(
+    () => GetBoutiqueBeneficiariesUseCase(getIt<BoutiqueDashboardRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueLatestSalesUseCase>(
+    () => GetBoutiqueLatestSalesUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueProvisionalSalesUseCase>(
+    () =>
+        GetBoutiqueProvisionalSalesUseCase(getIt<BoutiqueHistoryRepository>()),
   );
 }

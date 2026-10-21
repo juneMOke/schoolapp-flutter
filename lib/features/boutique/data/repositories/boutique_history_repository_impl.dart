@@ -2,6 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_history_dao.dart';
+import 'package:school_app_flutter/features/boutique/data/local/sold_at_bound.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sales_history_period.dart';
@@ -57,6 +60,50 @@ class BoutiqueHistoryRepositoryImpl implements BoutiqueHistoryRepository {
       // Avalé, délibérément : le ticket EST sorti. Faire remonter l'échec
       // d'une trace d'affichage afficherait une erreur après une impression
       // réussie, et laisserait croire que le papier n'est pas valable.
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<SaleHistoryEntry>>> latestSales({
+    required String academicYearId,
+    required DashboardWindow window,
+    required int limit,
+  }) async {
+    try {
+      return Right(
+        await _dao.salesBetween(
+          schoolId: _currentUser.schoolId ?? '',
+          academicYearId: academicYearId,
+          fromBound: SoldAtBound.of(window.startInstant),
+          toBound: SoldAtBound.of(window.endInstantExclusive),
+          limit: limit,
+        ),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Dernières ventes boutique illisibles : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ProvisionalSales>> provisionalSales({
+    required String academicYearId,
+    required DashboardWindow window,
+  }) async {
+    try {
+      return Right(
+        ProvisionalSales(
+          await _dao.provisionalLines(
+            schoolId: _currentUser.schoolId ?? '',
+            academicYearId: academicYearId,
+            fromBound: SoldAtBound.of(window.startInstant),
+            toBound: SoldAtBound.of(window.endInstantExclusive),
+          ),
+        ),
+      );
+    } catch (e) {
+      // Une base illisible n'est pas « aucun ticket en attente » : le dire
+      // ferait croire au guichet que tout est parti.
+      return Left(StorageFailure('Tickets provisoires illisibles : $e'));
     }
   }
 
