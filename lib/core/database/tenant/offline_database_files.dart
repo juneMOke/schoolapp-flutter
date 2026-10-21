@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/database/offline_database_opener.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/tenant/legacy_database_split.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_migrations.dart';
+import 'package:school_app_flutter/core/database/tenant/unreadable_device_database.dart';
 
 /// Les fichiers de base du poste (MULTI_ECOLE_PLAN.md §10.2-10.3) : où ils
 /// vivent, sous quelle clé, et comment la base héritée devient celle d'une
@@ -65,21 +66,71 @@ class OfflineDatabaseFiles {
   /// Un éclatement qui échoue ne fait pas échouer le démarrage : il est retenté
   /// à l'ouverture de la première école, qui, elle, refuse de s'ouvrir tant
   /// qu'il n'a pas abouti.
+  ///
+  /// Lève [UnreadableDeviceDatabaseException] si le fichier existe mais que
+  /// la clé du secure storage ne l'ouvre pas.
   Future<Database> openDevice() async {
-    final device = await _open(
-      devicePath,
-      key: await _keys.getOrCreateDeviceKey(),
-      version: AppConstants.offlineDbSchemaVersion,
-      onCreate: (db, _) => createOfflineSchema(db, buildDeviceSchema()),
-      onUpgrade: (db, oldVersion, newVersion) =>
-          migrateDeviceDatabase(db, oldVersion, newVersion: newVersion),
-    );
+    final Database device;
+    try {
+      device = await _open(
+        devicePath,
+        key: await _keys.getOrCreateDeviceKey(),
+        version: AppConstants.offlineDbSchemaVersion,
+        onCreate: (db, _) => createOfflineSchema(db, buildDeviceSchema()),
+        onUpgrade: (db, oldVersion, newVersion) =>
+            migrateDeviceDatabase(db, oldVersion, newVersion: newVersion),
+      );
+    } catch (error) {
+      if (!isUnreadableDatabaseError(error)) rethrow;
+      throw UnreadableDeviceDatabaseException(
+        cause: error,
+        discardUnreadableFiles: discardUnreadableFiles,
+      );
+    }
     try {
       await _split.runIfPending(device);
     } catch (_) {
       // Retenté à l'ouverture de la première école — cf. [openSchool].
     }
     return device;
+  }
+
+  /// Supprime `device.db`, et chaque base dont la clé a disparu.
+  ///
+  /// Une base d'école dont la clé est encore là est GARDÉE : elle s'ouvrira,
+  /// avec les écritures qu'elle attend d'envoyer. Seul ce qu'aucune clé n'ouvre
+  /// plus est perdu — de toute façon illisible. La base héritée suit la même
+  /// règle : sans clé, l'éclatement l'ignore déjà.
+  Future<void> discardUnreadableFiles() async {
+    await _deleteWithCompanions(devicePath);
+    final folder = Directory(directory);
+    if (!await folder.exists()) return;
+    await for (final entity in folder.list()) {
+      if (entity is! File) continue;
+      final name = p.basename(entity.path);
+      final bool keyed;
+      if (name == AppConstants.offlineDbName) {
+        keyed = await _keys.readLegacyKey() != null;
+      } else if (name.startsWith(AppConstants.offlineSchoolDbPrefix) &&
+          name.endsWith('.db')) {
+        keyed = await _keys.hasSchoolKey(
+          name.substring(
+            AppConstants.offlineSchoolDbPrefix.length,
+            name.length - '.db'.length,
+          ),
+        );
+      } else {
+        continue;
+      }
+      if (!keyed) await _deleteWithCompanions(entity.path);
+    }
+  }
+
+  Future<void> _deleteWithCompanions(String path) async {
+    for (final suffix in const ['', '-journal', '-wal', '-shm']) {
+      final file = File('$path$suffix');
+      if (await file.exists()) await file.delete();
+    }
   }
 
   /// Ouvre le fichier de [schoolId] : le sien s'il existe, sinon la base
