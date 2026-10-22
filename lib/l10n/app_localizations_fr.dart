@@ -17461,4 +17461,152 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get environmentBadgeProd => 'PROD';
+
+  @override
+  String get subMenuAttendanceJustifications => 'Justifications';
+
+  @override
+  String get justificationTabOpen => 'À traiter';
+
+  @override
+  String get justificationTabOpenSubtitle => 'Déposées par les parents';
+
+  @override
+  String justificationTabOpenBadge(int count) {
+    return '$count en attente';
+  }
+
+  @override
+  String get justificationTabDecided => 'Traitées';
+
+  @override
+  String get justificationTabDecidedSubtitle => 'Acceptées et refusées';
+
+  @override
+  String get justificationEmptyOpenTitle => 'Aucune justification à traiter';
+
+  @override
+  String get justificationEmptyDecidedTitle => 'Aucune justification traitée';
+
+  @override
+  String get justificationEmptyDescription =>
+      'Les justifications d\'absence déposées par les parents depuis le portail apparaissent ici.';
+
+  @override
+  String get justificationStatusPending => 'En attente';
+
+  @override
+  String get justificationStatusSending => 'Décision en cours d\'envoi';
+
+  @override
+  String get justificationStatusAccepted => 'Acceptée';
+
+  @override
+  String get justificationStatusRejected => 'Refusée';
+
+  @override
+  String get justificationUnknownStudent => 'Élève introuvable dans la classe';
+
+  @override
+  String get justificationParentNote => 'Mot du parent';
+
+  @override
+  String get justificationSchoolNote => 'Mot de l\'école';
+
+  @override
+  String justificationSubmittedOn(String date) {
+    return 'Déposée le $date';
+  }
+
+  @override
+  String justificationDecidedOn(String date) {
+    return 'Tranchée le $date';
+  }
+
+  @override
+  String get justificationBlockedNotAnAbsence =>
+      'L\'appel a été corrigé : l\'élève n\'est plus absent ce jour-là. La demande ne peut plus qu\'être refusée.';
+
+  @override
+  String get justificationBlockedMonthClosed =>
+      'Le mois de l\'absence est clôturé. La demande ne peut plus qu\'être refusée.';
+
+  @override
+  String justificationRefusalNotice(String reason) {
+    return 'Décision non transmise : $reason';
+  }
+
+  @override
+  String get justificationAccept => 'Accepter';
+
+  @override
+  String get justificationReject => 'Refuser';
+
+  @override
+  String get justificationCancel => 'Annuler';
+
+  @override
+  String get justificationAcceptTitle => 'Accepter la justification';
+
+  @override
+  String get justificationRejectTitle => 'Refuser la justification';
+
+  @override
+  String justificationDecisionHint(String student, String day) {
+    return 'Absence de $student, $day.';
+  }
+
+  @override
+  String get justificationNoteLabel => 'Mot de l\'école au parent';
+
+  @override
+  String get justificationNoteRequired =>
+      'Dites au parent pourquoi la demande est refusée.';
+
+  @override
+  String get justificationNoteHelper => 'Visible par le parent sur le portail.';
+
+  @override
+  String get justificationDecisionSaved =>
+      'Décision enregistrée : elle part au serveur.';
+
+  @override
+  String get justificationDecisionConflict =>
+      'Cette demande a déjà été tranchée.';
+
+  @override
+  String get justificationDecisionFailed =>
+      'La décision n\'a pas pu être enregistrée.';
+
+  @override
+  String justificationDecidedElsewhere(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count justifications ont déjà été tranchées par un autre poste : leurs décisions ont été retenues.',
+      one:
+          'Une justification a déjà été tranchée par un autre poste : sa décision a été retenue.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get justificationAttachmentOpen => 'Voir la pièce';
+
+  @override
+  String get justificationAttachmentOffline => 'Pièce disponible en ligne';
+
+  @override
+  String get justificationAttachmentUnavailable =>
+      'La pièce jointe n\'a pas pu être ouverte.';
+
+  @override
+  String get justificationAttachmentNotViewable =>
+      'Ce type de pièce ne peut pas être affiché.';
+
+  @override
+  String justificationAttachmentTitle(String student) {
+    return 'Pièce jointe · $student';
+  }
 }

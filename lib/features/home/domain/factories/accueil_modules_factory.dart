@@ -389,6 +389,11 @@ class AccueilModulesFactory {
         ),
         _page(
           menuId: menuId,
+          subMenuId: MenuConstants.justificationsId,
+          title: l10n.subMenuAttendanceJustifications,
+        ),
+        _page(
+          menuId: menuId,
           subMenuId: MenuConstants.disciplinesListId,
           title: l10n.subMenuDisciplinesList,
         ),

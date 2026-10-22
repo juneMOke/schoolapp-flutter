@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/attendances/presentation/pages/atten
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
+import 'package:school_app_flutter/features/attendances/presentation/justifications/pages/justification_queue_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_dashboard_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/pages/journal_coordinator_page.dart';
@@ -198,6 +199,11 @@ class ShellScreen extends StatelessWidget {
         );
       case MenuConstants.presencesId:
         return const AttendanceFeatureScope(child: ClassPresencePage());
+      case MenuConstants.justificationsId:
+        return const AttendanceFeatureScope(
+          key: ValueKey(MenuConstants.justificationsId),
+          child: JustificationQueuePage(),
+        );
       case MenuConstants.disciplinesListId:
         return const ClassesFeatureScope(
           key: ValueKey(MenuConstants.disciplinesListId),

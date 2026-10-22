@@ -107,6 +107,8 @@ class AppRoutesNames {
   static const String disciplinesDashboard =
       '/disciplines/${MenuConstants.disciplinesDashboardId}';
   static const String presences = '/disciplines/${MenuConstants.presencesId}';
+  static const String justifications =
+      '/disciplines/${MenuConstants.justificationsId}';
   static const String disciplinaryStudentDetail =
       '/disciplines/${MenuConstants.presencesId}/student/:studentId/:academicYearId';
   static const String disciplinesList =

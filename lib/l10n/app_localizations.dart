@@ -27036,6 +27036,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PROD'**
   String get environmentBadgeProd;
+
+  /// No description provided for @subMenuAttendanceJustifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Justifications'**
+  String get subMenuAttendanceJustifications;
+
+  /// No description provided for @justificationTabOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'To review'**
+  String get justificationTabOpen;
+
+  /// No description provided for @justificationTabOpenSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted by parents'**
+  String get justificationTabOpenSubtitle;
+
+  /// No description provided for @justificationTabOpenBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pending'**
+  String justificationTabOpenBadge(int count);
+
+  /// No description provided for @justificationTabDecided.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed'**
+  String get justificationTabDecided;
+
+  /// No description provided for @justificationTabDecidedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted and rejected'**
+  String get justificationTabDecidedSubtitle;
+
+  /// No description provided for @justificationEmptyOpenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No justification to review'**
+  String get justificationEmptyOpenTitle;
+
+  /// No description provided for @justificationEmptyDecidedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No justification reviewed yet'**
+  String get justificationEmptyDecidedTitle;
+
+  /// No description provided for @justificationEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Absence justifications submitted by parents from the portal appear here.'**
+  String get justificationEmptyDescription;
+
+  /// No description provided for @justificationStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get justificationStatusPending;
+
+  /// No description provided for @justificationStatusSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision being sent'**
+  String get justificationStatusSending;
+
+  /// No description provided for @justificationStatusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get justificationStatusAccepted;
+
+  /// No description provided for @justificationStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get justificationStatusRejected;
+
+  /// No description provided for @justificationUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not found in the class'**
+  String get justificationUnknownStudent;
+
+  /// No description provided for @justificationParentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent\'s note'**
+  String get justificationParentNote;
+
+  /// No description provided for @justificationSchoolNote.
+  ///
+  /// In en, this message translates to:
+  /// **'School\'s note'**
+  String get justificationSchoolNote;
+
+  /// No description provided for @justificationSubmittedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted on {date}'**
+  String justificationSubmittedOn(String date);
+
+  /// No description provided for @justificationDecidedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Decided on {date}'**
+  String justificationDecidedOn(String date);
+
+  /// No description provided for @justificationBlockedNotAnAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'The register was corrected: the student is no longer absent that day. The request can only be rejected.'**
+  String get justificationBlockedNotAnAbsence;
+
+  /// No description provided for @justificationBlockedMonthClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'The month of the absence is closed. The request can only be rejected.'**
+  String get justificationBlockedMonthClosed;
+
+  /// No description provided for @justificationRefusalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision not sent: {reason}'**
+  String justificationRefusalNotice(String reason);
+
+  /// No description provided for @justificationAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get justificationAccept;
+
+  /// No description provided for @justificationReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get justificationReject;
+
+  /// No description provided for @justificationCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get justificationCancel;
+
+  /// No description provided for @justificationAcceptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept the justification'**
+  String get justificationAcceptTitle;
+
+  /// No description provided for @justificationRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject the justification'**
+  String get justificationRejectTitle;
+
+  /// No description provided for @justificationDecisionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Absence of {student}, {day}.'**
+  String justificationDecisionHint(String student, String day);
+
+  /// No description provided for @justificationNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'School\'s note to the parent'**
+  String get justificationNoteLabel;
+
+  /// No description provided for @justificationNoteRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the parent why the request is rejected.'**
+  String get justificationNoteRequired;
+
+  /// No description provided for @justificationNoteHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to the parent on the portal.'**
+  String get justificationNoteHelper;
+
+  /// No description provided for @justificationDecisionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision saved: it is being sent to the server.'**
+  String get justificationDecisionSaved;
+
+  /// No description provided for @justificationDecisionConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This request has already been decided.'**
+  String get justificationDecisionConflict;
+
+  /// No description provided for @justificationDecisionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The decision could not be saved.'**
+  String get justificationDecisionFailed;
+
+  /// No description provided for @justificationDecidedElsewhere.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{A justification was already decided on another device: that decision was kept.} other{{count} justifications were already decided on another device: those decisions were kept.}}'**
+  String justificationDecidedElsewhere(int count);
+
+  /// No description provided for @justificationAttachmentOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'View attachment'**
+  String get justificationAttachmentOpen;
+
+  /// No description provided for @justificationAttachmentOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment available online'**
+  String get justificationAttachmentOffline;
+
+  /// No description provided for @justificationAttachmentUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The attachment could not be opened.'**
+  String get justificationAttachmentUnavailable;
+
+  /// No description provided for @justificationAttachmentNotViewable.
+  ///
+  /// In en, this message translates to:
+  /// **'This type of attachment cannot be displayed.'**
+  String get justificationAttachmentNotViewable;
+
+  /// No description provided for @justificationAttachmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment · {student}'**
+  String justificationAttachmentTitle(String student);
 }
 
 class _AppLocalizationsDelegate

@@ -378,6 +378,8 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
       Perm.attendanceStatsRead,
     ]),
     MenuConstants.presencesId: ModuleAccess([Perm.attendanceRead]),
+    // Le flux et la décision exigent tous deux `attendance.amend`.
+    MenuConstants.justificationsId: ModuleAccess([Perm.attendanceAmend]),
     MenuConstants.disciplinesListId: ModuleAccess([Perm.disciplineRead]),
   },
   MenuConstants.coursesMenuId: {

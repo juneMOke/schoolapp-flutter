@@ -17334,4 +17334,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get environmentBadgeProd => 'PROD';
+
+  @override
+  String get subMenuAttendanceJustifications => 'Justifications';
+
+  @override
+  String get justificationTabOpen => 'To review';
+
+  @override
+  String get justificationTabOpenSubtitle => 'Submitted by parents';
+
+  @override
+  String justificationTabOpenBadge(int count) {
+    return '$count pending';
+  }
+
+  @override
+  String get justificationTabDecided => 'Reviewed';
+
+  @override
+  String get justificationTabDecidedSubtitle => 'Accepted and rejected';
+
+  @override
+  String get justificationEmptyOpenTitle => 'No justification to review';
+
+  @override
+  String get justificationEmptyDecidedTitle => 'No justification reviewed yet';
+
+  @override
+  String get justificationEmptyDescription =>
+      'Absence justifications submitted by parents from the portal appear here.';
+
+  @override
+  String get justificationStatusPending => 'Pending';
+
+  @override
+  String get justificationStatusSending => 'Decision being sent';
+
+  @override
+  String get justificationStatusAccepted => 'Accepted';
+
+  @override
+  String get justificationStatusRejected => 'Rejected';
+
+  @override
+  String get justificationUnknownStudent => 'Student not found in the class';
+
+  @override
+  String get justificationParentNote => 'Parent\'s note';
+
+  @override
+  String get justificationSchoolNote => 'School\'s note';
+
+  @override
+  String justificationSubmittedOn(String date) {
+    return 'Submitted on $date';
+  }
+
+  @override
+  String justificationDecidedOn(String date) {
+    return 'Decided on $date';
+  }
+
+  @override
+  String get justificationBlockedNotAnAbsence =>
+      'The register was corrected: the student is no longer absent that day. The request can only be rejected.';
+
+  @override
+  String get justificationBlockedMonthClosed =>
+      'The month of the absence is closed. The request can only be rejected.';
+
+  @override
+  String justificationRefusalNotice(String reason) {
+    return 'Decision not sent: $reason';
+  }
+
+  @override
+  String get justificationAccept => 'Accept';
+
+  @override
+  String get justificationReject => 'Reject';
+
+  @override
+  String get justificationCancel => 'Cancel';
+
+  @override
+  String get justificationAcceptTitle => 'Accept the justification';
+
+  @override
+  String get justificationRejectTitle => 'Reject the justification';
+
+  @override
+  String justificationDecisionHint(String student, String day) {
+    return 'Absence of $student, $day.';
+  }
+
+  @override
+  String get justificationNoteLabel => 'School\'s note to the parent';
+
+  @override
+  String get justificationNoteRequired =>
+      'Tell the parent why the request is rejected.';
+
+  @override
+  String get justificationNoteHelper => 'Visible to the parent on the portal.';
+
+  @override
+  String get justificationDecisionSaved =>
+      'Decision saved: it is being sent to the server.';
+
+  @override
+  String get justificationDecisionConflict =>
+      'This request has already been decided.';
+
+  @override
+  String get justificationDecisionFailed => 'The decision could not be saved.';
+
+  @override
+  String justificationDecidedElsewhere(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count justifications were already decided on another device: those decisions were kept.',
+      one:
+          'A justification was already decided on another device: that decision was kept.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get justificationAttachmentOpen => 'View attachment';
+
+  @override
+  String get justificationAttachmentOffline => 'Attachment available online';
+
+  @override
+  String get justificationAttachmentUnavailable =>
+      'The attachment could not be opened.';
+
+  @override
+  String get justificationAttachmentNotViewable =>
+      'This type of attachment cannot be displayed.';
+
+  @override
+  String justificationAttachmentTitle(String student) {
+    return 'Attachment · $student';
+  }
 }
