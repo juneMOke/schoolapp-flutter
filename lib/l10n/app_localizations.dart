@@ -27270,6 +27270,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Attachment · {student}'**
   String justificationAttachmentTitle(String student);
+
+  /// No description provided for @remiseSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission'**
+  String get remiseSectionLabel;
+
+  /// No description provided for @remiseModeEnClasse.
+  ///
+  /// In en, this message translates to:
+  /// **'In class'**
+  String get remiseModeEnClasse;
+
+  /// No description provided for @remiseModeEnLigne.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get remiseModeEnLigne;
+
+  /// No description provided for @remiseHeureLimiteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline time'**
+  String get remiseHeureLimiteLabel;
+
+  /// No description provided for @remiseHeureLimiteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'End of the day'**
+  String get remiseHeureLimiteHint;
+
+  /// No description provided for @remiseHeureLimiteClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the deadline time'**
+  String get remiseHeureLimiteClear;
+
+  /// No description provided for @remiseDepotTardifLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept late submissions'**
+  String get remiseDepotTardifLabel;
+
+  /// No description provided for @remiseEnLigneHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The parent uploads the copy from the portal, on the homework date at the latest.'**
+  String get remiseEnLigneHelp;
+
+  /// No description provided for @remiseEnClasseHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The copy is handed in class; nothing is uploaded on the portal.'**
+  String get remiseEnClasseHelp;
+
+  /// No description provided for @remiseAvant.
+  ///
+  /// In en, this message translates to:
+  /// **'before {heure}'**
+  String remiseAvant(String heure);
+
+  /// No description provided for @remiseFinDuJour.
+  ///
+  /// In en, this message translates to:
+  /// **'end of day'**
+  String get remiseFinDuJour;
+
+  /// No description provided for @remiseRetardAccepte.
+  ///
+  /// In en, this message translates to:
+  /// **'late accepted'**
+  String get remiseRetardAccepte;
+
+  /// No description provided for @remiseRejectedNotHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission settings only apply to homework: the server rejected them on this evaluation.'**
+  String get remiseRejectedNotHomework;
 }
 
 class _AppLocalizationsDelegate

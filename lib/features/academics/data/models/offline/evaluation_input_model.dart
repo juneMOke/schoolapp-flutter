@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 
 /// Volet `evaluation` de l'enveloppe poussée au `/sync` (régime A, insert-only).
 /// Aligné sur le contrat de création online : `type` en valeur wire majuscule,
@@ -10,7 +11,9 @@ import 'package:school_app_flutter/features/academics/data/models/offline/sujet/
 /// `chapitreIds` voyage **intra-agrégat** (couverture, régime A donc immuable
 /// après création) — émis seulement s'il est non vide. Le titre et le cadre
 /// (`dureeMinutes`, `programme`, `consignes`) partent à la création ; un cadre
-/// modifié ensuite part avec le sujet.
+/// modifié ensuite part avec le sujet. La remise d'un DEVOIR part aussi à la
+/// création ; elle n'est jamais émise pour un autre type (le serveur la
+/// refuserait : `HOMEWORK_DELIVERY_ON_TEST`).
 class EvaluationInputModel extends Equatable {
   final String id;
   final String coursId;
@@ -25,6 +28,7 @@ class EvaluationInputModel extends Equatable {
   final int? dureeMinutes;
   final List<String> programme;
   final String? consignes;
+  final RemiseDevoir? remise;
 
   const EvaluationInputModel({
     required this.id,
@@ -40,6 +44,7 @@ class EvaluationInputModel extends Equatable {
     this.dureeMinutes,
     this.programme = const [],
     this.consignes,
+    this.remise,
   });
 
   /// Construit le volet depuis la ligne locale et son cadre. `evalDate` (epoch
@@ -61,6 +66,7 @@ class EvaluationInputModel extends Equatable {
     dureeMinutes: sujet?.dureeMinutes,
     programme: sujet?.programme ?? const [],
     consignes: sujet?.consignes,
+    remise: sujet?.remise,
   );
 
   factory EvaluationInputModel.fromJson(Map<String, dynamic> json) =>
@@ -86,6 +92,9 @@ class EvaluationInputModel extends Equatable {
             ) ??
             const [],
         consignes: json['consignes'] as String?,
+        remise: json.containsKey('modeRemise')
+            ? RemiseDevoir.fromJson(json)
+            : null,
       );
 
   Map<String, dynamic> toJson() {
@@ -106,8 +115,12 @@ class EvaluationInputModel extends Equatable {
     if (dureeMinutes != null) json['dureeMinutes'] = dureeMinutes;
     if (programme.isNotEmpty) json['programme'] = programme;
     if (consignes != null) json['consignes'] = consignes;
+    final remise = this.remise;
+    if (remise != null && type == _devoir) json.addAll(remise.toJson());
     return json;
   }
+
+  static const String _devoir = 'DEVOIR';
 
   @override
   List<Object?> get props => [
@@ -124,5 +137,6 @@ class EvaluationInputModel extends Equatable {
     dureeMinutes,
     programme,
     consignes,
+    remise,
   ];
 }

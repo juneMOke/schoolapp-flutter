@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/academics/data/models/offline/sujet/
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_codecs.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 
 List<T> _lenientList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
   final out = <T>[];
@@ -81,6 +82,9 @@ class EvaluationDeltaDto {
   final String? consignes;
   final List<SujetQuestion> questions;
 
+  /// La remise d'un devoir ; nulle pour une interrogation ou un examen.
+  final RemiseDevoir? remise;
+
   /// Heure, sur le poste, du dernier sujet accepté ; `null` tant qu'aucun
   /// sujet n'a été envoyé.
   final String? sujetClientUpdatedAt;
@@ -103,6 +107,7 @@ class EvaluationDeltaDto {
     this.programme = const [],
     this.consignes,
     this.questions = const [],
+    this.remise,
     this.sujetClientUpdatedAt,
     this.copieLog = const [],
     this.publications = EvaluationPublications.none,
@@ -129,6 +134,7 @@ class EvaluationDeltaDto {
         programme: SujetCodecs.programmeFromJson(j['programme']),
         consignes: j.text('consignes'),
         questions: SujetCodecs.questionsFromJson(j['questions']),
+        remise: j['type'] == 'DEVOIR' ? RemiseDevoir.fromJson(j) : null,
         sujetClientUpdatedAt: j.text('sujetClientUpdatedAt'),
         copieLog: [
           for (final e in (j['copieLog'] as List<dynamic>? ?? const []))
@@ -166,6 +172,7 @@ class EvaluationDeltaDto {
       programme: programme,
       consignes: consignes,
       questions: questions,
+      remise: remise,
       updatedAt: clientMs,
       syncStatus: clientMs == null ? null : SyncState.synced.dbValue,
     );

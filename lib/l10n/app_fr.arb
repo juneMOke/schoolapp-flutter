@@ -10571,5 +10571,18 @@
   "justificationAttachmentOffline": "Pièce disponible en ligne",
   "justificationAttachmentUnavailable": "La pièce jointe n'a pas pu être ouverte.",
   "justificationAttachmentNotViewable": "Ce type de pièce ne peut pas être affiché.",
-  "justificationAttachmentTitle": "Pièce jointe · {student}"
+  "justificationAttachmentTitle": "Pièce jointe · {student}",
+  "remiseSectionLabel": "Remise",
+  "remiseModeEnClasse": "En classe",
+  "remiseModeEnLigne": "En ligne",
+  "remiseHeureLimiteLabel": "Heure limite",
+  "remiseHeureLimiteHint": "Fin de la journée",
+  "remiseHeureLimiteClear": "Retirer l'heure limite",
+  "remiseDepotTardifLabel": "Accepter les dépôts en retard",
+  "remiseEnLigneHelp": "Le parent dépose la copie depuis le portail, le jour du devoir au plus tard.",
+  "remiseEnClasseHelp": "La copie est remise en classe ; rien n'est déposé sur le portail.",
+  "remiseAvant": "avant {heure}",
+  "remiseFinDuJour": "fin du jour",
+  "remiseRetardAccepte": "retard accepté",
+  "remiseRejectedNotHomework": "La remise ne vaut que pour un devoir : le serveur l'a refusée sur cette évaluation."
 }

@@ -17609,4 +17609,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String justificationAttachmentTitle(String student) {
     return 'Pièce jointe · $student';
   }
+
+  @override
+  String get remiseSectionLabel => 'Remise';
+
+  @override
+  String get remiseModeEnClasse => 'En classe';
+
+  @override
+  String get remiseModeEnLigne => 'En ligne';
+
+  @override
+  String get remiseHeureLimiteLabel => 'Heure limite';
+
+  @override
+  String get remiseHeureLimiteHint => 'Fin de la journée';
+
+  @override
+  String get remiseHeureLimiteClear => 'Retirer l\'heure limite';
+
+  @override
+  String get remiseDepotTardifLabel => 'Accepter les dépôts en retard';
+
+  @override
+  String get remiseEnLigneHelp =>
+      'Le parent dépose la copie depuis le portail, le jour du devoir au plus tard.';
+
+  @override
+  String get remiseEnClasseHelp =>
+      'La copie est remise en classe ; rien n\'est déposé sur le portail.';
+
+  @override
+  String remiseAvant(String heure) {
+    return 'avant $heure';
+  }
+
+  @override
+  String get remiseFinDuJour => 'fin du jour';
+
+  @override
+  String get remiseRetardAccepte => 'retard accepté';
+
+  @override
+  String get remiseRejectedNotHomework =>
+      'La remise ne vaut que pour un devoir : le serveur l\'a refusée sur cette évaluation.';
 }

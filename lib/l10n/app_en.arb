@@ -10169,5 +10169,19 @@
   "justificationAttachmentUnavailable": "The attachment could not be opened.",
   "justificationAttachmentNotViewable": "This type of attachment cannot be displayed.",
   "justificationAttachmentTitle": "Attachment · {student}",
-  "@justificationAttachmentTitle": {"placeholders": {"student": {"type": "String"}}}
+  "@justificationAttachmentTitle": {"placeholders": {"student": {"type": "String"}}},
+  "remiseSectionLabel": "Submission",
+  "remiseModeEnClasse": "In class",
+  "remiseModeEnLigne": "Online",
+  "remiseHeureLimiteLabel": "Deadline time",
+  "remiseHeureLimiteHint": "End of the day",
+  "remiseHeureLimiteClear": "Remove the deadline time",
+  "remiseDepotTardifLabel": "Accept late submissions",
+  "remiseEnLigneHelp": "The parent uploads the copy from the portal, on the homework date at the latest.",
+  "remiseEnClasseHelp": "The copy is handed in class; nothing is uploaded on the portal.",
+  "remiseAvant": "before {heure}",
+  "@remiseAvant": {"placeholders": {"heure": {"type": "String"}}},
+  "remiseFinDuJour": "end of day",
+  "remiseRetardAccepte": "late accepted",
+  "remiseRejectedNotHomework": "Submission settings only apply to homework: the server rejected them on this evaluation."
 }

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/c
 import 'package:school_app_flutter/features/academics/domain/entities/notation/create_evaluation_request.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_event.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/create_evaluation_state.dart';
@@ -48,6 +49,7 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
   Set<String> _chapitreIds = const {};
   int? _dureeMinutes;
   List<String> _programme = const [];
+  RemiseDevoir _remise = RemiseDevoir.parDefaut;
   late final TextEditingController _maxController;
   late final TextEditingController _poidsController;
   final TextEditingController _consignesController = TextEditingController();
@@ -91,6 +93,11 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
       double.tryParse(_maxController.text.trim().replaceAll(',', '.')) ?? 0;
 
   int get _poidsValue => int.tryParse(_poidsController.text.trim()) ?? 0;
+
+  /// La remise n'existe que pour un devoir : elle ne part jamais avec une
+  /// interrogation ou un examen (le serveur la refuserait).
+  RemiseDevoir? get _remiseIfDevoir =>
+      _type == TypeEvaluation.devoir ? _remise : null;
 
   bool get _isValid =>
       _date != null && _maxValue > 0 && _poidsValue > 0 && _rules.hasTarget;
@@ -148,6 +155,7 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
       dureeMinutes: _dureeMinutes,
       programme: _programme,
       consignes: _consignesController.text,
+      remise: _remiseIfDevoir,
     ).normalized();
     final chapitreIds = _chapitreIds.toList(growable: false);
     final request = rules.isExamen
@@ -246,6 +254,8 @@ class _EvalCreationFormState extends State<EvalCreationForm> {
                   ? null
                   : () => setState(() => _programme = _selectedChapitreTitres),
               consignes: _consignesController,
+              remise: _remiseIfDevoir,
+              onRemiseChanged: (remise) => setState(() => _remise = remise),
             ),
             const SizedBox(height: AppSpacing.sm),
             EvalCreationHint(l10n.evalCreateSujetHint),

@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_duree.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/remise_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Bandeau gris du cadre, en lecture (spec S2) : Durée | Au programme |
@@ -21,6 +22,7 @@ class SujetCadreBand extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final duree = cadre.dureeMinutes;
     final consignes = cadre.consignes;
+    final remise = cadre.remise;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -61,6 +63,11 @@ class SujetCadreBand extends StatelessWidget {
             ),
           if (consignes != null)
             _Rubrique(label: l10n.sujetConsignesLabel, child: _text(consignes)),
+          if (remise != null)
+            _Rubrique(
+              label: l10n.remiseSectionLabel,
+              child: _text(remiseSummary(l10n, remise)),
+            ),
         ],
       ),
     );

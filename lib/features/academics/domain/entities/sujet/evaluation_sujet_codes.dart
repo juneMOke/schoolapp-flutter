@@ -21,6 +21,10 @@ abstract final class EvaluationSujetCodes {
   /// `saisies` et `effectif`.
   static const String evaluationIncomplete = 'EVALUATION_INCOMPLETE';
 
+  /// La remise (heure limite, mode, dépôt tardif) posée sur une évaluation
+  /// qui n'est pas un DEVOIR. Terminal : ne pas rejouer, corriger la saisie.
+  static const String homeworkDeliveryOnTest = 'HOMEWORK_DELIVERY_ON_TEST';
+
   /// Le cours n'est pas celui de l'enseignant connecté.
   static const String coursNotOwned = 'COURS_NOT_OWNED';
 }

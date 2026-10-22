@@ -107,8 +107,10 @@ void main() {
     await bare.close();
   });
 
+  // Jusqu'au dernier palier : le schéma vivant porte aussi les colonnes
+  // ajoutées depuis (la remise d'un devoir, v66).
   test('base montée = base créée à neuf', () async {
-    await migrateTenantDatabase(db, 61, newVersion: 62);
+    await migrateTenantDatabase(db, 61);
     final fresh = await _openDb();
     await fresh.execute(evaluationTable.createTableSql);
     await fresh.execute(evaluationCopieLogTable.createTableSql);

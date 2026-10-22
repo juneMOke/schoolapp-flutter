@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/academics/data/models/offline/sujet/
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_codecs.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 
 /// Corps de `PUT /sync/academics/evaluations/{id}/sujet` (`SujetSyncRequest`)
 /// et **payload d'outbox** : le sujet entier, qui remplace le précédent.
@@ -14,6 +15,9 @@ import 'package:school_app_flutter/features/academics/domain/entities/sujet/eval
 /// l'arbitre du dernier enregistrement gagnant, et la garde de l'accusé local.
 /// [maxPoints] est le maximum local au moment de l'enregistrement : égal à
 /// celui du serveur, il ne change rien.
+///
+/// La remise d'un devoir part avec le cadre, ses trois champs **toujours
+/// ensemble** ; hors devoir elle est absente, et le serveur ne touche à rien.
 class SujetPushRequestModel extends Equatable {
   final String evaluationId;
   final String? authorId;
@@ -38,6 +42,7 @@ class SujetPushRequestModel extends Equatable {
     'consignes': sujet.consignes,
     'maxPoints': ?maxPoints,
     'questions': SujetCodecs.questionsToJson(sujet.questions),
+    ...?sujet.remise?.toJson(),
   };
 
   String toJsonString() => jsonEncode({
@@ -58,6 +63,9 @@ class SujetPushRequestModel extends Equatable {
         programme: SujetCodecs.programmeFromJson(json['programme']),
         consignes: json['consignes'] as String?,
         questions: SujetCodecs.questionsFromJson(json['questions']),
+        remise: json.containsKey('modeRemise')
+            ? RemiseDevoir.fromJson(json)
+            : null,
         updatedAt: (json['clientUpdatedAtMs'] as num).toInt(),
       ),
     );

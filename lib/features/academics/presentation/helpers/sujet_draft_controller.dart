@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_bareme.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
@@ -60,6 +61,9 @@ class SujetDraftController extends ChangeNotifier {
 
   int? _dureeMinutes;
   List<String> _programme;
+
+  /// La remise d'un devoir ; nulle hors devoir, et elle le reste.
+  RemiseDevoir? _remise;
   final TextEditingController consignes;
   final List<SujetQuestionDraft> _questions = [];
   double? _adjustedMax;
@@ -73,6 +77,7 @@ class SujetDraftController extends ChangeNotifier {
        _newId = newId,
        _dureeMinutes = initial.cadre.dureeMinutes,
        _programme = initial.cadre.programme,
+       _remise = initial.cadre.remise,
        consignes = TextEditingController(text: initial.cadre.consignes ?? '') {
     consignes.addListener(notifyListeners);
     for (final q in initial.questions) {
@@ -82,6 +87,7 @@ class SujetDraftController extends ChangeNotifier {
 
   int? get dureeMinutes => _dureeMinutes;
   List<String> get programme => _programme;
+  RemiseDevoir? get remise => _remise;
   List<SujetQuestionDraft> get questions => List.unmodifiable(_questions);
 
   /// Maximum à afficher et à enregistrer : l'ajusté, sinon celui de départ.
@@ -94,6 +100,7 @@ class SujetDraftController extends ChangeNotifier {
     dureeMinutes: _dureeMinutes,
     programme: _programme,
     consignes: consignes.text,
+    remise: _remise,
   ).normalized();
 
   List<SujetQuestion> get questionValues => [
@@ -115,6 +122,13 @@ class SujetDraftController extends ChangeNotifier {
       _adjustedMax != null ||
       cadre != _initial.cadre.normalized() ||
       !listEquals(questionValues, _initial.questions);
+
+  /// Sans effet hors devoir : une remise ne s'y crée pas.
+  void setRemise(RemiseDevoir remise) {
+    if (_remise == null) return;
+    _remise = remise;
+    notifyListeners();
+  }
 
   void setDuree(int? minutes) {
     _dureeMinutes = minutes;

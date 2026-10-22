@@ -56,6 +56,7 @@ class EvaluationSujetOutboxHandler implements OutboxSyncHandler {
     EvaluationSujetCodes.questionMismatch,
     // Un sujet ou un corrigé publiés gardent au moins une question.
     EvaluationSujetCodes.sujetEmpty,
+    EvaluationSujetCodes.homeworkDeliveryOnTest,
   ];
 
   @override

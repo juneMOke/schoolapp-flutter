@@ -56,6 +56,8 @@ class SujetEditor extends StatelessWidget {
                   ? null
                   : () => draft.setProgramme(chapitres),
               consignes: draft.consignes,
+              remise: draft.remise,
+              onRemiseChanged: draft.setRemise,
             ),
             const SizedBox(height: AppSpacing.lg),
             for (final (i, q) in questions.indexed) ...[

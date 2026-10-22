@@ -163,7 +163,10 @@ const TableSchema evaluationTable = TableSchema(
       sujet_sync_status TEXT,
       sujet_rejection_code TEXT,
       sujet_max_points REAL,
-      publication_json TEXT
+      publication_json TEXT,
+      heure_limite TEXT,
+      mode_remise TEXT NOT NULL DEFAULT 'EN_CLASSE',
+      depot_tardif_permis INTEGER NOT NULL DEFAULT 0
     )
   ''',
   createIndexSql: [

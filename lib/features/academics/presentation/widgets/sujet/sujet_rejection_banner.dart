@@ -56,6 +56,8 @@ class SujetRejectionBanner extends StatelessWidget {
                       l10n.sujetRejectedQuestionMismatch,
                     EvaluationSujetCodes.sujetEmpty =>
                       l10n.sujetRejectedEmptyPublished,
+                    EvaluationSujetCodes.homeworkDeliveryOnTest =>
+                      l10n.remiseRejectedNotHomework,
                     _ => l10n.sujetRejectedGeneric,
                   },
                   style: AppTypography.bodySmall.copyWith(

@@ -17481,4 +17481,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String justificationAttachmentTitle(String student) {
     return 'Attachment · $student';
   }
+
+  @override
+  String get remiseSectionLabel => 'Submission';
+
+  @override
+  String get remiseModeEnClasse => 'In class';
+
+  @override
+  String get remiseModeEnLigne => 'Online';
+
+  @override
+  String get remiseHeureLimiteLabel => 'Deadline time';
+
+  @override
+  String get remiseHeureLimiteHint => 'End of the day';
+
+  @override
+  String get remiseHeureLimiteClear => 'Remove the deadline time';
+
+  @override
+  String get remiseDepotTardifLabel => 'Accept late submissions';
+
+  @override
+  String get remiseEnLigneHelp =>
+      'The parent uploads the copy from the portal, on the homework date at the latest.';
+
+  @override
+  String get remiseEnClasseHelp =>
+      'The copy is handed in class; nothing is uploaded on the portal.';
+
+  @override
+  String remiseAvant(String heure) {
+    return 'before $heure';
+  }
+
+  @override
+  String get remiseFinDuJour => 'end of day';
+
+  @override
+  String get remiseRetardAccepte => 'late accepted';
+
+  @override
+  String get remiseRejectedNotHomework =>
+      'Submission settings only apply to homework: the server rejected them on this evaluation.';
 }

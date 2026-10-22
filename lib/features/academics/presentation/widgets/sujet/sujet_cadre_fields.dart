@@ -3,13 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/labels/form_section_label.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/remise_devoir_fields.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_duree_picker.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_programme_editor.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le cadre d'une évaluation (spec §4 bis) : durée, « Au programme »,
-/// consignes. Mêmes champs dans la modale de création et l'éditeur du sujet.
+/// consignes — et, pour un devoir seulement, sa remise. Mêmes champs dans la
+/// modale de création et l'éditeur du sujet.
 class SujetCadreFields extends StatelessWidget {
   final int? dureeMinutes;
   final ValueChanged<int?> onDureeChanged;
@@ -18,6 +21,11 @@ class SujetCadreFields extends StatelessWidget {
   final VoidCallback? onReprendreChapitres;
   final TextEditingController consignes;
   final VoidCallback? onConsignesChanged;
+
+  /// La remise d'un devoir ; `null` pour une interrogation ou un examen, et
+  /// le bloc n'apparaît pas.
+  final RemiseDevoir? remise;
+  final ValueChanged<RemiseDevoir>? onRemiseChanged;
 
   const SujetCadreFields({
     super.key,
@@ -28,6 +36,8 @@ class SujetCadreFields extends StatelessWidget {
     required this.consignes,
     this.onReprendreChapitres,
     this.onConsignesChanged,
+    this.remise,
+    this.onRemiseChanged,
   });
 
   @override
@@ -36,6 +46,13 @@ class SujetCadreFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (remise case final remise?) ...[
+          RemiseDevoirFields(
+            remise: remise,
+            onChanged: onRemiseChanged ?? (_) {},
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         FormSectionLabel(label: l10n.sujetDureeLabel),
         const SizedBox(height: AppSpacing.sm),
         SujetDureePicker(value: dureeMinutes, onChanged: onDureeChanged),

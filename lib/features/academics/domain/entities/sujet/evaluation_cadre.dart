@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_limits.dart';
 
 /// Le cadre d'une évaluation : ce que l'élève révise et les conditions de
@@ -7,15 +8,19 @@ import 'package:school_app_flutter/features/academics/domain/entities/sujet/suje
 ///
 /// [dureeMinutes] nul = « Non définie ». [programme] ne garde que des lignes
 /// non vides : une ligne blanche est retirée avant tout enregistrement.
+/// [remise] n'existe que pour un DEVOIR ; nulle pour une interrogation ou un
+/// examen.
 class EvaluationCadre extends Equatable {
   final int? dureeMinutes;
   final List<String> programme;
   final String? consignes;
+  final RemiseDevoir? remise;
 
   const EvaluationCadre({
     this.dureeMinutes,
     this.programme = const [],
     this.consignes,
+    this.remise,
   });
 
   static const EvaluationCadre empty = EvaluationCadre();
@@ -37,9 +42,10 @@ class EvaluationCadre extends Equatable {
           if (line.trim().isNotEmpty) line.trim(),
       ],
       consignes: text == null || text.isEmpty ? null : text,
+      remise: remise?.normalized(),
     );
   }
 
   @override
-  List<Object?> get props => [dureeMinutes, programme, consignes];
+  List<Object?> get props => [dureeMinutes, programme, consignes, remise];
 }

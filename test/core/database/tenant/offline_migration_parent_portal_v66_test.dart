@@ -71,4 +71,43 @@ void main() {
 
     expect(await db.query('attendance_justifications'), hasLength(1));
   });
+
+  test(
+    'une évaluation existante prend la remise par défaut du serveur',
+    () async {
+      await db.execute(
+        'CREATE TABLE evaluation (id TEXT PRIMARY KEY, type TEXT NOT NULL)',
+      );
+      await db.insert('evaluation', {'id': 'e', 'type': 'DEVOIR'});
+
+      await migrateTenantDatabase(db, 65, newVersion: 66);
+
+      final row = (await db.query('evaluation')).single;
+      expect(row['mode_remise'], 'EN_CLASSE');
+      expect(row['depot_tardif_permis'], 0);
+      expect(row['heure_limite'], isNull);
+    },
+  );
+
+  test('les curseurs des évaluations et des notes repartent de zéro, '
+      'les autres restent', () async {
+    await db.execute(
+      'CREATE TABLE sync_meta (resource TEXT PRIMARY KEY, cursor TEXT)',
+    );
+    for (final resource in [
+      'academics_evaluations:c1',
+      'academics_notes:c1',
+      'academics_cours:t1',
+      'attendance',
+    ]) {
+      await db.insert('sync_meta', {'resource': resource, 'cursor': 'x'});
+    }
+
+    await migrateTenantDatabase(db, 65, newVersion: 66);
+
+    final left = [
+      for (final row in await db.query('sync_meta')) row['resource'],
+    ];
+    expect(left, unorderedEquals(['academics_cours:t1', 'attendance']));
+  });
 }
