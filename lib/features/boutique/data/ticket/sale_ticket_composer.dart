@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/provisional_sale_reference.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_model.dart';
@@ -47,7 +48,11 @@ class SaleTicketComposer {
       // une vente poussée dont l'ACK n'a rendu aucun document reste provisoire
       // même en ligne, et c'est exactement ce que le porteur doit savoir.
       isProvisional: sale.receiptNumber == null,
-      soldAt: DateTime.tryParse(sale.soldAt)?.toLocal() ?? DateTime.now(),
+      // L'heure de l'école, pas celle du poste : une tablette réglée en UTC
+      // daterait du 29 une vente faite le 30 à 0 h 30 à Kinshasa.
+      soldAt: SchoolTime.wallClock(
+        DateTime.tryParse(sale.soldAt) ?? DateTime.now(),
+      ),
       cashierFullName: sale.collectedByName,
       // `null` — jamais `''` — quand la vente est anonyme : c'est ce que le
       // gabarit lit pour escamoter le bloc payeur entier. Le nom composé du
