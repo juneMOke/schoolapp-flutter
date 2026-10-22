@@ -35,7 +35,7 @@ class AttendanceJustification extends Equatable {
   /// Pourquoi la dernière décision de cette tablette n'est pas passée (droit
   /// retiré, demande disparue) ; `null` sinon. La demande se tranche à
   /// nouveau.
-  final String? refusal;
+  final JustificationRefusal? refusal;
 
   /// Le serveur a refusé l'acceptation : seul le refus reste possible.
   final JustificationAcceptBlock? acceptBlock;

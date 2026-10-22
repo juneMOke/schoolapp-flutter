@@ -17532,11 +17532,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le mois de l\'absence est clôturé. La demande ne peut plus qu\'être refusée.';
 
   @override
-  String justificationRefusalNotice(String reason) {
-    return 'Décision non transmise : $reason';
-  }
-
-  @override
   String get justificationAccept => 'Accepter';
 
   @override
@@ -17653,4 +17648,23 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get remiseRejectedNotHomework =>
       'La remise ne vaut que pour un devoir : le serveur l\'a refusée sur cette évaluation.';
+
+  @override
+  String get justificationStatusUnknown => 'Statut inconnu';
+
+  @override
+  String get justificationRefusalNoAuthor =>
+      'Décision non transmise : elle a été prise sans utilisateur connu. Reconnectez-vous, puis tranchez à nouveau.';
+
+  @override
+  String get justificationRefusalForbidden =>
+      'Décision non transmise : le droit de modifier l\'appel vous manque.';
+
+  @override
+  String get justificationRefusalRejected =>
+      'Décision refusée par le serveur. Tranchez à nouveau.';
+
+  @override
+  String get justificationRefusalNotSent =>
+      'Décision non transmise après plusieurs essais. Tranchez à nouveau.';
 }

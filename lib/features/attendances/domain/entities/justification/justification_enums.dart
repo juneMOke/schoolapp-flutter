@@ -2,19 +2,26 @@
 enum JustificationStatus {
   pending('PENDING'),
   accepted('ACCEPTED'),
-  rejected('REJECTED');
+  rejected('REJECTED'),
+
+  /// Un statut que cette tablette ne connaît pas (un contrat plus récent :
+  /// demande retirée par le parent…). Ni à traiter, ni tranchée par l'école :
+  /// la tablette ne propose aucun geste qu'elle ne saurait pas juger.
+  unknown('');
 
   const JustificationStatus(this.apiValue);
 
   final String apiValue;
 
-  /// Une valeur inconnue se lit « en attente » : une demande qu'on ne sait pas
-  /// lire reste devant l'école plutôt que de disparaître des traitées.
   static JustificationStatus fromApi(String? value) => switch (value) {
+    'PENDING' || null => pending,
     'ACCEPTED' => accepted,
     'REJECTED' => rejected,
-    _ => pending,
+    _ => unknown,
   };
+
+  /// Une décision de l'école, d'ici ou d'ailleurs.
+  bool get isDecision => this == accepted || this == rejected;
 }
 
 /// Ce que l'école décide d'une demande.
@@ -57,4 +64,31 @@ enum JustificationAcceptBlock {
     'MONTH_CLOSED' => monthClosed,
     _ => null,
   };
+}
+
+/// Pourquoi la dernière décision de cette tablette n'est pas passée. Rangé en
+/// code, jamais en phrase : l'écran le dit dans la langue de l'utilisateur.
+enum JustificationRefusal {
+  /// Décision prise sans utilisateur connu : il faut se reconnecter.
+  noAuthor('NO_AUTHOR'),
+
+  /// Le droit de modifier l'appel manque (403 du compte connecté).
+  forbidden('FORBIDDEN'),
+
+  /// Refus du serveur sans motif que la tablette sache dire.
+  rejected('REJECTED'),
+
+  /// Le geste n'a jamais pu partir (essais épuisés) : rien n'a été tranché.
+  notSent('NOT_SENT');
+
+  const JustificationRefusal(this.code);
+
+  final String code;
+
+  static JustificationRefusal? fromCode(String? code) => code == null
+      ? null
+      : JustificationRefusal.values.firstWhere(
+          (refusal) => refusal.code == code,
+          orElse: () => rejected,
+        );
 }

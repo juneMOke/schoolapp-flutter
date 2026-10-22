@@ -69,7 +69,7 @@ abstract final class AttendanceJustificationRow {
         row['local_decision'] as String?,
       ),
       sync: SyncState.fromDbValue(row['sync_status'] as String?),
-      refusal: row['sync_error'] as String?,
+      refusal: JustificationRefusal.fromCode(row['sync_error'] as String?),
       acceptBlock: JustificationAcceptBlock.fromCode(
         row['accept_blocked_code'] as String?,
       ),

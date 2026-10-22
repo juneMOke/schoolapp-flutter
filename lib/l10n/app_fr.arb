@@ -10553,7 +10553,6 @@
   "justificationDecidedOn": "Tranchée le {date}",
   "justificationBlockedNotAnAbsence": "L'appel a été corrigé : l'élève n'est plus absent ce jour-là. La demande ne peut plus qu'être refusée.",
   "justificationBlockedMonthClosed": "Le mois de l'absence est clôturé. La demande ne peut plus qu'être refusée.",
-  "justificationRefusalNotice": "Décision non transmise : {reason}",
   "justificationAccept": "Accepter",
   "justificationReject": "Refuser",
   "justificationCancel": "Annuler",
@@ -10584,5 +10583,10 @@
   "remiseAvant": "avant {heure}",
   "remiseFinDuJour": "fin du jour",
   "remiseRetardAccepte": "retard accepté",
-  "remiseRejectedNotHomework": "La remise ne vaut que pour un devoir : le serveur l'a refusée sur cette évaluation."
+  "remiseRejectedNotHomework": "La remise ne vaut que pour un devoir : le serveur l'a refusée sur cette évaluation.",
+  "justificationStatusUnknown": "Statut inconnu",
+  "justificationRefusalNoAuthor": "Décision non transmise : elle a été prise sans utilisateur connu. Reconnectez-vous, puis tranchez à nouveau.",
+  "justificationRefusalForbidden": "Décision non transmise : le droit de modifier l'appel vous manque.",
+  "justificationRefusalRejected": "Décision refusée par le serveur. Tranchez à nouveau.",
+  "justificationRefusalNotSent": "Décision non transmise après plusieurs essais. Tranchez à nouveau."
 }

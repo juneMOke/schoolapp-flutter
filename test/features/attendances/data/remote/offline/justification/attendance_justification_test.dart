@@ -34,6 +34,7 @@ void main() {
     String status = 'PENDING',
     String? decisionNote,
     Map<String, dynamic>? file,
+    String updatedAt = '2026-10-15T07:12:00Z',
   }) => AttendanceJustificationDto.fromJson({
     'id': 'j1',
     'studentId': 's1',
@@ -47,7 +48,7 @@ void main() {
     'file': ?file,
     'status': status,
     'decisionNote': decisionNote,
-    'serverUpdatedAt': '2026-10-15T07:12:00Z',
+    'serverUpdatedAt': updatedAt,
   });
 
   Future<AttendanceJustification> only() async =>
@@ -316,6 +317,26 @@ void main() {
       },
     );
 
+    test('5xx : nouvel essai, la décision reste en route', () async {
+      await decide(JustificationDecision.accept);
+      when(() => api.decide(any(), 'j1', any())).thenThrow(refused(503));
+
+      final result = await handler.dispatch(await entry());
+
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+      expect((await only()).isSending, isTrue);
+    });
+
+    test('409 : déjà tranchée, la demande revient sans rejeu', () async {
+      await decide(JustificationDecision.accept);
+      when(() => api.decide(any(), 'j1', any())).thenThrow(refused(409));
+
+      final result = await handler.dispatch(await entry());
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect((await only()).isSending, isFalse);
+    });
+
     test('réseau ou 5xx : nouvel essai, la décision reste en route', () async {
       await decide(JustificationDecision.accept);
       when(() => api.decide(any(), 'j1', any())).thenThrow(
@@ -336,6 +357,61 @@ void main() {
 
       expect(result.outcome, OutboxDispatchOutcome.blocked);
       verifyNever(() => api.decide(any(), any(), any()));
+    });
+  });
+
+  group('pull face à l accusé', () {
+    test('une page plus ancienne que l accusé est sautée', () async {
+      await decide(JustificationDecision.accept);
+      when(() => api.decide(any(), 'j1', any())).thenAnswer(
+        (_) async => dto(status: 'ACCEPTED', updatedAt: '2026-10-16T08:00:00Z'),
+      );
+      await handler.dispatch(await entry());
+
+      // Lue avant l'accusé, appliquée après.
+      await local.applyPulled([dto()]);
+
+      expect((await only()).status, JustificationStatus.accepted);
+    });
+
+    test('un geste qui n est plus en file libère la décision', () async {
+      await decide(JustificationDecision.accept);
+      await outbox.markSyncError('g-ACCEPT', 'essais épuisés');
+
+      await local.applyPulled([dto()]);
+
+      final j = await only();
+      expect(j.awaitsDecision, isTrue);
+      expect(j.refusal, JustificationRefusal.notSent);
+    });
+
+    test('une version plus récente lève l empêchement d accepter', () async {
+      await decide(JustificationDecision.accept);
+      when(
+        () => api.decide(any(), 'j1', any()),
+      ).thenThrow(refused(422, detailCode: 'NOT_AN_ABSENCE'));
+      await handler.dispatch(await entry());
+
+      await local.applyPulled([dto()]);
+      expect((await only()).acceptBlock, isNotNull);
+
+      await local.applyPulled([dto(updatedAt: '2026-10-17T08:00:00Z')]);
+      expect((await only()).canAccept, isTrue);
+    });
+
+    test('un statut inconnu n est ni à traiter ni « autre poste »', () async {
+      await decide(JustificationDecision.accept);
+      when(
+        () => api.decide(any(), 'j1', any()),
+      ).thenAnswer((_) async => dto(status: 'WITHDRAWN'));
+
+      await handler.dispatch(await entry());
+
+      final j = await only();
+      expect(j.status, JustificationStatus.unknown);
+      expect(j.isOpen, isFalse);
+      expect(j.canAccept || j.canReject, isFalse);
+      expect(j.decidedElsewhere, isFalse);
     });
   });
 }

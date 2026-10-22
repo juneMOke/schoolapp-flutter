@@ -76,6 +76,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(justification('fallback'));
     registerFallbackValue(JustificationDecision.accept);
+    registerFallbackValue(ref);
   });
 
   setUp(() {
@@ -89,6 +90,7 @@ void main() {
       final sub = radio.stream.listen(onChanged);
       return () => unawaited(sub.cancel());
     });
+    when(() => availability.isCached(any())).thenAnswer((_) async => true);
     when(
       () => availability.snapshot(any()),
     ).thenAnswer((_) async => const AttachmentAvailability(online: false));
@@ -150,6 +152,23 @@ void main() {
     await cubit.attachment(justification('a'));
 
     expect(cubit.state.attachments.canOpen(ref), isTrue);
+    await cubit.close();
+  });
+
+  test('une pièce obtenue mais pas gardée reste grisée hors ligne', () async {
+    when(
+      () => repository.list('y1'),
+    ).thenAnswer((_) async => Right([justification('a')]));
+    when(
+      () => repository.attachment(any()),
+    ).thenAnswer((_) async => Right(Uint8List(1)));
+    when(() => availability.isCached(any())).thenAnswer((_) async => false);
+    final cubit = build();
+    await cubit.setAcademicYear('y1');
+
+    await cubit.attachment(justification('a'));
+
+    expect(cubit.state.attachments.canOpen(ref), isFalse);
     await cubit.close();
   });
 

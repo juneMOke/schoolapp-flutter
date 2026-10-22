@@ -1,5 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/db_batching.dart';
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/attendances/data/models/offline/justification/attendance_justification_dto.dart';
@@ -95,13 +96,14 @@ class AttendanceJustificationLocalDataSource {
   ) {
     final sent = JustificationDecision.fromApi(payload.decision)?.status;
     final received = JustificationStatus.fromApi(justification.status);
+    final elsewhere = sent != null && received.isDecision && sent != received;
     return _db.update(
       table,
       {
         ...AttendanceJustificationRow.serverValues(justification),
         ...AttendanceJustificationRow.clearedDecision,
         'accept_blocked_code': null,
-        'decided_elsewhere': sent != null && sent != received ? 1 : 0,
+        'decided_elsewhere': elsewhere ? 1 : 0,
         'sync_status': SyncState.synced.dbValue,
         'sync_error': null,
       },
@@ -118,7 +120,7 @@ class AttendanceJustificationLocalDataSource {
   Future<void> revertDecision(
     JustificationDecisionPayload payload, {
     JustificationAcceptBlock? acceptBlock,
-    String? refusal,
+    JustificationRefusal? refusal,
   }) => _db.update(
     table,
     {
@@ -127,7 +129,7 @@ class AttendanceJustificationLocalDataSource {
       'sync_status': refusal == null
           ? SyncState.synced.dbValue
           : SyncState.syncError.dbValue,
-      'sync_error': refusal,
+      'sync_error': refusal?.code,
     },
     where: 'id = ? AND local_gesture_id = ?',
     whereArgs: [payload.justificationId, payload.gestureId],
@@ -141,8 +143,18 @@ class AttendanceJustificationLocalDataSource {
     whereArgs: [id],
   );
 
-  /// Les justifications reçues du serveur. Une décision locale en route n'est
-  /// pas touchée : c'est son accusé qui la réglera.
+  /// Les justifications reçues du serveur.
+  ///
+  /// - **Page périmée** : une ligne plus ancienne que la locale est sautée.
+  ///   Le pull et l'accusé d'une décision courent sans verrou commun ; sans
+  ///   cette garde, une page lue avant l'accusé remettrait « à traiter » une
+  ///   demande que le serveur vient d'accepter.
+  /// - **Décision en route** : elle n'est pas touchée, c'est son accusé qui la
+  ///   réglera — sauf si son geste n'est plus en file (essais épuisés) : elle
+  ///   est alors libérée, sans quoi la demande ne se retrancherait plus jamais.
+  /// - **Empêchement d'accepter** : il tombe quand la demande est tranchée, ou
+  ///   quand le serveur la renvoie dans une version plus récente (l'appel a pu
+  ///   être corrigé à nouveau).
   Future<int> applyPulled(List<AttendanceJustificationDto> items) async {
     var applied = 0;
     await applyInBatches<AttendanceJustificationDto>(
@@ -151,22 +163,63 @@ class AttendanceJustificationLocalDataSource {
       apply: (txn, chunk) async {
         for (final item in chunk) {
           final values = AttendanceJustificationRow.serverValues(item);
-          final decided = item.status != JustificationStatus.pending.apiValue;
-          final updated = await txn.update(
+          final rows = await txn.query(
+            table,
+            columns: ['server_updated_at', 'local_gesture_id'],
+            where: 'id = ?',
+            whereArgs: [item.id],
+            limit: 1,
+          );
+          if (rows.isEmpty) {
+            await txn.insert(table, values);
+            applied++;
+            continue;
+          }
+          final known = _instant(rows.single['server_updated_at']);
+          final incoming = _instant(item.serverUpdatedAt);
+          if (known != null && incoming != null && incoming.isBefore(known)) {
+            continue;
+          }
+          final newer =
+              known == null || incoming == null || incoming.isAfter(known);
+          final decided = JustificationStatus.fromApi(item.status).isDecision;
+          final gesture = rows.single['local_gesture_id'] as String?;
+          final stranded = gesture != null && !await _isQueued(txn, gesture);
+          await txn.update(
             table,
             {
               ...values,
-              // Une demande tranchée ne garde pas d'empêchement d'accepter.
-              if (decided) 'accept_blocked_code': null,
+              if (decided || newer) 'accept_blocked_code': null,
+              if (stranded) ...AttendanceJustificationRow.clearedDecision,
+              if (stranded)
+                'sync_status': decided
+                    ? SyncState.synced.dbValue
+                    : SyncState.syncError.dbValue,
+              if (stranded)
+                'sync_error': decided
+                    ? null
+                    : JustificationRefusal.notSent.code,
             },
             where: 'id = ?',
             whereArgs: [item.id],
           );
-          if (updated == 0) await txn.insert(table, values);
           applied++;
         }
       },
     );
     return applied;
   }
+
+  /// Le geste [gestureId] attend-il encore son envoi ?
+  static Future<bool> _isQueued(DatabaseExecutor txn, String gestureId) async =>
+      (await txn.query(
+        OutboxDao.table,
+        columns: ['1'],
+        where: 'id = ? AND status = ?',
+        whereArgs: [gestureId, OutboxStatus.pending.dbValue],
+        limit: 1,
+      )).isNotEmpty;
+
+  static DateTime? _instant(Object? iso) =>
+      iso is String ? DateTime.tryParse(iso) : null;
 }

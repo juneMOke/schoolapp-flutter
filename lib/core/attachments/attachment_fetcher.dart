@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/attachments/attachment_ref.dart';
 import 'package:school_app_flutter/core/attachments/ephemeral_attachment_cache.dart';
+import 'package:school_app_flutter/core/crypto/sha256_hex.dart';
 
 /// Pourquoi une pièce n'a pas pu être ouverte.
 enum AttachmentFetchError {
@@ -36,6 +37,9 @@ class AttachmentFetchFailed extends AttachmentFetch {
 /// `sha256`) : un 304 la rend sans transfert. Hors connexion, elle est rendue
 /// telle quelle — elle ne peut pas avoir changé, son empreinte est sa clé.
 ///
+/// **L'empreinte fait foi**, pas le cache ni la réponse : des octets qui ne la
+/// portent pas ne sont jamais rendus (fichier altéré, réponse tronquée).
+///
 /// Écrit sur Dio et non sur Retrofit : la réponse est binaire et le 304 doit
 /// se lire comme une issue, pas comme une erreur.
 class AttachmentFetcher {
@@ -50,7 +54,7 @@ class AttachmentFetcher {
     required AttachmentRef ref,
     required Map<String, dynamic> extras,
   }) async {
-    final cached = await _cache.read(ref.sha256);
+    final cached = await _verified(await _cache.read(ref.sha256), ref);
     try {
       final response = await _dio.get<List<int>>(
         path,
@@ -66,8 +70,11 @@ class AttachmentFetcher {
       if (response.statusCode == 304 && cached != null) {
         return AttachmentFetched(cached);
       }
-      final bytes = Uint8List.fromList(response.data ?? const []);
-      if (bytes.isEmpty) {
+      final bytes = await _verified(
+        Uint8List.fromList(response.data ?? const []),
+        ref,
+      );
+      if (bytes == null || bytes.isEmpty) {
         return const AttachmentFetchFailed(AttachmentFetchError.unavailable);
       }
       await _cache.write(ref.sha256, bytes);
@@ -83,5 +90,16 @@ class AttachmentFetcher {
   }
 
   /// La pièce est-elle lisible sans réseau ?
-  Future<bool> isCached(AttachmentRef ref) => _cache.contains(ref.sha256);
+  Future<bool> isCached(AttachmentRef ref) async =>
+      await _verified(await _cache.read(ref.sha256), ref) != null;
+
+  /// [bytes] s'ils portent l'empreinte de [ref], `null` sinon.
+  static Future<Uint8List?> _verified(
+    Uint8List? bytes,
+    AttachmentRef ref,
+  ) async {
+    if (bytes == null) return null;
+    final digest = await sha256Hex(bytes);
+    return digest == ref.sha256.toLowerCase() ? bytes : null;
+  }
 }

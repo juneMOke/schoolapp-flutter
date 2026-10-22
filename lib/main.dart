@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/attachments/ephemeral_attachment_cache.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -58,6 +59,9 @@ void main() async {
 Future<void> _start() async {
   try {
     await configureDependencies();
+    // Les pièces d'une session interrompue sans déconnexion (application
+    // tuée, poste éteint) ne survivent pas au redémarrage.
+    await getIt<EphemeralAttachmentCache>().purge();
   } on UnreadableDeviceDatabaseException catch (error) {
     debugPrint('$error');
     // L'injection s'est arrêtée à mi-chemin : la recommencer exige un

@@ -14,6 +14,7 @@ abstract final class JustificationLabels {
       JustificationStatus.pending => l10n.justificationStatusPending,
       JustificationStatus.accepted => l10n.justificationStatusAccepted,
       JustificationStatus.rejected => l10n.justificationStatusRejected,
+      JustificationStatus.unknown => l10n.justificationStatusUnknown,
     };
   }
 
@@ -23,6 +24,7 @@ abstract final class JustificationLabels {
       JustificationStatus.pending => PresenceStatus.late,
       JustificationStatus.accepted => PresenceStatus.present,
       JustificationStatus.rejected => PresenceStatus.absent,
+      JustificationStatus.unknown => PresenceStatus.none,
     });
   }
 
@@ -35,6 +37,14 @@ abstract final class JustificationLabels {
     JustificationAcceptBlock.monthClosed =>
       l10n.justificationBlockedMonthClosed,
   };
+
+  static String refusal(AppLocalizations l10n, JustificationRefusal refusal) =>
+      switch (refusal) {
+        JustificationRefusal.noAuthor => l10n.justificationRefusalNoAuthor,
+        JustificationRefusal.forbidden => l10n.justificationRefusalForbidden,
+        JustificationRefusal.rejected => l10n.justificationRefusalRejected,
+        JustificationRefusal.notSent => l10n.justificationRefusalNotSent,
+      };
 
   /// « Nom Post-nom Prénom », ou l'élève inconnu du roster.
   static String student(AppLocalizations l10n, AttendanceJustification j) =>

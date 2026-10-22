@@ -109,7 +109,7 @@ class JustificationCard extends StatelessWidget {
           if (refusal != null) ...[
             const SizedBox(height: AppSpacing.md),
             JustificationCardNotice(
-              message: l10n.justificationRefusalNotice(refusal),
+              message: JustificationLabels.refusal(l10n, refusal),
             ),
           ],
           const SizedBox(height: AppSpacing.md),

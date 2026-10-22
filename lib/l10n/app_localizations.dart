@@ -27157,12 +27157,6 @@ abstract class AppLocalizations {
   /// **'The month of the absence is closed. The request can only be rejected.'**
   String get justificationBlockedMonthClosed;
 
-  /// No description provided for @justificationRefusalNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'Decision not sent: {reason}'**
-  String justificationRefusalNotice(String reason);
-
   /// No description provided for @justificationAccept.
   ///
   /// In en, this message translates to:
@@ -27348,6 +27342,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submission settings only apply to homework: the server rejected them on this evaluation.'**
   String get remiseRejectedNotHomework;
+
+  /// No description provided for @justificationStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown status'**
+  String get justificationStatusUnknown;
+
+  /// No description provided for @justificationRefusalNoAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision not sent: it was taken without a known user. Sign in again, then decide again.'**
+  String get justificationRefusalNoAuthor;
+
+  /// No description provided for @justificationRefusalForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision not sent: you are missing the right to amend the register.'**
+  String get justificationRefusalForbidden;
+
+  /// No description provided for @justificationRefusalRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision rejected by the server. Decide again.'**
+  String get justificationRefusalRejected;
+
+  /// No description provided for @justificationRefusalNotSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision not sent after several attempts. Decide again.'**
+  String get justificationRefusalNotSent;
 }
 
 class _AppLocalizationsDelegate

@@ -14,7 +14,7 @@ void main() {
     setUp(() async {
       tmp = await Directory.systemTemp.createTemp('attachments_test');
       cache = EphemeralAttachmentCache(
-        temporaryDirectory: () async => tmp,
+        rootDirectory: () async => tmp,
         inMemory: false,
       );
     });
@@ -44,7 +44,7 @@ void main() {
 
     test('un dossier introuvable rend « pas en cache », sans lever', () async {
       final broken = EphemeralAttachmentCache(
-        temporaryDirectory: () async => throw const FileSystemException(),
+        rootDirectory: () async => throw const FileSystemException(),
         inMemory: false,
       );
       await broken.write('abc', bytes);

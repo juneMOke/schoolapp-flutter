@@ -26,6 +26,10 @@ class JustificationQueueCubit extends Cubit<JustificationQueueState> {
   void Function()? _unwatch;
   void Function()? _unwatchRadio;
 
+  /// Les demandes déjà annoncées « tranchées par un autre poste » : une
+  /// relecture qui passe avant l'acquittement ne refait pas l'annonce.
+  final Set<String> _announced = {};
+
   /// Numéro de la dernière lecture lancée : une lecture plus ancienne qui
   /// répond après ne doit pas écraser la plus récente.
   int _read = 0;
@@ -85,7 +89,10 @@ class JustificationQueueCubit extends Cubit<JustificationQueueState> {
         state.copyWith(
           load: JustificationQueueLoad.ready,
           all: all,
-          decidedElsewhere: all.where((j) => j.decidedElsewhere).toList(),
+          decidedElsewhere: [
+            for (final j in all)
+              if (j.decidedElsewhere && !_announced.contains(j.id)) j,
+          ],
         ),
       ),
     );
@@ -104,6 +111,7 @@ class JustificationQueueCubit extends Cubit<JustificationQueueState> {
     final shown = state.decidedElsewhere;
     if (shown.isEmpty) return;
     emit(state.copyWith(decidedElsewhere: const []));
+    _announced.addAll(shown.map((j) => j.id));
     for (final justification in shown) {
       await _acknowledge(justification.id);
     }
@@ -126,7 +134,10 @@ class JustificationQueueCubit extends Cubit<JustificationQueueState> {
   ) async {
     final result = await _attachment(justification);
     final ref = justification.attachment;
-    if (result.isRight() && ref != null && !isClosed) {
+    if (result.isRight() &&
+        ref != null &&
+        await _availability.isCached(ref) &&
+        !isClosed) {
       emit(
         state.copyWith(attachments: state.attachments.withCached(ref.sha256)),
       );

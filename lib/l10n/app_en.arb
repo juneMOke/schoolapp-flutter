@@ -10147,8 +10147,6 @@
   "@justificationDecidedOn": {"placeholders": {"date": {"type": "String"}}},
   "justificationBlockedNotAnAbsence": "The register was corrected: the student is no longer absent that day. The request can only be rejected.",
   "justificationBlockedMonthClosed": "The month of the absence is closed. The request can only be rejected.",
-  "justificationRefusalNotice": "Decision not sent: {reason}",
-  "@justificationRefusalNotice": {"placeholders": {"reason": {"type": "String"}}},
   "justificationAccept": "Accept",
   "justificationReject": "Reject",
   "justificationCancel": "Cancel",
@@ -10183,5 +10181,10 @@
   "@remiseAvant": {"placeholders": {"heure": {"type": "String"}}},
   "remiseFinDuJour": "end of day",
   "remiseRetardAccepte": "late accepted",
-  "remiseRejectedNotHomework": "Submission settings only apply to homework: the server rejected them on this evaluation."
+  "remiseRejectedNotHomework": "Submission settings only apply to homework: the server rejected them on this evaluation.",
+  "justificationStatusUnknown": "Unknown status",
+  "justificationRefusalNoAuthor": "Decision not sent: it was taken without a known user. Sign in again, then decide again.",
+  "justificationRefusalForbidden": "Decision not sent: you are missing the right to amend the register.",
+  "justificationRefusalRejected": "Decision rejected by the server. Decide again.",
+  "justificationRefusalNotSent": "Decision not sent after several attempts. Decide again."
 }

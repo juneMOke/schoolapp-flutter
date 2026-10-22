@@ -87,6 +87,11 @@ class JustificationQueueActions {
     final l10n = AppLocalizations.of(context)!;
     final ref = justification.attachment;
     if (ref == null) return;
+    // Rien à télécharger qu'on ne saurait pas montrer.
+    if (!ref.isViewable) {
+      AppSnackBar.showError(context, l10n.justificationAttachmentNotViewable);
+      return;
+    }
     final result = await _cubit.attachment(justification);
     if (!context.mounted) return;
     final bytes = result.fold((failure) {

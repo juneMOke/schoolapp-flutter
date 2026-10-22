@@ -17405,11 +17405,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The month of the absence is closed. The request can only be rejected.';
 
   @override
-  String justificationRefusalNotice(String reason) {
-    return 'Decision not sent: $reason';
-  }
-
-  @override
   String get justificationAccept => 'Accept';
 
   @override
@@ -17525,4 +17520,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get remiseRejectedNotHomework =>
       'Submission settings only apply to homework: the server rejected them on this evaluation.';
+
+  @override
+  String get justificationStatusUnknown => 'Unknown status';
+
+  @override
+  String get justificationRefusalNoAuthor =>
+      'Decision not sent: it was taken without a known user. Sign in again, then decide again.';
+
+  @override
+  String get justificationRefusalForbidden =>
+      'Decision not sent: you are missing the right to amend the register.';
+
+  @override
+  String get justificationRefusalRejected =>
+      'Decision rejected by the server. Decide again.';
+
+  @override
+  String get justificationRefusalNotSent =>
+      'Decision not sent after several attempts. Decide again.';
 }

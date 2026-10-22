@@ -12,7 +12,7 @@ void main() {
     JustificationStatus status = JustificationStatus.pending,
     JustificationDecision? local,
     JustificationAcceptBlock? block,
-    String? refusal,
+    JustificationRefusal? refusal,
     bool withFile = true,
   }) => AttendanceJustification(
     id: 'j1',
@@ -116,8 +116,8 @@ void main() {
   });
 
   testWidgets('un refus de la dernière décision est dit', (tester) async {
-    await pump(tester, justification(refusal: 'droit retiré'));
+    await pump(tester, justification(refusal: JustificationRefusal.forbidden));
 
-    expect(find.text('Décision non transmise : droit retiré'), findsOneWidget);
+    expect(find.textContaining("le droit de modifier l'appel"), findsOneWidget);
   });
 }

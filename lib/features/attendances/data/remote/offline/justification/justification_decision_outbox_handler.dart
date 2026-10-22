@@ -25,6 +25,8 @@ const String kDecisionGestureIdConflictCode = 'DECISION_GESTURE_ID_CONFLICT';
 ///   la raison, et seul le refus reste possible ;
 /// - 422 `DECISION_GESTURE_ID_CONFLICT` → bug de tablette : la demande revient
 ///   « à traiter », sans rien dire ;
+/// - 409 → la demande a déjà été tranchée : elle revient telle que le pull la
+///   redescendra, sans rejeu ;
 /// - 403 → attente propre si le geste est d'un autre compte, refus sinon ;
 /// - autre 4xx → refus définitif, la demande revient « à traiter » ;
 /// - réseau, 5xx, 401 → nouvel essai.
@@ -59,11 +61,7 @@ class JustificationDecisionOutboxHandler implements OutboxSyncHandler {
     final hold = outboxForeignSchoolHold(entry, currentUser.schoolId);
     if (hold != null) return hold;
     if (payload.authorId == null) {
-      return _refuse(
-        payload,
-        'Décision enregistrée sans auteur connu : reconnectez-vous, puis '
-        'tranchez la demande à nouveau.',
-      );
+      return _refuse(payload, JustificationRefusal.noAuthor);
     }
     try {
       final response = await api.decide(
@@ -93,7 +91,7 @@ class JustificationDecisionOutboxHandler implements OutboxSyncHandler {
       await justifications.revertDecision(payload, acceptBlock: block);
       return const OutboxDispatchResult.acked();
     }
-    if (code == kDecisionGestureIdConflictCode) {
+    if (code == kDecisionGestureIdConflictCode || status == 409) {
       await justifications.revertDecision(payload);
       return const OutboxDispatchResult.acked();
     }
@@ -103,18 +101,11 @@ class JustificationDecisionOutboxHandler implements OutboxSyncHandler {
         currentUser.uid,
       );
       if (blocked != null) return blocked;
-      return _refuse(
-        payload,
-        ApiErrorParser.serverMessageOf(e.response) ??
-            'Décision non autorisée : le droit de modifier l\'appel manque.',
-      );
+      return _refuse(payload, JustificationRefusal.forbidden);
     }
     final failure = e.error;
     if (failure is ValidationFailure || failure is NotFoundFailure) {
-      return _refuse(
-        payload,
-        ApiErrorParser.serverMessageOf(e.response) ?? 'Décision refusée.',
-      );
+      return _refuse(payload, JustificationRefusal.rejected);
     }
     return OutboxDispatchResult.retry(
       failure is Failure ? failure.message : e.message,
@@ -123,9 +114,11 @@ class JustificationDecisionOutboxHandler implements OutboxSyncHandler {
 
   Future<OutboxDispatchResult> _refuse(
     JustificationDecisionPayload payload,
-    String reason,
+    JustificationRefusal refusal,
   ) async {
-    await justifications.revertDecision(payload, refusal: reason);
-    return OutboxDispatchResult.failed(reason);
+    await justifications.revertDecision(payload, refusal: refusal);
+    return OutboxDispatchResult.failed(
+      'Justification decision refused: ${refusal.code}',
+    );
   }
 }

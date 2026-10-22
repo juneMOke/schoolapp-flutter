@@ -22,7 +22,9 @@ class AttendanceJustificationPageDto
           AttendanceJustificationDto.fromJson(raw as Map<String, dynamic>),
         );
       } catch (_) {
-        // Une ligne illisible n'empêche pas la page : elle reviendra.
+        // Une ligne illisible n'empêche pas la page de s'appliquer (sinon le
+        // flux entier se figerait). Le curseur avance quand même : elle ne
+        // redescendra qu'à sa prochaine modification côté serveur.
       }
     }
     return AttendanceJustificationPageDto(

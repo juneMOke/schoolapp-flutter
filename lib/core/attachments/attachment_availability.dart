@@ -56,6 +56,10 @@ class AttachmentAvailabilityTracker {
     return AttachmentAvailability(online: online, cached: cached);
   }
 
+  /// La pièce est-elle vraiment dans le dossier temporaire ? Le cache est
+  /// best-effort : une pièce obtenue n'y est pas forcément restée.
+  Future<bool> isCached(AttachmentRef ref) => _fetcher.isCached(ref);
+
   /// Appelle [onChanged] à chaque transition de la radio ; rend la fonction
   /// qui désabonne.
   void Function() watch(void Function(bool online) onChanged) {

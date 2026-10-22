@@ -10,13 +10,16 @@ import 'package:school_app_flutter/core/attachments/ephemeral_attachment_cache.d
 class _Dio extends Mock implements Dio {}
 
 void main() {
+  final bytes = Uint8List.fromList([1, 2, 3]);
+  // sha256 de [1, 2, 3].
+  const sha =
+      '039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81';
   const ref = AttachmentRef(
     name: 'certificat.pdf',
     mimeType: 'application/pdf',
     sizeBytes: 3,
-    sha256: 'abc',
+    sha256: sha,
   );
-  final bytes = Uint8List.fromList([1, 2, 3]);
   late _Dio dio;
   late EphemeralAttachmentCache cache;
   late AttachmentFetcher fetcher;
@@ -58,7 +61,7 @@ void main() {
   });
 
   test('déjà là : revalidée par If-None-Match, et 304 la rend', () async {
-    await cache.write('abc', bytes);
+    await cache.write(sha, bytes);
     when(
       () => dio.get<List<int>>(any(), options: any(named: 'options')),
     ).thenAnswer((_) async => response(304));
@@ -66,11 +69,11 @@ void main() {
     final result = await fetch();
 
     expect((result as AttachmentFetched).bytes, bytes);
-    expect(captured().headers?['If-None-Match'], '"abc"');
+    expect(captured().headers?['If-None-Match'], '"$sha"');
   });
 
   test('hors connexion : la pièce déjà là est rendue', () async {
-    await cache.write('abc', bytes);
+    await cache.write(sha, bytes);
     when(
       () => dio.get<List<int>>(any(), options: any(named: 'options')),
     ).thenThrow(DioException(requestOptions: RequestOptions(path: '/file')));
@@ -94,7 +97,7 @@ void main() {
   test(
     'refus du serveur : « indisponible », même avec la pièce en cache',
     () async {
-      await cache.write('abc', bytes);
+      await cache.write(sha, bytes);
       when(
         () => dio.get<List<int>>(any(), options: any(named: 'options')),
       ).thenThrow(
@@ -115,4 +118,36 @@ void main() {
       );
     },
   );
+
+  test(
+    'des octets qui ne portent pas l empreinte ne sont jamais rendus',
+    () async {
+      when(
+        () => dio.get<List<int>>(any(), options: any(named: 'options')),
+      ).thenAnswer((_) async => response(200, [9, 9, 9]));
+
+      final result = await fetch();
+
+      expect(
+        (result as AttachmentFetchFailed).error,
+        AttachmentFetchError.unavailable,
+      );
+      expect(await fetcher.isCached(ref), isFalse);
+    },
+  );
+
+  test('un fichier altéré dans le cache n est ni rendu ni revalidé', () async {
+    await cache.write(sha, Uint8List.fromList([6, 6, 6]));
+    expect(await fetcher.isCached(ref), isFalse);
+    when(
+      () => dio.get<List<int>>(any(), options: any(named: 'options')),
+    ).thenThrow(DioException(requestOptions: RequestOptions(path: '/file')));
+
+    final result = await fetch();
+
+    expect(
+      (result as AttachmentFetchFailed).error,
+      AttachmentFetchError.offline,
+    );
+  });
 }
