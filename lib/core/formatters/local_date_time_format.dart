@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/helpers/school_time.dart';
+
 /// `JJ/MM/AAAA à HH:MM`, en heure locale.
 ///
 /// Formateur **pur**, sans données de locale à initialiser : il se rend dans un
@@ -13,11 +15,18 @@
 ///
 /// L'instant est ramené au fuseau local : les horodatages stockés sont en UTC,
 /// et les afficher tels quels décalerait le geste de plusieurs heures.
-String formatLocalDateTime(DateTime instant) {
-  final local = instant.toLocal();
+String formatLocalDateTime(DateTime instant) => _dayAndTime(instant.toLocal());
+
+/// `JJ/MM/AAAA HH:MM` **à l'heure de l'école**, quel que soit le fuseau du
+/// poste — voir [SchoolTime]. C'est l'heure d'un geste métier (une vente, un
+/// ticket) : la journée de caisse se découpe à Kinshasa, sa lecture aussi.
+String formatSchoolDateTime(DateTime instant) =>
+    _dayAndTime(SchoolTime.wallClock(instant));
+
+String _dayAndTime(DateTime wall) {
   String two(int value) => value.toString().padLeft(2, '0');
-  return '${two(local.day)}/${two(local.month)}/${local.year} '
-      '${two(local.hour)}:${two(local.minute)}';
+  return '${two(wall.day)}/${two(wall.month)}/${wall.year} '
+      '${two(wall.hour)}:${two(wall.minute)}';
 }
 
 /// Un jour `YYYY-MM-DD` (sans fuseau) écrit `jj/mm/aaaa`. Rendu tel quel s'il

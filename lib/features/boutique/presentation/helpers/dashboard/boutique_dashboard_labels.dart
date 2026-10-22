@@ -1,5 +1,4 @@
 import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
-import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_bucket.dart';
@@ -48,14 +47,6 @@ abstract final class BoutiqueDashboardLabels {
     if (day == null) return bucket.key;
     String two(int v) => v.toString().padLeft(2, '0');
     return '${two(day.day)}/${two(day.month)}';
-  }
-
-  /// « 20/10/2026 18:05 » **à l'heure de l'école** — la date d'une photo hors
-  /// ligne doit se lire dans le même temps que la fenêtre qu'elle montre.
-  static String schoolDateTime(DateTime instant) {
-    final wall = SchoolTime.wallClock(instant);
-    String two(int v) => v.toString().padLeft(2, '0');
-    return '${formatLocalDay(wall)} ${two(wall.hour)}:${two(wall.minute)}';
   }
 
   /// Un montant par devise, l'un sous l'autre — jamais additionnés.

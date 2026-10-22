@@ -114,6 +114,8 @@ void main() {
     expect(find.textContaining('Kabeya Junior'), findsOneWidget);
     expect(find.textContaining('Taille M'), findsOneWidget);
     expect(find.text('Ndombo Lelo Willy'), findsOneWidget);
+    // 9 h 42 UTC : la vente se lit à 10 h 42, l'heure de l'école.
+    expect(find.text('30/08/2026 10:42'), findsOneWidget);
   });
 
   testWidgets('« encaissé par » est NOMMÉ', (tester) async {
@@ -152,7 +154,8 @@ void main() {
     // refuser la seconde sortie laisserait le guichet sans recours.
     await pumpDetail(
       tester,
-      detail: _detail(printedAt: DateTime(2026, 8, 30, 10, 15)),
+      // 9 h 15 UTC = 10 h 15 à Kinshasa, quel que soit le fuseau du poste.
+      detail: _detail(printedAt: DateTime.utc(2026, 8, 30, 9, 15)),
     );
 
     expect(find.text('Réimprimer le ticket'), findsOneWidget);

@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/provisional_sale_reference.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 
 /// Une vente de l'historique.
@@ -160,13 +161,16 @@ class BoutiqueSaleTile extends StatelessWidget {
   static String _timeOf(String soldAt, DateTime now) {
     final parsed = DateTime.tryParse(soldAt);
     if (parsed == null) return soldAt;
-    final local = parsed.toLocal();
+    // L'heure de l'école, et « aujourd'hui » aussi : la fenêtre du tableau de
+    // bord se découpe à Kinshasa, la ligne doit se lire dans le même temps.
+    final wall = SchoolTime.wallClock(parsed);
+    final today = SchoolTime.today(now);
     String two(int value) => value.toString().padLeft(2, '0');
-    final time = '${two(local.hour)}:${two(local.minute)}';
+    final time = '${two(wall.hour)}:${two(wall.minute)}';
     final isToday =
-        local.year == now.year &&
-        local.month == now.month &&
-        local.day == now.day;
-    return isToday ? time : '${two(local.day)}/${two(local.month)} $time';
+        wall.year == today.year &&
+        wall.month == today.month &&
+        wall.day == today.day;
+    return isToday ? time : '${two(wall.day)}/${two(wall.month)} $time';
   }
 }

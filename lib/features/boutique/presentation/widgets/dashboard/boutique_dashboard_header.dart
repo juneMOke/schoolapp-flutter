@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
+import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -57,7 +58,7 @@ class BoutiqueDashboardHeader extends StatelessWidget {
           StatusBadge(
             icon: Icons.cloud_off_outlined,
             label: l10n.boutiqueDashboardCachedBadge(
-              BoutiqueDashboardLabels.schoolDateTime(cachedAt),
+              formatSchoolDateTime(cachedAt),
             ),
             color: AppColors.warning,
           ),
