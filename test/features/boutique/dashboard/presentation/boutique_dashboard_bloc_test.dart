@@ -260,6 +260,52 @@ void main() {
     await bloc.close();
   });
 
+  test('un second démarrage pour la même année ne relit rien', () async {
+    final bloc = build()
+      ..add(started)
+      ..add(started);
+    await bloc.stream.firstWhere(
+      (s) => s.status == BoutiqueDashboardStatus.ready,
+    );
+    await Future<void>.delayed(Duration.zero);
+    verify(
+      () => getStats(
+        academicYearId: any(named: 'academicYearId'),
+        window: any(named: 'window'),
+      ),
+    ).called(1);
+    await bloc.close();
+  });
+
+  test('un geste de période avant la première fenêtre est ignoré', () async {
+    final bloc = build()
+      ..add(const BoutiqueDashboardPeriodChanged(DashboardPeriod.today));
+    await Future<void>.delayed(Duration.zero);
+    expect(bloc.state.period, DashboardPeriod.sevenDays);
+    verifyNever(() => preference.write(any()));
+    await bloc.close();
+  });
+
+  blocTest<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+    'actualiser recalcule la fenêtre : minuit passé, l\'écran suit',
+    build: () => BoutiqueDashboardBloc(
+      getStats: getStats,
+      getProvisional: getProvisional,
+      getLatest: getLatest,
+      preference: preference,
+      // 0 h 10 le 22 à Kinshasa.
+      now: () => DateTime.utc(2026, 10, 21, 23, 10),
+    ),
+    seed: () => BoutiqueDashboardState(
+      status: BoutiqueDashboardStatus.ready,
+      academicYearId: 'ay-1',
+      window: sevenDays,
+      stats: statsOf(),
+    ),
+    act: (bloc) => bloc.add(const BoutiqueDashboardRefreshRequested()),
+    verify: (bloc) => expect(bloc.state.window!.to, DateTime(2026, 10, 22)),
+  );
+
   group('isDeltaComparable', () {
     test(
       'une fenêtre précédente qui chevauche la rentrée ne se compare pas',

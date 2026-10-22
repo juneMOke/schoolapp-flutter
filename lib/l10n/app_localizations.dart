@@ -14634,17 +14634,29 @@ abstract class AppLocalizations {
   /// **'Offline — figures from {date}'**
   String boutiqueDashboardCachedBadge(String date);
 
-  /// No description provided for @boutiqueDashboardProvisionalTitle.
+  /// No description provided for @boutiqueDashboardProvisionalNotice.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, one{1 provisional ticket awaiting sync} other{{count} provisional tickets awaiting sync}}'**
-  String boutiqueDashboardProvisionalTitle(int count);
+  /// **'{count, plural, =0{No provisional ticket} one{1 provisional ticket awaiting sync} other{{count} provisional tickets awaiting sync}} — collected on this device for {amounts}. They are counted here; the sealed receipt will be issued when the network is back.'**
+  String boutiqueDashboardProvisionalNotice(int count, String amounts);
 
-  /// No description provided for @boutiqueDashboardProvisionalMessage.
+  /// No description provided for @boutiqueDashboardTopRank.
   ///
   /// In en, this message translates to:
-  /// **'Collected on this device for {amounts}. They are counted here; the sealed receipt will be issued when the network is back.'**
-  String boutiqueDashboardProvisionalMessage(String amounts);
+  /// **'{rank}. {label}'**
+  String boutiqueDashboardTopRank(int rank, String label);
+
+  /// No description provided for @boutiqueDashboardQuoted.
+  ///
+  /// In en, this message translates to:
+  /// **'“{text}”'**
+  String boutiqueDashboardQuoted(String text);
+
+  /// No description provided for @boutiqueDashboardRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get boutiqueDashboardRefresh;
 
   /// No description provided for @boutiqueDashboardKpiRevenue.
   ///

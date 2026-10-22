@@ -47,7 +47,10 @@ class BoutiqueDashboardContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final block = state.selectedBlock;
-    final family = block == null ? null : BoutiqueFamilyCard(block: block);
+    // Une carte titrée et vide ne dit rien : sans montant, elle n'est pas posée.
+    final family = block == null || !block.families.any((f) => f.amount > 0)
+        ? null
+        : BoutiqueFamilyCard(block: block);
     final top = stats.topArticles.isEmpty
         ? null
         : BoutiqueTopArticlesCard(

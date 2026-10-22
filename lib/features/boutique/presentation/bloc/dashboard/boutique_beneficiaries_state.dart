@@ -30,6 +30,10 @@ class BoutiqueBeneficiariesState extends Equatable {
   /// période** : on suit le même article sur 30 jours.
   final String? articleId;
   final String? classId;
+
+  /// Le libellé de la classe choisie, retenu au geste : une autre période peut
+  /// ne plus la porter dans son menu, et le filtre resterait actif sans nom.
+  final String? selectedClassLabel;
   final String search;
 
   final List<BeneficiaryArticleOption> articleOptions;
@@ -42,6 +46,7 @@ class BoutiqueBeneficiariesState extends Equatable {
     this.failure,
     this.articleId,
     this.classId,
+    this.selectedClassLabel,
     this.search = '',
     this.articleOptions = const [],
     this.expanded = false,
@@ -59,12 +64,14 @@ class BoutiqueBeneficiariesState extends Equatable {
     return null;
   }
 
-  /// Le libellé de la classe filtrée, lu dans le menu de la dernière réponse.
+  /// Le libellé de la classe filtrée : celui du menu de la dernière réponse,
+  /// ou, s'il n'y figure plus, celui retenu au geste.
   String? get classLabel {
+    if (classId == null) return null;
     for (final c in page?.classes ?? const []) {
       if (c.id == classId) return c.label;
     }
-    return null;
+    return selectedClassLabel;
   }
 
   BoutiqueBeneficiariesState copyWith({
@@ -73,6 +80,7 @@ class BoutiqueBeneficiariesState extends Equatable {
     Object? failure = _undefined,
     Object? articleId = _undefined,
     Object? classId = _undefined,
+    Object? selectedClassLabel = _undefined,
     String? search,
     List<BeneficiaryArticleOption>? articleOptions,
     bool? expanded,
@@ -89,6 +97,9 @@ class BoutiqueBeneficiariesState extends Equatable {
         ? this.articleId
         : articleId as String?,
     classId: identical(classId, _undefined) ? this.classId : classId as String?,
+    selectedClassLabel: identical(selectedClassLabel, _undefined)
+        ? this.selectedClassLabel
+        : selectedClassLabel as String?,
     search: search ?? this.search,
     articleOptions: articleOptions ?? this.articleOptions,
     expanded: expanded ?? this.expanded,
@@ -102,6 +113,7 @@ class BoutiqueBeneficiariesState extends Equatable {
     failure,
     articleId,
     classId,
+    selectedClassLabel,
     search,
     articleOptions,
     expanded,

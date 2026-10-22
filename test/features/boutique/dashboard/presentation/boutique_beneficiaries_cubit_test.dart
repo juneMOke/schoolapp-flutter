@@ -164,6 +164,31 @@ void main() {
     await cubit.close();
   });
 
+  test(
+    'la classe choisie reste nommée quand une période ne la porte plus',
+    () async {
+      final cubit = build();
+      await cubit.start(academicYearId: 'ay-1', window: sevenDays);
+      await cubit.classSelected('c-6a');
+      when(() => getBeneficiaries(any())).thenAnswer(
+        (_) async => const Right(
+          BoutiqueBeneficiariesPage(totalElements: 0, page: 0, size: 100),
+        ),
+      );
+      await cubit.windowChanged(
+        DashboardWindow(
+          from: DateTime(2026, 10, 21),
+          to: DateTime(2026, 10, 21),
+        ),
+      );
+      expect(cubit.state.classId, 'c-6a');
+      expect(cubit.state.classLabel, '6e A');
+      await cubit.resetFilters();
+      expect(cubit.state.classLabel, isNull);
+      await cubit.close();
+    },
+  );
+
   test('réessayer rejoue la même question, filtres compris', () async {
     final cubit = build();
     await cubit.start(academicYearId: 'ay-1', window: sevenDays);

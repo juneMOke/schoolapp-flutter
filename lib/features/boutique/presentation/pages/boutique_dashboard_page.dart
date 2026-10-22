@@ -130,27 +130,53 @@ class _DashboardViewState extends State<_DashboardView> {
                 eyebrow: l10n.boutiqueDashboardEyebrow,
                 title: l10n.boutiqueDashboardTitle,
               ),
-        child: BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-          builder: (context, state) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              BoutiqueDashboardHeader(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+              buildWhen: (prev, curr) =>
+                  prev.period != curr.period ||
+                  prev.window != curr.window ||
+                  prev.cachedAt != curr.cachedAt,
+              builder: (context, state) => BoutiqueDashboardHeader(
                 period: state.period,
                 window: state.window,
                 cachedAt: state.cachedAt,
                 onPeriodChanged: (period) => context
                     .read<BoutiqueDashboardBloc>()
                     .add(BoutiqueDashboardPeriodChanged(period)),
+                onRefresh: () => context.read<BoutiqueDashboardBloc>().add(
+                  const BoutiqueDashboardRefreshRequested(),
+                ),
                 onOpenTill: _openTill,
               ),
-              const SizedBox(height: AppDimensions.spacingM),
-              // Visible même sous une erreur réseau : ces ventes-là, le poste
-              // les connaît sans le serveur.
-              if (!state.provisional.isEmpty) ...[
-                BoutiqueProvisionalNotice(provisional: state.provisional),
-                const SizedBox(height: AppDimensions.spacingM),
-              ],
-              BoutiqueDashboardBody(
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            // Visible même sous une erreur réseau : ces ventes-là, le poste
+            // les connaît sans le serveur.
+            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+              buildWhen: (prev, curr) => prev.provisional != curr.provisional,
+              builder: (context, state) => state.provisional.isEmpty
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: AppDimensions.spacingM,
+                      ),
+                      child: BoutiqueProvisionalNotice(
+                        provisional: state.provisional,
+                      ),
+                    ),
+            ),
+            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+              buildWhen: (prev, curr) =>
+                  prev.status != curr.status ||
+                  prev.stats != curr.stats ||
+                  prev.failure != curr.failure ||
+                  prev.refreshing != curr.refreshing ||
+                  prev.latestSales != curr.latestSales ||
+                  prev.selectedCurrency != curr.selectedCurrency ||
+                  prev.window != curr.window,
+              builder: (context, state) => BoutiqueDashboardBody(
                 state: state,
                 now: DateTime.now(),
                 beneficiariesKey: _beneficiariesKey,
@@ -158,8 +184,8 @@ class _DashboardViewState extends State<_DashboardView> {
                 onOpenSale: _openSale,
                 onOpenTill: _openTill,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

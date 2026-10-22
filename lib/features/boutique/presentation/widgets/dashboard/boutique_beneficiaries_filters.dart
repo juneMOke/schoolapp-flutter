@@ -60,6 +60,16 @@ class BoutiqueBeneficiariesFilters extends StatelessWidget {
               ),
               for (final c in state.page?.classes ?? const [])
                 EteeloSelectItem(value: c.id, label: c.label),
+              // La classe choisie reste au menu, même si cette période ne la
+              // porte plus : le filtre actif doit se voir.
+              if (state.classId != null &&
+                  !(state.page?.classes ?? const []).any(
+                    (c) => c.id == state.classId,
+                  ))
+                EteeloSelectItem(
+                  value: state.classId!,
+                  label: state.classLabel ?? state.classId!,
+                ),
             ],
           ),
         ),

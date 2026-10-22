@@ -57,14 +57,23 @@ class BoutiqueDashboardBloc
     BoutiqueDashboardStarted event,
     Emitter<BoutiqueDashboardState> emit,
   ) async {
-    final period = await _preference.read() ?? DashboardPeriod.defaultPeriod;
+    // Idempotent : le gate d'année redemande le contexte au montage et remonte
+    // la vue, qui redémarrerait l'écran pour la même année.
+    if (event.academicYearId == state.academicYearId &&
+        state.status != BoutiqueDashboardStatus.initial) {
+      return;
+    }
+    // L'année est posée AVANT la lecture de la préférence : un second
+    // démarrage arrivé pendant cet `await` se reconnaît et s'arrête.
     emit(
       state.copyWith(
         academicYearId: event.academicYearId,
         yearStart: event.yearStart,
-        period: period,
+        status: BoutiqueDashboardStatus.loading,
       ),
     );
+    final period = await _preference.read() ?? DashboardPeriod.defaultPeriod;
+    emit(state.copyWith(period: period));
     await _load(emit, keepData: false);
   }
 
@@ -72,7 +81,9 @@ class BoutiqueDashboardBloc
     BoutiqueDashboardPeriodChanged event,
     Emitter<BoutiqueDashboardState> emit,
   ) async {
-    if (event.period == state.period && state.window != null) return;
+    // Avant la première fenêtre, la période mémorisée est encore en lecture :
+    // un geste arrivé là serait écrasé par elle.
+    if (state.window == null || event.period == state.period) return;
     // La période est posée AVANT la lecture : le sélecteur suit le doigt.
     emit(state.copyWith(period: event.period));
     await _preference.write(event.period);

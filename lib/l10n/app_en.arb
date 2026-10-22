@@ -6031,22 +6031,37 @@
       }
     }
   },
-  "boutiqueDashboardProvisionalTitle": "{count, plural, one{1 provisional ticket awaiting sync} other{{count} provisional tickets awaiting sync}}",
-  "@boutiqueDashboardProvisionalTitle": {
+  "boutiqueDashboardProvisionalNotice": "{count, plural, =0{No provisional ticket} one{1 provisional ticket awaiting sync} other{{count} provisional tickets awaiting sync}} — collected on this device for {amounts}. They are counted here; the sealed receipt will be issued when the network is back.",
+  "@boutiqueDashboardProvisionalNotice": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "boutiqueDashboardProvisionalMessage": "Collected on this device for {amounts}. They are counted here; the sealed receipt will be issued when the network is back.",
-  "@boutiqueDashboardProvisionalMessage": {
-    "placeholders": {
+      },
       "amounts": {
         "type": "String"
       }
     }
   },
+  "boutiqueDashboardTopRank": "{rank}. {label}",
+  "@boutiqueDashboardTopRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardQuoted": "“{text}”",
+  "@boutiqueDashboardQuoted": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardRefresh": "Refresh",
   "boutiqueDashboardKpiRevenue": "Revenue",
   "boutiqueDashboardKpiSales": "Sales",
   "boutiqueDashboardKpiAverageBasket": "Average basket",

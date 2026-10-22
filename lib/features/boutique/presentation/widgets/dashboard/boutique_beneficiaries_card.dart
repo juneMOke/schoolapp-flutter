@@ -7,6 +7,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiaries_filters.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiary_tile.dart';
@@ -72,6 +74,8 @@ class _Body extends StatelessWidget {
       return BoutiqueResultsErrorState(
         failure: state.failure!,
         onRetry: cubit.retry,
+        onReconnect: () =>
+            context.read<AuthBloc>().add(const AuthLogoutRequested()),
         surface: BoutiqueErrorSurface.dashboard,
       );
     }
@@ -87,7 +91,9 @@ class _Body extends StatelessWidget {
           EteeloEmptyResult(
             label: l10n.boutiqueBeneficiariesEmptyTitle,
             description: state.hasFilters
-                ? l10n.boutiqueBeneficiariesEmptyFiltered(_filtersOf(state))
+                ? l10n.boutiqueBeneficiariesEmptyFiltered(
+                    _filtersOf(state, l10n),
+                  )
                 : l10n.boutiqueBeneficiariesEmptyNone,
             medallionIcon: Icons.person_search_outlined,
             fullWidthCard: true,
@@ -140,10 +146,15 @@ class _Body extends StatelessWidget {
   }
 
   /// « « Polo Lacoste » · 6e A · « kab » » — l'état vide NOMME ce qui filtre.
-  static String _filtersOf(BoutiqueBeneficiariesState state) => [
-    if (state.articleLabel != null) '« ${state.articleLabel} »',
+  static String _filtersOf(
+    BoutiqueBeneficiariesState state,
+    AppLocalizations l10n,
+  ) => [
+    if (state.articleLabel != null)
+      l10n.boutiqueDashboardQuoted(state.articleLabel!),
     if (state.classLabel != null) state.classLabel!,
-    if (state.search.trim().isNotEmpty) '« ${state.search.trim()} »',
+    if (state.search.trim().isNotEmpty)
+      l10n.boutiqueDashboardQuoted(state.search.trim()),
   ].join(' · ');
 }
 

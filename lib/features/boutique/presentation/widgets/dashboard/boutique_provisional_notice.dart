@@ -27,9 +27,10 @@ class BoutiqueProvisionalNotice extends StatelessWidget {
       ink: AppColors.warningInk,
       background: AppColors.boutiqueUnresolvedSurface,
       border: AppColors.warning,
-      message:
-          '${l10n.boutiqueDashboardProvisionalTitle(provisional.saleCount)} — '
-          '${l10n.boutiqueDashboardProvisionalMessage(amounts)}',
+      message: l10n.boutiqueDashboardProvisionalNotice(
+        provisional.saleCount,
+        amounts,
+      ),
     );
   }
 }

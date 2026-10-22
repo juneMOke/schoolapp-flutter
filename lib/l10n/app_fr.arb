@@ -6106,22 +6106,37 @@
       }
     }
   },
-  "boutiqueDashboardProvisionalTitle": "{count, plural, one{1 ticket provisoire en attente de synchronisation} other{{count} tickets provisoires en attente de synchronisation}}",
-  "@boutiqueDashboardProvisionalTitle": {
+  "boutiqueDashboardProvisionalNotice": "{count, plural, =0{Aucun ticket provisoire} one{1 ticket provisoire en attente de synchronisation} other{{count} tickets provisoires en attente de synchronisation}} — encaissés sur ce poste pour {amounts}. Ils sont comptés ici ; le reçu scellé sera émis au retour du réseau.",
+  "@boutiqueDashboardProvisionalNotice": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "boutiqueDashboardProvisionalMessage": "Encaissés sur ce poste pour {amounts}. Ils sont comptés ici ; le reçu scellé sera émis au retour du réseau.",
-  "@boutiqueDashboardProvisionalMessage": {
-    "placeholders": {
+      },
       "amounts": {
         "type": "String"
       }
     }
   },
+  "boutiqueDashboardTopRank": "{rank}. {label}",
+  "@boutiqueDashboardTopRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardQuoted": "« {text} »",
+  "@boutiqueDashboardQuoted": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardRefresh": "Actualiser",
   "boutiqueDashboardKpiRevenue": "Recettes",
   "boutiqueDashboardKpiSales": "Ventes",
   "boutiqueDashboardKpiAverageBasket": "Panier moyen",
@@ -6174,7 +6189,7 @@
   "boutiqueDashboardCurrencyA11y": "Devise affichée",
   "boutiqueDashboardFamiliesTitle": "Par famille",
   "boutiqueDashboardFamiliesSubtitle": "Ce que pèse chaque famille du catalogue",
-  "boutiqueDashboardFamilyMeta": "{percent} % du total · {count, plural, one{1 article} other{{count} articles}}",
+  "boutiqueDashboardFamilyMeta": "{percent} % du total · {count, plural, =0{aucun article} one{1 article} other{{count} articles}}",
   "@boutiqueDashboardFamilyMeta": {
     "placeholders": {
       "percent": {
@@ -6220,7 +6235,7 @@
   "boutiqueDashboardErrorServer": "Le serveur n'a pas pu calculer les chiffres de la boutique. Réessayez ; aucune vente n'est perdue.",
   "boutiqueDashboardErrorNetwork": "Les chiffres de la boutique se calculent sur le serveur, et aucune photo n'est encore gardée sur ce poste. Réessayez une fois la connexion revenue.",
   "boutiqueBeneficiariesTitle": "Élèves concernés",
-  "boutiqueBeneficiariesSubtitleAll": "Bénéficiaires des achats · {count, plural, one{1 élève} other{{count} élèves}}",
+  "boutiqueBeneficiariesSubtitleAll": "Bénéficiaires des achats · {count, plural, =0{aucun élève} one{1 élève} other{{count} élèves}}",
   "@boutiqueBeneficiariesSubtitleAll": {
     "placeholders": {
       "count": {
@@ -6228,7 +6243,7 @@
       }
     }
   },
-  "boutiqueBeneficiariesSubtitleArticle": "Ont reçu « {article} » · {count, plural, one{1 élève} other{{count} élèves}}",
+  "boutiqueBeneficiariesSubtitleArticle": "Ont reçu « {article} » · {count, plural, =0{aucun élève} one{1 élève} other{{count} élèves}}",
   "@boutiqueBeneficiariesSubtitleArticle": {
     "placeholders": {
       "article": {
@@ -6286,7 +6301,7 @@
   },
   "boutiqueBeneficiariesCollapse": "Réduire",
   "boutiqueBeneficiariesLoadMore": "Charger la suite",
-  "boutiqueBeneficiariesWalkIn": "{count, plural, one{1 achat sans élève désigné (niveau choisi à la caisse) n'est pas listé ici.} other{{count} achats sans élève désigné (niveau choisi à la caisse) ne sont pas listés ici.}}",
+  "boutiqueBeneficiariesWalkIn": "{count, plural, =0{Aucun achat sans élève désigné.} one{1 achat sans élève désigné (niveau choisi à la caisse) n'est pas listé ici.} other{{count} achats sans élève désigné (niveau choisi à la caisse) ne sont pas listés ici.}}",
   "@boutiqueBeneficiariesWalkIn": {
     "placeholders": {
       "count": {

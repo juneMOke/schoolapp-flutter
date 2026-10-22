@@ -9140,20 +9140,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String boutiqueDashboardProvisionalTitle(int count) {
+  String boutiqueDashboardProvisionalNotice(int count, String amounts) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '$count provisional tickets awaiting sync',
       one: '1 provisional ticket awaiting sync',
+      zero: 'No provisional ticket',
     );
-    return '$_temp0';
+    return '$_temp0 — collected on this device for $amounts. They are counted here; the sealed receipt will be issued when the network is back.';
   }
 
   @override
-  String boutiqueDashboardProvisionalMessage(String amounts) {
-    return 'Collected on this device for $amounts. They are counted here; the sealed receipt will be issued when the network is back.';
+  String boutiqueDashboardTopRank(int rank, String label) {
+    return '$rank. $label';
   }
+
+  @override
+  String boutiqueDashboardQuoted(String text) {
+    return '“$text”';
+  }
+
+  @override
+  String get boutiqueDashboardRefresh => 'Refresh';
 
   @override
   String get boutiqueDashboardKpiRevenue => 'Revenue';

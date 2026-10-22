@@ -3,7 +3,6 @@ import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
@@ -23,12 +22,17 @@ class BoutiqueDashboardHeader extends StatelessWidget {
   final ValueChanged<DashboardPeriod> onPeriodChanged;
   final VoidCallback onOpenTill;
 
+  /// Relit la période retenue : rien d'autre ne fait revenir l'écran sur la
+  /// journée qui a tourné, ni ne retire les tickets partis entre-temps.
+  final VoidCallback onRefresh;
+
   const BoutiqueDashboardHeader({
     super.key,
     required this.period,
     required this.window,
     required this.onPeriodChanged,
     required this.onOpenTill,
+    required this.onRefresh,
     this.cachedAt,
   });
 
@@ -53,7 +57,7 @@ class BoutiqueDashboardHeader extends StatelessWidget {
           StatusBadge(
             icon: Icons.cloud_off_outlined,
             label: l10n.boutiqueDashboardCachedBadge(
-              formatLocalDateTime(cachedAt),
+              BoutiqueDashboardLabels.schoolDateTime(cachedAt),
             ),
             color: AppColors.warning,
           ),
@@ -67,6 +71,12 @@ class BoutiqueDashboardHeader extends StatelessWidget {
             BoutiqueDashboardPeriodFilter(
               selected: period,
               onChanged: onPeriodChanged,
+            ),
+            EteeloButton.ghost(
+              label: l10n.boutiqueDashboardRefresh,
+              icon: Icons.refresh_rounded,
+              onPressed: onRefresh,
+              fullWidth: false,
             ),
             EteeloButton.primary(
               label: l10n.boutiqueDashboardOpenTill,

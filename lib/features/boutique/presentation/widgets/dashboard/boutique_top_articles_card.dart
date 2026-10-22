@@ -33,15 +33,8 @@ class BoutiqueTopArticlesCard extends StatelessWidget {
         rows: [
           for (var i = 0; i < articles.length; i++)
             EteeloBarRow(
-              label: '${i + 1}. ${articles[i].label}',
-              caption: [
-                if (articles[i].family != null)
-                  BoutiqueFamilyStyle.labelOf(articles[i].family, l10n),
-                if (articles[i].amounts.isNotEmpty)
-                  BoutiqueDashboardLabels.moneyInline(
-                    articles[i].amounts.entries,
-                  ),
-              ].join(' · '),
+              label: l10n.boutiqueDashboardTopRank(i + 1, articles[i].label),
+              caption: _captionOf(articles[i], l10n),
               value: articles[i].quantity,
               valueLabel: l10n.boutiqueDashboardTopQuantity(
                 articles[i].quantity,
@@ -53,5 +46,17 @@ class BoutiqueTopArticlesCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// « Fournitures · 110,00 $ » — `null` quand il n'y a rien à dire, pour ne
+  /// pas laisser une ligne vide sous le libellé.
+  static String? _captionOf(BoutiqueTopArticle article, AppLocalizations l10n) {
+    final parts = [
+      if (article.family != null)
+        BoutiqueFamilyStyle.labelOf(article.family, l10n),
+      if (article.amounts.isNotEmpty)
+        BoutiqueDashboardLabels.moneyInline(article.amounts.entries),
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
   }
 }

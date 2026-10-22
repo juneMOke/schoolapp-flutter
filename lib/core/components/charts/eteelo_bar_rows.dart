@@ -221,7 +221,11 @@ class _Row extends StatelessWidget {
     return Semantics(
       container: true,
       button: row.onTap != null,
-      label: row.semanticsLabel ?? '${row.label}, ${row.valueLabel}',
+      // La précision se lit aussi : sans elle, « 58 % du total » ne serait
+      // donné qu'à qui voit l'écran.
+      label:
+          row.semanticsLabel ??
+          [row.label, ?row.caption, row.valueLabel].join(', '),
       onTap: row.onTap,
       child: ExcludeSemantics(
         child: row.onTap == null

@@ -9215,20 +9215,29 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String boutiqueDashboardProvisionalTitle(int count) {
+  String boutiqueDashboardProvisionalNotice(int count, String amounts) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '$count tickets provisoires en attente de synchronisation',
       one: '1 ticket provisoire en attente de synchronisation',
+      zero: 'Aucun ticket provisoire',
     );
-    return '$_temp0';
+    return '$_temp0 — encaissés sur ce poste pour $amounts. Ils sont comptés ici ; le reçu scellé sera émis au retour du réseau.';
   }
 
   @override
-  String boutiqueDashboardProvisionalMessage(String amounts) {
-    return 'Encaissés sur ce poste pour $amounts. Ils sont comptés ici ; le reçu scellé sera émis au retour du réseau.';
+  String boutiqueDashboardTopRank(int rank, String label) {
+    return '$rank. $label';
   }
+
+  @override
+  String boutiqueDashboardQuoted(String text) {
+    return '« $text »';
+  }
+
+  @override
+  String get boutiqueDashboardRefresh => 'Actualiser';
 
   @override
   String get boutiqueDashboardKpiRevenue => 'Recettes';
@@ -9297,6 +9306,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count articles',
       one: '1 article',
+      zero: 'aucun article',
     );
     return '$percent % du total · $_temp0';
   }
@@ -9362,6 +9372,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count élèves',
       one: '1 élève',
+      zero: 'aucun élève',
     );
     return 'Bénéficiaires des achats · $_temp0';
   }
@@ -9373,6 +9384,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count élèves',
       one: '1 élève',
+      zero: 'aucun élève',
     );
     return 'Ont reçu « $article » · $_temp0';
   }
@@ -9433,6 +9445,7 @@ class AppLocalizationsFr extends AppLocalizations {
           '$count achats sans élève désigné (niveau choisi à la caisse) ne sont pas listés ici.',
       one:
           '1 achat sans élève désigné (niveau choisi à la caisse) n\'est pas listé ici.',
+      zero: 'Aucun achat sans élève désigné.',
     );
     return '$_temp0';
   }

@@ -76,13 +76,24 @@ class BoutiqueBeneficiariesCubit extends Cubit<BoutiqueBeneficiariesState> {
   }
 
   Future<void> classSelected(String? classId) {
-    emit(state.copyWith(classId: classId));
+    String? label;
+    for (final c in state.page?.classes ?? const []) {
+      if (c.id == classId) label = c.label;
+    }
+    emit(state.copyWith(classId: classId, selectedClassLabel: label));
     return _reload();
   }
 
   Future<void> resetFilters() {
     _timer?.cancel();
-    emit(state.copyWith(articleId: null, classId: null, search: ''));
+    emit(
+      state.copyWith(
+        articleId: null,
+        classId: null,
+        selectedClassLabel: null,
+        search: '',
+      ),
+    );
     return _reload();
   }
 
