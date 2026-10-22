@@ -5681,7 +5681,7 @@ abstract class AppLocalizations {
   /// No description provided for @guardianPhoneNumberOptionalNotice.
   ///
   /// In en, this message translates to:
-  /// **'Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.'**
+  /// **'Used to sign in to the parent portal: the link arrives by WhatsApp on this number, and a wrong number gives no access, with no error message. Optional: without a number, this guardian gets no notification and cannot be reused for a sibling.'**
   String get guardianPhoneNumberOptionalNotice;
 
   /// No description provided for @phoneNumberHelp.
@@ -27504,6 +27504,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copies uploaded by parents will show here, student by student.'**
   String get depotsEmptyDescription;
+
+  /// No description provided for @publicationConfirmNotesPortal.
+  ///
+  /// In en, this message translates to:
+  /// **'Also visible on the parent portal, with each grade\'s comment and the class average (from 3 grades)'**
+  String get publicationConfirmNotesPortal;
+
+  /// No description provided for @disciplinaryCaseVisibleToParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to parents on the portal: the incident, its severity and its sanction. A summons shows as a meeting request.'**
+  String get disciplinaryCaseVisibleToParents;
+
+  /// No description provided for @disciplinaryCommentsInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal to the school: comments are never shown to parents.'**
+  String get disciplinaryCommentsInternal;
+
+  /// No description provided for @configurationSchoolPhoneOnPortal.
+  ///
+  /// In en, this message translates to:
+  /// **'The school phone is shown to parents on the portal as the contact, with the logo.'**
+  String get configurationSchoolPhoneOnPortal;
 }
 
 class _AppLocalizationsDelegate

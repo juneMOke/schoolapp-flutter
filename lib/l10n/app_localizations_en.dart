@@ -3567,7 +3567,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianPhoneNumberOptionalNotice =>
-      'Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.';
+      'Used to sign in to the parent portal: the link arrives by WhatsApp on this number, and a wrong number gives no access, with no error message. Optional: without a number, this guardian gets no notification and cannot be reused for a sibling.';
 
   @override
   String get phoneNumberHelp => 'Guardian\'s phone number.';
@@ -17616,4 +17616,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get depotsEmptyDescription =>
       'Copies uploaded by parents will show here, student by student.';
+
+  @override
+  String get publicationConfirmNotesPortal =>
+      'Also visible on the parent portal, with each grade\'s comment and the class average (from 3 grades)';
+
+  @override
+  String get disciplinaryCaseVisibleToParents =>
+      'Visible to parents on the portal: the incident, its severity and its sanction. A summons shows as a meeting request.';
+
+  @override
+  String get disciplinaryCommentsInternal =>
+      'Internal to the school: comments are never shown to parents.';
+
+  @override
+  String get configurationSchoolPhoneOnPortal =>
+      'The school phone is shown to parents on the portal as the contact, with the logo.';
 }

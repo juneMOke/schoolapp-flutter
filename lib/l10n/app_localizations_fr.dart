@@ -3585,7 +3585,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guardianPhoneNumberOptionalNotice =>
-      'Facultatif. Sans numéro, ce tuteur ne recevra aucune notification et n\'aura pas accès au portail parent — et il ne pourra pas être repris pour un frère ou une sœur.';
+      'Sert à la connexion au portail parent : le lien arrive par WhatsApp sur ce numéro, et un mauvais numéro ne donne aucun accès, sans message d\'erreur. Facultatif : sans numéro, ce tuteur ne recevra aucune notification et ne pourra pas être repris pour un frère ou une sœur.';
 
   @override
   String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
@@ -17744,4 +17744,20 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get depotsEmptyDescription =>
       'Les copies déposées par les parents s\'afficheront ici, élève par élève.';
+
+  @override
+  String get publicationConfirmNotesPortal =>
+      'Visibles aussi sur le portail parent, avec le commentaire de chaque note et la moyenne de la classe (à partir de 3 notes)';
+
+  @override
+  String get disciplinaryCaseVisibleToParents =>
+      'Visible par les parents sur le portail : le fait, sa gravité et sa sanction. Une convocation leur apparaît comme une demande d\'entretien.';
+
+  @override
+  String get disciplinaryCommentsInternal =>
+      'Interne à l\'école : les commentaires ne sont jamais montrés aux parents.';
+
+  @override
+  String get configurationSchoolPhoneOnPortal =>
+      'Le téléphone de l\'école est affiché aux parents sur le portail, comme contact, avec le logo.';
 }

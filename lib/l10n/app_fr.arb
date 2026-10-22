@@ -2631,7 +2631,7 @@
   "identificationNumberHelp": "Numéro d'identification officiel.",
   "phoneNumberLabel": "Téléphone",
   "guardianPhoneNumberAbsent": "Sans numéro",
-  "guardianPhoneNumberOptionalNotice": "Facultatif. Sans numéro, ce tuteur ne recevra aucune notification et n'aura pas accès au portail parent — et il ne pourra pas être repris pour un frère ou une sœur.",
+  "guardianPhoneNumberOptionalNotice": "Sert à la connexion au portail parent : le lien arrive par WhatsApp sur ce numéro, et un mauvais numéro ne donne aucun accès, sans message d'erreur. Facultatif : sans numéro, ce tuteur ne recevra aucune notification et ne pourra pas être repris pour un frère ou une sœur.",
   "phoneNumberHelp": "Numéro de téléphone du tuteur.",
   "phoneNumberCountryCodeLabel": "Indicatif pays",
   "phoneNumberInvalidError": "Numéro de téléphone invalide ({expectedDigits} chiffres attendus après l'indicatif).",
@@ -10610,5 +10610,9 @@
   "noteCommentaireCancel": "Annuler",
   "depotIncomplete": "Copie incomplète",
   "depotsEmptyTitle": "Aucun élève dans la classe",
-  "depotsEmptyDescription": "Les copies déposées par les parents s'afficheront ici, élève par élève."
+  "depotsEmptyDescription": "Les copies déposées par les parents s'afficheront ici, élève par élève.",
+  "publicationConfirmNotesPortal": "Visibles aussi sur le portail parent, avec le commentaire de chaque note et la moyenne de la classe (à partir de 3 notes)",
+  "disciplinaryCaseVisibleToParents": "Visible par les parents sur le portail : le fait, sa gravité et sa sanction. Une convocation leur apparaît comme une demande d'entretien.",
+  "disciplinaryCommentsInternal": "Interne à l'école : les commentaires ne sont jamais montrés aux parents.",
+  "configurationSchoolPhoneOnPortal": "Le téléphone de l'école est affiché aux parents sur le portail, comme contact, avec le logo."
 }

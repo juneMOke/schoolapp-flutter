@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/labels/audience_note.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
@@ -216,31 +217,41 @@ class _AddField extends StatelessWidget {
     return PermissionGate.access(
       kDisciplineInstructAccess,
       child: SessionWriteGate(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                minLines: 1,
-                maxLines: 3,
-                inputFormatters: const [SentenceCapitalizationInputFormatter()],
-                textCapitalization: TextCapitalization.sentences,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => onSubmit(),
-                decoration: InputDecoration(
-                  hintText: l10n.disciplinaryCommentAddHint,
-                  isDense: true,
+            AudienceNote.internal(l10n.disciplinaryCommentsInternal),
+            const SizedBox(height: AppDimensions.spacingS),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    minLines: 1,
+                    maxLines: 3,
+                    inputFormatters: const [
+                      SentenceCapitalizationInputFormatter(),
+                    ],
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => onSubmit(),
+                    decoration: InputDecoration(
+                      hintText: l10n.disciplinaryCommentAddHint,
+                      isDense: true,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(width: AppDimensions.spacingS),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(0, AppDimensions.minTouchTarget),
-              ),
-              onPressed: onSubmit,
-              child: Text(l10n.disciplinaryCommentAddAction),
+                const SizedBox(width: AppDimensions.spacingS),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, AppDimensions.minTouchTarget),
+                  ),
+                  onPressed: onSubmit,
+                  child: Text(l10n.disciplinaryCommentAddAction),
+                ),
+              ],
             ),
           ],
         ),
