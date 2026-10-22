@@ -10200,5 +10200,14 @@
   "depotIndisponible": "The copy could not be opened.",
   "depotIllisible": "This copy cannot be displayed.",
   "depotViewerTitle": "Copy · {student}",
-  "@depotViewerTitle": {"placeholders": {"student": {"type": "String"}}}
+  "@depotViewerTitle": {"placeholders": {"student": {"type": "String"}}},
+  "noteCommentaireAdd": "Add a comment",
+  "noteCommentaireEdit": "Edit the comment",
+  "noteCommentaireNeedsNote": "Enter the grade first: the comment goes with it.",
+  "noteCommentaireTitle": "Comment for {student}",
+  "@noteCommentaireTitle": {"placeholders": {"student": {"type": "String"}}},
+  "noteCommentaireLabel": "Comment",
+  "noteCommentaireHelper": "Visible to parents once published. Clear the field to remove the comment.",
+  "noteCommentaireSave": "Save",
+  "noteCommentaireCancel": "Cancel"
 }

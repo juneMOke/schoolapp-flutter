@@ -30,6 +30,9 @@ class EteeloReasonDialog extends StatefulWidget {
   /// La saisie s'arrête à cette longueur (rognage compris côté serveur).
   final int? maxLength;
 
+  /// Le texte déjà là, à modifier plutôt qu'à retaper.
+  final String? initialText;
+
   const EteeloReasonDialog({
     super.key,
     required this.title,
@@ -42,6 +45,7 @@ class EteeloReasonDialog extends StatefulWidget {
     this.destructive = false,
     this.isRequired = true,
     this.maxLength,
+    this.initialText,
   });
 
   static Future<String?> show(
@@ -54,7 +58,9 @@ class EteeloReasonDialog extends StatefulWidget {
 }
 
 class _EteeloReasonDialogState extends State<EteeloReasonDialog> {
-  final TextEditingController _reason = TextEditingController();
+  late final TextEditingController _reason = TextEditingController(
+    text: widget.initialText,
+  );
   bool _showError = false;
 
   @override

@@ -230,6 +230,9 @@ class NoteDeltaDto {
   final String? clientUpdatedAt;
   final String serverUpdatedAt;
 
+  /// Le commentaire de l'enseignant tel que le serveur le tient.
+  final String? commentaire;
+
   const NoteDeltaDto({
     required this.id,
     required this.evaluationId,
@@ -238,6 +241,7 @@ class NoteDeltaDto {
     required this.statut,
     this.clientUpdatedAt,
     required this.serverUpdatedAt,
+    this.commentaire,
   });
 
   factory NoteDeltaDto.fromJson(Map<String, dynamic> j) => NoteDeltaDto(
@@ -258,6 +262,7 @@ class NoteDeltaDto {
     clientUpdatedAt:
         (j['updatedAt'] as String?) ?? (j['clientUpdatedAt'] as String?),
     serverUpdatedAt: j['serverUpdatedAt'] as String,
+    commentaire: j.text('commentaire'),
   );
 
   NoteEvaluationRow toLocalRow(int syncedAt) {
@@ -274,6 +279,7 @@ class NoteDeltaDto {
       serverUpdatedAt: serverMs,
       syncStatus: 'SYNCED',
       syncedAt: syncedAt,
+      commentaire: commentaire,
     );
   }
 }

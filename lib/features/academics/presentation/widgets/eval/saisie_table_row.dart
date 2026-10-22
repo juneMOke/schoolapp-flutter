@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/note_
 import 'package:school_app_flutter/features/academics/presentation/helpers/saisie_draft_controller.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/detail/cours_notation_atoms.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/eval/absence_toggle.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/eval/note_commentaire_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une ligne de saisie en mode Tableau (spec §8) : n° · identité · champ note
@@ -28,6 +29,9 @@ class SaisieTableRow extends StatefulWidget {
   final VoidCallback? onSubmitted;
   final bool inputsEnabled;
 
+  /// Ouvre le commentaire de la note ; `null` : pas de bulle.
+  final ValueChanged<NoteEleve>? onComment;
+
   const SaisieTableRow({
     super.key,
     required this.position,
@@ -36,6 +40,7 @@ class SaisieTableRow extends StatefulWidget {
     required this.focusNode,
     required this.inputsEnabled,
     this.onSubmitted,
+    this.onComment,
   });
 
   @override
@@ -137,6 +142,14 @@ class _SaisieTableRowState extends State<SaisieTableRow> {
             hasError: hasError,
             maxPoints: draft.maxPoints,
           );
+          final onComment = widget.onComment;
+          final comment = onComment == null
+              ? const SizedBox.shrink()
+              : NoteCommentaireButton(
+                  student: widget.student,
+                  enabled: widget.inputsEnabled,
+                  onPressed: () => onComment(widget.student),
+                );
 
           if (constraints.maxWidth < 560) {
             return Column(
@@ -148,7 +161,7 @@ class _SaisieTableRowState extends State<SaisieTableRow> {
                   spacing: AppSpacing.md,
                   runSpacing: AppSpacing.sm,
                   crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [field, toggle, badge],
+                  children: [field, toggle, badge, comment],
                 ),
               ],
             );
@@ -162,6 +175,7 @@ class _SaisieTableRowState extends State<SaisieTableRow> {
               toggle,
               const SizedBox(width: AppSpacing.md),
               badge,
+              comment,
             ],
           );
         },

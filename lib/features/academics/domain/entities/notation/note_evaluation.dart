@@ -15,12 +15,16 @@ class NoteEvaluation extends Equatable {
 
   final StatutNote statut;
 
+  /// Le commentaire de l'enseignant ; `null` s'il n'y en a pas.
+  final String? commentaire;
+
   const NoteEvaluation({
     required this.id,
     required this.evaluationId,
     required this.studentId,
     required this.statut,
     this.pointsObtenus,
+    this.commentaire,
   });
 
   @override
@@ -30,5 +34,6 @@ class NoteEvaluation extends Equatable {
     studentId,
     pointsObtenus,
     statut,
+    commentaire,
   ];
 }

@@ -219,6 +219,7 @@ const TableSchema noteEvaluationTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       synced_at INTEGER,
       rejection_reason TEXT,
+      commentaire TEXT,
       UNIQUE (evaluation_id, student_id)
     )
   ''',

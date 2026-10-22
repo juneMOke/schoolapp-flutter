@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/note_commentaire_action.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/helpers/support_contact.dart';
 import 'package:school_app_flutter/core/navigation/discard_changes_confirmation.dart';
@@ -299,6 +302,13 @@ class _EvalSaisieViewState extends State<_EvalSaisieView> {
                   students: students,
                   draft: _draft,
                   inputsEnabled: !_isSaving,
+                  onComment: (student) => unawaited(
+                    openNoteCommentaire(
+                      context,
+                      evaluationId: _evalId,
+                      student: student,
+                    ),
+                  ),
                 )
               : SaisieFocus(
                   key: const ValueKey<String>('saisie-focus'),

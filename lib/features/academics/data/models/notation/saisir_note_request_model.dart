@@ -12,11 +12,13 @@ class SaisirNoteRequestModel {
   final String studentId;
   final double? pointsObtenus;
   final StatutNote statut;
+  final String? commentaire;
 
   const SaisirNoteRequestModel({
     required this.studentId,
     required this.statut,
     this.pointsObtenus,
+    this.commentaire,
   });
 
   factory SaisirNoteRequestModel.fromDomain(SaisirNoteRequest request) =>
@@ -24,6 +26,7 @@ class SaisirNoteRequestModel {
         studentId: request.studentId,
         statut: request.statut,
         pointsObtenus: request.pointsObtenus,
+        commentaire: request.commentaire,
       );
 
   Map<String, dynamic> toJson() {
@@ -35,6 +38,8 @@ class SaisirNoteRequestModel {
     if (statut == StatutNote.notee) {
       json['pointsObtenus'] = pointsObtenus;
     }
+    // Omis = commentaire gardé ; `""` = retiré (V179).
+    if (commentaire != null) json['commentaire'] = commentaire;
     return json;
   }
 }

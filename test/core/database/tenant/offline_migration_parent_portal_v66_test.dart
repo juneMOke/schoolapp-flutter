@@ -124,4 +124,15 @@ void main() {
       ]),
     );
   });
+
+  test('une note existante gagne la colonne du commentaire, vide', () async {
+    await db.execute(
+      'CREATE TABLE note_evaluation (id TEXT PRIMARY KEY, statut TEXT)',
+    );
+    await db.insert('note_evaluation', {'id': 'n', 'statut': 'NOTEE'});
+
+    await migrateTenantDatabase(db, 65, newVersion: 66);
+
+    expect((await db.query('note_evaluation')).single['commentaire'], isNull);
+  });
 }

@@ -45,3 +45,24 @@ class NoteSaisie extends SaisieNotesEvent {
   @override
   List<Object?> get props => [evaluationId, studentId, statut, pointsObtenus];
 }
+
+/// Pose, remplace ou retire le commentaire de l'enseignant sur la note de
+/// [studentId] — une note déjà saisie : le commentaire voyage avec elle.
+///
+/// [typed] est le texte du champ, tel quel ; le BLoC en tire la valeur à
+/// envoyer (`NoteCommentaire.edit`) : rien si rien ne change, `""` si un
+/// commentaire existant a été vidé.
+class NoteCommentaireSaisi extends SaisieNotesEvent {
+  final String evaluationId;
+  final String studentId;
+  final String typed;
+
+  const NoteCommentaireSaisi({
+    required this.evaluationId,
+    required this.studentId,
+    required this.typed,
+  });
+
+  @override
+  List<Object?> get props => [evaluationId, studentId, typed];
+}

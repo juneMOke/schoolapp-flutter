@@ -20,10 +20,15 @@ class SaisirNoteRequest extends Equatable {
 
   final StatutNote statut;
 
+  /// Le commentaire, selon la règle de `NoteCommentaire` : `null` = inchangé,
+  /// `""` = retiré, texte = remplacé.
+  final String? commentaire;
+
   const SaisirNoteRequest._({
     required this.studentId,
     required this.statut,
     this.pointsObtenus,
+    this.commentaire,
   });
 
   /// Construit la requête pour [statut], en appliquant les invariants ci-dessus.
@@ -31,6 +36,7 @@ class SaisirNoteRequest extends Equatable {
     required String studentId,
     required StatutNote statut,
     double? pointsObtenus,
+    String? commentaire,
   }) {
     if (studentId.isEmpty) {
       throw ArgumentError.value(
@@ -52,12 +58,17 @@ class SaisirNoteRequest extends Equatable {
           studentId: studentId,
           statut: statut,
           pointsObtenus: pointsObtenus,
+          commentaire: commentaire,
         );
       case StatutNote.absentJustifie:
       case StatutNote.absentNonJustifie:
       case StatutNote.enAttente:
         // Points ignorés par le backend : on ne les porte pas (règle 2).
-        return SaisirNoteRequest._(studentId: studentId, statut: statut);
+        return SaisirNoteRequest._(
+          studentId: studentId,
+          statut: statut,
+          commentaire: commentaire,
+        );
       case StatutNote.unknown:
         throw ArgumentError.value(
           statut,
@@ -68,5 +79,5 @@ class SaisirNoteRequest extends Equatable {
   }
 
   @override
-  List<Object?> get props => [studentId, pointsObtenus, statut];
+  List<Object?> get props => [studentId, pointsObtenus, statut, commentaire];
 }

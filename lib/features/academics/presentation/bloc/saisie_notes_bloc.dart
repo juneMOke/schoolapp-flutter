@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/note_commentaire.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/note_eleve.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/note_evaluation.dart';
@@ -34,6 +35,7 @@ class SaisieNotesBloc extends Bloc<SaisieNotesEvent, SaisieNotesState> {
        super(const SaisieNotesState()) {
     on<NotesElevesLoaded>(_onNotesElevesLoaded);
     on<NoteSaisie>(_onNoteSaisie);
+    on<NoteCommentaireSaisi>(_onCommentaire);
   }
 
   Future<void> _onNotesElevesLoaded(
@@ -106,7 +108,52 @@ class SaisieNotesBloc extends Bloc<SaisieNotesEvent, SaisieNotesState> {
       statut: event.statut,
       pointsObtenus: event.pointsObtenus,
     );
+    await _save(emit, event.evaluationId, current, request);
+  }
 
+  /// Le commentaire repart avec la note telle qu'elle est : mêmes statut et
+  /// points. Sans note saisie, il n'a pas de ligne où voyager.
+  Future<void> _onCommentaire(
+    NoteCommentaireSaisi event,
+    Emitter<SaisieNotesState> emit,
+  ) async {
+    final current = state.rowFor(event.studentId);
+    final statut = current?.note.statut;
+    if (current == null || current.isSaving || statut == null) return;
+    if (statut == StatutNote.unknown) return;
+    final commentaire = NoteCommentaire.edit(
+      previous: current.note.commentaire,
+      typed: event.typed,
+    );
+    if (commentaire == null) return;
+    if (commentaire.length > NoteCommentaire.maxLength) {
+      emit(
+        state.withRow(
+          current.copyWith(
+            saveStatus: RowSaveStatus.error,
+            errorType: SaisieNotesErrorType.validation,
+            errorMessage: null,
+          ),
+        ),
+      );
+      return;
+    }
+    final request = SaisirNoteRequest.forStatut(
+      studentId: event.studentId,
+      statut: statut,
+      pointsObtenus: current.note.pointsObtenus,
+      commentaire: commentaire,
+    );
+    await _save(emit, event.evaluationId, current, request);
+  }
+
+  /// Verrouille la ligne, enregistre, puis rend son issue.
+  Future<void> _save(
+    Emitter<SaisieNotesState> emit,
+    String evaluationId,
+    NoteEleveRow current,
+    SaisirNoteRequest request,
+  ) async {
     // Verrou de la ligne. L'émission est synchrone avant le premier `await` :
     // une 2e saisie sur la même ligne verra bien `saving` et sera ignorée.
     emit(
@@ -119,12 +166,12 @@ class SaisieNotesBloc extends Bloc<SaisieNotesEvent, SaisieNotesState> {
       ),
     );
 
-    final result = await _saisirNoteUseCase(event.evaluationId, request);
+    final result = await _saisirNoteUseCase(evaluationId, request);
 
     result.fold(
       (failure) {
         // On relit l'état courant : d'autres lignes ont pu évoluer entre-temps.
-        final row = state.rowFor(event.studentId);
+        final row = state.rowFor(request.studentId);
         if (row == null) return;
         emit(
           state.withRow(
@@ -137,7 +184,7 @@ class SaisieNotesBloc extends Bloc<SaisieNotesEvent, SaisieNotesState> {
         );
       },
       (evaluation) {
-        final row = state.rowFor(event.studentId);
+        final row = state.rowFor(request.studentId);
         if (row == null) return;
         emit(
           state.withRow(
@@ -172,6 +219,7 @@ class SaisieNotesBloc extends Bloc<SaisieNotesEvent, SaisieNotesState> {
     middleName: base.middleName,
     pointsObtenus: evaluation.pointsObtenus,
     statut: evaluation.statut,
+    commentaire: evaluation.commentaire,
   );
 
   SaisieNotesErrorType _mapFailureToErrorType(Failure failure) =>

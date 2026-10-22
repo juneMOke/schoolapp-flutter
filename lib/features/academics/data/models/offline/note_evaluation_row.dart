@@ -28,6 +28,11 @@ class NoteEvaluationRow extends Equatable {
   /// seulement sur un outcome `REJECTED`, surfacé à l'UI.
   final String? rejectionReason;
 
+  /// Le commentaire de l'enseignant (règle de `NoteCommentaire`) : `null` =
+  /// aucun, `""` = vidé ici et pas encore envoyé, texte sinon. Il part tel
+  /// quel avec la ligne : `null` garde, `""` retire.
+  final String? commentaire;
+
   const NoteEvaluationRow({
     required this.id,
     required this.evaluationId,
@@ -39,6 +44,7 @@ class NoteEvaluationRow extends Equatable {
     this.syncStatus = 'PENDING_SYNC',
     this.syncedAt,
     this.rejectionReason,
+    this.commentaire,
   });
 
   static int? _asIntOrNull(Object? v) {
@@ -67,6 +73,7 @@ class NoteEvaluationRow extends Equatable {
         syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
         syncedAt: _asIntOrNull(map['synced_at']),
         rejectionReason: map['rejection_reason'] as String?,
+        commentaire: map['commentaire'] as String?,
       );
 
   Map<String, Object?> toMap() => <String, Object?>{
@@ -80,6 +87,7 @@ class NoteEvaluationRow extends Equatable {
     'sync_status': syncStatus,
     'synced_at': syncedAt,
     'rejection_reason': rejectionReason,
+    'commentaire': commentaire,
   };
 
   SyncState get syncState => SyncState.fromDbValue(syncStatus);
@@ -96,5 +104,6 @@ class NoteEvaluationRow extends Equatable {
     syncStatus,
     syncedAt,
     rejectionReason,
+    commentaire,
   ];
 }

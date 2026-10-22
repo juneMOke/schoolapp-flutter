@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/academics/domain/entities/notation/note_commentaire.dart';
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -69,6 +70,7 @@ class NotationOfflineRepositoryImpl implements NotationRepository {
               rejectionReason: note?.syncState == SyncState.syncError
                   ? note!.rejectionReason ?? ''
                   : null,
+              commentaire: NoteCommentaire.visible(note?.commentaire),
             );
           })
           .toList(growable: false);
@@ -91,6 +93,7 @@ class NotationOfflineRepositoryImpl implements NotationRepository {
           studentId: request.studentId,
           statut: request.statut.toApiValue(),
           pointsObtenus: request.pointsObtenus,
+          commentaire: request.commentaire,
         ),
       ],
     );
@@ -113,6 +116,9 @@ class NotationOfflineRepositoryImpl implements NotationRepository {
           statut: row == null
               ? request.statut
               : StatutNoteX.fromApiValue(row.statut),
+          commentaire: NoteCommentaire.visible(
+            row?.commentaire ?? request.commentaire,
+          ),
         ),
       );
     });

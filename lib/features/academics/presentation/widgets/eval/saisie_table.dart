@@ -17,7 +17,11 @@ class SaisieTable extends StatefulWidget {
     required this.students,
     required this.draft,
     required this.inputsEnabled,
+    this.onComment,
   });
+
+  /// Ouvre le commentaire d'une note ; `null` : pas de bulle.
+  final ValueChanged<NoteEleve>? onComment;
 
   @override
   State<SaisieTable> createState() => _SaisieTableState();
@@ -80,6 +84,7 @@ class _SaisieTableState extends State<SaisieTable> {
                 focusNode: _nodes[i],
                 inputsEnabled: widget.inputsEnabled,
                 onSubmitted: () => _focusNext(i),
+                onComment: widget.onComment,
               ),
           ],
         ),

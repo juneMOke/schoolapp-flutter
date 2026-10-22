@@ -9,6 +9,8 @@ part of 'tenant_migrations.dart';
 ///   valeurs par défaut du serveur (en classe, fin du jour, pas de retard) ;
 /// - les copies déposées par les parents (V180) : `evaluation_depot`, création
 ///   pure, remplie par le re-pull des évaluations ;
+/// - le commentaire de l'enseignant par note (V179) : `note_evaluation`
+///   gagne `commentaire`, rempli par le re-pull des notes ;
 /// - les curseurs des évaluations et des notes repartent de zéro : les
 ///   tablettes ont déjà tiré, en ignorant les champs neufs, les devoirs
 ///   déposés depuis la mise en prod du portail (v0.13.0, 2026-10-20). Sans ce
@@ -16,6 +18,7 @@ part of 'tenant_migrations.dart';
 Future<void> _parentPortalStaffSide(DatabaseExecutor db) async {
   await _createTables(db, attendanceJustificationTables);
   await _createTables(db, evaluationDepotTables);
+  await _addColumns(db, 'note_evaluation', const {'commentaire': 'TEXT'});
   await _addColumns(db, 'evaluation', const {
     'heure_limite': 'TEXT',
     'mode_remise': "TEXT NOT NULL DEFAULT 'EN_CLASSE'",

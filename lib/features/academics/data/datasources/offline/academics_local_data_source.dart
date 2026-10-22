@@ -226,6 +226,8 @@ class AcademicsLocalDataSource {
           {
             'points_obtenus': note.pointsObtenus,
             'statut': note.statut,
+            // Un commentaire non touché reste tel quel (`null` = inchangé).
+            if (note.commentaire != null) 'commentaire': note.commentaire,
             'updated_at': effectiveUpdatedAt,
             'sync_status': SyncState.pendingSync.dbValue,
             'synced_at': null,
@@ -467,6 +469,7 @@ class AcademicsLocalDataSource {
             {
               'points_obtenus': row.pointsObtenus,
               'statut': row.statut,
+              'commentaire': row.commentaire,
               'updated_at': row.updatedAt,
               'server_updated_at': row.serverUpdatedAt,
               'sync_status': SyncState.synced.dbValue,

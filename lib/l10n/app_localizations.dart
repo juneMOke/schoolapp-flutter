@@ -27438,6 +27438,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy · {student}'**
   String depotViewerTitle(String student);
+
+  /// No description provided for @noteCommentaireAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a comment'**
+  String get noteCommentaireAdd;
+
+  /// No description provided for @noteCommentaireEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the comment'**
+  String get noteCommentaireEdit;
+
+  /// No description provided for @noteCommentaireNeedsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the grade first: the comment goes with it.'**
+  String get noteCommentaireNeedsNote;
+
+  /// No description provided for @noteCommentaireTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment for {student}'**
+  String noteCommentaireTitle(String student);
+
+  /// No description provided for @noteCommentaireLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get noteCommentaireLabel;
+
+  /// No description provided for @noteCommentaireHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to parents once published. Clear the field to remove the comment.'**
+  String get noteCommentaireHelper;
+
+  /// No description provided for @noteCommentaireSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get noteCommentaireSave;
+
+  /// No description provided for @noteCommentaireCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get noteCommentaireCancel;
 }
 
 class _AppLocalizationsDelegate

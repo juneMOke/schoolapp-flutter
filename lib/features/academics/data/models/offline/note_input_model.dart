@@ -16,12 +16,16 @@ class NoteInputModel extends Equatable {
   /// ISO-8601 (arbitre LWW).
   final String updatedAt;
 
+  /// `null` = le serveur garde le commentaire ; `""` = il le retire.
+  final String? commentaire;
+
   const NoteInputModel({
     required this.evaluationId,
     required this.studentId,
     required this.statut,
     this.pointsObtenus,
     required this.updatedAt,
+    this.commentaire,
   });
 
   /// `updatedAt` local (epoch ms) → ISO.
@@ -31,6 +35,7 @@ class NoteInputModel extends Equatable {
     statut: row.statut,
     pointsObtenus: row.pointsObtenus,
     updatedAt: EpochIsoHelper.toIso(row.updatedAt),
+    commentaire: row.commentaire,
   );
 
   factory NoteInputModel.fromJson(Map<String, dynamic> json) => NoteInputModel(
@@ -39,6 +44,7 @@ class NoteInputModel extends Equatable {
     statut: json['statut'] as String,
     pointsObtenus: (json['pointsObtenus'] as num?)?.toDouble(),
     updatedAt: json['updatedAt'] as String,
+    commentaire: json['commentaire'] as String?,
   );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -48,6 +54,8 @@ class NoteInputModel extends Equatable {
     // Toujours présent (peut être null) : distingue « absent » d'« omis ».
     'pointsObtenus': pointsObtenus,
     'updatedAt': updatedAt,
+    // Omis plutôt que `null` : le serveur garde alors le commentaire.
+    'commentaire': ?commentaire,
   };
 
   /// `updatedAt` (ISO) reconstruit en epoch ms — la valeur POUSSÉE, base de la
@@ -61,5 +69,6 @@ class NoteInputModel extends Equatable {
     statut,
     pointsObtenus,
     updatedAt,
+    commentaire,
   ];
 }

@@ -10599,5 +10599,13 @@
   "depotEnLigneSeulement": "Copie disponible en ligne",
   "depotIndisponible": "La copie n'a pas pu être ouverte.",
   "depotIllisible": "Cette copie ne peut pas être affichée.",
-  "depotViewerTitle": "Copie · {student}"
+  "depotViewerTitle": "Copie · {student}",
+  "noteCommentaireAdd": "Ajouter un commentaire",
+  "noteCommentaireEdit": "Modifier le commentaire",
+  "noteCommentaireNeedsNote": "Saisissez d'abord la note : le commentaire l'accompagne.",
+  "noteCommentaireTitle": "Commentaire pour {student}",
+  "noteCommentaireLabel": "Commentaire",
+  "noteCommentaireHelper": "Visible par les parents après publication. Videz le champ pour retirer le commentaire.",
+  "noteCommentaireSave": "Enregistrer",
+  "noteCommentaireCancel": "Annuler"
 }

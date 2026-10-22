@@ -17578,4 +17578,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String depotViewerTitle(String student) {
     return 'Copy · $student';
   }
+
+  @override
+  String get noteCommentaireAdd => 'Add a comment';
+
+  @override
+  String get noteCommentaireEdit => 'Edit the comment';
+
+  @override
+  String get noteCommentaireNeedsNote =>
+      'Enter the grade first: the comment goes with it.';
+
+  @override
+  String noteCommentaireTitle(String student) {
+    return 'Comment for $student';
+  }
+
+  @override
+  String get noteCommentaireLabel => 'Comment';
+
+  @override
+  String get noteCommentaireHelper =>
+      'Visible to parents once published. Clear the field to remove the comment.';
+
+  @override
+  String get noteCommentaireSave => 'Save';
+
+  @override
+  String get noteCommentaireCancel => 'Cancel';
 }
