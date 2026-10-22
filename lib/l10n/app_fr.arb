@@ -4444,7 +4444,7 @@
     }
   },
   "financeTillReceiptsUnit": "paiement",
-  "financeTillReceiptsUnsealed": "{count, plural, one{1 sans pièce scellée (saisie de rattrapage)} other{{count} sans pièce scellée (saisies de rattrapage)}}",
+  "financeTillReceiptsUnsealed": "{count, plural, one{{count} sans pièce scellée (saisie de rattrapage)} other{{count} sans pièce scellée (saisies de rattrapage)}}",
   "@financeTillReceiptsUnsealed": {
     "description": "Compte de FENÊTRE, servi par le serveur. Nécessaire et non cosmétique : sur une fenêtre de reprise de cahier la colonne est vide presque partout, et sans ce compte elle se lit comme une table cassée.",
     "placeholders": {
@@ -4505,7 +4505,7 @@
     "description": "Un rendu prend plusieurs secondes sur une grosse fenêtre, et le serveur n'en compose qu'un à la fois : le bouton se désarme et le dit."
   },
   "financeTillReportWaiting": "Patientez…",
-  "financeTillReportBusy": "{seconds, plural, one{Un rapport est déjà en préparation. Réessayez dans 1 seconde.} other{Un rapport est déjà en préparation. Réessayez dans {seconds} secondes.}}",
+  "financeTillReportBusy": "{seconds, plural, one{Un rapport est déjà en préparation. Réessayez dans {seconds} seconde.} other{Un rapport est déjà en préparation. Réessayez dans {seconds} secondes.}}",
   "@financeTillReportBusy": {
     "description": "429 : ce n'est ni une panne ni un refus, c'est un tour de file. Le bouton reste désarmé le temps annoncé plutôt que d'inviter à reproduire ce que le serveur vient de refuser.",
     "placeholders": {
@@ -4665,7 +4665,7 @@
   "@financeTillInsightCrossedEmpty": {
     "description": "La carte reste rendue même à zéro — une carte absente laisse croire qu'on a oublié de regarder."
   },
-  "financeTillInsightCrossedBody": "{count, plural, one{1 versement règle} other{{count} versements règlent}} un frais fixé dans l'autre devise, pour {amounts}{rateClause}. Un écart de taux au moment du contrôle de caisse vient de là.",
+  "financeTillInsightCrossedBody": "{count, plural, one{{count} versement règle} other{{count} versements règlent}} un frais fixé dans l'autre devise, pour {amounts}{rateClause}. Un écart de taux au moment du contrôle de caisse vient de là.",
   "@financeTillInsightCrossedBody": {
     "description": "Portée ÉCRAN : le compte et les montants couvrent toutes les caisses, comme le serveur les construit.",
     "placeholders": {
@@ -5790,7 +5790,7 @@
   "boutiqueFamilyFournitures": "Fournitures",
   "boutiqueFamilyActivites": "Activités",
   "boutiqueFamilyActes": "Actes",
-  "boutiqueArticleCount": "{count, plural, one{1 article} other{{count} articles}}",
+  "boutiqueArticleCount": "{count, plural, one{{count} article} other{{count} articles}}",
   "@boutiqueArticleCount": {
     "placeholders": {
       "count": {
@@ -5850,7 +5850,7 @@
   "boutiqueBlockersPrefix": "À compléter :",
   "boutiqueBlockerEmptyCart": "Panier vide",
   "boutiqueBlockerPhoneIncomplete": "Téléphone incomplet",
-  "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
+  "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{{count} ligne sans niveau} other{{count} lignes sans niveau}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {
       "count": {
@@ -5884,7 +5884,7 @@
     }
   },
   "boutiqueResetFilters": "Réinitialiser les filtres",
-  "boutiqueUnsellableNotice": "{count, plural, one{1 article de ce catalogue n'est pas vendable depuis cette version de l'application.} other{{count} articles de ce catalogue ne sont pas vendables depuis cette version de l'application.}}",
+  "boutiqueUnsellableNotice": "{count, plural, one{{count} article de ce catalogue n'est pas vendable depuis cette version de l'application.} other{{count} articles de ce catalogue ne sont pas vendables depuis cette version de l'application.}}",
   "@boutiqueUnsellableNotice": {
     "placeholders": {
       "count": {
@@ -5929,7 +5929,7 @@
   "boutiqueBeneficiaryNotSynced": "Inscription pas encore synchronisée — vendez au niveau, sans bénéficiaire : le prix est le même.",
   "boutiqueBeneficiaryNoLevel": "Cette inscription ne porte pas de niveau — vendez au niveau, sans bénéficiaire.",
   "boutiqueBeneficiaryLoadFailed": "La liste des élèves n'a pas pu être lue.",
-  "boutiquePayerDirectoryCount": "Déjà au répertoire · {count, plural, one{1 vente} other{{count} ventes}}",
+  "boutiquePayerDirectoryCount": "Déjà au répertoire · {count, plural, one{{count} vente} other{{count} ventes}}",
   "@boutiquePayerDirectoryCount": {
     "placeholders": {
       "count": {
@@ -6015,7 +6015,7 @@
   "boutiqueReceiptPrintFailed": "Le ticket n'a pas pu être imprimé. La vente est enregistrée — vous pouvez réessayer.",
   "boutiqueReceiptPrinted": "Ticket imprimé.",
   "boutiqueOpenCart": "Voir le panier",
-  "boutiqueOpenCartWithCount": "Voir le panier, {count, plural, one{1 article} other{{count} articles}}",
+  "boutiqueOpenCartWithCount": "Voir le panier, {count, plural, one{{count} article} other{{count} articles}}",
   "boutiqueCartPageEyebrow": "Boutique ▸ Panier",
   "boutiqueBackToCatalog": "Retour au catalogue",
   "boutiqueAddToCart": "Ajouter au panier",
@@ -6045,7 +6045,7 @@
       }
     }
   },
-  "boutiqueHistoryArticleCount": "{count, plural, one{1 article} other{{count} articles}}",
+  "boutiqueHistoryArticleCount": "{count, plural, one{{count} article} other{{count} articles}}",
   "boutiqueHistoryPendingBadge": "En attente",
   "boutiqueHistoryPayerUnknown": "Payeur non renseigné",
   "boutiqueHistorySaleTime": "{time} · {reference}",
@@ -6340,7 +6340,7 @@
   "boutiqueClearEyebrow": "Boutique ▸ Panier",
   "boutiqueClearTitle": "Vider le panier ?",
   "boutiqueClearMessage": "Les lignes composées et l'identité du payeur seront effacées. Rien n'a encore été encaissé — il n'y a donc rien à annuler côté argent.",
-  "boutiqueClearLinesSummary": "{count, plural, one{1 article} other{{count} articles}} au panier",
+  "boutiqueClearLinesSummary": "{count, plural, one{{count} article} other{{count} articles}} au panier",
   "boutiqueClearPayerSummary": "Payeur saisi : {payer}",
   "boutiqueClearCancel": "Garder le panier",
   "boutiqueClearConfirm": "Vider",
@@ -6749,7 +6749,7 @@
   "enrollmentDashboardEntriesReportTooltip": "Télécharger la liste des inscrits de la période en PDF",
   "enrollmentDashboardEntriesReportPreparing": "Préparation…",
   "enrollmentDashboardEntriesReportWaiting": "Patientez…",
-  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{Un document est déjà en préparation. Réessayez dans 1 seconde.} other{Un document est déjà en préparation. Réessayez dans {seconds} secondes.}}",
+  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{Un document est déjà en préparation. Réessayez dans {seconds} seconde.} other{Un document est déjà en préparation. Réessayez dans {seconds} secondes.}}",
   "@enrollmentDashboardEntriesReportBusy": {
     "description": "Le 429 du serveur : il ne compose qu'un document long à la fois, file partagée avec la caisse et la relance. La phrase n'accuse pas l'utilisateur — le rendu en cours peut être celui de quelqu'un d'autre.",
     "placeholders": {

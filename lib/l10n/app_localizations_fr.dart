@@ -6894,7 +6894,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count sans pièce scellée (saisies de rattrapage)',
-      one: '1 sans pièce scellée (saisie de rattrapage)',
+      one: '$count sans pièce scellée (saisie de rattrapage)',
     );
     return '$_temp0';
   }
@@ -6971,7 +6971,8 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other:
           'Un rapport est déjà en préparation. Réessayez dans $seconds secondes.',
-      one: 'Un rapport est déjà en préparation. Réessayez dans 1 seconde.',
+      one:
+          'Un rapport est déjà en préparation. Réessayez dans $seconds seconde.',
     );
     return '$_temp0';
   }
@@ -7089,7 +7090,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count versements règlent',
-      one: '1 versement règle',
+      one: '$count versement règle',
     );
     return '$_temp0 un frais fixé dans l\'autre devise, pour $amounts$rateClause. Un écart de taux au moment du contrôle de caisse vient de là.';
   }
@@ -8714,7 +8715,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
+      one: '$count article',
     );
     return '$_temp0';
   }
@@ -8810,7 +8811,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count lignes sans niveau',
-      one: '1 ligne sans niveau',
+      one: '$count ligne sans niveau',
     );
     return '$_temp0';
   }
@@ -8856,7 +8857,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other:
           '$count articles de ce catalogue ne sont pas vendables depuis cette version de l\'application.',
       one:
-          '1 article de ce catalogue n\'est pas vendable depuis cette version de l\'application.',
+          '$count article de ce catalogue n\'est pas vendable depuis cette version de l\'application.',
     );
     return '$_temp0';
   }
@@ -8951,7 +8952,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count ventes',
-      one: '1 vente',
+      one: '$count vente',
     );
     return 'Déjà au répertoire · $_temp0';
   }
@@ -9110,7 +9111,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
+      one: '$count article',
     );
     return 'Voir le panier, $_temp0';
   }
@@ -9151,7 +9152,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
+      one: '$count article',
     );
     return '$_temp0';
   }
@@ -9519,7 +9520,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
+      one: '$count article',
     );
     return '$_temp0 au panier';
   }
@@ -10142,7 +10143,8 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other:
           'Un document est déjà en préparation. Réessayez dans $seconds secondes.',
-      one: 'Un document est déjà en préparation. Réessayez dans 1 seconde.',
+      one:
+          'Un document est déjà en préparation. Réessayez dans $seconds seconde.',
     );
     return '$_temp0';
   }
