@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/attachments/ephemeral_attachment_cache.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -741,6 +743,25 @@ void main() {
     await manager.wipeSession();
 
     expect(await receipt.exists(), isFalse);
+  });
+
+  // Les pièces téléchargées à la demande (certificats d'absence, copies
+  // déposées par les parents) sont des documents de mineurs : elles ne
+  // survivent pas à la session.
+  test('le wipe purge les pièces téléchargées pendant la session', () async {
+    final attachments = EphemeralAttachmentCache(inMemory: true);
+    await attachments.write('abc', Uint8List.fromList([1]));
+    final manager = AuthSessionManager(
+      tokenStorage: tokenStorage,
+      authLocalDao: dao,
+      verifier: const PasswordVerifierService(),
+      attachmentCache: attachments,
+      now: () => clock,
+    );
+
+    await manager.wipeSession();
+
+    expect(await attachments.contains('abc'), isFalse);
   });
 
   // Fermer la session prime sur nettoyer un cache : un échec d'entrée-sortie ne
