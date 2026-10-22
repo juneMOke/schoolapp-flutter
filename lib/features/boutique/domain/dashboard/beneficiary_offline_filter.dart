@@ -19,7 +19,7 @@ abstract final class BeneficiaryOfflineFilter {
     final items = [
       for (final item in cached.items)
         if ((query.classId == null || item.classId == query.classId) &&
-            SearchNormalizationHelper.contains(item.fullName, query.search))
+            _matches(item.fullName, query.search))
           item,
     ];
     return BoutiqueBeneficiariesPage(
@@ -35,4 +35,19 @@ abstract final class BeneficiaryOfflineFilter {
       partial: cached.totalElements > cached.items.length,
     );
   }
+
+  /// La règle du `q` serveur : casse, accents, ponctuation **et espaces**
+  /// ignorés — « nkumbi » trouve N'KUMBI, « jean paul » comme « jeanpaul »
+  /// trouvent Jean-Paul. Hors ligne, la même question doit trouver les mêmes
+  /// élèves.
+  static bool _matches(String fullName, String? search) {
+    final term = _searchKey(search ?? '');
+    return term.isEmpty || _searchKey(fullName).contains(term);
+  }
+
+  static final _notLetterOrDigit = RegExp(r'[^\p{L}\p{N}]', unicode: true);
+
+  static String _searchKey(String text) => SearchNormalizationHelper.normalize(
+    text,
+  ).replaceAll(_notLetterOrDigit, '');
 }

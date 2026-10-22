@@ -55,6 +55,27 @@ void main() {
     expect(page.items.map((s) => s.studentId), ['s1']);
   });
 
+  test('par nom : ponctuation et espaces ignorés, comme le q serveur', () {
+    final page = BoutiqueBeneficiariesPage(
+      totalElements: 2,
+      page: 0,
+      size: 2,
+      items: [
+        _student('s1', "N'KUMBI Lelo", '6A'),
+        _student('s2', 'MBALA Jean-Paul', '6A'),
+      ],
+    );
+    List<String> idsOf(String search) => BeneficiaryOfflineFilter.apply(
+      page,
+      query(search: search),
+    )!.items.map((s) => s.studentId).toList();
+
+    expect(idsOf('nkumbi'), ['s1']);
+    expect(idsOf('jean paul'), ['s2']);
+    expect(idsOf('jeanpaul'), ['s2']);
+    expect(idsOf('  '), ['s1', 's2']);
+  });
+
   test('par classe : l\'élève non placé n\'y est pas', () {
     final page = BeneficiaryOfflineFilter.apply(cached, query(classId: '6A'))!;
     expect(page.items.map((s) => s.studentId), ['s1', 's2']);
