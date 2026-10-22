@@ -1,8 +1,12 @@
 """Génère les icônes de lancement dev/staging à partir de celles de la prod :
 fond recoloré + bandeau d'environnement (DEV / STG).
 
+Produit aussi la mention du splash natif (`splash_branding.png`), posée
+en bas de l'écran de lancement par flutter_native_splash.
+
 Usage (Pillow requis) : python3 scripts/generate_flavor_icons.py
 puis : dart run flutter_launcher_icons
+       dart run flutter_native_splash:create --flavors dev,staging
 """
 import sys
 from pathlib import Path
@@ -48,4 +52,10 @@ for env, spec in ENVS.items():
     fg = Image.open(src / "ic_launcher_foreground.png").convert("RGBA")
     banner(fg, spec["label"], spec["bg"], 330, 392, 121, 311, 31)
     fg.save(out / "ic_launcher_foreground.png")
+    # Mention du splash : pastille seule sur fond transparent. Lue en
+    # xxxhdpi (×4) par Android, soit 140 × 42 dp — sous le plafond de
+    # 200 × 80 dp de la marque d'Android 12.
+    tag = Image.new("RGBA", (560, 168), (0, 0, 0, 0))
+    banner(tag, spec["label"], spec["bg"], 0, 167, 0, 559, 84)
+    tag.save(out / "splash_branding.png")
     print(env, "ok")

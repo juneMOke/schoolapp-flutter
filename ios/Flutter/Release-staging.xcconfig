@@ -3,3 +3,4 @@
 APP_DISPLAY_NAME=ETEELO CONNECT Staging
 PRODUCT_BUNDLE_IDENTIFIER=com.junethink.schoolAppFlutter.staging
 APP_ENV=staging
+LAUNCH_SCREEN_STORYBOARD=LaunchScreenStaging

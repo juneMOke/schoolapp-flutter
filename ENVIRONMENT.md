@@ -28,6 +28,13 @@ l'icône de marque en prod. Les variantes sortent de
 `scripts/generate_flavor_icons.py` ; régénérer avec `dart run flutter_launcher_icons`.
 Web et bureau n'ont pas de flavors : ils gardent l'icône de prod.
 
+Le splash natif suit la même règle (`flutter_native_splash-<flavor>.yaml` pour dev et
+staging, bloc du `pubspec.yaml` pour la prod) : fond de l'environnement et mention
+« DEV » / « STG » en bas. Régénérer avec
+`dart run flutter_native_splash:create --flavors dev,staging`, puis
+`dart run flutter_native_splash:create` pour la prod. Sur iOS, le storyboard de
+lancement se choisit par `LAUNCH_SCREEN_STORYBOARD` dans les xcconfig de flavor.
+
 ⚠ Les deux plateformes n'ont **pas** le même identifiant : Android est en
 `snake_case` (`build.gradle.kts`), iOS en `camelCase` (`project.pbxproj`). Ce
 n'est pas une coquille — toute console tierce (Firebase, Play, App Store) doit
