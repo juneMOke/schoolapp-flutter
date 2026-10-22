@@ -10120,5 +10120,8 @@
   "localDataRecoveryConfirmMessage": "Operations entered on this device and not yet sent to the server will be lost. You will need to sign in again.",
   "localDataRecoveryConfirmCancel": "Cancel",
   "localDataRecoveryConfirmErase": "Erase",
-  "localDataRecoveryResetFailed": "Erasing failed. Close the app and try again."
+  "localDataRecoveryResetFailed": "Erasing failed. Close the app and try again.",
+  "environmentBadgeDev": "DEV",
+  "environmentBadgeStaging": "STG",
+  "environmentBadgeProd": "PROD"
 }

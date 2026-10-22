@@ -10519,5 +10519,17 @@
   "localDataRecoveryConfirmMessage": "Les opérations saisies sur cet appareil et pas encore envoyées au serveur seront perdues. Vous devrez vous reconnecter.",
   "localDataRecoveryConfirmCancel": "Annuler",
   "localDataRecoveryConfirmErase": "Effacer",
-  "localDataRecoveryResetFailed": "L'effacement a échoué. Fermez l'application et réessayez."
+  "localDataRecoveryResetFailed": "L'effacement a échoué. Fermez l'application et réessayez.",
+  "environmentBadgeDev": "DEV",
+  "@environmentBadgeDev": {
+    "description": "Badge d'angle de l'app construite pour le développement (même bandeau que l'icône de lancement)."
+  },
+  "environmentBadgeStaging": "STG",
+  "@environmentBadgeStaging": {
+    "description": "Badge d'angle de l'app construite pour la recette (staging)."
+  },
+  "environmentBadgeProd": "PROD",
+  "@environmentBadgeProd": {
+    "description": "Badge d'angle de l'app de production, seulement si SHOW_ENVIRONMENT_BANNER=true."
+  }
 }

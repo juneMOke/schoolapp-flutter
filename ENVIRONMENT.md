@@ -10,7 +10,8 @@ Ce projet utilise une approche hybride :
 
 - `APP_ENV` : `dev`, `staging`, `prod` (obligatoire)
 - `API_BASE_URL` : URL complète de l’API (obligatoire)
-- `SHOW_ENVIRONMENT_BANNER` : `true` / `false`
+- `SHOW_ENVIRONMENT_BANNER` : `true` / `false` — badge d'angle « DEV » / « STG »
+  (`EnvironmentBanner`). Absent : affiché partout sauf en prod.
 - `ENABLE_VERBOSE_NETWORK_LOGGING` : `true` / `false`
 
 ## Matrice des environnements
@@ -20,6 +21,12 @@ Ce projet utilise une approche hybride :
 | Dev | `dev` | `com.junethink.school_app_flutter.dev` | `com.junethink.schoolAppFlutter.dev` | `ETEELO CONNECT Dev` |
 | Staging | `staging` | `com.junethink.school_app_flutter.staging` | `com.junethink.schoolAppFlutter.staging` | `ETEELO CONNECT Staging` |
 | Prod | `prod` | `com.junethink.school_app_flutter` | `com.junethink.schoolAppFlutter` | `ETEELO CONNECT` |
+
+Chaque flavor a son icône de lancement (`flutter_launcher_icons-<flavor>.yaml`) :
+fond Vert Savane + bandeau « DEV » en dev, fond Terre Cuite + « STG » en staging,
+l'icône de marque en prod. Les variantes sortent de
+`scripts/generate_flavor_icons.py` ; régénérer avec `dart run flutter_launcher_icons`.
+Web et bureau n'ont pas de flavors : ils gardent l'icône de prod.
 
 ⚠ Les deux plateformes n'ont **pas** le même identifiant : Android est en
 `snake_case` (`build.gradle.kts`), iOS en `camelCase` (`project.pbxproj`). Ce

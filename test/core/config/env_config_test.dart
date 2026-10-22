@@ -64,5 +64,16 @@ void main() {
       expect(config.isProduction, isTrue);
       expect(config.apiBaseUrl, 'https://api.example.com');
     });
+    test('bannière d\'environnement : hors prod par défaut', () {
+      EnvConfig withDefault(String env) => EnvConfig.forTesting(
+        appEnvironment: env,
+        apiBaseUrl: 'https://api.example.com',
+        showEnvironmentBanner: null,
+      );
+
+      expect(withDefault('dev').showEnvironmentBanner, isTrue);
+      expect(withDefault('staging').showEnvironmentBanner, isTrue);
+      expect(withDefault('prod').showEnvironmentBanner, isFalse);
+    });
   });
 }

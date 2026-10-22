@@ -17452,4 +17452,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get localDataRecoveryResetFailed =>
       'L\'effacement a échoué. Fermez l\'application et réessayez.';
+
+  @override
+  String get environmentBadgeDev => 'DEV';
+
+  @override
+  String get environmentBadgeStaging => 'STG';
+
+  @override
+  String get environmentBadgeProd => 'PROD';
 }

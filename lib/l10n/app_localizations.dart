@@ -27018,6 +27018,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Erasing failed. Close the app and try again.'**
   String get localDataRecoveryResetFailed;
+
+  /// No description provided for @environmentBadgeDev.
+  ///
+  /// In en, this message translates to:
+  /// **'DEV'**
+  String get environmentBadgeDev;
+
+  /// No description provided for @environmentBadgeStaging.
+  ///
+  /// In en, this message translates to:
+  /// **'STG'**
+  String get environmentBadgeStaging;
+
+  /// No description provided for @environmentBadgeProd.
+  ///
+  /// In en, this message translates to:
+  /// **'PROD'**
+  String get environmentBadgeProd;
 }
 
 class _AppLocalizationsDelegate

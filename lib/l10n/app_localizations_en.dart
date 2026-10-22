@@ -17325,4 +17325,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get localDataRecoveryResetFailed =>
       'Erasing failed. Close the app and try again.';
+
+  @override
+  String get environmentBadgeDev => 'DEV';
+
+  @override
+  String get environmentBadgeStaging => 'STG';
+
+  @override
+  String get environmentBadgeProd => 'PROD';
 }

@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/web/app_update/app_update_scope.dart';
 import 'package:school_app_flutter/core/theme/app_scroll_behavior.dart';
+import 'package:school_app_flutter/core/components/status/environment_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_lifecycle_observer.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
@@ -14,6 +15,7 @@ import 'package:school_app_flutter/features/finance/offline/presentation/bloc/pa
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_anomaly_banner.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/components/status/web_online_gate.dart';
+import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/components/startup/local_data_recovery_app.dart';
@@ -394,17 +396,23 @@ class _MyAppState extends State<MyApp> {
             // navigateur, qui partagent la session, se tiennent d'accord.
             //
             // Le texte s'agrandit avec le réglage du système, jusqu'à ×1,3.
+            //
+            // Hors prod, un badge d'angle « DEV » / « STG » coiffe le tout,
+            // voile compris.
             builder: (context, child) => MediaQuery.withClampedTextScaling(
               maxScaleFactor: AppTypography.maxTextScaleFactor,
-              child: WebOnlineGate(
-                connectivity: getIt<ConnectivityService>(),
-                child: AppUpdateScope(
-                  child: TabSessionSync(
-                    child: PersonPhotoScope(
-                      source: getIt<StudentPhotoRegistry>(),
-                      child: PaymentAnomalyBanner(
-                        child: SessionDegradationBanner(
-                          child: child ?? const SizedBox.shrink(),
+              child: EnvironmentBanner(
+                config: getIt<EnvConfig>(),
+                child: WebOnlineGate(
+                  connectivity: getIt<ConnectivityService>(),
+                  child: AppUpdateScope(
+                    child: TabSessionSync(
+                      child: PersonPhotoScope(
+                        source: getIt<StudentPhotoRegistry>(),
+                        child: PaymentAnomalyBanner(
+                          child: SessionDegradationBanner(
+                            child: child ?? const SizedBox.shrink(),
+                          ),
                         ),
                       ),
                     ),

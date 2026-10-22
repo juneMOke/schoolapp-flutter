@@ -22,9 +22,9 @@ class EnvConfig {
     const rawApiBaseUrl = String.fromEnvironment(
       AppConstants.apiBaseUrlDefineKey,
     );
+    // Absent (chaîne vide) : le défaut de l'environnement décide.
     const rawShowEnvironmentBanner = String.fromEnvironment(
       AppConstants.showEnvironmentBannerDefineKey,
-      defaultValue: 'false',
     );
     const rawVerboseNetworkLogging = String.fromEnvironment(
       AppConstants.enableVerboseNetworkLoggingDefineKey,
@@ -34,7 +34,9 @@ class EnvConfig {
     return EnvConfig._fromValues(
       appEnvironment: rawEnvironment,
       apiBaseUrl: rawApiBaseUrl,
-      showEnvironmentBanner: rawShowEnvironmentBanner,
+      showEnvironmentBanner: rawShowEnvironmentBanner.trim().isEmpty
+          ? null
+          : rawShowEnvironmentBanner,
       enableVerboseNetworkLogging: rawVerboseNetworkLogging,
     );
   }
@@ -42,13 +44,14 @@ class EnvConfig {
   factory EnvConfig.forTesting({
     required String appEnvironment,
     required String apiBaseUrl,
-    bool showEnvironmentBanner = false,
+    // `null` : le défaut de l'environnement, comme un define absent.
+    bool? showEnvironmentBanner = false,
     bool enableVerboseNetworkLogging = false,
   }) {
     return EnvConfig._fromValues(
       appEnvironment: appEnvironment,
       apiBaseUrl: apiBaseUrl,
-      showEnvironmentBanner: showEnvironmentBanner.toString(),
+      showEnvironmentBanner: showEnvironmentBanner?.toString(),
       enableVerboseNetworkLogging: enableVerboseNetworkLogging.toString(),
     );
   }
@@ -56,7 +59,7 @@ class EnvConfig {
   factory EnvConfig._fromValues({
     required String appEnvironment,
     required String apiBaseUrl,
-    required String showEnvironmentBanner,
+    required String? showEnvironmentBanner,
     required String enableVerboseNetworkLogging,
   }) {
     final environment = AppEnvironment.fromName(appEnvironment);
@@ -85,7 +88,11 @@ class EnvConfig {
     return EnvConfig._(
       environment: environment,
       apiBaseUri: parsedUri,
-      showEnvironmentBanner: _parseBool(showEnvironmentBanner),
+      // Par défaut, le badge marque tout ce qui n'est pas la prod : une
+      // tablette de recette ne doit pas passer pour la vraie.
+      showEnvironmentBanner: showEnvironmentBanner == null
+          ? environment != AppEnvironment.prod
+          : _parseBool(showEnvironmentBanner),
       enableVerboseNetworkLogging: _parseBool(enableVerboseNetworkLogging),
     );
   }
