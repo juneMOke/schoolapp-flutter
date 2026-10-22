@@ -1,19 +1,23 @@
 # BOUTIQUE_TABLEAU_DE_BORD_PLAN.md — date de vente & tableau de bord
 
-> **Statut :** plan émis le 2026-10-21 · BQ-19 livré (branche
-> `feat/boutique-sale-date`, `3f2b0fdc`).
+> **Statut :** plan émis le 2026-10-21 · **front BQ-19 → BQ-27 codé** sur
+> `feat/boutique-sale-date` (2026-10-22), non poussé. Revues adversariales
+> faites après la couche données et après l'écran ; constats corrigés.
+> ⚠️ **Rien ne fusionne avant que B2 + B3 (R8, R9) soient en production** :
+> BQ-26 a remplacé l'historique, et sans ces routes le module n'aurait plus
+> d'écran de lecture qui réponde.
 >
 > | Lot | Objet | Dépend du back |
 > |---|---|---|
 > | BQ-19 ✅ | Date de la vente au panier | non (R10 améliore le RV, ne bloque pas) |
-> | BQ-20 | Données du tableau de bord (API, modèles, dépôt) | contrat figé ; R8/R9 = lots back B2/B3 |
-> | BQ-21 | Écran : en-tête, période, tuiles, encart provisoires | R8 |
-> | BQ-22 | Analyses : recettes dans le temps, familles, top articles | R8 |
-> | BQ-23 | Élèves concernés | R9 |
-> | BQ-24 | Dernières ventes (local) → fiche de vente existante | non |
-> | BQ-25 | États : squelettes, vides, erreurs 4 types, hors-ligne | R8 |
-> | BQ-26 | Navigation : Historique remplacé par Tableau de bord | B2 + B3 **en production** |
-> | BQ-27 | Revue adversariale | — |
+> | BQ-20 ✅ | Données du tableau de bord (API, modèles, dépôt) | contrat figé ; R8/R9 = lots back B2/B3 |
+> | BQ-21 ✅ | Écran : en-tête, période, tuiles, encart provisoires | R8 |
+> | BQ-22 ✅ | Analyses : recettes dans le temps, familles, top articles | R8 |
+> | BQ-23 ✅ | Élèves concernés | R9 |
+> | BQ-24 ✅ | Dernières ventes (local) → fiche de vente existante | non |
+> | BQ-25 ✅ | États : squelettes, vides, erreurs 4 types, hors-ligne | R8 |
+> | BQ-26 ✅ | Navigation : Historique remplacé par Tableau de bord | B2 + B3 **en production** avant fusion |
+> | BQ-27 ✅ | Revue adversariale | — |
 >
 > **Origine :** `Boutique - Spec module & tableau de bord (standalone).html`
 > (2026-10-21). **Demandes back :** `BOUTIQUE_DEMANDES_BACK.md`, deuxième vague
@@ -143,3 +147,22 @@ bord est prêt, pour ne jamais livrer un module sans lecture. Carte d'accueil et
   via `boutique.sale.read` ; rien côté front.
 - Export de la liste des élèves (PDF/CSV) : hors V1.
 - Clôture de caisse : hors V1 (voir R7/R11).
+
+## 6. Ce que le code a tranché (2026-10-22)
+
+- **Photo hors ligne** : table `boutique_dashboard_cache` (palier d'école
+  **v65**), une réponse par largeur de fenêtre ; servie, datée, **seulement**
+  sans réponse HTTP (un 401/403/500 ou un statut non classé reste une erreur).
+  La photo des élèves porte sa fenêtre et n'est pas servie pour une autre ;
+  une recherche hors ligne s'y rejoue par nom ou classe (jamais par article,
+  dont les montants ne se recalculent pas) et se dit partielle.
+- **Provisoires** : `sync_status <> 'SYNCED'`, donc `SYNC_ERROR` compris
+  (l'argent est dans le tiroir) ; lus sur la fenêtre **de la photo** ; ajoutés
+  aux compteurs, recettes, série et familles, jamais au palmarès.
+- **Pages d'élèves de 100** (plafond serveur), huit lignes repliées.
+- **Dates des seaux** affichées `jj/mm` et `7 h`, sans données de locale
+  (aucun `DateFormat` dans le projet).
+- **Bouton « Actualiser »** dans l'en-tête : seul moyen de faire tourner la
+  journée à minuit ou de retirer des provisoires partis.
+- **Adresse de l'historique** : redirigée vers le tableau de bord ; « Achats »
+  s'appelle désormais « Caisse » (identifiant `boutique-achats` inchangé).
