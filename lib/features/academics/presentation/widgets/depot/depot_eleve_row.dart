@@ -73,10 +73,12 @@ class DepotEleveRow extends StatelessWidget {
                   style: AppTypography.labelSmall.copyWith(color: tone.ink),
                 ),
               ),
-              if (eleve.depot != null) ...[
+              if (eleve.depot case final depot?) ...[
                 const SizedBox(width: AppSpacing.sm),
                 EteeloButton.ghost(
-                  label: canOpen
+                  label: !depot.isComplete
+                      ? l10n.depotIncomplete
+                      : canOpen
                       ? l10n.depotOuvrir
                       : l10n.depotEnLigneSeulement,
                   icon: Icons.description_outlined,

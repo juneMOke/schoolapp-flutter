@@ -8,7 +8,8 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// Une copie par élève, la plus récente. Seules les métadonnées des pages sont
 /// rangées (`fichiers_json` : id, ordre, nom, type, taille, empreinte) : les
 /// octets — la copie d'un mineur — ne se gardent pas, ils se téléchargent à
-/// la demande.
+/// la demande. `pages_ecartees` compte les pages que le fil décrivait mal : une
+/// copie incomplète ne s'ouvre pas, elle tromperait le correcteur.
 const TableSchema evaluationDepotTable = TableSchema(
   name: 'evaluation_depot',
   createTableSql: '''
@@ -18,7 +19,8 @@ const TableSchema evaluationDepotTable = TableSchema(
       student_id TEXT NOT NULL,
       deposited_at TEXT,
       en_retard INTEGER NOT NULL DEFAULT 0,
-      fichiers_json TEXT NOT NULL DEFAULT '[]'
+      fichiers_json TEXT NOT NULL DEFAULT '[]',
+      pages_ecartees INTEGER NOT NULL DEFAULT 0
     )
   ''',
   createIndexSql: [

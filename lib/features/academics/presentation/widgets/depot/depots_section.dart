@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/depot/depots_cubit.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/depot/depots_state.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/depot_actions.dart';
@@ -54,6 +55,12 @@ class _DepotsCard extends StatelessWidget {
               DepotsLoad.failure => EvalSaisieResultsErrorState.failure(
                 failure: state.failure!,
                 onRetry: () => unawaited(context.read<DepotsCubit>().refresh()),
+              ),
+              DepotsLoad.ready when copies.total == 0 => EteeloEmptyResult(
+                label: l10n.depotsEmptyTitle,
+                description: l10n.depotsEmptyDescription,
+                medallionIcon: Icons.groups_outlined,
+                fullWidthCard: true,
               ),
               DepotsLoad.ready => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

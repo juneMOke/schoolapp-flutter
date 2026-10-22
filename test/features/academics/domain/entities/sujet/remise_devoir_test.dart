@@ -51,4 +51,11 @@ void main() {
     expect(remise.copyWith(heureLimite: () => null).heureLimite, isNull);
     expect(remise.copyWith(mode: ModeRemise.enLigne).heureLimite, '17:30');
   });
+
+  test('une heure avec secondes est ramenée à HH:mm, pas perdue', () {
+    expect(
+      const RemiseDevoir(heureLimite: '17:30:15').normalized().heureLimite,
+      '17:30',
+    );
+  });
 }

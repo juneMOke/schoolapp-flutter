@@ -10209,5 +10209,8 @@
   "noteCommentaireLabel": "Comment",
   "noteCommentaireHelper": "Visible to parents once published. Clear the field to remove the comment.",
   "noteCommentaireSave": "Save",
-  "noteCommentaireCancel": "Cancel"
+  "noteCommentaireCancel": "Cancel",
+  "depotIncomplete": "Incomplete copy",
+  "depotsEmptyTitle": "No student in the class",
+  "depotsEmptyDescription": "Copies uploaded by parents will show here, student by student."
 }

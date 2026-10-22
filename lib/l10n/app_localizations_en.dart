@@ -17606,4 +17606,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noteCommentaireCancel => 'Cancel';
+
+  @override
+  String get depotIncomplete => 'Incomplete copy';
+
+  @override
+  String get depotsEmptyTitle => 'No student in the class';
+
+  @override
+  String get depotsEmptyDescription =>
+      'Copies uploaded by parents will show here, student by student.';
 }

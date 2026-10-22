@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,6 +24,9 @@ class DepotsCubit extends Cubit<DepotsState> {
   void Function()? _unwatchRadio;
   String? _evaluationId;
   int _read = 0;
+
+  /// Une copie à la fois : un double appui empilerait deux visionneuses.
+  bool _opening = false;
 
   DepotsCubit({
     required LoadCopiesRenduesUseCase load,
@@ -77,21 +79,32 @@ class DepotsCubit extends Cubit<DepotsState> {
   Future<Either<Failure, List<AttachmentPart>>> pages(CopieRendue eleve) async {
     final id = _evaluationId;
     final depot = eleve.depot;
-    if (id == null || depot == null) return const Left(NotFoundFailure());
-    final parts = <AttachmentPart>[];
-    for (final page in depot.fichiers) {
-      final result = await _open(id, page);
-      if (result.isLeft()) return result.map((_) => const []);
-      parts.add((ref: page.ref, bytes: result.getOrElse(() => Uint8List(0))));
-      if (await _availability.isCached(page.ref) && !isClosed) {
-        emit(
-          state.copyWith(
-            attachments: state.attachments.withCached(page.ref.sha256),
-          ),
-        );
-      }
+    if (id == null || depot == null || !depot.isComplete) {
+      return const Left(NotFoundFailure());
     }
-    return Right(parts);
+    if (_opening) return const Left(ConflictFailure());
+    _opening = true;
+    try {
+      final parts = <AttachmentPart>[];
+      for (final page in depot.fichiers) {
+        final result = await _open(id, page);
+        final Failure? failure = result.fold((failure) => failure, (bytes) {
+          parts.add((ref: page.ref, bytes: bytes));
+          return null;
+        });
+        if (failure != null) return Left(failure);
+        if (await _availability.isCached(page.ref) && !isClosed) {
+          emit(
+            state.copyWith(
+              attachments: state.attachments.withCached(page.ref.sha256),
+            ),
+          );
+        }
+      }
+      return Right(parts);
+    } finally {
+      _opening = false;
+    }
   }
 
   @override

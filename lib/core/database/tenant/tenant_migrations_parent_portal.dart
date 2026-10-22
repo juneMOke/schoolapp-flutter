@@ -10,11 +10,13 @@ part of 'tenant_migrations.dart';
 /// - les copies déposées par les parents (V180) : `evaluation_depot`, création
 ///   pure, remplie par le re-pull des évaluations ;
 /// - le commentaire de l'enseignant par note (V179) : `note_evaluation`
-///   gagne `commentaire`, rempli par le re-pull des notes ;
-/// - les curseurs des évaluations et des notes repartent de zéro : les
-///   tablettes ont déjà tiré, en ignorant les champs neufs, les devoirs
-///   déposés depuis la mise en prod du portail (v0.13.0, 2026-10-20). Sans ce
-///   re-pull, elles ne verraient jamais ces copies ni ces remises.
+///   gagne `commentaire` ;
+/// - le curseur des évaluations repart de zéro : les tablettes ont déjà tiré,
+///   en ignorant les champs neufs, les devoirs déposés depuis la mise en prod
+///   du portail (v0.13.0, 2026-10-20). Sans ce re-pull, elles ne verraient
+///   jamais ces copies ni ces remises. Celui des notes ne bouge pas : aucun
+///   commentaire n'existe encore (seule cette version en écrit), et un re-pull
+///   effacerait les saisies refusées encore affichées.
 Future<void> _parentPortalStaffSide(DatabaseExecutor db) async {
   await _createTables(db, attendanceJustificationTables);
   await _createTables(db, evaluationDepotTables);
@@ -24,7 +26,7 @@ Future<void> _parentPortalStaffSide(DatabaseExecutor db) async {
     'mode_remise': "TEXT NOT NULL DEFAULT 'EN_CLASSE'",
     'depot_tardif_permis': 'INTEGER NOT NULL DEFAULT 0',
   });
-  await _rewindCursors(db, const ['academics_evaluations', 'academics_notes']);
+  await _rewindCursors(db, const ['academics_evaluations']);
 }
 
 /// Remet à zéro les curseurs dont la clé commence par l'un des [prefixes] (un

@@ -123,10 +123,13 @@ void main() {
       expect(dto.toSujetRow().remise?.mode, ModeRemise.enLigne);
     });
 
-    test('un devoir d un serveur ancien prend la remise par défaut', () {
+    // Le serveur garde la remise quand `modeRemise` manque : la tablette fait
+    // de même, sans quoi une vue partielle remettrait « en classe ».
+    test('une vue sans modeRemise ne dit rien de la remise', () {
+      expect(EvaluationDeltaDto.fromJson(view('DEVOIR')).remise, isNull);
       expect(
-        EvaluationDeltaDto.fromJson(view('DEVOIR')).remise,
-        RemiseDevoir.parDefaut,
+        EvaluationDeltaDto.fromJson(view('DEVOIR')).toSujetRow().toMap(),
+        isNot(contains('mode_remise')),
       );
     });
 

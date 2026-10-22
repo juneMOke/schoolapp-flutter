@@ -205,6 +205,10 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
     descendantsSql: [
       'DELETE FROM note_evaluation WHERE evaluation_id IN '
           '(SELECT id FROM evaluation WHERE cours_id = ?)',
+      // Les copies déposées par les parents : des documents de mineurs, qui
+      // ne survivent pas à leur cours.
+      'DELETE FROM evaluation_depot WHERE evaluation_id IN '
+          '(SELECT id FROM evaluation WHERE cours_id = ?)',
       'DELETE FROM evaluation WHERE cours_id = ?',
       'DELETE FROM ref_chapitre WHERE cours_id = ?',
       'DELETE FROM chapitre_note WHERE cours_id = ?',

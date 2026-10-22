@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/depot/evaluation_depot_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_view_applier.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/academics_metier_pull_models.dart';
@@ -51,6 +52,9 @@ void main() {
         expect(depots, hasLength(1));
         expect(depots.single.enRetard, isTrue);
         expect(depots.single.fichiers.map((f) => f.id), ['d1-p1', 'd1-p2']);
+        // La page sans empreinte est comptée : la copie ne s'ouvrira pas.
+        expect(depots.single.pagesEcartees, 1);
+        expect(depots.single.isComplete, isFalse);
       },
     );
 
@@ -112,5 +116,28 @@ void main() {
 
       expect(await depots.depotsOf('e1'), hasLength(1));
     });
+  });
+
+  test('un cours retiré emporte les copies de ses devoirs', () async {
+    final db = await openFullOfflineDb();
+    addTearDown(db.close);
+    await db.insert('evaluation', {
+      'id': 'e1',
+      'cours_id': 'c1',
+      'type': 'DEVOIR',
+      'eval_date': 0,
+      'max_points': 20,
+      'poids': 1,
+      'updated_at': 0,
+    });
+    await db.insert('evaluation_depot', {
+      'id': 'd1',
+      'evaluation_id': 'e1',
+      'student_id': 's1',
+    });
+
+    await AcademicsLocalDataSource(db).evictCoursData('c1');
+
+    expect(await db.query('evaluation_depot'), isEmpty);
   });
 }

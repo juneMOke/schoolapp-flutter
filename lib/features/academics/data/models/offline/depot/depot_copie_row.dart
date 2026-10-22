@@ -18,12 +18,17 @@ abstract final class DepotCopieRow {
     final id = raw['id'];
     final studentId = raw['studentId'];
     if (id is! String || studentId is! String) return null;
+    final declared = raw['fichiers'] is List
+        ? (raw['fichiers'] as List).length
+        : 0;
+    final fichiers = _fichiers(raw['fichiers']);
     return DepotCopie(
       id: id,
       studentId: studentId,
       depositedAt: DateTime.tryParse(raw['depositedAt'] as String? ?? ''),
       enRetard: raw['enRetard'] == true,
-      fichiers: _fichiers(raw['fichiers']),
+      fichiers: fichiers,
+      pagesEcartees: declared - fichiers.length,
     );
   }
 
@@ -50,6 +55,7 @@ abstract final class DepotCopieRow {
     'student_id': depot.studentId,
     'deposited_at': depot.depositedAt?.toUtc().toIso8601String(),
     'en_retard': depot.enRetard ? 1 : 0,
+    'pages_ecartees': depot.pagesEcartees,
     'fichiers_json': jsonEncode([
       for (final page in depot.fichiers)
         {
@@ -69,6 +75,7 @@ abstract final class DepotCopieRow {
     depositedAt: DateTime.tryParse(map['deposited_at'] as String? ?? ''),
     enRetard: map['en_retard'] == 1,
     fichiers: _fichiers(_decode(map['fichiers_json'])),
+    pagesEcartees: (map['pages_ecartees'] as int?) ?? 0,
   );
 
   static Object? _decode(Object? column) {

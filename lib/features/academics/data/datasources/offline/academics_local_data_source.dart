@@ -489,7 +489,7 @@ class AcademicsLocalDataSource {
 
   /// Purge les évaluations d'un cours évincé (référence perdue — réaffectation,
   /// garde d'ownership 403), leurs notes et leur journal de copies, dans une
-  /// seule transaction. Emporte aussi le contenu `PENDING_SYNC` non encore
+  /// seule transaction — copies déposées par les parents comprises. Emporte aussi le contenu `PENDING_SYNC` non encore
   /// poussé : une fois le cours perdu, ce travail ne peut plus être poussé (le
   /// serveur le rejetterait en 403 à son tour) — ce n'est pas une perte due à
   /// un bug de synchro, mais une conséquence légitime de la perte d'accès.
@@ -511,6 +511,11 @@ class AcademicsLocalDataSource {
         );
         await txn.delete(
           copieLogTable,
+          where: 'evaluation_id IN ($placeholders)',
+          whereArgs: evalIds,
+        );
+        await txn.delete(
+          'evaluation_depot',
           where: 'evaluation_id IN ($placeholders)',
           whereArgs: evalIds,
         );

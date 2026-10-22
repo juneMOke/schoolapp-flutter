@@ -10607,5 +10607,8 @@
   "noteCommentaireLabel": "Commentaire",
   "noteCommentaireHelper": "Visible par les parents après publication. Videz le champ pour retirer le commentaire.",
   "noteCommentaireSave": "Enregistrer",
-  "noteCommentaireCancel": "Annuler"
+  "noteCommentaireCancel": "Annuler",
+  "depotIncomplete": "Copie incomplète",
+  "depotsEmptyTitle": "Aucun élève dans la classe",
+  "depotsEmptyDescription": "Les copies déposées par les parents s'afficheront ici, élève par élève."
 }

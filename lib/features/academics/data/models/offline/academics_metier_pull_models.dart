@@ -84,7 +84,8 @@ class EvaluationDeltaDto {
   final String? consignes;
   final List<SujetQuestion> questions;
 
-  /// La remise d'un devoir ; nulle pour une interrogation ou un examen.
+  /// La remise d'un devoir ; nulle pour une interrogation, un examen, ou une
+  /// vue qui ne la porte pas (rien n'est alors écrit).
   final RemiseDevoir? remise;
 
   /// Les copies déposées par les parents (devoir en ligne). `null` quand la
@@ -141,7 +142,11 @@ class EvaluationDeltaDto {
         programme: SujetCodecs.programmeFromJson(j['programme']),
         consignes: j.text('consignes'),
         questions: SujetCodecs.questionsFromJson(j['questions']),
-        remise: j['type'] == 'DEVOIR' ? RemiseDevoir.fromJson(j) : null,
+        // Sans `modeRemise`, la vue ne dit rien de la remise (projection,
+        // serveur ancien) : la locale reste, comme le fait le serveur.
+        remise: j['type'] == 'DEVOIR' && j.containsKey('modeRemise')
+            ? RemiseDevoir.fromJson(j)
+            : null,
         depots: DepotCopieRow.listFromJson(j['depots']),
         sujetClientUpdatedAt: j.text('sujetClientUpdatedAt'),
         copieLog: [

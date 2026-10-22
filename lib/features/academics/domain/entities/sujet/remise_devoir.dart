@@ -42,16 +42,17 @@ class RemiseDevoir extends Equatable {
   /// retard.
   static const RemiseDevoir parDefaut = RemiseDevoir();
 
-  static final RegExp _heure = RegExp(r'^([01]\d|2[0-3]):[0-5]\d$');
+  static final RegExp _heure = RegExp(r'^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$');
 
   bool get enLigne => mode == ModeRemise.enLigne;
 
-  /// Copie cohérente : pas de dépôt tardif en classe, une heure illisible
-  /// ramenée à « fin du jour ».
+  /// Copie cohérente : pas de dépôt tardif en classe, une heure `HH:mm:ss`
+  /// ramenée à `HH:mm` (jamais perdue : elle repartirait vide et le serveur
+  /// retirerait l'heure), une heure illisible à « fin du jour ».
   RemiseDevoir normalized() => RemiseDevoir(
     mode: mode,
     heureLimite: heureLimite != null && _heure.hasMatch(heureLimite!)
-        ? heureLimite
+        ? heureLimite!.substring(0, 5)
         : null,
     depotTardifPermis: enLigne && depotTardifPermis,
   );

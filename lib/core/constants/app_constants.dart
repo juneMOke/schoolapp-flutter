@@ -820,9 +820,10 @@ class AppConstants {
   // v66 (2026-10-22) : le côté école du portail parent —
   // `attendance_justifications` (les justifications d'absence déposées par
   // les parents et la décision de l'école), la remise d'un devoir
-  // (`evaluation.heure_limite`/`mode_remise`/`depot_tardif_permis`) et les
-  // copies déposées (`evaluation_depot`) ; re-pull des évaluations et des
-  // notes. Un seul palier pour toute la livraison. Palier d'école.
+  // (`evaluation.heure_limite`/`mode_remise`/`depot_tardif_permis`), les
+  // copies déposées (`evaluation_depot`) et le commentaire par note
+  // (`note_evaluation.commentaire`) ; re-pull des évaluations. Un seul palier
+  // pour toute la livraison. Palier d'école.
   static const int offlineDbSchemaVersion = 66;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier

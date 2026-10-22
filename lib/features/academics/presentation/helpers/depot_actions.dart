@@ -18,6 +18,8 @@ Future<void> openDepotCopie(BuildContext context, CopieRendue eleve) async {
   final result = await context.read<DepotsCubit>().pages(eleve);
   if (!context.mounted) return;
   final parts = result.fold((failure) {
+    // Une copie déjà en cours d'ouverture : le second appui ne dit rien.
+    if (failure is ConflictFailure) return null;
     AppSnackBar.showError(
       context,
       failure is NetworkFailure

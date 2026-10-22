@@ -89,27 +89,38 @@ void main() {
     },
   );
 
-  test('les curseurs des évaluations et des notes repartent de zéro, '
-      'les autres restent', () async {
-    await db.execute(
-      'CREATE TABLE sync_meta (resource TEXT PRIMARY KEY, cursor TEXT)',
-    );
-    for (final resource in [
-      'academics_evaluations:c1',
-      'academics_notes:c1',
-      'academics_cours:t1',
-      'attendance',
-    ]) {
-      await db.insert('sync_meta', {'resource': resource, 'cursor': 'x'});
-    }
+  // Les notes ne repartent pas : un re-pull effacerait les saisies refusées
+  // encore affichées, pour un commentaire qui n'existe encore nulle part.
+  test(
+    'le curseur des évaluations repart de zéro, les autres restent',
+    () async {
+      await db.execute(
+        'CREATE TABLE sync_meta (resource TEXT PRIMARY KEY, cursor TEXT)',
+      );
+      for (final resource in [
+        'academics_evaluations:c1',
+        'academics_notes:c1',
+        'academics_cours:t1',
+        'attendance',
+      ]) {
+        await db.insert('sync_meta', {'resource': resource, 'cursor': 'x'});
+      }
 
-    await migrateTenantDatabase(db, 65, newVersion: 66);
+      await migrateTenantDatabase(db, 65, newVersion: 66);
 
-    final left = [
-      for (final row in await db.query('sync_meta')) row['resource'],
-    ];
-    expect(left, unorderedEquals(['academics_cours:t1', 'attendance']));
-  });
+      final left = [
+        for (final row in await db.query('sync_meta')) row['resource'],
+      ];
+      expect(
+        left,
+        unorderedEquals([
+          'academics_notes:c1',
+          'academics_cours:t1',
+          'attendance',
+        ]),
+      );
+    },
+  );
 
   test('les copies déposées naissent avec leur index par évaluation', () async {
     await migrateTenantDatabase(db, 65, newVersion: 66);

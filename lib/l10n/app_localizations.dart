@@ -27486,6 +27486,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get noteCommentaireCancel;
+
+  /// No description provided for @depotIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete copy'**
+  String get depotIncomplete;
+
+  /// No description provided for @depotsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in the class'**
+  String get depotsEmptyTitle;
+
+  /// No description provided for @depotsEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies uploaded by parents will show here, student by student.'**
+  String get depotsEmptyDescription;
 }
 
 class _AppLocalizationsDelegate

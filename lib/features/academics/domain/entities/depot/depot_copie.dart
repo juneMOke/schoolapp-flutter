@@ -30,14 +30,28 @@ class DepotCopie extends Equatable {
   /// Dans l'ordre des pages.
   final List<DepotFichier> fichiers;
 
+  /// Pages que la tablette n'a pas su lire : la copie est alors incomplète.
+  final int pagesEcartees;
+
   const DepotCopie({
     required this.id,
     required this.studentId,
     this.depositedAt,
     this.enRetard = false,
     this.fichiers = const [],
+    this.pagesEcartees = 0,
   });
 
+  /// Toutes les pages sont lisibles, et il y en a.
+  bool get isComplete => pagesEcartees == 0 && fichiers.isNotEmpty;
+
   @override
-  List<Object?> get props => [id, studentId, depositedAt, enRetard, fichiers];
+  List<Object?> get props => [
+    id,
+    studentId,
+    depositedAt,
+    enRetard,
+    fichiers,
+    pagesEcartees,
+  ];
 }

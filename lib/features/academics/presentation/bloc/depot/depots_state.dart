@@ -22,7 +22,7 @@ class DepotsState extends Equatable {
   bool canOpen(CopieRendue eleve) {
     final depot = eleve.depot;
     return depot != null &&
-        depot.fichiers.isNotEmpty &&
+        depot.isComplete &&
         depot.fichiers.every((page) => attachments.canOpen(page.ref));
   }
 
