@@ -8,11 +8,14 @@ import 'package:school_app_flutter/features/academics/data/models/offline/note_e
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/depot/depot_copie_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/copie_log_row.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/depot/depot_copie.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_codecs.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 
 List<T> _lenientList<T>(dynamic raw, T Function(Map<String, dynamic>) parse) {
   final out = <T>[];
@@ -81,6 +84,14 @@ class EvaluationDeltaDto {
   final String? consignes;
   final List<SujetQuestion> questions;
 
+  /// La remise d'un devoir ; nulle pour une interrogation, un examen, ou une
+  /// vue qui ne la porte pas (rien n'est alors écrit).
+  final RemiseDevoir? remise;
+
+  /// Les copies déposées par les parents (devoir en ligne). `null` quand la
+  /// vue ne porte pas le champ : les copies connues restent.
+  final List<DepotCopie>? depots;
+
   /// Heure, sur le poste, du dernier sujet accepté ; `null` tant qu'aucun
   /// sujet n'a été envoyé.
   final String? sujetClientUpdatedAt;
@@ -103,6 +114,8 @@ class EvaluationDeltaDto {
     this.programme = const [],
     this.consignes,
     this.questions = const [],
+    this.remise,
+    this.depots,
     this.sujetClientUpdatedAt,
     this.copieLog = const [],
     this.publications = EvaluationPublications.none,
@@ -129,6 +142,12 @@ class EvaluationDeltaDto {
         programme: SujetCodecs.programmeFromJson(j['programme']),
         consignes: j.text('consignes'),
         questions: SujetCodecs.questionsFromJson(j['questions']),
+        // Sans `modeRemise`, la vue ne dit rien de la remise (projection,
+        // serveur ancien) : la locale reste, comme le fait le serveur.
+        remise: j['type'] == 'DEVOIR' && j.containsKey('modeRemise')
+            ? RemiseDevoir.fromJson(j)
+            : null,
+        depots: DepotCopieRow.listFromJson(j['depots']),
         sujetClientUpdatedAt: j.text('sujetClientUpdatedAt'),
         copieLog: [
           for (final e in (j['copieLog'] as List<dynamic>? ?? const []))
@@ -166,6 +185,7 @@ class EvaluationDeltaDto {
       programme: programme,
       consignes: consignes,
       questions: questions,
+      remise: remise,
       updatedAt: clientMs,
       syncStatus: clientMs == null ? null : SyncState.synced.dbValue,
     );
@@ -215,6 +235,9 @@ class NoteDeltaDto {
   final String? clientUpdatedAt;
   final String serverUpdatedAt;
 
+  /// Le commentaire de l'enseignant tel que le serveur le tient.
+  final String? commentaire;
+
   const NoteDeltaDto({
     required this.id,
     required this.evaluationId,
@@ -223,6 +246,7 @@ class NoteDeltaDto {
     required this.statut,
     this.clientUpdatedAt,
     required this.serverUpdatedAt,
+    this.commentaire,
   });
 
   factory NoteDeltaDto.fromJson(Map<String, dynamic> j) => NoteDeltaDto(
@@ -243,6 +267,7 @@ class NoteDeltaDto {
     clientUpdatedAt:
         (j['updatedAt'] as String?) ?? (j['clientUpdatedAt'] as String?),
     serverUpdatedAt: j['serverUpdatedAt'] as String,
+    commentaire: j.text('commentaire'),
   );
 
   NoteEvaluationRow toLocalRow(int syncedAt) {
@@ -259,6 +284,7 @@ class NoteDeltaDto {
       serverUpdatedAt: serverMs,
       syncStatus: 'SYNCED',
       syncedAt: syncedAt,
+      commentaire: commentaire,
     );
   }
 }

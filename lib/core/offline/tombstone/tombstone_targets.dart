@@ -125,8 +125,12 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
     table: 'students',
     syncStatusColumn: 'sync_status',
     // La photo part avec l'élève : le serveur la purge en cascade et ne la
-    // redescendra pas.
-    children: {'student_photos': 'student_id'},
+    // redescendra pas. Ses justifications d'absence aussi : sans l'élève, une
+    // demande ne se tranche plus.
+    children: {
+      'student_photos': 'student_id',
+      'attendance_justifications': 'student_id',
+    },
   ),
   'parents': TombstoneTarget(table: 'parents', syncStatusColumn: 'sync_status'),
   // Le couple (élève, parent) tient dans (entityId, scopeKey) faute de clé de
@@ -201,6 +205,10 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
     descendantsSql: [
       'DELETE FROM note_evaluation WHERE evaluation_id IN '
           '(SELECT id FROM evaluation WHERE cours_id = ?)',
+      // Les copies déposées par les parents : des documents de mineurs, qui
+      // ne survivent pas à leur cours.
+      'DELETE FROM evaluation_depot WHERE evaluation_id IN '
+          '(SELECT id FROM evaluation WHERE cours_id = ?)',
       'DELETE FROM evaluation WHERE cours_id = ?',
       'DELETE FROM ref_chapitre WHERE cours_id = ?',
       'DELETE FROM chapitre_note WHERE cours_id = ?',
@@ -222,6 +230,8 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
     table: 'evaluation',
     scopeColumn: 'cours_id',
     syncStatusColumn: 'sync_status',
+    // Les copies déposées par les parents partent avec leur devoir.
+    children: {'evaluation_depot': 'evaluation_id'},
   ),
   'academics_notes': TombstoneTarget(
     table: 'note_evaluation',

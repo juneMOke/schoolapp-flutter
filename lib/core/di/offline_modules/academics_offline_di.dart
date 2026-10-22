@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/di/offline_modules/evaluation_depot_di.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -222,6 +223,7 @@ void registerAcademicsOffline(GetIt getIt) {
   // ── Sujet d'une évaluation : sujet, copie, publications ──
   // Avant les handlers : le pull des évaluations résout son applicateur.
   registerEvaluationSujet(getIt);
+  registerEvaluationDepots(getIt); // Portail parent — copies déposées
 
   // ── Handlers d'outbox (push, routés par aggregateType) ──
   getIt<SyncEngine>().registerHandler(

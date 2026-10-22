@@ -1,4 +1,6 @@
 import 'package:school_app_flutter/core/database/schema/academics_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/attendance_justification_schema.dart';
+import 'package:school_app_flutter/core/database/schema/evaluation_depot_schema.dart';
 import 'package:school_app_flutter/core/database/schema/auth_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/boutique_dashboard_cache_schema.dart';
 import 'package:school_app_flutter/core/database/schema/boutique_offline_schema.dart';
@@ -126,4 +128,6 @@ List<TableSchema> buildOfflineSchema() => [
   ...enrollmentSuspensionTables, // Inscriptions — désactivation d'élèves
   ...classJournalTables, // Cours ▸ Mon journal — le journal de classe
   ...boutiqueDashboardCacheTables, // Boutique — photo hors ligne du tableau de bord
+  ...attendanceJustificationTables, // Présences — justifications des parents
+  ...evaluationDepotTables, // Cours — copies déposées par les parents
 ];

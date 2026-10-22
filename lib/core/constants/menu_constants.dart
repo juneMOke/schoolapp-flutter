@@ -124,6 +124,9 @@ class MenuConstants {
 
   static const String disciplinesDashboardId = 'disciplines-dashboard';
   static const String presencesId = 'presences';
+
+  /// Les justifications d'absence déposées par les parents (portail parent).
+  static const String justificationsId = 'justifications';
   static const String disciplinesListId = 'disciplines-list';
 
   /// « Mes évaluations » (ex-« Mes cours ») : l'identifiant ne change pas,

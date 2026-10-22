@@ -105,7 +105,9 @@ class ResultatFocusHeader extends StatelessWidget {
                 valueColor: AppColors.orDoux,
               ),
               _StatPill(
-                value: rang == null ? l10n.resultatsDash : '$rang',
+                // Un élève sans note n'a pas de rang : le serveur le dit
+                // « non classé », la fiche aussi.
+                value: rang == null ? l10n.resultatsNonClasseBadge : '$rang',
                 label: l10n.resultatsFocusRankOf(nbClasses),
                 valueColor: AppColors.textOnDark,
               ),

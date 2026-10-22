@@ -45,6 +45,7 @@ import '../../features/offline_full_db.dart';
 import 'package:school_app_flutter/core/database/tenant/device_database.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_pull_handler.dart';
+import 'package:school_app_flutter/features/attendances/data/remote/offline/justification/attendance_justification_pull_handler.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enrollment_suspension_puller.dart';
 import 'package:school_app_flutter/features/student_photo/data/sync/student_photo_puller.dart';
 
@@ -193,6 +194,22 @@ void main() {
     // Le delta de transfert résout son `school_level_id` par un SELECT sur
     // `ref_classrooms` — dans l'autre ordre, la colonne se remplit d'une chaîne
     // vide.
+    // Les justifications des parents nomment l'élève par le roster et visent
+    // une absence de l'appel : tirées avant, elles s'afficheraient sans nom et
+    // seraient tranchées sur un appel que la tablette n'a pas encore vu.
+    test('le roster et l\'appel précèdent les justifications des parents', () {
+      expectBefore(
+        kClassroomMembersResource,
+        kAttendanceJustificationsResource,
+        'la file nomme l\'élève par le roster',
+      );
+      expectBefore(
+        kAttendanceResource,
+        kAttendanceJustificationsResource,
+        'une justification vise une absence de l\'appel',
+      );
+    });
+
     test('les classes précèdent les transferts', () {
       expectBefore(
         kClassroomsResource,
@@ -259,11 +276,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('trente-huit handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(38));
+    test('trente-neuf handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(39));
       expect(
         order().toSet(),
-        hasLength(38),
+        hasLength(39),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -293,11 +310,11 @@ void main() {
       ]);
     });
 
-    // Les trente-six autres restent gouvernés par leur permission : sans cette
+    // Les trente-sept autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
     test(
-      'les trente-six autres flux déclarent tous une exigence de lecture',
+      'les trente-sept autres flux déclarent tous une exigence de lecture',
       () {
         final sansExigence = coordinator.registered
             .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
@@ -309,7 +326,7 @@ void main() {
         expect(sansExigence, isEmpty);
         expect(
           coordinator.registered.where((h) => !h.isBaseline),
-          hasLength(36),
+          hasLength(37),
         );
       },
     );
@@ -338,7 +355,7 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les trente-huit ressources attendues sont toutes enregistrées', () {
+  test('les trente-neuf ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       kTombstonesResource,
       EnrollmentPullRepositoryImpl.referentialResource,
@@ -354,6 +371,7 @@ void main() {
       kClassroomTransfersResource,
       kAttendanceResource,
       kAttendanceClosuresResource,
+      kAttendanceJustificationsResource,
       kDisciplinaryResource,
       kScheduleTimeSlotsResource,
       kScheduleSessionsResource,

@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_codecs.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_cadre.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/remise_devoir.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/sujet_question.dart';
 
 /// Colonnes « sujet » de la ligne `evaluation` — un **sous-agrégat LWW**.
@@ -16,11 +17,16 @@ import 'package:school_app_flutter/features/academics/domain/entities/sujet/suje
 ///
 /// [syncStatus] nul = jamais modifié depuis la création : le cadre est parti
 /// avec l'enveloppe de création, il n'y a rien à envoyer.
+///
+/// [remise] n'existe que pour un DEVOIR : la ligne ne la lit que si `type`
+/// le dit, et ne l'écrit que si elle existe — une interrogation garde les
+/// valeurs par défaut des colonnes, qui ne partent jamais.
 class EvaluationSujetRow extends Equatable {
   final int? dureeMinutes;
   final List<String> programme;
   final String? consignes;
   final List<SujetQuestion> questions;
+  final RemiseDevoir? remise;
 
   /// Horloge client (epoch ms) de la dernière écriture du sujet ; garde de
   /// l'accusé et arbitre du dernier enregistrement gagnant.
@@ -33,6 +39,7 @@ class EvaluationSujetRow extends Equatable {
     this.programme = const [],
     this.consignes,
     this.questions = const [],
+    this.remise,
     this.updatedAt,
     this.syncStatus,
     this.rejectionCode,
@@ -47,7 +54,14 @@ class EvaluationSujetRow extends Equatable {
     'sujet_updated_at',
     'sujet_sync_status',
     'sujet_rejection_code',
+    // La remise, et ce qui dit si elle existe.
+    'type',
+    'heure_limite',
+    'mode_remise',
+    'depot_tardif_permis',
   ];
+
+  static const String _devoir = 'DEVOIR';
 
   factory EvaluationSujetRow.fromEntity(
     EvaluationCadre cadre,
@@ -61,6 +75,7 @@ class EvaluationSujetRow extends Equatable {
       programme: normalized.programme,
       consignes: normalized.consignes,
       questions: questions,
+      remise: normalized.remise,
       updatedAt: updatedAt,
       syncStatus: syncStatus,
     );
@@ -76,6 +91,13 @@ class EvaluationSujetRow extends Equatable {
         questions: SujetCodecs.questionsFromJson(
           SujetCodecs.decodeColumn(map['sujet_questions_json']),
         ),
+        remise: map['type'] == _devoir
+            ? RemiseDevoir.fromJson({
+                'heureLimite': map['heure_limite'],
+                'modeRemise': map['mode_remise'],
+                'depotTardifPermis': map['depot_tardif_permis'] == 1,
+              })
+            : null,
         updatedAt: (map['sujet_updated_at'] as num?)?.toInt(),
         syncStatus: map['sujet_sync_status'] as String?,
         rejectionCode: map['sujet_rejection_code'] as String?,
@@ -89,12 +111,25 @@ class EvaluationSujetRow extends Equatable {
     'sujet_updated_at': updatedAt,
     'sujet_sync_status': syncStatus,
     'sujet_rejection_code': rejectionCode,
+    ...?remiseColumns,
   };
+
+  /// Les colonnes de la remise ; `null` hors devoir (rien n'est écrit).
+  Map<String, Object?>? get remiseColumns {
+    final value = remise?.normalized();
+    if (value == null) return null;
+    return {
+      'heure_limite': value.heureLimite,
+      'mode_remise': value.mode.apiValue,
+      'depot_tardif_permis': value.depotTardifPermis ? 1 : 0,
+    };
+  }
 
   EvaluationCadre get cadre => EvaluationCadre(
     dureeMinutes: dureeMinutes,
     programme: programme,
     consignes: consignes,
+    remise: remise,
   );
 
   EvaluationSujet toEntity() => EvaluationSujet(
@@ -117,6 +152,7 @@ class EvaluationSujetRow extends Equatable {
     programme,
     consignes,
     questions,
+    remise,
     updatedAt,
     syncStatus,
     rejectionCode,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/labels/audience_note.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_pickers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
@@ -248,6 +249,10 @@ class _DisciplinaryCaseCreateDialogState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Le portail montre le fait aux parents (gravité, sanction), pas
+            // ses commentaires ni son statut : l'agent le sait en l'écrivant.
+            AudienceNote(l10n.disciplinaryCaseVisibleToParents),
+            const SizedBox(height: AppDimensions.spacingM),
             _buildStatusBlock(l10n),
             const SizedBox(height: AppDimensions.spacingM),
             _buildCategoryField(l10n, isLoading),

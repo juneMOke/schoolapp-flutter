@@ -3567,7 +3567,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guardianPhoneNumberOptionalNotice =>
-      'Optional. Without a number, this guardian receives no notifications and has no access to the parent portal — and cannot be reused for a sibling.';
+      'Used to sign in to the parent portal: the link arrives by WhatsApp on this number, and a wrong number gives no access, with no error message. Optional: without a number, this guardian gets no notification and cannot be reused for a sibling.';
 
   @override
   String get phoneNumberHelp => 'Guardian\'s phone number.';
@@ -17334,4 +17334,302 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get environmentBadgeProd => 'PROD';
+
+  @override
+  String get subMenuAttendanceJustifications => 'Justifications';
+
+  @override
+  String get justificationTabOpen => 'To review';
+
+  @override
+  String get justificationTabOpenSubtitle => 'Submitted by parents';
+
+  @override
+  String justificationTabOpenBadge(int count) {
+    return '$count pending';
+  }
+
+  @override
+  String get justificationTabDecided => 'Reviewed';
+
+  @override
+  String get justificationTabDecidedSubtitle => 'Accepted and rejected';
+
+  @override
+  String get justificationEmptyOpenTitle => 'No justification to review';
+
+  @override
+  String get justificationEmptyDecidedTitle => 'No justification reviewed yet';
+
+  @override
+  String get justificationEmptyDescription =>
+      'Absence justifications submitted by parents from the portal appear here.';
+
+  @override
+  String get justificationStatusPending => 'Pending';
+
+  @override
+  String get justificationStatusSending => 'Decision being sent';
+
+  @override
+  String get justificationStatusAccepted => 'Accepted';
+
+  @override
+  String get justificationStatusRejected => 'Rejected';
+
+  @override
+  String get justificationUnknownStudent => 'Student not found in the class';
+
+  @override
+  String get justificationParentNote => 'Parent\'s note';
+
+  @override
+  String get justificationSchoolNote => 'School\'s note';
+
+  @override
+  String justificationSubmittedOn(String date) {
+    return 'Submitted on $date';
+  }
+
+  @override
+  String justificationDecidedOn(String date) {
+    return 'Decided on $date';
+  }
+
+  @override
+  String get justificationBlockedNotAnAbsence =>
+      'The register was corrected: the student is no longer absent that day. The request can only be rejected.';
+
+  @override
+  String get justificationBlockedMonthClosed =>
+      'The month of the absence is closed. The request can only be rejected.';
+
+  @override
+  String get justificationAccept => 'Accept';
+
+  @override
+  String get justificationReject => 'Reject';
+
+  @override
+  String get justificationCancel => 'Cancel';
+
+  @override
+  String get justificationAcceptTitle => 'Accept the justification';
+
+  @override
+  String get justificationRejectTitle => 'Reject the justification';
+
+  @override
+  String justificationDecisionHint(String student, String day) {
+    return 'Absence of $student, $day.';
+  }
+
+  @override
+  String get justificationNoteLabel => 'School\'s note to the parent';
+
+  @override
+  String get justificationNoteRequired =>
+      'Tell the parent why the request is rejected.';
+
+  @override
+  String get justificationNoteHelper => 'Visible to the parent on the portal.';
+
+  @override
+  String get justificationDecisionSaved =>
+      'Decision saved: it is being sent to the server.';
+
+  @override
+  String get justificationDecisionConflict =>
+      'This request has already been decided.';
+
+  @override
+  String get justificationDecisionFailed => 'The decision could not be saved.';
+
+  @override
+  String justificationDecidedElsewhere(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count justifications were already decided on another device: those decisions were kept.',
+      one:
+          'A justification was already decided on another device: that decision was kept.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get justificationAttachmentOpen => 'View attachment';
+
+  @override
+  String get justificationAttachmentOffline => 'Attachment available online';
+
+  @override
+  String get justificationAttachmentUnavailable =>
+      'The attachment could not be opened.';
+
+  @override
+  String get justificationAttachmentNotViewable =>
+      'This type of attachment cannot be displayed.';
+
+  @override
+  String justificationAttachmentTitle(String student) {
+    return 'Attachment · $student';
+  }
+
+  @override
+  String get remiseSectionLabel => 'Submission';
+
+  @override
+  String get remiseModeEnClasse => 'In class';
+
+  @override
+  String get remiseModeEnLigne => 'Online';
+
+  @override
+  String get remiseHeureLimiteLabel => 'Deadline time';
+
+  @override
+  String get remiseHeureLimiteHint => 'End of the day';
+
+  @override
+  String get remiseHeureLimiteClear => 'Remove the deadline time';
+
+  @override
+  String get remiseDepotTardifLabel => 'Accept late submissions';
+
+  @override
+  String get remiseEnLigneHelp =>
+      'The parent uploads the copy from the portal, on the homework date at the latest.';
+
+  @override
+  String get remiseEnClasseHelp =>
+      'The copy is handed in class; nothing is uploaded on the portal.';
+
+  @override
+  String remiseAvant(String heure) {
+    return 'before $heure';
+  }
+
+  @override
+  String get remiseFinDuJour => 'end of day';
+
+  @override
+  String get remiseRetardAccepte => 'late accepted';
+
+  @override
+  String get remiseRejectedNotHomework =>
+      'Submission settings only apply to homework: the server rejected them on this evaluation.';
+
+  @override
+  String get justificationStatusUnknown => 'Unknown status';
+
+  @override
+  String get justificationRefusalNoAuthor =>
+      'Decision not sent: it was taken without a known user. Sign in again, then decide again.';
+
+  @override
+  String get justificationRefusalForbidden =>
+      'Decision not sent: you are missing the right to amend the register.';
+
+  @override
+  String get justificationRefusalRejected =>
+      'Decision rejected by the server. Decide again.';
+
+  @override
+  String get justificationRefusalNotSent =>
+      'Decision not sent after several attempts. Decide again.';
+
+  @override
+  String get depotsSectionTitle => 'Uploaded copies';
+
+  @override
+  String depotsCompteur(int rendues, int total) {
+    return '$rendues / $total handed in';
+  }
+
+  @override
+  String get depotEtatRendu => 'Handed in';
+
+  @override
+  String get depotEtatRenduEnRetard => 'Handed in late';
+
+  @override
+  String get depotEtatPasRendu => 'Not handed in yet';
+
+  @override
+  String depotDeposeLe(String date) {
+    return 'Uploaded on $date';
+  }
+
+  @override
+  String get depotOuvrir => 'Open the copy';
+
+  @override
+  String get depotEnLigneSeulement => 'Copy available online';
+
+  @override
+  String get depotIndisponible => 'The copy could not be opened.';
+
+  @override
+  String get depotIllisible => 'This copy cannot be displayed.';
+
+  @override
+  String depotViewerTitle(String student) {
+    return 'Copy · $student';
+  }
+
+  @override
+  String get noteCommentaireAdd => 'Add a comment';
+
+  @override
+  String get noteCommentaireEdit => 'Edit the comment';
+
+  @override
+  String get noteCommentaireNeedsNote =>
+      'Enter the grade first: the comment goes with it.';
+
+  @override
+  String noteCommentaireTitle(String student) {
+    return 'Comment for $student';
+  }
+
+  @override
+  String get noteCommentaireLabel => 'Comment';
+
+  @override
+  String get noteCommentaireHelper =>
+      'Visible to parents once published. Clear the field to remove the comment.';
+
+  @override
+  String get noteCommentaireSave => 'Save';
+
+  @override
+  String get noteCommentaireCancel => 'Cancel';
+
+  @override
+  String get depotIncomplete => 'Incomplete copy';
+
+  @override
+  String get depotsEmptyTitle => 'No student in the class';
+
+  @override
+  String get depotsEmptyDescription =>
+      'Copies uploaded by parents will show here, student by student.';
+
+  @override
+  String get publicationConfirmNotesPortal =>
+      'Also visible on the parent portal, with each grade\'s comment and the class average (from 3 grades)';
+
+  @override
+  String get disciplinaryCaseVisibleToParents =>
+      'Visible to parents on the portal: the incident, its severity and its sanction. A summons shows as a meeting request.';
+
+  @override
+  String get disciplinaryCommentsInternal =>
+      'Internal to the school: comments are never shown to parents.';
+
+  @override
+  String get configurationSchoolPhoneOnPortal =>
+      'The school phone is shown to parents on the portal as the contact, with the logo.';
 }

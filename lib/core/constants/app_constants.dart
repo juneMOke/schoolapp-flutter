@@ -817,7 +817,14 @@ class AppConstants {
   // Palier d'école.
   // v65 (2026-10-21) : la photo hors ligne du tableau de bord de la boutique
   // (`boutique_dashboard_cache`). Création pure, sans reprise. Palier d'école.
-  static const int offlineDbSchemaVersion = 65;
+  // v66 (2026-10-22) : le côté école du portail parent —
+  // `attendance_justifications` (les justifications d'absence déposées par
+  // les parents et la décision de l'école), la remise d'un devoir
+  // (`evaluation.heure_limite`/`mode_remise`/`depot_tardif_permis`), les
+  // copies déposées (`evaluation_depot`) et le commentaire par note
+  // (`note_evaluation.commentaire`) ; re-pull des évaluations. Un seul palier
+  // pour toute la livraison. Palier d'école.
+  static const int offlineDbSchemaVersion = 66;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1200,6 +1207,26 @@ class AppConstants {
   /// POST d'un geste idempotent par `gestureId`, GET keyset.
   static const String syncAttendanceClosuresEndpoint =
       '/api/v1/sync/attendance-closures';
+
+  /// Justifications d'absence déposées par les parents (portail parent,
+  /// V182) : GET keyset sous `attendance.amend`.
+  static const String syncAttendanceJustificationsEndpoint =
+      '/api/v1/sync/attendance-justifications';
+
+  /// La décision de l'école sur une justification : POST d'un geste
+  /// idempotent par `gestureId`.
+  static const String syncAttendanceJustificationDecisionEndpoint =
+      '/api/v1/sync/attendance-justifications/{id}/decision';
+
+  /// Une page d'une copie déposée par un parent (portail parent, V180), sous
+  /// `academics.grade.read`, réservée à l'enseignant du cours. `ETag` = son
+  /// `sha256`.
+  static const String academicsDepotFichierContentEndpoint =
+      '/api/v1/academics/evaluations/{evaluationId}/depots/fichiers/{fichierId}/contenu';
+
+  /// La pièce jointe d'une justification, hors `/sync`. `ETag` = son `sha256`.
+  static const String attendanceJustificationFileEndpoint =
+      '/api/v1/attendance-justifications/{id}/file';
 
   /// Pull KEYSET des `ref_classrooms` (CB-2, re-contracté 2026-07-27 —
   /// remplace l'ancien contrat bundlé `updatedSince`/`serverCursor`) :

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_evaluation_sync_api.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_push_models.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet_codes.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart'
     show kEvaluationAggregateType;
 
@@ -139,6 +140,11 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
   /// projet ne porte pas de champ `code` dédié) — `null` si le message ne
   /// commence par aucun des 3 codes connus (défensif, contrat inattendu).
   String? _backstopCode(DioException e) {
+    // La remise refusée hors devoir porte un `detailCode`, pas un préfixe.
+    final detailCode = ApiErrorParser.detailCodeOf(e.response);
+    if (detailCode == EvaluationSujetCodes.homeworkDeliveryOnTest) {
+      return detailCode;
+    }
     final data = e.response?.data;
     final message = (data is Map && data['message'] is String)
         ? data['message'] as String

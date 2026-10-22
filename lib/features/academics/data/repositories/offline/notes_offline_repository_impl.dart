@@ -22,10 +22,14 @@ class NoteSaveInput {
   final String statut;
   final double? pointsObtenus;
 
+  /// `null` = commentaire inchangé, `""` = retiré, texte = remplacé.
+  final String? commentaire;
+
   const NoteSaveInput({
     required this.studentId,
     required this.statut,
     this.pointsObtenus,
+    this.commentaire,
   });
 }
 
@@ -72,6 +76,7 @@ class NotesOfflineRepositoryImpl {
               studentId: n.studentId,
               pointsObtenus: n.pointsObtenus,
               statut: n.statut,
+              commentaire: n.commentaire,
               updatedAt: nowMs,
             ),
           )

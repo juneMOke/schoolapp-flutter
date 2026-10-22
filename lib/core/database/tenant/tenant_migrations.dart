@@ -3,6 +3,8 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/academics_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/attendance_justification_schema.dart';
+import 'package:school_app_flutter/core/database/schema/evaluation_depot_schema.dart';
 import 'package:school_app_flutter/core/database/schema/boutique_dashboard_cache_schema.dart';
 import 'package:school_app_flutter/core/database/schema/class_journal_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
@@ -17,6 +19,7 @@ import 'package:school_app_flutter/core/database/schema/student_photo_schema.dar
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 part 'tenant_migrations_evaluation.dart';
+part 'tenant_migrations_parent_portal.dart';
 part 'tenant_migrations_presence.dart';
 part 'tenant_migrations_programme.dart';
 part 'tenant_migrations_suspension.dart';
@@ -95,6 +98,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(65)) {
     await _createTables(db, boutiqueDashboardCacheTables);
+  }
+  if (upTo(66)) {
+    await _parentPortalStaffSide(db);
   }
 }
 

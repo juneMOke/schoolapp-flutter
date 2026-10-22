@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/labels/audience_note.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -238,6 +239,10 @@ class _SchoolIdentityStepState extends State<SchoolIdentityStep> {
                   ),
                 ],
               ),
+              const SizedBox(height: AppSpacing.sm),
+              // Le portail parent montre ce numéro comme contact de l'école,
+              // avec son logo.
+              AudienceNote(l10n.configurationSchoolPhoneOnPortal),
               const SizedBox(height: AppSpacing.md),
               SchoolTicketCopiesSelect(
                 value: identity.ticketCopies,

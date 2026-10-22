@@ -339,6 +339,11 @@ class MenuFactory {
           route: AppRoutesNames.presences,
         ),
         SubMenuItem(
+          id: MenuConstants.justificationsId,
+          title: l10n.subMenuAttendanceJustifications,
+          route: AppRoutesNames.justifications,
+        ),
+        SubMenuItem(
           id: MenuConstants.disciplinesListId,
           title: l10n.subMenuDisciplinesList,
           route: AppRoutesNames.disciplinesList,

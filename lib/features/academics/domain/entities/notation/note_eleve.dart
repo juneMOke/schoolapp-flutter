@@ -25,6 +25,10 @@ class NoteEleve extends Equatable {
   /// n'est jamais perdue en silence.
   final String? rejectionReason;
 
+  /// Le commentaire de l'enseignant, visible par le parent après publication ;
+  /// `null` s'il n'y en a pas.
+  final String? commentaire;
+
   const NoteEleve({
     required this.studentId,
     required this.firstName,
@@ -33,6 +37,7 @@ class NoteEleve extends Equatable {
     this.pointsObtenus,
     this.statut,
     this.rejectionReason,
+    this.commentaire,
   });
 
   @override
@@ -44,5 +49,6 @@ class NoteEleve extends Equatable {
     pointsObtenus,
     statut,
     rejectionReason,
+    commentaire,
   ];
 }

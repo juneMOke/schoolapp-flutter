@@ -117,6 +117,11 @@ abstract final class SyncPlanKeys {
   /// ⚠️ À déclarer au plan serveur sous cette clé : sans elle, le plan ne
   /// désigne jamais le flux.
   static const String attendanceClosures = 'attendance.closures';
+
+  /// Les justifications d'absence déposées par les parents (portail parent,
+  /// V182). Sous `attendance.amend` **seul**, jamais entraîné : un profil
+  /// sans ce droit recevrait un 403.
+  static const String attendanceJustifications = 'attendance.justifications';
   static const String disciplineCases = 'discipline.cases';
   static const String scheduleTimeSlots = 'schedule.time-slots';
   static const String scheduleSessions = 'schedule.sessions';
@@ -211,6 +216,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.financePayments: ['finance_payments'],
   SyncPlanKeys.attendanceRecords: ['attendance'],
   SyncPlanKeys.attendanceClosures: ['attendance_closures'],
+  SyncPlanKeys.attendanceJustifications: ['attendance_justifications'],
   SyncPlanKeys.disciplineCases: ['disciplinary_cases'],
   SyncPlanKeys.scheduleTimeSlots: ['schedule_time_slots'],
   SyncPlanKeys.scheduleSessions: ['schedule_sessions'],

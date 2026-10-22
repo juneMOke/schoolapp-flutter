@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/academics/presentation/helpers/eval_
 import 'package:school_app_flutter/features/academics/presentation/helpers/eval_title.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/sujet_draft_controller.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/copie/copie_section.dart';
+import 'package:school_app_flutter/features/academics/presentation/widgets/depot/depots_section.dart';
 import 'package:school_app_flutter/features/academics/presentation/widgets/publication/publication_feedback.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_bloc.dart';
 import 'package:school_app_flutter/features/academics/presentation/bloc/publication/publication_event.dart';
@@ -24,7 +25,8 @@ import 'package:school_app_flutter/features/academics/presentation/widgets/sujet
 import 'package:school_app_flutter/features/academics/presentation/widgets/sujet/sujet_section.dart';
 
 /// Les sections empilées du détail d'une évaluation (spec S1) : Sujet,
-/// Copie, Publication aux parents.
+/// Copies déposées (devoir en ligne seulement), Copie, Publication aux
+/// parents.
 class EvalDetailSections extends StatelessWidget {
   final EvalDetailArgs args;
   final EvalDetailState state;
@@ -80,6 +82,10 @@ class EvalDetailSections extends StatelessWidget {
                       maxLocked: state.progress.maxLocked,
                     ),
             ),
+            if (sujet.cadre.remise?.enLigne ?? false) ...[
+              const SizedBox(height: AppSpacing.lg),
+              DepotsSection(evaluationId: eval.id),
+            ],
             const SizedBox(height: AppSpacing.lg),
             BlocBuilder<CopieBloc, CopieState>(
               builder: (context, copie) => CopieSection(

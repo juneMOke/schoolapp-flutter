@@ -115,6 +115,9 @@ import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/storage/serialized_secure_storage.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
+import 'package:school_app_flutter/core/attachments/attachment_availability.dart';
+import 'package:school_app_flutter/core/attachments/attachment_fetcher.dart';
+import 'package:school_app_flutter/core/attachments/ephemeral_attachment_cache.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/password_verifier_service.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
@@ -490,12 +493,25 @@ Future<void> configureDependencies({
       currentUser: getIt<CurrentUserContext>(),
       currentPermissions: getIt<CurrentPermissions>(),
       sharedDocumentCache: getIt<SharedDocumentCache>(),
+      attachmentCache: getIt<EphemeralAttachmentCache>(),
       tenants: getIt<TenantSwitch>(),
     ),
   );
 
   getIt.registerLazySingleton<SharedDocumentCache>(
     () => const SharedDocumentCache(),
+  );
+  getIt.registerLazySingleton<EphemeralAttachmentCache>(
+    () => EphemeralAttachmentCache(),
+  );
+  getIt.registerLazySingleton<AttachmentFetcher>(
+    () => AttachmentFetcher(getIt<Dio>(), getIt<EphemeralAttachmentCache>()),
+  );
+  getIt.registerLazySingleton<AttachmentAvailabilityTracker>(
+    () => AttachmentAvailabilityTracker(
+      getIt<ConnectivityService>(),
+      getIt<AttachmentFetcher>(),
+    ),
   );
 
   getIt.registerLazySingleton<AuthRemoteDataSource>(

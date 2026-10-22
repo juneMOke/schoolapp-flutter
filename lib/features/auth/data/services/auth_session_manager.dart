@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/attachments/ephemeral_attachment_cache.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/core/offline/revocation_evaluator.dart';
 import 'package:school_app_flutter/core/offline/outbox_author_directory.dart';
@@ -61,6 +62,11 @@ class AuthSessionManager
   /// lui, la fin de session se comporte exactement comme avant.
   final SharedDocumentCache? _sharedDocumentCache;
 
+  /// Purge des pièces téléchargées à la demande (certificats d'absence, copies
+  /// déposées) : des documents d'élèves mineurs, qui ne survivent pas à la
+  /// session. Optionnel, comme [_sharedDocumentCache].
+  final EphemeralAttachmentCache? _attachmentCache;
+
   /// Dernier `userVersion` **observé** sur une réponse serveur (header
   /// `X-User-Version`). En mémoire : re-observé au prochain contact si perdu.
   int? _observedUserVersion;
@@ -81,6 +87,7 @@ class AuthSessionManager
     CurrentUserContext? currentUser,
     CurrentPermissions? currentPermissions,
     SharedDocumentCache? sharedDocumentCache,
+    EphemeralAttachmentCache? attachmentCache,
     TenantSwitch? tenants,
     WallClock now = _systemWallClock,
   }) : _tokenStorage = tokenStorage,
@@ -90,6 +97,7 @@ class AuthSessionManager
        _currentUser = currentUser,
        _currentPermissions = currentPermissions,
        _sharedDocumentCache = sharedDocumentCache,
+       _attachmentCache = attachmentCache,
        _tenants = tenants,
        _now = now;
 
@@ -639,6 +647,7 @@ class AuthSessionManager
     // En dernier, et sans jamais faire échouer le wipe — fermer la session
     // prime sur nettoyer un cache.
     await _sharedDocumentCache?.purge();
+    await _attachmentCache?.purge();
   }
 
   // ── Sonde de crédentiels (boucle de synchro, V1.1) ──────────────────────────

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/academics/data/datasources/offline/depot/evaluation_depot_local_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -53,6 +54,9 @@ void registerEvaluationSujet(GetIt getIt) {
       sujets: getIt<EvaluationSujetLocalDataSource>(),
       copieLog: getIt<EvaluationCopieLogLocalDataSource>(),
       publications: getIt<EvaluationPublicationLocalDataSource>(),
+      // Sans état : construite ici, pour que l'applicateur ne dépende pas
+      // de l'ordre des modules (les tests de câblage n'en montent qu'une part).
+      depots: EvaluationDepotLocalDataSource(getIt<Database>()),
     ),
   );
   getIt.registerLazySingleton<EvaluationChildOutboxSupport>(

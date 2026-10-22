@@ -19,7 +19,10 @@ Future<bool> confirmPublication(
       l10n.publicationConfirmSujetNote,
     ],
     PublicationKind.corrige => [l10n.publicationConfirmCorrigeItems],
-    PublicationKind.notes => [l10n.publicationConfirmNotesItems],
+    PublicationKind.notes => [
+      l10n.publicationConfirmNotesItems,
+      l10n.publicationConfirmNotesPortal,
+    ],
   };
   final confirmed = await showDialog<bool>(
     context: context,

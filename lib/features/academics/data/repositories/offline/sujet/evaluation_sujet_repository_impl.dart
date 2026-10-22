@@ -91,6 +91,7 @@ class EvaluationSujetRepositoryImpl implements EvaluationSujetRepository {
         programme: sujet.programme,
         consignes: sujet.consignes,
         questions: sujet.questions,
+        remise: sujet.remise,
       );
       final clientUpdatedAt = await _local.saveSujet(
         evaluationId: evaluationId,
@@ -122,6 +123,7 @@ class EvaluationSujetRepositoryImpl implements EvaluationSujetRepository {
           programme: content.programme,
           consignes: content.consignes,
           questions: content.questions,
+          remise: content.remise,
           updatedAt: clientUpdatedAt,
           syncStatus: SyncState.pendingSync.dbValue,
         ).toEntity(),

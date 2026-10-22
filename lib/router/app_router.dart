@@ -57,6 +57,7 @@ import 'package:school_app_flutter/router/return_location.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/router/student_record_routes.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
+import 'package:school_app_flutter/features/attendances/presentation/justifications/pages/justification_queue_page.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/widgets/photo_capture_support.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/session/photo_session_page.dart';
 
@@ -549,6 +550,10 @@ class AppRouter {
         GoRoute(
           path: AppRoutesNames.presences,
           builder: (context, state) => const ClassPresencePage(),
+        ),
+        GoRoute(
+          path: AppRoutesNames.justifications,
+          builder: (context, state) => const JustificationQueuePage(),
         ),
         StudentRecordRoutes.disciplinaryDetail(),
       ],

@@ -3585,7 +3585,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guardianPhoneNumberOptionalNotice =>
-      'Facultatif. Sans numéro, ce tuteur ne recevra aucune notification et n\'aura pas accès au portail parent — et il ne pourra pas être repris pour un frère ou une sœur.';
+      'Sert à la connexion au portail parent : le lien arrive par WhatsApp sur ce numéro, et un mauvais numéro ne donne aucun accès, sans message d\'erreur. Facultatif : sans numéro, ce tuteur ne recevra aucune notification et ne pourra pas être repris pour un frère ou une sœur.';
 
   @override
   String get phoneNumberHelp => 'Numéro de téléphone du tuteur.';
@@ -17461,4 +17461,303 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get environmentBadgeProd => 'PROD';
+
+  @override
+  String get subMenuAttendanceJustifications => 'Justifications';
+
+  @override
+  String get justificationTabOpen => 'À traiter';
+
+  @override
+  String get justificationTabOpenSubtitle => 'Déposées par les parents';
+
+  @override
+  String justificationTabOpenBadge(int count) {
+    return '$count en attente';
+  }
+
+  @override
+  String get justificationTabDecided => 'Traitées';
+
+  @override
+  String get justificationTabDecidedSubtitle => 'Acceptées et refusées';
+
+  @override
+  String get justificationEmptyOpenTitle => 'Aucune justification à traiter';
+
+  @override
+  String get justificationEmptyDecidedTitle => 'Aucune justification traitée';
+
+  @override
+  String get justificationEmptyDescription =>
+      'Les justifications d\'absence déposées par les parents depuis le portail apparaissent ici.';
+
+  @override
+  String get justificationStatusPending => 'En attente';
+
+  @override
+  String get justificationStatusSending => 'Décision en cours d\'envoi';
+
+  @override
+  String get justificationStatusAccepted => 'Acceptée';
+
+  @override
+  String get justificationStatusRejected => 'Refusée';
+
+  @override
+  String get justificationUnknownStudent => 'Élève introuvable dans la classe';
+
+  @override
+  String get justificationParentNote => 'Mot du parent';
+
+  @override
+  String get justificationSchoolNote => 'Mot de l\'école';
+
+  @override
+  String justificationSubmittedOn(String date) {
+    return 'Déposée le $date';
+  }
+
+  @override
+  String justificationDecidedOn(String date) {
+    return 'Tranchée le $date';
+  }
+
+  @override
+  String get justificationBlockedNotAnAbsence =>
+      'L\'appel a été corrigé : l\'élève n\'est plus absent ce jour-là. La demande ne peut plus qu\'être refusée.';
+
+  @override
+  String get justificationBlockedMonthClosed =>
+      'Le mois de l\'absence est clôturé. La demande ne peut plus qu\'être refusée.';
+
+  @override
+  String get justificationAccept => 'Accepter';
+
+  @override
+  String get justificationReject => 'Refuser';
+
+  @override
+  String get justificationCancel => 'Annuler';
+
+  @override
+  String get justificationAcceptTitle => 'Accepter la justification';
+
+  @override
+  String get justificationRejectTitle => 'Refuser la justification';
+
+  @override
+  String justificationDecisionHint(String student, String day) {
+    return 'Absence de $student, $day.';
+  }
+
+  @override
+  String get justificationNoteLabel => 'Mot de l\'école au parent';
+
+  @override
+  String get justificationNoteRequired =>
+      'Dites au parent pourquoi la demande est refusée.';
+
+  @override
+  String get justificationNoteHelper => 'Visible par le parent sur le portail.';
+
+  @override
+  String get justificationDecisionSaved =>
+      'Décision enregistrée : elle part au serveur.';
+
+  @override
+  String get justificationDecisionConflict =>
+      'Cette demande a déjà été tranchée.';
+
+  @override
+  String get justificationDecisionFailed =>
+      'La décision n\'a pas pu être enregistrée.';
+
+  @override
+  String justificationDecidedElsewhere(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count justifications ont déjà été tranchées par un autre poste : leurs décisions ont été retenues.',
+      one:
+          'Une justification a déjà été tranchée par un autre poste : sa décision a été retenue.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get justificationAttachmentOpen => 'Voir la pièce';
+
+  @override
+  String get justificationAttachmentOffline => 'Pièce disponible en ligne';
+
+  @override
+  String get justificationAttachmentUnavailable =>
+      'La pièce jointe n\'a pas pu être ouverte.';
+
+  @override
+  String get justificationAttachmentNotViewable =>
+      'Ce type de pièce ne peut pas être affiché.';
+
+  @override
+  String justificationAttachmentTitle(String student) {
+    return 'Pièce jointe · $student';
+  }
+
+  @override
+  String get remiseSectionLabel => 'Remise';
+
+  @override
+  String get remiseModeEnClasse => 'En classe';
+
+  @override
+  String get remiseModeEnLigne => 'En ligne';
+
+  @override
+  String get remiseHeureLimiteLabel => 'Heure limite';
+
+  @override
+  String get remiseHeureLimiteHint => 'Fin de la journée';
+
+  @override
+  String get remiseHeureLimiteClear => 'Retirer l\'heure limite';
+
+  @override
+  String get remiseDepotTardifLabel => 'Accepter les dépôts en retard';
+
+  @override
+  String get remiseEnLigneHelp =>
+      'Le parent dépose la copie depuis le portail, le jour du devoir au plus tard.';
+
+  @override
+  String get remiseEnClasseHelp =>
+      'La copie est remise en classe ; rien n\'est déposé sur le portail.';
+
+  @override
+  String remiseAvant(String heure) {
+    return 'avant $heure';
+  }
+
+  @override
+  String get remiseFinDuJour => 'fin du jour';
+
+  @override
+  String get remiseRetardAccepte => 'retard accepté';
+
+  @override
+  String get remiseRejectedNotHomework =>
+      'La remise ne vaut que pour un devoir : le serveur l\'a refusée sur cette évaluation.';
+
+  @override
+  String get justificationStatusUnknown => 'Statut inconnu';
+
+  @override
+  String get justificationRefusalNoAuthor =>
+      'Décision non transmise : elle a été prise sans utilisateur connu. Reconnectez-vous, puis tranchez à nouveau.';
+
+  @override
+  String get justificationRefusalForbidden =>
+      'Décision non transmise : le droit de modifier l\'appel vous manque.';
+
+  @override
+  String get justificationRefusalRejected =>
+      'Décision refusée par le serveur. Tranchez à nouveau.';
+
+  @override
+  String get justificationRefusalNotSent =>
+      'Décision non transmise après plusieurs essais. Tranchez à nouveau.';
+
+  @override
+  String get depotsSectionTitle => 'Copies déposées';
+
+  @override
+  String depotsCompteur(int rendues, int total) {
+    return '$rendues / $total rendues';
+  }
+
+  @override
+  String get depotEtatRendu => 'Rendu';
+
+  @override
+  String get depotEtatRenduEnRetard => 'Rendu en retard';
+
+  @override
+  String get depotEtatPasRendu => 'Pas encore rendu';
+
+  @override
+  String depotDeposeLe(String date) {
+    return 'Déposée le $date';
+  }
+
+  @override
+  String get depotOuvrir => 'Ouvrir la copie';
+
+  @override
+  String get depotEnLigneSeulement => 'Copie disponible en ligne';
+
+  @override
+  String get depotIndisponible => 'La copie n\'a pas pu être ouverte.';
+
+  @override
+  String get depotIllisible => 'Cette copie ne peut pas être affichée.';
+
+  @override
+  String depotViewerTitle(String student) {
+    return 'Copie · $student';
+  }
+
+  @override
+  String get noteCommentaireAdd => 'Ajouter un commentaire';
+
+  @override
+  String get noteCommentaireEdit => 'Modifier le commentaire';
+
+  @override
+  String get noteCommentaireNeedsNote =>
+      'Saisissez d\'abord la note : le commentaire l\'accompagne.';
+
+  @override
+  String noteCommentaireTitle(String student) {
+    return 'Commentaire pour $student';
+  }
+
+  @override
+  String get noteCommentaireLabel => 'Commentaire';
+
+  @override
+  String get noteCommentaireHelper =>
+      'Visible par les parents après publication. Videz le champ pour retirer le commentaire.';
+
+  @override
+  String get noteCommentaireSave => 'Enregistrer';
+
+  @override
+  String get noteCommentaireCancel => 'Annuler';
+
+  @override
+  String get depotIncomplete => 'Copie incomplète';
+
+  @override
+  String get depotsEmptyTitle => 'Aucun élève dans la classe';
+
+  @override
+  String get depotsEmptyDescription =>
+      'Les copies déposées par les parents s\'afficheront ici, élève par élève.';
+
+  @override
+  String get publicationConfirmNotesPortal =>
+      'Visibles aussi sur le portail parent, avec le commentaire de chaque note et la moyenne de la classe (à partir de 3 notes)';
+
+  @override
+  String get disciplinaryCaseVisibleToParents =>
+      'Visible par les parents sur le portail : le fait, sa gravité et sa sanction. Une convocation leur apparaît comme une demande d\'entretien.';
+
+  @override
+  String get disciplinaryCommentsInternal =>
+      'Interne à l\'école : les commentaires ne sont jamais montrés aux parents.';
+
+  @override
+  String get configurationSchoolPhoneOnPortal =>
+      'Le téléphone de l\'école est affiché aux parents sur le portail, comme contact, avec le logo.';
 }

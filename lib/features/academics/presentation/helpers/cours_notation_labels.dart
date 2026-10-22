@@ -45,6 +45,7 @@ String evalRejectionLabel(AppLocalizations l10n, String code) => switch (code) {
   'PERIOD_CLOSED' => l10n.evalRejectionPeriodClosed,
   'EXAM_NOT_ALLOWED' => l10n.evalRejectionExamNotAllowed,
   'MAX_REACHED' => l10n.evalRejectionMaxReached,
+  'HOMEWORK_DELIVERY_ON_TEST' => l10n.remiseRejectedNotHomework,
   _ => l10n.evalRejectionGeneric,
 };
 

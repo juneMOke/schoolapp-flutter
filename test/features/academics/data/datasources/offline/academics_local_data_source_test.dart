@@ -61,6 +61,7 @@ void main() {
     double? points,
     String statut = 'NOTEE',
     int updatedAt = 1000,
+    String? commentaire,
   }) => NoteEvaluationRow(
     id: id,
     evaluationId: 'ev-1',
@@ -68,6 +69,7 @@ void main() {
     pointsObtenus: points,
     statut: statut,
     updatedAt: updatedAt,
+    commentaire: commentaire,
   );
 
   group('createEvaluationWithOutbox (régime A)', () {
@@ -136,6 +138,27 @@ void main() {
         op: OutboxOperation.upsert,
       ),
     );
+
+    test('une note ressaisie sans toucher au commentaire le garde', () async {
+      await save([note('s1', id: 'n1', points: 12, commentaire: 'Bien')]);
+      await save([note('s1', id: 'n2', points: 14, updatedAt: 2000)]);
+
+      final stored = (await local.getNotesForEvaluation('ev-1')).single;
+      expect(stored.pointsObtenus, 14);
+      expect(stored.commentaire, 'Bien');
+    });
+
+    test('un commentaire vidé est rangé "" pour partir tel quel', () async {
+      await save([note('s1', id: 'n1', points: 12, commentaire: 'Bien')]);
+      await save([
+        note('s1', id: 'n2', points: 12, updatedAt: 2000, commentaire: ''),
+      ]);
+
+      expect(
+        (await local.getNotesForEvaluation('ev-1')).single.commentaire,
+        '',
+      );
+    });
 
     test(
       'insère les notes PENDING_SYNC + une entrée outbox coalescée',
