@@ -106,12 +106,14 @@ class BoutiqueBeneficiariesCubit extends Cubit<BoutiqueBeneficiariesState> {
     final page = state.page;
     if (page == null || !page.hasMore || state.loadingMore) return;
     final ticket = _ticket;
-    emit(state.copyWith(loadingMore: true));
+    emit(state.copyWith(loadingMore: true, loadMoreFailure: null));
     final result = await _getBeneficiaries(_query(page: page.page + 1));
     if (isClosed || ticket != _ticket) return;
     result.fold(
-      // Une page suivante en échec ne vide pas ce qui est affiché.
-      (_) => emit(state.copyWith(loadingMore: false)),
+      // Une page suivante en échec ne vide pas ce qui est affiché — mais elle
+      // le dit : une liste qui s'arrête sans un mot se lit comme complète.
+      (failure) =>
+          emit(state.copyWith(loadingMore: false, loadMoreFailure: failure)),
       (next) =>
           emit(state.copyWith(page: page.append(next), loadingMore: false)),
     );
@@ -125,6 +127,7 @@ class BoutiqueBeneficiariesCubit extends Cubit<BoutiqueBeneficiariesState> {
         status: BeneficiariesStatus.loading,
         failure: null,
         loadingMore: false,
+        loadMoreFailure: null,
       ),
     );
     final result = await _getBeneficiaries(_query());

@@ -9359,6 +9359,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueBeneficiariesLoadMore => 'Load more';
 
   @override
+  String get boutiqueBeneficiariesLoadMoreOffline =>
+      'Connection lost: the rest of the list could not be loaded.';
+
+  @override
+  String get boutiqueBeneficiariesLoadMoreForbidden =>
+      'You no longer have access to this list: the rest was not loaded.';
+
+  @override
+  String get boutiqueBeneficiariesLoadMoreUnauthorized =>
+      'Session expired: sign in again to load the rest.';
+
+  @override
+  String get boutiqueBeneficiariesLoadMoreFailed =>
+      'The rest of the list could not be loaded.';
+
+  @override
   String boutiqueBeneficiariesWalkIn(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -6226,6 +6226,10 @@
   },
   "boutiqueBeneficiariesCollapse": "Collapse",
   "boutiqueBeneficiariesLoadMore": "Load more",
+  "boutiqueBeneficiariesLoadMoreOffline": "Connection lost: the rest of the list could not be loaded.",
+  "boutiqueBeneficiariesLoadMoreForbidden": "You no longer have access to this list: the rest was not loaded.",
+  "boutiqueBeneficiariesLoadMoreUnauthorized": "Session expired: sign in again to load the rest.",
+  "boutiqueBeneficiariesLoadMoreFailed": "The rest of the list could not be loaded.",
   "boutiqueBeneficiariesWalkIn": "{count, plural, one{1 purchase with no named student (level chosen at the till) is not listed here.} other{{count} purchases with no named student (level chosen at the till) are not listed here.}}",
   "@boutiqueBeneficiariesWalkIn": {
     "placeholders": {

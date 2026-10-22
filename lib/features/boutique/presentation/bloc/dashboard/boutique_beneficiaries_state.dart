@@ -40,6 +40,10 @@ class BoutiqueBeneficiariesState extends Equatable {
   final bool expanded;
   final bool loadingMore;
 
+  /// L'échec de la dernière page suivante. Ce qui est déjà affiché reste ;
+  /// la carte le dit, et le bouton devient « Réessayer ».
+  final Failure? loadMoreFailure;
+
   const BoutiqueBeneficiariesState({
     this.status = BeneficiariesStatus.initial,
     this.page,
@@ -51,6 +55,7 @@ class BoutiqueBeneficiariesState extends Equatable {
     this.articleOptions = const [],
     this.expanded = false,
     this.loadingMore = false,
+    this.loadMoreFailure,
   });
 
   bool get hasFilters =>
@@ -85,6 +90,7 @@ class BoutiqueBeneficiariesState extends Equatable {
     List<BeneficiaryArticleOption>? articleOptions,
     bool? expanded,
     bool? loadingMore,
+    Object? loadMoreFailure = _undefined,
   }) => BoutiqueBeneficiariesState(
     status: status ?? this.status,
     page: identical(page, _undefined)
@@ -104,6 +110,9 @@ class BoutiqueBeneficiariesState extends Equatable {
     articleOptions: articleOptions ?? this.articleOptions,
     expanded: expanded ?? this.expanded,
     loadingMore: loadingMore ?? this.loadingMore,
+    loadMoreFailure: identical(loadMoreFailure, _undefined)
+        ? this.loadMoreFailure
+        : loadMoreFailure as Failure?,
   );
 
   @override
@@ -118,5 +127,6 @@ class BoutiqueBeneficiariesState extends Equatable {
     articleOptions,
     expanded,
     loadingMore,
+    loadMoreFailure,
   ];
 }

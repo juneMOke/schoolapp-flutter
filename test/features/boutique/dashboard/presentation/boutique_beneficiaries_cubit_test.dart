@@ -145,6 +145,46 @@ void main() {
     await cubit.close();
   });
 
+  test('l\'échec de la page suivante se dit, et se lève au succès', () async {
+    when(() => getBeneficiaries(any())).thenAnswer((i) async {
+      final q = i.positionalArguments.first as BeneficiariesQuery;
+      return q.page == 0
+          ? Right(beneficiariesOf(count: 2, total: 4, size: 2))
+          : const Left(NetworkFailure('x'));
+    });
+    final cubit = build();
+    await cubit.start(academicYearId: 'ay-1', window: sevenDays);
+    await cubit.loadMore();
+    expect(cubit.state.loadMoreFailure, isA<NetworkFailure>());
+    expect(cubit.state.page!.items, hasLength(2));
+    expect(cubit.state.page!.hasMore, isTrue);
+
+    when(() => getBeneficiaries(any())).thenAnswer((i) async {
+      final q = i.positionalArguments.first as BeneficiariesQuery;
+      return Right(beneficiariesOf(count: 2, total: 4, page: q.page, size: 2));
+    });
+    await cubit.loadMore();
+    expect(cubit.state.loadMoreFailure, isNull);
+    expect(cubit.state.page!.items, hasLength(4));
+    await cubit.close();
+  });
+
+  test('relire la liste efface l\'échec de la page suivante', () async {
+    when(() => getBeneficiaries(any())).thenAnswer((i) async {
+      final q = i.positionalArguments.first as BeneficiariesQuery;
+      return q.page == 0
+          ? Right(beneficiariesOf(count: 2, total: 4, size: 2))
+          : const Left(ServerFailure('x'));
+    });
+    final cubit = build();
+    await cubit.start(academicYearId: 'ay-1', window: sevenDays);
+    await cubit.loadMore();
+    expect(cubit.state.loadMoreFailure, isNotNull);
+    await cubit.retry();
+    expect(cubit.state.loadMoreFailure, isNull);
+    await cubit.close();
+  });
+
   test('une réponse dépassée par un filtre posé depuis est jetée', () async {
     final slow = Completer<Either<Failure, BoutiqueBeneficiariesPage>>();
     var calls = 0;

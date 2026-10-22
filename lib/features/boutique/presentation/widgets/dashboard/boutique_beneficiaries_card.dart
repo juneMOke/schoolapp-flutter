@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiaries_filters.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiary_tile.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_load_more_failure_notice.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/states/boutique_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -115,11 +116,22 @@ class _Body extends StatelessWidget {
         : page.items.take(BoutiqueBeneficiariesState.collapsedCount).toList();
     final canExpand =
         page.items.length > BoutiqueBeneficiariesState.collapsedCount;
+    final loadMoreFailure = state.loadMoreFailure;
+    final canLoadMore =
+        state.expanded &&
+        page.hasMore &&
+        (loadMoreFailure == null ||
+            BoutiqueLoadMoreFailureNotice.canRetry(loadMoreFailure));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final student in shown) BoutiqueBeneficiaryTile(student: student),
-        if (canExpand || (state.expanded && page.hasMore))
+        if (loadMoreFailure != null)
+          Padding(
+            padding: const EdgeInsets.only(top: AppDimensions.spacingS),
+            child: BoutiqueLoadMoreFailureNotice(failure: loadMoreFailure),
+          ),
+        if (canExpand || canLoadMore)
           Wrap(
             spacing: AppDimensions.spacingS,
             children: [
@@ -131,9 +143,11 @@ class _Body extends StatelessWidget {
                   onPressed: cubit.toggleExpanded,
                   fullWidth: false,
                 ),
-              if (state.expanded && page.hasMore)
+              if (canLoadMore)
                 EteeloButton.ghost(
-                  label: l10n.boutiqueBeneficiariesLoadMore,
+                  label: loadMoreFailure == null
+                      ? l10n.boutiqueBeneficiariesLoadMore
+                      : l10n.boutiqueErrorRetry,
                   isLoading: state.loadingMore,
                   onPressed: cubit.loadMore,
                   fullWidth: false,

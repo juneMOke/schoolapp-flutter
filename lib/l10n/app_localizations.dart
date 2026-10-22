@@ -14933,6 +14933,30 @@ abstract class AppLocalizations {
   /// **'Load more'**
   String get boutiqueBeneficiariesLoadMore;
 
+  /// No description provided for @boutiqueBeneficiariesLoadMoreOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost: the rest of the list could not be loaded.'**
+  String get boutiqueBeneficiariesLoadMoreOffline;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMoreForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You no longer have access to this list: the rest was not loaded.'**
+  String get boutiqueBeneficiariesLoadMoreForbidden;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMoreUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired: sign in again to load the rest.'**
+  String get boutiqueBeneficiariesLoadMoreUnauthorized;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The rest of the list could not be loaded.'**
+  String get boutiqueBeneficiariesLoadMoreFailed;
+
   /// No description provided for @boutiqueBeneficiariesWalkIn.
   ///
   /// In en, this message translates to:

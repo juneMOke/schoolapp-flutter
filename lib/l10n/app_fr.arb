@@ -6301,6 +6301,10 @@
   },
   "boutiqueBeneficiariesCollapse": "Réduire",
   "boutiqueBeneficiariesLoadMore": "Charger la suite",
+  "boutiqueBeneficiariesLoadMoreOffline": "Connexion perdue : la suite de la liste n'a pas pu être chargée.",
+  "boutiqueBeneficiariesLoadMoreForbidden": "Vous n'avez plus accès à cette liste : la suite n'a pas été chargée.",
+  "boutiqueBeneficiariesLoadMoreUnauthorized": "Session expirée : reconnectez-vous pour charger la suite.",
+  "boutiqueBeneficiariesLoadMoreFailed": "La suite de la liste n'a pas pu être chargée.",
   "boutiqueBeneficiariesWalkIn": "{count, plural, =0{Aucun achat sans élève désigné.} one{1 achat sans élève désigné (niveau choisi à la caisse) n'est pas listé ici.} other{{count} achats sans élève désigné (niveau choisi à la caisse) ne sont pas listés ici.}}",
   "@boutiqueBeneficiariesWalkIn": {
     "placeholders": {
