@@ -1,0 +1,12 @@
+# Icône du flavor dev : bandeau DEV, fond Vert Savane, pour ne jamais confondre
+# l'app de test avec la prod. Visuels générés par
+# scripts/generate_flavor_icons.py. Régénérer : dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/app-icon/dev/appstore_1024.png"
+  android: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#3D6B4A"
+  adaptive_icon_foreground: "assets/app-icon/dev/ic_launcher_foreground.png"
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#3D6B4A"

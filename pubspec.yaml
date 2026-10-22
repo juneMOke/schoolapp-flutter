@@ -301,32 +301,9 @@ flutter_native_splash:
     color_dark: "#0E2D42"
   web: false
 
-# Icône de lancement ETEELO CONNECT (toutes plateformes sauf Linux, non pris en
-# charge par l'outil). Régénérer après modif :
+# Icônes de lancement : une par flavor (dev / staging / prod), dans
+# flutter_launcher_icons-<flavor>.yaml à la racine. Régénérer :
 #   dart run flutter_launcher_icons
-flutter_launcher_icons:
-  image_path: "assets/app-icon/appstore_1024.png"
-  android: true
-  min_sdk_android: 21
-  # Icône adaptative Android : symbole crème sur fond Bleu Profond uni.
-  adaptive_icon_background: "#0E2D42"
-  adaptive_icon_foreground: "assets/app-icon/ic_launcher_foreground.png"
-  ios: true
-  # iOS refuse la transparence : aplatir l'alpha sur le Bleu Profond.
-  remove_alpha_ios: true
-  background_color_ios: "#0E2D42"
-  web:
-    generate: true
-    image_path: "assets/app-icon/appstore_1024.png"
-    background_color: "#0E2D42"
-    theme_color: "#0E2D42"
-  macos:
-    generate: true
-    image_path: "assets/app-icon/appstore_1024.png"
-  windows:
-    generate: true
-    image_path: "assets/app-icon/appstore_1024.png"
-    icon_size: 48
 
 # ── Bibliothèque SQLite embarquée par `package:sqlite3` ─────────────────────
 # SQLite3MultipleCiphers au lieu de SQLite : c'est ce qui CHIFFRE la base
