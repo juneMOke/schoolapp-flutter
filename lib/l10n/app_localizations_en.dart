@@ -17539,4 +17539,43 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get justificationRefusalNotSent =>
       'Decision not sent after several attempts. Decide again.';
+
+  @override
+  String get depotsSectionTitle => 'Uploaded copies';
+
+  @override
+  String depotsCompteur(int rendues, int total) {
+    return '$rendues / $total handed in';
+  }
+
+  @override
+  String get depotEtatRendu => 'Handed in';
+
+  @override
+  String get depotEtatRenduEnRetard => 'Handed in late';
+
+  @override
+  String get depotEtatPasRendu => 'Not handed in yet';
+
+  @override
+  String depotDeposeLe(String date) {
+    return 'Uploaded on $date';
+  }
+
+  @override
+  String get depotOuvrir => 'Open the copy';
+
+  @override
+  String get depotEnLigneSeulement => 'Copy available online';
+
+  @override
+  String get depotIndisponible => 'The copy could not be opened.';
+
+  @override
+  String get depotIllisible => 'This copy cannot be displayed.';
+
+  @override
+  String depotViewerTitle(String student) {
+    return 'Copy · $student';
+  }
 }

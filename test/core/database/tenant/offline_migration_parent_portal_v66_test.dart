@@ -110,4 +110,18 @@ void main() {
     ];
     expect(left, unorderedEquals(['academics_cours:t1', 'attendance']));
   });
+
+  test('les copies déposées naissent avec leur index par évaluation', () async {
+    await migrateTenantDatabase(db, 65, newVersion: 66);
+
+    expect(
+      await columnsOf('evaluation_depot'),
+      containsAll([
+        'evaluation_id',
+        'student_id',
+        'en_retard',
+        'fichiers_json',
+      ]),
+    );
+  });
 }

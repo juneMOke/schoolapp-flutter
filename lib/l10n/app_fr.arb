@@ -10588,5 +10588,16 @@
   "justificationRefusalNoAuthor": "Décision non transmise : elle a été prise sans utilisateur connu. Reconnectez-vous, puis tranchez à nouveau.",
   "justificationRefusalForbidden": "Décision non transmise : le droit de modifier l'appel vous manque.",
   "justificationRefusalRejected": "Décision refusée par le serveur. Tranchez à nouveau.",
-  "justificationRefusalNotSent": "Décision non transmise après plusieurs essais. Tranchez à nouveau."
+  "justificationRefusalNotSent": "Décision non transmise après plusieurs essais. Tranchez à nouveau.",
+  "depotsSectionTitle": "Copies déposées",
+  "depotsCompteur": "{rendues} / {total} rendues",
+  "depotEtatRendu": "Rendu",
+  "depotEtatRenduEnRetard": "Rendu en retard",
+  "depotEtatPasRendu": "Pas encore rendu",
+  "depotDeposeLe": "Déposée le {date}",
+  "depotOuvrir": "Ouvrir la copie",
+  "depotEnLigneSeulement": "Copie disponible en ligne",
+  "depotIndisponible": "La copie n'a pas pu être ouverte.",
+  "depotIllisible": "Cette copie ne peut pas être affichée.",
+  "depotViewerTitle": "Copie · {student}"
 }

@@ -819,7 +819,10 @@ class AppConstants {
   // (`boutique_dashboard_cache`). Création pure, sans reprise. Palier d'école.
   // v66 (2026-10-22) : le côté école du portail parent —
   // `attendance_justifications` (les justifications d'absence déposées par
-  // les parents et la décision de l'école). Création pure. Palier d'école.
+  // les parents et la décision de l'école), la remise d'un devoir
+  // (`evaluation.heure_limite`/`mode_remise`/`depot_tardif_permis`) et les
+  // copies déposées (`evaluation_depot`) ; re-pull des évaluations et des
+  // notes. Un seul palier pour toute la livraison. Palier d'école.
   static const int offlineDbSchemaVersion = 66;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
@@ -1213,6 +1216,12 @@ class AppConstants {
   /// idempotent par `gestureId`.
   static const String syncAttendanceJustificationDecisionEndpoint =
       '/api/v1/sync/attendance-justifications/{id}/decision';
+
+  /// Une page d'une copie déposée par un parent (portail parent, V180), sous
+  /// `academics.grade.read`, réservée à l'enseignant du cours. `ETag` = son
+  /// `sha256`.
+  static const String academicsDepotFichierContentEndpoint =
+      '/api/v1/academics/evaluations/{evaluationId}/depots/fichiers/{fichierId}/contenu';
 
   /// La pièce jointe d'une justification, hors `/sync`. `ETag` = son `sha256`.
   static const String attendanceJustificationFileEndpoint =

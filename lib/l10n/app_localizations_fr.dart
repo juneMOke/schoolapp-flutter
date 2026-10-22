@@ -17667,4 +17667,43 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get justificationRefusalNotSent =>
       'Décision non transmise après plusieurs essais. Tranchez à nouveau.';
+
+  @override
+  String get depotsSectionTitle => 'Copies déposées';
+
+  @override
+  String depotsCompteur(int rendues, int total) {
+    return '$rendues / $total rendues';
+  }
+
+  @override
+  String get depotEtatRendu => 'Rendu';
+
+  @override
+  String get depotEtatRenduEnRetard => 'Rendu en retard';
+
+  @override
+  String get depotEtatPasRendu => 'Pas encore rendu';
+
+  @override
+  String depotDeposeLe(String date) {
+    return 'Déposée le $date';
+  }
+
+  @override
+  String get depotOuvrir => 'Ouvrir la copie';
+
+  @override
+  String get depotEnLigneSeulement => 'Copie disponible en ligne';
+
+  @override
+  String get depotIndisponible => 'La copie n\'a pas pu être ouverte.';
+
+  @override
+  String get depotIllisible => 'Cette copie ne peut pas être affichée.';
+
+  @override
+  String depotViewerTitle(String student) {
+    return 'Copie · $student';
+  }
 }

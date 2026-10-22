@@ -7,12 +7,15 @@ part of 'tenant_migrations.dart';
 ///   la table se remplit au premier pull du flux `attendance.justifications`) ;
 /// - la remise d'un devoir (V179) : trois colonnes sur `evaluation`, posées aux
 ///   valeurs par défaut du serveur (en classe, fin du jour, pas de retard) ;
+/// - les copies déposées par les parents (V180) : `evaluation_depot`, création
+///   pure, remplie par le re-pull des évaluations ;
 /// - les curseurs des évaluations et des notes repartent de zéro : les
 ///   tablettes ont déjà tiré, en ignorant les champs neufs, les devoirs
 ///   déposés depuis la mise en prod du portail (v0.13.0, 2026-10-20). Sans ce
 ///   re-pull, elles ne verraient jamais ces copies ni ces remises.
 Future<void> _parentPortalStaffSide(DatabaseExecutor db) async {
   await _createTables(db, attendanceJustificationTables);
+  await _createTables(db, evaluationDepotTables);
   await _addColumns(db, 'evaluation', const {
     'heure_limite': 'TEXT',
     'mode_remise': "TEXT NOT NULL DEFAULT 'EN_CLASSE'",

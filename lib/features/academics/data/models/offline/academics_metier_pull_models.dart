@@ -8,7 +8,9 @@ import 'package:school_app_flutter/features/academics/data/models/offline/note_e
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/academics/data/models/offline/depot/depot_copie_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/copie_log_row.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/depot/depot_copie.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/evaluation_sujet_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_codecs.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_publication.dart';
@@ -85,6 +87,10 @@ class EvaluationDeltaDto {
   /// La remise d'un devoir ; nulle pour une interrogation ou un examen.
   final RemiseDevoir? remise;
 
+  /// Les copies déposées par les parents (devoir en ligne). `null` quand la
+  /// vue ne porte pas le champ : les copies connues restent.
+  final List<DepotCopie>? depots;
+
   /// Heure, sur le poste, du dernier sujet accepté ; `null` tant qu'aucun
   /// sujet n'a été envoyé.
   final String? sujetClientUpdatedAt;
@@ -108,6 +114,7 @@ class EvaluationDeltaDto {
     this.consignes,
     this.questions = const [],
     this.remise,
+    this.depots,
     this.sujetClientUpdatedAt,
     this.copieLog = const [],
     this.publications = EvaluationPublications.none,
@@ -135,6 +142,7 @@ class EvaluationDeltaDto {
         consignes: j.text('consignes'),
         questions: SujetCodecs.questionsFromJson(j['questions']),
         remise: j['type'] == 'DEVOIR' ? RemiseDevoir.fromJson(j) : null,
+        depots: DepotCopieRow.listFromJson(j['depots']),
         sujetClientUpdatedAt: j.text('sujetClientUpdatedAt'),
         copieLog: [
           for (final e in (j['copieLog'] as List<dynamic>? ?? const []))

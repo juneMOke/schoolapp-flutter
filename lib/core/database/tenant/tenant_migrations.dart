@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/academics_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/attendance_justification_schema.dart';
+import 'package:school_app_flutter/core/database/schema/evaluation_depot_schema.dart';
 import 'package:school_app_flutter/core/database/schema/boutique_dashboard_cache_schema.dart';
 import 'package:school_app_flutter/core/database/schema/class_journal_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';

@@ -10186,5 +10186,19 @@
   "justificationRefusalNoAuthor": "Decision not sent: it was taken without a known user. Sign in again, then decide again.",
   "justificationRefusalForbidden": "Decision not sent: you are missing the right to amend the register.",
   "justificationRefusalRejected": "Decision rejected by the server. Decide again.",
-  "justificationRefusalNotSent": "Decision not sent after several attempts. Decide again."
+  "justificationRefusalNotSent": "Decision not sent after several attempts. Decide again.",
+  "depotsSectionTitle": "Uploaded copies",
+  "depotsCompteur": "{rendues} / {total} handed in",
+  "@depotsCompteur": {"placeholders": {"rendues": {"type": "int"}, "total": {"type": "int"}}},
+  "depotEtatRendu": "Handed in",
+  "depotEtatRenduEnRetard": "Handed in late",
+  "depotEtatPasRendu": "Not handed in yet",
+  "depotDeposeLe": "Uploaded on {date}",
+  "@depotDeposeLe": {"placeholders": {"date": {"type": "String"}}},
+  "depotOuvrir": "Open the copy",
+  "depotEnLigneSeulement": "Copy available online",
+  "depotIndisponible": "The copy could not be opened.",
+  "depotIllisible": "This copy cannot be displayed.",
+  "depotViewerTitle": "Copy · {student}",
+  "@depotViewerTitle": {"placeholders": {"student": {"type": "String"}}}
 }

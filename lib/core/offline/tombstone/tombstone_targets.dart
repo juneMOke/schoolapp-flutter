@@ -226,6 +226,8 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
     table: 'evaluation',
     scopeColumn: 'cours_id',
     syncStatusColumn: 'sync_status',
+    // Les copies déposées par les parents partent avec leur devoir.
+    children: {'evaluation_depot': 'evaluation_id'},
   ),
   'academics_notes': TombstoneTarget(
     table: 'note_evaluation',

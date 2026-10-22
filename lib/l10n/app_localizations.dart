@@ -27372,6 +27372,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Decision not sent after several attempts. Decide again.'**
   String get justificationRefusalNotSent;
+
+  /// No description provided for @depotsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded copies'**
+  String get depotsSectionTitle;
+
+  /// No description provided for @depotsCompteur.
+  ///
+  /// In en, this message translates to:
+  /// **'{rendues} / {total} handed in'**
+  String depotsCompteur(int rendues, int total);
+
+  /// No description provided for @depotEtatRendu.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed in'**
+  String get depotEtatRendu;
+
+  /// No description provided for @depotEtatRenduEnRetard.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed in late'**
+  String get depotEtatRenduEnRetard;
+
+  /// No description provided for @depotEtatPasRendu.
+  ///
+  /// In en, this message translates to:
+  /// **'Not handed in yet'**
+  String get depotEtatPasRendu;
+
+  /// No description provided for @depotDeposeLe.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded on {date}'**
+  String depotDeposeLe(String date);
+
+  /// No description provided for @depotOuvrir.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the copy'**
+  String get depotOuvrir;
+
+  /// No description provided for @depotEnLigneSeulement.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy available online'**
+  String get depotEnLigneSeulement;
+
+  /// No description provided for @depotIndisponible.
+  ///
+  /// In en, this message translates to:
+  /// **'The copy could not be opened.'**
+  String get depotIndisponible;
+
+  /// No description provided for @depotIllisible.
+  ///
+  /// In en, this message translates to:
+  /// **'This copy cannot be displayed.'**
+  String get depotIllisible;
+
+  /// No description provided for @depotViewerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy · {student}'**
+  String depotViewerTitle(String student);
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/academics_local_data_source.dart';
+import 'package:school_app_flutter/features/academics/data/datasources/offline/depot/evaluation_depot_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_copie_log_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_publication_local_data_source.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_sujet_local_data_source.dart';
@@ -10,7 +11,8 @@ import 'package:school_app_flutter/features/academics/data/models/offline/academ
 ///
 /// L'évaluation d'abord (une ligne en attente gagne), puis, par évaluation et
 /// dans une transaction : le sujet (un brouillon local en attente ou refusé
-/// gagne), le journal (union), l'état des publications (vérité serveur).
+/// gagne), le journal (union), l'état des publications et les copies
+/// déposées par les parents (vérité serveur).
 /// Tout est idempotent : un rejeu après interruption ne change rien.
 class EvaluationViewApplier {
   final Database _db;
@@ -18,6 +20,7 @@ class EvaluationViewApplier {
   final EvaluationSujetLocalDataSource _sujets;
   final EvaluationCopieLogLocalDataSource _copieLog;
   final EvaluationPublicationLocalDataSource _publications;
+  final EvaluationDepotLocalDataSource _depots;
 
   const EvaluationViewApplier({
     required Database db,
@@ -25,11 +28,13 @@ class EvaluationViewApplier {
     required EvaluationSujetLocalDataSource sujets,
     required EvaluationCopieLogLocalDataSource copieLog,
     required EvaluationPublicationLocalDataSource publications,
+    required EvaluationDepotLocalDataSource depots,
   }) : _db = db,
        _academics = academics,
        _sujets = sujets,
        _copieLog = copieLog,
-       _publications = publications;
+       _publications = publications,
+       _depots = depots;
 
   /// Toutes les tables sur la même base — les DAO sont des enveloppes sans
   /// état.
@@ -39,6 +44,7 @@ class EvaluationViewApplier {
     sujets: EvaluationSujetLocalDataSource(db),
     copieLog: EvaluationCopieLogLocalDataSource(db),
     publications: EvaluationPublicationLocalDataSource(db),
+    depots: EvaluationDepotLocalDataSource(db),
   );
 
   /// Renvoie le nombre d'évaluations appliquées.
@@ -59,6 +65,14 @@ class EvaluationViewApplier {
           evaluationId: view.id,
           publications: view.publications,
         );
+        final depots = view.depots;
+        if (depots != null) {
+          await _depots.replaceForEvaluation(
+            txn,
+            evaluationId: view.id,
+            depots: depots,
+          );
+        }
       });
     }
     return applied;
