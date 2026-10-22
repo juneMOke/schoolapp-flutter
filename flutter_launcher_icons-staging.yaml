@@ -1,0 +1,12 @@
+# Icône du flavor staging : bandeau STG, fond Terre Cuite foncée, pour ne jamais confondre
+# l'app de test avec la prod. Visuels générés par
+# scripts/generate_flavor_icons.py. Régénérer : dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/app-icon/staging/appstore_1024.png"
+  android: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#9A4A21"
+  adaptive_icon_foreground: "assets/app-icon/staging/ic_launcher_foreground.png"
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#9A4A21"

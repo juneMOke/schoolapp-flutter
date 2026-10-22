@@ -1,0 +1,21 @@
+# Splash natif du flavor staging : fond Terre Cuite foncée (comme l'icône de lancement) et
+# mention « STG » en bas. La prod garde le bloc du pubspec.yaml.
+# Visuels : scripts/generate_flavor_icons.py. Régénérer :
+#   dart run flutter_native_splash:create --flavors dev,staging
+flutter_native_splash:
+  color: "#9A4A21"
+  image: assets/app-icon/ic_launcher_foreground.png
+  branding: assets/app-icon/staging/splash_branding.png
+  color_dark: "#9A4A21"
+  image_dark: assets/app-icon/ic_launcher_foreground.png
+  branding_dark: assets/app-icon/staging/splash_branding.png
+  # Décolle la mention du bord bas (Android < 12, iOS).
+  branding_bottom_padding: 48
+  android_12:
+    image: assets/app-icon/ic_launcher_foreground.png
+    color: "#9A4A21"
+    branding: assets/app-icon/staging/splash_branding.png
+    image_dark: assets/app-icon/ic_launcher_foreground.png
+    color_dark: "#9A4A21"
+    branding_dark: assets/app-icon/staging/splash_branding.png
+  web: false
