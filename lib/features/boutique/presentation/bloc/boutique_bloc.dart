@@ -60,6 +60,7 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     on<BoutiqueLineBeneficiaryCleared>(_onBeneficiaryCleared);
     on<BoutiqueLineLevelChanged>(_onLevelChanged);
     on<BoutiqueLineSizeChanged>(_onSizeChanged);
+    on<BoutiqueSaleDateChanged>(_onSaleDateChanged);
     on<BoutiquePayerChanged>(_onPayerChanged);
     on<BoutiquePayerFromDirectoryUsed>(_onPayerFromDirectoryUsed);
     on<BoutiqueTenderCurrencyChanged>(_onTenderCurrencyChanged);
@@ -207,6 +208,11 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     Emitter<BoutiqueState> emit,
   ) =>
       emit(state.copyWith(cart: state.cart.setSize(event.lineKey, event.size)));
+
+  void _onSaleDateChanged(
+    BoutiqueSaleDateChanged event,
+    Emitter<BoutiqueState> emit,
+  ) => emit(state.copyWith(cart: state.cart.withSaleDate(event.date)));
 
   Future<void> _onPayerChanged(
     BoutiquePayerChanged event,

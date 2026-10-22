@@ -197,14 +197,14 @@ class MenuFactory {
       icon: Icons.storefront_outlined,
       subMenus: [
         SubMenuItem(
-          id: MenuConstants.boutiqueAchatsId,
-          title: l10n.subMenuBoutiquePurchases,
-          route: AppRoutesNames.boutiqueAchats,
+          id: MenuConstants.boutiqueDashboardId,
+          title: l10n.subMenuDashboard,
+          route: AppRoutesNames.boutiqueDashboard,
         ),
         SubMenuItem(
-          id: MenuConstants.boutiqueHistoriqueId,
-          title: l10n.subMenuBoutiqueHistory,
-          route: AppRoutesNames.boutiqueHistorique,
+          id: MenuConstants.boutiqueAchatsId,
+          title: l10n.subMenuBoutiqueTill,
+          route: AppRoutesNames.boutiqueAchats,
         ),
       ],
     );

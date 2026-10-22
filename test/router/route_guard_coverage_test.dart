@@ -36,6 +36,9 @@ void main() {
         'retombe sur l\'Accueil',
     '/dev/components': 'galerie de composants, kDebugMode uniquement',
     '/dev/ticket-print': 'banc de calage thermique, kDebugMode uniquement',
+    '/boutique/boutique-historique':
+        'ancienne adresse de l\'historique : elle ne rend rien et redirige '
+        'vers le tableau de bord, lui-même gardé',
   };
 
   /// Aplatit l'arbre en chemins absolus. Les enfants portent tantôt un chemin

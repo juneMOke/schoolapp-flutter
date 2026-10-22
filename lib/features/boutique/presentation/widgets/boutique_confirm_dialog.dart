@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
@@ -109,6 +111,15 @@ class BoutiqueConfirmDialog extends StatelessWidget {
                     // voulait nommer quelqu'un. Une ligne escamotée, ou pire
                     // une valeur vide, laisserait le doute intact. Le ticket,
                     // lui, escamote — il est lu APRÈS, par le client.
+                    // La date, toujours : c'est le dernier écran où une vente
+                    // antidatée par erreur peut encore être rattrapée.
+                    _Row(
+                      icon: Icons.event_outlined,
+                      label: l10n.boutiqueConfirmDate,
+                      value: formatLocalDay(
+                        cart.saleDate ?? SchoolTime.today(DateTime.now()),
+                      ),
+                    ),
                     _Row(
                       icon: Icons.person_outline_rounded,
                       label: l10n.boutiqueConfirmPayer,

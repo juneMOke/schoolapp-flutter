@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_payer.dart';
@@ -15,6 +16,7 @@ import 'package:school_app_flutter/features/boutique/presentation/widgets/boutiq
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_clear_cart_dialog.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_confirm_dialog.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_payer_section.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_date_section.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_success_dialog.dart';
 
 /// Le panier et tout ce qui s'y fait : désigner les bénéficiaires, saisir le
@@ -30,6 +32,9 @@ class BoutiqueCartView extends StatefulWidget {
   final String academicYearId;
   final List<BoutiqueLevelOption> levels;
 
+  /// L'ouverture de l'année scolaire : la borne basse de la date de vente.
+  final DateTime? academicYearStart;
+
   /// Vrai dans la colonne de la caisse : la vente encaissée laisse le panier
   /// vide en place au lieu de refermer une page qui n'existe pas.
   final bool embedded;
@@ -38,6 +43,7 @@ class BoutiqueCartView extends StatefulWidget {
     super.key,
     required this.academicYearId,
     required this.levels,
+    this.academicYearStart,
     this.embedded = false,
   });
 
@@ -263,30 +269,47 @@ class _BoutiqueCartViewState extends State<BoutiqueCartView> {
               tenderedCents: cents,
             ),
           ),
-          payerSection: BoutiquePayerSection(
-            payer: state.cart.payer,
-            match: state.payerMatch,
-            phoneController: _phoneController,
-            lastNameController: _lastNameController,
-            middleNameController: _middleNameController,
-            firstNameController: _firstNameController,
-            onPhoneChanged: (value) => bloc.add(
-              BoutiquePayerChanged(
-                state.cart.payer.copyWith(phoneNumber: value),
+          // La date d'abord : c'est le premier champ du formulaire, et le
+          // seul qui change ce que le ticket imprimera en tête.
+          payerSection: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              BoutiqueSaleDateSection(
+                saleDate: state.cart.saleDate,
+                academicYearStart: widget.academicYearStart,
+                onChanged: (date) => bloc.add(BoutiqueSaleDateChanged(date)),
               ),
-            ),
-            onLastNameChanged: (value) => bloc.add(
-              BoutiquePayerChanged(state.cart.payer.copyWith(lastName: value)),
-            ),
-            onMiddleNameChanged: (value) => bloc.add(
-              BoutiquePayerChanged(
-                state.cart.payer.copyWith(middleName: value),
+              const SizedBox(height: AppDimensions.spacingM),
+              BoutiquePayerSection(
+                payer: state.cart.payer,
+                match: state.payerMatch,
+                phoneController: _phoneController,
+                lastNameController: _lastNameController,
+                middleNameController: _middleNameController,
+                firstNameController: _firstNameController,
+                onPhoneChanged: (value) => bloc.add(
+                  BoutiquePayerChanged(
+                    state.cart.payer.copyWith(phoneNumber: value),
+                  ),
+                ),
+                onLastNameChanged: (value) => bloc.add(
+                  BoutiquePayerChanged(
+                    state.cart.payer.copyWith(lastName: value),
+                  ),
+                ),
+                onMiddleNameChanged: (value) => bloc.add(
+                  BoutiquePayerChanged(
+                    state.cart.payer.copyWith(middleName: value),
+                  ),
+                ),
+                onFirstNameChanged: (value) => bloc.add(
+                  BoutiquePayerChanged(
+                    state.cart.payer.copyWith(firstName: value),
+                  ),
+                ),
+                onUseMatch: _fillFromDirectory,
               ),
-            ),
-            onFirstNameChanged: (value) => bloc.add(
-              BoutiquePayerChanged(state.cart.payer.copyWith(firstName: value)),
-            ),
-            onUseMatch: _fillFromDirectory,
+            ],
           ),
           onRemoveLine: (key) => bloc.add(BoutiqueLineRemoved(key)),
           onQuantityChanged: (key, quantity) =>

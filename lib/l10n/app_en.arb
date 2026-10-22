@@ -1113,13 +1113,9 @@
   "@menuBoutique": {
     "description": "Shop till menu title"
   },
-  "subMenuBoutiquePurchases": "Purchases",
-  "@subMenuBoutiquePurchases": {
+  "subMenuBoutiqueTill": "Till",
+  "@subMenuBoutiqueTill": {
     "description": "Shop till counter sub-menu title"
-  },
-  "subMenuBoutiqueHistory": "History",
-  "@subMenuBoutiqueHistory": {
-    "description": "Shop sales history sub-menu title"
   },
   "subMenuOrganization": "Class\ncomposition",
   "@subMenuOrganization": {
@@ -2319,7 +2315,7 @@
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
   "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
   "accueilModuleFeeControlDescription": "For a given fee: who has settled it, who has paid only part of it, who has paid nothing.",
-  "accueilModuleBoutiqueDescription": "Cash sales of school items, and the counter's collection history.",
+  "accueilModuleBoutiqueDescription": "Cash till for school items, and sales follow-up.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
   "accueilModuleCoursDescription": "Weekly timetable and follow-up of your courses.",
   "accueilModuleResultatsDescription": "Percentages by period, for a whole class or a single student.",
@@ -5869,6 +5865,9 @@
   "boutiquePayerUse": "Use",
   "boutiqueConfirmEyebrow": "Cash collection",
   "boutiqueConfirmTitle": "Confirm the sale",
+  "boutiqueSaleDateLabel": "Sale date",
+  "boutiqueSaleDateBackdated": "Backdated sale — this date will be printed on the ticket.",
+  "boutiqueConfirmDate": "Date",
   "boutiqueConfirmPayer": "Payer",
   "boutiqueConfirmPhone": "Phone",
   "boutiqueConfirmArticles": "Items",
@@ -5971,39 +5970,11 @@
       }
     }
   },
-  "boutiqueHistoryEyebrow": "Shop ▸ History",
-  "boutiqueHistoryTitle": "Sales history",
-  "boutiqueHistoryPeriodDay": "Today",
-  "boutiqueHistoryPeriodWeek": "This week",
-  "boutiqueHistoryPeriodMonth": "This month",
-  "boutiqueHistoryPeriodYear": "This year",
-  "boutiqueHistorySaleCount": "{count, plural, one{1 sale} other{{count} sales}}",
   "boutiqueHistoryArticleCount": "{count, plural, one{1 item} other{{count} items}}",
-  "boutiqueHistoryPendingNotice": "{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}",
   "boutiqueHistoryPendingBadge": "Pending",
-  "boutiqueHistoryEmptyTitle": "No sale in this period",
-  "boutiqueHistoryEmptyMessage": "Nothing was collected at the counter. Widen the period, or open the shop to collect.",
-  "boutiqueHistoryPickTitle": "No sale selected",
-  "boutiqueHistoryPickMessage": "Pick a sale in the list to see its details here.",
   "boutiqueHistoryPayerUnknown": "Payer not recorded",
-  "boutiqueHistoryTotalLabel": "Total collected",
   "boutiqueHistorySaleTime": "{time} · {reference}",
-  "boutiqueHistoryProvisional": "provisional ticket",
-  "@boutiqueHistorySaleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "@boutiqueHistoryArticleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@boutiqueHistoryPendingNotice": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -6020,9 +5991,277 @@
       }
     }
   },
-  "boutiqueHistoryErrorServerTitle": "History unreadable",
-  "boutiqueHistoryErrorServer": "The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.",
-  "boutiqueHistoryErrorNetwork": "History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
+  "boutiqueHistoryErrorServerTitle": "Unreadable sale",
+  "boutiqueHistoryErrorServer": "The sale could not be read back on this device. Try again; it is not lost — it is written to the database, reading it back failed.",
+  "boutiqueHistoryErrorNetwork": "A sale is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
+  "boutiqueDashboardEyebrow": "Shop ▸ Dashboard",
+  "boutiqueDashboardTitle": "Dashboard",
+  "boutiqueDashboardSubtitleToday": "Cash sales today · {day}",
+  "@boutiqueDashboardSubtitleToday": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardSubtitleRange": "Cash sales over {days} days · from {from} to {to}",
+  "@boutiqueDashboardSubtitleRange": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardPeriodToday": "Today",
+  "boutiqueDashboardPeriodSevenDays": "7 days",
+  "boutiqueDashboardPeriodThirtyDays": "30 days",
+  "boutiqueDashboardPeriodA11y": "Dashboard period",
+  "boutiqueDashboardOpenTill": "Open the till",
+  "boutiqueDashboardCachedBadge": "Offline — figures from {date}",
+  "@boutiqueDashboardCachedBadge": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardProvisionalNotice": "{count, plural, =0{No provisional ticket} one{1 provisional ticket awaiting sync} other{{count} provisional tickets awaiting sync}} — collected on this device for {amounts}. They are counted here; the sealed receipt will be issued when the network is back.",
+  "@boutiqueDashboardProvisionalNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardTopRank": "{rank}. {label}",
+  "@boutiqueDashboardTopRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardQuoted": "“{text}”",
+  "@boutiqueDashboardQuoted": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardRefresh": "Refresh",
+  "boutiqueDashboardKpiRevenue": "Revenue",
+  "boutiqueDashboardKpiSales": "Sales",
+  "boutiqueDashboardKpiAverageBasket": "Average basket",
+  "boutiqueDashboardKpiArticles": "Items sold",
+  "boutiqueDashboardKpiPrevious": "vs {amounts} the previous period",
+  "@boutiqueDashboardKpiPrevious": {
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardKpiDelta": "{delta} vs previous period",
+  "@boutiqueDashboardKpiDelta": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardKpiNone": "—",
+  "boutiqueDashboardChartHourly": "Revenue hour by hour",
+  "boutiqueDashboardChartDaily": "Revenue day by day",
+  "boutiqueDashboardChartSubtitle": "What was sold, on the day of the sale",
+  "boutiqueDashboardChartA11y": "{title}: {count} bars, peak {amount} ({label})",
+  "@boutiqueDashboardChartA11y": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardHourLabel": "{hour}:00",
+  "@boutiqueDashboardHourLabel": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardCurrencyA11y": "Displayed currency",
+  "boutiqueDashboardFamiliesTitle": "By family",
+  "boutiqueDashboardFamiliesSubtitle": "What each catalogue family weighs",
+  "boutiqueDashboardFamilyMeta": "{percent}% of total · {count, plural, one{1 item} other{{count} items}}",
+  "@boutiqueDashboardFamilyMeta": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardFamilyUnknown": "Other",
+  "boutiqueDashboardTopTitle": "Best-selling items",
+  "boutiqueDashboardTopSubtitle": "Ranked by quantity · tap an item to see the students",
+  "boutiqueDashboardTopQuantity": "× {count}",
+  "@boutiqueDashboardTopQuantity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardTopA11y": "See the students who received {article}",
+  "@boutiqueDashboardTopA11y": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardFooterNote": "Shop sales are paid in cash: they are neither part of what is owed nor of the collection rate, and do not appear on the student's statement.",
+  "boutiqueDashboardEmptyTitleToday": "No sales today",
+  "boutiqueDashboardEmptyTitleRange": "No sales over {days} days",
+  "@boutiqueDashboardEmptyTitleRange": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardEmptyWiden": "Nothing collected over this period. Widen to 30 days or open the till to record a sale.",
+  "boutiqueDashboardEmptyFirst": "Sales will show here from the first receipt.",
+  "boutiqueDashboardErrorServerTitle": "Figures unavailable",
+  "boutiqueDashboardErrorServer": "The server could not compute the shop figures. Try again; no sale is lost.",
+  "boutiqueDashboardErrorNetwork": "Shop figures are computed on the server, and no snapshot is kept on this device yet. Try again once the connection is back.",
+  "boutiqueBeneficiariesTitle": "Students concerned",
+  "boutiqueBeneficiariesSubtitleAll": "Purchase beneficiaries · {count, plural, one{1 student} other{{count} students}}",
+  "@boutiqueBeneficiariesSubtitleAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSubtitleArticle": "Received “{article}” · {count, plural, one{1 student} other{{count} students}}",
+  "@boutiqueBeneficiariesSubtitleArticle": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSearchLabel": "Student",
+  "boutiqueBeneficiariesSearchHint": "Search a student…",
+  "boutiqueBeneficiariesArticleLabel": "Item",
+  "boutiqueBeneficiariesClassLabel": "Class",
+  "boutiqueBeneficiariesAllArticles": "All items",
+  "boutiqueBeneficiariesAllClasses": "All classes",
+  "boutiqueBeneficiariesNoClass": "No class",
+  "boutiqueBeneficiariesLastPurchase": "{classLabel} · last purchase {date}",
+  "@boutiqueBeneficiariesLastPurchase": {
+    "placeholders": {
+      "classLabel": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesArticleChip": "{quantity}× {label}",
+  "@boutiqueBeneficiariesArticleChip": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSizes": "Size {sizes}",
+  "@boutiqueBeneficiariesSizes": {
+    "placeholders": {
+      "sizes": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesShowAll": "See the {count} students",
+  "@boutiqueBeneficiariesShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesCollapse": "Collapse",
+  "boutiqueBeneficiariesLoadMore": "Load more",
+  "boutiqueBeneficiariesLoadMoreOffline": "Connection lost: the rest of the list could not be loaded.",
+  "boutiqueBeneficiariesLoadMoreForbidden": "You no longer have access to this list: the rest was not loaded.",
+  "boutiqueBeneficiariesLoadMoreUnauthorized": "Session expired: sign in again to load the rest.",
+  "boutiqueBeneficiariesLoadMoreFailed": "The rest of the list could not be loaded.",
+  "boutiqueBeneficiariesWalkIn": "{count, plural, one{1 purchase with no named student (level chosen at the till) is not listed here.} other{{count} purchases with no named student (level chosen at the till) are not listed here.}}",
+  "@boutiqueBeneficiariesWalkIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesPartial": "Offline: searched among the {count} students kept on this device; the full list comes back with the network.",
+  "@boutiqueBeneficiariesPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesEmptyTitle": "No student matches",
+  "boutiqueBeneficiariesEmptyFiltered": "No student matches over this period: {filters}.",
+  "@boutiqueBeneficiariesEmptyFiltered": {
+    "placeholders": {
+      "filters": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesEmptyNone": "No purchase over this period names a student.",
+  "boutiqueBeneficiariesReset": "Reset filters",
+  "boutiqueLatestSalesTitle": "Latest sales",
+  "boutiqueLatestSalesSubtitle": "The six latest receipts of the period — tap one to review or reprint it",
+  "boutiqueLatestSalesNewSale": "New sale",
+  "boutiqueLatestSalesEmpty": "No receipt over this period.",
+  "boutiqueLatestSalesError": "The latest sales could not be read on this device.",
   "boutiqueClearEyebrow": "Shop ▸ Cart",
   "boutiqueClearTitle": "Empty the cart?",
   "boutiqueClearMessage": "The composed lines and the payer's identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.",

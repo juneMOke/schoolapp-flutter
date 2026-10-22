@@ -21,11 +21,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class BoutiqueCartPage extends StatelessWidget {
   final String academicYearId;
   final List<BoutiqueLevelOption> levels;
+  final DateTime? academicYearStart;
 
   const BoutiqueCartPage({
     super.key,
     required this.academicYearId,
     required this.levels,
+    this.academicYearStart,
   });
 
   /// Ouvre la page. Rend quand elle se referme.
@@ -34,11 +36,16 @@ class BoutiqueCartPage extends StatelessWidget {
     required BoutiqueBloc bloc,
     required String academicYearId,
     required List<BoutiqueLevelOption> levels,
+    DateTime? academicYearStart,
   }) => Navigator.of(context).push<void>(
     MaterialPageRoute(
       builder: (_) => BlocProvider<BoutiqueBloc>.value(
         value: bloc,
-        child: BoutiqueCartPage(academicYearId: academicYearId, levels: levels),
+        child: BoutiqueCartPage(
+          academicYearId: academicYearId,
+          levels: levels,
+          academicYearStart: academicYearStart,
+        ),
       ),
     ),
   );
@@ -62,6 +69,7 @@ class BoutiqueCartPage extends StatelessWidget {
           child: BoutiqueCartView(
             academicYearId: academicYearId,
             levels: levels,
+            academicYearStart: academicYearStart,
           ),
         ),
       ),

@@ -1733,14 +1733,8 @@ abstract class AppLocalizations {
   /// Shop till counter sub-menu title
   ///
   /// In en, this message translates to:
-  /// **'Purchases'**
-  String get subMenuBoutiquePurchases;
-
-  /// Shop sales history sub-menu title
-  ///
-  /// In en, this message translates to:
-  /// **'History'**
-  String get subMenuBoutiqueHistory;
+  /// **'Till'**
+  String get subMenuBoutiqueTill;
 
   /// Organization sub-menu title
   ///
@@ -4217,7 +4211,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModuleBoutiqueDescription.
   ///
   /// In en, this message translates to:
-  /// **'Cash sales of school items, and the counter\'s collection history.'**
+  /// **'Cash till for school items, and sales follow-up.'**
   String get accueilModuleBoutiqueDescription;
 
   /// No description provided for @accueilModuleClassesDescription.
@@ -14244,6 +14238,24 @@ abstract class AppLocalizations {
   /// **'Confirm the sale'**
   String get boutiqueConfirmTitle;
 
+  /// No description provided for @boutiqueSaleDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale date'**
+  String get boutiqueSaleDateLabel;
+
+  /// No description provided for @boutiqueSaleDateBackdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Backdated sale — this date will be printed on the ticket.'**
+  String get boutiqueSaleDateBackdated;
+
+  /// No description provided for @boutiqueConfirmDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get boutiqueConfirmDate;
+
   /// No description provided for @boutiqueConfirmPayer.
   ///
   /// In en, this message translates to:
@@ -14520,59 +14532,11 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get boutiqueSuccessDone;
 
-  /// No description provided for @boutiqueHistoryEyebrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Shop ▸ History'**
-  String get boutiqueHistoryEyebrow;
-
-  /// No description provided for @boutiqueHistoryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sales history'**
-  String get boutiqueHistoryTitle;
-
-  /// No description provided for @boutiqueHistoryPeriodDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get boutiqueHistoryPeriodDay;
-
-  /// No description provided for @boutiqueHistoryPeriodWeek.
-  ///
-  /// In en, this message translates to:
-  /// **'This week'**
-  String get boutiqueHistoryPeriodWeek;
-
-  /// No description provided for @boutiqueHistoryPeriodMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'This month'**
-  String get boutiqueHistoryPeriodMonth;
-
-  /// No description provided for @boutiqueHistoryPeriodYear.
-  ///
-  /// In en, this message translates to:
-  /// **'This year'**
-  String get boutiqueHistoryPeriodYear;
-
-  /// No description provided for @boutiqueHistorySaleCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, one{1 sale} other{{count} sales}}'**
-  String boutiqueHistorySaleCount(int count);
-
   /// No description provided for @boutiqueHistoryArticleCount.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, one{1 item} other{{count} items}}'**
   String boutiqueHistoryArticleCount(int count);
-
-  /// No description provided for @boutiqueHistoryPendingNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, one{1 sale has not reached the server yet.} other{{count} sales have not reached the server yet.}}'**
-  String boutiqueHistoryPendingNotice(int count);
 
   /// No description provided for @boutiqueHistoryPendingBadge.
   ///
@@ -14580,41 +14544,11 @@ abstract class AppLocalizations {
   /// **'Pending'**
   String get boutiqueHistoryPendingBadge;
 
-  /// No description provided for @boutiqueHistoryEmptyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No sale in this period'**
-  String get boutiqueHistoryEmptyTitle;
-
-  /// No description provided for @boutiqueHistoryEmptyMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing was collected at the counter. Widen the period, or open the shop to collect.'**
-  String get boutiqueHistoryEmptyMessage;
-
-  /// No description provided for @boutiqueHistoryPickTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No sale selected'**
-  String get boutiqueHistoryPickTitle;
-
-  /// No description provided for @boutiqueHistoryPickMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick a sale in the list to see its details here.'**
-  String get boutiqueHistoryPickMessage;
-
   /// No description provided for @boutiqueHistoryPayerUnknown.
   ///
   /// In en, this message translates to:
   /// **'Payer not recorded'**
   String get boutiqueHistoryPayerUnknown;
-
-  /// No description provided for @boutiqueHistoryTotalLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Total collected'**
-  String get boutiqueHistoryTotalLabel;
 
   /// No description provided for @boutiqueHistorySaleTime.
   ///
@@ -14622,29 +14556,472 @@ abstract class AppLocalizations {
   /// **'{time} · {reference}'**
   String boutiqueHistorySaleTime(String time, String reference);
 
-  /// No description provided for @boutiqueHistoryProvisional.
-  ///
-  /// In en, this message translates to:
-  /// **'provisional ticket'**
-  String get boutiqueHistoryProvisional;
-
   /// No description provided for @boutiqueHistoryErrorServerTitle.
   ///
   /// In en, this message translates to:
-  /// **'History unreadable'**
+  /// **'Unreadable sale'**
   String get boutiqueHistoryErrorServerTitle;
 
   /// No description provided for @boutiqueHistoryErrorServer.
   ///
   /// In en, this message translates to:
-  /// **'The local till could not be read. Try again; no sale is lost — they are written to the database, only reading them back failed.'**
+  /// **'The sale could not be read back on this device. Try again; it is not lost — it is written to the database, reading it back failed.'**
   String get boutiqueHistoryErrorServer;
 
   /// No description provided for @boutiqueHistoryErrorNetwork.
   ///
   /// In en, this message translates to:
-  /// **'History is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.'**
+  /// **'A sale is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.'**
   String get boutiqueHistoryErrorNetwork;
+
+  /// No description provided for @boutiqueDashboardEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop ▸ Dashboard'**
+  String get boutiqueDashboardEyebrow;
+
+  /// No description provided for @boutiqueDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get boutiqueDashboardTitle;
+
+  /// No description provided for @boutiqueDashboardSubtitleToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash sales today · {day}'**
+  String boutiqueDashboardSubtitleToday(String day);
+
+  /// No description provided for @boutiqueDashboardSubtitleRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash sales over {days} days · from {from} to {to}'**
+  String boutiqueDashboardSubtitleRange(int days, String from, String to);
+
+  /// No description provided for @boutiqueDashboardPeriodToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get boutiqueDashboardPeriodToday;
+
+  /// No description provided for @boutiqueDashboardPeriodSevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get boutiqueDashboardPeriodSevenDays;
+
+  /// No description provided for @boutiqueDashboardPeriodThirtyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get boutiqueDashboardPeriodThirtyDays;
+
+  /// No description provided for @boutiqueDashboardPeriodA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard period'**
+  String get boutiqueDashboardPeriodA11y;
+
+  /// No description provided for @boutiqueDashboardOpenTill.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the till'**
+  String get boutiqueDashboardOpenTill;
+
+  /// No description provided for @boutiqueDashboardCachedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline — figures from {date}'**
+  String boutiqueDashboardCachedBadge(String date);
+
+  /// No description provided for @boutiqueDashboardProvisionalNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No provisional ticket} one{1 provisional ticket awaiting sync} other{{count} provisional tickets awaiting sync}} — collected on this device for {amounts}. They are counted here; the sealed receipt will be issued when the network is back.'**
+  String boutiqueDashboardProvisionalNotice(int count, String amounts);
+
+  /// No description provided for @boutiqueDashboardTopRank.
+  ///
+  /// In en, this message translates to:
+  /// **'{rank}. {label}'**
+  String boutiqueDashboardTopRank(int rank, String label);
+
+  /// No description provided for @boutiqueDashboardQuoted.
+  ///
+  /// In en, this message translates to:
+  /// **'“{text}”'**
+  String boutiqueDashboardQuoted(String text);
+
+  /// No description provided for @boutiqueDashboardRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get boutiqueDashboardRefresh;
+
+  /// No description provided for @boutiqueDashboardKpiRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get boutiqueDashboardKpiRevenue;
+
+  /// No description provided for @boutiqueDashboardKpiSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales'**
+  String get boutiqueDashboardKpiSales;
+
+  /// No description provided for @boutiqueDashboardKpiAverageBasket.
+  ///
+  /// In en, this message translates to:
+  /// **'Average basket'**
+  String get boutiqueDashboardKpiAverageBasket;
+
+  /// No description provided for @boutiqueDashboardKpiArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Items sold'**
+  String get boutiqueDashboardKpiArticles;
+
+  /// No description provided for @boutiqueDashboardKpiPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'vs {amounts} the previous period'**
+  String boutiqueDashboardKpiPrevious(String amounts);
+
+  /// No description provided for @boutiqueDashboardKpiDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'{delta} vs previous period'**
+  String boutiqueDashboardKpiDelta(String delta);
+
+  /// No description provided for @boutiqueDashboardKpiNone.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get boutiqueDashboardKpiNone;
+
+  /// No description provided for @boutiqueDashboardChartHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue hour by hour'**
+  String get boutiqueDashboardChartHourly;
+
+  /// No description provided for @boutiqueDashboardChartDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue day by day'**
+  String get boutiqueDashboardChartDaily;
+
+  /// No description provided for @boutiqueDashboardChartSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What was sold, on the day of the sale'**
+  String get boutiqueDashboardChartSubtitle;
+
+  /// No description provided for @boutiqueDashboardChartA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}: {count} bars, peak {amount} ({label})'**
+  String boutiqueDashboardChartA11y(
+    String title,
+    int count,
+    String amount,
+    String label,
+  );
+
+  /// No description provided for @boutiqueDashboardHourLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{hour}:00'**
+  String boutiqueDashboardHourLabel(int hour);
+
+  /// No description provided for @boutiqueDashboardCurrencyA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Displayed currency'**
+  String get boutiqueDashboardCurrencyA11y;
+
+  /// No description provided for @boutiqueDashboardFamiliesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'By family'**
+  String get boutiqueDashboardFamiliesTitle;
+
+  /// No description provided for @boutiqueDashboardFamiliesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What each catalogue family weighs'**
+  String get boutiqueDashboardFamiliesSubtitle;
+
+  /// No description provided for @boutiqueDashboardFamilyMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of total · {count, plural, one{1 item} other{{count} items}}'**
+  String boutiqueDashboardFamilyMeta(int percent, int count);
+
+  /// No description provided for @boutiqueDashboardFamilyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get boutiqueDashboardFamilyUnknown;
+
+  /// No description provided for @boutiqueDashboardTopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Best-selling items'**
+  String get boutiqueDashboardTopTitle;
+
+  /// No description provided for @boutiqueDashboardTopSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked by quantity · tap an item to see the students'**
+  String get boutiqueDashboardTopSubtitle;
+
+  /// No description provided for @boutiqueDashboardTopQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'× {count}'**
+  String boutiqueDashboardTopQuantity(int count);
+
+  /// No description provided for @boutiqueDashboardTopA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'See the students who received {article}'**
+  String boutiqueDashboardTopA11y(String article);
+
+  /// No description provided for @boutiqueDashboardFooterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop sales are paid in cash: they are neither part of what is owed nor of the collection rate, and do not appear on the student\'s statement.'**
+  String get boutiqueDashboardFooterNote;
+
+  /// No description provided for @boutiqueDashboardEmptyTitleToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No sales today'**
+  String get boutiqueDashboardEmptyTitleToday;
+
+  /// No description provided for @boutiqueDashboardEmptyTitleRange.
+  ///
+  /// In en, this message translates to:
+  /// **'No sales over {days} days'**
+  String boutiqueDashboardEmptyTitleRange(int days);
+
+  /// No description provided for @boutiqueDashboardEmptyWiden.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing collected over this period. Widen to 30 days or open the till to record a sale.'**
+  String get boutiqueDashboardEmptyWiden;
+
+  /// No description provided for @boutiqueDashboardEmptyFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales will show here from the first receipt.'**
+  String get boutiqueDashboardEmptyFirst;
+
+  /// No description provided for @boutiqueDashboardErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Figures unavailable'**
+  String get boutiqueDashboardErrorServerTitle;
+
+  /// No description provided for @boutiqueDashboardErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not compute the shop figures. Try again; no sale is lost.'**
+  String get boutiqueDashboardErrorServer;
+
+  /// No description provided for @boutiqueDashboardErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop figures are computed on the server, and no snapshot is kept on this device yet. Try again once the connection is back.'**
+  String get boutiqueDashboardErrorNetwork;
+
+  /// No description provided for @boutiqueBeneficiariesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Students concerned'**
+  String get boutiqueBeneficiariesTitle;
+
+  /// No description provided for @boutiqueBeneficiariesSubtitleAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase beneficiaries · {count, plural, one{1 student} other{{count} students}}'**
+  String boutiqueBeneficiariesSubtitleAll(int count);
+
+  /// No description provided for @boutiqueBeneficiariesSubtitleArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Received “{article}” · {count, plural, one{1 student} other{{count} students}}'**
+  String boutiqueBeneficiariesSubtitleArticle(String article, int count);
+
+  /// No description provided for @boutiqueBeneficiariesSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get boutiqueBeneficiariesSearchLabel;
+
+  /// No description provided for @boutiqueBeneficiariesSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a student…'**
+  String get boutiqueBeneficiariesSearchHint;
+
+  /// No description provided for @boutiqueBeneficiariesArticleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get boutiqueBeneficiariesArticleLabel;
+
+  /// No description provided for @boutiqueBeneficiariesClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get boutiqueBeneficiariesClassLabel;
+
+  /// No description provided for @boutiqueBeneficiariesAllArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'All items'**
+  String get boutiqueBeneficiariesAllArticles;
+
+  /// No description provided for @boutiqueBeneficiariesAllClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'All classes'**
+  String get boutiqueBeneficiariesAllClasses;
+
+  /// No description provided for @boutiqueBeneficiariesNoClass.
+  ///
+  /// In en, this message translates to:
+  /// **'No class'**
+  String get boutiqueBeneficiariesNoClass;
+
+  /// No description provided for @boutiqueBeneficiariesLastPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'{classLabel} · last purchase {date}'**
+  String boutiqueBeneficiariesLastPurchase(String classLabel, String date);
+
+  /// No description provided for @boutiqueBeneficiariesArticleChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity}× {label}'**
+  String boutiqueBeneficiariesArticleChip(int quantity, String label);
+
+  /// No description provided for @boutiqueBeneficiariesSizes.
+  ///
+  /// In en, this message translates to:
+  /// **'Size {sizes}'**
+  String boutiqueBeneficiariesSizes(String sizes);
+
+  /// No description provided for @boutiqueBeneficiariesShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See the {count} students'**
+  String boutiqueBeneficiariesShowAll(int count);
+
+  /// No description provided for @boutiqueBeneficiariesCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get boutiqueBeneficiariesCollapse;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get boutiqueBeneficiariesLoadMore;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMoreOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost: the rest of the list could not be loaded.'**
+  String get boutiqueBeneficiariesLoadMoreOffline;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMoreForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You no longer have access to this list: the rest was not loaded.'**
+  String get boutiqueBeneficiariesLoadMoreForbidden;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMoreUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired: sign in again to load the rest.'**
+  String get boutiqueBeneficiariesLoadMoreUnauthorized;
+
+  /// No description provided for @boutiqueBeneficiariesLoadMoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The rest of the list could not be loaded.'**
+  String get boutiqueBeneficiariesLoadMoreFailed;
+
+  /// No description provided for @boutiqueBeneficiariesWalkIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 purchase with no named student (level chosen at the till) is not listed here.} other{{count} purchases with no named student (level chosen at the till) are not listed here.}}'**
+  String boutiqueBeneficiariesWalkIn(int count);
+
+  /// No description provided for @boutiqueBeneficiariesPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: searched among the {count} students kept on this device; the full list comes back with the network.'**
+  String boutiqueBeneficiariesPartial(int count);
+
+  /// No description provided for @boutiqueBeneficiariesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches'**
+  String get boutiqueBeneficiariesEmptyTitle;
+
+  /// No description provided for @boutiqueBeneficiariesEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches over this period: {filters}.'**
+  String boutiqueBeneficiariesEmptyFiltered(String filters);
+
+  /// No description provided for @boutiqueBeneficiariesEmptyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchase over this period names a student.'**
+  String get boutiqueBeneficiariesEmptyNone;
+
+  /// No description provided for @boutiqueBeneficiariesReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get boutiqueBeneficiariesReset;
+
+  /// No description provided for @boutiqueLatestSalesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest sales'**
+  String get boutiqueLatestSalesTitle;
+
+  /// No description provided for @boutiqueLatestSalesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The six latest receipts of the period — tap one to review or reprint it'**
+  String get boutiqueLatestSalesSubtitle;
+
+  /// No description provided for @boutiqueLatestSalesNewSale.
+  ///
+  /// In en, this message translates to:
+  /// **'New sale'**
+  String get boutiqueLatestSalesNewSale;
+
+  /// No description provided for @boutiqueLatestSalesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipt over this period.'**
+  String get boutiqueLatestSalesEmpty;
+
+  /// No description provided for @boutiqueLatestSalesError.
+  ///
+  /// In en, this message translates to:
+  /// **'The latest sales could not be read on this device.'**
+  String get boutiqueLatestSalesError;
 
   /// No description provided for @boutiqueClearEyebrow.
   ///

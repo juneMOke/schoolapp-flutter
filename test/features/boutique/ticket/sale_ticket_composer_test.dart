@@ -27,6 +27,7 @@ const _labels = SaleTicketLabels(
 );
 
 RecordedSale _recorded({
+  String soldAt = '2026-08-29T11:42:00Z',
   String? receiptNumber,
   String? collectedByName = 'Moke Junior',
   String? levelId,
@@ -39,7 +40,7 @@ RecordedSale _recorded({
     payerName: 'NDOMBO Lelo Willy',
     payerPhoneNumber: '+243810220145',
     collectedByName: collectedByName,
-    soldAt: '2026-08-29T11:42:00Z',
+    soldAt: soldAt,
     receiptNumber: receiptNumber,
     updatedAt: 0,
   ),
@@ -72,6 +73,20 @@ void main() {
     RecordedSale sale, {
     Map<String, String> levels = const {},
   }) => composer.compose(sale, labels: _labels, levelLabels: levels);
+
+  test(
+    'le ticket date la vente à l\'heure de l\'école, pas du poste',
+    () async {
+      // 23 h 30 UTC le 29 = 0 h 30 le 30 à Kinshasa, quel que soit le fuseau
+      // de la tablette.
+      final model = await compose(_recorded(soldAt: '2026-08-29T23:30:00Z'));
+
+      expect(
+        (model.soldAt.day, model.soldAt.hour, model.soldAt.minute),
+        (30, 0, 30),
+      );
+    },
+  );
 
   test('sans numéro de reçu, le ticket est PROVISOIRE', () async {
     final model = await compose(_recorded());

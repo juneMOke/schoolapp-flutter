@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/database/app_database.dart';
 import 'package:school_app_flutter/core/database/offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/academics_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/boutique_dashboard_cache_schema.dart';
 import 'package:school_app_flutter/core/database/schema/class_journal_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
@@ -91,6 +92,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(64)) {
     await _createTables(db, classJournalTables);
+  }
+  if (upTo(65)) {
+    await _createTables(db, boutiqueDashboardCacheTables);
   }
 }
 

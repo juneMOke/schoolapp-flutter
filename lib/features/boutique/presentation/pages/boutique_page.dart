@@ -9,9 +9,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/navigation/bloc_exit_guard.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_cart_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_grid_reminder_banner.dart';
@@ -22,7 +20,7 @@ import 'package:school_app_flutter/features/boutique/presentation/widgets/boutiq
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_catalog_body.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_search_bar.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_academic_year_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La caisse boutique : composer un panier depuis le catalogue, désigner le
@@ -65,17 +63,6 @@ class _BoutiqueViewState extends State<_BoutiqueView> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<AcademicYearContextBloc>().add(
-        const AcademicYearContextRequested(),
-      );
-    });
-  }
-
-  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -83,54 +70,22 @@ class _BoutiqueViewState extends State<_BoutiqueView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
-      buildWhen: (prev, curr) =>
-          prev.status != curr.status || prev.context != curr.context,
-      builder: (context, academicYearState) {
-        if (academicYearState.status == AcademicYearContextLoadStatus.loading ||
-            academicYearState.status == AcademicYearContextLoadStatus.initial) {
-          return const AppPageBackground(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
-
-        if (academicYearState.status != AcademicYearContextLoadStatus.success) {
-          return AppPageBackground(
-            child: BootstrapContextError(
-              onLogout: () =>
-                  context.read<AuthBloc>().add(const AuthLogoutRequested()),
-            ),
-          );
-        }
-
-        final academicYearId = academicYearState.context?.academicYear.id ?? '';
-
-        // Le fond et la barre appartiennent au catalogue, pas au gate : la
-        // barre porte le panier, et un panier au-dessus d'un spinner ouvrirait
-        // une page sur un bloc qui n'a pas encore d'année à tarifer.
-        return _CatalogueScope(
-          academicYearId: academicYearId,
-          levels: _levelsOf(academicYearState),
-          searchController: _searchController,
-        );
-      },
+    return BoutiqueAcademicYearGate(
+      // Le fond et la barre appartiennent au catalogue, pas au gate : la barre
+      // porte le panier, et un panier au-dessus d'un spinner ouvrirait une page
+      // sur un bloc qui n'a pas encore d'année à tarifer.
+      builder: (context, year) => _CatalogueScope(
+        academicYearId: year?.academicYear.id ?? '',
+        levels: _levelsOf(year),
+        academicYearStart: year?.academicYear.startDate,
+        searchController: _searchController,
+      ),
     );
   }
 
-  /// Les niveaux de l'école, à plat, pour le sélecteur d'une ligne walk-in.
-  ///
-  /// **Liste fermée** : le walk-in choisit un niveau, jamais un prix
-  /// (invariant I-2).
-  ///
-  /// Le type de la liste vide est explicite : un `?? const []` nu se laisse
-  /// inférer en `List<dynamic>`, et l'accès aux membres cesse alors d'être
-  /// vérifié — l'erreur se découvre à l'exécution, dans la main du guichet.
-  List<BoutiqueLevelOption> _levelsOf(AcademicYearContextState state) => [
+  List<BoutiqueLevelOption> _levelsOf(AcademicYearContext? year) => [
     for (final bundle
-        in state.context?.schoolLevelGroups ?? const <SchoolLevelGroupBundle>[])
+        in year?.schoolLevelGroups ?? const <SchoolLevelGroupBundle>[])
       for (final level in bundle.levels)
         BoutiqueLevelOption(id: level.id, label: level.name),
   ];
@@ -139,11 +94,13 @@ class _BoutiqueViewState extends State<_BoutiqueView> {
 class _CatalogueScope extends StatefulWidget {
   final String academicYearId;
   final List<BoutiqueLevelOption> levels;
+  final DateTime? academicYearStart;
   final TextEditingController searchController;
 
   const _CatalogueScope({
     required this.academicYearId,
     required this.levels,
+    required this.academicYearStart,
     required this.searchController,
   });
 
@@ -174,6 +131,7 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
     bloc: context.read<BoutiqueBloc>(),
     academicYearId: widget.academicYearId,
     levels: widget.levels,
+    academicYearStart: widget.academicYearStart,
   );
 
   @override
@@ -275,6 +233,7 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
                           child: BoutiqueCartView(
                             academicYearId: widget.academicYearId,
                             levels: widget.levels,
+                            academicYearStart: widget.academicYearStart,
                             embedded: true,
                           ),
                         ),

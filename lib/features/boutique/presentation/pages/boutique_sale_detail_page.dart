@@ -212,7 +212,7 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
             ),
           SaleDetailStatus.failure => BoutiqueResultsErrorState(
             failure: state.failure!,
-            surface: BoutiqueErrorSurface.history,
+            surface: BoutiqueErrorSurface.localSales,
             onRetry: () => context.read<SaleDetailCubit>().load(),
           ),
           SaleDetailStatus.ready => _Body(
@@ -442,11 +442,12 @@ class _Body extends StatelessWidget {
     ].where((part) => part.trim().isNotEmpty).join(' ');
   }
 
-  /// `sold_at` est en UTC : l'afficher tel quel décalerait la vente au guichet.
+  /// `sold_at` est en UTC : il se lit à l'heure de l'école, comme le ticket
+  /// et le tableau de bord — pas à celle du poste.
   static String _dateTimeOf(String soldAt) {
     final parsed = DateTime.tryParse(soldAt);
     if (parsed == null) return soldAt;
-    return formatLocalDateTime(parsed);
+    return formatSchoolDateTime(parsed);
   }
 }
 
@@ -585,7 +586,7 @@ class _Actions extends StatelessWidget {
           detail.ticketPrintedAt == null
               ? l10n.boutiqueSaleDetailTicketNeverPrinted
               : l10n.boutiqueSaleDetailTicketPrintedAt(
-                  formatLocalDateTime(detail.ticketPrintedAt!),
+                  formatSchoolDateTime(detail.ticketPrintedAt!),
                 ),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodySmall?.copyWith(

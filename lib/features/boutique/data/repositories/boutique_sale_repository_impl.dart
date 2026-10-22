@@ -30,6 +30,12 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
   final DeviceIdentityService _device;
   final Clock _now;
 
+  /// L'horloge murale, d'où naît l'heure **métier** de la vente.
+  ///
+  /// Distincte de [_now] (horodatage technique de l'outbox, en millisecondes) :
+  /// les tests figent l'un sans dater leurs ventes de 1970.
+  final DateTime Function() _wallClock;
+
   /// La série de taux, relue **ici** et non reçue de l'écran : l'UI ne peut pas
   /// fabriquer un couple perçu/vendu que la base ne justifierait pas.
   final ExchangeRateReader? _rates;
@@ -40,12 +46,14 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
     required IdGenerator ids,
     required DeviceIdentityService device,
     Clock now = systemClock,
+    DateTime Function() wallClock = DateTime.now,
     ExchangeRateReader? rates,
   }) : _dao = dao,
        _currentUser = currentUser,
        _ids = ids,
        _device = device,
        _now = now,
+       _wallClock = wallClock,
        _rates = rates;
 
   @override
@@ -60,6 +68,15 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
     if (!cart.canCollect) {
       return const Left(
         ValidationFailure('Le panier n\'est pas prêt à être encaissé.'),
+      );
+    }
+    final collectedAt = _wallClock();
+    // Le sélecteur ne propose pas l'avenir ; seule une horloge qui recule entre
+    // le choix et l'encaissement le produit. Le serveur ramènerait la vente à
+    // son heure à lui, en silence : mieux vaut que le guichet le voie.
+    if (cart.isFutureAt(collectedAt)) {
+      return const Left(
+        ValidationFailure('La date de la vente est dans le futur.'),
       );
     }
     final schoolId = _currentUser.schoolId;
@@ -81,7 +98,8 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
 
     try {
       final nowMs = _now();
-      final soldAt = DateTime.now().toUtc().toIso8601String();
+      // Le jour choisi au guichet, à l'heure réelle de l'encaissement.
+      final soldAt = cart.soldAtFor(collectedAt).toUtc().toIso8601String();
       final saleId = _ids.newId();
       final payer = cart.payer;
       // La vente porte ses montants PAR DEVISE, et chaque ligne la sienne : un
@@ -176,7 +194,10 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
       // Ce qui est ENTRÉ DANS LE TIROIR, à côté de ce qui a été vendu.
       final settlement = TenderSettlement(
         rates: await _rates?.forCurrentSchool() ?? const <ExchangeRate>[],
-        at: DateTime.parse(soldAt),
+        // Le taux de l'ENCAISSEMENT, pas celui du jour choisi : c'est
+        // maintenant que l'argent entre dans le tiroir. Le bundle ne porte
+        // d'ailleurs aucun point antérieur au taux en vigueur.
+        at: collectedAt.toUtc(),
       );
       final settlementLines = [
         for (final due in amounts.entries) _settle(settlement, cart, due),

@@ -1077,10 +1077,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuBoutique => 'Boutique';
 
   @override
-  String get subMenuBoutiquePurchases => 'Achats';
-
-  @override
-  String get subMenuBoutiqueHistory => 'Historiques';
+  String get subMenuBoutiqueTill => 'Caisse';
 
   @override
   String get subMenuOrganization => 'Composition\ndes classes';
@@ -2747,7 +2744,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModuleBoutiqueDescription =>
-      'Vente au comptant d\'articles scolaires, et historique des encaissements du guichet.';
+      'Caisse au comptant des articles de l\'école et suivi des ventes.';
 
   @override
   String get accueilModuleClassesDescription =>
@@ -6897,7 +6894,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count sans pièce scellée (saisies de rattrapage)',
-      one: '1 sans pièce scellée (saisie de rattrapage)',
+      one: '$count sans pièce scellée (saisie de rattrapage)',
     );
     return '$_temp0';
   }
@@ -6974,7 +6971,8 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other:
           'Un rapport est déjà en préparation. Réessayez dans $seconds secondes.',
-      one: 'Un rapport est déjà en préparation. Réessayez dans 1 seconde.',
+      one:
+          'Un rapport est déjà en préparation. Réessayez dans $seconds seconde.',
     );
     return '$_temp0';
   }
@@ -7092,7 +7090,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count versements règlent',
-      one: '1 versement règle',
+      one: '$count versement règle',
     );
     return '$_temp0 un frais fixé dans l\'autre devise, pour $amounts$rateClause. Un écart de taux au moment du contrôle de caisse vient de là.';
   }
@@ -8717,7 +8715,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
+      one: '$count article',
     );
     return '$_temp0';
   }
@@ -8813,7 +8811,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count lignes sans niveau',
-      one: '1 ligne sans niveau',
+      one: '$count ligne sans niveau',
     );
     return '$_temp0';
   }
@@ -8859,7 +8857,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other:
           '$count articles de ce catalogue ne sont pas vendables depuis cette version de l\'application.',
       one:
-          '1 article de ce catalogue n\'est pas vendable depuis cette version de l\'application.',
+          '$count article de ce catalogue n\'est pas vendable depuis cette version de l\'application.',
     );
     return '$_temp0';
   }
@@ -8954,7 +8952,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count ventes',
-      one: '1 vente',
+      one: '$count vente',
     );
     return 'Déjà au répertoire · $_temp0';
   }
@@ -8967,6 +8965,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueConfirmTitle => 'Confirmer la vente';
+
+  @override
+  String get boutiqueSaleDateLabel => 'Date de la vente';
+
+  @override
+  String get boutiqueSaleDateBackdated =>
+      'Vente antidatée — la date figurera sur le ticket.';
+
+  @override
+  String get boutiqueConfirmDate => 'Date';
 
   @override
   String get boutiqueConfirmPayer => 'Payeur';
@@ -9103,7 +9111,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
+      one: '$count article',
     );
     return 'Voir le panier, $_temp0';
   }
@@ -9139,52 +9147,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueSuccessDone => 'Terminer';
 
   @override
-  String get boutiqueHistoryEyebrow => 'Boutique ▸ Historiques';
-
-  @override
-  String get boutiqueHistoryTitle => 'Historique des ventes';
-
-  @override
-  String get boutiqueHistoryPeriodDay => 'Aujourd\'hui';
-
-  @override
-  String get boutiqueHistoryPeriodWeek => 'Cette semaine';
-
-  @override
-  String get boutiqueHistoryPeriodMonth => 'Ce mois';
-
-  @override
-  String get boutiqueHistoryPeriodYear => 'Cette année';
-
-  @override
-  String boutiqueHistorySaleCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ventes',
-      one: '1 vente',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String boutiqueHistoryArticleCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String boutiqueHistoryPendingNotice(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ventes ne sont pas encore parties au serveur.',
-      one: '1 vente n\'est pas encore partie au serveur.',
+      one: '$count article',
     );
     return '$_temp0';
   }
@@ -9193,24 +9161,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueHistoryPendingBadge => 'En attente';
 
   @override
-  String get boutiqueHistoryEmptyTitle => 'Aucune vente sur cette période';
-
-  @override
-  String get boutiqueHistoryEmptyMessage =>
-      'Rien n\'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.';
-
-  @override
-  String get boutiqueHistoryPickTitle => 'Aucune vente choisie';
-
-  @override
-  String get boutiqueHistoryPickMessage =>
-      'Choisissez une vente dans la liste pour voir sa fiche ici.';
-
-  @override
   String get boutiqueHistoryPayerUnknown => 'Payeur non renseigné';
-
-  @override
-  String get boutiqueHistoryTotalLabel => 'Total encaissé';
 
   @override
   String boutiqueHistorySaleTime(String time, String reference) {
@@ -9218,18 +9169,340 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get boutiqueHistoryProvisional => 'ticket provisoire';
-
-  @override
-  String get boutiqueHistoryErrorServerTitle => 'Historique illisible';
+  String get boutiqueHistoryErrorServerTitle => 'Vente illisible';
 
   @override
   String get boutiqueHistoryErrorServer =>
-      'La caisse locale n\'a pas pu être lue. Réessayez ; les ventes ne sont pas perdues — elles sont écrites en base, c\'est leur relecture qui a échoué.';
+      'La vente n\'a pas pu être relue sur ce poste. Réessayez ; elle n\'est pas perdue — elle est écrite en base, c\'est sa relecture qui a échoué.';
 
   @override
   String get boutiqueHistoryErrorNetwork =>
-      'L\'historique se lit en local et n\'a pas besoin du réseau. Réessayez ; s\'il ne revient pas, c\'est la base locale qui est en cause.';
+      'Une vente se relit en local et n\'a pas besoin du réseau. Réessayez ; si elle ne revient pas, c\'est la base locale qui est en cause.';
+
+  @override
+  String get boutiqueDashboardEyebrow => 'Boutique ▸ Tableau de bord';
+
+  @override
+  String get boutiqueDashboardTitle => 'Tableau de bord';
+
+  @override
+  String boutiqueDashboardSubtitleToday(String day) {
+    return 'Ventes au comptant d\'aujourd\'hui · $day';
+  }
+
+  @override
+  String boutiqueDashboardSubtitleRange(int days, String from, String to) {
+    return 'Ventes au comptant sur $days jours · du $from au $to';
+  }
+
+  @override
+  String get boutiqueDashboardPeriodToday => 'Aujourd\'hui';
+
+  @override
+  String get boutiqueDashboardPeriodSevenDays => '7 jours';
+
+  @override
+  String get boutiqueDashboardPeriodThirtyDays => '30 jours';
+
+  @override
+  String get boutiqueDashboardPeriodA11y => 'Période du tableau de bord';
+
+  @override
+  String get boutiqueDashboardOpenTill => 'Ouvrir la caisse';
+
+  @override
+  String boutiqueDashboardCachedBadge(String date) {
+    return 'Hors ligne — chiffres du $date';
+  }
+
+  @override
+  String boutiqueDashboardProvisionalNotice(int count, String amounts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tickets provisoires en attente de synchronisation',
+      one: '1 ticket provisoire en attente de synchronisation',
+      zero: 'Aucun ticket provisoire',
+    );
+    return '$_temp0 — encaissés sur ce poste pour $amounts. Ils sont comptés ici ; le reçu scellé sera émis au retour du réseau.';
+  }
+
+  @override
+  String boutiqueDashboardTopRank(int rank, String label) {
+    return '$rank. $label';
+  }
+
+  @override
+  String boutiqueDashboardQuoted(String text) {
+    return '« $text »';
+  }
+
+  @override
+  String get boutiqueDashboardRefresh => 'Actualiser';
+
+  @override
+  String get boutiqueDashboardKpiRevenue => 'Recettes';
+
+  @override
+  String get boutiqueDashboardKpiSales => 'Ventes';
+
+  @override
+  String get boutiqueDashboardKpiAverageBasket => 'Panier moyen';
+
+  @override
+  String get boutiqueDashboardKpiArticles => 'Articles vendus';
+
+  @override
+  String boutiqueDashboardKpiPrevious(String amounts) {
+    return 'vs $amounts la période précédente';
+  }
+
+  @override
+  String boutiqueDashboardKpiDelta(String delta) {
+    return '$delta vs période précédente';
+  }
+
+  @override
+  String get boutiqueDashboardKpiNone => '—';
+
+  @override
+  String get boutiqueDashboardChartHourly => 'Recettes heure par heure';
+
+  @override
+  String get boutiqueDashboardChartDaily => 'Recettes jour par jour';
+
+  @override
+  String get boutiqueDashboardChartSubtitle =>
+      'Ce qui a été vendu, au jour de la vente';
+
+  @override
+  String boutiqueDashboardChartA11y(
+    String title,
+    int count,
+    String amount,
+    String label,
+  ) {
+    return '$title : $count barres, maximum $amount ($label)';
+  }
+
+  @override
+  String boutiqueDashboardHourLabel(int hour) {
+    return '$hour h';
+  }
+
+  @override
+  String get boutiqueDashboardCurrencyA11y => 'Devise affichée';
+
+  @override
+  String get boutiqueDashboardFamiliesTitle => 'Par famille';
+
+  @override
+  String get boutiqueDashboardFamiliesSubtitle =>
+      'Ce que pèse chaque famille du catalogue';
+
+  @override
+  String boutiqueDashboardFamilyMeta(int percent, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+      zero: 'aucun article',
+    );
+    return '$percent % du total · $_temp0';
+  }
+
+  @override
+  String get boutiqueDashboardFamilyUnknown => 'Autre';
+
+  @override
+  String get boutiqueDashboardTopTitle => 'Articles les plus vendus';
+
+  @override
+  String get boutiqueDashboardTopSubtitle =>
+      'Classés par quantité · touchez un article pour voir les élèves';
+
+  @override
+  String boutiqueDashboardTopQuantity(int count) {
+    return '× $count';
+  }
+
+  @override
+  String boutiqueDashboardTopA11y(String article) {
+    return 'Voir les élèves ayant reçu $article';
+  }
+
+  @override
+  String get boutiqueDashboardFooterNote =>
+      'Les ventes boutique sont réglées comptant : elles n\'entrent ni dans l\'attendu ni dans le taux de recouvrement, et n\'apparaissent pas sur le relevé de l\'élève.';
+
+  @override
+  String get boutiqueDashboardEmptyTitleToday => 'Aucune vente aujourd\'hui';
+
+  @override
+  String boutiqueDashboardEmptyTitleRange(int days) {
+    return 'Aucune vente sur $days jours';
+  }
+
+  @override
+  String get boutiqueDashboardEmptyWiden =>
+      'Rien d\'encaissé sur cette période. Élargissez à 30 jours ou ouvrez la caisse pour enregistrer une vente.';
+
+  @override
+  String get boutiqueDashboardEmptyFirst =>
+      'Les ventes apparaîtront ici dès le premier reçu.';
+
+  @override
+  String get boutiqueDashboardErrorServerTitle => 'Chiffres indisponibles';
+
+  @override
+  String get boutiqueDashboardErrorServer =>
+      'Le serveur n\'a pas pu calculer les chiffres de la boutique. Réessayez ; aucune vente n\'est perdue.';
+
+  @override
+  String get boutiqueDashboardErrorNetwork =>
+      'Les chiffres de la boutique se calculent sur le serveur, et aucune photo n\'est encore gardée sur ce poste. Réessayez une fois la connexion revenue.';
+
+  @override
+  String get boutiqueBeneficiariesTitle => 'Élèves concernés';
+
+  @override
+  String boutiqueBeneficiariesSubtitleAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+      zero: 'aucun élève',
+    );
+    return 'Bénéficiaires des achats · $_temp0';
+  }
+
+  @override
+  String boutiqueBeneficiariesSubtitleArticle(String article, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
+      zero: 'aucun élève',
+    );
+    return 'Ont reçu « $article » · $_temp0';
+  }
+
+  @override
+  String get boutiqueBeneficiariesSearchLabel => 'Élève';
+
+  @override
+  String get boutiqueBeneficiariesSearchHint => 'Chercher un élève…';
+
+  @override
+  String get boutiqueBeneficiariesArticleLabel => 'Article';
+
+  @override
+  String get boutiqueBeneficiariesClassLabel => 'Classe';
+
+  @override
+  String get boutiqueBeneficiariesAllArticles => 'Tous les articles';
+
+  @override
+  String get boutiqueBeneficiariesAllClasses => 'Toutes les classes';
+
+  @override
+  String get boutiqueBeneficiariesNoClass => 'Sans classe';
+
+  @override
+  String boutiqueBeneficiariesLastPurchase(String classLabel, String date) {
+    return '$classLabel · dernier achat $date';
+  }
+
+  @override
+  String boutiqueBeneficiariesArticleChip(int quantity, String label) {
+    return '$quantity× $label';
+  }
+
+  @override
+  String boutiqueBeneficiariesSizes(String sizes) {
+    return 'T. $sizes';
+  }
+
+  @override
+  String boutiqueBeneficiariesShowAll(int count) {
+    return 'Voir les $count élèves';
+  }
+
+  @override
+  String get boutiqueBeneficiariesCollapse => 'Réduire';
+
+  @override
+  String get boutiqueBeneficiariesLoadMore => 'Charger la suite';
+
+  @override
+  String get boutiqueBeneficiariesLoadMoreOffline =>
+      'Connexion perdue : la suite de la liste n\'a pas pu être chargée.';
+
+  @override
+  String get boutiqueBeneficiariesLoadMoreForbidden =>
+      'Vous n\'avez plus accès à cette liste : la suite n\'a pas été chargée.';
+
+  @override
+  String get boutiqueBeneficiariesLoadMoreUnauthorized =>
+      'Session expirée : reconnectez-vous pour charger la suite.';
+
+  @override
+  String get boutiqueBeneficiariesLoadMoreFailed =>
+      'La suite de la liste n\'a pas pu être chargée.';
+
+  @override
+  String boutiqueBeneficiariesWalkIn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count achats sans élève désigné (niveau choisi à la caisse) ne sont pas listés ici.',
+      one:
+          '1 achat sans élève désigné (niveau choisi à la caisse) n\'est pas listé ici.',
+      zero: 'Aucun achat sans élève désigné.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String boutiqueBeneficiariesPartial(int count) {
+    return 'Hors ligne : recherche faite sur les $count élèves gardés sur ce poste, la liste complète reviendra avec le réseau.';
+  }
+
+  @override
+  String get boutiqueBeneficiariesEmptyTitle => 'Aucun élève ne correspond';
+
+  @override
+  String boutiqueBeneficiariesEmptyFiltered(String filters) {
+    return 'Aucun élève ne correspond sur cette période : $filters.';
+  }
+
+  @override
+  String get boutiqueBeneficiariesEmptyNone =>
+      'Aucun achat de la période ne désigne un élève.';
+
+  @override
+  String get boutiqueBeneficiariesReset => 'Réinitialiser les filtres';
+
+  @override
+  String get boutiqueLatestSalesTitle => 'Dernières ventes';
+
+  @override
+  String get boutiqueLatestSalesSubtitle =>
+      'Les six derniers reçus de la période — touchez-en un pour le revoir ou le réimprimer';
+
+  @override
+  String get boutiqueLatestSalesNewSale => 'Nouvelle vente';
+
+  @override
+  String get boutiqueLatestSalesEmpty => 'Aucun reçu sur cette période.';
+
+  @override
+  String get boutiqueLatestSalesError =>
+      'Les dernières ventes n\'ont pas pu être lues sur ce poste.';
 
   @override
   String get boutiqueClearEyebrow => 'Boutique ▸ Panier';
@@ -9247,7 +9520,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count articles',
-      one: '1 article',
+      one: '$count article',
     );
     return '$_temp0 au panier';
   }
@@ -9870,7 +10143,8 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other:
           'Un document est déjà en préparation. Réessayez dans $seconds secondes.',
-      one: 'Un document est déjà en préparation. Réessayez dans 1 seconde.',
+      one:
+          'Un document est déjà en préparation. Réessayez dans $seconds seconde.',
     );
     return '$_temp0';
   }

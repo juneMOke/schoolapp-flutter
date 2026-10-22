@@ -25,9 +25,9 @@ class BoutiqueResultsErrorState extends StatelessWidget {
   /// L'écran qui échoue — c'est lui qui décide ce que le message NOMME.
   ///
   /// Les quatre familles et leurs quatre gestes sont partagés ; les phrases, non.
-  /// L'historique annonçant « le catalogue local n'a pas pu être lu » ferait
-  /// chercher une panne de catalogue à qui vient consulter sa caisse, et le
-  /// message réseau y serait carrément faux : l'historique se lit en local.
+  /// La fiche d'une vente annonçant « le catalogue local n'a pas pu être lu »
+  /// ferait chercher une panne de catalogue à qui vient relire une vente, et
+  /// le message réseau y serait carrément faux : une vente se lit en local.
   final BoutiqueErrorSurface surface;
 
   const BoutiqueResultsErrorState({
@@ -93,27 +93,31 @@ class BoutiqueResultsErrorState extends StatelessWidget {
     EteeloErrorType.network => l10n.boutiqueErrorNetworkTitle,
     EteeloErrorType.unauthorized => l10n.boutiqueErrorUnauthorizedTitle,
     EteeloErrorType.forbidden => l10n.boutiqueErrorForbiddenTitle,
-    EteeloErrorType.server || EteeloErrorType.unknown =>
-      surface == BoutiqueErrorSurface.history
-          ? l10n.boutiqueHistoryErrorServerTitle
-          : l10n.boutiqueErrorServerTitle,
+    EteeloErrorType.server || EteeloErrorType.unknown => switch (surface) {
+      BoutiqueErrorSurface.catalog => l10n.boutiqueErrorServerTitle,
+      BoutiqueErrorSurface.localSales => l10n.boutiqueHistoryErrorServerTitle,
+      BoutiqueErrorSurface.dashboard => l10n.boutiqueDashboardErrorServerTitle,
+    },
   };
 
   String _message(AppLocalizations l10n, EteeloErrorType type) =>
       switch (type) {
-        EteeloErrorType.network =>
-          surface == BoutiqueErrorSurface.history
-              ? l10n.boutiqueHistoryErrorNetwork
-              : l10n.boutiqueErrorNetwork,
+        EteeloErrorType.network => switch (surface) {
+          BoutiqueErrorSurface.catalog => l10n.boutiqueErrorNetwork,
+          BoutiqueErrorSurface.localSales => l10n.boutiqueHistoryErrorNetwork,
+          BoutiqueErrorSurface.dashboard => l10n.boutiqueDashboardErrorNetwork,
+        },
         EteeloErrorType.unauthorized => l10n.boutiqueErrorUnauthorized,
         EteeloErrorType.forbidden => l10n.boutiqueErrorForbidden,
-        EteeloErrorType.server || EteeloErrorType.unknown =>
-          surface == BoutiqueErrorSurface.history
-              ? l10n.boutiqueHistoryErrorServer
-              : l10n.boutiqueErrorServer,
+        EteeloErrorType.server || EteeloErrorType.unknown => switch (surface) {
+          BoutiqueErrorSurface.catalog => l10n.boutiqueErrorServer,
+          BoutiqueErrorSurface.localSales => l10n.boutiqueHistoryErrorServer,
+          BoutiqueErrorSurface.dashboard => l10n.boutiqueDashboardErrorServer,
+        },
       };
 }
 
 /// Quel écran de la caisse échoue. Les gestes de reprise sont les mêmes ; ce que
-/// les phrases NOMMENT ne l'est pas.
-enum BoutiqueErrorSurface { catalog, history }
+/// les phrases NOMMENT ne l'est pas — le tableau de bord, lui, se calcule au
+/// serveur.
+enum BoutiqueErrorSurface { catalog, localSales, dashboard }

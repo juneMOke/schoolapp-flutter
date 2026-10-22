@@ -177,10 +177,8 @@ class AccueilModulesFactory {
     );
   }
 
-  /// La caisse boutique — une carte propre, comme le menu.
-  ///
-  /// Sans tableau de bord : la caisse a un guichet et un historique, pas de
-  /// synthèse ; sa page d'entrée est donc son premier sous-module (Achats).
+  /// La boutique — une carte propre, comme le menu : tableau de bord, puis la
+  /// caisse.
   static AccueilModule _boutique(AppLocalizations l10n) {
     const menuId = MenuConstants.boutiqueMenuId;
     return AccueilModule(
@@ -190,15 +188,15 @@ class AccueilModulesFactory {
       icon: Icons.storefront_outlined,
       tone: AccueilModuleTones.of(menuId),
       subModules: [
-        _page(
+        _dashboard(
+          l10n,
           menuId: menuId,
-          subMenuId: MenuConstants.boutiqueAchatsId,
-          title: l10n.subMenuBoutiquePurchases,
+          subMenuId: MenuConstants.boutiqueDashboardId,
         ),
         _page(
           menuId: menuId,
-          subMenuId: MenuConstants.boutiqueHistoriqueId,
-          title: l10n.subMenuBoutiqueHistory,
+          subMenuId: MenuConstants.boutiqueAchatsId,
+          title: l10n.subMenuBoutiqueTill,
         ),
       ],
     );

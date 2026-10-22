@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/auth/presentation/pages/forgot_passw
 import 'package:school_app_flutter/features/auth/presentation/pages/login_page.dart';
 import 'package:school_app_flutter/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
-import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_dashboard_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/communication/presentation/pages/announcement_templates_page.dart';
 import 'package:school_app_flutter/features/communication/presentation/pages/announcements_page.dart';
@@ -461,8 +461,14 @@ class AppRouter {
       builder: (context, state) => const BoutiquePage(),
     ),
     GoRoute(
-      path: AppRoutesNames.boutiqueHistorique,
-      builder: (context, state) => const BoutiqueHistoryPage(),
+      path: AppRoutesNames.boutiqueDashboard,
+      builder: (context, state) => const BoutiqueDashboardPage(),
+    ),
+    // L'historique a laissé place au tableau de bord : un favori sur l'ancienne
+    // adresse y mène au lieu d'une page introuvable.
+    GoRoute(
+      path: AppRoutesNames.boutiqueLegacyHistory,
+      redirect: (context, state) => AppRoutesNames.boutiqueDashboard,
     ),
     // Les dépenses ont leur menu et leur scope : il hydrate le registre et le
     // taux du jour au montage. Aucun partage avec Finances — la source de fonds

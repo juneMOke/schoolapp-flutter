@@ -1075,8 +1075,7 @@
   "menuRecouvrement": "Recouvrement",
   "subMenuFeeControl": "Contrôle par frais",
   "menuBoutique": "Boutique",
-  "subMenuBoutiquePurchases": "Achats",
-  "subMenuBoutiqueHistory": "Historiques",
+  "subMenuBoutiqueTill": "Caisse",
   "subMenuOrganization": "Composition\ndes classes",
   "classesOrganisationHeroTitle": "Composition des classes",
   "classesOrganisationHeroSubtitle": "Repartissez les élèves d'un niveau en sous-classes (ex. 1ere année A, 1ere année B, 1ere année C) et visualisez la liste des élèves par sous-classe.",
@@ -2263,7 +2262,7 @@
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
   "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
   "accueilModuleFeeControlDescription": "Pour un frais donné, qui l'a soldé, qui n'a versé qu'une part, qui n'a rien versé.",
-  "accueilModuleBoutiqueDescription": "Vente au comptant d'articles scolaires, et historique des encaissements du guichet.",
+  "accueilModuleBoutiqueDescription": "Caisse au comptant des articles de l'école et suivi des ventes.",
   "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
   "accueilModuleCoursDescription": "Emploi du temps de la semaine et suivi de vos cours.",
   "accueilModuleResultatsDescription": "Pourcentages par période, par classe entière ou pour un élève précis.",
@@ -4445,7 +4444,7 @@
     }
   },
   "financeTillReceiptsUnit": "paiement",
-  "financeTillReceiptsUnsealed": "{count, plural, one{1 sans pièce scellée (saisie de rattrapage)} other{{count} sans pièce scellée (saisies de rattrapage)}}",
+  "financeTillReceiptsUnsealed": "{count, plural, one{{count} sans pièce scellée (saisie de rattrapage)} other{{count} sans pièce scellée (saisies de rattrapage)}}",
   "@financeTillReceiptsUnsealed": {
     "description": "Compte de FENÊTRE, servi par le serveur. Nécessaire et non cosmétique : sur une fenêtre de reprise de cahier la colonne est vide presque partout, et sans ce compte elle se lit comme une table cassée.",
     "placeholders": {
@@ -4506,7 +4505,7 @@
     "description": "Un rendu prend plusieurs secondes sur une grosse fenêtre, et le serveur n'en compose qu'un à la fois : le bouton se désarme et le dit."
   },
   "financeTillReportWaiting": "Patientez…",
-  "financeTillReportBusy": "{seconds, plural, one{Un rapport est déjà en préparation. Réessayez dans 1 seconde.} other{Un rapport est déjà en préparation. Réessayez dans {seconds} secondes.}}",
+  "financeTillReportBusy": "{seconds, plural, one{Un rapport est déjà en préparation. Réessayez dans {seconds} seconde.} other{Un rapport est déjà en préparation. Réessayez dans {seconds} secondes.}}",
   "@financeTillReportBusy": {
     "description": "429 : ce n'est ni une panne ni un refus, c'est un tour de file. Le bouton reste désarmé le temps annoncé plutôt que d'inviter à reproduire ce que le serveur vient de refuser.",
     "placeholders": {
@@ -4666,7 +4665,7 @@
   "@financeTillInsightCrossedEmpty": {
     "description": "La carte reste rendue même à zéro — une carte absente laisse croire qu'on a oublié de regarder."
   },
-  "financeTillInsightCrossedBody": "{count, plural, one{1 versement règle} other{{count} versements règlent}} un frais fixé dans l'autre devise, pour {amounts}{rateClause}. Un écart de taux au moment du contrôle de caisse vient de là.",
+  "financeTillInsightCrossedBody": "{count, plural, one{{count} versement règle} other{{count} versements règlent}} un frais fixé dans l'autre devise, pour {amounts}{rateClause}. Un écart de taux au moment du contrôle de caisse vient de là.",
   "@financeTillInsightCrossedBody": {
     "description": "Portée ÉCRAN : le compte et les montants couvrent toutes les caisses, comme le serveur les construit.",
     "placeholders": {
@@ -5791,7 +5790,7 @@
   "boutiqueFamilyFournitures": "Fournitures",
   "boutiqueFamilyActivites": "Activités",
   "boutiqueFamilyActes": "Actes",
-  "boutiqueArticleCount": "{count, plural, one{1 article} other{{count} articles}}",
+  "boutiqueArticleCount": "{count, plural, one{{count} article} other{{count} articles}}",
   "@boutiqueArticleCount": {
     "placeholders": {
       "count": {
@@ -5851,7 +5850,7 @@
   "boutiqueBlockersPrefix": "À compléter :",
   "boutiqueBlockerEmptyCart": "Panier vide",
   "boutiqueBlockerPhoneIncomplete": "Téléphone incomplet",
-  "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{1 ligne sans niveau} other{{count} lignes sans niveau}}",
+  "boutiqueBlockerLinesWithoutLevel": "{count, plural, one{{count} ligne sans niveau} other{{count} lignes sans niveau}}",
   "@boutiqueBlockerLinesWithoutLevel": {
     "placeholders": {
       "count": {
@@ -5885,7 +5884,7 @@
     }
   },
   "boutiqueResetFilters": "Réinitialiser les filtres",
-  "boutiqueUnsellableNotice": "{count, plural, one{1 article de ce catalogue n'est pas vendable depuis cette version de l'application.} other{{count} articles de ce catalogue ne sont pas vendables depuis cette version de l'application.}}",
+  "boutiqueUnsellableNotice": "{count, plural, one{{count} article de ce catalogue n'est pas vendable depuis cette version de l'application.} other{{count} articles de ce catalogue ne sont pas vendables depuis cette version de l'application.}}",
   "@boutiqueUnsellableNotice": {
     "placeholders": {
       "count": {
@@ -5930,7 +5929,7 @@
   "boutiqueBeneficiaryNotSynced": "Inscription pas encore synchronisée — vendez au niveau, sans bénéficiaire : le prix est le même.",
   "boutiqueBeneficiaryNoLevel": "Cette inscription ne porte pas de niveau — vendez au niveau, sans bénéficiaire.",
   "boutiqueBeneficiaryLoadFailed": "La liste des élèves n'a pas pu être lue.",
-  "boutiquePayerDirectoryCount": "Déjà au répertoire · {count, plural, one{1 vente} other{{count} ventes}}",
+  "boutiquePayerDirectoryCount": "Déjà au répertoire · {count, plural, one{{count} vente} other{{count} ventes}}",
   "@boutiquePayerDirectoryCount": {
     "placeholders": {
       "count": {
@@ -5941,6 +5940,9 @@
   "boutiquePayerUse": "Utiliser",
   "boutiqueConfirmEyebrow": "Encaissement comptant",
   "boutiqueConfirmTitle": "Confirmer la vente",
+  "boutiqueSaleDateLabel": "Date de la vente",
+  "boutiqueSaleDateBackdated": "Vente antidatée — la date figurera sur le ticket.",
+  "boutiqueConfirmDate": "Date",
   "boutiqueConfirmPayer": "Payeur",
   "boutiqueConfirmPhone": "Téléphone",
   "boutiqueConfirmArticles": "Articles",
@@ -6013,7 +6015,7 @@
   "boutiqueReceiptPrintFailed": "Le ticket n'a pas pu être imprimé. La vente est enregistrée — vous pouvez réessayer.",
   "boutiqueReceiptPrinted": "Ticket imprimé.",
   "boutiqueOpenCart": "Voir le panier",
-  "boutiqueOpenCartWithCount": "Voir le panier, {count, plural, one{1 article} other{{count} articles}}",
+  "boutiqueOpenCartWithCount": "Voir le panier, {count, plural, one{{count} article} other{{count} articles}}",
   "boutiqueCartPageEyebrow": "Boutique ▸ Panier",
   "boutiqueBackToCatalog": "Retour au catalogue",
   "boutiqueAddToCart": "Ajouter au panier",
@@ -6043,39 +6045,11 @@
       }
     }
   },
-  "boutiqueHistoryEyebrow": "Boutique ▸ Historiques",
-  "boutiqueHistoryTitle": "Historique des ventes",
-  "boutiqueHistoryPeriodDay": "Aujourd'hui",
-  "boutiqueHistoryPeriodWeek": "Cette semaine",
-  "boutiqueHistoryPeriodMonth": "Ce mois",
-  "boutiqueHistoryPeriodYear": "Cette année",
-  "boutiqueHistorySaleCount": "{count, plural, one{1 vente} other{{count} ventes}}",
-  "boutiqueHistoryArticleCount": "{count, plural, one{1 article} other{{count} articles}}",
-  "boutiqueHistoryPendingNotice": "{count, plural, one{1 vente n'est pas encore partie au serveur.} other{{count} ventes ne sont pas encore parties au serveur.}}",
+  "boutiqueHistoryArticleCount": "{count, plural, one{{count} article} other{{count} articles}}",
   "boutiqueHistoryPendingBadge": "En attente",
-  "boutiqueHistoryEmptyTitle": "Aucune vente sur cette période",
-  "boutiqueHistoryEmptyMessage": "Rien n'a été encaissé au guichet. Élargissez la période, ou ouvrez la boutique pour encaisser.",
-  "boutiqueHistoryPickTitle": "Aucune vente choisie",
-  "boutiqueHistoryPickMessage": "Choisissez une vente dans la liste pour voir sa fiche ici.",
   "boutiqueHistoryPayerUnknown": "Payeur non renseigné",
-  "boutiqueHistoryTotalLabel": "Total encaissé",
   "boutiqueHistorySaleTime": "{time} · {reference}",
-  "boutiqueHistoryProvisional": "ticket provisoire",
-  "@boutiqueHistorySaleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "@boutiqueHistoryArticleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@boutiqueHistoryPendingNotice": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -6092,13 +6066,281 @@
       }
     }
   },
-  "boutiqueHistoryErrorServerTitle": "Historique illisible",
-  "boutiqueHistoryErrorServer": "La caisse locale n'a pas pu être lue. Réessayez ; les ventes ne sont pas perdues — elles sont écrites en base, c'est leur relecture qui a échoué.",
-  "boutiqueHistoryErrorNetwork": "L'historique se lit en local et n'a pas besoin du réseau. Réessayez ; s'il ne revient pas, c'est la base locale qui est en cause.",
+  "boutiqueHistoryErrorServerTitle": "Vente illisible",
+  "boutiqueHistoryErrorServer": "La vente n'a pas pu être relue sur ce poste. Réessayez ; elle n'est pas perdue — elle est écrite en base, c'est sa relecture qui a échoué.",
+  "boutiqueHistoryErrorNetwork": "Une vente se relit en local et n'a pas besoin du réseau. Réessayez ; si elle ne revient pas, c'est la base locale qui est en cause.",
+  "boutiqueDashboardEyebrow": "Boutique ▸ Tableau de bord",
+  "boutiqueDashboardTitle": "Tableau de bord",
+  "boutiqueDashboardSubtitleToday": "Ventes au comptant d'aujourd'hui · {day}",
+  "@boutiqueDashboardSubtitleToday": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardSubtitleRange": "Ventes au comptant sur {days} jours · du {from} au {to}",
+  "@boutiqueDashboardSubtitleRange": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardPeriodToday": "Aujourd'hui",
+  "boutiqueDashboardPeriodSevenDays": "7 jours",
+  "boutiqueDashboardPeriodThirtyDays": "30 jours",
+  "boutiqueDashboardPeriodA11y": "Période du tableau de bord",
+  "boutiqueDashboardOpenTill": "Ouvrir la caisse",
+  "boutiqueDashboardCachedBadge": "Hors ligne — chiffres du {date}",
+  "@boutiqueDashboardCachedBadge": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardProvisionalNotice": "{count, plural, =0{Aucun ticket provisoire} one{1 ticket provisoire en attente de synchronisation} other{{count} tickets provisoires en attente de synchronisation}} — encaissés sur ce poste pour {amounts}. Ils sont comptés ici ; le reçu scellé sera émis au retour du réseau.",
+  "@boutiqueDashboardProvisionalNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardTopRank": "{rank}. {label}",
+  "@boutiqueDashboardTopRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardQuoted": "« {text} »",
+  "@boutiqueDashboardQuoted": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardRefresh": "Actualiser",
+  "boutiqueDashboardKpiRevenue": "Recettes",
+  "boutiqueDashboardKpiSales": "Ventes",
+  "boutiqueDashboardKpiAverageBasket": "Panier moyen",
+  "boutiqueDashboardKpiArticles": "Articles vendus",
+  "boutiqueDashboardKpiPrevious": "vs {amounts} la période précédente",
+  "@boutiqueDashboardKpiPrevious": {
+    "placeholders": {
+      "amounts": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardKpiDelta": "{delta} vs période précédente",
+  "@boutiqueDashboardKpiDelta": {
+    "placeholders": {
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardKpiNone": "—",
+  "boutiqueDashboardChartHourly": "Recettes heure par heure",
+  "boutiqueDashboardChartDaily": "Recettes jour par jour",
+  "boutiqueDashboardChartSubtitle": "Ce qui a été vendu, au jour de la vente",
+  "boutiqueDashboardChartA11y": "{title} : {count} barres, maximum {amount} ({label})",
+  "@boutiqueDashboardChartA11y": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardHourLabel": "{hour} h",
+  "@boutiqueDashboardHourLabel": {
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardCurrencyA11y": "Devise affichée",
+  "boutiqueDashboardFamiliesTitle": "Par famille",
+  "boutiqueDashboardFamiliesSubtitle": "Ce que pèse chaque famille du catalogue",
+  "boutiqueDashboardFamilyMeta": "{percent} % du total · {count, plural, =0{aucun article} one{1 article} other{{count} articles}}",
+  "@boutiqueDashboardFamilyMeta": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardFamilyUnknown": "Autre",
+  "boutiqueDashboardTopTitle": "Articles les plus vendus",
+  "boutiqueDashboardTopSubtitle": "Classés par quantité · touchez un article pour voir les élèves",
+  "boutiqueDashboardTopQuantity": "× {count}",
+  "@boutiqueDashboardTopQuantity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardTopA11y": "Voir les élèves ayant reçu {article}",
+  "@boutiqueDashboardTopA11y": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueDashboardFooterNote": "Les ventes boutique sont réglées comptant : elles n'entrent ni dans l'attendu ni dans le taux de recouvrement, et n'apparaissent pas sur le relevé de l'élève.",
+  "boutiqueDashboardEmptyTitleToday": "Aucune vente aujourd'hui",
+  "boutiqueDashboardEmptyTitleRange": "Aucune vente sur {days} jours",
+  "@boutiqueDashboardEmptyTitleRange": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueDashboardEmptyWiden": "Rien d'encaissé sur cette période. Élargissez à 30 jours ou ouvrez la caisse pour enregistrer une vente.",
+  "boutiqueDashboardEmptyFirst": "Les ventes apparaîtront ici dès le premier reçu.",
+  "boutiqueDashboardErrorServerTitle": "Chiffres indisponibles",
+  "boutiqueDashboardErrorServer": "Le serveur n'a pas pu calculer les chiffres de la boutique. Réessayez ; aucune vente n'est perdue.",
+  "boutiqueDashboardErrorNetwork": "Les chiffres de la boutique se calculent sur le serveur, et aucune photo n'est encore gardée sur ce poste. Réessayez une fois la connexion revenue.",
+  "boutiqueBeneficiariesTitle": "Élèves concernés",
+  "boutiqueBeneficiariesSubtitleAll": "Bénéficiaires des achats · {count, plural, =0{aucun élève} one{1 élève} other{{count} élèves}}",
+  "@boutiqueBeneficiariesSubtitleAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSubtitleArticle": "Ont reçu « {article} » · {count, plural, =0{aucun élève} one{1 élève} other{{count} élèves}}",
+  "@boutiqueBeneficiariesSubtitleArticle": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSearchLabel": "Élève",
+  "boutiqueBeneficiariesSearchHint": "Chercher un élève…",
+  "boutiqueBeneficiariesArticleLabel": "Article",
+  "boutiqueBeneficiariesClassLabel": "Classe",
+  "boutiqueBeneficiariesAllArticles": "Tous les articles",
+  "boutiqueBeneficiariesAllClasses": "Toutes les classes",
+  "boutiqueBeneficiariesNoClass": "Sans classe",
+  "boutiqueBeneficiariesLastPurchase": "{classLabel} · dernier achat {date}",
+  "@boutiqueBeneficiariesLastPurchase": {
+    "placeholders": {
+      "classLabel": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesArticleChip": "{quantity}× {label}",
+  "@boutiqueBeneficiariesArticleChip": {
+    "placeholders": {
+      "quantity": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesSizes": "T. {sizes}",
+  "@boutiqueBeneficiariesSizes": {
+    "placeholders": {
+      "sizes": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesShowAll": "Voir les {count} élèves",
+  "@boutiqueBeneficiariesShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesCollapse": "Réduire",
+  "boutiqueBeneficiariesLoadMore": "Charger la suite",
+  "boutiqueBeneficiariesLoadMoreOffline": "Connexion perdue : la suite de la liste n'a pas pu être chargée.",
+  "boutiqueBeneficiariesLoadMoreForbidden": "Vous n'avez plus accès à cette liste : la suite n'a pas été chargée.",
+  "boutiqueBeneficiariesLoadMoreUnauthorized": "Session expirée : reconnectez-vous pour charger la suite.",
+  "boutiqueBeneficiariesLoadMoreFailed": "La suite de la liste n'a pas pu être chargée.",
+  "boutiqueBeneficiariesWalkIn": "{count, plural, =0{Aucun achat sans élève désigné.} one{1 achat sans élève désigné (niveau choisi à la caisse) n'est pas listé ici.} other{{count} achats sans élève désigné (niveau choisi à la caisse) ne sont pas listés ici.}}",
+  "@boutiqueBeneficiariesWalkIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesPartial": "Hors ligne : recherche faite sur les {count} élèves gardés sur ce poste, la liste complète reviendra avec le réseau.",
+  "@boutiqueBeneficiariesPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueBeneficiariesEmptyTitle": "Aucun élève ne correspond",
+  "boutiqueBeneficiariesEmptyFiltered": "Aucun élève ne correspond sur cette période : {filters}.",
+  "@boutiqueBeneficiariesEmptyFiltered": {
+    "placeholders": {
+      "filters": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueBeneficiariesEmptyNone": "Aucun achat de la période ne désigne un élève.",
+  "boutiqueBeneficiariesReset": "Réinitialiser les filtres",
+  "boutiqueLatestSalesTitle": "Dernières ventes",
+  "boutiqueLatestSalesSubtitle": "Les six derniers reçus de la période — touchez-en un pour le revoir ou le réimprimer",
+  "boutiqueLatestSalesNewSale": "Nouvelle vente",
+  "boutiqueLatestSalesEmpty": "Aucun reçu sur cette période.",
+  "boutiqueLatestSalesError": "Les dernières ventes n'ont pas pu être lues sur ce poste.",
   "boutiqueClearEyebrow": "Boutique ▸ Panier",
   "boutiqueClearTitle": "Vider le panier ?",
   "boutiqueClearMessage": "Les lignes composées et l'identité du payeur seront effacées. Rien n'a encore été encaissé — il n'y a donc rien à annuler côté argent.",
-  "boutiqueClearLinesSummary": "{count, plural, one{1 article} other{{count} articles}} au panier",
+  "boutiqueClearLinesSummary": "{count, plural, one{{count} article} other{{count} articles}} au panier",
   "boutiqueClearPayerSummary": "Payeur saisi : {payer}",
   "boutiqueClearCancel": "Garder le panier",
   "boutiqueClearConfirm": "Vider",
@@ -6507,7 +6749,7 @@
   "enrollmentDashboardEntriesReportTooltip": "Télécharger la liste des inscrits de la période en PDF",
   "enrollmentDashboardEntriesReportPreparing": "Préparation…",
   "enrollmentDashboardEntriesReportWaiting": "Patientez…",
-  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{Un document est déjà en préparation. Réessayez dans 1 seconde.} other{Un document est déjà en préparation. Réessayez dans {seconds} secondes.}}",
+  "enrollmentDashboardEntriesReportBusy": "{seconds, plural, one{Un document est déjà en préparation. Réessayez dans {seconds} seconde.} other{Un document est déjà en préparation. Réessayez dans {seconds} secondes.}}",
   "@enrollmentDashboardEntriesReportBusy": {
     "description": "Le 429 du serveur : il ne compose qu'un document long à la fois, file partagée avec la caisse et la relance. La phrase n'accuse pas l'utilisateur — le rendu en cours peut être celui de quelqu'un d'autre.",
     "placeholders": {

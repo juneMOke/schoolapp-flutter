@@ -27,6 +27,10 @@ class EteeloBarRow {
   /// Phrase lue à la place de la ligne. `null` compose « libellé, valeur ».
   final String? semanticsLabel;
 
+  /// Une précision sous le libellé — « 58 % du total · 41 articles ». `null`,
+  /// le défaut, laisse la rangée sur une ligne, comme elle l'a toujours été.
+  final String? caption;
+
   const EteeloBarRow({
     required this.label,
     required this.value,
@@ -34,6 +38,7 @@ class EteeloBarRow {
     required this.color,
     this.onTap,
     this.semanticsLabel,
+    this.caption,
   });
 }
 
@@ -187,14 +192,7 @@ class _Row extends StatelessWidget {
                       ? math.min(labelWidth, constraints.maxWidth * _labelShare)
                       : labelWidth,
                 ),
-                child: Text(
-                  row.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+                child: _Label(row: row),
               ),
               const SizedBox(width: AppDimensions.spacingM),
               Expanded(
@@ -223,7 +221,11 @@ class _Row extends StatelessWidget {
     return Semantics(
       container: true,
       button: row.onTap != null,
-      label: row.semanticsLabel ?? '${row.label}, ${row.valueLabel}',
+      // La précision se lit aussi : sans elle, « 58 % du total » ne serait
+      // donné qu'à qui voit l'écran.
+      label:
+          row.semanticsLabel ??
+          [row.label, ?row.caption, row.valueLabel].join(', '),
       onTap: row.onTap,
       child: ExcludeSemantics(
         child: row.onTap == null
@@ -286,6 +288,38 @@ class _Bar extends StatelessWidget {
       duration: AppMotion.layout,
       curve: AppMotion.outCurve,
       builder: (context, t, _) => barAt(t),
+    );
+  }
+}
+
+/// Le libellé d'une rangée, et sa précision s'il en a une.
+class _Label extends StatelessWidget {
+  final EteeloBarRow row;
+
+  const _Label({required this.row});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(
+      row.label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+    );
+    final caption = row.caption;
+    if (caption == null) return label;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        label,
+        Text(
+          caption,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.caption.copyWith(color: AppColors.textMutedAa),
+        ),
+      ],
     );
   }
 }

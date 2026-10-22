@@ -17,15 +17,15 @@ void main() {
   final l10n = AppLocalizationsFr();
   final tousDroits = Perm.values.map((p) => p.wire).toList();
 
-  test('la caisse a son PROPRE menu, avec Achats et Historiques', () {
+  test('la boutique a son PROPRE menu : tableau de bord, puis caisse', () {
     final menus = MenuFactory.createMenuItems(l10n, permissions: tousDroits);
     final boutique = menus.firstWhere(
       (menu) => menu.id == MenuConstants.boutiqueMenuId,
     );
 
     expect(boutique.subMenus.map((sub) => sub.id), [
+      MenuConstants.boutiqueDashboardId,
       MenuConstants.boutiqueAchatsId,
-      MenuConstants.boutiqueHistoriqueId,
     ]);
   });
 
@@ -50,8 +50,8 @@ void main() {
     );
 
     expect(boutique.subModules.map((sub) => sub.target.subMenuId), [
+      MenuConstants.boutiqueDashboardId,
       MenuConstants.boutiqueAchatsId,
-      MenuConstants.boutiqueHistoriqueId,
     ]);
     final finances = modules.firstWhere(
       (module) => module.id == MenuConstants.financesMenuId,

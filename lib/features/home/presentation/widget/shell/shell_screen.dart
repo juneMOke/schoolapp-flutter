@@ -6,7 +6,7 @@ import 'package:school_app_flutter/features/attendances/presentation/pages/atten
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_overview_dashboard_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
-import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_history_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_dashboard_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_page.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/pages/journal_coordinator_page.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/pages/journal_feature_scope.dart';
@@ -117,8 +117,8 @@ class ShellScreen extends StatelessWidget {
       case MenuConstants.boutiqueAchatsId:
         return const BoutiquePage();
 
-      case MenuConstants.boutiqueHistoriqueId:
-        return const BoutiqueHistoryPage();
+      case MenuConstants.boutiqueDashboardId:
+        return const BoutiqueDashboardPage();
       // Les trois écrans des dépenses partagent le même type de scope au même
       // emplacement du switch : une clé par sous-menu, sinon Flutter recycle
       // l'Element et le pull de montage ne rejoue pas en passant de l'un à

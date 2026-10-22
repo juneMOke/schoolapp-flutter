@@ -1,3 +1,16 @@
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:school_app_flutter/features/boutique/data/dashboard/boutique_dashboard_api.dart';
+import 'package:school_app_flutter/features/boutique/data/dashboard/boutique_dashboard_cache_dao.dart';
+import 'package:school_app_flutter/features/boutique/data/dashboard/dashboard_period_store.dart';
+import 'package:school_app_flutter/features/boutique/data/repositories/boutique_dashboard_repository_impl.dart';
+import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_dashboard_repository.dart';
+import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_beneficiaries_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_latest_sales_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -12,9 +25,7 @@ import 'package:school_app_flutter/features/boutique/domain/repositories/boutiqu
 import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_receipt_repository.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
-import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_history_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
-import 'package:school_app_flutter/features/boutique/presentation/bloc/boutique_history_bloc.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_pull_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/ticket/sale_ticket_composer.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_write_dao.dart';
@@ -121,9 +132,9 @@ void registerBoutiqueOffline(GetIt getIt) {
     () => RecordBoutiqueSaleUseCase(getIt<BoutiqueSaleRepository>()),
   );
 
-  // ── Historique de caisse ────────────────────────────────────────────────
-  // Lecture LOCALE seule : une caisse se consulte le jour où le réseau manque,
-  // et c'est aussi ce qui rend les ventes non encore parties visibles ici.
+  // ── Ventes du poste (lecture locale) ────────────────────────────────────
+  // Lecture LOCALE seule : la fiche d'une vente se rouvre le jour où le réseau
+  // manque, et c'est aussi ce qui rend les ventes non encore parties visibles.
   getIt.registerLazySingleton<BoutiqueSaleHistoryDao>(
     () => BoutiqueSaleHistoryDao(getIt<Database>()),
   );
@@ -133,9 +144,6 @@ void registerBoutiqueOffline(GetIt getIt) {
       currentUser: getIt<CurrentUserContext>(),
       now: DateTime.now,
     ),
-  );
-  getIt.registerFactory<GetBoutiqueSalesHistoryUseCase>(
-    () => GetBoutiqueSalesHistoryUseCase(getIt<BoutiqueHistoryRepository>()),
   );
   getIt.registerFactory<GetBoutiqueSaleDetailUseCase>(
     () => GetBoutiqueSaleDetailUseCase(getIt<BoutiqueHistoryRepository>()),
@@ -160,14 +168,8 @@ void registerBoutiqueOffline(GetIt getIt) {
   getIt.registerFactory<ClaimSaleReceiptUseCase>(
     () => ClaimSaleReceiptUseCase(getIt<BoutiqueReceiptRepository>()),
   );
-  // `registerFactory`, jamais singleton : la fenêtre choisie appartient à
-  // l'écran ouvert, et un bloc partagé ferait revenir la période d'une visite
-  // précédente.
-  getIt.registerFactory<BoutiqueHistoryBloc>(
-    () => BoutiqueHistoryBloc(
-      getHistory: getIt<GetBoutiqueSalesHistoryUseCase>(),
-    ),
-  );
+
+  _registerDashboard(getIt);
 
   getIt.registerFactoryParam<BeneficiaryPickerCubit, String, void>(
     (academicYearId, _) => BeneficiaryPickerCubit(
@@ -216,6 +218,61 @@ void registerBoutiqueOffline(GetIt getIt) {
       dependency: (studentId, academicYearId) => getIt<EnrollmentReadDao>()
           .studentEnrollmentDependency(studentId, academicYearId),
       extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
+}
+
+/// Le tableau de bord : chiffres **serveur** (avec photo hors ligne datée) et
+/// lectures **locales** (tickets provisoires, dernières ventes).
+void _registerDashboard(GetIt getIt) {
+  getIt.registerLazySingleton<BoutiqueDashboardApi>(
+    () => BoutiqueDashboardApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<BoutiqueDashboardCacheDao>(
+    () => BoutiqueDashboardCacheDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<BoutiqueDashboardRepository>(
+    () => BoutiqueDashboardRepositoryImpl(
+      api: getIt<BoutiqueDashboardApi>(),
+      cache: getIt<BoutiqueDashboardCacheDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerLazySingleton<DashboardPeriodPreference>(
+    () => DashboardPeriodStore(
+      storage: getIt<FlutterSecureStorage>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
+  getIt.registerFactory<GetBoutiqueStatsUseCase>(
+    () => GetBoutiqueStatsUseCase(getIt<BoutiqueDashboardRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueBeneficiariesUseCase>(
+    () => GetBoutiqueBeneficiariesUseCase(getIt<BoutiqueDashboardRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueLatestSalesUseCase>(
+    () => GetBoutiqueLatestSalesUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueProvisionalSalesUseCase>(
+    () =>
+        GetBoutiqueProvisionalSalesUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  // `registerFactory`, jamais singleton : la période et les filtres
+  // appartiennent à l'écran ouvert.
+  getIt.registerFactory<BoutiqueDashboardBloc>(
+    () => BoutiqueDashboardBloc(
+      getStats: getIt<GetBoutiqueStatsUseCase>(),
+      getProvisional: getIt<GetBoutiqueProvisionalSalesUseCase>(),
+      getLatest: getIt<GetBoutiqueLatestSalesUseCase>(),
+      preference: getIt<DashboardPeriodPreference>(),
+    ),
+  );
+  getIt.registerFactory<BoutiqueBeneficiariesCubit>(
+    () => BoutiqueBeneficiariesCubit(
+      getBeneficiaries: getIt<GetBoutiqueBeneficiariesUseCase>(),
+      getCatalog: getIt<GetBoutiqueCatalogUseCase>(),
     ),
   );
 }
