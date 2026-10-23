@@ -15053,6 +15053,60 @@ abstract class AppLocalizations {
   /// **'The six latest receipts of the period — tap one to review or reprint it'**
   String get boutiqueLatestSalesSubtitle;
 
+  /// No description provided for @boutiqueLatestSalesColumnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get boutiqueLatestSalesColumnDate;
+
+  /// No description provided for @boutiqueLatestSalesColumnReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get boutiqueLatestSalesColumnReceipt;
+
+  /// No description provided for @boutiqueLatestSalesColumnPayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer'**
+  String get boutiqueLatestSalesColumnPayer;
+
+  /// No description provided for @boutiqueLatestSalesColumnAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get boutiqueLatestSalesColumnAmount;
+
+  /// No description provided for @boutiqueLatestSalesOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the sale'**
+  String get boutiqueLatestSalesOpen;
+
+  /// No description provided for @boutiqueBeneficiariesColumnStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get boutiqueBeneficiariesColumnStudent;
+
+  /// No description provided for @boutiqueBeneficiariesColumnArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Items received'**
+  String get boutiqueBeneficiariesColumnArticles;
+
+  /// No description provided for @boutiqueBeneficiariesColumnLastPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Last purchase'**
+  String get boutiqueBeneficiariesColumnLastPurchase;
+
+  /// No description provided for @boutiqueBeneficiariesColumnAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get boutiqueBeneficiariesColumnAmount;
+
   /// No description provided for @boutiqueLatestSalesNewSale.
   ///
   /// In en, this message translates to:

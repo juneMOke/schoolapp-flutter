@@ -30,7 +30,7 @@ import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutiqu
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_dashboard_page.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_tile.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../dashboard_fixtures.dart';
@@ -188,7 +188,10 @@ void main() {
     expect(find.text('Par famille'), findsOneWidget);
     expect(find.text('Articles les plus vendus'), findsOneWidget);
     expect(find.text('Élèves concernés'), findsOneWidget);
-    expect(find.byType(BoutiqueSaleTile), findsNWidgets(2));
+    // Deux tableaux à la manière de la caisse : dernières ventes, élèves.
+    expect(find.byType(DataTableView), findsNWidgets(2));
+    expect(find.text('PAYEUR'), findsOneWidget);
+    expect(find.text('DERNIER ACHAT'), findsOneWidget);
     expect(find.textContaining('du 19/10/2026 au 21/10/2026'), findsOneWidget);
     // Le delta : 61 ventes contre 55.
     expect(find.text('+11 % vs période précédente'), findsOneWidget);

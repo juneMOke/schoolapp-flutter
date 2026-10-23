@@ -9524,6 +9524,33 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les six derniers reçus de la période — touchez-en un pour le revoir ou le réimprimer';
 
   @override
+  String get boutiqueLatestSalesColumnDate => 'Date';
+
+  @override
+  String get boutiqueLatestSalesColumnReceipt => 'Reçu';
+
+  @override
+  String get boutiqueLatestSalesColumnPayer => 'Payeur';
+
+  @override
+  String get boutiqueLatestSalesColumnAmount => 'Montant';
+
+  @override
+  String get boutiqueLatestSalesOpen => 'Revoir la vente';
+
+  @override
+  String get boutiqueBeneficiariesColumnStudent => 'Élève';
+
+  @override
+  String get boutiqueBeneficiariesColumnArticles => 'Articles reçus';
+
+  @override
+  String get boutiqueBeneficiariesColumnLastPurchase => 'Dernier achat';
+
+  @override
+  String get boutiqueBeneficiariesColumnAmount => 'Montant';
+
+  @override
   String get boutiqueLatestSalesNewSale => 'Nouvelle vente';
 
   @override

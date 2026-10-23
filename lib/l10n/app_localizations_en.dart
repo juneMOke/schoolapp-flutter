@@ -9444,6 +9444,33 @@ class AppLocalizationsEn extends AppLocalizations {
       'The six latest receipts of the period — tap one to review or reprint it';
 
   @override
+  String get boutiqueLatestSalesColumnDate => 'Date';
+
+  @override
+  String get boutiqueLatestSalesColumnReceipt => 'Receipt';
+
+  @override
+  String get boutiqueLatestSalesColumnPayer => 'Payer';
+
+  @override
+  String get boutiqueLatestSalesColumnAmount => 'Amount';
+
+  @override
+  String get boutiqueLatestSalesOpen => 'Open the sale';
+
+  @override
+  String get boutiqueBeneficiariesColumnStudent => 'Student';
+
+  @override
+  String get boutiqueBeneficiariesColumnArticles => 'Items received';
+
+  @override
+  String get boutiqueBeneficiariesColumnLastPurchase => 'Last purchase';
+
+  @override
+  String get boutiqueBeneficiariesColumnAmount => 'Amount';
+
+  @override
   String get boutiqueLatestSalesNewSale => 'New sale';
 
   @override
