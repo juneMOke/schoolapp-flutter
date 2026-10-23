@@ -1039,6 +1039,27 @@ class AppConstants {
   static const String boutiqueBeneficiariesEndpoint =
       '/api/v1/boutique/beneficiaries';
 
+  /// Les ventes de la période, **une ligne par vente**, 10 par page, la plus
+  /// récente en tête. Filtrables par `family` **ou** `classId`, jamais les
+  /// deux : le serveur refuse le couple en 400. `boutique.sale.read`.
+  static const String boutiqueSalesEndpoint = '/api/v1/boutique/sales';
+
+  /// Le rapport PDF des mêmes ventes — pièce **VB**, numérotée et horodatée,
+  /// non archivée. Mêmes paramètres que [boutiqueSalesEndpoint], sans
+  /// pagination ; plafonné à 5 000 ventes ; un rendu à la fois (429).
+  static const String boutiqueSalesReportEndpoint =
+      '/api/v1/boutique/sales.pdf';
+
+  /// Délai de réception du rapport des ventes — celui des autres rapports :
+  /// le délai de guichet du client expirerait pendant le rendu d'une année.
+  static const Duration boutiqueSalesReportTimeout = Duration(seconds: 60);
+
+  /// L'attente retenue quand un 429 du rapport n'annonce pas la sienne (cf.
+  /// [financeTillReportRetryFallback]).
+  static const Duration boutiqueSalesReportRetryFallback = Duration(
+    seconds: 60,
+  );
+
   // ── Offline sync — Dépenses (registre des frais de fonctionnement) ──
   /// Registre des dépenses :
   ///  - **POST** = état complet d'une dépense, création comme modification
