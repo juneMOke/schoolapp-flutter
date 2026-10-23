@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
@@ -57,9 +58,11 @@ SaleDetail _detail({
   BoutiqueSaleLocalModel? sale,
   DateTime? printedAt,
   List<BoutiqueSaleLineLocalModel> lines = const [_line],
+  List<SaleBeneficiary> beneficiaries = const [],
 }) => SaleDetail(
   sale: RecordedSale(sale: sale ?? _sale(), lines: lines),
   ticketPrintedAt: printedAt,
+  beneficiaries: beneficiaries,
 );
 
 void main() {
@@ -116,6 +119,48 @@ void main() {
     expect(find.text('Ndombo Lelo Willy'), findsOneWidget);
     // 9 h 42 UTC : la vente se lit à 10 h 42, l'heure de l'école.
     expect(find.text('30/08/2026 10:42'), findsOneWidget);
+  });
+
+  group('élèves servis', () {
+    testWidgets('chaque élève est nommé avec sa classe', (tester) async {
+      // Le tableau de bord les montrait ; la fiche ouverte depuis lui, non.
+      await pumpDetail(
+        tester,
+        detail: _detail(
+          beneficiaries: const [
+            SaleBeneficiary(
+              studentId: 'st-1',
+              fullName: 'MUKENDI Kasongo Grâce',
+              classLabel: '6e A',
+            ),
+          ],
+        ),
+      );
+
+      expect(find.text('ÉLÈVES SERVIS'), findsOneWidget);
+      expect(find.text('MUKENDI Kasongo Grâce'), findsOneWidget);
+      expect(find.text('6e A'), findsOneWidget);
+    });
+
+    testWidgets('un élève inconnu du poste reste LISTÉ, et le dit', (
+      tester,
+    ) async {
+      await pumpDetail(
+        tester,
+        detail: _detail(
+          beneficiaries: const [SaleBeneficiary(studentId: 'st-x')],
+        ),
+      );
+
+      expect(find.text('Élève introuvable sur cette tablette'), findsOneWidget);
+      expect(find.text('Classe inconnue'), findsOneWidget);
+    });
+
+    testWidgets('une vente sans élève n\'a pas de section', (tester) async {
+      await pumpDetail(tester, detail: _detail());
+
+      expect(find.text('ÉLÈVES SERVIS'), findsNothing);
+    });
   });
 
   testWidgets('« encaissé par » est NOMMÉ', (tester) async {

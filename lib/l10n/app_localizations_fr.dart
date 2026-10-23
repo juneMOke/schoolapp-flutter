@@ -9736,6 +9736,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueSaleDetailLines => 'Articles vendus';
 
   @override
+  String get boutiqueSaleDetailStudents => 'Élèves servis';
+
+  @override
+  String get boutiqueSaleDetailStudentUnknown =>
+      'Élève introuvable sur cette tablette';
+
+  @override
+  String get boutiqueSaleDetailStudentNoClass => 'Classe inconnue';
+
+  @override
   String boutiqueSaleDetailBeneficiary(String name) {
     return 'pour $name';
   }

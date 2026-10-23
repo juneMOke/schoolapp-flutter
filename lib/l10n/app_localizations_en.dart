@@ -9655,6 +9655,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueSaleDetailLines => 'Items sold';
 
   @override
+  String get boutiqueSaleDetailStudents => 'Students served';
+
+  @override
+  String get boutiqueSaleDetailStudentUnknown =>
+      'Student not found on this tablet';
+
+  @override
+  String get boutiqueSaleDetailStudentNoClass => 'Class unknown';
+
+  @override
   String boutiqueSaleDetailBeneficiary(String name) {
     return 'for $name';
   }

@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutiqu
 import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_detail_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/ticket/sale_ticket_print_flow.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_detail_beneficiaries.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_detail_lines.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/states/boutique_results_error_state.dart';
@@ -345,6 +346,23 @@ class _Body extends StatelessWidget {
         ],
       ),
     );
+    // Absente d'une vente sans élève : une section vide ne dirait rien que
+    // la liste des articles ne dise déjà.
+    final students = detail.beneficiaries.isEmpty
+        ? null
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _SectionTitle(label: l10n.boutiqueSaleDetailStudents),
+              const SizedBox(height: AppDimensions.spacingS),
+              _Card(
+                padding: EdgeInsets.zero,
+                child: BoutiqueSaleDetailBeneficiaries(
+                  beneficiaries: detail.beneficiaries,
+                ),
+              ),
+            ],
+          );
     final lines = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -382,6 +400,10 @@ class _Body extends StatelessWidget {
                     children: [
                       info,
                       const SizedBox(height: AppDimensions.spacingM),
+                      if (students != null) ...[
+                        students,
+                        const SizedBox(height: AppDimensions.spacingM),
+                      ],
                       lines,
                     ],
                   ),
@@ -418,6 +440,10 @@ class _Body extends StatelessWidget {
             ],
             info,
             const SizedBox(height: AppDimensions.spacingM),
+            if (students != null) ...[
+              students,
+              const SizedBox(height: AppDimensions.spacingM),
+            ],
             lines,
             const SizedBox(height: AppDimensions.spacingL),
             actions,
