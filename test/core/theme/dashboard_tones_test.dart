@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart' as tokens;
 
 /// Le test de non-régression que la spec Tableaux de bord réclame à son §11 :
 /// « un test itère `paveAccents × pave()` et échoue si l'encre principale
@@ -399,6 +400,54 @@ void main() {
           0.0001,
         ),
       );
+    });
+  });
+
+  group('encreTendanceSur', () {
+    Color fond(Color accent) =>
+        DashboardTones.pave(DashboardTones.paveAccentSur(accent));
+
+    test('les nuances de la caisse sur les pavés froids', () {
+      final bleu = fond(DashboardSense.attendu);
+      expect(
+        DashboardTones.encreTendanceSur(bleu, hausse: true),
+        AppColors.paveInkPercu,
+      );
+      expect(
+        DashboardTones.encreTendanceSur(bleu, hausse: false),
+        AppColors.paveInkReste,
+      );
+    });
+
+    test('sous le seuil, le rose retombe sur l\'encre de sous-ligne', () {
+      for (final chaud in [DashboardSense.marque, DashboardSense.attente]) {
+        final encre = DashboardTones.encreTendanceSur(
+          fond(chaud),
+          hausse: false,
+        );
+        expect(encre, DashboardTones.inkSousLigne);
+      }
+    });
+
+    test('quelle que soit l\'encre retenue, elle franchit le seuil', () {
+      for (final accent in [
+        DashboardSense.attendu,
+        DashboardSense.encaisse,
+        DashboardSense.marque,
+        DashboardSense.attente,
+        tokens.AppColors.boutiqueActesAccent,
+      ]) {
+        for (final hausse in [true, false]) {
+          final f = fond(accent);
+          expect(
+            DashboardTones.contraste(
+              DashboardTones.encreTendanceSur(f, hausse: hausse),
+              f,
+            ),
+            greaterThanOrEqualTo(DashboardTones.seuilTexte),
+          );
+        }
+      }
     });
   });
 }

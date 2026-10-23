@@ -9110,6 +9110,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueDashboardTitle => 'Dashboard';
 
   @override
+  String boutiqueDashboardSubtitleDay(String day) {
+    return 'Cash sales on $day';
+  }
+
+  @override
   String boutiqueDashboardSubtitleToday(String day) {
     return 'Cash sales today · $day';
   }
@@ -9123,10 +9128,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueDashboardPeriodToday => 'Today';
 
   @override
-  String get boutiqueDashboardPeriodSevenDays => '7 days';
+  String get boutiqueDashboardPeriodWeek => 'This week';
 
   @override
-  String get boutiqueDashboardPeriodThirtyDays => '30 days';
+  String get boutiqueDashboardPeriodMonth => 'This month';
+
+  @override
+  String get boutiqueDashboardPeriodYear => 'Year';
+
+  @override
+  String get boutiqueDashboardPeriodCustom => 'Custom range';
+
+  @override
+  String get boutiqueDashboardRangeFieldFrom => 'From';
+
+  @override
+  String get boutiqueDashboardRangeFieldTo => 'To';
 
   @override
   String get boutiqueDashboardPeriodA11y => 'Dashboard period';
@@ -9187,6 +9204,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get boutiqueDashboardKpiNoComparable =>
+      'No comparable period before the start of the school year';
+
+  @override
   String get boutiqueDashboardKpiNone => '—';
 
   @override
@@ -9194,6 +9215,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueDashboardChartDaily => 'Revenue day by day';
+
+  @override
+  String get boutiqueDashboardChartMonthly => 'Revenue month by month';
 
   @override
   String get boutiqueDashboardChartSubtitle =>
@@ -9263,13 +9287,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueDashboardEmptyTitleToday => 'No sales today';
 
   @override
+  String boutiqueDashboardEmptyTitleDay(String day) {
+    return 'No sales on $day';
+  }
+
+  @override
   String boutiqueDashboardEmptyTitleRange(int days) {
     return 'No sales over $days days';
   }
 
   @override
   String get boutiqueDashboardEmptyWiden =>
-      'Nothing collected over this period. Widen to 30 days or open the till to record a sale.';
+      'Nothing collected over this period. Widen the period or open the till to record a sale.';
 
   @override
   String get boutiqueDashboardEmptyFirst =>
@@ -9408,21 +9437,157 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueBeneficiariesReset => 'Reset filters';
 
   @override
-  String get boutiqueLatestSalesTitle => 'Latest sales';
+  String get boutiqueLatestSalesColumnDate => 'Date';
 
   @override
-  String get boutiqueLatestSalesSubtitle =>
-      'The six latest receipts of the period — tap one to review or reprint it';
+  String get boutiqueLatestSalesColumnReceipt => 'Receipt';
+
+  @override
+  String get boutiqueLatestSalesColumnAmount => 'Amount';
+
+  @override
+  String get boutiqueLatestSalesOpen => 'Open the sale';
+
+  @override
+  String get boutiqueBeneficiariesColumnStudent => 'Student';
+
+  @override
+  String get boutiqueBeneficiariesColumnArticles => 'Items received';
+
+  @override
+  String get boutiqueBeneficiariesColumnLastPurchase => 'Last purchase';
+
+  @override
+  String get boutiqueBeneficiariesColumnAmount => 'Amount';
+
+  @override
+  String get boutiqueSalesTitle => 'Sales of the period';
+
+  @override
+  String boutiqueSalesSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '$count sale',
+      zero: 'No sale',
+    );
+    return '$_temp0 — tap one to review or reprint it';
+  }
+
+  @override
+  String get boutiqueSalesFilterLabel => 'Filter by';
+
+  @override
+  String get boutiqueSalesFilterSemantics => 'Sales filter criterion';
+
+  @override
+  String get boutiqueSalesFilterFamily => 'Article type';
+
+  @override
+  String get boutiqueSalesFilterClass => 'Class';
+
+  @override
+  String get boutiqueSalesAllFamilies => 'All types';
+
+  @override
+  String get boutiqueSalesAllClasses => 'All classes';
+
+  @override
+  String get boutiqueSalesColumnStudents => 'Student(s)';
+
+  @override
+  String boutiqueSalesPayer(String name) {
+    return 'Payer: $name';
+  }
+
+  @override
+  String get boutiqueSalesAnonymous => 'Anonymous sale';
+
+  @override
+  String get boutiqueSalesStudentUnknown => 'Student not found';
+
+  @override
+  String get boutiqueSalesNoClass => 'No class';
+
+  @override
+  String get boutiqueSalesReceiptPending => 'Receipt not issued';
+
+  @override
+  String boutiqueSalesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales',
+      one: '$count sale',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueSalesUnit => 'sales';
+
+  @override
+  String get boutiqueSalesEmptyTitle => 'No sale';
+
+  @override
+  String get boutiqueSalesEmptyNone => 'No sale over this period.';
+
+  @override
+  String boutiqueSalesEmptyFiltered(String filter) {
+    return 'No sale over the period for “$filter”.';
+  }
+
+  @override
+  String get boutiqueSalesReset => 'Clear the filter';
+
+  @override
+  String boutiqueSalesProvisionalNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sales not yet sent appear neither here nor in the PDF.',
+      one: '1 sale not yet sent appears neither here nor in the PDF.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueSalesReportDownload => 'Download the PDF';
+
+  @override
+  String get boutiqueSalesReportTooltip =>
+      'Every sale of the period, filter included, as a PDF';
+
+  @override
+  String get boutiqueSalesReportPreparing => 'Preparing…';
+
+  @override
+  String get boutiqueSalesReportWaiting => 'Please wait…';
+
+  @override
+  String get boutiqueSalesReportTitle => 'Shop sales';
+
+  @override
+  String boutiqueSalesReportBusy(int seconds) {
+    return 'A report is already being prepared. Try again in $seconds s.';
+  }
+
+  @override
+  String get boutiqueSalesReportForbidden =>
+      'You do not have access to the shop sales.';
+
+  @override
+  String boutiqueSalesReportTooLarge(int lines, int cap) {
+    return '$lines sales, beyond the report\'s $cap: narrow the period or add a filter.';
+  }
+
+  @override
+  String get boutiqueSalesReportFailed =>
+      'The sales report could not be prepared.';
 
   @override
   String get boutiqueLatestSalesNewSale => 'New sale';
-
-  @override
-  String get boutiqueLatestSalesEmpty => 'No receipt over this period.';
-
-  @override
-  String get boutiqueLatestSalesError =>
-      'The latest sales could not be read on this device.';
 
   @override
   String get boutiqueClearEyebrow => 'Shop ▸ Cart';

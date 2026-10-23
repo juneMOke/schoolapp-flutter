@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_bar_rows.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_top_article.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_family_style.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_labels.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les cinq articles les plus vendus **en quantité**. Chaque ligne est une
@@ -26,7 +26,10 @@ class BoutiqueTopArticlesCard extends StatelessWidget {
       title: l10n.boutiqueDashboardTopTitle,
       subtitle: l10n.boutiqueDashboardTopSubtitle,
       icon: Icons.emoji_events_outlined,
-      iconColor: AppColors.terreCuite,
+      tone: BoutiqueDashboardTones.articles,
+      toneStrength: BoutiqueDashboardTones.sectionStrength(
+        BoutiqueDashboardTones.articles,
+      ),
       child: EteeloBarRows(
         // La jauge est relative au n° 1.
         scale: EteeloBarRowsScale.byMax,

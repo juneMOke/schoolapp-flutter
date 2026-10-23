@@ -5996,6 +5996,14 @@
   "boutiqueHistoryErrorNetwork": "A sale is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
   "boutiqueDashboardEyebrow": "Shop ▸ Dashboard",
   "boutiqueDashboardTitle": "Dashboard",
+  "boutiqueDashboardSubtitleDay": "Cash sales on {day}",
+  "@boutiqueDashboardSubtitleDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueDashboardSubtitleToday": "Cash sales today · {day}",
   "@boutiqueDashboardSubtitleToday": {
     "placeholders": {
@@ -6019,8 +6027,12 @@
     }
   },
   "boutiqueDashboardPeriodToday": "Today",
-  "boutiqueDashboardPeriodSevenDays": "7 days",
-  "boutiqueDashboardPeriodThirtyDays": "30 days",
+  "boutiqueDashboardPeriodWeek": "This week",
+  "boutiqueDashboardPeriodMonth": "This month",
+  "boutiqueDashboardPeriodYear": "Year",
+  "boutiqueDashboardPeriodCustom": "Custom range",
+  "boutiqueDashboardRangeFieldFrom": "From",
+  "boutiqueDashboardRangeFieldTo": "To",
   "boutiqueDashboardPeriodA11y": "Dashboard period",
   "boutiqueDashboardOpenTill": "Open the till",
   "boutiqueDashboardCachedBadge": "Offline — figures from {date}",
@@ -6082,9 +6094,11 @@
       }
     }
   },
+  "boutiqueDashboardKpiNoComparable": "No comparable period before the start of the school year",
   "boutiqueDashboardKpiNone": "—",
   "boutiqueDashboardChartHourly": "Revenue hour by hour",
   "boutiqueDashboardChartDaily": "Revenue day by day",
+  "boutiqueDashboardChartMonthly": "Revenue month by month",
   "boutiqueDashboardChartSubtitle": "What was sold, on the day of the sale",
   "boutiqueDashboardChartA11y": "{title}: {count} bars, peak {amount} ({label})",
   "@boutiqueDashboardChartA11y": {
@@ -6146,6 +6160,14 @@
   },
   "boutiqueDashboardFooterNote": "Shop sales are paid in cash: they are neither part of what is owed nor of the collection rate, and do not appear on the student's statement.",
   "boutiqueDashboardEmptyTitleToday": "No sales today",
+  "boutiqueDashboardEmptyTitleDay": "No sales on {day}",
+  "@boutiqueDashboardEmptyTitleDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueDashboardEmptyTitleRange": "No sales over {days} days",
   "@boutiqueDashboardEmptyTitleRange": {
     "placeholders": {
@@ -6154,7 +6176,7 @@
       }
     }
   },
-  "boutiqueDashboardEmptyWiden": "Nothing collected over this period. Widen to 30 days or open the till to record a sale.",
+  "boutiqueDashboardEmptyWiden": "Nothing collected over this period. Widen the period or open the till to record a sale.",
   "boutiqueDashboardEmptyFirst": "Sales will show here from the first receipt.",
   "boutiqueDashboardErrorServerTitle": "Figures unavailable",
   "boutiqueDashboardErrorServer": "The server could not compute the shop figures. Try again; no sale is lost.",
@@ -6257,11 +6279,97 @@
   },
   "boutiqueBeneficiariesEmptyNone": "No purchase over this period names a student.",
   "boutiqueBeneficiariesReset": "Reset filters",
-  "boutiqueLatestSalesTitle": "Latest sales",
-  "boutiqueLatestSalesSubtitle": "The six latest receipts of the period — tap one to review or reprint it",
+  "boutiqueLatestSalesColumnDate": "Date",
+  "boutiqueLatestSalesColumnReceipt": "Receipt",
+  "boutiqueLatestSalesColumnAmount": "Amount",
+  "boutiqueLatestSalesOpen": "Open the sale",
+  "boutiqueBeneficiariesColumnStudent": "Student",
+  "boutiqueBeneficiariesColumnArticles": "Items received",
+  "boutiqueBeneficiariesColumnLastPurchase": "Last purchase",
+  "boutiqueBeneficiariesColumnAmount": "Amount",
+  "boutiqueSalesTitle": "Sales of the period",
+  "boutiqueSalesSubtitle": "{count, plural, =0{No sale} one{{count} sale} other{{count} sales}} — tap one to review or reprint it",
+  "@boutiqueSalesSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesFilterLabel": "Filter by",
+  "boutiqueSalesFilterSemantics": "Sales filter criterion",
+  "boutiqueSalesFilterFamily": "Article type",
+  "boutiqueSalesFilterClass": "Class",
+  "boutiqueSalesAllFamilies": "All types",
+  "boutiqueSalesAllClasses": "All classes",
+  "boutiqueSalesColumnStudents": "Student(s)",
+  "boutiqueSalesPayer": "Payer: {name}",
+  "@boutiqueSalesPayer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueSalesAnonymous": "Anonymous sale",
+  "boutiqueSalesStudentUnknown": "Student not found",
+  "boutiqueSalesNoClass": "No class",
+  "boutiqueSalesReceiptPending": "Receipt not issued",
+  "boutiqueSalesCount": "{count, plural, one{{count} sale} other{{count} sales}}",
+  "@boutiqueSalesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesUnit": "sales",
+  "boutiqueSalesEmptyTitle": "No sale",
+  "boutiqueSalesEmptyNone": "No sale over this period.",
+  "boutiqueSalesEmptyFiltered": "No sale over the period for “{filter}”.",
+  "@boutiqueSalesEmptyFiltered": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueSalesReset": "Clear the filter",
+  "boutiqueSalesProvisionalNote": "{count, plural, one{1 sale not yet sent appears neither here nor in the PDF.} other{{count} sales not yet sent appear neither here nor in the PDF.}}",
+  "@boutiqueSalesProvisionalNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportDownload": "Download the PDF",
+  "boutiqueSalesReportTooltip": "Every sale of the period, filter included, as a PDF",
+  "boutiqueSalesReportPreparing": "Preparing…",
+  "boutiqueSalesReportWaiting": "Please wait…",
+  "boutiqueSalesReportTitle": "Shop sales",
+  "boutiqueSalesReportBusy": "A report is already being prepared. Try again in {seconds} s.",
+  "@boutiqueSalesReportBusy": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportForbidden": "You do not have access to the shop sales.",
+  "boutiqueSalesReportTooLarge": "{lines} sales, beyond the report's {cap}: narrow the period or add a filter.",
+  "@boutiqueSalesReportTooLarge": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportFailed": "The sales report could not be prepared.",
   "boutiqueLatestSalesNewSale": "New sale",
-  "boutiqueLatestSalesEmpty": "No receipt over this period.",
-  "boutiqueLatestSalesError": "The latest sales could not be read on this device.",
   "boutiqueClearEyebrow": "Shop ▸ Cart",
   "boutiqueClearTitle": "Empty the cart?",
   "boutiqueClearMessage": "The composed lines and the payer's identity will be cleared. Nothing has been collected yet — so there is nothing to reverse on the money side.",

@@ -9,19 +9,23 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/b
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_bucket.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_labels.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_tones.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/revenue_series.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// « Recettes jour par jour » / « heure par heure » — quand on vend.
+/// « Recettes jour par jour » / « heure par heure » / « mois par mois » —
+/// quand on vend.
 ///
 /// Le même graphique en barres que la caisse Finances : la barre en cours en
 /// terre cuite **et** chiffrée (la couleur ne porte jamais seule
 /// l'information), toutes chiffrées jusqu'à dix barres, aucun axe vertical.
+/// La carte et les autres barres prennent la teinte de la devise affichée.
 class BoutiqueRevenueChartCard extends StatelessWidget {
   final BoutiqueCurrencyStats block;
   final StatsGranularity granularity;
 
-  /// La clé du seau en cours (aujourd'hui, ou l'heure qu'il est).
+  /// La clé du seau en cours (aujourd'hui, ou l'heure qu'il est). Sur une
+  /// série regroupée par mois, le mois de ce jour est en cours.
   final String currentKey;
 
   /// Le choix de devise, posé dans l'en-tête de la carte.
@@ -41,23 +45,32 @@ class BoutiqueRevenueChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final monthly = RevenueSeries.isMonthly(block.buckets, granularity);
     final title = granularity == StatsGranularity.hour
         ? l10n.boutiqueDashboardChartHourly
+        : monthly
+        ? l10n.boutiqueDashboardChartMonthly
         : l10n.boutiqueDashboardChartDaily;
     final visible = RevenueSeries.visible(block.buckets, granularity);
-    final current = RevenueSeries.currentIndex(visible, currentKey);
+    final currentDay = monthly ? DateTime.tryParse(currentKey) : null;
+    final current = RevenueSeries.currentIndex(
+      visible,
+      currentDay == null ? currentKey : RevenueSeries.monthKey(currentDay),
+    );
     final labels = [
       for (final bucket in visible)
         BoutiqueDashboardLabels.bucketLabel(bucket, granularity, l10n),
     ];
     String money(num cents) =>
         MoneyFormat.compact(Money.parse(cents.round(), block.currency));
+    final tone = BoutiqueDashboardTones.devise(block.currency);
 
     return EteeloStatsCard(
       title: title,
       subtitle: l10n.boutiqueDashboardChartSubtitle,
       icon: Icons.trending_up_rounded,
-      iconColor: AppColors.terreCuite,
+      tone: tone,
+      toneStrength: BoutiqueDashboardTones.sectionStrength(tone),
       actions: [?currencySelector],
       child: visible.isEmpty
           ? const SizedBox.shrink()
@@ -71,9 +84,7 @@ class BoutiqueRevenueChartCard extends StatelessWidget {
                       BarChartItem(
                         label: labels[i],
                         value: visible[i].total.toDouble(),
-                        color: i == current
-                            ? AppColors.terreCuite
-                            : AppColors.bleuProfond,
+                        color: i == current ? AppColors.terreCuite : tone,
                       ),
                   ],
                   highlightedIndexes: {if (current >= 0) current},

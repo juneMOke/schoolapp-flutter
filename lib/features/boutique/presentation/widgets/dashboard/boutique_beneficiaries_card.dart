@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_density.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_view.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -10,8 +13,9 @@ import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_tones.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiaries_filters.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiary_tile.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiary_row.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_load_more_failure_notice.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/states/boutique_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -20,6 +24,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// déjà son polo ? »
 ///
 /// Son propre état : un filtre recharge la carte, jamais l'écran.
+///
+/// Le tableau des reçus de la caisse Finances, dans le bleu ardoise des
+/// effectifs : bandeau, zébrure, cadre — et des cartes sur téléphone.
 class BoutiqueBeneficiariesCard extends StatelessWidget {
   const BoutiqueBeneficiariesCard({super.key});
 
@@ -37,7 +44,10 @@ class BoutiqueBeneficiariesCard extends StatelessWidget {
               ? l10n.boutiqueBeneficiariesSubtitleAll(count)
               : l10n.boutiqueBeneficiariesSubtitleArticle(article, count),
           icon: Icons.groups_outlined,
-          iconColor: AppColors.bleuArdoise,
+          tone: BoutiqueDashboardTones.eleves,
+          toneStrength: BoutiqueDashboardTones.sectionStrength(
+            BoutiqueDashboardTones.eleves,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -125,7 +135,37 @@ class _Body extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final student in shown) BoutiqueBeneficiaryTile(student: student),
+        DataTableView(
+          rows: [
+            for (final student in shown)
+              BoutiqueBeneficiaryRow.of(student, l10n),
+          ],
+          config: DataTableViewConfig(
+            tone: BoutiqueDashboardTones.tableOf(BoutiqueDashboardTones.eleves),
+            semanticsLabel: l10n.boutiqueBeneficiariesTitle,
+            density: DataTableDensity.compact,
+            phoneLayout: DataTablePhoneLayout.cards,
+            columns: [
+              DataTableColumnDef(
+                label: l10n.boutiqueBeneficiariesColumnStudent,
+                flex: 20,
+              ),
+              DataTableColumnDef(
+                label: l10n.boutiqueBeneficiariesColumnArticles,
+                flex: 24,
+              ),
+              DataTableColumnDef(
+                label: l10n.boutiqueBeneficiariesColumnLastPurchase,
+                flex: 11,
+              ),
+              DataTableColumnDef(
+                label: l10n.boutiqueBeneficiariesColumnAmount,
+                flex: 12,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingS),
         if (loadMoreFailure != null)
           Padding(
             padding: const EdgeInsets.only(top: AppDimensions.spacingS),

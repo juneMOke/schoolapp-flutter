@@ -16,7 +16,7 @@ abstract final class KpiDelta {
     return percent >= 0 ? '+$percent %' : '−${percent.abs()} %';
   }
 
-  /// Vrai pour une baisse — l'écran la teinte autrement.
+  /// Vrai pour une baisse — la flèche se retourne, l'encre change.
   static bool isDown(int? current, int? previous) =>
       current != null && previous != null && current < previous;
 }

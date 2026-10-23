@@ -7,15 +7,23 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/b
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_beneficiary.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_currency_stats.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_family_amount.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sales_page.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_bucket.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_top_article.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 
-/// Mardi 21 octobre 2026, 14 h 30 à Kinshasa.
+/// Mercredi 21 octobre 2026, 14 h 30 à Kinshasa.
 final dashboardNow = DateTime.utc(2026, 10, 21, 13, 30);
+
+/// « Cette semaine » à [dashboardNow] — la fenêtre par défaut : du lundi 19 au
+/// mercredi 21.
+final thisWeek = DashboardWindow(
+  from: DateTime(2026, 10, 19),
+  to: DateTime(2026, 10, 21),
+);
 
 final sevenDays = DashboardWindow(
   from: DateTime(2026, 10, 15),
@@ -112,13 +120,53 @@ BoutiqueBeneficiariesPage beneficiariesOf({
   ],
 );
 
-SaleHistoryEntry saleEntry(String id, {String status = 'SYNCED'}) =>
-    SaleHistoryEntry(
-      id: id,
-      payerName: 'Ndombo Lelo Willy',
-      amounts: MoneyBag.of(const [Money(1500, 'USD')]),
-      soldAt: '2026-10-21T09:00:00Z',
-      syncStatus: status,
-      receiptNumber: status == 'SYNCED' ? 'RV-000472' : null,
-      articleCount: 2,
+/// Une page de ventes : la première sert deux élèves, la deuxième un payeur
+/// sans élève, la troisième personne.
+BoutiqueSalesPage salesPageOf({int total = 3, int page = 0}) =>
+    BoutiqueSalesPage(
+      totalElements: total,
+      page: page,
+      size: 10,
+      classes: const [
+        BeneficiaryClass(id: 'c-6a', label: '6e A'),
+        BeneficiaryClass(id: 'c-5b', label: '5e B'),
+      ],
+      items: [
+        BoutiqueSaleRow(
+          saleId: 's-$page-1',
+          soldAt: '2026-10-21T09:00:00Z',
+          receiptNumber: 'RV-000472',
+          amounts: MoneyBag.of(const [Money(1500, 'USD')]),
+          articleCount: 3,
+          beneficiaries: const [
+            SaleBeneficiary(
+              studentId: 'st-1',
+              fullName: 'KABONGO Daniel',
+              classId: 'c-6a',
+              classLabel: '6e A',
+            ),
+            SaleBeneficiary(
+              studentId: 'st-2',
+              fullName: 'KABONGO Ruth',
+              classId: 'c-5b',
+              classLabel: '5e B',
+            ),
+          ],
+          payerName: 'Ndombo Lelo Willy',
+        ),
+        BoutiqueSaleRow(
+          saleId: 's-$page-2',
+          soldAt: '2026-10-20T15:00:00Z',
+          receiptNumber: 'RV-000471',
+          amounts: MoneyBag.of(const [Money(90000, 'CDF')]),
+          articleCount: 1,
+          payerName: 'MBUYI Grâce',
+        ),
+        BoutiqueSaleRow(
+          saleId: 's-$page-3',
+          soldAt: '2026-10-19T10:00:00Z',
+          amounts: MoneyBag.of(const [Money(500, 'USD')]),
+          articleCount: 1,
+        ),
+      ],
     );

@@ -9186,6 +9186,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueDashboardTitle => 'Tableau de bord';
 
   @override
+  String boutiqueDashboardSubtitleDay(String day) {
+    return 'Ventes au comptant du $day';
+  }
+
+  @override
   String boutiqueDashboardSubtitleToday(String day) {
     return 'Ventes au comptant d\'aujourd\'hui · $day';
   }
@@ -9199,10 +9204,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueDashboardPeriodToday => 'Aujourd\'hui';
 
   @override
-  String get boutiqueDashboardPeriodSevenDays => '7 jours';
+  String get boutiqueDashboardPeriodWeek => 'Cette semaine';
 
   @override
-  String get boutiqueDashboardPeriodThirtyDays => '30 jours';
+  String get boutiqueDashboardPeriodMonth => 'Ce mois';
+
+  @override
+  String get boutiqueDashboardPeriodYear => 'Année';
+
+  @override
+  String get boutiqueDashboardPeriodCustom => 'Période précise';
+
+  @override
+  String get boutiqueDashboardRangeFieldFrom => 'Du';
+
+  @override
+  String get boutiqueDashboardRangeFieldTo => 'Au';
 
   @override
   String get boutiqueDashboardPeriodA11y => 'Période du tableau de bord';
@@ -9263,6 +9280,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get boutiqueDashboardKpiNoComparable =>
+      'Pas de période comparable avant la rentrée';
+
+  @override
   String get boutiqueDashboardKpiNone => '—';
 
   @override
@@ -9270,6 +9291,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueDashboardChartDaily => 'Recettes jour par jour';
+
+  @override
+  String get boutiqueDashboardChartMonthly => 'Recettes mois par mois';
 
   @override
   String get boutiqueDashboardChartSubtitle =>
@@ -9340,13 +9364,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueDashboardEmptyTitleToday => 'Aucune vente aujourd\'hui';
 
   @override
+  String boutiqueDashboardEmptyTitleDay(String day) {
+    return 'Aucune vente le $day';
+  }
+
+  @override
   String boutiqueDashboardEmptyTitleRange(int days) {
     return 'Aucune vente sur $days jours';
   }
 
   @override
   String get boutiqueDashboardEmptyWiden =>
-      'Rien d\'encaissé sur cette période. Élargissez à 30 jours ou ouvrez la caisse pour enregistrer une vente.';
+      'Rien d\'encaissé sur cette période. Élargissez la période ou ouvrez la caisse pour enregistrer une vente.';
 
   @override
   String get boutiqueDashboardEmptyFirst =>
@@ -9488,21 +9517,158 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueBeneficiariesReset => 'Réinitialiser les filtres';
 
   @override
-  String get boutiqueLatestSalesTitle => 'Dernières ventes';
+  String get boutiqueLatestSalesColumnDate => 'Date';
 
   @override
-  String get boutiqueLatestSalesSubtitle =>
-      'Les six derniers reçus de la période — touchez-en un pour le revoir ou le réimprimer';
+  String get boutiqueLatestSalesColumnReceipt => 'Reçu';
+
+  @override
+  String get boutiqueLatestSalesColumnAmount => 'Montant';
+
+  @override
+  String get boutiqueLatestSalesOpen => 'Revoir la vente';
+
+  @override
+  String get boutiqueBeneficiariesColumnStudent => 'Élève';
+
+  @override
+  String get boutiqueBeneficiariesColumnArticles => 'Articles reçus';
+
+  @override
+  String get boutiqueBeneficiariesColumnLastPurchase => 'Dernier achat';
+
+  @override
+  String get boutiqueBeneficiariesColumnAmount => 'Montant';
+
+  @override
+  String get boutiqueSalesTitle => 'Ventes de la période';
+
+  @override
+  String boutiqueSalesSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '$count vente',
+      zero: 'Aucune vente',
+    );
+    return '$_temp0 — touchez-en une pour la revoir ou la réimprimer';
+  }
+
+  @override
+  String get boutiqueSalesFilterLabel => 'Filtrer par';
+
+  @override
+  String get boutiqueSalesFilterSemantics => 'Critère de filtre des ventes';
+
+  @override
+  String get boutiqueSalesFilterFamily => 'Type d\'article';
+
+  @override
+  String get boutiqueSalesFilterClass => 'Classe';
+
+  @override
+  String get boutiqueSalesAllFamilies => 'Tous les types';
+
+  @override
+  String get boutiqueSalesAllClasses => 'Toutes les classes';
+
+  @override
+  String get boutiqueSalesColumnStudents => 'Élève(s)';
+
+  @override
+  String boutiqueSalesPayer(String name) {
+    return 'Payeur : $name';
+  }
+
+  @override
+  String get boutiqueSalesAnonymous => 'Vente anonyme';
+
+  @override
+  String get boutiqueSalesStudentUnknown => 'Élève introuvable';
+
+  @override
+  String get boutiqueSalesNoClass => 'Sans classe';
+
+  @override
+  String get boutiqueSalesReceiptPending => 'Reçu non émis';
+
+  @override
+  String boutiqueSalesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '$count vente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueSalesUnit => 'ventes';
+
+  @override
+  String get boutiqueSalesEmptyTitle => 'Aucune vente';
+
+  @override
+  String get boutiqueSalesEmptyNone => 'Aucune vente sur cette période.';
+
+  @override
+  String boutiqueSalesEmptyFiltered(String filter) {
+    return 'Aucune vente de la période pour « $filter ».';
+  }
+
+  @override
+  String get boutiqueSalesReset => 'Retirer le filtre';
+
+  @override
+  String boutiqueSalesProvisionalNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count ventes pas encore envoyées n\'apparaissent ni ici ni dans le PDF.',
+      one: '$count vente pas encore envoyée n\'apparaît ni ici ni dans le PDF.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boutiqueSalesReportDownload => 'Télécharger le PDF';
+
+  @override
+  String get boutiqueSalesReportTooltip =>
+      'Toutes les ventes de la période, filtre compris, en PDF';
+
+  @override
+  String get boutiqueSalesReportPreparing => 'Préparation…';
+
+  @override
+  String get boutiqueSalesReportWaiting => 'Patientez…';
+
+  @override
+  String get boutiqueSalesReportTitle => 'Ventes de la boutique';
+
+  @override
+  String boutiqueSalesReportBusy(int seconds) {
+    return 'Un rapport est déjà en préparation. Réessayez dans $seconds s.';
+  }
+
+  @override
+  String get boutiqueSalesReportForbidden =>
+      'Vous n\'avez pas accès aux ventes de la boutique.';
+
+  @override
+  String boutiqueSalesReportTooLarge(int lines, int cap) {
+    return '$lines ventes, au-delà des $cap du rapport : resserrez la période ou ajoutez un filtre.';
+  }
+
+  @override
+  String get boutiqueSalesReportFailed =>
+      'Le rapport des ventes n\'a pas pu être préparé.';
 
   @override
   String get boutiqueLatestSalesNewSale => 'Nouvelle vente';
-
-  @override
-  String get boutiqueLatestSalesEmpty => 'Aucun reçu sur cette période.';
-
-  @override
-  String get boutiqueLatestSalesError =>
-      'Les dernières ventes n\'ont pas pu être lues sur ce poste.';
 
   @override
   String get boutiqueClearEyebrow => 'Boutique ▸ Panier';

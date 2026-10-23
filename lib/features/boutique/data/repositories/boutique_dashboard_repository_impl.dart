@@ -59,10 +59,20 @@ class BoutiqueDashboardRepositoryImpl implements BoutiqueDashboardRepository {
       );
       return (model.toJson(), BoutiqueStatsSnapshot(stats: model.toEntity()));
     },
-    fromCache: (payload, at) => BoutiqueStatsSnapshot(
-      stats: BoutiqueStatsModel.fromJson(payload).toEntity(),
-      cachedAt: at,
-    ),
+    // Les fenêtres sont calendaires : à largeur égale, « Cette semaine » un
+    // mercredi et « Ce mois » le 3 sont deux fenêtres différentes. Seule la
+    // photo de LA fenêtre demandée se sert.
+    fromCache: (payload, at) {
+      final requested = _windowOf(window);
+      if (payload['from'] != requested['from'] ||
+          payload['to'] != requested['to']) {
+        return null;
+      }
+      return BoutiqueStatsSnapshot(
+        stats: BoutiqueStatsModel.fromJson(payload).toEntity(),
+        cachedAt: at,
+      );
+    },
   );
 
   @override

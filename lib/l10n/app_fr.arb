@@ -6071,6 +6071,14 @@
   "boutiqueHistoryErrorNetwork": "Une vente se relit en local et n'a pas besoin du réseau. Réessayez ; si elle ne revient pas, c'est la base locale qui est en cause.",
   "boutiqueDashboardEyebrow": "Boutique ▸ Tableau de bord",
   "boutiqueDashboardTitle": "Tableau de bord",
+  "boutiqueDashboardSubtitleDay": "Ventes au comptant du {day}",
+  "@boutiqueDashboardSubtitleDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueDashboardSubtitleToday": "Ventes au comptant d'aujourd'hui · {day}",
   "@boutiqueDashboardSubtitleToday": {
     "placeholders": {
@@ -6094,8 +6102,12 @@
     }
   },
   "boutiqueDashboardPeriodToday": "Aujourd'hui",
-  "boutiqueDashboardPeriodSevenDays": "7 jours",
-  "boutiqueDashboardPeriodThirtyDays": "30 jours",
+  "boutiqueDashboardPeriodWeek": "Cette semaine",
+  "boutiqueDashboardPeriodMonth": "Ce mois",
+  "boutiqueDashboardPeriodYear": "Année",
+  "boutiqueDashboardPeriodCustom": "Période précise",
+  "boutiqueDashboardRangeFieldFrom": "Du",
+  "boutiqueDashboardRangeFieldTo": "Au",
   "boutiqueDashboardPeriodA11y": "Période du tableau de bord",
   "boutiqueDashboardOpenTill": "Ouvrir la caisse",
   "boutiqueDashboardCachedBadge": "Hors ligne — chiffres du {date}",
@@ -6157,9 +6169,11 @@
       }
     }
   },
+  "boutiqueDashboardKpiNoComparable": "Pas de période comparable avant la rentrée",
   "boutiqueDashboardKpiNone": "—",
   "boutiqueDashboardChartHourly": "Recettes heure par heure",
   "boutiqueDashboardChartDaily": "Recettes jour par jour",
+  "boutiqueDashboardChartMonthly": "Recettes mois par mois",
   "boutiqueDashboardChartSubtitle": "Ce qui a été vendu, au jour de la vente",
   "boutiqueDashboardChartA11y": "{title} : {count} barres, maximum {amount} ({label})",
   "@boutiqueDashboardChartA11y": {
@@ -6221,6 +6235,14 @@
   },
   "boutiqueDashboardFooterNote": "Les ventes boutique sont réglées comptant : elles n'entrent ni dans l'attendu ni dans le taux de recouvrement, et n'apparaissent pas sur le relevé de l'élève.",
   "boutiqueDashboardEmptyTitleToday": "Aucune vente aujourd'hui",
+  "boutiqueDashboardEmptyTitleDay": "Aucune vente le {day}",
+  "@boutiqueDashboardEmptyTitleDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueDashboardEmptyTitleRange": "Aucune vente sur {days} jours",
   "@boutiqueDashboardEmptyTitleRange": {
     "placeholders": {
@@ -6229,7 +6251,7 @@
       }
     }
   },
-  "boutiqueDashboardEmptyWiden": "Rien d'encaissé sur cette période. Élargissez à 30 jours ou ouvrez la caisse pour enregistrer une vente.",
+  "boutiqueDashboardEmptyWiden": "Rien d'encaissé sur cette période. Élargissez la période ou ouvrez la caisse pour enregistrer une vente.",
   "boutiqueDashboardEmptyFirst": "Les ventes apparaîtront ici dès le premier reçu.",
   "boutiqueDashboardErrorServerTitle": "Chiffres indisponibles",
   "boutiqueDashboardErrorServer": "Le serveur n'a pas pu calculer les chiffres de la boutique. Réessayez ; aucune vente n'est perdue.",
@@ -6332,11 +6354,97 @@
   },
   "boutiqueBeneficiariesEmptyNone": "Aucun achat de la période ne désigne un élève.",
   "boutiqueBeneficiariesReset": "Réinitialiser les filtres",
-  "boutiqueLatestSalesTitle": "Dernières ventes",
-  "boutiqueLatestSalesSubtitle": "Les six derniers reçus de la période — touchez-en un pour le revoir ou le réimprimer",
+  "boutiqueLatestSalesColumnDate": "Date",
+  "boutiqueLatestSalesColumnReceipt": "Reçu",
+  "boutiqueLatestSalesColumnAmount": "Montant",
+  "boutiqueLatestSalesOpen": "Revoir la vente",
+  "boutiqueBeneficiariesColumnStudent": "Élève",
+  "boutiqueBeneficiariesColumnArticles": "Articles reçus",
+  "boutiqueBeneficiariesColumnLastPurchase": "Dernier achat",
+  "boutiqueBeneficiariesColumnAmount": "Montant",
+  "boutiqueSalesTitle": "Ventes de la période",
+  "boutiqueSalesSubtitle": "{count, plural, =0{Aucune vente} one{{count} vente} other{{count} ventes}} — touchez-en une pour la revoir ou la réimprimer",
+  "@boutiqueSalesSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesFilterLabel": "Filtrer par",
+  "boutiqueSalesFilterSemantics": "Critère de filtre des ventes",
+  "boutiqueSalesFilterFamily": "Type d'article",
+  "boutiqueSalesFilterClass": "Classe",
+  "boutiqueSalesAllFamilies": "Tous les types",
+  "boutiqueSalesAllClasses": "Toutes les classes",
+  "boutiqueSalesColumnStudents": "Élève(s)",
+  "boutiqueSalesPayer": "Payeur : {name}",
+  "@boutiqueSalesPayer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueSalesAnonymous": "Vente anonyme",
+  "boutiqueSalesStudentUnknown": "Élève introuvable",
+  "boutiqueSalesNoClass": "Sans classe",
+  "boutiqueSalesReceiptPending": "Reçu non émis",
+  "boutiqueSalesCount": "{count, plural, one{{count} vente} other{{count} ventes}}",
+  "@boutiqueSalesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesUnit": "ventes",
+  "boutiqueSalesEmptyTitle": "Aucune vente",
+  "boutiqueSalesEmptyNone": "Aucune vente sur cette période.",
+  "boutiqueSalesEmptyFiltered": "Aucune vente de la période pour « {filter} ».",
+  "@boutiqueSalesEmptyFiltered": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueSalesReset": "Retirer le filtre",
+  "boutiqueSalesProvisionalNote": "{count, plural, one{{count} vente pas encore envoyée n'apparaît ni ici ni dans le PDF.} other{{count} ventes pas encore envoyées n'apparaissent ni ici ni dans le PDF.}}",
+  "@boutiqueSalesProvisionalNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportDownload": "Télécharger le PDF",
+  "boutiqueSalesReportTooltip": "Toutes les ventes de la période, filtre compris, en PDF",
+  "boutiqueSalesReportPreparing": "Préparation…",
+  "boutiqueSalesReportWaiting": "Patientez…",
+  "boutiqueSalesReportTitle": "Ventes de la boutique",
+  "boutiqueSalesReportBusy": "Un rapport est déjà en préparation. Réessayez dans {seconds} s.",
+  "@boutiqueSalesReportBusy": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportForbidden": "Vous n'avez pas accès aux ventes de la boutique.",
+  "boutiqueSalesReportTooLarge": "{lines} ventes, au-delà des {cap} du rapport : resserrez la période ou ajoutez un filtre.",
+  "@boutiqueSalesReportTooLarge": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportFailed": "Le rapport des ventes n'a pas pu être préparé.",
   "boutiqueLatestSalesNewSale": "Nouvelle vente",
-  "boutiqueLatestSalesEmpty": "Aucun reçu sur cette période.",
-  "boutiqueLatestSalesError": "Les dernières ventes n'ont pas pu être lues sur ce poste.",
   "boutiqueClearEyebrow": "Boutique ▸ Panier",
   "boutiqueClearTitle": "Vider le panier ?",
   "boutiqueClearMessage": "Les lignes composées et l'identité du payeur seront effacées. Rien n'a encore été encaissé — il n'y a donc rien à annuler côté argent.",

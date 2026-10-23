@@ -524,6 +524,11 @@ class AppDimensions {
   /// Champs Du/Au de la fenêtre personnalisée.
   static const enrollmentDashboardDateFieldWidth = 150.0;
 
+  /// Champs Du/Au de la période précise du tableau de bord Boutique — la même
+  /// largeur que ceux des inscriptions, dont il reprend le filtre.
+  static const boutiqueDashboardDateFieldWidth =
+      enrollmentDashboardDateFieldWidth;
+
   /// Barres. Le rayon 999 fait la pilule quelle que soit la hauteur.
   static const enrollmentDashboardSplitBarHeight = 16.0;
   static const enrollmentDashboardRowBarHeight = 9.0;

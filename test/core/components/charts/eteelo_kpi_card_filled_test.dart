@@ -143,4 +143,64 @@ void main() {
       // d'une autre forme ne mesurerait pas la même chose.
     });
   });
+
+  group('tendance', () {
+    EteeloKpiCardData avec(EteeloKpiTrend trend) => EteeloKpiCardData(
+      label: 'Ventes',
+      value: 61,
+      accent: AppColors.bleuArdoise,
+      accentSoft: AppColors.enrollmentStatsAccentSoft,
+      icon: Icons.receipt_long_outlined,
+      filledBackground: fondPave,
+      trend: trend,
+    );
+
+    testWidgets('la flèche monte, la phrase est écrite', (tester) async {
+      await pump(
+        tester,
+        avec(const EteeloKpiTrend(rising: true, label: '+11 % vs avant')),
+      );
+      expect(find.text('+11 % vs avant'), findsOneWidget);
+      final flip = tester.widget<Transform>(
+        find
+            .ancestor(
+              of: find.byIcon(Icons.trending_up_rounded),
+              matching: find.byType(Transform),
+            )
+            .first,
+      );
+      expect(flip.transform.getRow(1)[1], 1);
+    });
+
+    testWidgets('à la baisse, la même flèche se retourne', (tester) async {
+      await pump(
+        tester,
+        avec(const EteeloKpiTrend(rising: false, label: '−3 % vs avant')),
+      );
+      final flip = tester.widget<Transform>(
+        find
+            .ancestor(
+              of: find.byIcon(Icons.trending_up_rounded),
+              matching: find.byType(Transform),
+            )
+            .first,
+      );
+      expect(flip.transform.getRow(1)[1], -1);
+    });
+
+    testWidgets('la carte claire ignore la tendance', (tester) async {
+      await pump(
+        tester,
+        const EteeloKpiCardData(
+          label: 'Ventes',
+          value: 61,
+          accent: AppColors.bleuArdoise,
+          accentSoft: AppColors.enrollmentStatsAccentSoft,
+          icon: Icons.receipt_long_outlined,
+          trend: EteeloKpiTrend(rising: true, label: '+11 % vs avant'),
+        ),
+      );
+      expect(find.text('+11 % vs avant'), findsNothing);
+    });
+  });
 }

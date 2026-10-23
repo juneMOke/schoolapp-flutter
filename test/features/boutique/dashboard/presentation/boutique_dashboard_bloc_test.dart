@@ -11,7 +11,6 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sale_line.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';
-import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_latest_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
@@ -23,14 +22,11 @@ class _MockStats extends Mock implements GetBoutiqueStatsUseCase {}
 class _MockProvisional extends Mock
     implements GetBoutiqueProvisionalSalesUseCase {}
 
-class _MockLatest extends Mock implements GetBoutiqueLatestSalesUseCase {}
-
 class _MockPreference extends Mock implements DashboardPeriodPreference {}
 
 void main() {
   late _MockStats getStats;
   late _MockProvisional getProvisional;
-  late _MockLatest getLatest;
   late _MockPreference preference;
 
   setUpAll(() {
@@ -41,7 +37,6 @@ void main() {
   setUp(() {
     getStats = _MockStats();
     getProvisional = _MockProvisional();
-    getLatest = _MockLatest();
     preference = _MockPreference();
     when(() => preference.read()).thenAnswer((_) async => null);
     when(() => preference.write(any())).thenAnswer((_) async {});
@@ -63,19 +58,11 @@ void main() {
         window: any(named: 'window'),
       ),
     ).thenAnswer((_) async => const Right(ProvisionalSales.none));
-    when(
-      () => getLatest(
-        academicYearId: any(named: 'academicYearId'),
-        window: any(named: 'window'),
-        limit: any(named: 'limit'),
-      ),
-    ).thenAnswer((_) async => Right([saleEntry('s-1')]));
   });
 
   BoutiqueDashboardBloc build() => BoutiqueDashboardBloc(
     getStats: getStats,
     getProvisional: getProvisional,
-    getLatest: getLatest,
     preference: preference,
     now: () => dashboardNow,
   );
@@ -83,15 +70,14 @@ void main() {
   const started = BoutiqueDashboardStarted(academicYearId: 'ay-1');
 
   blocTest<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-    '7 jours par défaut, la fenêtre glissante qui finit aujourd\'hui',
+    '« Cette semaine » par défaut, du lundi à aujourd\'hui',
     build: build,
     act: (bloc) => bloc.add(started),
     verify: (bloc) {
       expect(bloc.state.status, BoutiqueDashboardStatus.ready);
-      expect(bloc.state.period, DashboardPeriod.sevenDays);
-      expect(bloc.state.window, sevenDays);
+      expect(bloc.state.period, DashboardPeriod.week);
+      expect(bloc.state.window, thisWeek);
       expect(bloc.state.selectedCurrency, 'USD');
-      expect(bloc.state.latestSales, hasLength(1));
     },
   );
 
@@ -100,9 +86,9 @@ void main() {
     build: build,
     setUp: () => when(
       () => preference.read(),
-    ).thenAnswer((_) async => DashboardPeriod.thirtyDays),
+    ).thenAnswer((_) async => DashboardPeriod.month),
     act: (bloc) => bloc.add(started),
-    verify: (bloc) => expect(bloc.state.window!.dayCount, 30),
+    verify: (bloc) => expect(bloc.state.window!.from, DateTime(2026, 10)),
   );
 
   blocTest<BoutiqueDashboardBloc, BoutiqueDashboardState>(
@@ -138,7 +124,7 @@ void main() {
     when(
       () => getStats(
         academicYearId: any(named: 'academicYearId'),
-        window: sevenDays,
+        window: thisWeek,
       ),
     ).thenAnswer((_) => slow.future);
 
@@ -281,7 +267,7 @@ void main() {
     final bloc = build()
       ..add(const BoutiqueDashboardPeriodChanged(DashboardPeriod.today));
     await Future<void>.delayed(Duration.zero);
-    expect(bloc.state.period, DashboardPeriod.sevenDays);
+    expect(bloc.state.period, DashboardPeriod.week);
     verifyNever(() => preference.write(any()));
     await bloc.close();
   });
@@ -291,7 +277,6 @@ void main() {
     build: () => BoutiqueDashboardBloc(
       getStats: getStats,
       getProvisional: getProvisional,
-      getLatest: getLatest,
       preference: preference,
       // 0 h 10 le 22 à Kinshasa.
       now: () => DateTime.utc(2026, 10, 21, 23, 10),
@@ -305,6 +290,81 @@ void main() {
     act: (bloc) => bloc.add(const BoutiqueDashboardRefreshRequested()),
     verify: (bloc) => expect(bloc.state.window!.to, DateTime(2026, 10, 22)),
   );
+
+  blocTest<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+    '« Année » part de l\'ouverture de l\'année scolaire',
+    build: build,
+    seed: () => BoutiqueDashboardState(
+      status: BoutiqueDashboardStatus.ready,
+      academicYearId: 'ay-1',
+      yearStart: DateTime(2026, 9),
+      window: thisWeek,
+      stats: statsOf(window: thisWeek),
+    ),
+    act: (bloc) =>
+        bloc.add(const BoutiqueDashboardPeriodChanged(DashboardPeriod.year)),
+    verify: (bloc) {
+      expect(bloc.state.window!.from, DateTime(2026, 9));
+      expect(bloc.state.window!.to, DateTime(2026, 10, 21));
+      verify(() => preference.write(DashboardPeriod.year)).called(1);
+    },
+  );
+
+  group('période précise', () {
+    final range = DashboardWindow(
+      from: DateTime(2026, 10, 5),
+      to: DateTime(2026, 10, 9),
+    );
+
+    BoutiqueDashboardState seeded() => BoutiqueDashboardState(
+      status: BoutiqueDashboardStatus.ready,
+      academicYearId: 'ay-1',
+      window: thisWeek,
+      stats: statsOf(window: thisWeek),
+    );
+
+    blocTest<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+      'l\'onglet ouvre sur la journée du jour, sans être mémorisé',
+      build: build,
+      seed: seeded,
+      act: (bloc) => bloc.add(
+        const BoutiqueDashboardPeriodChanged(DashboardPeriod.custom),
+      ),
+      verify: (bloc) {
+        expect(bloc.state.period, DashboardPeriod.custom);
+        expect(
+          bloc.state.window,
+          DashboardWindow(
+            from: DateTime(2026, 10, 21),
+            to: DateTime(2026, 10, 21),
+          ),
+        );
+        verifyNever(() => preference.write(any()));
+      },
+    );
+
+    blocTest<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+      'les bornes saisies sont lues telles quelles',
+      build: build,
+      seed: seeded,
+      act: (bloc) => bloc.add(BoutiqueDashboardCustomRangeChanged(range)),
+      verify: (bloc) {
+        expect(bloc.state.period, DashboardPeriod.custom);
+        expect(bloc.state.window, range);
+        expect(bloc.state.stats!.window, range);
+        verify(() => getStats(academicYearId: 'ay-1', window: range)).called(1);
+      },
+    );
+
+    blocTest<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+      'actualiser rejoue les bornes saisies, sans les recalculer',
+      build: build,
+      seed: () =>
+          seeded().copyWith(period: DashboardPeriod.custom, window: range),
+      act: (bloc) => bloc.add(const BoutiqueDashboardRefreshRequested()),
+      verify: (bloc) => expect(bloc.state.window, range),
+    );
+  });
 
   group('isDeltaComparable', () {
     test(

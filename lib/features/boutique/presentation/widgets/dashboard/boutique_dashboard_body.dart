@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_top_article.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_content.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_empty_state.dart';
@@ -18,7 +18,7 @@ class BoutiqueDashboardBody extends StatelessWidget {
   final DateTime now;
   final GlobalKey beneficiariesKey;
   final void Function(BoutiqueTopArticle article) onArticleTap;
-  final ValueChanged<SaleHistoryEntry> onOpenSale;
+  final ValueChanged<BoutiqueSaleRow> onOpenSale;
   final VoidCallback onOpenTill;
 
   /// Les valeurs restent affichées, atténuées, pendant qu'une autre période se

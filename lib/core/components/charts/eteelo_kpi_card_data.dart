@@ -1,5 +1,18 @@
 import 'package:flutter/material.dart';
 
+/// L'évolution d'un chiffre contre la période précédente, dessinée sous la
+/// valeur d'un pavé : une flèche, et la phrase qui la chiffre.
+class EteeloKpiTrend {
+  /// Sens de la flèche — et de la nuance d'encre, quand le pavé la porte.
+  final bool rising;
+
+  /// La phrase entière, déjà formatée et **signée** (« +11 % vs période
+  /// précédente ») : la flèche et la couleur ne portent jamais seules le sens.
+  final String label;
+
+  const EteeloKpiTrend({required this.rising, required this.label});
+}
+
 /// Données génériques pour une carte KPI.
 class EteeloKpiCardData {
   final String label;
@@ -62,6 +75,11 @@ class EteeloKpiCardData {
   /// pas conservent le rendu et la hauteur historiques.
   final String? subline;
 
+  /// La tendance, rendue **sous** la sous-ligne d'un pavé plein — le modèle des
+  /// caisses du tableau de bord Finances. Ignorée sur la carte claire, dont
+  /// les hauteurs sont assertées au pixel.
+  final EteeloKpiTrend? trend;
+
   /// Ce que la carte fait quand on la touche. `null` — le défaut — en fait une
   /// carte de lecture : aucune bordure de survol, aucun rôle de bouton annoncé.
   ///
@@ -83,6 +101,7 @@ class EteeloKpiCardData {
     required this.icon,
     this.percent,
     this.subline,
+    this.trend,
     this.onTap,
     this.selected = false,
     this.filledBackground,

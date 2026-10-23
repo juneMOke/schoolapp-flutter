@@ -6,19 +6,19 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/boutique/domain/dashboard/stats_bucket_keys.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_top_article.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_beneficiaries_card.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_currency_selector.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_kpis.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_family_card.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_latest_sales_card.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_revenue_chart_card.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_sales_card.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_top_articles_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'écran prêt : une colonne qui descend du plus synthétique au plus
-/// détaillé — chiffres → temps → contenu → élèves → reçus.
+/// détaillé — chiffres → temps → contenu → élèves → ventes.
 class BoutiqueDashboardContent extends StatelessWidget {
   final BoutiqueDashboardState state;
   final BoutiqueStats stats;
@@ -26,7 +26,7 @@ class BoutiqueDashboardContent extends StatelessWidget {
   final GlobalKey beneficiariesKey;
   final ValueChanged<String> onCurrencySelected;
   final void Function(BoutiqueTopArticle article) onArticleTap;
-  final ValueChanged<SaleHistoryEntry> onOpenSale;
+  final ValueChanged<BoutiqueSaleRow> onOpenSale;
   final VoidCallback onOpenTill;
 
   const BoutiqueDashboardContent({
@@ -85,8 +85,8 @@ class BoutiqueDashboardContent extends StatelessWidget {
         const SizedBox(height: _gap),
         BoutiqueBeneficiariesCard(key: beneficiariesKey),
         const SizedBox(height: _gap),
-        BoutiqueLatestSalesCard(
-          sales: state.latestSales,
+        BoutiqueSalesCard(
+          provisionalCount: state.provisional.saleCount,
           onOpenSale: onOpenSale,
           onNewSale: onOpenTill,
         ),

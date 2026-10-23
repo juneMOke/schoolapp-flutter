@@ -33,6 +33,19 @@ class BoutiqueDashboardPeriodChanged extends BoutiqueDashboardEvent {
   List<Object?> get props => [period];
 }
 
+/// Pose les bornes de la période précise — et bascule sur elle.
+///
+/// La fenêtre arrive **complète et dans l'ordre** : l'écran ne laisse composer
+/// ni une borne vide ni une plage à l'envers.
+class BoutiqueDashboardCustomRangeChanged extends BoutiqueDashboardEvent {
+  final DashboardWindow window;
+
+  const BoutiqueDashboardCustomRangeChanged(this.window);
+
+  @override
+  List<Object?> get props => [window];
+}
+
 /// Rejoue la période **retenue** — après une coupure, ou au retour d'une fiche.
 class BoutiqueDashboardRefreshRequested extends BoutiqueDashboardEvent {
   const BoutiqueDashboardRefreshRequested();
