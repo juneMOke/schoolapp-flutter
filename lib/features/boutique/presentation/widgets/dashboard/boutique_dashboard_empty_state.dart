@@ -6,8 +6,8 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// « Aucune vente sur 7 jours » — remplace tout sous l'en-tête, la période
-/// restant accessible. Sur 30 jours, il n'y a plus rien à élargir : le message
+/// « Aucune vente sur 3 jours » — remplace tout sous l'en-tête, la période
+/// restant accessible. Sur l'année, il n'y a plus rien à élargir : le message
 /// dit alors que les ventes viendront.
 class BoutiqueDashboardEmptyState extends StatelessWidget {
   final DashboardPeriod period;
@@ -25,8 +25,8 @@ class BoutiqueDashboardEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EteeloEmptyResult(
-      label: BoutiqueDashboardLabels.emptyTitle(window, l10n),
-      description: period == DashboardPeriod.thirtyDays
+      label: BoutiqueDashboardLabels.emptyTitle(window, period, l10n),
+      description: period == DashboardPeriod.year
           ? l10n.boutiqueDashboardEmptyFirst
           : l10n.boutiqueDashboardEmptyWiden,
       medallionIcon: Icons.shopping_bag_outlined,

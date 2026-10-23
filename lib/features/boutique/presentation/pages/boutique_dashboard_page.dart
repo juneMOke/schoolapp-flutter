@@ -137,14 +137,19 @@ class _DashboardViewState extends State<_DashboardView> {
               buildWhen: (prev, curr) =>
                   prev.period != curr.period ||
                   prev.window != curr.window ||
-                  prev.cachedAt != curr.cachedAt,
+                  prev.cachedAt != curr.cachedAt ||
+                  prev.yearStart != curr.yearStart,
               builder: (context, state) => BoutiqueDashboardHeader(
                 period: state.period,
                 window: state.window,
                 cachedAt: state.cachedAt,
+                yearStart: state.yearStart,
                 onPeriodChanged: (period) => context
                     .read<BoutiqueDashboardBloc>()
                     .add(BoutiqueDashboardPeriodChanged(period)),
+                onRangeChanged: (window) => context
+                    .read<BoutiqueDashboardBloc>()
+                    .add(BoutiqueDashboardCustomRangeChanged(window)),
                 onRefresh: () => context.read<BoutiqueDashboardBloc>().add(
                   const BoutiqueDashboardRefreshRequested(),
                 ),

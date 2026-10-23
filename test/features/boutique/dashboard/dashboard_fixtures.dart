@@ -14,8 +14,15 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 
-/// Mardi 21 octobre 2026, 14 h 30 à Kinshasa.
+/// Mercredi 21 octobre 2026, 14 h 30 à Kinshasa.
 final dashboardNow = DateTime.utc(2026, 10, 21, 13, 30);
+
+/// « Cette semaine » à [dashboardNow] — la fenêtre par défaut : du lundi 19 au
+/// mercredi 21.
+final thisWeek = DashboardWindow(
+  from: DateTime(2026, 10, 19),
+  to: DateTime(2026, 10, 21),
+);
 
 final sevenDays = DashboardWindow(
   from: DateTime(2026, 10, 15),

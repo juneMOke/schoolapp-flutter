@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
@@ -187,10 +188,10 @@ void main() {
     expect(find.text('Articles les plus vendus'), findsOneWidget);
     expect(find.text('Élèves concernés'), findsOneWidget);
     expect(find.byType(BoutiqueSaleTile), findsNWidgets(2));
-    expect(find.textContaining('du 15/10/2026 au 21/10/2026'), findsOneWidget);
+    expect(find.textContaining('du 19/10/2026 au 21/10/2026'), findsOneWidget);
     // Le delta : 61 ventes contre 55.
     expect(find.text('+11 % vs période précédente'), findsOneWidget);
-    expect(queries.single.window, sevenDays);
+    expect(queries.single.window, thisWeek);
   });
 
   testWidgets('un article du palmarès filtre la liste des élèves', (
@@ -213,6 +214,41 @@ void main() {
     expect(queries.last.window.isSingleDay, isTrue);
   });
 
+  testWidgets('les cinq périodes des inscriptions, dans le même ordre', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    for (final label in [
+      'Aujourd\'hui',
+      'Cette semaine',
+      'Ce mois',
+      'Année',
+      'Période précise',
+    ]) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+    expect(find.text('7 jours'), findsNothing);
+    expect(find.text('30 jours'), findsNothing);
+  });
+
+  testWidgets('« Période précise » ouvre ses bornes sur la journée du jour', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    expect(find.byType(EteeloDateInput), findsNothing);
+    await tester.tap(find.text('Période précise'));
+    await tester.pumpAndSettle();
+    expect(find.byType(EteeloDateInput), findsNWidgets(2));
+    expect(
+      queries.last.window,
+      DashboardWindow(from: DateTime(2026, 10, 21), to: DateTime(2026, 10, 21)),
+    );
+    expect(
+      find.textContaining('Ventes au comptant du 21/10/2026'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('rien vendu : l\'état vide invite à élargir, la période reste', (
     tester,
   ) async {
@@ -224,8 +260,8 @@ void main() {
       ),
     );
     await pumpPage(tester);
-    expect(find.text('Aucune vente sur 7 jours'), findsOneWidget);
-    expect(find.text('7 jours'), findsOneWidget);
+    expect(find.text('Aucune vente sur 3 jours'), findsOneWidget);
+    expect(find.text('Cette semaine'), findsOneWidget);
     expect(find.text('Élèves concernés'), findsNothing);
   });
 

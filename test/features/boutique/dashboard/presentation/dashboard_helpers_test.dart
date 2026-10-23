@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/boutique/domain/dashboard/stats_bucket_keys.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_bucket.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/kpi_delta.dart';
@@ -23,6 +24,42 @@ void main() {
   });
 
   group('RevenueSeries.visible', () {
+    test('au-delà de deux mois, les jours se regroupent par mois', () {
+      // Du 1er septembre au 21 octobre 2026 : 51 jours — encore au jour.
+      List<BoutiqueStatsBucket> days(DateTime from, int count) => [
+        for (var i = 0; i < count; i++)
+          BoutiqueStatsBucket(
+            key: StatsBucketKeys.dayKey(
+              DateTime(from.year, from.month, from.day + i),
+            ),
+            total: 100,
+          ),
+      ];
+      final short = days(DateTime(2026, 9), 51);
+      expect(RevenueSeries.isMonthly(short, StatsGranularity.day), isFalse);
+
+      // Du 15 juillet au 21 octobre : 99 jours, quatre mois dont deux partiels.
+      final long = days(DateTime(2026, 7, 15), 99);
+      expect(RevenueSeries.isMonthly(long, StatsGranularity.day), isTrue);
+      final months = RevenueSeries.visible(long, StatsGranularity.day);
+      expect(months.map((b) => b.key), [
+        '2026-07',
+        '2026-08',
+        '2026-09',
+        '2026-10',
+      ]);
+      expect(months.first.total, 1700);
+      expect(months.last.total, 2100);
+      expect(months.first.month, DateTime(2026, 7));
+      expect(
+        RevenueSeries.currentIndex(
+          months,
+          RevenueSeries.monthKey(DateTime(2026, 10, 21)),
+        ),
+        3,
+      );
+    });
+
     test(
       'heure par heure : les heures creuses en tête et en queue partent',
       () {

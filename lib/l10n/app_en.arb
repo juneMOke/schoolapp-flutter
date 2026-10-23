@@ -5996,6 +5996,14 @@
   "boutiqueHistoryErrorNetwork": "A sale is read locally and does not need the network. Try again; if it does not come back, the local database is at fault.",
   "boutiqueDashboardEyebrow": "Shop ▸ Dashboard",
   "boutiqueDashboardTitle": "Dashboard",
+  "boutiqueDashboardSubtitleDay": "Cash sales on {day}",
+  "@boutiqueDashboardSubtitleDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueDashboardSubtitleToday": "Cash sales today · {day}",
   "@boutiqueDashboardSubtitleToday": {
     "placeholders": {
@@ -6019,8 +6027,12 @@
     }
   },
   "boutiqueDashboardPeriodToday": "Today",
-  "boutiqueDashboardPeriodSevenDays": "7 days",
-  "boutiqueDashboardPeriodThirtyDays": "30 days",
+  "boutiqueDashboardPeriodWeek": "This week",
+  "boutiqueDashboardPeriodMonth": "This month",
+  "boutiqueDashboardPeriodYear": "Year",
+  "boutiqueDashboardPeriodCustom": "Custom range",
+  "boutiqueDashboardRangeFieldFrom": "From",
+  "boutiqueDashboardRangeFieldTo": "To",
   "boutiqueDashboardPeriodA11y": "Dashboard period",
   "boutiqueDashboardOpenTill": "Open the till",
   "boutiqueDashboardCachedBadge": "Offline — figures from {date}",
@@ -6085,6 +6097,7 @@
   "boutiqueDashboardKpiNone": "—",
   "boutiqueDashboardChartHourly": "Revenue hour by hour",
   "boutiqueDashboardChartDaily": "Revenue day by day",
+  "boutiqueDashboardChartMonthly": "Revenue month by month",
   "boutiqueDashboardChartSubtitle": "What was sold, on the day of the sale",
   "boutiqueDashboardChartA11y": "{title}: {count} bars, peak {amount} ({label})",
   "@boutiqueDashboardChartA11y": {
@@ -6146,6 +6159,14 @@
   },
   "boutiqueDashboardFooterNote": "Shop sales are paid in cash: they are neither part of what is owed nor of the collection rate, and do not appear on the student's statement.",
   "boutiqueDashboardEmptyTitleToday": "No sales today",
+  "boutiqueDashboardEmptyTitleDay": "No sales on {day}",
+  "@boutiqueDashboardEmptyTitleDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
   "boutiqueDashboardEmptyTitleRange": "No sales over {days} days",
   "@boutiqueDashboardEmptyTitleRange": {
     "placeholders": {
@@ -6154,7 +6175,7 @@
       }
     }
   },
-  "boutiqueDashboardEmptyWiden": "Nothing collected over this period. Widen to 30 days or open the till to record a sale.",
+  "boutiqueDashboardEmptyWiden": "Nothing collected over this period. Widen the period or open the till to record a sale.",
   "boutiqueDashboardEmptyFirst": "Sales will show here from the first receipt.",
   "boutiqueDashboardErrorServerTitle": "Figures unavailable",
   "boutiqueDashboardErrorServer": "The server could not compute the shop figures. Try again; no sale is lost.",

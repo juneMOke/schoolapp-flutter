@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 /// Une barre de la série : un jour (`2026-10-15`) ou une heure
-/// (`2026-10-21T07`) de la fenêtre, et ce qui s'y est vendu.
+/// (`2026-10-21T07`) de la fenêtre, et ce qui s'y est vendu — ou un mois
+/// (`2026-10`), que l'écran regroupe lui-même sur une longue fenêtre.
 ///
 /// La série est **dense** : un seau par pas, zéros et dimanches compris. C'est
 /// l'écran qui décide de retirer un dimanche vide ou des heures creuses.
@@ -19,6 +20,12 @@ class BoutiqueStatsBucket extends Equatable {
   DateTime? get day {
     if (key.length < 10) return null;
     return DateTime.tryParse(key.substring(0, 10));
+  }
+
+  /// Le mois d'un seau regroupé par l'écran (`2026-10`), `null` sinon.
+  DateTime? get month {
+    if (key.length != 7) return null;
+    return DateTime.tryParse('$key-01');
   }
 
   /// L'heure du seau (`T07` → 7), `null` pour un seau de jour.

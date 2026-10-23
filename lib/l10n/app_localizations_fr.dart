@@ -9186,6 +9186,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueDashboardTitle => 'Tableau de bord';
 
   @override
+  String boutiqueDashboardSubtitleDay(String day) {
+    return 'Ventes au comptant du $day';
+  }
+
+  @override
   String boutiqueDashboardSubtitleToday(String day) {
     return 'Ventes au comptant d\'aujourd\'hui · $day';
   }
@@ -9199,10 +9204,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueDashboardPeriodToday => 'Aujourd\'hui';
 
   @override
-  String get boutiqueDashboardPeriodSevenDays => '7 jours';
+  String get boutiqueDashboardPeriodWeek => 'Cette semaine';
 
   @override
-  String get boutiqueDashboardPeriodThirtyDays => '30 jours';
+  String get boutiqueDashboardPeriodMonth => 'Ce mois';
+
+  @override
+  String get boutiqueDashboardPeriodYear => 'Année';
+
+  @override
+  String get boutiqueDashboardPeriodCustom => 'Période précise';
+
+  @override
+  String get boutiqueDashboardRangeFieldFrom => 'Du';
+
+  @override
+  String get boutiqueDashboardRangeFieldTo => 'Au';
 
   @override
   String get boutiqueDashboardPeriodA11y => 'Période du tableau de bord';
@@ -9270,6 +9287,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueDashboardChartDaily => 'Recettes jour par jour';
+
+  @override
+  String get boutiqueDashboardChartMonthly => 'Recettes mois par mois';
 
   @override
   String get boutiqueDashboardChartSubtitle =>
@@ -9340,13 +9360,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueDashboardEmptyTitleToday => 'Aucune vente aujourd\'hui';
 
   @override
+  String boutiqueDashboardEmptyTitleDay(String day) {
+    return 'Aucune vente le $day';
+  }
+
+  @override
   String boutiqueDashboardEmptyTitleRange(int days) {
     return 'Aucune vente sur $days jours';
   }
 
   @override
   String get boutiqueDashboardEmptyWiden =>
-      'Rien d\'encaissé sur cette période. Élargissez à 30 jours ou ouvrez la caisse pour enregistrer une vente.';
+      'Rien d\'encaissé sur cette période. Élargissez la période ou ouvrez la caisse pour enregistrer une vente.';
 
   @override
   String get boutiqueDashboardEmptyFirst =>

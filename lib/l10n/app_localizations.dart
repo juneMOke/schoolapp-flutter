@@ -14586,6 +14586,12 @@ abstract class AppLocalizations {
   /// **'Dashboard'**
   String get boutiqueDashboardTitle;
 
+  /// No description provided for @boutiqueDashboardSubtitleDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash sales on {day}'**
+  String boutiqueDashboardSubtitleDay(String day);
+
   /// No description provided for @boutiqueDashboardSubtitleToday.
   ///
   /// In en, this message translates to:
@@ -14604,17 +14610,41 @@ abstract class AppLocalizations {
   /// **'Today'**
   String get boutiqueDashboardPeriodToday;
 
-  /// No description provided for @boutiqueDashboardPeriodSevenDays.
+  /// No description provided for @boutiqueDashboardPeriodWeek.
   ///
   /// In en, this message translates to:
-  /// **'7 days'**
-  String get boutiqueDashboardPeriodSevenDays;
+  /// **'This week'**
+  String get boutiqueDashboardPeriodWeek;
 
-  /// No description provided for @boutiqueDashboardPeriodThirtyDays.
+  /// No description provided for @boutiqueDashboardPeriodMonth.
   ///
   /// In en, this message translates to:
-  /// **'30 days'**
-  String get boutiqueDashboardPeriodThirtyDays;
+  /// **'This month'**
+  String get boutiqueDashboardPeriodMonth;
+
+  /// No description provided for @boutiqueDashboardPeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get boutiqueDashboardPeriodYear;
+
+  /// No description provided for @boutiqueDashboardPeriodCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom range'**
+  String get boutiqueDashboardPeriodCustom;
+
+  /// No description provided for @boutiqueDashboardRangeFieldFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get boutiqueDashboardRangeFieldFrom;
+
+  /// No description provided for @boutiqueDashboardRangeFieldTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get boutiqueDashboardRangeFieldTo;
 
   /// No description provided for @boutiqueDashboardPeriodA11y.
   ///
@@ -14712,6 +14742,12 @@ abstract class AppLocalizations {
   /// **'Revenue day by day'**
   String get boutiqueDashboardChartDaily;
 
+  /// No description provided for @boutiqueDashboardChartMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue month by month'**
+  String get boutiqueDashboardChartMonthly;
+
   /// No description provided for @boutiqueDashboardChartSubtitle.
   ///
   /// In en, this message translates to:
@@ -14801,6 +14837,12 @@ abstract class AppLocalizations {
   /// **'No sales today'**
   String get boutiqueDashboardEmptyTitleToday;
 
+  /// No description provided for @boutiqueDashboardEmptyTitleDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No sales on {day}'**
+  String boutiqueDashboardEmptyTitleDay(String day);
+
   /// No description provided for @boutiqueDashboardEmptyTitleRange.
   ///
   /// In en, this message translates to:
@@ -14810,7 +14852,7 @@ abstract class AppLocalizations {
   /// No description provided for @boutiqueDashboardEmptyWiden.
   ///
   /// In en, this message translates to:
-  /// **'Nothing collected over this period. Widen to 30 days or open the till to record a sale.'**
+  /// **'Nothing collected over this period. Widen the period or open the till to record a sale.'**
   String get boutiqueDashboardEmptyWiden;
 
   /// No description provided for @boutiqueDashboardEmptyFirst.

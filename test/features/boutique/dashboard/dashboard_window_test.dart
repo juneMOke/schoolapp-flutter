@@ -2,29 +2,78 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
 
-/// Les fenêtres glissantes du tableau de bord, lues dans le jour de l'école.
+/// Les fenêtres calendaires du tableau de bord, lues dans le jour de l'école.
 void main() {
-  // Mardi 21 octobre 2026, 14 h 30 à Kinshasa (UTC+1).
+  // Mercredi 21 octobre 2026, 14 h 30 à Kinshasa (UTC+1).
   final now = DateTime.utc(2026, 10, 21, 13, 30);
 
   group('DashboardPeriod.windowAt', () {
-    test('« 7 jours » finit aujourd\'hui, aujourd\'hui compris', () {
-      final window = DashboardPeriod.sevenDays.windowAt(now);
-      expect(window.from, DateTime(2026, 10, 15));
-      expect(window.to, DateTime(2026, 10, 21));
-      expect(window.dayCount, 7);
-    });
-
     test('« Aujourd\'hui » est une seule journée', () {
       final window = DashboardPeriod.today.windowAt(now);
       expect(window.from, window.to);
       expect(window.isSingleDay, isTrue);
     });
 
-    test('« 30 jours » traverse un changement de mois', () {
-      final window = DashboardPeriod.thirtyDays.windowAt(now);
-      expect(window.from, DateTime(2026, 9, 22));
-      expect(window.dayCount, 30);
+    test('« Cette semaine » part du lundi, aujourd\'hui compris', () {
+      final window = DashboardPeriod.week.windowAt(now);
+      expect(window.from, DateTime(2026, 10, 19));
+      expect(window.to, DateTime(2026, 10, 21));
+      expect(window.dayCount, 3);
+    });
+
+    test('« Cette semaine » un lundi est une journée', () {
+      final window = DashboardPeriod.week.windowAt(
+        DateTime.utc(2026, 10, 19, 9),
+      );
+      expect(window.isSingleDay, isTrue);
+    });
+
+    test('« Cette semaine » remonte au mois précédent si le lundi y tombe', () {
+      // Jeudi 1er octobre 2026 : le lundi est le 28 septembre.
+      final window = DashboardPeriod.week.windowAt(
+        DateTime.utc(2026, 10, 1, 9),
+      );
+      expect(window.from, DateTime(2026, 9, 28));
+    });
+
+    test('« Ce mois » part du 1er', () {
+      final window = DashboardPeriod.month.windowAt(now);
+      expect(window.from, DateTime(2026, 10));
+      expect(window.dayCount, 21);
+    });
+
+    test('« Année » part de l\'ouverture de l\'année scolaire', () {
+      final window = DashboardPeriod.year.windowAt(
+        now,
+        yearStart: DateTime(2026, 9, 1, 8),
+      );
+      expect(window.from, DateTime(2026, 9));
+      expect(window.to, DateTime(2026, 10, 21));
+    });
+
+    test('« Année » sans ouverture connue : au plus large que le serveur '
+        'accepte', () {
+      final window = DashboardPeriod.year.windowAt(now);
+      expect(window.dayCount, DashboardWindow.maxDayCount);
+    });
+
+    test('« Année » ne dépasse jamais 366 jours, ni ne part dans le futur', () {
+      expect(
+        DashboardPeriod.year
+            .windowAt(now, yearStart: DateTime(2024, 9))
+            .dayCount,
+        DashboardWindow.maxDayCount,
+      );
+      expect(
+        DashboardPeriod.year
+            .windowAt(now, yearStart: DateTime(2026, 11, 2))
+            .isSingleDay,
+        isTrue,
+      );
+    });
+
+    test('la période précise n\'a pas de fenêtre calculée', () {
+      expect(() => DashboardPeriod.custom.windowAt(now), throwsStateError);
     });
 
     test('le jour est celui de KINSHASA, pas celui de la tablette', () {
@@ -35,14 +84,21 @@ void main() {
       expect(window.to, DateTime(2026, 10, 21));
     });
 
-    test('une valeur mémorisée inconnue ne désigne rien', () {
-      expect(
-        DashboardPeriod.fromStorage('SEVEN_DAYS'),
-        DashboardPeriod.sevenDays,
-      );
-      expect(DashboardPeriod.fromStorage('WEEK'), isNull);
-      expect(DashboardPeriod.fromStorage(null), isNull);
-    });
+    test(
+      'valeurs mémorisées : les anciennes fenêtres glissantes survivent',
+      () {
+        expect(DashboardPeriod.fromStorage('WEEK'), DashboardPeriod.week);
+        expect(DashboardPeriod.fromStorage('YEAR'), DashboardPeriod.year);
+        expect(DashboardPeriod.fromStorage('SEVEN_DAYS'), DashboardPeriod.week);
+        expect(
+          DashboardPeriod.fromStorage('THIRTY_DAYS'),
+          DashboardPeriod.month,
+        );
+        expect(DashboardPeriod.custom.storageKey, isNull);
+        expect(DashboardPeriod.fromStorage('CUSTOM'), isNull);
+        expect(DashboardPeriod.fromStorage(null), isNull);
+      },
+    );
   });
 
   group('DashboardWindow', () {

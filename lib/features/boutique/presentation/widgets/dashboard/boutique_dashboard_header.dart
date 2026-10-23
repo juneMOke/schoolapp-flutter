@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_labels.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_period_filter.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_range_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'en-tête : la fenêtre exacte, la période, « Ouvrir la caisse » — et, hors
@@ -21,6 +22,12 @@ class BoutiqueDashboardHeader extends StatelessWidget {
   final DashboardWindow? window;
   final DateTime? cachedAt;
   final ValueChanged<DashboardPeriod> onPeriodChanged;
+
+  /// Les bornes saisies de la période précise.
+  final ValueChanged<DashboardWindow> onRangeChanged;
+
+  /// L'ouverture de l'année : la période précise ne remonte pas avant.
+  final DateTime? yearStart;
   final VoidCallback onOpenTill;
 
   /// Relit la période retenue : rien d'autre ne fait revenir l'écran sur la
@@ -32,9 +39,11 @@ class BoutiqueDashboardHeader extends StatelessWidget {
     required this.period,
     required this.window,
     required this.onPeriodChanged,
+    required this.onRangeChanged,
     required this.onOpenTill,
     required this.onRefresh,
     this.cachedAt,
+    this.yearStart,
   });
 
   @override
@@ -48,7 +57,7 @@ class BoutiqueDashboardHeader extends StatelessWidget {
       children: [
         if (window != null)
           Text(
-            BoutiqueDashboardLabels.windowSubtitle(window, l10n),
+            BoutiqueDashboardLabels.windowSubtitle(window, period, l10n),
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -87,6 +96,14 @@ class BoutiqueDashboardHeader extends StatelessWidget {
             ),
           ],
         ),
+        if (period == DashboardPeriod.custom && window != null) ...[
+          const SizedBox(height: AppDimensions.spacingM),
+          BoutiqueDashboardRangeFields(
+            window: window,
+            yearStart: yearStart,
+            onChanged: onRangeChanged,
+          ),
+        ],
       ],
     );
   }

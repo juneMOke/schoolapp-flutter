@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/boutique/domain/dashboard/provisional_stats_merger.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_currency_stats.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats.dart';
@@ -30,8 +31,8 @@ class BoutiqueDashboardBloc
   final DashboardPeriodPreference _preference;
   final DateTime Function() _now;
 
-  /// Le numéro de la dernière lecture lancée. Une réponse plus ancienne — un
-  /// « 7 jours » qui arrive après le « 30 jours » demandé ensuite — est jetée :
+  /// Le numéro de la dernière lecture lancée. Une réponse plus ancienne — une
+  /// « semaine » qui arrive après le « mois » demandé ensuite — est jetée :
   /// l'écran marquerait une fenêtre et en afficherait une autre.
   int _ticket = 0;
 
@@ -49,6 +50,7 @@ class BoutiqueDashboardBloc
        super(const BoutiqueDashboardState()) {
     on<BoutiqueDashboardStarted>(_onStarted);
     on<BoutiqueDashboardPeriodChanged>(_onPeriodChanged);
+    on<BoutiqueDashboardCustomRangeChanged>(_onCustomRangeChanged);
     on<BoutiqueDashboardRefreshRequested>(_onRefreshRequested);
     on<BoutiqueDashboardCurrencySelected>(_onCurrencySelected);
   }
@@ -74,7 +76,7 @@ class BoutiqueDashboardBloc
     );
     final period = await _preference.read() ?? DashboardPeriod.defaultPeriod;
     emit(state.copyWith(period: period));
-    await _load(emit, keepData: false);
+    await _load(emit, window: _presetWindow(period), keepData: false);
   }
 
   Future<void> _onPeriodChanged(
@@ -86,14 +88,56 @@ class BoutiqueDashboardBloc
     if (state.window == null || event.period == state.period) return;
     // La période est posée AVANT la lecture : le sélecteur suit le doigt.
     emit(state.copyWith(period: event.period));
+    if (event.period == DashboardPeriod.custom) {
+      // Par défaut, la journée d'aujourd'hui — comme aux inscriptions : une
+      // fenêtre valide et lisible, que l'utilisateur élargit ensuite. Ouvrir
+      // sur deux champs vides laisserait l'écran sans chiffres sans dire
+      // pourquoi.
+      final today = SchoolTime.today(_now());
+      await _load(
+        emit,
+        window: DashboardWindow(from: today, to: today),
+        keepData: true,
+      );
+      return;
+    }
     await _preference.write(event.period);
-    await _load(emit, keepData: true);
+    await _load(emit, window: _presetWindow(event.period), keepData: true);
   }
 
+  Future<void> _onCustomRangeChanged(
+    BoutiqueDashboardCustomRangeChanged event,
+    Emitter<BoutiqueDashboardState> emit,
+  ) async {
+    if (state.window == null) return;
+    if (state.period == DashboardPeriod.custom &&
+        event.window == state.window) {
+      return;
+    }
+    emit(state.copyWith(period: DashboardPeriod.custom));
+    await _load(emit, window: event.window, keepData: true);
+  }
+
+  /// La période précise rejoue **ses** bornes ; les autres recalculent la
+  /// leur — minuit passé, « aujourd'hui » a changé de jour.
   Future<void> _onRefreshRequested(
     BoutiqueDashboardRefreshRequested event,
     Emitter<BoutiqueDashboardState> emit,
-  ) => _load(emit, keepData: true);
+  ) => _load(
+    emit,
+    window: state.period == DashboardPeriod.custom && state.window != null
+        ? state.window!
+        : _presetWindow(state.period),
+    keepData: true,
+  );
+
+  /// La fenêtre d'une période calculée. Une période précise sans bornes — ce
+  /// qui n'arrive qu'à une préférence corrompue — retombe sur le défaut.
+  DashboardWindow _presetWindow(DashboardPeriod period) =>
+      (period == DashboardPeriod.custom
+              ? DashboardPeriod.defaultPeriod
+              : period)
+          .windowAt(_now(), yearStart: state.yearStart);
 
   void _onCurrencySelected(
     BoutiqueDashboardCurrencySelected event,
@@ -105,10 +149,10 @@ class BoutiqueDashboardBloc
 
   Future<void> _load(
     Emitter<BoutiqueDashboardState> emit, {
+    required DashboardWindow window,
     required bool keepData,
   }) async {
     final ticket = ++_ticket;
-    final window = state.period.windowAt(_now());
     final hasData = keepData && state.stats != null;
     emit(
       state.copyWith(

@@ -13,27 +13,50 @@ abstract final class BoutiqueDashboardLabels {
   static String periodLabel(DashboardPeriod period, AppLocalizations l10n) =>
       switch (period) {
         DashboardPeriod.today => l10n.boutiqueDashboardPeriodToday,
-        DashboardPeriod.sevenDays => l10n.boutiqueDashboardPeriodSevenDays,
-        DashboardPeriod.thirtyDays => l10n.boutiqueDashboardPeriodThirtyDays,
+        DashboardPeriod.week => l10n.boutiqueDashboardPeriodWeek,
+        DashboardPeriod.month => l10n.boutiqueDashboardPeriodMonth,
+        DashboardPeriod.year => l10n.boutiqueDashboardPeriodYear,
+        DashboardPeriod.custom => l10n.boutiqueDashboardPeriodCustom,
       };
 
-  /// « Ventes au comptant sur 7 jours · du 15/10/2026 au 21/10/2026 » — la
+  /// « Ventes au comptant sur 3 jours · du 19/10/2026 au 21/10/2026 » — la
   /// fenêtre exacte est toujours écrite.
-  static String windowSubtitle(DashboardWindow window, AppLocalizations l10n) =>
-      window.isSingleDay
-      ? l10n.boutiqueDashboardSubtitleToday(formatLocalDay(window.to))
-      : l10n.boutiqueDashboardSubtitleRange(
-          window.dayCount,
-          formatLocalDay(window.from),
-          formatLocalDay(window.to),
-        );
+  ///
+  /// Une journée ne se dit « aujourd'hui » que sous l'onglet du même nom : le
+  /// lundi de « Cette semaine » ou une période précise d'un jour passé se
+  /// nomment par leur date.
+  static String windowSubtitle(
+    DashboardWindow window,
+    DashboardPeriod period,
+    AppLocalizations l10n,
+  ) {
+    if (!window.isSingleDay) {
+      return l10n.boutiqueDashboardSubtitleRange(
+        window.dayCount,
+        formatLocalDay(window.from),
+        formatLocalDay(window.to),
+      );
+    }
+    final day = formatLocalDay(window.to);
+    return period == DashboardPeriod.today
+        ? l10n.boutiqueDashboardSubtitleToday(day)
+        : l10n.boutiqueDashboardSubtitleDay(day);
+  }
 
-  static String emptyTitle(DashboardWindow window, AppLocalizations l10n) =>
-      window.isSingleDay
-      ? l10n.boutiqueDashboardEmptyTitleToday
-      : l10n.boutiqueDashboardEmptyTitleRange(window.dayCount);
+  static String emptyTitle(
+    DashboardWindow window,
+    DashboardPeriod period,
+    AppLocalizations l10n,
+  ) {
+    if (!window.isSingleDay) {
+      return l10n.boutiqueDashboardEmptyTitleRange(window.dayCount);
+    }
+    return period == DashboardPeriod.today
+        ? l10n.boutiqueDashboardEmptyTitleToday
+        : l10n.boutiqueDashboardEmptyTitleDay(formatLocalDay(window.to));
+  }
 
-  /// « 7 h » pour une heure, « 15/10 » pour un jour.
+  /// « 7 h » pour une heure, « 15/10 » pour un jour, « 10/2026 » pour un mois.
   static String bucketLabel(
     BoutiqueStatsBucket bucket,
     StatsGranularity granularity,
@@ -42,6 +65,10 @@ abstract final class BoutiqueDashboardLabels {
     final hour = bucket.hour;
     if (granularity == StatsGranularity.hour && hour != null) {
       return l10n.boutiqueDashboardHourLabel(hour);
+    }
+    final month = bucket.month;
+    if (granularity == StatsGranularity.day && month != null) {
+      return '${month.month.toString().padLeft(2, '0')}/${month.year}';
     }
     final day = bucket.day;
     if (day == null) return bucket.key;

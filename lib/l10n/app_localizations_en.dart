@@ -9110,6 +9110,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueDashboardTitle => 'Dashboard';
 
   @override
+  String boutiqueDashboardSubtitleDay(String day) {
+    return 'Cash sales on $day';
+  }
+
+  @override
   String boutiqueDashboardSubtitleToday(String day) {
     return 'Cash sales today · $day';
   }
@@ -9123,10 +9128,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueDashboardPeriodToday => 'Today';
 
   @override
-  String get boutiqueDashboardPeriodSevenDays => '7 days';
+  String get boutiqueDashboardPeriodWeek => 'This week';
 
   @override
-  String get boutiqueDashboardPeriodThirtyDays => '30 days';
+  String get boutiqueDashboardPeriodMonth => 'This month';
+
+  @override
+  String get boutiqueDashboardPeriodYear => 'Year';
+
+  @override
+  String get boutiqueDashboardPeriodCustom => 'Custom range';
+
+  @override
+  String get boutiqueDashboardRangeFieldFrom => 'From';
+
+  @override
+  String get boutiqueDashboardRangeFieldTo => 'To';
 
   @override
   String get boutiqueDashboardPeriodA11y => 'Dashboard period';
@@ -9196,6 +9213,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueDashboardChartDaily => 'Revenue day by day';
 
   @override
+  String get boutiqueDashboardChartMonthly => 'Revenue month by month';
+
+  @override
   String get boutiqueDashboardChartSubtitle =>
       'What was sold, on the day of the sale';
 
@@ -9263,13 +9283,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueDashboardEmptyTitleToday => 'No sales today';
 
   @override
+  String boutiqueDashboardEmptyTitleDay(String day) {
+    return 'No sales on $day';
+  }
+
+  @override
   String boutiqueDashboardEmptyTitleRange(int days) {
     return 'No sales over $days days';
   }
 
   @override
   String get boutiqueDashboardEmptyWiden =>
-      'Nothing collected over this period. Widen to 30 days or open the till to record a sale.';
+      'Nothing collected over this period. Widen the period or open the till to record a sale.';
 
   @override
   String get boutiqueDashboardEmptyFirst =>

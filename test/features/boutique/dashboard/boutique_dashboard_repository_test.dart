@@ -115,6 +115,26 @@ void main() {
     verifyNever(() => api.getStats(any(), any(), any(), any()));
   });
 
+  test(
+    'la photo d\'une autre fenêtre de même largeur n\'est pas servie',
+    () async {
+      // 7 jours aussi, mais pas les mêmes : « Ce mois » le 7 et la semaine
+      // glissante d'avant ne comptent pas les mêmes ventes.
+      stubStats(() async => _stats());
+      await repo.stats(academicYearId: 'ay-1', window: window);
+
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+      final result = await repo.stats(
+        academicYearId: 'ay-1',
+        window: DashboardWindow(
+          from: DateTime(2026, 10),
+          to: DateTime(2026, 10, 7),
+        ),
+      );
+      expect(result.fold((f) => f, (_) => null), isA<NetworkFailure>());
+    },
+  );
+
   test('une coupure en vol se replie sur la photo', () async {
     stubStats(() async => _stats(saleCount: 3));
     await repo.stats(academicYearId: 'ay-1', window: window);
