@@ -221,15 +221,16 @@ class EteeloKpiCardFilledContent extends StatelessWidget {
                 // seconde devise — prennent la nuance du pavé quand l'appelant
                 // en fournit une, et l'encre pleine sinon : le défaut reste
                 // identique à l'octet pour les cartes qui n'en déclarent pas.
-                style: TextStyle(
-                  fontFamily: 'Inter',
+                //
+                // **Le chiffre des caisses Finances** (`FinanceTillCashBoxes`) :
+                // Lora 34, interligne 1,05. Tous les pavés du produit écrivent
+                // ainsi leur chiffre de la même main, caisse comprise.
+                style: AppTextStyles.totalAmountLora.copyWith(
                   fontSize: AppDimensions.insPaveValueFontSize,
-                  fontWeight: FontWeight.w700,
-                  height: 1.08,
+                  height: 1.05,
                   color: i == 0
                       ? AppColors.insInkMain
                       : (data.filledSecondaryInk ?? AppColors.insInkMain),
-                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ),
