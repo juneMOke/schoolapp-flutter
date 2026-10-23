@@ -824,7 +824,10 @@ class AppConstants {
   // copies déposées (`evaluation_depot`) et le commentaire par note
   // (`note_evaluation.commentaire`) ; re-pull des évaluations. Un seul palier
   // pour toute la livraison. Palier d'école.
-  static const int offlineDbSchemaVersion = 66;
+  // v67 (2026-10-24) : re-pull des ventes boutique — le delta porte le numéro
+  // du reçu, que le poste ignorait ; les ventes déjà tirées restaient en
+  // `PROV-`. Aucun DDL. Palier d'école.
+  static const int offlineDbSchemaVersion = 67;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

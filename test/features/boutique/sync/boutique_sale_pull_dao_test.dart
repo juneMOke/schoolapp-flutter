@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 BoutiqueSaleDeltaDto _delta({
   String id = 'vente-1',
   String? receiptDocumentId,
+  String? receiptNumber,
   String? payerName = 'NDOMBO Lelo Willy',
   String? payerLastName = 'Ndombo',
   String? collectedByName = 'Moke Junior',
@@ -28,6 +29,7 @@ BoutiqueSaleDeltaDto _delta({
   amounts: MoneyBag.of(const [Money(3500, 'USD')]),
   soldAt: '2026-08-29T11:42:00Z',
   receiptDocumentId: receiptDocumentId,
+  receiptNumber: receiptNumber,
   lines:
       lines ??
       const [
@@ -102,13 +104,120 @@ void main() {
       );
     });
 
-    test('le NUMÉRO n\'est jamais inventé depuis le delta', () async {
-      // Le delta ne porte que l'identifiant d'archive. Un ticket réimprimé avec
-      // un faux numéro serait pire qu'un ticket provisoire honnête.
+    test('le NUMÉRO n\'est jamais inventé quand le delta le tait', () async {
+      // Un ticket réimprimé avec un faux numéro serait pire qu'un ticket
+      // provisoire honnête.
       await apply([_delta(receiptDocumentId: 'doc-1')]);
 
       expect(
         (await db.query('boutique_sales')).single['receipt_number'],
+        isNull,
+      );
+    });
+
+    test('le numéro descendu est écrit — la fiche quitte le PROV-', () async {
+      // Le tableau de bord lit le serveur et montrait le numéro définitif ;
+      // la fiche, locale, restait sur la référence provisoire.
+      await apply([
+        _delta(receiptDocumentId: 'doc-1', receiptNumber: 'ETL-RV-2526-000007'),
+      ]);
+
+      expect(
+        (await db.query('boutique_sales')).single['receipt_number'],
+        'ETL-RV-2526-000007',
+      );
+    });
+
+    test('un numéro RÉCLAMÉ survit à un delta qui le tait', () async {
+      await apply([_delta(receiptDocumentId: 'doc-1')]);
+      await db.update('boutique_sales', {'receipt_number': 'ETL-RV-1'});
+
+      await apply([_delta(receiptDocumentId: 'doc-1')]);
+
+      expect(
+        (await db.query('boutique_sales')).single['receipt_number'],
+        'ETL-RV-1',
+      );
+    });
+
+    test('…mais pas sur une AUTRE pièce', () async {
+      await apply([_delta(receiptDocumentId: 'doc-1')]);
+      await db.update('boutique_sales', {'receipt_number': 'ETL-RV-1'});
+
+      await apply([_delta(receiptDocumentId: 'doc-2')]);
+
+      expect(
+        (await db.query('boutique_sales')).single['receipt_number'],
+        isNull,
+      );
+    });
+  });
+
+  test('le fil porte le numéro du reçu à côté de son identifiant', () {
+    // Le nom de la clé est le contrat : une coquille ici et le numéro
+    // retomberait à `null` sans qu'aucun autre test ne rougisse.
+    final dto = BoutiqueSaleDeltaDto.fromJson({
+      'id': 'vente-1',
+      'academicYearId': 'ay-1',
+      'soldAt': '2026-08-29T11:42:00Z',
+      'receiptDocumentId': 'doc-1',
+      'receiptNumber': 'ETL-RV-2526-000001',
+      'serverUpdatedAt': '2026-08-29T11:45:00Z',
+    });
+
+    expect(dto.receiptNumber, 'ETL-RV-2526-000001');
+  });
+
+  group('ce que le poste seul sait survit au pull', () {
+    test('la trace d\'impression du ticket', () async {
+      await apply([_delta()]);
+      await db.update('boutique_sales', {'ticket_printed_at': 4242});
+
+      await apply([_delta(receiptDocumentId: 'doc-1')]);
+
+      expect(
+        (await db.query('boutique_sales')).single['ticket_printed_at'],
+        4242,
+      );
+    });
+
+    BoutiqueSaleDeltaDto withStudent(String studentId) => _delta(
+      lines: [
+        BoutiqueSaleLineDeltaDto(
+          id: 'l1',
+          articleId: 'art-polo',
+          articleLabel: 'Polo Lacoste',
+          beneficiaryStudentId: studentId,
+          quantity: 1,
+          unitPriceInCents: 1500,
+          lineTotalInCents: 1500,
+          currency: 'USD',
+        ),
+      ],
+    );
+
+    test('le nom de l\'élève figé à la vente', () async {
+      // Le delta ne porte que l'identifiant : le nom disparaissait de la fiche
+      // et du ticket réimprimé dès le premier pull.
+      await apply([withStudent('st-1')]);
+      await db.update('boutique_sale_lines', {'beneficiary_name': 'MUKENDI'});
+
+      await apply([withStudent('st-1')]);
+
+      expect(
+        (await db.query('boutique_sale_lines')).single['beneficiary_name'],
+        'MUKENDI',
+      );
+    });
+
+    test('…pas quand la ligne désigne un autre élève', () async {
+      await apply([withStudent('st-1')]);
+      await db.update('boutique_sale_lines', {'beneficiary_name': 'MUKENDI'});
+
+      await apply([withStudent('st-2')]);
+
+      expect(
+        (await db.query('boutique_sale_lines')).single['beneficiary_name'],
         isNull,
       );
     });

@@ -43,6 +43,11 @@ class BoutiqueSaleDeltaDto {
   /// scellement tardif redescend.
   final String? receiptDocumentId;
 
+  /// Le **numéro** de ce reçu, celui qu'on lit et qu'on imprime. Le serveur le
+  /// résout depuis son annuaire des pièces : `null` quand
+  /// [receiptDocumentId] l'est, et aussi quand l'annuaire ne le résout plus.
+  final String? receiptNumber;
+
   final List<BoutiqueSaleLineDeltaDto> lines;
 
   /// Ce qui est réellement **entré dans le tiroir**, une entrée par devise
@@ -72,6 +77,7 @@ class BoutiqueSaleDeltaDto {
     required this.amounts,
     required this.soldAt,
     this.receiptDocumentId,
+    this.receiptNumber,
     this.lines = const [],
     this.tenders = const [],
     required this.serverUpdatedAt,
@@ -98,6 +104,7 @@ class BoutiqueSaleDeltaDto {
         ]),
         soldAt: j['soldAt'] as String,
         receiptDocumentId: j['receiptDocumentId'] as String?,
+        receiptNumber: j['receiptNumber'] as String?,
         lines: [
           for (final line in (j['lines'] as List<dynamic>? ?? const []))
             if (line is Map<String, dynamic>)

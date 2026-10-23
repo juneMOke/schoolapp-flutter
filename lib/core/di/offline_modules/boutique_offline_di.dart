@@ -22,6 +22,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_beneficiary_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_history_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_history_repository_impl.dart';
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_receipt_repository_impl.dart';
@@ -142,9 +143,13 @@ void registerBoutiqueOffline(GetIt getIt) {
   getIt.registerLazySingleton<BoutiqueSaleHistoryDao>(
     () => BoutiqueSaleHistoryDao(getIt<Database>()),
   );
+  getIt.registerLazySingleton<BoutiqueSaleBeneficiaryDao>(
+    () => BoutiqueSaleBeneficiaryDao(getIt<Database>()),
+  );
   getIt.registerLazySingleton<BoutiqueHistoryRepository>(
     () => BoutiqueHistoryRepositoryImpl(
       dao: getIt<BoutiqueSaleHistoryDao>(),
+      beneficiaries: getIt<BoutiqueSaleBeneficiaryDao>(),
       currentUser: getIt<CurrentUserContext>(),
       now: DateTime.now,
     ),

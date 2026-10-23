@@ -15383,6 +15383,24 @@ abstract class AppLocalizations {
   /// **'Items sold'**
   String get boutiqueSaleDetailLines;
 
+  /// No description provided for @boutiqueSaleDetailStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Students served'**
+  String get boutiqueSaleDetailStudents;
+
+  /// No description provided for @boutiqueSaleDetailStudentUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not found on this tablet'**
+  String get boutiqueSaleDetailStudentUnknown;
+
+  /// No description provided for @boutiqueSaleDetailStudentNoClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class unknown'**
+  String get boutiqueSaleDetailStudentNoClass;
+
   /// No description provided for @boutiqueSaleDetailBeneficiary.
   ///
   /// In en, this message translates to:

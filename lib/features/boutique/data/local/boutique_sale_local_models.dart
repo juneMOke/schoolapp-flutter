@@ -181,6 +181,26 @@ class BoutiqueSaleLineLocalModel extends Equatable {
     this.position = 0,
   });
 
+  /// La même ligne, nommée. Sert à la lecture seule : rien ne la réécrit.
+  BoutiqueSaleLineLocalModel withBeneficiaryName(String? name) =>
+      BoutiqueSaleLineLocalModel(
+        id: id,
+        saleId: saleId,
+        articleId: articleId,
+        articleLabel: articleLabel,
+        articleCode: articleCode,
+        beneficiaryStudentId: beneficiaryStudentId,
+        beneficiaryName: name,
+        schoolLevelId: schoolLevelId,
+        size: size,
+        quantity: quantity,
+        unitPriceInCents: unitPriceInCents,
+        lineTotalInCents: lineTotalInCents,
+        currency: currency,
+        catalogPriceInCents: catalogPriceInCents,
+        position: position,
+      );
+
   Map<String, Object?> toMap() => {
     'id': id,
     'sale_id': saleId,
