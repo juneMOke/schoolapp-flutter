@@ -14,6 +14,17 @@ import 'package:sqflite_common/sqlite_api.dart';
 /// **répare** l'état local plutôt que de le corrompre — c'est ce qui fait passer
 /// la vente en `SYNCED` et lui donne son reçu. L'outbox la repoussera peut-être
 /// une fois de plus ; le POST est idempotent, elle rendra 200.
+///
+/// ## Ce que le poste sait et que le delta ne dit pas
+///
+/// `INSERT OR REPLACE` supprime la ligne avant de la réécrire : toute colonne
+/// absente de la map retombe à `NULL`. Trois renseignements ne vivent que sur
+/// le poste et sont donc **relus avant, puis réécrits** :
+///  - `ticket_printed_at` — la trace d'impression, qui ne part jamais ;
+///  - `receipt_number` obtenu par la réclamation, quand le delta tait le
+///    numéro d'une pièce que le poste connaît déjà ;
+///  - `beneficiary_name` des lignes — le delta ne porte que l'identifiant de
+///    l'élève, et le nom figé à la vente se perdait au premier pull.
 class BoutiqueSalePullDao {
   final Database _db;
 
@@ -29,6 +40,7 @@ class BoutiqueSalePullDao {
 
     await _db.transaction((txn) async {
       for (final sale in sales) {
+        final kept = await _localOnly(txn, sale.id);
         await txn.insert('boutique_sales', {
           'id': sale.id,
           'school_id': schoolId,
@@ -52,10 +64,16 @@ class BoutiqueSalePullDao {
           'collected_by_name': sale.collectedByName,
           'sold_at': sale.soldAt,
           'receipt_document_id': sale.receiptDocumentId,
-          // ⚠️ Le delta ne porte PAS le numéro de la pièce, seulement son
-          // identifiant d'archive. On ne l'invente pas : un ticket réimprimé
-          // avec un faux numéro serait pire qu'un ticket provisoire honnête.
-          // Le numéro arrive par la réclamation du reçu.
+          // Le numéro descendu fait foi. À défaut, celui que le poste tient de
+          // la réclamation — mais seulement pour la MÊME pièce : un numéro
+          // n'est jamais inventé, ni reporté sur une pièce qu'il ne désigne pas.
+          'receipt_number':
+              sale.receiptNumber ??
+              (sale.receiptDocumentId != null &&
+                      sale.receiptDocumentId == kept.receiptDocumentId
+                  ? kept.receiptNumber
+                  : null),
+          'ticket_printed_at': kept.ticketPrintedAt,
           'sync_status': 'SYNCED',
           'sync_error': null,
           'synced_at': nowMs,
@@ -82,6 +100,9 @@ class BoutiqueSalePullDao {
             // toujours préférable à une ligne muette sur un ticket.
             'article_label': line.articleLabel ?? line.articleId,
             'beneficiary_student_id': line.beneficiaryStudentId,
+            // Le nom figé à la vente, s'il désigne toujours le même élève.
+            'beneficiary_name':
+                kept.beneficiaryNames[(line.id, line.beneficiaryStudentId)],
             'school_level_id': line.schoolLevelId,
             'size': line.size,
             'quantity': line.quantity,
@@ -132,4 +153,53 @@ class BoutiqueSalePullDao {
 
     return sales.length;
   }
+
+  /// Ce que la réécriture effacerait, lu avant elle.
+  static Future<_LocalOnly> _localOnly(Transaction txn, String saleId) async {
+    final rows = await txn.query(
+      'boutique_sales',
+      columns: const [
+        'receipt_document_id',
+        'receipt_number',
+        'ticket_printed_at',
+      ],
+      where: 'id = ?',
+      whereArgs: [saleId],
+      limit: 1,
+    );
+    final lines = await txn.query(
+      'boutique_sale_lines',
+      columns: const ['id', 'beneficiary_student_id', 'beneficiary_name'],
+      where: 'sale_id = ? AND beneficiary_name IS NOT NULL',
+      whereArgs: [saleId],
+    );
+    final row = rows.isEmpty ? null : rows.first;
+    return _LocalOnly(
+      receiptDocumentId: row?['receipt_document_id'] as String?,
+      receiptNumber: row?['receipt_number'] as String?,
+      ticketPrintedAt: row?['ticket_printed_at'] as int?,
+      beneficiaryNames: {
+        for (final line in lines)
+          (line['id'] as String, line['beneficiary_student_id'] as String?):
+              line['beneficiary_name'] as String,
+      },
+    );
+  }
+}
+
+class _LocalOnly {
+  final String? receiptDocumentId;
+  final String? receiptNumber;
+  final int? ticketPrintedAt;
+
+  /// Clé (ligne, élève) : un nom ne survit que si la ligne désigne encore le
+  /// même enfant.
+  final Map<(String, String?), String> beneficiaryNames;
+
+  const _LocalOnly({
+    this.receiptDocumentId,
+    this.receiptNumber,
+    this.ticketPrintedAt,
+    this.beneficiaryNames = const {},
+  });
 }
