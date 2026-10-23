@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_beneficiary_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_history_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_history_repository_impl.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/article_family.dart';
@@ -58,6 +59,7 @@ void main() {
     db = await openFullOfflineDb();
     repo = BoutiqueHistoryRepositoryImpl(
       dao: BoutiqueSaleHistoryDao(db),
+      beneficiaries: BoutiqueSaleBeneficiaryDao(db),
       currentUser: CurrentUserContext()..set('u-1', schoolId: 'E1'),
       now: DateTime.now,
     );

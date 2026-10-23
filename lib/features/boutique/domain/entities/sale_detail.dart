@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 
 /// Une vente ouverte depuis l'historique : son contenu, et ce qu'on peut encore
@@ -17,7 +18,16 @@ class SaleDetail extends Equatable {
   /// mention informe, elle ne garde pas la porte.
   final DateTime? ticketPrintedAt;
 
-  const SaleDetail({required this.sale, this.ticketPrintedAt});
+  /// Les élèves servis, dans l'ordre des lignes, chacun une fois ; vide pour
+  /// une vente sans élève. Le nom figé au guichet d'abord, celui que le poste
+  /// retrouve ensuite — et `null` quand il ne le connaît pas.
+  final List<SaleBeneficiary> beneficiaries;
+
+  const SaleDetail({
+    required this.sale,
+    this.ticketPrintedAt,
+    this.beneficiaries = const [],
+  });
 
   /// Le reçu scellé existe-t-il côté serveur ?
   ///
@@ -52,5 +62,5 @@ class SaleDetail extends Equatable {
   /// et un `Cubit` n'émet pas un état égal. L'écran restait sur ses valeurs
   /// périmées sans que rien ne le signale.
   @override
-  List<Object?> get props => [sale, ticketPrintedAt];
+  List<Object?> get props => [sale, ticketPrintedAt, beneficiaries];
 }
