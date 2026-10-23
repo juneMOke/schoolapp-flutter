@@ -37,6 +37,7 @@ class AccueilModulesFactory {
       _boutique(l10n),
       _expenses(l10n),
       _humanResources(l10n),
+      _hrPersonnel(l10n),
       _classes(l10n),
       _cours(l10n),
       _resultats(l10n),
@@ -256,6 +257,30 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.hrPayrollId,
           title: l10n.subMenuPayroll,
+        ),
+      ],
+    );
+  }
+
+  /// RH · Personnel — une carte propre, comme le menu.
+  static AccueilModule _hrPersonnel(AppLocalizations l10n) {
+    const menuId = MenuConstants.hrPersonnelMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuHrPersonnel,
+      description: l10n.accueilModuleHrPersonnelDescription,
+      icon: Icons.groups_outlined,
+      tone: AccueilModuleTones.of(menuId),
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPersonnelDashboardId,
+          title: l10n.subMenuDashboard,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPersonnelFileId,
+          title: l10n.subMenuHrPersonnelFile,
         ),
       ],
     );

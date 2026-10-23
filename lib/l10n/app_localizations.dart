@@ -27798,6 +27798,540 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The school phone is shown to parents on the portal as the contact, with the logo.'**
   String get configurationSchoolPhoneOnPortal;
+
+  /// Menu du module RH · Personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'HR · Staff'**
+  String get menuHrPersonnel;
+
+  /// Sous-menu Fichier du module RH · Personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff file'**
+  String get subMenuHrPersonnelFile;
+
+  /// Carte d'accueil RH · Personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'How many staff, who they are, and each one\'s record.'**
+  String get accueilModuleHrPersonnelDescription;
+
+  /// Sur-titre des écrans RH · Personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'HR · Staff'**
+  String get hrPersonnelEyebrow;
+
+  /// Sous-titre du tableau de bord.
+  ///
+  /// In en, this message translates to:
+  /// **'Who works at the school · {agents} · year {year}'**
+  String hrDashboardSubtitle(String agents, String year);
+
+  /// Sous-titre sans année connue.
+  ///
+  /// In en, this message translates to:
+  /// **'Who works at the school · {agents}'**
+  String hrDashboardSubtitleNoYear(String agents);
+
+  /// Bouton : descendre à la liste.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff list'**
+  String get hrDashboardActionList;
+
+  /// Bouton : ouvrir le Fichier du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the file'**
+  String get hrDashboardActionOpenFile;
+
+  /// Nombre d'agents.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 staff} =1{1 staff member} other{{count} staff}}'**
+  String hrAgentsCount(int count);
+
+  /// Nombre de femmes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 women} =1{1 woman} other{{count} women}}'**
+  String hrCountWomen(int count);
+
+  /// Nombre d'hommes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{0 men} =1{1 man} other{{count} men}}'**
+  String hrCountMen(int count);
+
+  /// Fiches sans sexe renseigné.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 not stated} other{{count} not stated}}'**
+  String hrCountSexUnknown(int count);
+
+  /// Deux mentions accolées par un point médian.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} · {second}'**
+  String hrJoin(String first, String second);
+
+  /// Indicateur effectif.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount'**
+  String get hrKpiHeadcount;
+
+  /// Indicateur enseignants.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers'**
+  String get hrKpiTeachers;
+
+  /// Part des enseignants et reste du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% · {others} outside teaching'**
+  String hrKpiTeachersSubline(int percent, int others);
+
+  /// Indicateur ancienneté moyenne.
+  ///
+  /// In en, this message translates to:
+  /// **'Average length of service'**
+  String get hrKpiSeniority;
+
+  /// Ancienneté moyenne, déjà formatée (« 7,6 »).
+  ///
+  /// In en, this message translates to:
+  /// **'{value} yrs'**
+  String hrKpiSeniorityValue(String value);
+
+  /// L'agent entré le premier.
+  ///
+  /// In en, this message translates to:
+  /// **'longest-serving: {name} · {seniority}'**
+  String hrKpiSeniorityDean(String name, String seniority);
+
+  /// Aucun agent n'a de date d'entrée.
+  ///
+  /// In en, this message translates to:
+  /// **'no entry date'**
+  String get hrKpiSeniorityNone;
+
+  /// Agents exclus de la moyenne.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 without entry date, not averaged} other{{count} without entry date, not averaged}}'**
+  String hrKpiSeniorityExcluded(int count);
+
+  /// Ancienneté d'un agent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{under 1 yr} =1{1 yr} other{{count} yrs}}'**
+  String hrSeniorityYears(int count);
+
+  /// Agent sans date d'entrée.
+  ///
+  /// In en, this message translates to:
+  /// **'entry date not stated'**
+  String get hrSeniorityUnknown;
+
+  /// Alerte de synchronisation.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change still on the tablet} other{{count} changes still on the tablet}}'**
+  String hrSyncPendingTitle(int count);
+
+  /// Corps de l'alerte de synchronisation.
+  ///
+  /// In en, this message translates to:
+  /// **'Records or documents entered offline: they will reach the server when the network returns. They are already counted here.'**
+  String get hrSyncPendingBody;
+
+  /// Carte de répartition par catégorie.
+  ///
+  /// In en, this message translates to:
+  /// **'By category'**
+  String get hrByCategoryTitle;
+
+  /// Indice de la carte Par catégorie.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a row to see these staff'**
+  String get hrByCategoryHint;
+
+  /// Ligne de catégorie qui filtre la liste.
+  ///
+  /// In en, this message translates to:
+  /// **'active filter'**
+  String get hrFilterActive;
+
+  /// Catégorie absente ou inconnue de la tablette.
+  ///
+  /// In en, this message translates to:
+  /// **'Not stated'**
+  String get hrCategoryUnknown;
+
+  /// Carte de parité.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender balance'**
+  String get hrParityTitle;
+
+  /// Indice de la carte Parité.
+  ///
+  /// In en, this message translates to:
+  /// **'Women and men, by category'**
+  String get hrParityHint;
+
+  /// Ligne globale de la parité.
+  ///
+  /// In en, this message translates to:
+  /// **'All staff'**
+  String get hrParityAll;
+
+  /// Compte femmes / hommes.
+  ///
+  /// In en, this message translates to:
+  /// **'{women} W · {men} M'**
+  String hrParityCounts(int women, int men);
+
+  /// Compte avec sexes non renseignés.
+  ///
+  /// In en, this message translates to:
+  /// **'{women} W · {men} M · {unknown} n.s.'**
+  String hrParityCountsUnknown(int women, int men, int unknown);
+
+  /// Légende parité.
+  ///
+  /// In en, this message translates to:
+  /// **'Women'**
+  String get hrParityWomen;
+
+  /// Légende parité.
+  ///
+  /// In en, this message translates to:
+  /// **'Men'**
+  String get hrParityMen;
+
+  /// Légende parité : sexe absent.
+  ///
+  /// In en, this message translates to:
+  /// **'Not stated'**
+  String get hrParityUnknown;
+
+  /// Liste nominative du tableau de bord.
+  ///
+  /// In en, this message translates to:
+  /// **'Who they are'**
+  String get hrRosterTitle;
+
+  /// Portée de la liste sans filtre.
+  ///
+  /// In en, this message translates to:
+  /// **'all staff'**
+  String get hrRosterScopeAll;
+
+  /// Portée : une recherche est active.
+  ///
+  /// In en, this message translates to:
+  /// **'search'**
+  String get hrRosterScopeSearch;
+
+  /// Libellé du champ de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'Search staff'**
+  String get hrRosterSearchLabel;
+
+  /// Indice du champ de recherche.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, role, subject, staff number…'**
+  String get hrRosterSearchPlaceholder;
+
+  /// Libellé du sélecteur de catégorie.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get hrCategoryFilterLabel;
+
+  /// Option toutes catégories.
+  ///
+  /// In en, this message translates to:
+  /// **'All · {count}'**
+  String hrCategoryAllCount(int count);
+
+  /// Option d'une catégorie avec son effectif.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {count}'**
+  String hrCategoryOptionCount(String label, int count);
+
+  /// Libellé du sélecteur de tri.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get hrSortLabel;
+
+  /// Tri alphabétique.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: name'**
+  String get hrSortName;
+
+  /// Tri par date d'entrée croissante.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: longest-serving'**
+  String get hrSortOldest;
+
+  /// Tri par date d'entrée décroissante.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: most recent'**
+  String get hrSortNewest;
+
+  /// Bouton d'export PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get hrRosterPdf;
+
+  /// Infobulle du bouton PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the list as shown, as a PDF'**
+  String get hrRosterPdfTooltip;
+
+  /// Mois d'entrée d'un agent (MM/AAAA).
+  ///
+  /// In en, this message translates to:
+  /// **'since {date} · '**
+  String hrRosterSince(String date);
+
+  /// Infobulle du compteur de pièces.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} documents on file'**
+  String hrRosterDossierTooltip(int done, int total);
+
+  /// Liste filtrée vide.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff match'**
+  String get hrRosterEmptyTitle;
+
+  /// Liste filtrée vide : que faire.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the search or remove the “{scope}” filter.'**
+  String hrRosterEmptyMessage(String scope);
+
+  /// Vide recherche et catégorie.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get hrRosterShowAll;
+
+  /// Pied de la liste.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a staff member to open their record'**
+  String get hrRosterFooter;
+
+  /// Note de renvoi en bas du tableau de bord.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance and payroll have their own modules: Attendance and Payroll, under Human resources.'**
+  String get hrDashboardFootnote;
+
+  /// Tableau de bord vide.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff on file'**
+  String get hrDashboardEmptyTitle;
+
+  /// Tableau de bord vide : que faire.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff file is empty. Record the first staff member: their record, their contract and their documents.'**
+  String get hrDashboardEmptyMessage;
+
+  /// Action du tableau de bord vide.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a staff member'**
+  String get hrDashboardEmptyAction;
+
+  /// Sur-titre du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'ETEELO CONNECT · HR · Staff'**
+  String get hrPdfOvertitle;
+
+  /// Titre du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff list'**
+  String get hrPdfTitle;
+
+  /// Ligne de contexte du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} · {agents} · sorted by {sort} · school year {year}'**
+  String hrPdfSubtitle(String scope, String agents, String sort, String year);
+
+  /// Ligne de contexte sans année.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} · {agents} · sorted by {sort}'**
+  String hrPdfSubtitleNoYear(String scope, String agents, String sort);
+
+  /// Tri dans le PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'name'**
+  String get hrPdfSortName;
+
+  /// Tri dans le PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'name (Z to A)'**
+  String get hrPdfSortNameDescending;
+
+  /// Tri dans le PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'length of service (longest first)'**
+  String get hrPdfSortOldest;
+
+  /// Tri dans le PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'length of service (most recent first)'**
+  String get hrPdfSortNewest;
+
+  /// Colonne PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff no.'**
+  String get hrPdfColNumber;
+
+  /// Colonne PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff member'**
+  String get hrPdfColAgent;
+
+  /// Colonne PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get hrPdfColJob;
+
+  /// Colonne PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get hrPdfColCategory;
+
+  /// Colonne PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get hrPdfColContract;
+
+  /// Colonne PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get hrPdfColEntry;
+
+  /// Colonne PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get hrPdfColSeniority;
+
+  /// Matricule pas encore attribué, dans le PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'pending'**
+  String get hrPdfNumberPending;
+
+  /// Pied du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued on {date} at {time} · page {page}/{pages} · {school}'**
+  String hrPdfFooter(
+    String date,
+    String time,
+    int page,
+    int pages,
+    String school,
+  );
+
+  /// Pied du PDF sans nom d'école.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued on {date} at {time} · page {page}/{pages}'**
+  String hrPdfFooterNoSchool(String date, String time, int page, int pages);
+
+  /// Toast après composition du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF ready to print or save · {agents}'**
+  String hrPdfReady(String agents);
+
+  /// Échec de composition du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'The PDF could not be built. Try again.'**
+  String get hrPdfFailed;
+
+  /// Sous-titre du Fichier.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers, administrative and support staff — entered on the tablet, synced as soon as the network returns.'**
+  String get hrFileSubtitle;
+
+  /// Pied du Fichier sans filtre.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No staff on file} =1{1 staff member on file} other{{count} staff on file}}'**
+  String hrFileFooterAll(int count);
+
+  /// Pied du Fichier filtré.
+  ///
+  /// In en, this message translates to:
+  /// **'{shown} of {total}'**
+  String hrFileFooterFiltered(String shown, int total);
+
+  /// Nombre au dixième (partie entière, dixième).
+  ///
+  /// In en, this message translates to:
+  /// **'{whole}.{tenth}'**
+  String hrDecimal(int whole, int tenth);
+
+  /// Ancienneté moyenne inconnue.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get hrKpiSeniorityEmpty;
+
+  /// Heure d'édition (« 10h12 »).
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}:{minutes}'**
+  String hrClockTime(String hours, String minutes);
+
+  /// Portée du PDF sans filtre.
+  ///
+  /// In en, this message translates to:
+  /// **'All staff'**
+  String get hrPdfScopeAll;
 }
 
 class _AppLocalizationsDelegate

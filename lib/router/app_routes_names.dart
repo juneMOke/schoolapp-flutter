@@ -92,6 +92,10 @@ class AppRoutesNames {
       '/${MenuConstants.communicationMenuId}/${MenuConstants.communicationTemplatesId}';
   static const String expenseQueue =
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseQueueId}';
+  static const String hrPersonnelDashboard =
+      '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelDashboardId}';
+  static const String hrPersonnelFile =
+      '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelFileId}';
   static const String hrStaffFile =
       '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffFileId}';
   static const String hrStaffAttendance =

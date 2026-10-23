@@ -17936,4 +17936,390 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get configurationSchoolPhoneOnPortal =>
       'Le téléphone de l\'école est affiché aux parents sur le portail, comme contact, avec le logo.';
+
+  @override
+  String get menuHrPersonnel => 'RH · Personnel';
+
+  @override
+  String get subMenuHrPersonnelFile => 'Fichier du personnel';
+
+  @override
+  String get accueilModuleHrPersonnelDescription =>
+      'Combien d\'agents, qui ils sont, et la fiche de chacun.';
+
+  @override
+  String get hrPersonnelEyebrow => 'RH · Personnel';
+
+  @override
+  String hrDashboardSubtitle(String agents, String year) {
+    return 'Qui travaille à l\'école · $agents · année $year';
+  }
+
+  @override
+  String hrDashboardSubtitleNoYear(String agents) {
+    return 'Qui travaille à l\'école · $agents';
+  }
+
+  @override
+  String get hrDashboardActionList => 'Liste du personnel';
+
+  @override
+  String get hrDashboardActionOpenFile => 'Ouvrir le fichier';
+
+  @override
+  String hrAgentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents',
+      one: '1 agent',
+      zero: '0 agent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrCountWomen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count femmes',
+      one: '1 femme',
+      zero: '0 femme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrCountMen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hommes',
+      one: '1 homme',
+      zero: '0 homme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrCountSexUnknown(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count non renseignés',
+      one: '1 non renseigné',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrJoin(String first, String second) {
+    return '$first · $second';
+  }
+
+  @override
+  String get hrKpiHeadcount => 'Effectif';
+
+  @override
+  String get hrKpiTeachers => 'Enseignants';
+
+  @override
+  String hrKpiTeachersSubline(int percent, int others) {
+    return '$percent % · $others hors enseignement';
+  }
+
+  @override
+  String get hrKpiSeniority => 'Ancienneté moyenne';
+
+  @override
+  String hrKpiSeniorityValue(String value) {
+    return '$value ans';
+  }
+
+  @override
+  String hrKpiSeniorityDean(String name, String seniority) {
+    return 'doyen : $name · $seniority';
+  }
+
+  @override
+  String get hrKpiSeniorityNone => 'aucune date d\'entrée';
+
+  @override
+  String hrKpiSeniorityExcluded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents sans date d\'entrée, hors moyenne',
+      one: '1 agent sans date d\'entrée, hors moyenne',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrSeniorityYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ans',
+      one: '1 an',
+      zero: 'moins d\'1 an',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrSeniorityUnknown => 'entrée non renseignée';
+
+  @override
+  String hrSyncPendingTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count modifications encore sur la tablette',
+      one: '1 modification encore sur la tablette',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrSyncPendingBody =>
+      'Fiches ou pièces saisies hors ligne : elles partiront au serveur au retour du réseau. Elles sont déjà comptées ici.';
+
+  @override
+  String get hrByCategoryTitle => 'Par catégorie';
+
+  @override
+  String get hrByCategoryHint => 'Touchez une ligne pour voir ces agents';
+
+  @override
+  String get hrFilterActive => 'filtre actif';
+
+  @override
+  String get hrCategoryUnknown => 'Non renseignée';
+
+  @override
+  String get hrParityTitle => 'Parité';
+
+  @override
+  String get hrParityHint => 'Femmes et hommes, par catégorie';
+
+  @override
+  String get hrParityAll => 'Tout le personnel';
+
+  @override
+  String hrParityCounts(int women, int men) {
+    return '$women F · $men H';
+  }
+
+  @override
+  String hrParityCountsUnknown(int women, int men, int unknown) {
+    return '$women F · $men H · $unknown n.r.';
+  }
+
+  @override
+  String get hrParityWomen => 'Femmes';
+
+  @override
+  String get hrParityMen => 'Hommes';
+
+  @override
+  String get hrParityUnknown => 'Non renseigné';
+
+  @override
+  String get hrRosterTitle => 'Qui sont-ils';
+
+  @override
+  String get hrRosterScopeAll => 'tout le personnel';
+
+  @override
+  String get hrRosterScopeSearch => 'recherche';
+
+  @override
+  String get hrRosterSearchLabel => 'Rechercher un agent';
+
+  @override
+  String get hrRosterSearchPlaceholder => 'Nom, fonction, matière, matricule…';
+
+  @override
+  String get hrCategoryFilterLabel => 'Catégorie';
+
+  @override
+  String hrCategoryAllCount(int count) {
+    return 'Tous · $count';
+  }
+
+  @override
+  String hrCategoryOptionCount(String label, int count) {
+    return '$label · $count';
+  }
+
+  @override
+  String get hrSortLabel => 'Ordre';
+
+  @override
+  String get hrSortName => 'Trier : nom';
+
+  @override
+  String get hrSortOldest => 'Trier : plus anciens';
+
+  @override
+  String get hrSortNewest => 'Trier : plus récents';
+
+  @override
+  String get hrRosterPdf => 'PDF';
+
+  @override
+  String get hrRosterPdfTooltip => 'Télécharger la liste affichée en PDF';
+
+  @override
+  String hrRosterSince(String date) {
+    return 'depuis $date · ';
+  }
+
+  @override
+  String hrRosterDossierTooltip(int done, int total) {
+    return '$done pièce(s) sur $total au dossier';
+  }
+
+  @override
+  String get hrRosterEmptyTitle => 'Aucun agent ne correspond';
+
+  @override
+  String hrRosterEmptyMessage(String scope) {
+    return 'Modifiez la recherche ou retirez le filtre « $scope ».';
+  }
+
+  @override
+  String get hrRosterShowAll => 'Tout afficher';
+
+  @override
+  String get hrRosterFooter => 'Touchez un agent pour ouvrir sa fiche';
+
+  @override
+  String get hrDashboardFootnote =>
+      'La présence et la paie ont leurs propres modules : Pointage & présences et Paie, sous Ressources humaines.';
+
+  @override
+  String get hrDashboardEmptyTitle => 'Aucun agent dans le fichier';
+
+  @override
+  String get hrDashboardEmptyMessage =>
+      'Le fichier du personnel est vide. Enregistrez le premier agent : sa fiche, son contrat et les pièces de son dossier.';
+
+  @override
+  String get hrDashboardEmptyAction => 'Ajouter un agent';
+
+  @override
+  String get hrPdfOvertitle => 'ETEELO CONNECT · RH · Personnel';
+
+  @override
+  String get hrPdfTitle => 'Liste du personnel';
+
+  @override
+  String hrPdfSubtitle(String scope, String agents, String sort, String year) {
+    return '$scope · $agents · trié par $sort · année scolaire $year';
+  }
+
+  @override
+  String hrPdfSubtitleNoYear(String scope, String agents, String sort) {
+    return '$scope · $agents · trié par $sort';
+  }
+
+  @override
+  String get hrPdfSortName => 'nom';
+
+  @override
+  String get hrPdfSortNameDescending => 'nom (de Z à A)';
+
+  @override
+  String get hrPdfSortOldest => 'ancienneté (plus anciens d\'abord)';
+
+  @override
+  String get hrPdfSortNewest => 'ancienneté (plus récents d\'abord)';
+
+  @override
+  String get hrPdfColNumber => 'Matricule';
+
+  @override
+  String get hrPdfColAgent => 'Agent';
+
+  @override
+  String get hrPdfColJob => 'Fonction';
+
+  @override
+  String get hrPdfColCategory => 'Catégorie';
+
+  @override
+  String get hrPdfColContract => 'Contrat';
+
+  @override
+  String get hrPdfColEntry => 'Entrée';
+
+  @override
+  String get hrPdfColSeniority => 'Anc.';
+
+  @override
+  String get hrPdfNumberPending => 'en attente';
+
+  @override
+  String hrPdfFooter(
+    String date,
+    String time,
+    int page,
+    int pages,
+    String school,
+  ) {
+    return 'Édité le $date à $time · page $page/$pages · $school';
+  }
+
+  @override
+  String hrPdfFooterNoSchool(String date, String time, int page, int pages) {
+    return 'Édité le $date à $time · page $page/$pages';
+  }
+
+  @override
+  String hrPdfReady(String agents) {
+    return 'PDF prêt à imprimer ou enregistrer · $agents';
+  }
+
+  @override
+  String get hrPdfFailed => 'Le PDF n\'a pas pu être composé. Réessayez.';
+
+  @override
+  String get hrFileSubtitle =>
+      'Enseignants, administratifs et personnel d\'appui — saisis sur la tablette, synchronisés dès que le réseau revient.';
+
+  @override
+  String hrFileFooterAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents au fichier',
+      one: '1 agent au fichier',
+      zero: 'Aucun agent au fichier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrFileFooterFiltered(String shown, int total) {
+    return '$shown sur $total';
+  }
+
+  @override
+  String hrDecimal(int whole, int tenth) {
+    return '$whole,$tenth';
+  }
+
+  @override
+  String get hrKpiSeniorityEmpty => '—';
+
+  @override
+  String hrClockTime(String hours, String minutes) {
+    return '${hours}h$minutes';
+  }
+
+  @override
+  String get hrPdfScopeAll => 'Tout le personnel';
 }

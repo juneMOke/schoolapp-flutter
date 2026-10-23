@@ -37,6 +37,8 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_f
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_dashboard_page.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_personnel_file_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
@@ -149,6 +151,10 @@ class ShellScreen extends StatelessWidget {
         return const StaffAttendancePage();
       case MenuConstants.hrPayrollId:
         return const PayrollPage();
+      case MenuConstants.hrPersonnelDashboardId:
+        return const HrDashboardPage();
+      case MenuConstants.hrPersonnelFileId:
+        return const HrPersonnelFilePage();
       // Scope PROPRE depuis que le contrôle est un module à part : plus rien
       // ne le partage avec la Facturation, donc plus de `ValueKey` à poser
       // pour empêcher Flutter de recycler l'`Element` de l'autre écran — les

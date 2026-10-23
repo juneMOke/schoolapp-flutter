@@ -74,6 +74,9 @@ class AccueilModuleTones {
     MenuConstants.expenseMenuId: _terreFoncee,
     // Des personnes, pas de l'argent : la famille bleue, comme Inscriptions.
     MenuConstants.hrMenuId: _bleuProfond,
+    // Voisin des Ressources humaines dans la grille : l'ardoise, pour que les
+    // deux cartes ne se confondent pas.
+    MenuConstants.hrPersonnelMenuId: _bleuArdoise,
     MenuConstants.classesMenuId: _terreFoncee,
     MenuConstants.coursesMenuId: _bleuArdoise,
     MenuConstants.resultatsMenuId: _terreFoncee,

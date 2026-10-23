@@ -50,6 +50,12 @@ class MenuConstants {
   /// agent n'est ni un élève ni une écriture de caisse.
   static const String hrMenuId = 'ressources-humaines';
 
+  /// RH · Personnel — combien d'agents, qui ils sont, et où est la fiche de
+  /// chacun. Un module neuf, posé À CÔTÉ de [hrMenuId] (laissé tel quel) :
+  /// il lit le même fichier local, donc la même vérité, mais avec ses propres
+  /// écrans.
+  static const String hrPersonnelMenuId = 'rh-personnel';
+
   // Configuration — les réglages de l'école, réouvrables une fois celle-ci en
   // service. L'assistant de mise en service, lui, s'atteint depuis le splash :
   // il précède la coquille, qui n'a rien à afficher sans année académique.
@@ -110,6 +116,14 @@ class MenuConstants {
   /// La Paie du personnel : le livre du mois, les bulletins, les avances et
   /// l'historique.
   static const String hrPayrollId = 'paie';
+
+  /// RH · Personnel ▸ Tableau de bord : l'effectif, sa répartition, et la
+  /// liste nominative « Qui sont-ils », exportable en PDF.
+  static const String hrPersonnelDashboardId = 'rh-personnel-tableau-de-bord';
+
+  /// RH · Personnel ▸ Fichier du personnel : trouver un agent et ouvrir sa
+  /// fiche — sans statistiques, celles-ci vivent au tableau de bord.
+  static const String hrPersonnelFileId = 'rh-personnel-fichier';
 
   /// Les communiqués aux parents : rédiger, programmer, envoyer, consulter.
   static const String communicationAnnouncementsId =

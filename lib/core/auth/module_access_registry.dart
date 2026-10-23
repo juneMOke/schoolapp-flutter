@@ -356,6 +356,13 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // régler sont gardés geste par geste.
     MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
   },
+  // RH · Personnel : les deux écrans lisent le MÊME fichier local que les
+  // Ressources humaines, sous le même droit. Créer ou modifier une fiche reste
+  // gardé geste par geste ([kStaffWriteAccess]).
+  MenuConstants.hrPersonnelMenuId: {
+    MenuConstants.hrPersonnelDashboardId: ModuleAccess([Perm.hrStaffRead]),
+    MenuConstants.hrPersonnelFileId: ModuleAccess([Perm.hrStaffRead]),
+  },
   MenuConstants.communicationMenuId: {
     // Lire suffit à ouvrir la liste et le détail ; écrire et envoyer sont
     // gardés geste par geste ([kAnnouncementSendAccess]).

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_attendance_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
@@ -130,6 +131,11 @@ void registerStaffOffline(GetIt getIt) {
   );
   getIt.registerFactory<StaffFileCubit>(
     () => StaffFileCubit(source: getIt<StaffSnapshotSource>()),
+  );
+  // RH · Personnel : une instance par écran (tableau de bord, fichier), sur la
+  // même lecture locale.
+  getIt.registerFactory<HrPersonnelCubit>(
+    () => HrPersonnelCubit(source: getIt<StaffSnapshotSource>()),
   );
   getIt.registerFactory<StaffContractsCubit>(
     () => StaffContractsCubit(

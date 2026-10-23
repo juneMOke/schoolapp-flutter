@@ -1034,4 +1034,26 @@ class AppDimensions {
 
   /// Ligne d'un élève proposé par la recherche : cible ≥ 48 dp.
   static const communicationStudentRowMinHeight = 48.0;
+
+  // ── RH · Personnel — tableau de bord et fichier ──
+  /// Au-delà, « Par catégorie » et « Parité » se tiennent côte à côte.
+  static const hrDashboardTwoColumnsMinWidth = 736.0;
+
+  /// Sous ce seuil, une ligne de « Qui sont-ils » passe sur deux niveaux.
+  static const hrRosterTwoLinesMaxWidth = 600.0;
+  static const hrRosterRowMinHeight = 60.0;
+  static const hrRosterAvatarSize = 38.0;
+
+  /// Colonne de l'ancienneté : « depuis 09/2018 · 8 ans » ne saute pas d'une
+  /// ligne à l'autre.
+  static const hrRosterSeniorityMinWidth = 118.0;
+  static const hrRosterSortWidth = 220.0;
+  static const hrSyncDotSize = 9.0;
+  static const hrCategoryBarHeight = 10.0;
+  static const hrParityAllBarHeight = 14.0;
+  static const hrParityBarHeight = 10.0;
+  static const hrLegendSwatchSize = 10.0;
+  static const hrLegendSwatchRadius = 3.0;
+  static const hrBarLabelWidth = 132.0;
+  static const hrInsightIconSize = 20.0;
 }
