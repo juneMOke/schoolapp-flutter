@@ -6094,6 +6094,7 @@
       }
     }
   },
+  "boutiqueDashboardKpiNoComparable": "No comparable period before the start of the school year",
   "boutiqueDashboardKpiNone": "—",
   "boutiqueDashboardChartHourly": "Revenue hour by hour",
   "boutiqueDashboardChartDaily": "Revenue day by day",

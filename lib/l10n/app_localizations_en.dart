@@ -9204,6 +9204,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get boutiqueDashboardKpiNoComparable =>
+      'No comparable period before the start of the school year';
+
+  @override
   String get boutiqueDashboardKpiNone => '—';
 
   @override

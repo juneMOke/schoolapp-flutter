@@ -9280,6 +9280,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get boutiqueDashboardKpiNoComparable =>
+      'Pas de période comparable avant la rentrée';
+
+  @override
   String get boutiqueDashboardKpiNone => '—';
 
   @override

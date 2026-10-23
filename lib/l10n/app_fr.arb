@@ -6169,6 +6169,7 @@
       }
     }
   },
+  "boutiqueDashboardKpiNoComparable": "Pas de période comparable avant la rentrée",
   "boutiqueDashboardKpiNone": "—",
   "boutiqueDashboardChartHourly": "Recettes heure par heure",
   "boutiqueDashboardChartDaily": "Recettes jour par jour",

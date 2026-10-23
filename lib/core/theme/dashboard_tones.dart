@@ -297,6 +297,19 @@ class DashboardTones {
   /// dont le montant ne s'additionne pas au premier.
   static const Color inkSousLigne = AppColors.insInkSub;
 
+  /// Encre de la ligne de tendance d'un pavé de fond [fond] : le vert pâle à
+  /// la hausse, le rose pâle à la baisse — les encres de la caisse Finances.
+  ///
+  /// ⚠️ **Mesurée, pas supposée.** Ces deux nuances tiennent sur les pavés
+  /// bleu et vert (5,43 à 7,95), mais pas sur les chauds : le rose tombe à
+  /// 4,35 sur la terre cuite et 4,26 sur l'ocre. Sous le seuil, la ligne
+  /// retombe sur [inkSousLigne], qui passe partout : le sens reste porté par la
+  /// flèche et par le signe du pourcentage, jamais par la couleur seule.
+  static Color encreTendanceSur(Color fond, {required bool hausse}) {
+    final teintee = hausse ? AppColors.paveInkPercu : AppColors.paveInkReste;
+    return contraste(teintee, fond) >= seuilTexte ? teintee : inkSousLigne;
+  }
+
   /// Encre de la **seconde** valeur d'un pavé bi-devise.
   ///
   /// C'est le seul endroit du produit où une valeur secondaire porte une

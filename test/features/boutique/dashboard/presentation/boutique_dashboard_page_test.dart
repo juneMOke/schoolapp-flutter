@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
@@ -182,7 +183,7 @@ void main() {
     await pumpPage(tester);
 
     expect(find.text('RECETTES'), findsOneWidget);
-    expect(find.text('Panier moyen'), findsOneWidget);
+    expect(find.text('PANIER MOYEN'), findsOneWidget);
     expect(find.text('Recettes jour par jour'), findsOneWidget);
     expect(find.text('Par famille'), findsOneWidget);
     expect(find.text('Articles les plus vendus'), findsOneWidget);
@@ -212,6 +213,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Recettes heure par heure'), findsOneWidget);
     expect(queries.last.window.isSingleDay, isTrue);
+  });
+
+  testWidgets('les quatre chiffres clés sont des pavés, flèche comprise', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    final cards = tester.widgetList<EteeloKpiCard>(find.byType(EteeloKpiCard));
+    expect(cards, hasLength(4));
+    expect(cards.every((c) => c.data.isFilled), isTrue);
+    // Ventes 61/55, articles 97/88, recettes 1 284/1 102 en une devise.
+    expect(find.byIcon(Icons.trending_up_rounded), findsAtLeastNWidgets(3));
+    expect(
+      find.text('Pas de période comparable avant la rentrée'),
+      findsNothing,
+    );
   });
 
   testWidgets('les cinq périodes des inscriptions, dans le même ordre', (

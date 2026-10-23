@@ -14724,6 +14724,12 @@ abstract class AppLocalizations {
   /// **'{delta} vs previous period'**
   String boutiqueDashboardKpiDelta(String delta);
 
+  /// No description provided for @boutiqueDashboardKpiNoComparable.
+  ///
+  /// In en, this message translates to:
+  /// **'No comparable period before the start of the school year'**
+  String get boutiqueDashboardKpiNoComparable;
+
   /// No description provided for @boutiqueDashboardKpiNone.
   ///
   /// In en, this message translates to:

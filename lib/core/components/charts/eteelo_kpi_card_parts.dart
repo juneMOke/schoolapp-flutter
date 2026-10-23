@@ -249,6 +249,61 @@ class EteeloKpiCardFilledContent extends StatelessWidget {
             ),
           ),
         ],
+        if (data.trend case final trend?) ...[
+          const SizedBox(height: AppDimensions.spacingXS),
+          _FilledTrend(
+            trend: trend,
+            background: data.filledBackground ?? AppColors.bleuProfond,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// La flèche et sa phrase. Une seule icône, retournée à la baisse : deux
+/// glyphes distincts divergeraient de graisse et d'inclinaison.
+class _FilledTrend extends StatelessWidget {
+  final EteeloKpiTrend trend;
+  final Color background;
+
+  const _FilledTrend({required this.trend, required this.background});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = DashboardTones.encreTendanceSur(
+      background,
+      hausse: trend.rising,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ExcludeSemantics(
+          child: Transform.scale(
+            scaleY: trend.rising ? 1 : -1,
+            child: Icon(
+              Icons.trending_up_rounded,
+              size: AppDimensions.insPaveSublineFontSize + 2,
+              color: color,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingXS),
+        Flexible(
+          child: Text(
+            trend.label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: AppDimensions.insPaveSublineFontSize,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+              color: color,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
       ],
     );
   }
