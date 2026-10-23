@@ -61,7 +61,7 @@ void main() {
     });
 
     test(
-      'heure par heure : les heures creuses en tête et en queue partent',
+      'heure par heure : seules les heures vendues restent, creux compris',
       () {
         final buckets = [
           for (var h = 0; h < 24; h++)
@@ -71,7 +71,7 @@ void main() {
             ),
         ];
         final visible = RevenueSeries.visible(buckets, StatsGranularity.hour);
-        expect(visible.map((b) => b.hour), [8, 9, 10, 11]);
+        expect(visible.map((b) => b.hour), [8, 11]);
       },
     );
 
@@ -82,19 +82,28 @@ void main() {
       );
     });
 
-    test('jour par jour : un dimanche vide part, un dimanche vendu reste', () {
-      // Le 18 et le 25 octobre 2026 sont des dimanches.
+    test('jour par jour : seuls les jours d\'encaissement restent', () {
       final visible = RevenueSeries.visible([
         _b('2026-10-17', 100),
         _b('2026-10-18', 0),
         _b('2026-10-19', 0),
+        _b('2026-10-20', 0),
         _b('2026-10-25', 50),
       ], StatsGranularity.day);
-      expect(visible.map((b) => b.key), [
-        '2026-10-17',
-        '2026-10-19',
-        '2026-10-25',
-      ]);
+      expect(visible.map((b) => b.key), ['2026-10-17', '2026-10-25']);
+    });
+
+    test('mois par mois : un mois sans vente ne se dessine pas', () {
+      final buckets = [
+        for (var i = 0; i < 99; i++)
+          _b(
+            StatsBucketKeys.dayKey(DateTime(2026, 7, 15 + i)),
+            // Rien vendu en août.
+            DateTime(2026, 7, 15 + i).month == 8 ? 0 : 100,
+          ),
+      ];
+      final visible = RevenueSeries.visible(buckets, StatsGranularity.day);
+      expect(visible.map((b) => b.key), ['2026-07', '2026-09', '2026-10']);
     });
   });
 }

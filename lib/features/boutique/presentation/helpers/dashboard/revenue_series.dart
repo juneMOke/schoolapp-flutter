@@ -4,14 +4,15 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/s
 /// Les barres que le graphique dessine, prises dans la série **dense** du
 /// serveur.
 ///
-/// - Heure par heure : les heures vides **en tête et en queue** sont retirées —
-///   le serveur n'a pas à connaître les heures d'ouverture, et 24 barres dont
-///   quinze à zéro noieraient la journée. Un creux en pleine journée reste.
-/// - Jour par jour : un dimanche est retiré **s'il est vide**. Une école qui
-///   vend le dimanche garde sa barre, sans paramètre d'école à inventer.
-/// - Au-delà de [monthlyBeyond] jours, les jours sont **regroupés par mois** :
-///   le serveur ne découpe qu'à l'heure ou au jour, et une année jour par jour
-///   ferait deux cents barres sans libellé lisible.
+/// - **Seuls les seaux où l'on a vendu se dessinent** — heure, jour ou mois.
+///   C'est la règle de la caisse Finances (`FinanceTillBucketsSection`),
+///   tranchée par le porteur : un axe de trente jours dont vingt à zéro
+///   noierait les jours de vente. Prix connu : l'axe n'est plus régulier dans
+///   le temps, deux barres voisines peuvent être séparées d'un jour ou de six.
+/// - Au-delà de [monthlyBeyond] jours, les jours sont **regroupés par mois** —
+///   comme la caisse, dont le serveur découpe l'année par mois : le nôtre ne
+///   découpe qu'à l'heure ou au jour, et une année jour par jour ferait deux
+///   cents barres sans libellé lisible.
 abstract final class RevenueSeries {
   /// Deux mois : « Ce mois » et une période précise courte restent au jour.
   static const int monthlyBeyond = 62;
@@ -26,16 +27,12 @@ abstract final class RevenueSeries {
     List<BoutiqueStatsBucket> buckets,
     StatsGranularity granularity,
   ) {
-    if (isMonthly(buckets, granularity)) return _byMonth(buckets);
-    if (granularity == StatsGranularity.hour) {
-      final first = buckets.indexWhere((b) => b.total > 0);
-      if (first < 0) return const [];
-      final last = buckets.lastIndexWhere((b) => b.total > 0);
-      return buckets.sublist(first, last + 1);
-    }
+    final series = isMonthly(buckets, granularity)
+        ? _byMonth(buckets)
+        : buckets;
     return [
-      for (final bucket in buckets)
-        if (bucket.total > 0 || bucket.day?.weekday != DateTime.sunday) bucket,
+      for (final bucket in series)
+        if (bucket.total > 0) bucket,
     ];
   }
 
