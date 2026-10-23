@@ -6354,20 +6354,97 @@
   },
   "boutiqueBeneficiariesEmptyNone": "Aucun achat de la période ne désigne un élève.",
   "boutiqueBeneficiariesReset": "Réinitialiser les filtres",
-  "boutiqueLatestSalesTitle": "Dernières ventes",
-  "boutiqueLatestSalesSubtitle": "Les six derniers reçus de la période — touchez-en un pour le revoir ou le réimprimer",
   "boutiqueLatestSalesColumnDate": "Date",
   "boutiqueLatestSalesColumnReceipt": "Reçu",
-  "boutiqueLatestSalesColumnPayer": "Payeur",
   "boutiqueLatestSalesColumnAmount": "Montant",
   "boutiqueLatestSalesOpen": "Revoir la vente",
   "boutiqueBeneficiariesColumnStudent": "Élève",
   "boutiqueBeneficiariesColumnArticles": "Articles reçus",
   "boutiqueBeneficiariesColumnLastPurchase": "Dernier achat",
   "boutiqueBeneficiariesColumnAmount": "Montant",
+  "boutiqueSalesTitle": "Ventes de la période",
+  "boutiqueSalesSubtitle": "{count, plural, =0{Aucune vente} one{{count} vente} other{{count} ventes}} — touchez-en une pour la revoir ou la réimprimer",
+  "@boutiqueSalesSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesFilterLabel": "Filtrer par",
+  "boutiqueSalesFilterSemantics": "Critère de filtre des ventes",
+  "boutiqueSalesFilterFamily": "Type d'article",
+  "boutiqueSalesFilterClass": "Classe",
+  "boutiqueSalesAllFamilies": "Tous les types",
+  "boutiqueSalesAllClasses": "Toutes les classes",
+  "boutiqueSalesColumnStudents": "Élève(s)",
+  "boutiqueSalesPayer": "Payeur : {name}",
+  "@boutiqueSalesPayer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueSalesAnonymous": "Vente anonyme",
+  "boutiqueSalesStudentUnknown": "Élève introuvable",
+  "boutiqueSalesNoClass": "Sans classe",
+  "boutiqueSalesReceiptPending": "Reçu non émis",
+  "boutiqueSalesCount": "{count, plural, one{{count} vente} other{{count} ventes}}",
+  "@boutiqueSalesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesUnit": "ventes",
+  "boutiqueSalesEmptyTitle": "Aucune vente",
+  "boutiqueSalesEmptyNone": "Aucune vente sur cette période.",
+  "boutiqueSalesEmptyFiltered": "Aucune vente de la période pour « {filter} ».",
+  "@boutiqueSalesEmptyFiltered": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "boutiqueSalesReset": "Retirer le filtre",
+  "boutiqueSalesProvisionalNote": "{count, plural, one{{count} vente pas encore envoyée n'apparaît ni ici ni dans le PDF.} other{{count} ventes pas encore envoyées n'apparaissent ni ici ni dans le PDF.}}",
+  "@boutiqueSalesProvisionalNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportDownload": "Télécharger le PDF",
+  "boutiqueSalesReportTooltip": "Toutes les ventes de la période, filtre compris, en PDF",
+  "boutiqueSalesReportPreparing": "Préparation…",
+  "boutiqueSalesReportWaiting": "Patientez…",
+  "boutiqueSalesReportTitle": "Ventes de la boutique",
+  "boutiqueSalesReportBusy": "Un rapport est déjà en préparation. Réessayez dans {seconds} s.",
+  "@boutiqueSalesReportBusy": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportForbidden": "Vous n'avez pas accès aux ventes de la boutique.",
+  "boutiqueSalesReportTooLarge": "{lines} ventes, au-delà des {cap} du rapport : resserrez la période ou ajoutez un filtre.",
+  "@boutiqueSalesReportTooLarge": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "boutiqueSalesReportFailed": "Le rapport des ventes n'a pas pu être préparé.",
   "boutiqueLatestSalesNewSale": "Nouvelle vente",
-  "boutiqueLatestSalesEmpty": "Aucun reçu sur cette période.",
-  "boutiqueLatestSalesError": "Les dernières ventes n'ont pas pu être lues sur ce poste.",
   "boutiqueClearEyebrow": "Boutique ▸ Panier",
   "boutiqueClearTitle": "Vider le panier ?",
   "boutiqueClearMessage": "Les lignes composées et l'identité du payeur seront effacées. Rien n'a encore été encaissé — il n'y a donc rien à annuler côté argent.",

@@ -24,10 +24,6 @@ class BoutiqueDashboardState extends Equatable {
   /// quand le serveur échoue : l'encart reste visible au-dessus de l'erreur.
   final ProvisionalSales provisional;
 
-  /// `null` si la lecture locale a échoué : la carte le dit, sans emporter le
-  /// reste de l'écran.
-  final List<SaleHistoryEntry>? latestSales;
-
   final Failure? failure;
 
   /// Vrai pendant qu'une nouvelle période se charge **par-dessus** des valeurs
@@ -47,7 +43,6 @@ class BoutiqueDashboardState extends Equatable {
     this.stats,
     this.cachedAt,
     this.provisional = ProvisionalSales.none,
-    this.latestSales = const [],
     this.failure,
     this.refreshing = false,
     this.selectedCurrency,
@@ -79,7 +74,6 @@ class BoutiqueDashboardState extends Equatable {
     Object? stats = _undefined,
     Object? cachedAt = _undefined,
     ProvisionalSales? provisional,
-    Object? latestSales = _undefined,
     Object? failure = _undefined,
     bool? refreshing,
     Object? selectedCurrency = _undefined,
@@ -96,9 +90,6 @@ class BoutiqueDashboardState extends Equatable {
         ? this.cachedAt
         : cachedAt as DateTime?,
     provisional: provisional ?? this.provisional,
-    latestSales: identical(latestSales, _undefined)
-        ? this.latestSales
-        : latestSales as List<SaleHistoryEntry>?,
     failure: identical(failure, _undefined)
         ? this.failure
         : failure as Failure?,
@@ -118,7 +109,6 @@ class BoutiqueDashboardState extends Equatable {
     stats,
     cachedAt,
     provisional,
-    latestSales,
     failure,
     refreshing,
     selectedCurrency,

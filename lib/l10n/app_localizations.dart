@@ -15041,18 +15041,6 @@ abstract class AppLocalizations {
   /// **'Reset filters'**
   String get boutiqueBeneficiariesReset;
 
-  /// No description provided for @boutiqueLatestSalesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Latest sales'**
-  String get boutiqueLatestSalesTitle;
-
-  /// No description provided for @boutiqueLatestSalesSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'The six latest receipts of the period — tap one to review or reprint it'**
-  String get boutiqueLatestSalesSubtitle;
-
   /// No description provided for @boutiqueLatestSalesColumnDate.
   ///
   /// In en, this message translates to:
@@ -15064,12 +15052,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Receipt'**
   String get boutiqueLatestSalesColumnReceipt;
-
-  /// No description provided for @boutiqueLatestSalesColumnPayer.
-  ///
-  /// In en, this message translates to:
-  /// **'Payer'**
-  String get boutiqueLatestSalesColumnPayer;
 
   /// No description provided for @boutiqueLatestSalesColumnAmount.
   ///
@@ -15107,23 +15089,191 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get boutiqueBeneficiariesColumnAmount;
 
+  /// No description provided for @boutiqueSalesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales of the period'**
+  String get boutiqueSalesTitle;
+
+  /// No description provided for @boutiqueSalesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No sale} one{{count} sale} other{{count} sales}} — tap one to review or reprint it'**
+  String boutiqueSalesSubtitle(int count);
+
+  /// No description provided for @boutiqueSalesFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by'**
+  String get boutiqueSalesFilterLabel;
+
+  /// No description provided for @boutiqueSalesFilterSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales filter criterion'**
+  String get boutiqueSalesFilterSemantics;
+
+  /// No description provided for @boutiqueSalesFilterFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Article type'**
+  String get boutiqueSalesFilterFamily;
+
+  /// No description provided for @boutiqueSalesFilterClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get boutiqueSalesFilterClass;
+
+  /// No description provided for @boutiqueSalesAllFamilies.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get boutiqueSalesAllFamilies;
+
+  /// No description provided for @boutiqueSalesAllClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'All classes'**
+  String get boutiqueSalesAllClasses;
+
+  /// No description provided for @boutiqueSalesColumnStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Student(s)'**
+  String get boutiqueSalesColumnStudents;
+
+  /// No description provided for @boutiqueSalesPayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Payer: {name}'**
+  String boutiqueSalesPayer(String name);
+
+  /// No description provided for @boutiqueSalesAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous sale'**
+  String get boutiqueSalesAnonymous;
+
+  /// No description provided for @boutiqueSalesStudentUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not found'**
+  String get boutiqueSalesStudentUnknown;
+
+  /// No description provided for @boutiqueSalesNoClass.
+  ///
+  /// In en, this message translates to:
+  /// **'No class'**
+  String get boutiqueSalesNoClass;
+
+  /// No description provided for @boutiqueSalesReceiptPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt not issued'**
+  String get boutiqueSalesReceiptPending;
+
+  /// No description provided for @boutiqueSalesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} sale} other{{count} sales}}'**
+  String boutiqueSalesCount(int count);
+
+  /// No description provided for @boutiqueSalesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'sales'**
+  String get boutiqueSalesUnit;
+
+  /// No description provided for @boutiqueSalesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No sale'**
+  String get boutiqueSalesEmptyTitle;
+
+  /// No description provided for @boutiqueSalesEmptyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No sale over this period.'**
+  String get boutiqueSalesEmptyNone;
+
+  /// No description provided for @boutiqueSalesEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No sale over the period for “{filter}”.'**
+  String boutiqueSalesEmptyFiltered(String filter);
+
+  /// No description provided for @boutiqueSalesReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the filter'**
+  String get boutiqueSalesReset;
+
+  /// No description provided for @boutiqueSalesProvisionalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 sale not yet sent appears neither here nor in the PDF.} other{{count} sales not yet sent appear neither here nor in the PDF.}}'**
+  String boutiqueSalesProvisionalNote(int count);
+
+  /// No description provided for @boutiqueSalesReportDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the PDF'**
+  String get boutiqueSalesReportDownload;
+
+  /// No description provided for @boutiqueSalesReportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Every sale of the period, filter included, as a PDF'**
+  String get boutiqueSalesReportTooltip;
+
+  /// No description provided for @boutiqueSalesReportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get boutiqueSalesReportPreparing;
+
+  /// No description provided for @boutiqueSalesReportWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait…'**
+  String get boutiqueSalesReportWaiting;
+
+  /// No description provided for @boutiqueSalesReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop sales'**
+  String get boutiqueSalesReportTitle;
+
+  /// No description provided for @boutiqueSalesReportBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'A report is already being prepared. Try again in {seconds} s.'**
+  String boutiqueSalesReportBusy(int seconds);
+
+  /// No description provided for @boutiqueSalesReportForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have access to the shop sales.'**
+  String get boutiqueSalesReportForbidden;
+
+  /// No description provided for @boutiqueSalesReportTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'{lines} sales, beyond the report\'s {cap}: narrow the period or add a filter.'**
+  String boutiqueSalesReportTooLarge(int lines, int cap);
+
+  /// No description provided for @boutiqueSalesReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The sales report could not be prepared.'**
+  String get boutiqueSalesReportFailed;
+
   /// No description provided for @boutiqueLatestSalesNewSale.
   ///
   /// In en, this message translates to:
   /// **'New sale'**
   String get boutiqueLatestSalesNewSale;
-
-  /// No description provided for @boutiqueLatestSalesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No receipt over this period.'**
-  String get boutiqueLatestSalesEmpty;
-
-  /// No description provided for @boutiqueLatestSalesError.
-  ///
-  /// In en, this message translates to:
-  /// **'The latest sales could not be read on this device.'**
-  String get boutiqueLatestSalesError;
 
   /// No description provided for @boutiqueClearEyebrow.
   ///

@@ -11,7 +11,6 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/d
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sale_line.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';
-import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_latest_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
@@ -23,14 +22,11 @@ class _MockStats extends Mock implements GetBoutiqueStatsUseCase {}
 class _MockProvisional extends Mock
     implements GetBoutiqueProvisionalSalesUseCase {}
 
-class _MockLatest extends Mock implements GetBoutiqueLatestSalesUseCase {}
-
 class _MockPreference extends Mock implements DashboardPeriodPreference {}
 
 void main() {
   late _MockStats getStats;
   late _MockProvisional getProvisional;
-  late _MockLatest getLatest;
   late _MockPreference preference;
 
   setUpAll(() {
@@ -41,7 +37,6 @@ void main() {
   setUp(() {
     getStats = _MockStats();
     getProvisional = _MockProvisional();
-    getLatest = _MockLatest();
     preference = _MockPreference();
     when(() => preference.read()).thenAnswer((_) async => null);
     when(() => preference.write(any())).thenAnswer((_) async {});
@@ -63,19 +58,11 @@ void main() {
         window: any(named: 'window'),
       ),
     ).thenAnswer((_) async => const Right(ProvisionalSales.none));
-    when(
-      () => getLatest(
-        academicYearId: any(named: 'academicYearId'),
-        window: any(named: 'window'),
-        limit: any(named: 'limit'),
-      ),
-    ).thenAnswer((_) async => Right([saleEntry('s-1')]));
   });
 
   BoutiqueDashboardBloc build() => BoutiqueDashboardBloc(
     getStats: getStats,
     getProvisional: getProvisional,
-    getLatest: getLatest,
     preference: preference,
     now: () => dashboardNow,
   );
@@ -91,7 +78,6 @@ void main() {
       expect(bloc.state.period, DashboardPeriod.week);
       expect(bloc.state.window, thisWeek);
       expect(bloc.state.selectedCurrency, 'USD');
-      expect(bloc.state.latestSales, hasLength(1));
     },
   );
 
@@ -291,7 +277,6 @@ void main() {
     build: () => BoutiqueDashboardBloc(
       getStats: getStats,
       getProvisional: getProvisional,
-      getLatest: getLatest,
       preference: preference,
       // 0 h 10 le 22 à Kinshasa.
       now: () => DateTime.utc(2026, 10, 21, 23, 10),

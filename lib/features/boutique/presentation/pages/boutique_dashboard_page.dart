@@ -10,9 +10,11 @@ import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_top_article.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_academic_year_gate.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_body.dart';
@@ -32,6 +34,8 @@ class BoutiqueDashboardPage extends StatelessWidget {
     providers: [
       BlocProvider(create: (_) => getIt<BoutiqueDashboardBloc>()),
       BlocProvider(create: (_) => getIt<BoutiqueBeneficiariesCubit>()),
+      BlocProvider(create: (_) => getIt<BoutiqueSalesCubit>()),
+      BlocProvider(create: (_) => getIt<BoutiqueSalesReportCubit>()),
     ],
     child: BoutiqueAcademicYearGate(
       builder: (context, year) => _DashboardView(year: year),
@@ -50,12 +54,12 @@ class _DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<_DashboardView> {
   final GlobalKey _beneficiariesKey = GlobalKey();
-  bool _beneficiariesStarted = false;
+  bool _listsStarted = false;
 
   String get _academicYearId => widget.year?.academicYear.id ?? '';
 
   /// Les libellés de niveaux servent au TICKET d'une vente walk-in, rouvert
-  /// depuis « Dernières ventes ».
+  /// depuis « Ventes de la période ».
   Map<String, String> get _levelLabels => {
     for (final bundle
         in widget.year?.schoolLevelGroups ?? const <SchoolLevelGroupBundle>[])
@@ -73,17 +77,20 @@ class _DashboardViewState extends State<_DashboardView> {
     );
   }
 
-  /// La liste des élèves suit la fenêtre du tableau de bord ; ses filtres, eux,
-  /// restent.
+  /// Les deux listes suivent la fenêtre du tableau de bord ; leurs filtres,
+  /// eux, restent.
   void _onWindowChanged(BuildContext context, BoutiqueDashboardState state) {
     final window = state.window;
     if (window == null) return;
-    final cubit = context.read<BoutiqueBeneficiariesCubit>();
-    if (_beneficiariesStarted) {
-      cubit.windowChanged(window);
+    final beneficiaries = context.read<BoutiqueBeneficiariesCubit>();
+    final sales = context.read<BoutiqueSalesCubit>();
+    if (_listsStarted) {
+      beneficiaries.windowChanged(window);
+      sales.windowChanged(window);
     } else {
-      _beneficiariesStarted = true;
-      cubit.start(academicYearId: _academicYearId, window: window);
+      _listsStarted = true;
+      beneficiaries.start(academicYearId: _academicYearId, window: window);
+      sales.start(academicYearId: _academicYearId, window: window);
     }
   }
 
@@ -104,15 +111,19 @@ class _DashboardViewState extends State<_DashboardView> {
 
   /// Rouvre la fiche, puis relit : elle a pu noter une impression ou réclamer
   /// le reçu scellé.
-  Future<void> _openSale(SaleHistoryEntry sale) async {
+  Future<void> _openSale(BoutiqueSaleRow sale) async {
     final bloc = context.read<BoutiqueDashboardBloc>();
+    final sales = context.read<BoutiqueSalesCubit>();
     await BoutiqueSaleDetailPage.push(
       context,
-      saleId: sale.id,
+      saleId: sale.saleId,
       levelLabels: _levelLabels,
     );
     if (!mounted) return;
     bloc.add(const BoutiqueDashboardRefreshRequested());
+    // La fenêtre n'a pas bougé : la liste se relit d'elle-même, page et
+    // filtre compris — le reçu a pu être émis entre-temps.
+    sales.retry();
   }
 
   @override
@@ -178,7 +189,6 @@ class _DashboardViewState extends State<_DashboardView> {
                   prev.stats != curr.stats ||
                   prev.failure != curr.failure ||
                   prev.refreshing != curr.refreshing ||
-                  prev.latestSales != curr.latestSales ||
                   prev.selectedCurrency != curr.selectedCurrency ||
                   prev.window != curr.window,
               builder: (context, state) => BoutiqueDashboardBody(

@@ -8,7 +8,11 @@ import 'package:school_app_flutter/features/boutique/data/repositories/boutique_
 import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_dashboard_repository.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_beneficiaries_use_case.dart';
-import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_latest_sales_use_case.dart';
+import 'package:school_app_flutter/features/boutique/data/repositories/boutique_sales_repository_impl.dart';
+import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_sales_repository.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_use_case.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
@@ -222,8 +226,9 @@ void registerBoutiqueOffline(GetIt getIt) {
   );
 }
 
-/// Le tableau de bord : chiffres **serveur** (avec photo hors ligne datée) et
-/// lectures **locales** (tickets provisoires, dernières ventes).
+/// Le tableau de bord : chiffres **serveur** (avec photo hors ligne datée),
+/// ventes de la période et leur rapport (**serveur**, sans photo), et tickets
+/// provisoires (**locaux**).
 void _registerDashboard(GetIt getIt) {
   getIt.registerLazySingleton<BoutiqueDashboardApi>(
     () => BoutiqueDashboardApi(getIt<Dio>()),
@@ -252,8 +257,18 @@ void _registerDashboard(GetIt getIt) {
   getIt.registerFactory<GetBoutiqueBeneficiariesUseCase>(
     () => GetBoutiqueBeneficiariesUseCase(getIt<BoutiqueDashboardRepository>()),
   );
-  getIt.registerFactory<GetBoutiqueLatestSalesUseCase>(
-    () => GetBoutiqueLatestSalesUseCase(getIt<BoutiqueHistoryRepository>()),
+  getIt.registerLazySingleton<BoutiqueSalesRepository>(
+    () => BoutiqueSalesRepositoryImpl(
+      api: getIt<BoutiqueDashboardApi>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerFactory<GetBoutiqueSalesUseCase>(
+    () => GetBoutiqueSalesUseCase(getIt<BoutiqueSalesRepository>()),
+  );
+  getIt.registerFactory<GetBoutiqueSalesReportUseCase>(
+    () => GetBoutiqueSalesReportUseCase(getIt<BoutiqueSalesRepository>()),
   );
   getIt.registerFactory<GetBoutiqueProvisionalSalesUseCase>(
     () =>
@@ -265,7 +280,6 @@ void _registerDashboard(GetIt getIt) {
     () => BoutiqueDashboardBloc(
       getStats: getIt<GetBoutiqueStatsUseCase>(),
       getProvisional: getIt<GetBoutiqueProvisionalSalesUseCase>(),
-      getLatest: getIt<GetBoutiqueLatestSalesUseCase>(),
       preference: getIt<DashboardPeriodPreference>(),
     ),
   );
@@ -273,6 +287,14 @@ void _registerDashboard(GetIt getIt) {
     () => BoutiqueBeneficiariesCubit(
       getBeneficiaries: getIt<GetBoutiqueBeneficiariesUseCase>(),
       getCatalog: getIt<GetBoutiqueCatalogUseCase>(),
+    ),
+  );
+  getIt.registerFactory<BoutiqueSalesCubit>(
+    () => BoutiqueSalesCubit(getSales: getIt<GetBoutiqueSalesUseCase>()),
+  );
+  getIt.registerFactory<BoutiqueSalesReportCubit>(
+    () => BoutiqueSalesReportCubit(
+      getReport: getIt<GetBoutiqueSalesReportUseCase>(),
     ),
   );
 }

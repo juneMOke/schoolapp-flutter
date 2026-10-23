@@ -8,9 +8,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/b
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/sale_history_entry.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';
-import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_latest_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
 
@@ -19,15 +17,14 @@ part 'boutique_dashboard_state.dart';
 
 /// Le tableau de bord de la boutique : « combien a-t-elle vendu, et quoi ? »
 ///
-/// Trois lectures par fenêtre — les chiffres du serveur, les tickets
-/// provisoires du poste (ajoutés aux premiers), les dernières ventes locales.
-/// La liste des élèves a son propre cubit : ses filtres et sa pagination ne
+/// Deux lectures par fenêtre — les chiffres du serveur, et les tickets
+/// provisoires du poste, ajoutés aux premiers. La liste des élèves et celle
+/// des ventes ont chacune leur cubit : leurs filtres et leur pagination ne
 /// doivent pas démonter le reste de l'écran.
 class BoutiqueDashboardBloc
     extends Bloc<BoutiqueDashboardEvent, BoutiqueDashboardState> {
   final GetBoutiqueStatsUseCase _getStats;
   final GetBoutiqueProvisionalSalesUseCase _getProvisional;
-  final GetBoutiqueLatestSalesUseCase _getLatest;
   final DashboardPeriodPreference _preference;
   final DateTime Function() _now;
 
@@ -39,12 +36,10 @@ class BoutiqueDashboardBloc
   BoutiqueDashboardBloc({
     required GetBoutiqueStatsUseCase getStats,
     required GetBoutiqueProvisionalSalesUseCase getProvisional,
-    required GetBoutiqueLatestSalesUseCase getLatest,
     required DashboardPeriodPreference preference,
     DateTime Function() now = DateTime.now,
   }) : _getStats = getStats,
        _getProvisional = getProvisional,
-       _getLatest = getLatest,
        _preference = preference,
        _now = now,
        super(const BoutiqueDashboardState()) {
@@ -163,10 +158,7 @@ class BoutiqueDashboardBloc
     );
 
     final yearId = state.academicYearId;
-    final (statsResult, latestResult) = await (
-      _getStats(academicYearId: yearId, window: window),
-      _getLatest(academicYearId: yearId, window: window),
-    ).wait;
+    final statsResult = await _getStats(academicYearId: yearId, window: window);
     if (ticket != _ticket) return;
 
     final snapshot = statsResult.fold((_) => null, (value) => value);
@@ -180,10 +172,6 @@ class BoutiqueDashboardBloc
     final provisional = provisionalResult.getOrElse(
       () => ProvisionalSales.none,
     );
-    final latest = latestResult.fold<List<SaleHistoryEntry>?>(
-      (_) => null,
-      (sales) => sales,
-    );
 
     statsResult.fold(
       (failure) => emit(
@@ -193,7 +181,6 @@ class BoutiqueDashboardBloc
           stats: null,
           cachedAt: null,
           provisional: provisional,
-          latestSales: latest,
           refreshing: false,
         ),
       ),
@@ -206,7 +193,6 @@ class BoutiqueDashboardBloc
             stats: stats,
             cachedAt: snapshot.cachedAt,
             provisional: provisional,
-            latestSales: latest,
             refreshing: false,
             selectedCurrency: _resolveCurrency(state.selectedCurrency, stats),
           ),
