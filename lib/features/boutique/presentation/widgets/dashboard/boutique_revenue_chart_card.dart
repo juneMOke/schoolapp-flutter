@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/b
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_bucket.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_labels.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_tones.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/revenue_series.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -18,6 +19,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Le même graphique en barres que la caisse Finances : la barre en cours en
 /// terre cuite **et** chiffrée (la couleur ne porte jamais seule
 /// l'information), toutes chiffrées jusqu'à dix barres, aucun axe vertical.
+/// La carte et les autres barres prennent la teinte de la devise affichée.
 class BoutiqueRevenueChartCard extends StatelessWidget {
   final BoutiqueCurrencyStats block;
   final StatsGranularity granularity;
@@ -61,12 +63,14 @@ class BoutiqueRevenueChartCard extends StatelessWidget {
     ];
     String money(num cents) =>
         MoneyFormat.compact(Money.parse(cents.round(), block.currency));
+    final tone = BoutiqueDashboardTones.devise(block.currency);
 
     return EteeloStatsCard(
       title: title,
       subtitle: l10n.boutiqueDashboardChartSubtitle,
       icon: Icons.trending_up_rounded,
-      iconColor: AppColors.terreCuite,
+      tone: tone,
+      toneStrength: BoutiqueDashboardTones.sectionStrength(tone),
       actions: [?currencySelector],
       child: visible.isEmpty
           ? const SizedBox.shrink()
@@ -80,9 +84,7 @@ class BoutiqueRevenueChartCard extends StatelessWidget {
                       BarChartItem(
                         label: labels[i],
                         value: visible[i].total.toDouble(),
-                        color: i == current
-                            ? AppColors.terreCuite
-                            : AppColors.bleuProfond,
+                        color: i == current ? AppColors.terreCuite : tone,
                       ),
                   ],
                   highlightedIndexes: {if (current >= 0) current},

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_sale_time.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_tones.dart';
+import 'package:school_app_flutter/features/finance/presentation/helpers/till_currency_order.dart';
 
 void main() {
   test('le tableau des ventes porte le ton des reçus de la caisse', () {
@@ -9,6 +10,16 @@ void main() {
     final tone = BoutiqueDashboardTones.tableOf(BoutiqueDashboardTones.ventes);
     expect(tone.header, DashboardTones.entete(DashboardSense.attente));
     expect(tone.zebra, DashboardTones.zebrure(DashboardSense.attente));
+  });
+
+  test('la teinte d\'une devise est celle de la caisse', () {
+    for (final currency in ['USD', 'CDF', 'EUR']) {
+      expect(
+        BoutiqueDashboardTones.devise(currency),
+        tillCurrencyAccent(currency),
+        reason: currency,
+      );
+    }
   });
 
   test('les encres d\'en-tête se lisent sur les deux bandeaux', () {

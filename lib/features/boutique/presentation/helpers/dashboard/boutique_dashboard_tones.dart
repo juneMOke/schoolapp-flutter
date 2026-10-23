@@ -19,6 +19,28 @@ abstract final class BoutiqueDashboardTones {
   /// « Élèves concernés » : un effectif.
   static const Color eleves = DashboardSense.attendu;
 
+  /// « Par famille » — le neutre structurel, celui de « Poste imputé » à la
+  /// caisse : une ventilation, pas un sens.
+  static const Color familles = AppColors.bleuArdoise;
+
+  /// « Articles les plus vendus » — la marque, comme « Par source » à la
+  /// caisse : on y parle de ce que la boutique vend.
+  static const Color articles = AppColors.terreCuite;
+
+  /// La teinte d'une devise — **celle de la caisse** (`tillCurrencyAccent`) :
+  /// les dollars en bleu ardoise, les francs en vert. Recopiée plutôt
+  /// qu'importée pour ne pas lier la boutique au module Finances ;
+  /// `boutique_dashboard_tones_test.dart` vérifie que les deux ne divergent
+  /// pas.
+  ///
+  /// « Recettes jour par jour » en prend le ton, et ses barres la couleur :
+  /// comme à la caisse, la série suit la devise affichée.
+  static Color devise(String currency) => switch (currency) {
+    'USD' => AppColors.bleuArdoise,
+    'CDF' => AppColors.vertSavane,
+    _ => AppColors.textSecondary,
+  };
+
   /// Le bandeau, la zébrure et le cadre d'un tableau de ton [tone]. Les encres
   /// d'en-tête sont celles de la caisse, vérifiées sur ces deux bandeaux par
   /// `boutique_dashboard_tones_test.dart`.

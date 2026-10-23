@@ -3,9 +3,9 @@ import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart'
 import 'package:school_app_flutter/core/components/charts/eteelo_bar_rows.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_currency_stats.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_family_style.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Par famille » — ce qu'on vend, famille par famille, dans la devise
@@ -31,7 +31,10 @@ class BoutiqueFamilyCard extends StatelessWidget {
       title: l10n.boutiqueDashboardFamiliesTitle,
       subtitle: l10n.boutiqueDashboardFamiliesSubtitle,
       icon: Icons.category_outlined,
-      iconColor: AppColors.bleuArdoise,
+      tone: BoutiqueDashboardTones.familles,
+      toneStrength: BoutiqueDashboardTones.sectionStrength(
+        BoutiqueDashboardTones.familles,
+      ),
       child: EteeloBarRows(
         // Proportionnelle au plus gros montant, pas au total.
         scale: EteeloBarRowsScale.byMax,
