@@ -102,6 +102,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(66)) {
     await _parentPortalStaffSide(db);
   }
+  if (upTo(67)) {
+    await _repullBoutiqueSales(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -289,6 +292,29 @@ Future<void> _returnDeviceTables(DatabaseExecutor db) async {
   await db.execute(
     "DELETE FROM sync_meta WHERE resource = 'editique_cache_school' "
     "OR substr(resource, 1, 18) = 'editique_documents'",
+  );
+}
+
+/// v67 — les ventes boutique redescendent une fois, avec leur numéro de reçu.
+///
+/// Le delta porte `receiptNumber` depuis l'alignement du back, mais le poste
+/// l'ignorait : chaque vente déjà tirée garde en base un numéro `NULL`, et sa
+/// fiche une référence `PROV-` — pendant que le tableau de bord, lu sur le
+/// serveur, montre le numéro définitif. Le curseur les a dépassées ; seul un
+/// pull complet les rapporte.
+///
+/// Sans perte : le pull relit ce que le poste seul sait (trace d'impression,
+/// numéro réclamé, nom figé des élèves) avant de réécrire. La clé est suffixée
+/// par l'école (`boutique_sales@<école>`) ; la forme nue est effacée aussi.
+Future<void> _repullBoutiqueSales(DatabaseExecutor db) async {
+  // Une base sans curseurs n'a rien tiré : rien à faire re-tirer.
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isEmpty) return;
+  await db.execute(
+    "DELETE FROM sync_meta WHERE resource = 'boutique_sales' "
+    "OR substr(resource, 1, 15) = 'boutique_sales@'",
   );
 }
 
