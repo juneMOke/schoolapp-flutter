@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/school_time_label.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
@@ -57,10 +58,15 @@ class FinanceTillReceiptsSection extends StatelessWidget {
   /// appelant qui n'en veut pas.
   final ValueChanged<TillReceipt>? onOpenRecord;
 
+  /// L'horloge qui décide d'« aujourd'hui » dans la colonne Date — l'heure
+  /// seule pour un versement du jour. Injectable pour les tests.
+  final DateTime Function() now;
+
   const FinanceTillReceiptsSection({
     super.key,
     required this.tillTotals,
     this.onOpenRecord,
+    this.now = DateTime.now,
   });
 
   @override
@@ -224,7 +230,6 @@ class FinanceTillReceiptsSection extends StatelessWidget {
     TillReceipt receipt, {
     required bool hasAcademicYear,
   }) {
-    final materialL10n = MaterialLocalizations.of(context);
     // L'année vient de l'ENVELOPPE, l'identité de la LIGNE : les deux sont
     // nécessaires pour pousser la route, et il en manque une jusqu'à ce que le
     // serveur serve les deux.
@@ -255,7 +260,9 @@ class FinanceTillReceiptsSection extends StatelessWidget {
       ),
       cells: [
         DataTableCellSpec(
-          text: materialL10n.formatCompactDate(receipt.paidAt.toLocal()),
+          // À l'heure de l'école, et l'heure comprise : `toLocal()` lisait le
+          // fuseau du poste, et ne disait pas quand dans la journée.
+          text: SchoolTimeLabel.compact(receipt.paidAt, now()),
           variant: DataTableCellTextVariant.mono,
         ),
         DataTableCellSpec(
