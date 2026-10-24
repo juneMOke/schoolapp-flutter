@@ -16,6 +16,7 @@ abstract final class PayrollFingerprintJson {
         },
     ],
     'linesDigest': fingerprint.linesDigest,
+    'formulaVersion': fingerprint.formulaVersion,
     if (fingerprint.lines.isNotEmpty)
       'lines': [
         for (final line in fingerprint.lines)
@@ -25,6 +26,10 @@ abstract final class PayrollFingerprintJson {
             'grossInCents': line.grossInCents,
             'advanceInCents': line.advanceInCents,
             'netInCents': line.netInCents,
+            if (line.formulaVersion >= 2) ...{
+              'fixedDeductionsInCents': line.fixedDeductionsInCents,
+              'toPayInCents': line.toPayInCents,
+            },
           },
       ],
   };
@@ -35,8 +40,10 @@ abstract final class PayrollFingerprintJson {
     final totals = raw['totals'];
     if (lineCount == null || totals is! List) return null;
     final lines = raw['lines'];
+    final version = raw.integer('formulaVersion') ?? 1;
     return PayrollFingerprint(
       lineCount: lineCount,
+      formulaVersion: version,
       linesDigest: raw.text('linesDigest') ?? '',
       totals: [
         for (final item in totals)
@@ -45,7 +52,7 @@ abstract final class PayrollFingerprintJson {
       lines: [
         if (lines is List)
           for (final item in lines)
-            if (_line(item) case final PayrollDigestLine line) line,
+            if (_line(item, version) case final PayrollDigestLine line) line,
       ],
     );
   }
@@ -62,7 +69,7 @@ abstract final class PayrollFingerprintJson {
     );
   }
 
-  static PayrollDigestLine? _line(Object? raw) {
+  static PayrollDigestLine? _line(Object? raw, int version) {
     if (raw is! Map) return null;
     final id = raw.text('staffMemberId');
     final currency = raw.text('currency');
@@ -73,6 +80,9 @@ abstract final class PayrollFingerprintJson {
       grossInCents: raw.integer('grossInCents') ?? 0,
       advanceInCents: raw.integer('advanceInCents') ?? 0,
       netInCents: raw.integer('netInCents') ?? 0,
+      formulaVersion: version,
+      fixedDeductionsInCents: raw.integer('fixedDeductionsInCents') ?? 0,
+      toPayInCents: raw.integer('toPayInCents'),
     );
   }
 }

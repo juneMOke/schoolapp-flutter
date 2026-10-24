@@ -31,19 +31,34 @@ class PayrollDigestLine extends Equatable {
   final int advanceInCents;
   final int netInCents;
 
+  /// v2 : les retenues fixes et ce qui sera versé ce mois — la direction
+  /// valide le montant qui sortira, pas seulement le net. Zéro et le net sur
+  /// une ligne v1.
+  final int formulaVersion;
+  final int fixedDeductionsInCents;
+  final int toPayInCents;
+
   const PayrollDigestLine({
     required this.staffMemberId,
     required this.currency,
     required this.grossInCents,
     required this.advanceInCents,
     required this.netInCents,
-  });
+    this.formulaVersion = 1,
+    this.fixedDeductionsInCents = 0,
+    int? toPayInCents,
+  }) : toPayInCents = toPayInCents ?? netInCents;
 
-  /// `{staffMemberId}|{currency}|{gross}|{advance}|{net}` — la forme exacte du
-  /// contrat, entiers en base 10 sans séparateur.
-  String get canonical =>
-      '${staffMemberId.toLowerCase()}|$currency|$grossInCents|'
-      '$advanceInCents|$netInCents';
+  /// La forme exacte du contrat, entiers en base 10 sans séparateur :
+  /// - v1 `{staffMemberId}|{currency}|{gross}|{advance}|{net}` ;
+  /// - v2 `{staffMemberId}|{currency}|{gross}|{fixes}|{advance}|{net}|{verser}`
+  ///   (proposition tablette, à confirmer au back).
+  String get canonical => formulaVersion < 2
+      ? '${staffMemberId.toLowerCase()}|$currency|$grossInCents|'
+            '$advanceInCents|$netInCents'
+      : '${staffMemberId.toLowerCase()}|$currency|$grossInCents|'
+            '$fixedDeductionsInCents|$advanceInCents|$netInCents|'
+            '$toPayInCents';
 
   @override
   List<Object?> get props => [
@@ -52,6 +67,9 @@ class PayrollDigestLine extends Equatable {
     grossInCents,
     advanceInCents,
     netInCents,
+    formulaVersion,
+    fixedDeductionsInCents,
+    toPayInCents,
   ];
 }
 
@@ -71,13 +89,23 @@ class PayrollFingerprint extends Equatable {
   /// quels agents diffèrent ; vides dans ce que la tablette envoie.
   final List<PayrollDigestLine> lines;
 
+  /// La formule sous laquelle [linesDigest] a été calculé (T6).
+  final int formulaVersion;
+
   const PayrollFingerprint({
     required this.lineCount,
     required this.totals,
     required this.linesDigest,
     this.lines = const [],
+    this.formulaVersion = 1,
   });
 
   @override
-  List<Object?> get props => [lineCount, totals, linesDigest, lines];
+  List<Object?> get props => [
+    lineCount,
+    totals,
+    linesDigest,
+    lines,
+    formulaVersion,
+  ];
 }

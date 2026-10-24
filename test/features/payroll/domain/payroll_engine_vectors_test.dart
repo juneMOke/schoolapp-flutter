@@ -37,7 +37,11 @@ void main() {
       final expected = vector['expected'] as Map<String, dynamic>;
 
       final result = PayrollEngine.compute(input);
-      final fingerprint = await PayrollFingerprinter.of(result.lines);
+      // Les vecteurs v1 : l'empreinte se relit sous la formule 1.
+      final fingerprint = await PayrollFingerprinter.of(
+        result.lines,
+        formulaVersion: 1,
+      );
 
       expect(result.withoutContract, expected['withoutContract']);
       expect(fingerprint.lineCount, expected['lineCount']);

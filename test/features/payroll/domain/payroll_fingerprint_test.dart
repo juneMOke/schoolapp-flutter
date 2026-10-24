@@ -37,7 +37,18 @@ void main() {
           ),
         ];
 
-        final fingerprint = await PayrollFingerprinter.of(lines);
+        // Forme v2 (proposition tablette) — recalculée en Python :
+        // deux lignes triées, la seconde '9a1c…|CDF|185000000|0|0|…'.
+        expect(
+          (await PayrollFingerprinter.of(lines)).linesDigest,
+          'ad7a940ed2a14a4e3ad373b90a68e2d855e5826cd48dc9e97a401202d6b314eb',
+        );
+
+        // Forme v1 : celle des paies figées avant la v2.
+        final fingerprint = await PayrollFingerprinter.of(
+          lines,
+          formulaVersion: 1,
+        );
 
         expect(
           fingerprint.linesDigest,
