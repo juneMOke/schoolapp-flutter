@@ -14604,53 +14604,53 @@ abstract class AppLocalizations {
   /// **'Cash sales over {days} days · from {from} to {to}'**
   String boutiqueDashboardSubtitleRange(int days, String from, String to);
 
-  /// No description provided for @boutiqueDashboardPeriodToday.
+  /// No description provided for @dashboardPeriodToday.
   ///
   /// In en, this message translates to:
   /// **'Today'**
-  String get boutiqueDashboardPeriodToday;
+  String get dashboardPeriodToday;
 
-  /// No description provided for @boutiqueDashboardPeriodWeek.
+  /// No description provided for @dashboardPeriodWeek.
   ///
   /// In en, this message translates to:
   /// **'This week'**
-  String get boutiqueDashboardPeriodWeek;
+  String get dashboardPeriodWeek;
 
-  /// No description provided for @boutiqueDashboardPeriodMonth.
+  /// No description provided for @dashboardPeriodMonth.
   ///
   /// In en, this message translates to:
   /// **'This month'**
-  String get boutiqueDashboardPeriodMonth;
+  String get dashboardPeriodMonth;
 
-  /// No description provided for @boutiqueDashboardPeriodYear.
+  /// No description provided for @dashboardPeriodYear.
   ///
   /// In en, this message translates to:
   /// **'Year'**
-  String get boutiqueDashboardPeriodYear;
+  String get dashboardPeriodYear;
 
-  /// No description provided for @boutiqueDashboardPeriodCustom.
+  /// No description provided for @dashboardPeriodCustom.
   ///
   /// In en, this message translates to:
   /// **'Custom range'**
-  String get boutiqueDashboardPeriodCustom;
+  String get dashboardPeriodCustom;
 
-  /// No description provided for @boutiqueDashboardRangeFieldFrom.
+  /// No description provided for @dashboardRangeFieldFrom.
   ///
   /// In en, this message translates to:
   /// **'From'**
-  String get boutiqueDashboardRangeFieldFrom;
+  String get dashboardRangeFieldFrom;
 
-  /// No description provided for @boutiqueDashboardRangeFieldTo.
+  /// No description provided for @dashboardRangeFieldTo.
   ///
   /// In en, this message translates to:
   /// **'To'**
-  String get boutiqueDashboardRangeFieldTo;
+  String get dashboardRangeFieldTo;
 
-  /// No description provided for @boutiqueDashboardPeriodA11y.
+  /// No description provided for @dashboardPeriodA11y.
   ///
   /// In en, this message translates to:
   /// **'Dashboard period'**
-  String get boutiqueDashboardPeriodA11y;
+  String get dashboardPeriodA11y;
 
   /// No description provided for @boutiqueDashboardOpenTill.
   ///

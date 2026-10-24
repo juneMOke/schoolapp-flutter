@@ -17,8 +17,8 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_catalog.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/beneficiaries_query.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_snapshot.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_period.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sale_line.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';

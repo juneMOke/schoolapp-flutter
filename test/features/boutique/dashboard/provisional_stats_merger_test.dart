@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/b
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_family_amount.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_bucket.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sale_line.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';

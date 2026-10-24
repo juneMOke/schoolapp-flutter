@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/b
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_bucket.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_top_article.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 
 /// Mercredi 21 octobre 2026, 14 h 30 à Kinshasa.

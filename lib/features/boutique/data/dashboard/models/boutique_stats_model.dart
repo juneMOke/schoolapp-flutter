@@ -1,7 +1,7 @@
 import 'package:school_app_flutter/features/boutique/data/dashboard/models/boutique_currency_stats_model.dart';
 import 'package:school_app_flutter/features/boutique/data/dashboard/models/boutique_top_article_model.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 
 /// Miroir de la réponse de `GET /api/v1/boutique/stats` (R8).

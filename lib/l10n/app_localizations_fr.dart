@@ -9201,28 +9201,28 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get boutiqueDashboardPeriodToday => 'Aujourd\'hui';
+  String get dashboardPeriodToday => 'Aujourd\'hui';
 
   @override
-  String get boutiqueDashboardPeriodWeek => 'Cette semaine';
+  String get dashboardPeriodWeek => 'Cette semaine';
 
   @override
-  String get boutiqueDashboardPeriodMonth => 'Ce mois';
+  String get dashboardPeriodMonth => 'Ce mois';
 
   @override
-  String get boutiqueDashboardPeriodYear => 'Année';
+  String get dashboardPeriodYear => 'Année';
 
   @override
-  String get boutiqueDashboardPeriodCustom => 'Période précise';
+  String get dashboardPeriodCustom => 'Période précise';
 
   @override
-  String get boutiqueDashboardRangeFieldFrom => 'Du';
+  String get dashboardRangeFieldFrom => 'Du';
 
   @override
-  String get boutiqueDashboardRangeFieldTo => 'Au';
+  String get dashboardRangeFieldTo => 'Au';
 
   @override
-  String get boutiqueDashboardPeriodA11y => 'Période du tableau de bord';
+  String get dashboardPeriodA11y => 'Période du tableau de bord';
 
   @override
   String get boutiqueDashboardOpenTill => 'Ouvrir la caisse';

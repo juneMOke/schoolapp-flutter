@@ -6026,14 +6026,14 @@
       }
     }
   },
-  "boutiqueDashboardPeriodToday": "Today",
-  "boutiqueDashboardPeriodWeek": "This week",
-  "boutiqueDashboardPeriodMonth": "This month",
-  "boutiqueDashboardPeriodYear": "Year",
-  "boutiqueDashboardPeriodCustom": "Custom range",
-  "boutiqueDashboardRangeFieldFrom": "From",
-  "boutiqueDashboardRangeFieldTo": "To",
-  "boutiqueDashboardPeriodA11y": "Dashboard period",
+  "dashboardPeriodToday": "Today",
+  "dashboardPeriodWeek": "This week",
+  "dashboardPeriodMonth": "This month",
+  "dashboardPeriodYear": "Year",
+  "dashboardPeriodCustom": "Custom range",
+  "dashboardRangeFieldFrom": "From",
+  "dashboardRangeFieldTo": "To",
+  "dashboardPeriodA11y": "Dashboard period",
   "boutiqueDashboardOpenTill": "Open the till",
   "boutiqueDashboardCachedBadge": "Offline — figures from {date}",
   "@boutiqueDashboardCachedBadge": {

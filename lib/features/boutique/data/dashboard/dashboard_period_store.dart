@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
+import 'package:school_app_flutter/core/entities/dashboard_period.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/dashboard_period_preference.dart';
 
 /// [DashboardPeriodPreference] rangée dans le stockage sécurisé, faute d'autre

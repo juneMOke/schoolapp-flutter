@@ -1,5 +1,5 @@
 import 'package:school_app_flutter/core/helpers/school_time.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 
 /// Les clés de seau **telles que le serveur les écrit** : `2026-10-15` pour un

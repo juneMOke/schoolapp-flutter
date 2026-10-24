@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_currency_stats.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_top_article.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/stats_granularity.dart';
 
 /// « Combien la boutique a-t-elle vendu, et quoi ? » sur une fenêtre — la

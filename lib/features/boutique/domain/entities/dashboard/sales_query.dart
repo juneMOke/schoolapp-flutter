@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/article_family.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 
 /// Par quoi la liste des ventes se filtre — **l'un ou l'autre**, jamais les
 /// deux : le serveur refuse le couple en 400, et l'écran ne propose qu'une

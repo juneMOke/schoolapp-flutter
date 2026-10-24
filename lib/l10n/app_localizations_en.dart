@@ -9125,28 +9125,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get boutiqueDashboardPeriodToday => 'Today';
+  String get dashboardPeriodToday => 'Today';
 
   @override
-  String get boutiqueDashboardPeriodWeek => 'This week';
+  String get dashboardPeriodWeek => 'This week';
 
   @override
-  String get boutiqueDashboardPeriodMonth => 'This month';
+  String get dashboardPeriodMonth => 'This month';
 
   @override
-  String get boutiqueDashboardPeriodYear => 'Year';
+  String get dashboardPeriodYear => 'Year';
 
   @override
-  String get boutiqueDashboardPeriodCustom => 'Custom range';
+  String get dashboardPeriodCustom => 'Custom range';
 
   @override
-  String get boutiqueDashboardRangeFieldFrom => 'From';
+  String get dashboardRangeFieldFrom => 'From';
 
   @override
-  String get boutiqueDashboardRangeFieldTo => 'To';
+  String get dashboardRangeFieldTo => 'To';
 
   @override
-  String get boutiqueDashboardPeriodA11y => 'Dashboard period';
+  String get dashboardPeriodA11y => 'Dashboard period';
 
   @override
   String get boutiqueDashboardOpenTill => 'Open the till';

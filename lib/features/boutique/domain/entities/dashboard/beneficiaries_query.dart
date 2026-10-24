@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 
 /// Ce que la liste des élèves demande au serveur.
 ///

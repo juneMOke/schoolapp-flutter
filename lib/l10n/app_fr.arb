@@ -6101,14 +6101,14 @@
       }
     }
   },
-  "boutiqueDashboardPeriodToday": "Aujourd'hui",
-  "boutiqueDashboardPeriodWeek": "Cette semaine",
-  "boutiqueDashboardPeriodMonth": "Ce mois",
-  "boutiqueDashboardPeriodYear": "Année",
-  "boutiqueDashboardPeriodCustom": "Période précise",
-  "boutiqueDashboardRangeFieldFrom": "Du",
-  "boutiqueDashboardRangeFieldTo": "Au",
-  "boutiqueDashboardPeriodA11y": "Période du tableau de bord",
+  "dashboardPeriodToday": "Aujourd'hui",
+  "dashboardPeriodWeek": "Cette semaine",
+  "dashboardPeriodMonth": "Ce mois",
+  "dashboardPeriodYear": "Année",
+  "dashboardPeriodCustom": "Période précise",
+  "dashboardRangeFieldFrom": "Du",
+  "dashboardRangeFieldTo": "Au",
+  "dashboardPeriodA11y": "Période du tableau de bord",
   "boutiqueDashboardOpenTill": "Ouvrir la caisse",
   "boutiqueDashboardCachedBadge": "Hors ligne — chiffres du {date}",
   "@boutiqueDashboardCachedBadge": {

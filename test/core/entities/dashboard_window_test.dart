@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_period.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 
 /// Les fenêtres calendaires du tableau de bord, lues dans le jour de l'école.
 void main() {
