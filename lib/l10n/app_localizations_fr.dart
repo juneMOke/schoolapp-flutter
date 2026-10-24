@@ -18211,18 +18211,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hrDashboardEmptyAction => 'Ajouter un agent';
 
   @override
-  String get hrPdfSortName => 'nom';
-
-  @override
-  String get hrPdfSortNameDescending => 'nom (de Z à A)';
-
-  @override
-  String get hrPdfSortOldest => 'ancienneté (plus anciens d\'abord)';
-
-  @override
-  String get hrPdfSortNewest => 'ancienneté (plus récents d\'abord)';
-
-  @override
   String get hrFileSubtitle =>
       'Enseignants, administratifs et personnel d\'appui — saisis sur la tablette, synchronisés dès que le réseau revient.';
 
@@ -18266,7 +18254,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrAgentNotFoundMessage =>
-      'Cette fiche n’est pas dans le fichier du personnel de la tablette : l’agent a pu être retiré, ou le lien vient d’une autre école.';
+      'Cette fiche n\'est pas dans le fichier du personnel de la tablette : l\'agent a pu être retiré, ou le lien vient d\'une autre école.';
 
   @override
   String get hrAgentNotFoundAction => 'Retour au personnel';
@@ -18303,4 +18291,26 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get hrStaffReportFailed =>
       'La liste du personnel n\'a pas pu être préparée.';
+
+  @override
+  String get hrDashboardErrorServerTitle => 'Le serveur n\'a pas répondu';
+
+  @override
+  String get hrDashboardErrorServer =>
+      'Les chiffres du personnel n\'ont pas pu être lus au serveur. Réessayez dans un instant ; si le problème persiste, contactez le support.';
+
+  @override
+  String get hrDashboardPendingOnlyTitle => 'Rien encore sur le serveur';
+
+  @override
+  String get hrDashboardPendingOnlyMessage =>
+      'Les agents saisis sur cette tablette n\'ont pas encore été reçus par le serveur : ils apparaîtront ici dès leur envoi.';
+
+  @override
+  String get hrStaffReportNoYear =>
+      'Aucune année scolaire en cours : la liste ne peut pas être numérotée.';
+
+  @override
+  String get hrStaffReportSessionExpired =>
+      'Session expirée : reconnectez-vous pour imprimer la liste.';
 }

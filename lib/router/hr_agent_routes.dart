@@ -23,14 +23,11 @@ abstract final class HrAgentRoutes {
     redirect: (context, state) =>
         redirectFor(state.pathParameters['subMenuId']),
     builder: (context, state) {
-      final agentId = state.pathParameters['agentId'] ?? '';
       final extra = state.extra;
       return HrAgentRoutePage(
         subMenuId: state.pathParameters['subMenuId'] ?? '',
-        agentId: agentId,
-        intent: extra is HrAgentIntent && extra.member.id == agentId
-            ? extra
-            : null,
+        agentId: state.pathParameters['agentId'] ?? '',
+        onClosed: extra is HrAgentIntent ? extra.onClosed : null,
       );
     },
   );

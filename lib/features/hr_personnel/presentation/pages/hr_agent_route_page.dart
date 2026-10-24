@@ -6,13 +6,15 @@ import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleto
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
-import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_contract_timeline.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
@@ -22,21 +24,25 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// La fiche d'un agent ouverte par son adresse (`/home/{sousMenu}/{agentId}`).
 ///
-/// Ouverte depuis la liste, elle reçoit l'agent ([intent]) et s'affiche
-/// aussitôt. Rechargée, collée ou partagée, elle relit le fichier local ; un
-/// agent absent fait tirer les flux une fois avant de se dire introuvable —
-/// une tablette neuve n'a peut-être pas encore descendu le fichier.
+/// L'agent est **toujours relu** dans le fichier local, même ouvert depuis la
+/// liste : Suivant du navigateur rejoue la navigation, et un agent passé à
+/// l'ouverture reviendrait tel qu'il était. Un agent absent fait tirer les
+/// flux une fois avant de se dire introuvable — une tablette neuve n'a
+/// peut-être pas encore descendu le fichier ; hors ligne, c'est le réseau qui
+/// manque, et la page le dit.
 class HrAgentRoutePage extends StatefulWidget {
   final String subMenuId;
   final String agentId;
-  final HrAgentIntent? intent;
+
+  /// Prévient l'écran qui a ouvert la fiche, à sa disparition.
+  final VoidCallback? onClosed;
   final DateTime Function() now;
 
   const HrAgentRoutePage({
     super.key,
     required this.subMenuId,
     required this.agentId,
-    this.intent,
+    this.onClosed,
     this.now = DateTime.now,
   });
 
@@ -46,26 +52,30 @@ class HrAgentRoutePage extends StatefulWidget {
 
 enum _Lookup { loading, found, missing, failure }
 
+/// L'agent relu, son contrat du jour, et le reste du fichier pour les
+/// doublons.
+typedef _Agent = ({
+  StaffMember member,
+  StaffContractKind? kind,
+  List<StaffMember> others,
+  String today,
+});
+
 class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
   late final StaffSnapshotSource _source = getIt<StaffSnapshotSource>();
   _Lookup _lookup = _Lookup.loading;
-  HrAgentIntent? _intent;
+  _Agent? _agent;
   Failure? _failure;
 
   @override
   void initState() {
     super.initState();
-    _intent = widget.intent;
-    if (_intent != null) {
-      _lookup = _Lookup.found;
-    } else {
-      unawaited(_resolve());
-    }
+    unawaited(_resolve());
   }
 
   @override
   void dispose() {
-    widget.intent?.onClosed?.call();
+    widget.onClosed?.call();
     super.dispose();
   }
 
@@ -75,7 +85,16 @@ class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
     await _source.pull();
     if (!mounted) return;
     if (await _read()) return;
-    if (mounted) setState(() => _lookup = _Lookup.missing);
+    final online = await getIt<ConnectivityService>().isOnline();
+    if (!mounted) return;
+    setState(() {
+      if (online) {
+        _lookup = _Lookup.missing;
+      } else {
+        _failure = const NetworkFailure('Aucune connexion.');
+        _lookup = _Lookup.failure;
+      }
+    });
   }
 
   /// Vrai quand la lecture a tranché (agent trouvé, ou base illisible).
@@ -91,10 +110,10 @@ class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
         return true;
       },
       (snapshot) {
-        final intent = _intentFrom(snapshot);
-        if (intent == null) return false;
+        final agent = _agentFrom(snapshot);
+        if (agent == null) return false;
         setState(() {
-          _intent = intent;
+          _agent = agent;
           _lookup = _Lookup.found;
         });
         return true;
@@ -102,13 +121,13 @@ class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
     );
   }
 
-  HrAgentIntent? _intentFrom(StaffFileSnapshot snapshot) {
+  _Agent? _agentFrom(StaffFileSnapshot snapshot) {
     final member = snapshot.members
         .where((m) => m.id == widget.agentId)
         .firstOrNull;
     if (member == null) return null;
     final today = HrPersonnelCubit.dayOf(widget.now());
-    return HrAgentIntent(
+    return (
       member: member,
       kind: StaffContractTimeline.currentAt(member.contracts, today)?.kind,
       others: snapshot.members,
@@ -126,49 +145,49 @@ class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
 
   @override
   Widget build(BuildContext context) {
-    final intent = _intent;
-    if (_lookup == _Lookup.found && intent != null) {
+    final agent = _agent;
+    if (_lookup == _Lookup.found && agent != null) {
       return StaffAgentPage(
-        member: intent.member,
-        kind: intent.kind,
-        others: intent.others,
-        today: intent.today,
-      );
-    }
-    if (_lookup == _Lookup.loading) {
-      return const AppPageBackground(
-        scrollable: false,
-        child: EteeloListSkeleton(rowCount: 4),
+        member: agent.member,
+        kind: agent.kind,
+        others: agent.others,
+        today: agent.today,
       );
     }
 
     final l10n = AppLocalizations.of(context)!;
+    // La sortie reste offerte pendant la lecture et le tirage.
+    final bar = OffShellTopBar(
+      eyebrow: l10n.hrPersonnelEyebrow,
+      title: widget.subMenuId == MenuConstants.hrPersonnelDashboardId
+          ? l10n.subMenuDashboard
+          : l10n.subMenuHrPersonnelFile,
+      backTooltip: l10n.staffActionBack,
+      shellSubMenuId: widget.subMenuId,
+    );
     return AppPageBackground(
-      appBar: OffShellTopBar(
-        eyebrow: l10n.hrPersonnelEyebrow,
-        title: widget.subMenuId == MenuConstants.hrPersonnelDashboardId
-            ? l10n.subMenuDashboard
-            : l10n.subMenuHrPersonnelFile,
-        backTooltip: l10n.staffActionBack,
-        shellSubMenuId: widget.subMenuId,
-      ),
-      child: _lookup == _Lookup.failure
-          ? StaffResultsErrorState(
-              failure: _failure,
-              onRetry: () => unawaited(_resolve()),
-            )
-          : EteeloEmptyResult(
-              label: l10n.hrAgentNotFoundTitle,
-              description: l10n.hrAgentNotFoundMessage,
-              medallionIcon: Icons.person_search_outlined,
-              fullWidthCard: true,
-              primaryAction: EteeloButton.primary(
-                label: l10n.hrAgentNotFoundAction,
-                icon: Icons.arrow_back,
-                onPressed: _leave,
-                fullWidth: false,
-              ),
-            ),
+      appBar: bar,
+      scrollable: _lookup != _Lookup.loading,
+      child: switch (_lookup) {
+        _Lookup.loading ||
+        _Lookup.found => const EteeloListSkeleton(rowCount: 4),
+        _Lookup.failure => StaffResultsErrorState(
+          failure: _failure,
+          onRetry: () => unawaited(_resolve()),
+        ),
+        _Lookup.missing => EteeloEmptyResult(
+          label: l10n.hrAgentNotFoundTitle,
+          description: l10n.hrAgentNotFoundMessage,
+          medallionIcon: Icons.person_search_outlined,
+          fullWidthCard: true,
+          primaryAction: EteeloButton.primary(
+            label: l10n.hrAgentNotFoundAction,
+            icon: Icons.arrow_back,
+            onPressed: _leave,
+            fullWidth: false,
+          ),
+        ),
+      },
     );
   }
 }

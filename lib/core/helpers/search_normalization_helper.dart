@@ -10,8 +10,9 @@ class SearchNormalizationHelper {
   static const _plain = 'aaaaaaceeeeiiiidnooooouuuuyy';
 
   /// Les ligatures se déplient en deux lettres : « coeur » trouve « Cœur »,
-  /// comme sur le serveur (`Texts.fold`). Replier `æ` sur un seul `a`
-  /// faisait manquer « Laetitia » derrière « Lætitia ».
+  /// comme sur le serveur (`Texts.fold`, qui déplie `œ` et `æ`). Replier `æ`
+  /// sur un seul `a` faisait manquer « Laetitia » derrière « Lætitia ». `ß`
+  /// est déplié en plus, côté tablette seulement.
   static const _ligatures = {'æ': 'ae', 'œ': 'oe', 'ß': 'ss'};
 
   /// Normalise [value] : minuscules, accents retirés, ligatures dépliées.

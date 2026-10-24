@@ -23,6 +23,10 @@ class HrQueryLocation extends StatelessWidget {
 
   /// `null` : l'écran n'a pas de bascule cartes/liste.
   final CollectionViewMode? viewMode;
+
+  /// Faux sur un écran qui lit le serveur : « non renseignée » n'y est pas un
+  /// filtre (il la refuserait), et une adresse qui la porte vaut « toutes ».
+  final bool acceptsUnknownCategory;
   final void Function(HrLocationFilters filters) onLocation;
   final Widget child;
 
@@ -30,6 +34,7 @@ class HrQueryLocation extends StatelessWidget {
     super.key,
     required this.query,
     this.viewMode,
+    this.acceptsUnknownCategory = true,
     required this.onLocation,
     required this.child,
   });
@@ -46,7 +51,13 @@ class HrQueryLocation extends StatelessWidget {
       },
       onLocation: (values) => onLocation(
         HrLocationFilters(
-          category: _byName(HrCategoryKey.values, values[categoryParam]),
+          category: switch (_byName(
+            HrCategoryKey.values,
+            values[categoryParam],
+          )) {
+            HrCategoryKey.unknown when !acceptsUnknownCategory => null,
+            final key => key,
+          },
           sort:
               _byName(HrRosterSort.values, values[sortParam]) ??
               HrRosterSort.name,

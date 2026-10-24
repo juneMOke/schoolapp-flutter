@@ -89,7 +89,15 @@ HrStaffStats statsOf(List<HrStaffMemberRow> rows) {
 class FakeHrStaffDashboard implements HrStaffDashboardRepository {
   List<HrStaffMemberRow> rows;
   HrStaffStats? statsOverride;
+
+  /// Les chiffres ET la liste échouent.
   Failure? failure;
+
+  /// La liste seule échoue : les chiffres, eux, arrivent.
+  Failure? membersFailure;
+
+  /// Le PDF échoue (429, 403, plafond…).
+  Failure? reportFailure;
   final int pageSize;
   final List<(HrRosterQuery, int)> asked = [];
   final List<HrRosterQuery> printed = [];
@@ -111,7 +119,7 @@ class FakeHrStaffDashboard implements HrStaffDashboardRepository {
     required int page,
   }) async {
     asked.add((query, page));
-    final failed = failure;
+    final failed = membersFailure ?? failure;
     if (failed != null) return Left(failed);
     final words = query.text
         .toLowerCase()
@@ -123,9 +131,19 @@ class FakeHrStaffDashboard implements HrStaffDashboardRepository {
             words.every((w) => row.fullName.toLowerCase().contains(w)))
           row,
     ]..sort((a, b) => a.fullName.compareTo(b.fullName));
-    final ordered = query.sort == HrRosterSort.nameDescending
-        ? kept.reversed.toList()
-        : kept;
+    final ordered = switch (query.sort) {
+      HrRosterSort.name => kept,
+      HrRosterSort.nameDescending => kept.reversed.toList(),
+      // Date absente en fin de liste dans les deux sens, comme le serveur.
+      HrRosterSort.oldest || HrRosterSort.newest => [
+        ...kept.where((r) => r.entryDate != null).toList()..sort(
+          (a, b) => query.sort == HrRosterSort.oldest
+              ? a.entryDate!.compareTo(b.entryDate!)
+              : b.entryDate!.compareTo(a.entryDate!),
+        ),
+        ...kept.where((r) => r.entryDate == null),
+      ],
+    };
     return Right(
       HrStaffMembersPage(
         totalElements: ordered.length,
@@ -139,6 +157,8 @@ class FakeHrStaffDashboard implements HrStaffDashboardRepository {
   @override
   Future<Either<Failure, HrStaffListReport>> report(HrRosterQuery query) async {
     printed.add(query);
+    final failed = reportFailure;
+    if (failed != null) return Left(failed);
     return Right(
       HrStaffListReport(
         bytes: Uint8List.fromList(const [0x25, 0x50, 0x44, 0x46]),

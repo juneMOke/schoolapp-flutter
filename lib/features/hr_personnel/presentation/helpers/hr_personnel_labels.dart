@@ -93,13 +93,4 @@ abstract final class HrPersonnelLabels {
         HrRosterSort.oldest => l10n.hrSortOldest,
         HrRosterSort.newest => l10n.hrSortNewest,
       };
-
-  /// Le tri tel que le PDF l'imprime (« trié par nom »).
-  static String pdfSort(AppLocalizations l10n, HrRosterSort sort) =>
-      switch (sort) {
-        HrRosterSort.name => l10n.hrPdfSortName,
-        HrRosterSort.nameDescending => l10n.hrPdfSortNameDescending,
-        HrRosterSort.oldest => l10n.hrPdfSortOldest,
-        HrRosterSort.newest => l10n.hrPdfSortNewest,
-      };
 }

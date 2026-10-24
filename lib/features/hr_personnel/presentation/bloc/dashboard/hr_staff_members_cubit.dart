@@ -26,6 +26,11 @@ class HrStaffMembersCubit extends Cubit<HrStaffMembersState> {
   /// posé depuis est jetée.
   int _ticket = 0;
 
+  /// La page **demandée** en dernier — pas forcément celle affichée : une
+  /// relecture de fond pendant un changement de page doit relire la page
+  /// voulue, et « Réessayer » rejouer celle qui a échoué.
+  int _requestedPage = 0;
+
   HrStaffMembersCubit({
     required GetHrStaffMembersUseCase getMembers,
     this.debounce = defaultDebounce,
@@ -67,11 +72,12 @@ class HrStaffMembersCubit extends Cubit<HrStaffMembersState> {
   }
 
   /// Rejoue la dernière question, page comprise.
-  Future<void> retry() => _load(page: state.page?.page ?? 0);
+  Future<void> retry() => _load(page: _requestedPage);
 
-  /// F5, fin d'un envoi : la même page relue, sans la retirer de l'écran.
+  /// F5, fin d'un envoi : la page voulue relue, sans retirer de l'écran celle
+  /// qui s'y trouve.
   Future<void> reload() =>
-      _load(page: state.page?.page ?? 0, keepPage: true, silent: true);
+      _load(page: _requestedPage, keepPage: true, silent: true);
 
   Future<void> _ask(HrRosterQuery query) async {
     if (query == state.query && state.status != HrStaffMembersStatus.failure) {
@@ -90,6 +96,7 @@ class HrStaffMembersCubit extends Cubit<HrStaffMembersState> {
     bool silent = false,
   }) async {
     final ticket = ++_ticket;
+    _requestedPage = page;
     final query = state.query;
     emit(
       state.copyWith(
@@ -115,13 +122,24 @@ class HrStaffMembersCubit extends Cubit<HrStaffMembersState> {
           ),
         );
       },
-      (members) => emit(
-        state.copyWith(
-          status: HrStaffMembersStatus.ready,
-          page: members,
-          answered: query,
-        ),
-      ),
+      (members) {
+        // La liste a raccourci sous la page voulue (une fiche sortie du
+        // filtre, un agent retiré) : la dernière page qui existe, plutôt
+        // qu'un « aucun agent » sous « 20 agents », sans barre pour revenir.
+        if (members.items.isEmpty && page > 0 && members.totalElements > 0) {
+          unawaited(
+            _load(page: members.totalPages - 1, keepPage: true, silent: silent),
+          );
+          return;
+        }
+        emit(
+          state.copyWith(
+            status: HrStaffMembersStatus.ready,
+            page: members,
+            answered: query,
+          ),
+        );
+      },
     );
   }
 

@@ -18082,18 +18082,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hrDashboardEmptyAction => 'Add a staff member';
 
   @override
-  String get hrPdfSortName => 'name';
-
-  @override
-  String get hrPdfSortNameDescending => 'name (Z to A)';
-
-  @override
-  String get hrPdfSortOldest => 'length of service (longest first)';
-
-  @override
-  String get hrPdfSortNewest => 'length of service (most recent first)';
-
-  @override
   String get hrFileSubtitle =>
       'Teachers, administrative and support staff — entered on the tablet, synced as soon as the network returns.';
 
@@ -18136,7 +18124,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrAgentNotFoundMessage =>
-      'This record is not in the tablet’s staff file: the staff member may have been removed, or the link comes from another school.';
+      'This record is not in the tablet\'s staff file: the staff member may have been removed, or the link comes from another school.';
 
   @override
   String get hrAgentNotFoundAction => 'Back to staff';
@@ -18172,4 +18160,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrStaffReportFailed => 'The staff list could not be prepared.';
+
+  @override
+  String get hrDashboardErrorServerTitle => 'The server did not answer';
+
+  @override
+  String get hrDashboardErrorServer =>
+      'The staff figures could not be read from the server. Try again in a moment; if the problem persists, contact support.';
+
+  @override
+  String get hrDashboardPendingOnlyTitle => 'Nothing on the server yet';
+
+  @override
+  String get hrDashboardPendingOnlyMessage =>
+      'The staff entered on this tablet have not reached the server yet: they will appear here once sent.';
+
+  @override
+  String get hrStaffReportNoYear =>
+      'No current school year: the list cannot be numbered.';
+
+  @override
+  String get hrStaffReportSessionExpired =>
+      'Session expired: sign in again to print the list.';
 }

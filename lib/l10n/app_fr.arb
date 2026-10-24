@@ -10787,10 +10787,6 @@
   "hrDashboardEmptyTitle": "Aucun agent dans le fichier",
   "hrDashboardEmptyMessage": "Le fichier du personnel est vide. Enregistrez le premier agent : sa fiche, son contrat et les pièces de son dossier.",
   "hrDashboardEmptyAction": "Ajouter un agent",
-  "hrPdfSortName": "nom",
-  "hrPdfSortNameDescending": "nom (de Z à A)",
-  "hrPdfSortOldest": "ancienneté (plus anciens d'abord)",
-  "hrPdfSortNewest": "ancienneté (plus récents d'abord)",
   "hrFileSubtitle": "Enseignants, administratifs et personnel d'appui — saisis sur la tablette, synchronisés dès que le réseau revient.",
   "hrFileFooterAll": "{count, plural, =0{Aucun agent au fichier} =1{1 agent au fichier} other{{count} agents au fichier}}",
   "hrFileFooterFiltered": "{shown} sur {total}",
@@ -10800,7 +10796,7 @@
   "staffTableSortDescending": "Trié de Z à A ; touchez pour inverser",
   "hrSortNameDescending": "Trier : nom (Z à A)",
   "hrAgentNotFoundTitle": "Agent introuvable",
-  "hrAgentNotFoundMessage": "Cette fiche n’est pas dans le fichier du personnel de la tablette : l’agent a pu être retiré, ou le lien vient d’une autre école.",
+  "hrAgentNotFoundMessage": "Cette fiche n'est pas dans le fichier du personnel de la tablette : l'agent a pu être retiré, ou le lien vient d'une autre école.",
   "hrAgentNotFoundAction": "Retour au personnel",
   "hrDashboardSubtitleBare": "Qui travaille à l'école",
   "hrRosterLoading": "Chargement de la liste du personnel",
@@ -10810,5 +10806,11 @@
   "hrStaffReportBusy": "Un document est déjà en préparation. Réessayez dans {seconds} s.",
   "hrStaffReportForbidden": "Vous n'avez pas accès à la liste du personnel.",
   "hrStaffReportTooLarge": "{lines} agents, au-delà des {cap} du document : ajoutez une recherche ou une catégorie.",
-  "hrStaffReportFailed": "La liste du personnel n'a pas pu être préparée."
+  "hrStaffReportFailed": "La liste du personnel n'a pas pu être préparée.",
+  "hrDashboardErrorServerTitle": "Le serveur n'a pas répondu",
+  "hrDashboardErrorServer": "Les chiffres du personnel n'ont pas pu être lus au serveur. Réessayez dans un instant ; si le problème persiste, contactez le support.",
+  "hrDashboardPendingOnlyTitle": "Rien encore sur le serveur",
+  "hrDashboardPendingOnlyMessage": "Les agents saisis sur cette tablette n'ont pas encore été reçus par le serveur : ils apparaîtront ici dès leur envoi.",
+  "hrStaffReportNoYear": "Aucune année scolaire en cours : la liste ne peut pas être numérotée.",
+  "hrStaffReportSessionExpired": "Session expirée : reconnectez-vous pour imprimer la liste."
 }

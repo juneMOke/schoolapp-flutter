@@ -21,8 +21,6 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_pe
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_query_location.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_body.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -95,30 +93,16 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
     await context.read<HrPersonnelCubit>().reload();
   }
 
-  /// Ouvre la fiche — depuis le fichier local quand la tablette l'a, sans
-  /// attendre —, puis relit : elle a pu changer.
+  /// Ouvre la fiche, puis relit le fichier local : elle a pu changer. Le
+  /// serveur se relit de lui-même si le fichier a bougé (écouteur ci-dessous).
   Future<void> _openAgent(HrStaffMemberRow row) async {
-    final local = context.read<HrPersonnelCubit>().state;
-    final view = _viewOf(local);
-    final known = view.all.where((r) => r.member.id == row.id).firstOrNull;
-    if (known == null) {
-      await HrAgentIntent.openById(
-        context,
-        subMenuId: MenuConstants.hrPersonnelDashboardId,
-        agentId: row.id,
-      );
-    } else {
-      await HrAgentIntent.open(
-        context,
-        subMenuId: MenuConstants.hrPersonnelDashboardId,
-        row: known,
-        others: local.snapshot.members,
-        today: local.today,
-      );
-    }
+    await HrAgentIntent.open(
+      context,
+      subMenuId: MenuConstants.hrPersonnelDashboardId,
+      agentId: row.id,
+    );
     if (!mounted) return;
     await context.read<HrPersonnelCubit>().refresh();
-    if (mounted) _rereadServer();
   }
 
   /// Une fiche neuve n'a pas d'adresse : elle s'ouvre par-dessus l'écran.
@@ -131,16 +115,7 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
     );
     if (!mounted) return;
     await context.read<HrPersonnelCubit>().refresh();
-    if (mounted) _rereadServer();
   }
-
-  /// Pour retrouver la ligne locale d'un agent : ses pièces n'y comptent pas.
-  StaffFileView _viewOf(HrPersonnelState local) => StaffFileView.build(
-    local.snapshot,
-    query: StaffFileQuery.none,
-    today: local.today,
-    documentsVisible: false,
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +152,7 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
                 selector: (state) => state.query,
                 builder: (context, query) => HrQueryLocation(
                   query: query,
+                  acceptsUnknownCategory: false,
                   onLocation: (filters) => unawaited(
                     context.read<HrStaffMembersCubit>().applyLocation(filters),
                   ),

@@ -50,7 +50,11 @@ class HrCategoryCard extends StatelessWidget {
               category: category,
               scale: max,
               selected: category.key == active,
-              onTap: () => onTap(category.key),
+              // Une catégorie que le serveur ne connaît pas ne se filtre pas :
+              // sa ligne se lit, elle ne se touche pas.
+              onTap: category.key == HrCategoryKey.unknown
+                  ? null
+                  : () => onTap(category.key),
             ),
         ],
       ),
@@ -62,7 +66,7 @@ class _CategoryRow extends StatelessWidget {
   final HrCategoryCount category;
   final int scale;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _CategoryRow({
     required this.category,
@@ -77,7 +81,7 @@ class _CategoryRow extends StatelessWidget {
     final label = HrPersonnelLabels.category(l10n, category.key);
     final value = l10n.hrAgentsCount(category.count);
     return Semantics(
-      button: true,
+      button: onTap != null,
       selected: selected,
       label: l10n.hrJoin(label, value),
       // L'action doit être portée ici : `excludeSemantics` retire celle de

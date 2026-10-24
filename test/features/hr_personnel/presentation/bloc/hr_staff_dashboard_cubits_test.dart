@@ -25,11 +25,28 @@ class _MockMembers extends Mock implements GetHrStaffMembersUseCase {}
 
 class _MockReport extends Mock implements GetHrStaffListReportUseCase {}
 
+/// Une page du serveur, avec une ligne : une page vide au-delà de la
+/// première dit « la liste a raccourci ».
 HrStaffMembersPage _page(int total, {int page = 0}) => HrStaffMembersPage(
   totalElements: total,
   page: page,
   size: 20,
-  items: const [],
+  items: const [
+    HrStaffMemberRow(
+      id: 'a',
+      staffNumber: 'CF-AG-0001',
+      lastName: 'KALALA',
+      middleName: null,
+      firstName: 'Jean',
+      sex: null,
+      category: HrCategoryKey.teacher,
+      jobTitle: null,
+      entryDate: null,
+      seniorityYears: null,
+      contractKind: null,
+      dossier: null,
+    ),
+  ],
 );
 
 const _stats = HrStaffStats(
@@ -107,6 +124,60 @@ void main() {
       await cubit.pageChanged(3); // 42 agents : pages 0 à 2
       await cubit.pageChanged(-1);
       verifyNever(() => getMembers(any(), page: any(named: 'page')));
+    });
+
+    test(
+      'la liste a raccourci sous la page voulue : la dernière qui existe',
+      () async {
+        await cubit.load();
+        await cubit.pageChanged(2);
+        // 42 → 20 agents : la page 2 n'existe plus.
+        when(() => getMembers(any(), page: 2)).thenAnswer(
+          (_) async => const Right(
+            HrStaffMembersPage(totalElements: 20, page: 2, size: 20, items: []),
+          ),
+        );
+        when(
+          () => getMembers(any(), page: 0),
+        ).thenAnswer((_) async => Right(_page(20)));
+        await cubit.reload();
+        await Future<void>.delayed(Duration.zero);
+
+        verify(() => getMembers(any(), page: 0)).called(greaterThan(0));
+        expect(cubit.state.page!.totalElements, 20);
+        expect(cubit.state.page!.page, 0);
+      },
+    );
+
+    test('une relecture de fond pendant un changement de page relit la page '
+        'voulue', () async {
+      await cubit.load();
+      final slow = Completer<Either<Failure, HrStaffMembersPage>>();
+      when(() => getMembers(any(), page: 1)).thenAnswer((_) => slow.future);
+      final turning = cubit.pageChanged(1);
+      when(
+        () => getMembers(any(), page: 1),
+      ).thenAnswer((_) async => Right(_page(42, page: 1)));
+      await cubit.reload();
+      slow.complete(Right(_page(42, page: 1)));
+      await turning;
+
+      expect(cubit.state.page!.page, 1);
+    });
+
+    test('« Réessayer » rejoue la page qui a échoué', () async {
+      await cubit.load();
+      when(
+        () => getMembers(any(), page: 2),
+      ).thenAnswer((_) async => const Left(ServerFailure('500')));
+      await cubit.pageChanged(2);
+      expect(cubit.state.status, HrStaffMembersStatus.failure);
+
+      when(
+        () => getMembers(any(), page: 2),
+      ).thenAnswer((_) async => Right(_page(42, page: 2)));
+      await cubit.retry();
+      expect(cubit.state.page!.page, 2);
     });
 
     test('une relecture ratée garde la page affichée', () async {

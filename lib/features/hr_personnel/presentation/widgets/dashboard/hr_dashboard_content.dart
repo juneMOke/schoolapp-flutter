@@ -24,7 +24,7 @@ class HrDashboardContent extends StatelessWidget {
   /// Fiches et pièces encore sur la tablette : ni dans les chiffres, ni dans
   /// la liste, ni dans le PDF tant que le serveur ne les a pas reçues.
   final int pending;
-  final RecordSyncState Function(String id) syncOf;
+  final RecordSyncState? Function(String id) syncOf;
 
   /// Porte la clé vers laquelle l'écran défile.
   final Key rosterKey;

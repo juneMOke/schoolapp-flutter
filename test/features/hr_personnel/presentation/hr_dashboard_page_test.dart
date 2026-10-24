@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
+import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
@@ -14,7 +16,7 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_d
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_roster_row.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_sync_insight.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/states/hr_dashboard_results_error_state.dart';
 
 import '../hr_personnel_builders.dart';
 import 'hr_dashboard_harness.dart';
@@ -151,6 +153,23 @@ void main() {
     expect(rosterIds(tester), ['c', 'b', 'a']);
   });
 
+  testWidgets('par ancienneté : la date absente en fin de liste', (
+    tester,
+  ) async {
+    final server = FakeHrStaffDashboard([
+      serverRow('r', lastName: 'RECENT', entryDate: '2024-09-01'),
+      serverRow('x', lastName: 'SANS', entryDate: null, seniorityYears: null),
+      serverRow('o', lastName: 'ANCIEN', entryDate: '2001-09-01'),
+    ]);
+    await pumpHrDashboard(tester, server: server);
+
+    await members(tester).setSort(HrRosterSort.oldest);
+    await tester.pump();
+
+    expect(server.asked.last.$1.sort, HrRosterSort.oldest);
+    expect(rosterIds(tester), ['o', 'r', 'x']);
+  });
+
   testWidgets('sans ligne, le PDF est désactivé et « Tout afficher » vide', (
     tester,
   ) async {
@@ -201,7 +220,9 @@ void main() {
     expect(rosterIds(tester), hasLength(20));
     expect(find.text('Page 1 / 2'), findsOneWidget);
 
-    await members(tester).pageChanged(1);
+    await tester.ensureVisible(find.byTooltip('Page suivante'));
+    await tester.tap(find.byTooltip('Page suivante'));
+    await tester.pump();
     await tester.pump();
 
     expect(server.asked.last.$2, 1);
@@ -213,7 +234,8 @@ void main() {
       ..failure = const NetworkFailure('Aucune connexion.');
     await pumpHrDashboard(tester, server: server);
 
-    expect(find.byType(StaffResultsErrorState), findsOneWidget);
+    expect(find.byType(HrDashboardResultsErrorState), findsOneWidget);
+    expect(find.text('Pas de connexion'), findsOneWidget);
     expect(find.text('EFFECTIF'), findsNothing);
   });
 
@@ -237,8 +259,8 @@ void main() {
     expect(find.text('Ouvrir le fichier'), findsOneWidget);
   });
 
-  testWidgets('vide pour le serveur, mais des agents en attente : l\'alerte '
-      'le dit', (tester) async {
+  testWidgets('vide pour le serveur, mais des agents en attente : ni « vide » '
+      'ni « ajouter », qui inviterait au doublon', (tester) async {
     await pumpHrDashboard(
       tester,
       server: FakeHrStaffDashboard(const []),
@@ -246,7 +268,112 @@ void main() {
     );
 
     expect(find.byType(HrSyncInsight), findsOneWidget);
-    expect(find.text('Aucun agent dans le fichier'), findsOneWidget);
+    expect(find.text('Rien encore sur le serveur'), findsOneWidget);
+    expect(find.text('Aucun agent dans le fichier'), findsNothing);
+    expect(find.text('Ajouter un agent'), findsNothing);
+  });
+
+  testWidgets('chiffres là, liste en panne : l\'erreur reste dans la carte', (
+    tester,
+  ) async {
+    final server = FakeHrStaffDashboard(rows)
+      ..membersFailure = const ServerFailure('500');
+    await pumpHrDashboard(tester, server: server);
+
+    expect(find.text('EFFECTIF'), findsOneWidget);
+    expect(find.text('Le serveur n\'a pas répondu'), findsOneWidget);
+    expect(
+      tester
+          .widget<EteeloButton>(find.widgetWithText(EteeloButton, 'PDF'))
+          .onPressed,
+      isNull,
+    );
+  });
+
+  testWidgets('une panne serveur se dit serveur, pas « cette tablette »', (
+    tester,
+  ) async {
+    final server = FakeHrStaffDashboard(rows)
+      ..failure = const ServerFailure('500');
+    await pumpHrDashboard(tester, server: server);
+
+    expect(find.text('Le serveur n\'a pas répondu'), findsWidgets);
+    expect(find.textContaining('sur cette tablette'), findsNothing);
+  });
+
+  testWidgets(
+    'fichier local illisible : aucune pastille ne prétend « à jour »',
+    (tester) async {
+      final source = MockStaffSnapshotSource();
+      when(() => source.watch(any())).thenReturn(() {});
+      when(() => source.pull()).thenAnswer((_) async {});
+      when(() => source.read()).thenAnswer(
+        (_) async =>
+            const Left<Failure, StaffFileSnapshot>(StorageFailure('illisible')),
+      );
+      await pumpHrDashboard(
+        tester,
+        server: FakeHrStaffDashboard(rows),
+        source: source,
+      );
+
+      expect(rosterIds(tester), hasLength(3));
+      for (final row in tester.widgetList<HrRosterRow>(
+        find.byType(HrRosterRow),
+      )) {
+        expect(row.sync, isNull);
+      }
+      // La légende de la carte garde ses pastilles ; aucune ligne n'en porte.
+      expect(
+        find.descendant(
+          of: find.byType(HrRosterRow),
+          matching: find.byType(RecordSyncDot),
+        ),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets('un 429 sur le PDF : le bouton attend, désarmé, et le dit', (
+    tester,
+  ) async {
+    final server = FakeHrStaffDashboard(rows)
+      ..reportFailure = const TooManyRequestsFailure(
+        retryAfter: Duration(seconds: 30),
+      );
+    await pumpHrDashboard(tester, server: server);
+
+    await tester.tap(find.widgetWithText(EteeloButton, 'PDF'));
+    await tester.pump();
+    await tester.pump();
+
+    final waiting = find.widgetWithText(EteeloButton, 'Patientez…');
+    expect(waiting, findsOneWidget);
+    expect(tester.widget<EteeloButton>(waiting).onPressed, isNull);
+    expect(
+      find.text('Un document est déjà en préparation. Réessayez dans 30 s.'),
+      findsOneWidget,
+    );
+    // L'attente court encore : elle s'achève avec le test.
+    await tester.pump(const Duration(seconds: 31));
+  });
+
+  testWidgets('pendant la frappe, le PDF n\'imprime pas l\'ancienne liste', (
+    tester,
+  ) async {
+    await pumpHrDashboard(tester, server: FakeHrStaffDashboard(rows));
+    members(tester).setText('ruth');
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<EteeloButton>(find.widgetWithText(EteeloButton, 'PDF'))
+          .onPressed,
+      isNull,
+    );
+    // La recherche part : le minuteur de frappe se dénoue.
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump();
   });
 
   testWidgets('un envoi achevé fait relire le serveur', (tester) async {

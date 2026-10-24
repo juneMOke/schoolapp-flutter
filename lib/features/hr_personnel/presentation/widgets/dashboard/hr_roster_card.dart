@@ -21,7 +21,7 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/helpers/hr
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_sort_select.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_roster_row.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_staff_list_report_button.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/states/hr_dashboard_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Qui sont-ils » : la liste nominative de l'effectif — qui, quel rôle,
@@ -32,7 +32,7 @@ class HrRosterCard extends StatelessWidget {
   final HrStaffStats stats;
 
   /// L'état de la fiche sur cette tablette, par agent.
-  final RecordSyncState Function(String id) syncOf;
+  final RecordSyncState? Function(String id) syncOf;
   final ValueChanged<String> onTextChanged;
   final ValueChanged<HrCategoryKey?> onCategoryChanged;
   final ValueChanged<HrRosterSort> onSortChanged;
@@ -63,7 +63,13 @@ class HrRosterCard extends StatelessWidget {
     final query = members.query;
     final scope = HrPersonnelLabels.scope(l10n, query);
     final page = members.page;
-    final printable = page != null && page.totalElements > 0
+    // Le PDF n'imprime que la liste à l'écran : pas pendant une lecture, ni
+    // pendant la frappe d'une recherche qui n'est pas encore partie.
+    final printable =
+        page != null &&
+            page.totalElements > 0 &&
+            members.status == HrStaffMembersStatus.ready &&
+            members.answered == members.query
         ? members.answered
         : null;
     return Container(
@@ -159,7 +165,10 @@ extension on HrRosterCard {
     final page = members.page;
     if (members.status == HrStaffMembersStatus.failure) {
       return [
-        StaffResultsErrorState(failure: members.failure, onRetry: onRetry),
+        HrDashboardResultsErrorState(
+          failure: members.failure,
+          onRetry: onRetry,
+        ),
       ];
     }
     if (page == null) {

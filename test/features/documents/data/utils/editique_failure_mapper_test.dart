@@ -63,6 +63,39 @@ void main() {
       expect(failure.message, 'Charges en devises multiples');
     });
 
+    test('un 400 REPORT_LINE_CAP garde son code et ses chiffres', () {
+      final failure = EditiqueFailureMapper.fromDioException(
+        _badResponse(
+          statusCode: 400,
+          classified: const ApiValidationFailure(
+            code: ApiErrorCode.validation,
+            detailCode: 'REPORT_LINE_CAP',
+            details: {'lines': 6000, 'cap': 5000},
+          ),
+          body: _apiError('Trop d\'agents pour une seule liste.'),
+        ),
+      );
+
+      expect(failure, isA<ApiValidationFailure>());
+      final typed = failure as ApiValidationFailure;
+      expect(typed.detailCode, 'REPORT_LINE_CAP');
+      expect(typed.details, {'lines': 6000, 'cap': 5000});
+      expect(typed.message, 'Trop d\'agents pour une seule liste.');
+    });
+
+    test('un 5xx garde sa référence d\'incident', () {
+      final failure = EditiqueFailureMapper.fromDioException(
+        _badResponse(
+          statusCode: 500,
+          classified: const ApiServerFailure(incidentId: 'INC-42'),
+          body: _apiError('Erreur interne.'),
+        ),
+      );
+
+      expect(failure, isA<ApiServerFailure>());
+      expect((failure as ApiServerFailure).incidentId, 'INC-42');
+    });
+
     test('conserve la Failure telle quelle si le corps est illisible', () {
       const classified = NotFoundFailure('Resource not found');
       final failure = EditiqueFailureMapper.fromDioException(

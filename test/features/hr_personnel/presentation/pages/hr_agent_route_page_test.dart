@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,11 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
@@ -26,9 +27,12 @@ import '../hr_personnel_harness.dart';
 /// La fiche d'un agent a son adresse, `/home/{sousMenu}/{agentId}` : la liste
 /// l'ouvre par-dessus elle, et une adresse rechargée la rouvre sur la
 /// coquille, l'agent relu dans le fichier local.
+class _MockConnectivity extends Mock implements ConnectivityService {}
+
 void main() {
   final getIt = GetIt.instance;
   late MockStaffSnapshotSource source;
+  late _MockConnectivity connectivity;
   const file = MenuConstants.hrPersonnelFileId;
   final agentA = agent(
     'a',
@@ -45,6 +49,9 @@ void main() {
       () => source.read(),
     ).thenAnswer((_) async => Right(snapshotOf([agentA])));
     getIt.registerFactory<StaffSnapshotSource>(() => source);
+    connectivity = _MockConnectivity();
+    when(() => connectivity.isOnline()).thenAnswer((_) async => true);
+    getIt.registerSingleton<ConnectivityService>(connectivity);
   });
   tearDown(() async => getIt.reset());
 
@@ -70,14 +77,7 @@ void main() {
                   onPressed: () => HrAgentIntent.open(
                     context,
                     subMenuId: file,
-                    row: StaffFileView.build(
-                      snapshotOf([agentA]),
-                      query: StaffFileQuery.none,
-                      today: '2026-10-24',
-                      documentsVisible: true,
-                    ).all.single,
-                    others: [agentA],
-                    today: '2026-10-24',
+                    agentId: 'a',
                   ).then((_) => closed++),
                   child: Text('écran ${state.pathParameters['subMenuId']}'),
                 ),
@@ -113,14 +113,16 @@ void main() {
   Finder agentPage(String id) =>
       find.byWidgetPredicate((w) => w is StaffAgentPage && w.member?.id == id);
 
-  testWidgets('ouverte depuis la liste : aussitôt, sans relire, avec son '
-      'adresse', (tester) async {
+  testWidgets('ouverte depuis la liste : l\'agent relu, l\'adresse prise', (
+    tester,
+  ) async {
     await pump(tester, '/home/$file');
     await tester.tap(find.text('écran $file'));
     await settle(tester);
 
     expect(agentPage('a'), findsOneWidget);
-    verifyNever(() => source.read());
+    // Toujours relu : Suivant rejouerait sinon l'agent de l'ouverture.
+    verify(() => source.read()).called(1);
     final reflected = ReflectedRecordsParser(
       GoRouter.of(tester.element(agentPage('a'))).routeInformationParser,
     );
@@ -199,6 +201,50 @@ void main() {
     await tester.pump();
 
     expect(agentPage('a'), findsOneWidget);
+  });
+
+  testWidgets('rouverte, la fiche montre l\'agent tel qu\'il est devenu', (
+    tester,
+  ) async {
+    final router = await pump(tester, '/home/$file');
+    await tester.tap(find.text('écran $file'));
+    await settle(tester);
+    router.pop();
+    await settle(tester);
+
+    // Modifié entre-temps (enregistré, ou reçu du serveur).
+    final renamed = agent('a', lastName: 'Mayala-Kongo');
+    when(
+      () => source.read(),
+    ).thenAnswer((_) async => Right(snapshotOf([renamed])));
+    await tester.tap(find.text('écran $file'));
+    await settle(tester);
+
+    expect(
+      tester.widget<StaffAgentPage>(agentPage('a')).member!.lastName,
+      'Mayala-Kongo',
+    );
+  });
+
+  testWidgets('hors ligne, un agent absent : le réseau manque, pas l\'agent', (
+    tester,
+  ) async {
+    when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+    await pump(tester, '/home/$file/inconnu');
+    await settle(tester);
+
+    expect(find.text('Agent introuvable'), findsNothing);
+    expect(find.text('Pas de connexion'), findsOneWidget);
+  });
+
+  testWidgets('pendant la lecture, la sortie reste offerte', (tester) async {
+    final slow = Completer<Either<Failure, StaffFileSnapshot>>();
+    when(() => source.read()).thenAnswer((_) => slow.future);
+    await pump(tester, '/home/$file/a');
+
+    expect(find.byTooltip('Retour'), findsOneWidget);
+    slow.complete(Right(snapshotOf([agentA])));
+    await settle(tester);
   });
 
   testWidgets('une base illisible est une panne, pas un agent introuvable', (

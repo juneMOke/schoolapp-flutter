@@ -10699,22 +10699,6 @@
   "@hrDashboardEmptyAction": {
     "description": "Action du tableau de bord vide."
   },
-  "hrPdfSortName": "name",
-  "@hrPdfSortName": {
-    "description": "Tri dans le PDF."
-  },
-  "hrPdfSortNameDescending": "name (Z to A)",
-  "@hrPdfSortNameDescending": {
-    "description": "Tri dans le PDF."
-  },
-  "hrPdfSortOldest": "length of service (longest first)",
-  "@hrPdfSortOldest": {
-    "description": "Tri dans le PDF."
-  },
-  "hrPdfSortNewest": "length of service (most recent first)",
-  "@hrPdfSortNewest": {
-    "description": "Tri dans le PDF."
-  },
   "hrFileSubtitle": "Teachers, administrative and support staff — entered on the tablet, synced as soon as the network returns.",
   "@hrFileSubtitle": {
     "description": "Sous-titre du Fichier."
@@ -10772,7 +10756,7 @@
   "@hrAgentNotFoundTitle": {
     "description": "RH · Personnel : fiche d’agent ouverte par une adresse inconnue — titre."
   },
-  "hrAgentNotFoundMessage": "This record is not in the tablet’s staff file: the staff member may have been removed, or the link comes from another school.",
+  "hrAgentNotFoundMessage": "This record is not in the tablet's staff file: the staff member may have been removed, or the link comes from another school.",
   "@hrAgentNotFoundMessage": {
     "description": "RH · Personnel : fiche d’agent introuvable — explication."
   },
@@ -10828,5 +10812,29 @@
   "hrStaffReportFailed": "The staff list could not be prepared.",
   "@hrStaffReportFailed": {
     "description": "RH · Personnel : échec du PDF."
+  },
+  "hrDashboardErrorServerTitle": "The server did not answer",
+  "@hrDashboardErrorServerTitle": {
+    "description": "RH · Personnel : panne serveur du tableau de bord — titre."
+  },
+  "hrDashboardErrorServer": "The staff figures could not be read from the server. Try again in a moment; if the problem persists, contact support.",
+  "@hrDashboardErrorServer": {
+    "description": "RH · Personnel : panne serveur du tableau de bord — explication."
+  },
+  "hrDashboardPendingOnlyTitle": "Nothing on the server yet",
+  "@hrDashboardPendingOnlyTitle": {
+    "description": "RH · Personnel : le serveur ne compte aucun agent, mais la tablette en a en attente — titre."
+  },
+  "hrDashboardPendingOnlyMessage": "The staff entered on this tablet have not reached the server yet: they will appear here once sent.",
+  "@hrDashboardPendingOnlyMessage": {
+    "description": "RH · Personnel : agents en attente, serveur vide — explication."
+  },
+  "hrStaffReportNoYear": "No current school year: the list cannot be numbered.",
+  "@hrStaffReportNoYear": {
+    "description": "RH · Personnel : 404 du PDF (pas d'année en cours)."
+  },
+  "hrStaffReportSessionExpired": "Session expired: sign in again to print the list.",
+  "@hrStaffReportSessionExpired": {
+    "description": "RH · Personnel : 401 du PDF."
   }
 }

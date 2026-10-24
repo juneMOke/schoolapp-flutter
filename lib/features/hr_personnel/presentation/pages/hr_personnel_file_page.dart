@@ -99,9 +99,7 @@ class HrPersonnelFileScreen extends StatelessWidget {
         await HrAgentIntent.open(
           context,
           subMenuId: MenuConstants.hrPersonnelFileId,
-          row: row,
-          others: state.snapshot.members,
-          today: state.today,
+          agentId: row.member.id,
         );
       }
       if (context.mounted) await cubit.refresh();

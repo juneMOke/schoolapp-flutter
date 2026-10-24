@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/avatars/person_sync_avatar.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -22,8 +23,10 @@ class HrRosterRow extends StatelessWidget {
   final HrStaffMemberRow row;
 
   /// L'état de la fiche **sur cette tablette** : le serveur la connaît, mais
-  /// une modification peut ne pas lui être encore parvenue.
-  final RecordSyncState sync;
+  /// une modification peut ne pas lui être encore parvenue. `null` tant que
+  /// le fichier local n'est pas lu (ou illisible) : on ne sait pas, et aucune
+  /// pastille ne le prétend.
+  final RecordSyncState? sync;
   final VoidCallback onOpen;
 
   const HrRosterRow({
@@ -55,13 +58,21 @@ class HrRosterRow extends StatelessWidget {
             builder: (context, constraints) {
               final identity = Row(
                 children: [
-                  PersonSyncAvatar(
-                    firstName: row.firstName ?? '',
-                    lastName: row.lastName,
-                    personId: row.id,
-                    sync: sync,
-                    size: AppDimensions.hrRosterAvatarSize,
-                  ),
+                  if (sync case final known?)
+                    PersonSyncAvatar(
+                      firstName: row.firstName ?? '',
+                      lastName: row.lastName,
+                      personId: row.id,
+                      sync: known,
+                      size: AppDimensions.hrRosterAvatarSize,
+                    )
+                  else
+                    PersonAvatar(
+                      firstName: row.firstName ?? '',
+                      lastName: row.lastName,
+                      personId: row.id,
+                      size: AppDimensions.hrRosterAvatarSize,
+                    ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
@@ -127,7 +138,7 @@ class HrRosterRow extends StatelessWidget {
 
 class _Facts extends StatelessWidget {
   final HrStaffMemberRow row;
-  final RecordSyncState sync;
+  final RecordSyncState? sync;
 
   const _Facts({required this.row, required this.sync});
 
@@ -180,10 +191,14 @@ class _Facts extends StatelessWidget {
               total: dossier.required,
             ),
           ),
-        Semantics(
-          label: RecordSyncPill.label(l10n, sync),
-          child: RecordSyncDot(state: sync, size: AppDimensions.hrSyncDotSize),
-        ),
+        if (sync case final known?)
+          Semantics(
+            label: RecordSyncPill.label(l10n, known),
+            child: RecordSyncDot(
+              state: known,
+              size: AppDimensions.hrSyncDotSize,
+            ),
+          ),
       ],
     );
   }

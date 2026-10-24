@@ -23,7 +23,7 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/da
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr_personnel_header.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/states/hr_dashboard_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le tableau de bord sous son en-tête : les chiffres du serveur, ou leur
@@ -56,19 +56,25 @@ class HrDashboardBody extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final figures = stats.stats;
     final empty = figures != null && figures.headcount == 0;
+    // Tant que le fichier local n'est pas lu (ou s'il est illisible), on ne
+    // sait ni ce qui attend ni où en est chaque fiche : rien ne le prétend.
+    final localKnown = local.status == HrPersonnelStatus.ready;
     // Les pièces en attente ne se comptent que pour qui les voit.
-    final pending = StaffFileView.build(
-      local.snapshot,
-      query: StaffFileQuery.none,
-      today: local.today,
-      documentsVisible: PermissionGate.allows(context, const [
-        Perm.hrDocumentRead,
-      ]),
-    ).pending;
+    final pending = localKnown
+        ? StaffFileView.build(
+            local.snapshot,
+            query: StaffFileQuery.none,
+            today: local.today,
+            documentsVisible: PermissionGate.allows(context, const [
+              Perm.hrDocumentRead,
+            ]),
+          ).pending
+        : 0;
     final syncById = {
       for (final member in local.snapshot.members) member.id: member.syncState,
     };
-    RecordSyncState syncOf(String id) => syncById[id] ?? RecordSyncState.synced;
+    RecordSyncState? syncOf(String id) =>
+        localKnown ? syncById[id] ?? RecordSyncState.synced : null;
 
     final header = HrPersonnelHeader(
       subtitle: _subtitle(context, l10n, figures?.headcount),
@@ -102,7 +108,7 @@ class HrDashboardBody extends StatelessWidget {
       case HrStaffStatsStatus.loading:
         content = const HrDashboardSkeleton();
       case HrStaffStatsStatus.failure:
-        content = StaffResultsErrorState(
+        content = HrDashboardResultsErrorState(
           failure: stats.failure,
           onRetry: () {
             unawaited(context.read<HrStaffStatsCubit>().load());
@@ -114,26 +120,33 @@ class HrDashboardBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Des agents saisis ici, pas encore reçus : le fichier n'est
-            // vide que pour le serveur.
+            // vide que pour le serveur — et proposer d'en ajouter un
+            // inviterait au doublon.
             if (pending > 0) ...[
               HrSyncInsight(pending: pending),
               const SizedBox(height: AppSpacing.lg),
-            ],
-            EteeloEmptyResult(
-              label: l10n.hrDashboardEmptyTitle,
-              description: l10n.hrDashboardEmptyMessage,
-              medallionIcon: Icons.groups_outlined,
-              fullWidthCard: true,
-              primaryAction: PermissionGate.access(
-                kStaffWriteAccess,
-                child: EteeloButton.primary(
-                  label: l10n.hrDashboardEmptyAction,
-                  icon: Icons.person_add_alt,
-                  onPressed: onCreate,
-                  fullWidth: false,
+              EteeloEmptyResult(
+                label: l10n.hrDashboardPendingOnlyTitle,
+                description: l10n.hrDashboardPendingOnlyMessage,
+                medallionIcon: Icons.cloud_upload_outlined,
+                fullWidthCard: true,
+              ),
+            ] else
+              EteeloEmptyResult(
+                label: l10n.hrDashboardEmptyTitle,
+                description: l10n.hrDashboardEmptyMessage,
+                medallionIcon: Icons.groups_outlined,
+                fullWidthCard: true,
+                primaryAction: PermissionGate.access(
+                  kStaffWriteAccess,
+                  child: EteeloButton.primary(
+                    label: l10n.hrDashboardEmptyAction,
+                    icon: Icons.person_add_alt,
+                    onPressed: onCreate,
+                    fullWidth: false,
+                  ),
                 ),
               ),
-            ),
           ],
         );
       case HrStaffStatsStatus.ready:

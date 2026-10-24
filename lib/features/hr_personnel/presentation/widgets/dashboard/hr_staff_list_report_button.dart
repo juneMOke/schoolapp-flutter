@@ -94,6 +94,12 @@ class HrStaffListReportButton extends StatelessWidget {
       return l10n.hrStaffReportBusy(wait.inSeconds);
     }
     if (failure is UnauthorizedFailure) return l10n.hrStaffReportForbidden;
+    if (failure is InvalidCredentialsFailure || failure is AuthFailure) {
+      return l10n.hrStaffReportSessionExpired;
+    }
+    // La seule 404 de la route : l'école n'a pas d'année en cours, dont la
+    // pièce tire son numéro.
+    if (failure is NotFoundFailure) return l10n.hrStaffReportNoYear;
     final cap = ReportLineCap.of(failure);
     if (cap != null) return l10n.hrStaffReportTooLarge(cap.lines, cap.cap);
 

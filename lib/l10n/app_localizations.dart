@@ -28165,30 +28165,6 @@ abstract class AppLocalizations {
   /// **'Add a staff member'**
   String get hrDashboardEmptyAction;
 
-  /// Tri dans le PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'name'**
-  String get hrPdfSortName;
-
-  /// Tri dans le PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'name (Z to A)'**
-  String get hrPdfSortNameDescending;
-
-  /// Tri dans le PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'length of service (longest first)'**
-  String get hrPdfSortOldest;
-
-  /// Tri dans le PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'length of service (most recent first)'**
-  String get hrPdfSortNewest;
-
   /// Sous-titre du Fichier.
   ///
   /// In en, this message translates to:
@@ -28246,7 +28222,7 @@ abstract class AppLocalizations {
   /// RH · Personnel : fiche d’agent introuvable — explication.
   ///
   /// In en, this message translates to:
-  /// **'This record is not in the tablet’s staff file: the staff member may have been removed, or the link comes from another school.'**
+  /// **'This record is not in the tablet\'s staff file: the staff member may have been removed, or the link comes from another school.'**
   String get hrAgentNotFoundMessage;
 
   /// RH · Personnel : fiche d’agent introuvable — retour à l’écran.
@@ -28308,6 +28284,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The staff list could not be prepared.'**
   String get hrStaffReportFailed;
+
+  /// RH · Personnel : panne serveur du tableau de bord — titre.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not answer'**
+  String get hrDashboardErrorServerTitle;
+
+  /// RH · Personnel : panne serveur du tableau de bord — explication.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff figures could not be read from the server. Try again in a moment; if the problem persists, contact support.'**
+  String get hrDashboardErrorServer;
+
+  /// RH · Personnel : le serveur ne compte aucun agent, mais la tablette en a en attente — titre.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on the server yet'**
+  String get hrDashboardPendingOnlyTitle;
+
+  /// RH · Personnel : agents en attente, serveur vide — explication.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff entered on this tablet have not reached the server yet: they will appear here once sent.'**
+  String get hrDashboardPendingOnlyMessage;
+
+  /// RH · Personnel : 404 du PDF (pas d'année en cours).
+  ///
+  /// In en, this message translates to:
+  /// **'No current school year: the list cannot be numbered.'**
+  String get hrStaffReportNoYear;
+
+  /// RH · Personnel : 401 du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired: sign in again to print the list.'**
+  String get hrStaffReportSessionExpired;
 }
 
 class _AppLocalizationsDelegate
