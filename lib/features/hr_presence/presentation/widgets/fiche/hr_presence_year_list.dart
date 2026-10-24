@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_profile_badge.dart';
@@ -122,7 +124,14 @@ class _MonthRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Expanded(child: figures),
           if (month.isOpenable)
-            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+            DataTableTrailingRegistry.build(
+              context,
+              DataTableTrailingSpec(
+                type: DataTableTrailingType.eye,
+                tooltip: l10n.hrPresenceYearOpen,
+                onTap: () => onOpen(month.month),
+              ),
+            ),
         ],
       ),
     );

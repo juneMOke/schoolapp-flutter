@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
+
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_profile_tone.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_profile_badge.dart';
@@ -136,10 +139,14 @@ class HrPresenceProfileRow extends StatelessWidget {
                 final inline =
                     constraints.maxWidth >=
                     AppDimensions.presenceProfileRowInlineMinWidth;
-                final chevron = Icon(
-                  Icons.chevron_right,
-                  color: AppColors.textSecondary,
-                  semanticLabel: l10n.hrPresenceStaffOpen,
+                // L'œil des tables de l'app : toute la ligne ouvre aussi.
+                final eye = DataTableTrailingRegistry.build(
+                  context,
+                  DataTableTrailingSpec(
+                    type: DataTableTrailingType.eye,
+                    tooltip: l10n.hrPresenceStaffOpen,
+                    onTap: onOpen,
+                  ),
                 );
                 if (inline) {
                   return Row(
@@ -147,7 +154,7 @@ class HrPresenceProfileRow extends StatelessWidget {
                       Expanded(flex: 5, child: identity),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(flex: 6, child: figures),
-                      chevron,
+                      eye,
                     ],
                   );
                 }
@@ -163,7 +170,7 @@ class HrPresenceProfileRow extends StatelessWidget {
                         ],
                       ),
                     ),
-                    chevron,
+                    eye,
                   ],
                 );
               },

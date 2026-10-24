@@ -91,6 +91,15 @@ void main() {
     expect(opened.single.agent.staffMemberId, 'a-2');
   });
 
+  testWidgets('l\'œil de l\'app, sur chaque ligne, ouvre aussi la fiche', (
+    tester,
+  ) async {
+    final opened = await pump(tester);
+    expect(find.byIcon(Icons.visibility_outlined), findsNWidgets(3));
+    await tester.tap(find.byIcon(Icons.visibility_outlined).first);
+    expect(opened.single.agent.staffMemberId, 'a-1');
+  });
+
   testWidgets('un mois de vacances le dit', (tester) async {
     await pump(tester, answer: profilesOf(classDays: 0, staff: const []));
     expect(find.byType(PresenceHolidayState), findsOneWidget);

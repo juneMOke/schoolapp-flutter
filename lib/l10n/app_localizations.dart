@@ -29229,6 +29229,12 @@ abstract class AppLocalizations {
     String late,
     String absent,
   );
+
+  /// No description provided for @hrPresenceYearOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'See this month'**
+  String get hrPresenceYearOpen;
 }
 
 class _AppLocalizationsDelegate

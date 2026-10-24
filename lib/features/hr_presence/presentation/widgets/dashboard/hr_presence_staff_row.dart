@@ -37,7 +37,7 @@ abstract final class HrPresenceStaffRow {
       trailing: onOpen == null
           ? const DataTableTrailingSpec()
           : DataTableTrailingSpec(
-              type: DataTableTrailingType.chevronOpen,
+              type: DataTableTrailingType.eye,
               tooltip: l10n.hrPresenceStaffOpen,
               onTap: onOpen,
             ),

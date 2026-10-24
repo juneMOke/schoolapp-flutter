@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
@@ -33,6 +36,7 @@ class HrPresenceRecapTable extends StatelessWidget {
     AppDimensions.staffAttendanceRecapColCount,
     AppDimensions.staffAttendanceRecapColCount,
     AppDimensions.hrPresenceRecapColHours,
+    EteeloDataTableTheme.trailingSlotWidth,
   ];
 
   @override
@@ -50,6 +54,7 @@ class HrPresenceRecapTable extends StatelessWidget {
         l10n.presenceMarkKpiAbsences,
         l10n.presenceMarkKpiNotMarked,
         l10n.staffAttendanceRecapColHours,
+        '',
       ],
       rowCount: rows.length,
       row: (context, index) => _Row(row: rows[index], onOpen: onOpen),
@@ -144,6 +149,15 @@ class _Row extends StatelessWidget {
                 : l10n.hrPresenceNoValue,
             style: style,
             textAlign: TextAlign.end,
+          ),
+        ),
+        // L'œil des tables de l'app : toute la ligne ouvre aussi.
+        DataTableTrailingRegistry.build(
+          context,
+          DataTableTrailingSpec(
+            type: DataTableTrailingType.eye,
+            tooltip: l10n.hrPresenceStaffOpen,
+            onTap: () => onOpen(row),
           ),
         ),
       ],

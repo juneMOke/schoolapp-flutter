@@ -10968,5 +10968,6 @@
   "hrPresenceRecapCloseRefused": "La dernière clôture de ce mois a été refusée par le serveur : vérifiez le mois, puis recommencez.",
   "hrPresenceAgentNotFoundMessage": "Le serveur ne connaît pas cet agent dans cette école : il a pu être retiré du fichier, ou le lien vient d'une autre école.",
   "hrPresenceErrorForbidden": "Votre profil ne permet pas de consulter les présences du personnel.",
-  "hrPresenceYearRowA11y": "{month} : présence {presence}, retards {late}, absences {absent}"
+  "hrPresenceYearRowA11y": "{month} : présence {presence}, retards {late}, absences {absent}",
+  "hrPresenceYearOpen": "Voir ce mois"
 }

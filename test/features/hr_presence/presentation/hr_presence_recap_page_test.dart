@@ -152,6 +152,11 @@ void main() {
     expect(find.text('MWAMBA Clarisse'), findsOneWidget);
   });
 
+  testWidgets('chaque ligne porte l\'œil de l\'app', (tester) async {
+    await pump(tester);
+    expect(find.byIcon(Icons.visibility_outlined), findsNWidgets(3));
+  });
+
   testWidgets('sans hr.pay.read, ni montant ni colonne d\'argent', (
     tester,
   ) async {

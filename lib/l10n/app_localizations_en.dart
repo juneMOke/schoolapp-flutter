@@ -18850,4 +18850,7 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$month: attendance $presence, late $late, absent $absent';
   }
+
+  @override
+  String get hrPresenceYearOpen => 'See this month';
 }

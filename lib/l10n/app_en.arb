@@ -11077,5 +11077,6 @@
   "hrPresenceAgentNotFoundMessage": "The server does not know this staff member in this school: they may have been removed, or the link comes from another school.",
   "hrPresenceErrorForbidden": "Your profile does not allow you to view staff attendance.",
   "hrPresenceYearRowA11y": "{month}: attendance {presence}, late {late}, absent {absent}",
-  "@hrPresenceYearRowA11y": {"placeholders": {"month": {"type": "String"}, "presence": {"type": "String"}, "late": {"type": "String"}, "absent": {"type": "String"}}}
+  "@hrPresenceYearRowA11y": {"placeholders": {"month": {"type": "String"}, "presence": {"type": "String"}, "late": {"type": "String"}, "absent": {"type": "String"}}},
+  "hrPresenceYearOpen": "See this month"
 }
