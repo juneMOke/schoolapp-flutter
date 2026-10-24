@@ -28488,6 +28488,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Neither often absent, often late nor exemplary.'**
   String get presenceProfileRuleRegular;
+
+  /// No description provided for @menuHrPresence.
+  ///
+  /// In en, this message translates to:
+  /// **'HR · Attendance'**
+  String get menuHrPresence;
+
+  /// No description provided for @subMenuHrPresenceRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily register'**
+  String get subMenuHrPresenceRegister;
+
+  /// No description provided for @accueilModuleHrPresenceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Who came in, at what time, and what goes to payroll.'**
+  String get accueilModuleHrPresenceDescription;
+
+  /// No description provided for @hrPresenceEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'HR · Attendance'**
+  String get hrPresenceEyebrow;
+
+  /// No description provided for @hrPresenceRegisterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The prefect or the censor marks attendance from the tablet, in class or at the front desk — even offline.'**
+  String get hrPresenceRegisterSubtitle;
 }
 
 class _AppLocalizationsDelegate

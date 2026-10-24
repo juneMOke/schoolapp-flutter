@@ -31,6 +31,7 @@ class MenuFactory {
       _createExpenseMenu(l10n),
       _createHrMenu(l10n),
       _createHrPersonnelMenu(l10n),
+      _createHrPresenceMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
@@ -313,6 +314,24 @@ class MenuFactory {
           id: MenuConstants.hrPersonnelFileId,
           title: l10n.subMenuHrPersonnelFile,
           route: AppRoutesNames.hrPersonnelFile,
+        ),
+      ],
+    );
+  }
+
+  /// RH · Présences — posé après RH · Personnel. Ses autres sous-menus
+  /// (tableau de bord, fiche individuelle, récapitulatif) arrivent avec leurs
+  /// écrans.
+  static MenuItem _createHrPresenceMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.hrPresenceMenuId,
+      title: l10n.menuHrPresence,
+      icon: Icons.event_available_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.hrPresenceRegisterId,
+          title: l10n.subMenuHrPresenceRegister,
+          route: AppRoutesNames.hrPresenceRegister,
         ),
       ],
     );

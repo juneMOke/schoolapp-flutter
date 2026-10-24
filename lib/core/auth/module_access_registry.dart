@@ -363,6 +363,11 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     MenuConstants.hrPersonnelDashboardId: ModuleAccess([Perm.hrStaffRead]),
     MenuConstants.hrPersonnelFileId: ModuleAccess([Perm.hrStaffRead]),
   },
+  // RH · Présences : tout se lit sous `hr.attendance.read` ; pointer, valider,
+  // clore et régler restent gardés geste par geste (write / manage).
+  MenuConstants.hrPresenceMenuId: {
+    MenuConstants.hrPresenceRegisterId: ModuleAccess([Perm.hrAttendanceRead]),
+  },
   MenuConstants.communicationMenuId: {
     // Lire suffit à ouvrir la liste et le détail ; écrire et envoyer sont
     // gardés geste par geste ([kAnnouncementSendAccess]).

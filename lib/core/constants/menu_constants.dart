@@ -56,6 +56,11 @@ class MenuConstants {
   /// écrans.
   static const String hrPersonnelMenuId = 'rh-personnel';
 
+  /// RH · Présences — qui est venu, à quelle heure, et ce qui part à la paie.
+  /// Un module neuf, posé après RH · Personnel ; l'onglet Pointage des
+  /// [hrMenuId] reste en place à côté (même registre, même verrou).
+  static const String hrPresenceMenuId = 'rh-presences';
+
   // Configuration — les réglages de l'école, réouvrables une fois celle-ci en
   // service. L'assistant de mise en service, lui, s'atteint depuis le splash :
   // il précède la coquille, qui n'a rien à afficher sans année académique.
@@ -124,6 +129,10 @@ class MenuConstants {
   /// RH · Personnel ▸ Fichier du personnel : trouver un agent et ouvrir sa
   /// fiche — sans statistiques, celles-ci vivent au tableau de bord.
   static const String hrPersonnelFileId = 'rh-personnel-fichier';
+
+  /// RH · Présences ▸ Registre du jour : pointer chaque agent, justifier,
+  /// valider le rapport — le seul écran du module hors ligne.
+  static const String hrPresenceRegisterId = 'rh-presences-registre';
 
   /// Les communiqués aux parents : rédiger, programmer, envoyer, consulter.
   static const String communicationAnnouncementsId =

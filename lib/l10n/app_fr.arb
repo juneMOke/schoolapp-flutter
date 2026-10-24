@@ -10847,5 +10847,10 @@
   "presenceProfileRuleAbsentee": "Absences d’au moins 10 % des jours pointés, ou au moins 3 absences non justifiées.",
   "presenceProfileRuleLate": "Retards sur plus de 15 % des jours pointés.",
   "presenceProfileRuleExemplary": "Présent au moins 97 % des jours pointés, avec 5 % de retards au plus.",
-  "presenceProfileRuleRegular": "Ni absentéiste, ni retardataire, ni exemplaire."
+  "presenceProfileRuleRegular": "Ni absentéiste, ni retardataire, ni exemplaire.",
+  "menuHrPresence": "RH · Présences",
+  "subMenuHrPresenceRegister": "Registre du jour",
+  "accueilModuleHrPresenceDescription": "Qui est venu, à quelle heure, et ce qui part à la paie.",
+  "hrPresenceEyebrow": "RH · Présences",
+  "hrPresenceRegisterSubtitle": "Le préfet ou le censeur pointe depuis la tablette, en classe ou à l'accueil — même sans réseau."
 }

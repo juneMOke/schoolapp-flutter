@@ -18409,4 +18409,21 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get presenceProfileRuleRegular =>
       'Ni absentéiste, ni retardataire, ni exemplaire.';
+
+  @override
+  String get menuHrPresence => 'RH · Présences';
+
+  @override
+  String get subMenuHrPresenceRegister => 'Registre du jour';
+
+  @override
+  String get accueilModuleHrPresenceDescription =>
+      'Qui est venu, à quelle heure, et ce qui part à la paie.';
+
+  @override
+  String get hrPresenceEyebrow => 'RH · Présences';
+
+  @override
+  String get hrPresenceRegisterSubtitle =>
+      'Le préfet ou le censeur pointe depuis la tablette, en classe ou à l\'accueil — même sans réseau.';
 }

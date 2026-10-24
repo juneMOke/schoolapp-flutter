@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/expense/presentation/pages/expense_q
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_register_page.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_dashboard_page.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_personnel_file_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_register_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_attendance_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_file_page.dart';
@@ -535,6 +536,10 @@ class AppRouter {
       path: AppRoutesNames.hrPersonnelFile,
       onExit: RouteExitGuard.onExit,
       builder: (context, state) => const HrPersonnelFilePage(),
+    ),
+    GoRoute(
+      path: AppRoutesNames.hrPresenceRegister,
+      builder: (context, state) => const HrPresenceRegisterPage(),
     ),
     ShellRoute(
       builder: (context, state, child) => ClassesFeatureScope(child: child),

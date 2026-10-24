@@ -10923,5 +10923,10 @@
   "presenceProfileRuleAbsentee": "Absent on at least 10% of the marked days, or at least 3 unjustified absences.",
   "presenceProfileRuleLate": "Late on more than 15% of the marked days.",
   "presenceProfileRuleExemplary": "Present on at least 97% of the marked days, late on 5% at most.",
-  "presenceProfileRuleRegular": "Neither often absent, often late nor exemplary."
+  "presenceProfileRuleRegular": "Neither often absent, often late nor exemplary.",
+  "menuHrPresence": "HR · Attendance",
+  "subMenuHrPresenceRegister": "Daily register",
+  "accueilModuleHrPresenceDescription": "Who came in, at what time, and what goes to payroll.",
+  "hrPresenceEyebrow": "HR · Attendance",
+  "hrPresenceRegisterSubtitle": "The prefect or the censor marks attendance from the tablet, in class or at the front desk — even offline."
 }

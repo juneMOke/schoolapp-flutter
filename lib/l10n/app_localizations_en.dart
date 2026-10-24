@@ -18278,4 +18278,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get presenceProfileRuleRegular =>
       'Neither often absent, often late nor exemplary.';
+
+  @override
+  String get menuHrPresence => 'HR · Attendance';
+
+  @override
+  String get subMenuHrPresenceRegister => 'Daily register';
+
+  @override
+  String get accueilModuleHrPresenceDescription =>
+      'Who came in, at what time, and what goes to payroll.';
+
+  @override
+  String get hrPresenceEyebrow => 'HR · Attendance';
+
+  @override
+  String get hrPresenceRegisterSubtitle =>
+      'The prefect or the censor marks attendance from the tablet, in class or at the front desk — even offline.';
 }
