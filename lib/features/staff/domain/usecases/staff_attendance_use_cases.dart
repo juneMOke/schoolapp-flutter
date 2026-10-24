@@ -18,6 +18,18 @@ class LoadStaffAttendanceUseCase {
   }) => _repository.load(from: from, to: to);
 }
 
+/// Les pointages d'une plage pas encore reçus par le serveur.
+class CountUnsyncedStaffAttendanceUseCase {
+  final StaffAttendanceRepository _repository;
+
+  const CountUnsyncedStaffAttendanceUseCase(this._repository);
+
+  Future<Either<Failure, int>> call({
+    required String from,
+    required String to,
+  }) => _repository.unsyncedCount(from: from, to: to);
+}
+
 /// Enregistre des pointages et les met en file d'envoi.
 class SaveStaffAttendanceUseCase {
   final StaffAttendanceRepository _repository;

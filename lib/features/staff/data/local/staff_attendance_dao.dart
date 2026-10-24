@@ -29,6 +29,23 @@ class StaffAttendanceDao {
     return rows.map(StaffAttendanceLocalModel.new).toList(growable: false);
   }
 
+  /// Combien de pointages de l'école, du jour [from] au jour [to] inclus,
+  /// ne sont pas encore reçus par le serveur — en file ou refusés.
+  Future<int> unsyncedCount(
+    String schoolId, {
+    required String from,
+    required String to,
+  }) async {
+    if (schoolId.isEmpty) return 0;
+    final rows = await _db.rawQuery(
+      'SELECT COUNT(*) AS n FROM $table '
+      'WHERE school_id = ? AND work_date >= ? AND work_date <= ? '
+      'AND sync_status != ?',
+      [schoolId, from, to, RecordSyncState.synced.dbValue],
+    );
+    return (rows.single['n'] as int?) ?? 0;
+  }
+
   Future<StaffAttendanceLocalModel?> find(String id) async {
     final rows = await _db.query(
       table,

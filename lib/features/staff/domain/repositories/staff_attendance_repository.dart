@@ -39,4 +39,11 @@ abstract class StaffAttendanceRepository {
   );
 
   Future<Either<Failure, Unit>> saveSettings(StaffAttendanceSettings settings);
+
+  /// Les pointages des jours [from] → [to] pas encore reçus par le serveur :
+  /// ce que ses statistiques ne comptent pas encore (D1).
+  Future<Either<Failure, int>> unsyncedCount({
+    required String from,
+    required String to,
+  });
 }
