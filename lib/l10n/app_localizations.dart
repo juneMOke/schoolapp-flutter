@@ -27946,7 +27946,7 @@ abstract class AppLocalizations {
   /// Corps de l'alerte de synchronisation.
   ///
   /// In en, this message translates to:
-  /// **'Records or documents entered offline: they will reach the server when the network returns. They are already counted here.'**
+  /// **'Records or documents entered offline: they will reach the server when the network is back. They are not counted here yet — figures, list and PDF are the server\'s.'**
   String get hrSyncPendingBody;
 
   /// Carte de répartition par catégorie.
@@ -28165,30 +28165,6 @@ abstract class AppLocalizations {
   /// **'Add a staff member'**
   String get hrDashboardEmptyAction;
 
-  /// Sur-titre du PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'ETEELO CONNECT · HR · Staff'**
-  String get hrPdfOvertitle;
-
-  /// Titre du PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Staff list'**
-  String get hrPdfTitle;
-
-  /// Ligne de contexte du PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'{scope} · {agents} · sorted by {sort} · school year {year}'**
-  String hrPdfSubtitle(String scope, String agents, String sort, String year);
-
-  /// Ligne de contexte sans année.
-  ///
-  /// In en, this message translates to:
-  /// **'{scope} · {agents} · sorted by {sort}'**
-  String hrPdfSubtitleNoYear(String scope, String agents, String sort);
-
   /// Tri dans le PDF.
   ///
   /// In en, this message translates to:
@@ -28212,84 +28188,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'length of service (most recent first)'**
   String get hrPdfSortNewest;
-
-  /// Colonne PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Staff no.'**
-  String get hrPdfColNumber;
-
-  /// Colonne PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Staff member'**
-  String get hrPdfColAgent;
-
-  /// Colonne PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Role'**
-  String get hrPdfColJob;
-
-  /// Colonne PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get hrPdfColCategory;
-
-  /// Colonne PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Contract'**
-  String get hrPdfColContract;
-
-  /// Colonne PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Entry'**
-  String get hrPdfColEntry;
-
-  /// Colonne PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Service'**
-  String get hrPdfColSeniority;
-
-  /// Matricule pas encore attribué, dans le PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'pending'**
-  String get hrPdfNumberPending;
-
-  /// Pied du PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'Issued on {date} at {time} · page {page}/{pages} · {school}'**
-  String hrPdfFooter(
-    String date,
-    String time,
-    int page,
-    int pages,
-    String school,
-  );
-
-  /// Pied du PDF sans nom d'école.
-  ///
-  /// In en, this message translates to:
-  /// **'Issued on {date} at {time} · page {page}/{pages}'**
-  String hrPdfFooterNoSchool(String date, String time, int page, int pages);
-
-  /// Toast après composition du PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'PDF ready to print or save · {agents}'**
-  String hrPdfReady(String agents);
-
-  /// Échec de composition du PDF.
-  ///
-  /// In en, this message translates to:
-  /// **'The PDF could not be built. Try again.'**
-  String get hrPdfFailed;
 
   /// Sous-titre du Fichier.
   ///
@@ -28320,18 +28218,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'—'**
   String get hrKpiSeniorityEmpty;
-
-  /// Heure d'édition (« 10h12 »).
-  ///
-  /// In en, this message translates to:
-  /// **'{hours}:{minutes}'**
-  String hrClockTime(String hours, String minutes);
-
-  /// Portée du PDF sans filtre.
-  ///
-  /// In en, this message translates to:
-  /// **'All staff'**
-  String get hrPdfScopeAll;
 
   /// Tri de la colonne Agent.
   ///
@@ -28368,6 +28254,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to staff'**
   String get hrAgentNotFoundAction;
+
+  /// RH · Personnel : sous-titre du tableau de bord avant l'arrivée des chiffres.
+  ///
+  /// In en, this message translates to:
+  /// **'Who works at the school'**
+  String get hrDashboardSubtitleBare;
+
+  /// RH · Personnel : libellé d'accessibilité du chargement de « Qui sont-ils ».
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the staff list'**
+  String get hrRosterLoading;
+
+  /// RH · Personnel : bouton PDF pendant le rendu serveur.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing…'**
+  String get hrStaffReportPreparing;
+
+  /// RH · Personnel : bouton PDF pendant l'attente d'un 429.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait…'**
+  String get hrStaffReportWaiting;
+
+  /// RH · Personnel : titre de la visionneuse de la pièce LP.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff list'**
+  String get hrStaffReportTitle;
+
+  /// RH · Personnel : 429 sur la liste du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'A document is already being prepared. Try again in {seconds} s.'**
+  String hrStaffReportBusy(int seconds);
+
+  /// RH · Personnel : 403 sur la liste du personnel.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have access to the staff list.'**
+  String get hrStaffReportForbidden;
+
+  /// RH · Personnel : 400 REPORT_LINE_CAP.
+  ///
+  /// In en, this message translates to:
+  /// **'{lines} staff members, beyond the document\'s {cap}: add a search or a category.'**
+  String hrStaffReportTooLarge(int lines, int cap);
+
+  /// RH · Personnel : échec du PDF.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff list could not be prepared.'**
+  String get hrStaffReportFailed;
 }
 
 class _AppLocalizationsDelegate

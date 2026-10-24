@@ -10501,7 +10501,7 @@
       }
     }
   },
-  "hrSyncPendingBody": "Records or documents entered offline: they will reach the server when the network returns. They are already counted here.",
+  "hrSyncPendingBody": "Records or documents entered offline: they will reach the server when the network is back. They are not counted here yet — figures, list and PDF are the server's.",
   "@hrSyncPendingBody": {
     "description": "Corps de l'alerte de synchronisation."
   },
@@ -10699,47 +10699,6 @@
   "@hrDashboardEmptyAction": {
     "description": "Action du tableau de bord vide."
   },
-  "hrPdfOvertitle": "ETEELO CONNECT · HR · Staff",
-  "@hrPdfOvertitle": {
-    "description": "Sur-titre du PDF."
-  },
-  "hrPdfTitle": "Staff list",
-  "@hrPdfTitle": {
-    "description": "Titre du PDF."
-  },
-  "hrPdfSubtitle": "{scope} · {agents} · sorted by {sort} · school year {year}",
-  "@hrPdfSubtitle": {
-    "description": "Ligne de contexte du PDF.",
-    "placeholders": {
-      "scope": {
-        "type": "String"
-      },
-      "agents": {
-        "type": "String"
-      },
-      "sort": {
-        "type": "String"
-      },
-      "year": {
-        "type": "String"
-      }
-    }
-  },
-  "hrPdfSubtitleNoYear": "{scope} · {agents} · sorted by {sort}",
-  "@hrPdfSubtitleNoYear": {
-    "description": "Ligne de contexte sans année.",
-    "placeholders": {
-      "scope": {
-        "type": "String"
-      },
-      "agents": {
-        "type": "String"
-      },
-      "sort": {
-        "type": "String"
-      }
-    }
-  },
   "hrPdfSortName": "name",
   "@hrPdfSortName": {
     "description": "Tri dans le PDF."
@@ -10755,90 +10714,6 @@
   "hrPdfSortNewest": "length of service (most recent first)",
   "@hrPdfSortNewest": {
     "description": "Tri dans le PDF."
-  },
-  "hrPdfColNumber": "Staff no.",
-  "@hrPdfColNumber": {
-    "description": "Colonne PDF."
-  },
-  "hrPdfColAgent": "Staff member",
-  "@hrPdfColAgent": {
-    "description": "Colonne PDF."
-  },
-  "hrPdfColJob": "Role",
-  "@hrPdfColJob": {
-    "description": "Colonne PDF."
-  },
-  "hrPdfColCategory": "Category",
-  "@hrPdfColCategory": {
-    "description": "Colonne PDF."
-  },
-  "hrPdfColContract": "Contract",
-  "@hrPdfColContract": {
-    "description": "Colonne PDF."
-  },
-  "hrPdfColEntry": "Entry",
-  "@hrPdfColEntry": {
-    "description": "Colonne PDF."
-  },
-  "hrPdfColSeniority": "Service",
-  "@hrPdfColSeniority": {
-    "description": "Colonne PDF."
-  },
-  "hrPdfNumberPending": "pending",
-  "@hrPdfNumberPending": {
-    "description": "Matricule pas encore attribué, dans le PDF."
-  },
-  "hrPdfFooter": "Issued on {date} at {time} · page {page}/{pages} · {school}",
-  "@hrPdfFooter": {
-    "description": "Pied du PDF.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      },
-      "page": {
-        "type": "int"
-      },
-      "pages": {
-        "type": "int"
-      },
-      "school": {
-        "type": "String"
-      }
-    }
-  },
-  "hrPdfFooterNoSchool": "Issued on {date} at {time} · page {page}/{pages}",
-  "@hrPdfFooterNoSchool": {
-    "description": "Pied du PDF sans nom d'école.",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      },
-      "page": {
-        "type": "int"
-      },
-      "pages": {
-        "type": "int"
-      }
-    }
-  },
-  "hrPdfReady": "PDF ready to print or save · {agents}",
-  "@hrPdfReady": {
-    "description": "Toast après composition du PDF.",
-    "placeholders": {
-      "agents": {
-        "type": "String"
-      }
-    }
-  },
-  "hrPdfFailed": "The PDF could not be built. Try again.",
-  "@hrPdfFailed": {
-    "description": "Échec de composition du PDF."
   },
   "hrFileSubtitle": "Teachers, administrative and support staff — entered on the tablet, synced as soon as the network returns.",
   "@hrFileSubtitle": {
@@ -10881,22 +10756,6 @@
   "@hrKpiSeniorityEmpty": {
     "description": "Ancienneté moyenne inconnue."
   },
-  "hrClockTime": "{hours}:{minutes}",
-  "@hrClockTime": {
-    "description": "Heure d'édition (« 10h12 »).",
-    "placeholders": {
-      "hours": {
-        "type": "String"
-      },
-      "minutes": {
-        "type": "String"
-      }
-    }
-  },
-  "hrPdfScopeAll": "All staff",
-  "@hrPdfScopeAll": {
-    "description": "Portée du PDF sans filtre."
-  },
   "staffTableSortAscending": "Sorted A to Z; tap to reverse",
   "@staffTableSortAscending": {
     "description": "Tri de la colonne Agent."
@@ -10920,5 +10779,54 @@
   "hrAgentNotFoundAction": "Back to staff",
   "@hrAgentNotFoundAction": {
     "description": "RH · Personnel : fiche d’agent introuvable — retour à l’écran."
+  },
+  "hrDashboardSubtitleBare": "Who works at the school",
+  "@hrDashboardSubtitleBare": {
+    "description": "RH · Personnel : sous-titre du tableau de bord avant l'arrivée des chiffres."
+  },
+  "hrRosterLoading": "Loading the staff list",
+  "@hrRosterLoading": {
+    "description": "RH · Personnel : libellé d'accessibilité du chargement de « Qui sont-ils »."
+  },
+  "hrStaffReportPreparing": "Preparing…",
+  "@hrStaffReportPreparing": {
+    "description": "RH · Personnel : bouton PDF pendant le rendu serveur."
+  },
+  "hrStaffReportWaiting": "Please wait…",
+  "@hrStaffReportWaiting": {
+    "description": "RH · Personnel : bouton PDF pendant l'attente d'un 429."
+  },
+  "hrStaffReportTitle": "Staff list",
+  "@hrStaffReportTitle": {
+    "description": "RH · Personnel : titre de la visionneuse de la pièce LP."
+  },
+  "hrStaffReportBusy": "A document is already being prepared. Try again in {seconds} s.",
+  "@hrStaffReportBusy": {
+    "description": "RH · Personnel : 429 sur la liste du personnel.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "hrStaffReportForbidden": "You do not have access to the staff list.",
+  "@hrStaffReportForbidden": {
+    "description": "RH · Personnel : 403 sur la liste du personnel."
+  },
+  "hrStaffReportTooLarge": "{lines} staff members, beyond the document's {cap}: add a search or a category.",
+  "@hrStaffReportTooLarge": {
+    "description": "RH · Personnel : 400 REPORT_LINE_CAP.",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "hrStaffReportFailed": "The staff list could not be prepared.",
+  "@hrStaffReportFailed": {
+    "description": "RH · Personnel : échec du PDF."
   }
 }

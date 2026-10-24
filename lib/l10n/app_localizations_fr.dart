@@ -18084,7 +18084,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrSyncPendingBody =>
-      'Fiches ou pièces saisies hors ligne : elles partiront au serveur au retour du réseau. Elles sont déjà comptées ici.';
+      'Fiches ou pièces saisies hors ligne : elles partiront au serveur au retour du réseau. Elles ne sont pas encore comptées ici — chiffres, liste et PDF sont ceux du serveur.';
 
   @override
   String get hrByCategoryTitle => 'Par catégorie';
@@ -18211,22 +18211,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hrDashboardEmptyAction => 'Ajouter un agent';
 
   @override
-  String get hrPdfOvertitle => 'ETEELO CONNECT · RH · Personnel';
-
-  @override
-  String get hrPdfTitle => 'Liste du personnel';
-
-  @override
-  String hrPdfSubtitle(String scope, String agents, String sort, String year) {
-    return '$scope · $agents · trié par $sort · année scolaire $year';
-  }
-
-  @override
-  String hrPdfSubtitleNoYear(String scope, String agents, String sort) {
-    return '$scope · $agents · trié par $sort';
-  }
-
-  @override
   String get hrPdfSortName => 'nom';
 
   @override
@@ -18237,54 +18221,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPdfSortNewest => 'ancienneté (plus récents d\'abord)';
-
-  @override
-  String get hrPdfColNumber => 'Matricule';
-
-  @override
-  String get hrPdfColAgent => 'Agent';
-
-  @override
-  String get hrPdfColJob => 'Fonction';
-
-  @override
-  String get hrPdfColCategory => 'Catégorie';
-
-  @override
-  String get hrPdfColContract => 'Contrat';
-
-  @override
-  String get hrPdfColEntry => 'Entrée';
-
-  @override
-  String get hrPdfColSeniority => 'Anc.';
-
-  @override
-  String get hrPdfNumberPending => 'en attente';
-
-  @override
-  String hrPdfFooter(
-    String date,
-    String time,
-    int page,
-    int pages,
-    String school,
-  ) {
-    return 'Édité le $date à $time · page $page/$pages · $school';
-  }
-
-  @override
-  String hrPdfFooterNoSchool(String date, String time, int page, int pages) {
-    return 'Édité le $date à $time · page $page/$pages';
-  }
-
-  @override
-  String hrPdfReady(String agents) {
-    return 'PDF prêt à imprimer ou enregistrer · $agents';
-  }
-
-  @override
-  String get hrPdfFailed => 'Le PDF n\'a pas pu être composé. Réessayez.';
 
   @override
   String get hrFileSubtitle =>
@@ -18316,14 +18252,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hrKpiSeniorityEmpty => '—';
 
   @override
-  String hrClockTime(String hours, String minutes) {
-    return '${hours}h$minutes';
-  }
-
-  @override
-  String get hrPdfScopeAll => 'Tout le personnel';
-
-  @override
   String get staffTableSortAscending => 'Trié de A à Z ; touchez pour inverser';
 
   @override
@@ -18342,4 +18270,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrAgentNotFoundAction => 'Retour au personnel';
+
+  @override
+  String get hrDashboardSubtitleBare => 'Qui travaille à l\'école';
+
+  @override
+  String get hrRosterLoading => 'Chargement de la liste du personnel';
+
+  @override
+  String get hrStaffReportPreparing => 'Préparation…';
+
+  @override
+  String get hrStaffReportWaiting => 'Patientez…';
+
+  @override
+  String get hrStaffReportTitle => 'Liste du personnel';
+
+  @override
+  String hrStaffReportBusy(int seconds) {
+    return 'Un document est déjà en préparation. Réessayez dans $seconds s.';
+  }
+
+  @override
+  String get hrStaffReportForbidden =>
+      'Vous n\'avez pas accès à la liste du personnel.';
+
+  @override
+  String hrStaffReportTooLarge(int lines, int cap) {
+    return '$lines agents, au-delà des $cap du document : ajoutez une recherche ou une catégorie.';
+  }
+
+  @override
+  String get hrStaffReportFailed =>
+      'La liste du personnel n\'a pas pu être préparée.';
 }

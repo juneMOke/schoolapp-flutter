@@ -29,6 +29,8 @@ Future<HrPersonnelCubit> pumpHrScreen(
   required StaffFileSnapshot snapshot,
   required Widget screen,
   Size? size = const Size(1280, 1400),
+  List<BlocProvider> extraProviders = const [],
+  MockStaffSnapshotSource? source,
 }) async {
   // `physicalSize`, pas `setSurfaceSize` : seul le premier change
   // `MediaQuery`. `null` : le format est déjà posé (test aux formats).
@@ -38,10 +40,13 @@ Future<HrPersonnelCubit> pumpHrScreen(
     addTearDown(tester.view.reset);
   }
 
-  final source = MockStaffSnapshotSource();
-  when(() => source.watch(any())).thenReturn(() {});
-  when(() => source.pull()).thenAnswer((_) async {});
-  when(() => source.read()).thenAnswer((_) async => Right(snapshot));
+  // Une source fournie a déjà ses réponses.
+  final mock = source ?? MockStaffSnapshotSource();
+  if (source == null) {
+    when(() => mock.watch(any())).thenReturn(() {});
+    when(() => mock.pull()).thenAnswer((_) async {});
+    when(() => mock.read()).thenAnswer((_) async => Right(snapshot));
+  }
 
   final year = MockAcademicYearContextBloc();
   whenListen(
@@ -67,7 +72,7 @@ Future<HrPersonnelCubit> pumpHrScreen(
   );
 
   final cubit = HrPersonnelCubit(
-    source: source,
+    source: mock,
     now: () => DateTime(2026, 10, 24, 10),
   );
   addTearDown(cubit.close);
@@ -78,6 +83,7 @@ Future<HrPersonnelCubit> pumpHrScreen(
         BlocProvider<AcademicYearContextBloc>.value(value: year),
         BlocProvider<SchoolIdentityCubit>.value(value: school),
         BlocProvider<HrPersonnelCubit>.value(value: cubit..load()),
+        ...extraProviders,
       ],
       child: MaterialApp(
         locale: const Locale('fr'),

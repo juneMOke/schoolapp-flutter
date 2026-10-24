@@ -75,9 +75,8 @@ class HrDashboardKpis extends StatelessWidget {
   String _dean(AppLocalizations l10n) {
     final dean = stats.dean;
     if (dean == null) return l10n.hrKpiSeniorityNone;
-    final member = dean.member;
     final line = l10n.hrKpiSeniorityDean(
-      '${member.firstName} ${member.lastName}',
+      dean.displayName,
       l10n.hrSeniorityYears(dean.years),
     );
     final excluded = stats.headcount - stats.seniorityBase;

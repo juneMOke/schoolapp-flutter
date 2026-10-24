@@ -44,6 +44,11 @@ abstract final class HrPersonnelLabels {
         : l10n.hrSeniorityYears(years);
   }
 
+  /// L'ancienneté que le serveur a comptée ; « non renseignée » sans date
+  /// d'entrée.
+  static String seniorityOf(AppLocalizations l10n, int? years) =>
+      years == null ? l10n.hrSeniorityUnknown : l10n.hrSeniorityYears(years);
+
   /// « 09/2018 » depuis `2018-09-01` ; `null` si la date ne se lit pas.
   static String? monthYear(String? day) {
     final date = HrSeniority.entryOf(day);

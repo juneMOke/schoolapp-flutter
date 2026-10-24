@@ -6,8 +6,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// « 4 modifications encore sur la tablette » — et qu'elles sont déjà
-/// comptées. Aucune action : la synchronisation est automatique.
+/// « 4 modifications encore sur la tablette » — et qu'elles ne sont pas
+/// encore comptées : le tableau de bord lit le serveur. Aucune action : la
+/// synchronisation est automatique.
 ///
 /// L'appelant ne la pose que s'il y a quelque chose en attente : pas d'espace
 /// réservé quand tout est parti.

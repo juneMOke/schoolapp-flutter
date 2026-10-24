@@ -1,10 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
-import 'package:school_app_flutter/features/hr_personnel/domain/hr_name_order.dart';
-import 'package:school_app_flutter/features/hr_personnel/domain/hr_seniority.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
 
 /// Femmes, hommes, et fiches dont le sexe n'est pas renseigné. Les trois
 /// somment toujours à [total] : un sexe absent n'est jamais rangé d'office
@@ -17,12 +12,6 @@ class HrSexSplit extends Equatable {
   const HrSexSplit({this.women = 0, this.men = 0, this.unknown = 0});
 
   int get total => women + men + unknown;
-
-  HrSexSplit add(StaffSex? sex) => switch (sex) {
-    StaffSex.female => HrSexSplit(women: women + 1, men: men, unknown: unknown),
-    StaffSex.male => HrSexSplit(women: women, men: men + 1, unknown: unknown),
-    null => HrSexSplit(women: women, men: men, unknown: unknown + 1),
-  };
 
   @override
   List<Object?> get props => [women, men, unknown];
@@ -43,32 +32,56 @@ class HrCategoryCount extends Equatable {
 
 /// Le doyen : l'agent entré le premier, et depuis combien d'années.
 class HrDean extends Equatable {
-  final StaffMember member;
+  final String staffMemberId;
+  final String lastName;
+  final String? middleName;
+  final String? firstName;
+  final String entryDate;
   final int years;
 
-  const HrDean({required this.member, required this.years});
+  const HrDean({
+    required this.staffMemberId,
+    required this.lastName,
+    required this.middleName,
+    required this.firstName,
+    required this.entryDate,
+    required this.years,
+  });
+
+  /// « Béatrice MBUYI » : prénom puis nom, comme la ligne du doyen l'écrit.
+  String get displayName => [
+    firstName?.trim() ?? '',
+    lastName.trim(),
+  ].where((part) => part.isNotEmpty).join(' ');
 
   @override
-  List<Object?> get props => [member, years];
+  List<Object?> get props => [
+    staffMemberId,
+    lastName,
+    middleName,
+    firstName,
+    entryDate,
+    years,
+  ];
 }
 
-/// Les chiffres du tableau de bord RH · Personnel, calculés sur la tablette à
-/// partir du fichier local — saisies hors ligne comprises — et jamais demandés
-/// au serveur.
+/// Les chiffres du tableau de bord RH · Personnel, **calculés par le serveur**
+/// (`GET /hr/staff-stats`) au jour de l'école [asOf], sur les seules fiches
+/// déjà remontées : la même source que la liste et le PDF, pour que l'écran et
+/// le papier ne divergent jamais. Ce que la tablette n'a pas encore envoyé se
+/// dit à part.
 ///
-/// Ils portent sur **tout** le fichier : les filtres de la liste « Qui
+/// Ils portent sur **tout** le personnel : les filtres de la liste « Qui
 /// sont-ils » ne les touchent pas.
 class HrStaffStats extends Equatable {
+  /// Le jour de l'école, `YYYY-MM-DD`.
+  final String asOf;
   final int headcount;
   final HrSexSplit sexes;
-  final int teachers;
 
-  /// Moyenne des anciennetés entières, arrondie au dixième ; `null` quand
-  /// aucun agent n'a de date d'entrée exploitable.
-  ///
-  /// Un agent sans date d'entrée lisible est **exclu**
-  /// de la moyenne plutôt que compté pour zéro : zéro ferait baisser la
-  /// moyenne d'une information qu'on n'a pas.
+  /// Moyenne des anciennetés en années révolues, au dixième ; `null` quand
+  /// aucun agent n'a de date d'entrée. Un agent sans date est **exclu** de la
+  /// moyenne plutôt que compté pour zéro.
   final double? averageSeniority;
 
   /// Combien d'agents la moyenne porte.
@@ -76,88 +89,37 @@ class HrStaffStats extends Equatable {
   final HrDean? dean;
 
   /// Les catégories non vides, dans l'ordre fixe enseignant → administratif →
-  /// appui → non renseignée.
+  /// appui.
   final List<HrCategoryCount> categories;
 
-  /// Fiches et pièces encore sur la tablette.
-  final int pending;
-
   const HrStaffStats({
+    required this.asOf,
     required this.headcount,
     required this.sexes,
-    required this.teachers,
     required this.averageSeniority,
     required this.seniorityBase,
     required this.dean,
     required this.categories,
-    required this.pending,
   });
 
-  factory HrStaffStats.of(StaffFileView view, {required String today}) {
-    var sexes = const HrSexSplit();
-    final byCategory = <HrCategoryKey, HrSexSplit>{};
-    var seniorityTotal = 0;
-    var seniorityBase = 0;
-    StaffMember? dean;
-    var deanYears = 0;
+  int get teachers => countOf(HrCategoryKey.teacher);
 
-    for (final row in view.all) {
-      final member = row.member;
-      sexes = sexes.add(member.sex);
-      final key = HrCategoryKey.of(member.category);
-      byCategory[key] = (byCategory[key] ?? const HrSexSplit()).add(member.sex);
-
-      final years = HrSeniority.yearsAt(member.entryDate, today);
-      if (years == null) continue;
-      seniorityTotal += years;
-      seniorityBase++;
-      if (dean == null || _enteredBefore(member, dean)) {
-        dean = member;
-        deanYears = years;
-      }
-    }
-
-    return HrStaffStats(
-      headcount: view.all.length,
-      sexes: sexes,
-      teachers: byCategory[HrCategoryKey.teacher]?.total ?? 0,
-      averageSeniority: seniorityBase == 0
-          ? null
-          : (seniorityTotal * 10 / seniorityBase).round() / 10,
-      seniorityBase: seniorityBase,
-      dean: dean == null ? null : HrDean(member: dean, years: deanYears),
-      categories: [
-        for (final key in HrCategoryKey.values)
-          if (byCategory[key] case final split?)
-            HrCategoryCount(key: key, split: split),
-      ],
-      pending: view.pending,
-    );
-  }
+  /// L'effectif de [key] ; zéro pour une catégorie vide.
+  int countOf(HrCategoryKey key) =>
+      categories.where((c) => c.key == key).firstOrNull?.count ?? 0;
 
   /// Part des enseignants, en pour cent entier ; 0 sur un fichier vide.
   int get teacherPercent =>
       headcount == 0 ? 0 : (teachers * 100 / headcount).round();
 
-  /// L'entrée la plus ancienne gagne ; à date égale, l'ordre alphabétique.
-  /// N'est appelé que sur des dates lisibles (ancienneté connue).
-  static bool _enteredBefore(StaffMember candidate, StaffMember current) {
-    final order = HrSeniority.entryOf(
-      candidate.entryDate,
-    )!.compareTo(HrSeniority.entryOf(current.entryDate)!);
-    if (order != 0) return order < 0;
-    return HrNameOrder.compare(candidate, current) < 0;
-  }
-
   @override
   List<Object?> get props => [
+    asOf,
     headcount,
     sexes,
-    teachers,
     averageSeniority,
     seniorityBase,
     dean,
     categories,
-    pending,
   ];
 }

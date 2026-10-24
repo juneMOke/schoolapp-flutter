@@ -66,4 +66,14 @@ class HrAgentIntent {
     );
     return closed.future;
   }
+
+  /// La fiche d'un agent que cette tablette n'a pas (encore) dans son
+  /// fichier : sans `extra`, la page le relit — et tire les flux s'il manque.
+  static Future<void> openById(
+    BuildContext context, {
+    required String subMenuId,
+    required String agentId,
+  }) => context.push<void>(
+    AppRoutesNames.hrPersonnelAgentPath(subMenuId: subMenuId, agentId: agentId),
+  );
 }

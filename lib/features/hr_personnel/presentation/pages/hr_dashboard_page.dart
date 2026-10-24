@@ -2,51 +2,56 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/auth/module_access_registry.dart';
-import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
-import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/layout/shell_chrome.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
-import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_stats.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_member_row.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/dashboard/hr_staff_list_report_cubit.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/dashboard/hr_staff_members_cubit.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/dashboard/hr_staff_stats_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_state.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_query_location.dart';
-import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_content.dart';
-import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_skeleton.dart';
-import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr_personnel_header.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_body.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_file_row.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// RH · Personnel ▸ Tableau de bord — combien d'agents, comment ils se
 /// répartissent, et qui ils sont.
 ///
-/// Le tableau de bord **lit** : tout est calculé sur la tablette depuis le
-/// fichier local, saisies hors ligne comprises ; aucun chiffre n'est demandé
-/// au serveur.
+/// **En ligne**, comme Inscriptions, Caisse et Boutique : chiffres, liste et
+/// PDF viennent du serveur, sur les mêmes critères — l'écran et le papier ne
+/// divergent jamais. Le fichier local ne sert plus qu'à dire ce qui n'est pas
+/// encore parti, et à ouvrir une fiche sans attendre.
 class HrDashboardPage extends StatelessWidget {
   const HrDashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) => BlocProvider<HrPersonnelCubit>(
-    create: (_) => getIt<HrPersonnelCubit>()..load(),
+  Widget build(BuildContext context) => MultiBlocProvider(
+    providers: [
+      BlocProvider<HrPersonnelCubit>(
+        create: (_) => getIt<HrPersonnelCubit>()..load(),
+      ),
+      BlocProvider<HrStaffStatsCubit>(
+        create: (_) => getIt<HrStaffStatsCubit>()..load(),
+      ),
+      BlocProvider<HrStaffMembersCubit>(
+        create: (_) => getIt<HrStaffMembersCubit>()..load(),
+      ),
+      BlocProvider<HrStaffListReportCubit>(
+        create: (_) => getIt<HrStaffListReportCubit>(),
+      ),
+    ],
     child: const HrDashboardScreen(),
   );
 }
@@ -64,7 +69,7 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
   /// Descend jusqu'à « Qui sont-ils » — après un tap sur une catégorie, ou
   /// sur « Liste du personnel ».
   Future<void> _scrollToRoster() async {
-    // La liste vient d'être refiltrée : attendre qu'elle soit peinte.
+    // La liste vient d'être redemandée : attendre qu'elle soit peinte.
     await WidgetsBinding.instance.endOfFrame;
     final target = _rosterKey.currentContext;
     if (target == null || !target.mounted) return;
@@ -72,40 +77,79 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
   }
 
   void _onCategoryTap(HrCategoryKey key) {
-    context.read<HrPersonnelCubit>().toggleCategory(key);
+    // Une catégorie que le serveur ne connaît pas ne se filtre pas.
+    if (key == HrCategoryKey.unknown) return;
+    unawaited(context.read<HrStaffMembersCubit>().toggleCategory(key));
     unawaited(_scrollToRoster());
   }
 
-  /// Ouvre la fiche (ou une fiche neuve), puis relit : elle a pu changer.
-  /// Un agent existant a son adresse ; une fiche neuve, pas encore.
-  Future<void> _openAgent(HrPersonnelState state, {StaffFileRow? row}) async {
-    final cubit = context.read<HrPersonnelCubit>();
-    if (row == null) {
-      await StaffAgentPage.open(
+  /// Le serveur a pu recevoir quelque chose : les chiffres et la page se
+  /// relisent, sans squelette.
+  void _rereadServer() {
+    unawaited(context.read<HrStaffStatsCubit>().load());
+    unawaited(context.read<HrStaffMembersCubit>().reload());
+  }
+
+  Future<void> _reload() async {
+    _rereadServer();
+    await context.read<HrPersonnelCubit>().reload();
+  }
+
+  /// Ouvre la fiche — depuis le fichier local quand la tablette l'a, sans
+  /// attendre —, puis relit : elle a pu changer.
+  Future<void> _openAgent(HrStaffMemberRow row) async {
+    final local = context.read<HrPersonnelCubit>().state;
+    final view = _viewOf(local);
+    final known = view.all.where((r) => r.member.id == row.id).firstOrNull;
+    if (known == null) {
+      await HrAgentIntent.openById(
         context,
-        others: state.snapshot.members,
-        today: state.today,
+        subMenuId: MenuConstants.hrPersonnelDashboardId,
+        agentId: row.id,
       );
     } else {
       await HrAgentIntent.open(
         context,
         subMenuId: MenuConstants.hrPersonnelDashboardId,
-        row: row,
-        others: state.snapshot.members,
-        today: state.today,
+        row: known,
+        others: local.snapshot.members,
+        today: local.today,
       );
     }
     if (!mounted) return;
-    await cubit.refresh();
+    await context.read<HrPersonnelCubit>().refresh();
+    if (mounted) _rereadServer();
   }
+
+  /// Une fiche neuve n'a pas d'adresse : elle s'ouvre par-dessus l'écran.
+  Future<void> _createAgent() async {
+    final local = context.read<HrPersonnelCubit>().state;
+    await StaffAgentPage.open(
+      context,
+      others: local.snapshot.members,
+      today: local.today,
+    );
+    if (!mounted) return;
+    await context.read<HrPersonnelCubit>().refresh();
+    if (mounted) _rereadServer();
+  }
+
+  /// Pour retrouver la ligne locale d'un agent : ses pièces n'y comptent pas.
+  StaffFileView _viewOf(HrPersonnelState local) => StaffFileView.build(
+    local.snapshot,
+    query: StaffFileQuery.none,
+    today: local.today,
+    documentsVisible: false,
+  );
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // F5 / Ctrl+R : redescendre le fichier, sans recharger la page web.
+    // F5 / Ctrl+R : relire le serveur et redescendre le fichier, sans
+    // recharger la page web.
     return PageActionShortcut(
       action: PageAction.refresh,
-      onInvoke: () => unawaited(context.read<HrPersonnelCubit>().reload()),
+      onInvoke: () => unawaited(_reload()),
       child: AppPageBackground(
         width: PageContentWidth.wide,
         // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
@@ -115,117 +159,48 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
                 eyebrow: l10n.hrPersonnelEyebrow,
                 title: l10n.subMenuDashboard,
               ),
-        child: BlocBuilder<HrPersonnelCubit, HrPersonnelState>(
-          buildWhen: (previous, current) => previous != current,
+        // Un envoi achevé change ce que le serveur sait : relire.
+        child: BlocListener<HrPersonnelCubit, HrPersonnelState>(
+          listenWhen: (previous, current) =>
+              previous.status == HrPersonnelStatus.ready &&
+              current.status == HrPersonnelStatus.ready &&
+              previous.snapshot != current.snapshot,
+          listener: (_, _) => _rereadServer(),
           // Catégorie et ordre de « Qui sont-ils » dans l'adresse ; pas de
           // bascule cartes/liste ici.
-          builder: (context, state) => HrQueryLocation(
-            query: state.query,
-            onLocation: context.read<HrPersonnelCubit>().applyLocation,
-            child: _body(context, state),
-          ),
+          child:
+              BlocSelector<
+                HrStaffMembersCubit,
+                HrStaffMembersState,
+                HrRosterQuery
+              >(
+                selector: (state) => state.query,
+                builder: (context, query) => HrQueryLocation(
+                  query: query,
+                  onLocation: (filters) => unawaited(
+                    context.read<HrStaffMembersCubit>().applyLocation(filters),
+                  ),
+                  child: BlocBuilder<HrStaffStatsCubit, HrStaffStatsState>(
+                    builder: (context, stats) =>
+                        BlocBuilder<HrPersonnelCubit, HrPersonnelState>(
+                          buildWhen: (previous, current) =>
+                              previous.snapshot != current.snapshot,
+                          builder: (context, local) => HrDashboardBody(
+                            stats: stats,
+                            local: local,
+                            rosterKey: _rosterKey,
+                            onScrollToRoster: () =>
+                                unawaited(_scrollToRoster()),
+                            onCategoryTap: _onCategoryTap,
+                            onOpen: (row) => unawaited(_openAgent(row)),
+                            onCreate: () => unawaited(_createAgent()),
+                          ),
+                        ),
+                  ),
+                ),
+              ),
         ),
       ),
     );
-  }
-
-  Widget _body(BuildContext context, HrPersonnelState state) {
-    final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<HrPersonnelCubit>();
-    final ready = state.status == HrPersonnelStatus.ready;
-    final view = StaffFileView.build(
-      state.snapshot,
-      query: StaffFileQuery.none,
-      today: state.today,
-      documentsVisible: PermissionGate.allows(context, const [
-        Perm.hrDocumentRead,
-      ]),
-    );
-    final stats = HrStaffStats.of(view, today: state.today);
-    final empty = ready && view.isFileEmpty;
-
-    final header = HrPersonnelHeader(
-      subtitle: _subtitle(context, l10n, stats.headcount),
-      actions: [
-        if (ready && !empty)
-          EteeloButton.secondary(
-            label: l10n.hrDashboardActionList,
-            icon: Icons.groups_outlined,
-            onPressed: () => unawaited(_scrollToRoster()),
-            fullWidth: false,
-          ),
-        EteeloButton.primary(
-          label: l10n.hrDashboardActionOpenFile,
-          icon: Icons.work_outline,
-          // Dans la coquille, comme un choix du menu : une route seule
-          // afficherait la page nue, sans barre ni retour.
-          onPressed: () => context.read<NavigationBloc>().add(
-            SubMenuItemSelected(
-              menuId: MenuConstants.hrPersonnelMenuId,
-              subMenuId: MenuConstants.hrPersonnelFileId,
-              title: l10n.subMenuHrPersonnelFile,
-            ),
-          ),
-          fullWidth: false,
-        ),
-      ],
-    );
-
-    final Widget content;
-    switch (state.status) {
-      case HrPersonnelStatus.loading:
-        content = const HrDashboardSkeleton();
-      case HrPersonnelStatus.failure:
-        content = StaffResultsErrorState(
-          failure: state.failure,
-          onRetry: cubit.load,
-        );
-      case HrPersonnelStatus.ready when empty:
-        content = EteeloEmptyResult(
-          label: l10n.hrDashboardEmptyTitle,
-          description: l10n.hrDashboardEmptyMessage,
-          medallionIcon: Icons.groups_outlined,
-          fullWidthCard: true,
-          primaryAction: PermissionGate.access(
-            kStaffWriteAccess,
-            child: EteeloButton.primary(
-              label: l10n.hrDashboardEmptyAction,
-              icon: Icons.person_add_alt,
-              onPressed: () => unawaited(_openAgent(state)),
-              fullWidth: false,
-            ),
-          ),
-        );
-      case HrPersonnelStatus.ready:
-        content = HrDashboardContent(
-          state: state,
-          view: view,
-          stats: stats,
-          rosterKey: _rosterKey,
-          onCategoryTap: _onCategoryTap,
-          onOpen: (row) => unawaited(_openAgent(state, row: row)),
-        );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (ready && !state.snapshot.hasEverSynced)
-          EteeloNotice.warning(l10n.staffFileNotYetSynced),
-        header,
-        const SizedBox(height: AppSpacing.lg),
-        content,
-      ],
-    );
-  }
-
-  String _subtitle(BuildContext context, AppLocalizations l10n, int count) {
-    final year = context.select<AcademicYearContextBloc, String?>(
-      (bloc) => bloc.state.context?.academicYear.name,
-    );
-    final agents = l10n.hrAgentsCount(count);
-    return year == null
-        ? l10n.hrDashboardSubtitleNoYear(agents)
-        : l10n.hrDashboardSubtitle(agents, year);
   }
 }
