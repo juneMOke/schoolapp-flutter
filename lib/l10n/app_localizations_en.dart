@@ -13508,7 +13508,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffAttendanceForbidden =>
-      'Only the head and the deputy head mark staff attendance.';
+      'Only the school management and the prefect or deputy head (academic administration account) mark staff attendance.';
 
   @override
   String get staffAttendanceValidationRefused =>

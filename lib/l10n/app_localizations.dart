@@ -21263,7 +21263,7 @@ abstract class AppLocalizations {
   /// No description provided for @staffAttendanceForbidden.
   ///
   /// In en, this message translates to:
-  /// **'Only the head and the deputy head mark staff attendance.'**
+  /// **'Only the school management and the prefect or deputy head (academic administration account) mark staff attendance.'**
   String get staffAttendanceForbidden;
 
   /// No description provided for @staffAttendanceValidationRefused.

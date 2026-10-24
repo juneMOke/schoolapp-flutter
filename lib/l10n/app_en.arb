@@ -9054,7 +9054,7 @@
   "staffAttendanceRefusedDayLocked": "Refused: day already validated",
   "staffAttendanceRefusedMonthClosed": "Refused: month closed",
   "staffAttendanceRefused": "Sending refused",
-  "staffAttendanceForbidden": "Only the head and the deputy head mark staff attendance.",
+  "staffAttendanceForbidden": "Only the school management and the prefect or deputy head (academic administration account) mark staff attendance.",
   "staffAttendanceValidationRefused": "The server refused to validate the report: the day can still be edited. Validate it again once the cause is fixed.",
   "presenceMarkHoursMinutes": "{hours} h {minutes}",
   "@presenceMarkHoursMinutes": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "String"}}},

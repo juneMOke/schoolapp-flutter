@@ -9451,7 +9451,7 @@
   "staffAttendanceRefusedDayLocked": "Refusé : jour déjà validé",
   "staffAttendanceRefusedMonthClosed": "Refusé : mois clos",
   "staffAttendanceRefused": "Envoi refusé",
-  "staffAttendanceForbidden": "Seuls le directeur et le censeur pointent le personnel.",
+  "staffAttendanceForbidden": "Seuls la direction et le préfet ou le censeur (compte administration académique) pointent le personnel.",
   "staffAttendanceValidationRefused": "La validation du rapport a été refusée par le serveur : le jour reste modifiable. Validez-le à nouveau une fois la cause levée.",
   "presenceMarkHoursMinutes": "{hours} h {minutes}",
   "presenceMarkReasonRequired": "Motif *",

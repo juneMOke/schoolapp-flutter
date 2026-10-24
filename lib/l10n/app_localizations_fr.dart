@@ -13606,7 +13606,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffAttendanceForbidden =>
-      'Seuls le directeur et le censeur pointent le personnel.';
+      'Seuls la direction et le préfet ou le censeur (compte administration académique) pointent le personnel.';
 
   @override
   String get staffAttendanceValidationRefused =>

@@ -233,7 +233,10 @@ void main() {
 
     verifyNever(() => save(any()));
     expect(
-      find.text('Seuls le directeur et le censeur pointent le personnel.'),
+      find.text(
+        'Seuls la direction et le préfet ou le censeur (compte '
+        'administration académique) pointent le personnel.',
+      ),
       findsOneWidget,
     );
     expect(find.text('Valider le rapport'), findsNothing);
