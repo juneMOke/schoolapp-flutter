@@ -46,6 +46,14 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
     `BiModeSearchForm`), jamais deux blocs concurrents reliés par un « OU ».
     Classe en premier, identité en second ; seuls les critères du mode actif
     partent. Détails dans AGENTS.md §"Formulaires de recherche".
+13. **Un écran neuf tient sur tous les formats dès sa première version** —
+    téléphone 360×740, 7″ et 10″ dans les deux sens, poste 1440/1920, texte
+    ×1,3. Seuils pris dans `AppBreakpoints`, cibles ≥ 48 dp, raccourcis
+    (`PageActionShortcut`), filtres dans l'adresse, test de formats. Pas de
+    passe responsive après coup. Détails dans AGENTS.md §"Écran neuf".
+14. **Tableau de bord = une seule source serveur** — chiffres, liste et PDF
+    sur les mêmes paramètres ; le PDF d'une liste nominative est composé par
+    le serveur, jamais sur l'appareil.
 
 ## Modules (`lib/features/`)
 
@@ -106,6 +114,8 @@ Pour modifier → éditer la source (`.dart` annoté, `.arb`) et relancer le gé
 - [ ] Chaque `Failure` mappée dans `_mapFailureToMessage()` du BLoC
 - [ ] Pas de string/couleur/dimension hardcodée
 - [ ] `FeatureScope` ferme bien son BLoC dans `dispose()` si scopé
+- [ ] Écran neuf : test aux formats de référence (+ texte ×1,3), aucun seuil
+      hors `AppBreakpoints`, cibles ≥ 48 dp (AGENTS.md §"Écran neuf")
 
 ## Langue & ton
 
