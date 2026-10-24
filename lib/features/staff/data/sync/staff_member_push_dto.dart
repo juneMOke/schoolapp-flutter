@@ -26,6 +26,7 @@ class StaffMemberInputDto {
   final String? address;
   final String category;
   final String jobTitle;
+  final String? grade;
   final String entryDate;
   final List<String> branches;
   final List<StaffDiplomaDto> diplomas;
@@ -49,6 +50,7 @@ class StaffMemberInputDto {
     this.email,
     this.city,
     this.address,
+    this.grade,
     this.branches = const [],
     this.diplomas = const [],
   });
@@ -69,6 +71,7 @@ class StaffMemberInputDto {
     'address': address,
     'category': category,
     'jobTitle': jobTitle,
+    'grade': grade,
     'entryDate': entryDate,
     'branches': branches,
     'diplomas': [for (final d in diplomas) d.toJson()],
@@ -117,6 +120,7 @@ class StaffMemberInputDto {
       address: raw.text('address'),
       category: required['category']!,
       jobTitle: required['jobTitle']!,
+      grade: raw.text('grade'),
       entryDate: entryDate,
       branches: raw.texts('branches'),
       diplomas: [

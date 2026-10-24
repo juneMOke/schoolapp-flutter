@@ -12491,6 +12491,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffFieldCategory => 'Category';
 
   @override
+  String get staffFieldGrade => 'Grade';
+
+  @override
+  String get staffFieldGradeHint => 'E.g. L2, G3, A2';
+
+  @override
   String get staffFieldJob => 'Job';
 
   @override
@@ -14215,6 +14221,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollSettingsStep => 'Round the rate to steps of';
+
+  @override
+  String get payrollSettingsWorkDays => 'Days in a full month';
+
+  @override
+  String get payrollSettingsAbsenceDeduction => 'Deduct unexcused absences';
+
+  @override
+  String get payrollSettingsIpr => 'Flat IPR per paid agent';
+
+  @override
+  String get payrollSettingsCnss => 'CNSS (‰ of base pay)';
 
   @override
   String get payrollSettingsEligible => 'Contracts that open allowances';

@@ -8751,6 +8751,14 @@
   "@staffFieldCategory": {
     "description": "Champ du poste."
   },
+  "staffFieldGrade": "Grade",
+  "@staffFieldGrade": {
+    "description": "Champ du poste : le grade de l'agent, lu par l'état de paie."
+  },
+  "staffFieldGradeHint": "Ex. L2, G3, A2",
+  "@staffFieldGradeHint": {
+    "description": "Exemple du champ Grade."
+  },
   "staffFieldJob": "Fonction",
   "@staffFieldJob": {
     "description": "Champ du poste."
@@ -9641,6 +9649,22 @@
   "payrollSettingsAllowance": "Allocation par enfant",
   "payrollSettingsDefaultRate": "Taux d'heure sup. par défaut",
   "payrollSettingsStep": "Arrondi du taux au pas de",
+  "payrollSettingsWorkDays": "Jours d'un mois plein",
+  "@payrollSettingsWorkDays": {
+    "description": "Réglage v2 : diviseur de la retenue d'absence (1 à 31)."
+  },
+  "payrollSettingsAbsenceDeduction": "Retenir les absences non justifiées",
+  "@payrollSettingsAbsenceDeduction": {
+    "description": "Réglage v2 : active la retenue d'absence ; coupée par défaut."
+  },
+  "payrollSettingsIpr": "Forfait IPR par agent payé",
+  "@payrollSettingsIpr": {
+    "description": "Réglage v2 par devise."
+  },
+  "payrollSettingsCnss": "CNSS (‰ de la base)",
+  "@payrollSettingsCnss": {
+    "description": "Réglage v2 par devise, en pour mille."
+  },
   "payrollSettingsEligible": "Statuts qui ouvrent les allocations",
   "payrollPayslipTitle": "Bulletin de paie",
   "payrollPayslipProvisional": "Provisoire — non validée",

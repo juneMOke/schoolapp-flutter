@@ -12585,6 +12585,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffFieldCategory => 'Catégorie';
 
   @override
+  String get staffFieldGrade => 'Grade';
+
+  @override
+  String get staffFieldGradeHint => 'Ex. L2, G3, A2';
+
+  @override
   String get staffFieldJob => 'Fonction';
 
   @override
@@ -14316,6 +14322,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollSettingsStep => 'Arrondi du taux au pas de';
+
+  @override
+  String get payrollSettingsWorkDays => 'Jours d\'un mois plein';
+
+  @override
+  String get payrollSettingsAbsenceDeduction =>
+      'Retenir les absences non justifiées';
+
+  @override
+  String get payrollSettingsIpr => 'Forfait IPR par agent payé';
+
+  @override
+  String get payrollSettingsCnss => 'CNSS (‰ de la base)';
 
   @override
   String get payrollSettingsEligible => 'Statuts qui ouvrent les allocations';

@@ -19592,6 +19592,18 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get staffFieldCategory;
 
+  /// No description provided for @staffFieldGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get staffFieldGrade;
+
+  /// No description provided for @staffFieldGradeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. L2, G3, A2'**
+  String get staffFieldGradeHint;
+
   /// Champ du poste.
   ///
   /// In en, this message translates to:
@@ -22404,6 +22416,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Round the rate to steps of'**
   String get payrollSettingsStep;
+
+  /// No description provided for @payrollSettingsWorkDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days in a full month'**
+  String get payrollSettingsWorkDays;
+
+  /// No description provided for @payrollSettingsAbsenceDeduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduct unexcused absences'**
+  String get payrollSettingsAbsenceDeduction;
+
+  /// No description provided for @payrollSettingsIpr.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat IPR per paid agent'**
+  String get payrollSettingsIpr;
+
+  /// No description provided for @payrollSettingsCnss.
+  ///
+  /// In en, this message translates to:
+  /// **'CNSS (‰ of base pay)'**
+  String get payrollSettingsCnss;
 
   /// No description provided for @payrollSettingsEligible.
   ///

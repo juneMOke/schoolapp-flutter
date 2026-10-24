@@ -40,6 +40,10 @@ class StaffMember extends Equatable {
   final StaffCategory? category;
   final String? jobTitle;
 
+  /// Le grade (`L2`, `G3`, `A2`…), texte libre ; `null` = la paie se rabat
+  /// sur le niveau du premier diplôme.
+  final String? grade;
+
   /// Matières qu'un enseignant déclare pouvoir tenir.
   final List<String> branches;
   final List<StaffDiploma> diplomas;
@@ -69,6 +73,7 @@ class StaffMember extends Equatable {
     this.neighborhood,
     this.address,
     this.jobTitle,
+    this.grade,
     this.branches = const [],
     this.diplomas = const [],
     this.contracts = const [],
@@ -94,6 +99,7 @@ class StaffMember extends Equatable {
     address: address,
     category: category,
     jobTitle: jobTitle,
+    grade: grade,
     branches: branches,
     diplomas: diplomas,
     contracts: periods,
@@ -126,6 +132,7 @@ class StaffMember extends Equatable {
     address,
     category,
     jobTitle,
+    grade,
     branches,
     diplomas,
     contracts,

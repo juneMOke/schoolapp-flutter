@@ -54,6 +54,7 @@ class StaffMemberWriteDao {
       'address': input.address,
       'category': input.category,
       'job_title': input.jobTitle,
+      'grade': input.grade,
       'entry_date': input.entryDate,
       'branches': jsonEncode(input.branches),
       'diplomas': jsonEncode([for (final d in input.diplomas) d.toJson()]),

@@ -8548,6 +8548,8 @@
   "@staffFieldCategory": {
     "description": "Champ du poste."
   },
+  "staffFieldGrade": "Grade",
+  "staffFieldGradeHint": "E.g. L2, G3, A2",
   "staffFieldJob": "Job",
   "@staffFieldJob": {
     "description": "Champ du poste."
@@ -9282,6 +9284,10 @@
   "payrollSettingsAllowance": "Allowance per child",
   "payrollSettingsDefaultRate": "Default overtime rate",
   "payrollSettingsStep": "Round the rate to steps of",
+  "payrollSettingsWorkDays": "Days in a full month",
+  "payrollSettingsAbsenceDeduction": "Deduct unexcused absences",
+  "payrollSettingsIpr": "Flat IPR per paid agent",
+  "payrollSettingsCnss": "CNSS (‰ of base pay)",
   "payrollSettingsEligible": "Contracts that open allowances",
   "payrollPayslipTitle": "Payslip",
   "payrollPayslipProvisional": "Provisional — not validated",

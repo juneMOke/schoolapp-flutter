@@ -28,6 +28,8 @@ const TableSchema refPayrollSettingsTable = TableSchema(
       overtime_multiplier_permille INTEGER NOT NULL,
       allowance_eligible_kinds TEXT NOT NULL,
       by_currency TEXT NOT NULL,
+      work_days_divisor INTEGER NOT NULL DEFAULT 26,
+      absence_deduction_enabled INTEGER NOT NULL DEFAULT 0,
       client_updated_at TEXT,
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,

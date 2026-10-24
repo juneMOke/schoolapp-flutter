@@ -39,6 +39,7 @@ abstract final class StaffMemberInputMapper {
       address: optional(draft.address),
       category: category.wire,
       jobTitle: draft.jobTitle.trim(),
+      grade: optional(draft.grade),
       entryDate: entryDate,
       branches: draft.isTeacher
           ? [

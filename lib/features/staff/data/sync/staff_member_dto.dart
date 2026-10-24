@@ -101,6 +101,10 @@ class StaffMemberDeltaDto {
   final String? address;
   final String category;
   final String? jobTitle;
+
+  /// Le grade de l'agent (`L2`, `A1`…), texte libre ; absent = repli sur le
+  /// premier diplôme.
+  final String? grade;
   final String? entryDate;
   final List<String> branches;
   final List<StaffDiplomaDto> diplomas;
@@ -126,6 +130,7 @@ class StaffMemberDeltaDto {
     this.neighborhood,
     this.address,
     this.jobTitle,
+    this.grade,
     this.entryDate,
     this.branches = const [],
     this.diplomas = const [],
@@ -170,6 +175,7 @@ class StaffMemberDeltaDto {
       address: raw.text('address'),
       category: category,
       jobTitle: raw.text('jobTitle'),
+      grade: raw.text('grade'),
       entryDate: raw.day('entryDate'),
       branches: raw.texts('branches'),
       diplomas: each('diplomas', StaffDiplomaDto.tryParse),

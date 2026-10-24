@@ -35,6 +35,8 @@ class PayrollSettingsDao {
       'overtimeMultiplierPermille': row['overtime_multiplier_permille'],
       'allowanceEligibleKinds': _decode(row['allowance_eligible_kinds']),
       'currencyRules': _decode(row['by_currency']),
+      'workDaysDivisor': row['work_days_divisor'],
+      'absenceDeductionEnabled': row['absence_deduction_enabled'] == 1,
     });
     if (seed == null) return PayrollSettings.defaults;
     return toEntity(
@@ -119,6 +121,8 @@ class PayrollSettingsDao {
       'overtime_multiplier_permille': seed.overtimeMultiplierPermille,
       'allowance_eligible_kinds': jsonEncode(json['allowanceEligibleKinds']),
       'by_currency': jsonEncode(json['currencyRules']),
+      'work_days_divisor': seed.workDaysDivisor,
+      'absence_deduction_enabled': seed.absenceDeductionEnabled ? 1 : 0,
     };
   }
 
@@ -147,8 +151,12 @@ class PayrollSettingsDao {
           childAllowanceInCents: currency.childAllowanceInCents,
           defaultOvertimeRateInCents: currency.defaultOvertimeRateInCents,
           overtimeRateStepInCents: currency.overtimeRateStepInCents,
+          iprFlatInCents: currency.iprFlatInCents,
+          cnssPermille: currency.cnssPermille,
         ),
     },
+    workDaysDivisor: seed.workDaysDivisor,
+    absenceDeductionEnabled: seed.absenceDeductionEnabled,
     syncState: syncState,
   );
 
@@ -171,7 +179,11 @@ class PayrollSettingsDao {
               defaultOvertimeRateInCents:
                   entry.value.defaultOvertimeRateInCents,
               overtimeRateStepInCents: entry.value.overtimeRateStepInCents,
+              iprFlatInCents: entry.value.iprFlatInCents,
+              cnssPermille: entry.value.cnssPermille,
             ),
         ],
+        workDaysDivisor: settings.workDaysDivisor,
+        absenceDeductionEnabled: settings.absenceDeductionEnabled,
       );
 }

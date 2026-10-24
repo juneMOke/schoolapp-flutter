@@ -827,7 +827,11 @@ class AppConstants {
   // v67 (2026-10-24) : re-pull des ventes boutique — le delta porte le numéro
   // du reçu, que le poste ignorait ; les ventes déjà tirées restaient en
   // `PROV-`. Aucun DDL. Palier d'école.
-  static const int offlineDbSchemaVersion = 67;
+  // v68 (2026-10-25) : la Paie v2 — réglages v2 (`ref_payroll_settings` :
+  // diviseur de jours, retenue d'absence), grade de l'agent
+  // (`staff_members.grade`), puis les colonnes et tables des lots suivants.
+  // Un seul palier pour la livraison, comme à la v66. Additif. Palier d'école.
+  static const int offlineDbSchemaVersion = 68;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

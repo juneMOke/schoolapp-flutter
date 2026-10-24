@@ -4,16 +4,25 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.da
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les réglages d'une devise : allocation par enfant, taux d'heure sup. par
-/// défaut, et le pas auquel s'arrondit un taux calculé. Centimes.
+/// défaut, le pas auquel s'arrondit un taux calculé, et les retenues légales
+/// v2 — le forfait IPR par agent payé et la CNSS en ‰ de la base. Centimes.
 class PayrollCurrencySettings extends Equatable {
   final int childAllowanceInCents;
   final int defaultOvertimeRateInCents;
   final int overtimeRateStepInCents;
 
+  /// Retenu une fois sur chaque agent dont le brut est positif (T3).
+  final int iprFlatInCents;
+
+  /// Pour mille de la base de la ligne, avant l'absence (T4).
+  final int cnssPermille;
+
   const PayrollCurrencySettings({
     required this.childAllowanceInCents,
     required this.defaultOvertimeRateInCents,
     required this.overtimeRateStepInCents,
+    this.iprFlatInCents = 0,
+    this.cnssPermille = 0,
   });
 
   /// Une devise que l'école n'a pas réglée : rien n'est inventé.
@@ -28,6 +37,8 @@ class PayrollCurrencySettings extends Equatable {
     childAllowanceInCents,
     defaultOvertimeRateInCents,
     overtimeRateStepInCents,
+    iprFlatInCents,
+    cnssPermille,
   ];
 }
 
@@ -43,6 +54,13 @@ class PayrollSettings extends Equatable {
   /// Les statuts qui ouvrent les allocations familiales de l'école.
   final Set<StaffContractKind> allowanceEligibleKinds;
 
+  /// Jours d'un mois plein pour la retenue d'absence (T5) — distinct de
+  /// [monthlyHoursDivisor], qui compte des heures.
+  final int workDaysDivisor;
+
+  /// Coupée par défaut : une école qui ne règle rien est payée comme en v1.
+  final bool absenceDeductionEnabled;
+
   /// Par code ISO.
   final Map<String, PayrollCurrencySettings> byCurrency;
   final RecordSyncState syncState;
@@ -52,8 +70,16 @@ class PayrollSettings extends Equatable {
     required this.overtimeMultiplierPermille,
     required this.allowanceEligibleKinds,
     required this.byCurrency,
+    this.workDaysDivisor = defaultWorkDaysDivisor,
+    this.absenceDeductionEnabled = false,
     this.syncState = RecordSyncState.synced,
   });
+
+  static const int defaultWorkDaysDivisor = 26;
+
+  /// Les bornes du diviseur de jours que le serveur accepte.
+  static const int minWorkDaysDivisor = 1;
+  static const int maxWorkDaysDivisor = 31;
 
   /// Les valeurs de la spec, tant que l'école n'a rien posé.
   static const PayrollSettings defaults = PayrollSettings(
@@ -92,6 +118,8 @@ class PayrollSettings extends Equatable {
     int? overtimeMultiplierPermille,
     Set<StaffContractKind>? allowanceEligibleKinds,
     Map<String, PayrollCurrencySettings>? byCurrency,
+    int? workDaysDivisor,
+    bool? absenceDeductionEnabled,
   }) => PayrollSettings(
     monthlyHoursDivisor: monthlyHoursDivisor ?? this.monthlyHoursDivisor,
     overtimeMultiplierPermille:
@@ -99,6 +127,9 @@ class PayrollSettings extends Equatable {
     allowanceEligibleKinds:
         allowanceEligibleKinds ?? this.allowanceEligibleKinds,
     byCurrency: byCurrency ?? this.byCurrency,
+    workDaysDivisor: workDaysDivisor ?? this.workDaysDivisor,
+    absenceDeductionEnabled:
+        absenceDeductionEnabled ?? this.absenceDeductionEnabled,
     syncState: syncState,
   );
 
@@ -108,6 +139,8 @@ class PayrollSettings extends Equatable {
     overtimeMultiplierPermille,
     allowanceEligibleKinds,
     byCurrency,
+    workDaysDivisor,
+    absenceDeductionEnabled,
     syncState,
   ];
 }

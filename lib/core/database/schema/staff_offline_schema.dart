@@ -65,6 +65,7 @@ const TableSchema staffMembersTable = TableSchema(
       address TEXT,
       category TEXT NOT NULL,
       job_title TEXT,
+      grade TEXT,
       entry_date TEXT,
       branches TEXT NOT NULL DEFAULT '[]',
       diplomas TEXT NOT NULL DEFAULT '[]',
