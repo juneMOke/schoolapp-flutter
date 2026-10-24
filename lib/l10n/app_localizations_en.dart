@@ -13386,16 +13386,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'U = unjustified · J = justified · tap a row to open the monthly sheet';
 
   @override
-  String get staffAttendanceClose => 'Close and send to Payroll';
+  String get staffAttendanceClose => 'Close the month';
 
   @override
   String staffAttendanceCloseTitle(String month) {
-    return 'Send $month to Payroll?';
+    return 'Close $month?';
   }
 
   @override
   String staffAttendanceCloseHours(String hours) {
-    return '$hours of hourly work, added to hourly staff pay';
+    return '$hours of hourly work, which Payroll reads from the marks';
   }
 
   @override
@@ -13410,7 +13410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String staffAttendanceCloseNotMarked(int count) {
-    return '$count staff-days without marks will be treated as present by default';
+    return '$count staff-days without marks: an unmarked day of hourly staff pays 0 h';
   }
 
   @override
@@ -18739,4 +18739,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String hrPresenceMonthScored(int scored, int classDays) {
     return '$scored/$classDays days marked';
   }
+
+  @override
+  String get subMenuHrPresenceRecap => 'Monthly summary';
+
+  @override
+  String get hrPresenceRecapSubtitle =>
+      'Each staff member\'s attendance totals for the month, then its closing. Payroll reads the actual marks.';
+
+  @override
+  String hrPresenceRecapClassDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count school days',
+      one: '1 school day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrPresenceRecapClassDaysToDate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count school days so far',
+      one: '1 school day so far',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceRecapUnsynced => 'Still on this tablet';
+
+  @override
+  String get hrPresenceRecapCurrentMonth => 'Current month';
+
+  @override
+  String get hrPresenceRecapNotClosed => 'Month not closed';
+
+  @override
+  String get hrPresenceRecapCloseExplain =>
+      'Closing locks the month\'s marks. Nothing is sent: Payroll reads the actual marks.';
+
+  @override
+  String hrPresenceRecapCloseFrom(String day) {
+    return 'Can be closed from $day';
+  }
+
+  @override
+  String get hrPresenceRecapClosedOnTablet =>
+      'Closing saved on this tablet, waiting to be sent';
+
+  @override
+  String hrPresenceRecapClosedBy(String when, String by) {
+    return 'on $when by $by';
+  }
+
+  @override
+  String hrPresenceRecapDaysWorked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days worked',
+      one: '1 day worked',
+      zero: 'no day worked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceRecapLegend =>
+      'NJ = unexcused · J = excused · tap a row to open the individual record';
+
+  @override
+  String get staffAttendanceCloseIrreversible =>
+      'A closed month cannot be reopened: validated pay depends on it.';
 }

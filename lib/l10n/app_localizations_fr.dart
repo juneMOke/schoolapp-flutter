@@ -13486,16 +13486,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'NJ = non justifiée · J = justifiée · touchez une ligne pour ouvrir la fiche mensuelle';
 
   @override
-  String get staffAttendanceClose => 'Clôturer et transmettre à la Paie';
+  String get staffAttendanceClose => 'Clôturer le mois';
 
   @override
   String staffAttendanceCloseTitle(String month) {
-    return 'Transmettre $month à la Paie ?';
+    return 'Clôturer $month ?';
   }
 
   @override
   String staffAttendanceCloseHours(String hours) {
-    return '$hours de vacation, ajoutées au salaire des vacataires';
+    return '$hours de vacation, que la Paie relit dans les pointages';
   }
 
   @override
@@ -13510,7 +13510,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String staffAttendanceCloseNotMarked(int count) {
-    return '$count jours-agent sans pointage seront traités comme présents par défaut';
+    return '$count jours-agent sans pointage : un jour non pointé d\'un vacataire vaut 0 h payée';
   }
 
   @override
@@ -18870,4 +18870,80 @@ class AppLocalizationsFr extends AppLocalizations {
   String hrPresenceMonthScored(int scored, int classDays) {
     return '$scored/$classDays j pointés';
   }
+
+  @override
+  String get subMenuHrPresenceRecap => 'Récapitulatif';
+
+  @override
+  String get hrPresenceRecapSubtitle =>
+      'Les totaux de présence du mois par agent, puis sa clôture. La Paie relit les pointages réels.';
+
+  @override
+  String hrPresenceRecapClassDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours de classe',
+      one: '1 jour de classe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrPresenceRecapClassDaysToDate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours de classe à ce jour',
+      one: '1 jour de classe à ce jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceRecapUnsynced => 'Encore sur la tablette';
+
+  @override
+  String get hrPresenceRecapCurrentMonth => 'Mois en cours';
+
+  @override
+  String get hrPresenceRecapNotClosed => 'Mois non clôturé';
+
+  @override
+  String get hrPresenceRecapCloseExplain =>
+      'Clôturer verrouille les pointages du mois. Rien n\'est transmis : la Paie relit les pointages réels.';
+
+  @override
+  String hrPresenceRecapCloseFrom(String day) {
+    return 'Clôture possible à partir du $day';
+  }
+
+  @override
+  String get hrPresenceRecapClosedOnTablet =>
+      'Clôture enregistrée sur la tablette, en attente d\'envoi';
+
+  @override
+  String hrPresenceRecapClosedBy(String when, String by) {
+    return 'le $when par $by';
+  }
+
+  @override
+  String hrPresenceRecapDaysWorked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours prestés',
+      one: '1 jour presté',
+      zero: 'aucun jour presté',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceRecapLegend =>
+      'NJ = non justifiée · J = justifiée · touchez une ligne pour ouvrir la fiche individuelle';
+
+  @override
+  String get staffAttendanceCloseIrreversible =>
+      'Un mois clôturé ne se rouvre pas : la paie validée en dépend.';
 }

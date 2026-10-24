@@ -20,12 +20,16 @@ class PresenceMonthCloseDialog extends StatelessWidget {
   final String? notMarkedWarning;
   final String confirmLabel;
 
+  /// Ce que la clôture fige ; la phrase de l'appel par défaut.
+  final String? irreversibleMessage;
+
   const PresenceMonthCloseDialog({
     super.key,
     required this.title,
     required this.consequences,
     required this.confirmLabel,
     this.notMarkedWarning,
+    this.irreversibleMessage,
   });
 
   @override
@@ -60,7 +64,7 @@ class PresenceMonthCloseDialog extends StatelessWidget {
           PresenceWarning(
             icon: Icons.lock_outline,
             tone: PresenceStatus.absent,
-            message: l10n.presenceMarkCloseIrreversible,
+            message: irreversibleMessage ?? l10n.presenceMarkCloseIrreversible,
           ),
         ],
       ),

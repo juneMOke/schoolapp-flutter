@@ -21089,19 +21089,19 @@ abstract class AppLocalizations {
   /// No description provided for @staffAttendanceClose.
   ///
   /// In en, this message translates to:
-  /// **'Close and send to Payroll'**
+  /// **'Close the month'**
   String get staffAttendanceClose;
 
   /// No description provided for @staffAttendanceCloseTitle.
   ///
   /// In en, this message translates to:
-  /// **'Send {month} to Payroll?'**
+  /// **'Close {month}?'**
   String staffAttendanceCloseTitle(String month);
 
   /// No description provided for @staffAttendanceCloseHours.
   ///
   /// In en, this message translates to:
-  /// **'{hours} of hourly work, added to hourly staff pay'**
+  /// **'{hours} of hourly work, which Payroll reads from the marks'**
   String staffAttendanceCloseHours(String hours);
 
   /// No description provided for @staffAttendanceCloseAbsences.
@@ -21119,7 +21119,7 @@ abstract class AppLocalizations {
   /// No description provided for @staffAttendanceCloseNotMarked.
   ///
   /// In en, this message translates to:
-  /// **'{count} staff-days without marks will be treated as present by default'**
+  /// **'{count} staff-days without marks: an unmarked day of hourly staff pays 0 h'**
   String staffAttendanceCloseNotMarked(int count);
 
   /// No description provided for @presenceMarkCloseIrreversible.
@@ -29104,6 +29104,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{scored}/{classDays} days marked'**
   String hrPresenceMonthScored(int scored, int classDays);
+
+  /// No description provided for @subMenuHrPresenceRecap.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly summary'**
+  String get subMenuHrPresenceRecap;
+
+  /// No description provided for @hrPresenceRecapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Each staff member\'s attendance totals for the month, then its closing. Payroll reads the actual marks.'**
+  String get hrPresenceRecapSubtitle;
+
+  /// No description provided for @hrPresenceRecapClassDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 school day} other{{count} school days}}'**
+  String hrPresenceRecapClassDays(int count);
+
+  /// No description provided for @hrPresenceRecapClassDaysToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 school day so far} other{{count} school days so far}}'**
+  String hrPresenceRecapClassDaysToDate(int count);
+
+  /// No description provided for @hrPresenceRecapUnsynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Still on this tablet'**
+  String get hrPresenceRecapUnsynced;
+
+  /// No description provided for @hrPresenceRecapCurrentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Current month'**
+  String get hrPresenceRecapCurrentMonth;
+
+  /// No description provided for @hrPresenceRecapNotClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Month not closed'**
+  String get hrPresenceRecapNotClosed;
+
+  /// No description provided for @hrPresenceRecapCloseExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing locks the month\'s marks. Nothing is sent: Payroll reads the actual marks.'**
+  String get hrPresenceRecapCloseExplain;
+
+  /// No description provided for @hrPresenceRecapCloseFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Can be closed from {day}'**
+  String hrPresenceRecapCloseFrom(String day);
+
+  /// No description provided for @hrPresenceRecapClosedOnTablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing saved on this tablet, waiting to be sent'**
+  String get hrPresenceRecapClosedOnTablet;
+
+  /// No description provided for @hrPresenceRecapClosedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'on {when} by {by}'**
+  String hrPresenceRecapClosedBy(String when, String by);
+
+  /// No description provided for @hrPresenceRecapDaysWorked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no day worked} =1{1 day worked} other{{count} days worked}}'**
+  String hrPresenceRecapDaysWorked(int count);
+
+  /// No description provided for @hrPresenceRecapLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'NJ = unexcused · J = excused · tap a row to open the individual record'**
+  String get hrPresenceRecapLegend;
+
+  /// No description provided for @staffAttendanceCloseIrreversible.
+  ///
+  /// In en, this message translates to:
+  /// **'A closed month cannot be reopened: validated pay depends on it.'**
+  String get staffAttendanceCloseIrreversible;
 }
 
 class _AppLocalizationsDelegate

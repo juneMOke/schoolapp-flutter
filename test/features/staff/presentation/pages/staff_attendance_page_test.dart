@@ -261,13 +261,13 @@ void main() {
       Perm.hrAttendanceRead.wire,
       Perm.hrAttendanceWrite.wire,
     ]);
-    expect(find.text('Clôturer et transmettre à la Paie'), findsNothing);
+    expect(find.text('Clôturer le mois'), findsNothing);
 
     await openPreviousRecap([
       Perm.hrAttendanceRead.wire,
       Perm.hrAttendanceManage.wire,
     ]);
-    expect(find.text('Clôturer et transmettre à la Paie'), findsOneWidget);
+    expect(find.text('Clôturer le mois'), findsOneWidget);
   });
 
   testWidgets('la modale d\'heure tient en paysage, clavier ouvert', (
