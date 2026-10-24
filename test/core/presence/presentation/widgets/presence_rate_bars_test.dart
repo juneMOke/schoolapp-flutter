@@ -70,4 +70,25 @@ void main() {
     expect(find.text('80'), findsNWidgets(23));
     expect(find.text('20 %'), findsNothing);
   });
+
+  testWidgets('chaque segment a sa hauteur : vert en bas, rouge au-dessus', (
+    tester,
+  ) async {
+    await pump(tester, [bar(80)]);
+    final heights = tester
+        .widgetList<ColoredBox>(
+          find.descendant(
+            of: find.byType(PresenceRateBars),
+            matching: find.byType(ColoredBox),
+          ),
+        )
+        .map((box) => tester.getSize(find.byWidget(box)))
+        .toList();
+    expect(heights, hasLength(2));
+    final total = heights.fold<double>(0, (sum, s) => sum + s.height);
+    expect(heights.last.height, closeTo(total * 0.8, 0.5));
+    for (final size in heights) {
+      expect(size.width, greaterThan(0));
+    }
+  });
 }

@@ -40,7 +40,10 @@ class PresenceShareBar extends StatelessWidget {
         height: AppDimensions.presenceShareBarHeight,
         child: segments.isEmpty
             ? ColoredBox(color: none.soft)
+            // `stretch` : un ColoredBox sans enfant prend la plus petite
+            // hauteur permise — sans elle, les segments faisaient 0 dp.
             : Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (final (share, color) in segments)
                     Expanded(
