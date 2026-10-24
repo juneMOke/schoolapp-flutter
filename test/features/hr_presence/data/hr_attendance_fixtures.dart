@@ -1,6 +1,5 @@
 /// Les réponses des statistiques de présence, au format exact des DTO du
-/// back (`feat/hr-attendance-stats`, 2026-10-24) — sauf le récapitulatif, lu
-/// sur le contrat du doc back (route 5 pas encore servie).
+/// back (`feat/hr-attendance-stats`, 2026-10-24, revue `f8de0fc8` comprise).
 library;
 
 Map<String, dynamic> identity({
@@ -200,6 +199,7 @@ Map<String, dynamic> recap({bool withAmounts = true}) => {
       'lateMinutes': 12,
       'justifiedAbsences': 0,
       'unjustifiedAbsences': 1,
+      'unscored': 0,
       'workedMinutes': 1200,
       'amount': withAmounts
           ? {'currency': 'USD', 'amountInCents': 16000}

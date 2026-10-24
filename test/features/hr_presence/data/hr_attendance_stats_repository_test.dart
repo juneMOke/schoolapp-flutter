@@ -175,6 +175,7 @@ void main() {
       expect(recap.staff.single.agent.isHourly, isTrue);
       expect(recap.staff.single.amount, const Money(16000, 'USD'));
       expect(recap.closable, isFalse);
+      expect(recap.staff.single.unscored, 0);
     });
 
     test('sans hr.pay.read : aucun montant', () async {

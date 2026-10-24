@@ -11,6 +11,10 @@ class HrAttendanceRecapRow extends Equatable {
   final int lateMinutes;
   final int justifiedAbsences;
   final int unjustifiedAbsences;
+
+  /// Jours de classe attendus et non pointés — jamais pour un vacataire à
+  /// l'heure (D2).
+  final int unscored;
   final int workedMinutes;
 
   /// Minutes prestées × taux horaire du contrat, dans sa devise. `null` sans
@@ -25,6 +29,7 @@ class HrAttendanceRecapRow extends Equatable {
     required this.lateMinutes,
     required this.justifiedAbsences,
     required this.unjustifiedAbsences,
+    required this.unscored,
     required this.workedMinutes,
     required this.amount,
   });
@@ -38,6 +43,7 @@ class HrAttendanceRecapRow extends Equatable {
     lateMinutes,
     justifiedAbsences,
     unjustifiedAbsences,
+    unscored,
     workedMinutes,
     amount,
   ];

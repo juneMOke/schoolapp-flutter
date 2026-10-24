@@ -4,9 +4,8 @@ import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_atten
 
 /// Le récapitulatif pour la paie (`GET /hr/attendance-stats/recap`).
 ///
-/// ⚠ Lu sur le contrat du doc back (« RH · Présences — écarts serveur »,
-/// route 5) : la route n'est pas encore servie. À confronter au DTO dès qu'il
-/// existe.
+/// Calé sur `AttendanceRecapDto` du back (`feat/hr-attendance-stats`,
+/// `b6bcd97f` + revue `f8de0fc8`).
 abstract final class HrAttendanceRecapModel {
   static HrAttendanceRecap fromJson(Map<String, dynamic> json) {
     final totals = HrAttendanceJson.map(json['totals']);
@@ -47,6 +46,7 @@ abstract final class HrAttendanceRecapModel {
               row,
               'unjustifiedAbsences',
             ),
+            unscored: HrAttendanceJson.count(row, 'unscored'),
             workedMinutes: HrAttendanceJson.count(row, 'workedMinutes'),
             amount: HrAttendanceJson.money(row['amount']),
           ),
