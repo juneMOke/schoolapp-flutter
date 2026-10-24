@@ -174,6 +174,10 @@ const ModuleAccess kStaffAttendanceManageAccess = ModuleAccess([
   Perm.hrAttendanceManage,
 ]);
 
+/// Lire la paie : montants, taux horaires, « Voir sa paie du mois »
+/// (`hr.pay.read`) — l'économe et la direction.
+const ModuleAccess kPayrollReadAccess = ModuleAccess([Perm.hrPayRead]);
+
 /// Préparer la paie, la soumettre, verser un salaire, accorder une avance,
 /// tenir le profil de paie d'un agent (`hr.pay.write`).
 ///

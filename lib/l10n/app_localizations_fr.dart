@@ -18712,4 +18712,42 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get hrPresenceReportFailed =>
       'L\'assiduité des agents n\'a pas pu être préparée.';
+
+  @override
+  String get hrPresenceAgentTitle => 'Présence de l\'agent';
+
+  @override
+  String get hrPresenceAllAgents => 'Tous les agents';
+
+  @override
+  String get hrPresenceAgentOpenPayroll => 'Voir sa paie';
+
+  @override
+  String get hrPresenceAgentMonthRate => 'Présence du mois';
+
+  @override
+  String hrPresenceAgentClassDays(int classDays, int unscored) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classDays,
+      locale: localeName,
+      other: '$classDays jours de classe',
+      one: '1 jour de classe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      unscored,
+      locale: localeName,
+      other: '$unscored non pointés',
+      one: '1 non pointé',
+      zero: 'tout pointé',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get hrPresenceAgentTrendTitle => 'Tendance sur six mois';
+
+  @override
+  String hrPresenceTrendDescription(String when, int pct) {
+    return '$when · présence $pct %';
+  }
 }

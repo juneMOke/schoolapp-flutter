@@ -10913,5 +10913,12 @@
   "hrPresenceReportForbidden": "Vous n'avez pas accès aux présences du personnel.",
   "hrPresenceReportNoYear": "Aucune année scolaire en cours : la pièce ne peut pas être numérotée.",
   "hrPresenceReportTooLarge": "{lines} agents, au-delà des {cap} du document : ajoutez une recherche.",
-  "hrPresenceReportFailed": "L'assiduité des agents n'a pas pu être préparée."
+  "hrPresenceReportFailed": "L'assiduité des agents n'a pas pu être préparée.",
+  "hrPresenceAgentTitle": "Présence de l'agent",
+  "hrPresenceAllAgents": "Tous les agents",
+  "hrPresenceAgentOpenPayroll": "Voir sa paie",
+  "hrPresenceAgentMonthRate": "Présence du mois",
+  "hrPresenceAgentClassDays": "{classDays, plural, =1{1 jour de classe} other{{classDays} jours de classe}} · {unscored, plural, =0{tout pointé} =1{1 non pointé} other{{unscored} non pointés}}",
+  "hrPresenceAgentTrendTitle": "Tendance sur six mois",
+  "hrPresenceTrendDescription": "{when} · présence {pct} %"
 }

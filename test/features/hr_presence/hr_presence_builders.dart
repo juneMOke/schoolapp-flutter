@@ -1,4 +1,7 @@
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_month.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_dashboard.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_kpis.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -98,4 +101,81 @@ HrAttendanceDashboard dashboardOf({
           kpis: kpisOf(rate: 100, late: 0, justified: 0, unjustified: 0),
         ),
       ],
+);
+
+/// Le mois d'octobre 2026 d'un agent : trois jours pointés (présent, retard
+/// de 12 min, absence non justifiée), le reste à venir.
+HrAttendanceAgentMonth agentMonthOf({
+  String id = 'a-1',
+  String month = '2026-10',
+  StaffPayMode? payMode,
+  HrAttendanceKpis? kpis,
+  List<HrAttendanceDay>? days,
+}) => HrAttendanceAgentMonth(
+  month: month,
+  classDays: 17,
+  toDate: true,
+  agent: HrAttendanceAgent(
+    staffMemberId: id,
+    staffNumber: 'CF-AG-0012',
+    lastName: 'MWAMBA',
+    middleName: 'ILUNGA',
+    firstName: 'Clarisse',
+    jobTitle: 'Secrétaire',
+    category: StaffCategory.administrative,
+    contractKind: StaffContractKind.permanent,
+    payMode: payMode,
+  ),
+  profile: PresenceProfile.absentee,
+  kpis:
+      kpis ??
+      kpisOf(
+        scored: 3,
+        presences: 2,
+        rate: 67,
+        late: 1,
+        lateMinutes: 12,
+        justified: 0,
+        unjustified: 1,
+        unscored: 14,
+      ),
+  days:
+      days ??
+      [
+        const HrAttendanceDay(
+          date: '2026-10-01',
+          status: PresenceStatus.present,
+          arrival: '07:25',
+          lateMinutes: 0,
+          workedMinutes: 0,
+          future: false,
+        ),
+        const HrAttendanceDay(
+          date: '2026-10-02',
+          status: PresenceStatus.late,
+          arrival: '07:52',
+          lateMinutes: 12,
+          workedMinutes: 0,
+          future: false,
+        ),
+        const HrAttendanceDay(
+          date: '2026-10-05',
+          status: PresenceStatus.absent,
+          lateMinutes: 0,
+          workedMinutes: 0,
+          future: false,
+        ),
+        for (final d in ['06', '07', '08', '09'])
+          HrAttendanceDay(
+            date: '2026-10-$d',
+            status: PresenceStatus.none,
+            lateMinutes: 0,
+            workedMinutes: 0,
+            future: true,
+          ),
+      ],
+  trend: const [
+    HrAttendanceTrendPoint(month: '2026-09', presenceRatePct: 95),
+    HrAttendanceTrendPoint(month: '2026-10', presenceRatePct: 67),
+  ],
 );

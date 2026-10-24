@@ -3,6 +3,8 @@ import 'package:school_app_flutter/core/di/offline_modules/staff_attendance_di.d
 import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/hr_personnel/data/hr_staff_dashboard_api.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_args.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_month_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
@@ -211,6 +213,19 @@ void registerStaffOffline(GetIt getIt) {
       getDashboard: getIt<GetHrAttendanceDashboardUseCase>(),
       countUnsynced: getIt<CountUnsyncedStaffAttendanceUseCase>(),
       signals: getIt<StaffSyncSignals>(),
+    ),
+  );
+  getIt.registerFactoryParam<
+    HrPresenceAgentMonthCubit,
+    HrPresenceAgentArgs,
+    void
+  >(
+    (args, _) => HrPresenceAgentMonthCubit(
+      getMonth: getIt<GetHrAttendanceAgentMonthUseCase>(),
+      source: getIt<StaffSnapshotSource>(),
+      agentId: args.agentId,
+      month: args.month,
+      yearStart: args.yearStart,
     ),
   );
   getIt.registerFactory<HrAttendanceReportCubit>(

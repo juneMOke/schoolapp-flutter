@@ -19,7 +19,8 @@ class HrAgentIntent {
   const HrAgentIntent({required this.onClosed});
 
   /// Ouvre la fiche de [agentId] par-dessus l'écran [subMenuId] — elle prend
-  /// son adresse — et se termine quand elle se referme.
+  /// son adresse, et [query] s'il y en a une — et se termine quand elle se
+  /// referme.
   ///
   /// ⚠️ Le `Future` de `push` ne se termine pas quand Précédent du navigateur
   /// retire la fiche (nouvelle configuration, pas un `pop`) : c'est la page
@@ -28,6 +29,7 @@ class HrAgentIntent {
     BuildContext context, {
     required String subMenuId,
     required String agentId,
+    Map<String, String> query = const {},
   }) {
     final closed = Completer<void>();
     void finish() {
@@ -37,10 +39,13 @@ class HrAgentIntent {
     unawaited(
       context
           .push<void>(
-            AppRoutesNames.hrPersonnelAgentPath(
-              subMenuId: subMenuId,
-              agentId: agentId,
-            ),
+            Uri(
+              path: AppRoutesNames.hrPersonnelAgentPath(
+                subMenuId: subMenuId,
+                agentId: agentId,
+              ),
+              queryParameters: query.isEmpty ? null : query,
+            ).toString(),
             extra: HrAgentIntent(onClosed: finish),
           )
           .whenComplete(finish),

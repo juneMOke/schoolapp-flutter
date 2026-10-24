@@ -28890,6 +28890,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The staff attendance document could not be prepared.'**
   String get hrPresenceReportFailed;
+
+  /// No description provided for @hrPresenceAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff member attendance'**
+  String get hrPresenceAgentTitle;
+
+  /// No description provided for @hrPresenceAllAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'All staff'**
+  String get hrPresenceAllAgents;
+
+  /// No description provided for @hrPresenceAgentOpenPayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'See their pay'**
+  String get hrPresenceAgentOpenPayroll;
+
+  /// No description provided for @hrPresenceAgentMonthRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance this month'**
+  String get hrPresenceAgentMonthRate;
+
+  /// No description provided for @hrPresenceAgentClassDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{classDays, plural, =1{1 school day} other{{classDays} school days}} · {unscored, plural, =0{all marked} =1{1 not marked} other{{unscored} not marked}}'**
+  String hrPresenceAgentClassDays(int classDays, int unscored);
+
+  /// No description provided for @hrPresenceAgentTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Six-month trend'**
+  String get hrPresenceAgentTrendTitle;
+
+  /// No description provided for @hrPresenceTrendDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'{when} · attendance {pct} %'**
+  String hrPresenceTrendDescription(String when, int pct);
 }
 
 class _AppLocalizationsDelegate

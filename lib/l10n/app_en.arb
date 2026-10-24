@@ -11006,5 +11006,14 @@
   "@hrPresenceStaffSubtitleTap": {"placeholders": {"period": {"type": "String"}}},
   "@hrPresenceLateCell": {"placeholders": {"count": {"type": "int"}, "minutes": {"type": "int"}}},
   "@hrPresenceStaffEmptyMessage": {"placeholders": {"text": {"type": "String"}}},
-  "@hrPresenceReportTooLarge": {"placeholders": {"lines": {"type": "int"}, "cap": {"type": "int"}}}
+  "@hrPresenceReportTooLarge": {"placeholders": {"lines": {"type": "int"}, "cap": {"type": "int"}}},
+  "hrPresenceAgentTitle": "Staff member attendance",
+  "hrPresenceAllAgents": "All staff",
+  "hrPresenceAgentOpenPayroll": "See their pay",
+  "hrPresenceAgentMonthRate": "Attendance this month",
+  "hrPresenceAgentClassDays": "{classDays, plural, =1{1 school day} other{{classDays} school days}} · {unscored, plural, =0{all marked} =1{1 not marked} other{{unscored} not marked}}",
+  "@hrPresenceAgentClassDays": {"placeholders": {"classDays": {"type": "int"}, "unscored": {"type": "int"}}},
+  "hrPresenceAgentTrendTitle": "Six-month trend",
+  "hrPresenceTrendDescription": "{when} · attendance {pct} %",
+  "@hrPresenceTrendDescription": {"placeholders": {"when": {"type": "String"}, "pct": {"type": "int"}}}
 }

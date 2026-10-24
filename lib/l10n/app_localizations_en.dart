@@ -18579,4 +18579,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get hrPresenceReportFailed =>
       'The staff attendance document could not be prepared.';
+
+  @override
+  String get hrPresenceAgentTitle => 'Staff member attendance';
+
+  @override
+  String get hrPresenceAllAgents => 'All staff';
+
+  @override
+  String get hrPresenceAgentOpenPayroll => 'See their pay';
+
+  @override
+  String get hrPresenceAgentMonthRate => 'Attendance this month';
+
+  @override
+  String hrPresenceAgentClassDays(int classDays, int unscored) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classDays,
+      locale: localeName,
+      other: '$classDays school days',
+      one: '1 school day',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      unscored,
+      locale: localeName,
+      other: '$unscored not marked',
+      one: '1 not marked',
+      zero: 'all marked',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get hrPresenceAgentTrendTitle => 'Six-month trend';
+
+  @override
+  String hrPresenceTrendDescription(String when, int pct) {
+    return '$when · attendance $pct %';
+  }
 }

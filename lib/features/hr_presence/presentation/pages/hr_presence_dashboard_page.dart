@@ -14,6 +14,8 @@ import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bl
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_dashboard.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_agent_page.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/dashboard/hr_presence_dashboard_body.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_dashboard_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -38,7 +40,22 @@ class HrPresenceDashboardPage extends StatelessWidget {
         create: (_) => getIt<HrAttendanceReportCubit>(),
       ),
     ],
-    child: const HrPresenceDashboardScreen(),
+    child: HrPresenceDashboardScreen(
+      onOpenAgent: (context, row) {
+        final window = context.read<HrPresenceDashboardCubit>().state.window;
+        if (window == null) return;
+        unawaited(
+          HrPresenceAgentPage.open(
+            context,
+            agentId: row.agent.staffMemberId,
+            // Le mois de fin de période (spec §4).
+            month: SchoolDayCalendar.monthOf(
+              SchoolDayCalendar.dayOf(window.to),
+            ),
+          ),
+        );
+      },
+    ),
   );
 
   /// L'ouverture de l'année, si le contexte la connaît déjà.
@@ -58,7 +75,8 @@ class HrPresenceDashboardPage extends StatelessWidget {
 
 class HrPresenceDashboardScreen extends StatelessWidget {
   /// `null` : les lignes d'agent ne s'ouvrent pas.
-  final ValueChanged<HrAttendanceStaffRow>? onOpenAgent;
+  final void Function(BuildContext context, HrAttendanceStaffRow row)?
+  onOpenAgent;
 
   const HrPresenceDashboardScreen({super.key, this.onOpenAgent});
 
@@ -99,7 +117,9 @@ class HrPresenceDashboardScreen extends StatelessWidget {
             child: HrPresenceDashboardBody(
               state: state,
               onOpenRegister: () => openRegister(context),
-              onOpen: onOpenAgent,
+              onOpen: onOpenAgent == null
+                  ? null
+                  : (row) => onOpenAgent!(context, row),
             ),
           ),
         ),
