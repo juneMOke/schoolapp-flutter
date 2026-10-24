@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_stats.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/helpers/hr_personnel_labels.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_sort_select.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_roster_row.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -109,29 +110,7 @@ class HrRosterCard extends StatelessWidget {
                   onChanged: onCategoryChanged,
                 ),
               ),
-              SizedBox(
-                width: AppDimensions.hrRosterSortWidth,
-                child: EteeloSelectInput<HrRosterSort>(
-                  label: l10n.hrSortLabel,
-                  value: query.sort == HrRosterSort.nameDescending
-                      ? HrRosterSort.name
-                      : query.sort,
-                  onChanged: (sort) {
-                    if (sort != null) onSortChanged(sort);
-                  },
-                  items: [
-                    for (final sort in const [
-                      HrRosterSort.name,
-                      HrRosterSort.oldest,
-                      HrRosterSort.newest,
-                    ])
-                      EteeloSelectItem(
-                        value: sort,
-                        label: HrPersonnelLabels.sort(l10n, sort),
-                      ),
-                  ],
-                ),
-              ),
+              HrSortSelect(value: query.sort, onChanged: onSortChanged),
             ],
           ),
           const SizedBox(height: AppSpacing.md),

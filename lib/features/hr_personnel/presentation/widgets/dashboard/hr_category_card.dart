@@ -99,55 +99,80 @@ class _CategoryRow extends StatelessWidget {
                 horizontal: AppSpacing.sm,
                 vertical: AppSpacing.sm,
               ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: AppDimensions.hrBarLabelWidth,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final caption = Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      if (selected)
                         Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.labelLarge.copyWith(
-                            color: AppColors.textPrimary,
+                          l10n.hrFilterActive,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.bleuArdoise,
                           ),
                         ),
-                        if (selected)
-                          Text(
-                            l10n.hrFilterActive,
-                            style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.bleuArdoise,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: HrBar(
-                      segments: [
-                        HrBarSegment(
-                          count: category.count,
-                          color: HrPersonnelLabels.categoryColor(category.key),
-                        ),
-                      ],
-                      scale: scale,
-                      height: AppDimensions.hrCategoryBarHeight,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Text(
+                    ],
+                  );
+                  final bar = HrBar(
+                    segments: [
+                      HrBarSegment(
+                        count: category.count,
+                        color: HrPersonnelLabels.categoryColor(category.key),
+                      ),
+                    ],
+                    scale: scale,
+                    height: AppDimensions.hrCategoryBarHeight,
+                  );
+                  final count = Text(
                     value,
                     textAlign: TextAlign.right,
                     style: AppTypography.labelMedium.copyWith(
                       color: AppColors.textPrimary,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
-                  ),
-                ],
+                  );
+                  // Étroit (téléphone) : libellé et compte sur une ligne, la
+                  // barre dessous — côte à côte, elle n'aurait plus de place.
+                  if (constraints.maxWidth <
+                      AppDimensions.hrCategoryRowStackedMaxWidth) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child: caption),
+                            const SizedBox(width: AppSpacing.md),
+                            count,
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        bar,
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      SizedBox(
+                        width: AppDimensions.hrBarLabelWidth,
+                        child: caption,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(child: bar),
+                      const SizedBox(width: AppSpacing.md),
+                      count,
+                    ],
+                  );
+                },
               ),
             ),
           ),

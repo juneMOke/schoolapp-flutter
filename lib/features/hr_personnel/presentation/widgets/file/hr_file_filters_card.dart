@@ -7,10 +7,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_sort_select.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// La carte de filtres du Fichier : recherche, catégorie et bascule
+/// La carte de filtres du Fichier : recherche, catégorie, ordre et bascule
 /// cartes/liste, puis la légende des pastilles. Ni puce de contrat ni « dossier
 /// incomplet » : ce sont des statistiques, et elles vivent au tableau de bord.
 class HrFileFiltersCard extends StatelessWidget {
@@ -18,6 +19,7 @@ class HrFileFiltersCard extends StatelessWidget {
   final CollectionViewMode viewMode;
   final ValueChanged<String> onTextChanged;
   final ValueChanged<HrCategoryKey?> onCategoryChanged;
+  final ValueChanged<HrRosterSort> onSortChanged;
   final ValueChanged<CollectionViewMode> onViewModeChanged;
 
   const HrFileFiltersCard({
@@ -26,6 +28,7 @@ class HrFileFiltersCard extends StatelessWidget {
     required this.viewMode,
     required this.onTextChanged,
     required this.onCategoryChanged,
+    required this.onSortChanged,
     required this.onViewModeChanged,
   });
 
@@ -53,6 +56,9 @@ class HrFileFiltersCard extends StatelessWidget {
             ),
             viewMode: viewMode,
             onViewModeChanged: onViewModeChanged,
+            trailingFilters: [
+              HrSortSelect(value: query.sort, onChanged: onSortChanged),
+            ],
           ),
           const SizedBox(height: AppSpacing.sm),
           const Wrap(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -96,25 +97,26 @@ class _ParityLine extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: labelStyle.copyWith(color: AppColors.textPrimary),
-                ),
+          // Les comptes ne s'abrègent jamais : bornés aux deux tiers de la
+          // ligne, ils passent à la ligne (téléphone, texte ×1,3).
+          LeadingTrailingRow(
+            gap: AppSpacing.sm,
+            maxTrailingShare: 2 / 3,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            leading: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: labelStyle.copyWith(color: AppColors.textPrimary),
+            ),
+            trailing: Text(
+              counts,
+              textAlign: TextAlign.right,
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                counts,
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.textSecondary,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           HrBar(

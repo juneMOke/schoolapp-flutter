@@ -18199,4 +18199,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffTableSortDescending => 'Sorted Z to A; tap to reverse';
+
+  @override
+  String get hrSortNameDescending => 'Sort: name (Z to A)';
 }

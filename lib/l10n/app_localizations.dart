@@ -28344,6 +28344,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sorted Z to A; tap to reverse'**
   String get staffTableSortDescending;
+
+  /// RH · Personnel : tri alphabétique inversé.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: name (Z to A)'**
+  String get hrSortNameDescending;
 }
 
 class _AppLocalizationsDelegate

@@ -83,7 +83,8 @@ abstract final class HrPersonnelLabels {
 
   static String sort(AppLocalizations l10n, HrRosterSort sort) =>
       switch (sort) {
-        HrRosterSort.name || HrRosterSort.nameDescending => l10n.hrSortName,
+        HrRosterSort.name => l10n.hrSortName,
+        HrRosterSort.nameDescending => l10n.hrSortNameDescending,
         HrRosterSort.oldest => l10n.hrSortOldest,
         HrRosterSort.newest => l10n.hrSortNewest,
       };

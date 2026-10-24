@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -22,6 +23,7 @@ import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_stats.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_query_location.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_content.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_skeleton.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr_personnel_header.dart';
@@ -90,18 +92,29 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AppPageBackground(
-      width: PageContentWidth.wide,
-      // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
-      appBar: ShellChrome.wraps(context)
-          ? null
-          : ModuleTopBar(
-              eyebrow: l10n.hrPersonnelEyebrow,
-              title: l10n.subMenuDashboard,
-            ),
-      child: BlocBuilder<HrPersonnelCubit, HrPersonnelState>(
-        buildWhen: (previous, current) => previous != current,
-        builder: _body,
+    // F5 / Ctrl+R : redescendre le fichier, sans recharger la page web.
+    return PageActionShortcut(
+      action: PageAction.refresh,
+      onInvoke: () => unawaited(context.read<HrPersonnelCubit>().reload()),
+      child: AppPageBackground(
+        width: PageContentWidth.wide,
+        // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
+        appBar: ShellChrome.wraps(context)
+            ? null
+            : ModuleTopBar(
+                eyebrow: l10n.hrPersonnelEyebrow,
+                title: l10n.subMenuDashboard,
+              ),
+        child: BlocBuilder<HrPersonnelCubit, HrPersonnelState>(
+          buildWhen: (previous, current) => previous != current,
+          // Catégorie et ordre de « Qui sont-ils » dans l'adresse ; pas de
+          // bascule cartes/liste ici.
+          builder: (context, state) => HrQueryLocation(
+            query: state.query,
+            onLocation: context.read<HrPersonnelCubit>().applyLocation,
+            child: _body(context, state),
+          ),
+        ),
       ),
     );
   }

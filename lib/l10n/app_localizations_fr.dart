@@ -18329,4 +18329,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get staffTableSortDescending =>
       'Trié de Z à A ; touchez pour inverser';
+
+  @override
+  String get hrSortNameDescending => 'Trier : nom (Z à A)';
 }

@@ -10904,5 +10904,9 @@
   "staffTableSortDescending": "Sorted Z to A; tap to reverse",
   "@staffTableSortDescending": {
     "description": "Tri de la colonne Agent."
+  },
+  "hrSortNameDescending": "Sort: name (Z to A)",
+  "@hrSortNameDescending": {
+    "description": "RH · Personnel : tri alphabétique inversé."
   }
 }

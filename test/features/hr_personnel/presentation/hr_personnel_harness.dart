@@ -28,10 +28,15 @@ Future<HrPersonnelCubit> pumpHrScreen(
   WidgetTester tester, {
   required StaffFileSnapshot snapshot,
   required Widget screen,
-  Size size = const Size(1280, 1400),
+  Size? size = const Size(1280, 1400),
 }) async {
-  await tester.binding.setSurfaceSize(size);
-  addTearDown(() => tester.binding.setSurfaceSize(null));
+  // `physicalSize`, pas `setSurfaceSize` : seul le premier change
+  // `MediaQuery`. `null` : le format est déjà posé (test aux formats).
+  if (size != null) {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = size;
+    addTearDown(tester.view.reset);
+  }
 
   final source = MockStaffSnapshotSource();
   when(() => source.watch(any())).thenReturn(() {});

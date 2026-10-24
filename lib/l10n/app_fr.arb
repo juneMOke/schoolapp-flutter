@@ -10815,5 +10815,6 @@
   "hrClockTime": "{hours}h{minutes}",
   "hrPdfScopeAll": "Tout le personnel",
   "staffTableSortAscending": "Trié de A à Z ; touchez pour inverser",
-  "staffTableSortDescending": "Trié de Z à A ; touchez pour inverser"
+  "staffTableSortDescending": "Trié de Z à A ; touchez pour inverser",
+  "hrSortNameDescending": "Trier : nom (Z à A)"
 }

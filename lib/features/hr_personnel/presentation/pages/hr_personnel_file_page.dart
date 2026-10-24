@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
@@ -18,6 +19,7 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_query_location.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/file/hr_file_filters_card.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr_personnel_header.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
@@ -53,17 +55,27 @@ class HrPersonnelFileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return AppPageBackground(
-      width: PageContentWidth.wide,
-      appBar: ShellChrome.wraps(context)
-          ? null
-          : ModuleTopBar(
-              eyebrow: l10n.hrPersonnelEyebrow,
-              title: l10n.subMenuHrPersonnelFile,
-            ),
-      child: BlocBuilder<HrPersonnelCubit, HrPersonnelState>(
-        buildWhen: (previous, current) => previous != current,
-        builder: _body,
+    // F5 / Ctrl+R : redescendre le fichier, sans recharger la page web.
+    return PageActionShortcut(
+      action: PageAction.refresh,
+      onInvoke: () => unawaited(context.read<HrPersonnelCubit>().reload()),
+      child: AppPageBackground(
+        width: PageContentWidth.wide,
+        appBar: ShellChrome.wraps(context)
+            ? null
+            : ModuleTopBar(
+                eyebrow: l10n.hrPersonnelEyebrow,
+                title: l10n.subMenuHrPersonnelFile,
+              ),
+        child: BlocBuilder<HrPersonnelCubit, HrPersonnelState>(
+          buildWhen: (previous, current) => previous != current,
+          builder: (context, state) => HrQueryLocation(
+            query: state.query,
+            viewMode: state.viewMode,
+            onLocation: context.read<HrPersonnelCubit>().applyLocation,
+            child: _body(context, state),
+          ),
+        ),
       ),
     );
   }
@@ -84,19 +96,26 @@ class HrPersonnelFileScreen extends StatelessWidget {
       if (context.mounted) await cubit.refresh();
     }
 
+    // Une base illisible n'accepte pas non plus d'écriture.
+    final VoidCallback? create = state.status == HrPersonnelStatus.failure
+        ? null
+        : () => unawaited(open());
+
     final header = HrPersonnelHeader(
       subtitle: l10n.hrFileSubtitle,
       actions: [
         PermissionGate.access(
           kStaffWriteAccess,
-          child: EteeloButton.primary(
-            label: l10n.staffActionNewAgent,
-            icon: Icons.person_add_alt,
-            // Une base illisible n'accepte pas non plus d'écriture.
-            onPressed: state.status == HrPersonnelStatus.failure
-                ? null
-                : () => unawaited(open()),
-            fullWidth: false,
+          // Ctrl+N : la même fiche neuve que le bouton, sous le même droit.
+          child: PageActionShortcut(
+            action: PageAction.create,
+            onInvoke: create,
+            child: EteeloButton.primary(
+              label: l10n.staffActionNewAgent,
+              icon: Icons.person_add_alt,
+              onPressed: create,
+              fullWidth: false,
+            ),
           ),
         ),
       ],
@@ -106,6 +125,7 @@ class HrPersonnelFileScreen extends StatelessWidget {
       viewMode: state.viewMode,
       onTextChanged: cubit.setText,
       onCategoryChanged: cubit.setCategory,
+      onSortChanged: cubit.setSort,
       onViewModeChanged: cubit.setViewMode,
     );
 

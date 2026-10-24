@@ -1036,11 +1036,14 @@ class AppDimensions {
   static const communicationStudentRowMinHeight = 48.0;
 
   // ── RH · Personnel — tableau de bord et fichier ──
-  /// Au-delà, « Par catégorie » et « Parité » se tiennent côte à côte.
-  static const hrDashboardTwoColumnsMinWidth = 736.0;
+  /// Au-delà, « Par catégorie » et « Parité » se tiennent côte à côte —
+  /// mesuré sur la largeur reçue : le palier où une fiche cesse d'être
+  /// compacte laisse ~370 dp à chaque carte, assez pour ses barres.
+  static const hrDashboardTwoColumnsMinWidth = AppBreakpoints.detailCompactMax;
 
-  /// Sous ce seuil, une ligne de « Qui sont-ils » passe sur deux niveaux.
-  static const hrRosterTwoLinesMaxWidth = 600.0;
+  /// Sous ce seuil, une ligne de « Qui sont-ils » passe sur deux niveaux :
+  /// le palier où les tableaux passent en cartes, pour la même raison.
+  static const hrRosterTwoLinesMaxWidth = AppBreakpoints.dataTableCardsMax;
   static const hrRosterRowMinHeight = 60.0;
   static const hrRosterAvatarSize = 38.0;
 
@@ -1055,5 +1058,11 @@ class AppDimensions {
   static const hrLegendSwatchSize = 10.0;
   static const hrLegendSwatchRadius = 3.0;
   static const hrBarLabelWidth = 132.0;
+
+  /// Sous cette largeur reçue, une ligne de « Par catégorie » passe sur deux
+  /// niveaux (libellé et compte, puis la barre) : à côté d'un libellé de
+  /// [hrBarLabelWidth] et d'un compte au texte ×1,3, la barre n'avait plus
+  /// de place — le palier où un tableau se lit déjà en téléphone.
+  static const hrCategoryRowStackedMaxWidth = AppBreakpoints.dataTablePhoneMax;
   static const hrInsightIconSize = 20.0;
 }

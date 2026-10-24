@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/helpers/hr_location_filters.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 
@@ -95,6 +96,30 @@ void main() {
   test('l\'affichage cartes / liste se garde dans l\'état', () {
     cubit.setViewMode(CollectionViewMode.list);
     expect(cubit.state.viewMode, CollectionViewMode.list);
+  });
+
+  test(
+    'l\'adresse pose catégorie, ordre et affichage ; la recherche reste',
+    () {
+      cubit.setText('mayala');
+      cubit.applyLocation(
+        const HrLocationFilters(
+          category: HrCategoryKey.teacher,
+          sort: HrRosterSort.oldest,
+          viewMode: CollectionViewMode.list,
+        ),
+      );
+
+      expect(cubit.state.query.category, HrCategoryKey.teacher);
+      expect(cubit.state.query.sort, HrRosterSort.oldest);
+      expect(cubit.state.viewMode, CollectionViewMode.list);
+      expect(cubit.state.query.text, 'mayala');
+    },
+  );
+
+  test('F5 redescend le fichier', () async {
+    await cubit.reload();
+    verify(() => source.pull()).called(1);
   });
 
   test('une relecture silencieuse ne remet pas de squelette', () async {

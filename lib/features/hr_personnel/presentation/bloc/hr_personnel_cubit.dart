@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/helpers/hr_location_filters.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 
@@ -74,6 +75,13 @@ class HrPersonnelCubit extends Cubit<HrPersonnelState> {
     });
   }
 
+  /// F5 / Ctrl+R : redescend les flux. La relecture suit d'elle-même — le
+  /// tirage réveille [StaffSnapshotSource.watch].
+  Future<void> reload() async {
+    if (isClosed) return;
+    await _source.pull();
+  }
+
   void _emitReady(StaffFileSnapshot snapshot) => emit(
     state.copyWith(
       status: HrPersonnelStatus.ready,
@@ -110,6 +118,15 @@ class HrPersonnelCubit extends Cubit<HrPersonnelState> {
     state.query.sort == HrRosterSort.name
         ? HrRosterSort.nameDescending
         : HrRosterSort.name,
+  );
+
+  /// L'adresse a changé (F5, Précédent) : catégorie, ordre et affichage en
+  /// une seule émission. La recherche, qui n'y figure pas, reste.
+  void applyLocation(HrLocationFilters filters) => emit(
+    state.copyWith(
+      query: state.query.withCategory(filters.category).withSort(filters.sort),
+      viewMode: filters.viewMode,
+    ),
   );
 
   void clearFilters() => emit(state.copyWith(query: state.query.cleared()));
