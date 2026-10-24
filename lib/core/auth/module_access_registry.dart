@@ -373,6 +373,7 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     MenuConstants.hrPresenceDashboardId: ModuleAccess([Perm.hrAttendanceRead]),
     MenuConstants.hrPresenceFicheId: ModuleAccess([Perm.hrAttendanceRead]),
     MenuConstants.hrPresenceRegisterId: ModuleAccess([Perm.hrAttendanceRead]),
+    MenuConstants.hrPresenceRecapId: ModuleAccess([Perm.hrAttendanceRead]),
   },
   MenuConstants.communicationMenuId: {
     // Lire suffit à ouvrir la liste et le détail ; écrire et envoyer sont

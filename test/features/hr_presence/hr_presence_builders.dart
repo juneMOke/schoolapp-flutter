@@ -1,9 +1,11 @@
+import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_month.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_year.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_profiles.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_recap.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_dashboard.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_kpis.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -291,4 +293,91 @@ HrAttendanceAgentYear agentYearOf({String id = 'a-1'}) => HrAttendanceAgentYear(
       profile: PresenceProfile.notEvaluated,
     ),
   ],
+);
+
+HrAttendanceRecapRow recapRow(
+  String id, {
+  required String lastName,
+  String? firstName,
+  StaffContractKind? contract = StaffContractKind.permanent,
+  StaffPayMode? payMode,
+  int presences = 15,
+  int late = 1,
+  int lateMinutes = 12,
+  int justified = 1,
+  int unjustified = 0,
+  int unscored = 1,
+  int workedMinutes = 0,
+  Money? amount,
+}) => HrAttendanceRecapRow(
+  agent: HrAttendanceAgent(
+    staffMemberId: id,
+    staffNumber: 'AG-$id',
+    lastName: lastName,
+    firstName: firstName,
+    jobTitle: 'Enseignant',
+    category: StaffCategory.teacher,
+    contractKind: contract,
+    payMode: payMode,
+  ),
+  classDays: 17,
+  presences: presences,
+  late: late,
+  lateMinutes: lateMinutes,
+  justifiedAbsences: justified,
+  unjustifiedAbsences: unjustified,
+  unscored: unscored,
+  workedMinutes: workedMinutes,
+  amount: amount,
+);
+
+HrAttendanceRecap recapOf({
+  String month = '2026-10',
+  int classDays = 17,
+  bool toDate = true,
+  bool closed = false,
+  bool closable = false,
+  bool withAmounts = true,
+  List<HrAttendanceRecapRow>? staff,
+}) => HrAttendanceRecap(
+  month: month,
+  classDays: classDays,
+  toDate: toDate,
+  closed: closed,
+  closedAt: closed ? '2026-10-31T15:05:00Z' : null,
+  closedBy: closed ? 'Mme la Directrice' : null,
+  closable: closable,
+  unscored: 6,
+  totals: HrAttendanceRecapTotals(
+    presenceRatePct: 92,
+    workedMinutes: 2760,
+    unjustifiedAbsences: 11,
+    amounts: withAmounts ? const [Money(36800, 'USD')] : null,
+  ),
+  staff:
+      staff ??
+      [
+        recapRow(
+          'a-1',
+          lastName: 'MWAMBA',
+          firstName: 'Clarisse',
+          unjustified: 3,
+        ),
+        recapRow(
+          'a-2',
+          lastName: 'KALALA',
+          firstName: 'Didier',
+          contract: StaffContractKind.vacataire,
+          payMode: StaffPayMode.hourly,
+          unscored: 0,
+          workedMinutes: 1200,
+          amount: withAmounts ? const Money(16000, 'USD') : null,
+        ),
+        recapRow(
+          'a-3',
+          lastName: 'MAYALA',
+          firstName: 'Ruth',
+          contract: StaffContractKind.conventionne,
+        ),
+      ],
 );

@@ -319,8 +319,8 @@ class MenuFactory {
     );
   }
 
-  /// RH · Présences — posé après RH · Personnel. Ses autres sous-menus
-  /// (récapitulatif) arrive avec son écran.
+  /// RH · Présences — posé après RH · Personnel : tableau de bord, fiche
+  /// individuelle, registre du jour et récapitulatif.
   static MenuItem _createHrPresenceMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.hrPresenceMenuId,
@@ -341,6 +341,11 @@ class MenuFactory {
           id: MenuConstants.hrPresenceRegisterId,
           title: l10n.subMenuHrPresenceRegister,
           route: AppRoutesNames.hrPresenceRegister,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPresenceRecapId,
+          title: l10n.subMenuHrPresenceRecap,
+          route: AppRoutesNames.hrPresenceRecap,
         ),
       ],
     );

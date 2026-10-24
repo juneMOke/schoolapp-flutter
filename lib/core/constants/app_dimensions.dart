@@ -813,6 +813,9 @@ class AppDimensions {
   static const staffAttendanceRecapColSync = 104.0;
   static const staffAttendanceRecapMinWidth = 820.0;
 
+  /// RH · Présences ▸ Récapitulatif : les heures et leur montant.
+  static const hrPresenceRecapColHours = 136.0;
+
   /// Opacité de la grille d'un jour validé : lisible, visiblement figée.
   static const presenceMarkFrozenOpacity = 0.78;
 

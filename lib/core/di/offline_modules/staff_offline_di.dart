@@ -7,6 +7,8 @@ import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_month_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_cubit.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
@@ -242,6 +244,16 @@ void registerStaffOffline(GetIt getIt) {
       getYear: getIt<GetHrAttendanceAgentYearUseCase>(),
       source: getIt<StaffSnapshotSource>(),
       args: args,
+    ),
+  );
+  getIt.registerFactoryParam<HrPresenceRecapCubit, DateTime?, void>(
+    (yearStart, _) => HrPresenceRecapCubit(
+      getRecap: getIt<GetHrAttendanceRecapUseCase>(),
+      loadLocal: getIt<LoadStaffAttendanceUseCase>(),
+      countUnsynced: getIt<CountUnsyncedStaffAttendanceUseCase>(),
+      commands: getIt<StaffAttendanceCommands>(),
+      signals: getIt<StaffSyncSignals>(),
+      yearStart: yearStart,
     ),
   );
   getIt.registerFactory<HrAttendanceReportCubit>(

@@ -100,6 +100,8 @@ class AppRoutesNames {
       '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceDashboardId}';
   static const String hrPresenceFiche =
       '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceFicheId}';
+  static const String hrPresenceRecap =
+      '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceRecapId}';
   static const String hrPresenceRegister =
       '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceRegisterId}';
 

@@ -138,6 +138,10 @@ class MenuConstants {
   /// agent, sur le mois ou l'année — en ligne (D1).
   static const String hrPresenceFicheId = 'rh-presences-fiche';
 
+  /// RH · Présences ▸ Récapitulatif : les totaux du mois par agent et sa
+  /// clôture — en ligne (D1), la clôture partant par l'outbox.
+  static const String hrPresenceRecapId = 'rh-presences-recap';
+
   /// RH · Présences ▸ Registre du jour : pointer chaque agent, justifier,
   /// valider le rapport — le seul écran du module hors ligne.
   static const String hrPresenceRegisterId = 'rh-presences-registre';

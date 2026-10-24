@@ -312,6 +312,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.hrPresenceRegisterId,
           title: l10n.subMenuHrPresenceRegister,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPresenceRecapId,
+          title: l10n.subMenuHrPresenceRecap,
+        ),
       ],
     );
   }
