@@ -10896,5 +10896,13 @@
   "hrPdfScopeAll": "All staff",
   "@hrPdfScopeAll": {
     "description": "Portée du PDF sans filtre."
+  },
+  "staffTableSortAscending": "Sorted A to Z; tap to reverse",
+  "@staffTableSortAscending": {
+    "description": "Tri de la colonne Agent."
+  },
+  "staffTableSortDescending": "Sorted Z to A; tap to reverse",
+  "@staffTableSortDescending": {
+    "description": "Tri de la colonne Agent."
   }
 }

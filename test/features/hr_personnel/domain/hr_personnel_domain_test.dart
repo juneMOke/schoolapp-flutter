@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/hr_seniority.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_stats.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_seniority.dart';
@@ -67,7 +68,6 @@ void main() {
           agent('a', entryDate: '2016-09-01'), // 10 ans
           agent('b', entryDate: '2023-09-15'), // 3 ans
           agent('c', entryDate: null),
-          agent('d', entryDate: '2027-01-01'), // à venir
         ]),
         today: '2026-10-24',
       );
@@ -133,6 +133,38 @@ void main() {
       expect(stats.headcount, 0);
       expect(stats.teacherPercent, 0);
       expect(stats.categories, isEmpty);
+    });
+  });
+
+  group('Entrée à venir ou illisible', () {
+    test('à venir : 0 an, comptée dans la moyenne', () {
+      final stats = HrStaffStats.of(
+        viewOf([
+          agent('a', entryDate: '2016-09-01'), // 10
+          agent('b', entryDate: '2026-11-01'), // à venir : 0
+        ]),
+        today: '2026-10-24',
+      );
+      expect(stats.seniorityBase, 2);
+      expect(stats.averageSeniority, 5.0);
+      expect(HrSeniority.yearsAt('2026-11-01', '2026-10-24'), 0);
+    });
+
+    test('illisible : hors moyenne, et en fin de liste', () {
+      final view = viewOf([
+        agent('a', lastName: 'Amisi', entryDate: '01/09/2016'),
+        agent('b', lastName: 'Bola', entryDate: '2020-09-01'),
+      ]);
+      expect(HrStaffStats.of(view, today: '2026-10-24').seniorityBase, 1);
+      expect(
+        [
+          for (final row in const HrRosterQuery(
+            sort: HrRosterSort.oldest,
+          ).apply(view.all))
+            row.member.id,
+        ],
+        ['b', 'a'],
+      );
     });
   });
 

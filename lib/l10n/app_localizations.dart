@@ -28332,6 +28332,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All staff'**
   String get hrPdfScopeAll;
+
+  /// Tri de la colonne Agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorted A to Z; tap to reverse'**
+  String get staffTableSortAscending;
+
+  /// Tri de la colonne Agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorted Z to A; tap to reverse'**
+  String get staffTableSortDescending;
 }
 
 class _AppLocalizationsDelegate

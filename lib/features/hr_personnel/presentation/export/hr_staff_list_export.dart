@@ -20,6 +20,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// impossible se dit tout de suite par un toast, plutôt que par une fenêtre
 /// qui se refermerait seule.
 abstract final class HrStaffListExport {
+  /// Une composition à la fois : un double tap ouvrirait deux visionneuses.
+  static bool _running = false;
+
   static Future<void> run(
     BuildContext context, {
     required List<StaffFileRow> rows,
@@ -27,6 +30,8 @@ abstract final class HrStaffListExport {
     required String today,
     DateTime Function() now = DateTime.now,
   }) async {
+    if (_running) return;
+    _running = true;
     final l10n = AppLocalizations.of(context)!;
     // L'heure de l'école, comme sous un ticket : la mention ne bouge pas avec
     // le fuseau du poste.
@@ -71,6 +76,8 @@ abstract final class HrStaffListExport {
       // intactes, seul le geste a échoué.
       if (!context.mounted) return;
       AppSnackBar.showError(context, l10n.hrPdfFailed);
+    } finally {
+      _running = false;
     }
   }
 

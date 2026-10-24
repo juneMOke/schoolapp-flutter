@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/layout/shell_chrome.dart';
@@ -17,6 +17,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_stats.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
@@ -30,7 +31,6 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_file_vie
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// RH · Personnel ▸ Tableau de bord — combien d'agents, comment ils se
 /// répartissent, et qui ils sont.
@@ -134,7 +134,15 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
         EteeloButton.primary(
           label: l10n.hrDashboardActionOpenFile,
           icon: Icons.work_outline,
-          onPressed: () => context.go(AppRoutesNames.hrPersonnelFile),
+          // Dans la coquille, comme un choix du menu : une route seule
+          // afficherait la page nue, sans barre ni retour.
+          onPressed: () => context.read<NavigationBloc>().add(
+            SubMenuItemSelected(
+              menuId: MenuConstants.hrPersonnelMenuId,
+              subMenuId: MenuConstants.hrPersonnelFileId,
+              title: l10n.subMenuHrPersonnelFile,
+            ),
+          ),
           fullWidth: false,
         ),
       ],

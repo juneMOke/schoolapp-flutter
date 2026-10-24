@@ -21,6 +21,36 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// perdrait le texte. Le gabarit est celui des exports de l'école
 /// ([EnrollmentPdfKit]) : deux feuilles posées côte à côte se reconnaissent.
 abstract final class HrStaffListPdf {
+  /// Les caractères hors Latin-1 qu'un clavier de téléphone glisse dans un nom
+  /// ou un intitulé, et leur équivalent imprimable : les polices standard du
+  /// PDF n'ont que Latin-1, et rendraient « N’Sele » en « N Sele ».
+  static const Map<String, String> _latin1 = {
+    '\u2018': "'",
+    '\u2019': "'",
+    '\u201A': "'",
+    '\u201C': '"',
+    '\u201D': '"',
+    '\u201E': '"',
+    '\u2013': '-',
+    '\u2014': '-',
+    '\u2026': '...',
+    '\u0152': 'OE',
+    '\u0153': 'oe',
+    '\u00A0': ' ',
+    '\u202F': ' ',
+  };
+
+  /// [text] réduit à ce que Helvetica et Courier savent dessiner ; un
+  /// caractère sans équivalent devient « ? » plutôt qu'un blanc muet.
+  static String printable(String text) {
+    final buffer = StringBuffer();
+    for (final rune in text.runes) {
+      final char = String.fromCharCode(rune);
+      buffer.write(_latin1[char] ?? (rune <= 0xFF ? char : '?'));
+    }
+    return buffer.toString();
+  }
+
   static const double _numberWidth = 76;
   static const double _contractWidth = 78;
   static const double _entryWidth = 60;
@@ -52,7 +82,12 @@ abstract final class HrStaffListPdf {
                 title: l10n.hrPdfTitle,
                 subtitle: academicYear == null
                     ? l10n.hrPdfSubtitleNoYear(scope, agents, sort)
-                    : l10n.hrPdfSubtitle(scope, agents, sort, academicYear),
+                    : l10n.hrPdfSubtitle(
+                        scope,
+                        agents,
+                        sort,
+                        printable(academicYear),
+                      ),
               )
             : pw.SizedBox(),
         footer: (context) => EnrollmentPdfKit.footer(
@@ -68,7 +103,7 @@ abstract final class HrStaffListPdf {
                   issuedTime,
                   context.pageNumber,
                   context.pagesCount,
-                  schoolName,
+                  printable(schoolName),
                 ),
         ),
         build: (_) => [_table(rows, today: today, l10n: l10n)],
@@ -114,8 +149,8 @@ abstract final class HrStaffListPdf {
               : null,
           children: [
             _number(row.member.staffNumber, l10n),
-            EnrollmentPdfKit.cell(row.member.fullName),
-            EnrollmentPdfKit.cell(row.member.jobTitle?.trim() ?? ''),
+            EnrollmentPdfKit.cell(printable(row.member.fullName)),
+            EnrollmentPdfKit.cell(printable(row.member.jobTitle?.trim() ?? '')),
             EnrollmentPdfKit.cell(
               HrPersonnelLabels.category(
                 l10n,
@@ -146,7 +181,7 @@ abstract final class HrStaffListPdf {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       child: pw.Text(
-        value.isEmpty ? l10n.hrPdfNumberPending : value,
+        value.isEmpty ? l10n.hrPdfNumberPending : printable(value),
         style: pw.TextStyle(
           font: value.isEmpty ? pw.Font.helveticaOblique() : pw.Font.courier(),
           fontSize: EnrollmentPdfKit.bodySize - 1,

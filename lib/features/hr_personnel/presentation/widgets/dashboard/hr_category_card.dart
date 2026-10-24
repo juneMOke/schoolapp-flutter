@@ -80,6 +80,9 @@ class _CategoryRow extends StatelessWidget {
       button: true,
       selected: selected,
       label: l10n.hrJoin(label, value),
+      // L'action doit être portée ici : `excludeSemantics` retire celle de
+      // l'`InkWell`, et le lecteur d'écran annoncerait un bouton inerte.
+      onTap: onTap,
       excludeSemantics: true,
       child: Material(
         color: selected ? AppColors.hrCategoryRowActive : Colors.transparent,

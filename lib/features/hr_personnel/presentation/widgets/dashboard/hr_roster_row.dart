@@ -89,11 +89,20 @@ class HrRosterRow extends StatelessWidget {
                   ],
                 );
               }
+              // Le bloc de droite est borné : sans `Flexible`, le `Wrap`
+              // recevrait une largeur infinie, ne passerait jamais à la ligne
+              // et déborderait entre 600 et ~860 dp.
               return Row(
                 children: [
-                  Expanded(child: identity),
+                  Expanded(flex: 4, child: identity),
                   const SizedBox(width: AppSpacing.md),
-                  facts,
+                  Flexible(
+                    flex: 5,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: facts,
+                    ),
+                  ),
                 ],
               );
             },

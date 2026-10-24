@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_name_order.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/hr_seniority.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_row.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 
@@ -77,16 +78,16 @@ class HrRosterQuery extends Equatable {
     HrRosterSort.newest => _byEntry(a, b, ascending: false),
   };
 
-  /// Par date d'entrée ; une date absente va **en fin de liste** dans les deux
-  /// sens — elle ne dit ni « ancien » ni « récent ». À date égale, l'ordre
-  /// alphabétique.
+  /// Par date d'entrée ; une date absente ou illisible va **en fin de liste**
+  /// dans les deux sens — elle ne dit ni « ancien » ni « récent ». À date
+  /// égale, l'ordre alphabétique.
   static int _byEntry(
     StaffFileRow a,
     StaffFileRow b, {
     required bool ascending,
   }) {
-    final left = _day(a.member.entryDate);
-    final right = _day(b.member.entryDate);
+    final left = HrSeniority.entryOf(a.member.entryDate);
+    final right = HrSeniority.entryOf(b.member.entryDate);
     if (left != right) {
       if (left == null) return 1;
       if (right == null) return -1;
@@ -94,11 +95,6 @@ class HrRosterQuery extends Equatable {
       return ascending ? order : -order;
     }
     return HrNameOrder.compare(a.member, b.member);
-  }
-
-  static String? _day(String? value) {
-    final day = value?.trim();
-    return day == null || day.isEmpty ? null : day;
   }
 
   @override

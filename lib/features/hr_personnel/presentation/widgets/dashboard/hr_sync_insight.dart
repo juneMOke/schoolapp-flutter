@@ -35,7 +35,7 @@ class HrSyncInsight extends StatelessWidget {
             const Icon(
               Icons.cloud_off_outlined,
               size: AppDimensions.hrInsightIconSize,
-              color: AppColors.hrSyncInsightAccent,
+              color: AppColors.hrSyncInsightIcon,
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(

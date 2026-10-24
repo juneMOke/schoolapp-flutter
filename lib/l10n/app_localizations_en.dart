@@ -18193,4 +18193,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPdfScopeAll => 'All staff';
+
+  @override
+  String get staffTableSortAscending => 'Sorted A to Z; tap to reverse';
+
+  @override
+  String get staffTableSortDescending => 'Sorted Z to A; tap to reverse';
 }

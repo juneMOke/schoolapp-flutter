@@ -201,4 +201,33 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('tient en tablette portrait : les lignes ne débordent pas', (
+    tester,
+  ) async {
+    await pumpHrScreen(
+      tester,
+      snapshot: file,
+      screen: const HrDashboardScreen(),
+      size: const Size(800, 2400),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('une catégorie se pose aussi au lecteur d\'écran', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final cubit = await pumpHrScreen(
+      tester,
+      snapshot: file,
+      screen: const HrDashboardScreen(),
+    );
+
+    tester.semantics.tap(find.semantics.byLabel('Administratif · 1 agent'));
+    await tester.pumpAndSettle();
+
+    expect(cubit.state.query.category, HrCategoryKey.administrative);
+    semantics.dispose();
+  });
 }

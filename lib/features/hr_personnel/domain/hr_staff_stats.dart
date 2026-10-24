@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_name_order.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/hr_seniority.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_seniority.dart';
 
 /// Femmes, hommes, et fiches dont le sexe n'est pas renseigné. Les trois
 /// somment toujours à [total] : un sexe absent n'est jamais rangé d'office
@@ -66,7 +66,7 @@ class HrStaffStats extends Equatable {
   /// Moyenne des anciennetés entières, arrondie au dixième ; `null` quand
   /// aucun agent n'a de date d'entrée exploitable.
   ///
-  /// Un agent sans date d'entrée (ou entré à une date à venir) est **exclu**
+  /// Un agent sans date d'entrée lisible est **exclu**
   /// de la moyenne plutôt que compté pour zéro : zéro ferait baisser la
   /// moyenne d'une information qu'on n'a pas.
   final double? averageSeniority;
@@ -107,7 +107,7 @@ class HrStaffStats extends Equatable {
       final key = HrCategoryKey.of(member.category);
       byCategory[key] = (byCategory[key] ?? const HrSexSplit()).add(member.sex);
 
-      final years = StaffSeniority.yearsAt(member.entryDate, today);
+      final years = HrSeniority.yearsAt(member.entryDate, today);
       if (years == null) continue;
       seniorityTotal += years;
       seniorityBase++;
@@ -140,9 +140,11 @@ class HrStaffStats extends Equatable {
       headcount == 0 ? 0 : (teachers * 100 / headcount).round();
 
   /// L'entrée la plus ancienne gagne ; à date égale, l'ordre alphabétique.
-  /// Les jours `YYYY-MM-DD` se comparent comme des chaînes.
+  /// N'est appelé que sur des dates lisibles (ancienneté connue).
   static bool _enteredBefore(StaffMember candidate, StaffMember current) {
-    final order = candidate.entryDate!.compareTo(current.entryDate!);
+    final order = HrSeniority.entryOf(
+      candidate.entryDate,
+    )!.compareTo(HrSeniority.entryOf(current.entryDate)!);
     if (order != 0) return order < 0;
     return HrNameOrder.compare(candidate, current) < 0;
   }

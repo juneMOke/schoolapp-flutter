@@ -137,28 +137,37 @@ class _SortableHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.brSm,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(child: label),
-            const SizedBox(width: AppSpacing.xs),
-            Icon(
-              descending ? Icons.arrow_downward : Icons.arrow_upward,
-              size: AppDimensions.detailMiniIconSize,
-              color: ListingTones.inkEnteteTable,
-            ),
-          ],
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      // La flèche ne se lit pas : le sens du tri se dit.
+      hint: descending
+          ? l10n.staffTableSortDescending
+          : l10n.staffTableSortAscending,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.brSm,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppDimensions.minTouchTarget,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: label),
+              const SizedBox(width: AppSpacing.xs),
+              Icon(
+                descending ? Icons.arrow_downward : Icons.arrow_upward,
+                size: AppDimensions.detailMiniIconSize,
+                color: ListingTones.inkEnteteTable,
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// Une rangée de colonnes : deux souples (agent, fonction), trois fixes.

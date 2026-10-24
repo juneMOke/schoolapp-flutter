@@ -46,4 +46,11 @@ void main() {
       'personnel-teacher-20261004.pdf',
     );
   });
+
+  test('les apostrophes et tirets typographiques restent imprimables', () {
+    expect(HrStaffListPdf.printable('N’Sele'), "N'Sele");
+    expect(HrStaffListPdf.printable('2026–2027'), '2026-2027');
+    expect(HrStaffListPdf.printable('Cœur'), 'Coeur');
+    expect(HrStaffListPdf.printable('Élodie'), 'Élodie');
+  });
 }

@@ -2,7 +2,7 @@ import 'package:flutter/painting.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_seniority.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/hr_seniority.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -38,7 +38,7 @@ abstract final class HrPersonnelLabels {
     required String? entryDate,
     required String today,
   }) {
-    final years = StaffSeniority.yearsAt(entryDate, today);
+    final years = HrSeniority.yearsAt(entryDate, today);
     return years == null
         ? l10n.hrSeniorityUnknown
         : l10n.hrSeniorityYears(years);
@@ -46,14 +46,14 @@ abstract final class HrPersonnelLabels {
 
   /// « 09/2018 » depuis `2018-09-01` ; `null` si la date ne se lit pas.
   static String? monthYear(String? day) {
-    final date = DateTime.tryParse(day ?? '');
+    final date = HrSeniority.entryOf(day);
     if (date == null) return null;
     return '${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   /// « 15/09/2023 » depuis `2023-09-15` ; `null` si la date ne se lit pas.
   static String? dayMonthYear(String? day) {
-    final date = DateTime.tryParse(day ?? '');
+    final date = HrSeniority.entryOf(day);
     if (date == null) return null;
     String two(int value) => value.toString().padLeft(2, '0');
     return '${two(date.day)}/${two(date.month)}/${date.year}';
