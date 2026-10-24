@@ -186,19 +186,24 @@ class PayrollDisbursementDao {
     String? reason,
   }) => _store.mark(table, {'id': id}, state, code: code, reason: reason);
 
-  /// Un versement vivant — ou en file — existe-t-il déjà pour ce salaire ?
-  /// La garde d'unicité de la tablette : deux taps, ou un pull arrivé pendant
-  /// la saisie, ne remettent jamais l'argent deux fois.
-  Future<bool> hasLive(String month, String staffMemberId) async {
+  /// Ce qui est déjà versé — ou en file — sur ce salaire, en [currency]. La
+  /// garde du reste (B3) : deux taps, ou un pull arrivé pendant la saisie, ne
+  /// font jamais verser au-delà du net.
+  Future<int> liveTotal(
+    String month,
+    String staffMemberId, {
+    required String currency,
+  }) async {
     final rows = await _store.db.rawQuery(
-      'SELECT 1 FROM $table WHERE month = ? AND staff_member_id = ? '
+      'SELECT COALESCE(SUM(amount_in_cents), 0) AS total FROM $table '
+      'WHERE month = ? AND staff_member_id = ? AND currency = ? '
       "AND sync_status != '${RecordSyncState.failed.dbValue}' "
       'AND (cancellation_id IS NULL '
       "OR cancellation_status = '${RecordSyncState.failed.dbValue}') "
-      'AND cancelled_at IS NULL LIMIT 1',
-      [month, staffMemberId],
+      'AND cancelled_at IS NULL',
+      [month, staffMemberId, currency],
     );
-    return rows.isNotEmpty;
+    return (rows.single['total'] as int?) ?? 0;
   }
 
   Future<RecordSyncState?> stateOf(String id) async {

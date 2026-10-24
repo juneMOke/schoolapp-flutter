@@ -45,8 +45,9 @@ class PayrollLedgerFilters extends StatelessWidget {
                 selected: state.payFilter,
                 label: (filter) => switch (filter) {
                   PayrollPayFilter.all => l10n.payrollFilterAll,
-                  PayrollPayFilter.toPay => l10n.payrollFilterToPay,
-                  PayrollPayFilter.paid => l10n.payrollFilterPaid,
+                  PayrollPayFilter.unpaid => l10n.payrollFilterUnpaid,
+                  PayrollPayFilter.partial => l10n.payrollFilterPartial,
+                  PayrollPayFilter.settled => l10n.payrollFilterSettled,
                 },
                 onSelected: cubit.setPayFilter,
               ),

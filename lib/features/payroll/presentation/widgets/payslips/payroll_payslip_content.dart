@@ -167,7 +167,7 @@ class PayrollPayslipContent {
         line.attendance.lateMinutes,
       ),
       payment: l10n.payrollPayslipPayment(
-        _payment(context, view.disbursements[line.staffMemberId]),
+        _payments(context, view.disbursements[line.staffMemberId]),
       ),
       signatures: [
         l10n.payrollPayslipSignAgent,
@@ -190,10 +190,19 @@ class PayrollPayslipContent {
         : '$label · ${PayrollLabels.reason(l10n, advance.reason)}';
   }
 
-  /// Le mode et sa preuve, ou « À verser ».
-  static String _payment(BuildContext context, PayrollDisbursement? paid) {
+  /// Chaque versement reçu — mode, montant, preuve, date —, une ligne
+  /// chacun ; « À verser » tant qu'aucun.
+  static String _payments(
+    BuildContext context,
+    List<PayrollDisbursement>? received,
+  ) {
     final l10n = AppLocalizations.of(context)!;
-    if (paid == null) return l10n.payrollToPay;
+    if (received == null || received.isEmpty) return l10n.payrollToPay;
+    return [for (final paid in received) _payment(context, paid)].join('\n');
+  }
+
+  static String _payment(BuildContext context, PayrollDisbursement paid) {
+    final l10n = AppLocalizations.of(context)!;
     final mode = PayrollLabels.mode(l10n, paid.mode);
     final proof = switch (paid.mode) {
       PayoutMode.cash => paid.signedRegister ? l10n.payrollPaySigned : null,

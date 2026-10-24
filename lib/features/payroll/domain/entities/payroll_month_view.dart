@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gest
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
 
 /// Où en est une paie **à l'écran** : le statut serveur, plus le geste de
@@ -61,8 +62,8 @@ class PayrollMonthView {
   final List<PayrollLine> lines;
   final List<PayrollTotal> totals;
 
-  /// Le versement vivant (ou en file) de chaque agent.
-  final Map<String, PayrollDisbursement> disbursements;
+  /// Les versements vivants (ou en file) de chaque agent, dans l'ordre.
+  final Map<String, List<PayrollDisbursement>> disbursements;
 
   /// Les agents sans aucun contrat : « contrat à poser ».
   final List<String> withoutContract;
@@ -115,8 +116,15 @@ class PayrollMonthView {
   Iterable<PayrollLine> get payable =>
       lines.where((line) => line.netInCents > 0);
 
+  /// Le règlement de [line] : net, déjà versé, reste, statut.
+  PayrollSettlement settlementOf(PayrollLine line) => PayrollSettlement(
+    line: line,
+    disbursements: disbursements[line.staffMemberId] ?? const [],
+  );
+
+  /// Les agents pour qui il n'y a plus rien à verser ce mois.
   int get paidCount =>
-      payable.where((line) => disbursements[line.staffMemberId] != null).length;
+      payable.where((line) => settlementOf(line).isDoneThisMonth).length;
 
   int get remainingCount => payable.length - paidCount;
 

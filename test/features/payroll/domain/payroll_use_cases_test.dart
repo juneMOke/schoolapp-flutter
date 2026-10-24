@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/money/mobile_money_operator.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
@@ -54,31 +55,37 @@ void main() {
     ).thenAnswer((_) async => const Right(unit));
   });
 
-  PayrollSnapshot snapshot({Map<String, PayrollHeader> headers = const {}}) =>
-      PayrollSnapshot(
-        members: [member('m-1')],
-        contractsByMember: {
-          'm-1': [contract('m-1')],
-        },
-        settings: PayrollSettings.defaults,
-        profiles: const {},
-        headers: headers,
-        variables: const {},
-        frozenLines: {
-          if (headers['2026-10']?.status == PayrollStatus.validated)
-            '2026-10': [frozenLine('m-1', '2026-10', gross: 27500)],
-        },
-        summaries: const {},
-        gestures: const [],
-        advances: const [],
-        disbursements: const [],
-        schoolYears: const [(start: '2026-09-07', end: '2027-07-02')],
-        shareTraces: const {},
-        hasEverSynced: true,
-      );
+  PayrollSnapshot snapshot({
+    Map<String, PayrollHeader> headers = const {},
+    List<PayrollDisbursement> disbursements = const [],
+  }) => PayrollSnapshot(
+    members: [member('m-1')],
+    contractsByMember: {
+      'm-1': [contract('m-1')],
+    },
+    settings: PayrollSettings.defaults,
+    profiles: const {},
+    headers: headers,
+    variables: const {},
+    frozenLines: {
+      if (headers['2026-10']?.status == PayrollStatus.validated)
+        '2026-10': [frozenLine('m-1', '2026-10', gross: 27500)],
+    },
+    summaries: const {},
+    gestures: const [],
+    advances: const [],
+    disbursements: disbursements,
+    schoolYears: const [(start: '2026-09-07', end: '2027-07-02')],
+    shareTraces: const {},
+    hasEverSynced: true,
+  );
 
-  PayrollMonthView view(PayrollStatus status) => PayrollLedger.monthView(
+  PayrollMonthView view(
+    PayrollStatus status, {
+    List<PayrollDisbursement> disbursements = const [],
+  }) => PayrollLedger.monthView(
     snapshot(
+      disbursements: disbursements,
       headers: {
         '2026-10': PayrollHeader(
           id: 'p',
@@ -262,14 +269,57 @@ void main() {
       );
     });
 
-    test('le montant est le net figé, jamais une saisie', () {
+    test('B3 : un acompte passe, zéro et au-delà du reste non', () {
+      final validated = view(PayrollStatus.validated);
+
       expect(
-        DisbursePayrollUseCase.refusalOf(
-          view(PayrollStatus.validated),
-          draft(amount: 27000),
-        ),
+        DisbursePayrollUseCase.refusalOf(validated, draft(amount: 10000)),
+        isNull,
+      );
+      expect(
+        DisbursePayrollUseCase.refusalOf(validated, draft(amount: 0)),
         PayrollRule.invalidAmount,
       );
+      expect(
+        DisbursePayrollUseCase.refusalOf(validated, draft(amount: 27501)),
+        PayrollRule.exceedsBalance,
+      );
+    });
+
+    test('B3 : le reste tient compte des versements déjà posés', () {
+      PayrollDisbursement paid(String id, int amount) => PayrollDisbursement(
+        id: id,
+        month: '2026-10',
+        staffMemberId: 'm-1',
+        validationGestureId: 'g-v',
+        amount: Money(amount, 'USD'),
+        mode: PayoutMode.cash,
+        paidAt: '2026-10-28T09:00:00.000Z',
+        signedRegister: true,
+      );
+      final partly = view(
+        PayrollStatus.validated,
+        disbursements: [paid('d-1', 20000)],
+      );
+      final settled = view(
+        PayrollStatus.validated,
+        disbursements: [paid('d-1', 20000), paid('d-2', 7500)],
+      );
+
+      expect(
+        DisbursePayrollUseCase.refusalOf(partly, draft(amount: 7500)),
+        isNull,
+      );
+      expect(
+        DisbursePayrollUseCase.refusalOf(partly, draft(amount: 7600)),
+        PayrollRule.exceedsBalance,
+      );
+      expect(
+        DisbursePayrollUseCase.refusalOf(settled, draft(amount: 100)),
+        PayrollRule.alreadyDisbursed,
+      );
+      expect(partly.paidCount, 0);
+      expect(settled.paidCount, 1);
     });
 
     test('mobile money : numéro E.164 et référence de 6 caractères', () {

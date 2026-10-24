@@ -9199,8 +9199,9 @@
   "payrollNothingToPay": "Nothing to pay",
   "payrollTotal": "Total",
   "payrollFilterAll": "All",
-  "payrollFilterToPay": "To pay",
-  "payrollFilterPaid": "Paid",
+  "payrollFilterUnpaid": "Unpaid",
+  "payrollFilterPartial": "Partly paid",
+  "payrollFilterSettled": "Settled",
   "payrollSearchHint": "Search a staff member",
   "payrollZeroHours": "Hourly staff at 0 h in {month}: {names}. Check the attendance before submitting.",
   "@payrollZeroHours": {"placeholders": {"month": {"type": "String"}, "names": {"type": "String"}}},
@@ -9212,6 +9213,7 @@
   "payrollRegularizeRow": "{name} · {amount} · {month} — {reason}",
   "@payrollRegularizeRow": {"placeholders": {"name": {"type": "String"}, "amount": {"type": "String"}, "month": {"type": "String"}, "reason": {"type": "String"}}},
   "payrollRefusedReopened": "payroll reopened since",
+  "payrollRefusedExceeds": "beyond the balance due",
   "payrollRefusedDouble": "double payment",
   "payrollRefusedOther": "refused ({code})",
   "@payrollRefusedOther": {"placeholders": {"code": {"type": "String"}}},
@@ -9394,6 +9396,69 @@
   "payrollStaleOpen": "Compare",
   "payrollGestureRefused": "The server refused the action: {reason}",
   "@payrollGestureRefused": {"placeholders": {"reason": {"type": "String"}}},
+  "payrollSettleNet": "Net pay for the month",
+  "payrollSettlePaid": "Already paid",
+  "payrollSettleRemaining": "Still to pay",
+  "payrollTrancheRank": "#{rank}",
+  "@payrollTrancheRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayAmount": "Amount ({currency})",
+  "@payrollPayAmount": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayPlanned": "This month's decided share",
+  "payrollPayAllRemaining": "All the rest",
+  "payrollPayShare": "{share} % of the net",
+  "@payrollPayShare": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPaySettles": "This payment settles the salary.",
+  "payrollPayLeaves": "Instalment: {amount} will remain.",
+  "@payrollPayLeaves": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayAbovePlan": "Beyond the share decided this month: the head office planned less.",
+  "payrollSettledCount": "Settled · {count} payments",
+  "@payrollSettledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPartialLeft": "Partly paid · {amount} left",
+  "@payrollPartialLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollDeferredLeft": "Deferred · {amount} in arrears",
+  "@payrollDeferredLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayTitle": "Pay the salary",
   "payrollPayNet": "Net to pay",
   "payrollModeCash": "Cash",
@@ -9587,6 +9652,7 @@
   "payrollRuleAlreadyDeducted": "An instalment of this advance is already deducted: it can no longer be cancelled.",
   "payrollRuleNotValidated": "The payroll must be validated by the server before any payment.",
   "payrollRuleNothingToDisburse": "Nothing to pay for this staff member.",
+  "payrollRuleExceedsBalance": "This payment exceeds what is still owed on this salary.",
   "payrollRuleAlreadyDisbursed": "This salary is already paid.",
   "payrollRuleSignatureRequired": "Have the pay sheet signed.",
   "payrollRuleMobileDetails": "Choose the operator and enter a full number.",

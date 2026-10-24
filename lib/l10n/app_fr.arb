@@ -9593,8 +9593,18 @@
   "payrollNothingToPay": "Rien à verser",
   "payrollTotal": "Total",
   "payrollFilterAll": "Tous",
-  "payrollFilterToPay": "À verser",
-  "payrollFilterPaid": "Versés",
+  "payrollFilterUnpaid": "Non payés",
+  "@payrollFilterUnpaid": {
+    "description": "Puce : rien versé."
+  },
+  "payrollFilterPartial": "Partiels",
+  "@payrollFilterPartial": {
+    "description": "Puce : un reste dû (acompte ou arriéré décidé)."
+  },
+  "payrollFilterSettled": "Soldés",
+  "@payrollFilterSettled": {
+    "description": "Puce : tout le net versé."
+  },
   "payrollSearchHint": "Rechercher un agent",
   "payrollZeroHours": "Vacataires à 0 h en {month} : {names}. Vérifiez le pointage avant de soumettre.",
   "payrollWithoutContract": "{count, plural, =1{1 agent sans contrat — posez son contrat dans le fichier du personnel.} other{{count} agents sans contrat — posez leur contrat dans le fichier du personnel.}}",
@@ -9603,6 +9613,10 @@
   "payrollRegularizeHint": "L'argent est sorti, mais le serveur a refusé de l'enregistrer. Rien n'est effacé : traitez chaque ligne avec la direction.",
   "payrollRegularizeRow": "{name} · {amount} · {month} — {reason}",
   "payrollRefusedReopened": "paie rouverte depuis",
+  "payrollRefusedExceeds": "au-delà du reste dû",
+  "@payrollRefusedExceeds": {
+    "description": "Motif d'un versement à régulariser : dépassement du reste."
+  },
   "payrollRefusedDouble": "double versement",
   "payrollRefusedOther": "refusé ({code})",
   "payrollSave": "Enregistrer",
@@ -9850,6 +9864,97 @@
   "payrollStaleBanner": "La dernière soumission ou validation a été refusée : les chiffres ont changé.",
   "payrollStaleOpen": "Comparer",
   "payrollGestureRefused": "Le serveur a refusé le geste : {reason}",
+  "payrollSettleNet": "Net à payer du mois",
+  "@payrollSettleNet": {
+    "description": "Bandeau de solde."
+  },
+  "payrollSettlePaid": "Déjà versé",
+  "@payrollSettlePaid": {
+    "description": "Bandeau de solde."
+  },
+  "payrollSettleRemaining": "Reste à payer",
+  "@payrollSettleRemaining": {
+    "description": "Bandeau de solde."
+  },
+  "payrollTrancheRank": "n° {rank}",
+  "@payrollTrancheRank": {
+    "description": "Rang d'un versement.",
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayAmount": "Montant ({currency})",
+  "@payrollPayAmount": {
+    "description": "Champ du montant d'un versement.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayPlanned": "Part décidée du mois",
+  "@payrollPayPlanned": {
+    "description": "Raccourci : la part prévue."
+  },
+  "payrollPayAllRemaining": "Tout le reste",
+  "@payrollPayAllRemaining": {
+    "description": "Raccourci : solde."
+  },
+  "payrollPayShare": "{share} % du net",
+  "@payrollPayShare": {
+    "description": "Raccourci : part du net.",
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPaySettles": "Ce versement solde le salaire.",
+  "@payrollPaySettles": {
+    "description": "Aide sous le montant."
+  },
+  "payrollPayLeaves": "Acompte : il restera {amount}.",
+  "@payrollPayLeaves": {
+    "description": "Aide sous le montant.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayAbovePlan": "Au-delà de la part décidée ce mois : la direction avait prévu moins.",
+  "@payrollPayAbovePlan": {
+    "description": "Avertissement T8, non bloquant."
+  },
+  "payrollSettledCount": "Soldé · {count} versements",
+  "@payrollSettledCount": {
+    "description": "Pastille : soldé en plusieurs fois.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPartialLeft": "Partiel · reste {amount}",
+  "@payrollPartialLeft": {
+    "description": "Pastille : acompte.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollDeferredLeft": "Différé · arriéré {amount}",
+  "@payrollDeferredLeft": {
+    "description": "Pastille : part décidée versée, arriéré.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayTitle": "Verser le salaire",
   "payrollPayNet": "Net à verser",
   "payrollModeCash": "Espèces",
@@ -10033,7 +10138,11 @@
   "payrollRuleAlreadyDeducted": "Une échéance de cette avance est déjà retenue : elle ne s'annule plus.",
   "payrollRuleNotValidated": "La paie doit être validée par le serveur avant tout versement.",
   "payrollRuleNothingToDisburse": "Rien à verser pour cet agent.",
-  "payrollRuleAlreadyDisbursed": "Ce salaire est déjà versé.",
+  "payrollRuleExceedsBalance": "Ce versement dépasse ce qui reste dû sur ce salaire.",
+  "@payrollRuleExceedsBalance": {
+    "description": "Règle : versement au-delà du reste."
+  },
+  "payrollRuleAlreadyDisbursed": "Ce salaire est déjà entièrement versé.",
   "payrollRuleSignatureRequired": "Faites signer l'état d'émargement.",
   "payrollRuleMobileDetails": "Choisissez l'opérateur et saisissez un numéro complet.",
   "payrollRuleInvalidReference": "La référence compte au moins 6 caractères.",

@@ -102,7 +102,7 @@ class _Empty extends StatelessWidget {
         state.hasFilters && (state.view?.lines.isNotEmpty ?? false);
     if (filtered) {
       return EteeloEmptyResult(
-        label: state.payFilter == PayrollPayFilter.toPay
+        label: state.payFilter == PayrollPayFilter.unpaid
             ? l10n.payrollEmptyAllPaid
             : l10n.payrollEmptyFilter,
         medallionIcon: Icons.filter_alt_off_outlined,

@@ -27,9 +27,14 @@ abstract final class PayrollLedger {
     final lines = frozen ?? computation?.lines ?? const <PayrollLine>[];
     final disbursements = liveDisbursements(snapshot, month);
     final payable = lines.where((line) => line.netInCents > 0);
+    int paid(PayrollLine line) =>
+        (disbursements[line.staffMemberId] ?? const []).fold(
+          0,
+          (sum, d) => sum + d.amount.amountInCents,
+        );
     final allPaid =
         payable.isNotEmpty &&
-        payable.every((line) => disbursements.containsKey(line.staffMemberId));
+        payable.every((line) => paid(line) >= line.netInCents);
     final phase = PayrollPhaseResolver.resolve(
       server: server,
       monthGestures: gestures,
@@ -148,16 +153,28 @@ abstract final class PayrollLedger {
       if (gesture.month == month) gesture,
   ];
 
-  /// Le versement vivant — ou encore en file — de chaque agent pour [month].
-  /// Un versement refusé n'en est pas un : il va « à régulariser ».
-  static Map<String, PayrollDisbursement> liveDisbursements(
+  /// Les versements vivants — ou encore en file — de chaque agent pour
+  /// [month], dans l'ordre de leur instant (B3 : un salaire se règle en
+  /// plusieurs fois). Un versement refusé n'en est pas un : il va « à
+  /// régulariser ».
+  static Map<String, List<PayrollDisbursement>> liveDisbursements(
     PayrollSnapshot snapshot,
     String month,
-  ) => {
-    for (final disbursement in snapshot.disbursements)
-      if (disbursement.month == month && disbursement.isLive)
-        disbursement.staffMemberId: disbursement,
-  };
+  ) {
+    final result = <String, List<PayrollDisbursement>>{};
+    for (final disbursement in snapshot.disbursements) {
+      if (disbursement.month == month && disbursement.isLive) {
+        (result[disbursement.staffMemberId] ??= []).add(disbursement);
+      }
+    }
+    for (final list in result.values) {
+      list.sort((a, b) {
+        final byTime = a.paidAt.compareTo(b.paidAt);
+        return byTime != 0 ? byTime : a.id.compareTo(b.id);
+      });
+    }
+    return result;
+  }
 
   /// Les versements refusés, tous mois confondus : l'argent est parti.
   static List<PayrollDisbursement> toRegularize(PayrollSnapshot snapshot) => [

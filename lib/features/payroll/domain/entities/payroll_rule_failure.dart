@@ -34,6 +34,9 @@ enum PayrollRule {
   notValidated,
   nothingToDisburse,
   alreadyDisbursed,
+
+  /// Le versement dépasse ce qui reste dû sur ce salaire (B3, T7).
+  exceedsBalance,
   signatureRequired,
   mobileDetailsRequired,
   invalidReference,
@@ -93,6 +96,7 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'ADVANCE_CURRENCY_MISMATCH' || 'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,
   'ADVANCE_ALREADY_DEDUCTED' => PayrollRule.alreadyDeducted,
   'ALREADY_DISBURSED' => PayrollRule.alreadyDisbursed,
+  'DISBURSEMENT_EXCEEDS_BALANCE' => PayrollRule.exceedsBalance,
   'NOTHING_TO_DISBURSE' => PayrollRule.nothingToDisburse,
   'SIGNATURE_REQUIRED' => PayrollRule.signatureRequired,
   'PAYROLL_NOT_VALIDATED' => PayrollRule.notValidated,

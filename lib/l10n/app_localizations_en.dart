@@ -13852,10 +13852,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollFilterAll => 'All';
 
   @override
-  String get payrollFilterToPay => 'To pay';
+  String get payrollFilterUnpaid => 'Unpaid';
 
   @override
-  String get payrollFilterPaid => 'Paid';
+  String get payrollFilterPartial => 'Partly paid';
+
+  @override
+  String get payrollFilterSettled => 'Settled';
 
   @override
   String get payrollSearchHint => 'Search a staff member';
@@ -13899,6 +13902,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollRefusedReopened => 'payroll reopened since';
+
+  @override
+  String get payrollRefusedExceeds => 'beyond the balance due';
 
   @override
   String get payrollRefusedDouble => 'double payment';
@@ -14156,6 +14162,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String payrollGestureRefused(String reason) {
     return 'The server refused the action: $reason';
+  }
+
+  @override
+  String get payrollSettleNet => 'Net pay for the month';
+
+  @override
+  String get payrollSettlePaid => 'Already paid';
+
+  @override
+  String get payrollSettleRemaining => 'Still to pay';
+
+  @override
+  String payrollTrancheRank(int rank) {
+    return '#$rank';
+  }
+
+  @override
+  String payrollPayAmount(String currency) {
+    return 'Amount ($currency)';
+  }
+
+  @override
+  String get payrollPayPlanned => 'This month\'s decided share';
+
+  @override
+  String get payrollPayAllRemaining => 'All the rest';
+
+  @override
+  String payrollPayShare(int share) {
+    return '$share % of the net';
+  }
+
+  @override
+  String get payrollPaySettles => 'This payment settles the salary.';
+
+  @override
+  String payrollPayLeaves(String amount) {
+    return 'Instalment: $amount will remain.';
+  }
+
+  @override
+  String get payrollPayAbovePlan =>
+      'Beyond the share decided this month: the head office planned less.';
+
+  @override
+  String payrollSettledCount(int count) {
+    return 'Settled · $count payments';
+  }
+
+  @override
+  String payrollPartialLeft(String amount) {
+    return 'Partly paid · $amount left';
+  }
+
+  @override
+  String payrollDeferredLeft(String amount) {
+    return 'Deferred · $amount in arrears';
   }
 
   @override
@@ -14725,6 +14788,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payrollRuleNothingToDisburse =>
       'Nothing to pay for this staff member.';
+
+  @override
+  String get payrollRuleExceedsBalance =>
+      'This payment exceeds what is still owed on this salary.';
 
   @override
   String get payrollRuleAlreadyDisbursed => 'This salary is already paid.';

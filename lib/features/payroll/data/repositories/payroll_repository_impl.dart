@@ -161,8 +161,16 @@ class PayrollRepositoryImpl implements PayrollRepository {
 
   @override
   Future<Either<Failure, Unit>> disburse(PayrollDisbursementDraft draft) async {
-    if (await _local.disbursements.hasLive(draft.month, draft.staffMemberId)) {
-      return Left(PayrollRuleFailure(PayrollRule.alreadyDisbursed));
+    final net = draft.netInCents;
+    if (net != null) {
+      final paid = await _local.disbursements.liveTotal(
+        draft.month,
+        draft.staffMemberId,
+        currency: draft.amount.currency,
+      );
+      if (paid + draft.amount.amountInCents > net) {
+        return Left(PayrollRuleFailure(PayrollRule.exceedsBalance));
+      }
     }
     return _write(
       'Écriture du versement',

@@ -80,12 +80,15 @@ class DisbursePayrollUseCase {
     if (line == null || line.netInCents <= 0) {
       return PayrollRule.nothingToDisburse;
     }
-    if (view.disbursements.containsKey(draft.staffMemberId)) {
-      return PayrollRule.alreadyDisbursed;
-    }
-    if (draft.amount.amountInCents != line.netInCents ||
+    // B3 : plusieurs versements, montant saisi, 0 < montant ≤ reste.
+    final settlement = view.settlementOf(line);
+    if (settlement.remainingInCents <= 0) return PayrollRule.alreadyDisbursed;
+    if (draft.amount.amountInCents <= 0 ||
         draft.amount.currency != line.currency) {
       return PayrollRule.invalidAmount;
+    }
+    if (draft.amount.amountInCents > settlement.remainingInCents) {
+      return PayrollRule.exceedsBalance;
     }
     final reference = draft.reference?.trim() ?? '';
     return switch (draft.mode) {

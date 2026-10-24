@@ -98,6 +98,7 @@ abstract final class PayrollLabels {
     PayrollRule.notValidated => l10n.payrollRuleNotValidated,
     PayrollRule.nothingToDisburse => l10n.payrollRuleNothingToDisburse,
     PayrollRule.alreadyDisbursed => l10n.payrollRuleAlreadyDisbursed,
+    PayrollRule.exceedsBalance => l10n.payrollRuleExceedsBalance,
     PayrollRule.signatureRequired => l10n.payrollRuleSignatureRequired,
     PayrollRule.mobileDetailsRequired => l10n.payrollRuleMobileDetails,
     PayrollRule.invalidReference => l10n.payrollRuleInvalidReference,
@@ -128,6 +129,7 @@ abstract final class PayrollLabels {
   static String refusal(AppLocalizations l10n, String? code) => switch (code) {
     'PAYROLL_REOPENED_SINCE' => l10n.payrollRefusedReopened,
     'ALREADY_DISBURSED' => l10n.payrollRefusedDouble,
+    'DISBURSEMENT_EXCEEDS_BALANCE' => l10n.payrollRefusedExceeds,
     _ => serverRefusal(l10n, code),
   };
 }

@@ -269,6 +269,76 @@ void main() {
       },
     );
 
+    test(
+      'T7 : deux acomptes refusés ne repartent que dans le reste du net',
+      () async {
+        PayrollDisbursementRequestDto partial(String id, String at) =>
+            PayrollDisbursementRequestDto(
+              disbursement: PayrollDisbursementDto(
+                id: id,
+                month: '2026-10',
+                staffMemberId: 'm-1',
+                validationGestureId: 'g-v',
+                amountInCents: 10000,
+                currency: 'USD',
+                mode: 'CASH',
+                signedRegister: true,
+                paidAt: at,
+              ),
+              authorId: 'u-1',
+            );
+        await disbursements.add(
+          partial('d-1', '2026-10-28T09:00:00Z'),
+          schoolId: _school,
+          nowMs: 10,
+        );
+        await disbursements.add(
+          partial('d-2', '2026-10-29T09:00:00Z'),
+          schoolId: _school,
+          nowMs: 11,
+        );
+        for (final id in ['d-1', 'd-2']) {
+          await disbursements.mark(
+            id,
+            RecordSyncState.failed,
+            code: 'PAYROLL_REOPENED_SINCE',
+          );
+          await outbox.markSyncError(PayrollDisbursementDao.entryId(id), 'x');
+        }
+        await PayrollDao(db).apply(
+          [
+            _payroll(
+              'VALIDATED',
+              validation: 'g-v2',
+              lines: [
+                {
+                  'staffMemberId': 'm-1',
+                  'currency': 'USD',
+                  'grossInCents': 15000,
+                  'netInCents': 15000,
+                },
+              ],
+            ),
+          ],
+          schoolId: _school,
+          nowMs: 20,
+        );
+
+        final requeued = await PayrollDisbursementRegularizer(
+          payrolls: PayrollDao(db),
+          disbursements: disbursements,
+          now: () => 30,
+        ).run(_school);
+
+        expect(requeued, 1);
+        final byId = {
+          for (final d in await disbursements.forSchool(_school)) d.id: d,
+        };
+        expect(byId['d-1']!.validationGestureId, 'g-v2');
+        expect(byId['d-2']!.needsRegularization, isTrue);
+      },
+    );
+
     test('annuler un versement refusé se clôt sans rien envoyer', () async {
       await disbursements.add(request(), schoolId: _school, nowMs: 10);
       await disbursements.mark('d-1', RecordSyncState.failed, code: 'X');
@@ -425,7 +495,10 @@ void main() {
 
       expect(result.outcome, OutboxDispatchOutcome.acked);
       verifyNever(() => api.submitDisbursement(any(), any()));
-      expect(await disbursements.hasLive('2026-10', 'm-1'), isFalse);
+      expect(
+        await disbursements.liveTotal('2026-10', 'm-1', currency: 'USD'),
+        0,
+      );
     });
   });
 

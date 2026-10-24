@@ -111,8 +111,9 @@ class PayrollHistoryTab extends StatelessWidget {
         ).join('\n');
     final remaining = PayrollLabels.perCurrency([
       for (final line in view.payable)
-        if (!view.disbursements.containsKey(line.staffMemberId))
-          (line.netInCents, line.currency),
+        if (view.settlementOf(line).remainingInCents case final rest
+            when rest > 0)
+          (rest, line.currency),
     ]);
     final header = view.header;
     final figures = EteeloColumnTableRow.figures();

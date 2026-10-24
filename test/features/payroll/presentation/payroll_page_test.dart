@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
@@ -64,6 +65,7 @@ void main() {
     PayrollStatus? status,
     List<PayrollGesture> gestures = const [],
     Map<String, PayrollPayoutPolicy> policies = const {},
+    List<PayrollDisbursement> disbursements = const [],
   }) => PayrollSnapshot(
     members: [
       member('m-1', lastName: 'Mayala', firstName: 'Ruth'),
@@ -95,7 +97,7 @@ void main() {
     summaries: const {},
     gestures: gestures,
     advances: const [],
-    disbursements: const [],
+    disbursements: disbursements,
     schoolYears: const [(start: '2026-09-07', end: '2027-07-02')],
     shareTraces: const {},
     hasEverSynced: true,
@@ -321,6 +323,48 @@ void main() {
     expect(draft.validationGestureId, 'g-v');
     expect(draft.signedRegister, isTrue);
     expect(draft.mode, PayoutMode.cash);
+  });
+
+  testWidgets('B3 : un acompte laisse un reste, et se complète', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      snapshot: snapshotOf(
+        status: PayrollStatus.validated,
+        disbursements: const [
+          PayrollDisbursement(
+            id: 'd-1',
+            month: '2026-10',
+            staffMemberId: 'm-1',
+            validationGestureId: 'g-v',
+            amount: Money(10000, 'USD'),
+            mode: PayoutMode.cash,
+            paidAt: '2026-10-28T09:00:00.000Z',
+            signedRegister: true,
+          ),
+        ],
+      ),
+    );
+
+    await tester.tap(find.textContaining('Partiel · reste'));
+    await tester.pumpAndSettle();
+    expect(find.text('Déjà versé'), findsOneWidget);
+    expect(find.text('n° 1'), findsOneWidget);
+    final signed = find.text("L'agent a signé l'état d'émargement");
+    await tester.ensureVisible(signed);
+    await tester.pumpAndSettle();
+    await tester.tap(signed);
+    await tester.pump();
+    await tester.tap(find.text('Verser').last);
+    await tester.pumpAndSettle();
+
+    final draft =
+        verify(() => repository.disburse(captureAny())).captured.single
+            as PayrollDisbursementDraft;
+    // Prérempli au reste : 350 − 100.
+    expect(draft.amount, const Money(25000, 'USD'));
+    expect(draft.netInCents, 35000);
   });
 
   testWidgets('un refus PAYROLL_STALE s affiche avec sa comparaison', (

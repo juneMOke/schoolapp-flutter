@@ -21764,17 +21764,23 @@ abstract class AppLocalizations {
   /// **'All'**
   String get payrollFilterAll;
 
-  /// No description provided for @payrollFilterToPay.
+  /// No description provided for @payrollFilterUnpaid.
   ///
   /// In en, this message translates to:
-  /// **'To pay'**
-  String get payrollFilterToPay;
+  /// **'Unpaid'**
+  String get payrollFilterUnpaid;
 
-  /// No description provided for @payrollFilterPaid.
+  /// No description provided for @payrollFilterPartial.
   ///
   /// In en, this message translates to:
-  /// **'Paid'**
-  String get payrollFilterPaid;
+  /// **'Partly paid'**
+  String get payrollFilterPartial;
+
+  /// No description provided for @payrollFilterSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get payrollFilterSettled;
 
   /// No description provided for @payrollSearchHint.
   ///
@@ -21828,6 +21834,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'payroll reopened since'**
   String get payrollRefusedReopened;
+
+  /// No description provided for @payrollRefusedExceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'beyond the balance due'**
+  String get payrollRefusedExceeds;
 
   /// No description provided for @payrollRefusedDouble.
   ///
@@ -22218,6 +22230,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The server refused the action: {reason}'**
   String payrollGestureRefused(String reason);
+
+  /// No description provided for @payrollSettleNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net pay for the month'**
+  String get payrollSettleNet;
+
+  /// No description provided for @payrollSettlePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid'**
+  String get payrollSettlePaid;
+
+  /// No description provided for @payrollSettleRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to pay'**
+  String get payrollSettleRemaining;
+
+  /// No description provided for @payrollTrancheRank.
+  ///
+  /// In en, this message translates to:
+  /// **'#{rank}'**
+  String payrollTrancheRank(int rank);
+
+  /// No description provided for @payrollPayAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount ({currency})'**
+  String payrollPayAmount(String currency);
+
+  /// No description provided for @payrollPayPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'This month\'s decided share'**
+  String get payrollPayPlanned;
+
+  /// No description provided for @payrollPayAllRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'All the rest'**
+  String get payrollPayAllRemaining;
+
+  /// No description provided for @payrollPayShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{share} % of the net'**
+  String payrollPayShare(int share);
+
+  /// No description provided for @payrollPaySettles.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment settles the salary.'**
+  String get payrollPaySettles;
+
+  /// No description provided for @payrollPayLeaves.
+  ///
+  /// In en, this message translates to:
+  /// **'Instalment: {amount} will remain.'**
+  String payrollPayLeaves(String amount);
+
+  /// No description provided for @payrollPayAbovePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Beyond the share decided this month: the head office planned less.'**
+  String get payrollPayAbovePlan;
+
+  /// No description provided for @payrollSettledCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled · {count} payments'**
+  String payrollSettledCount(int count);
+
+  /// No description provided for @payrollPartialLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly paid · {amount} left'**
+  String payrollPartialLeft(String amount);
+
+  /// No description provided for @payrollDeferredLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Deferred · {amount} in arrears'**
+  String payrollDeferredLeft(String amount);
 
   /// No description provided for @payrollPayTitle.
   ///
@@ -23190,6 +23286,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing to pay for this staff member.'**
   String get payrollRuleNothingToDisburse;
+
+  /// No description provided for @payrollRuleExceedsBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'This payment exceeds what is still owed on this salary.'**
+  String get payrollRuleExceedsBalance;
 
   /// No description provided for @payrollRuleAlreadyDisbursed.
   ///
