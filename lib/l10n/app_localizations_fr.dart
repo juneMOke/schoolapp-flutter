@@ -18374,4 +18374,39 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get hrStaffReportSessionExpired =>
       'Session expirée : reconnectez-vous pour imprimer la liste.';
+
+  @override
+  String get presenceProfileNotEvaluated => 'Non évalué';
+
+  @override
+  String get presenceProfileAbsentee => 'Absentéiste';
+
+  @override
+  String get presenceProfileLate => 'Retardataire';
+
+  @override
+  String get presenceProfileExemplary => 'Exemplaire';
+
+  @override
+  String get presenceProfileRegular => 'Régulier';
+
+  @override
+  String get presenceProfileRuleNotEvaluated =>
+      'Aucun jour pointé sur la période.';
+
+  @override
+  String get presenceProfileRuleAbsentee =>
+      'Absences d’au moins 10 % des jours pointés, ou au moins 3 absences non justifiées.';
+
+  @override
+  String get presenceProfileRuleLate =>
+      'Retards sur plus de 15 % des jours pointés.';
+
+  @override
+  String get presenceProfileRuleExemplary =>
+      'Présent au moins 97 % des jours pointés, avec 5 % de retards au plus.';
+
+  @override
+  String get presenceProfileRuleRegular =>
+      'Ni absentéiste, ni retardataire, ni exemplaire.';
 }

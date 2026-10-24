@@ -10837,5 +10837,15 @@
   "hrDashboardPendingOnlyTitle": "Rien encore sur le serveur",
   "hrDashboardPendingOnlyMessage": "Les agents saisis sur cette tablette n'ont pas encore été reçus par le serveur : ils apparaîtront ici dès leur envoi.",
   "hrStaffReportNoYear": "Aucune année scolaire en cours : la liste ne peut pas être numérotée.",
-  "hrStaffReportSessionExpired": "Session expirée : reconnectez-vous pour imprimer la liste."
+  "hrStaffReportSessionExpired": "Session expirée : reconnectez-vous pour imprimer la liste.",
+  "presenceProfileNotEvaluated": "Non évalué",
+  "presenceProfileAbsentee": "Absentéiste",
+  "presenceProfileLate": "Retardataire",
+  "presenceProfileExemplary": "Exemplaire",
+  "presenceProfileRegular": "Régulier",
+  "presenceProfileRuleNotEvaluated": "Aucun jour pointé sur la période.",
+  "presenceProfileRuleAbsentee": "Absences d’au moins 10 % des jours pointés, ou au moins 3 absences non justifiées.",
+  "presenceProfileRuleLate": "Retards sur plus de 15 % des jours pointés.",
+  "presenceProfileRuleExemplary": "Présent au moins 97 % des jours pointés, avec 5 % de retards au plus.",
+  "presenceProfileRuleRegular": "Ni absentéiste, ni retardataire, ni exemplaire."
 }

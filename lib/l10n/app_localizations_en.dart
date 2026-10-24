@@ -18243,4 +18243,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get hrStaffReportSessionExpired =>
       'Session expired: sign in again to print the list.';
+
+  @override
+  String get presenceProfileNotEvaluated => 'Not evaluated';
+
+  @override
+  String get presenceProfileAbsentee => 'Often absent';
+
+  @override
+  String get presenceProfileLate => 'Often late';
+
+  @override
+  String get presenceProfileExemplary => 'Exemplary';
+
+  @override
+  String get presenceProfileRegular => 'Regular';
+
+  @override
+  String get presenceProfileRuleNotEvaluated =>
+      'No day marked over the period.';
+
+  @override
+  String get presenceProfileRuleAbsentee =>
+      'Absent on at least 10% of the marked days, or at least 3 unjustified absences.';
+
+  @override
+  String get presenceProfileRuleLate =>
+      'Late on more than 15% of the marked days.';
+
+  @override
+  String get presenceProfileRuleExemplary =>
+      'Present on at least 97% of the marked days, late on 5% at most.';
+
+  @override
+  String get presenceProfileRuleRegular =>
+      'Neither often absent, often late nor exemplary.';
 }

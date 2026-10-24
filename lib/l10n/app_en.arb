@@ -10913,5 +10913,15 @@
   "hrStaffReportSessionExpired": "Session expired: sign in again to print the list.",
   "@hrStaffReportSessionExpired": {
     "description": "RH · Personnel : 401 du PDF."
-  }
+  },
+  "presenceProfileNotEvaluated": "Not evaluated",
+  "presenceProfileAbsentee": "Often absent",
+  "presenceProfileLate": "Often late",
+  "presenceProfileExemplary": "Exemplary",
+  "presenceProfileRegular": "Regular",
+  "presenceProfileRuleNotEvaluated": "No day marked over the period.",
+  "presenceProfileRuleAbsentee": "Absent on at least 10% of the marked days, or at least 3 unjustified absences.",
+  "presenceProfileRuleLate": "Late on more than 15% of the marked days.",
+  "presenceProfileRuleExemplary": "Present on at least 97% of the marked days, late on 5% at most.",
+  "presenceProfileRuleRegular": "Neither often absent, often late nor exemplary."
 }

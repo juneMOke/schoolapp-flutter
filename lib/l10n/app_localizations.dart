@@ -28428,6 +28428,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Session expired: sign in again to print the list.'**
   String get hrStaffReportSessionExpired;
+
+  /// No description provided for @presenceProfileNotEvaluated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not evaluated'**
+  String get presenceProfileNotEvaluated;
+
+  /// No description provided for @presenceProfileAbsentee.
+  ///
+  /// In en, this message translates to:
+  /// **'Often absent'**
+  String get presenceProfileAbsentee;
+
+  /// No description provided for @presenceProfileLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Often late'**
+  String get presenceProfileLate;
+
+  /// No description provided for @presenceProfileExemplary.
+  ///
+  /// In en, this message translates to:
+  /// **'Exemplary'**
+  String get presenceProfileExemplary;
+
+  /// No description provided for @presenceProfileRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular'**
+  String get presenceProfileRegular;
+
+  /// No description provided for @presenceProfileRuleNotEvaluated.
+  ///
+  /// In en, this message translates to:
+  /// **'No day marked over the period.'**
+  String get presenceProfileRuleNotEvaluated;
+
+  /// No description provided for @presenceProfileRuleAbsentee.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent on at least 10% of the marked days, or at least 3 unjustified absences.'**
+  String get presenceProfileRuleAbsentee;
+
+  /// No description provided for @presenceProfileRuleLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late on more than 15% of the marked days.'**
+  String get presenceProfileRuleLate;
+
+  /// No description provided for @presenceProfileRuleExemplary.
+  ///
+  /// In en, this message translates to:
+  /// **'Present on at least 97% of the marked days, late on 5% at most.'**
+  String get presenceProfileRuleExemplary;
+
+  /// No description provided for @presenceProfileRuleRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Neither often absent, often late nor exemplary.'**
+  String get presenceProfileRuleRegular;
 }
 
 class _AppLocalizationsDelegate
