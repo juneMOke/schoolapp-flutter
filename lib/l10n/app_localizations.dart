@@ -28350,6 +28350,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sort: name (Z to A)'**
   String get hrSortNameDescending;
+
+  /// RH · Personnel : fiche d’agent ouverte par une adresse inconnue — titre.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff member not found'**
+  String get hrAgentNotFoundTitle;
+
+  /// RH · Personnel : fiche d’agent introuvable — explication.
+  ///
+  /// In en, this message translates to:
+  /// **'This record is not in the tablet’s staff file: the staff member may have been removed, or the link comes from another school.'**
+  String get hrAgentNotFoundMessage;
+
+  /// RH · Personnel : fiche d’agent introuvable — retour à l’écran.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to staff'**
+  String get hrAgentNotFoundAction;
 }
 
 class _AppLocalizationsDelegate

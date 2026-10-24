@@ -23,6 +23,7 @@ import 'package:school_app_flutter/features/hr_personnel/domain/hr_category_key.
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_stats.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_query_location.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_content.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_skeleton.dart';
@@ -76,15 +77,24 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
   }
 
   /// Ouvre la fiche (ou une fiche neuve), puis relit : elle a pu changer.
+  /// Un agent existant a son adresse ; une fiche neuve, pas encore.
   Future<void> _openAgent(HrPersonnelState state, {StaffFileRow? row}) async {
     final cubit = context.read<HrPersonnelCubit>();
-    await StaffAgentPage.open(
-      context,
-      member: row?.member,
-      kind: row?.kind,
-      others: state.snapshot.members,
-      today: state.today,
-    );
+    if (row == null) {
+      await StaffAgentPage.open(
+        context,
+        others: state.snapshot.members,
+        today: state.today,
+      );
+    } else {
+      await HrAgentIntent.open(
+        context,
+        subMenuId: MenuConstants.hrPersonnelDashboardId,
+        row: row,
+        others: state.snapshot.members,
+        today: state.today,
+      );
+    }
     if (!mounted) return;
     await cubit.refresh();
   }

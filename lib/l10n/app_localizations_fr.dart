@@ -18332,4 +18332,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrSortNameDescending => 'Trier : nom (Z à A)';
+
+  @override
+  String get hrAgentNotFoundTitle => 'Agent introuvable';
+
+  @override
+  String get hrAgentNotFoundMessage =>
+      'Cette fiche n’est pas dans le fichier du personnel de la tablette : l’agent a pu être retiré, ou le lien vient d’une autre école.';
+
+  @override
+  String get hrAgentNotFoundAction => 'Retour au personnel';
 }

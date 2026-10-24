@@ -10816,5 +10816,8 @@
   "hrPdfScopeAll": "Tout le personnel",
   "staffTableSortAscending": "Trié de A à Z ; touchez pour inverser",
   "staffTableSortDescending": "Trié de Z à A ; touchez pour inverser",
-  "hrSortNameDescending": "Trier : nom (Z à A)"
+  "hrSortNameDescending": "Trier : nom (Z à A)",
+  "hrAgentNotFoundTitle": "Agent introuvable",
+  "hrAgentNotFoundMessage": "Cette fiche n’est pas dans le fichier du personnel de la tablette : l’agent a pu être retiré, ou le lien vient d’une autre école.",
+  "hrAgentNotFoundAction": "Retour au personnel"
 }

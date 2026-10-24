@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/layout/shell_chrome.dart';
@@ -19,6 +20,7 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_state.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_query_location.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/file/hr_file_filters_card.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr_personnel_header.dart';
@@ -84,15 +86,24 @@ class HrPersonnelFileScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<HrPersonnelCubit>();
 
+    // Un agent existant a son adresse ; une fiche neuve, pas encore.
     Future<void> open({StaffFileRow? row, String prefill = ''}) async {
-      await StaffAgentPage.open(
-        context,
-        member: row?.member,
-        kind: row?.kind,
-        others: state.snapshot.members,
-        today: state.today,
-        prefill: prefill,
-      );
+      if (row == null) {
+        await StaffAgentPage.open(
+          context,
+          others: state.snapshot.members,
+          today: state.today,
+          prefill: prefill,
+        );
+      } else {
+        await HrAgentIntent.open(
+          context,
+          subMenuId: MenuConstants.hrPersonnelFileId,
+          row: row,
+          others: state.snapshot.members,
+          today: state.today,
+        );
+      }
       if (context.mounted) await cubit.refresh();
     }
 

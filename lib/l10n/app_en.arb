@@ -10908,5 +10908,17 @@
   "hrSortNameDescending": "Sort: name (Z to A)",
   "@hrSortNameDescending": {
     "description": "RH · Personnel : tri alphabétique inversé."
+  },
+  "hrAgentNotFoundTitle": "Staff member not found",
+  "@hrAgentNotFoundTitle": {
+    "description": "RH · Personnel : fiche d’agent ouverte par une adresse inconnue — titre."
+  },
+  "hrAgentNotFoundMessage": "This record is not in the tablet’s staff file: the staff member may have been removed, or the link comes from another school.",
+  "@hrAgentNotFoundMessage": {
+    "description": "RH · Personnel : fiche d’agent introuvable — explication."
+  },
+  "hrAgentNotFoundAction": "Back to staff",
+  "@hrAgentNotFoundAction": {
+    "description": "RH · Personnel : fiche d’agent introuvable — retour à l’écran."
   }
 }

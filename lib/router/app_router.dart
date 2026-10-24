@@ -57,6 +57,7 @@ import 'package:school_app_flutter/features/classes/presentation/pages/classes_o
 import 'package:school_app_flutter/features/classes/presentation/pages/classes_stats_dashboard_page.dart';
 import 'package:school_app_flutter/router/return_location.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
+import 'package:school_app_flutter/router/hr_agent_routes.dart';
 import 'package:school_app_flutter/router/student_record_routes.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/justifications/pages/justification_queue_page.dart';
@@ -385,6 +386,7 @@ class AppRouter {
       onExit: RouteExitGuard.onExitOfPage(_shellPageKey),
       pageBuilder: (context, state) =>
           _shellPage(state.pathParameters['subMenuId']),
+      routes: [HrAgentRoutes.agent()],
     ),
     ShellRoute(
       builder: (context, state, child) {

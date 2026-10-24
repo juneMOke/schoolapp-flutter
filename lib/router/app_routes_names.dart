@@ -96,6 +96,16 @@ class AppRoutesNames {
       '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelDashboardId}';
   static const String hrPersonnelFile =
       '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelFileId}';
+
+  /// La fiche d'un agent, par-dessus l'écran de RH · Personnel qui l'a
+  /// ouverte (`/home/rh-personnel-fichier/{agentId}`) : F5 et un lien
+  /// partagé rouvrent l'écran dans la coquille, et la fiche par-dessus.
+  static const String hrPersonnelAgent = '$homeSubMenuRoute/:agentId';
+
+  static String hrPersonnelAgentPath({
+    required String subMenuId,
+    required String agentId,
+  }) => '${homeSubMenuPath(subMenuId)}/${Uri.encodeComponent(agentId)}';
   static const String hrStaffFile =
       '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffFileId}';
   static const String hrStaffAttendance =

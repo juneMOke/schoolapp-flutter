@@ -18202,4 +18202,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrSortNameDescending => 'Sort: name (Z to A)';
+
+  @override
+  String get hrAgentNotFoundTitle => 'Staff member not found';
+
+  @override
+  String get hrAgentNotFoundMessage =>
+      'This record is not in the tablet’s staff file: the staff member may have been removed, or the link comes from another school.';
+
+  @override
+  String get hrAgentNotFoundAction => 'Back to staff';
 }

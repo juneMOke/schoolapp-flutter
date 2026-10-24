@@ -28,7 +28,7 @@ class HrPersonnelCubit extends Cubit<HrPersonnelState> {
     DateTime Function() now = DateTime.now,
   }) : _source = source,
        _now = now,
-       super(HrPersonnelState.initial(today: _dayOf(now())));
+       super(HrPersonnelState.initial(today: dayOf(now())));
 
   Future<void> load() async {
     emit(state.copyWith(status: HrPersonnelStatus.loading, clearFailure: true));
@@ -86,7 +86,7 @@ class HrPersonnelCubit extends Cubit<HrPersonnelState> {
     state.copyWith(
       status: HrPersonnelStatus.ready,
       snapshot: snapshot,
-      today: _dayOf(_now()),
+      today: dayOf(_now()),
       clearFailure: true,
     ),
   );
@@ -136,7 +136,8 @@ class HrPersonnelCubit extends Cubit<HrPersonnelState> {
     emit(state.copyWith(viewMode: mode));
   }
 
-  static String _dayOf(DateTime moment) {
+  /// Le jour local de [moment], `aaaa-mm-jj` — celui des contrats.
+  static String dayOf(DateTime moment) {
     final local = moment.toLocal();
     String two(int value) => value.toString().padLeft(2, '0');
     return '${local.year}-${two(local.month)}-${two(local.day)}';

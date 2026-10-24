@@ -22,6 +22,7 @@ class ReflectedRecordsParser extends RouteInformationParser<RouteMatchList> {
     AppRoutesNames.facturationDetail,
     AppRoutesNames.documentsCatalog,
     AppRoutesNames.disciplinaryStudentDetail,
+    AppRoutesNames.hrPersonnelAgent,
   };
 
   final GoRouteInformationParser _inner;

@@ -129,7 +129,8 @@ class _StaffAgentViewState extends State<StaffAgentView> {
             state.mode == StaffAgentMode.view &&
             MediaQuery.sizeOf(context).width >= AppBreakpoints.staffFileViewMin;
         // Précédent du navigateur : la page est poussée au-dessus du fichier
-        // du personnel, dont la route consulte cette garde (`onExit`).
+        // du personnel, dont la route consulte cette garde (`onExit`) — ou,
+        // sous RH · Personnel, elle a sa propre route (`HrAgentRoutes`).
         return RouteExitGuard(
           hasUnsavedWork: () => _hasUnsavedWork(cubit),
           confirmExit: _confirmDiscard,
