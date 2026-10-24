@@ -18750,4 +18750,124 @@ class AppLocalizationsFr extends AppLocalizations {
   String hrPresenceTrendDescription(String when, int pct) {
     return '$when · présence $pct %';
   }
+
+  @override
+  String get subMenuHrPresenceFiche => 'Fiche individuelle';
+
+  @override
+  String get hrPresenceFicheSubtitle =>
+      'Choisissez un agent : son profil de présence, en vue mensuelle ou annuelle.';
+
+  @override
+  String get hrPresenceFicheListTitle => 'Personnel';
+
+  @override
+  String get hrPresenceFicheSearchPlaceholder => 'Nom, fonction ou matricule…';
+
+  @override
+  String get hrPresenceFicheEmptyMessage => 'Aucun agent pour ces critères.';
+
+  @override
+  String get hrPresenceProfilesLoading => 'Chargement des profils de présence';
+
+  @override
+  String get hrPresenceScopeA11y => 'Portée de la fiche';
+
+  @override
+  String get hrPresenceScopeMonthly => 'Mensuelle';
+
+  @override
+  String get hrPresenceScopeYearly => 'Annuelle';
+
+  @override
+  String hrPresenceYearScope(String year, String to) {
+    return 'Année scolaire $year · au $to';
+  }
+
+  @override
+  String hrPresenceProfileRates(String presence, String late, String absent) {
+    return '$presence · $late · $absent';
+  }
+
+  @override
+  String hrPresenceProfileRatesA11y(
+    String presence,
+    String late,
+    String absent,
+  ) {
+    return 'Présence $presence, retards $late, absences $absent';
+  }
+
+  @override
+  String get hrPresenceLegendOnTime => 'À l\'heure';
+
+  @override
+  String get hrPresenceLegendLate => 'En retard';
+
+  @override
+  String get hrPresenceLegendAbsent => 'Absent';
+
+  @override
+  String get hrPresenceLegendShare =>
+      '(% des jours pointés) · touchez longuement un profil pour sa règle';
+
+  @override
+  String get hrPresenceStaffList => 'Liste du personnel';
+
+  @override
+  String get hrPresenceAgentOpenFiche => 'Ouvrir sa fiche individuelle';
+
+  @override
+  String hrPresenceProfileOf(String scope) {
+    return 'Profil · $scope';
+  }
+
+  @override
+  String hrPresenceScopeYearLabel(String year) {
+    return 'année $year';
+  }
+
+  @override
+  String hrPresenceFicheRateDetail(int presences, int scored) {
+    String _temp0 = intl.Intl.pluralLogic(
+      presences,
+      locale: localeName,
+      other: '$presences jours',
+      one: '1 jour',
+      zero: '0 jour',
+    );
+    return '$_temp0 sur $scored pointés';
+  }
+
+  @override
+  String get hrPresenceFicheLateRate => 'Taux de retard';
+
+  @override
+  String hrPresenceFicheLateDetail(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retards',
+      one: '1 retard',
+      zero: 'aucun retard',
+    );
+    return '$_temp0 · $minutes min cumulées';
+  }
+
+  @override
+  String get hrPresenceFicheAbsenceRate => 'Taux d\'absence';
+
+  @override
+  String get hrPresenceYearTitle => 'Mois par mois';
+
+  @override
+  String get hrPresenceMonthHoliday => 'Vacances scolaires';
+
+  @override
+  String get hrPresenceMonthFuture => 'À venir';
+
+  @override
+  String hrPresenceMonthScored(int scored, int classDays) {
+    return '$scored/$classDays j pointés';
+  }
 }

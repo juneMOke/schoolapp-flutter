@@ -2,6 +2,8 @@ import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_month.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_year.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_profiles.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_dashboard.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_kpis.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -177,5 +179,116 @@ HrAttendanceAgentMonth agentMonthOf({
   trend: const [
     HrAttendanceTrendPoint(month: '2026-09', presenceRatePct: 95),
     HrAttendanceTrendPoint(month: '2026-10', presenceRatePct: 67),
+  ],
+);
+
+HrAttendanceProfileRow profileRow(
+  String id, {
+  required String lastName,
+  String? firstName,
+  String? jobTitle = 'Enseignant',
+  StaffCategory category = StaffCategory.teacher,
+  PresenceProfile profile = PresenceProfile.regular,
+  int? presence = 92,
+  int? late = 6,
+  int? absent = 8,
+}) => HrAttendanceProfileRow(
+  agent: HrAttendanceAgent(
+    staffMemberId: id,
+    staffNumber: 'AG-$id',
+    lastName: lastName,
+    firstName: firstName,
+    jobTitle: jobTitle,
+    category: category,
+  ),
+  scored: 17,
+  presenceRatePct: presence,
+  lateRatePct: late,
+  absenceRatePct: absent,
+  profile: profile,
+);
+
+HrAttendanceProfiles profilesOf({
+  String? month = '2026-10',
+  int classDays = 17,
+  List<HrAttendanceProfileRow>? staff,
+}) => HrAttendanceProfiles(
+  month: month,
+  schoolYear: const HrSchoolYear(
+    name: '2026-2027',
+    from: '2026-09-01',
+    to: '2027-06-30',
+  ),
+  from: month == null ? '2026-09-01' : '$month-01',
+  to: '2026-10-23',
+  classDays: classDays,
+  profileCounts: const {},
+  staff:
+      staff ??
+      [
+        profileRow(
+          'a-1',
+          lastName: 'MWAMBA',
+          firstName: 'Clarisse',
+          jobTitle: 'Secrétaire',
+          category: StaffCategory.administrative,
+          profile: PresenceProfile.absentee,
+          presence: 79,
+          late: 9,
+          absent: 21,
+        ),
+        profileRow(
+          'a-2',
+          lastName: 'MAYALA',
+          firstName: 'Ruth',
+          profile: PresenceProfile.exemplary,
+          presence: 100,
+          late: 0,
+          absent: 0,
+        ),
+        profileRow('a-3', lastName: 'KALALA', firstName: 'Didier'),
+      ],
+);
+
+HrAttendanceAgentYear agentYearOf({String id = 'a-1'}) => HrAttendanceAgentYear(
+  schoolYear: const HrSchoolYear(
+    name: '2026-2027',
+    from: '2026-09-01',
+    to: '2027-06-30',
+  ),
+  agent: agentMonthOf(id: id).agent,
+  profile: PresenceProfile.regular,
+  kpis: kpisOf(),
+  months: const [
+    HrAttendanceMonthSummary(
+      month: '2026-09',
+      state: HrAttendanceMonthState.classMonth,
+      classDays: 22,
+      scored: 22,
+      presenceRatePct: 95,
+      lateRatePct: 5,
+      absenceRatePct: 5,
+      profile: PresenceProfile.regular,
+    ),
+    HrAttendanceMonthSummary(
+      month: '2026-10',
+      state: HrAttendanceMonthState.classMonth,
+      classDays: 17,
+      scored: 3,
+      presenceRatePct: 67,
+      lateRatePct: 33,
+      absenceRatePct: 33,
+      profile: PresenceProfile.absentee,
+    ),
+    HrAttendanceMonthSummary(
+      month: '2026-11',
+      state: HrAttendanceMonthState.future,
+      classDays: 0,
+      scored: 0,
+      presenceRatePct: null,
+      lateRatePct: null,
+      absenceRatePct: null,
+      profile: PresenceProfile.notEvaluated,
+    ),
   ],
 );

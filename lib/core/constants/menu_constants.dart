@@ -134,6 +134,10 @@ class MenuConstants {
   /// assiduité par agent sur une période — en ligne (D1).
   static const String hrPresenceDashboardId = 'rh-presences-tableau-de-bord';
 
+  /// RH · Présences ▸ Fiche individuelle : le profil de présence de chaque
+  /// agent, sur le mois ou l'année — en ligne (D1).
+  static const String hrPresenceFicheId = 'rh-presences-fiche';
+
   /// RH · Présences ▸ Registre du jour : pointer chaque agent, justifier,
   /// valider le rapport — le seul écran du module hors ligne.
   static const String hrPresenceRegisterId = 'rh-presences-registre';

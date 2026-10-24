@@ -41,6 +41,7 @@ const Set<String> shellFullBleedSubMenuIds = {
   MenuConstants.hrPersonnelDashboardId,
   MenuConstants.hrPersonnelFileId,
   MenuConstants.hrPresenceDashboardId,
+  MenuConstants.hrPresenceFicheId,
   MenuConstants.hrPresenceRegisterId,
   MenuConstants.courseProgrammeId,
 };

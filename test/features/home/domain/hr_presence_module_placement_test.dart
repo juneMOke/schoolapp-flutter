@@ -19,7 +19,7 @@ void main() {
     permissions: permissions,
   ).map((menu) => menu.id).toList();
 
-  test('un menu propre : le tableau de bord, puis le registre du jour', () {
+  test('un menu propre : tableau de bord, fiche individuelle, registre', () {
     final module = MenuFactory.createMenuItems(
       l10n,
       permissions: tousDroits,
@@ -28,10 +28,12 @@ void main() {
     expect(module.title, 'RH · Présences');
     expect(module.subMenus.map((sub) => sub.id), [
       MenuConstants.hrPresenceDashboardId,
+      MenuConstants.hrPresenceFicheId,
       MenuConstants.hrPresenceRegisterId,
     ]);
     expect(module.subMenus.map((sub) => sub.title), [
       'Tableau de bord',
+      'Fiche individuelle',
       'Registre du jour',
     ]);
     expect(
@@ -67,6 +69,7 @@ void main() {
     );
     for (final route in [
       AppRoutesNames.hrPresenceDashboard,
+      AppRoutesNames.hrPresenceFiche,
       AppRoutesNames.hrPresenceRegister,
     ]) {
       expect(
@@ -110,6 +113,7 @@ void main() {
     ).firstWhere((module) => module.id == MenuConstants.hrPresenceMenuId);
     expect(module.subModules.map((sub) => sub.target.subMenuId), [
       MenuConstants.hrPresenceDashboardId,
+      MenuConstants.hrPresenceFicheId,
       MenuConstants.hrPresenceRegisterId,
     ]);
   });

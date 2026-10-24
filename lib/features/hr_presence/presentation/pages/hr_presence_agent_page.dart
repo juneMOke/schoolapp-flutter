@@ -26,6 +26,7 @@ import 'package:school_app_flutter/features/hr_presence/presentation/widgets/age
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_agent_kpis.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_agent_toolbar.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_month_body.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_fiche_location.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/states/hr_presence_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -182,7 +183,7 @@ class HrPresenceAgentScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           HrPresenceMonthBody(month: data),
           const SizedBox(height: AppSpacing.lg),
-          _Actions(agentId: state.agentId),
+          _Actions(agentId: state.agentId, month: state.month),
         ],
       ),
     };
@@ -205,8 +206,9 @@ class HrPresenceAgentScreen extends StatelessWidget {
 
 class _Actions extends StatelessWidget {
   final String agentId;
+  final String month;
 
-  const _Actions({required this.agentId});
+  const _Actions({required this.agentId, required this.month});
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +217,22 @@ class _Actions extends StatelessWidget {
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       children: [
+        EteeloButton.secondary(
+          label: l10n.hrPresenceAgentOpenFiche,
+          icon: Icons.badge_outlined,
+          // Dans la coquille, par son adresse : le détail est poussé
+          // par-dessus le tableau de bord, la fiche par-dessus sa liste.
+          onPressed: () => context.go(
+            Uri(
+              path: AppRoutesNames.hrPersonnelAgentPath(
+                subMenuId: MenuConstants.hrPresenceFicheId,
+                agentId: agentId,
+              ),
+              queryParameters: {HrFicheLocation.monthParam: month},
+            ).toString(),
+          ),
+          fullWidth: false,
+        ),
         // Le montant et la paie : à qui lit la paie seulement (E2).
         if (PermissionGate.allowsAccess(context, kPayrollReadAccess))
           EteeloButton.secondary(

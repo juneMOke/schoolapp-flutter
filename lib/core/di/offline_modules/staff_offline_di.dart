@@ -5,6 +5,8 @@ import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/hr_personnel/data/hr_staff_dashboard_api.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_args.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_month_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
@@ -226,6 +228,20 @@ void registerStaffOffline(GetIt getIt) {
       agentId: args.agentId,
       month: args.month,
       yearStart: args.yearStart,
+    ),
+  );
+  getIt.registerFactoryParam<HrPresenceProfilesCubit, DateTime?, void>(
+    (yearStart, _) => HrPresenceProfilesCubit(
+      getProfiles: getIt<GetHrAttendanceProfilesUseCase>(),
+      yearStart: yearStart,
+    ),
+  );
+  getIt.registerFactoryParam<HrPresenceFicheCubit, HrPresenceFicheArgs, void>(
+    (args, _) => HrPresenceFicheCubit(
+      getMonth: getIt<GetHrAttendanceAgentMonthUseCase>(),
+      getYear: getIt<GetHrAttendanceAgentYearUseCase>(),
+      source: getIt<StaffSnapshotSource>(),
+      args: args,
     ),
   );
   getIt.registerFactory<HrAttendanceReportCubit>(

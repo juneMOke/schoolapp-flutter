@@ -9,7 +9,9 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_args.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_month_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_agent_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -22,11 +24,14 @@ class _MockGet extends Mock implements GetHrAttendanceAgentMonthUseCase {}
 
 class _MockSource extends Mock implements StaffSnapshotSource {}
 
+class _MockYear extends Mock implements GetHrAttendanceAgentYearUseCase {}
+
 /// Le détail d'un agent a son adresse sous le tableau de bord :
 /// `/home/rh-presences-tableau-de-bord/{agentId}?mois=AAAA-MM`.
 void main() {
   final getIt = GetIt.instance;
   late _MockGet get;
+  late _MockYear year;
   const dashboard = MenuConstants.hrPresenceDashboardId;
 
   setUp(() {
@@ -49,6 +54,17 @@ void main() {
         agentId: args.agentId,
         month: args.month,
         yearStart: args.yearStart,
+        now: () => DateTime(2026, 10, 23, 10),
+      ),
+    );
+    year = _MockYear();
+    when(() => year(any())).thenAnswer((_) async => Right(agentYearOf()));
+    getIt.registerFactoryParam<HrPresenceFicheCubit, HrPresenceFicheArgs, void>(
+      (args, _) => HrPresenceFicheCubit(
+        getMonth: get,
+        getYear: year,
+        source: source,
+        args: args,
         now: () => DateTime(2026, 10, 23, 10),
       ),
     );
@@ -136,5 +152,14 @@ void main() {
 
     expect(find.byType(HrPresenceAgentScreen), findsOneWidget);
     verify(() => get('a-1', month: '2026-09')).called(1);
+  });
+
+  testWidgets('la fiche individuelle a son adresse : `?vue=an` l\'ouvre sur '
+      'l\'année', (tester) async {
+    await pump(tester, '/home/${MenuConstants.hrPresenceFicheId}/a-1?vue=an');
+    await settle(tester);
+
+    expect(find.byType(HrPresenceFicheAgentScreen), findsOneWidget);
+    verify(() => year('a-1')).called(1);
   });
 }

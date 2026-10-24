@@ -101,6 +101,7 @@ const Map<String, String> _constants = {
   'hrPersonnelDashboardId': 'rh-personnel-tableau-de-bord',
   'hrPersonnelFileId': 'rh-personnel-fichier',
   'hrPresenceDashboardId': 'rh-presences-tableau-de-bord',
+  'hrPresenceFicheId': 'rh-presences-fiche',
   'hrPresenceRegisterId': 'rh-presences-registre',
   'classesDashboardId': 'classes-dashboard',
   'organisationId': 'organisation',

@@ -304,6 +304,11 @@ class AccueilModulesFactory {
         ),
         _page(
           menuId: menuId,
+          subMenuId: MenuConstants.hrPresenceFicheId,
+          title: l10n.subMenuHrPresenceFiche,
+        ),
+        _page(
+          menuId: menuId,
           subMenuId: MenuConstants.hrPresenceRegisterId,
           title: l10n.subMenuHrPresenceRegister,
         ),

@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_agent_route_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_agent_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_fiche_location.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// La fiche d'un agent, enfant de l'écran de la coquille qui l'a ouverte :
@@ -17,6 +19,7 @@ abstract final class HrAgentRoutes {
     MenuConstants.hrPersonnelDashboardId,
     MenuConstants.hrPersonnelFileId,
     MenuConstants.hrPresenceDashboardId,
+    MenuConstants.hrPresenceFicheId,
   };
 
   static GoRoute agent() => GoRoute(
@@ -34,6 +37,19 @@ abstract final class HrAgentRoutes {
           args: (
             agentId: state.pathParameters['agentId'] ?? '',
             month: state.uri.queryParameters[HrPresenceAgentPage.monthParam],
+            yearStart: null,
+          ),
+          onClosed: onClosed,
+        );
+      }
+      if (subMenuId == MenuConstants.hrPresenceFicheId) {
+        final query = state.uri.queryParameters;
+        return HrPresenceFicheAgentPage(
+          args: (
+            agentId: state.pathParameters['agentId'] ?? '',
+            yearly:
+                query[HrFicheLocation.viewParam] == HrFicheLocation.yearValue,
+            month: query[HrFicheLocation.monthParam],
             yearStart: null,
           ),
           onClosed: onClosed,

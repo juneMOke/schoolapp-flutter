@@ -743,6 +743,29 @@ class AppDimensions {
   static const presenceRateMeterWidth = 40.0;
   static const presenceRateMeterHeight = 6.0;
 
+  // ── Fiche individuelle : profils (spec §10–12) ──
+  static const presenceShareBarHeight = 6.0;
+  static const presenceShareBarWidth = 120.0;
+  static const presenceProfileBadgeIcon = 14.0;
+  static const presenceProfileBadgeIconLarge = 18.0;
+
+  /// Le liseré d'une ligne ou d'une carte de profil, et l'anneau d'avatar.
+  static const presenceProfileAccentWidth = 4.0;
+  static const presenceProfileHeaderAccentWidth = 5.0;
+  static const presenceProfileRingWidth = 2.0;
+  static const presenceProfileHeaderRingWidth = 3.0;
+
+  /// Sous cette largeur, une ligne de profil range sa barre et ses taux sous
+  /// le nom.
+  static const presenceProfileRowInlineMinWidth = 640.0;
+
+  /// La règle du profil, à droite de l'en-tête de fiche : lisible sans
+  /// s'étirer.
+  static const hrPresenceProfileRuleMaxWidth = 360.0;
+
+  /// La colonne du nom de mois dans la vue annuelle.
+  static const hrPresenceYearMonthWidth = 132.0;
+
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;

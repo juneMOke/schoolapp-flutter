@@ -28932,6 +28932,178 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{when} · attendance {pct} %'**
   String hrPresenceTrendDescription(String when, int pct);
+
+  /// No description provided for @subMenuHrPresenceFiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual record'**
+  String get subMenuHrPresenceFiche;
+
+  /// No description provided for @hrPresenceFicheSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a staff member: their attendance profile, by month or for the year.'**
+  String get hrPresenceFicheSubtitle;
+
+  /// No description provided for @hrPresenceFicheListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get hrPresenceFicheListTitle;
+
+  /// No description provided for @hrPresenceFicheSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, job title or staff number…'**
+  String get hrPresenceFicheSearchPlaceholder;
+
+  /// No description provided for @hrPresenceFicheEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No staff member for these criteria.'**
+  String get hrPresenceFicheEmptyMessage;
+
+  /// No description provided for @hrPresenceProfilesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading attendance profiles'**
+  String get hrPresenceProfilesLoading;
+
+  /// No description provided for @hrPresenceScopeA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Record scope'**
+  String get hrPresenceScopeA11y;
+
+  /// No description provided for @hrPresenceScopeMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get hrPresenceScopeMonthly;
+
+  /// No description provided for @hrPresenceScopeYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get hrPresenceScopeYearly;
+
+  /// No description provided for @hrPresenceYearScope.
+  ///
+  /// In en, this message translates to:
+  /// **'School year {year} · up to {to}'**
+  String hrPresenceYearScope(String year, String to);
+
+  /// No description provided for @hrPresenceProfileRates.
+  ///
+  /// In en, this message translates to:
+  /// **'{presence} · {late} · {absent}'**
+  String hrPresenceProfileRates(String presence, String late, String absent);
+
+  /// No description provided for @hrPresenceProfileRatesA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance {presence}, late {late}, absent {absent}'**
+  String hrPresenceProfileRatesA11y(
+    String presence,
+    String late,
+    String absent,
+  );
+
+  /// No description provided for @hrPresenceLegendOnTime.
+  ///
+  /// In en, this message translates to:
+  /// **'On time'**
+  String get hrPresenceLegendOnTime;
+
+  /// No description provided for @hrPresenceLegendLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get hrPresenceLegendLate;
+
+  /// No description provided for @hrPresenceLegendAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get hrPresenceLegendAbsent;
+
+  /// No description provided for @hrPresenceLegendShare.
+  ///
+  /// In en, this message translates to:
+  /// **'(% of marked days) · long-press a profile for its rule'**
+  String get hrPresenceLegendShare;
+
+  /// No description provided for @hrPresenceStaffList.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff list'**
+  String get hrPresenceStaffList;
+
+  /// No description provided for @hrPresenceAgentOpenFiche.
+  ///
+  /// In en, this message translates to:
+  /// **'Open their individual record'**
+  String get hrPresenceAgentOpenFiche;
+
+  /// No description provided for @hrPresenceProfileOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile · {scope}'**
+  String hrPresenceProfileOf(String scope);
+
+  /// No description provided for @hrPresenceScopeYearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'year {year}'**
+  String hrPresenceScopeYearLabel(String year);
+
+  /// No description provided for @hrPresenceFicheRateDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{presences, plural, =0{0 days} =1{1 day} other{{presences} days}} out of {scored} marked'**
+  String hrPresenceFicheRateDetail(int presences, int scored);
+
+  /// No description provided for @hrPresenceFicheLateRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late rate'**
+  String get hrPresenceFicheLateRate;
+
+  /// No description provided for @hrPresenceFicheLateDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no late arrival} =1{1 late arrival} other{{count} late arrivals}} · {minutes} min in all'**
+  String hrPresenceFicheLateDetail(int count, int minutes);
+
+  /// No description provided for @hrPresenceFicheAbsenceRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Absence rate'**
+  String get hrPresenceFicheAbsenceRate;
+
+  /// No description provided for @hrPresenceYearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Month by month'**
+  String get hrPresenceYearTitle;
+
+  /// No description provided for @hrPresenceMonthHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'School holidays'**
+  String get hrPresenceMonthHoliday;
+
+  /// No description provided for @hrPresenceMonthFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get hrPresenceMonthFuture;
+
+  /// No description provided for @hrPresenceMonthScored.
+  ///
+  /// In en, this message translates to:
+  /// **'{scored}/{classDays} days marked'**
+  String hrPresenceMonthScored(int scored, int classDays);
 }
 
 class _AppLocalizationsDelegate
