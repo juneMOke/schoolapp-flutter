@@ -15,7 +15,18 @@ class HrDashboardResultsErrorState extends StatelessWidget {
   final Failure? failure;
   final VoidCallback? onRetry;
 
-  const HrDashboardResultsErrorState({super.key, this.failure, this.onRetry});
+  /// Les mots d'une panne du serveur, pour un autre écran RH en ligne ; ceux
+  /// du personnel par défaut.
+  final String? serverTitle;
+  final String? serverMessage;
+
+  const HrDashboardResultsErrorState({
+    super.key,
+    this.failure,
+    this.onRetry,
+    this.serverTitle,
+    this.serverMessage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +41,13 @@ class HrDashboardResultsErrorState extends StatelessWidget {
         EteeloErrorType.network => l10n.staffErrorNetworkTitle,
         EteeloErrorType.unauthorized => l10n.staffErrorUnauthorizedTitle,
         EteeloErrorType.forbidden => l10n.staffErrorForbiddenTitle,
-        _ => l10n.hrDashboardErrorServerTitle,
+        _ => serverTitle ?? l10n.hrDashboardErrorServerTitle,
       },
       message: switch (type) {
         EteeloErrorType.network => l10n.staffErrorNetwork,
         EteeloErrorType.unauthorized => l10n.staffErrorUnauthorized,
         EteeloErrorType.forbidden => l10n.staffErrorForbidden,
-        _ => l10n.hrDashboardErrorServer,
+        _ => serverMessage ?? l10n.hrDashboardErrorServer,
       },
       primaryAction: switch (type) {
         EteeloErrorType.forbidden => null,

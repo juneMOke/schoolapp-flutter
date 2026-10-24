@@ -19,7 +19,7 @@ void main() {
     permissions: permissions,
   ).map((menu) => menu.id).toList();
 
-  test('un menu propre, ouvert sur le registre du jour', () {
+  test('un menu propre : le tableau de bord, puis le registre du jour', () {
     final module = MenuFactory.createMenuItems(
       l10n,
       permissions: tousDroits,
@@ -27,9 +27,17 @@ void main() {
 
     expect(module.title, 'RH · Présences');
     expect(module.subMenus.map((sub) => sub.id), [
+      MenuConstants.hrPresenceDashboardId,
       MenuConstants.hrPresenceRegisterId,
     ]);
-    expect(module.subMenus.single.title, 'Registre du jour');
+    expect(module.subMenus.map((sub) => sub.title), [
+      'Tableau de bord',
+      'Registre du jour',
+    ]);
+    expect(
+      AppRoutesNames.hrPresenceDashboard,
+      '/rh-presences/rh-presences-tableau-de-bord',
+    );
     expect(
       AppRoutesNames.hrPresenceRegister,
       '/rh-presences/rh-presences-registre',
@@ -52,17 +60,21 @@ void main() {
     );
   });
 
-  test('`hr.attendance.read` suffit à ouvrir le registre et sa route', () {
+  test('`hr.attendance.read` suffit à ouvrir ses écrans et leurs routes', () {
     expect(
       menuIds([Perm.hrAttendanceRead.wire]),
       contains(MenuConstants.hrPresenceMenuId),
     );
-    expect(
-      canAccessLocation(Uri.parse(AppRoutesNames.hrPresenceRegister), [
-        Perm.hrAttendanceRead.wire,
-      ]),
-      isTrue,
-    );
+    for (final route in [
+      AppRoutesNames.hrPresenceDashboard,
+      AppRoutesNames.hrPresenceRegister,
+    ]) {
+      expect(
+        canAccessLocation(Uri.parse(route), [Perm.hrAttendanceRead.wire]),
+        isTrue,
+        reason: route,
+      );
+    }
     // L'économe lit les mois clos dans la Paie, pas le registre.
     expect(
       canAccessLocation(Uri.parse(AppRoutesNames.hrPresenceRegister), [
@@ -97,6 +109,7 @@ void main() {
       permissions: tousDroits,
     ).firstWhere((module) => module.id == MenuConstants.hrPresenceMenuId);
     expect(module.subModules.map((sub) => sub.target.subMenuId), [
+      MenuConstants.hrPresenceDashboardId,
       MenuConstants.hrPresenceRegisterId,
     ]);
   });

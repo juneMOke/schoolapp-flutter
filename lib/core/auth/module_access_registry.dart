@@ -366,6 +366,7 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // RH · Présences : tout se lit sous `hr.attendance.read` ; pointer, valider,
   // clore et régler restent gardés geste par geste (write / manage).
   MenuConstants.hrPresenceMenuId: {
+    MenuConstants.hrPresenceDashboardId: ModuleAccess([Perm.hrAttendanceRead]),
     MenuConstants.hrPresenceRegisterId: ModuleAccess([Perm.hrAttendanceRead]),
   },
   MenuConstants.communicationMenuId: {

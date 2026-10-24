@@ -130,6 +130,10 @@ class MenuConstants {
   /// fiche — sans statistiques, celles-ci vivent au tableau de bord.
   static const String hrPersonnelFileId = 'rh-personnel-fichier';
 
+  /// RH · Présences ▸ Tableau de bord : taux, retards, absences et
+  /// assiduité par agent sur une période — en ligne (D1).
+  static const String hrPresenceDashboardId = 'rh-presences-tableau-de-bord';
+
   /// RH · Présences ▸ Registre du jour : pointer chaque agent, justifier,
   /// valider le rapport — le seul écran du module hors ligne.
   static const String hrPresenceRegisterId = 'rh-presences-registre';

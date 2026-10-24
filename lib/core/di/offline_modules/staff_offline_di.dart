@@ -3,6 +3,10 @@ import 'package:school_app_flutter/core/di/offline_modules/staff_attendance_di.d
 import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/hr_personnel/data/hr_staff_dashboard_api.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/features/hr_presence/data/hr_attendance_stats_api.dart';
 import 'package:school_app_flutter/features/hr_presence/data/repositories/hr_attendance_stats_repository_impl.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/repositories/hr_attendance_stats_repository.dart';
@@ -201,6 +205,18 @@ void registerStaffOffline(GetIt getIt) {
   );
   getIt.registerFactory<GetHrAttendanceReportUseCase>(
     () => GetHrAttendanceReportUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<HrPresenceDashboardCubit>(
+    () => HrPresenceDashboardCubit(
+      getDashboard: getIt<GetHrAttendanceDashboardUseCase>(),
+      countUnsynced: getIt<CountUnsyncedStaffAttendanceUseCase>(),
+      signals: getIt<StaffSyncSignals>(),
+    ),
+  );
+  getIt.registerFactory<HrAttendanceReportCubit>(
+    () => HrAttendanceReportCubit(
+      getReport: getIt<GetHrAttendanceReportUseCase>(),
+    ),
   );
   getIt.registerFactory<HrStaffStatsCubit>(
     () => HrStaffStatsCubit(getStats: getIt<GetHrStaffStatsUseCase>()),

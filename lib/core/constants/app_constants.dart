@@ -1194,6 +1194,14 @@ class AppConstants {
   /// Délai de réception du PDF d'assiduité — celui des autres rapports.
   static const Duration hrAttendanceReportTimeout = Duration(seconds: 60);
 
+  /// L'attente retenue quand un 429 du PDF d'assiduité n'annonce pas la
+  /// sienne.
+  static const Duration hrAttendanceReportRetryFallback = Duration(seconds: 60);
+
+  /// La période précise du tableau de bord des présences s'ouvre sur ces
+  /// jours-là jusqu'à aujourd'hui (spec §1 : J−14 → J).
+  static const int hrPresenceCustomRangeDays = 14;
+
   /// Pointage du personnel : remontée d'**un** pointage par requête (POST,
   /// `hr.attendance.write`) et descente (GET, flux `hr.staff-attendance`).
   static const String syncStaffAttendanceEndpoint =

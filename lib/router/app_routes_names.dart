@@ -96,6 +96,8 @@ class AppRoutesNames {
       '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelDashboardId}';
   static const String hrPersonnelFile =
       '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelFileId}';
+  static const String hrPresenceDashboard =
+      '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceDashboardId}';
   static const String hrPresenceRegister =
       '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceRegisterId}';
 

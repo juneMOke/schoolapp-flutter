@@ -299,6 +299,11 @@ class AccueilModulesFactory {
       subModules: [
         _page(
           menuId: menuId,
+          subMenuId: MenuConstants.hrPresenceDashboardId,
+          title: l10n.subMenuDashboard,
+        ),
+        _page(
+          menuId: menuId,
           subMenuId: MenuConstants.hrPresenceRegisterId,
           title: l10n.subMenuHrPresenceRegister,
         ),

@@ -18426,4 +18426,290 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get hrPresenceRegisterSubtitle =>
       'Le préfet ou le censeur pointe depuis la tablette, en classe ou à l\'accueil — même sans réseau.';
+
+  @override
+  String get hrPresenceActionMark => 'Pointer';
+
+  @override
+  String get hrPresenceRefresh => 'Actualiser';
+
+  @override
+  String get hrPresenceDashboardSubtitleBare => 'Pointage du personnel';
+
+  @override
+  String hrPresenceDashboardSubtitle(String period) {
+    return 'Pointage du personnel · $period';
+  }
+
+  @override
+  String hrPresenceWindowRange(String from, String to) {
+    return 'du $from au $to';
+  }
+
+  @override
+  String hrPresenceWindowYear(String year, String to) {
+    return 'année scolaire $year · au $to';
+  }
+
+  @override
+  String hrPresenceWeekdayDay(String weekday, int day) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'lun.',
+      '2': 'mar.',
+      '3': 'mer.',
+      '4': 'jeu.',
+      '5': 'ven.',
+      '6': 'sam.',
+      'other': 'dim.',
+    });
+    return '$_temp0 $day';
+  }
+
+  @override
+  String hrPresenceMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'janv.',
+      '2': 'févr.',
+      '3': 'mars',
+      '4': 'avr.',
+      '5': 'mai',
+      '6': 'juin',
+      '7': 'juil.',
+      '8': 'août',
+      '9': 'sept.',
+      '10': 'oct.',
+      '11': 'nov.',
+      'other': 'déc.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceNoValue => '—';
+
+  @override
+  String get hrPresenceKpisA11y => 'Présence du personnel sur la période';
+
+  @override
+  String get hrPresenceKpiRate => 'Taux de présence';
+
+  @override
+  String hrPresenceKpiRateSubline(int presences, int scored) {
+    String _temp0 = intl.Intl.pluralLogic(
+      presences,
+      locale: localeName,
+      other: '$presences présences',
+      one: '1 présence',
+      zero: '0 présence',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      scored,
+      locale: localeName,
+      other: '$scored pointages',
+      one: '1 pointage',
+      zero: '0 pointage',
+    );
+    return '$_temp0 sur $_temp1';
+  }
+
+  @override
+  String get hrPresenceKpiLate => 'Retards';
+
+  @override
+  String hrPresenceMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String hrPresenceKpiLateSubline(int minutes, int punctuality) {
+    return '$minutes min · ponctualité $punctuality %';
+  }
+
+  @override
+  String get hrPresenceKpiUnjustified => 'Absences non justifiées';
+
+  @override
+  String get hrPresenceKpiUnjustifiedSubline =>
+      'signalées sur le bulletin, sans retenue';
+
+  @override
+  String get hrPresenceKpiJustified => 'Absences justifiées';
+
+  @override
+  String get hrPresenceKpiJustifiedSubline => 'avec un motif';
+
+  @override
+  String hrPresenceUnscoredTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours-agent non pointés',
+      one: '1 jour-agent non pointé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceUnscoredBody =>
+      'Ils ne comptent ni comme présence ni comme absence : le taux est calculé sur les seuls jours pointés.';
+
+  @override
+  String get hrPresenceUnscoredAction => 'Compléter le pointage';
+
+  @override
+  String hrPresenceUnsyncedTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pointages encore sur la tablette',
+      one: '1 pointage encore sur la tablette',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceUnsyncedBody =>
+      'Ces chiffres sont ceux du serveur : ils ne les comptent pas encore. L\'envoi se fait de lui-même dès que le réseau revient.';
+
+  @override
+  String get hrPresenceChartTitleDay => 'Présence jour par jour';
+
+  @override
+  String get hrPresenceChartTitleMonth => 'Présence mois par mois';
+
+  @override
+  String get hrPresenceChartSubtitle =>
+      'Part des agents pointés présents (vert) et absents (rouge)';
+
+  @override
+  String get hrPresenceChartLegendPresent =>
+      'Présents (à l\'heure ou en retard)';
+
+  @override
+  String get hrPresenceChartLegendAbsent => 'Absents';
+
+  @override
+  String get hrPresenceChartLegendEmpty => 'Non pointé';
+
+  @override
+  String get hrPresenceChartLegendNarrow =>
+      'Taux de présence en % au-dessus de chaque barre';
+
+  @override
+  String hrPresenceBarDescription(
+    String when,
+    int presentPct,
+    int presences,
+    int scored,
+    int absentPct,
+  ) {
+    return '$when · présents $presentPct % ($presences/$scored) · absents $absentPct %';
+  }
+
+  @override
+  String hrPresenceBarEmpty(String when) {
+    return '$when · aucun pointage';
+  }
+
+  @override
+  String get hrPresenceStaffTitle => 'Assiduité par agent';
+
+  @override
+  String hrPresenceStaffSubtitle(String period) {
+    return '$period · du moins au plus assidu';
+  }
+
+  @override
+  String hrPresenceStaffSubtitleTap(String period) {
+    return '$period · du moins au plus assidu · touchez un agent pour son détail';
+  }
+
+  @override
+  String get hrPresenceStaffSearchLabel => 'Rechercher';
+
+  @override
+  String get hrPresenceStaffSearchPlaceholder => 'Chercher un agent…';
+
+  @override
+  String get hrPresenceStaffOpen => 'Voir le détail';
+
+  @override
+  String get hrPresenceColAgent => 'Agent';
+
+  @override
+  String get hrPresenceColJob => 'Fonction';
+
+  @override
+  String get hrPresenceColRate => 'Présence';
+
+  @override
+  String get hrPresenceColLate => 'Retards';
+
+  @override
+  String get hrPresenceColJustified => 'Abs. just.';
+
+  @override
+  String get hrPresenceColUnjustified => 'Abs. NJ';
+
+  @override
+  String hrPresenceLateCell(int count, int minutes) {
+    return '$count · $minutes min';
+  }
+
+  @override
+  String get hrPresenceStaffEmptyTitle => 'Aucun agent ne correspond';
+
+  @override
+  String hrPresenceStaffEmptyMessage(String text) {
+    return 'Rien pour « $text ».';
+  }
+
+  @override
+  String get hrPresenceStaffShowAll => 'Tout afficher';
+
+  @override
+  String get hrPresenceNoClassDaysTitle =>
+      'Aucun jour de classe sur cette période';
+
+  @override
+  String get hrPresenceNoClassDaysMessage =>
+      'Week-end ou vacances : rien n\'était à pointer. Choisissez une autre période.';
+
+  @override
+  String get hrPresenceNoStaffTitle => 'Aucun agent attendu';
+
+  @override
+  String get hrPresenceNoStaffMessage =>
+      'Aucun contrat ne couvre cette période : il n\'y avait personne à pointer.';
+
+  @override
+  String get hrPresenceErrorServerTitle => 'Le serveur n\'a pas répondu';
+
+  @override
+  String get hrPresenceErrorServer =>
+      'Les présences du personnel n\'ont pas pu être lues au serveur. Réessayez dans un instant ; si le problème persiste, contactez le support.';
+
+  @override
+  String get hrPresenceReportTitle => 'Assiduité des agents';
+
+  @override
+  String get hrPresenceReportTooltip =>
+      'Télécharger ce tableau en PDF, tel qu\'affiché';
+
+  @override
+  String get hrPresenceReportForbidden =>
+      'Vous n\'avez pas accès aux présences du personnel.';
+
+  @override
+  String get hrPresenceReportNoYear =>
+      'Aucune année scolaire en cours : la pièce ne peut pas être numérotée.';
+
+  @override
+  String hrPresenceReportTooLarge(int lines, int cap) {
+    return '$lines agents, au-delà des $cap du document : ajoutez une recherche.';
+  }
+
+  @override
+  String get hrPresenceReportFailed =>
+      'L\'assiduité des agents n\'a pas pu être préparée.';
 }

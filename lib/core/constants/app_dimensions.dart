@@ -717,6 +717,32 @@ class AppDimensions {
   /// disait 44 ; la règle maison est 48.
   static const presenceMarkTapTarget = minTouchTarget;
 
+  // ── Graphique de présence bichrome (RH · Présences, spec §3) ──
+  /// Hauteur totale : taux, barre pleine hauteur, étiquette d'axe.
+  static const presenceRateBarsHeight = 210.0;
+  static const presenceRateBarValueHeight = 18.0;
+  static const presenceRateBarAxisHeight = 18.0;
+
+  /// Largeur d'une barre : les deux tiers du pas, bornée.
+  static const presenceRateBarWidthShare = 0.66;
+  static const presenceRateBarMin = 8.0;
+  static const presenceRateBarMax = 46.0;
+
+  /// Sous cette largeur, le taux s'écrit sans « % » (la légende le dit).
+  static const presenceRateBarNarrowWidth = 22.0;
+
+  /// Le taux d'absence ne s'écrit dans le rouge qu'à partir de cette hauteur.
+  static const presenceRateBarAbsentLabelMinHeight = 14.0;
+
+  /// Écart minimal entre deux étiquettes d'axe voisines.
+  static const presenceRateBarLabelSpacing = 40.0;
+  static const presenceRateBarRadius = 4.0;
+  static const presenceRateLegendSwatch = 12.0;
+
+  /// La mini-barre de taux d'une ligne d'agent.
+  static const presenceRateMeterWidth = 40.0;
+  static const presenceRateMeterHeight = 6.0;
+
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;
@@ -1064,4 +1090,8 @@ class AppDimensions {
   /// de place — le palier où un tableau se lit déjà en téléphone.
   static const hrCategoryRowStackedMaxWidth = AppBreakpoints.dataTablePhoneMax;
   static const hrInsightIconSize = 20.0;
+
+  /// RH · Présences : le texte d'une alerte de tableau de bord ne s'étire pas
+  /// sur tout un poste — l'action se range à sa droite.
+  static const hrPresenceInsightTextMaxWidth = 560.0;
 }
