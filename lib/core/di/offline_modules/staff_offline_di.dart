@@ -3,6 +3,10 @@ import 'package:school_app_flutter/core/di/offline_modules/staff_attendance_di.d
 import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/hr_personnel/data/hr_staff_dashboard_api.dart';
+import 'package:school_app_flutter/features/hr_presence/data/hr_attendance_stats_api.dart';
+import 'package:school_app_flutter/features/hr_presence/data/repositories/hr_attendance_stats_repository_impl.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/repositories/hr_attendance_stats_repository.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_personnel/data/repositories/hr_staff_dashboard_repository_impl.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/repositories/hr_staff_dashboard_repository.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/usecases/hr_staff_dashboard_use_cases.dart';
@@ -165,6 +169,38 @@ void registerStaffOffline(GetIt getIt) {
   );
   getIt.registerFactory<GetHrStaffListReportUseCase>(
     () => GetHrStaffListReportUseCase(getIt<HrStaffDashboardRepository>()),
+  );
+  // RH · Présences : statistiques en ligne seulement (D1) — tableau de bord,
+  // détail d'un agent, fiche, récapitulatif et PDF sur `/hr/attendance-stats`.
+  // Le registre du jour reste sur le Pointage local.
+  getIt.registerLazySingleton<HrAttendanceStatsApi>(
+    () => HrAttendanceStatsApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<HrAttendanceStatsRepository>(
+    () => HrAttendanceStatsRepositoryImpl(
+      api: getIt<HrAttendanceStatsApi>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerFactory<GetHrAttendanceDashboardUseCase>(
+    () => GetHrAttendanceDashboardUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceAgentMonthUseCase>(
+    () =>
+        GetHrAttendanceAgentMonthUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceAgentYearUseCase>(
+    () => GetHrAttendanceAgentYearUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceProfilesUseCase>(
+    () => GetHrAttendanceProfilesUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceRecapUseCase>(
+    () => GetHrAttendanceRecapUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceReportUseCase>(
+    () => GetHrAttendanceReportUseCase(getIt<HrAttendanceStatsRepository>()),
   );
   getIt.registerFactory<HrStaffStatsCubit>(
     () => HrStaffStatsCubit(getStats: getIt<GetHrStaffStatsUseCase>()),
