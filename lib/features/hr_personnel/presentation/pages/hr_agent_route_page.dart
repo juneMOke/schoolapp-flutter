@@ -63,6 +63,12 @@ class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
     }
   }
 
+  @override
+  void dispose() {
+    widget.intent?.onClosed?.call();
+    super.dispose();
+  }
+
   Future<void> _resolve() async {
     if (_lookup != _Lookup.loading) setState(() => _lookup = _Lookup.loading);
     if (await _read()) return;

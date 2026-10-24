@@ -50,7 +50,10 @@ void main() {
 
   /// La coquille remplacée par une liste qui ouvre l'agent `a` comme le
   /// Fichier : `push` avec son intent.
+  var closed = 0;
+
   Future<GoRouter> pump(WidgetTester tester, String location) async {
+    closed = 0;
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
     addTearDown(tester.view.reset);
@@ -75,7 +78,7 @@ void main() {
                     ).all.single,
                     others: [agentA],
                     today: '2026-10-24',
-                  ),
+                  ).then((_) => closed++),
                   child: Text('écran ${state.pathParameters['subMenuId']}'),
                 ),
               ),
@@ -99,6 +102,14 @@ void main() {
     return router;
   }
 
+  /// Transitions et `onExit` (asynchrone) : quelques images, sans
+  /// `pumpAndSettle` — la fiche porte des indicateurs qui tournent.
+  Future<void> settle(WidgetTester tester) async {
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
   Finder agentPage(String id) =>
       find.byWidgetPredicate((w) => w is StaffAgentPage && w.member?.id == id);
 
@@ -106,8 +117,7 @@ void main() {
       'adresse', (tester) async {
     await pump(tester, '/home/$file');
     await tester.tap(find.text('écran $file'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await settle(tester);
 
     expect(agentPage('a'), findsOneWidget);
     verifyNever(() => source.read());
@@ -124,6 +134,32 @@ void main() {
     );
   });
 
+  testWidgets('Précédent du navigateur referme la fiche, et l\'écran le '
+      'sait — le Future de push, lui, ne se termine pas', (tester) async {
+    final router = await pump(tester, '/home/$file');
+    await tester.tap(find.text('écran $file'));
+    await settle(tester);
+    expect(agentPage('a'), findsOneWidget);
+
+    // Ce que fait Précédent : une nouvelle configuration, pas un pop.
+    router.go('/home/$file');
+    await settle(tester);
+
+    expect(agentPage('a'), findsNothing);
+    expect(closed, 1);
+  });
+
+  testWidgets('refermée par l\'appli : prévenu une seule fois', (tester) async {
+    final router = await pump(tester, '/home/$file');
+    await tester.tap(find.text('écran $file'));
+    await settle(tester);
+
+    router.pop();
+    await settle(tester);
+
+    expect(closed, 1);
+  });
+
   testWidgets('rechargée : la coquille dessous, l\'agent relu avec son '
       'contrat du jour', (tester) async {
     final router = await pump(tester, '/home/$file/a');
@@ -134,8 +170,7 @@ void main() {
     verifyNever(() => source.pull());
 
     router.pop();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await settle(tester);
     expect(find.text('écran $file'), findsOneWidget);
   });
 
