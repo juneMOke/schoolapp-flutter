@@ -16,44 +16,56 @@ class PresencePersonHeading extends StatelessWidget {
   const PresencePersonHeading({super.key, required this.row, this.trailing});
 
   @override
-  Widget build(BuildContext context) {
-    final trailing = this.trailing;
-    return Row(
-      children: [
-        PersonSyncAvatar(
-          firstName: row.firstName,
-          lastName: row.lastName,
-          personId: row.personId,
-          sync: row.sync,
-          size: AppDimensions.presenceMarkAvatarSize,
-          studentPhotoOf: row.showsStudentPhoto ? row.personId : null,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                row.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.titleSmall.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                row.subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final trailing = this.trailing;
+      // Une colonne étroite (liste sur téléphone, texte agrandi) range le
+      // badge sous le nom plutôt que de le pousser hors de la ligne.
+      final stacked =
+          trailing != null &&
+          constraints.maxWidth <
+              AppDimensions.presencePersonHeadingInlineBadgeMinWidth;
+      return Row(
+        children: [
+          PersonSyncAvatar(
+            firstName: row.firstName,
+            lastName: row.lastName,
+            personId: row.personId,
+            sync: row.sync,
+            size: AppDimensions.presenceMarkAvatarSize,
+            studentPhotoOf: row.showsStudentPhoto ? row.personId : null,
           ),
-        ),
-        ?trailing,
-      ],
-    );
-  }
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  row.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.titleSmall.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  row.subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                if (stacked) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  trailing,
+                ],
+              ],
+            ),
+          ),
+          if (!stacked) ?trailing,
+        ],
+      );
+    },
+  );
 }

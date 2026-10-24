@@ -702,6 +702,11 @@ class AppDimensions {
   static const saisieFocusCardMaxWidth = 560.0;
   static const saisieFocusSideBySideMaxWidth = 880.0;
   static const presenceMarkAvatarSize = 44.0;
+
+  /// Largeur sous laquelle l'en-tête d'une personne du registre range son
+  /// badge (« VAC · H ») sous le nom : avatar, nom lisible et badge ne
+  /// tiennent plus sur une ligne.
+  static const presencePersonHeadingInlineBadgeMinWidth = 220.0;
   static const presenceMarkMedallionSize = 46.0;
   static const presenceMarkMedallionIconSize = 24.0;
 

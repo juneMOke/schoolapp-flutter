@@ -94,25 +94,30 @@ class PresenceDayBanner extends StatelessWidget {
                 onPressed: onPrevious,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    eyebrow.toUpperCase(),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.presenceMarkOnBannerMuted,
+              // Flexible : sur téléphone la date longue passe à la ligne
+              // plutôt que de pousser le bouton « jour suivant » hors du
+              // bandeau.
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      eyebrow.toUpperCase(),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.presenceMarkOnBannerMuted,
+                      ),
                     ),
-                  ),
-                  Text(
-                    PresenceLabels.longDay(
-                      MaterialLocalizations.of(context),
-                      day,
+                    Text(
+                      PresenceLabels.longDay(
+                        MaterialLocalizations.of(context),
+                        day,
+                      ),
+                      style: AppTypography.titleLarge.copyWith(color: onBanner),
                     ),
-                    style: AppTypography.titleLarge.copyWith(color: onBanner),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  _SchedulePill(schedule: schedule, onTap: onSettings),
-                ],
+                    const SizedBox(height: AppSpacing.xs),
+                    _SchedulePill(schedule: schedule, onTap: onSettings),
+                  ],
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               PresenceBannerButton(
@@ -130,41 +135,60 @@ class PresenceDayBanner extends StatelessWidget {
               ],
             ],
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          // La progression et ses actions restent voisines ; sur un écran
+          // étroit les actions passent sous la progression au lieu de
+          // déborder.
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.sm,
             children: [
-              PresenceProgressRing(marked: marked, total: total),
-              const SizedBox(width: AppSpacing.md),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    l10n.presenceMarkProgress(marked, total),
-                    style: AppTypography.titleMedium.copyWith(color: onBanner),
-                  ),
-                  Text(
-                    detail,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.presenceMarkOnBannerMuted,
+                  PresenceProgressRing(marked: marked, total: total),
+                  const SizedBox(width: AppSpacing.md),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.presenceMarkProgress(marked, total),
+                          style: AppTypography.titleMedium.copyWith(
+                            color: onBanner,
+                          ),
+                        ),
+                        Text(
+                          detail,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.presenceMarkOnBannerMuted,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              if (showActions) ...[
-                const SizedBox(width: AppSpacing.md),
-                PresenceBannerButton(
-                  icon: Icons.checklist,
-                  tooltip: l10n.presenceMarkMarkRemaining,
-                  onPressed: onMarkRemaining,
+              if (showActions)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PresenceBannerButton(
+                      icon: Icons.checklist,
+                      tooltip: l10n.presenceMarkMarkRemaining,
+                      onPressed: onMarkRemaining,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Flexible(
+                      child: EteeloButton.primary(
+                        label: validateLabel,
+                        icon: Icons.task_alt,
+                        onPressed: onValidate,
+                        fullWidth: false,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                EteeloButton.primary(
-                  label: validateLabel,
-                  icon: Icons.task_alt,
-                  onPressed: onValidate,
-                  fullWidth: false,
-                ),
-              ],
             ],
           ),
         ],
@@ -231,13 +255,15 @@ class _SchedulePill extends StatelessWidget {
             color: AppColors.presenceMarkOnBanner,
           ),
           const SizedBox(width: AppSpacing.xs),
-          Text(
-            AppLocalizations.of(context)!.presenceMarkSettingsPill(
-              schedule.start.wire,
-              schedule.toleranceMinutes,
-            ),
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.presenceMarkOnBanner,
+          Flexible(
+            child: Text(
+              AppLocalizations.of(context)!.presenceMarkSettingsPill(
+                schedule.start.wire,
+                schedule.toleranceMinutes,
+              ),
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.presenceMarkOnBanner,
+              ),
             ),
           ),
         ],
