@@ -6,15 +6,28 @@
 class SearchNormalizationHelper {
   SearchNormalizationHelper._();
 
-  static const _accented = 'àáâãäåæçèéêëìíîïðñòóôõöùúûüýÿ';
-  static const _plain = 'aaaaaaaceeeeiiiidnooooouuuuyy';
+  static const _accented = 'àáâãäåçèéêëìíîïðñòóôõöùúûüýÿ';
+  static const _plain = 'aaaaaaceeeeiiiidnooooouuuuyy';
 
-  /// Normalise [value] : minuscules + accents retirés.
+  /// Les ligatures se déplient en deux lettres : « coeur » trouve « Cœur »,
+  /// comme sur le serveur (`Texts.fold`). Replier `æ` sur un seul `a`
+  /// faisait manquer « Laetitia » derrière « Lætitia ».
+  static const _ligatures = {'æ': 'ae', 'œ': 'oe', 'ß': 'ss'};
+
+  /// Normalise [value] : minuscules, accents retirés, ligatures dépliées.
+  ///
+  /// ⚠️ La longueur peut changer (« œ » → « oe ») : un index dans le résultat
+  /// n'est pas un index dans [value].
   static String normalize(String value) {
     final lowered = value.toLowerCase();
     final buffer = StringBuffer();
     for (final rune in lowered.runes) {
       final char = String.fromCharCode(rune);
+      final ligature = _ligatures[char];
+      if (ligature != null) {
+        buffer.write(ligature);
+        continue;
+      }
       final index = _accented.indexOf(char);
       buffer.write(index == -1 ? char : _plain[index]);
     }
