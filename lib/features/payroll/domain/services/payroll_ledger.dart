@@ -45,6 +45,7 @@ abstract final class PayrollLedger {
       month: month,
       header: header,
       payoutPolicy: snapshot.payoutPolicies[month],
+      absenceDeductionEnabled: snapshot.settings.absenceDeductionEnabled,
       phase: phase,
       lines: lines,
       totals: PayrollFingerprinter.totalsOf(

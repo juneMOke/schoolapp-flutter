@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_no
 /// à montrer — succès, règle refusée, ou écriture impossible.
 class PayrollCommands {
   final SavePayrollVariablesUseCase _variables;
+  final SavePayrollPayoutPolicyUseCase _payoutPolicy;
   final RecordPayrollGestureUseCase _gesture;
   final DisbursePayrollUseCase _disburse;
   final CancelPayrollDisbursementUseCase _cancelDisbursement;
@@ -34,6 +35,7 @@ class PayrollCommands {
 
   const PayrollCommands({
     required SavePayrollVariablesUseCase variables,
+    required SavePayrollPayoutPolicyUseCase payoutPolicy,
     required RecordPayrollGestureUseCase gesture,
     required DisbursePayrollUseCase disburse,
     required CancelPayrollDisbursementUseCase cancelDisbursement,
@@ -44,6 +46,7 @@ class PayrollCommands {
     required RecordPayslipShareUseCase share,
     required FetchPayslipUseCase payslip,
   }) : _variables = variables,
+       _payoutPolicy = payoutPolicy,
        _gesture = gesture,
        _disburse = disburse,
        _cancelDisbursement = cancelDisbursement,
@@ -61,6 +64,15 @@ class PayrollCommands {
   }) async => _notice(
     await _variables(view, variables),
     PayrollNotice(PayrollNoticeKind.variablesSaved, name: name),
+  );
+
+  Future<PayrollNotice> savePayoutPolicy(
+    PayrollMonthView view,
+    int ratePercent, {
+    String? reason,
+  }) async => _notice(
+    await _payoutPolicy(view, ratePercent, reason: reason),
+    PayrollNotice(PayrollNoticeKind.payoutPolicySaved, amount: '$ratePercent'),
   );
 
   Future<PayrollNotice> gesture(

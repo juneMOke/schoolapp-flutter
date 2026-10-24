@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enum
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
@@ -62,6 +63,7 @@ void main() {
   PayrollSnapshot snapshotOf({
     PayrollStatus? status,
     List<PayrollGesture> gestures = const [],
+    Map<String, PayrollPayoutPolicy> policies = const {},
   }) => PayrollSnapshot(
     members: [
       member('m-1', lastName: 'Mayala', firstName: 'Ruth'),
@@ -97,6 +99,7 @@ void main() {
     schoolYears: const [(start: '2026-09-07', end: '2027-07-02')],
     shareTraces: const {},
     hasEverSynced: true,
+    payoutPolicies: policies,
   );
 
   Future<void> pump(
@@ -120,6 +123,13 @@ void main() {
     when(
       () => repository.disburse(any()),
     ).thenAnswer((_) async => const Right(unit));
+    when(
+      () => repository.savePayoutPolicy(
+        any(),
+        any(),
+        reason: any(named: 'reason'),
+      ),
+    ).thenAnswer((_) async => const Right(unit));
     final signals = _MockSignals();
     when(() => signals.watch(any())).thenReturn(() {});
     when(() => signals.pull()).thenAnswer((_) async {});
@@ -128,6 +138,7 @@ void main() {
       signals: signals,
       commands: PayrollCommands(
         variables: SavePayrollVariablesUseCase(repository),
+        payoutPolicy: SavePayrollPayoutPolicyUseCase(repository),
         gesture: RecordPayrollGestureUseCase(repository),
         disburse: DisbursePayrollUseCase(repository),
         cancelDisbursement: CancelPayrollDisbursementUseCase(repository),
@@ -192,6 +203,66 @@ void main() {
       ),
     ).captured.single;
     expect(expected, isNotNull);
+  });
+
+  testWidgets('taux du mois : l économe le fixe, motif exigé sous 100 %', (
+    tester,
+  ) async {
+    await pump(tester, snapshot: snapshotOf());
+    expect(find.text('Versement intégral du net'), findsOneWidget);
+
+    await tester.tap(find.text('Fixer un taux de versement'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('60 %'));
+    await tester.pump();
+    await tester.tap(find.text('Appliquer 60 %'));
+    await tester.pump();
+    verifyNever(
+      () => repository.savePayoutPolicy(
+        any(),
+        any(),
+        reason: any(named: 'reason'),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField).last, 'Trésorerie tendue');
+    await tester.pump();
+    await tester.tap(find.text('Appliquer 60 %'));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => repository.savePayoutPolicy(
+        '2026-10',
+        60,
+        reason: 'Trésorerie tendue',
+      ),
+    ).called(1);
+  });
+
+  testWidgets('taux du mois réglé : bandeau actif, « verser » sous le net', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      snapshot: snapshotOf(
+        policies: {
+          '2026-10': const PayrollPayoutPolicy(
+            month: '2026-10',
+            ratePercent: 60,
+            reason: 'Trésorerie tendue',
+          ),
+        },
+      ),
+    );
+
+    expect(
+      find.text(
+        "Ce mois, l'école verse 60 % du net · 2 agents en versement réduit",
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('« Trésorerie tendue »'), findsOneWidget);
+    expect(find.textContaining('verser 210'), findsOneWidget);
   });
 
   testWidgets('soumise : l économe attend, la direction valide ou renvoie', (

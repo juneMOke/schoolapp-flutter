@@ -55,6 +55,7 @@ void _registerPresentation(GetIt getIt) {
   getIt.registerFactory<PayrollCommands>(
     () => PayrollCommands(
       variables: getIt<SavePayrollVariablesUseCase>(),
+      payoutPolicy: getIt<SavePayrollPayoutPolicyUseCase>(),
       gesture: getIt<RecordPayrollGestureUseCase>(),
       disburse: getIt<DisbursePayrollUseCase>(),
       cancelDisbursement: getIt<CancelPayrollDisbursementUseCase>(),

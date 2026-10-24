@@ -13729,11 +13729,40 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get payrollKpiDeductions => 'Deductions';
+
+  @override
+  String payrollKpiDeductionsDetail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Absences, IPR/CNSS, PC/E and $count instalments',
+      one: 'Absences, IPR/CNSS, PC/E and 1 instalment',
+      zero: 'Absences, IPR/CNSS, PC/E',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payrollKpiNetToPay(String toPay, String deferred) {
+    return 'To pay $toPay · $deferred in arrears';
+  }
+
+  @override
   String get payrollKpiNet => 'Net to pay';
 
   @override
   String payrollKpiPaid(int paid, int total) {
     return 'Paid $paid / $total';
+  }
+
+  @override
+  String payrollAttendanceSignalDeducted(
+    String month,
+    int absences,
+    int lates,
+  ) {
+    return 'Attendance for $month: $absences unexcused absences and $lates late arrivals — unexcused absences reduce the days worked.';
   }
 
   @override
@@ -13754,7 +13783,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollColAllowance => 'Allow.';
 
   @override
-  String get payrollColAdvance => 'Advance';
+  String payrollLineToPay(String amount) {
+    return 'pay $amount';
+  }
+
+  @override
+  String payrollLineToPayFixed(String amount) {
+    return 'pay $amount · fixed';
+  }
+
+  @override
+  String get payrollColAdvance => 'Deductions';
 
   @override
   String get payrollColNet => 'Net';
@@ -13885,6 +13924,98 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollReasonLabel => 'Reason *';
 
   @override
+  String payrollPayoutEyebrow(String month) {
+    return 'Payout policy · $month';
+  }
+
+  @override
+  String get payrollPayoutTitle => 'How much of the net to pay this month?';
+
+  @override
+  String payrollPayoutRate(int rate) {
+    return '$rate %';
+  }
+
+  @override
+  String get payrollPayoutOther => 'Other rate (0 to 100)';
+
+  @override
+  String get payrollPayoutReason => 'Reason';
+
+  @override
+  String get payrollPayoutDue => 'Net due';
+
+  @override
+  String get payrollPayoutToPay => 'To pay';
+
+  @override
+  String get payrollPayoutDeferred => 'In arrears';
+
+  @override
+  String get payrollPayoutFixedKept => 'Agents on a fixed amount keep it.';
+
+  @override
+  String payrollPayoutApply(int rate) {
+    return 'Apply $rate %';
+  }
+
+  @override
+  String payrollPayoutBarActive(int rate, int reduced) {
+    String _temp0 = intl.Intl.pluralLogic(
+      reduced,
+      locale: localeName,
+      other:
+          'This month the school pays $rate % of the net · $reduced agents on reduced pay',
+      one:
+          'This month the school pays $rate % of the net · 1 agent on reduced pay',
+      zero: 'This month the school pays $rate % of the net',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payrollPayoutBarDetail(String toPay, String due, String deferred) {
+    return 'To pay $toPay of $due due · $deferred will become arrears at validation';
+  }
+
+  @override
+  String payrollPayoutBarReason(String reason) {
+    return '“$reason”';
+  }
+
+  @override
+  String get payrollPayoutBarFull => 'Full net payout';
+
+  @override
+  String get payrollPayoutBarEdit => 'Change the rate';
+
+  @override
+  String get payrollPayoutBarSet => 'Set a payout rate';
+
+  @override
+  String get payrollConfirmFixedDeductions =>
+      'Deductions (absences, IPR/CNSS, PC/E)';
+
+  @override
+  String payrollConfirmToPay(int rate) {
+    return 'To pay this month ($rate %)';
+  }
+
+  @override
+  String get payrollConfirmDeferred => 'Recorded as arrears';
+
+  @override
+  String payrollConfirmDeferredWarning(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents',
+      one: '1 agent',
+    );
+    return '$amount will be recorded as arrears owed to $_temp0.';
+  }
+
+  @override
   String get payrollVarsTitle => 'Variable items';
 
   @override
@@ -13911,6 +14042,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollVarsAdvances => 'Advances — managed in the Advances tab';
+
+  @override
+  String get payrollVarsWorkedDays => 'Days worked';
+
+  @override
+  String payrollVarsWorkedDaysValue(int days, int divisor) {
+    return '$days / $divisor d';
+  }
+
+  @override
+  String payrollVarsWorkedDaysCorrected(int days) {
+    return 'Corrected by hand — attendance says $days d';
+  }
+
+  @override
+  String get payrollVarsChildcare => 'Staff children care (PC/E) this month';
+
+  @override
+  String get payrollVarsChildcareShort => 'Staff children care (PC/E)';
+
+  @override
+  String payrollVarsAbsence(int days) {
+    return 'Unexcused absence · $days d';
+  }
+
+  @override
+  String get payrollVarsLegal => 'IPR & CNSS';
+
+  @override
+  String get payrollVarsPayout => 'Payout this month';
+
+  @override
+  String payrollVarsPayoutRate(int rate) {
+    return 'Month rate · $rate %';
+  }
+
+  @override
+  String get payrollVarsPayoutFixed => 'Fixed amount for this agent';
+
+  @override
+  String get payrollVarsFixedAmount => 'Pay at most';
+
+  @override
+  String get payrollVarsFixedReason => 'Reason';
+
+  @override
+  String payrollVarsPayoutPreview(String toPay, String deferred) {
+    return 'To pay $toPay · In arrears $deferred';
+  }
 
   @override
   String get payrollVarsNoOvertime => 'Temporary staff have no overtime.';
@@ -14442,6 +14622,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payrollNotYetSynced =>
       'The payroll has not been downloaded on this tablet yet; what shows may be incomplete.';
+
+  @override
+  String payrollToastPayoutPolicy(String rate) {
+    return 'Month payout rate: $rate %';
+  }
 
   @override
   String payrollToastVariables(String name) {

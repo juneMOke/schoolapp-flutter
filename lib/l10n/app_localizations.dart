@@ -21584,6 +21584,24 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No instalment} =1{1 instalment} other{{count} instalments}}'**
   String payrollKpiAdvancesDetail(int count);
 
+  /// No description provided for @payrollKpiDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions'**
+  String get payrollKpiDeductions;
+
+  /// No description provided for @payrollKpiDeductionsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Absences, IPR/CNSS, PC/E} =1{Absences, IPR/CNSS, PC/E and 1 instalment} other{Absences, IPR/CNSS, PC/E and {count} instalments}}'**
+  String payrollKpiDeductionsDetail(int count);
+
+  /// No description provided for @payrollKpiNetToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay {toPay} · {deferred} in arrears'**
+  String payrollKpiNetToPay(String toPay, String deferred);
+
   /// No description provided for @payrollKpiNet.
   ///
   /// In en, this message translates to:
@@ -21595,6 +21613,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paid {paid} / {total}'**
   String payrollKpiPaid(int paid, int total);
+
+  /// No description provided for @payrollAttendanceSignalDeducted.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences reduce the days worked.'**
+  String payrollAttendanceSignalDeducted(String month, int absences, int lates);
 
   /// No description provided for @payrollAttendanceSignal.
   ///
@@ -21626,10 +21650,22 @@ abstract class AppLocalizations {
   /// **'Allow.'**
   String get payrollColAllowance;
 
+  /// No description provided for @payrollLineToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'pay {amount}'**
+  String payrollLineToPay(String amount);
+
+  /// No description provided for @payrollLineToPayFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'pay {amount} · fixed'**
+  String payrollLineToPayFixed(String amount);
+
   /// No description provided for @payrollColAdvance.
   ///
   /// In en, this message translates to:
-  /// **'Advance'**
+  /// **'Deductions'**
   String get payrollColAdvance;
 
   /// No description provided for @payrollColNet.
@@ -21835,6 +21871,126 @@ abstract class AppLocalizations {
   /// **'Reason *'**
   String get payrollReasonLabel;
 
+  /// No description provided for @payrollPayoutEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout policy · {month}'**
+  String payrollPayoutEyebrow(String month);
+
+  /// No description provided for @payrollPayoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much of the net to pay this month?'**
+  String get payrollPayoutTitle;
+
+  /// No description provided for @payrollPayoutRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate} %'**
+  String payrollPayoutRate(int rate);
+
+  /// No description provided for @payrollPayoutOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other rate (0 to 100)'**
+  String get payrollPayoutOther;
+
+  /// No description provided for @payrollPayoutReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get payrollPayoutReason;
+
+  /// No description provided for @payrollPayoutDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Net due'**
+  String get payrollPayoutDue;
+
+  /// No description provided for @payrollPayoutToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay'**
+  String get payrollPayoutToPay;
+
+  /// No description provided for @payrollPayoutDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'In arrears'**
+  String get payrollPayoutDeferred;
+
+  /// No description provided for @payrollPayoutFixedKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Agents on a fixed amount keep it.'**
+  String get payrollPayoutFixedKept;
+
+  /// No description provided for @payrollPayoutApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply {rate} %'**
+  String payrollPayoutApply(int rate);
+
+  /// No description provided for @payrollPayoutBarActive.
+  ///
+  /// In en, this message translates to:
+  /// **'{reduced, plural, =0{This month the school pays {rate} % of the net} =1{This month the school pays {rate} % of the net · 1 agent on reduced pay} other{This month the school pays {rate} % of the net · {reduced} agents on reduced pay}}'**
+  String payrollPayoutBarActive(int rate, int reduced);
+
+  /// No description provided for @payrollPayoutBarDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay {toPay} of {due} due · {deferred} will become arrears at validation'**
+  String payrollPayoutBarDetail(String toPay, String due, String deferred);
+
+  /// No description provided for @payrollPayoutBarReason.
+  ///
+  /// In en, this message translates to:
+  /// **'“{reason}”'**
+  String payrollPayoutBarReason(String reason);
+
+  /// No description provided for @payrollPayoutBarFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full net payout'**
+  String get payrollPayoutBarFull;
+
+  /// No description provided for @payrollPayoutBarEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the rate'**
+  String get payrollPayoutBarEdit;
+
+  /// No description provided for @payrollPayoutBarSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a payout rate'**
+  String get payrollPayoutBarSet;
+
+  /// No description provided for @payrollConfirmFixedDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions (absences, IPR/CNSS, PC/E)'**
+  String get payrollConfirmFixedDeductions;
+
+  /// No description provided for @payrollConfirmToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay this month ({rate} %)'**
+  String payrollConfirmToPay(int rate);
+
+  /// No description provided for @payrollConfirmDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded as arrears'**
+  String get payrollConfirmDeferred;
+
+  /// No description provided for @payrollConfirmDeferredWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} will be recorded as arrears owed to {count, plural, =1{1 agent} other{{count} agents}}.'**
+  String payrollConfirmDeferredWarning(String amount, int count);
+
   /// No description provided for @payrollVarsTitle.
   ///
   /// In en, this message translates to:
@@ -21882,6 +22038,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advances — managed in the Advances tab'**
   String get payrollVarsAdvances;
+
+  /// No description provided for @payrollVarsWorkedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days worked'**
+  String get payrollVarsWorkedDays;
+
+  /// No description provided for @payrollVarsWorkedDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} / {divisor} d'**
+  String payrollVarsWorkedDaysValue(int days, int divisor);
+
+  /// No description provided for @payrollVarsWorkedDaysCorrected.
+  ///
+  /// In en, this message translates to:
+  /// **'Corrected by hand — attendance says {days} d'**
+  String payrollVarsWorkedDaysCorrected(int days);
+
+  /// No description provided for @payrollVarsChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff children care (PC/E) this month'**
+  String get payrollVarsChildcare;
+
+  /// No description provided for @payrollVarsChildcareShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff children care (PC/E)'**
+  String get payrollVarsChildcareShort;
+
+  /// No description provided for @payrollVarsAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused absence · {days} d'**
+  String payrollVarsAbsence(int days);
+
+  /// No description provided for @payrollVarsLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'IPR & CNSS'**
+  String get payrollVarsLegal;
+
+  /// No description provided for @payrollVarsPayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout this month'**
+  String get payrollVarsPayout;
+
+  /// No description provided for @payrollVarsPayoutRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Month rate · {rate} %'**
+  String payrollVarsPayoutRate(int rate);
+
+  /// No description provided for @payrollVarsPayoutFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed amount for this agent'**
+  String get payrollVarsPayoutFixed;
+
+  /// No description provided for @payrollVarsFixedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay at most'**
+  String get payrollVarsFixedAmount;
+
+  /// No description provided for @payrollVarsFixedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get payrollVarsFixedReason;
+
+  /// No description provided for @payrollVarsPayoutPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay {toPay} · In arrears {deferred}'**
+  String payrollVarsPayoutPreview(String toPay, String deferred);
 
   /// No description provided for @payrollVarsNoOvertime.
   ///
@@ -22788,6 +23022,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The payroll has not been downloaded on this tablet yet; what shows may be incomplete.'**
   String get payrollNotYetSynced;
+
+  /// No description provided for @payrollToastPayoutPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Month payout rate: {rate} %'**
+  String payrollToastPayoutPolicy(String rate);
 
   /// No description provided for @payrollToastVariables.
   ///

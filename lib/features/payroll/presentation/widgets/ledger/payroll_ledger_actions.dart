@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
@@ -15,6 +16,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_pay_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_reason_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_stale_dialog.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_payout_policy_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_variables_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -45,6 +47,9 @@ class PayrollLedgerActions {
         name: nameOf(line.staffMemberId),
         line: line,
         settings: state.snapshot.settings,
+        monthRate:
+            state.snapshot.payoutPolicies[month]?.ratePercent ??
+            PayrollPayoutPolicy.full,
         current:
             state.snapshot.variables[month]?[line.staffMemberId] ??
             PayrollVariables(staffMemberId: line.staffMemberId),
@@ -59,6 +64,27 @@ class PayrollLedgerActions {
         result,
         name: nameOf(line.staffMemberId),
       ),
+    );
+  }
+
+  /// Le taux de versement du mois (v2).
+  Future<void> editPayoutPolicy() async {
+    final view = _state.view;
+    if (view == null) return;
+    final policy = view.payoutPolicy;
+    final result = await PayrollPayoutPolicyDialog.show(
+      context,
+      PayrollPayoutPolicyDialog(
+        monthLabel: _monthLabel,
+        lines: view.lines,
+        rate: policy?.ratePercent ?? PayrollPayoutPolicy.full,
+        reason: policy?.reason,
+      ),
+    );
+    if (result == null || !context.mounted) return;
+    await _cubit.perform(
+      (commands) =>
+          commands.savePayoutPolicy(view, result.rate, reason: result.reason),
     );
   }
 

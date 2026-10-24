@@ -35,6 +35,8 @@ class PayrollKpis extends StatelessWidget {
           sum + line.advances.where((a) => a.takenInCents > 0).length,
     );
     final locked = view.phase.isLocked;
+    final fixed = lines.any((l) => l.deductions.totalInCents > 0);
+    final deferred = _perCurrency(lines, (l) => l.deferredInCents);
     final absences = lines.fold<int>(
       0,
       (sum, line) => sum + line.attendance.unjustifiedAbsences,
@@ -65,12 +67,19 @@ class PayrollKpis extends StatelessWidget {
               subline: l10n.payrollKpiComplementsDetail,
             ),
             EteeloKpiCardData(
-              label: l10n.payrollKpiAdvances,
-              valueLines: _perCurrency(lines, (l) => l.advanceInCents),
+              label: fixed
+                  ? l10n.payrollKpiDeductions
+                  : l10n.payrollKpiAdvances,
+              valueLines: _perCurrency(
+                lines,
+                (l) => l.deductions.totalInCents + l.advanceInCents,
+              ),
               accent: AppColors.presenceMarkAbsentInk,
               accentSoft: AppColors.presenceMarkAbsentSoft,
               icon: Icons.remove_circle_outline,
-              subline: l10n.payrollKpiAdvancesDetail(installments),
+              subline: fixed
+                  ? l10n.payrollKpiDeductionsDetail(installments)
+                  : l10n.payrollKpiAdvancesDetail(installments),
             ),
             EteeloKpiCardData(
               label: l10n.payrollKpiNet,
@@ -82,6 +91,11 @@ class PayrollKpis extends StatelessWidget {
               filledSecondaryInk: AppColors.presenceMarkOnBannerMuted,
               subline: locked
                   ? l10n.payrollKpiPaid(view.paidCount, view.payable.length)
+                  : view.hasReducedPayout
+                  ? l10n.payrollKpiNetToPay(
+                      _perCurrency(lines, (l) => l.toPayInCents).join(' · '),
+                      deferred.join(' · '),
+                    )
                   : null,
             ),
           ],
@@ -97,7 +111,9 @@ class PayrollKpis extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
-                l10n.payrollAttendanceSignal(
+                (view.absenceDeductionEnabled
+                    ? l10n.payrollAttendanceSignalDeducted
+                    : l10n.payrollAttendanceSignal)(
                   PayrollLabels.month(
                     context,
                     PayrollMonth.previous(view.month),

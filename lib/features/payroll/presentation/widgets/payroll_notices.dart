@@ -17,6 +17,8 @@ void showPayrollNotice(
   switch (notice.kind) {
     case PayrollNoticeKind.variablesSaved:
       AppSnackBar.showSuccess(context, l10n.payrollToastVariables(name));
+    case PayrollNoticeKind.payoutPolicySaved:
+      AppSnackBar.showSuccess(context, l10n.payrollToastPayoutPolicy(amount));
     case PayrollNoticeKind.submitted:
       AppSnackBar.showSuccess(context, l10n.payrollToastSubmitted);
     case PayrollNoticeKind.validated:

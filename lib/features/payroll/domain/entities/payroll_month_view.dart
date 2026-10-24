@@ -53,6 +53,10 @@ class PayrollMonthView {
   /// Le taux de versement du mois ; `null` = 100 %.
   final PayrollPayoutPolicy? payoutPolicy;
 
+  /// L'école retient-elle les absences non justifiées ? Sinon le Pointage
+  /// reste indicatif.
+  final bool absenceDeductionEnabled;
+
   /// Calculées tant que la paie n'est pas validée, figées ensuite.
   final List<PayrollLine> lines;
   final List<PayrollTotal> totals;
@@ -89,6 +93,7 @@ class PayrollMonthView {
     required this.zeroHourMembers,
     required this.attendance,
     this.payoutPolicy,
+    this.absenceDeductionEnabled = false,
     this.awaitingFrozenLines = false,
     this.lastRefusal,
     this.submitBlocker,
@@ -97,6 +102,9 @@ class PayrollMonthView {
   });
 
   bool get isEditable => phase == PayrollPhase.draft;
+
+  /// Un versement réduit ce mois-ci : un taux sous 100 % ou un montant fixe.
+  bool get hasReducedPayout => lines.any((line) => line.deferredInCents > 0);
 
   bool get canPay =>
       (phase == PayrollPhase.validated || phase == PayrollPhase.paid) &&

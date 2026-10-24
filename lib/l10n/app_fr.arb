@@ -9511,14 +9511,72 @@
   "payrollKpiComplementsDetail": "Heures sup. et allocations",
   "payrollKpiAdvances": "Avances déduites",
   "payrollKpiAdvancesDetail": "{count, plural, =0{Aucune échéance} =1{1 échéance} other{{count} échéances}}",
+  "payrollKpiDeductions": "Retenues",
+  "@payrollKpiDeductions": {
+    "description": "KPI v2 : retenues fixes et avances."
+  },
+  "payrollKpiDeductionsDetail": "{count, plural, =0{Absences, IPR/CNSS, PC/E} =1{Absences, IPR/CNSS, PC/E et 1 échéance} other{Absences, IPR/CNSS, PC/E et {count} échéances}}",
+  "@payrollKpiDeductionsDetail": {
+    "description": "Sous-titre du KPI des retenues.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollKpiNetToPay": "À verser {toPay} · {deferred} en arriéré",
+  "@payrollKpiNetToPay": {
+    "description": "Sous-titre du net quand le versement est réduit.",
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollKpiNet": "Net à payer",
   "payrollKpiPaid": "Versé {paid} / {total}",
+  "payrollAttendanceSignalDeducted": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — les absences non justifiées réduisent les jours prestés.",
+  "@payrollAttendanceSignalDeducted": {
+    "description": "Signal Pointage quand l'école retient les absences.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      }
+    }
+  },
   "payrollAttendanceSignal": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — affichés à titre indicatif, aucune retenue.",
   "payrollColAgent": "Agent",
   "payrollColBase": "Base",
   "payrollColOvertime": "H. sup",
   "payrollColAllowance": "Alloc.",
-  "payrollColAdvance": "Avance",
+  "payrollLineToPay": "verser {amount}",
+  "@payrollLineToPay": {
+    "description": "Sous le net : ce qui sera versé ce mois.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollLineToPayFixed": "verser {amount} · fixe",
+  "@payrollLineToPayFixed": {
+    "description": "Sous le net : montant fixe.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollColAdvance": "Retenues",
   "payrollColNet": "Net",
   "payrollColAttendance": "Pointage",
   "payrollColPayout": "Versement",
@@ -9552,6 +9610,138 @@
   "payrollConfirm": "Confirmer",
   "payrollClose": "Fermer",
   "payrollReasonLabel": "Motif *",
+  "payrollPayoutEyebrow": "Politique de versement · {month}",
+  "@payrollPayoutEyebrow": {
+    "description": "Sur-titre de la modale du taux du mois.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutTitle": "Quelle part du net verser ce mois ?",
+  "@payrollPayoutTitle": {
+    "description": "Titre de la modale du taux du mois."
+  },
+  "payrollPayoutRate": "{rate} %",
+  "@payrollPayoutRate": {
+    "description": "Puce de taux.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutOther": "Autre taux (0 à 100)",
+  "@payrollPayoutOther": {
+    "description": "Champ de taux libre."
+  },
+  "payrollPayoutReason": "Motif",
+  "@payrollPayoutReason": {
+    "description": "Motif du taux réduit, visible par la direction."
+  },
+  "payrollPayoutDue": "Net dû",
+  "@payrollPayoutDue": {
+    "description": "Aperçu : net dû."
+  },
+  "payrollPayoutToPay": "À verser",
+  "@payrollPayoutToPay": {
+    "description": "Aperçu : à verser."
+  },
+  "payrollPayoutDeferred": "En arriéré",
+  "@payrollPayoutDeferred": {
+    "description": "Aperçu : part différée."
+  },
+  "payrollPayoutFixedKept": "Les agents à montant fixe gardent leur montant.",
+  "@payrollPayoutFixedKept": {
+    "description": "Note de la modale du taux."
+  },
+  "payrollPayoutApply": "Appliquer {rate} %",
+  "@payrollPayoutApply": {
+    "description": "Bouton de la modale du taux.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarActive": "{reduced, plural, =0{Ce mois, l'école verse {rate} % du net} =1{Ce mois, l'école verse {rate} % du net · 1 agent en versement réduit} other{Ce mois, l'école verse {rate} % du net · {reduced} agents en versement réduit}}",
+  "@payrollPayoutBarActive": {
+    "description": "Bandeau du taux du mois, actif.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      },
+      "reduced": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarDetail": "À verser {toPay} sur {due} dus · {deferred} deviendront des arriérés à la validation",
+  "@payrollPayoutBarDetail": {
+    "description": "Détail du bandeau du taux.",
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarReason": "« {reason} »",
+  "@payrollPayoutBarReason": {
+    "description": "Motif du taux entre guillemets.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarFull": "Versement intégral du net",
+  "@payrollPayoutBarFull": {
+    "description": "Bandeau du taux du mois, neutre."
+  },
+  "payrollPayoutBarEdit": "Modifier le taux",
+  "@payrollPayoutBarEdit": {
+    "description": "Bouton du bandeau actif."
+  },
+  "payrollPayoutBarSet": "Fixer un taux de versement",
+  "@payrollPayoutBarSet": {
+    "description": "Bouton du bandeau neutre."
+  },
+  "payrollConfirmFixedDeductions": "Retenues (absences, IPR/CNSS, PC/E)",
+  "@payrollConfirmFixedDeductions": {
+    "description": "Ligne de la confirmation."
+  },
+  "payrollConfirmToPay": "À verser ce mois ({rate} %)",
+  "@payrollConfirmToPay": {
+    "description": "Ligne de la confirmation.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollConfirmDeferred": "Inscrit en arriéré",
+  "@payrollConfirmDeferred": {
+    "description": "Ligne de la confirmation."
+  },
+  "payrollConfirmDeferredWarning": "{amount} seront inscrits comme arriérés dus à {count, plural, =1{1 agent} other{{count} agents}}.",
+  "@payrollConfirmDeferredWarning": {
+    "description": "Avertissement de la confirmation.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "payrollVarsTitle": "Éléments variables",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Heures supplémentaires",
@@ -9560,6 +9750,89 @@
   "payrollVarsChildren": "Enfants à charge",
   "payrollVarsAllowance": "{children} × {unit} = {amount}",
   "payrollVarsAdvances": "Avances — gérées dans l'onglet Avances",
+  "payrollVarsWorkedDays": "Jours prestés (NJP)",
+  "@payrollVarsWorkedDays": {
+    "description": "Éléments variables v2 : jours prestés."
+  },
+  "payrollVarsWorkedDaysValue": "{days} / {divisor} j",
+  "@payrollVarsWorkedDaysValue": {
+    "description": "Valeur du stepper NJP.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsWorkedDaysCorrected": "Corrigé à la main — le Pointage dit {days} j",
+  "@payrollVarsWorkedDaysCorrected": {
+    "description": "Écart entre NJP saisi et Pointage.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsChildcare": "Prise en charge des enfants (PC/E) du mois",
+  "@payrollVarsChildcare": {
+    "description": "Montant PC/E du mois."
+  },
+  "payrollVarsChildcareShort": "Prise en charge enfants (PC/E)",
+  "@payrollVarsChildcareShort": {
+    "description": "Ligne de retenue PC/E."
+  },
+  "payrollVarsAbsence": "Absence non justifiée · {days} j",
+  "@payrollVarsAbsence": {
+    "description": "Ligne de retenue d'absence.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsLegal": "IPR & CNSS",
+  "@payrollVarsLegal": {
+    "description": "Ligne de retenue légale."
+  },
+  "payrollVarsPayout": "Versement ce mois",
+  "@payrollVarsPayout": {
+    "description": "Bloc du versement du mois."
+  },
+  "payrollVarsPayoutRate": "Taux du mois · {rate} %",
+  "@payrollVarsPayoutRate": {
+    "description": "Segment taux du mois.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsPayoutFixed": "Montant fixe pour cet agent",
+  "@payrollVarsPayoutFixed": {
+    "description": "Segment montant fixe."
+  },
+  "payrollVarsFixedAmount": "Verser au plus",
+  "@payrollVarsFixedAmount": {
+    "description": "Champ du montant fixe."
+  },
+  "payrollVarsFixedReason": "Motif",
+  "@payrollVarsFixedReason": {
+    "description": "Motif du montant fixe."
+  },
+  "payrollVarsPayoutPreview": "À verser {toPay} · En arriéré {deferred}",
+  "@payrollVarsPayoutPreview": {
+    "description": "Aperçu du versement réduit.",
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollVarsNoOvertime": "Un vacataire n'a pas d'heures supplémentaires.",
   "payrollSubmitTitle": "Soumettre la paie de {month} ?",
   "payrollValidateTitle": "Valider et verrouiller la paie de {month} ?",
@@ -9721,6 +9994,15 @@
   "payrollShowAll": "Tout afficher",
   "payrollCurrentMonth": "Mois en cours",
   "payrollNotYetSynced": "La paie n'a pas encore été téléchargée sur cette tablette ; ce qui s'affiche peut être incomplet.",
+  "payrollToastPayoutPolicy": "Taux de versement du mois : {rate} %",
+  "@payrollToastPayoutPolicy": {
+    "description": "Toast après réglage du taux du mois.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
   "payrollToastVariables": "Éléments variables enregistrés — {name}",
   "payrollToastSubmitted": "Soumission enregistrée — elle part à la prochaine synchronisation",
   "payrollToastValidated": "Validation enregistrée — la paie sera verrouillée à la confirmation du serveur",

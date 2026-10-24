@@ -3,6 +3,9 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule
 
 enum PayrollNoticeKind {
   variablesSaved,
+
+  /// Le taux de versement du mois ; `amount` porte le taux.
+  payoutPolicySaved,
   submitted,
   validated,
   returned,

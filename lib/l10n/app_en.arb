@@ -9119,16 +9119,66 @@
   "payrollKpiAdvances": "Advances deducted",
   "payrollKpiAdvancesDetail": "{count, plural, =0{No instalment} =1{1 instalment} other{{count} instalments}}",
   "@payrollKpiAdvancesDetail": {"placeholders": {"count": {"type": "int"}}},
+  "payrollKpiDeductions": "Deductions",
+  "payrollKpiDeductionsDetail": "{count, plural, =0{Absences, IPR/CNSS, PC/E} =1{Absences, IPR/CNSS, PC/E and 1 instalment} other{Absences, IPR/CNSS, PC/E and {count} instalments}}",
+  "@payrollKpiDeductionsDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollKpiNetToPay": "To pay {toPay} · {deferred} in arrears",
+  "@payrollKpiNetToPay": {
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollKpiNet": "Net to pay",
   "payrollKpiPaid": "Paid {paid} / {total}",
   "@payrollKpiPaid": {"placeholders": {"paid": {"type": "int"}, "total": {"type": "int"}}},
+  "payrollAttendanceSignalDeducted": "Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences reduce the days worked.",
+  "@payrollAttendanceSignalDeducted": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      }
+    }
+  },
   "payrollAttendanceSignal": "{month} attendance: {absences} unexcused absences and {lates} late arrivals — shown for information, never deducted.",
   "@payrollAttendanceSignal": {"placeholders": {"month": {"type": "String"}, "absences": {"type": "int"}, "lates": {"type": "int"}}},
   "payrollColAgent": "Staff member",
   "payrollColBase": "Base",
   "payrollColOvertime": "Overtime",
   "payrollColAllowance": "Allow.",
-  "payrollColAdvance": "Advance",
+  "payrollLineToPay": "pay {amount}",
+  "@payrollLineToPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollLineToPayFixed": "pay {amount} · fixed",
+  "@payrollLineToPayFixed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollColAdvance": "Deductions",
   "payrollColNet": "Net",
   "payrollColAttendance": "Attendance",
   "payrollColPayout": "Payment",
@@ -9170,6 +9220,94 @@
   "payrollConfirm": "Confirm",
   "payrollClose": "Close",
   "payrollReasonLabel": "Reason *",
+  "payrollPayoutEyebrow": "Payout policy · {month}",
+  "@payrollPayoutEyebrow": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutTitle": "How much of the net to pay this month?",
+  "payrollPayoutRate": "{rate} %",
+  "@payrollPayoutRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutOther": "Other rate (0 to 100)",
+  "payrollPayoutReason": "Reason",
+  "payrollPayoutDue": "Net due",
+  "payrollPayoutToPay": "To pay",
+  "payrollPayoutDeferred": "In arrears",
+  "payrollPayoutFixedKept": "Agents on a fixed amount keep it.",
+  "payrollPayoutApply": "Apply {rate} %",
+  "@payrollPayoutApply": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarActive": "{reduced, plural, =0{This month the school pays {rate} % of the net} =1{This month the school pays {rate} % of the net · 1 agent on reduced pay} other{This month the school pays {rate} % of the net · {reduced} agents on reduced pay}}",
+  "@payrollPayoutBarActive": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      },
+      "reduced": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarDetail": "To pay {toPay} of {due} due · {deferred} will become arrears at validation",
+  "@payrollPayoutBarDetail": {
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarReason": "“{reason}”",
+  "@payrollPayoutBarReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarFull": "Full net payout",
+  "payrollPayoutBarEdit": "Change the rate",
+  "payrollPayoutBarSet": "Set a payout rate",
+  "payrollConfirmFixedDeductions": "Deductions (absences, IPR/CNSS, PC/E)",
+  "payrollConfirmToPay": "To pay this month ({rate} %)",
+  "@payrollConfirmToPay": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollConfirmDeferred": "Recorded as arrears",
+  "payrollConfirmDeferredWarning": "{amount} will be recorded as arrears owed to {count, plural, =1{1 agent} other{{count} agents}}.",
+  "@payrollConfirmDeferredWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "payrollVarsTitle": "Variable items",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Overtime",
@@ -9180,6 +9318,60 @@
   "payrollVarsAllowance": "{children} × {unit} = {amount}",
   "@payrollVarsAllowance": {"placeholders": {"children": {"type": "int"}, "unit": {"type": "String"}, "amount": {"type": "String"}}},
   "payrollVarsAdvances": "Advances — managed in the Advances tab",
+  "payrollVarsWorkedDays": "Days worked",
+  "payrollVarsWorkedDaysValue": "{days} / {divisor} d",
+  "@payrollVarsWorkedDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsWorkedDaysCorrected": "Corrected by hand — attendance says {days} d",
+  "@payrollVarsWorkedDaysCorrected": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsChildcare": "Staff children care (PC/E) this month",
+  "payrollVarsChildcareShort": "Staff children care (PC/E)",
+  "payrollVarsAbsence": "Unexcused absence · {days} d",
+  "@payrollVarsAbsence": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsLegal": "IPR & CNSS",
+  "payrollVarsPayout": "Payout this month",
+  "payrollVarsPayoutRate": "Month rate · {rate} %",
+  "@payrollVarsPayoutRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsPayoutFixed": "Fixed amount for this agent",
+  "payrollVarsFixedAmount": "Pay at most",
+  "payrollVarsFixedReason": "Reason",
+  "payrollVarsPayoutPreview": "To pay {toPay} · In arrears {deferred}",
+  "@payrollVarsPayoutPreview": {
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollVarsNoOvertime": "Temporary staff have no overtime.",
   "payrollSubmitTitle": "Submit the {month} payroll?",
   "@payrollSubmitTitle": {"placeholders": {"month": {"type": "String"}}},
@@ -9357,6 +9549,14 @@
   "payrollShowAll": "Show all",
   "payrollCurrentMonth": "Current month",
   "payrollNotYetSynced": "The payroll has not been downloaded on this tablet yet; what shows may be incomplete.",
+  "payrollToastPayoutPolicy": "Month payout rate: {rate} %",
+  "@payrollToastPayoutPolicy": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
   "payrollToastVariables": "Variable items saved — {name}",
   "@payrollToastVariables": {"placeholders": {"name": {"type": "String"}}},
   "payrollToastSubmitted": "Submission saved — it leaves at the next sync",

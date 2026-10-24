@@ -83,6 +83,7 @@ class PayrollLedgerTable extends StatelessWidget {
       style: EteeloColumnTableRow.figures(color: color, strong: strong),
     );
     final carried = line.carriedInCents;
+    final withheld = line.deductions.totalInCents + line.advanceInCents;
     return EteeloColumnTableRow(
       widths: _widths,
       onTap: () => onOpen(line),
@@ -142,10 +143,8 @@ class PayrollLedgerTable extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             amount(
-              line.advanceInCents == 0
-                  ? '—'
-                  : '− ${money(line.advanceInCents)}',
-              color: line.advanceInCents == 0 ? null : PayrollTone.alert.ink,
+              withheld == 0 ? '—' : '− ${money(withheld)}',
+              color: withheld == 0 ? null : PayrollTone.alert.ink,
             ),
             if (carried > 0)
               Text(
@@ -156,7 +155,22 @@ class PayrollLedgerTable extends StatelessWidget {
               ),
           ],
         ),
-        amount(money(line.netInCents), strong: true),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            amount(money(line.netInCents), strong: true),
+            if (line.deferredInCents > 0)
+              Text(
+                line.payout?.fixed ?? false
+                    ? l10n.payrollLineToPayFixed(money(line.toPayInCents))
+                    : l10n.payrollLineToPay(money(line.toPayInCents)),
+                textAlign: TextAlign.end,
+                style: AppTypography.bodySmall.copyWith(
+                  color: PayrollTone.submitted.ink,
+                ),
+              ),
+          ],
+        ),
         _Signals(line: line),
         PayrollPayoutCell(
           view: view,

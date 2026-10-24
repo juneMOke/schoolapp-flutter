@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_header.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_table.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_payout_bar.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_regularizations.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_settings_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -56,6 +57,12 @@ class PayrollLedgerTab extends StatelessWidget {
         if (view.lines.isEmpty)
           _Empty(state: state)
         else ...[
+          PayrollPayoutBar(
+            view: view,
+            canEdit: canWrite && view.isEditable,
+            onEdit: actions.editPayoutPolicy,
+          ),
+          const SizedBox(height: AppSpacing.md),
           PayrollKpis(view: view),
           const SizedBox(height: AppSpacing.lg),
           PayrollLedgerFilters(state: state),
