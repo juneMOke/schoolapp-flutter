@@ -10641,7 +10641,7 @@
   "@hrRosterPdfTooltip": {
     "description": "Infobulle du bouton PDF."
   },
-  "hrRosterSince": "since {date} · ",
+  "hrRosterSince": "since {date}",
   "@hrRosterSince": {
     "description": "Mois d'entrée d'un agent (MM/AAAA).",
     "placeholders": {
@@ -10771,6 +10771,34 @@
   "hrRosterLoading": "Loading the staff list",
   "@hrRosterLoading": {
     "description": "RH · Personnel : libellé d'accessibilité du chargement de « Qui sont-ils »."
+  },
+  "hrRosterColumnAgent": "Staff member",
+  "@hrRosterColumnAgent": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — nom et fonction."
+  },
+  "hrRosterColumnCategory": "Category",
+  "@hrRosterColumnCategory": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — catégorie de l'agent."
+  },
+  "hrRosterColumnContract": "Contract",
+  "@hrRosterColumnContract": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — contrat du jour."
+  },
+  "hrRosterColumnSeniority": "Seniority",
+  "@hrRosterColumnSeniority": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — ancienneté et mois d'entrée."
+  },
+  "hrRosterColumnDossier": "File",
+  "@hrRosterColumnDossier": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — pièces fournies au dossier."
+  },
+  "hrRosterOpen": "Open the record",
+  "@hrRosterOpen": {
+    "description": "RH · Personnel : infobulle de l'œil d'une ligne de « Qui sont-ils »."
+  },
+  "hrRosterUnit": "staff members",
+  "@hrRosterUnit": {
+    "description": "RH · Personnel : unité du pied de « Qui sont-ils » (« 1–20 sur 25 agents »)."
   },
   "hrStaffReportPreparing": "Preparing…",
   "@hrStaffReportPreparing": {

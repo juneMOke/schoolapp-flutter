@@ -28108,7 +28108,7 @@ abstract class AppLocalizations {
   /// Mois d'entrée d'un agent (MM/AAAA).
   ///
   /// In en, this message translates to:
-  /// **'since {date} · '**
+  /// **'since {date}'**
   String hrRosterSince(String date);
 
   /// Infobulle du compteur de pièces.
@@ -28242,6 +28242,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading the staff list'**
   String get hrRosterLoading;
+
+  /// RH · Personnel : colonne « Qui sont-ils » — nom et fonction.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff member'**
+  String get hrRosterColumnAgent;
+
+  /// RH · Personnel : colonne « Qui sont-ils » — catégorie de l'agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get hrRosterColumnCategory;
+
+  /// RH · Personnel : colonne « Qui sont-ils » — contrat du jour.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get hrRosterColumnContract;
+
+  /// RH · Personnel : colonne « Qui sont-ils » — ancienneté et mois d'entrée.
+  ///
+  /// In en, this message translates to:
+  /// **'Seniority'**
+  String get hrRosterColumnSeniority;
+
+  /// RH · Personnel : colonne « Qui sont-ils » — pièces fournies au dossier.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get hrRosterColumnDossier;
+
+  /// RH · Personnel : infobulle de l'œil d'une ligne de « Qui sont-ils ».
+  ///
+  /// In en, this message translates to:
+  /// **'Open the record'**
+  String get hrRosterOpen;
+
+  /// RH · Personnel : unité du pied de « Qui sont-ils » (« 1–20 sur 25 agents »).
+  ///
+  /// In en, this message translates to:
+  /// **'staff members'**
+  String get hrRosterUnit;
 
   /// RH · Personnel : bouton PDF pendant le rendu serveur.
   ///

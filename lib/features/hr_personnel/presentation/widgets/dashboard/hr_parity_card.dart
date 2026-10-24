@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
@@ -16,6 +17,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Un sexe non renseigné a son propre segment, gris, au bout de la barre : le
 /// ranger d'office d'un côté fausserait la parité.
 class HrParityCard extends StatelessWidget {
+  /// La marque, comme « Articles les plus vendus » à la Boutique : distincte
+  /// de sa voisine « Par catégorie » sur la même ligne.
+  static const Color tone = AppColors.terreCuite;
+
   final HrStaffStats stats;
 
   const HrParityCard({super.key, required this.stats});
@@ -25,6 +30,8 @@ class HrParityCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final anyUnknown = stats.sexes.unknown > 0;
     return EteeloStatsCard(
+      tone: tone,
+      toneStrength: DashboardTones.forceDe(tone),
       title: l10n.hrParityTitle,
       hint: l10n.hrParityHint,
       icon: Icons.wc_outlined,

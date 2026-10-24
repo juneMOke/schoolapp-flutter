@@ -13,7 +13,12 @@ import 'package:school_app_flutter/features/hr_personnel/domain/hr_roster_query.
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_stats.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/dashboard/hr_staff_members_cubit.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_dashboard_page.dart';
-import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_roster_row.dart';
+import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
+import 'package:school_app_flutter/core/components/avatars/person_sync_avatar.dart';
+import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
+import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_member_row.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_sync_insight.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/states/hr_dashboard_results_error_state.dart';
@@ -52,9 +57,22 @@ void main() {
   ];
 
   List<String> rosterIds(WidgetTester tester) => [
-    for (final row in tester.widgetList<HrRosterRow>(find.byType(HrRosterRow)))
-      row.row.id,
+    for (final row
+        in tester.widget<DataTableView>(find.byType(DataTableView)).rows)
+      row.id,
   ];
+
+  /// La pastille de l'agent [id] dans le tableau, ou `null` sans pastille.
+  RecordSyncState? syncOf(WidgetTester tester, String id) => tester
+      .widgetList<PersonSyncAvatar>(
+        find.descendant(
+          of: find.byType(DataTableView),
+          matching: find.byType(PersonSyncAvatar),
+        ),
+      )
+      .where((avatar) => avatar.personId == id)
+      .firstOrNull
+      ?.sync;
 
   HrStaffMembersCubit members(WidgetTester tester) =>
       tester.element(find.byType(HrDashboardScreen)).read();
@@ -64,7 +82,11 @@ void main() {
       ..statsOverride = statsOf(rows).withDean;
     await pumpHrDashboard(tester, server: server);
 
+    // Trois pavés pleins : l'icône et le libellé sur une ligne.
+    final cards = tester.widgetList<EteeloKpiCard>(find.byType(EteeloKpiCard));
+    expect(cards.map((card) => card.data.isFilled), [true, true, true]);
     expect(find.text('EFFECTIF'), findsOneWidget);
+    expect(find.text('ENSEIGNANTS'), findsOneWidget);
     expect(find.text('2 femmes · 1 homme'), findsOneWidget);
     expect(find.text('67 % · 1 hors enseignement'), findsOneWidget);
     // (3 + 8 + 16) / 3 = 9,0
@@ -88,6 +110,46 @@ void main() {
     expect(find.text('3 agents · tout le personnel'), findsOneWidget);
   });
 
+  testWidgets('le tableau des reçus : teinté, une colonne par fait', (
+    tester,
+  ) async {
+    await pumpHrDashboard(tester, server: FakeHrStaffDashboard(rows));
+
+    // Toutes les sections teintées, comme à la Boutique.
+    expect(
+      tester
+          .widgetList<EteeloStatsCard>(find.byType(EteeloStatsCard))
+          .map((card) => card.tone),
+      everyElement(isNotNull),
+    );
+    final table = tester.widget<DataTableView>(find.byType(DataTableView));
+    expect(table.config.tone, isNotNull);
+    expect(table.config.phoneLayout, DataTablePhoneLayout.cards);
+    // Sans `hr.document.read`, le serveur tait le dossier : pas de colonne.
+    expect(table.config.columns.map((column) => column.label), [
+      'Agent',
+      'Catégorie',
+      'Contrat',
+      'Ancienneté',
+    ]);
+  });
+
+  testWidgets('le dossier fourni ouvre sa colonne', (tester) async {
+    await pumpHrDashboard(
+      tester,
+      server: FakeHrStaffDashboard([
+        serverRow('a', dossier: const HrDossierCount(provided: 2, required: 5)),
+        serverRow('b', lastName: 'MBUYI'),
+      ]),
+    );
+
+    final table = tester.widget<DataTableView>(find.byType(DataTableView));
+    expect(table.config.columns.last.label, 'Dossier');
+    // Chaque ligne garde une cellule par colonne, même sans compte.
+    expect(table.rows.map((row) => row.cells.length), [5, 5]);
+    expect(find.byTooltip('2 pièce(s) sur 5 au dossier'), findsOneWidget);
+  });
+
   testWidgets('rien en attente : pas d\'alerte', (tester) async {
     await pumpHrDashboard(tester, server: FakeHrStaffDashboard(rows));
     expect(find.byType(HrSyncInsight), findsNothing);
@@ -104,10 +166,8 @@ void main() {
 
     expect(find.byType(HrSyncInsight), findsOneWidget);
     expect(find.text('1 modification encore sur la tablette'), findsOneWidget);
-    final row = tester.widget<HrRosterRow>(
-      find.byWidgetPredicate((w) => w is HrRosterRow && w.row.id == 'a'),
-    );
-    expect(row.sync, RecordSyncState.pending);
+    expect(syncOf(tester, 'a'), RecordSyncState.pending);
+    expect(syncOf(tester, 'b'), RecordSyncState.synced);
   });
 
   testWidgets('taper une catégorie la demande au serveur ; re-taper la '
@@ -318,18 +378,20 @@ void main() {
       );
 
       expect(rosterIds(tester), hasLength(3));
-      for (final row in tester.widgetList<HrRosterRow>(
-        find.byType(HrRosterRow),
-      )) {
-        expect(row.sync, isNull);
-      }
       // La légende de la carte garde ses pastilles ; aucune ligne n'en porte.
       expect(
         find.descendant(
-          of: find.byType(HrRosterRow),
+          of: find.byType(DataTableView),
           matching: find.byType(RecordSyncDot),
         ),
         findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(DataTableView),
+          matching: find.byType(PersonAvatar),
+        ),
+        findsNWidgets(3),
       );
     },
   );

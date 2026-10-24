@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/search/eteelo_search_toolbar.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
-import 'package:school_app_flutter/core/components/tables/data_table_pagination_bar.dart';
+import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -27,7 +30,14 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// « Qui sont-ils » : la liste nominative de l'effectif — qui, quel rôle,
 /// depuis quand —, filtrée, triée et découpée par le serveur, et imprimable
 /// telle qu'affichée : le PDF reprend la même question.
+///
+/// Le tableau de Boutique et des reçus de la caisse : carte de section
+/// teintée, bandeau, zébrure, cadre, une carte par agent sur téléphone. Le
+/// bleu ardoise des effectifs, comme « Élèves concernés » à la Boutique.
 class HrRosterCard extends StatelessWidget {
+  /// Un effectif : le ton partagé des tableaux de bord.
+  static const Color tone = DashboardSense.attendu;
+
   final HrStaffMembersState members;
   final HrStaffStats stats;
 
@@ -72,49 +82,18 @@ class HrRosterCard extends StatelessWidget {
             members.answered == members.query
         ? members.answered
         : null;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceRaised,
-        borderRadius: AppRadius.brCard,
-        border: Border.all(color: AppColors.border),
-      ),
+    return EteeloStatsCard(
+      title: l10n.hrRosterTitle,
+      subtitle: page == null
+          ? scope
+          : l10n.hrJoin(l10n.hrAgentsCount(page.totalElements), scope),
+      icon: Icons.groups_outlined,
+      tone: HrRosterCard.tone,
+      toneStrength: DashboardTones.forceDe(HrRosterCard.tone),
+      actions: [HrStaffListReportButton(query: printable)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.hrRosterTitle,
-                      style: AppTypography.titleMedium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      page == null
-                          ? scope
-                          : l10n.hrJoin(
-                              l10n.hrAgentsCount(page.totalElements),
-                              scope,
-                            ),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              HrStaffListReportButton(query: printable),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
           EteeloSearchToolbar(
             text: query.text,
             label: l10n.hrRosterSearchLabel,
@@ -192,24 +171,51 @@ extension on HrRosterCard {
         ),
       ];
     }
+    final withDossier = page.items.any((row) => row.dossier != null);
     return [
-      for (final row in page.items)
-        HrRosterRow(
-          key: ValueKey(row.id),
-          row: row,
-          sync: syncOf(row.id),
-          onOpen: () => onOpen(row),
+      DataTableView(
+        rows: [
+          for (final row in page.items)
+            HrRosterRow.of(
+              row,
+              l10n,
+              sync: syncOf(row.id),
+              withDossier: withDossier,
+              onOpen: () => onOpen(row),
+            ),
+        ],
+        config: DataTableViewConfig(
+          tone: ListingTones.tableTone(HrRosterCard.tone),
+          semanticsLabel: l10n.hrRosterTitle,
+          density: DataTableDensity.compact,
+          phoneLayout: DataTablePhoneLayout.cards,
+          columns: [
+            DataTableColumnDef(label: l10n.hrRosterColumnAgent, flex: 24),
+            DataTableColumnDef(label: l10n.hrRosterColumnCategory, flex: 12),
+            DataTableColumnDef(label: l10n.hrRosterColumnContract, flex: 11),
+            DataTableColumnDef(label: l10n.hrRosterColumnSeniority, flex: 12),
+            if (withDossier)
+              DataTableColumnDef(label: l10n.hrRosterColumnDossier, flex: 10),
+          ],
+          footer: DataTableFooterConfig(
+            label: l10n.hrAgentsCount(page.totalElements),
+            total: page.totalElements,
+            unit: l10n.hrRosterUnit,
+            pagination: page.totalPages <= 1
+                ? null
+                : DataTablePaginationConfig(
+                    // Le serveur compte les pages à partir de 0, la barre du
+                    // socle à partir de 1.
+                    currentPage: page.page + 1,
+                    totalPages: page.totalPages,
+                    pageSize: AppConstants.hrStaffMembersPageSize,
+                    isLoading: members.status == HrStaffMembersStatus.loading,
+                    onPrevious: () => onPageChanged(page.page - 1),
+                    onNext: () => onPageChanged(page.page + 1),
+                  ),
+          ),
         ),
-      if (page.totalPages > 1)
-        DataTablePaginationBar(
-          // Le serveur compte les pages à partir de 0, la barre du socle à
-          // partir de 1.
-          currentPage: page.page + 1,
-          totalPages: page.totalPages,
-          isLoading: members.status == HrStaffMembersStatus.loading,
-          onPrevious: () => onPageChanged(page.page - 1),
-          onNext: () => onPageChanged(page.page + 1),
-        ),
+      ),
     ];
   }
 }

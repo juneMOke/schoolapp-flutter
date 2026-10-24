@@ -509,8 +509,13 @@ class AppColors {
   /// Le segment « non renseigné » : assez sombre pour se détacher de la
   /// piste (3,7:1 sur blanc), sans voler la vedette aux deux autres.
   static const hrParityUnknown = Color(0xFF8C8478);
-  static const hrSeniorityAccent = Color(0xFF2E6E8E);
-  static const hrSenioritySoft = Color(0xFFE8F3F7);
+
+  /// Les pavés « Enseignants » et « Ancienneté » : le vert et l'or des
+  /// tableaux de bord. Le pavé dérive son fond de l'accent (`DashboardTones`).
+  static const hrTeachersAccent = vertSavane;
+  static const hrTeachersSoft = Color(0xFFEDF5EF);
+  static const hrSeniorityAccent = orDoux;
+  static const hrSenioritySoft = Color(0xFFFBF1DF);
 
   /// La ligne « Par catégorie » qui filtre la liste.
   static const hrCategoryRowActive = bleuArdoiseSoft;

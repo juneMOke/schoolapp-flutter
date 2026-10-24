@@ -1041,17 +1041,7 @@ class AppDimensions {
   /// compacte laisse ~370 dp à chaque carte, assez pour ses barres.
   static const hrDashboardTwoColumnsMinWidth = AppBreakpoints.detailCompactMax;
 
-  /// Sous ce seuil, une ligne de « Qui sont-ils » passe sur deux niveaux :
-  /// le palier où les tableaux passent en cartes, pour la même raison.
-  static const hrRosterTwoLinesMaxWidth = AppBreakpoints.dataTableCardsMax;
-  static const hrRosterRowMinHeight = 60.0;
-  static const hrRosterAvatarSize = 38.0;
-
-  /// Colonne de l'ancienneté : « depuis 09/2018 · 8 ans » ne saute pas d'une
-  /// ligne à l'autre.
-  static const hrRosterSeniorityMinWidth = 118.0;
   static const hrRosterSortWidth = 220.0;
-  static const hrSyncDotSize = 9.0;
   static const hrCategoryBarHeight = 10.0;
   static const hrParityAllBarHeight = 14.0;
   static const hrParityBarHeight = 10.0;

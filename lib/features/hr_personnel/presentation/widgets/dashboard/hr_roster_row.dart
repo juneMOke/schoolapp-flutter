@@ -2,204 +2,104 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/avatars/person_sync_avatar.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/hr_staff_member_row.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/helpers/hr_personnel_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dossier_meter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Une ligne de « Qui sont-ils » : l'agent et sa fonction à gauche ; à
-/// droite, sa catégorie, son contrat, depuis quand il est là, son dossier et
-/// où en est sa fiche sur cette tablette. Toute la ligne ouvre sa fiche.
-///
-/// Sous [AppDimensions.hrRosterTwoLinesMaxWidth], le bloc de droite passe sous
-/// le nom, toujours aligné à droite.
-class HrRosterRow extends StatelessWidget {
-  final HrStaffMemberRow row;
-
-  /// L'état de la fiche **sur cette tablette** : le serveur la connaît, mais
-  /// une modification peut ne pas lui être encore parvenue. `null` tant que
-  /// le fichier local n'est pas lu (ou illisible) : on ne sait pas, et aucune
-  /// pastille ne le prétend.
-  final RecordSyncState? sync;
-  final VoidCallback onOpen;
-
-  const HrRosterRow({
-    super.key,
-    required this.row,
-    required this.sync,
-    required this.onOpen,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final job = row.jobTitle;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onOpen,
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: AppDimensions.hrRosterRowMinHeight,
-          ),
-          padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.md,
-            horizontal: AppSpacing.sm,
-          ),
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final identity = Row(
-                children: [
-                  if (sync case final known?)
-                    PersonSyncAvatar(
-                      firstName: row.firstName ?? '',
-                      lastName: row.lastName,
-                      personId: row.id,
-                      sync: known,
-                      size: AppDimensions.hrRosterAvatarSize,
-                    )
-                  else
-                    PersonAvatar(
-                      firstName: row.firstName ?? '',
-                      lastName: row.lastName,
-                      personId: row.id,
-                      size: AppDimensions.hrRosterAvatarSize,
-                    ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          row.fullName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.titleSmall.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        if (job != null)
-                          Text(
-                            job,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-              final facts = _Facts(row: row, sync: sync);
-              if (constraints.maxWidth <
-                  AppDimensions.hrRosterTwoLinesMaxWidth) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    identity,
-                    const SizedBox(height: AppSpacing.sm),
-                    Align(alignment: Alignment.centerRight, child: facts),
-                  ],
-                );
-              }
-              // Le bloc de droite est borné : sans `Flexible`, le `Wrap`
-              // recevrait une largeur infinie, ne passerait jamais à la ligne
-              // et déborderait entre 600 et ~860 dp.
-              return Row(
-                children: [
-                  Expanded(flex: 4, child: identity),
-                  const SizedBox(width: AppSpacing.md),
-                  Flexible(
-                    flex: 5,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: facts,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Facts extends StatelessWidget {
-  final HrStaffMemberRow row;
-  final RecordSyncState? sync;
-
-  const _Facts({required this.row, required this.sync});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+/// Un agent en ligne de table : Agent · Catégorie · Contrat · Ancienneté, et
+/// Dossier pour qui voit les pièces. L'avatar porte la pastille de la fiche
+/// sur cette tablette ; toute la ligne ouvre la fiche, l'œil le redit.
+abstract final class HrRosterRow {
+  /// [sync] `null` tant que le fichier local n'est pas lu (ou illisible) : on
+  /// ne sait pas où en est la fiche, et aucune pastille ne le prétend.
+  ///
+  /// [withDossier] : la colonne existe — vide pour une ligne sans compte, afin
+  /// que les cellules restent sous leurs en-têtes.
+  static DataTableRowSpec of(
+    HrStaffMemberRow row,
+    AppLocalizations l10n, {
+    required RecordSyncState? sync,
+    required bool withDossier,
+    required VoidCallback onOpen,
+  }) {
     final since = HrPersonnelLabels.monthYear(row.entryDate);
     final dossier = row.dossier;
-    return Wrap(
-      alignment: WrapAlignment.end,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: AppSpacing.md,
-      runSpacing: AppSpacing.xs,
-      children: [
-        Text(
-          HrPersonnelLabels.category(l10n, row.category),
-          style: AppTypography.labelMedium.copyWith(
-            color: HrPersonnelLabels.categoryInk(row.category),
-          ),
+    return DataTableRowSpec(
+      id: row.id,
+      displayName: row.fullName,
+      leading: _avatar(row, l10n, sync),
+      onTap: onOpen,
+      trailing: DataTableTrailingSpec(
+        type: DataTableTrailingType.eye,
+        tooltip: l10n.hrRosterOpen,
+        onTap: onOpen,
+      ),
+      cells: [
+        DataTableCellSpec(
+          text: row.fullName,
+          variant: DataTableCellTextVariant.strong,
+          secondaryText: row.jobTitle,
         ),
-        StaffContractBadge(kind: row.contractKind),
-        ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: AppDimensions.hrRosterSeniorityMinWidth,
-          ),
-          child: Text.rich(
-            TextSpan(
-              children: [
-                if (since != null) TextSpan(text: l10n.hrRosterSince(since)),
-                TextSpan(
-                  text: HrPersonnelLabels.seniorityOf(l10n, row.seniorityYears),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
+        DataTableCellSpec(
+          text: HrPersonnelLabels.category(l10n, row.category),
+          color: HrPersonnelLabels.categoryInk(row.category),
         ),
-        if (dossier != null && dossier.required > 0)
-          Tooltip(
-            message: l10n.hrRosterDossierTooltip(
-              dossier.provided,
-              dossier.required,
-            ),
-            child: StaffDossierMeter.counts(
-              done: dossier.provided,
-              total: dossier.required,
-            ),
-          ),
-        if (sync case final known?)
-          Semantics(
-            label: RecordSyncPill.label(l10n, known),
-            child: RecordSyncDot(
-              state: known,
-              size: AppDimensions.hrSyncDotSize,
-            ),
-          ),
+        DataTableCellSpec(
+          text: '',
+          child: StaffContractBadge(kind: row.contractKind),
+        ),
+        DataTableCellSpec(
+          text: HrPersonnelLabels.seniorityOf(l10n, row.seniorityYears),
+          variant: DataTableCellTextVariant.strong,
+          secondaryText: since == null ? null : l10n.hrRosterSince(since),
+        ),
+        if (withDossier)
+          dossier != null && dossier.required > 0
+              ? DataTableCellSpec(
+                  text: '',
+                  child: Tooltip(
+                    message: l10n.hrRosterDossierTooltip(
+                      dossier.provided,
+                      dossier.required,
+                    ),
+                    child: StaffDossierMeter.counts(
+                      done: dossier.provided,
+                      total: dossier.required,
+                    ),
+                  ),
+                )
+              : const DataTableCellSpec(),
       ],
+    );
+  }
+
+  static Widget _avatar(
+    HrStaffMemberRow row,
+    AppLocalizations l10n,
+    RecordSyncState? sync,
+  ) {
+    if (sync == null) {
+      return PersonAvatar(
+        firstName: row.firstName ?? '',
+        lastName: row.lastName,
+        personId: row.id,
+        size: AvatarSize.md,
+      );
+    }
+    // La pastille ne se lit qu'à la couleur : l'assistance vocale l'entend.
+    return Semantics(
+      label: RecordSyncPill.label(l10n, sync),
+      child: PersonSyncAvatar(
+        firstName: row.firstName ?? '',
+        lastName: row.lastName,
+        personId: row.id,
+        sync: sync,
+        size: AvatarSize.md,
+      ),
     );
   }
 }

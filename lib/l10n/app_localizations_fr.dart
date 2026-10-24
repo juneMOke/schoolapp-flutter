@@ -18174,7 +18174,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String hrRosterSince(String date) {
-    return 'depuis $date · ';
+    return 'depuis $date';
   }
 
   @override
@@ -18264,6 +18264,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrRosterLoading => 'Chargement de la liste du personnel';
+
+  @override
+  String get hrRosterColumnAgent => 'Agent';
+
+  @override
+  String get hrRosterColumnCategory => 'Catégorie';
+
+  @override
+  String get hrRosterColumnContract => 'Contrat';
+
+  @override
+  String get hrRosterColumnSeniority => 'Ancienneté';
+
+  @override
+  String get hrRosterColumnDossier => 'Dossier';
+
+  @override
+  String get hrRosterOpen => 'Ouvrir la fiche';
+
+  @override
+  String get hrRosterUnit => 'agents';
 
   @override
   String get hrStaffReportPreparing => 'Préparation…';

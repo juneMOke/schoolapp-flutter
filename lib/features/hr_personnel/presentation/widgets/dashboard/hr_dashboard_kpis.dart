@@ -9,6 +9,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Trois chiffres, pas plus — effectif, enseignants, ancienneté moyenne — sur
 /// tout le fichier, quels que soient les filtres de la liste.
+///
+/// Trois pavés pleins, comme les caisses de Finances : l'icône et le libellé
+/// sur une ligne, le chiffre dessous. Une teinte par chiffre — l'effectif en
+/// bleu ardoise, les enseignants en vert, l'ancienneté en or.
 class HrDashboardKpis extends StatelessWidget {
   final HrStaffStats stats;
 
@@ -34,8 +38,11 @@ class HrDashboardKpis extends StatelessWidget {
           label: l10n.hrKpiTeachers,
           value: stats.teachers,
           icon: Icons.school_outlined,
-          accent: AppColors.bleuArdoise,
-          accentSoft: AppColors.bleuArdoiseSoft,
+          accent: AppColors.hrTeachersAccent,
+          accentSoft: AppColors.hrTeachersSoft,
+          filledBackground: DashboardTones.pave(
+            DashboardTones.paveAccentSur(AppColors.hrTeachersAccent),
+          ),
           subline: l10n.hrKpiTeachersSubline(
             stats.teacherPercent,
             stats.headcount - stats.teachers,
@@ -47,6 +54,9 @@ class HrDashboardKpis extends StatelessWidget {
           icon: Icons.workspace_premium_outlined,
           accent: AppColors.hrSeniorityAccent,
           accentSoft: AppColors.hrSenioritySoft,
+          filledBackground: DashboardTones.pave(
+            DashboardTones.paveAccentSur(AppColors.hrSeniorityAccent),
+          ),
           subline: _dean(l10n),
         ),
       ],

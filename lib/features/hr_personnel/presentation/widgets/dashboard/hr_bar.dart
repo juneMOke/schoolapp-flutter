@@ -45,7 +45,10 @@ class HrBar extends StatelessWidget {
           height: height,
           child: ColoredBox(
             color: AppColors.surfaceAlt,
+            // `stretch` : sans hauteur imposée, un `ColoredBox` sans enfant se
+            // réduit à 0 dp — seule la piste se voyait.
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final segment in segments)
                   if (segment.count > 0)
