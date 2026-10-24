@@ -713,8 +713,9 @@ class AppDimensions {
   /// Bouton d'icône d'un pied de carte (effacer, réessayer).
   static const presenceMarkIconButtonSize = 36.0;
 
-  /// Cible tactile standard du module : puces, flèches, segments.
-  static const presenceMarkTapTarget = 44.0;
+  /// Cible tactile standard du module : puces, flèches, segments. La spec
+  /// disait 44 ; la règle maison est 48.
+  static const presenceMarkTapTarget = minTouchTarget;
 
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
@@ -733,7 +734,10 @@ class AppDimensions {
   /// autour de « 10 h 30 ». À 96, le « + » débordait sur la colonne retard,
   /// et la part débordée ne recevait plus les appuis.
   static const presenceMarkColHours = 160.0;
-  static const presenceMarkColAction = 40.0;
+
+  /// La colonne du bouton de ligne : la cible de 48 dp du bouton y tient
+  /// entière (à 40, ses bords ne recevaient plus les appuis).
+  static const presenceMarkColAction = minTouchTarget;
 
   /// Les modales du pointage.
   static const formDialogMaxWidth = 480.0;

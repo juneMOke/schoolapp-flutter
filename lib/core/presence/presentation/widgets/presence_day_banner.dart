@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le bandeau d'un registre du jour : navigation de jour, horaire, progression
@@ -36,7 +37,10 @@ class PresenceDayBanner extends StatelessWidget {
   /// `null` : aujourd'hui, pas de jour suivant.
   final VoidCallback? onNext;
   final VoidCallback onToday;
-  final VoidCallback onSettings;
+
+  /// `null` : le compte ne règle pas l'horaire — la pastille le montre, sans
+  /// rien ouvrir.
+  final VoidCallback? onSettings;
 
   /// `null` : personne à marquer.
   final VoidCallback? onMarkRemaining;
@@ -58,7 +62,7 @@ class PresenceDayBanner extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.onToday,
-    required this.onSettings,
+    this.onSettings,
     required this.onMarkRemaining,
     required this.onValidate,
   });
@@ -229,15 +233,14 @@ class PresenceBannerButton extends StatelessWidget {
 
 class _SchedulePill extends StatelessWidget {
   final PresenceSchedule schedule;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _SchedulePill({required this.schedule, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: AppRadius.brPill,
-    child: Container(
+  Widget build(BuildContext context) {
+    final onTap = this.onTap;
+    final pill = Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.xs,
@@ -249,8 +252,9 @@ class _SchedulePill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.tune,
+          Icon(
+            // Le réglage s'ouvre (tune) ou se lit seulement (horloge).
+            onTap == null ? Icons.schedule : Icons.tune,
             size: AppSpacing.lg,
             color: AppColors.presenceMarkOnBanner,
           ),
@@ -268,6 +272,13 @@ class _SchedulePill extends StatelessWidget {
           ),
         ],
       ),
-    ),
-  );
+    );
+    if (onTap == null) return pill;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadius.brPill,
+      // La pastille reste fine ; sa zone d'appui fait 48 dp.
+      child: TouchTarget(child: pill),
+    );
+  }
 }
