@@ -683,8 +683,8 @@ class AppDimensions {
   /// champs s'étirent sans rien apporter.
   static const staffAgentBodyMaxWidth = 960.0;
 
-  /// Largeur d'une tuile de statut dans le choix du contrat : trois tiennent
-  /// sur une ligne de tablette, elles passent à la ligne en portrait.
+  /// Largeur minimale d'une tuile de statut dans le choix du contrat : sous
+  /// trois fois cette largeur, les tuiles s'empilent sur toute la largeur.
   static const staffContractTileWidth = 240.0;
 
   /// Filet d'une tuile de statut : plus épais que le filet courant, pour que

@@ -19883,7 +19883,7 @@ abstract class AppLocalizations {
   /// No description provided for @staffBlockContractHint.
   ///
   /// In en, this message translates to:
-  /// **'Dated periods: a new contract takes effect on a date, without rewriting the previous one.'**
+  /// **'A new contract takes over from the previous one on its effective date; the previous one stays in the history.'**
   String get staffBlockContractHint;
 
   /// No description provided for @staffContractAdd.
@@ -19927,6 +19927,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel only'**
   String get staffContractCancelOnly;
+
+  /// Fiche agent en création : sous-titre du bloc contrat initial.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: choose a status to set the contract with the record. Without a status, the staff member is saved as \"contract to set\".'**
+  String get staffInitialContractHint;
+
+  /// Fiche agent en création : bloc contrat sans le droit hr.pay.write.
+  ///
+  /// In en, this message translates to:
+  /// **'The contract will be set by whoever manages payroll, once the record is saved.'**
+  String get staffInitialContractNoRight;
+
+  /// Contrat : titre de la question 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get staffContractSectionKind;
+
+  /// Contrat : titre de la question 2.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
+  String get staffContractSectionPay;
+
+  /// Contrat : titre de la question 3.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get staffContractSectionPeriod;
+
+  /// Contrat : rémunération tant qu'aucun statut n'est choisi.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a status first: the pay depends on it.'**
+  String get staffContractPayPending;
+
+  /// Contrat vacataire : explication du mode de paiement.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly: a rate per hour worked. Monthly flat: a fixed amount each month.'**
+  String get staffContractPayModeHint;
+
+  /// Contrat : explication de la période.
+  ///
+  /// In en, this message translates to:
+  /// **'Without an end date, it stays in force until the next contract.'**
+  String get staffContractPeriodHint;
+
+  /// Contrat : récapitulatif avant de valider.
+  ///
+  /// In en, this message translates to:
+  /// **'Will be set: {summary}'**
+  String staffContractRecap(String summary);
+
+  /// Fiche agent en création : oublie le contrat entamé.
+  ///
+  /// In en, this message translates to:
+  /// **'Save without a contract'**
+  String get staffInitialContractSkip;
 
   /// No description provided for @staffContractNoneYet.
   ///
@@ -20065,6 +20125,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Monthly flat fee'**
   String get staffFieldMonthlyFlat;
+
+  /// Contrat conventionné : devise de la prime locale.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonus currency'**
+  String get staffFieldBonusCurrency;
 
   /// No description provided for @staffFieldCurrency.
   ///

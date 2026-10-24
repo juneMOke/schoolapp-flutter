@@ -7,7 +7,6 @@ import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
@@ -15,8 +14,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_contract
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_messages.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_form_block.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_synced_text_input.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_fields.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_kind_picker.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_editor.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_step_style.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_discard_confirmation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -157,30 +155,7 @@ class _StaffContractFormPageState extends State<StaffContractFormPage> {
                 icon: Icons.handshake_outlined,
                 color: StaffStepStyle.of(2).color,
                 children: [
-                  StaffContractKindPicker(
-                    selected: _draft.kind,
-                    // Re-toucher le statut choisi ne doit pas effacer le mode de
-                    // paiement déjà saisi.
-                    onChanged: (kind) {
-                      if (kind == _draft.kind) return;
-                      _change(
-                        (d) =>
-                            d.copyWith(kind: () => kind, payMode: () => null),
-                      );
-                    },
-                  ),
-                  if (errors[StaffContractField.kind] case final error?)
-                    Padding(
-                      padding: const EdgeInsets.only(top: AppSpacing.xs),
-                      child: Text(
-                        error,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: AppSpacing.lg),
-                  StaffContractFields(
+                  StaffContractEditor(
                     draft: _draft,
                     errors: errors,
                     onChanged: _change,

@@ -12662,7 +12662,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffBlockContractHint =>
-      'Dated periods: a new contract takes effect on a date, without rewriting the previous one.';
+      'A new contract takes over from the previous one on its effective date; the previous one stays in the history.';
 
   @override
   String get staffContractAdd => 'New contract';
@@ -12684,6 +12684,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffContractCancelOnly => 'Cancel only';
+
+  @override
+  String get staffInitialContractHint =>
+      'Optional: choose a status to set the contract with the record. Without a status, the staff member is saved as \"contract to set\".';
+
+  @override
+  String get staffInitialContractNoRight =>
+      'The contract will be set by whoever manages payroll, once the record is saved.';
+
+  @override
+  String get staffContractSectionKind => 'Status';
+
+  @override
+  String get staffContractSectionPay => 'Pay';
+
+  @override
+  String get staffContractSectionPeriod => 'Period';
+
+  @override
+  String get staffContractPayPending =>
+      'Choose a status first: the pay depends on it.';
+
+  @override
+  String get staffContractPayModeHint =>
+      'Hourly: a rate per hour worked. Monthly flat: a fixed amount each month.';
+
+  @override
+  String get staffContractPeriodHint =>
+      'Without an end date, it stays in force until the next contract.';
+
+  @override
+  String staffContractRecap(String summary) {
+    return 'Will be set: $summary';
+  }
+
+  @override
+  String get staffInitialContractSkip => 'Save without a contract';
 
   @override
   String get staffContractNoneYet =>
@@ -12764,6 +12801,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffFieldMonthlyFlat => 'Monthly flat fee';
+
+  @override
+  String get staffFieldBonusCurrency => 'Bonus currency';
 
   @override
   String get staffFieldCurrency => 'Currency';

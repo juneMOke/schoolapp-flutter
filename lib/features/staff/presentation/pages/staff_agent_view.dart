@@ -18,7 +18,9 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_dossie
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_body.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_footer.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_agent_header.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_contract_panel.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/contract/staff_initial_contract_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/documents/staff_dossier_panel.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_discard_confirmation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -91,8 +93,8 @@ class _StaffAgentViewState extends State<StaffAgentView> {
     // se lisent désormais, que la page n'a pas pu charger à l'ouverture.
     final created = state.member;
     if (state.justSaved && previous.member == null && created != null) {
-      unawaited(context.read<StaffContractsCubit>().load(created.id));
       unawaited(context.read<StaffDossierCubit>().load(created.id));
+      unawaited(_afterCreation(context, created.id, previous.contractToPose));
     }
     if (state.justSaved) {
       AppSnackBar.showSuccess(
@@ -106,6 +108,58 @@ class _StaffAgentViewState extends State<StaffAgentView> {
       AppSnackBar.showError(context, l10n.staffSaveError);
     }
   }
+
+  /// La fiche est écrite : son contrat initial se pose à sa suite — en file
+  /// derrière elle, il attend son envoi. La fiche s'ouvre alors sur
+  /// « Poste & contrat », où le geste dit s'il a réussi.
+  Future<void> _afterCreation(
+    BuildContext context,
+    String memberId,
+    StaffContractDraft? contract,
+  ) async {
+    final contracts = context.read<StaffContractsCubit>();
+    final agent = context.read<StaffAgentCubit>();
+    if (contract == null) {
+      await contracts.load(memberId);
+      return;
+    }
+    agent.goTo(StaffAgentState.jobStep);
+    // Le bloc des contrats doit être monté pour annoncer l'issue du geste.
+    await WidgetsBinding.instance.endOfFrame;
+    if (await contracts.add(memberId, contract)) await agent.refreshMember();
+  }
+
+  /// Ce qui suit une étape hors saisie : les contrats sous « Poste », les
+  /// pièces sous « Diplômes ».
+  Map<int, Widget> _appendices(StaffAgentState state, StaffAgentCubit cubit) =>
+      switch ((state.mode, state.member)) {
+        (StaffAgentMode.create, _) => {
+          StaffAgentState.jobStep: StaffInitialContractCard(
+            contract: state.initialContract,
+            errors: state.visibleContractErrors,
+            onChanged: cubit.updateInitialContract,
+            onClear: cubit.clearInitialContract,
+          ),
+        },
+        (StaffAgentMode.view, final member?) => {
+          StaffAgentState.jobStep: StaffContractPanel(
+            member: member,
+            today: widget.today,
+          ),
+          StaffAgentState.jobStep + 1: StaffDossierPanel(
+            member: member,
+            today: widget.today,
+          ),
+        },
+        (StaffAgentMode.edit, final member?) => {
+          StaffAgentState.jobStep: StaffContractPanel(
+            member: member,
+            today: widget.today,
+            readOnly: true,
+          ),
+        },
+        _ => const {},
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -176,20 +230,7 @@ class _StaffAgentViewState extends State<StaffAgentView> {
                       catalog: _catalog,
                       today: widget.today,
                       onChanged: cubit.updateDraft,
-                      appendices: switch (state.member) {
-                        final member? when state.mode == StaffAgentMode.view =>
-                          {
-                            2: StaffContractPanel(
-                              member: member,
-                              today: widget.today,
-                            ),
-                            3: StaffDossierPanel(
-                              member: member,
-                              today: widget.today,
-                            ),
-                          },
-                        _ => const {},
-                      },
+                      appendices: _appendices(state, cubit),
                     ),
                   ),
                   StaffAgentFooter(

@@ -8958,7 +8958,7 @@
   "@staffBlockContract": {
     "description": "Bloc des contrats de la fiche agent."
   },
-  "staffBlockContractHint": "Des périodes datées : un nouveau contrat prend effet à une date, sans réécrire l'ancien.",
+  "staffBlockContractHint": "Un nouveau contrat prend la suite du précédent à sa date d'effet ; le précédent reste dans l'historique.",
   "@staffBlockContractHint": {
     "description": "Sous-titre du bloc des contrats."
   },
@@ -8990,6 +8990,23 @@
   "@staffContractCancelOnly": {
     "description": "Corriger sans remplaçant : la période était un doublon."
   },
+  "staffInitialContractHint": "Facultatif : choisissez un statut pour poser le contrat avec la fiche. Sans statut, l'agent est enregistré « contrat à poser ».",
+  "staffInitialContractNoRight": "Le contrat sera posé par la personne qui gère la paie, une fois la fiche enregistrée.",
+  "staffContractSectionKind": "Statut",
+  "staffContractSectionPay": "Rémunération",
+  "staffContractSectionPeriod": "Période",
+  "staffContractPayPending": "Choisissez d'abord un statut : la rémunération en dépend.",
+  "staffContractPayModeHint": "À l'heure : un taux par heure prestée. Forfait mensuel : un montant fixe chaque mois.",
+  "staffContractPeriodHint": "Sans date de fin, il reste en vigueur jusqu'au contrat suivant.",
+  "staffContractRecap": "Sera posé : {summary}",
+  "@staffContractRecap": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "staffInitialContractSkip": "Enregistrer sans contrat",
   "staffContractNoneYet": "Aucun contrat : l'agent est « contrat à poser ».",
   "@staffContractNoneYet": {
     "description": "Frise vide."
@@ -9100,6 +9117,7 @@
   "@staffFieldMonthlyFlat": {
     "description": "Montant d'un vacataire au forfait."
   },
+  "staffFieldBonusCurrency": "Devise de la prime",
   "staffFieldCurrency": "Devise",
   "@staffFieldCurrency": {
     "description": "Devise du montant."

@@ -8740,7 +8740,7 @@
   "boutiqueCartDiscardMessage": "The current cart will be emptied.",
   "communicationEditorDiscardMessage": "The announcement being written is not saved. Your changes will be lost.",
   "staffBlockContract": "Contract",
-  "staffBlockContractHint": "Dated periods: a new contract takes effect on a date, without rewriting the previous one.",
+  "staffBlockContractHint": "A new contract takes over from the previous one on its effective date; the previous one stays in the history.",
   "staffContractAdd": "New contract",
   "staffContractAddTitle": "New contract",
   "staffContractAddSubmit": "Record the contract",
@@ -8748,6 +8748,51 @@
   "staffContractCorrectTitle": "Correct a period",
   "staffContractCorrectSubmit": "Replace the period",
   "staffContractCancelOnly": "Cancel only",
+  "staffInitialContractHint": "Optional: choose a status to set the contract with the record. Without a status, the staff member is saved as \"contract to set\".",
+  "@staffInitialContractHint": {
+    "description": "Fiche agent en création : sous-titre du bloc contrat initial."
+  },
+  "staffInitialContractNoRight": "The contract will be set by whoever manages payroll, once the record is saved.",
+  "@staffInitialContractNoRight": {
+    "description": "Fiche agent en création : bloc contrat sans le droit hr.pay.write."
+  },
+  "staffContractSectionKind": "Status",
+  "@staffContractSectionKind": {
+    "description": "Contrat : titre de la question 1."
+  },
+  "staffContractSectionPay": "Pay",
+  "@staffContractSectionPay": {
+    "description": "Contrat : titre de la question 2."
+  },
+  "staffContractSectionPeriod": "Period",
+  "@staffContractSectionPeriod": {
+    "description": "Contrat : titre de la question 3."
+  },
+  "staffContractPayPending": "Choose a status first: the pay depends on it.",
+  "@staffContractPayPending": {
+    "description": "Contrat : rémunération tant qu'aucun statut n'est choisi."
+  },
+  "staffContractPayModeHint": "Hourly: a rate per hour worked. Monthly flat: a fixed amount each month.",
+  "@staffContractPayModeHint": {
+    "description": "Contrat vacataire : explication du mode de paiement."
+  },
+  "staffContractPeriodHint": "Without an end date, it stays in force until the next contract.",
+  "@staffContractPeriodHint": {
+    "description": "Contrat : explication de la période."
+  },
+  "staffContractRecap": "Will be set: {summary}",
+  "@staffContractRecap": {
+    "description": "Contrat : récapitulatif avant de valider.",
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "staffInitialContractSkip": "Save without a contract",
+  "@staffInitialContractSkip": {
+    "description": "Fiche agent en création : oublie le contrat entamé."
+  },
   "staffContractNoneYet": "No contract: this staff member has no contract yet.",
   "staffContractCurrent": "Current",
   "staffContractFrom": "Since {from}",
@@ -8774,6 +8819,10 @@
   "staffFieldSalary": "Monthly salary",
   "staffFieldHourlyRate": "Hourly rate",
   "staffFieldMonthlyFlat": "Monthly flat fee",
+  "staffFieldBonusCurrency": "Bonus currency",
+  "@staffFieldBonusCurrency": {
+    "description": "Contrat conventionné : devise de la prime locale."
+  },
   "staffFieldCurrency": "Currency",
   "staffFieldSecope": "SECOPE number",
   "staffFieldBonus": "Local bonus (optional)",

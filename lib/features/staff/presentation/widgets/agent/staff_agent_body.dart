@@ -82,9 +82,13 @@ class StaffAgentBody extends StatelessWidget {
   Widget build(BuildContext context) {
     if (wholeFile) return _wholeFile();
     final l10n = AppLocalizations.of(context)!;
-    final stepErrors = state.visibleErrors.keys
-        .where((field) => field.step == state.step)
-        .length;
+    final stepErrors =
+        state.visibleErrors.keys
+            .where((field) => field.step == state.step)
+            .length +
+        (state.step == StaffAgentState.jobStep
+            ? state.visibleContractErrors.length
+            : 0);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Center(

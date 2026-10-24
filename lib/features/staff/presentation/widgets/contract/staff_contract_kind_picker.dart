@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_con
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les trois statuts en tuiles égales : la tuile choisie prend le voile et la
+/// Les trois statuts en tuiles égales, sur toute la largeur : la tuile choisie prend le voile et la
 /// bordure de son contrat, et dit ce que le statut implique.
 class StaffContractKindPicker extends StatelessWidget {
   final StaffContractKind? selected;
@@ -29,22 +29,45 @@ class StaffContractKindPicker extends StatelessWidget {
       StaffContractKind.vacataire => l10n.staffContractVacataireHint,
       StaffContractKind.conventionne => l10n.staffContractConventionneHint,
     };
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: [
-        for (final kind in StaffContractKind.values)
-          SizedBox(
-            width: AppDimensions.staffContractTileWidth,
-            child: _Tile(
-              title: StaffLabels.contract(l10n, kind),
-              hint: hint(kind),
-              tone: StaffContractTone.of(kind),
-              selected: selected == kind,
-              onTap: () => onChanged(kind),
-            ),
+    Widget tile(StaffContractKind kind) => _Tile(
+      title: StaffLabels.contract(l10n, kind),
+      hint: hint(kind),
+      tone: StaffContractTone.of(kind),
+      selected: selected == kind,
+      onTap: () => onChanged(kind),
+    );
+    const kinds = StaffContractKind.values;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final inRow =
+            constraints.maxWidth >=
+            kinds.length * AppDimensions.staffContractTileWidth +
+                (kinds.length - 1) * AppSpacing.sm;
+        // Côte à côte, les trois tuiles partagent la largeur et la hauteur ;
+        // à l'étroit, elles s'empilent sur toute la largeur.
+        if (!inRow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final kind in kinds) ...[
+                if (kind != kinds.first) const SizedBox(height: AppSpacing.sm),
+                tile(kind),
+              ],
+            ],
+          );
+        }
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final kind in kinds) ...[
+                if (kind != kinds.first) const SizedBox(width: AppSpacing.sm),
+                Expanded(child: tile(kind)),
+              ],
+            ],
           ),
-      ],
+        );
+      },
     );
   }
 }

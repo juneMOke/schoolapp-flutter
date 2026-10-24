@@ -12757,7 +12757,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffBlockContractHint =>
-      'Des périodes datées : un nouveau contrat prend effet à une date, sans réécrire l\'ancien.';
+      'Un nouveau contrat prend la suite du précédent à sa date d\'effet ; le précédent reste dans l\'historique.';
 
   @override
   String get staffContractAdd => 'Nouveau contrat';
@@ -12779,6 +12779,43 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffContractCancelOnly => 'Annuler seulement';
+
+  @override
+  String get staffInitialContractHint =>
+      'Facultatif : choisissez un statut pour poser le contrat avec la fiche. Sans statut, l\'agent est enregistré « contrat à poser ».';
+
+  @override
+  String get staffInitialContractNoRight =>
+      'Le contrat sera posé par la personne qui gère la paie, une fois la fiche enregistrée.';
+
+  @override
+  String get staffContractSectionKind => 'Statut';
+
+  @override
+  String get staffContractSectionPay => 'Rémunération';
+
+  @override
+  String get staffContractSectionPeriod => 'Période';
+
+  @override
+  String get staffContractPayPending =>
+      'Choisissez d\'abord un statut : la rémunération en dépend.';
+
+  @override
+  String get staffContractPayModeHint =>
+      'À l\'heure : un taux par heure prestée. Forfait mensuel : un montant fixe chaque mois.';
+
+  @override
+  String get staffContractPeriodHint =>
+      'Sans date de fin, il reste en vigueur jusqu\'au contrat suivant.';
+
+  @override
+  String staffContractRecap(String summary) {
+    return 'Sera posé : $summary';
+  }
+
+  @override
+  String get staffInitialContractSkip => 'Enregistrer sans contrat';
 
   @override
   String get staffContractNoneYet =>
@@ -12860,6 +12897,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffFieldMonthlyFlat => 'Forfait mensuel';
+
+  @override
+  String get staffFieldBonusCurrency => 'Devise de la prime';
 
   @override
   String get staffFieldCurrency => 'Devise';

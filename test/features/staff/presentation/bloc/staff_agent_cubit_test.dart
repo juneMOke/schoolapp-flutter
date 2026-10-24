@@ -2,7 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_contract_validator.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_draft_validator.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_member_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_agent_cubit.dart';
@@ -142,4 +145,98 @@ void main() {
       expect(cubit.state.draft.firstName, 'Jean');
     },
   );
+
+  group('contrat initial', () {
+    const contract = StaffContractDraft(
+      kind: StaffContractKind.permanent,
+      effectiveFrom: '2026-09-01',
+      amount: '250',
+    );
+
+    test('le premier statut choisi date le contrat de l entrée', () {
+      final cubit = creating(completeDraft())
+        ..updateInitialContract(
+          (d) => d.copyWith(kind: () => StaffContractKind.permanent),
+        );
+
+      expect(
+        cubit.state.initialContract?.effectiveFrom,
+        completeDraft().entryDate,
+      );
+      expect(cubit.state.contractToPose, isNotNull);
+    });
+
+    test('sans statut, rien à poser : la saisie entamée ne retient pas', () {
+      final cubit = creating(completeDraft())
+        ..updateInitialContract((d) => d.copyWith(amount: '250'));
+
+      expect(cubit.state.contractToPose, isNull);
+      expect(cubit.state.contractErrors, isEmpty);
+    });
+
+    test('« sans contrat » oublie la saisie', () {
+      final cubit = creating()
+        ..updateInitialContract((_) => contract)
+        ..clearInitialContract();
+
+      expect(cubit.state.initialContract, isNull);
+    });
+
+    test('ignoré hors création : la fiche pose ses contrats elle-même', () {
+      final cubit = StaffAgentCubit(
+        save: save,
+        load: load,
+        others: const [],
+        today: '2026-09-29',
+        draft: completeDraft(),
+        member: member('a'),
+      )..updateInitialContract((_) => contract);
+
+      expect(cubit.state.initialContract, isNull);
+    });
+
+    test('un contrat incomplet retient « Poste & contrat »', () {
+      final cubit = creating(completeDraft())
+        ..goTo(0)
+        ..next()
+        ..next()
+        ..updateInitialContract(
+          (d) => d.copyWith(kind: () => StaffContractKind.permanent),
+        )
+        ..next();
+
+      expect(cubit.state.step, StaffAgentState.jobStep);
+      expect(
+        cubit.state.visibleContractErrors.keys,
+        contains(StaffContractField.amount),
+      );
+      expect(cubit.state.visibleErrorSteps, {StaffAgentState.jobStep});
+    });
+
+    test('à l enregistrement, un contrat incomplet ramène à son étape, sans '
+        'rien écrire', () async {
+      final cubit = creating(completeDraft())
+        ..updateInitialContract(
+          (d) => d.copyWith(kind: () => StaffContractKind.permanent),
+        );
+
+      expect(await cubit.save(), isFalse);
+      expect(cubit.state.step, StaffAgentState.jobStep);
+      verifyNever(() => save(any()));
+    });
+
+    test(
+      'l enregistrement le consomme : il ne repart jamais deux fois',
+      () async {
+        when(() => save(any())).thenAnswer((_) async => const Right(unit));
+        when(() => load(any())).thenAnswer((_) async => Right(member('new')));
+        final cubit = creating(completeDraft())
+          ..updateInitialContract((_) => contract);
+
+        expect(await cubit.save(), isTrue);
+        expect(cubit.state.justSaved, isTrue);
+        expect(cubit.state.initialContract, isNull);
+      },
+    );
+  });
 }
