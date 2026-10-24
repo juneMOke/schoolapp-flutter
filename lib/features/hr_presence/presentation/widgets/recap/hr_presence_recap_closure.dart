@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
@@ -97,6 +98,16 @@ class HrPresenceRecapClosure extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
           ],
+          // Une clôture posée ici que le serveur a refusée : le dire avant
+          // d'offrir de recommencer.
+          if (local != null && local.syncState == RecordSyncState.failed) ...[
+            PresenceWarning(
+              icon: Icons.sync_problem,
+              tone: PresenceStatus.absent,
+              message: l10n.hrPresenceRecapCloseRefused,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
           Text(
             l10n.hrPresenceRecapCloseExplain,
             style: AppTypography.bodySmall.copyWith(
@@ -122,7 +133,7 @@ class HrPresenceRecapClosure extends StatelessWidget {
                   fullWidth: false,
                 ),
                 // E5 : un mois se clôt au plus tôt son dernier jour.
-                if (!recap.closable)
+                if (!recap.closable && recap.toDate)
                   Text(
                     l10n.hrPresenceRecapCloseFrom(
                       MaterialLocalizations.of(

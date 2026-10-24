@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_month.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_year.dart';
@@ -119,7 +120,10 @@ class HrPresenceFicheCubit extends Cubit<HrPresenceFicheState> {
        super(_initial(args, now()));
 
   static HrPresenceFicheState _initial(HrPresenceFicheArgs args, DateTime now) {
-    final current = SchoolDayCalendar.monthOf(SchoolDayCalendar.dayOf(now));
+    final current = SchoolDayCalendar.monthOf(
+      // Le mois de l'école, comme le serveur : pas celui de la tablette.
+      SchoolDayCalendar.dayOf(SchoolTime.today(now)),
+    );
     final yearStart = args.yearStart;
     final first = yearStart == null
         ? null

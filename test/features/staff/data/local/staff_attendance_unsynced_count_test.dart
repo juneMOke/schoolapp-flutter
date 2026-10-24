@@ -50,6 +50,23 @@ void main() {
     );
   });
 
+  test('un pointage refusé ne compte pas : il ne repartira pas seul', () async {
+    await write('a', '2026-10-05');
+    await db.update(
+      StaffAttendanceDao.table,
+      {'sync_status': 'SYNC_ERROR'},
+      where: 'id = ?',
+      whereArgs: ['a'],
+    );
+
+    expect(
+      await StaffAttendanceDao(
+        db,
+      ).unsyncedCount('s-1', from: '2026-10-01', to: '2026-10-31'),
+      0,
+    );
+  });
+
   test('un pointage reçu par le serveur ne compte plus', () async {
     await write('a', '2026-10-05');
     await db.update(

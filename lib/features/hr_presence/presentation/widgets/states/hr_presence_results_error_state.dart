@@ -20,6 +20,7 @@ class HrPresenceResultsErrorState extends StatelessWidget {
       onRetry: onRetry,
       serverTitle: l10n.hrPresenceErrorServerTitle,
       serverMessage: l10n.hrPresenceErrorServer,
+      forbiddenMessage: l10n.hrPresenceErrorForbidden,
     );
   }
 }

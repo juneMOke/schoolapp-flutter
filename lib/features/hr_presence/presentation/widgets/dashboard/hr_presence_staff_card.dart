@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/components/search/eteelo_search_toolbar.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/listing_tones.dart';
@@ -104,6 +105,7 @@ class HrPresenceStaffCard extends StatelessWidget {
                 semanticsLabel: l10n.hrPresenceStaffTitle,
                 density: DataTableDensity.compact,
                 phoneLayout: DataTablePhoneLayout.cards,
+                minWidth: AppDimensions.hrPresenceStaffTableMinWidth,
                 columns: [
                   DataTableColumnDef(label: l10n.hrPresenceColAgent, flex: 22),
                   DataTableColumnDef(label: l10n.hrPresenceColJob, flex: 14),

@@ -14,7 +14,6 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_p
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
@@ -23,23 +22,29 @@ import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fic
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_card.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_scope_bar.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_year_list.dart';
-import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_fiche_location.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/states/hr_presence_results_error_state.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// RH · Présences ▸ Fiche individuelle ▸ un agent (spec §12) : son profil,
 /// en vue mensuelle (route 2) ou annuelle (route 3), par-dessus la liste —
-/// `/home/rh-presences-fiche/{agentId}?vue=an` ou `?mois=AAAA-MM`.
+/// `/home/rh-presences-fiche/{agentId}?vue-agent=an` ou `?mois-agent=AAAA-MM`
+/// — sous le Récapitulatif quand c'est lui qui l'ouvre, pour qu'un F5 la
+/// rebâtisse sur le bon écran.
 class HrPresenceFicheAgentPage extends StatelessWidget {
   final HrPresenceFicheArgs args;
   final VoidCallback? onClosed;
+
+  /// L'écran qui l'a ouverte : la liste de la fiche, ou le récapitulatif.
+  final String shellSubMenuId;
 
   const HrPresenceFicheAgentPage({
     super.key,
     required this.args,
     this.onClosed,
+    this.shellSubMenuId = MenuConstants.hrPresenceFicheId,
   });
 
   /// Ouvre la fiche de [agentId] sur la portée de l'écran qui l'ouvre, et se
@@ -49,13 +54,14 @@ class HrPresenceFicheAgentPage extends StatelessWidget {
     required String agentId,
     required bool yearly,
     required String month,
+    String fromSubMenuId = MenuConstants.hrPresenceFicheId,
   }) => HrAgentIntent.open(
     context,
-    subMenuId: MenuConstants.hrPresenceFicheId,
+    subMenuId: fromSubMenuId,
     agentId: agentId,
     query: yearly
-        ? {HrFicheLocation.viewParam: HrFicheLocation.yearValue}
-        : {HrFicheLocation.monthParam: month},
+        ? {HrAgentAddress.viewParam: HrAgentAddress.yearValue}
+        : {HrAgentAddress.monthParam: month},
   );
 
   @override
@@ -65,52 +71,23 @@ class HrPresenceFicheAgentPage extends StatelessWidget {
         agentId: args.agentId,
         yearly: args.yearly,
         month: args.month,
-        yearStart: args.yearStart ?? _yearStart(context),
+        yearStart: args.yearStart ?? HrPresenceContext.yearStart(context),
       ),
     )..load(),
-    child: _Closing(
+    child: HrClosingNotifier(
       onClosed: onClosed,
-      child: const HrPresenceFicheAgentScreen(),
+      child: HrPresenceFicheAgentScreen(shellSubMenuId: shellSubMenuId),
     ),
   );
-
-  static DateTime? _yearStart(BuildContext context) {
-    try {
-      return context
-          .read<AcademicYearContextBloc>()
-          .state
-          .context
-          ?.academicYear
-          .startDate;
-    } on Object {
-      return null;
-    }
-  }
-}
-
-class _Closing extends StatefulWidget {
-  final VoidCallback? onClosed;
-  final Widget child;
-
-  const _Closing({required this.onClosed, required this.child});
-
-  @override
-  State<_Closing> createState() => _ClosingState();
-}
-
-class _ClosingState extends State<_Closing> {
-  @override
-  void dispose() {
-    widget.onClosed?.call();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 class HrPresenceFicheAgentScreen extends StatelessWidget {
-  const HrPresenceFicheAgentScreen({super.key});
+  final String shellSubMenuId;
+
+  const HrPresenceFicheAgentScreen({
+    super.key,
+    this.shellSubMenuId = MenuConstants.hrPresenceFicheId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,8 +101,12 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
         appBar: OffShellTopBar(
           eyebrow: l10n.hrPresenceEyebrow,
           title: l10n.subMenuHrPresenceFiche,
-          backTooltip: l10n.hrPresenceStaffList,
-          shellSubMenuId: MenuConstants.hrPresenceFicheId,
+          backTooltip: shellSubMenuId == MenuConstants.hrPresenceRecapId
+              ? l10n.subMenuHrPresenceRecap
+              : l10n.hrPresenceStaffList,
+          shellSubMenuId: shellSubMenuId,
+          onBack: (context) =>
+              HrAgentAddress.leave(context, subMenuId: shellSubMenuId),
         ),
         child: BlocBuilder<HrPresenceFicheCubit, HrPresenceFicheState>(
           builder: (context, state) => _body(context, l10n, cubit, state),
@@ -158,7 +139,7 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
               : null,
           onNext: () => unawaited(cubit.stepMonth(1)),
           onCurrent: () => unawaited(cubit.goCurrentMonth()),
-          yearLabel: state.yearData?.schoolYear.name,
+          yearLabel: state.yearData?.schoolYear?.name,
         ),
         if (members.isNotEmpty)
           PresencePersonPicker<StaffMember>(
@@ -195,7 +176,7 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
       HrPresenceFicheStatus.failure when state.failure is NotFoundFailure =>
         EteeloEmptyResult(
           label: l10n.hrAgentNotFoundTitle,
-          description: l10n.hrAgentNotFoundMessage,
+          description: l10n.hrPresenceAgentNotFoundMessage,
           medallionIcon: Icons.person_search_outlined,
           fullWidthCard: true,
         ),
@@ -203,13 +184,21 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
         failure: state.failure,
         onRetry: () => unawaited(cubit.retry()),
       ),
+      HrPresenceFicheStatus.ready
+          when year != null && year.schoolYear == null =>
+        EteeloEmptyResult(
+          label: l10n.hrPresenceNoYearTitle,
+          description: l10n.hrPresenceNoYearMessage,
+          medallionIcon: Icons.event_busy_outlined,
+          fullWidthCard: true,
+        ),
       HrPresenceFicheStatus.ready when year != null => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           HrPresenceProfileCard(
             agent: year.agent,
             profile: year.profile,
-            scopeLabel: l10n.hrPresenceScopeYearLabel(year.schoolYear.name),
+            scopeLabel: l10n.hrPresenceScopeYearLabel(year.schoolYear!.name),
           ),
           const SizedBox(height: AppSpacing.lg),
           HrPresenceFicheKpis(kpis: year.kpis, hourly: year.agent.isHourly),

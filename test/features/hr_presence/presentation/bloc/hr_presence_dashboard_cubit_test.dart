@@ -146,6 +146,24 @@ void main() {
     },
   );
 
+  test(
+    'une autre fenêtre ne garde pas le compte local de la précédente',
+    () async {
+      final cubit = build();
+      await cubit.start();
+      expect(cubit.state.unsynced, 4);
+      when(
+        () => count(
+          from: any(named: 'from'),
+          to: any(named: 'to'),
+        ),
+      ).thenAnswer((_) async => const Left(StorageFailure('—')));
+      await cubit.setPeriod(DashboardPeriod.week);
+
+      expect(cubit.state.unsynced, 0);
+    },
+  );
+
   test('un premier échec s\'affiche', () async {
     when(
       () => get(any()),

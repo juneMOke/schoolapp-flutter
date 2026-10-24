@@ -20987,7 +20987,7 @@ abstract class AppLocalizations {
   /// No description provided for @presenceMarkKpiAbsencesDetail.
   ///
   /// In en, this message translates to:
-  /// **'{justified} J · {unjustified} U'**
+  /// **'{justified} E · {unjustified} U'**
   String presenceMarkKpiAbsencesDetail(int justified, int unjustified);
 
   /// No description provided for @presenceMarkKpiNotMarked.
@@ -21083,7 +21083,7 @@ abstract class AppLocalizations {
   /// No description provided for @staffAttendanceRecapLegend.
   ///
   /// In en, this message translates to:
-  /// **'U = unjustified · J = justified · tap a row to open the monthly sheet'**
+  /// **'U = unexcused · E = excused · a row opens the monthly sheet'**
   String get staffAttendanceRecapLegend;
 
   /// No description provided for @staffAttendanceClose.
@@ -21107,7 +21107,7 @@ abstract class AppLocalizations {
   /// No description provided for @staffAttendanceCloseAbsences.
   ///
   /// In en, this message translates to:
-  /// **'{count} unjustified absences, flagged in the payroll book, without deduction'**
+  /// **'{count} unexcused absences, shown on the payslip, never deducted'**
   String staffAttendanceCloseAbsences(int count);
 
   /// No description provided for @staffAttendanceCloseLates.
@@ -28504,7 +28504,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModuleHrPresenceDescription.
   ///
   /// In en, this message translates to:
-  /// **'Who came in, at what time, and what goes to payroll.'**
+  /// **'Who came in, at what time, and the month\'s totals.'**
   String get accueilModuleHrPresenceDescription;
 
   /// No description provided for @hrPresenceEyebrow.
@@ -28516,7 +28516,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceRegisterSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'The prefect or the censor marks attendance from the tablet, in class or at the front desk — even offline.'**
+  /// **'The prefect or the deputy head marks attendance from the tablet, in class or at the front desk — even offline.'**
   String get hrPresenceRegisterSubtitle;
 
   /// No description provided for @hrPresenceActionMark.
@@ -28738,7 +28738,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceStaffSubtitleTap.
   ///
   /// In en, this message translates to:
-  /// **'{period} · least to most regular · tap a staff member for details'**
+  /// **'{period} · least to most regular · open a staff member for details'**
   String hrPresenceStaffSubtitleTap(String period);
 
   /// No description provided for @hrPresenceStaffSearchLabel.
@@ -28906,7 +28906,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceAgentOpenPayroll.
   ///
   /// In en, this message translates to:
-  /// **'See their pay'**
+  /// **'Open payroll'**
   String get hrPresenceAgentOpenPayroll;
 
   /// No description provided for @hrPresenceAgentMonthRate.
@@ -29030,7 +29030,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceLegendShare.
   ///
   /// In en, this message translates to:
-  /// **'(% of marked days) · long-press a profile for its rule'**
+  /// **'(% of marked days) · hold or hover a profile for its rule'**
   String get hrPresenceLegendShare;
 
   /// No description provided for @hrPresenceStaffList.
@@ -29060,7 +29060,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceFicheRateDetail.
   ///
   /// In en, this message translates to:
-  /// **'{presences, plural, =0{0 days} =1{1 day} other{{presences} days}} out of {scored} marked'**
+  /// **'{presences, plural, =0{0 days} =1{1 day} other{{presences} days}} out of {scored, plural, =1{1 marked} other{{scored} marked}}'**
   String hrPresenceFicheRateDetail(int presences, int scored);
 
   /// No description provided for @hrPresenceFicheLateRate.
@@ -29180,7 +29180,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceRecapLegend.
   ///
   /// In en, this message translates to:
-  /// **'NJ = unexcused · J = excused · tap a row to open the individual record'**
+  /// **'U = unexcused · E = excused · a row opens the individual record'**
   String get hrPresenceRecapLegend;
 
   /// No description provided for @staffAttendanceCloseIrreversible.
@@ -29188,6 +29188,47 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A closed month cannot be reopened: validated pay depends on it.'**
   String get staffAttendanceCloseIrreversible;
+
+  /// No description provided for @hrPresenceNoYearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No current school year'**
+  String get hrPresenceNoYearTitle;
+
+  /// No description provided for @hrPresenceNoYearMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The school is between two years: the yearly view returns when the next one opens.'**
+  String get hrPresenceNoYearMessage;
+
+  /// No description provided for @hrPresenceRecapCloseRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused the last closing of this month: check the month, then try again.'**
+  String get hrPresenceRecapCloseRefused;
+
+  /// No description provided for @hrPresenceAgentNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server does not know this staff member in this school: they may have been removed, or the link comes from another school.'**
+  String get hrPresenceAgentNotFoundMessage;
+
+  /// No description provided for @hrPresenceErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile does not allow you to view staff attendance.'**
+  String get hrPresenceErrorForbidden;
+
+  /// No description provided for @hrPresenceYearRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}: attendance {presence}, late {late}, absent {absent}'**
+  String hrPresenceYearRowA11y(
+    String month,
+    String presence,
+    String late,
+    String absent,
+  );
 }
 
 class _AppLocalizationsDelegate

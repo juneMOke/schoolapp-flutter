@@ -8,12 +8,12 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/layout/shell_chrome.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_profiles.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profiles_body.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_fiche_location.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// RH · Présences ▸ Fiche individuelle — le profil de présence de chaque
@@ -23,8 +23,9 @@ class HrPresenceFichePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (context) =>
-        getIt<HrPresenceProfilesCubit>(param1: _yearStart(context))..load(),
+    create: (context) => getIt<HrPresenceProfilesCubit>(
+      param1: HrPresenceContext.yearStart(context),
+    )..load(),
     child: HrPresenceFicheScreen(
       onOpenAgent: (context, row) {
         final state = context.read<HrPresenceProfilesCubit>().state;
@@ -39,19 +40,6 @@ class HrPresenceFichePage extends StatelessWidget {
       },
     ),
   );
-
-  static DateTime? _yearStart(BuildContext context) {
-    try {
-      return context
-          .read<AcademicYearContextBloc>()
-          .state
-          .context
-          ?.academicYear
-          .startDate;
-    } on Object {
-      return null;
-    }
-  }
 }
 
 class HrPresenceFicheScreen extends StatelessWidget {

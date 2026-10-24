@@ -118,8 +118,10 @@ Map<String, dynamic> schoolYear() => {
   'to': '2027-07-02',
 };
 
-Map<String, dynamic> agentYear() => {
-  'schoolYear': schoolYear(),
+/// [withYear] faux : l'école est entre deux années, le serveur rend
+/// `schoolYear: null`, sans mois.
+Map<String, dynamic> agentYear({bool withYear = true}) => {
+  'schoolYear': withYear ? schoolYear() : null,
   'agent': identity(),
   'profile': 'REGULIER',
   'kpis': kpis(),

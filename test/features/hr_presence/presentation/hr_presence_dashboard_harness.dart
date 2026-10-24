@@ -134,6 +134,7 @@ Future<HrPresenceDashboardHarness> pumpHrPresenceDashboard(
   Size? size = const Size(1280, 1600),
   List<String>? permissions,
   String? location,
+  bool openable = false,
 }) async {
   if (size != null) {
     tester.view.devicePixelRatio = 1;
@@ -201,14 +202,17 @@ Future<HrPresenceDashboardHarness> pumpHrPresenceDashboard(
     providers.add(BlocProvider<AuthBloc>.value(value: auth));
   }
 
-  const page = Scaffold(body: HrPresenceDashboardScreen());
+  // [openable] : les lignes ouvrent un agent (chevron, sous-titre long).
+  final page = Scaffold(
+    body: HrPresenceDashboardScreen(onOpenAgent: openable ? (_, _) {} : null),
+  );
   GoRouter? router;
   if (location == null) {
     await tester.pumpWidget(
       MultiBlocProvider(
         providers: providers,
-        child: const MaterialApp(
-          locale: Locale('fr'),
+        child: MaterialApp(
+          locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: page,

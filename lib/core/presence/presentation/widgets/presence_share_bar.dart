@@ -11,15 +11,16 @@ class PresenceShareBar extends StatelessWidget {
   final int latePct;
   final int absentPct;
 
-  /// La phrase qui porte les trois taux pour le lecteur d'écran.
-  final String semanticsLabel;
+  /// La phrase qui porte les trois taux pour le lecteur d'écran ; `null`
+  /// quand les taux sont déjà écrits à côté — la barre se tait alors.
+  final String? semanticsLabel;
 
   const PresenceShareBar({
     super.key,
     required this.onTimePct,
     required this.latePct,
     required this.absentPct,
-    required this.semanticsLabel,
+    this.semanticsLabel,
   });
 
   @override
@@ -30,28 +31,28 @@ class PresenceShareBar extends StatelessWidget {
       (latePct, PresenceTone.of(PresenceStatus.late).color),
       (absentPct, PresenceTone.of(PresenceStatus.absent).color),
     ].where((segment) => segment.$1 > 0).toList();
-    return Semantics(
-      label: semanticsLabel,
-      excludeSemantics: true,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(AppDimensions.presenceShareBarHeight / 2),
-        ),
-        child: SizedBox(
-          height: AppDimensions.presenceShareBarHeight,
-          child: segments.isEmpty
-              ? ColoredBox(color: none.soft)
-              : Row(
-                  children: [
-                    for (final (share, color) in segments)
-                      Expanded(
-                        flex: share,
-                        child: ColoredBox(color: color),
-                      ),
-                  ],
-                ),
-        ),
+    final label = semanticsLabel;
+    final bar = ClipRRect(
+      borderRadius: const BorderRadius.all(
+        Radius.circular(AppDimensions.presenceShareBarHeight / 2),
+      ),
+      child: SizedBox(
+        height: AppDimensions.presenceShareBarHeight,
+        child: segments.isEmpty
+            ? ColoredBox(color: none.soft)
+            : Row(
+                children: [
+                  for (final (share, color) in segments)
+                    Expanded(
+                      flex: share,
+                      child: ColoredBox(color: color),
+                    ),
+                ],
+              ),
       ),
     );
+    return label == null
+        ? ExcludeSemantics(child: bar)
+        : Semantics(label: label, excludeSemantics: true, child: bar);
   }
 }

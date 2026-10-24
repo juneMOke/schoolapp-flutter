@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
 import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_dashboard.dart';
@@ -13,11 +15,7 @@ class HrPresenceDashboardContent extends StatelessWidget {
   final HrAttendanceDashboard dashboard;
   final DashboardWindow window;
   final String periodLabel;
-  final List<HrAttendanceStaffRow> rows;
-  final String text;
   final int unsynced;
-  final ValueChanged<String> onTextChanged;
-  final VoidCallback onClearText;
 
   /// `null` : le compte ne pointe pas.
   final VoidCallback? onCompleteMarking;
@@ -28,11 +26,7 @@ class HrPresenceDashboardContent extends StatelessWidget {
     required this.dashboard,
     required this.window,
     required this.periodLabel,
-    required this.rows,
-    required this.text,
     required this.unsynced,
-    required this.onTextChanged,
-    required this.onClearText,
     this.onCompleteMarking,
     this.onOpen,
   });
@@ -58,15 +52,25 @@ class HrPresenceDashboardContent extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         HrPresenceRateCard(dashboard: dashboard),
         const SizedBox(height: AppSpacing.lg),
-        HrPresenceStaffCard(
-          dashboard: dashboard,
-          window: window,
-          periodLabel: periodLabel,
-          rows: rows,
-          text: text,
-          onTextChanged: onTextChanged,
-          onClearText: onClearText,
-          onOpen: onOpen,
+        // Seule la liste suit la frappe : les chiffres et le graphique ne se
+        // reconstruisent pas à chaque lettre.
+        BlocBuilder<HrPresenceDashboardCubit, HrPresenceDashboardState>(
+          buildWhen: (previous, current) =>
+              previous.text != current.text ||
+              previous.dashboard != current.dashboard,
+          builder: (context, state) {
+            final cubit = context.read<HrPresenceDashboardCubit>();
+            return HrPresenceStaffCard(
+              dashboard: dashboard,
+              window: window,
+              periodLabel: periodLabel,
+              rows: state.visibleStaff,
+              text: state.text,
+              onTextChanged: cubit.setText,
+              onClearText: cubit.clearText,
+              onOpen: onOpen,
+            );
+          },
         ),
       ],
     );

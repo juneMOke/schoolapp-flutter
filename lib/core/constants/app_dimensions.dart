@@ -816,6 +816,10 @@ class AppDimensions {
   /// RH · Présences ▸ Récapitulatif : les heures et leur montant.
   static const hrPresenceRecapColHours = 136.0;
 
+  /// « Assiduité par agent » : sous cette largeur, la table défile plutôt
+  /// que d'écraser ses six colonnes (7″ et 10″ en portrait).
+  static const hrPresenceStaffTableMinWidth = 760.0;
+
   /// Opacité de la grille d'un jour validé : lisible, visiblement figée.
   static const presenceMarkFrozenOpacity = 0.78;
 

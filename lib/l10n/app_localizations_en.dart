@@ -13329,7 +13329,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String presenceMarkKpiAbsencesDetail(int justified, int unjustified) {
-    return '$justified J · $unjustified U';
+    return '$justified E · $unjustified U';
   }
 
   @override
@@ -13383,7 +13383,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffAttendanceRecapLegend =>
-      'U = unjustified · J = justified · tap a row to open the monthly sheet';
+      'U = unexcused · E = excused · a row opens the monthly sheet';
 
   @override
   String get staffAttendanceClose => 'Close the month';
@@ -13400,7 +13400,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String staffAttendanceCloseAbsences(int count) {
-    return '$count unjustified absences, flagged in the payroll book, without deduction';
+    return '$count unexcused absences, shown on the payslip, never deducted';
   }
 
   @override
@@ -18287,14 +18287,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accueilModuleHrPresenceDescription =>
-      'Who came in, at what time, and what goes to payroll.';
+      'Who came in, at what time, and the month\'s totals.';
 
   @override
   String get hrPresenceEyebrow => 'HR · Attendance';
 
   @override
   String get hrPresenceRegisterSubtitle =>
-      'The prefect or the censor marks attendance from the tablet, in class or at the front desk — even offline.';
+      'The prefect or the deputy head marks attendance from the tablet, in class or at the front desk — even offline.';
 
   @override
   String get hrPresenceActionMark => 'Mark attendance';
@@ -18489,7 +18489,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String hrPresenceStaffSubtitleTap(String period) {
-    return '$period · least to most regular · tap a staff member for details';
+    return '$period · least to most regular · open a staff member for details';
   }
 
   @override
@@ -18587,7 +18587,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hrPresenceAllAgents => 'All staff';
 
   @override
-  String get hrPresenceAgentOpenPayroll => 'See their pay';
+  String get hrPresenceAgentOpenPayroll => 'Open payroll';
 
   @override
   String get hrPresenceAgentMonthRate => 'Attendance this month';
@@ -18678,7 +18678,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceLegendShare =>
-      '(% of marked days) · long-press a profile for its rule';
+      '(% of marked days) · hold or hover a profile for its rule';
 
   @override
   String get hrPresenceStaffList => 'Staff list';
@@ -18705,7 +18705,13 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 day',
       zero: '0 days',
     );
-    return '$_temp0 out of $scored marked';
+    String _temp1 = intl.Intl.pluralLogic(
+      scored,
+      locale: localeName,
+      other: '$scored marked',
+      one: '1 marked',
+    );
+    return '$_temp0 out of $_temp1';
   }
 
   @override
@@ -18810,9 +18816,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapLegend =>
-      'NJ = unexcused · J = excused · tap a row to open the individual record';
+      'U = unexcused · E = excused · a row opens the individual record';
 
   @override
   String get staffAttendanceCloseIrreversible =>
       'A closed month cannot be reopened: validated pay depends on it.';
+
+  @override
+  String get hrPresenceNoYearTitle => 'No current school year';
+
+  @override
+  String get hrPresenceNoYearMessage =>
+      'The school is between two years: the yearly view returns when the next one opens.';
+
+  @override
+  String get hrPresenceRecapCloseRefused =>
+      'The server refused the last closing of this month: check the month, then try again.';
+
+  @override
+  String get hrPresenceAgentNotFoundMessage =>
+      'The server does not know this staff member in this school: they may have been removed, or the link comes from another school.';
+
+  @override
+  String get hrPresenceErrorForbidden =>
+      'Your profile does not allow you to view staff attendance.';
+
+  @override
+  String hrPresenceYearRowA11y(
+    String month,
+    String presence,
+    String late,
+    String absent,
+  ) {
+    return '$month: attendance $presence, late $late, absent $absent';
+  }
 }

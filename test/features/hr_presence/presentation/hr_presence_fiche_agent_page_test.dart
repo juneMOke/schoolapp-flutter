@@ -3,16 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_year.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_calendar.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_year_list.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../test_helpers/reference_formats.dart';
+import '../../staff/staff_builders.dart';
 import '../hr_presence_builders.dart';
 
 class _MockMonth extends Mock implements GetHrAttendanceAgentMonthUseCase {}
@@ -21,10 +24,21 @@ class _MockYear extends Mock implements GetHrAttendanceAgentYearUseCase {}
 
 class _MockSource extends Mock implements StaffSnapshotSource {}
 
+StaffFileSnapshot _file() => StaffFileSnapshot(
+  members: [
+    member('a-1', lastName: 'KABASELE-TSHIMANGA', firstName: 'Marie-Béatrice'),
+    member('a-2', lastName: 'Mayala', firstName: 'Ruth'),
+  ],
+  documentsByMember: const {},
+  documentTypes: const [],
+  hasEverSynced: true,
+);
+
 void main() {
   Future<({_MockMonth month, _MockYear year})> pump(
     WidgetTester tester, {
     bool yearly = false,
+    HrAttendanceAgentYear? year,
     Size? size = const Size(1280, 1400),
   }) async {
     if (size != null) {
@@ -32,19 +46,22 @@ void main() {
       tester.view.physicalSize = size;
       addTearDown(tester.view.reset);
     }
+    final answerYear = year;
     final month = _MockMonth();
-    final year = _MockYear();
+    final yearMock = _MockYear();
     final source = _MockSource();
-    when(
-      () => source.read(),
-    ).thenAnswer((_) async => const Left(StorageFailure('—')));
+    // Le fichier local nourrit le sélecteur : posé, il entre dans la mise en
+    // page aux formats.
+    when(() => source.read()).thenAnswer((_) async => Right(_file()));
     when(
       () => month(any(), month: any(named: 'month')),
     ).thenAnswer((_) async => Right(agentMonthOf()));
-    when(() => year(any())).thenAnswer((_) async => Right(agentYearOf()));
+    when(
+      () => yearMock(any()),
+    ).thenAnswer((_) async => Right(answerYear ?? agentYearOf()));
     final cubit = HrPresenceFicheCubit(
       getMonth: month,
-      getYear: year,
+      getYear: yearMock,
       source: source,
       args: (
         agentId: 'a-1',
@@ -68,7 +85,7 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    return (month: month, year: year);
+    return (month: month, year: yearMock);
   }
 
   testWidgets('vue mensuelle : le profil du mois, ses taux, son calendrier', (
@@ -108,6 +125,21 @@ void main() {
     await tester.pump();
     await tester.pump();
     verify(() => mocks.year('a-1')).called(1);
+  });
+
+  testWidgets('entre deux années, la vue annuelle le dit', (tester) async {
+    await pump(
+      tester,
+      yearly: true,
+      year: HrAttendanceAgentYear(
+        schoolYear: null,
+        agent: agentMonthOf().agent,
+        profile: PresenceProfile.notEvaluated,
+        kpis: kpisOf(),
+        months: const [],
+      ),
+    );
+    expect(find.text('Aucune année scolaire en cours'), findsOneWidget);
   });
 
   testAtReferenceFormats('la fiche mensuelle tient', (tester, format) async {

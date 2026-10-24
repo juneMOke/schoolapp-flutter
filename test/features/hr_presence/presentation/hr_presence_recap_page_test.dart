@@ -5,6 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -49,6 +52,8 @@ void main() {
     WidgetTester tester, {
     HrAttendanceRecap? answer,
     List<String>? permissions,
+    StaffAttendanceLock? lock,
+    int unsynced = 0,
     Size? size = const Size(1280, 1600),
   }) async {
     if (size != null) {
@@ -75,7 +80,12 @@ void main() {
         StaffAttendanceSnapshot(
           members: const [],
           records: const {},
-          locks: const {},
+          locks: lock == null
+              ? const {}
+              : {
+                  StaffAttendanceSnapshot.lockKey(lock.kind, lock.periodStart):
+                      lock,
+                },
           settings: StaffAttendanceSettings.defaults,
           hasEverSynced: true,
         ),
@@ -86,7 +96,7 @@ void main() {
         from: any(named: 'from'),
         to: any(named: 'to'),
       ),
-    ).thenAnswer((_) async => const Right(0));
+    ).thenAnswer((_) async => Right(unsynced));
     when(() => commands.closeMonth(any())).thenAnswer(
       (_) async => const StaffAttendanceNotice(
         StaffAttendanceNoticeKind.monthClosed,
@@ -206,8 +216,58 @@ void main() {
     expect(find.byType(PresenceHolidayState), findsOneWidget);
   });
 
+  testWidgets('une clôture refusée par le serveur se dit', (tester) async {
+    await pump(
+      tester,
+      permissions: manage,
+      answer: recapOf(month: '2026-10', closable: true),
+      lock: const StaffAttendanceLock(
+        kind: StaffAttendanceLockKind.month,
+        periodStart: '2026-10-01',
+        locked: false,
+        syncState: RecordSyncState.failed,
+      ),
+    );
+    expect(find.textContaining('refusée par le serveur'), findsOneWidget);
+  });
+
+  testWidgets('un mois passé non clôturable ne promet pas de date', (
+    tester,
+  ) async {
+    await pump(tester, permissions: manage, answer: recapOf(toDate: false));
+    expect(find.textContaining('Clôture possible'), findsNothing);
+  });
+
   testAtReferenceFormats('le récapitulatif tient', (tester, format) async {
-    await pump(tester, size: null, permissions: manage);
+    await pump(tester, size: null, permissions: manage, unsynced: 3);
     expect(find.byType(HrPresenceRecapTable), findsOneWidget);
+  });
+
+  testAtReferenceFormats('le récapitulatif clos tient', (tester, format) async {
+    await pump(
+      tester,
+      size: null,
+      permissions: manage,
+      answer: recapOf(closed: true),
+    );
+    expect(find.textContaining('Mois clôturé'), findsOneWidget);
+  });
+
+  testAtReferenceFormats('la clôture en attente d\'envoi tient', (
+    tester,
+    format,
+  ) async {
+    await pump(
+      tester,
+      size: null,
+      permissions: manage,
+      lock: const StaffAttendanceLock(
+        kind: StaffAttendanceLockKind.month,
+        periodStart: '2026-10-01',
+        locked: true,
+        syncState: RecordSyncState.pending,
+      ),
+    );
+    expect(find.textContaining('en attente d\'envoi'), findsOneWidget);
   });
 }

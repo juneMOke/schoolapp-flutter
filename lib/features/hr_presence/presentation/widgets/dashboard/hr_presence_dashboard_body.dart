@@ -157,11 +157,7 @@ class HrPresenceDashboardBody extends StatelessWidget {
           dashboard: dashboard,
           window: window,
           periodLabel: periodLabel,
-          rows: state.visibleStaff,
-          text: state.text,
           unsynced: state.unsynced,
-          onTextChanged: cubit.setText,
-          onClearText: cubit.clearText,
           onCompleteMarking: canMark ? onOpenRegister : null,
           onOpen: onOpen,
         );

@@ -26,6 +26,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
   final DateTime Function() _now;
   void Function()? _unwatch;
   int _seq = 0;
+  int _readSeq = 0;
 
   StaffAttendanceCubit({
     required LoadStaffAttendanceUseCase load,
@@ -66,9 +67,12 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   Future<void> _read({required bool loading}) async {
     if (isClosed) return;
+    // Deux lectures se croisent (un lien ?jour= juste après load, un signal
+    // de synchro) : seule la dernière demandée écrit.
+    final ticket = ++_readSeq;
     final (from, to) = _range(state.day, state.month);
     final result = await _load(from: from, to: to);
-    if (isClosed) return;
+    if (isClosed || ticket != _readSeq) return;
     result.fold(
       (failure) {
         if (loading) {

@@ -30,7 +30,10 @@ class StaffAttendanceDao {
   }
 
   /// Combien de pointages de l'école, du jour [from] au jour [to] inclus,
-  /// ne sont pas encore reçus par le serveur — en file ou refusés.
+  /// attendent leur envoi : en file, avec une entrée d'outbox en attente.
+  /// Un pointage refusé n'en est pas — il ne repartira pas seul, sa
+  /// pastille le dit au registre (même piège que les gestes : jamais
+  /// `sync_status` seul).
   Future<int> unsyncedCount(
     String schoolId, {
     required String from,
@@ -38,10 +41,18 @@ class StaffAttendanceDao {
   }) async {
     if (schoolId.isEmpty) return 0;
     final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS n FROM $table '
-      'WHERE school_id = ? AND work_date >= ? AND work_date <= ? '
-      'AND sync_status != ?',
-      [schoolId, from, to, RecordSyncState.synced.dbValue],
+      'SELECT COUNT(*) AS n FROM $table r '
+      'JOIN ${OutboxDao.table} o '
+      "ON o.id = '${StaffAttendanceWriteDao.aggregateType}:' || r.id "
+      'WHERE r.school_id = ? AND r.work_date >= ? AND r.work_date <= ? '
+      'AND r.sync_status = ? AND o.status = ?',
+      [
+        schoolId,
+        from,
+        to,
+        RecordSyncState.pending.dbValue,
+        OutboxStatus.pending.dbValue,
+      ],
     );
     return (rows.single['n'] as int?) ?? 0;
   }

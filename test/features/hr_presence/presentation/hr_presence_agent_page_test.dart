@@ -17,9 +17,11 @@ import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_agent_page.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../test_helpers/reference_formats.dart';
+import '../../staff/staff_builders.dart';
 import '../hr_presence_builders.dart';
 
 class _MockGet extends Mock implements GetHrAttendanceAgentMonthUseCase {}
@@ -27,6 +29,16 @@ class _MockGet extends Mock implements GetHrAttendanceAgentMonthUseCase {}
 class _MockSource extends Mock implements StaffSnapshotSource {}
 
 class _MockAuth extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
+
+StaffFileSnapshot _file() => StaffFileSnapshot(
+  members: [
+    member('a-1', lastName: 'KABASELE-TSHIMANGA', firstName: 'Marie-Béatrice'),
+    member('a-2', lastName: 'Mayala', firstName: 'Ruth'),
+  ],
+  documentsByMember: const {},
+  documentTypes: const [],
+  hasEverSynced: true,
+);
 
 void main() {
   Future<_MockGet> pump(
@@ -43,9 +55,9 @@ void main() {
     }
     final get = _MockGet();
     final source = _MockSource();
-    when(
-      () => source.read(),
-    ).thenAnswer((_) async => const Left(StorageFailure('—')));
+    // Le fichier local nourrit le sélecteur : posé, il entre dans la mise en
+    // page aux formats.
+    when(() => source.read()).thenAnswer((_) async => Right(_file()));
     when(() => get(any(), month: any(named: 'month'))).thenAnswer(
       (_) async => answer == null
           ? Right(agentMonthOf(payMode: payMode))

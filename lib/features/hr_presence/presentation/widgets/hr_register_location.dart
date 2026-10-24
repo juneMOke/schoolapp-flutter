@@ -10,8 +10,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 
 /// Le jour et les filtres du registre tenus dans l'adresse :
 /// `?jour=2026-10-21&vue=list&categorie=teacher&statut=absent`. F5 rouvre le
-/// même jour, un lien du tableau de bord y mène, Précédent revient au jour
-/// d'avant.
+/// même jour, un lien partagé aussi, Précédent revient au jour d'avant.
 ///
 /// La recherche n'y va pas : chaque frappe serait une entrée d'historique.
 /// Les valeurs par défaut (dernier jour ouvré, cartes, tout le personnel)

@@ -135,7 +135,7 @@ void main() {
       ReflectedRecordsParser.reflectedUri(
         router.routerDelegate.currentConfiguration,
       ).toString(),
-      '/home/$dashboard/a-1?mois=2026-09',
+      '/home/$dashboard/a-1?mois-agent=2026-09',
     );
 
     await tester.tap(find.byTooltip('Tous les agents'));
@@ -147,19 +147,55 @@ void main() {
   testWidgets('rechargé : le tableau de bord dessous, le même mois', (
     tester,
   ) async {
-    await pump(tester, '/home/$dashboard/a-1?mois=2026-09');
+    await pump(tester, '/home/$dashboard/a-1?mois-agent=2026-09');
     await settle(tester);
 
     expect(find.byType(HrPresenceAgentScreen), findsOneWidget);
     verify(() => get('a-1', month: '2026-09')).called(1);
   });
 
-  testWidgets('la fiche individuelle a son adresse : `?vue=an` l\'ouvre sur '
-      'l\'année', (tester) async {
-    await pump(tester, '/home/${MenuConstants.hrPresenceFicheId}/a-1?vue=an');
+  testWidgets(
+    'la fiche individuelle a son adresse : `?vue-agent=an` l\'ouvre sur '
+    'l\'année',
+    (tester) async {
+      await pump(
+        tester,
+        '/home/${MenuConstants.hrPresenceFicheId}/a-1?vue-agent=an',
+      );
+      await settle(tester);
+
+      expect(find.byType(HrPresenceFicheAgentScreen), findsOneWidget);
+      verify(() => year('a-1')).called(1);
+    },
+  );
+
+  testWidgets('rechargé puis refermé : les clés de l\'agent quittent '
+      'l\'adresse du tableau de bord', (tester) async {
+    final router = await pump(
+      tester,
+      '/home/$dashboard/a-1?mois-agent=2026-09',
+    );
+    await settle(tester);
+    await tester.tap(find.byTooltip('Tous les agents'));
+    await settle(tester);
+
+    expect(find.byType(HrPresenceAgentScreen), findsNothing);
+    expect(
+      router.routerDelegate.currentConfiguration.uri.toString(),
+      '/home/$dashboard',
+    );
+  });
+
+  testWidgets('ouverte depuis le récapitulatif, la fiche lui appartient', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      '/home/${MenuConstants.hrPresenceRecapId}/a-1?mois-agent=2026-09',
+    );
     await settle(tester);
 
     expect(find.byType(HrPresenceFicheAgentScreen), findsOneWidget);
-    verify(() => year('a-1')).called(1);
+    expect(find.byTooltip('Récapitulatif'), findsOneWidget);
   });
 }

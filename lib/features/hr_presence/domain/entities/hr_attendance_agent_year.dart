@@ -86,7 +86,9 @@ class HrAttendanceMonthSummary extends Equatable {
 /// L'année scolaire courante d'un agent, mois par mois
 /// (`GET /hr/attendance-stats/staff/{id}/year`).
 class HrAttendanceAgentYear extends Equatable {
-  final HrSchoolYear schoolYear;
+  /// `null` : l'école n'a pas d'année scolaire en cours (entre deux
+  /// années) — ni mois, ni chiffres.
+  final HrSchoolYear? schoolYear;
   final HrAttendanceAgent agent;
   final PresenceProfile profile;
   final HrAttendanceKpis kpis;

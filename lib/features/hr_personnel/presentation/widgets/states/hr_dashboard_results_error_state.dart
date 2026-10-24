@@ -20,12 +20,16 @@ class HrDashboardResultsErrorState extends StatelessWidget {
   final String? serverTitle;
   final String? serverMessage;
 
+  /// Le droit qui manque, nommé par l'écran ; celui du personnel par défaut.
+  final String? forbiddenMessage;
+
   const HrDashboardResultsErrorState({
     super.key,
     this.failure,
     this.onRetry,
     this.serverTitle,
     this.serverMessage,
+    this.forbiddenMessage,
   });
 
   @override
@@ -46,7 +50,8 @@ class HrDashboardResultsErrorState extends StatelessWidget {
       message: switch (type) {
         EteeloErrorType.network => l10n.staffErrorNetwork,
         EteeloErrorType.unauthorized => l10n.staffErrorUnauthorized,
-        EteeloErrorType.forbidden => l10n.staffErrorForbidden,
+        EteeloErrorType.forbidden =>
+          forbiddenMessage ?? l10n.staffErrorForbidden,
         _ => serverMessage ?? l10n.hrDashboardErrorServer,
       },
       primaryAction: switch (type) {

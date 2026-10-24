@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_state.dart';
@@ -24,7 +25,10 @@ class HrPresenceProfilesCubit extends Cubit<HrPresenceProfilesState> {
        super(_initial(yearStart, now()));
 
   static HrPresenceProfilesState _initial(DateTime? yearStart, DateTime now) {
-    final current = SchoolDayCalendar.monthOf(SchoolDayCalendar.dayOf(now));
+    final current = SchoolDayCalendar.monthOf(
+      // Le mois de l'école, comme le serveur : pas celui de la tablette.
+      SchoolDayCalendar.dayOf(SchoolTime.today(now)),
+    );
     return HrPresenceProfilesState(
       month: current,
       currentMonth: current,

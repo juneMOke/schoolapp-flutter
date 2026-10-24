@@ -47,6 +47,7 @@ void main() {
       server: FakeHrAttendanceStats(dashboard),
       unsynced: 3,
       size: null,
+      openable: true,
     );
     expect(find.text('Assiduité par agent'), findsOneWidget);
   });

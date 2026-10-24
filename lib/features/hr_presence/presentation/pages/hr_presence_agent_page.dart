@@ -16,7 +16,6 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr_personnel_header.dart';
@@ -26,8 +25,8 @@ import 'package:school_app_flutter/features/hr_presence/presentation/widgets/age
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_agent_kpis.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_agent_toolbar.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_month_body.dart';
-import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_fiche_location.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/states/hr_presence_results_error_state.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -39,9 +38,6 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 /// Un écran distinct de la vue mensuelle de la fiche individuelle (§12),
 /// même s'il lit la même route.
 class HrPresenceAgentPage extends StatelessWidget {
-  /// Le mois affiché, `AAAA-MM`.
-  static const monthParam = 'mois';
-
   final HrPresenceAgentArgs args;
 
   /// Prévient l'écran qui l'a ouvert, à sa disparition.
@@ -59,7 +55,7 @@ class HrPresenceAgentPage extends StatelessWidget {
     context,
     subMenuId: MenuConstants.hrPresenceDashboardId,
     agentId: agentId,
-    query: {monthParam: month},
+    query: {HrAgentAddress.monthParam: month},
   );
 
   @override
@@ -68,50 +64,14 @@ class HrPresenceAgentPage extends StatelessWidget {
       param1: (
         agentId: args.agentId,
         month: args.month,
-        yearStart: args.yearStart ?? _yearStart(context),
+        yearStart: args.yearStart ?? HrPresenceContext.yearStart(context),
       ),
     )..load(),
-    child: _ClosingNotifier(
+    child: HrClosingNotifier(
       onClosed: onClosed,
       child: const HrPresenceAgentScreen(),
     ),
   );
-}
-
-/// L'ouverture de l'année, si le contexte la connaît déjà.
-DateTime? _yearStart(BuildContext context) {
-  try {
-    return context
-        .read<AcademicYearContextBloc>()
-        .state
-        .context
-        ?.academicYear
-        .startDate;
-  } on Object {
-    return null;
-  }
-}
-
-/// Appelle [onClosed] quand la page disparaît, quelle que soit la sortie.
-class _ClosingNotifier extends StatefulWidget {
-  final VoidCallback? onClosed;
-  final Widget child;
-
-  const _ClosingNotifier({required this.onClosed, required this.child});
-
-  @override
-  State<_ClosingNotifier> createState() => _ClosingNotifierState();
-}
-
-class _ClosingNotifierState extends State<_ClosingNotifier> {
-  @override
-  void dispose() {
-    widget.onClosed?.call();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }
 
 class HrPresenceAgentScreen extends StatelessWidget {
@@ -133,6 +93,10 @@ class HrPresenceAgentScreen extends StatelessWidget {
           title: l10n.hrPresenceAgentTitle,
           backTooltip: l10n.hrPresenceAllAgents,
           shellSubMenuId: MenuConstants.hrPresenceDashboardId,
+          onBack: (context) => HrAgentAddress.leave(
+            context,
+            subMenuId: MenuConstants.hrPresenceDashboardId,
+          ),
         ),
         child:
             BlocBuilder<HrPresenceAgentMonthCubit, HrPresenceAgentMonthState>(
@@ -163,7 +127,7 @@ class HrPresenceAgentScreen extends StatelessWidget {
           when state.failure is NotFoundFailure =>
         EteeloEmptyResult(
           label: l10n.hrAgentNotFoundTitle,
-          description: l10n.hrAgentNotFoundMessage,
+          description: l10n.hrPresenceAgentNotFoundMessage,
           medallionIcon: Icons.person_search_outlined,
           fullWidthCard: true,
         ),
@@ -228,7 +192,7 @@ class _Actions extends StatelessWidget {
                 subMenuId: MenuConstants.hrPresenceFicheId,
                 agentId: agentId,
               ),
-              queryParameters: {HrFicheLocation.monthParam: month},
+              queryParameters: {HrAgentAddress.monthParam: month},
             ).toString(),
           ),
           fullWidth: false,
@@ -238,8 +202,9 @@ class _Actions extends StatelessWidget {
           EteeloButton.secondary(
             label: l10n.hrPresenceAgentOpenPayroll,
             icon: Icons.payments_outlined,
-            // Dans la coquille, par son adresse : la page de l'agent est
-            // poussée par-dessus, hors de la navigation du menu.
+            // La Paie en général, dans la coquille et par son adresse : la
+            // page de l'agent, poussée par-dessus la coquille, n'en voit pas
+            // la navigation. La Paie n'a pas encore d'adresse par agent.
             onPressed: () => context.go(
               AppRoutesNames.homeSubMenuPath(MenuConstants.hrPayrollId),
             ),

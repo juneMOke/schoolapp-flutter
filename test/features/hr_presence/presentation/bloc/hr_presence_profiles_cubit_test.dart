@@ -65,6 +65,17 @@ void main() {
     },
   );
 
+  test('la puce active reste, même vidée par la recherche', () async {
+    final cubit = build();
+    await cubit.load();
+    cubit
+      ..toggleProfile(PresenceProfile.absentee)
+      ..setText('mayala');
+    expect(cubit.state.profileCounts[PresenceProfile.absentee], 0);
+    cubit.toggleProfile(PresenceProfile.absentee);
+    expect(ids(cubit.state), ['a-2']);
+  });
+
   test('recherche (nom, fonction, matricule) et catégorie', () async {
     final cubit = build();
     await cubit.load();
@@ -82,6 +93,16 @@ void main() {
     ]);
     cubit.clearFilters();
     expect(cubit.state.hasFilters, isFalse);
+  });
+
+  test('le mois en cours est celui de l\'école, pas de la tablette', () {
+    // 1er novembre 00:30 à Lubumbashi = 31 octobre 23:30 à Kinshasa.
+    final cubit = HrPresenceProfilesCubit(
+      getProfiles: get,
+      now: () => DateTime.utc(2026, 10, 31, 22, 30),
+    );
+    addTearDown(cubit.close);
+    expect(cubit.state.currentMonth, '2026-10');
   });
 
   test('le mois ne passe ni le mois en cours ni la rentrée', () async {

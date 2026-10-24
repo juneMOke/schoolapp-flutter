@@ -52,11 +52,6 @@ class HrPresenceProfileRow extends StatelessWidget {
         onTimePct: presence == null ? 0 : (presence - late).clamp(0, 100),
         latePct: late,
         absentPct: absent,
-        semanticsLabel: l10n.hrPresenceProfileRatesA11y(
-          rate(presence),
-          rate(row.lateRatePct),
-          rate(row.absenceRatePct),
-        ),
       ),
     );
     final identity = Row(

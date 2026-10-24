@@ -79,11 +79,6 @@ class _MonthRow extends StatelessWidget {
               onTimePct: presence == null ? 0 : (presence - late).clamp(0, 100),
               latePct: late,
               absentPct: month.absenceRatePct ?? 0,
-              semanticsLabel: l10n.hrPresenceProfileRatesA11y(
-                rate(presence),
-                rate(month.lateRatePct),
-                rate(month.absenceRatePct),
-              ),
             ),
           ),
           Text(
@@ -132,9 +127,17 @@ class _MonthRow extends StatelessWidget {
       ),
     );
     if (!month.isOpenable) return row;
+    // Une seule phrase pour le lecteur d'écran : le mois et ses taux.
     return Semantics(
       button: true,
-      label: name,
+      label: l10n.hrPresenceYearRowA11y(
+        name,
+        rate(presence),
+        rate(month.lateRatePct),
+        rate(month.absenceRatePct),
+      ),
+      excludeSemantics: true,
+      onTap: () => onOpen(month.month),
       child: InkWell(
         borderRadius: AppRadius.brMd,
         onTap: () => onOpen(month.month),

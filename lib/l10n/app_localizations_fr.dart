@@ -13500,7 +13500,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String staffAttendanceCloseAbsences(int count) {
-    return '$count absences non justifiées, signalées dans le livre de paie, sans retenue';
+    return '$count absences non justifiées, signalées sur le bulletin, sans retenue';
   }
 
   @override
@@ -18418,7 +18418,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModuleHrPresenceDescription =>
-      'Qui est venu, à quelle heure, et ce qui part à la paie.';
+      'Qui est venu, à quelle heure, et les totaux du mois.';
 
   @override
   String get hrPresenceEyebrow => 'RH · Présences';
@@ -18621,7 +18621,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String hrPresenceStaffSubtitleTap(String period) {
-    return '$period · du moins au plus assidu · touchez un agent pour son détail';
+    return '$period · du moins au plus assidu · ouvrez un agent pour son détail';
   }
 
   @override
@@ -18720,7 +18720,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hrPresenceAllAgents => 'Tous les agents';
 
   @override
-  String get hrPresenceAgentOpenPayroll => 'Voir sa paie';
+  String get hrPresenceAgentOpenPayroll => 'Ouvrir la paie';
 
   @override
   String get hrPresenceAgentMonthRate => 'Présence du mois';
@@ -18809,7 +18809,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceLegendShare =>
-      '(% des jours pointés) · touchez longuement un profil pour sa règle';
+      '(% des jours pointés) · la règle d\'un profil s\'affiche à l\'appui long ou au survol';
 
   @override
   String get hrPresenceStaffList => 'Liste du personnel';
@@ -18836,7 +18836,13 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 jour',
       zero: '0 jour',
     );
-    return '$_temp0 sur $scored pointés';
+    String _temp1 = intl.Intl.pluralLogic(
+      scored,
+      locale: localeName,
+      other: '$scored pointés',
+      one: '1 pointé',
+    );
+    return '$_temp0 sur $_temp1';
   }
 
   @override
@@ -18941,9 +18947,38 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceRecapLegend =>
-      'NJ = non justifiée · J = justifiée · touchez une ligne pour ouvrir la fiche individuelle';
+      'NJ = non justifiée · J = justifiée · une ligne ouvre la fiche individuelle';
 
   @override
   String get staffAttendanceCloseIrreversible =>
       'Un mois clôturé ne se rouvre pas : la paie validée en dépend.';
+
+  @override
+  String get hrPresenceNoYearTitle => 'Aucune année scolaire en cours';
+
+  @override
+  String get hrPresenceNoYearMessage =>
+      'L\'école est entre deux années : la vue annuelle reviendra à l\'ouverture de la prochaine.';
+
+  @override
+  String get hrPresenceRecapCloseRefused =>
+      'La dernière clôture de ce mois a été refusée par le serveur : vérifiez le mois, puis recommencez.';
+
+  @override
+  String get hrPresenceAgentNotFoundMessage =>
+      'Le serveur ne connaît pas cet agent dans cette école : il a pu être retiré du fichier, ou le lien vient d\'une autre école.';
+
+  @override
+  String get hrPresenceErrorForbidden =>
+      'Votre profil ne permet pas de consulter les présences du personnel.';
+
+  @override
+  String hrPresenceYearRowA11y(
+    String month,
+    String presence,
+    String late,
+    String absent,
+  ) {
+    return '$month : présence $presence, retards $late, absences $absent';
+  }
 }

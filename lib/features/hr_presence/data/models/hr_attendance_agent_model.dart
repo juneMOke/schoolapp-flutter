@@ -29,7 +29,9 @@ abstract final class HrAttendanceAgentModel {
 
   static HrAttendanceAgentYear yearFromJson(Map<String, dynamic> json) =>
       HrAttendanceAgentYear(
-        schoolYear: schoolYear(HrAttendanceJson.map(json['schoolYear'])),
+        schoolYear: json['schoolYear'] == null
+            ? null
+            : schoolYear(HrAttendanceJson.map(json['schoolYear'])),
         agent: HrAttendanceJson.agent(HrAttendanceJson.map(json['agent'])),
         profile: HrAttendanceJson.profile(json),
         kpis: HrAttendanceJson.kpis(HrAttendanceJson.map(json['kpis'])),

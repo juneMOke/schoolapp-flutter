@@ -74,9 +74,11 @@ class HrPresenceProfilesState extends Equatable {
     for (final row in _selection) {
       counts[row.profile] = (counts[row.profile] ?? 0) + 1;
     }
+    // La puce active reste, même à zéro : sinon plus rien ne la retire.
     return {
       for (final profile in PresenceProfile.values)
-        if (counts[profile] != null) profile: counts[profile]!,
+        if (counts[profile] != null || profile == this.profile)
+          profile: counts[profile] ?? 0,
     };
   }
 

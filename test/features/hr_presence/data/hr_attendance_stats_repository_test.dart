@@ -129,11 +129,19 @@ void main() {
         () => api.getAgentYear(any(), any()),
       ).thenAnswer((_) async => fx.agentYear());
       final year = _right(await repo.agentYear('a-1'));
-      expect(year.schoolYear.name, '2026-2027');
+      expect(year.schoolYear!.name, '2026-2027');
       expect(year.months.first.isOpenable, isTrue);
       expect(year.months.last.state, HrAttendanceMonthState.future);
       expect(year.months.last.isOpenable, isFalse);
       expect(year.months.last.profile, PresenceProfile.notEvaluated);
+    });
+
+    test('entre deux années : pas d\'année, pas d\'erreur', () async {
+      when(
+        () => api.getAgentYear(any(), any()),
+      ).thenAnswer((_) async => fx.agentYear(withYear: false));
+      final year = _right(await repo.agentYear('a-1'));
+      expect(year.schoolYear, isNull);
     });
   });
 

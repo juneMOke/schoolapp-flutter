@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr
 import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_agent_route_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_agent_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
-import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_fiche_location.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// La fiche d'un agent, enfant de l'écran de la coquille qui l'a ouverte :
@@ -20,6 +20,7 @@ abstract final class HrAgentRoutes {
     MenuConstants.hrPersonnelFileId,
     MenuConstants.hrPresenceDashboardId,
     MenuConstants.hrPresenceFicheId,
+    MenuConstants.hrPresenceRecapId,
   };
 
   static GoRoute agent() => GoRoute(
@@ -36,23 +37,24 @@ abstract final class HrAgentRoutes {
         return HrPresenceAgentPage(
           args: (
             agentId: state.pathParameters['agentId'] ?? '',
-            month: state.uri.queryParameters[HrPresenceAgentPage.monthParam],
+            month: state.uri.queryParameters[HrAgentAddress.monthParam],
             yearStart: null,
           ),
           onClosed: onClosed,
         );
       }
-      if (subMenuId == MenuConstants.hrPresenceFicheId) {
+      if (subMenuId == MenuConstants.hrPresenceFicheId ||
+          subMenuId == MenuConstants.hrPresenceRecapId) {
         final query = state.uri.queryParameters;
         return HrPresenceFicheAgentPage(
           args: (
             agentId: state.pathParameters['agentId'] ?? '',
-            yearly:
-                query[HrFicheLocation.viewParam] == HrFicheLocation.yearValue,
-            month: query[HrFicheLocation.monthParam],
+            yearly: query[HrAgentAddress.viewParam] == HrAgentAddress.yearValue,
+            month: query[HrAgentAddress.monthParam],
             yearStart: null,
           ),
           onClosed: onClosed,
+          shellSubMenuId: subMenuId!,
         );
       }
       return HrAgentRoutePage(

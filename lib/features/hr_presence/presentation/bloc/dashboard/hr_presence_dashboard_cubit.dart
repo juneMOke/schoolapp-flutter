@@ -107,6 +107,7 @@ class HrPresenceDashboardCubit extends Cubit<HrPresenceDashboardState> {
         status: same ? state.status : HrPresenceDashboardStatus.loading,
         dashboard: same ? state.dashboard : null,
         failure: null,
+        unsynced: same ? state.unsynced : 0,
       ),
     );
     unawaited(_readUnsynced(window, ticket));
