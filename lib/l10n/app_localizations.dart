@@ -21326,6 +21326,114 @@ abstract class AppLocalizations {
   /// **'Net {amount}'**
   String payrollTabLedgerSubtitle(String amount);
 
+  /// No description provided for @payrollTabStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll statement'**
+  String get payrollTabStatement;
+
+  /// No description provided for @payrollTabStatementSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The schools\' spreadsheet'**
+  String get payrollTabStatementSubtitle;
+
+  /// No description provided for @payrollStatementColName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get payrollStatementColName;
+
+  /// No description provided for @payrollStatementColGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get payrollStatementColGrade;
+
+  /// No description provided for @payrollStatementColGross.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross'**
+  String get payrollStatementColGross;
+
+  /// No description provided for @payrollStatementColWorkedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get payrollStatementColWorkedDays;
+
+  /// No description provided for @payrollStatementColAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexc. abs.'**
+  String get payrollStatementColAbsence;
+
+  /// No description provided for @payrollStatementColLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan'**
+  String get payrollStatementColLoan;
+
+  /// No description provided for @payrollStatementColAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Adv.'**
+  String get payrollStatementColAdvance;
+
+  /// No description provided for @payrollStatementColChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'PC/E'**
+  String get payrollStatementColChildcare;
+
+  /// No description provided for @payrollStatementColIpr.
+  ///
+  /// In en, this message translates to:
+  /// **'IPR'**
+  String get payrollStatementColIpr;
+
+  /// No description provided for @payrollStatementColCnss.
+  ///
+  /// In en, this message translates to:
+  /// **'CNSS'**
+  String get payrollStatementColCnss;
+
+  /// No description provided for @payrollStatementColNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net pay'**
+  String get payrollStatementColNet;
+
+  /// No description provided for @payrollStatementSubtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get payrollStatementSubtotal;
+
+  /// No description provided for @payrollStatementTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand total'**
+  String get payrollStatementTotal;
+
+  /// No description provided for @payrollStatementOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Others'**
+  String get payrollStatementOther;
+
+  /// No description provided for @payrollStatementLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only: the payroll is no longer a draft.'**
+  String get payrollStatementLocked;
+
+  /// No description provided for @payrollStatementControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross {gross} − deductions {withheld} = net {net}'**
+  String payrollStatementControl(String gross, String withheld, String net);
+
   /// No description provided for @payrollTabPayslips.
   ///
   /// In en, this message translates to:

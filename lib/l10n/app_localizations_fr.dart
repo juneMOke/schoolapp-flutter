@@ -13646,6 +13646,63 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get payrollTabStatement => 'État de paie';
+
+  @override
+  String get payrollTabStatementSubtitle => 'Le tableur des écoles';
+
+  @override
+  String get payrollStatementColName => 'Nom et postnom';
+
+  @override
+  String get payrollStatementColGrade => 'Grade';
+
+  @override
+  String get payrollStatementColGross => 'Sal. brut';
+
+  @override
+  String get payrollStatementColWorkedDays => 'NJP';
+
+  @override
+  String get payrollStatementColAbsence => 'Abs. non just.';
+
+  @override
+  String get payrollStatementColLoan => 'Crédit';
+
+  @override
+  String get payrollStatementColAdvance => 'A/S';
+
+  @override
+  String get payrollStatementColChildcare => 'PC/E';
+
+  @override
+  String get payrollStatementColIpr => 'IPR';
+
+  @override
+  String get payrollStatementColCnss => 'CNSS';
+
+  @override
+  String get payrollStatementColNet => 'Net à payer';
+
+  @override
+  String get payrollStatementSubtotal => 'Sous-total';
+
+  @override
+  String get payrollStatementTotal => 'Total général';
+
+  @override
+  String get payrollStatementOther => 'Autres';
+
+  @override
+  String get payrollStatementLocked =>
+      'Lecture seule : la paie n\'est plus en brouillon.';
+
+  @override
+  String payrollStatementControl(String gross, String withheld, String net) {
+    return 'Brut $gross − retenues $withheld = net $net';
+  }
+
+  @override
   String get payrollTabPayslips => 'Bulletins';
 
   @override

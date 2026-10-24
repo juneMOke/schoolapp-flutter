@@ -10,7 +10,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_member_s
 
 enum PayrollLoad { loading, ready, failure }
 
-enum PayrollTab { ledger, payslips, advances, history }
+enum PayrollTab { ledger, statement, payslips, advances, history }
 
 /// Les puces du règlement (B3) : un salaire se règle en plusieurs fois.
 enum PayrollPayFilter {

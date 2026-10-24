@@ -9068,6 +9068,37 @@
   "payrollTabLedger": "Payroll ledger",
   "payrollTabLedgerSubtitle": "Net {amount}",
   "@payrollTabLedgerSubtitle": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollTabStatement": "Payroll statement",
+  "payrollTabStatementSubtitle": "The schools' spreadsheet",
+  "payrollStatementColName": "Name",
+  "payrollStatementColGrade": "Grade",
+  "payrollStatementColGross": "Gross",
+  "payrollStatementColWorkedDays": "Days",
+  "payrollStatementColAbsence": "Unexc. abs.",
+  "payrollStatementColLoan": "Loan",
+  "payrollStatementColAdvance": "Adv.",
+  "payrollStatementColChildcare": "PC/E",
+  "payrollStatementColIpr": "IPR",
+  "payrollStatementColCnss": "CNSS",
+  "payrollStatementColNet": "Net pay",
+  "payrollStatementSubtotal": "Subtotal",
+  "payrollStatementTotal": "Grand total",
+  "payrollStatementOther": "Others",
+  "payrollStatementLocked": "Read only: the payroll is no longer a draft.",
+  "payrollStatementControl": "Gross {gross} − deductions {withheld} = net {net}",
+  "@payrollStatementControl": {
+    "placeholders": {
+      "gross": {
+        "type": "String"
+      },
+      "withheld": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
   "payrollTabPayslips": "Payslips",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
   "payrollTabAdvances": "Advances",

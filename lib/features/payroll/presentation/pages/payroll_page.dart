@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advances_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/history/payroll_history_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_tab.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/statement/payroll_statement_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_tabs.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslips_tab.dart';
@@ -88,6 +89,7 @@ class PayrollScreen extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         switch (state.tab) {
           PayrollTab.ledger => PayrollLedgerTab(state: state),
+          PayrollTab.statement => PayrollStatementTab(state: state),
           PayrollTab.payslips => PayrollPayslipsTab(state: state),
           PayrollTab.advances => PayrollAdvancesTab(state: state),
           PayrollTab.history => PayrollHistoryTab(state: state),

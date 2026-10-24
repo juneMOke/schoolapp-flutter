@@ -6,7 +6,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/core/components/controls/eteelo_card_tabs.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les quatre onglets de la paie, en cartes comme ceux du Pointage.
+/// Les cinq onglets de la paie, en cartes comme ceux du Pointage.
 class PayrollTabs extends StatelessWidget {
   final PayrollState state;
   final ValueChanged<PayrollTab> onSelect;
@@ -39,6 +39,12 @@ class PayrollTabs extends StatelessWidget {
               : PayrollTone.of(
                   view.phase,
                 ).badge(PayrollLabels.phase(l10n, view.phase)),
+        ),
+        EteeloCardTab(
+          id: PayrollTab.statement,
+          icon: Icons.table_chart_outlined,
+          title: l10n.payrollTabStatement,
+          subtitle: l10n.payrollTabStatementSubtitle,
         ),
         EteeloCardTab(
           id: PayrollTab.payslips,

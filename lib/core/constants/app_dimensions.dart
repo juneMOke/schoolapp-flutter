@@ -864,6 +864,10 @@ class AppDimensions {
   // alignées à droite, en chiffres tabulaires.
   static const payrollLedgerMinWidth = 920.0;
   static const payrollColAmount = 100.0;
+
+  /// L'état de paie : onze colonnes du tableur des écoles.
+  static const payrollStatementMinWidth = 1120.0;
+  static const payrollColCode = 64.0;
   static const payrollColSmallAmount = 80.0;
   static const payrollColAttendance = 88.0;
   static const payrollColPayout = 136.0;

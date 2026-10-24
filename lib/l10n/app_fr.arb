@@ -9468,6 +9468,89 @@
   "subMenuPayroll": "Paie",
   "payrollTabLedger": "Livre de paie",
   "payrollTabLedgerSubtitle": "Net {amount}",
+  "payrollTabStatement": "État de paie",
+  "@payrollTabStatement": {
+    "description": "Onglet de l'état de paie."
+  },
+  "payrollTabStatementSubtitle": "Le tableur des écoles",
+  "@payrollTabStatementSubtitle": {
+    "description": "Sous-titre de l'onglet."
+  },
+  "payrollStatementColName": "Nom et postnom",
+  "@payrollStatementColName": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColGrade": "Grade",
+  "@payrollStatementColGrade": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColGross": "Sal. brut",
+  "@payrollStatementColGross": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColWorkedDays": "NJP",
+  "@payrollStatementColWorkedDays": {
+    "description": "Colonne de l'état : jours prestés."
+  },
+  "payrollStatementColAbsence": "Abs. non just.",
+  "@payrollStatementColAbsence": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColLoan": "Crédit",
+  "@payrollStatementColLoan": {
+    "description": "Colonne de l'état : prêt."
+  },
+  "payrollStatementColAdvance": "A/S",
+  "@payrollStatementColAdvance": {
+    "description": "Colonne de l'état : avance sur salaire."
+  },
+  "payrollStatementColChildcare": "PC/E",
+  "@payrollStatementColChildcare": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColIpr": "IPR",
+  "@payrollStatementColIpr": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColCnss": "CNSS",
+  "@payrollStatementColCnss": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColNet": "Net à payer",
+  "@payrollStatementColNet": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementSubtotal": "Sous-total",
+  "@payrollStatementSubtotal": {
+    "description": "Ligne de sous-total d'un groupe."
+  },
+  "payrollStatementTotal": "Total général",
+  "@payrollStatementTotal": {
+    "description": "Ligne de total général."
+  },
+  "payrollStatementOther": "Autres",
+  "@payrollStatementOther": {
+    "description": "Groupe d'une catégorie inconnue."
+  },
+  "payrollStatementLocked": "Lecture seule : la paie n'est plus en brouillon.",
+  "@payrollStatementLocked": {
+    "description": "Bandeau cadenas de l'état."
+  },
+  "payrollStatementControl": "Brut {gross} − retenues {withheld} = net {net}",
+  "@payrollStatementControl": {
+    "description": "Ligne de contrôle de l'état.",
+    "placeholders": {
+      "gross": {
+        "type": "String"
+      },
+      "withheld": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
   "payrollTabPayslips": "Bulletins",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
   "payrollTabAdvances": "Avances",

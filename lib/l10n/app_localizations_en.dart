@@ -13548,6 +13548,63 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get payrollTabStatement => 'Payroll statement';
+
+  @override
+  String get payrollTabStatementSubtitle => 'The schools\' spreadsheet';
+
+  @override
+  String get payrollStatementColName => 'Name';
+
+  @override
+  String get payrollStatementColGrade => 'Grade';
+
+  @override
+  String get payrollStatementColGross => 'Gross';
+
+  @override
+  String get payrollStatementColWorkedDays => 'Days';
+
+  @override
+  String get payrollStatementColAbsence => 'Unexc. abs.';
+
+  @override
+  String get payrollStatementColLoan => 'Loan';
+
+  @override
+  String get payrollStatementColAdvance => 'Adv.';
+
+  @override
+  String get payrollStatementColChildcare => 'PC/E';
+
+  @override
+  String get payrollStatementColIpr => 'IPR';
+
+  @override
+  String get payrollStatementColCnss => 'CNSS';
+
+  @override
+  String get payrollStatementColNet => 'Net pay';
+
+  @override
+  String get payrollStatementSubtotal => 'Subtotal';
+
+  @override
+  String get payrollStatementTotal => 'Grand total';
+
+  @override
+  String get payrollStatementOther => 'Others';
+
+  @override
+  String get payrollStatementLocked =>
+      'Read only: the payroll is no longer a draft.';
+
+  @override
+  String payrollStatementControl(String gross, String withheld, String net) {
+    return 'Gross $gross − deductions $withheld = net $net';
+  }
+
+  @override
   String get payrollTabPayslips => 'Payslips';
 
   @override
