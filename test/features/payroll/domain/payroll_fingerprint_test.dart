@@ -124,4 +124,21 @@ void main() {
       'fc692e71-4f14-575c-a4fc-4fd5a492fff3',
     );
   });
+
+  test('uuid5 de l avance d une dépense : le vecteur du back (T10)', () {
+    expect(
+      PayrollIds.salaryAdvanceIdOf('7f3c2a10-1b2c-4d5e-8f90-a1b2c3d4e5f6'),
+      'bd759072-c0ed-506c-a502-d263347edd73',
+    );
+  });
+
+  test('uuid5 de la priorité d un arriéré (T9), recalculé en Python', () {
+    expect(
+      PayrollIds.arrearsPriorityId(
+        staffMemberId: '00000000-0000-4000-8000-000000000001',
+        month: '2026-09',
+      ),
+      'bb81e2af-70d0-5fb4-b9f7-7514768df586',
+    );
+  });
 }

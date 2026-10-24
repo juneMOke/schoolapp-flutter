@@ -868,6 +868,10 @@ class AppDimensions {
   /// L'état de paie : onze colonnes du tableur des écoles.
   static const payrollStatementMinWidth = 1120.0;
   static const payrollColCode = 64.0;
+
+  /// Le registre des arriérés : l'agent, ses mois dus, le dû, l'ancienneté.
+  static const payrollArrearsMinWidth = 880.0;
+  static const payrollColArrearsMonths = 300.0;
   static const payrollColSmallAmount = 80.0;
   static const payrollColAttendance = 88.0;
   static const payrollColPayout = 136.0;

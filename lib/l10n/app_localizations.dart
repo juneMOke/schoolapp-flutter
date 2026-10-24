@@ -21434,6 +21434,186 @@ abstract class AppLocalizations {
   /// **'Gross {gross} − deductions {withheld} = net {net}'**
   String payrollStatementControl(String gross, String withheld, String net);
 
+  /// No description provided for @payrollArrearsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary arrears'**
+  String get payrollArrearsTitle;
+
+  /// No description provided for @payrollArrearsDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary debt'**
+  String get payrollArrearsDebt;
+
+  /// No description provided for @payrollArrearsDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Decided deferral'**
+  String get payrollArrearsDeferred;
+
+  /// No description provided for @payrollArrearsUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid and part-paid'**
+  String get payrollArrearsUnpaid;
+
+  /// No description provided for @payrollArrearsOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get payrollArrearsOldest;
+
+  /// No description provided for @payrollArrearsAge.
+  ///
+  /// In en, this message translates to:
+  /// **'{months, plural, =0{this month} =1{1 month ago} other{{months} months ago}}'**
+  String payrollArrearsAge(int months);
+
+  /// No description provided for @payrollArrearsColMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Months owed'**
+  String get payrollArrearsColMonths;
+
+  /// No description provided for @payrollArrearsColDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get payrollArrearsColDue;
+
+  /// No description provided for @payrollArrearsColAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get payrollArrearsColAge;
+
+  /// No description provided for @payrollArrearsSince.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} · {months, plural, =0{this month} =1{1 month ago} other{{months} months ago}}'**
+  String payrollArrearsSince(String month, int months);
+
+  /// No description provided for @payrollArrearsPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get payrollArrearsPriority;
+
+  /// No description provided for @payrollArrearsOriginDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Decided deferral'**
+  String get payrollArrearsOriginDeferred;
+
+  /// No description provided for @payrollArrearsOriginUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get payrollArrearsOriginUnpaid;
+
+  /// No description provided for @payrollArrearsOriginPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Part-paid'**
+  String get payrollArrearsOriginPartial;
+
+  /// No description provided for @payrollArrearsFilterDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Decided deferrals'**
+  String get payrollArrearsFilterDeferred;
+
+  /// No description provided for @payrollArrearsFilterUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get payrollArrearsFilterUnpaid;
+
+  /// No description provided for @payrollArrearsFilterPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get payrollArrearsFilterPriority;
+
+  /// No description provided for @payrollArrearsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No salary arrears'**
+  String get payrollArrearsEmpty;
+
+  /// No description provided for @payrollArrearsAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {amount} owed'**
+  String payrollArrearsAgentTitle(String name, String amount);
+
+  /// No description provided for @payrollArrearsNetPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Net {net} · paid {paid}'**
+  String payrollArrearsNetPaid(String net, String paid);
+
+  /// No description provided for @payrollArrearsRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid at {rate} %'**
+  String payrollArrearsRate(int rate);
+
+  /// No description provided for @payrollArrearsFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed amount {amount}'**
+  String payrollArrearsFixed(String amount);
+
+  /// No description provided for @payrollArrearsPayAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get payrollArrearsPayAll;
+
+  /// No description provided for @payrollArrearsPayOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'The oldest'**
+  String get payrollArrearsPayOldest;
+
+  /// No description provided for @payrollArrearsPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}'**
+  String payrollArrearsPay(String amount);
+
+  /// No description provided for @payrollArrearsPrioritize.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle first'**
+  String get payrollArrearsPrioritize;
+
+  /// No description provided for @payrollArrearsUnprioritize.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove priority'**
+  String get payrollArrearsUnprioritize;
+
+  /// No description provided for @subMenuPayrollArrears.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary arrears'**
+  String get subMenuPayrollArrears;
+
+  /// No description provided for @payrollArrearsBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Salary arrears · 1 agent · {amount} owed by the school} other{Salary arrears · {count} agents · {amount} owed by the school}}'**
+  String payrollArrearsBanner(int count, String amount);
+
+  /// No description provided for @payrollArrearsBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Handle the arrears'**
+  String get payrollArrearsBannerAction;
+
   /// No description provided for @payrollTabPayslips.
   ///
   /// In en, this message translates to:
@@ -23232,6 +23412,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Month payout rate: {rate} %'**
   String payrollToastPayoutPolicy(String rate);
+
+  /// No description provided for @payrollToastArrearsPrioritized.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrears marked as a priority'**
+  String get payrollToastArrearsPrioritized;
+
+  /// No description provided for @payrollToastArrearsUnprioritized.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority removed'**
+  String get payrollToastArrearsUnprioritized;
 
   /// No description provided for @payrollToastVariables.
   ///

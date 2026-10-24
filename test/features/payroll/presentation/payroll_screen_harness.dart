@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.da
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
@@ -21,7 +22,7 @@ import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_p
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-class _MockRepository extends Mock implements PayrollRepository {}
+class MockPayrollRepository extends Mock implements PayrollRepository {}
 
 class _MockPayslips extends Mock implements PayslipRepository {}
 
@@ -30,15 +31,21 @@ class _MockSignals extends Mock implements StaffSyncSignals {}
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
 
-/// L'écran de la paie sur [snapshot], la taille de la fenêtre laissée à
-/// l'appelant (tests de formats). Rend le cubit, pour ouvrir un onglet.
-Future<PayrollCubit> pumpPayrollScreen(
+/// L'écran de la paie ([child], par défaut celui de la Paie) sur [snapshot],
+/// la taille de la fenêtre laissée à l'appelant (tests de formats). Rend le
+/// cubit, pour ouvrir un onglet, et le dépôt, pour vérifier une écriture.
+Future<({PayrollCubit cubit, MockPayrollRepository repository})>
+pumpPayrollScreen(
   WidgetTester tester, {
   required PayrollSnapshot snapshot,
   List<Perm> permissions = const [Perm.hrPayRead, Perm.hrPayWrite],
+  Widget child = const PayrollScreen(),
 }) async {
-  final repository = _MockRepository();
+  final repository = MockPayrollRepository();
   when(() => repository.load()).thenAnswer((_) async => Right(snapshot));
+  when(
+    () => repository.disburseAll(any()),
+  ).thenAnswer((_) async => const Right(unit));
   final signals = _MockSignals();
   when(() => signals.watch(any())).thenReturn(() {});
   when(() => signals.pull()).thenAnswer((_) async {});
@@ -48,6 +55,8 @@ Future<PayrollCubit> pumpPayrollScreen(
     commands: PayrollCommands(
       variables: SavePayrollVariablesUseCase(repository),
       payoutPolicy: SavePayrollPayoutPolicyUseCase(repository),
+      payArrears: PayPayrollArrearsUseCase(repository),
+      priority: SetPayrollArrearsPriorityUseCase(repository),
       gesture: RecordPayrollGestureUseCase(repository),
       disburse: DisbursePayrollUseCase(repository),
       cancelDisbursement: CancelPayrollDisbursementUseCase(repository),
@@ -76,15 +85,12 @@ Future<PayrollCubit> pumpPayrollScreen(
       home: Scaffold(
         body: BlocProvider<AuthBloc>.value(
           value: auth,
-          child: BlocProvider.value(
-            value: cubit..load(),
-            child: const PayrollScreen(),
-          ),
+          child: BlocProvider.value(value: cubit..load(), child: child),
         ),
       ),
     ),
   );
   await tester.pump();
   await tester.pump();
-  return cubit;
+  return (cubit: cubit, repository: repository);
 }

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledg
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_action_bar.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_arrears_banner.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_kpis.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_filters.dart';
@@ -47,6 +48,7 @@ class PayrollLedgerTab extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
+        PayrollArrearsBanner(snapshot: state.snapshot, view: view),
         PayrollActionBar(view: view),
         PayrollLedgerNotices(view: view),
         PayrollRegularizations(

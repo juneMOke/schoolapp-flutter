@@ -19,6 +19,10 @@ void showPayrollNotice(
       AppSnackBar.showSuccess(context, l10n.payrollToastVariables(name));
     case PayrollNoticeKind.payoutPolicySaved:
       AppSnackBar.showSuccess(context, l10n.payrollToastPayoutPolicy(amount));
+    case PayrollNoticeKind.arrearsPrioritized:
+      AppSnackBar.showInfo(context, l10n.payrollToastArrearsPrioritized);
+    case PayrollNoticeKind.arrearsUnprioritized:
+      AppSnackBar.showInfo(context, l10n.payrollToastArrearsUnprioritized);
     case PayrollNoticeKind.submitted:
       AppSnackBar.showSuccess(context, l10n.payrollToastSubmitted);
     case PayrollNoticeKind.validated:

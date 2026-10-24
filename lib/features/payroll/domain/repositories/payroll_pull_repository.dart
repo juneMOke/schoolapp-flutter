@@ -9,9 +9,10 @@ const String kStaffPayProfilesResource = 'staff_pay_profiles';
 const String kStaffAttendanceSummariesResource = 'staff_attendance_summaries';
 const String kSalaryAdvancesResource = 'salary_advances';
 const String kPayrollDisbursementsResource = 'payroll_disbursements';
+const String kPayrollArrearsPrioritiesResource = 'payroll_arrears_priorities';
 
 /// Ce que l'écran de la paie lit : les agents et leurs contrats, puis les
-/// cinq flux de la paie.
+/// six flux de la paie.
 const Set<String> kPayrollScreenResources = {
   kStaffMembersResource,
   kStaffContractsResource,
@@ -20,13 +21,15 @@ const Set<String> kPayrollScreenResources = {
   kStaffAttendanceSummariesResource,
   kSalaryAdvancesResource,
   kPayrollDisbursementsResource,
+  kPayrollArrearsPrioritiesResource,
 };
 
-/// Les cinq descentes de la Paie, toutes sous `hr.pay.read`.
+/// Les six descentes de la Paie, toutes sous `hr.pay.read`.
 abstract class PayrollPullRepository {
   Future<Either<Failure, KeysetPullResult>> syncPayrolls();
   Future<Either<Failure, KeysetPullResult>> syncProfiles();
   Future<Either<Failure, KeysetPullResult>> syncAttendanceSummaries();
   Future<Either<Failure, KeysetPullResult>> syncAdvances();
   Future<Either<Failure, KeysetPullResult>> syncDisbursements();
+  Future<Either<Failure, KeysetPullResult>> syncArrearsPriorities();
 }

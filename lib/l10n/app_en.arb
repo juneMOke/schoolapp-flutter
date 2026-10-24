@@ -9099,6 +9099,104 @@
       }
     }
   },
+  "payrollArrearsTitle": "Salary arrears",
+  "payrollArrearsDebt": "Salary debt",
+  "payrollArrearsDeferred": "Decided deferral",
+  "payrollArrearsUnpaid": "Unpaid and part-paid",
+  "payrollArrearsOldest": "Oldest",
+  "payrollArrearsAge": "{months, plural, =0{this month} =1{1 month ago} other{{months} months ago}}",
+  "@payrollArrearsAge": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsColMonths": "Months owed",
+  "payrollArrearsColDue": "Due",
+  "payrollArrearsColAge": "Age",
+  "payrollArrearsSince": "{month} · {months, plural, =0{this month} =1{1 month ago} other{{months} months ago}}",
+  "@payrollArrearsSince": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsPriority": "Priority",
+  "payrollArrearsOriginDeferred": "Decided deferral",
+  "payrollArrearsOriginUnpaid": "Unpaid",
+  "payrollArrearsOriginPartial": "Part-paid",
+  "payrollArrearsFilterDeferred": "Decided deferrals",
+  "payrollArrearsFilterUnpaid": "Unpaid",
+  "payrollArrearsFilterPriority": "Priority",
+  "payrollArrearsEmpty": "No salary arrears",
+  "payrollArrearsAgentTitle": "{name} · {amount} owed",
+  "@payrollArrearsAgentTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsNetPaid": "Net {net} · paid {paid}",
+  "@payrollArrearsNetPaid": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsRate": "Paid at {rate} %",
+  "@payrollArrearsRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsFixed": "Fixed amount {amount}",
+  "@payrollArrearsFixed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPayAll": "All",
+  "payrollArrearsPayOldest": "The oldest",
+  "payrollArrearsPay": "Pay {amount}",
+  "@payrollArrearsPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPrioritize": "Settle first",
+  "payrollArrearsUnprioritize": "Remove priority",
+  "subMenuPayrollArrears": "Salary arrears",
+  "payrollArrearsBanner": "{count, plural, =1{Salary arrears · 1 agent · {amount} owed by the school} other{Salary arrears · {count} agents · {amount} owed by the school}}",
+  "@payrollArrearsBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsBannerAction": "Handle the arrears",
   "payrollTabPayslips": "Payslips",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
   "payrollTabAdvances": "Advances",
@@ -9653,6 +9751,8 @@
       }
     }
   },
+  "payrollToastArrearsPrioritized": "Arrears marked as a priority",
+  "payrollToastArrearsUnprioritized": "Priority removed",
   "payrollToastVariables": "Variable items saved — {name}",
   "@payrollToastVariables": {"placeholders": {"name": {"type": "String"}}},
   "payrollToastSubmitted": "Submission saved — it leaves at the next sync",

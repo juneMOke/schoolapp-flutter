@@ -2,6 +2,9 @@ import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
@@ -12,6 +15,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
@@ -23,6 +27,8 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_no
 class PayrollCommands {
   final SavePayrollVariablesUseCase _variables;
   final SavePayrollPayoutPolicyUseCase _payoutPolicy;
+  final PayPayrollArrearsUseCase? _payArrears;
+  final SetPayrollArrearsPriorityUseCase? _priority;
   final RecordPayrollGestureUseCase _gesture;
   final DisbursePayrollUseCase _disburse;
   final CancelPayrollDisbursementUseCase _cancelDisbursement;
@@ -36,6 +42,8 @@ class PayrollCommands {
   const PayrollCommands({
     required SavePayrollVariablesUseCase variables,
     required SavePayrollPayoutPolicyUseCase payoutPolicy,
+    PayPayrollArrearsUseCase? payArrears,
+    SetPayrollArrearsPriorityUseCase? priority,
     required RecordPayrollGestureUseCase gesture,
     required DisbursePayrollUseCase disburse,
     required CancelPayrollDisbursementUseCase cancelDisbursement,
@@ -47,6 +55,8 @@ class PayrollCommands {
     required FetchPayslipUseCase payslip,
   }) : _variables = variables,
        _payoutPolicy = payoutPolicy,
+       _payArrears = payArrears,
+       _priority = priority,
        _gesture = gesture,
        _disburse = disburse,
        _cancelDisbursement = cancelDisbursement,
@@ -74,6 +84,53 @@ class PayrollCommands {
     await _payoutPolicy(view, ratePercent, reason: reason),
     PayrollNotice(PayrollNoticeKind.payoutPolicySaved, amount: '$ratePercent'),
   );
+
+  /// Verse des arriérés, répartis du mois le plus ancien au plus récent.
+  Future<PayrollNotice> payArrears(
+    PayrollSnapshot snapshot,
+    PayrollArrearsAgent agent, {
+    required String currency,
+    required int amountInCents,
+    required PayrollDisbursementDraft proof,
+    required String name,
+  }) async {
+    final payArrears = _payArrears;
+    if (payArrears == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await payArrears(
+        snapshot,
+        agent,
+        currency: currency,
+        amountInCents: amountInCents,
+        proof: proof,
+      ),
+      PayrollNotice(
+        PayrollNoticeKind.paid,
+        name: name,
+        amount: MoneyFormat.format(Money(amountInCents, currency)),
+      ),
+    );
+  }
+
+  Future<PayrollNotice> setArrearsPriority(
+    PayrollArrear arrear, {
+    required bool prioritized,
+  }) async {
+    final priority = _priority;
+    if (priority == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await priority(arrear, prioritized: prioritized),
+      PayrollNotice(
+        prioritized
+            ? PayrollNoticeKind.arrearsPrioritized
+            : PayrollNoticeKind.arrearsUnprioritized,
+      ),
+    );
+  }
 
   Future<PayrollNotice> gesture(
     PayrollMonthView view,

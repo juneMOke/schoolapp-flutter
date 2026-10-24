@@ -24,13 +24,20 @@ void main() {
       MenuConstants.hrStaffFileId,
       MenuConstants.hrStaffAttendanceId,
       MenuConstants.hrPayrollId,
+      MenuConstants.hrPayrollArrearsId,
     ]);
     expect(rh.subMenus.first.title, 'Fichier du personnel');
     expect(rh.subMenus.first.route, AppRoutesNames.hrStaffFile);
     expect(rh.subMenus[1].title, 'Pointage & présences');
     expect(rh.subMenus[1].route, AppRoutesNames.hrStaffAttendance);
-    expect(rh.subMenus.last.title, 'Paie');
-    expect(rh.subMenus.last.route, AppRoutesNames.hrPayroll);
+    expect(rh.subMenus[2].title, 'Paie');
+    expect(rh.subMenus[2].route, AppRoutesNames.hrPayroll);
+    expect(rh.subMenus.last.title, 'Arriérés de salaire');
+    expect(rh.subMenus.last.route, AppRoutesNames.hrPayrollArrears);
+    expect(
+      AppRoutesNames.hrPayrollArrears,
+      '/ressources-humaines/paie-arrieres',
+    );
     expect(AppRoutesNames.hrPayroll, '/ressources-humaines/paie');
     expect(
       AppRoutesNames.hrStaffFile,
@@ -107,10 +114,18 @@ void main() {
       permissions: [Perm.hrPayRead.wire],
     ).firstWhere((menu) => menu.id == MenuConstants.hrMenuId);
 
-    expect(rh.subMenus.map((sub) => sub.id), [MenuConstants.hrPayrollId]);
-    final route = Uri.parse(AppRoutesNames.hrPayroll);
-    expect(canAccessLocation(route, [Perm.hrStaffRead.wire]), isFalse);
-    expect(canAccessLocation(route, [Perm.hrPayRead.wire]), isTrue);
+    expect(rh.subMenus.map((sub) => sub.id), [
+      MenuConstants.hrPayrollId,
+      MenuConstants.hrPayrollArrearsId,
+    ]);
+    for (final path in [
+      AppRoutesNames.hrPayroll,
+      AppRoutesNames.hrPayrollArrears,
+    ]) {
+      final route = Uri.parse(path);
+      expect(canAccessLocation(route, [Perm.hrStaffRead.wire]), isFalse);
+      expect(canAccessLocation(route, [Perm.hrPayRead.wire]), isTrue);
+    }
   });
 
   test('la route refuse qui ne lit pas le fichier', () {
@@ -131,6 +146,7 @@ void main() {
       MenuConstants.hrStaffFileId,
       MenuConstants.hrStaffAttendanceId,
       MenuConstants.hrPayrollId,
+      MenuConstants.hrPayrollArrearsId,
     ]);
   });
 }

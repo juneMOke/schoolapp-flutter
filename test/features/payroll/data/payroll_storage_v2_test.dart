@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/payroll_arrears_priority_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_line_json.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
@@ -231,5 +233,56 @@ void main() {
         expect(absurd.toPayInCents, 14800);
       },
     );
+  });
+
+  group('priorité des arriérés', () {
+    PayrollArrearsPriorityDto flag(bool on, String at) =>
+        PayrollArrearsPriorityDto(
+          id: 'p-1',
+          staffMemberId: 'm-1',
+          month: '2026-09',
+          prioritized: on,
+          clientUpdatedAt: at,
+        );
+
+    test('descend, puis une saisie en attente n est pas écrasée', () async {
+      final dao = PayrollArrearsPriorityDao(db);
+      await dao.applyPulled(
+        [flag(true, '2026-10-01T09:00:00Z')],
+        schoolId: _school,
+        nowMs: 1,
+      );
+      expect(await dao.prioritized(_school), {'2026-09|m-1'});
+
+      await dao.save(
+        PayrollArrearsPriorityRequestDto(
+          priority: flag(false, '2026-10-02T09:00:00Z'),
+          authorId: 'u-1',
+        ),
+        schoolId: _school,
+        nowMs: 2,
+      );
+      await dao.applyPulled(
+        [flag(true, '2026-10-01T09:00:00Z')],
+        schoolId: _school,
+        nowMs: 3,
+      );
+
+      expect(await dao.prioritized(_school), isEmpty);
+      final entry = (await OutboxDao(db).pendingAll()).single;
+      expect(entry.aggregateId, 'payroll-line:2026-09:m-1');
+    });
+
+    test('la requête figée se relit à l identique', () {
+      final sent = PayrollArrearsPriorityRequestDto(
+        priority: flag(true, '2026-10-02T09:00:00.000Z'),
+        authorId: 'u-1',
+      );
+
+      expect(
+        PayrollArrearsPriorityRequestDto.tryParse(sent.toJson())!.toJson(),
+        sent.toJson(),
+      );
+    });
   });
 }

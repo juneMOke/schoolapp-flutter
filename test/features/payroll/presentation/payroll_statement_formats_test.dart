@@ -63,8 +63,8 @@ void main() {
   );
 
   testAtReferenceFormats('État de paie v2', (tester, format) async {
-    final cubit = await pumpPayrollScreen(tester, snapshot: snapshot);
-    cubit.setTab(PayrollTab.statement);
+    final pumped = await pumpPayrollScreen(tester, snapshot: snapshot);
+    pumped.cubit.setTab(PayrollTab.statement);
     await tester.pumpAndSettle();
 
     expect(find.text('Total général · USD'), findsOneWidget);

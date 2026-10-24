@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/payroll/data/local/attendance_summary_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_calendar_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
@@ -19,6 +20,7 @@ class PayrollLocal {
   final PayrollDao payrolls;
   final PayrollVariablesDao variables;
   final PayrollPayoutPolicyDao payoutPolicies;
+  final PayrollArrearsPriorityDao arrearsPriorities;
   final PayrollGestureDao gestures;
   final AttendanceSummaryDao summaries;
   final SalaryAdvanceDao advances;
@@ -32,6 +34,7 @@ class PayrollLocal {
     required this.payrolls,
     required this.variables,
     required this.payoutPolicies,
+    required this.arrearsPriorities,
     required this.gestures,
     required this.summaries,
     required this.advances,
@@ -47,6 +50,7 @@ class PayrollLocal {
     payrolls: PayrollDao(db),
     variables: PayrollVariablesDao(db),
     payoutPolicies: PayrollPayoutPolicyDao(db),
+    arrearsPriorities: PayrollArrearsPriorityDao(db),
     gestures: PayrollGestureDao(db),
     summaries: AttendanceSummaryDao(db),
     advances: SalaryAdvanceDao(db),

@@ -95,6 +95,7 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.hrStaffAttendanceSummaries,
   SyncPlanKeys.hrSalaryAdvances,
   SyncPlanKeys.hrPayrollDisbursements,
+  SyncPlanKeys.hrPayrollArrearsPriorities,
   SyncPlanKeys.studentPhotos,
   SyncPlanKeys.enrollmentSuspensions,
 ];
@@ -137,6 +138,7 @@ const Set<String> _kSuffixedCursorResources = {
   'staff_attendance_summaries',
   'salary_advances',
   'payroll_disbursements',
+  'payroll_arrears_priorities',
   'enrollment_reenrollment_cohort',
   'student_photos',
   'enrollment_suspensions',
@@ -266,7 +268,7 @@ void main() {
 
   // ── Le compte : vingt et une clés, vingt-deux ressources ──────────────────
 
-  test('trente-huit clés de plan pour trente-neuf ressources de handler', () {
+  test('trente-neuf clés de plan pour quarante ressources de handler', () {
     // Vingt et une depuis le registre des disparitions (V121), second flux de
     // socle : sans lui, une base locale garde indéfiniment ce que le serveur a
     // retiré. Vingt-deux avec le registre des dépenses (`expense.expenses`).
@@ -275,14 +277,15 @@ void main() {
     // Paie, trente-trois avec les clôtures de mois de l'appel, trente-quatre
     // avec la photo de l'élève, trente-cinq avec les chapitres du programme,
     // trente-six avec la désactivation des élèves, trente-sept avec le journal
-    // de classe, trente-huit avec les justifications des parents.
-    expect(kSyncPlanAliases.length, 38);
-    expect(registeredResources.length, 39);
+    // de classe, trente-huit avec les justifications des parents, trente-neuf
+    // avec la priorité des arriérés (Paie v2).
+    expect(kSyncPlanAliases.length, 39);
+    expect(registeredResources.length, 40);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 39);
+    expect(aliased.length, 40);
     // Vingt et une ressources aliasées ET autant de handlers : les deux
     // ensembles coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
@@ -300,12 +303,12 @@ void main() {
   });
 
   test(
-    'les trente-huit constantes déclarées sont exactement les clés de la table',
+    'les trente-neuf constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 38);
+      expect(_kDeclaredPlanKeys.length, 39);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        38,
+        39,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());
@@ -413,6 +416,7 @@ void main() {
       'staff_attendance_summaries',
       'salary_advances',
       'payroll_disbursements',
+      'payroll_arrears_priorities',
     ]);
   });
 

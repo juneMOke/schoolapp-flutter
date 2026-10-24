@@ -28,6 +28,9 @@ class PayrollSnapshot {
 
   /// Par mois : le taux de versement ; absent = 100 %.
   final Map<String, PayrollPayoutPolicy> payoutPolicies;
+
+  /// `mois|agent` des arriérés que la direction a mis en priorité.
+  final Set<String> arrearsPriorities;
   final Map<String, List<PayrollLine>> frozenLines;
   final Map<String, AttendanceSummary> summaries;
 
@@ -63,6 +66,7 @@ class PayrollSnapshot {
     required this.shareTraces,
     required this.hasEverSynced,
     this.payoutPolicies = const {},
+    this.arrearsPriorities = const {},
     this.school,
   });
 

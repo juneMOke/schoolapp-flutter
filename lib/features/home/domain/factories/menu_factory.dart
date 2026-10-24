@@ -293,6 +293,11 @@ class MenuFactory {
           title: l10n.subMenuPayroll,
           route: AppRoutesNames.hrPayroll,
         ),
+        SubMenuItem(
+          id: MenuConstants.hrPayrollArrearsId,
+          title: l10n.subMenuPayrollArrears,
+          route: AppRoutesNames.hrPayrollArrears,
+        ),
       ],
     );
   }

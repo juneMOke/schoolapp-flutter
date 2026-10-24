@@ -6,6 +6,8 @@ enum PayrollNoticeKind {
 
   /// Le taux de versement du mois ; `amount` porte le taux.
   payoutPolicySaved,
+  arrearsPrioritized,
+  arrearsUnprioritized,
   submitted,
   validated,
   returned,

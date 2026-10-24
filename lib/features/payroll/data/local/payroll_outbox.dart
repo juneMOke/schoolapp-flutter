@@ -13,6 +13,7 @@ abstract final class PayrollOutbox {
   static const String profile = 'STAFF_PAY_PROFILE';
   static const String variables = 'PAYROLL_VARIABLES';
   static const String payoutPolicy = 'PAYROLL_PAYOUT_POLICY';
+  static const String arrearsPriority = 'PAYROLL_ARREARS_PRIORITY';
   static const String gesture = 'PAYROLL_GESTURE';
   static const String advance = 'SALARY_ADVANCE';
   static const String advanceCancellation = 'SALARY_ADVANCE_CANCELLATION';

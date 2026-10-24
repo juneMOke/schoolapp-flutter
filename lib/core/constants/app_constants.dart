@@ -1263,6 +1263,11 @@ class AppConstants {
   static const String syncPayrollPayoutPoliciesEndpoint =
       '/api/v1/sync/payroll-payout-policies';
 
+  /// Drapeau « priorité » d'un arriéré (POST, dernier écrit gagne) et
+  /// descente (GET, flux `hr.payroll-arrears-priorities`) — Paie v2, T9.
+  static const String syncPayrollArrearsPrioritiesEndpoint =
+      '/api/v1/sync/payroll-arrears-priorities';
+
   /// Gestes du circuit (POST, un par requête : `SUBMIT`, `RETURN`, `VALIDATE`,
   /// `REOPEN`), idempotents par `gestureId`.
   static const String syncPayrollGesturesEndpoint =

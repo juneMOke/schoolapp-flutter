@@ -9551,6 +9551,178 @@
       }
     }
   },
+  "payrollArrearsTitle": "Arriérés de salaire",
+  "@payrollArrearsTitle": {
+    "description": "Titre du registre des arriérés."
+  },
+  "payrollArrearsDebt": "Dette salariale",
+  "@payrollArrearsDebt": {
+    "description": "Tuile : total dû."
+  },
+  "payrollArrearsDeferred": "Différé décidé",
+  "@payrollArrearsDeferred": {
+    "description": "Tuile : part différée par décision."
+  },
+  "payrollArrearsUnpaid": "Impayés et acomptes",
+  "@payrollArrearsUnpaid": {
+    "description": "Tuile : non payé ou reste d'acompte."
+  },
+  "payrollArrearsOldest": "Plus ancien",
+  "@payrollArrearsOldest": {
+    "description": "Tuile : mois dû le plus ancien."
+  },
+  "payrollArrearsAge": "{months, plural, =0{ce mois} =1{il y a 1 mois} other{il y a {months} mois}}",
+  "@payrollArrearsAge": {
+    "description": "Ancienneté d'un arriéré.",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsColMonths": "Mois concernés",
+  "@payrollArrearsColMonths": {
+    "description": "Colonne du registre."
+  },
+  "payrollArrearsColDue": "Dû",
+  "@payrollArrearsColDue": {
+    "description": "Colonne du registre."
+  },
+  "payrollArrearsColAge": "Ancienneté",
+  "@payrollArrearsColAge": {
+    "description": "Colonne du registre."
+  },
+  "payrollArrearsSince": "{month} · {months, plural, =0{ce mois} =1{il y a 1 mois} other{il y a {months} mois}}",
+  "@payrollArrearsSince": {
+    "description": "Mois d'origine et ancienneté.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsPriority": "En priorité",
+  "@payrollArrearsPriority": {
+    "description": "Drapeau priorité."
+  },
+  "payrollArrearsOriginDeferred": "Différé décidé",
+  "@payrollArrearsOriginDeferred": {
+    "description": "Origine d'un arriéré."
+  },
+  "payrollArrearsOriginUnpaid": "Non payé",
+  "@payrollArrearsOriginUnpaid": {
+    "description": "Origine d'un arriéré."
+  },
+  "payrollArrearsOriginPartial": "Acompte partiel",
+  "@payrollArrearsOriginPartial": {
+    "description": "Origine d'un arriéré."
+  },
+  "payrollArrearsFilterDeferred": "Différés décidés",
+  "@payrollArrearsFilterDeferred": {
+    "description": "Puce du registre."
+  },
+  "payrollArrearsFilterUnpaid": "Impayés",
+  "@payrollArrearsFilterUnpaid": {
+    "description": "Puce du registre."
+  },
+  "payrollArrearsFilterPriority": "En priorité",
+  "@payrollArrearsFilterPriority": {
+    "description": "Puce du registre."
+  },
+  "payrollArrearsEmpty": "Aucun arriéré de salaire",
+  "@payrollArrearsEmpty": {
+    "description": "Registre vide."
+  },
+  "payrollArrearsAgentTitle": "{name} · {amount} dus",
+  "@payrollArrearsAgentTitle": {
+    "description": "Titre de la fiche arriérés.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsNetPaid": "Net {net} · versé {paid}",
+  "@payrollArrearsNetPaid": {
+    "description": "Détail d'un mois dû.",
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsRate": "Versé à {rate} %",
+  "@payrollArrearsRate": {
+    "description": "Détail : versement réduit au taux du mois.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsFixed": "Montant fixe {amount}",
+  "@payrollArrearsFixed": {
+    "description": "Détail : versement à montant fixe.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPayAll": "Tout",
+  "@payrollArrearsPayAll": {
+    "description": "Raccourci : tout le dû."
+  },
+  "payrollArrearsPayOldest": "Le plus ancien",
+  "@payrollArrearsPayOldest": {
+    "description": "Raccourci : le mois le plus ancien."
+  },
+  "payrollArrearsPay": "Verser {amount}",
+  "@payrollArrearsPay": {
+    "description": "Bouton de versement d'arriérés.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPrioritize": "À solder en priorité",
+  "@payrollArrearsPrioritize": {
+    "description": "Lever le drapeau."
+  },
+  "payrollArrearsUnprioritize": "Retirer la priorité",
+  "@payrollArrearsUnprioritize": {
+    "description": "Baisser le drapeau."
+  },
+  "subMenuPayrollArrears": "Arriérés de salaire",
+  "@subMenuPayrollArrears": {
+    "description": "Sous-menu RH · Paie ▸ Arriérés."
+  },
+  "payrollArrearsBanner": "{count, plural, =1{Arriérés de salaire · 1 agent · {amount} dus par l'école} other{Arriérés de salaire · {count} agents · {amount} dus par l'école}}",
+  "@payrollArrearsBanner": {
+    "description": "Bannière M+1.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsBannerAction": "Traiter les arriérés",
+  "@payrollArrearsBannerAction": {
+    "description": "Bouton de la bannière."
+  },
   "payrollTabPayslips": "Bulletins",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
   "payrollTabAdvances": "Avances",
@@ -10190,6 +10362,14 @@
         "type": "String"
       }
     }
+  },
+  "payrollToastArrearsPrioritized": "Arriéré à solder en priorité",
+  "@payrollToastArrearsPrioritized": {
+    "description": "Toast du drapeau priorité."
+  },
+  "payrollToastArrearsUnprioritized": "Priorité retirée",
+  "@payrollToastArrearsUnprioritized": {
+    "description": "Toast du drapeau priorité."
   },
   "payrollToastVariables": "Éléments variables enregistrés — {name}",
   "payrollToastSubmitted": "Soumission enregistrée — elle part à la prochaine synchronisation",

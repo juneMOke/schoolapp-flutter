@@ -122,6 +122,10 @@ class MenuConstants {
   /// l'historique.
   static const String hrPayrollId = 'paie';
 
+  /// RH · Paie ▸ Arriérés : ce que l'école doit encore à ses agents sur des
+  /// paies validées (Paie v2, B4).
+  static const String hrPayrollArrearsId = 'paie-arrieres';
+
   /// RH · Personnel ▸ Tableau de bord : l'effectif, sa répartition, et la
   /// liste nominative « Qui sont-ils », exportable en PDF.
   static const String hrPersonnelDashboardId = 'rh-personnel-tableau-de-bord';

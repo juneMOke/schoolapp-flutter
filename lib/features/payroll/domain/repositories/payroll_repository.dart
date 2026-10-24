@@ -46,6 +46,19 @@ abstract class PayrollRepository {
 
   Future<Either<Failure, Unit>> disburse(PayrollDisbursementDraft draft);
 
+  /// Plusieurs versements d'une seule saisie (arriérés répartis par mois),
+  /// posés dans l'ordre ; s'arrête au premier refus.
+  Future<Either<Failure, Unit>> disburseAll(
+    List<PayrollDisbursementDraft> drafts,
+  );
+
+  /// Le drapeau « priorité » d'un arriéré (T9).
+  Future<Either<Failure, Unit>> setArrearsPriority({
+    required String staffMemberId,
+    required String month,
+    required bool prioritized,
+  });
+
   Future<Either<Failure, Unit>> cancelDisbursement(
     PayrollDisbursement disbursement,
     String reason,

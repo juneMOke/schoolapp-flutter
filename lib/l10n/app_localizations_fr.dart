@@ -13703,6 +13703,132 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get payrollArrearsTitle => 'Arriérés de salaire';
+
+  @override
+  String get payrollArrearsDebt => 'Dette salariale';
+
+  @override
+  String get payrollArrearsDeferred => 'Différé décidé';
+
+  @override
+  String get payrollArrearsUnpaid => 'Impayés et acomptes';
+
+  @override
+  String get payrollArrearsOldest => 'Plus ancien';
+
+  @override
+  String payrollArrearsAge(int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: 'il y a $months mois',
+      one: 'il y a 1 mois',
+      zero: 'ce mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollArrearsColMonths => 'Mois concernés';
+
+  @override
+  String get payrollArrearsColDue => 'Dû';
+
+  @override
+  String get payrollArrearsColAge => 'Ancienneté';
+
+  @override
+  String payrollArrearsSince(String month, int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: 'il y a $months mois',
+      one: 'il y a 1 mois',
+      zero: 'ce mois',
+    );
+    return '$month · $_temp0';
+  }
+
+  @override
+  String get payrollArrearsPriority => 'En priorité';
+
+  @override
+  String get payrollArrearsOriginDeferred => 'Différé décidé';
+
+  @override
+  String get payrollArrearsOriginUnpaid => 'Non payé';
+
+  @override
+  String get payrollArrearsOriginPartial => 'Acompte partiel';
+
+  @override
+  String get payrollArrearsFilterDeferred => 'Différés décidés';
+
+  @override
+  String get payrollArrearsFilterUnpaid => 'Impayés';
+
+  @override
+  String get payrollArrearsFilterPriority => 'En priorité';
+
+  @override
+  String get payrollArrearsEmpty => 'Aucun arriéré de salaire';
+
+  @override
+  String payrollArrearsAgentTitle(String name, String amount) {
+    return '$name · $amount dus';
+  }
+
+  @override
+  String payrollArrearsNetPaid(String net, String paid) {
+    return 'Net $net · versé $paid';
+  }
+
+  @override
+  String payrollArrearsRate(int rate) {
+    return 'Versé à $rate %';
+  }
+
+  @override
+  String payrollArrearsFixed(String amount) {
+    return 'Montant fixe $amount';
+  }
+
+  @override
+  String get payrollArrearsPayAll => 'Tout';
+
+  @override
+  String get payrollArrearsPayOldest => 'Le plus ancien';
+
+  @override
+  String payrollArrearsPay(String amount) {
+    return 'Verser $amount';
+  }
+
+  @override
+  String get payrollArrearsPrioritize => 'À solder en priorité';
+
+  @override
+  String get payrollArrearsUnprioritize => 'Retirer la priorité';
+
+  @override
+  String get subMenuPayrollArrears => 'Arriérés de salaire';
+
+  @override
+  String payrollArrearsBanner(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Arriérés de salaire · $count agents · $amount dus par l\'école',
+      one: 'Arriérés de salaire · 1 agent · $amount dus par l\'école',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollArrearsBannerAction => 'Traiter les arriérés';
+
+  @override
   String get payrollTabPayslips => 'Bulletins';
 
   @override
@@ -14852,6 +14978,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollToastPayoutPolicy(String rate) {
     return 'Taux de versement du mois : $rate %';
   }
+
+  @override
+  String get payrollToastArrearsPrioritized => 'Arriéré à solder en priorité';
+
+  @override
+  String get payrollToastArrearsUnprioritized => 'Priorité retirée';
 
   @override
   String payrollToastVariables(String name) {

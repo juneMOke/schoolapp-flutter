@@ -328,6 +328,28 @@ const TableSchema payrollPayoutPoliciesTable = TableSchema(
   ''',
 );
 
+/// `payroll_arrears_priorities` — le drapeau « priorité » d'un arriéré, par
+/// agent et mois d'origine (v2). Dernier écrit gagne ; sans effet sur les
+/// montants.
+const TableSchema payrollArrearsPrioritiesTable = TableSchema(
+  name: 'payroll_arrears_priorities',
+  createTableSql: '''
+    CREATE TABLE payroll_arrears_priorities (
+      school_id TEXT NOT NULL,
+      month TEXT NOT NULL,
+      staff_member_id TEXT NOT NULL,
+      id TEXT NOT NULL,
+      prioritized INTEGER NOT NULL DEFAULT 0,
+      client_updated_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'SYNCED',
+      sync_error TEXT,
+      sync_error_code TEXT,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, month, staff_member_id)
+    )
+  ''',
+);
+
 const List<TableSchema> payrollTables = [
   refPayrollSettingsTable,
   staffPayProfilesTable,
@@ -340,4 +362,5 @@ const List<TableSchema> payrollTables = [
   payrollDisbursementsTable,
   payrollShareTracesTable,
   payrollPayoutPoliciesTable,
+  payrollArrearsPrioritiesTable,
 ];

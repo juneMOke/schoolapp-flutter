@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/money/mobile_money_operator.dart';
 import 'package:school_app_flutter/core/money/amount_input.dart';
 import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
@@ -16,7 +14,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_pr
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_payout_proof.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_settlement_band.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_tranche_list.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_pay_amount.dart';
@@ -149,35 +147,14 @@ class _PayrollPayDialogState extends State<PayrollPayDialog> {
               onChanged: () => setState(() {}),
             ),
             const SizedBox(height: AppSpacing.md),
-            PayrollChoiceChips<PayoutMode>(
-              values: PayoutMode.values,
-              selected: _mode,
-              label: (mode) => PayrollLabels.mode(l10n, mode),
-              icon: _icon,
-              onSelected: (mode) => setState(() => _mode = mode),
-            ),
-            if (_mode == PayoutMode.cash) ...[
-              const SizedBox(height: AppSpacing.md),
-              CheckboxListTile(
-                value: _signed,
-                onChanged: (value) => setState(() => _signed = value ?? false),
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                title: Text(l10n.payrollPaySigned),
-                subtitle: Text(
-                  l10n.payrollPayCashHelp,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-            PayrollPayoutFields(
+            PayrollPayoutProof(
               mode: _mode,
+              onMode: (mode) => setState(() => _mode = mode),
               operator: _operator,
               onOperator: (op) => setState(() => _operator = op),
+              signed: _signed,
+              onSigned: (value) => setState(() => _signed = value),
               controllers: _fields,
-              withReference: true,
               onChanged: () => setState(() {}),
             ),
             if (refusal != null) ...[
@@ -199,17 +176,11 @@ class _PayrollPayDialogState extends State<PayrollPayDialog> {
         if (_canPay)
           EteeloButton.primary(
             label: l10n.payrollPay,
-            icon: _icon(_mode),
+            icon: PayrollPayoutProof.iconOf(_mode),
             onPressed: _submit,
             fullWidth: false,
           ),
       ],
     );
   }
-
-  static IconData _icon(PayoutMode mode) => switch (mode) {
-    PayoutMode.cash => Icons.payments_outlined,
-    PayoutMode.mobileMoney => Icons.phone_android,
-    PayoutMode.bank => Icons.account_balance_outlined,
-  };
 }

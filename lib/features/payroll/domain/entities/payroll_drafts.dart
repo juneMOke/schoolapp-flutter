@@ -63,4 +63,26 @@ class PayrollDisbursementDraft {
     this.bankAccount,
     this.signedRegister = false,
   });
+
+  /// Le même mode et la même preuve, pour un autre salaire : un versement
+  /// d'arriérés réparti sur plusieurs mois en pose un par mois d'origine.
+  PayrollDisbursementDraft forLine({
+    required String month,
+    required String validationGestureId,
+    required Money amount,
+    required int netInCents,
+  }) => PayrollDisbursementDraft(
+    month: month,
+    staffMemberId: staffMemberId,
+    validationGestureId: validationGestureId,
+    amount: amount,
+    mode: mode,
+    netInCents: netInCents,
+    operator: operator,
+    payoutPhone: payoutPhone,
+    reference: reference,
+    bankName: bankName,
+    bankAccount: bankAccount,
+    signedRegister: signedRegister,
+  );
 }

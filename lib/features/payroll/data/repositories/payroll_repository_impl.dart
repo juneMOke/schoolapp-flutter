@@ -160,6 +160,35 @@ class PayrollRepositoryImpl implements PayrollRepository {
   );
 
   @override
+  Future<Either<Failure, Unit>> disburseAll(
+    List<PayrollDisbursementDraft> drafts,
+  ) async {
+    for (final draft in drafts) {
+      final result = await disburse(draft);
+      if (result.isLeft()) return result;
+    }
+    return const Right(unit);
+  }
+
+  @override
+  Future<Either<Failure, Unit>> setArrearsPriority({
+    required String staffMemberId,
+    required String month,
+    required bool prioritized,
+  }) => _write(
+    "Écriture de la priorité d'un arriéré",
+    (requests, nowMs) => _local.arrearsPriorities.save(
+      requests.arrearsPriority(
+        staffMemberId: staffMemberId,
+        month: month,
+        prioritized: prioritized,
+      ),
+      schoolId: requests.schoolId,
+      nowMs: nowMs,
+    ),
+  );
+
+  @override
   Future<Either<Failure, Unit>> disburse(PayrollDisbursementDraft draft) async {
     final net = draft.netInCents;
     if (net != null) {

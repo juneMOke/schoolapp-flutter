@@ -359,6 +359,7 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // La Paie se lit sous `hr.pay.read` ; préparer et verser, valider et
     // régler sont gardés geste par geste.
     MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
+    MenuConstants.hrPayrollArrearsId: ModuleAccess([Perm.hrPayRead]),
   },
   // RH · Personnel : les deux écrans lisent le MÊME fichier local que les
   // Ressources humaines, sous le même droit. Créer ou modifier une fiche reste
