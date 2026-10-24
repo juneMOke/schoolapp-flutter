@@ -22897,6 +22897,12 @@ abstract class AppLocalizations {
   /// **'A reason is required.'**
   String get payrollRuleReasonRequired;
 
+  /// No description provided for @payrollRuleWorkedDaysOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Days worked go from 0 to the number of days in the month.'**
+  String get payrollRuleWorkedDaysOutOfRange;
+
   /// No description provided for @payrollRuleOvertimeNotAllowed.
   ///
   /// In en, this message translates to:

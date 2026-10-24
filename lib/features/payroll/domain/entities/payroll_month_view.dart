@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fing
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
 
 /// Où en est une paie **à l'écran** : le statut serveur, plus le geste de
@@ -49,6 +50,9 @@ class PayrollMonthView {
   final PayrollHeader? header;
   final PayrollPhase phase;
 
+  /// Le taux de versement du mois ; `null` = 100 %.
+  final PayrollPayoutPolicy? payoutPolicy;
+
   /// Calculées tant que la paie n'est pas validée, figées ensuite.
   final List<PayrollLine> lines;
   final List<PayrollTotal> totals;
@@ -84,6 +88,7 @@ class PayrollMonthView {
     required this.withoutContract,
     required this.zeroHourMembers,
     required this.attendance,
+    this.payoutPolicy,
     this.awaitingFrozenLines = false,
     this.lastRefusal,
     this.submitBlocker,

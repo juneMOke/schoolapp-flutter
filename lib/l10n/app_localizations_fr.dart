@@ -14611,6 +14611,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollRuleReasonRequired => 'Le motif est obligatoire.';
 
   @override
+  String get payrollRuleWorkedDaysOutOfRange =>
+      'Les jours prestés vont de 0 au nombre de jours du mois.';
+
+  @override
   String get payrollRuleOvertimeNotAllowed =>
       'Un vacataire n\'a pas d\'heures supplémentaires.';
 

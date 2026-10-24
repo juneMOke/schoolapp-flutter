@@ -20,6 +20,13 @@ abstract class PayrollRepository {
     PayrollVariables variables,
   );
 
+  /// Le taux de versement de [month] et son motif (v2).
+  Future<Either<Failure, Unit>> savePayoutPolicy(
+    String month,
+    int ratePercent, {
+    String? reason,
+  });
+
   /// Pose un geste du circuit ; [expected] = l'empreinte vue (SUBMIT,
   /// VALIDATE), [reason] = le motif (RETURN, REOPEN).
   Future<Either<Failure, Unit>> recordGesture(

@@ -11,6 +11,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_mont
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
@@ -88,6 +90,92 @@ void main() {
     ),
     '2026-10',
   );
+
+  PayrollRule? ruleOf(Either<Failure, Unit> result) => result.fold(
+    (failure) => failure is PayrollRuleFailure ? failure.rule : null,
+    (_) => null,
+  );
+
+  group('v2 : variables et taux du mois', () {
+    setUp(() {
+      when(
+        () => repository.saveVariables(any(), any()),
+      ).thenAnswer((_) async => const Right(unit));
+      when(
+        () => repository.savePayoutPolicy(
+          any(),
+          any(),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async => const Right(unit));
+    });
+
+    setUpAll(
+      () => registerFallbackValue(const PayrollVariables(staffMemberId: 's')),
+    );
+
+    test('NJP au-delà du diviseur : refusé avant la file', () async {
+      final result = await SavePayrollVariablesUseCase(repository)(
+        view(PayrollStatus.draft),
+        const PayrollVariables(staffMemberId: 'm-1', workedDays: 27),
+      );
+
+      expect(ruleOf(result), PayrollRule.workedDaysOutOfRange);
+      verifyNever(() => repository.saveVariables(any(), any()));
+    });
+
+    test('un montant fixe sans motif est refusé', () async {
+      final result = await SavePayrollVariablesUseCase(repository)(
+        view(PayrollStatus.draft),
+        const PayrollVariables(
+          staffMemberId: 'm-1',
+          fixedPayoutInCents: 10000,
+          fixedPayoutReason: ' x ',
+        ),
+      );
+
+      expect(ruleOf(result), PayrollRule.reasonRequired);
+    });
+
+    test('NJP dans les bornes : part', () async {
+      final result = await SavePayrollVariablesUseCase(repository)(
+        view(PayrollStatus.draft),
+        const PayrollVariables(staffMemberId: 'm-1', workedDays: 20),
+      );
+
+      expect(result.isRight(), isTrue);
+    });
+
+    test('taux sous 100 % sans motif : refusé ; avec motif : part', () async {
+      final useCase = SavePayrollPayoutPolicyUseCase(repository);
+
+      expect(
+        ruleOf(await useCase(view(PayrollStatus.draft), 60)),
+        PayrollRule.reasonRequired,
+      );
+      expect(
+        (await useCase(
+          view(PayrollStatus.draft),
+          60,
+          reason: 'Trésorerie',
+        )).isRight(),
+        isTrue,
+      );
+      expect(
+        ruleOf(await useCase(view(PayrollStatus.draft), 120)),
+        PayrollRule.invalidAmount,
+      );
+    });
+
+    test('taux du mois sur une paie soumise : non modifiable', () async {
+      final result = await SavePayrollPayoutPolicyUseCase(repository)(
+        view(PayrollStatus.submitted),
+        100,
+      );
+
+      expect(ruleOf(result), PayrollRule.notEditable);
+    });
+  });
 
   group('geste du circuit', () {
     test('soumettre part avec l empreinte du livre affiché', () async {

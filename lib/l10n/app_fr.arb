@@ -9739,6 +9739,10 @@
   "payrollRuleNotEditable": "La paie n'est plus en brouillon.",
   "payrollRuleWrongPhase": "Ce geste ne part pas de l'état actuel de la paie.",
   "payrollRuleReasonRequired": "Le motif est obligatoire.",
+  "payrollRuleWorkedDaysOutOfRange": "Les jours prestés vont de 0 au nombre de jours du mois.",
+  "@payrollRuleWorkedDaysOutOfRange": {
+    "description": "Refus d'une saisie de NJP hors bornes."
+  },
   "payrollRuleOvertimeNotAllowed": "Un vacataire n'a pas d'heures supplémentaires.",
   "payrollRuleInvalidAmount": "Montant invalide.",
   "payrollRuleInvalidInstallments": "Une avance se rembourse en 1 à 4 mois.",

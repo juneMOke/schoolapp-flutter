@@ -100,7 +100,8 @@ const TableSchema payrollsTable = TableSchema(
 );
 
 /// `payroll_variables` — les éléments variables d'un agent pour un mois :
-/// minutes d'heures sup., taux horaire imposé, enfants à charge du mois.
+/// minutes d'heures sup., taux horaire imposé, enfants à charge du mois ; en
+/// v2, jours prestés (NJP), prise en charge (PC/E) et montant fixe versé.
 /// Dernier écrit gagne ; écrits seulement sur une paie en brouillon.
 const TableSchema payrollVariablesTable = TableSchema(
   name: 'payroll_variables',
@@ -112,6 +113,10 @@ const TableSchema payrollVariablesTable = TableSchema(
       overtime_minutes INTEGER,
       overtime_rate_in_cents INTEGER,
       dependent_children INTEGER,
+      worked_days INTEGER,
+      childcare_in_cents INTEGER,
+      fixed_payout_in_cents INTEGER,
+      fixed_payout_reason TEXT,
       client_updated_at TEXT NOT NULL,
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
@@ -302,6 +307,27 @@ const TableSchema payrollShareTracesTable = TableSchema(
   ''',
 );
 
+/// `payroll_payout_policies` — le taux de versement d'un mois et son motif
+/// (v2). Dernier écrit gagne ; écrit seulement sur une paie en brouillon.
+/// Absent = 100 %.
+const TableSchema payrollPayoutPoliciesTable = TableSchema(
+  name: 'payroll_payout_policies',
+  createTableSql: '''
+    CREATE TABLE payroll_payout_policies (
+      school_id TEXT NOT NULL,
+      month TEXT NOT NULL,
+      rate_percent INTEGER NOT NULL,
+      reason TEXT,
+      client_updated_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'SYNCED',
+      sync_error TEXT,
+      sync_error_code TEXT,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, month)
+    )
+  ''',
+);
+
 const List<TableSchema> payrollTables = [
   refPayrollSettingsTable,
   staffPayProfilesTable,
@@ -313,4 +339,5 @@ const List<TableSchema> payrollTables = [
   salaryAdvancesTable,
   payrollDisbursementsTable,
   payrollShareTracesTable,
+  payrollPayoutPoliciesTable,
 ];

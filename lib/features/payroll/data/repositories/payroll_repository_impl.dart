@@ -82,6 +82,20 @@ class PayrollRepositoryImpl implements PayrollRepository {
   );
 
   @override
+  Future<Either<Failure, Unit>> savePayoutPolicy(
+    String month,
+    int ratePercent, {
+    String? reason,
+  }) => _write(
+    'Écriture du taux de versement',
+    (requests, nowMs) => _local.payoutPolicies.save(
+      requests.payoutPolicy(month, ratePercent, reason: reason),
+      schoolId: requests.schoolId,
+      nowMs: nowMs,
+    ),
+  );
+
+  @override
   Future<Either<Failure, Unit>> recordGesture(
     String month,
     PayrollGestureKind kind, {

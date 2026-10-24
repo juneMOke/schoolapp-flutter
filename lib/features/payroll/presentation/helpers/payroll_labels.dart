@@ -89,6 +89,7 @@ abstract final class PayrollLabels {
     PayrollRule.hasDisbursements => l10n.payrollBlockerDisbursed,
     PayrollRule.reasonRequired => l10n.payrollRuleReasonRequired,
     PayrollRule.overtimeNotAllowed => l10n.payrollRuleOvertimeNotAllowed,
+    PayrollRule.workedDaysOutOfRange => l10n.payrollRuleWorkedDaysOutOfRange,
     PayrollRule.invalidAmount => l10n.payrollRuleInvalidAmount,
     PayrollRule.invalidInstallments => l10n.payrollRuleInvalidInstallments,
     PayrollRule.monthLocked => l10n.payrollRuleMonthLocked,

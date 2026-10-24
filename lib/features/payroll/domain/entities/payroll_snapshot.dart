@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enum
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
@@ -24,6 +25,9 @@ class PayrollSnapshot {
   /// Par mois `YYYY-MM`.
   final Map<String, PayrollHeader> headers;
   final Map<String, Map<String, PayrollVariables>> variables;
+
+  /// Par mois : le taux de versement ; absent = 100 %.
+  final Map<String, PayrollPayoutPolicy> payoutPolicies;
   final Map<String, List<PayrollLine>> frozenLines;
   final Map<String, AttendanceSummary> summaries;
 
@@ -58,6 +62,7 @@ class PayrollSnapshot {
     required this.schoolYears,
     required this.shareTraces,
     required this.hasEverSynced,
+    this.payoutPolicies = const {},
     this.school,
   });
 

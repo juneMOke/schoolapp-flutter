@@ -12,10 +12,20 @@ part of 'tenant_migrations.dart';
 /// - `staff_members.grade` : le grade de l'agent, lu par l'état de paie. Pas
 ///   de re-pull : le champ naît vide au serveur, il ne descend qu'une fois
 ///   saisi, donc avec une ligne modifiée.
+/// - `payroll_variables` : jours prestés (NJP), prise en charge (PC/E),
+///   montant fixe versé et son motif.
+/// - `payroll_payout_policies` : le taux de versement du mois.
 Future<void> _payrollV2(DatabaseExecutor db) async {
   await _addColumns(db, 'ref_payroll_settings', const {
     'work_days_divisor': 'INTEGER NOT NULL DEFAULT 26',
     'absence_deduction_enabled': 'INTEGER NOT NULL DEFAULT 0',
   });
   await _addColumns(db, 'staff_members', const {'grade': 'TEXT'});
+  await _addColumns(db, 'payroll_variables', const {
+    'worked_days': 'INTEGER',
+    'childcare_in_cents': 'INTEGER',
+    'fixed_payout_in_cents': 'INTEGER',
+    'fixed_payout_reason': 'TEXT',
+  });
+  await _createTables(db, const [payrollPayoutPoliciesTable]);
 }

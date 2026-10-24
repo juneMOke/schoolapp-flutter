@@ -1258,6 +1258,11 @@ class AppConstants {
   static const String syncPayrollVariablesEndpoint =
       '/api/v1/sync/payroll-variables';
 
+  /// Taux de versement d'un mois (PUT, brouillon seulement, dernier écrit
+  /// gagne) — Paie v2, route proposée par la tablette.
+  static const String syncPayrollPayoutPoliciesEndpoint =
+      '/api/v1/sync/payroll-payout-policies';
+
   /// Gestes du circuit (POST, un par requête : `SUBMIT`, `RETURN`, `VALIDATE`,
   /// `REOPEN`), idempotents par `gestureId`.
   static const String syncPayrollGesturesEndpoint =

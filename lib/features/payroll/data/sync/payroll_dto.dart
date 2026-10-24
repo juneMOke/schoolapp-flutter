@@ -7,6 +7,10 @@ class PayrollVariablesDto {
   final int? overtimeMinutes;
   final int? overtimeRateInCents;
   final int? dependentChildren;
+  final int? workedDays;
+  final int? childcareInCents;
+  final int? fixedPayoutInCents;
+  final String? fixedPayoutReason;
   final String clientUpdatedAt;
 
   const PayrollVariablesDto({
@@ -15,6 +19,10 @@ class PayrollVariablesDto {
     this.overtimeMinutes,
     this.overtimeRateInCents,
     this.dependentChildren,
+    this.workedDays,
+    this.childcareInCents,
+    this.fixedPayoutInCents,
+    this.fixedPayoutReason,
   });
 
   static PayrollVariablesDto? tryParse(Object? raw) {
@@ -28,6 +36,36 @@ class PayrollVariablesDto {
       overtimeMinutes: raw.integer('overtimeMinutes'),
       overtimeRateInCents: raw.integer('overtimeRateInCents'),
       dependentChildren: raw.integer('dependentChildren'),
+      workedDays: raw.integer('workedDays'),
+      childcareInCents: raw.integer('childcareInCents'),
+      fixedPayoutInCents: raw.integer('fixedPayoutInCents'),
+      fixedPayoutReason: raw.text('fixedPayoutReason'),
+    );
+  }
+}
+
+/// Le taux de versement du mois, tel qu'il descend avec la paie (v2).
+class PayrollPayoutPolicyDto {
+  final int ratePercent;
+  final String? reason;
+  final String clientUpdatedAt;
+
+  const PayrollPayoutPolicyDto({
+    required this.ratePercent,
+    required this.clientUpdatedAt,
+    this.reason,
+  });
+
+  /// `null` hors bornes : un taux qu'on ne sait pas lire ne s'applique pas.
+  static PayrollPayoutPolicyDto? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    final rate = raw.integer('ratePercent');
+    final at = raw.instant('clientUpdatedAt');
+    if (rate == null || rate < 0 || rate > 100 || at == null) return null;
+    return PayrollPayoutPolicyDto(
+      ratePercent: rate,
+      clientUpdatedAt: at,
+      reason: raw.text('reason'),
     );
   }
 }
@@ -80,6 +118,9 @@ class PayrollDto {
   final List<PayrollVariablesDto> variables;
   final List<PayrollGestureDto> gestures;
 
+  /// `null` : le serveur n'en porte pas (100 %), ou une paie v1.
+  final PayrollPayoutPolicyDto? payoutPolicy;
+
   /// Liste vide hors `VALIDATED` ; `null` si le champ manque (ne rien
   /// effacer d'une paie validée).
   final List<Map<dynamic, dynamic>>? lines;
@@ -97,6 +138,7 @@ class PayrollDto {
     this.validationGestureId,
     this.variables = const [],
     this.gestures = const [],
+    this.payoutPolicy,
     this.lines,
     this.serverUpdatedAt,
   });
@@ -130,6 +172,7 @@ class PayrollDto {
         if (gestures is List)
           for (final item in gestures) ?PayrollGestureDto.tryParse(item),
       ],
+      payoutPolicy: PayrollPayoutPolicyDto.tryParse(raw['payoutPolicy']),
       lines: lines is List
           ? [
               for (final l in lines)

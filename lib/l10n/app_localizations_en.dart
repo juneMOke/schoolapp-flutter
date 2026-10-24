@@ -14507,6 +14507,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollRuleReasonRequired => 'A reason is required.';
 
   @override
+  String get payrollRuleWorkedDaysOutOfRange =>
+      'Days worked go from 0 to the number of days in the month.';
+
+  @override
   String get payrollRuleOvertimeNotAllowed =>
       'Temporary staff have no overtime.';
 

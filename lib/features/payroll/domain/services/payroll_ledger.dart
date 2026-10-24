@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enum
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
@@ -43,6 +44,7 @@ abstract final class PayrollLedger {
     return PayrollMonthView(
       month: month,
       header: header,
+      payoutPolicy: snapshot.payoutPolicies[month],
       phase: phase,
       lines: lines,
       totals: PayrollFingerprinter.totalsOf(
@@ -90,6 +92,9 @@ abstract final class PayrollLedger {
         variables: snapshot.variables[month] ?? const {},
         profiles: snapshot.profiles,
         attendance: snapshot.summaries[PayrollMonth.previous(month)],
+        payoutRatePercent:
+            snapshot.payoutPolicies[month]?.ratePercent ??
+            PayrollPayoutPolicy.full,
         advances: PayrollAdvanceSchedule.statesOf(
           snapshot.advances,
           month,
@@ -117,6 +122,7 @@ abstract final class PayrollLedger {
         profiles: input.profiles,
         attendance: input.attendance,
         advances: input.advances,
+        payoutRatePercent: input.payoutRatePercent,
       ),
     ).lines;
     return lines.isEmpty ? null : lines.single;

@@ -37,9 +37,27 @@ class PayrollRequestFactory {
         overtimeMinutes: v.overtimeMinutes,
         overtimeRateInCents: v.overtimeRateInCents,
         dependentChildren: v.dependentChildren,
+        workedDays: v.workedDays,
+        childcareInCents: v.childcareInCents,
+        fixedPayoutInCents: v.fixedPayoutInCents,
+        fixedPayoutReason: v.fixedPayoutInCents == null
+            ? null
+            : v.fixedPayoutReason?.trim(),
         clientUpdatedAt: stamp,
         authorId: authorId,
       );
+
+  PayrollPayoutPolicyRequestDto payoutPolicy(
+    String month,
+    int ratePercent, {
+    String? reason,
+  }) => PayrollPayoutPolicyRequestDto(
+    month: month,
+    ratePercent: ratePercent,
+    reason: ratePercent >= 100 ? null : reason?.trim(),
+    clientUpdatedAt: stamp,
+    authorId: authorId,
+  );
 
   PayrollGestureRequestDto gesture(
     String month,

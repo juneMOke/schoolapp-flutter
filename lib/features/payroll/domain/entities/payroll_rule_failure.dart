@@ -16,6 +16,10 @@ enum PayrollRule {
 
   /// Un vacataire n'a pas d'heures supplémentaires.
   overtimeNotAllowed,
+
+  /// Jours prestés hors de `[0, diviseur]`, ou saisis pour un vacataire à
+  /// l'heure.
+  workedDaysOutOfRange,
   invalidAmount,
   invalidInstallments,
 
@@ -83,6 +87,7 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'REASON_REQUIRED' => PayrollRule.reasonRequired,
   'PAYROLL_NOT_DRAFT' => PayrollRule.notEditable,
   'OVERTIME_NOT_ALLOWED' => PayrollRule.overtimeNotAllowed,
+  'WORKED_DAYS_OUT_OF_RANGE' => PayrollRule.workedDaysOutOfRange,
   'STAFF_NOT_ON_PAYROLL' => PayrollRule.noContract,
   'ADVANCE_MONTH_LOCKED' => PayrollRule.monthLocked,
   'ADVANCE_CURRENCY_MISMATCH' || 'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,

@@ -9378,6 +9378,7 @@
   "payrollRuleNotEditable": "The payroll is no longer a draft.",
   "payrollRuleWrongPhase": "This action does not apply to the payroll's current state.",
   "payrollRuleReasonRequired": "A reason is required.",
+  "payrollRuleWorkedDaysOutOfRange": "Days worked go from 0 to the number of days in the month.",
   "payrollRuleOvertimeNotAllowed": "Temporary staff have no overtime.",
   "payrollRuleInvalidAmount": "Invalid amount.",
   "payrollRuleInvalidInstallments": "An advance is repaid over 1 to 4 months.",

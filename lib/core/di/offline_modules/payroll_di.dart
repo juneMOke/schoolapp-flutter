@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_calendar_
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_share_trace_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
@@ -90,6 +91,7 @@ void _registerDomain(GetIt getIt) {
       profiles: getIt<StaffPayProfileDao>(),
       payrolls: getIt<PayrollDao>(),
       variables: getIt<PayrollVariablesDao>(),
+      payoutPolicies: getIt<PayrollPayoutPolicyDao>(),
       gestures: getIt<PayrollGestureDao>(),
       summaries: getIt<AttendanceSummaryDao>(),
       advances: getIt<SalaryAdvanceDao>(),
@@ -129,6 +131,7 @@ void _registerDomain(GetIt getIt) {
     ..registerFactory(() => FetchPayslipUseCase(getIt<PayslipRepository>()))
     ..registerFactory(() => RecordPayslipShareUseCase(repository()))
     ..registerFactory(() => SavePayrollVariablesUseCase(repository()))
+    ..registerFactory(() => SavePayrollPayoutPolicyUseCase(repository()))
     ..registerFactory(() => RecordPayrollGestureUseCase(repository()))
     ..registerFactory(() => GrantSalaryAdvanceUseCase(repository()))
     ..registerFactory(() => CancelSalaryAdvanceUseCase(repository()))
@@ -148,6 +151,9 @@ void _registerStorage(GetIt getIt) {
   getIt.registerLazySingleton<PayrollDao>(() => PayrollDao(getIt<Database>()));
   getIt.registerLazySingleton<PayrollVariablesDao>(
     () => PayrollVariablesDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<PayrollPayoutPolicyDao>(
+    () => PayrollPayoutPolicyDao(getIt<Database>()),
   );
   getIt.registerLazySingleton<PayrollGestureDao>(
     () => PayrollGestureDao(getIt<Database>()),

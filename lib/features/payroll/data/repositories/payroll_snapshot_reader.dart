@@ -54,6 +54,7 @@ class PayrollSnapshotReader {
                 profiles: await _local.profiles.forSchool(schoolId),
                 headers: await _local.payrolls.headers(schoolId),
                 variables: await _local.variables.forSchool(schoolId),
+                payoutPolicies: await _local.payoutPolicies.forSchool(schoolId),
                 frozenLines: {
                   for (final entry in frozen.entries)
                     entry.key: [

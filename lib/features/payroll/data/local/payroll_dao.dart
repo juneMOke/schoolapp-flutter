@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_line_json.dart';
@@ -128,6 +129,13 @@ class PayrollDao {
       txn,
       payroll.month,
       payroll.variables,
+      schoolId: schoolId,
+      nowMs: nowMs,
+    );
+    await PayrollPayoutPolicyDao.applyServer(
+      txn,
+      payroll.month,
+      payroll.payoutPolicy,
       schoolId: schoolId,
       nowMs: nowMs,
     );

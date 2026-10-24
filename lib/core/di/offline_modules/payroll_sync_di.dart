@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/payroll/data/local/attendance_summar
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/salary_advance_dao.dart';
@@ -121,6 +122,15 @@ void _registerPushes(GetIt getIt) {
         currentUser: currentUser,
         extras: extras,
         members: members,
+      ),
+    )
+    ..registerHandler(
+      PayrollPayoutPolicyOutboxHandler(
+        api: api,
+        dao: getIt<PayrollPayoutPolicyDao>(),
+        outbox: outbox,
+        currentUser: currentUser,
+        extras: extras,
       ),
     )
     ..registerHandler(

@@ -7,6 +7,9 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_vari
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
 
+/// Le motif d'un versement réduit (taux du mois ou montant fixe).
+const int minPayoutReasonLength = 3;
+
 /// Enregistre les éléments variables d'un agent, brouillon seulement.
 class SavePayrollVariablesUseCase {
   final PayrollRepository _repository;
@@ -27,10 +30,54 @@ class SavePayrollVariablesUseCase {
     }
     if ((variables.overtimeMinutes ?? 0) < 0 ||
         (variables.overtimeRateInCents ?? 0) < 0 ||
-        (variables.dependentChildren ?? 0) < 0) {
+        (variables.dependentChildren ?? 0) < 0 ||
+        (variables.childcareInCents ?? 0) < 0 ||
+        (variables.fixedPayoutInCents ?? 0) < 0) {
       return Left(PayrollRuleFailure(PayrollRule.invalidAmount));
     }
+    // NJP ∈ [0, diviseur] ; un vacataire à l'heure n'en a pas (T5).
+    if (variables.workedDays case final days?) {
+      final divisor = line.deductions.workDaysDivisor;
+      if (divisor == null || days < 0 || days > divisor) {
+        return Left(PayrollRuleFailure(PayrollRule.workedDaysOutOfRange));
+      }
+    }
+    if (variables.fixedPayoutInCents != null &&
+        (variables.fixedPayoutReason?.trim().length ?? 0) <
+            minPayoutReasonLength) {
+      return Left(PayrollRuleFailure(PayrollRule.reasonRequired));
+    }
     return _repository.saveVariables(view.month, variables);
+  }
+}
+
+/// Règle le taux de versement du mois (v2) : brouillon seulement, de 0 à
+/// 100 %, motif requis sous 100 %. Le net dû ne change pas.
+class SavePayrollPayoutPolicyUseCase {
+  final PayrollRepository _repository;
+
+  const SavePayrollPayoutPolicyUseCase(this._repository);
+
+  Future<Either<Failure, Unit>> call(
+    PayrollMonthView view,
+    int ratePercent, {
+    String? reason,
+  }) async {
+    if (!view.isEditable) {
+      return Left(PayrollRuleFailure(PayrollRule.notEditable));
+    }
+    if (ratePercent < 0 || ratePercent > 100) {
+      return Left(PayrollRuleFailure(PayrollRule.invalidAmount));
+    }
+    if (ratePercent < 100 &&
+        (reason?.trim().length ?? 0) < minPayoutReasonLength) {
+      return Left(PayrollRuleFailure(PayrollRule.reasonRequired));
+    }
+    return _repository.savePayoutPolicy(
+      view.month,
+      ratePercent,
+      reason: reason,
+    );
   }
 }
 

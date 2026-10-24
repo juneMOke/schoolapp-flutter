@@ -47,6 +47,10 @@ class PayrollVariablesRequestDto {
   final int? overtimeMinutes;
   final int? overtimeRateInCents;
   final int? dependentChildren;
+  final int? workedDays;
+  final int? childcareInCents;
+  final int? fixedPayoutInCents;
+  final String? fixedPayoutReason;
   final String clientUpdatedAt;
   final String authorId;
 
@@ -58,6 +62,10 @@ class PayrollVariablesRequestDto {
     this.overtimeMinutes,
     this.overtimeRateInCents,
     this.dependentChildren,
+    this.workedDays,
+    this.childcareInCents,
+    this.fixedPayoutInCents,
+    this.fixedPayoutReason,
   });
 
   Map<String, dynamic> toJson() => {
@@ -67,6 +75,10 @@ class PayrollVariablesRequestDto {
       'overtimeMinutes': overtimeMinutes,
       'overtimeRateInCents': overtimeRateInCents,
       'dependentChildren': dependentChildren,
+      'workedDays': workedDays,
+      'childcareInCents': childcareInCents,
+      'fixedPayoutInCents': fixedPayoutInCents,
+      'fixedPayoutReason': fixedPayoutReason,
       'clientUpdatedAt': clientUpdatedAt,
     },
     kOutboxAuthorIdKey: authorId,
@@ -91,6 +103,10 @@ class PayrollVariablesRequestDto {
       overtimeMinutes: inner.integer('overtimeMinutes'),
       overtimeRateInCents: inner.integer('overtimeRateInCents'),
       dependentChildren: inner.integer('dependentChildren'),
+      workedDays: inner.integer('workedDays'),
+      childcareInCents: inner.integer('childcareInCents'),
+      fixedPayoutInCents: inner.integer('fixedPayoutInCents'),
+      fixedPayoutReason: inner.text('fixedPayoutReason'),
     );
   }
 }
@@ -153,6 +169,54 @@ class PayrollGestureRequestDto {
       reason: inner.text('reason'),
       expected: PayrollFingerprintJson.tryParse(inner['expected']),
       clientRecordedAt: at,
+      authorId: author,
+    );
+  }
+}
+
+/// `PUT /sync/payroll-payout-policies` — le taux de versement d'un mois et
+/// son motif, dernier écrit gagne, brouillon seulement (v2).
+class PayrollPayoutPolicyRequestDto {
+  final String month;
+  final int ratePercent;
+  final String? reason;
+  final String clientUpdatedAt;
+  final String authorId;
+
+  const PayrollPayoutPolicyRequestDto({
+    required this.month,
+    required this.ratePercent,
+    required this.clientUpdatedAt,
+    required this.authorId,
+    this.reason,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'policy': {
+      'month': month,
+      'ratePercent': ratePercent,
+      'reason': reason,
+      'clientUpdatedAt': clientUpdatedAt,
+    },
+    kOutboxAuthorIdKey: authorId,
+  };
+
+  static PayrollPayoutPolicyRequestDto? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    final inner = raw['policy'];
+    if (inner is! Map) return null;
+    final month = inner.yearMonth('month');
+    final rate = inner.integer('ratePercent');
+    final at = inner.instant('clientUpdatedAt');
+    final author = raw.text(kOutboxAuthorIdKey);
+    if (month == null || rate == null || at == null || author == null) {
+      return null;
+    }
+    return PayrollPayoutPolicyRequestDto(
+      month: month,
+      ratePercent: rate,
+      reason: inner.text('reason'),
+      clientUpdatedAt: at,
       authorId: author,
     );
   }

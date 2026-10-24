@@ -37,6 +37,12 @@ abstract class PayrollSyncApi {
     @Body() Map<String, dynamic> body,
   );
 
+  @PUT(AppConstants.syncPayrollPayoutPoliciesEndpoint)
+  Future<dynamic> putPayoutPolicy(
+    @Extras() Map<String, dynamic> extras,
+    @Body() Map<String, dynamic> body,
+  );
+
   /// Rend la paie telle que le geste l'a laissée.
   @POST(AppConstants.syncPayrollGesturesEndpoint)
   Future<PayrollDto> submitGesture(
