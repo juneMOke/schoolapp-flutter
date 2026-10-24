@@ -34,6 +34,10 @@ void main() {
         'écran de la coquille — gardé par son second segment, l\'identifiant '
         'de sous-menu (cf. test dédié ci-dessous) ; un identifiant inconnu '
         'retombe sur l\'Accueil',
+    '/home/:subMenuId/:agentId':
+        'fiche d\'agent de RH · Personnel — gardée, comme l\'écran qui '
+        'l\'ouvre, par son second segment ; sous un autre sous-menu, '
+        '`HrAgentRoutes.redirectFor` la ramène à l\'écran',
     '/dev/components': 'galerie de composants, kDebugMode uniquement',
     '/dev/ticket-print': 'banc de calage thermique, kDebugMode uniquement',
     '/boutique/boutique-historique':

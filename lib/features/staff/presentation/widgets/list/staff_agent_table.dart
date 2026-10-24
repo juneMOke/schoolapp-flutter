@@ -25,11 +25,20 @@ class StaffAgentTable extends StatelessWidget {
   final bool showDossier;
   final ValueChanged<StaffFileRow>? onOpen;
 
+  /// Rend l'en-tête « Agent » touchable pour inverser l'ordre alphabétique.
+  /// `null` — le défaut — le laisse en simple libellé.
+  final VoidCallback? onAgentSort;
+
+  /// L'ordre que montre la flèche de l'en-tête « Agent » (avec [onAgentSort]).
+  final bool agentDescending;
+
   const StaffAgentTable({
     super.key,
     required this.rows,
     required this.showDossier,
     this.onOpen,
+    this.onAgentSort,
+    this.agentDescending = false,
   });
 
   static const double _fixedColumn = 150;
@@ -58,7 +67,13 @@ class StaffAgentTable extends StatelessWidget {
             _Line(
               background: DashboardTones.entete(ListingTones.zoneResultat),
               showDossier: showDossier,
-              agent: _header(l10n.staffTableAgent),
+              agent: onAgentSort == null
+                  ? _header(l10n.staffTableAgent)
+                  : _SortableHeader(
+                      label: _header(l10n.staffTableAgent),
+                      descending: agentDescending,
+                      onTap: onAgentSort!,
+                    ),
               job: _header(l10n.staffTableJob),
               contract: _header(l10n.staffContractLabel),
               dossier: _header(l10n.staffTableDossier),
@@ -107,6 +122,52 @@ class StaffAgentTable extends StatelessWidget {
       letterSpacing: 0.6,
     ),
   );
+}
+
+/// Un en-tête qui trie : son libellé et la flèche du sens courant.
+class _SortableHeader extends StatelessWidget {
+  final Widget label;
+  final bool descending;
+  final VoidCallback onTap;
+
+  const _SortableHeader({
+    required this.label,
+    required this.descending,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Semantics(
+      button: true,
+      // La flèche ne se lit pas : le sens du tri se dit.
+      hint: descending
+          ? l10n.staffTableSortDescending
+          : l10n.staffTableSortAscending,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.brSm,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppDimensions.minTouchTarget,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: label),
+              const SizedBox(width: AppSpacing.xs),
+              Icon(
+                descending ? Icons.arrow_downward : Icons.arrow_upward,
+                size: AppDimensions.detailMiniIconSize,
+                color: ListingTones.inkEnteteTable,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Une rangée de colonnes : deux souples (agent, fonction), trois fixes.

@@ -24,6 +24,10 @@ class StaffSearchToolbar extends StatelessWidget {
   final ValueChanged<CollectionViewMode>? onViewModeChanged;
   final CollectionViewMode viewMode;
 
+  /// Filtres propres à l'écran, posés après la catégorie (un tri, par
+  /// exemple).
+  final List<Widget> trailingFilters;
+
   const StaffSearchToolbar({
     super.key,
     required this.text,
@@ -34,6 +38,7 @@ class StaffSearchToolbar extends StatelessWidget {
     this.category,
     this.onViewModeChanged,
     this.viewMode = CollectionViewMode.grid,
+    this.trailingFilters = const [],
   });
 
   @override
@@ -65,6 +70,7 @@ class StaffSearchToolbar extends StatelessWidget {
               ],
             ),
           ),
+        ...trailingFilters,
       ],
     );
   }

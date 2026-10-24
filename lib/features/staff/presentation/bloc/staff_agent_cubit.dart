@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_draft_validator.dart';
@@ -48,6 +49,30 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
     emit(state.copyWith(draft: draft, validation: _validate(draft)));
   }
 
+  /// Saisit le contrat initial d'une création. Sans effet hors création : un
+  /// agent enregistré pose ses contrats depuis sa fiche.
+  ///
+  /// Le premier statut choisi date le contrat de l'entrée de l'agent, à
+  /// défaut d'aujourd'hui — la date reste modifiable.
+  void updateInitialContract(
+    StaffContractDraft Function(StaffContractDraft) change,
+  ) {
+    if (state.mode != StaffAgentMode.create) return;
+    var contract = change(state.initialContract ?? const StaffContractDraft());
+    if (contract.kind != null && contract.effectiveFrom == null) {
+      contract = contract.copyWith(
+        effectiveFrom: () => state.draft.entryDate ?? _today,
+      );
+    }
+    emit(state.copyWith(initialContract: () => contract));
+  }
+
+  /// « Enregistrer sans contrat » : la saisie entamée est oubliée.
+  void clearInitialContract() {
+    if (state.mode != StaffAgentMode.create) return;
+    emit(state.copyWith(initialContract: () => null));
+  }
+
   /// En création, on n'atteint une étape qu'après avoir validé la précédente ;
   /// en consultation et en modification, les étapes sont libres.
   void goTo(int step) {
@@ -60,7 +85,7 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
   /// reste tant qu'il y en a.
   void next() {
     final tried = {...state.tried, state.step};
-    if (state.validation.errorsInStep(state.step).isNotEmpty) {
+    if (state.stepHasErrors(state.step)) {
       emit(state.copyWith(tried: tried));
       return;
     }
@@ -118,12 +143,17 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
   Future<bool> save() async {
     if (!state.isEditable || state.saving) return false;
     final validation = _validate(state.draft);
-    if (!validation.isValid) {
+    final contractInvalid = state.contractErrors.isNotEmpty;
+    if (!validation.isValid || contractInvalid) {
       emit(
         state.copyWith(
           validation: validation,
           tried: {for (var i = 0; i < StaffAgentState.stepCount; i++) i},
-          step: validation.firstInvalidStep,
+          // La première étape fautive, contrat compris.
+          step: [
+            ?validation.firstInvalidStep,
+            if (contractInvalid) StaffAgentState.jobStep,
+          ].reduce((a, b) => a < b ? a : b),
         ),
       );
       return false;
@@ -148,6 +178,9 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
         tried: const {},
         reached: StaffAgentState.stepCount - 1,
         justSaved: true,
+        // L'écran le lit sur l'état d'avant, et le pose : il ne doit pas
+        // survivre à la création, ni repartir une seconde fois.
+        initialContract: () => null,
       ),
     );
     return true;

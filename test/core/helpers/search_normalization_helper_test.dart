@@ -130,4 +130,21 @@ void main() {
       );
     });
   });
+
+  group('ligatures', () {
+    test('se déplient en deux lettres, majuscules comprises', () {
+      expect(SearchNormalizationHelper.normalize('Cœur'), 'coeur');
+      expect(SearchNormalizationHelper.normalize('ŒUVRE'), 'oeuvre');
+      expect(SearchNormalizationHelper.normalize('Lætitia'), 'laetitia');
+    });
+
+    test('« coeur » trouve « Cœur », et l\'inverse', () {
+      expect(SearchNormalizationHelper.contains('Sacré-Cœur', 'coeur'), isTrue);
+      expect(SearchNormalizationHelper.contains('Sacre-Coeur', 'cœur'), isTrue);
+      expect(
+        SearchNormalizationHelper.containsAllWords(['Lætitia Mbuyi'], 'laeti'),
+        isTrue,
+      );
+    });
+  });
 }

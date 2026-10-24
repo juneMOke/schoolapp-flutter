@@ -11,39 +11,49 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Rien ne s'affiche quand les pièces exigées ne sont pas encore connues
 /// (référentiel pas descendu) : on ne mesure pas contre une liste vide.
 class StaffDossierMeter extends StatelessWidget {
-  final StaffDossier dossier;
+  /// Une case par pièce exigée, vraie quand elle est versée.
+  final List<bool> _slots;
 
-  const StaffDossierMeter({super.key, required this.dossier});
+  StaffDossierMeter({super.key, required StaffDossier dossier})
+    : _slots = [
+        for (final type in dossier.required)
+          dossier.filled.contains(type.rawCode),
+      ];
+
+  /// Le dossier tel qu'un compte le dit (`3 sur 4`, servi par le serveur) :
+  /// les pièces versées d'abord.
+  StaffDossierMeter.counts({super.key, required int done, required int total})
+    : _slots = [for (var i = 0; i < total; i++) i < done];
 
   static const double _barWidth = 12;
   static const double _barHeight = 5;
 
   @override
   Widget build(BuildContext context) {
-    if (!dossier.isKnown) return const SizedBox.shrink();
+    final total = _slots.length;
+    if (total == 0) return const SizedBox.shrink();
+    final done = _slots.where((filled) => filled).length;
     final l10n = AppLocalizations.of(context)!;
-    final color = dossier.isComplete
+    final color = done == total
         ? AppColors.success
-        : dossier.isEmpty
+        : done == 0
         ? AppColors.error
         : AppColors.staffPartialInk;
-    final label = dossier.isComplete
+    final label = done == total
         ? l10n.staffDossierComplete
-        : l10n.staffDossierProgress(dossier.done, dossier.total);
+        : l10n.staffDossierProgress(done, total);
     return Semantics(
       label: label,
       excludeSemantics: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          for (final type in dossier.required) ...[
+          for (final filled in _slots) ...[
             Container(
               width: _barWidth,
               height: _barHeight,
               decoration: BoxDecoration(
-                color: dossier.filled.contains(type.rawCode)
-                    ? color
-                    : AppColors.border,
+                color: filled ? color : AppColors.border,
                 borderRadius: BorderRadius.circular(_barHeight / 2),
               ),
             ),

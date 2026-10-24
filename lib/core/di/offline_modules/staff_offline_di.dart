@@ -1,6 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_attendance_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/features/hr_personnel/data/hr_staff_dashboard_api.dart';
+import 'package:school_app_flutter/features/hr_personnel/data/repositories/hr_staff_dashboard_repository_impl.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/repositories/hr_staff_dashboard_repository.dart';
+import 'package:school_app_flutter/features/hr_personnel/domain/usecases/hr_staff_dashboard_use_cases.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/dashboard/hr_staff_list_report_cubit.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/dashboard/hr_staff_members_cubit.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/dashboard/hr_staff_stats_cubit.dart';
+import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_personnel_cubit.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_lock_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
@@ -130,6 +139,42 @@ void registerStaffOffline(GetIt getIt) {
   );
   getIt.registerFactory<StaffFileCubit>(
     () => StaffFileCubit(source: getIt<StaffSnapshotSource>()),
+  );
+  // RH · Personnel : une instance par écran (tableau de bord, fichier), sur la
+  // même lecture locale.
+  getIt.registerFactory<HrPersonnelCubit>(
+    () => HrPersonnelCubit(source: getIt<StaffSnapshotSource>()),
+  );
+  // RH · Personnel ▸ Tableau de bord : en ligne, sur les trois routes
+  // `/hr/staff-stats` — chiffres, liste et PDF à la même source.
+  getIt.registerLazySingleton<HrStaffDashboardApi>(
+    () => HrStaffDashboardApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<HrStaffDashboardRepository>(
+    () => HrStaffDashboardRepositoryImpl(
+      api: getIt<HrStaffDashboardApi>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerFactory<GetHrStaffStatsUseCase>(
+    () => GetHrStaffStatsUseCase(getIt<HrStaffDashboardRepository>()),
+  );
+  getIt.registerFactory<GetHrStaffMembersUseCase>(
+    () => GetHrStaffMembersUseCase(getIt<HrStaffDashboardRepository>()),
+  );
+  getIt.registerFactory<GetHrStaffListReportUseCase>(
+    () => GetHrStaffListReportUseCase(getIt<HrStaffDashboardRepository>()),
+  );
+  getIt.registerFactory<HrStaffStatsCubit>(
+    () => HrStaffStatsCubit(getStats: getIt<GetHrStaffStatsUseCase>()),
+  );
+  getIt.registerFactory<HrStaffMembersCubit>(
+    () => HrStaffMembersCubit(getMembers: getIt<GetHrStaffMembersUseCase>()),
+  );
+  getIt.registerFactory<HrStaffListReportCubit>(
+    () =>
+        HrStaffListReportCubit(getReport: getIt<GetHrStaffListReportUseCase>()),
   );
   getIt.registerFactory<StaffContractsCubit>(
     () => StaffContractsCubit(

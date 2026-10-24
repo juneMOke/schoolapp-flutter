@@ -33,6 +33,22 @@ class EditiqueFailureMapper {
   /// (réseau / 401 / 403 / 500), le message n'en est que le détail.
   static Failure _withMessage(Failure failure, String message) {
     return switch (failure) {
+      // Les variantes typées d'abord : la branche générique de leur parent
+      // les dégraderait, et le plafond `REPORT_LINE_CAP` (ses chiffres), le
+      // code typé ou la référence d'incident disparaîtraient avec elles.
+      ApiValidationFailure() => ApiValidationFailure(
+        code: failure.code,
+        serverMessage: failure.serverMessage ?? message,
+        detailCode: failure.detailCode,
+        details: failure.details,
+        message: message,
+      ),
+      ApiServerFailure() => ApiServerFailure(
+        code: failure.code,
+        serverMessage: failure.serverMessage ?? message,
+        incidentId: failure.incidentId,
+        message: message,
+      ),
       InvalidCredentialsFailure() => InvalidCredentialsFailure(message),
       UnauthorizedFailure() => UnauthorizedFailure(message),
       NotFoundFailure() => NotFoundFailure(message),

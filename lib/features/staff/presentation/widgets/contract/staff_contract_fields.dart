@@ -13,15 +13,14 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/agent/sta
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_synced_text_input.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les champs d'un contrat qui dépendent de son statut : mode de paie et
-/// montant d'un vacataire, salaire d'un permanent, matricule SECOPE et prime
-/// d'un conventionné — puis les dates.
-class StaffContractFields extends StatelessWidget {
+/// « Ce qu'il paie » : mode de paie et montant d'un vacataire, salaire d'un
+/// permanent, matricule SECOPE et prime d'un conventionné.
+class StaffContractPayFields extends StatelessWidget {
   final StaffContractDraft draft;
   final Map<StaffContractField, String> errors;
   final ValueChanged<StaffContractDraft Function(StaffContractDraft)> onChanged;
 
-  const StaffContractFields({
+  const StaffContractPayFields({
     super.key,
     required this.draft,
     required this.errors,
@@ -69,6 +68,13 @@ class StaffContractFields extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.staffContractPayModeHint,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
           if (errors[StaffContractField.payMode] case final error?)
             Text(
               error,
@@ -89,6 +95,7 @@ class StaffContractFields extends StatelessWidget {
                 onChanged: (v) => onChanged((d) => d.copyWith(amount: v)),
               ),
               _CurrencyField(
+                label: l10n.staffFieldCurrency,
                 selected: draft.currency,
                 onChanged: (c) => onChanged((d) => d.copyWith(currency: c)),
               ),
@@ -114,29 +121,49 @@ class StaffContractFields extends StatelessWidget {
                 onChanged: (v) => onChanged((d) => d.copyWith(bonus: v)),
               ),
               _CurrencyField(
+                label: l10n.staffFieldBonusCurrency,
                 selected: draft.bonusCurrency,
                 onChanged: (c) =>
                     onChanged((d) => d.copyWith(bonusCurrency: c)),
               ),
             ],
           ),
-        StaffFieldRow(
-          children: [
-            StaffDayField(
-              label: l10n.staffFieldEffectiveFrom,
-              value: draft.effectiveFrom,
-              required: true,
-              errorText: errors[StaffContractField.effectiveFrom],
-              onChanged: (v) =>
-                  onChanged((d) => d.copyWith(effectiveFrom: () => v)),
-            ),
-            StaffDayField(
-              label: l10n.staffFieldEndsOn,
-              value: draft.endsOn,
-              errorText: errors[StaffContractField.endsOn],
-              onChanged: (v) => onChanged((d) => d.copyWith(endsOn: () => v)),
-            ),
-          ],
+      ],
+    );
+  }
+}
+
+/// « À partir de quand » : la date d'effet, et une fin facultative.
+class StaffContractPeriodFields extends StatelessWidget {
+  final StaffContractDraft draft;
+  final Map<StaffContractField, String> errors;
+  final ValueChanged<StaffContractDraft Function(StaffContractDraft)> onChanged;
+
+  const StaffContractPeriodFields({
+    super.key,
+    required this.draft,
+    required this.errors,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return StaffFieldRow(
+      children: [
+        StaffDayField(
+          label: l10n.staffFieldEffectiveFrom,
+          value: draft.effectiveFrom,
+          required: true,
+          errorText: errors[StaffContractField.effectiveFrom],
+          onChanged: (v) =>
+              onChanged((d) => d.copyWith(effectiveFrom: () => v)),
+        ),
+        StaffDayField(
+          label: l10n.staffFieldEndsOn,
+          value: draft.endsOn,
+          errorText: errors[StaffContractField.endsOn],
+          onChanged: (v) => onChanged((d) => d.copyWith(endsOn: () => v)),
         ),
       ],
     );
@@ -144,25 +171,29 @@ class StaffContractFields extends StatelessWidget {
 }
 
 class _CurrencyField extends StatelessWidget {
+  final String label;
   final String selected;
   final ValueChanged<String> onChanged;
 
-  const _CurrencyField({required this.selected, required this.onChanged});
+  const _CurrencyField({
+    required this.label,
+    required this.selected,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.staffFieldCurrency, style: AppTypography.labelMedium),
+        Text(label, style: AppTypography.labelMedium),
         const SizedBox(height: AppSpacing.xs),
         SegmentedTabFilter<String>(
-          semanticsLabel: l10n.staffFieldCurrency,
+          semanticsLabel: label,
           selected: selected,
           onSelected: onChanged,
           options: [
-            for (final code in StaffContractFields.currencies)
+            for (final code in StaffContractPayFields.currencies)
               SegmentedTabOption(label: code, value: code),
           ],
         ),

@@ -8740,7 +8740,7 @@
   "boutiqueCartDiscardMessage": "The current cart will be emptied.",
   "communicationEditorDiscardMessage": "The announcement being written is not saved. Your changes will be lost.",
   "staffBlockContract": "Contract",
-  "staffBlockContractHint": "Dated periods: a new contract takes effect on a date, without rewriting the previous one.",
+  "staffBlockContractHint": "A new contract takes over from the previous one on its effective date; the previous one stays in the history.",
   "staffContractAdd": "New contract",
   "staffContractAddTitle": "New contract",
   "staffContractAddSubmit": "Record the contract",
@@ -8748,6 +8748,51 @@
   "staffContractCorrectTitle": "Correct a period",
   "staffContractCorrectSubmit": "Replace the period",
   "staffContractCancelOnly": "Cancel only",
+  "staffInitialContractHint": "Optional: choose a status to set the contract with the record. Without a status, the staff member is saved as \"contract to set\".",
+  "@staffInitialContractHint": {
+    "description": "Fiche agent en création : sous-titre du bloc contrat initial."
+  },
+  "staffInitialContractNoRight": "The contract will be set by whoever manages payroll, once the record is saved.",
+  "@staffInitialContractNoRight": {
+    "description": "Fiche agent en création : bloc contrat sans le droit hr.pay.write."
+  },
+  "staffContractSectionKind": "Status",
+  "@staffContractSectionKind": {
+    "description": "Contrat : titre de la question 1."
+  },
+  "staffContractSectionPay": "Pay",
+  "@staffContractSectionPay": {
+    "description": "Contrat : titre de la question 2."
+  },
+  "staffContractSectionPeriod": "Period",
+  "@staffContractSectionPeriod": {
+    "description": "Contrat : titre de la question 3."
+  },
+  "staffContractPayPending": "Choose a status first: the pay depends on it.",
+  "@staffContractPayPending": {
+    "description": "Contrat : rémunération tant qu'aucun statut n'est choisi."
+  },
+  "staffContractPayModeHint": "Hourly: a rate per hour worked. Monthly flat: a fixed amount each month.",
+  "@staffContractPayModeHint": {
+    "description": "Contrat vacataire : explication du mode de paiement."
+  },
+  "staffContractPeriodHint": "Without an end date, it stays in force until the next contract.",
+  "@staffContractPeriodHint": {
+    "description": "Contrat : explication de la période."
+  },
+  "staffContractRecap": "Will be set: {summary}",
+  "@staffContractRecap": {
+    "description": "Contrat : récapitulatif avant de valider.",
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "staffInitialContractSkip": "Save without a contract",
+  "@staffInitialContractSkip": {
+    "description": "Fiche agent en création : oublie le contrat entamé."
+  },
   "staffContractNoneYet": "No contract: this staff member has no contract yet.",
   "staffContractCurrent": "Current",
   "staffContractFrom": "Since {from}",
@@ -8774,6 +8819,10 @@
   "staffFieldSalary": "Monthly salary",
   "staffFieldHourlyRate": "Hourly rate",
   "staffFieldMonthlyFlat": "Monthly flat fee",
+  "staffFieldBonusCurrency": "Bonus currency",
+  "@staffFieldBonusCurrency": {
+    "description": "Contrat conventionné : devise de la prime locale."
+  },
   "staffFieldCurrency": "Currency",
   "staffFieldSecope": "SECOPE number",
   "staffFieldBonus": "Local bonus (optional)",
@@ -10327,5 +10376,542 @@
   "publicationConfirmNotesPortal": "Also visible on the parent portal, with each grade's comment and the class average (from 3 grades)",
   "disciplinaryCaseVisibleToParents": "Visible to parents on the portal: the incident, its severity and its sanction. A summons shows as a meeting request.",
   "disciplinaryCommentsInternal": "Internal to the school: comments are never shown to parents.",
-  "configurationSchoolPhoneOnPortal": "The school phone is shown to parents on the portal as the contact, with the logo."
+  "configurationSchoolPhoneOnPortal": "The school phone is shown to parents on the portal as the contact, with the logo.",
+  "menuHrPersonnel": "HR · Staff",
+  "@menuHrPersonnel": {
+    "description": "Menu du module RH · Personnel."
+  },
+  "subMenuHrPersonnelFile": "Staff file",
+  "@subMenuHrPersonnelFile": {
+    "description": "Sous-menu Fichier du module RH · Personnel."
+  },
+  "accueilModuleHrPersonnelDescription": "How many staff, who they are, and each one's record.",
+  "@accueilModuleHrPersonnelDescription": {
+    "description": "Carte d'accueil RH · Personnel."
+  },
+  "hrPersonnelEyebrow": "HR · Staff",
+  "@hrPersonnelEyebrow": {
+    "description": "Sur-titre des écrans RH · Personnel."
+  },
+  "hrDashboardSubtitle": "Who works at the school · {agents} · year {year}",
+  "@hrDashboardSubtitle": {
+    "description": "Sous-titre du tableau de bord.",
+    "placeholders": {
+      "agents": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "hrDashboardSubtitleNoYear": "Who works at the school · {agents}",
+  "@hrDashboardSubtitleNoYear": {
+    "description": "Sous-titre sans année connue.",
+    "placeholders": {
+      "agents": {
+        "type": "String"
+      }
+    }
+  },
+  "hrDashboardActionList": "Staff list",
+  "@hrDashboardActionList": {
+    "description": "Bouton : descendre à la liste."
+  },
+  "hrDashboardActionOpenFile": "Open the file",
+  "@hrDashboardActionOpenFile": {
+    "description": "Bouton : ouvrir le Fichier du personnel."
+  },
+  "hrAgentsCount": "{count, plural, =0{0 staff} =1{1 staff member} other{{count} staff}}",
+  "@hrAgentsCount": {
+    "description": "Nombre d'agents.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrCountWomen": "{count, plural, =0{0 women} =1{1 woman} other{{count} women}}",
+  "@hrCountWomen": {
+    "description": "Nombre de femmes.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrCountMen": "{count, plural, =0{0 men} =1{1 man} other{{count} men}}",
+  "@hrCountMen": {
+    "description": "Nombre d'hommes.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrCountSexUnknown": "{count, plural, =1{1 not stated} other{{count} not stated}}",
+  "@hrCountSexUnknown": {
+    "description": "Fiches sans sexe renseigné.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrJoin": "{first} · {second}",
+  "@hrJoin": {
+    "description": "Deux mentions accolées par un point médian.",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "hrKpiHeadcount": "Headcount",
+  "@hrKpiHeadcount": {
+    "description": "Indicateur effectif."
+  },
+  "hrKpiTeachers": "Teachers",
+  "@hrKpiTeachers": {
+    "description": "Indicateur enseignants."
+  },
+  "hrKpiTeachersSubline": "{percent}% · {others} outside teaching",
+  "@hrKpiTeachersSubline": {
+    "description": "Part des enseignants et reste du personnel.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "others": {
+        "type": "int"
+      }
+    }
+  },
+  "hrKpiSeniority": "Average length of service",
+  "@hrKpiSeniority": {
+    "description": "Indicateur ancienneté moyenne."
+  },
+  "hrKpiSeniorityValue": "{value} yrs",
+  "@hrKpiSeniorityValue": {
+    "description": "Ancienneté moyenne, déjà formatée (« 7,6 »).",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "hrKpiSeniorityDean": "longest-serving: {name} · {seniority}",
+  "@hrKpiSeniorityDean": {
+    "description": "L'agent entré le premier.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "seniority": {
+        "type": "String"
+      }
+    }
+  },
+  "hrKpiSeniorityNone": "no entry date",
+  "@hrKpiSeniorityNone": {
+    "description": "Aucun agent n'a de date d'entrée."
+  },
+  "hrKpiSeniorityExcluded": "{count, plural, =1{1 without entry date, not averaged} other{{count} without entry date, not averaged}}",
+  "@hrKpiSeniorityExcluded": {
+    "description": "Agents exclus de la moyenne.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrSeniorityYears": "{count, plural, =0{under 1 yr} =1{1 yr} other{{count} yrs}}",
+  "@hrSeniorityYears": {
+    "description": "Ancienneté d'un agent.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrSeniorityUnknown": "entry date not stated",
+  "@hrSeniorityUnknown": {
+    "description": "Agent sans date d'entrée."
+  },
+  "hrSyncPendingTitle": "{count, plural, =1{1 change still on the tablet} other{{count} changes still on the tablet}}",
+  "@hrSyncPendingTitle": {
+    "description": "Alerte de synchronisation.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrSyncPendingBody": "Records or documents entered offline: they will reach the server when the network is back. They are not counted here yet — figures, list and PDF are the server's.",
+  "@hrSyncPendingBody": {
+    "description": "Corps de l'alerte de synchronisation."
+  },
+  "hrByCategoryTitle": "By category",
+  "@hrByCategoryTitle": {
+    "description": "Carte de répartition par catégorie."
+  },
+  "hrByCategoryHint": "Tap a row to see these staff",
+  "@hrByCategoryHint": {
+    "description": "Indice de la carte Par catégorie."
+  },
+  "hrFilterActive": "active filter",
+  "@hrFilterActive": {
+    "description": "Ligne de catégorie qui filtre la liste."
+  },
+  "hrCategoryUnknown": "Not stated",
+  "@hrCategoryUnknown": {
+    "description": "Catégorie absente ou inconnue de la tablette."
+  },
+  "hrParityTitle": "Gender balance",
+  "@hrParityTitle": {
+    "description": "Carte de parité."
+  },
+  "hrParityHint": "Women and men, by category",
+  "@hrParityHint": {
+    "description": "Indice de la carte Parité."
+  },
+  "hrParityAll": "All staff",
+  "@hrParityAll": {
+    "description": "Ligne globale de la parité."
+  },
+  "hrParityCounts": "{women} W · {men} M",
+  "@hrParityCounts": {
+    "description": "Compte femmes / hommes.",
+    "placeholders": {
+      "women": {
+        "type": "int"
+      },
+      "men": {
+        "type": "int"
+      }
+    }
+  },
+  "hrParityCountsUnknown": "{women} W · {men} M · {unknown} n.s.",
+  "@hrParityCountsUnknown": {
+    "description": "Compte avec sexes non renseignés.",
+    "placeholders": {
+      "women": {
+        "type": "int"
+      },
+      "men": {
+        "type": "int"
+      },
+      "unknown": {
+        "type": "int"
+      }
+    }
+  },
+  "hrParityWomen": "Women",
+  "@hrParityWomen": {
+    "description": "Légende parité."
+  },
+  "hrParityMen": "Men",
+  "@hrParityMen": {
+    "description": "Légende parité."
+  },
+  "hrParityUnknown": "Not stated",
+  "@hrParityUnknown": {
+    "description": "Légende parité : sexe absent."
+  },
+  "hrRosterTitle": "Who they are",
+  "@hrRosterTitle": {
+    "description": "Liste nominative du tableau de bord."
+  },
+  "hrRosterScopeAll": "all staff",
+  "@hrRosterScopeAll": {
+    "description": "Portée de la liste sans filtre."
+  },
+  "hrRosterScopeSearch": "search",
+  "@hrRosterScopeSearch": {
+    "description": "Portée : une recherche est active."
+  },
+  "hrRosterSearchLabel": "Search staff",
+  "@hrRosterSearchLabel": {
+    "description": "Libellé du champ de recherche."
+  },
+  "hrRosterSearchPlaceholder": "Name, role, subject, staff number…",
+  "@hrRosterSearchPlaceholder": {
+    "description": "Indice du champ de recherche."
+  },
+  "hrCategoryFilterLabel": "Category",
+  "@hrCategoryFilterLabel": {
+    "description": "Libellé du sélecteur de catégorie."
+  },
+  "hrCategoryAllCount": "All · {count}",
+  "@hrCategoryAllCount": {
+    "description": "Option toutes catégories.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrCategoryOptionCount": "{label} · {count}",
+  "@hrCategoryOptionCount": {
+    "description": "Option d'une catégorie avec son effectif.",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrSortLabel": "Order",
+  "@hrSortLabel": {
+    "description": "Libellé du sélecteur de tri."
+  },
+  "hrSortName": "Sort: name",
+  "@hrSortName": {
+    "description": "Tri alphabétique."
+  },
+  "hrSortOldest": "Sort: longest-serving",
+  "@hrSortOldest": {
+    "description": "Tri par date d'entrée croissante."
+  },
+  "hrSortNewest": "Sort: most recent",
+  "@hrSortNewest": {
+    "description": "Tri par date d'entrée décroissante."
+  },
+  "hrRosterPdf": "PDF",
+  "@hrRosterPdf": {
+    "description": "Bouton d'export PDF."
+  },
+  "hrRosterPdfTooltip": "Download the list as shown, as a PDF",
+  "@hrRosterPdfTooltip": {
+    "description": "Infobulle du bouton PDF."
+  },
+  "hrRosterSince": "since {date}",
+  "@hrRosterSince": {
+    "description": "Mois d'entrée d'un agent (MM/AAAA).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "hrRosterDossierTooltip": "{done} of {total} documents on file",
+  "@hrRosterDossierTooltip": {
+    "description": "Infobulle du compteur de pièces.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hrRosterEmptyTitle": "No staff match",
+  "@hrRosterEmptyTitle": {
+    "description": "Liste filtrée vide."
+  },
+  "hrRosterEmptyMessage": "Change the search or remove the “{scope}” filter.",
+  "@hrRosterEmptyMessage": {
+    "description": "Liste filtrée vide : que faire.",
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
+  "hrRosterShowAll": "Show all",
+  "@hrRosterShowAll": {
+    "description": "Vide recherche et catégorie."
+  },
+  "hrRosterFooter": "Tap a staff member to open their record",
+  "@hrRosterFooter": {
+    "description": "Pied de la liste."
+  },
+  "hrDashboardFootnote": "Attendance and payroll have their own modules: Attendance and Payroll, under Human resources.",
+  "@hrDashboardFootnote": {
+    "description": "Note de renvoi en bas du tableau de bord."
+  },
+  "hrDashboardEmptyTitle": "No staff on file",
+  "@hrDashboardEmptyTitle": {
+    "description": "Tableau de bord vide."
+  },
+  "hrDashboardEmptyMessage": "The staff file is empty. Record the first staff member: their record, their contract and their documents.",
+  "@hrDashboardEmptyMessage": {
+    "description": "Tableau de bord vide : que faire."
+  },
+  "hrDashboardEmptyAction": "Add a staff member",
+  "@hrDashboardEmptyAction": {
+    "description": "Action du tableau de bord vide."
+  },
+  "hrFileSubtitle": "Teachers, administrative and support staff — entered on the tablet, synced as soon as the network returns.",
+  "@hrFileSubtitle": {
+    "description": "Sous-titre du Fichier."
+  },
+  "hrFileFooterAll": "{count, plural, =0{No staff on file} =1{1 staff member on file} other{{count} staff on file}}",
+  "@hrFileFooterAll": {
+    "description": "Pied du Fichier sans filtre.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hrFileFooterFiltered": "{shown} of {total}",
+  "@hrFileFooterFiltered": {
+    "description": "Pied du Fichier filtré.",
+    "placeholders": {
+      "shown": {
+        "type": "String"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hrDecimal": "{whole}.{tenth}",
+  "@hrDecimal": {
+    "description": "Nombre au dixième (partie entière, dixième).",
+    "placeholders": {
+      "whole": {
+        "type": "int"
+      },
+      "tenth": {
+        "type": "int"
+      }
+    }
+  },
+  "hrKpiSeniorityEmpty": "—",
+  "@hrKpiSeniorityEmpty": {
+    "description": "Ancienneté moyenne inconnue."
+  },
+  "staffTableSortAscending": "Sorted A to Z; tap to reverse",
+  "@staffTableSortAscending": {
+    "description": "Tri de la colonne Agent."
+  },
+  "staffTableSortDescending": "Sorted Z to A; tap to reverse",
+  "@staffTableSortDescending": {
+    "description": "Tri de la colonne Agent."
+  },
+  "hrSortNameDescending": "Sort: name (Z to A)",
+  "@hrSortNameDescending": {
+    "description": "RH · Personnel : tri alphabétique inversé."
+  },
+  "hrAgentNotFoundTitle": "Staff member not found",
+  "@hrAgentNotFoundTitle": {
+    "description": "RH · Personnel : fiche d’agent ouverte par une adresse inconnue — titre."
+  },
+  "hrAgentNotFoundMessage": "This record is not in the tablet's staff file: the staff member may have been removed, or the link comes from another school.",
+  "@hrAgentNotFoundMessage": {
+    "description": "RH · Personnel : fiche d’agent introuvable — explication."
+  },
+  "hrAgentNotFoundAction": "Back to staff",
+  "@hrAgentNotFoundAction": {
+    "description": "RH · Personnel : fiche d’agent introuvable — retour à l’écran."
+  },
+  "hrDashboardSubtitleBare": "Who works at the school",
+  "@hrDashboardSubtitleBare": {
+    "description": "RH · Personnel : sous-titre du tableau de bord avant l'arrivée des chiffres."
+  },
+  "hrRosterLoading": "Loading the staff list",
+  "@hrRosterLoading": {
+    "description": "RH · Personnel : libellé d'accessibilité du chargement de « Qui sont-ils »."
+  },
+  "hrRosterColumnAgent": "Staff member",
+  "@hrRosterColumnAgent": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — nom et fonction."
+  },
+  "hrRosterColumnCategory": "Category",
+  "@hrRosterColumnCategory": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — catégorie de l'agent."
+  },
+  "hrRosterColumnContract": "Contract",
+  "@hrRosterColumnContract": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — contrat du jour."
+  },
+  "hrRosterColumnSeniority": "Seniority",
+  "@hrRosterColumnSeniority": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — ancienneté et mois d'entrée."
+  },
+  "hrRosterColumnDossier": "File",
+  "@hrRosterColumnDossier": {
+    "description": "RH · Personnel : colonne « Qui sont-ils » — pièces fournies au dossier."
+  },
+  "hrRosterOpen": "Open the record",
+  "@hrRosterOpen": {
+    "description": "RH · Personnel : infobulle de l'œil d'une ligne de « Qui sont-ils »."
+  },
+  "hrRosterUnit": "staff members",
+  "@hrRosterUnit": {
+    "description": "RH · Personnel : unité du pied de « Qui sont-ils » (« 1–20 sur 25 agents »)."
+  },
+  "hrStaffReportPreparing": "Preparing…",
+  "@hrStaffReportPreparing": {
+    "description": "RH · Personnel : bouton PDF pendant le rendu serveur."
+  },
+  "hrStaffReportWaiting": "Please wait…",
+  "@hrStaffReportWaiting": {
+    "description": "RH · Personnel : bouton PDF pendant l'attente d'un 429."
+  },
+  "hrStaffReportTitle": "Staff list",
+  "@hrStaffReportTitle": {
+    "description": "RH · Personnel : titre de la visionneuse de la pièce LP."
+  },
+  "hrStaffReportBusy": "A document is already being prepared. Try again in {seconds} s.",
+  "@hrStaffReportBusy": {
+    "description": "RH · Personnel : 429 sur la liste du personnel.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "hrStaffReportForbidden": "You do not have access to the staff list.",
+  "@hrStaffReportForbidden": {
+    "description": "RH · Personnel : 403 sur la liste du personnel."
+  },
+  "hrStaffReportTooLarge": "{lines} staff members, beyond the document's {cap}: add a search or a category.",
+  "@hrStaffReportTooLarge": {
+    "description": "RH · Personnel : 400 REPORT_LINE_CAP.",
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "hrStaffReportFailed": "The staff list could not be prepared.",
+  "@hrStaffReportFailed": {
+    "description": "RH · Personnel : échec du PDF."
+  },
+  "hrDashboardErrorServerTitle": "The server did not answer",
+  "@hrDashboardErrorServerTitle": {
+    "description": "RH · Personnel : panne serveur du tableau de bord — titre."
+  },
+  "hrDashboardErrorServer": "The staff figures could not be read from the server. Try again in a moment; if the problem persists, contact support.",
+  "@hrDashboardErrorServer": {
+    "description": "RH · Personnel : panne serveur du tableau de bord — explication."
+  },
+  "hrDashboardPendingOnlyTitle": "Nothing on the server yet",
+  "@hrDashboardPendingOnlyTitle": {
+    "description": "RH · Personnel : le serveur ne compte aucun agent, mais la tablette en a en attente — titre."
+  },
+  "hrDashboardPendingOnlyMessage": "The staff entered on this tablet have not reached the server yet: they will appear here once sent.",
+  "@hrDashboardPendingOnlyMessage": {
+    "description": "RH · Personnel : agents en attente, serveur vide — explication."
+  },
+  "hrStaffReportNoYear": "No current school year: the list cannot be numbered.",
+  "@hrStaffReportNoYear": {
+    "description": "RH · Personnel : 404 du PDF (pas d'année en cours)."
+  },
+  "hrStaffReportSessionExpired": "Session expired: sign in again to print the list.",
+  "@hrStaffReportSessionExpired": {
+    "description": "RH · Personnel : 401 du PDF."
+  }
 }

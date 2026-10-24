@@ -1134,6 +1134,31 @@ class AppConstants {
   static const String syncStaffDocumentsEndpoint =
       '/api/v1/sync/staff-documents';
 
+  // ── RH · Personnel — tableau de bord, en ligne ──
+  /// Les chiffres du tableau de bord du personnel, au jour de l'école
+  /// (`asOf`), sur les seules fiches déjà remontées. `hr.staff.read`.
+  static const String hrStaffStatsEndpoint = '/api/v1/hr/staff-stats';
+
+  /// La liste « Qui sont-ils » : `q`, `category`, `sort` (**obligatoire**),
+  /// `page`, `size` (au plus 100) ; forme `{totalElements, page, size,
+  /// items}`, comme les ventes de la boutique.
+  static const String hrStaffMembersEndpoint = '/api/v1/hr/staff-stats/members';
+
+  /// La même liste en PDF — pièce **LP**, numérotée et horodatée, non
+  /// archivée. Mêmes `q`, `category` et `sort`, sans pagination ; plafonnée à
+  /// 5 000 agents ; un rendu à la fois (429).
+  static const String hrStaffMembersReportEndpoint =
+      '/api/v1/hr/staff-stats/members.pdf';
+
+  /// Une page de « Qui sont-ils ».
+  static const int hrStaffMembersPageSize = 20;
+
+  /// Délai de réception de la liste du personnel — celui des autres rapports.
+  static const Duration hrStaffListReportTimeout = Duration(seconds: 60);
+
+  /// L'attente retenue quand un 429 de la liste n'annonce pas la sienne.
+  static const Duration hrStaffListReportRetryFallback = Duration(seconds: 60);
+
   /// Pointage du personnel : remontée d'**un** pointage par requête (POST,
   /// `hr.attendance.write`) et descente (GET, flux `hr.staff-attendance`).
   static const String syncStaffAttendanceEndpoint =

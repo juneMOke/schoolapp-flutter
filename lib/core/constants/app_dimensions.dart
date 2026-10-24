@@ -683,8 +683,8 @@ class AppDimensions {
   /// champs s'étirent sans rien apporter.
   static const staffAgentBodyMaxWidth = 960.0;
 
-  /// Largeur d'une tuile de statut dans le choix du contrat : trois tiennent
-  /// sur une ligne de tablette, elles passent à la ligne en portrait.
+  /// Largeur minimale d'une tuile de statut dans le choix du contrat : sous
+  /// trois fois cette largeur, les tuiles s'empilent sur toute la largeur.
   static const staffContractTileWidth = 240.0;
 
   /// Filet d'une tuile de statut : plus épais que le filet courant, pour que
@@ -1034,4 +1034,25 @@ class AppDimensions {
 
   /// Ligne d'un élève proposé par la recherche : cible ≥ 48 dp.
   static const communicationStudentRowMinHeight = 48.0;
+
+  // ── RH · Personnel — tableau de bord et fichier ──
+  /// Au-delà, « Par catégorie » et « Parité » se tiennent côte à côte —
+  /// mesuré sur la largeur reçue : le palier où une fiche cesse d'être
+  /// compacte laisse ~370 dp à chaque carte, assez pour ses barres.
+  static const hrDashboardTwoColumnsMinWidth = AppBreakpoints.detailCompactMax;
+
+  static const hrRosterSortWidth = 220.0;
+  static const hrCategoryBarHeight = 10.0;
+  static const hrParityAllBarHeight = 14.0;
+  static const hrParityBarHeight = 10.0;
+  static const hrLegendSwatchSize = 10.0;
+  static const hrLegendSwatchRadius = 3.0;
+  static const hrBarLabelWidth = 132.0;
+
+  /// Sous cette largeur reçue, une ligne de « Par catégorie » passe sur deux
+  /// niveaux (libellé et compte, puis la barre) : à côté d'un libellé de
+  /// [hrBarLabelWidth] et d'un compte au texte ×1,3, la barre n'avait plus
+  /// de place — le palier où un tableau se lit déjà en téléphone.
+  static const hrCategoryRowStackedMaxWidth = AppBreakpoints.dataTablePhoneMax;
+  static const hrInsightIconSize = 20.0;
 }

@@ -489,6 +489,46 @@ class AppColors {
   /// maquette, créée ici (amendement A10 du back).
   static const staffStepDocuments = Color(0xFF9D174D);
 
+  // ---- RH · Personnel — tableau de bord ----
+  //
+  // Trois familles, chacune un seul sens : la catégorie dit ce que fait
+  // l'agent, la parité qui il est, l'alerte où est la donnée. Fond et encre
+  // séparés là où la teinte s'écrit trop juste en petit corps (la terre
+  // cuite, 4,6:1 sur blanc : assombrie pour le libellé).
+  static const hrCategoryTeacher = bleuArdoise;
+  static const hrCategoryTeacherInk = bleuArdoise; // 9,0:1
+  static const hrCategoryAdministrative = Color(0xFF7A4E68);
+  static const hrCategoryAdministrativeInk = Color(0xFF7A4E68); // 6,7:1
+  static const hrCategorySupport = terreCuite;
+  static const hrCategorySupportInk = terreCuiteDark; // 6,2:1
+  static const hrCategoryUnknown = Color(0xFF8C8478);
+  static const hrCategoryUnknownInk = textMutedAa;
+  static const hrParityWomen = Color(0xFF9D174D);
+  static const hrParityMen = Color(0xFF2E6E8E);
+
+  /// Le segment « non renseigné » : assez sombre pour se détacher de la
+  /// piste (3,7:1 sur blanc), sans voler la vedette aux deux autres.
+  static const hrParityUnknown = Color(0xFF8C8478);
+
+  /// Les pavés « Enseignants » et « Ancienneté » : le vert et l'or des
+  /// tableaux de bord. Le pavé dérive son fond de l'accent (`DashboardTones`).
+  static const hrTeachersAccent = vertSavane;
+  static const hrTeachersSoft = Color(0xFFEDF5EF);
+  static const hrSeniorityAccent = orDoux;
+  static const hrSenioritySoft = Color(0xFFFBF1DF);
+
+  /// La ligne « Par catégorie » qui filtre la liste.
+  static const hrCategoryRowActive = bleuArdoiseSoft;
+
+  /// L'alerte « modifications encore sur la tablette ».
+  static const hrSyncInsightBackground = Color(0xFFFBF1DF);
+  static const hrSyncInsightBorder = Color(0xFFEAD9B0);
+  static const hrSyncInsightTitle = Color(0xFF8A5A08); // 5,3:1 sur son fond
+
+  /// L'icône de l'alerte : l'ambre de [warning] n'y tient que 2,5:1, l'encre
+  /// du titre (5,3:1) porte le sens.
+  static const hrSyncInsightIcon = hrSyncInsightTitle;
+
   // ---- Ressources humaines — le Pointage (spec B, tokens) ----
   //
   // Une teinte par statut, **fond et encre séparés** comme pour les contrats :

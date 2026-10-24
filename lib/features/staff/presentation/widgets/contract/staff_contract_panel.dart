@@ -29,10 +29,15 @@ class StaffContractPanel extends StatelessWidget {
   final StaffMember member;
   final String today;
 
+  /// En modification de la fiche : la frise se lit, aucun geste ne s'offre —
+  /// un contrat posé relit la fiche, ce qui écraserait la saisie en cours.
+  final bool readOnly;
+
   const StaffContractPanel({
     super.key,
     required this.member,
     required this.today,
+    this.readOnly = false,
   });
 
   Future<void> _add(BuildContext context) async {
@@ -94,7 +99,8 @@ class StaffContractPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final canRead = PermissionGate.allows(context, const [Perm.hrPayRead]);
-    final canWrite = PermissionGate.allows(context, const [Perm.hrPayWrite]);
+    final canWrite =
+        !readOnly && PermissionGate.allows(context, const [Perm.hrPayWrite]);
     return BlocConsumer<StaffContractsCubit, StaffContractsState>(
       buildWhen: (previous, current) =>
           previous.contracts != current.contracts ||

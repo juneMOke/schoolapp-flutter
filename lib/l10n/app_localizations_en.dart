@@ -12662,7 +12662,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffBlockContractHint =>
-      'Dated periods: a new contract takes effect on a date, without rewriting the previous one.';
+      'A new contract takes over from the previous one on its effective date; the previous one stays in the history.';
 
   @override
   String get staffContractAdd => 'New contract';
@@ -12684,6 +12684,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffContractCancelOnly => 'Cancel only';
+
+  @override
+  String get staffInitialContractHint =>
+      'Optional: choose a status to set the contract with the record. Without a status, the staff member is saved as \"contract to set\".';
+
+  @override
+  String get staffInitialContractNoRight =>
+      'The contract will be set by whoever manages payroll, once the record is saved.';
+
+  @override
+  String get staffContractSectionKind => 'Status';
+
+  @override
+  String get staffContractSectionPay => 'Pay';
+
+  @override
+  String get staffContractSectionPeriod => 'Period';
+
+  @override
+  String get staffContractPayPending =>
+      'Choose a status first: the pay depends on it.';
+
+  @override
+  String get staffContractPayModeHint =>
+      'Hourly: a rate per hour worked. Monthly flat: a fixed amount each month.';
+
+  @override
+  String get staffContractPeriodHint =>
+      'Without an end date, it stays in force until the next contract.';
+
+  @override
+  String staffContractRecap(String summary) {
+    return 'Will be set: $summary';
+  }
+
+  @override
+  String get staffInitialContractSkip => 'Save without a contract';
 
   @override
   String get staffContractNoneYet =>
@@ -12764,6 +12801,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffFieldMonthlyFlat => 'Monthly flat fee';
+
+  @override
+  String get staffFieldBonusCurrency => 'Bonus currency';
 
   @override
   String get staffFieldCurrency => 'Currency';
@@ -17807,4 +17847,400 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get configurationSchoolPhoneOnPortal =>
       'The school phone is shown to parents on the portal as the contact, with the logo.';
+
+  @override
+  String get menuHrPersonnel => 'HR · Staff';
+
+  @override
+  String get subMenuHrPersonnelFile => 'Staff file';
+
+  @override
+  String get accueilModuleHrPersonnelDescription =>
+      'How many staff, who they are, and each one\'s record.';
+
+  @override
+  String get hrPersonnelEyebrow => 'HR · Staff';
+
+  @override
+  String hrDashboardSubtitle(String agents, String year) {
+    return 'Who works at the school · $agents · year $year';
+  }
+
+  @override
+  String hrDashboardSubtitleNoYear(String agents) {
+    return 'Who works at the school · $agents';
+  }
+
+  @override
+  String get hrDashboardActionList => 'Staff list';
+
+  @override
+  String get hrDashboardActionOpenFile => 'Open the file';
+
+  @override
+  String hrAgentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff',
+      one: '1 staff member',
+      zero: '0 staff',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrCountWomen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count women',
+      one: '1 woman',
+      zero: '0 women',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrCountMen(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count men',
+      one: '1 man',
+      zero: '0 men',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrCountSexUnknown(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count not stated',
+      one: '1 not stated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrJoin(String first, String second) {
+    return '$first · $second';
+  }
+
+  @override
+  String get hrKpiHeadcount => 'Headcount';
+
+  @override
+  String get hrKpiTeachers => 'Teachers';
+
+  @override
+  String hrKpiTeachersSubline(int percent, int others) {
+    return '$percent% · $others outside teaching';
+  }
+
+  @override
+  String get hrKpiSeniority => 'Average length of service';
+
+  @override
+  String hrKpiSeniorityValue(String value) {
+    return '$value yrs';
+  }
+
+  @override
+  String hrKpiSeniorityDean(String name, String seniority) {
+    return 'longest-serving: $name · $seniority';
+  }
+
+  @override
+  String get hrKpiSeniorityNone => 'no entry date';
+
+  @override
+  String hrKpiSeniorityExcluded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count without entry date, not averaged',
+      one: '1 without entry date, not averaged',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrSeniorityYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count yrs',
+      one: '1 yr',
+      zero: 'under 1 yr',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrSeniorityUnknown => 'entry date not stated';
+
+  @override
+  String hrSyncPendingTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes still on the tablet',
+      one: '1 change still on the tablet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrSyncPendingBody =>
+      'Records or documents entered offline: they will reach the server when the network is back. They are not counted here yet — figures, list and PDF are the server\'s.';
+
+  @override
+  String get hrByCategoryTitle => 'By category';
+
+  @override
+  String get hrByCategoryHint => 'Tap a row to see these staff';
+
+  @override
+  String get hrFilterActive => 'active filter';
+
+  @override
+  String get hrCategoryUnknown => 'Not stated';
+
+  @override
+  String get hrParityTitle => 'Gender balance';
+
+  @override
+  String get hrParityHint => 'Women and men, by category';
+
+  @override
+  String get hrParityAll => 'All staff';
+
+  @override
+  String hrParityCounts(int women, int men) {
+    return '$women W · $men M';
+  }
+
+  @override
+  String hrParityCountsUnknown(int women, int men, int unknown) {
+    return '$women W · $men M · $unknown n.s.';
+  }
+
+  @override
+  String get hrParityWomen => 'Women';
+
+  @override
+  String get hrParityMen => 'Men';
+
+  @override
+  String get hrParityUnknown => 'Not stated';
+
+  @override
+  String get hrRosterTitle => 'Who they are';
+
+  @override
+  String get hrRosterScopeAll => 'all staff';
+
+  @override
+  String get hrRosterScopeSearch => 'search';
+
+  @override
+  String get hrRosterSearchLabel => 'Search staff';
+
+  @override
+  String get hrRosterSearchPlaceholder => 'Name, role, subject, staff number…';
+
+  @override
+  String get hrCategoryFilterLabel => 'Category';
+
+  @override
+  String hrCategoryAllCount(int count) {
+    return 'All · $count';
+  }
+
+  @override
+  String hrCategoryOptionCount(String label, int count) {
+    return '$label · $count';
+  }
+
+  @override
+  String get hrSortLabel => 'Order';
+
+  @override
+  String get hrSortName => 'Sort: name';
+
+  @override
+  String get hrSortOldest => 'Sort: longest-serving';
+
+  @override
+  String get hrSortNewest => 'Sort: most recent';
+
+  @override
+  String get hrRosterPdf => 'PDF';
+
+  @override
+  String get hrRosterPdfTooltip => 'Download the list as shown, as a PDF';
+
+  @override
+  String hrRosterSince(String date) {
+    return 'since $date';
+  }
+
+  @override
+  String hrRosterDossierTooltip(int done, int total) {
+    return '$done of $total documents on file';
+  }
+
+  @override
+  String get hrRosterEmptyTitle => 'No staff match';
+
+  @override
+  String hrRosterEmptyMessage(String scope) {
+    return 'Change the search or remove the “$scope” filter.';
+  }
+
+  @override
+  String get hrRosterShowAll => 'Show all';
+
+  @override
+  String get hrRosterFooter => 'Tap a staff member to open their record';
+
+  @override
+  String get hrDashboardFootnote =>
+      'Attendance and payroll have their own modules: Attendance and Payroll, under Human resources.';
+
+  @override
+  String get hrDashboardEmptyTitle => 'No staff on file';
+
+  @override
+  String get hrDashboardEmptyMessage =>
+      'The staff file is empty. Record the first staff member: their record, their contract and their documents.';
+
+  @override
+  String get hrDashboardEmptyAction => 'Add a staff member';
+
+  @override
+  String get hrFileSubtitle =>
+      'Teachers, administrative and support staff — entered on the tablet, synced as soon as the network returns.';
+
+  @override
+  String hrFileFooterAll(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff on file',
+      one: '1 staff member on file',
+      zero: 'No staff on file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrFileFooterFiltered(String shown, int total) {
+    return '$shown of $total';
+  }
+
+  @override
+  String hrDecimal(int whole, int tenth) {
+    return '$whole.$tenth';
+  }
+
+  @override
+  String get hrKpiSeniorityEmpty => '—';
+
+  @override
+  String get staffTableSortAscending => 'Sorted A to Z; tap to reverse';
+
+  @override
+  String get staffTableSortDescending => 'Sorted Z to A; tap to reverse';
+
+  @override
+  String get hrSortNameDescending => 'Sort: name (Z to A)';
+
+  @override
+  String get hrAgentNotFoundTitle => 'Staff member not found';
+
+  @override
+  String get hrAgentNotFoundMessage =>
+      'This record is not in the tablet\'s staff file: the staff member may have been removed, or the link comes from another school.';
+
+  @override
+  String get hrAgentNotFoundAction => 'Back to staff';
+
+  @override
+  String get hrDashboardSubtitleBare => 'Who works at the school';
+
+  @override
+  String get hrRosterLoading => 'Loading the staff list';
+
+  @override
+  String get hrRosterColumnAgent => 'Staff member';
+
+  @override
+  String get hrRosterColumnCategory => 'Category';
+
+  @override
+  String get hrRosterColumnContract => 'Contract';
+
+  @override
+  String get hrRosterColumnSeniority => 'Seniority';
+
+  @override
+  String get hrRosterColumnDossier => 'File';
+
+  @override
+  String get hrRosterOpen => 'Open the record';
+
+  @override
+  String get hrRosterUnit => 'staff members';
+
+  @override
+  String get hrStaffReportPreparing => 'Preparing…';
+
+  @override
+  String get hrStaffReportWaiting => 'Please wait…';
+
+  @override
+  String get hrStaffReportTitle => 'Staff list';
+
+  @override
+  String hrStaffReportBusy(int seconds) {
+    return 'A document is already being prepared. Try again in $seconds s.';
+  }
+
+  @override
+  String get hrStaffReportForbidden =>
+      'You do not have access to the staff list.';
+
+  @override
+  String hrStaffReportTooLarge(int lines, int cap) {
+    return '$lines staff members, beyond the document\'s $cap: add a search or a category.';
+  }
+
+  @override
+  String get hrStaffReportFailed => 'The staff list could not be prepared.';
+
+  @override
+  String get hrDashboardErrorServerTitle => 'The server did not answer';
+
+  @override
+  String get hrDashboardErrorServer =>
+      'The staff figures could not be read from the server. Try again in a moment; if the problem persists, contact support.';
+
+  @override
+  String get hrDashboardPendingOnlyTitle => 'Nothing on the server yet';
+
+  @override
+  String get hrDashboardPendingOnlyMessage =>
+      'The staff entered on this tablet have not reached the server yet: they will appear here once sent.';
+
+  @override
+  String get hrStaffReportNoYear =>
+      'No current school year: the list cannot be numbered.';
+
+  @override
+  String get hrStaffReportSessionExpired =>
+      'Session expired: sign in again to print the list.';
 }

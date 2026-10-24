@@ -571,6 +571,105 @@ une capitale saisie à la main (sigles, particules corrigées). Les
 capitalisation. Pour un champ qui n'est pas un `EteeloTextInput` (`TextField` /
 `TextFormField` brut), passer le formatter explicitement.
 
+## Écran neuf — téléphone, tablette, poste, web
+
+Quatre audits (desktop W0→K4, desktop D1→D7, mobile M1-M6/T1-T5, web E1→E7)
+ont repris après coup des écrans qui ne tenaient que sur le format où ils
+avaient été écrits. Leurs leçons s'appliquent **pendant** le développement,
+pas dans une passe suivante. Détail des constats : `MOBILE_RESPONSIVE_PLAN.md`.
+
+### Formats de référence (dp)
+
+| Format | Taille | Ce qui casse d'habitude |
+|---|---|---|
+| Téléphone | 360×740 | lignes `Row` qui débordent, tableaux comprimés, modales étroites |
+| 7″ portrait / paysage | 600×960 · 960×600 | seuil 600 des cartes, faible hauteur, double barre de titre |
+| 10″ portrait / paysage | 800×1280 · 1280×800 | 1280 − 280 de barre latérale ≈ 1000 dp de contenu |
+| Poste | 1440 · 1920 | lignes de lecture trop longues, contenu non plafonné |
+
+Plus **le texte à ×1,3** (`AppTypography.maxTextScaleFactor`, le plafond de
+l'app) : aucune hauteur fixe sur un bloc qui contient du texte, une hauteur
+**plancher** à la place.
+
+### Mise en page
+
+- **Seuils = `AppBreakpoints`**, jamais une constante d'écran. Un seuil propre
+  s'y rattache par alias (`= AppBreakpoints.dataTableCardsMax`) et dit
+  pourquoi. Deux colonnes côte à côte : `sideBySideMin` (976), qu'une 10″
+  paysage atteint barre dépliée. Mesurer la **largeur reçue**
+  (`LayoutBuilder`), pas la fenêtre, quand le bloc vit dans une colonne.
+- **Largeur de page** : `AppPageBackground` + `PageContentWidth` (`reading`
+  pour un formulaire ou une fiche, `wide` pour un tableau de bord ou un
+  listing).
+- **Maître-détail** : `MasterDetailLayout` / `EmbeddedRecordPane` plutôt
+  qu'une page poussée dès que la largeur permet les deux.
+- **Une ligne avec un texte et une action** : `LeadingTrailingRow`. Jamais
+  `Flexible` à côté d'un `Expanded`/`Spacer` (parts égales : texte bridé à
+  50 %). Un `Wrap` dans une `Row` passe par `Flexible`/`Expanded`, sinon il
+  reçoit une largeur infinie.
+- **Texte tronqué** : `EteeloOverflowText` (info-bulle sur le poste). Pas
+  d'`IntrinsicHeight` autour d'un `LayoutBuilder`.
+- **Changer la forme d'un arbre** (une colonne ⇄ deux, tiroir ⇄ barre)
+  remonte l'état : `GlobalKey` + `KeyedSubtree` sur le contenu qui doit
+  survivre (filtres, saisie, défilement).
+- **Tableaux** : `DataTableView` passe en cartes sous
+  `AppBreakpoints.dataTableCardsMax` — tout ce que porte l'en-tête (tri,
+  case « tout ») doit avoir un équivalent en mode cartes. Un tableau large qui
+  défile de côté porte une `Scrollbar` visible.
+- **Graphiques** : `ChartHeight` ; `SideTitles` avec `interval` explicite.
+  Bandes KPI : `EteeloKpiBand` (largeur de carte calculée, pas fixée).
+
+### Tactile
+
+- **Cibles ≥ 48 dp** (`AppDimensions.minTouchTarget`, `TapTargetHeight`), y
+  compris un en-tête triable, une case, une icône d'action.
+- Un `Semantics(excludeSemantics: true)` autour d'un `InkWell` lui retire son
+  action : reporter `onTap` sur le `Semantics`.
+- **Retour Android** : un écran à niveaux (liste ⇄ détail interne) passe par
+  `ScreenBackScope`, jamais deux `PopScope` sur la même route.
+- **Modales** : `EteeloFormDialog` / `EteeloDialogBody` (plein écran sous
+  `formDialogFullscreenMax`, clavier géré) ; tester **en paysage téléphone**.
+  Une feuille : `showEteeloAdaptiveSheet`.
+- Bas d'écran : barre gestuelle et bord à bord Android 15 — `SafeArea` sur
+  toute barre posée en bas de page.
+
+### Clavier, navigation, web
+
+- **Recherche** : `EteeloSearchToolbar` / `SearchFocusShortcut` (Ctrl+F,
+  « / ») — automatique avec les barres partagées.
+- **Actions de page** : `PageActionShortcut` — `create` (Ctrl+N) sur le bouton
+  « Nouveau… », `refresh` (F5, Ctrl+R) sur un écran qui relit. Toujours un
+  équivalent tactile.
+- **Lien vers un autre sous-menu** : `NavigationBloc.add(SubMenuItemSelected…)`.
+  Un `context.go/push` vers une route de sous-menu affiche la page **nue** —
+  sinon patron `fromRoute` + `OffShellTopBar`.
+- **Filtres et onglet d'un écran** dans l'adresse (`LocationQuery`,
+  `BlocLocationTab`) : un F5 sur le web ne doit pas les perdre.
+- **Saisie non enregistrée** : `RouteExitGuard` / `BlocExitGuard` sur toute
+  page qui en porte.
+
+### Tableaux de bord et PDF
+
+- Un tableau de bord lit **ses chiffres, sa liste et son PDF à la même source
+  serveur** (`…-stats`, `…-stats/…` paginé, `….pdf` sur les mêmes
+  paramètres) : l'écran et le papier ne divergent jamais. Modèles :
+  Inscriptions (`/enrollment-stats`), Caisse (`/finance-stats/till`),
+  Boutique (`/boutique/stats`, `/boutique/sales`).
+- Le PDF d'une **liste nominative** est composé par le serveur (cubit « un à
+  la fois », 429 → attente, `REPORT_LINE_CAP` nommé, visionneuse partagée
+  `showEteeloDocumentViewer`). Seul un PDF de **comptes** sans noms peut être
+  composé sur l'appareil (`EnrollmentLevelsPdf`).
+
+### Tester
+
+- `tester.view.physicalSize` + `devicePixelRatio` (remis par
+  `addTearDown(tester.view.reset)`) — **pas** `setSurfaceSize`, qui ne change
+  pas `MediaQuery`.
+- Tout écran neuf a un test qui le pose **à chaque format de référence**, et
+  au texte ×1,3 sur le téléphone, et échoue au premier débordement.
+- La sonde de suite complète (`test/flutter_test_config.dart` à 360×740, dans
+  un `git worktree` détaché) reste l'instrument d'une passe transverse.
+
 ## Common Workflows
 
 ### Creating a New Feature

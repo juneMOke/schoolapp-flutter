@@ -30,6 +30,7 @@ class MenuFactory {
       _createBoutiqueMenu(l10n),
       _createExpenseMenu(l10n),
       _createHrMenu(l10n),
+      _createHrPersonnelMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
@@ -290,6 +291,28 @@ class MenuFactory {
           id: MenuConstants.hrPayrollId,
           title: l10n.subMenuPayroll,
           route: AppRoutesNames.hrPayroll,
+        ),
+      ],
+    );
+  }
+
+  /// RH · Personnel — un module à part, posé après les Ressources humaines
+  /// qu'il ne remplace pas (encore) : le même fichier, d'autres écrans.
+  static MenuItem _createHrPersonnelMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.hrPersonnelMenuId,
+      title: l10n.menuHrPersonnel,
+      icon: Icons.groups_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.hrPersonnelDashboardId,
+          title: l10n.subMenuDashboard,
+          route: AppRoutesNames.hrPersonnelDashboard,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPersonnelFileId,
+          title: l10n.subMenuHrPersonnelFile,
+          route: AppRoutesNames.hrPersonnelFile,
         ),
       ],
     );
