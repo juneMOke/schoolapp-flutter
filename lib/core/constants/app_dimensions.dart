@@ -728,6 +728,11 @@ class AppDimensions {
   static const presenceRateBarMin = 8.0;
   static const presenceRateBarMax = 46.0;
 
+  /// Le pas minimal d'une barre : en deçà (un mois sur téléphone), le
+  /// graphique défile au lieu de serrer ses barres. Barre de 24 dp, taux
+  /// lisible avec son « % ».
+  static const presenceRateBarMinStep = 36.0;
+
   /// Sous cette largeur, le taux s'écrit sans « % » (la légende le dit).
   static const presenceRateBarNarrowWidth = 22.0;
 

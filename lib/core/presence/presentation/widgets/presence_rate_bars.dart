@@ -54,10 +54,24 @@ class PresenceRateBars extends StatelessWidget {
   static bool isNarrow(double barWidth) =>
       barWidth < AppDimensions.presenceRateBarNarrowWidth;
 
+  /// La largeur du tracé pour [count] barres sur [width] dp : jamais moins
+  /// d'un pas minimal par barre. Au-delà de [width] — un mois sur téléphone
+  /// —, le graphique défile plutôt que de serrer ses barres.
+  static double contentWidthFor({required int count, required double width}) {
+    if (!width.isFinite) return width;
+    final needed = count * AppDimensions.presenceRateBarMinStep;
+    return needed > width ? needed : width;
+  }
+
+  /// Le graphique défile-t-il sur [width] dp ?
+  static bool scrollsFor({required int count, required double width}) =>
+      contentWidthFor(count: count, width: width) > width;
+
   /// La largeur d'une barre pour [count] barres sur [width] dp.
   static double barWidthFor({required int count, required double width}) {
     if (count <= 0 || !width.isFinite) return AppDimensions.presenceRateBarMax;
-    return (width / count * AppDimensions.presenceRateBarWidthShare).clamp(
+    final content = contentWidthFor(count: count, width: width);
+    return (content / count * AppDimensions.presenceRateBarWidthShare).clamp(
       AppDimensions.presenceRateBarMin,
       AppDimensions.presenceRateBarMax,
     );
@@ -69,15 +83,17 @@ class PresenceRateBars extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
+        final content = contentWidthFor(count: bars.length, width: width);
         final barWidth = barWidthFor(count: bars.length, width: width);
         final step = chartLabelStep(
           count: bars.length,
-          width: width,
+          width: content,
           minSpacing: AppDimensions.presenceRateBarLabelSpacing,
         );
-        return ChartEntrance(
+        final chart = ChartEntrance(
           builder: (context, motion) => SizedBox(
             height: AppDimensions.presenceRateBarsHeight,
+            width: content.isFinite ? content : null,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -92,6 +108,16 @@ class PresenceRateBars extends StatelessWidget {
                   ),
               ],
             ),
+          ),
+        );
+        if (content <= width) return chart;
+        // Trop de barres pour la largeur : le tracé défile, ouvert sur les
+        // jours les plus récents (à droite).
+        return Scrollbar(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            child: chart,
           ),
         );
       },

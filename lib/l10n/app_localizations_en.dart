@@ -18853,4 +18853,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceYearOpen => 'See this month';
+
+  @override
+  String get hrPresenceChartScrollHint =>
+      'Swipe the chart to see the start of the period';
 }

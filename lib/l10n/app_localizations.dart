@@ -29235,6 +29235,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See this month'**
   String get hrPresenceYearOpen;
+
+  /// No description provided for @hrPresenceChartScrollHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe the chart to see the start of the period'**
+  String get hrPresenceChartScrollHint;
 }
 
 class _AppLocalizationsDelegate

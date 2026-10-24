@@ -11078,5 +11078,6 @@
   "hrPresenceErrorForbidden": "Your profile does not allow you to view staff attendance.",
   "hrPresenceYearRowA11y": "{month}: attendance {presence}, late {late}, absent {absent}",
   "@hrPresenceYearRowA11y": {"placeholders": {"month": {"type": "String"}, "presence": {"type": "String"}, "late": {"type": "String"}, "absent": {"type": "String"}}},
-  "hrPresenceYearOpen": "See this month"
+  "hrPresenceYearOpen": "See this month",
+  "hrPresenceChartScrollHint": "Swipe the chart to see the start of the period"
 }

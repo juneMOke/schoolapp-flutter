@@ -42,12 +42,16 @@ class HrPresenceRateCard extends StatelessWidget {
               width: constraints.maxWidth,
             ),
           );
+          final scrolls = PresenceRateBars.scrollsFor(
+            count: bars.length,
+            width: constraints.maxWidth,
+          );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               PresenceRateBars(bars: bars),
               const SizedBox(height: AppSpacing.md),
-              _Legend(narrow: narrow),
+              _Legend(narrow: narrow, scrolls: scrolls),
             ],
           );
         },
@@ -59,7 +63,10 @@ class HrPresenceRateCard extends StatelessWidget {
 class _Legend extends StatelessWidget {
   final bool narrow;
 
-  const _Legend({required this.narrow});
+  /// Le tracé défile : dire qu'il y a des jours plus anciens à gauche.
+  final bool scrolls;
+
+  const _Legend({required this.narrow, required this.scrolls});
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +90,13 @@ class _Legend extends StatelessWidget {
           border: none.border,
           label: l10n.hrPresenceChartLegendEmpty,
         ),
+        if (scrolls)
+          Text(
+            l10n.hrPresenceChartScrollHint,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textMutedAa,
+            ),
+          ),
         if (narrow)
           Text(
             l10n.hrPresenceChartLegendNarrow,

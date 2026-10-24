@@ -38,13 +38,16 @@ void main() {
         presencePct: pct,
       );
 
-  test('largeur de barre : deux tiers du pas, entre 8 et 46 dp', () {
+  test('largeur de barre : deux tiers du pas, jamais un pas sous 36 dp', () {
     expect(PresenceRateBars.barWidthFor(count: 5, width: 600), 46);
+    // Un mois sur téléphone : le tracé s'élargit à 23 × 36 dp et défile.
+    expect(PresenceRateBars.contentWidthFor(count: 23, width: 300), 828);
+    expect(PresenceRateBars.scrollsFor(count: 23, width: 300), isTrue);
     expect(
       PresenceRateBars.barWidthFor(count: 23, width: 300),
-      closeTo(8.6, 0.01),
+      closeTo(23.76, 0.01),
     );
-    expect(PresenceRateBars.barWidthFor(count: 60, width: 300), 8);
+    expect(PresenceRateBars.scrollsFor(count: 23, width: 900), isFalse);
     expect(PresenceRateBars.isNarrow(21), isTrue);
     expect(PresenceRateBars.isNarrow(22), isFalse);
   });
@@ -60,15 +63,20 @@ void main() {
     expect(find.bySemanticsLabel('jour · null'), findsOneWidget);
   });
 
-  testWidgets('étroites : le taux sans « % », pas de chiffre dans le rouge', (
-    tester,
-  ) async {
+  testWidgets('un mois sur téléphone : les barres gardent leur largeur et le '
+      'tracé défile, ouvert sur les derniers jours', (tester) async {
     await pump(tester, [
-      for (var i = 0; i < 23; i++) bar(80, '$i'),
+      for (var i = 0; i < 23; i++) bar(80, 'j$i'),
     ], width: 320);
 
-    expect(find.text('80'), findsNWidgets(23));
-    expect(find.text('20 %'), findsNothing);
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    // Le taux garde son « % » : la barre fait 24 dp.
+    expect(find.text('80 %'), findsWidgets);
+    expect(find.text('80'), findsNothing);
+    // Le dernier jour est à l'écran, le premier hors champ à gauche.
+    final view = tester.getRect(find.byType(SingleChildScrollView));
+    expect(view.contains(tester.getCenter(find.text('j22'))), isTrue);
+    expect(find.text('j0').hitTestable(), findsNothing);
   });
 
   testWidgets('chaque segment a sa hauteur : vert en bas, rouge au-dessus', (
