@@ -116,6 +116,18 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
+  Future<Either<Failure, Expense?>> find(String expenseId) async {
+    final schoolId = _currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
+    try {
+      final row = await _reader.find(expenseId);
+      return Right(row?.schoolId == schoolId ? row?.toEntity() : null);
+    } catch (e) {
+      return Left(StorageFailure('Dépense illisible : $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<ExpenseMessage>>> thread(String expenseId) async {
     final schoolId = _currentUser.schoolId ?? '';
     if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));

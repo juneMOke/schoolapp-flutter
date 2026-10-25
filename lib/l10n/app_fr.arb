@@ -11933,5 +11933,21 @@
   "payrollSettingsSave": "Enregistrer le barème",
   "payrollSettingsDiscardMessage": "Les modifications du barème non enregistrées seront perdues.",
   "payrollSettingsNotYetSynced": "Le barème n'a pas encore été téléchargé sur cette tablette : les valeurs affichées sont celles par défaut.",
-  "payrollSettingsReadOnly": "Lecture seule — seule la direction modifie le barème."
+  "payrollSettingsReadOnly": "Lecture seule — seule la direction modifie le barème.",
+  "payrollAdvanceApprove": "Approuver",
+  "payrollAdvanceRefuse": "Refuser",
+  "payrollAdvanceDisburse": "Décaisser",
+  "payrollAdvanceWaitsDirection": "Attend la direction",
+  "payrollAdvanceWaitsCash": "Attend la caisse",
+  "payrollAdvanceApprovedOn": "approuvée le {date} par {name}",
+  "@payrollAdvanceApprovedOn": {"placeholders": {"date": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvanceRefuseTitle": "Refuser la demande d'avance",
+  "payrollAdvanceRefuseConfirm": "Refuser la demande",
+  "payrollAdvanceRefuseHint": "Le motif est transmis à l'économe ; une nouvelle demande reste possible.",
+  "payrollToastAdvanceApproved": "Demande de {amount} approuvée · {name}",
+  "@payrollToastAdvanceApproved": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollToastAdvanceRefused": "Demande refusée · {name} — motif transmis à l'économe",
+  "@payrollToastAdvanceRefused": {"placeholders": {"name": {"type": "String"}}},
+  "payrollToastAdvanceDisbursed": "Avance de {amount} décaissée à {name}",
+  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}}
 }

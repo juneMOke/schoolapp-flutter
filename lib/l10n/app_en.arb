@@ -11681,5 +11681,21 @@
   "payrollSettingsSave": "Save the pay scale",
   "payrollSettingsDiscardMessage": "Unsaved changes to the pay scale will be lost.",
   "payrollSettingsNotYetSynced": "The pay scale has not been downloaded to this tablet yet: default values are shown.",
-  "payrollSettingsReadOnly": "Read only — only the management can change the pay scale."
+  "payrollSettingsReadOnly": "Read only — only the management can change the pay scale.",
+  "payrollAdvanceApprove": "Approve",
+  "payrollAdvanceRefuse": "Refuse",
+  "payrollAdvanceDisburse": "Disburse",
+  "payrollAdvanceWaitsDirection": "Awaiting management",
+  "payrollAdvanceWaitsCash": "Awaiting the cashier",
+  "payrollAdvanceApprovedOn": "approved on {date} by {name}",
+  "@payrollAdvanceApprovedOn": {"placeholders": {"date": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvanceRefuseTitle": "Refuse the advance request",
+  "payrollAdvanceRefuseConfirm": "Refuse the request",
+  "payrollAdvanceRefuseHint": "The reason is passed on to the bursar; a new request remains possible.",
+  "payrollToastAdvanceApproved": "Request for {amount} approved · {name}",
+  "@payrollToastAdvanceApproved": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollToastAdvanceRefused": "Request refused · {name} — reason passed on to the bursar",
+  "@payrollToastAdvanceRefused": {"placeholders": {"name": {"type": "String"}}},
+  "payrollToastAdvanceDisbursed": "Advance of {amount} disbursed to {name}",
+  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}}
 }

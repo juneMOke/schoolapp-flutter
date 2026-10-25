@@ -19577,4 +19577,49 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payrollSettingsReadOnly =>
       'Read only — only the management can change the pay scale.';
+
+  @override
+  String get payrollAdvanceApprove => 'Approve';
+
+  @override
+  String get payrollAdvanceRefuse => 'Refuse';
+
+  @override
+  String get payrollAdvanceDisburse => 'Disburse';
+
+  @override
+  String get payrollAdvanceWaitsDirection => 'Awaiting management';
+
+  @override
+  String get payrollAdvanceWaitsCash => 'Awaiting the cashier';
+
+  @override
+  String payrollAdvanceApprovedOn(String date, String name) {
+    return 'approved on $date by $name';
+  }
+
+  @override
+  String get payrollAdvanceRefuseTitle => 'Refuse the advance request';
+
+  @override
+  String get payrollAdvanceRefuseConfirm => 'Refuse the request';
+
+  @override
+  String get payrollAdvanceRefuseHint =>
+      'The reason is passed on to the bursar; a new request remains possible.';
+
+  @override
+  String payrollToastAdvanceApproved(String amount, String name) {
+    return 'Request for $amount approved · $name';
+  }
+
+  @override
+  String payrollToastAdvanceRefused(String name) {
+    return 'Request refused · $name — reason passed on to the bursar';
+  }
+
+  @override
+  String payrollToastAdvanceDisbursed(String amount, String name) {
+    return 'Advance of $amount disbursed to $name';
+  }
 }

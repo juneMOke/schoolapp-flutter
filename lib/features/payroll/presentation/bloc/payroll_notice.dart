@@ -18,6 +18,11 @@ enum PayrollNoticeKind {
 
   /// Une demande d'avance déposée en validation (B5) ; `amount` mis en forme.
   advanceRequested,
+
+  /// Une demande d'avance tranchée depuis la Paie ; `name` et `amount`.
+  advanceApproved,
+  advanceRefused,
+  advanceDisbursed,
   advanceCancelled,
   profileSaved,
   settingsSaved,

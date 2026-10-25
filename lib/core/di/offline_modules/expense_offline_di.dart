@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/expense/domain/repositories/expense_
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/find_expense_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_register_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/sync_expense_pulls_use_case.dart';
@@ -104,6 +105,9 @@ void registerExpenseOffline(GetIt getIt) {
   );
   getIt.registerFactory<ApplyExpenseGestureUseCase>(
     () => ApplyExpenseGestureUseCase(getIt<ExpenseRepository>()),
+  );
+  getIt.registerFactory<FindExpenseUseCase>(
+    () => FindExpenseUseCase(getIt<ExpenseRepository>()),
   );
   getIt.registerFactory<SyncExpensePullsUseCase>(
     () => SyncExpensePullsUseCase(getIt<PullCoordinator>()),

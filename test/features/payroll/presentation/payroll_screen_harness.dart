@@ -8,9 +8,13 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/find_expense_use_case.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
@@ -40,6 +44,9 @@ pumpPayrollScreen(
   required PayrollSnapshot snapshot,
   List<Perm> permissions = const [Perm.hrPayRead, Perm.hrPayWrite],
   Widget child = const PayrollScreen(),
+
+  /// Les dépenses, pour trancher une demande d'avance depuis la Paie.
+  ExpenseRepository? expenses,
 }) async {
   final repository = MockPayrollRepository();
   when(() => repository.load()).thenAnswer((_) async => Right(snapshot));
@@ -57,6 +64,12 @@ pumpPayrollScreen(
       payoutPolicy: SavePayrollPayoutPolicyUseCase(repository),
       payArrears: PayPayrollArrearsUseCase(repository),
       priority: SetPayrollArrearsPriorityUseCase(repository),
+      decide: expenses == null
+          ? null
+          : DecideSalaryAdvanceUseCase(
+              FindExpenseUseCase(expenses),
+              ApplyExpenseGestureUseCase(expenses),
+            ),
       gesture: RecordPayrollGestureUseCase(repository),
       disburse: DisbursePayrollUseCase(repository),
       cancelDisbursement: CancelPayrollDisbursementUseCase(repository),

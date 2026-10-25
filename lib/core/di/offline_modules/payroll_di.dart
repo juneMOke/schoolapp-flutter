@@ -30,6 +30,7 @@ import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/find_expense_use_case.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
@@ -66,6 +67,10 @@ void _registerPresentation(GetIt getIt) {
       payArrears: getIt<PayPayrollArrearsUseCase>(),
       priority: getIt<SetPayrollArrearsPriorityUseCase>(),
       request: RequestSalaryAdvanceUseCase(getIt<SaveExpenseUseCase>()),
+      decide: DecideSalaryAdvanceUseCase(
+        getIt<FindExpenseUseCase>(),
+        getIt<ApplyExpenseGestureUseCase>(),
+      ),
       gesture: getIt<RecordPayrollGestureUseCase>(),
       disburse: getIt<DisbursePayrollUseCase>(),
       cancelDisbursement: getIt<CancelPayrollDisbursementUseCase>(),

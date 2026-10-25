@@ -15,6 +15,9 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
@@ -31,6 +34,7 @@ class PayrollCommands {
   final PayPayrollArrearsUseCase? _payArrears;
   final SetPayrollArrearsPriorityUseCase? _priority;
   final RequestSalaryAdvanceUseCase? _request;
+  final DecideSalaryAdvanceUseCase? _decide;
   final RecordPayrollGestureUseCase _gesture;
   final DisbursePayrollUseCase _disburse;
   final CancelPayrollDisbursementUseCase _cancelDisbursement;
@@ -47,6 +51,7 @@ class PayrollCommands {
     PayPayrollArrearsUseCase? payArrears,
     SetPayrollArrearsPriorityUseCase? priority,
     RequestSalaryAdvanceUseCase? request,
+    DecideSalaryAdvanceUseCase? decide,
     required RecordPayrollGestureUseCase gesture,
     required DisbursePayrollUseCase disburse,
     required CancelPayrollDisbursementUseCase cancelDisbursement,
@@ -61,6 +66,7 @@ class PayrollCommands {
        _payArrears = payArrears,
        _priority = priority,
        _request = request,
+       _decide = decide,
        _gesture = gesture,
        _disburse = disburse,
        _cancelDisbursement = cancelDisbursement,
@@ -200,6 +206,44 @@ class PayrollCommands {
         recordedByName: recordedByName,
       ),
       PayrollNotice(PayrollNoticeKind.advanceRequested, amount: amount),
+    );
+  }
+
+  /// La demande d'avance telle que la tablette la tient, ou `null`.
+  Future<Expense?> advanceExpense(String expenseId) async =>
+      (await _decide?.requestOf(expenseId))?.fold((_) => null, (e) => e);
+
+  /// Approuver, refuser ou décaisser une demande d'avance (spec §10).
+  Future<PayrollNotice> decideAdvance(
+    Expense expense,
+    ExpenseGesture gesture, {
+    required String name,
+    required String amount,
+    String note = '',
+    String? actorName,
+    ExpenseAdvancePayment? advancePayment,
+  }) async {
+    final decide = _decide;
+    if (decide == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await decide(
+        expense,
+        gesture,
+        note: note,
+        actorName: actorName,
+        advancePayment: advancePayment,
+      ),
+      PayrollNotice(
+        switch (gesture) {
+          ExpenseGesture.refuse => PayrollNoticeKind.advanceRefused,
+          ExpenseGesture.pay => PayrollNoticeKind.advanceDisbursed,
+          _ => PayrollNoticeKind.advanceApproved,
+        },
+        name: name,
+        amount: amount,
+      ),
     );
   }
 

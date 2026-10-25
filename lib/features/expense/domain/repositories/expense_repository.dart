@@ -15,6 +15,10 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_regi
 abstract class ExpenseRepository {
   Future<Either<Failure, ExpenseRegisterSnapshot>> loadRegister();
 
+  /// La demande telle que la tablette la tient, ou `null` si elle n'y est
+  /// plus (purgée, ou d'une autre école).
+  Future<Either<Failure, Expense?>> find(String expenseId);
+
   /// Crée, modifie ou duplique ; rend la dépense telle qu'elle est rangée.
   Future<Either<Failure, Expense>> save(ExpenseDraft draft);
 

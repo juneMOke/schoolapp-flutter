@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cu
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advance_circuit_block.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advance_decisions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advance_table.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_advance_dialog.dart';
@@ -164,7 +165,7 @@ class PayrollAdvancesTab extends StatelessWidget {
           title: l10n.payrollAdvanceExpenseTitle,
           today: DateTime.parse(state.today),
           amount: MoneyFormat.format(draft.amount),
-          recordedByName: _agentName(context),
+          recordedByName: PayrollAdvanceDecisions.sessionAgentName(context),
         ),
       );
       return;
@@ -177,14 +178,6 @@ class PayrollAdvancesTab extends StatelessWidget {
         amount: MoneyFormat.format(draft.amount),
       ),
     );
-  }
-
-  /// Le demandeur, affiché dans la file des validations.
-  static String? _agentName(BuildContext context) {
-    final user = PermissionGate.maybeBlocOf(context)?.state.user;
-    if (user == null) return null;
-    final name = '${user.lastName} ${user.firstName}'.trim();
-    return name.isEmpty ? null : name;
   }
 
   Future<void> _cancel(BuildContext context, SalaryAdvance advance) async {

@@ -37,6 +37,18 @@ void showPayrollNotice(
       AppSnackBar.showInfo(context, l10n.payrollToastPayCancelled);
     case PayrollNoticeKind.advanceGranted:
       AppSnackBar.showSuccess(context, l10n.payrollToastAdvance(amount, name));
+    case PayrollNoticeKind.advanceApproved:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.payrollToastAdvanceApproved(amount, name),
+      );
+    case PayrollNoticeKind.advanceRefused:
+      AppSnackBar.showSuccess(context, l10n.payrollToastAdvanceRefused(name));
+    case PayrollNoticeKind.advanceDisbursed:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.payrollToastAdvanceDisbursed(amount, name),
+      );
     case PayrollNoticeKind.advanceRequested:
       AppSnackBar.showSuccess(
         context,

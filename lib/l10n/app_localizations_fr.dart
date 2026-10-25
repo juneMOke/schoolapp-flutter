@@ -19713,4 +19713,49 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get payrollSettingsReadOnly =>
       'Lecture seule — seule la direction modifie le barème.';
+
+  @override
+  String get payrollAdvanceApprove => 'Approuver';
+
+  @override
+  String get payrollAdvanceRefuse => 'Refuser';
+
+  @override
+  String get payrollAdvanceDisburse => 'Décaisser';
+
+  @override
+  String get payrollAdvanceWaitsDirection => 'Attend la direction';
+
+  @override
+  String get payrollAdvanceWaitsCash => 'Attend la caisse';
+
+  @override
+  String payrollAdvanceApprovedOn(String date, String name) {
+    return 'approuvée le $date par $name';
+  }
+
+  @override
+  String get payrollAdvanceRefuseTitle => 'Refuser la demande d\'avance';
+
+  @override
+  String get payrollAdvanceRefuseConfirm => 'Refuser la demande';
+
+  @override
+  String get payrollAdvanceRefuseHint =>
+      'Le motif est transmis à l\'économe ; une nouvelle demande reste possible.';
+
+  @override
+  String payrollToastAdvanceApproved(String amount, String name) {
+    return 'Demande de $amount approuvée · $name';
+  }
+
+  @override
+  String payrollToastAdvanceRefused(String name) {
+    return 'Demande refusée · $name — motif transmis à l\'économe';
+  }
+
+  @override
+  String payrollToastAdvanceDisbursed(String amount, String name) {
+    return 'Avance de $amount décaissée à $name';
+  }
 }

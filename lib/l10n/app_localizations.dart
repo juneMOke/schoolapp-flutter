@@ -30326,6 +30326,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Read only — only the management can change the pay scale.'**
   String get payrollSettingsReadOnly;
+
+  /// No description provided for @payrollAdvanceApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get payrollAdvanceApprove;
+
+  /// No description provided for @payrollAdvanceRefuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse'**
+  String get payrollAdvanceRefuse;
+
+  /// No description provided for @payrollAdvanceDisburse.
+  ///
+  /// In en, this message translates to:
+  /// **'Disburse'**
+  String get payrollAdvanceDisburse;
+
+  /// No description provided for @payrollAdvanceWaitsDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting management'**
+  String get payrollAdvanceWaitsDirection;
+
+  /// No description provided for @payrollAdvanceWaitsCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting the cashier'**
+  String get payrollAdvanceWaitsCash;
+
+  /// No description provided for @payrollAdvanceApprovedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'approved on {date} by {name}'**
+  String payrollAdvanceApprovedOn(String date, String name);
+
+  /// No description provided for @payrollAdvanceRefuseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse the advance request'**
+  String get payrollAdvanceRefuseTitle;
+
+  /// No description provided for @payrollAdvanceRefuseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Refuse the request'**
+  String get payrollAdvanceRefuseConfirm;
+
+  /// No description provided for @payrollAdvanceRefuseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The reason is passed on to the bursar; a new request remains possible.'**
+  String get payrollAdvanceRefuseHint;
+
+  /// No description provided for @payrollToastAdvanceApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Request for {amount} approved · {name}'**
+  String payrollToastAdvanceApproved(String amount, String name);
+
+  /// No description provided for @payrollToastAdvanceRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Request refused · {name} — reason passed on to the bursar'**
+  String payrollToastAdvanceRefused(String name);
+
+  /// No description provided for @payrollToastAdvanceDisbursed.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance of {amount} disbursed to {name}'**
+  String payrollToastAdvanceDisbursed(String amount, String name);
 }
 
 class _AppLocalizationsDelegate
