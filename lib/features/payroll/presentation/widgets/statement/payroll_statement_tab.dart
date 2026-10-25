@@ -59,12 +59,15 @@ class PayrollStatementTab extends StatelessWidget {
                     onPressed: PayrollPayslipActions(context).openStatement,
                     fullWidth: false,
                   ),
-                EteeloButton.ghost(
-                  label: l10n.payrollPayslipAll,
-                  icon: Icons.library_books_outlined,
-                  onPressed: () => PayrollPayslipActions(context).openPdf(null),
-                  fullWidth: false,
-                ),
+                // Le recueil des bulletins : scellé, après validation (P8).
+                if (view.phase.isLocked)
+                  EteeloButton.ghost(
+                    label: l10n.payrollPayslipAll,
+                    icon: Icons.library_books_outlined,
+                    onPressed: () =>
+                        PayrollPayslipActions(context).openPdf(null),
+                    fullWidth: false,
+                  ),
               ],
             ),
           ],

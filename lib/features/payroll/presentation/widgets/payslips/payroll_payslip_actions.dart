@@ -16,14 +16,14 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
-import 'package:school_app_flutter/features/payroll/presentation/export/payroll_payslip_pdf.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_content.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Les sorties d'un bulletin : le PDF (scellé par le serveur après
-/// validation, provisoire sur la tablette avant), et WhatsApp.
+/// Les sorties d'un bulletin : le PDF — scellé par le serveur après
+/// validation, provisoire rendu par le serveur avant (P8, en ligne) — et
+/// WhatsApp.
 class PayrollPayslipActions {
   final BuildContext context;
 
@@ -36,7 +36,7 @@ class PayrollPayslipActions {
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   /// Un agent, ou tout le livre quand [line] est `null` — ce recueil-là
-  /// n'existe qu'en provisoire : le serveur ne scelle les bulletins qu'un à un.
+  /// n'existe qu'en scellé.
   Future<void> openPdf(PayrollLine? line) async {
     // Le cubit est pris avant le premier `await` : la page peut se fermer
     // pendant le téléchargement ou l'aperçu.
@@ -48,22 +48,9 @@ class PayrollPayslipActions {
         ? _l10n.payrollPayslipsFileName(view.month)
         : '${_l10n.payrollPayslipFileName(view.month)}-${line.staffMemberId}';
     if (!sealed) {
-      final bytes = await PayrollPayslipPdf.build([
-        for (final l in line == null ? view.lines : [line])
-          PayrollPayslipContent.of(
-            context,
-            snapshot: _state.snapshot,
-            view: view,
-            line: l,
-          ),
-      ]);
-      if (!context.mounted) return;
-      await showEteeloDocumentViewer(
-        context,
-        title: _l10n.payrollPayslipProvisional,
-        document: PrintableDocument(bytes: bytes, fileName: '$name.pdf'),
-        canShare: false,
-      );
+      // Le recueil du mois n'existe qu'en scellé ; un brouillon se lit agent
+      // par agent (P8).
+      if (line != null) await _preview(line, name);
       return;
     }
     // Un bulletin scellé s'émet : le serveur exige `editique.write`.
@@ -110,6 +97,55 @@ class PayrollPayslipActions {
       },
     );
   }
+
+  /// Le bulletin provisoire d'un agent, rendu par le serveur sur le gabarit
+  /// du définitif, sans numéro ni QR (P8) — en ligne seulement. La file part
+  /// d'abord : le PDF doit voir les dernières variables. Il ne se garde ni ne
+  /// se partage : le redemander donne l'état du moment.
+  Future<void> _preview(PayrollLine line, String name) async {
+    final cubit = _cubit;
+    final month = line.month;
+    await cubit.flushOutbox();
+    final result = await cubit.commands.payslipPreview(
+      month,
+      line.staffMemberId,
+    );
+    if (!context.mounted || cubit.isClosed) return;
+    await result.fold(
+      (failure) async {
+        final code = failure is ApiErrorDetails ? failure.detailCode : null;
+        if (code == _alreadyValidated) {
+          // Validée entre-temps : relire, puis proposer le scellé — jamais
+          // le demander d'office.
+          await cubit.syncAndRefresh();
+          cubit.announce(
+            const PayrollNotice(PayrollNoticeKind.validatedMeanwhile),
+          );
+          return;
+        }
+        cubit.announce(switch (failure) {
+          NetworkFailure() => const PayrollNotice(PayrollNoticeKind.offline),
+          _ when code == _notOnPayroll => const PayrollNotice(
+            PayrollNoticeKind.refused,
+            rule: PayrollRule.noContract,
+          ),
+          _ => const PayrollNotice(PayrollNoticeKind.downloadFailed),
+        });
+      },
+      (bytes) => showEteeloDocumentViewer(
+        context,
+        title: _l10n.payrollPayslipProvisional,
+        document: PrintableDocument(
+          bytes: bytes,
+          fileName: '${_l10n.payrollPayslipPreviewFileName(month)}.pdf',
+        ),
+        canShare: false,
+      ),
+    );
+  }
+
+  static const String _alreadyValidated = 'PAYROLL_ALREADY_VALIDATED';
+  static const String _notOnPayroll = 'STAFF_NOT_ON_PAYROLL';
 
   /// L'état de paie du mois validé (A4 paysage), composé par le serveur —
   /// en ligne seulement (T16).

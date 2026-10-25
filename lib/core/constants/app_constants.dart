@@ -1317,6 +1317,13 @@ class AppConstants {
   /// seul, sur les mêmes paramètres que l'écran : `filter`
   /// (`ALL` | `OUTSTANDING` | `SETTLED`) et `q` (nom ou fonction). Un brouillon
   /// porte « montants provisoires » ; 429 pendant un autre long rendu.
+  /// Le bulletin provisoire d'un agent (P8) : le gabarit BP sur la ligne
+  /// calculée à l'instant, sans numéro ni QR, filigrané « ne vaut pas
+  /// bulletin ». `hr.pay.read` seul ; paie non validée seulement (sinon 422
+  /// `PAYROLL_ALREADY_VALIDATED`). Rien n'est émis ni rangé.
+  static const String payrollPayslipPreviewEndpoint =
+      '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}/preview.pdf';
+
   static const String payrollDashboardPdfEndpoint =
       '/api/v1/hr/payrolls/{month}/dashboard.pdf';
 

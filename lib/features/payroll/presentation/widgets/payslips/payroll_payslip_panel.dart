@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_online_only.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -65,11 +66,28 @@ class PayrollPayslipPanel extends StatelessWidget {
         children: [
           if (locked && !line.frozen)
             PayrollTone.submitted.notice(l10n.payrollPayslipUnsealed),
-          EteeloButton.secondary(
-            label: l10n.payrollPayslipDownload,
-            icon: Icons.picture_as_pdf_outlined,
-            onPressed: () => actions.openPdf(line),
-          ),
+          if (locked)
+            EteeloButton.secondary(
+              label: l10n.payrollPayslipDownload,
+              icon: Icons.picture_as_pdf_outlined,
+              onPressed: () => actions.openPdf(line),
+            )
+          else
+            // Le provisoire est rendu par le serveur (P8) : en ligne seulement.
+            PayrollOnlineOnly(
+              builder: (context, online) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  EteeloButton.secondary(
+                    label: l10n.payrollPayslipDownloadProvisional,
+                    icon: Icons.picture_as_pdf_outlined,
+                    onPressed: online ? () => actions.openPdf(line) : null,
+                  ),
+                  if (!online)
+                    Text(l10n.payrollPayslipOnlineOnly, style: muted),
+                ],
+              ),
+            ),
           if (locked) ...[
             const SizedBox(height: AppSpacing.sm),
             EteeloButton.primary(
@@ -100,13 +118,14 @@ class PayrollPayslipPanel extends StatelessWidget {
             ),
           ],
           const Divider(height: AppSpacing.xl),
-          // Provisoires sur la tablette avant validation, scellés et réunis
-          // par le serveur ensuite (T16).
-          EteeloButton.ghost(
-            label: l10n.payrollPayslipAll,
-            icon: Icons.library_books_outlined,
-            onPressed: () => actions.openPdf(null),
-          ),
+          // Le recueil du mois : scellé et réuni par le serveur, après
+          // validation seulement (T16) — pas de recueil provisoire (P8).
+          if (locked)
+            EteeloButton.ghost(
+              label: l10n.payrollPayslipAll,
+              icon: Icons.library_books_outlined,
+              onPressed: () => actions.openPdf(null),
+            ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [

@@ -47,6 +47,10 @@ class PayrollCubit extends Cubit<PayrollState> {
   /// Relecture silencieuse : jamais de squelette, un échec garde l'écran.
   Future<void> refresh() => _read(loading: false);
 
+  /// Pousse la file d'envoi : un appel en ligne qui doit voir les dernières
+  /// saisies (le bulletin provisoire, P8) part après.
+  Future<void> flushOutbox() => _signals.flush();
+
   /// « Synchroniser puis revoir » : tire les flux, puis relit.
   Future<void> syncAndRefresh() async {
     await _signals.pull();

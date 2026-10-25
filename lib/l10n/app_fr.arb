@@ -12052,5 +12052,10 @@
   "payrollDashEmployerCost": "+ {amount} de charges employeur",
   "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}},
   "payrollDashEmployerCostCurrent": "+ {amount} de charges employeur, aux taux actuels",
-  "@payrollDashEmployerCostCurrent": {"placeholders": {"amount": {"type": "String"}}}
+  "@payrollDashEmployerCostCurrent": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollPayslipDownloadProvisional": "Bulletin provisoire (PDF)",
+  "payrollPayslipOnlineOnly": "Disponible en ligne seulement : le provisoire est rendu par le serveur.",
+  "payrollPayslipPreviewFileName": "bulletin-provisoire-{month}",
+  "@payrollPayslipPreviewFileName": {"placeholders": {"month": {"type": "String"}}},
+  "payrollToastValidatedMeanwhile": "La paie vient d'être validée : demandez désormais le bulletin scellé."
 }

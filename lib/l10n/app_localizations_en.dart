@@ -19942,4 +19942,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String payrollDashEmployerCostCurrent(String amount) {
     return '+ $amount of employer charges, at current rates';
   }
+
+  @override
+  String get payrollPayslipDownloadProvisional => 'Provisional payslip (PDF)';
+
+  @override
+  String get payrollPayslipOnlineOnly =>
+      'Available online only: the server renders the provisional payslip.';
+
+  @override
+  String payrollPayslipPreviewFileName(String month) {
+    return 'provisional-payslip-$month';
+  }
+
+  @override
+  String get payrollToastValidatedMeanwhile =>
+      'The payroll has just been validated: request the sealed payslip instead.';
 }

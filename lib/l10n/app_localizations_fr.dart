@@ -20078,4 +20078,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollDashEmployerCostCurrent(String amount) {
     return '+ $amount de charges employeur, aux taux actuels';
   }
+
+  @override
+  String get payrollPayslipDownloadProvisional => 'Bulletin provisoire (PDF)';
+
+  @override
+  String get payrollPayslipOnlineOnly =>
+      'Disponible en ligne seulement : le provisoire est rendu par le serveur.';
+
+  @override
+  String payrollPayslipPreviewFileName(String month) {
+    return 'bulletin-provisoire-$month';
+  }
+
+  @override
+  String get payrollToastValidatedMeanwhile =>
+      'La paie vient d\'être validée : demandez désormais le bulletin scellé.';
 }

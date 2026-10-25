@@ -135,6 +135,7 @@ void main() {
     final signals = _MockSignals();
     when(() => signals.watch(any())).thenReturn(() {});
     when(() => signals.pull()).thenAnswer((_) async {});
+    when(() => signals.flush()).thenAnswer((_) async {});
     final cubit = PayrollCubit(
       load: LoadPayrollUseCase(repository),
       signals: signals,

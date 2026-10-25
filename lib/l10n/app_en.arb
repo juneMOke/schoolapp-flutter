@@ -11800,5 +11800,10 @@
   "payrollDashEmployerCost": "+ {amount} of employer charges",
   "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}},
   "payrollDashEmployerCostCurrent": "+ {amount} of employer charges, at current rates",
-  "@payrollDashEmployerCostCurrent": {"placeholders": {"amount": {"type": "String"}}}
+  "@payrollDashEmployerCostCurrent": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollPayslipDownloadProvisional": "Provisional payslip (PDF)",
+  "payrollPayslipOnlineOnly": "Available online only: the server renders the provisional payslip.",
+  "payrollPayslipPreviewFileName": "provisional-payslip-{month}",
+  "@payrollPayslipPreviewFileName": {"placeholders": {"month": {"type": "String"}}},
+  "payrollToastValidatedMeanwhile": "The payroll has just been validated: request the sealed payslip instead."
 }

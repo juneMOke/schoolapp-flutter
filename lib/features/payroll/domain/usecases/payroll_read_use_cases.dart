@@ -34,6 +34,12 @@ class FetchPayslipUseCase {
   Future<Either<Failure, Uint8List>> statement(String month) =>
       _repository.statement(month);
 
+  /// Le bulletin provisoire d'un agent (P8).
+  Future<Either<Failure, Uint8List>> preview(
+    String month,
+    String staffMemberId,
+  ) => _repository.payslipPreview(month, staffMemberId);
+
   Future<Either<Failure, Uint8List>> dashboard(
     String month, {
     required String filter,

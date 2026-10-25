@@ -30914,6 +30914,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'+ {amount} of employer charges, at current rates'**
   String payrollDashEmployerCostCurrent(String amount);
+
+  /// No description provided for @payrollPayslipDownloadProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional payslip (PDF)'**
+  String get payrollPayslipDownloadProvisional;
+
+  /// No description provided for @payrollPayslipOnlineOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Available online only: the server renders the provisional payslip.'**
+  String get payrollPayslipOnlineOnly;
+
+  /// No description provided for @payrollPayslipPreviewFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'provisional-payslip-{month}'**
+  String payrollPayslipPreviewFileName(String month);
+
+  /// No description provided for @payrollToastValidatedMeanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'The payroll has just been validated: request the sealed payslip instead.'**
+  String get payrollToastValidatedMeanwhile;
 }
 
 class _AppLocalizationsDelegate

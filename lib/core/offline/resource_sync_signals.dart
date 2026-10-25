@@ -26,6 +26,12 @@ class ResourceSyncSignals {
   /// Tire les flux de l'écran.
   Future<void> pull() => _pull();
 
+  /// Pousse la file d'envoi tout de suite — avant un appel en ligne qui doit
+  /// voir les dernières saisies.
+  Future<void> flush() async {
+    await _engine.flush();
+  }
+
   /// Appelle [onChanged] à chaque signal ; rend la fonction qui désabonne.
   ///
   /// [onFlush] : `false` pour un écran qui ne lit rien que l'outbox puisse
