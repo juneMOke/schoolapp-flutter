@@ -92,6 +92,7 @@ class SalaryAdvanceDao {
           {
             'school_id': schoolId,
             ..._content(item),
+            'expense_id': item.expenseId,
             'deducted_in_cents': item.deductedInCents ?? 0,
             'balance_in_cents': item.balanceInCents,
             ...PayrollCancellationStore.serverColumns(
@@ -159,6 +160,7 @@ class SalaryAdvanceDao {
           syncState: PayrollStore.effectiveState(row),
           syncError: PayrollStore.effectiveError(row),
           syncErrorCode: row['sync_error_code'] as String?,
+          expenseId: row['expense_id'] as String?,
         ),
     ];
   }

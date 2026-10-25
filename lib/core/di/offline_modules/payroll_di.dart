@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
+import 'package:school_app_flutter/features/payroll/data/repositories/payroll_expense_advance_guard.dart';
 import 'package:school_app_flutter/core/di/offline_modules/payroll_sync_di.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -11,6 +13,9 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_calendar_
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_advance_request_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_share_trace_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
@@ -24,12 +29,18 @@ import 'package:school_app_flutter/features/payroll/data/sync/payslip_api.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_pull_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/find_expense_use_case.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_settings_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_commands.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_expense_advance_bridge.dart';
+import 'package:school_app_flutter/features/expense/presentation/bridge/expense_staff_advance_bridge.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_local_writer.dart';
@@ -54,6 +65,14 @@ void _registerPresentation(GetIt getIt) {
   getIt.registerFactory<PayrollCommands>(
     () => PayrollCommands(
       variables: getIt<SavePayrollVariablesUseCase>(),
+      payoutPolicy: getIt<SavePayrollPayoutPolicyUseCase>(),
+      payArrears: getIt<PayPayrollArrearsUseCase>(),
+      priority: getIt<SetPayrollArrearsPriorityUseCase>(),
+      request: RequestSalaryAdvanceUseCase(getIt<SaveExpenseUseCase>()),
+      decide: DecideSalaryAdvanceUseCase(
+        getIt<FindExpenseUseCase>(),
+        getIt<ApplyExpenseGestureUseCase>(),
+      ),
       gesture: getIt<RecordPayrollGestureUseCase>(),
       disburse: getIt<DisbursePayrollUseCase>(),
       cancelDisbursement: getIt<CancelPayrollDisbursementUseCase>(),
@@ -63,6 +82,13 @@ void _registerPresentation(GetIt getIt) {
       settings: getIt<SavePayrollSettingsUseCase>(),
       share: getIt<RecordPayslipShareUseCase>(),
       payslip: getIt<FetchPayslipUseCase>(),
+    ),
+  );
+  // Dépenses ▸ Nouvelle demande → formulaire d'avance de la Paie.
+  getIt.registerFactory<ExpenseStaffAdvanceBridge>(
+    () => PayrollExpenseAdvanceBridge(
+      load: getIt<LoadPayrollUseCase>(),
+      commands: () => getIt<PayrollCommands>(),
     ),
   );
   getIt.registerFactory<PayrollCubit>(
@@ -90,6 +116,9 @@ void _registerDomain(GetIt getIt) {
       profiles: getIt<StaffPayProfileDao>(),
       payrolls: getIt<PayrollDao>(),
       variables: getIt<PayrollVariablesDao>(),
+      payoutPolicies: getIt<PayrollPayoutPolicyDao>(),
+      arrearsPriorities: getIt<PayrollArrearsPriorityDao>(),
+      advanceRequests: PayrollAdvanceRequestDao(getIt<Database>()),
       gestures: getIt<PayrollGestureDao>(),
       summaries: getIt<AttendanceSummaryDao>(),
       advances: getIt<SalaryAdvanceDao>(),
@@ -129,6 +158,9 @@ void _registerDomain(GetIt getIt) {
     ..registerFactory(() => FetchPayslipUseCase(getIt<PayslipRepository>()))
     ..registerFactory(() => RecordPayslipShareUseCase(repository()))
     ..registerFactory(() => SavePayrollVariablesUseCase(repository()))
+    ..registerFactory(() => SavePayrollPayoutPolicyUseCase(repository()))
+    ..registerFactory(() => PayPayrollArrearsUseCase(repository()))
+    ..registerFactory(() => SetPayrollArrearsPriorityUseCase(repository()))
     ..registerFactory(() => RecordPayrollGestureUseCase(repository()))
     ..registerFactory(() => GrantSalaryAdvanceUseCase(repository()))
     ..registerFactory(() => CancelSalaryAdvanceUseCase(repository()))
@@ -139,6 +171,14 @@ void _registerDomain(GetIt getIt) {
 }
 
 void _registerStorage(GetIt getIt) {
+  // Le port des Dépenses (B6) : réouverture et première retenue d'une avance.
+  getIt.registerLazySingleton<ExpenseAdvanceGuard>(
+    () => PayrollExpenseAdvanceGuard(
+      payrolls: getIt<PayrollDao>(),
+      advances: getIt<SalaryAdvanceDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
   getIt.registerLazySingleton<PayrollSettingsDao>(
     () => PayrollSettingsDao(getIt<Database>()),
   );
@@ -148,6 +188,12 @@ void _registerStorage(GetIt getIt) {
   getIt.registerLazySingleton<PayrollDao>(() => PayrollDao(getIt<Database>()));
   getIt.registerLazySingleton<PayrollVariablesDao>(
     () => PayrollVariablesDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<PayrollArrearsPriorityDao>(
+    () => PayrollArrearsPriorityDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<PayrollPayoutPolicyDao>(
+    () => PayrollPayoutPolicyDao(getIt<Database>()),
   );
   getIt.registerLazySingleton<PayrollGestureDao>(
     () => PayrollGestureDao(getIt<Database>()),

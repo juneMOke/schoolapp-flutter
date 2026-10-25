@@ -46,7 +46,7 @@ class MenuConstants {
   static const String communicationMenuId = 'communication';
 
   /// Les ressources humaines — le fichier central des agents de l'école, puis
-  /// le Pointage, et plus tard la Paie, qui le lisent. Un menu propre : un
+  /// le Pointage qui le lit ; la Paie a son propre module ([hrPayrollMenuId]). Un menu propre : un
   /// agent n'est ni un élève ni une écriture de caisse.
   static const String hrMenuId = 'ressources-humaines';
 
@@ -60,6 +60,11 @@ class MenuConstants {
   /// Un module neuf, posé après RH · Personnel ; l'onglet Pointage des
   /// [hrMenuId] reste en place à côté (même registre, même verrou).
   static const String hrPresenceMenuId = 'rh-presences';
+
+  /// RH · Paie — le livre du mois, les avances, les arriérés et le barème
+  /// (spec « R.H. ▸ Paie », carte des sous-modules). Un module propre, posé
+  /// après RH · Présences dont il lit le Pointage clos.
+  static const String hrPayrollMenuId = 'rh-paie';
 
   // Configuration — les réglages de l'école, réouvrables une fois celle-ci en
   // service. L'assistant de mise en service, lui, s'atteint depuis le splash :
@@ -118,9 +123,24 @@ class MenuConstants {
   /// agent et le récapitulatif du mois.
   static const String hrStaffAttendanceId = 'pointage';
 
-  /// La Paie du personnel : le livre du mois, les bulletins, les avances et
+  /// RH · Paie ▸ Tableau de bord : prévu et réel, payé et non payé, prêts,
+  /// arriérés, et ce que chaque salarié perçoit (spec TB).
+  static const String hrPayrollDashboardId = 'paie-tableau-de-bord';
+
+  /// RH · Paie ▸ Paie : le livre du mois, l'état de paie, les bulletins et
   /// l'historique.
   static const String hrPayrollId = 'paie';
+
+  /// RH · Paie ▸ Avances & prêts : les demandes, le registre, l'échéancier.
+  static const String hrPayrollAdvancesId = 'paie-avances';
+
+  /// RH · Paie ▸ Arriérés : ce que l'école doit encore à ses agents sur des
+  /// paies validées (Paie v2, B4).
+  static const String hrPayrollArrearsId = 'paie-arrieres';
+
+  /// RH · Paie ▸ Configuration : le barème de l'école. La direction le
+  /// modifie, l'économe le consulte.
+  static const String hrPayrollSettingsId = 'paie-configuration';
 
   /// RH · Personnel ▸ Tableau de bord : l'effectif, sa répartition, et la
   /// liste nominative « Qui sont-ils », exportable en PDF.

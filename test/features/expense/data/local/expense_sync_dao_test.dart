@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -173,6 +174,150 @@ void main() {
   });
 
   group('applyPulled', () {
+    test('T14 : un delta sans rh ne vide pas le bloc R.H. local', () async {
+      await db.insert(
+        'expenses',
+        ExpenseLocalModel(
+          id: 'e-1',
+          schoolId: 'school-1',
+          typeId: 't-advance',
+          title: 'Avance au personnel',
+          amountInCents: 500,
+          currency: 'USD',
+          status: 'PAID',
+          expenseDate: '2026-09-03',
+          clientUpdatedAt: _sent,
+          staffAdvance: const ExpenseStaffAdvance(
+            staffMemberId: 'm-1',
+            kind: ExpenseStaffAdvanceKind.advance,
+            installments: 1,
+            reason: 'RENT',
+            firstMonth: '2026-10',
+          ).encode(),
+          syncStatus: 'SYNCED',
+        ).toMap(),
+      );
+
+      await dao.applyPulled([_canonical()], schoolId: 'school-1', nowMs: 1);
+      expect(
+        ExpenseStaffAdvance.tryParse((await row()).staffAdvance)?.firstMonth,
+        '2026-10',
+      );
+
+      // Le serveur renvoie le bloc sans encore le mois : la tablette le garde.
+      await dao.applyPulled(
+        [
+          ExpenseDeltaDto.tryParse({
+            'id': 'e-1',
+            'typeId': 't-advance',
+            'title': 'Avance au personnel',
+            'amountInCents': 500,
+            'currency': 'USD',
+            'status': 'PAID',
+            'expenseDate': '2026-09-03',
+            'clientUpdatedAt': _sent,
+            'staffAdvance': {
+              'staffMemberId': 'm-1',
+              'nature': 'ADVANCE',
+              'installments': 1,
+              'reason': 'RENT',
+            },
+          })!,
+        ],
+        schoolId: 'school-1',
+        nowMs: 2,
+      );
+      expect(
+        ExpenseStaffAdvance.tryParse((await row()).staffAdvance)?.firstMonth,
+        '2026-10',
+      );
+    });
+
+    group('le type avance fait foi', () {
+      const block = ExpenseStaffAdvance(
+        staffMemberId: 'm-1',
+        kind: ExpenseStaffAdvanceKind.advance,
+        installments: 1,
+        reason: 'RENT',
+        firstMonth: '2026-10',
+      );
+
+      setUp(() async {
+        await db.insert('ref_expense_types', {
+          'id': 't-advance',
+          'school_id': 'school-1',
+          'code': ExpenseStaffAdvance.typeCode,
+          'label': 'Avance au personnel',
+          'short_label': 'Avance',
+          'icon': 'hand-coins',
+          'color': '#8A5A12',
+          'soft_color': '#FAF2E2',
+          'default_currency': 'USD',
+        });
+        await db.insert(
+          'expenses',
+          ExpenseLocalModel(
+            id: 'e-1',
+            schoolId: 'school-1',
+            typeId: 't-advance',
+            title: 'Avance au personnel',
+            amountInCents: 500,
+            currency: 'USD',
+            status: 'PAID',
+            expenseDate: '2026-09-03',
+            clientUpdatedAt: _sent,
+            staffAdvance: block.encode(),
+            syncStatus: 'SYNCED',
+          ).toMap(),
+        );
+      });
+
+      ExpenseDeltaDto delta({
+        String typeId = 't-advance',
+        String status = 'PAID',
+        bool carried = false,
+      }) => ExpenseDeltaDto.tryParse({
+        'id': 'e-1',
+        'typeId': typeId,
+        'title': 'Avance au personnel',
+        'amountInCents': 500,
+        'currency': 'USD',
+        'status': status,
+        'expenseDate': '2026-09-03',
+        'clientUpdatedAt': _sent,
+        'staffAdvance': carried ? block.toWireJson() : null,
+      })!;
+
+      Future<ExpenseStaffAdvance?> stored() async =>
+          ExpenseStaffAdvance.tryParse((await row()).staffAdvance);
+
+      test('caviardée : le bloc local reste', () async {
+        await dao.applyPulled([delta()], schoolId: 'school-1', nowMs: 1);
+
+        expect(await stored(), block);
+      });
+
+      test('passée à un autre type : le bloc s efface', () async {
+        await dao.applyPulled(
+          [delta(typeId: 't-elec')],
+          schoolId: 'school-1',
+          nowMs: 1,
+        );
+
+        expect((await row()).staffAdvance, isNull);
+      });
+
+      test('rouverte : l ancien mois de première retenue s oublie', () async {
+        await dao.applyPulled(
+          [delta(status: 'APPROVED', carried: true)],
+          schoolId: 'school-1',
+          nowMs: 1,
+        );
+
+        expect((await stored())?.firstMonth, isNull);
+      });
+    });
+
     test('inconnue → insérée ; synchronisée → remplacée', () async {
       expect(
         await dao.applyPulled([_canonical()], schoolId: 'school-1', nowMs: 1),

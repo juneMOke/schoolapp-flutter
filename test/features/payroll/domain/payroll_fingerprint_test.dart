@@ -37,7 +37,21 @@ void main() {
           ),
         ];
 
-        final fingerprint = await PayrollFingerprinter.of(lines);
+        // Forme v2 du serveur — recalculée en Python : deux lignes triées,
+        // la seconde '9a1c…|CDF|185000000|0|0|0|0|0|185000000|185000000'.
+        final v2 = await PayrollFingerprinter.of(lines);
+        expect(
+          v2.linesDigest,
+          '6130d2862d98e3d4d9568c2c22f55459a1efdc3bc271e723edac9eaaa722f5dc',
+        );
+        expect(v2.totals.last.deductionInCents, 0);
+        expect(v2.totals.last.toPayInCents, 27500);
+
+        // Forme v1 : celle des paies figées avant la v2.
+        final fingerprint = await PayrollFingerprinter.of(
+          lines,
+          formulaVersion: 1,
+        );
 
         expect(
           fingerprint.linesDigest,
@@ -111,6 +125,23 @@ void main() {
         month: '2026-10',
       ),
       'fc692e71-4f14-575c-a4fc-4fd5a492fff3',
+    );
+  });
+
+  test('uuid5 de l avance d une dépense : le vecteur du back (T10)', () {
+    expect(
+      PayrollIds.salaryAdvanceIdOf('7f3c2a10-1b2c-4d5e-8f90-a1b2c3d4e5f6'),
+      'bd759072-c0ed-506c-a502-d263347edd73',
+    );
+  });
+
+  test('uuid5 de la priorité d un arriéré (T9), recalculé en Python', () {
+    expect(
+      PayrollIds.arrearsPriorityId(
+        staffMemberId: '00000000-0000-4000-8000-000000000001',
+        month: '2026-09',
+      ),
+      'bb81e2af-70d0-5fb4-b9f7-7514768df586',
     );
   });
 }

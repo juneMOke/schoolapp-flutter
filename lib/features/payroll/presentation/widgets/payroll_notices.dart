@@ -17,6 +17,12 @@ void showPayrollNotice(
   switch (notice.kind) {
     case PayrollNoticeKind.variablesSaved:
       AppSnackBar.showSuccess(context, l10n.payrollToastVariables(name));
+    case PayrollNoticeKind.payoutPolicySaved:
+      AppSnackBar.showSuccess(context, l10n.payrollToastPayoutPolicy(amount));
+    case PayrollNoticeKind.arrearsPrioritized:
+      AppSnackBar.showInfo(context, l10n.payrollToastArrearsPrioritized);
+    case PayrollNoticeKind.arrearsUnprioritized:
+      AppSnackBar.showInfo(context, l10n.payrollToastArrearsUnprioritized);
     case PayrollNoticeKind.submitted:
       AppSnackBar.showSuccess(context, l10n.payrollToastSubmitted);
     case PayrollNoticeKind.validated:
@@ -31,6 +37,23 @@ void showPayrollNotice(
       AppSnackBar.showInfo(context, l10n.payrollToastPayCancelled);
     case PayrollNoticeKind.advanceGranted:
       AppSnackBar.showSuccess(context, l10n.payrollToastAdvance(amount, name));
+    case PayrollNoticeKind.advanceApproved:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.payrollToastAdvanceApproved(amount, name),
+      );
+    case PayrollNoticeKind.advanceRefused:
+      AppSnackBar.showSuccess(context, l10n.payrollToastAdvanceRefused(name));
+    case PayrollNoticeKind.advanceDisbursed:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.payrollToastAdvanceDisbursed(amount, name),
+      );
+    case PayrollNoticeKind.advanceRequested:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.payrollToastAdvanceRequested(amount),
+      );
     case PayrollNoticeKind.advanceCancelled:
       AppSnackBar.showInfo(context, l10n.payrollToastAdvanceCancelled);
     case PayrollNoticeKind.profileSaved:
@@ -45,6 +68,8 @@ void showPayrollNotice(
       AppSnackBar.showWarning(context, l10n.payrollToastOffline);
     case PayrollNoticeKind.downloadFailed:
       AppSnackBar.showError(context, l10n.payrollToastDownloadFailed);
+    case PayrollNoticeKind.renderBusy:
+      AppSnackBar.showWarning(context, l10n.payrollToastRenderBusy);
     case PayrollNoticeKind.refused:
       final rule = notice.rule;
       if (rule != null) {

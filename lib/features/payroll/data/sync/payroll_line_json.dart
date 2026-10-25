@@ -1,11 +1,13 @@
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line_parts.dart';
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
 /// Une ligne figée telle que le serveur la descend — gardée entière dans
-/// `payroll_lines.line`, relue ici.
+/// `payroll_lines.line`, relue ici. Une ligne sans `formulaVersion` est une
+/// ligne v1 : ni retenues fixes, ni versement réduit.
 abstract final class PayrollLineJson {
   /// `null` si la ligne est illisible : une ligne tronquée ne s'invente pas.
   static PayrollLine? tryParse(Object? raw, {required String month}) {
@@ -44,6 +46,9 @@ abstract final class PayrollLineJson {
       allowanceInCents: allowance.integer('amountInCents') ?? 0,
       grossInCents: gross,
       netInCents: net,
+      formulaVersion: raw.integer('formulaVersion') ?? 1,
+      deductions: _deductions(raw['deductions']),
+      payout: _payout(raw['payout'], net),
       advances: [
         if (advances is List)
           for (final item in advances)
@@ -58,6 +63,33 @@ abstract final class PayrollLineJson {
         workedMinutes: base.integer('minutes') ?? 0,
       ),
       frozen: true,
+    );
+  }
+
+  static PayrollLineDeductions _deductions(Object? raw) {
+    if (raw is! Map) return PayrollLineDeductions.none;
+    return PayrollLineDeductions(
+      workDaysDivisor: raw.integer('workDaysDivisor'),
+      workedDays: raw.integer('daysWorked'),
+      absenceInCents: raw.integer('absenceInCents') ?? 0,
+      iprInCents: raw.integer('iprInCents') ?? 0,
+      cnssInCents: raw.integer('cnssInCents') ?? 0,
+      childcareInCents: raw.integer('childcareInCents') ?? 0,
+    );
+  }
+
+  /// Sans bloc, tout le net est à verser — un « à verser » au-delà du net ne
+  /// se croit pas.
+  static PayrollLinePayout? _payout(Object? raw, int net) {
+    if (raw is! Map) return null;
+    final toPay = raw.integer('toPayInCents');
+    if (toPay == null || toPay < 0 || toPay > net) return null;
+    return PayrollLinePayout(
+      toPayInCents: toPay,
+      deferredInCents: net - toPay,
+      ratePercent: raw.integer('percent'),
+      fixedInCents: raw.integer('fixedInCents'),
+      reason: raw.text('reason'),
     );
   }
 

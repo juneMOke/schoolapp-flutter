@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_gest
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_queue_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_navigation.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_advance_pay_flow.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
@@ -73,11 +74,19 @@ class ExpenseQueueActions {
     String note = '',
   }) async {
     final l10n = AppLocalizations.of(context)!;
+    final advance = await ExpenseAdvancePayFlow.run(
+      context,
+      expense,
+      gesture,
+      type: _cubit.state.snapshot.typesById[expense.typeId],
+    );
+    if (!advance.proceed || !context.mounted) return;
     final result = await _cubit.applyGesture(
       expense,
       gesture,
       note: note,
       actorName: _agentName(),
+      advancePayment: advance.payment,
     );
     if (!context.mounted) return;
     result.fold(

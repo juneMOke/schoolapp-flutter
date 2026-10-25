@@ -1,7 +1,9 @@
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellation_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_disbursement_dto.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/payroll_arrears_priority_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_ids.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/salary_advance_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/staff_pay_profile_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
@@ -37,9 +39,45 @@ class PayrollRequestFactory {
         overtimeMinutes: v.overtimeMinutes,
         overtimeRateInCents: v.overtimeRateInCents,
         dependentChildren: v.dependentChildren,
+        workedDays: v.workedDays,
+        childcareInCents: v.childcareInCents,
+        fixedPayoutInCents: v.fixedPayoutInCents,
+        fixedPayoutReason: v.fixedPayoutInCents == null
+            ? null
+            : v.fixedPayoutReason?.trim(),
         clientUpdatedAt: stamp,
         authorId: authorId,
       );
+
+  PayrollArrearsPriorityRequestDto arrearsPriority({
+    required String staffMemberId,
+    required String month,
+    required bool prioritized,
+  }) => PayrollArrearsPriorityRequestDto(
+    priority: PayrollArrearsPriorityDto(
+      id: PayrollIds.arrearsPriorityId(
+        staffMemberId: staffMemberId,
+        month: month,
+      ),
+      staffMemberId: staffMemberId,
+      month: month,
+      prioritized: prioritized,
+      clientUpdatedAt: stamp,
+    ),
+    authorId: authorId,
+  );
+
+  PayrollPayoutPolicyRequestDto payoutPolicy(
+    String month,
+    int ratePercent, {
+    String? reason,
+  }) => PayrollPayoutPolicyRequestDto(
+    month: month,
+    ratePercent: ratePercent,
+    reason: ratePercent >= 100 ? null : reason?.trim(),
+    clientUpdatedAt: stamp,
+    authorId: authorId,
+  );
 
   PayrollGestureRequestDto gesture(
     String month,

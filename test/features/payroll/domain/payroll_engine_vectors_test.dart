@@ -16,7 +16,7 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_contract
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
-/// Les vecteurs de référence du moteur de paie, **le même fichier que le
+/// Les vecteurs de référence du moteur de paie v2, **le même fichier que le
 /// serveur** (`src/test/resources/payroll/engine-vectors.json`), copié tel
 /// quel : un moteur qui diverge fait échouer la CI des deux dépôts. Ne jamais
 /// le retoucher à la main — le recopier du dépôt serveur.
@@ -40,6 +40,7 @@ void main() {
       final fingerprint = await PayrollFingerprinter.of(result.lines);
 
       expect(result.withoutContract, expected['withoutContract']);
+      expect(fingerprint.formulaVersion, expected['formulaVersion']);
       expect(fingerprint.lineCount, expected['lineCount']);
       expect(fingerprint.linesDigest, expected['linesDigest']);
       expect([
@@ -47,8 +48,10 @@ void main() {
           {
             'currency': total.currency,
             'grossInCents': total.grossInCents,
+            'deductionInCents': total.deductionInCents,
             'advanceInCents': total.advanceInCents,
             'netInCents': total.netInCents,
+            'toPayInCents': total.toPayInCents,
           },
       ], expected['totals']);
       final lines = expected['lines'] as List;
@@ -58,6 +61,7 @@ void main() {
         final line = result.lines[index];
         expect(
           {
+            'formulaVersion': line.formulaVersion,
             'staffMemberId': line.staffMemberId,
             'contractId': line.contractId,
             'currency': line.currency,
@@ -70,6 +74,12 @@ void main() {
             'dependentChildren': line.children,
             'allowanceInCents': line.allowanceInCents,
             'grossInCents': line.grossInCents,
+            'daysWorked': line.deductions.workedDays,
+            'workDaysDivisor': line.deductions.workDaysDivisor,
+            'absenceInCents': line.deductions.absenceInCents,
+            'iprInCents': line.deductions.iprInCents,
+            'cnssInCents': line.deductions.cnssInCents,
+            'childcareInCents': line.deductions.childcareInCents,
             'advances': [
               for (final a in line.advances)
                 {
@@ -82,6 +92,11 @@ void main() {
             ],
             'advanceInCents': line.advanceInCents,
             'netInCents': line.netInCents,
+            'payoutPercent': line.payout?.ratePercent,
+            'fixedPayoutInCents': line.payout?.fixedInCents,
+            'payoutReason': line.payout?.reason,
+            'toPayInCents': line.toPayInCents,
+            'deferredInCents': line.deferredInCents,
             'attendanceMonth': line.attendanceMonth,
           },
           want,
@@ -101,8 +116,11 @@ PayrollEngineInput _input(
     for (final raw in vector['staff'] as List? ?? const [])
       raw as Map<String, dynamic>,
   ];
+  final payout = vector['payout'] as Map<String, dynamic>?;
   return PayrollEngineInput(
     month: month,
+    payoutRatePercent: payout?['percent'] as int? ?? 100,
+    payoutReason: payout?['reason'] as String?,
     settings: PayrollSettingsDao.toEntity(
       _settings(vector['settings'] ?? defaultSettings),
     ),
@@ -121,6 +139,10 @@ PayrollEngineInput _input(
             overtimeMinutes: v['overtimeMinutes'] as int?,
             overtimeRateInCents: v['overtimeRateInCents'] as int?,
             dependentChildren: v['dependentChildren'] as int?,
+            workedDays: v['daysWorked'] as int?,
+            childcareInCents: v['childcareInCents'] as int?,
+            fixedPayoutInCents: v['fixedPayoutInCents'] as int?,
+            fixedPayoutReason: v['fixedPayoutReason'] as String?,
           ),
     },
     profiles: {

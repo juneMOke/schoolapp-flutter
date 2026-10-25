@@ -7935,6 +7935,17 @@
   "expenseRejectedNotOwner": "ce geste est réservé au demandeur",
   "expenseRejectedReasonRequired": "un refus exige son motif",
   "expenseRejectedOutOfOrder": "un geste antérieur n'est pas encore parti",
+  "expenseRejectedStaffAdvanceForbidden": "une avance au personnel demande l'accès à la paie",
+  "expenseRejectedStaffAdvanceDetails": "il manque l'agent de l'avance ou le mois de sa première retenue",
+  "expenseRejectedStaffAdvanceInvalid": "avance invalide : échéances ou mois de première retenue",
+  "expenseRejectedStaffAdvanceLocked": "une avance accordée ou payée ne se modifie plus",
+  "expenseRejectedStaffAdvancePaid": "une avance payée ne se retire ni ne se supprime",
+  "expenseRejectedAdvanceMonthLocked": "la paie de la première retenue est déjà fermée : payez de nouveau sur un mois suivant",
+  "expenseRejectedAdvanceDeducted": "une retenue de cette avance est déjà figée",
+  "expenseRejectedAdvanceSignature": "la reconnaissance de dette signée est requise pour une avance en espèces",
+  "expenseRejectedAdvanceProof": "mois de première retenue passé, ou référence de paiement trop courte",
+  "expenseRejectedAdvanceCurrency": "la devise de l'avance n'est pas celle du contrat de l'agent",
+  "expenseRejectedAdvanceNoContract": "l'agent n'a pas de contrat qui le paie",
   "expenseDetailGestureRejected": "Geste refusé par le serveur : {reason}. La demande est restée telle qu'elle était.",
   "@expenseDetailGestureRejected": {"placeholders": {"reason": {"type": "String"}}},
   "expenseThreadRejected": "non envoyé",
@@ -7997,6 +8008,54 @@
   "expenseFormSupplier": "Fournisseur / bénéficiaire (facultatif)",
   "expenseFormSupplierPlaceholder": "ex. SNEL, Librairie Papyrus…",
   "expenseFormNoTypes": "Les types de dépense ne sont pas encore descendus sur cet appareil. Synchronisez, puis réessayez.",
+  "expenseAdvancePayTitle": "Décaisser l'avance · {amount}",
+  "@expenseAdvancePayTitle": {
+    "description": "Titre de la modale de décaissement d'une avance.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayApprovedBy": "Accordée par {name}",
+  "@expenseAdvancePayApprovedBy": {
+    "description": "Rappel de l'accord.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayMode": "Mode : {mode}",
+  "@expenseAdvancePayMode": {
+    "description": "Rappel de la source des fonds.",
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayAcknowledged": "L'agent a signé la reconnaissance de dette",
+  "@expenseAdvancePayAcknowledged": {
+    "description": "Preuve en espèces."
+  },
+  "expenseAdvancePayReference": "Référence de l'opération (6 caractères au moins)",
+  "@expenseAdvancePayReference": {
+    "description": "Preuve hors espèces."
+  },
+  "expenseAdvancePayFirstMonth": "Première retenue sur la paie de",
+  "@expenseAdvancePayFirstMonth": {
+    "description": "Choix du mois de première retenue."
+  },
+  "expenseAdvancePayConfirm": "Décaisser {amount}",
+  "@expenseAdvancePayConfirm": {
+    "description": "Bouton de décaissement.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "expenseFormCancel": "Annuler",
   "expenseFormSaveCreate": "Enregistrer la dépense",
   "expenseFormSaveEdit": "Enregistrer les modifications",
@@ -8751,6 +8810,14 @@
   "@staffFieldCategory": {
     "description": "Champ du poste."
   },
+  "staffFieldGrade": "Grade",
+  "@staffFieldGrade": {
+    "description": "Champ du poste : le grade de l'agent, lu par l'état de paie."
+  },
+  "staffFieldGradeHint": "Ex. L2, G3, A2",
+  "@staffFieldGradeHint": {
+    "description": "Exemple du champ Grade."
+  },
   "staffFieldJob": "Fonction",
   "@staffFieldJob": {
     "description": "Champ du poste."
@@ -9425,7 +9492,7 @@
   "staffAttendanceClose": "Clôturer le mois",
   "staffAttendanceCloseTitle": "Clôturer {month} ?",
   "staffAttendanceCloseHours": "{hours} de vacation, que la Paie relit dans les pointages",
-  "staffAttendanceCloseAbsences": "{count} absences non justifiées, signalées sur le bulletin, sans retenue",
+  "staffAttendanceCloseAbsences": "{count} absences non justifiées, signalées sur le bulletin",
   "staffAttendanceCloseLates": "{minutes} min de retard, à titre indicatif",
   "staffAttendanceCloseNotMarked": "{count} jours-agent sans pointage : un jour non pointé d'un vacataire vaut 0 h payée",
   "presenceMarkCloseIrreversible": "La clôture verrouille le mois : elle ne se rouvre pas depuis la tablette.",
@@ -9460,11 +9527,276 @@
   "subMenuPayroll": "Paie",
   "payrollTabLedger": "Livre de paie",
   "payrollTabLedgerSubtitle": "Net {amount}",
+  "payrollTabStatement": "État de paie",
+  "@payrollTabStatement": {
+    "description": "Onglet de l'état de paie."
+  },
+  "payrollTabStatementSubtitle": "Le tableur des écoles",
+  "@payrollTabStatementSubtitle": {
+    "description": "Sous-titre de l'onglet."
+  },
+  "payrollStatementColName": "Nom et postnom",
+  "@payrollStatementColName": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColGrade": "Grade",
+  "@payrollStatementColGrade": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColGross": "Sal. brut",
+  "@payrollStatementColGross": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColWorkedDays": "NJP",
+  "@payrollStatementColWorkedDays": {
+    "description": "Colonne de l'état : jours prestés."
+  },
+  "payrollStatementColAbsence": "Abs. non just.",
+  "@payrollStatementColAbsence": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColLoan": "Crédit",
+  "@payrollStatementColLoan": {
+    "description": "Colonne de l'état : prêt."
+  },
+  "payrollStatementColAdvance": "A/S",
+  "@payrollStatementColAdvance": {
+    "description": "Colonne de l'état : avance sur salaire."
+  },
+  "payrollStatementColChildcare": "PC/E",
+  "@payrollStatementColChildcare": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColIpr": "IPR",
+  "@payrollStatementColIpr": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColCnss": "CNSS",
+  "@payrollStatementColCnss": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementColNet": "Net à payer",
+  "@payrollStatementColNet": {
+    "description": "Colonne de l'état."
+  },
+  "payrollStatementSubtotal": "Sous-total",
+  "@payrollStatementSubtotal": {
+    "description": "Ligne de sous-total d'un groupe."
+  },
+  "payrollStatementTotal": "Total général",
+  "@payrollStatementTotal": {
+    "description": "Ligne de total général."
+  },
+  "payrollStatementOther": "Autres",
+  "@payrollStatementOther": {
+    "description": "Groupe d'une catégorie inconnue."
+  },
+  "payrollStatementLocked": "Lecture seule : la paie n'est plus en brouillon.",
+  "@payrollStatementLocked": {
+    "description": "Bandeau cadenas de l'état."
+  },
+  "payrollStatementControl": "Brut {gross} − retenues {withheld} = net {net}",
+  "@payrollStatementControl": {
+    "description": "Ligne de contrôle de l'état.",
+    "placeholders": {
+      "gross": {
+        "type": "String"
+      },
+      "withheld": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsTitle": "Arriérés de salaire",
+  "@payrollArrearsTitle": {
+    "description": "Titre du registre des arriérés."
+  },
+  "payrollArrearsDebt": "Dette salariale",
+  "@payrollArrearsDebt": {
+    "description": "Tuile : total dû."
+  },
+  "payrollArrearsDeferred": "Différé décidé",
+  "@payrollArrearsDeferred": {
+    "description": "Tuile : part différée par décision."
+  },
+  "payrollArrearsUnpaid": "Impayés et acomptes",
+  "@payrollArrearsUnpaid": {
+    "description": "Tuile : non payé ou reste d'acompte."
+  },
+  "payrollArrearsOldest": "Plus ancien",
+  "@payrollArrearsOldest": {
+    "description": "Tuile : mois dû le plus ancien."
+  },
+  "payrollArrearsAge": "{months, plural, =0{ce mois} =1{il y a 1 mois} other{il y a {months} mois}}",
+  "@payrollArrearsAge": {
+    "description": "Ancienneté d'un arriéré.",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsColMonths": "Mois concernés",
+  "@payrollArrearsColMonths": {
+    "description": "Colonne du registre."
+  },
+  "payrollArrearsColDue": "Dû",
+  "@payrollArrearsColDue": {
+    "description": "Colonne du registre."
+  },
+  "payrollArrearsColAge": "Ancienneté",
+  "@payrollArrearsColAge": {
+    "description": "Colonne du registre."
+  },
+  "payrollArrearsSince": "{month} · {months, plural, =0{ce mois} =1{il y a 1 mois} other{il y a {months} mois}}",
+  "@payrollArrearsSince": {
+    "description": "Mois d'origine et ancienneté.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsPriority": "En priorité",
+  "@payrollArrearsPriority": {
+    "description": "Drapeau priorité."
+  },
+  "payrollArrearsOriginDeferred": "Différé décidé",
+  "@payrollArrearsOriginDeferred": {
+    "description": "Origine d'un arriéré."
+  },
+  "payrollArrearsOriginUnpaid": "Non payé",
+  "@payrollArrearsOriginUnpaid": {
+    "description": "Origine d'un arriéré."
+  },
+  "payrollArrearsOriginPartial": "Acompte partiel",
+  "@payrollArrearsOriginPartial": {
+    "description": "Origine d'un arriéré."
+  },
+  "payrollArrearsFilterDeferred": "Différés décidés",
+  "@payrollArrearsFilterDeferred": {
+    "description": "Puce du registre."
+  },
+  "payrollArrearsFilterUnpaid": "Impayés",
+  "@payrollArrearsFilterUnpaid": {
+    "description": "Puce du registre."
+  },
+  "payrollArrearsFilterPriority": "En priorité",
+  "@payrollArrearsFilterPriority": {
+    "description": "Puce du registre."
+  },
+  "payrollArrearsEmpty": "Aucun arriéré de salaire",
+  "@payrollArrearsEmpty": {
+    "description": "Registre vide."
+  },
+  "payrollArrearsAgentTitle": "{name} · {amount} dus",
+  "@payrollArrearsAgentTitle": {
+    "description": "Titre de la fiche arriérés.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsNetPaid": "Net {net} · versé {paid}",
+  "@payrollArrearsNetPaid": {
+    "description": "Détail d'un mois dû.",
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsRate": "Versé à {rate} %",
+  "@payrollArrearsRate": {
+    "description": "Détail : versement réduit au taux du mois.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsFixed": "Montant fixe {amount}",
+  "@payrollArrearsFixed": {
+    "description": "Détail : versement à montant fixe.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPayAll": "Tout",
+  "@payrollArrearsPayAll": {
+    "description": "Raccourci : tout le dû."
+  },
+  "payrollArrearsPayOldest": "Le plus ancien",
+  "@payrollArrearsPayOldest": {
+    "description": "Raccourci : le mois le plus ancien."
+  },
+  "payrollArrearsPay": "Verser {amount}",
+  "@payrollArrearsPay": {
+    "description": "Bouton de versement d'arriérés.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPrioritize": "À solder en priorité",
+  "@payrollArrearsPrioritize": {
+    "description": "Lever le drapeau."
+  },
+  "payrollArrearsUnprioritize": "Retirer la priorité",
+  "@payrollArrearsUnprioritize": {
+    "description": "Baisser le drapeau."
+  },
+  "subMenuPayrollArrears": "Arriérés de salaire",
+  "@subMenuPayrollArrears": {
+    "description": "Sous-menu RH · Paie ▸ Arriérés."
+  },
+  "payrollArrearsBanner": "{count, plural, =1{Arriérés de salaire · 1 agent · {amount} dus par l'école} other{Arriérés de salaire · {count} agents · {amount} dus par l'école}}",
+  "@payrollArrearsBanner": {
+    "description": "Bannière M+1.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsBannerAction": "Traiter les arriérés",
+  "@payrollArrearsBannerAction": {
+    "description": "Bouton de la bannière."
+  },
+  "payrollStatementPrint": "Imprimer l'état",
+  "@payrollStatementPrint": {
+    "description": "Bouton : état de paie A4 composé par le serveur."
+  },
+  "payrollStatementFileName": "etat-de-paie-{month}",
+  "@payrollStatementFileName": {
+    "description": "Nom de fichier de l'état de paie.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "payrollTabPayslips": "Bulletins",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
-  "payrollTabAdvances": "Avances",
-  "payrollTabAdvancesOngoing": "{count, plural, =1{1 en cours} other{{count} en cours}}",
-  "payrollTabAdvancesNone": "Aucune en cours",
   "payrollTabHistory": "Historique",
   "payrollTabHistorySubtitle": "{count, plural, =1{1 mois} other{{count} mois}}",
   "payrollPhaseDraft": "Brouillon",
@@ -9491,7 +9823,6 @@
   "payrollActionValidate": "Valider et verrouiller",
   "payrollActionReopen": "Rouvrir",
   "payrollActionDiffuse": "Diffuser les bulletins",
-  "payrollActionSettings": "Réglages de paie",
   "payrollReturnedBanner": "Renvoyée par la direction : « {reason} »",
   "payrollBlockerPrevious": "La paie du mois précédent doit d'abord être validée.",
   "payrollBlockerAttendance": "Clôturez d'abord le pointage de {month}.",
@@ -9503,14 +9834,72 @@
   "payrollKpiComplementsDetail": "Heures sup. et allocations",
   "payrollKpiAdvances": "Avances déduites",
   "payrollKpiAdvancesDetail": "{count, plural, =0{Aucune échéance} =1{1 échéance} other{{count} échéances}}",
+  "payrollKpiDeductions": "Retenues",
+  "@payrollKpiDeductions": {
+    "description": "KPI v2 : retenues fixes et avances."
+  },
+  "payrollKpiDeductionsDetail": "{count, plural, =0{Absences, IPR/CNSS, PC/E} =1{Absences, IPR/CNSS, PC/E et 1 échéance} other{Absences, IPR/CNSS, PC/E et {count} échéances}}",
+  "@payrollKpiDeductionsDetail": {
+    "description": "Sous-titre du KPI des retenues.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollKpiNetToPay": "À verser {toPay} · {deferred} en arriéré",
+  "@payrollKpiNetToPay": {
+    "description": "Sous-titre du net quand le versement est réduit.",
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollKpiNet": "Net à payer",
   "payrollKpiPaid": "Versé {paid} / {total}",
+  "payrollAttendanceSignalDeducted": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — les absences non justifiées réduisent les jours prestés.",
+  "@payrollAttendanceSignalDeducted": {
+    "description": "Signal Pointage quand l'école retient les absences.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      }
+    }
+  },
   "payrollAttendanceSignal": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — affichés à titre indicatif, aucune retenue.",
   "payrollColAgent": "Agent",
   "payrollColBase": "Base",
   "payrollColOvertime": "H. sup",
   "payrollColAllowance": "Alloc.",
-  "payrollColAdvance": "Avance",
+  "payrollLineToPay": "verser {amount}",
+  "@payrollLineToPay": {
+    "description": "Sous le net : ce qui sera versé ce mois.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollLineToPayFixed": "verser {amount} · fixe",
+  "@payrollLineToPayFixed": {
+    "description": "Sous le net : montant fixe.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollColAdvance": "Retenues",
   "payrollColNet": "Net",
   "payrollColAttendance": "Pointage",
   "payrollColPayout": "Versement",
@@ -9520,15 +9909,25 @@
   "payrollSignalAbsences": "{count} abs",
   "payrollSignalLates": "{count} ret",
   "payrollSignalNone": "RAS",
-  "payrollSignalHint": "Indicatif, sans retenue",
+  "payrollSignalHint": "Pointage du mois précédent",
   "payrollPayAfterValidation": "Après validation",
   "payrollPay": "Verser",
   "payrollToPay": "À verser",
   "payrollNothingToPay": "Rien à verser",
   "payrollTotal": "Total",
   "payrollFilterAll": "Tous",
-  "payrollFilterToPay": "À verser",
-  "payrollFilterPaid": "Versés",
+  "payrollFilterUnpaid": "Non payés",
+  "@payrollFilterUnpaid": {
+    "description": "Puce : rien versé."
+  },
+  "payrollFilterPartial": "Partiels",
+  "@payrollFilterPartial": {
+    "description": "Puce : un reste dû (acompte ou arriéré décidé)."
+  },
+  "payrollFilterSettled": "Soldés",
+  "@payrollFilterSettled": {
+    "description": "Puce : tout le net versé."
+  },
   "payrollSearchHint": "Rechercher un agent",
   "payrollZeroHours": "Vacataires à 0 h en {month} : {names}. Vérifiez le pointage avant de soumettre.",
   "payrollWithoutContract": "{count, plural, =1{1 agent sans contrat — posez son contrat dans le fichier du personnel.} other{{count} agents sans contrat — posez leur contrat dans le fichier du personnel.}}",
@@ -9537,6 +9936,10 @@
   "payrollRegularizeHint": "L'argent est sorti, mais le serveur a refusé de l'enregistrer. Rien n'est effacé : traitez chaque ligne avec la direction.",
   "payrollRegularizeRow": "{name} · {amount} · {month} — {reason}",
   "payrollRefusedReopened": "paie rouverte depuis",
+  "payrollRefusedExceeds": "au-delà du reste dû",
+  "@payrollRefusedExceeds": {
+    "description": "Motif d'un versement à régulariser : dépassement du reste."
+  },
   "payrollRefusedDouble": "double versement",
   "payrollRefusedOther": "refusé ({code})",
   "payrollSave": "Enregistrer",
@@ -9544,6 +9947,179 @@
   "payrollConfirm": "Confirmer",
   "payrollClose": "Fermer",
   "payrollReasonLabel": "Motif *",
+  "payrollPayoutEyebrow": "Politique de versement · {month}",
+  "@payrollPayoutEyebrow": {
+    "description": "Sur-titre de la modale du taux du mois.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutTitle": "Quelle part du net verser ce mois ?",
+  "@payrollPayoutTitle": {
+    "description": "Titre de la modale du taux du mois."
+  },
+  "payrollPayoutRate": "{rate} %",
+  "@payrollPayoutRate": {
+    "description": "Puce de taux.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutOther": "Autre taux (0 à 100)",
+  "@payrollPayoutOther": {
+    "description": "Champ de taux libre."
+  },
+  "payrollPayoutReason": "Motif",
+  "@payrollPayoutReason": {
+    "description": "Motif du taux réduit, visible par la direction."
+  },
+  "payrollPayoutDue": "Net dû",
+  "@payrollPayoutDue": {
+    "description": "Aperçu : net dû."
+  },
+  "payrollPayoutToPay": "À verser",
+  "@payrollPayoutToPay": {
+    "description": "Aperçu : à verser."
+  },
+  "payrollPayoutDeferred": "En arriéré",
+  "@payrollPayoutDeferred": {
+    "description": "Aperçu : part différée."
+  },
+  "payrollPayoutFixedKept": "Les agents à montant fixe gardent leur montant.",
+  "@payrollPayoutFixedKept": {
+    "description": "Note de la modale du taux."
+  },
+  "payrollPayoutApply": "Appliquer {rate} %",
+  "@payrollPayoutApply": {
+    "description": "Bouton de la modale du taux.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarActive": "{reduced, plural, =0{Ce mois, l'école verse {rate} % du net} =1{Ce mois, l'école verse {rate} % du net · 1 agent en versement réduit} other{Ce mois, l'école verse {rate} % du net · {reduced} agents en versement réduit}}",
+  "@payrollPayoutBarActive": {
+    "description": "Bandeau du taux du mois, actif.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      },
+      "reduced": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarDetail": "À verser {toPay} sur {due} dus · {deferred} deviendront des arriérés à la validation",
+  "@payrollPayoutBarDetail": {
+    "description": "Détail du bandeau du taux.",
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarReason": "« {reason} »",
+  "@payrollPayoutBarReason": {
+    "description": "Motif du taux entre guillemets.",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarFull": "Versement intégral du net",
+  "@payrollPayoutBarFull": {
+    "description": "Bandeau du taux du mois, neutre."
+  },
+  "payrollPayoutBarEdit": "Modifier le taux",
+  "@payrollPayoutBarEdit": {
+    "description": "Bouton du bandeau actif."
+  },
+  "payrollPayoutBarSet": "Fixer un taux de versement",
+  "@payrollPayoutBarSet": {
+    "description": "Bouton du bandeau neutre."
+  },
+  "payrollConfirmFixedDeductions": "Retenues (absences, IPR/CNSS, PC/E)",
+  "@payrollConfirmFixedDeductions": {
+    "description": "Ligne de la confirmation."
+  },
+  "payrollConfirmToPay": "À verser ce mois ({rate} %)",
+  "@payrollConfirmToPay": {
+    "description": "Ligne de la confirmation.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollConfirmDeferred": "Inscrit en arriéré",
+  "@payrollConfirmDeferred": {
+    "description": "Ligne de la confirmation."
+  },
+  "payrollConfirmDeferredWarning": "{amount} seront inscrits comme arriérés dus à {count, plural, =1{1 agent} other{{count} agents}}.",
+  "@payrollConfirmDeferredWarning": {
+    "description": "Avertissement de la confirmation.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollAdvanceRequestEyebrow": "Nouvelle demande de dépense",
+  "@payrollAdvanceRequestEyebrow": {
+    "description": "Sur-titre du dépôt d'une avance."
+  },
+  "payrollAdvanceRequestNote": "La demande part en validation et rejoint la file Dépenses ▸ Validations ; rien n'est versé ni retenu avant approbation et décaissement.",
+  "@payrollAdvanceRequestNote": {
+    "description": "Note du dépôt d'une avance."
+  },
+  "payrollAdvanceRequestSubmit": "Déposer la demande",
+  "@payrollAdvanceRequestSubmit": {
+    "description": "Bouton du dépôt d'une avance."
+  },
+  "payrollAdvanceCircuitTitle": "Dans le circuit de dépense · {count}",
+  "@payrollAdvanceCircuitTitle": {
+    "description": "Titre du bloc des demandes d'avance.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollAdvanceCircuitOpen": "Ouvrir les validations",
+  "@payrollAdvanceCircuitOpen": {
+    "description": "Bouton vers Dépenses ▸ Validations."
+  },
+  "payrollAdvanceCircuitVia": "via Dépenses",
+  "@payrollAdvanceCircuitVia": {
+    "description": "Mention d'une avance demandée."
+  },
+  "payrollAdvanceCircuitToApprove": "À valider",
+  "@payrollAdvanceCircuitToApprove": {
+    "description": "Statut d'une demande en attente."
+  },
+  "payrollAdvanceCircuitToPay": "À décaisser",
+  "@payrollAdvanceCircuitToPay": {
+    "description": "Statut d'une demande accordée."
+  },
+  "payrollPayoutOtherInvalid": "Un taux de 0 à 100.",
+  "@payrollPayoutOtherInvalid": {
+    "description": "Erreur du taux libre."
+  },
   "payrollVarsTitle": "Éléments variables",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Heures supplémentaires",
@@ -9552,6 +10128,89 @@
   "payrollVarsChildren": "Enfants à charge",
   "payrollVarsAllowance": "{children} × {unit} = {amount}",
   "payrollVarsAdvances": "Avances — gérées dans l'onglet Avances",
+  "payrollVarsWorkedDays": "Jours prestés (NJP)",
+  "@payrollVarsWorkedDays": {
+    "description": "Éléments variables v2 : jours prestés."
+  },
+  "payrollVarsWorkedDaysValue": "{days} / {divisor} j",
+  "@payrollVarsWorkedDaysValue": {
+    "description": "Valeur du stepper NJP.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsWorkedDaysCorrected": "Corrigé à la main — le Pointage dit {days} j",
+  "@payrollVarsWorkedDaysCorrected": {
+    "description": "Écart entre NJP saisi et Pointage.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsChildcare": "Prise en charge des enfants (PC/E) du mois",
+  "@payrollVarsChildcare": {
+    "description": "Montant PC/E du mois."
+  },
+  "payrollVarsChildcareShort": "Prise en charge enfants (PC/E)",
+  "@payrollVarsChildcareShort": {
+    "description": "Ligne de retenue PC/E."
+  },
+  "payrollVarsAbsence": "Absence non justifiée · {days} j",
+  "@payrollVarsAbsence": {
+    "description": "Ligne de retenue d'absence.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsLegal": "IPR & CNSS",
+  "@payrollVarsLegal": {
+    "description": "Ligne de retenue légale."
+  },
+  "payrollVarsPayout": "Versement ce mois",
+  "@payrollVarsPayout": {
+    "description": "Bloc du versement du mois."
+  },
+  "payrollVarsPayoutRate": "Taux du mois · {rate} %",
+  "@payrollVarsPayoutRate": {
+    "description": "Segment taux du mois.",
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsPayoutFixed": "Montant fixe pour cet agent",
+  "@payrollVarsPayoutFixed": {
+    "description": "Segment montant fixe."
+  },
+  "payrollVarsFixedAmount": "Verser au plus",
+  "@payrollVarsFixedAmount": {
+    "description": "Champ du montant fixe."
+  },
+  "payrollVarsFixedReason": "Motif",
+  "@payrollVarsFixedReason": {
+    "description": "Motif du montant fixe."
+  },
+  "payrollVarsPayoutPreview": "À verser {toPay} · En arriéré {deferred}",
+  "@payrollVarsPayoutPreview": {
+    "description": "Aperçu du versement réduit.",
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollVarsNoOvertime": "Un vacataire n'a pas d'heures supplémentaires.",
   "payrollSubmitTitle": "Soumettre la paie de {month} ?",
   "payrollValidateTitle": "Valider et verrouiller la paie de {month} ?",
@@ -9569,6 +10228,97 @@
   "payrollStaleBanner": "La dernière soumission ou validation a été refusée : les chiffres ont changé.",
   "payrollStaleOpen": "Comparer",
   "payrollGestureRefused": "Le serveur a refusé le geste : {reason}",
+  "payrollSettleNet": "Net à payer du mois",
+  "@payrollSettleNet": {
+    "description": "Bandeau de solde."
+  },
+  "payrollSettlePaid": "Déjà versé",
+  "@payrollSettlePaid": {
+    "description": "Bandeau de solde."
+  },
+  "payrollSettleRemaining": "Reste à payer",
+  "@payrollSettleRemaining": {
+    "description": "Bandeau de solde."
+  },
+  "payrollTrancheRank": "n° {rank}",
+  "@payrollTrancheRank": {
+    "description": "Rang d'un versement.",
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayAmount": "Montant ({currency})",
+  "@payrollPayAmount": {
+    "description": "Champ du montant d'un versement.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayPlanned": "Part décidée du mois",
+  "@payrollPayPlanned": {
+    "description": "Raccourci : la part prévue."
+  },
+  "payrollPayAllRemaining": "Tout le reste",
+  "@payrollPayAllRemaining": {
+    "description": "Raccourci : solde."
+  },
+  "payrollPayShare": "{share} % du net",
+  "@payrollPayShare": {
+    "description": "Raccourci : part du net.",
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPaySettles": "Ce versement solde le salaire.",
+  "@payrollPaySettles": {
+    "description": "Aide sous le montant."
+  },
+  "payrollPayLeaves": "Acompte : il restera {amount}.",
+  "@payrollPayLeaves": {
+    "description": "Aide sous le montant.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayAbovePlan": "Au-delà de la part décidée ce mois : la direction avait prévu moins.",
+  "@payrollPayAbovePlan": {
+    "description": "Avertissement T8, non bloquant."
+  },
+  "payrollSettledCount": "Soldé · {count} versements",
+  "@payrollSettledCount": {
+    "description": "Pastille : soldé en plusieurs fois.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPartialLeft": "Partiel · reste {amount}",
+  "@payrollPartialLeft": {
+    "description": "Pastille : acompte.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollDeferredLeft": "Différé · arriéré {amount}",
+  "@payrollDeferredLeft": {
+    "description": "Pastille : part décidée versée, arriéré.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayTitle": "Verser le salaire",
   "payrollPayNet": "Net à verser",
   "payrollModeCash": "Espèces",
@@ -9605,12 +10355,11 @@
   "payrollAdvanceFirstMonth": "Première échéance : {month}",
   "payrollAdvanceFirstMonthNext": "La paie de {month} n'est plus en brouillon : la première échéance tombe le mois suivant.",
   "payrollAdvancePreview": "{count, plural, =1{1 déduction de {amount} en {month}} other{{count} déductions de {amount} à partir de {month}}}",
-  "payrollAdvanceHeavy": "L'échéance dépasse la moitié du salaire mensuel : envisagez d'étaler.",
   "payrollAdvanceCancel": "Annuler cette avance",
   "payrollAdvancesOutstanding": "Encours à rembourser",
-  "payrollAdvancesThisMonth": "Déduit ce mois",
+  "payrollAdvancesThisMonth": "Retenu ce mois",
   "payrollAdvancesSettled": "Soldées",
-  "payrollAdvancesFilterOngoing": "En cours",
+  "payrollAdvancesFilterOngoing": "En remboursement",
   "payrollAdvancesFilterSettled": "Soldées",
   "payrollAdvancesFilterAll": "Toutes",
   "payrollAdvanceColGranted": "Accordée le",
@@ -9634,13 +10383,28 @@
   "payrollProfileMode": "Mode de versement préféré",
   "payrollProfileOperator": "Opérateur",
   "payrollProfilePhone": "Numéro de versement",
-  "payrollSettingsTitle": "Réglages de paie",
   "payrollSettingsDivisor": "Heures d'un mois plein",
   "payrollSettingsMultiplier": "Majoration des heures sup. (%)",
   "payrollSettingsCurrency": "En {currency}",
   "payrollSettingsAllowance": "Allocation par enfant",
   "payrollSettingsDefaultRate": "Taux d'heure sup. par défaut",
   "payrollSettingsStep": "Arrondi du taux au pas de",
+  "payrollSettingsWorkDays": "Jours d'un mois plein",
+  "@payrollSettingsWorkDays": {
+    "description": "Réglage v2 : diviseur de la retenue d'absence (1 à 31)."
+  },
+  "payrollSettingsAbsenceDeduction": "Retenir les absences non justifiées",
+  "@payrollSettingsAbsenceDeduction": {
+    "description": "Réglage v2 : active la retenue d'absence ; coupée par défaut."
+  },
+  "payrollSettingsIpr": "Forfait IPR par agent payé",
+  "@payrollSettingsIpr": {
+    "description": "Réglage v2 par devise."
+  },
+  "payrollSettingsCnss": "CNSS (‰ de la base)",
+  "@payrollSettingsCnss": {
+    "description": "Réglage v2 par devise, en pour mille."
+  },
   "payrollSettingsEligible": "Statuts qui ouvrent les allocations",
   "payrollPayslipTitle": "Bulletin de paie",
   "payrollPayslipProvisional": "Provisoire — non validée",
@@ -9649,6 +10413,95 @@
   "payrollPayslipJob": "Fonction",
   "payrollPayslipContract": "Contrat",
   "payrollPayslipContractFrom": "{kind} du {date}",
+  "payrollPayslipGrade": "Grade",
+  "@payrollPayslipGrade": {
+    "description": "Ligne d'identité du bulletin."
+  },
+  "payrollPayslipWorkedDays": "Jours prestés",
+  "@payrollPayslipWorkedDays": {
+    "description": "Ligne d'identité du bulletin."
+  },
+  "payrollPayslipWorkedDaysValue": "{days} jrs / {divisor}",
+  "@payrollPayslipWorkedDaysValue": {
+    "description": "Valeur des jours prestés.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipIprCnss": "IPR & CNSS",
+  "@payrollPayslipIprCnss": {
+    "description": "Retenue du bulletin."
+  },
+  "payrollPayslipAbsence": "Absence non justifiée",
+  "@payrollPayslipAbsence": {
+    "description": "Retenue du bulletin."
+  },
+  "payrollPayslipAbsenceDays": "{days} j",
+  "@payrollPayslipAbsenceDays": {
+    "description": "Jours retenus.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipSalaryAdvance": "Avance sur salaire",
+  "@payrollPayslipSalaryAdvance": {
+    "description": "Retenue du bulletin (A/S)."
+  },
+  "payrollPayslipLoan": "Remboursement prêt",
+  "@payrollPayslipLoan": {
+    "description": "Retenue du bulletin (Crédit)."
+  },
+  "payrollPayslipChildcare": "Prise en charge enfant du personnel",
+  "@payrollPayslipChildcare": {
+    "description": "Retenue du bulletin (PC/E)."
+  },
+  "payrollPayslipDeductionsTotal": "Total retenues",
+  "@payrollPayslipDeductionsTotal": {
+    "description": "Total des retenues du bulletin."
+  },
+  "payrollPayslipAttendanceDeducted": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — les absences non justifiées sont retenues sur les jours prestés.",
+  "@payrollPayslipAttendanceDeducted": {
+    "description": "Encart Pointage quand l'école retient les absences.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "justified": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipBalance": "Net à payer {net} · déjà perçu {paid} · reste à percevoir {rest}",
+  "@payrollPayslipBalance": {
+    "description": "Solde progressif du bulletin.",
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipGains": "Gains",
   "payrollPayslipBase": "Salaire de base",
   "payrollPayslipOvertime": "Heures sup. {hours} h × {rate}",
@@ -9661,9 +10514,9 @@
   "payrollPayslipNoLegal": "Paie nette, sans retenue légale",
   "payrollPayslipAttendance": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — sans incidence sur le montant.",
   "payrollPayslipPayment": "Versement : {detail}",
-  "payrollPayslipSignAgent": "L'agent",
-  "payrollPayslipSignBursar": "L'économe",
-  "payrollPayslipSignHead": "La direction",
+  "payrollPayslipSignAgent": "Bénéficiaire",
+  "payrollPayslipSignBursar": "Caissier(e)",
+  "payrollPayslipSignHead": "Vu et approuvé par le DG",
   "payrollPayslipDownload": "Télécharger le PDF",
   "payrollPayslipWhatsapp": "Envoyer par WhatsApp",
   "payrollPayslipAll": "Tous les bulletins (PDF)",
@@ -9673,7 +10526,42 @@
   "payrollPayslipNext": "Suivant",
   "payrollPayslipPosition": "{index} / {count}",
   "payrollPayslipNoPhone": "Aucun numéro pour cet agent.",
-  "payrollPayslipWhatsappMessage": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : net {net}, {payment}.",
+  "payrollPayslipWhatsappMessageV2": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : brut {gross} ; retenues {deductions} ; total retenues {total} ; jours prestés {days} ; net {net} ; perçu {paid} ; reste {rest}.",
+  "@payrollPayslipWhatsappMessageV2": {
+    "description": "Message WhatsApp v2 du bulletin.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "school": {
+        "type": "String"
+      },
+      "gross": {
+        "type": "String"
+      },
+      "deductions": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipEmpty": "Aucun agent au livre de ce mois.",
   "payrollHistoryMonths": "Mois tenus",
   "payrollHistoryPaid": "Total net versé",
@@ -9697,6 +10585,36 @@
   "payrollShowAll": "Tout afficher",
   "payrollCurrentMonth": "Mois en cours",
   "payrollNotYetSynced": "La paie n'a pas encore été téléchargée sur cette tablette ; ce qui s'affiche peut être incomplet.",
+  "payrollToastPayoutPolicy": "Taux de versement du mois : {rate} %",
+  "@payrollToastPayoutPolicy": {
+    "description": "Toast après réglage du taux du mois.",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollToastArrearsPrioritized": "Arriéré à solder en priorité",
+  "@payrollToastArrearsPrioritized": {
+    "description": "Toast du drapeau priorité."
+  },
+  "payrollToastArrearsUnprioritized": "Priorité retirée",
+  "@payrollToastArrearsUnprioritized": {
+    "description": "Toast du drapeau priorité."
+  },
+  "payrollToastAdvanceRequested": "Demande de {amount} déposée · en attente de validation",
+  "@payrollToastAdvanceRequested": {
+    "description": "Toast du dépôt d'une demande d'avance.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollAdvanceExpenseTitle": "Avance au personnel",
+  "@payrollAdvanceExpenseTitle": {
+    "description": "Intitulé de la dépense d'une avance (sans nom, T14)."
+  },
   "payrollToastVariables": "Éléments variables enregistrés — {name}",
   "payrollToastSubmitted": "Soumission enregistrée — elle part à la prochaine synchronisation",
   "payrollToastValidated": "Validation enregistrée — la paie sera verrouillée à la confirmation du serveur",
@@ -9707,7 +10625,7 @@
   "payrollToastAdvance": "Avance de {amount} accordée à {name}",
   "payrollToastAdvanceCancelled": "Avance annulée",
   "payrollToastProfile": "Profil de paie enregistré",
-  "payrollToastSettings": "Réglages de paie enregistrés",
+  "payrollToastSettings": "Barème de paie enregistré",
   "payrollToastWriteFailed": "L'écriture a échoué sur la tablette.",
   "payrollToastShared": "Bulletin ouvert dans WhatsApp",
   "payrollToastDownloaded": "Bulletin téléchargé",
@@ -9715,6 +10633,10 @@
   "payrollRuleNotEditable": "La paie n'est plus en brouillon.",
   "payrollRuleWrongPhase": "Ce geste ne part pas de l'état actuel de la paie.",
   "payrollRuleReasonRequired": "Le motif est obligatoire.",
+  "payrollRuleWorkedDaysOutOfRange": "Les jours prestés vont de 0 au nombre de jours du mois.",
+  "@payrollRuleWorkedDaysOutOfRange": {
+    "description": "Refus d'une saisie de NJP hors bornes."
+  },
   "payrollRuleOvertimeNotAllowed": "Un vacataire n'a pas d'heures supplémentaires.",
   "payrollRuleInvalidAmount": "Montant invalide.",
   "payrollRuleInvalidInstallments": "Une avance se rembourse en 1 à 4 mois.",
@@ -9723,7 +10645,19 @@
   "payrollRuleAlreadyDeducted": "Une échéance de cette avance est déjà retenue : elle ne s'annule plus.",
   "payrollRuleNotValidated": "La paie doit être validée par le serveur avant tout versement.",
   "payrollRuleNothingToDisburse": "Rien à verser pour cet agent.",
-  "payrollRuleAlreadyDisbursed": "Ce salaire est déjà versé.",
+  "payrollRuleExceedsBalance": "Ce versement dépasse ce qui reste dû sur ce salaire.",
+  "@payrollRuleExceedsBalance": {
+    "description": "Règle : versement au-delà du reste."
+  },
+  "payrollRuleFollowsExpense": "Cette avance est née d'une dépense : elle se gère dans les Dépenses.",
+  "@payrollRuleFollowsExpense": {
+    "description": "Règle : avance née d'une dépense."
+  },
+  "payrollRuleAdvanceTypeMissing": "Le type de dépense « Avance au personnel » n'est pas encore disponible.",
+  "@payrollRuleAdvanceTypeMissing": {
+    "description": "Règle : type STAFF_ADVANCE absent."
+  },
+  "payrollRuleAlreadyDisbursed": "Ce salaire est déjà entièrement versé.",
   "payrollRuleSignatureRequired": "Faites signer l'état d'émargement.",
   "payrollRuleMobileDetails": "Choisissez l'opérateur et saisissez un numéro complet.",
   "payrollRuleInvalidReference": "La référence compte au moins 6 caractères.",
@@ -9731,6 +10665,7 @@
   "payrollDecrease": "Moins",
   "payrollIncrease": "Plus",
   "payrollToastDownloadFailed": "Le bulletin n'a pas pu être téléchargé.",
+  "payrollToastRenderBusy": "Le serveur compose déjà un long document : réessayez dans un instant.",
   "payrollPayslipFileName": "bulletin-{month}",
   "payrollPayslipsFileName": "bulletins-{month}",
   "payrollPayslipSealed": "Bulletin scellé",
@@ -10869,7 +11804,7 @@
   "hrPresenceMinutes": "{minutes} min",
   "hrPresenceKpiLateSubline": "{minutes} min · ponctualité {punctuality} %",
   "hrPresenceKpiUnjustified": "Absences non justifiées",
-  "hrPresenceKpiUnjustifiedSubline": "signalées sur le bulletin, sans retenue",
+  "hrPresenceKpiUnjustifiedSubline": "signalées sur le bulletin",
   "hrPresenceKpiJustified": "Absences justifiées",
   "hrPresenceKpiJustifiedSubline": "avec un motif",
   "hrPresenceUnscoredTitle": "{count, plural, =1{1 jour-agent non pointé} other{{count} jours-agent non pointés}}",
@@ -10970,5 +11905,150 @@
   "hrPresenceErrorForbidden": "Votre profil ne permet pas de consulter les présences du personnel.",
   "hrPresenceYearRowA11y": "{month} : présence {presence}, retards {late}, absences {absent}",
   "hrPresenceYearOpen": "Voir ce mois",
-  "hrPresenceChartScrollHint": "Faites glisser le graphique pour voir le début de la période"
+  "hrPresenceChartScrollHint": "Faites glisser le graphique pour voir le début de la période",
+  "menuHrPayroll": "RH · Paie",
+  "accueilModuleHrPayrollDescription": "Le livre du mois, les avances et prêts, les arriérés et le barème.",
+  "subMenuPayrollAdvances": "Avances & prêts",
+  "subMenuPayrollSettings": "Configuration",
+  "payrollSettingsErrorRange": "Entre {min} et {max}",
+  "@payrollSettingsErrorRange": {"placeholders": {"min": {"type": "int"}, "max": {"type": "int"}}},
+  "payrollSettingsErrorAmount": "Montant invalide",
+  "payrollSettingsErrorStep": "Au moins un centime",
+  "payrollSettingsInCurrency": "{label} · {currency}",
+  "@payrollSettingsInCurrency": {"placeholders": {"label": {"type": "String"}, "currency": {"type": "String"}}},
+  "payrollSettingsMonthTitle": "Mois de salaire",
+  "payrollSettingsMonthSubtitle": "Heures et jours d'un mois plein ; une journée non prestée = brut ÷ jours.",
+  "payrollSettingsLegalTitle": "Retenues légales",
+  "payrollSettingsLegalSubtitle": "IPR forfaitaire par agent payé, CNSS en ‰ de la base.",
+  "payrollSettingsOvertimeTitle": "Heures supplémentaires",
+  "payrollSettingsOvertimeSubtitle": "Majoration, taux par défaut et pas d'arrondi du taux.",
+  "payrollSettingsAllowanceTitle": "Allocations familiales",
+  "payrollSettingsAllowanceSubtitle": "Montant par enfant et statuts qui y ouvrent droit.",
+  "payrollSettingsStateErrors": "Corrigez les champs en rouge avant d'enregistrer.",
+  "payrollSettingsStateDirty": "{count, plural, =1{Modifications non enregistrées · s'appliqueront à 1 paie en cours} other{Modifications non enregistrées · s'appliqueront à {count} paies en cours}}",
+  "@payrollSettingsStateDirty": {"placeholders": {"count": {"type": "int"}}},
+  "payrollSettingsStateClean": "Barème à jour",
+  "payrollSettingsReset": "Rétablir les valeurs par défaut",
+  "payrollSettingsSave": "Enregistrer le barème",
+  "payrollSettingsDiscardMessage": "Les modifications du barème non enregistrées seront perdues.",
+  "payrollSettingsNotYetSynced": "Le barème n'a pas encore été téléchargé sur cette tablette : les valeurs affichées sont celles par défaut.",
+  "payrollSettingsReadOnly": "Lecture seule — seule la direction modifie le barème.",
+  "payrollAdvanceApprove": "Approuver",
+  "payrollAdvanceRefuse": "Refuser",
+  "payrollAdvanceDisburse": "Décaisser",
+  "payrollAdvanceWaitsDirection": "Attend la direction",
+  "payrollAdvanceWaitsCash": "Attend la caisse",
+  "payrollAdvanceApprovedOn": "approuvée le {date} par {name}",
+  "@payrollAdvanceApprovedOn": {"placeholders": {"date": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvanceRefuseTitle": "Refuser la demande d'avance",
+  "payrollAdvanceRefuseConfirm": "Refuser la demande",
+  "payrollAdvanceRefuseHint": "Le motif est transmis à l'économe ; une nouvelle demande reste possible.",
+  "payrollToastAdvanceApproved": "Demande de {amount} approuvée · {name}",
+  "@payrollToastAdvanceApproved": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollToastAdvanceRefused": "Demande refusée · {name} — motif transmis à l'économe",
+  "@payrollToastAdvanceRefused": {"placeholders": {"name": {"type": "String"}}},
+  "payrollToastAdvanceDisbursed": "Avance de {amount} décaissée à {name}",
+  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvancesToApprove": "Demandes à valider",
+  "payrollAdvancesFilterRefused": "Refusées",
+  "payrollAdvancesRefusedEmpty": "Aucune demande refusée",
+  "payrollAdvanceColDecided": "Tranchée le",
+  "payrollAdvanceColReason": "Motif",
+  "payrollDashNet": "Net à payer",
+  "payrollDashAbsence": "Absences non justifiées",
+  "payrollDashAdvances": "Prêts & avances",
+  "payrollDashLegal": "IPR & CNSS",
+  "payrollDashChildcare": "PC/E",
+  "payrollDashOther": "Autres",
+  "payrollDashForecastTitle": "Prévu et réel du mois",
+  "payrollDashValidatedOn": "Paie validée le {date}",
+  "@payrollDashValidatedOn": {"placeholders": {"date": {"type": "String"}}},
+  "payrollDashDraftSubtitle": "Le réel bouge encore avec le pointage et les variables",
+  "payrollDashPlanned": "Coût prévu",
+  "payrollDashActual": "À payer selon la réalité",
+  "payrollDashLessThanPlanned": "{amount} de moins que prévu (− {percent} %)",
+  "@payrollDashLessThanPlanned": {"placeholders": {"amount": {"type": "String"}, "percent": {"type": "int"}}},
+  "payrollDashArrearsCarried": "+ {arrears} d'arriérés en priorité ce mois : {total} à verser au total",
+  "@payrollDashArrearsCarried": {"placeholders": {"arrears": {"type": "String"}, "total": {"type": "String"}}},
+  "payrollDashPaid": "Payé",
+  "payrollDashDeferred": "Reporté",
+  "payrollDashUnpaid": "Non payé",
+  "payrollDashNotYet": "Pas encore versé",
+  "payrollDashPaidTitle": "Net à payer : payé et non payé",
+  "payrollDashPaidSummary": "Payé à {percent} % · {count, plural, =0{aucun agent soldé} =1{1 agent soldé} other{{count} agents soldés}}",
+  "@payrollDashPaidSummary": {"placeholders": {"percent": {"type": "int"}, "count": {"type": "int"}}},
+  "payrollDashUnpaidSummary": "Partiels : {partial} · Sans versement : {unpaid}",
+  "@payrollDashUnpaidSummary": {"placeholders": {"partial": {"type": "int"}, "unpaid": {"type": "int"}}},
+  "payrollDashNothingBeforeValidation": "Rien n'est versé avant validation.",
+  "payrollDashPrepare": "Préparer la paie",
+  "payrollDashByMonth": "Mois par mois",
+  "payrollDashColumnA11y": "{month} : payé {paid}, reste {rest}",
+  "@payrollDashColumnA11y": {"placeholders": {"month": {"type": "String"}, "paid": {"type": "String"}, "rest": {"type": "String"}}},
+  "payrollDashAdvancesTitle": "Prêts & avances",
+  "payrollDashAdvancesSubtitle": "{count, plural, =1{1 agent rembourse} other{{count} agents remboursent}} · {due} encore dus",
+  "@payrollDashAdvancesSubtitle": {"placeholders": {"count": {"type": "int"}, "due": {"type": "String"}}},
+  "payrollDashManage": "Gérer",
+  "payrollDashFilterOngoing": "En cours",
+  "payrollDashFilterSettled": "Soldés",
+  "payrollDashAdvancesEmpty": "Aucun prêt ni avance en cours",
+  "payrollDashRemainingOf": "reste {remaining} sur {amount}",
+  "@payrollDashRemainingOf": {"placeholders": {"remaining": {"type": "String"}, "amount": {"type": "String"}}},
+  "payrollDashTakenThisMonth": "− {amount} ce mois",
+  "@payrollDashTakenThisMonth": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollDashRepaidA11y": "Remboursé à {percent} %",
+  "@payrollDashRepaidA11y": {"placeholders": {"percent": {"type": "int"}}},
+  "payrollDashArrearsTitle": "Arriérés par salarié",
+  "payrollDashSettle": "Solder dans la paie",
+  "payrollDashArrearsEmpty": "Tous les salaires des paies validées sont versés",
+  "payrollDashPriority": "prioritaire",
+  "payrollDashColPlanned": "Prévu",
+  "payrollDashColDeductions": "Retenues",
+  "payrollDashColNet": "Net du mois",
+  "payrollDashColArrears": "+ Arriérés",
+  "payrollDashColReceived": "Perçu",
+  "payrollDashColRemaining": "Reste",
+  "payrollDashTotal": "Total {currency}",
+  "@payrollDashTotal": {"placeholders": {"currency": {"type": "String"}}},
+  "payrollDashStatusToDisburse": "À verser",
+  "payrollDashStatusSettled": "Soldé",
+  "payrollDashStatusPartial": "Partiel",
+  "payrollDashStatusDue": "À payer",
+  "payrollDashStaffTitle": "Ce que chaque salarié perçoit",
+  "payrollDashPdfFileName": "situation-de-paie-{month}",
+  "@payrollDashPdfFileName": {"placeholders": {"month": {"type": "String"}}},
+  "payrollDashProvisional": "Montants provisoires : la paie n'est pas encore validée",
+  "payrollDashPdf": "PDF",
+  "payrollDashSearchHint": "Rechercher un agent ou une fonction",
+  "payrollDashFilterOutstanding": "Reste à payer",
+  "payrollDashStaffEmpty": "Aucun agent ne correspond",
+  "payrollDashShowAll": "Tout afficher",
+  "payrollDashOpenPayroll": "Ouvrir la paie",
+  "payrollDashNoPayroll": "Aucune paie pour ce mois",
+  "payrollDashCurrentMonth": "Mois en cours",
+  "payrollDashNoStaff": "Aucun agent à payer",
+  "payrollDashNotTracked": "Paie validée avant la v2 : ses versements n'étaient pas saisis, rien ne s'y suit.",
+  "payrollDashMore": "{count, plural, =1{+ 1 autre — voir Avances & prêts} other{+ {count} autres — voir Avances & prêts}}",
+  "@payrollDashMore": {"placeholders": {"count": {"type": "int"}}},
+  "payrollAdvanceRetractedNote": "Retirée par le demandeur",
+  "payrollSettingsErrorLabel": "{max} caractères au plus",
+  "@payrollSettingsErrorLabel": {"placeholders": {"max": {"type": "int"}}},
+  "payrollSettingsAdvancesTitle": "Avances, prêts et PC/E",
+  "payrollSettingsAdvancesSubtitle": "Plafond d'une échéance (avertissement à la demande) et durée d'un prêt.",
+  "payrollSettingsAdvanceMax": "Plafond d'une échéance (% du salaire de base)",
+  "payrollSettingsLoanMax": "Durée maximale d'un prêt (mois)",
+  "payrollSettingsChildcare": "Retenir la PC/E (frais scolaires des enfants du personnel)",
+  "payrollSettingsEmployerTitle": "Charges patronales",
+  "payrollSettingsEmployerSubtitle": "Le coût employeur du tableau de bord ; aucune retenue sur le bulletin.",
+  "payrollSettingsCnssEmployer": "CNSS patronale (‰ du brut)",
+  "payrollSettingsInpp": "INPP (‰ du brut)",
+  "payrollSettingsOnem": "ONEM (‰ du brut)",
+  "payrollSettingsPayslipTitle": "Bulletin de paie",
+  "payrollSettingsPayslipSubtitle": "Les intitulés des trois signatures ; vides, ceux du modèle papier.",
+  "payrollSettingsSignBeneficiary": "Première signature",
+  "payrollSettingsSignDirector": "Deuxième signature",
+  "payrollSettingsSignCashier": "Troisième signature",
+  "payrollAdvanceOverCap": "L'échéance dépasse {percent} % du salaire mensuel : la direction en sera avertie.",
+  "@payrollAdvanceOverCap": {"placeholders": {"percent": {"type": "int"}}},
+  "payrollDashEmployerCost": "+ {amount} de charges employeur",
+  "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}}
 }

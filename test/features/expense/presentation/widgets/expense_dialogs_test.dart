@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
@@ -164,6 +165,48 @@ void main() {
       expect(draft!.amountInCents, 14250);
       expect(draft!.expenseDate, _today);
       expect(draft!.recordedByName, 'Moke Junior');
+    });
+
+    testWidgets('choisir « Avance / prêt au personnel » passe la main à la '
+        'Paie : la modale se ferme sans brouillon', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const advance = ExpenseType(
+        id: 't-adv',
+        code: 'STAFF_ADVANCE',
+        label: 'Avance / prêt au personnel',
+        shortLabel: 'Avance',
+        icon: 'hand-coins',
+        colorHex: '#8A5A12',
+        softColorHex: '#FAF2E2',
+        defaultCurrency: 'USD',
+        sortOrder: 9,
+        active: true,
+      );
+      var bridged = false;
+      ExpenseDraft? draft;
+      await _pumpHost(tester, (context) async {
+        draft = await showExpenseFormDialog(
+          context,
+          seed: ExpenseFormSeed.blank(types: _types, today: _today),
+          types: [..._types, advance],
+          rate: _rate,
+          today: _today,
+          staffAdvanceTypeId: advance.id,
+          onStaffAdvance: () => bridged = true,
+        );
+      });
+
+      tester
+          .widget<EteeloSelectInput<String>>(
+            find.byType(EteeloSelectInput<String>),
+          )
+          .onChanged('t-adv');
+      await tester.pumpAndSettle();
+
+      expect(bridged, isTrue);
+      expect(draft, isNull);
+      expect(find.text('Enregistrer la dépense'), findsNothing);
     });
 
     testWidgets(

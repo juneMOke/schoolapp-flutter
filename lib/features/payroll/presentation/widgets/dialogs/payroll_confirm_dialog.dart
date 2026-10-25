@@ -4,14 +4,19 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_payout_preview.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Confirmer une soumission ou une validation : ce qui part, devise par
-/// devise — agents, masse brute, avances, net. Rend `true` pour confirmer.
+/// devise — agents, masse brute, retenues, avances, net, et en v2 ce qui sera
+/// versé ce mois et ce qui sera inscrit en arriéré. Rend `true` pour
+/// confirmer.
 class PayrollConfirmDialog extends StatelessWidget {
   final PayrollMonthView view;
   final String title;
@@ -48,6 +53,13 @@ class PayrollConfirmDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final warning = this.warning;
+    final lines = view.lines;
+    String sum(int Function(PayrollLine line) of) => PayrollLabels.perCurrency(
+      lines.map((line) => (of(line), line.currency)),
+    ).join(' · ');
+    final fixed = lines.any((line) => line.deductions.totalInCents > 0);
+    final reduced = PayrollPayoutPreview.reducedCount(lines);
+    final rate = view.payoutPolicy?.ratePercent ?? PayrollPayoutPolicy.full;
     void submit() => Navigator.of(context).pop(true);
     return EteeloFormDialog(
       onSubmit: submit,
@@ -61,6 +73,11 @@ class PayrollConfirmDialog extends StatelessWidget {
             l10n.payrollKpiGross,
             _join(view.totals, (t) => t.grossInCents),
           ),
+          if (fixed)
+            _Line(
+              l10n.payrollConfirmFixedDeductions,
+              sum((line) => line.deductions.totalInCents),
+            ),
           _Line(
             l10n.payrollKpiAdvances,
             _join(view.totals, (t) => t.advanceInCents),
@@ -70,6 +87,24 @@ class PayrollConfirmDialog extends StatelessWidget {
             _join(view.totals, (t) => t.netInCents),
             strong: true,
           ),
+          if (reduced > 0) ...[
+            _Line(
+              l10n.payrollConfirmToPay(rate),
+              sum((line) => line.toPayInCents),
+            ),
+            _Line(
+              l10n.payrollConfirmDeferred,
+              sum((line) => line.deferredInCents),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            PayrollTone.submitted.notice(
+              l10n.payrollConfirmDeferredWarning(
+                sum((line) => line.deferredInCents),
+                reduced,
+              ),
+              icon: Icons.hourglass_bottom,
+            ),
+          ],
           if (warning != null) ...[
             const SizedBox(height: AppSpacing.md),
             PayrollTone.submitted.notice(

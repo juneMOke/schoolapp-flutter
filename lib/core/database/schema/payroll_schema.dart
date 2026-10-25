@@ -32,7 +32,18 @@ const TableSchema refPayrollSettingsTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
       sync_error_code TEXT,
-      updated_at INTEGER NOT NULL DEFAULT 0
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      work_days_divisor INTEGER NOT NULL DEFAULT 26,
+      absence_deduction_enabled INTEGER NOT NULL DEFAULT 0,
+      cnss_employer_permille INTEGER,
+      inpp_permille INTEGER,
+      onem_permille INTEGER,
+      advance_max_percent INTEGER,
+      loan_max_months INTEGER,
+      childcare_enabled INTEGER,
+      signature_beneficiary_label TEXT,
+      signature_director_label TEXT,
+      signature_cashier_label TEXT
     )
   ''',
 );
@@ -98,7 +109,8 @@ const TableSchema payrollsTable = TableSchema(
 );
 
 /// `payroll_variables` — les éléments variables d'un agent pour un mois :
-/// minutes d'heures sup., taux horaire imposé, enfants à charge du mois.
+/// minutes d'heures sup., taux horaire imposé, enfants à charge du mois ; en
+/// v2, jours prestés (NJP), prise en charge (PC/E) et montant fixe versé.
 /// Dernier écrit gagne ; écrits seulement sur une paie en brouillon.
 const TableSchema payrollVariablesTable = TableSchema(
   name: 'payroll_variables',
@@ -115,6 +127,10 @@ const TableSchema payrollVariablesTable = TableSchema(
       sync_error TEXT,
       sync_error_code TEXT,
       updated_at INTEGER NOT NULL DEFAULT 0,
+      worked_days INTEGER,
+      childcare_in_cents INTEGER,
+      fixed_payout_in_cents INTEGER,
+      fixed_payout_reason TEXT,
       PRIMARY KEY (school_id, month, staff_member_id)
     )
   ''',
@@ -226,7 +242,8 @@ const TableSchema salaryAdvancesTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
       sync_error_code TEXT,
-      created_at INTEGER NOT NULL DEFAULT 0
+      created_at INTEGER NOT NULL DEFAULT 0,
+      expense_id TEXT
     )
   ''',
   createIndexSql: [
@@ -300,6 +317,49 @@ const TableSchema payrollShareTracesTable = TableSchema(
   ''',
 );
 
+/// `payroll_payout_policies` — le taux de versement d'un mois et son motif
+/// (v2). Dernier écrit gagne ; écrit seulement sur une paie en brouillon.
+/// Absent = 100 %.
+const TableSchema payrollPayoutPoliciesTable = TableSchema(
+  name: 'payroll_payout_policies',
+  createTableSql: '''
+    CREATE TABLE payroll_payout_policies (
+      school_id TEXT NOT NULL,
+      month TEXT NOT NULL,
+      rate_percent INTEGER NOT NULL,
+      reason TEXT,
+      client_updated_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'SYNCED',
+      sync_error TEXT,
+      sync_error_code TEXT,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, month)
+    )
+  ''',
+);
+
+/// `payroll_arrears_priorities` — le drapeau « priorité » d'un arriéré, par
+/// agent et mois d'origine (v2). Dernier écrit gagne ; sans effet sur les
+/// montants.
+const TableSchema payrollArrearsPrioritiesTable = TableSchema(
+  name: 'payroll_arrears_priorities',
+  createTableSql: '''
+    CREATE TABLE payroll_arrears_priorities (
+      school_id TEXT NOT NULL,
+      month TEXT NOT NULL,
+      staff_member_id TEXT NOT NULL,
+      id TEXT NOT NULL,
+      prioritized INTEGER NOT NULL DEFAULT 0,
+      client_updated_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'SYNCED',
+      sync_error TEXT,
+      sync_error_code TEXT,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, month, staff_member_id)
+    )
+  ''',
+);
+
 const List<TableSchema> payrollTables = [
   refPayrollSettingsTable,
   staffPayProfilesTable,
@@ -311,4 +371,6 @@ const List<TableSchema> payrollTables = [
   salaryAdvancesTable,
   payrollDisbursementsTable,
   payrollShareTracesTable,
+  payrollPayoutPoliciesTable,
+  payrollArrearsPrioritiesTable,
 ];

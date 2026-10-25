@@ -5,14 +5,16 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La cellule « Versement » : après validation seulement ; le bouton Verser
-/// pour l'économe, « À verser » en lecture pour la direction, la pastille du
-/// mode une fois versé, « Rien à verser » sur un net nul.
+/// pour l'économe, « À verser » en lecture pour la direction, puis le statut
+/// du règlement (B3) — soldé, partiel et son reste, différé et l'arriéré —,
+/// « Rien à verser » sur un net nul.
 class PayrollPayoutCell extends StatelessWidget {
   final PayrollMonthView view;
   final PayrollLine line;
@@ -33,8 +35,28 @@ class PayrollPayoutCell extends StatelessWidget {
     final muted = AppTypography.bodySmall.copyWith(
       color: AppColors.textMutedAa,
     );
-    final paid = view.disbursements[line.staffMemberId];
-    if (paid != null) {
+    final settlement = view.settlementOf(line);
+    final last = settlement.last;
+    String money(int cents) => PayrollLabels.money(cents, line.currency);
+    final pill = switch (settlement.status) {
+      PayrollSettlementStatus.settled => (
+        PayrollTone.paid,
+        settlement.disbursements.length == 1
+            ? PayrollLabels.mode(l10n, last!.mode)
+            : l10n.payrollSettledCount(settlement.disbursements.length),
+      ),
+      PayrollSettlementStatus.partial => (
+        PayrollTone.submitted,
+        l10n.payrollPartialLeft(money(settlement.remainingInCents)),
+      ),
+      PayrollSettlementStatus.deferred => (
+        PayrollTone.submitted,
+        l10n.payrollDeferredLeft(money(settlement.remainingInCents)),
+      ),
+      _ => null,
+    };
+    if (pill != null && view.canPay) {
+      final (tone, label) = pill;
       return InkWell(
         onTap: onPayout,
         child: Row(
@@ -47,20 +69,20 @@ class PayrollPayoutCell extends StatelessWidget {
                   vertical: AppSpacing.xs / 2,
                 ),
                 decoration: BoxDecoration(
-                  color: PayrollTone.paid.soft,
+                  color: tone.soft,
                   borderRadius: BorderRadius.circular(AppSpacing.md),
                 ),
                 child: Text(
-                  PayrollLabels.mode(l10n, paid.mode),
+                  label,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: PayrollTone.paid.ink,
-                  ),
+                  style: AppTypography.labelSmall.copyWith(color: tone.ink),
                 ),
               ),
             ),
-            const SizedBox(width: AppSpacing.xs),
-            RecordSyncDot(state: paid.syncState),
+            if (last != null) ...[
+              const SizedBox(width: AppSpacing.xs),
+              RecordSyncDot(state: last.syncState),
+            ],
           ],
         ),
       );

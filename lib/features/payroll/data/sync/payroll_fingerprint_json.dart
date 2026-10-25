@@ -11,11 +11,14 @@ abstract final class PayrollFingerprintJson {
         {
           'currency': total.currency,
           'grossInCents': total.grossInCents,
+          'deductionInCents': ?total.deductionInCents,
           'advanceInCents': total.advanceInCents,
           'netInCents': total.netInCents,
+          'toPayInCents': ?total.toPayInCents,
         },
     ],
     'linesDigest': fingerprint.linesDigest,
+    'formulaVersion': fingerprint.formulaVersion,
     if (fingerprint.lines.isNotEmpty)
       'lines': [
         for (final line in fingerprint.lines)
@@ -25,6 +28,13 @@ abstract final class PayrollFingerprintJson {
             'grossInCents': line.grossInCents,
             'advanceInCents': line.advanceInCents,
             'netInCents': line.netInCents,
+            if (line.formulaVersion >= 2) ...{
+              'absenceInCents': line.absenceInCents,
+              'iprInCents': line.iprInCents,
+              'cnssInCents': line.cnssInCents,
+              'childcareInCents': line.childcareInCents,
+              'toPayInCents': line.toPayInCents,
+            },
           },
       ],
   };
@@ -35,8 +45,10 @@ abstract final class PayrollFingerprintJson {
     final totals = raw['totals'];
     if (lineCount == null || totals is! List) return null;
     final lines = raw['lines'];
+    final version = raw.integer('formulaVersion') ?? 1;
     return PayrollFingerprint(
       lineCount: lineCount,
+      formulaVersion: version,
       linesDigest: raw.text('linesDigest') ?? '',
       totals: [
         for (final item in totals)
@@ -45,7 +57,7 @@ abstract final class PayrollFingerprintJson {
       lines: [
         if (lines is List)
           for (final item in lines)
-            if (_line(item) case final PayrollDigestLine line) line,
+            if (_line(item, version) case final PayrollDigestLine line) line,
       ],
     );
   }
@@ -59,10 +71,12 @@ abstract final class PayrollFingerprintJson {
       grossInCents: raw.integer('grossInCents') ?? 0,
       advanceInCents: raw.integer('advanceInCents') ?? 0,
       netInCents: raw.integer('netInCents') ?? 0,
+      deductionInCents: raw.integer('deductionInCents'),
+      toPayInCents: raw.integer('toPayInCents'),
     );
   }
 
-  static PayrollDigestLine? _line(Object? raw) {
+  static PayrollDigestLine? _line(Object? raw, int version) {
     if (raw is! Map) return null;
     final id = raw.text('staffMemberId');
     final currency = raw.text('currency');
@@ -73,6 +87,12 @@ abstract final class PayrollFingerprintJson {
       grossInCents: raw.integer('grossInCents') ?? 0,
       advanceInCents: raw.integer('advanceInCents') ?? 0,
       netInCents: raw.integer('netInCents') ?? 0,
+      formulaVersion: version,
+      absenceInCents: raw.integer('absenceInCents') ?? 0,
+      iprInCents: raw.integer('iprInCents') ?? 0,
+      cnssInCents: raw.integer('cnssInCents') ?? 0,
+      childcareInCents: raw.integer('childcareInCents') ?? 0,
+      toPayInCents: raw.integer('toPayInCents'),
     );
   }
 }

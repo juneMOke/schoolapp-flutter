@@ -123,10 +123,11 @@ abstract final class PayrollPayslipPdf {
         for (final row in content.deductions) _row(row, color: _alert),
         pw.Divider(),
         _row(content.net, bold: true, size: 14),
-        pw.Text(
-          _pdf(content.legalNote),
-          style: _style(size: 8, color: EnrollmentPdfKit.muted),
-        ),
+        if (content.legalNote case final note?)
+          pw.Text(
+            _pdf(note),
+            style: _style(size: 8, color: EnrollmentPdfKit.muted),
+          ),
         pw.SizedBox(height: 10),
         pw.Container(
           padding: const pw.EdgeInsets.all(6),

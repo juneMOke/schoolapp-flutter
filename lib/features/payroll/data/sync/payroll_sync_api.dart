@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/attendance_summary_dto.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/payroll_arrears_priority_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_disbursement_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/salary_advance_dto.dart';
@@ -33,6 +34,25 @@ abstract class PayrollSyncApi {
 
   @POST(AppConstants.syncPayrollVariablesEndpoint)
   Future<dynamic> submitVariables(
+    @Extras() Map<String, dynamic> extras,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @POST(AppConstants.syncPayrollArrearsPrioritiesEndpoint)
+  Future<dynamic> submitArrearsPriority(
+    @Extras() Map<String, dynamic> extras,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @GET(AppConstants.syncPayrollArrearsPrioritiesEndpoint)
+  Future<HttpResponse<PayrollArrearsPriorityPageDto>> pullArrearsPriorities(
+    @Extras() Map<String, dynamic> extras,
+    @Query('cursor') String? cursor,
+    @Query('limit') int? limit,
+  );
+
+  @POST(AppConstants.syncPayrollPayoutPoliciesEndpoint)
+  Future<dynamic> submitPayoutPolicy(
     @Extras() Map<String, dynamic> extras,
     @Body() Map<String, dynamic> body,
   );

@@ -2,6 +2,9 @@ import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
@@ -12,6 +15,11 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
@@ -22,6 +30,11 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_no
 /// à montrer — succès, règle refusée, ou écriture impossible.
 class PayrollCommands {
   final SavePayrollVariablesUseCase _variables;
+  final SavePayrollPayoutPolicyUseCase _payoutPolicy;
+  final PayPayrollArrearsUseCase? _payArrears;
+  final SetPayrollArrearsPriorityUseCase? _priority;
+  final RequestSalaryAdvanceUseCase? _request;
+  final DecideSalaryAdvanceUseCase? _decide;
   final RecordPayrollGestureUseCase _gesture;
   final DisbursePayrollUseCase _disburse;
   final CancelPayrollDisbursementUseCase _cancelDisbursement;
@@ -34,6 +47,11 @@ class PayrollCommands {
 
   const PayrollCommands({
     required SavePayrollVariablesUseCase variables,
+    required SavePayrollPayoutPolicyUseCase payoutPolicy,
+    PayPayrollArrearsUseCase? payArrears,
+    SetPayrollArrearsPriorityUseCase? priority,
+    RequestSalaryAdvanceUseCase? request,
+    DecideSalaryAdvanceUseCase? decide,
     required RecordPayrollGestureUseCase gesture,
     required DisbursePayrollUseCase disburse,
     required CancelPayrollDisbursementUseCase cancelDisbursement,
@@ -44,6 +62,11 @@ class PayrollCommands {
     required RecordPayslipShareUseCase share,
     required FetchPayslipUseCase payslip,
   }) : _variables = variables,
+       _payoutPolicy = payoutPolicy,
+       _payArrears = payArrears,
+       _priority = priority,
+       _request = request,
+       _decide = decide,
        _gesture = gesture,
        _disburse = disburse,
        _cancelDisbursement = cancelDisbursement,
@@ -62,6 +85,62 @@ class PayrollCommands {
     await _variables(view, variables),
     PayrollNotice(PayrollNoticeKind.variablesSaved, name: name),
   );
+
+  Future<PayrollNotice> savePayoutPolicy(
+    PayrollMonthView view,
+    int ratePercent, {
+    String? reason,
+  }) async => _notice(
+    await _payoutPolicy(view, ratePercent, reason: reason),
+    PayrollNotice(PayrollNoticeKind.payoutPolicySaved, amount: '$ratePercent'),
+  );
+
+  /// Verse des arriérés, répartis du mois le plus ancien au plus récent.
+  Future<PayrollNotice> payArrears(
+    PayrollSnapshot snapshot,
+    PayrollArrearsAgent agent, {
+    required String currency,
+    required int amountInCents,
+    required PayrollDisbursementDraft proof,
+    required String name,
+  }) async {
+    final payArrears = _payArrears;
+    if (payArrears == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await payArrears(
+        snapshot,
+        agent,
+        currency: currency,
+        amountInCents: amountInCents,
+        proof: proof,
+      ),
+      PayrollNotice(
+        PayrollNoticeKind.paid,
+        name: name,
+        amount: MoneyFormat.format(Money(amountInCents, currency)),
+      ),
+    );
+  }
+
+  Future<PayrollNotice> setArrearsPriority(
+    PayrollArrear arrear, {
+    required bool prioritized,
+  }) async {
+    final priority = _priority;
+    if (priority == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await priority(arrear, prioritized: prioritized),
+      PayrollNotice(
+        prioritized
+            ? PayrollNoticeKind.arrearsPrioritized
+            : PayrollNoticeKind.arrearsUnprioritized,
+      ),
+    );
+  }
 
   Future<PayrollNotice> gesture(
     PayrollMonthView view,
@@ -105,6 +184,69 @@ class PayrollCommands {
     PayrollNotice(PayrollNoticeKind.advanceGranted, name: name, amount: amount),
   );
 
+  /// Une avance demandée par le circuit des dépenses (B5).
+  Future<PayrollNotice> requestAdvance(
+    PayrollSnapshot snapshot,
+    SalaryAdvanceDraft draft, {
+    required String title,
+    required DateTime today,
+    required String amount,
+    String? recordedByName,
+  }) async {
+    final request = _request;
+    if (request == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await request(
+        snapshot,
+        draft,
+        title: title,
+        today: today,
+        recordedByName: recordedByName,
+      ),
+      PayrollNotice(PayrollNoticeKind.advanceRequested, amount: amount),
+    );
+  }
+
+  /// La demande d'avance telle que la tablette la tient, ou `null`.
+  Future<Expense?> advanceExpense(String expenseId) async =>
+      (await _decide?.requestOf(expenseId))?.fold((_) => null, (e) => e);
+
+  /// Approuver, refuser ou décaisser une demande d'avance (spec §10).
+  Future<PayrollNotice> decideAdvance(
+    Expense expense,
+    ExpenseGesture gesture, {
+    required String name,
+    required String amount,
+    String note = '',
+    String? actorName,
+    ExpenseAdvancePayment? advancePayment,
+  }) async {
+    final decide = _decide;
+    if (decide == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await decide(
+        expense,
+        gesture,
+        note: note,
+        actorName: actorName,
+        advancePayment: advancePayment,
+      ),
+      PayrollNotice(
+        switch (gesture) {
+          ExpenseGesture.refuse => PayrollNoticeKind.advanceRefused,
+          ExpenseGesture.pay => PayrollNoticeKind.advanceDisbursed,
+          _ => PayrollNoticeKind.advanceApproved,
+        },
+        name: name,
+        amount: amount,
+      ),
+    );
+  }
+
   Future<PayrollNotice> cancelAdvance(
     PayrollSnapshot snapshot,
     SalaryAdvance advance,
@@ -137,6 +279,19 @@ class PayrollCommands {
     String month,
     String staffMemberId,
   ) => _payslip(month, staffMemberId);
+
+  Future<Either<Failure, Uint8List>> monthPayslips(String month) =>
+      _payslip.month(month);
+
+  Future<Either<Failure, Uint8List>> statement(String month) =>
+      _payslip.statement(month);
+
+  /// Le PDF du tableau « Ce que chaque salarié perçoit » — en ligne (Q7).
+  Future<Either<Failure, Uint8List>> dashboardPdf(
+    String month, {
+    required String filter,
+    String? query,
+  }) => _payslip.dashboard(month, filter: filter, query: query);
 
   static PayrollNotice _notice(
     Either<Failure, Unit> result,

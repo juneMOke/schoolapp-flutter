@@ -20,6 +20,13 @@ abstract class PayrollRepository {
     PayrollVariables variables,
   );
 
+  /// Le taux de versement de [month] et son motif (v2).
+  Future<Either<Failure, Unit>> savePayoutPolicy(
+    String month,
+    int ratePercent, {
+    String? reason,
+  });
+
   /// Pose un geste du circuit ; [expected] = l'empreinte vue (SUBMIT,
   /// VALIDATE), [reason] = le motif (RETURN, REOPEN).
   Future<Either<Failure, Unit>> recordGesture(
@@ -38,6 +45,19 @@ abstract class PayrollRepository {
   Future<Either<Failure, Unit>> cancelAdvance(String advanceId, String reason);
 
   Future<Either<Failure, Unit>> disburse(PayrollDisbursementDraft draft);
+
+  /// Plusieurs versements d'une seule saisie (arriérés répartis par mois),
+  /// posés dans l'ordre ; s'arrête au premier refus.
+  Future<Either<Failure, Unit>> disburseAll(
+    List<PayrollDisbursementDraft> drafts,
+  );
+
+  /// Le drapeau « priorité » d'un arriéré (T9).
+  Future<Either<Failure, Unit>> setArrearsPriority({
+    required String staffMemberId,
+    required String month,
+    required bool prioritized,
+  });
 
   Future<Either<Failure, Unit>> cancelDisbursement(
     PayrollDisbursement disbursement,

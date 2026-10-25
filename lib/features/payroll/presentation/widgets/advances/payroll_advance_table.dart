@@ -75,6 +75,8 @@ class PayrollAdvanceTable extends StatelessWidget {
     final cancellable =
         onCancel != null &&
         advance.isLive &&
+        // Née d'une dépense, l'avance suit sa dépense (B5).
+        advance.expenseId == null &&
         !PayrollAdvanceRules.hasFrozenDeduction(snapshot, advance);
     return EteeloColumnTableRow(
       widths: _widths,

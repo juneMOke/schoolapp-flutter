@@ -10,15 +10,18 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/attendance_summary_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/salary_advance_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/staff_pay_profile_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/repositories/payroll_disbursement_regularizer.dart';
 import 'package:school_app_flutter/features/payroll/data/repositories/payroll_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/payroll_arrears_priority_outbox_handler.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellation_outbox_handler.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_fact_outbox_handlers.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_gesture_outbox_handler.dart';
@@ -49,6 +52,7 @@ void _registerPulls(GetIt getIt) {
       disbursements: getIt<PayrollDisbursementDao>(),
       currentUser: getIt<CurrentUserContext>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      priorities: getIt<PayrollArrearsPriorityDao>(),
       regularizer: PayrollDisbursementRegularizer(
         payrolls: getIt<PayrollDao>(),
         disbursements: getIt<PayrollDisbursementDao>(),
@@ -80,6 +84,13 @@ void _registerPulls(GetIt getIt) {
         kPayrollDisbursementsResource,
         read,
         pulls.syncDisbursements,
+      ),
+    )
+    ..registerHandler(
+      StaffPullHandler.of(
+        kPayrollArrearsPrioritiesResource,
+        read,
+        pulls.syncArrearsPriorities,
       ),
     );
 }
@@ -121,6 +132,25 @@ void _registerPushes(GetIt getIt) {
         currentUser: currentUser,
         extras: extras,
         members: members,
+      ),
+    )
+    ..registerHandler(
+      PayrollArrearsPriorityOutboxHandler(
+        api: api,
+        dao: getIt<PayrollArrearsPriorityDao>(),
+        outbox: outbox,
+        currentUser: currentUser,
+        extras: extras,
+        members: members,
+      ),
+    )
+    ..registerHandler(
+      PayrollPayoutPolicyOutboxHandler(
+        api: api,
+        dao: getIt<PayrollPayoutPolicyDao>(),
+        outbox: outbox,
+        currentUser: currentUser,
+        extras: extras,
       ),
     )
     ..registerHandler(

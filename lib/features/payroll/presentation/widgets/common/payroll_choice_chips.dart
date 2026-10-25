@@ -12,6 +12,9 @@ class PayrollChoiceChips<T> extends StatelessWidget {
   final ValueChanged<T>? onSelected;
   final IconData? Function(T value)? icon;
 
+  /// Le compteur d'une puce de filtre, ou `null`.
+  final int? Function(T value)? count;
+
   const PayrollChoiceChips({
     super.key,
     required this.values,
@@ -19,6 +22,7 @@ class PayrollChoiceChips<T> extends StatelessWidget {
     required this.label,
     required this.onSelected,
     this.icon,
+    this.count,
   });
 
   @override
@@ -30,6 +34,7 @@ class PayrollChoiceChips<T> extends StatelessWidget {
         EteeloFilterChip(
           label: label(value),
           icon: icon?.call(value),
+          count: count?.call(value),
           selected: value == selected,
           color: AppColors.payrollValidated,
           soft: AppColors.payrollValidatedSoft,

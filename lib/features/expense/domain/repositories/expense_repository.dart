@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
@@ -13,6 +14,10 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_regi
 /// Un `Left` ne signale donc qu'une panne du poste lui-même (base, session).
 abstract class ExpenseRepository {
   Future<Either<Failure, ExpenseRegisterSnapshot>> loadRegister();
+
+  /// La demande telle que la tablette la tient, ou `null` si elle n'y est
+  /// plus (purgée, ou d'une autre école).
+  Future<Either<Failure, Expense?>> find(String expenseId);
 
   /// Crée, modifie ou duplique ; rend la dépense telle qu'elle est rangée.
   Future<Either<Failure, Expense>> save(ExpenseDraft draft);
@@ -37,10 +42,14 @@ abstract class ExpenseRepository {
   ///
   /// La demande passée sert à décider quoi offrir ; le dépôt **relit** la
   /// ligne avant d'écrire, et refuse le geste si l'état a changé entre-temps.
+  ///
+  /// [advancePayment] : exigé pour payer une avance au personnel (T13),
+  /// ignoré ailleurs.
   Future<Either<Failure, Unit>> applyGesture(
     Expense expense,
     ExpenseGesture gesture, {
     String note = '',
     String? actorName,
+    ExpenseAdvancePayment? advancePayment,
   });
 }

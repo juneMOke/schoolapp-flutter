@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_adva
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_contract_picker.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_deductions.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_math.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
@@ -30,6 +31,12 @@ class PayrollEngineInput {
   /// (`PayrollAdvanceSchedule.statesOf`).
   final Map<String, List<PayrollAdvanceState>> advances;
 
+  /// Le taux de versement du mois, en % — 100 tant que l'école verse tout.
+  final int payoutRatePercent;
+
+  /// Le motif du taux du mois, figé sur les lignes qu'il réduit.
+  final String? payoutReason;
+
   const PayrollEngineInput({
     required this.month,
     required this.settings,
@@ -38,6 +45,8 @@ class PayrollEngineInput {
     this.profiles = const {},
     this.attendance,
     this.advances = const {},
+    this.payoutRatePercent = 100,
+    this.payoutReason,
   });
 }
 
@@ -64,7 +73,10 @@ class PayrollComputation {
 ///         × pas : défaut[devise])
 /// hs      roundDiv(minutes_sup × tauxHS, 60)          (0 pour un vacataire)
 /// alloc   enfants × allocation[devise]                (statuts éligibles)
-/// net     brut − retenues d'avance                    (jamais négatif)
+/// fixes   absence, IPR/CNSS, PC/E                     (PayrollDeductions)
+/// avances prises sur brut − fixes
+/// net     brut − fixes − retenues d'avance            (jamais négatif)
+/// verser  montant fixe ?? net × taux du mois          (le reste : arriéré)
 /// ```
 abstract final class PayrollEngine {
   static PayrollComputation compute(PayrollEngineInput input) {
@@ -130,13 +142,23 @@ abstract final class PayrollEngine {
         : 0;
 
     final gross = base + overtime + allowance;
+    final deductions = PayrollDeductions.compute(
+      hourly: hourly,
+      baseInCents: base,
+      grossInCents: gross,
+      settings: settings,
+      perCurrency: perCurrency,
+      variables: variables,
+      attendance: input.attendance == null ? null : summary,
+    );
     final advances = PayrollAdvanceSchedule.deduct(
       month: input.month,
       currency: currency,
-      grossInCents: gross,
+      grossInCents: gross - deductions.totalInCents,
       states: input.advances[memberId] ?? const [],
     );
     final taken = advances.fold(0, (sum, a) => sum + a.takenInCents);
+    final net = gross - deductions.totalInCents - taken;
 
     return PayrollLine(
       month: input.month,
@@ -157,7 +179,15 @@ abstract final class PayrollEngine {
       allowanceInCents: allowance,
       grossInCents: gross,
       advances: advances,
-      netInCents: gross - taken,
+      netInCents: net,
+      deductions: deductions,
+      payout: PayrollDeductions.payout(
+        netInCents: net,
+        ratePercent: input.payoutRatePercent,
+        fixedInCents: variables?.fixedPayoutInCents,
+        rateReason: input.payoutReason,
+        fixedReason: variables?.fixedPayoutReason,
+      ),
       attendanceMonth: hoursMonth,
       attendance: summary,
     );

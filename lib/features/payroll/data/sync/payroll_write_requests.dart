@@ -2,6 +2,7 @@ import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_fingerprint_json.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 // Les remontées de la paie qui ne sont pas des faits : réglages, éléments
@@ -47,6 +48,10 @@ class PayrollVariablesRequestDto {
   final int? overtimeMinutes;
   final int? overtimeRateInCents;
   final int? dependentChildren;
+  final int? workedDays;
+  final int? childcareInCents;
+  final int? fixedPayoutInCents;
+  final String? fixedPayoutReason;
   final String clientUpdatedAt;
   final String authorId;
 
@@ -58,7 +63,15 @@ class PayrollVariablesRequestDto {
     this.overtimeMinutes,
     this.overtimeRateInCents,
     this.dependentChildren,
+    this.workedDays,
+    this.childcareInCents,
+    this.fixedPayoutInCents,
+    this.fixedPayoutReason,
   });
+
+  /// La formule que la tablette calcule : jours prestés, PC/E et montant
+  /// fixe ne s'écrivent qu'en v2.
+  static const int formulaVersion = PayrollLine.currentFormula;
 
   Map<String, dynamic> toJson() => {
     'variables': {
@@ -67,6 +80,12 @@ class PayrollVariablesRequestDto {
       'overtimeMinutes': overtimeMinutes,
       'overtimeRateInCents': overtimeRateInCents,
       'dependentChildren': dependentChildren,
+      'daysWorked': workedDays,
+      'childcareInCents': childcareInCents,
+      'fixedPayoutInCents': fixedPayoutInCents,
+      'fixedPayoutReason': fixedPayoutReason,
+      // Sans lui, le serveur ignore les trois champs v2 et garde les siens.
+      'formulaVersion': formulaVersion,
       'clientUpdatedAt': clientUpdatedAt,
     },
     kOutboxAuthorIdKey: authorId,
@@ -91,6 +110,10 @@ class PayrollVariablesRequestDto {
       overtimeMinutes: inner.integer('overtimeMinutes'),
       overtimeRateInCents: inner.integer('overtimeRateInCents'),
       dependentChildren: inner.integer('dependentChildren'),
+      workedDays: inner.integer('daysWorked'),
+      childcareInCents: inner.integer('childcareInCents'),
+      fixedPayoutInCents: inner.integer('fixedPayoutInCents'),
+      fixedPayoutReason: inner.text('fixedPayoutReason'),
     );
   }
 }
@@ -153,6 +176,54 @@ class PayrollGestureRequestDto {
       reason: inner.text('reason'),
       expected: PayrollFingerprintJson.tryParse(inner['expected']),
       clientRecordedAt: at,
+      authorId: author,
+    );
+  }
+}
+
+/// `POST /sync/payroll-payouts` — le taux de versement d'un mois et son
+/// motif, dernier écrit gagne, brouillon seulement (v2).
+class PayrollPayoutPolicyRequestDto {
+  final String month;
+  final int ratePercent;
+  final String? reason;
+  final String clientUpdatedAt;
+  final String authorId;
+
+  const PayrollPayoutPolicyRequestDto({
+    required this.month,
+    required this.ratePercent,
+    required this.clientUpdatedAt,
+    required this.authorId,
+    this.reason,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'payout': {
+      'month': month,
+      'percent': ratePercent,
+      'reason': reason,
+      'clientUpdatedAt': clientUpdatedAt,
+    },
+    kOutboxAuthorIdKey: authorId,
+  };
+
+  static PayrollPayoutPolicyRequestDto? tryParse(Object? raw) {
+    if (raw is! Map) return null;
+    final inner = raw['payout'];
+    if (inner is! Map) return null;
+    final month = inner.yearMonth('month');
+    final rate = inner.integer('percent');
+    final at = inner.instant('clientUpdatedAt');
+    final author = raw.text(kOutboxAuthorIdKey);
+    if (month == null || rate == null || at == null || author == null) {
+      return null;
+    }
+    return PayrollPayoutPolicyRequestDto(
+      month: month,
+      ratePercent: rate,
+      reason: inner.text('reason'),
+      clientUpdatedAt: at,
       authorId: author,
     );
   }

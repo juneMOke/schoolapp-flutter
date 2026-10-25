@@ -43,6 +43,9 @@ class CancelSalaryAdvanceUseCase {
       return Left(PayrollRuleFailure(PayrollRule.reasonRequired));
     }
     if (advance.isCancelled) return const Right(unit);
+    if (advance.expenseId != null) {
+      return Left(PayrollRuleFailure(PayrollRule.followsExpense));
+    }
     if (PayrollAdvanceRules.hasFrozenDeduction(snapshot, advance)) {
       return Left(PayrollRuleFailure(PayrollRule.alreadyDeducted));
     }
@@ -50,7 +53,8 @@ class CancelSalaryAdvanceUseCase {
   }
 }
 
-/// Verse le net figé d'un agent. Le montant n'est jamais une saisie.
+/// Verse tout ou partie de ce qui reste dû sur un salaire validé (B3) : le
+/// montant est saisi, jamais au-delà du reste.
 class DisbursePayrollUseCase {
   final PayrollRepository _repository;
 
@@ -80,12 +84,15 @@ class DisbursePayrollUseCase {
     if (line == null || line.netInCents <= 0) {
       return PayrollRule.nothingToDisburse;
     }
-    if (view.disbursements.containsKey(draft.staffMemberId)) {
-      return PayrollRule.alreadyDisbursed;
-    }
-    if (draft.amount.amountInCents != line.netInCents ||
+    // B3 : plusieurs versements, montant saisi, 0 < montant ≤ reste.
+    final settlement = view.settlementOf(line);
+    if (settlement.remainingInCents <= 0) return PayrollRule.alreadyDisbursed;
+    if (draft.amount.amountInCents <= 0 ||
         draft.amount.currency != line.currency) {
       return PayrollRule.invalidAmount;
+    }
+    if (draft.amount.amountInCents > settlement.remainingInCents) {
+      return PayrollRule.exceedsBalance;
     }
     final reference = draft.reference?.trim() ?? '';
     return switch (draft.mode) {

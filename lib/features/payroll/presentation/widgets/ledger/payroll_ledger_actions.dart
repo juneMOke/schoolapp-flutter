@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
@@ -15,6 +18,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_pay_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_reason_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_stale_dialog.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_payout_policy_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_variables_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -45,6 +49,9 @@ class PayrollLedgerActions {
         name: nameOf(line.staffMemberId),
         line: line,
         settings: state.snapshot.settings,
+        monthRate:
+            state.snapshot.payoutPolicies[month]?.ratePercent ??
+            PayrollPayoutPolicy.full,
         current:
             state.snapshot.variables[month]?[line.staffMemberId] ??
             PayrollVariables(staffMemberId: line.staffMemberId),
@@ -59,6 +66,27 @@ class PayrollLedgerActions {
         result,
         name: nameOf(line.staffMemberId),
       ),
+    );
+  }
+
+  /// Le taux de versement du mois (v2).
+  Future<void> editPayoutPolicy() async {
+    final view = _state.view;
+    if (view == null) return;
+    final policy = view.payoutPolicy;
+    final result = await PayrollPayoutPolicyDialog.show(
+      context,
+      PayrollPayoutPolicyDialog(
+        monthLabel: _monthLabel,
+        lines: view.lines,
+        rate: policy?.ratePercent ?? PayrollPayoutPolicy.full,
+        reason: policy?.reason,
+      ),
+    );
+    if (result == null || !context.mounted) return;
+    await _cubit.perform(
+      (commands) =>
+          commands.savePayoutPolicy(view, result.rate, reason: result.reason),
     );
   }
 
@@ -142,47 +170,38 @@ class PayrollLedgerActions {
     if (sync && context.mounted) await _cubit.syncAndRefresh();
   }
 
-  /// Verser, ou consulter le versement déjà fait.
+  /// Le règlement d'un salaire : verser (un acompte, le reste), consulter les
+  /// versements reçus, annuler le dernier.
   Future<void> openPayout(PayrollLine line, {required bool canWrite}) async {
     final view = _state.view;
     if (view == null) return;
-    final existing = view.disbursements[line.staffMemberId];
     final name = nameOf(line.staffMemberId);
-    if (existing != null) {
-      final cancel = await PayrollDisbursementDialog.show(
-        context,
-        PayrollDisbursementDialog(
-          name: name,
-          disbursement: existing,
-          canCancel: canWrite,
-        ),
-      );
-      if (!cancel || !context.mounted) return;
-      final reason = await PayrollReasonDialog.show(
-        context,
-        title: _l10n.payrollPayCancel,
-        confirmLabel: _l10n.payrollPayCancel,
-        destructive: true,
-      );
-      if (reason == null || !context.mounted) return;
-      await _cubit.perform(
-        (commands) => commands.cancelDisbursement(existing, reason),
-      );
-      return;
-    }
-    if (!canWrite) return;
-    final draft = await PayrollPayDialog.show(
+    final outcome = await PayrollPayDialog.show(
       context,
       PayrollPayDialog(
         name: name,
         view: view,
         line: line,
+        canWrite: canWrite,
         profile:
             _state.snapshot.profiles[line.staffMemberId] ??
             StaffPayProfile.empty(line.staffMemberId),
       ),
     );
-    if (draft == null || !context.mounted) return;
+    if (outcome == null || !context.mounted) return;
+    final opened = outcome.open;
+    if (opened != null) {
+      await _openDisbursement(
+        view,
+        line,
+        opened,
+        name: name,
+        canWrite: canWrite,
+      );
+      return;
+    }
+    final draft = outcome.draft;
+    if (draft == null) return;
     // Le livre a pu changer pendant la saisie (un pull, un autre poste) :
     // le geste se juge sur le livre du moment, pas sur celui de l'ouverture.
     final fresh = _state.view ?? view;
@@ -193,6 +212,37 @@ class PayrollLedgerActions {
         name: name,
         amount: MoneyFormat.format(draft.amount),
       ),
+    );
+  }
+
+  /// Un versement reçu : son détail ; seul le dernier s'annule, pour que les
+  /// versements restent dans l'ordre où l'argent est sorti.
+  Future<void> _openDisbursement(
+    PayrollMonthView view,
+    PayrollLine line,
+    PayrollDisbursement disbursement, {
+    required String name,
+    required bool canWrite,
+  }) async {
+    final last = view.settlementOf(line).last;
+    final cancel = await PayrollDisbursementDialog.show(
+      context,
+      PayrollDisbursementDialog(
+        name: name,
+        disbursement: disbursement,
+        canCancel: canWrite && last?.id == disbursement.id,
+      ),
+    );
+    if (!cancel || !context.mounted) return;
+    final reason = await PayrollReasonDialog.show(
+      context,
+      title: _l10n.payrollPayCancel,
+      confirmLabel: _l10n.payrollPayCancel,
+      destructive: true,
+    );
+    if (reason == null || !context.mounted) return;
+    await _cubit.perform(
+      (commands) => commands.cancelDisbursement(disbursement, reason),
     );
   }
 }

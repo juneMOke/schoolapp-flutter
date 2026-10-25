@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_cancellation.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -41,6 +42,8 @@ SalaryAdvance advance(
   String firstMonth = '2026-10',
   String grantedOn = '2026-10-05',
   RecordSyncState syncState = RecordSyncState.synced,
+  String? expenseId,
+  PayrollCancellation? cancellation,
 }) => SalaryAdvance(
   id: id,
   staffMemberId: memberId,
@@ -51,6 +54,8 @@ SalaryAdvance advance(
   mode: PayoutMode.cash,
   grantedOn: grantedOn,
   syncState: syncState,
+  expenseId: expenseId,
+  cancellation: cancellation,
 );
 
 /// Une ligne figée d'un mois validé, portant la retenue [taken] de [advanceId].

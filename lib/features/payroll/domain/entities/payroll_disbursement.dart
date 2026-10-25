@@ -5,7 +5,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_canc
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
-/// Un salaire versé. Le montant est le net figé ; [validationGestureId] nomme
+/// Un versement sur un salaire validé — un acompte ou le solde, borné par le
+/// reste dû (B3) ; [validationGestureId] nomme
 /// la validation sous laquelle l'argent est sorti.
 class PayrollDisbursement extends Equatable {
   final String id;

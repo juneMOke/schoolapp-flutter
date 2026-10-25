@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/expense/data/local/expense_local_mod
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 
 /// Passages entre couches, rangés à part pour garder les modèles plats.
@@ -37,6 +38,7 @@ extension ExpenseLocalModelX on ExpenseLocalModel {
     supplier: supplier,
     fundingSource: fundingSource,
     clientUpdatedAt: clientUpdatedAt,
+    staffAdvance: ExpenseStaffAdvance.tryParse(staffAdvance)?.toWireJson(),
   );
 }
 
@@ -52,6 +54,7 @@ extension ExpenseToDraftX on Expense {
     currency: currency,
     expenseDate: expenseDate,
     supplier: supplier,
+    staffAdvance: staffAdvance,
     fundingSource: fundingSource,
     recordedByName: recordedByName,
   );

@@ -7,6 +7,10 @@ class PayrollVariablesDto {
   final int? overtimeMinutes;
   final int? overtimeRateInCents;
   final int? dependentChildren;
+  final int? workedDays;
+  final int? childcareInCents;
+  final int? fixedPayoutInCents;
+  final String? fixedPayoutReason;
   final String clientUpdatedAt;
 
   const PayrollVariablesDto({
@@ -15,6 +19,10 @@ class PayrollVariablesDto {
     this.overtimeMinutes,
     this.overtimeRateInCents,
     this.dependentChildren,
+    this.workedDays,
+    this.childcareInCents,
+    this.fixedPayoutInCents,
+    this.fixedPayoutReason,
   });
 
   static PayrollVariablesDto? tryParse(Object? raw) {
@@ -28,8 +36,43 @@ class PayrollVariablesDto {
       overtimeMinutes: raw.integer('overtimeMinutes'),
       overtimeRateInCents: raw.integer('overtimeRateInCents'),
       dependentChildren: raw.integer('dependentChildren'),
+      workedDays: raw.integer('daysWorked'),
+      childcareInCents: raw.integer('childcareInCents'),
+      fixedPayoutInCents: raw.integer('fixedPayoutInCents'),
+      fixedPayoutReason: raw.text('fixedPayoutReason'),
     );
   }
+}
+
+/// Le taux de versement du mois, tel qu'il descend avec la paie (v2).
+class PayrollPayoutPolicyDto {
+  final int ratePercent;
+  final String? reason;
+  final String clientUpdatedAt;
+
+  const PayrollPayoutPolicyDto({
+    required this.ratePercent,
+    required this.clientUpdatedAt,
+    this.reason,
+  });
+
+  /// Lu à plat sur la paie (`payoutPercent`, `payoutReason`,
+  /// `payoutClientUpdatedAt`). `null` hors bornes — un taux qu'on ne sait
+  /// pas lire ne s'applique pas — et pour le 100 % jamais posé.
+  static PayrollPayoutPolicyDto? tryParse(Map<dynamic, dynamic> payroll) {
+    final rate = payroll.integer('payoutPercent');
+    final at = payroll.instant('payoutClientUpdatedAt');
+    if (rate == null || rate < 0 || rate > 100) return null;
+    if (at == null && rate == 100) return null;
+    return PayrollPayoutPolicyDto(
+      ratePercent: rate,
+      // Sans horloge, le taux du serveur cède à toute saisie locale.
+      clientUpdatedAt: at ?? _epoch,
+      reason: payroll.text('payoutReason'),
+    );
+  }
+
+  static const String _epoch = '1970-01-01T00:00:00.000Z';
 }
 
 /// Un geste du circuit, tel que le serveur l'a enregistré.
@@ -80,6 +123,9 @@ class PayrollDto {
   final List<PayrollVariablesDto> variables;
   final List<PayrollGestureDto> gestures;
 
+  /// `null` : 100 % jamais réglé, ou une paie v1.
+  final PayrollPayoutPolicyDto? payoutPolicy;
+
   /// Liste vide hors `VALIDATED` ; `null` si le champ manque (ne rien
   /// effacer d'une paie validée).
   final List<Map<dynamic, dynamic>>? lines;
@@ -97,6 +143,7 @@ class PayrollDto {
     this.validationGestureId,
     this.variables = const [],
     this.gestures = const [],
+    this.payoutPolicy,
     this.lines,
     this.serverUpdatedAt,
   });
@@ -130,6 +177,7 @@ class PayrollDto {
         if (gestures is List)
           for (final item in gestures) ?PayrollGestureDto.tryParse(item),
       ],
+      payoutPolicy: PayrollPayoutPolicyDto.tryParse(raw),
       lines: lines is List
           ? [
               for (final l in lines)

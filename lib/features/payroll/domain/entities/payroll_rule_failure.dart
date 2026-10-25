@@ -16,6 +16,10 @@ enum PayrollRule {
 
   /// Un vacataire n'a pas d'heures supplémentaires.
   overtimeNotAllowed,
+
+  /// Jours prestés hors de `[0, diviseur]`, ou saisis pour un vacataire à
+  /// l'heure.
+  workedDaysOutOfRange,
   invalidAmount,
   invalidInstallments,
 
@@ -27,9 +31,18 @@ enum PayrollRule {
 
   /// Une retenue de cette avance est déjà figée.
   alreadyDeducted,
+
+  /// L'avance est née d'une dépense : elle se gère dans les Dépenses (B5).
+  followsExpense,
+
+  /// Le type « Avance au personnel » n'est pas encore semé (T12).
+  advanceTypeMissing,
   notValidated,
   nothingToDisburse,
   alreadyDisbursed,
+
+  /// Le versement dépasse ce qui reste dû sur ce salaire (B3, T7).
+  exceedsBalance,
   signatureRequired,
   mobileDetailsRequired,
   invalidReference,
@@ -83,11 +96,16 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'REASON_REQUIRED' => PayrollRule.reasonRequired,
   'PAYROLL_NOT_DRAFT' => PayrollRule.notEditable,
   'OVERTIME_NOT_ALLOWED' => PayrollRule.overtimeNotAllowed,
+  'INVALID_DAYS_WORKED' => PayrollRule.workedDaysOutOfRange,
   'STAFF_NOT_ON_PAYROLL' => PayrollRule.noContract,
   'ADVANCE_MONTH_LOCKED' => PayrollRule.monthLocked,
-  'ADVANCE_CURRENCY_MISMATCH' || 'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,
+  'ADVANCE_CURRENCY_MISMATCH' ||
+  'DISBURSEMENT_CURRENCY_MISMATCH' ||
+  'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,
   'ADVANCE_ALREADY_DEDUCTED' => PayrollRule.alreadyDeducted,
+  'ADVANCE_FROM_EXPENSE' => PayrollRule.followsExpense,
   'ALREADY_DISBURSED' => PayrollRule.alreadyDisbursed,
+  'DISBURSEMENT_EXCEEDS_BALANCE' => PayrollRule.exceedsBalance,
   'NOTHING_TO_DISBURSE' => PayrollRule.nothingToDisburse,
   'SIGNATURE_REQUIRED' => PayrollRule.signatureRequired,
   'PAYROLL_NOT_VALIDATED' => PayrollRule.notValidated,
@@ -101,7 +119,8 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'INVALID_ADVANCE' ||
   'INVALID_DISBURSEMENT' ||
   'INVALID_PAY_PROFILE' ||
-  'INVALID_PAYROLL_SETTINGS' => PayrollRule.invalidData,
+  'INVALID_PAYROLL_SETTINGS' ||
+  'INVALID_PAYOUT' => PayrollRule.invalidData,
   final code? when code.endsWith('_ID_CONFLICT') => PayrollRule.invalidData,
   _ => null,
 };

@@ -21,14 +21,18 @@ import 'package:school_app_flutter/features/expense/data/local/expense_write_dao
 import 'package:school_app_flutter/features/expense/data/mappers/expense_mappers.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_payload.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
+import 'package:school_app_flutter/features/expense/data/repositories/expense_advance_rules.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_gesture_policy.dart';
 
@@ -50,6 +54,10 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   /// un harnais sans moteur.
   final SyncEngine? _syncEngine;
 
+  /// La Paie, qui sait si une avance a déjà une retenue ; absente (tests),
+  /// aucune réouverture n'est retenue.
+  final ExpenseAdvanceGuard? _advanceGuard;
+
   /// Jour de rentrée de l'année courante (référentiel), ou `null`.
   final Future<DateTime?> Function() _schoolYearStart;
   final DateTime Function() _now;
@@ -64,8 +72,10 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     required ExchangeRateReader rates,
     required Future<DateTime?> Function() schoolYearStart,
     SyncEngine? syncEngine,
+    ExpenseAdvanceGuard? advanceGuard,
     DateTime Function() now = DateTime.now,
   }) : _reader = reader,
+       _advanceGuard = advanceGuard,
        _writer = writer,
        _types = types,
        _messages = messages,
@@ -106,6 +116,18 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
+  Future<Either<Failure, Expense?>> find(String expenseId) async {
+    final schoolId = _currentUser.schoolId ?? '';
+    if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
+    try {
+      final row = await _reader.find(expenseId);
+      return Right(row?.schoolId == schoolId ? row?.toEntity() : null);
+    } catch (e) {
+      return Left(StorageFailure('Dépense illisible : $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<ExpenseMessage>>> thread(String expenseId) async {
     final schoolId = _currentUser.schoolId ?? '';
     if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
@@ -119,12 +141,22 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     }
   }
 
+  Future<bool> _isStaffAdvanceType(String schoolId, Expense expense) async {
+    final types = await _types.typesForSchool(schoolId);
+    return types.any(
+      (type) =>
+          type.id == expense.typeId &&
+          type.code == ExpenseStaffAdvance.typeCode,
+    );
+  }
+
   @override
   Future<Either<Failure, Unit>> applyGesture(
     Expense expense,
     ExpenseGesture gesture, {
     String note = '',
     String? actorName,
+    ExpenseAdvancePayment? advancePayment,
   }) async {
     final schoolId = _currentUser.schoolId ?? '';
     if (schoolId.isEmpty) return const Left(StorageFailure('Aucune école'));
@@ -149,6 +181,43 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       if (!ExpenseGesturePolicy.allows(gesture, current, accountId: actorId)) {
         return const Left(_staleGesture);
       }
+      final staffAdvance = current.staffAdvance;
+      // Une avance caviardée (sans `hr.pay.read`) arrive sans son bloc : c'est
+      // son type qui la nomme, et sa caisse doit tout de même porter le mois
+      // et la preuve.
+      final isAdvance =
+          staffAdvance != null || await _isStaffAdvanceType(schoolId, current);
+      final advance = gesture == ExpenseGesture.pay && isAdvance
+          ? advancePayment
+          : null;
+      if (gesture == ExpenseGesture.pay && isAdvance) {
+        if (advance == null ||
+            !ExpenseAdvanceRules.proves(advance, current.fundingSource)) {
+          return const Left(ExpenseAdvanceRules.proofRequired);
+        }
+        // La paie choisie a pu se fermer depuis l'ouverture de la modale
+        // (un autre poste a soumis) : la retenue tomberait sur un mois figé.
+        if (!(await _advanceGuard?.acceptsFirstMonth(advance.firstMonth) ??
+            true)) {
+          return const Left(ExpenseAdvanceRules.monthClosed);
+        }
+      }
+      // Le serveur ne consulte la Paie qu'à la réouverture d'une avance
+      // payée : avant, aucune avance n'est née.
+      if (gesture == ExpenseGesture.reopen &&
+          isAdvance &&
+          current.status == ExpenseStatus.paid) {
+        if (await _advanceGuard?.isDeducted(current.id) ?? false) {
+          return const Left(ExpenseAdvanceRules.deducted);
+        }
+        if (await _advanceGuard?.isMonthLocked(
+              current.id,
+              firstMonth: staffAdvance?.firstMonth,
+            ) ??
+            false) {
+          return const Left(ExpenseAdvanceRules.monthLocked);
+        }
+      }
       final now = _now();
       final messageId = _ids.newId();
       await _messages.appendGesture(
@@ -162,13 +231,21 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
           authorId: actorId,
           authorName: actorName,
         ),
-        columns: ExpenseGestureColumns.of(
-          gesture,
-          actorId: actorId,
-          actorName: actorName,
-          at: now,
-          reason: body,
-        ),
+        columns: {
+          ...ExpenseGestureColumns.of(
+            gesture,
+            actorId: actorId,
+            actorName: actorName,
+            at: now,
+            reason: body,
+          ),
+          // La première retenue est connue de la tablette dès le paiement :
+          // la Paie projette l'avance sans attendre l'accusé.
+          if (advance != null && staffAdvance != null)
+            'staff_advance': staffAdvance
+                .withFirstMonth(advance.firstMonth)
+                .encode(),
+        },
         bumpsReminder: gesture == ExpenseGesture.remind,
         entry: OutboxEntry(
           id: ExpenseWriteDao.gestureEntryId(messageId),
@@ -190,6 +267,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
                   ? current.clientUpdatedAt.toUtc().toIso8601String()
                   : null,
               authorId: actorId,
+              advance: advance,
             ).toJson(),
           ),
           // Sans école, l'entrée deviendrait inéligible au flush scopé.
@@ -229,6 +307,11 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         paidOn: ExpenseDay.tryParse(previous?.paidOn),
         expenseDate: ExpenseDay.of(draft.expenseDate),
         supplier: _blankToNull(draft.supplier),
+        // Le formulaire des Dépenses ne porte pas le bloc R.H. : corrigée ici,
+        // une avance le garde — sans lui, elle se paierait sans retenue.
+        staffAdvance:
+            draft.staffAdvance ??
+            ExpenseStaffAdvance.tryParse(previous?.staffAdvance),
         fundingSource: draft.fundingSource,
         recordedById: authorId,
         recordedByName: draft.recordedByName,

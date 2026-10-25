@@ -1,9 +1,11 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
@@ -24,6 +26,19 @@ class PayrollSnapshot {
   /// Par mois `YYYY-MM`.
   final Map<String, PayrollHeader> headers;
   final Map<String, Map<String, PayrollVariables>> variables;
+
+  /// Par mois : le taux de versement ; absent = 100 %.
+  final Map<String, PayrollPayoutPolicy> payoutPolicies;
+
+  /// `mois|agent` des arriérés que la direction a mis en priorité.
+  final Set<String> arrearsPriorities;
+
+  /// Les avances demandées par le circuit des dépenses (B5).
+  final List<PayrollAdvanceRequest> advanceRequests;
+
+  /// Le type de dépense `STAFF_ADVANCE` de l'école ; `null` tant que le
+  /// serveur ne l'a pas semé — une avance s'accorde alors en direct (T11).
+  final String? staffAdvanceTypeId;
   final Map<String, List<PayrollLine>> frozenLines;
   final Map<String, AttendanceSummary> summaries;
 
@@ -58,6 +73,10 @@ class PayrollSnapshot {
     required this.schoolYears,
     required this.shareTraces,
     required this.hasEverSynced,
+    this.payoutPolicies = const {},
+    this.arrearsPriorities = const {},
+    this.advanceRequests = const [],
+    this.staffAdvanceTypeId,
     this.school,
   });
 

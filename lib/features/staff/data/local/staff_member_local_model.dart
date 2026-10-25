@@ -43,6 +43,7 @@ class StaffMemberLocalModel {
     'address': dto.address,
     'category': dto.category,
     'job_title': dto.jobTitle,
+    'grade': dto.grade,
     'entry_date': dto.entryDate,
     'branches': jsonEncode(dto.branches),
     'diplomas': jsonEncode([for (final d in dto.diplomas) d.toJson()]),
@@ -71,6 +72,7 @@ class StaffMemberLocalModel {
       address: text('address'),
       category: StaffCategory.fromWire(text('category')),
       jobTitle: text('job_title'),
+      grade: text('grade'),
       branches: [
         for (final item in _jsonList(text('branches')))
           if (item is String) item,

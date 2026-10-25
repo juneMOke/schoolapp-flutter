@@ -40,10 +40,15 @@ class ExpenseDetailActions extends StatelessWidget {
   /// que son absence.
   final bool allowShortcuts;
 
+  /// Une avance au personnel, bloc R.H. caviardé compris : elle ne se
+  /// duplique pas (B5).
+  final bool isStaffAdvance;
+
   const ExpenseDetailActions({
     super.key,
     required this.expense,
     required this.accountId,
+    this.isStaffAdvance = false,
     required this.onShortcut,
     required this.onGesture,
     required this.onRefuse,
@@ -107,12 +112,16 @@ class ExpenseDetailActions extends StatelessWidget {
                 spacing: AppDimensions.spacingS,
                 runSpacing: AppDimensions.spacingS,
                 children: [
-                  EteeloButton.secondary(
-                    label: l10n.expenseActionDuplicate,
-                    icon: Icons.copy_outlined,
-                    onPressed: () => onShortcut(ExpenseDetailChoice.duplicate),
-                    fullWidth: false,
-                  ),
+                  // Une avance au personnel ne se duplique pas : elle se
+                  // dépose depuis la Paie, avec son bloc R.H. (B5).
+                  if (!isStaffAdvance)
+                    EteeloButton.secondary(
+                      label: l10n.expenseActionDuplicate,
+                      icon: Icons.copy_outlined,
+                      onPressed: () =>
+                          onShortcut(ExpenseDetailChoice.duplicate),
+                      fullWidth: false,
+                    ),
                   // Modifier suit la même règle que les gestes du demandeur :
                   // tant que personne n'a décidé, et sur sa propre demande. Une
                   // dépense accordée dont on réécrirait le montant ne serait

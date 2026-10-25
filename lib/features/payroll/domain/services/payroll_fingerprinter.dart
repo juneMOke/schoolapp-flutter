@@ -7,21 +7,31 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 /// L'empreinte d'un livre : ce que la direction a vu, sous la forme exacte que
 /// le serveur recalcule (Q2).
 ///
-/// `linesDigest` = SHA-256 hexadécimal de
-/// `{staffMemberId}|{currency}|{gross}|{advance}|{net}`, une ligne par agent
-/// triée par `staffMemberId`, jointes par `\n` sans `\n` final ; livre vide =
-/// empreinte de la chaîne vide.
+/// `linesDigest` = SHA-256 hexadécimal de la forme canonique de chaque ligne
+/// ([PayrollDigestLine.canonical], v1 ou v2 selon [formulaVersion]), une
+/// ligne par agent triée par `staffMemberId`, jointes par `\n` sans `\n`
+/// final ; livre vide = empreinte de la chaîne vide.
+///
+/// Tout calcul de la tablette est v2 ([PayrollLine.currentFormula]) ; la v1
+/// ne sert qu'à relire les vecteurs et les paies figées avant la v2.
 abstract final class PayrollFingerprinter {
-  static Future<PayrollFingerprint> of(List<PayrollLine> lines) async {
-    final reduced = digestLines(lines);
+  static Future<PayrollFingerprint> of(
+    List<PayrollLine> lines, {
+    int formulaVersion = PayrollLine.currentFormula,
+  }) async {
+    final reduced = digestLines(lines, formulaVersion: formulaVersion);
     return PayrollFingerprint(
       lineCount: reduced.length,
-      totals: totalsOf(reduced),
+      totals: totalsOf(reduced, formulaVersion: formulaVersion),
       linesDigest: await digestOf(reduced),
+      formulaVersion: formulaVersion,
     );
   }
 
-  static List<PayrollDigestLine> digestLines(List<PayrollLine> lines) => [
+  static List<PayrollDigestLine> digestLines(
+    List<PayrollLine> lines, {
+    int formulaVersion = PayrollLine.currentFormula,
+  }) => [
     for (final line in lines)
       PayrollDigestLine(
         staffMemberId: line.staffMemberId.toLowerCase(),
@@ -29,21 +39,34 @@ abstract final class PayrollFingerprinter {
         grossInCents: line.grossInCents,
         advanceInCents: line.advanceInCents,
         netInCents: line.netInCents,
+        formulaVersion: formulaVersion,
+        absenceInCents: line.deductions.absenceInCents,
+        iprInCents: line.deductions.iprInCents,
+        cnssInCents: line.deductions.cnssInCents,
+        childcareInCents: line.deductions.childcareInCents,
+        toPayInCents: line.toPayInCents,
       ),
   ]..sort((a, b) => a.staffMemberId.compareTo(b.staffMemberId));
 
   static Future<String> digestOf(List<PayrollDigestLine> sorted) =>
       sha256Hex(utf8.encode(sorted.map((line) => line.canonical).join('\n')));
 
-  /// Les totaux par devise, triés par code.
-  static List<PayrollTotal> totalsOf(Iterable<PayrollDigestLine> lines) {
+  /// Les totaux par devise, triés par code ; retenues fixes et « à verser »
+  /// en v2 seulement.
+  static List<PayrollTotal> totalsOf(
+    Iterable<PayrollDigestLine> lines, {
+    int formulaVersion = PayrollLine.currentFormula,
+  }) {
     final byCurrency = <String, List<int>>{};
     for (final line in lines) {
-      final sums = byCurrency.putIfAbsent(line.currency, () => [0, 0, 0]);
+      final sums = byCurrency.putIfAbsent(line.currency, () => [0, 0, 0, 0, 0]);
       sums[0] += line.grossInCents;
       sums[1] += line.advanceInCents;
       sums[2] += line.netInCents;
+      sums[3] += line.fixedDeductionsInCents;
+      sums[4] += line.toPayInCents;
     }
+    final v2 = formulaVersion >= 2;
     final currencies = byCurrency.keys.toList()..sort();
     return [
       for (final currency in currencies)
@@ -52,6 +75,8 @@ abstract final class PayrollFingerprinter {
           grossInCents: byCurrency[currency]![0],
           advanceInCents: byCurrency[currency]![1],
           netInCents: byCurrency[currency]![2],
+          deductionInCents: v2 ? byCurrency[currency]![3] : null,
+          toPayInCents: v2 ? byCurrency[currency]![4] : null,
         ),
     ];
   }

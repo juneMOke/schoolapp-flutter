@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/features/payroll/data/local/attendance_summary_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/salary_advance_dao.dart';
@@ -22,6 +23,7 @@ class PayrollPullRepositoryImpl implements PayrollPullRepository {
   final AttendanceSummaryDao _summaries;
   final SalaryAdvanceDao _advances;
   final PayrollDisbursementDao _disbursements;
+  final PayrollArrearsPriorityDao? _priorities;
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _requiredAuth;
 
@@ -39,7 +41,9 @@ class PayrollPullRepositoryImpl implements PayrollPullRepository {
     required CurrentUserContext currentUser,
     required Map<String, dynamic> requiredAuth,
     PayrollDisbursementRegularizer? regularizer,
+    PayrollArrearsPriorityDao? priorities,
   }) : _api = api,
+       _priorities = priorities,
        _regularizer = regularizer,
        _runner = runner,
        _payrolls = payrolls,
@@ -103,6 +107,23 @@ class PayrollPullRepositoryImpl implements PayrollPullRepository {
         (await _api.pullDisbursements(_requiredAuth, cursor, pageLimit)).data,
     apply: (items, schoolId, nowMs) =>
         _disbursements.applyPulled(items, schoolId: schoolId, nowMs: nowMs),
+  );
+
+  @override
+  Future<Either<Failure, KeysetPullResult>> syncArrearsPriorities() => _run(
+    kPayrollArrearsPrioritiesResource,
+    fetch: (cursor) async => (await _api.pullArrearsPriorities(
+      _requiredAuth,
+      cursor,
+      pageLimit,
+    )).data,
+    apply: (items, schoolId, nowMs) async =>
+        await _priorities?.applyPulled(
+          items,
+          schoolId: schoolId,
+          nowMs: nowMs,
+        ) ??
+        0,
   );
 
   Future<Either<Failure, KeysetPullResult>> _run<I>(

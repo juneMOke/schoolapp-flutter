@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 
 /// Une ligne de `expenses`, telle qu'elle dort en local.
 ///
@@ -27,6 +28,9 @@ class ExpenseLocalModel {
   final String? lastMessageAt;
   final String expenseDate;
   final String? supplier;
+
+  /// Le bloc R.H. (`STAFF_ADVANCE`), en JSON ; `null` ailleurs.
+  final String? staffAdvance;
   final String fundingSource;
   final String? recordedById;
   final String? recordedByName;
@@ -63,6 +67,7 @@ class ExpenseLocalModel {
     this.lastMessageAt,
     required this.expenseDate,
     this.supplier,
+    this.staffAdvance,
     this.fundingSource = 'CASH',
     this.recordedById,
     this.recordedByName,
@@ -98,6 +103,7 @@ class ExpenseLocalModel {
         lastMessageAt: map['last_message_at'] as String?,
         expenseDate: (map['expense_date'] as String?) ?? '',
         supplier: map['supplier'] as String?,
+        staffAdvance: map['staff_advance'] as String?,
         fundingSource: (map['funding_source'] as String?) ?? 'CASH',
         recordedById: map['recorded_by_id'] as String?,
         recordedByName: map['recorded_by_name'] as String?,
@@ -144,6 +150,7 @@ class ExpenseLocalModel {
     lastMessageAt: previous?.lastMessageAt,
     expenseDate: ExpenseDay.format(expense.expenseDate),
     supplier: expense.supplier,
+    staffAdvance: expense.staffAdvance?.encode(),
     fundingSource: expense.fundingSource.wireValue,
     recordedById: previous?.recordedById ?? expense.recordedById,
     recordedByName: previous?.recordedByName ?? expense.recordedByName,
@@ -176,6 +183,7 @@ class ExpenseLocalModel {
     'last_message_at': lastMessageAt,
     'expense_date': expenseDate,
     'supplier': supplier,
+    'staff_advance': staffAdvance,
     'funding_source': fundingSource,
     'recorded_by_id': recordedById,
     'recorded_by_name': recordedByName,
@@ -207,6 +215,7 @@ class ExpenseLocalModel {
     'currency': currency,
     'expense_date': expenseDate,
     'supplier': supplier,
+    'staff_advance': staffAdvance,
     'funding_source': fundingSource,
     'client_updated_at': clientUpdatedAt,
     'sync_status': syncStatus,
@@ -240,6 +249,7 @@ class ExpenseLocalModel {
           : DateTime.tryParse(lastMessageAt!),
       expenseDate: day,
       supplier: supplier,
+      staffAdvance: ExpenseStaffAdvance.tryParse(staffAdvance),
       fundingSource: ExpenseFundingSource.fromWire(fundingSource),
       recordedById: recordedById,
       recordedByName: recordedByName,

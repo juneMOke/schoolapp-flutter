@@ -48,6 +48,39 @@ abstract final class ExpenseErrorCodes {
   /// relancer, modifier le contenu).
   static const String notRequestOwner = 'NOT_REQUEST_OWNER';
 
+  // ── Avance au personnel (Paie v2, B5-B7) ────────────────────────────────
+
+  /// **403** — déposer ou modifier une avance sans `hr.pay.read` : on ne
+  /// remplit pas un bloc R.H. qu'on ne voit pas.
+  static const String staffAdvanceForbidden = 'STAFF_ADVANCE_FORBIDDEN';
+
+  /// **422** — une avance sans bloc R.H., ou payée sans `advance`.
+  static const String staffAdvanceDetailsRequired =
+      'STAFF_ADVANCE_DETAILS_REQUIRED';
+
+  /// **422** — nature et échéances en désaccord, ou première retenue sur un
+  /// mois passé.
+  static const String invalidStaffAdvance = 'INVALID_STAFF_ADVANCE';
+
+  /// **422** — une avance accordée ou payée ne se modifie plus.
+  static const String staffAdvanceLocked = 'STAFF_ADVANCE_LOCKED';
+
+  /// **422** — une avance payée ne se retire ni ne se supprime.
+  static const String staffAdvancePaid = 'STAFF_ADVANCE_PAID';
+
+  /// **409** — l'agent de l'avance n'est pas encore remonté : une attente,
+  /// rejouée, jamais un refus.
+  static const String staffMemberNotYetSynced = 'STAFF_MEMBER_NOT_YET_SYNCED';
+
+  // Les gardes de la Paie, atteintes par le PAY ou la réouverture d'une
+  // avance : des refus du geste, jamais du contenu.
+  static const String advanceMonthLocked = 'ADVANCE_MONTH_LOCKED';
+  static const String advanceAlreadyDeducted = 'ADVANCE_ALREADY_DEDUCTED';
+  static const String signatureRequired = 'SIGNATURE_REQUIRED';
+  static const String invalidAdvance = 'INVALID_ADVANCE';
+  static const String advanceCurrencyMismatch = 'ADVANCE_CURRENCY_MISMATCH';
+  static const String staffNotOnPayroll = 'STAFF_NOT_ON_PAYROLL';
+
   /// Les refus qui viennent d'un **geste**, et non d'une saisie.
   ///
   /// La distinction se paie à deux endroits : l'écran ne conseille pas de
@@ -60,5 +93,14 @@ abstract final class ExpenseErrorCodes {
     reasonRequired,
     selfApprovalForbidden,
     notRequestOwner,
+    staffAdvancePaid,
+    staffAdvanceDetailsRequired,
+    invalidStaffAdvance,
+    advanceMonthLocked,
+    advanceAlreadyDeducted,
+    signatureRequired,
+    invalidAdvance,
+    advanceCurrencyMismatch,
+    staffNotOnPayroll,
   };
 }

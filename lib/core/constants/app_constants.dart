@@ -827,7 +827,14 @@ class AppConstants {
   // v67 (2026-10-24) : re-pull des ventes boutique — le delta porte le numéro
   // du reçu, que le poste ignorait ; les ventes déjà tirées restaient en
   // `PROV-`. Aucun DDL. Palier d'école.
-  static const int offlineDbSchemaVersion = 67;
+  // v68 (2026-10-25) : la Paie v2 — réglages v2 (`ref_payroll_settings` :
+  // diviseur de jours, retenue d'absence), grade de l'agent
+  // (`staff_members.grade`), puis les colonnes et tables des lots suivants.
+  // Un seul palier pour la livraison, comme à la v66. Additif. Palier d'école.
+  // v69 (2026-10-25) : le barème élargi du back (Q8) — charges patronales,
+  // plafonds d'avance, PC/E activable, intitulés du bulletin
+  // (`ref_payroll_settings`). Additif, nullable. Palier d'école.
+  static const int offlineDbSchemaVersion = 69;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1254,6 +1261,16 @@ class AppConstants {
   static const String syncPayrollVariablesEndpoint =
       '/api/v1/sync/payroll-variables';
 
+  /// Taux de versement d'un mois (POST, brouillon seulement, dernier écrit
+  /// gagne) — Paie v2.
+  static const String syncPayrollPayoutPoliciesEndpoint =
+      '/api/v1/sync/payroll-payouts';
+
+  /// Drapeau « priorité » d'un arriéré (POST, dernier écrit gagne) et
+  /// descente (GET, flux `hr.payroll-arrear-priorities`) — Paie v2, T9.
+  static const String syncPayrollArrearsPrioritiesEndpoint =
+      '/api/v1/sync/payroll-arrear-priorities';
+
   /// Gestes du circuit (POST, un par requête : `SUBMIT`, `RETURN`, `VALIDATE`,
   /// `REOPEN`), idempotents par `gestureId`.
   static const String syncPayrollGesturesEndpoint =
@@ -1283,6 +1300,25 @@ class AppConstants {
   /// appel, après validation seulement.
   static const String payrollPayslipEndpoint =
       '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}.pdf';
+
+  /// Les bulletins scellés d'un mois validé en un PDF, une page par agent
+  /// (Paie v2, T16) — composé par le serveur, sous `hr.pay.read` et
+  /// `editique.write`.
+  static const String payrollMonthPayslipsEndpoint =
+      '/api/v1/hr/payrolls/{month}/payslips.pdf';
+
+  /// L'état de paie d'un mois validé, A4 paysage, signatures économe,
+  /// caissier(e) et DG (Paie v2, T16) — composé par le serveur ; 429 tant
+  /// qu'un autre long rendu tourne.
+  static const String payrollStatementEndpoint =
+      '/api/v1/hr/payrolls/{month}/statement.pdf';
+
+  /// « Ce que chaque salarié perçoit » (pièce SP, Q7) — sous `hr.pay.read`
+  /// seul, sur les mêmes paramètres que l'écran : `filter`
+  /// (`ALL` | `OUTSTANDING` | `SETTLED`) et `q` (nom ou fonction). Un brouillon
+  /// porte « montants provisoires » ; 429 pendant un autre long rendu.
+  static const String payrollDashboardPdfEndpoint =
+      '/api/v1/hr/payrolls/{month}/dashboard.pdf';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

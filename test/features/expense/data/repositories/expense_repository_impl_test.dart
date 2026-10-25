@@ -18,6 +18,9 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense.dart
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
@@ -60,31 +63,47 @@ ExpenseDraft _draft({String? id, DateTime? day}) => ExpenseDraft(
   recordedByName: 'Moke Junior',
 );
 
+class _ClosedPayroll implements ExpenseAdvanceGuard {
+  @override
+  Future<bool> acceptsFirstMonth(String month) async => false;
+
+  @override
+  Future<bool> isDeducted(String expenseId) async => false;
+
+  @override
+  Future<bool> isMonthLocked(String expenseId, {String? firstMonth}) async =>
+      false;
+}
+
 void main() {
   late Database db;
   late ExpenseRepositoryImpl repo;
   late CurrentUserContext user;
 
-  ExpenseRepositoryImpl build({SyncEngine? engine, IdGenerator? ids}) =>
-      ExpenseRepositoryImpl(
-        reader: ExpenseReadDao(db),
-        writer: ExpenseWriteDao(db),
-        types: ExpenseTypeDao(db),
-        messages: ExpenseMessageDao(db),
-        currentUser: user,
-        ids: ids ?? _Ids(),
-        rates: _Rates([
-          ExchangeRate(
-            base: 'USD',
-            quote: 'CDF',
-            rateMicros: 2800 * ExchangeRate.scale,
-            effectiveFrom: DateTime.utc(2026, 9, 1),
-          ),
-        ]),
-        schoolYearStart: () async => DateTime(2025, 9, 7),
-        syncEngine: engine,
-        now: () => _now,
-      );
+  ExpenseRepositoryImpl build({
+    SyncEngine? engine,
+    IdGenerator? ids,
+    ExpenseAdvanceGuard? guard,
+  }) => ExpenseRepositoryImpl(
+    reader: ExpenseReadDao(db),
+    writer: ExpenseWriteDao(db),
+    types: ExpenseTypeDao(db),
+    messages: ExpenseMessageDao(db),
+    currentUser: user,
+    ids: ids ?? _Ids(),
+    rates: _Rates([
+      ExchangeRate(
+        base: 'USD',
+        quote: 'CDF',
+        rateMicros: 2800 * ExchangeRate.scale,
+        effectiveFrom: DateTime.utc(2026, 9, 1),
+      ),
+    ]),
+    schoolYearStart: () async => DateTime(2025, 9, 7),
+    syncEngine: engine,
+    advanceGuard: guard,
+    now: () => _now,
+  );
 
   setUp(() async {
     db = await openFullOfflineDb();
@@ -321,6 +340,139 @@ void main() {
         (await repo.thread('e-new')).fold((f) => fail('$f'), (m) => m),
         isEmpty,
       );
+    });
+  });
+
+  group('avance au personnel (B5, T13)', () {
+    const block = ExpenseStaffAdvance(
+      staffMemberId: 'm-1',
+      kind: ExpenseStaffAdvanceKind.loan,
+      installments: 3,
+      reason: 'MEDICAL',
+    );
+
+    Future<Expense> approvedAdvance(ExpenseRepositoryImpl gestes) async {
+      final expense = await saved(
+        ExpenseDraft(
+          typeId: 't-1',
+          title: 'Avance au personnel',
+          amountInCents: 30000,
+          currency: 'USD',
+          expenseDate: _now,
+          staffAdvance: block,
+        ),
+      );
+      user.set('u-direction', schoolId: 'school-1');
+      await gestes.applyGesture(expense, ExpenseGesture.approve);
+      return expense;
+    }
+
+    test('le bloc R.H. part avec le contenu et se relit', () async {
+      final expense = await saved(
+        ExpenseDraft(
+          typeId: 't-1',
+          title: 'Avance au personnel',
+          amountInCents: 30000,
+          currency: 'USD',
+          expenseDate: _now,
+          staffAdvance: block,
+        ),
+      );
+
+      expect(expense.staffAdvance, block);
+      final entry = (await outbox()).last;
+      final payload = jsonDecode(entry['payload']! as String) as Map;
+      expect((payload['expense'] as Map)['staffAdvance'], block.toWireJson());
+    });
+
+    test(
+      'payer sans mois de retenue ni preuve : refusé, rien en file',
+      () async {
+        final gestes = build(ids: _SeqIds());
+        final expense = await approvedAdvance(gestes);
+        final before = (await outbox()).length;
+
+        final refused = await gestes.applyGesture(expense, ExpenseGesture.pay);
+        final unproven = await gestes.applyGesture(
+          expense,
+          ExpenseGesture.pay,
+          advancePayment: const ExpenseAdvancePayment(firstMonth: '2026-10'),
+        );
+
+        expect(refused.isLeft(), isTrue);
+        expect(unproven.isLeft(), isTrue);
+        expect((await outbox()).length, before);
+      },
+    );
+
+    test('corriger une avance garde son bloc R.H.', () async {
+      final expense = await saved(
+        ExpenseDraft(
+          typeId: 't-1',
+          title: 'Avance au personnel',
+          amountInCents: 30000,
+          currency: 'USD',
+          expenseDate: _now,
+          staffAdvance: block,
+        ),
+      );
+
+      final edited = await saved(
+        ExpenseDraft(
+          id: expense.id,
+          typeId: 't-1',
+          title: 'Avance au personnel',
+          amountInCents: 25000,
+          currency: 'USD',
+          expenseDate: _now,
+        ),
+      );
+
+      expect(edited.staffAdvance, block);
+    });
+
+    test('payer sur une paie fermée entre-temps : refusé', () async {
+      final gestes = build(ids: _SeqIds(), guard: _ClosedPayroll());
+      final expense = await approvedAdvance(gestes);
+
+      final result = await gestes.applyGesture(
+        expense,
+        ExpenseGesture.pay,
+        advancePayment: const ExpenseAdvancePayment(
+          firstMonth: '2026-09',
+          debtAcknowledged: true,
+        ),
+      );
+
+      expect(result.isLeft(), isTrue);
+    });
+
+    test('payer porte le bloc advance et fixe la première retenue', () async {
+      final gestes = build(ids: _SeqIds());
+      final expense = await approvedAdvance(gestes);
+
+      final result = await gestes.applyGesture(
+        expense,
+        ExpenseGesture.pay,
+        advancePayment: const ExpenseAdvancePayment(
+          firstMonth: '2026-10',
+          debtAcknowledged: true,
+        ),
+      );
+
+      expect(result.isRight(), isTrue);
+      final row = (await db.query('expenses')).single;
+      expect(
+        ExpenseStaffAdvance.tryParse(row['staff_advance'])?.firstMonth,
+        '2026-10',
+      );
+      final payload =
+          jsonDecode((await outbox()).last['payload']! as String) as Map;
+      expect(payload['advance'], {
+        'firstMonth': '2026-10',
+        'debtAcknowledged': true,
+        'reference': null,
+      });
     });
   });
 

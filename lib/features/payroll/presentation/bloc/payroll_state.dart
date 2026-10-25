@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -9,11 +10,21 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_member_s
 
 enum PayrollLoad { loading, ready, failure }
 
-enum PayrollTab { ledger, payslips, advances, history }
+enum PayrollTab { ledger, statement, payslips, history }
 
-enum PayrollPayFilter { all, toPay, paid }
+/// Les puces du règlement (B3) : un salaire se règle en plusieurs fois.
+enum PayrollPayFilter {
+  all,
+  unpaid,
 
-enum PayrollAdvanceFilter { ongoing, settled, all }
+  /// Un reste dû : acompte, ou arriéré décidé.
+  partial,
+  settled,
+}
+
+/// Les filtres du registre des avances (spec §10 bis) ; « Refusées » liste
+/// les demandes closes, qui n'ont jamais fait naître d'avance.
+enum PayrollAdvanceFilter { ongoing, settled, refused, all }
 
 /// L'écran de la paie : ce que la tablette sait, le mois ouvert, son livre
 /// composé, et les filtres en mémoire.
@@ -115,11 +126,14 @@ class PayrollState extends Equatable {
   /// ne s'affichent pas ailleurs.
   bool _matchesPay(PayrollMonthView view, PayrollLine line) {
     if (!view.phase.isLocked) return true;
-    final paid = view.disbursements.containsKey(line.staffMemberId);
+    final status = view.settlementOf(line).status;
     return switch (payFilter) {
       PayrollPayFilter.all => true,
-      PayrollPayFilter.toPay => !paid && line.netInCents > 0,
-      PayrollPayFilter.paid => paid,
+      PayrollPayFilter.unpaid => status == PayrollSettlementStatus.unpaid,
+      PayrollPayFilter.partial =>
+        status == PayrollSettlementStatus.partial ||
+            status == PayrollSettlementStatus.deferred,
+      PayrollPayFilter.settled => status == PayrollSettlementStatus.settled,
     };
   }
 

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
@@ -53,10 +54,12 @@ class ApplyExpenseGestureUseCase {
     ExpenseGesture gesture, {
     String note = '',
     String? actorName,
+    ExpenseAdvancePayment? advancePayment,
   }) => _repository.applyGesture(
     expense,
     gesture,
     note: note,
     actorName: actorName,
+    advancePayment: advancePayment,
   );
 }

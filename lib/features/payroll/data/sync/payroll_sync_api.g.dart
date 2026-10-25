@@ -98,6 +98,98 @@ class _PayrollSyncApi implements PayrollSyncApi {
   }
 
   @override
+  Future<dynamic> submitArrearsPriority(
+    Map<String, dynamic> extras,
+    Map<String, dynamic> body,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body);
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/sync/payroll-arrear-priorities',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<HttpResponse<PayrollArrearsPriorityPageDto>> pullArrearsPriorities(
+    Map<String, dynamic> extras,
+    String? cursor,
+    int? limit,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{
+      r'cursor': cursor,
+      r'limit': limit,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options =
+        _setStreamType<HttpResponse<PayrollArrearsPriorityPageDto>>(
+          Options(method: 'GET', headers: _headers, extra: _extra)
+              .compose(
+                _dio.options,
+                '/api/v1/sync/payroll-arrear-priorities',
+                queryParameters: queryParameters,
+                data: _data,
+              )
+              .copyWith(
+                baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl),
+              ),
+        );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late PayrollArrearsPriorityPageDto _value;
+    try {
+      _value = PayrollArrearsPriorityPageDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
+  }
+
+  @override
+  Future<dynamic> submitPayoutPolicy(
+    Map<String, dynamic> extras,
+    Map<String, dynamic> body,
+  ) async {
+    final _extra = <String, dynamic>{};
+    _extra.addAll(extras);
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body);
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/sync/payroll-payouts',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
   Future<PayrollDto> submitGesture(
     Map<String, dynamic> extras,
     Map<String, dynamic> body,

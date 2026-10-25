@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_outbox.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/staff_pay_profile_dao.dart';
@@ -9,7 +10,7 @@ import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requ
 import 'package:school_app_flutter/features/payroll/data/sync/staff_pay_profile_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
 
-// Les trois remontées « dernier écrit gagne » de la paie : l'accusé et le
+// Les quatre remontées « dernier écrit gagne » de la paie : l'accusé et le
 // refus se jugent sur l'horloge envoyée — une saisie retouchée pendant le vol
 // part à son tour.
 
@@ -154,6 +155,55 @@ class PayrollVariablesOutboxHandler
   @override
   Future<bool> reject(
     PayrollVariablesRequestDto request,
+    StaffPushFailure failure,
+    String schoolId,
+  ) => _dao.settle(
+    request,
+    schoolId: schoolId,
+    failed: true,
+    code: failure.storedCode,
+    reason: failure.reason,
+  );
+}
+
+/// `PAYROLL_PAYOUT_POLICY` — le taux de versement d'un mois (v2). Attend les
+/// gestes du mois posés avant lui, comme les éléments variables.
+class PayrollPayoutPolicyOutboxHandler
+    extends PayrollOutboxHandler<PayrollPayoutPolicyRequestDto> {
+  final PayrollSyncApi _api;
+  final PayrollPayoutPolicyDao _dao;
+
+  PayrollPayoutPolicyOutboxHandler({
+    required PayrollSyncApi api,
+    required PayrollPayoutPolicyDao dao,
+    required super.outbox,
+    required super.currentUser,
+    required super.extras,
+  }) : _api = api,
+       _dao = dao;
+
+  @override
+  String get aggregateType => PayrollOutbox.payoutPolicy;
+
+  @override
+  Set<String> get waitsFor => const {PayrollOutbox.gesture};
+
+  @override
+  PayrollPayoutPolicyRequestDto? parse(Object? raw) =>
+      PayrollPayoutPolicyRequestDto.tryParse(raw);
+
+  @override
+  Future<void> send(
+    PayrollPayoutPolicyRequestDto request,
+    String schoolId,
+  ) async {
+    await _api.submitPayoutPolicy(extras, request.toJson());
+    await _dao.settle(request, schoolId: schoolId, failed: false);
+  }
+
+  @override
+  Future<bool> reject(
+    PayrollPayoutPolicyRequestDto request,
     StaffPushFailure failure,
     String schoolId,
   ) => _dao.settle(

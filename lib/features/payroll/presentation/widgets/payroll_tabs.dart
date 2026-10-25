@@ -21,9 +21,6 @@ class PayrollTabs extends StatelessWidget {
       for (final total in view?.totals ?? const <PayrollTotal>[])
         (total.netInCents, total.currency),
     ]).join(' · ');
-    final ongoing = state.snapshot.advances
-        .where((advance) => advance.isOngoing)
-        .length;
     final months = state.snapshot.headers.length;
     return EteeloCardTabs<PayrollTab>(
       active: state.tab,
@@ -41,18 +38,16 @@ class PayrollTabs extends StatelessWidget {
                 ).badge(PayrollLabels.phase(l10n, view.phase)),
         ),
         EteeloCardTab(
+          id: PayrollTab.statement,
+          icon: Icons.table_chart_outlined,
+          title: l10n.payrollTabStatement,
+          subtitle: l10n.payrollTabStatementSubtitle,
+        ),
+        EteeloCardTab(
           id: PayrollTab.payslips,
           icon: Icons.description_outlined,
           title: l10n.payrollTabPayslips,
           subtitle: l10n.payrollTabPayslipsSubtitle,
-        ),
-        EteeloCardTab(
-          id: PayrollTab.advances,
-          icon: Icons.volunteer_activism_outlined,
-          title: l10n.payrollTabAdvances,
-          subtitle: ongoing == 0
-              ? l10n.payrollTabAdvancesNone
-              : l10n.payrollTabAdvancesOngoing(ongoing),
         ),
         EteeloCardTab(
           id: PayrollTab.history,

@@ -192,6 +192,18 @@ void main() {
       },
     );
 
+    test('409 agent pas encore remonté → attente rejouée', () async {
+      await seed();
+      when(() => api.submitExpense(any(), any())).thenThrow(
+        _http(409, body: {'detailCode': 'STAFF_MEMBER_NOT_YET_SYNCED'}),
+      );
+
+      final result = await handler().dispatch(entry());
+
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+      expect((await row())!.syncStatus, 'PENDING_SYNC');
+    });
+
     for (final status in [null, 409, 503]) {
       test('transitoire ($status) → retry', () async {
         await seed();

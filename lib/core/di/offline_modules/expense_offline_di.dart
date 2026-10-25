@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -8,8 +9,10 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
+import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_rh_visibility.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
@@ -21,8 +24,10 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_pull_handl
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_withdrawal_outbox_handler.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_pull_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/find_expense_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_register_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/sync_expense_pulls_use_case.dart';
@@ -76,6 +81,11 @@ void registerExpenseOffline(GetIt getIt) {
           (await getIt<AcademicYearContextRepository>().loadCurrentContext())
               .fold((_) => null, (context) => context.academicYear.startDate),
       syncEngine: getIt<SyncEngine>(),
+      // Tenu par la Paie, enregistrée après ce module : lu à la première
+      // résolution du dépôt, pas à l'enregistrement.
+      advanceGuard: getIt.isRegistered<ExpenseAdvanceGuard>()
+          ? getIt<ExpenseAdvanceGuard>()
+          : null,
     ),
   );
   getIt.registerFactory<LoadExpenseRegisterUseCase>(
@@ -95,6 +105,9 @@ void registerExpenseOffline(GetIt getIt) {
   );
   getIt.registerFactory<ApplyExpenseGestureUseCase>(
     () => ApplyExpenseGestureUseCase(getIt<ExpenseRepository>()),
+  );
+  getIt.registerFactory<FindExpenseUseCase>(
+    () => FindExpenseUseCase(getIt<ExpenseRepository>()),
   );
   getIt.registerFactory<SyncExpensePullsUseCase>(
     () => SyncExpensePullsUseCase(getIt<PullCoordinator>()),
@@ -148,6 +161,15 @@ void registerExpenseOffline(GetIt getIt) {
       syncMetaDao: getIt<SyncMetaDao>(),
       currentUser: getIt<CurrentUserContext>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      // Un poste qui gagne `hr.pay.read` reprend le flux depuis le début : le
+      // bloc R.H. des avances est caviardé à la descente (T14).
+      rhVisibility: ExpenseRhVisibility(
+        syncMetaDao: getIt<SyncMetaDao>(),
+        readsPayroll: () async {
+          final user = await getIt<AuthLocalDao>().getSessionUser();
+          return user?.permissions?.contains(Perm.hrPayRead.wire);
+        },
+      ),
     ),
   );
   getIt<PullCoordinator>().registerHandler(

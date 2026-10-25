@@ -89,14 +89,18 @@ abstract final class PayrollLabels {
     PayrollRule.hasDisbursements => l10n.payrollBlockerDisbursed,
     PayrollRule.reasonRequired => l10n.payrollRuleReasonRequired,
     PayrollRule.overtimeNotAllowed => l10n.payrollRuleOvertimeNotAllowed,
+    PayrollRule.workedDaysOutOfRange => l10n.payrollRuleWorkedDaysOutOfRange,
     PayrollRule.invalidAmount => l10n.payrollRuleInvalidAmount,
     PayrollRule.invalidInstallments => l10n.payrollRuleInvalidInstallments,
     PayrollRule.monthLocked => l10n.payrollRuleMonthLocked,
     PayrollRule.noContract => l10n.payrollRuleNoContract,
     PayrollRule.alreadyDeducted => l10n.payrollRuleAlreadyDeducted,
+    PayrollRule.followsExpense => l10n.payrollRuleFollowsExpense,
+    PayrollRule.advanceTypeMissing => l10n.payrollRuleAdvanceTypeMissing,
     PayrollRule.notValidated => l10n.payrollRuleNotValidated,
     PayrollRule.nothingToDisburse => l10n.payrollRuleNothingToDisburse,
     PayrollRule.alreadyDisbursed => l10n.payrollRuleAlreadyDisbursed,
+    PayrollRule.exceedsBalance => l10n.payrollRuleExceedsBalance,
     PayrollRule.signatureRequired => l10n.payrollRuleSignatureRequired,
     PayrollRule.mobileDetailsRequired => l10n.payrollRuleMobileDetails,
     PayrollRule.invalidReference => l10n.payrollRuleInvalidReference,
@@ -127,6 +131,7 @@ abstract final class PayrollLabels {
   static String refusal(AppLocalizations l10n, String? code) => switch (code) {
     'PAYROLL_REOPENED_SINCE' => l10n.payrollRefusedReopened,
     'ALREADY_DISBURSED' => l10n.payrollRefusedDouble,
+    'DISBURSEMENT_EXCEEDS_BALANCE' => l10n.payrollRefusedExceeds,
     _ => serverRefusal(l10n, code),
   };
 }

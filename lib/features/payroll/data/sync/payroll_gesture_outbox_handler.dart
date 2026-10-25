@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_outbox.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_fingerprint_json.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_outbox_handler.dart';
@@ -45,6 +46,9 @@ class PayrollGestureOutboxHandler
   @override
   Set<String> get waitsFor => const {
     PayrollOutbox.variables,
+    // Le taux du mois entre dans l'empreinte (« à verser ») : un geste qui
+    // le doublerait serait recalculé à 100 % et refusé.
+    PayrollOutbox.payoutPolicy,
     PayrollOutbox.gesture,
     PayrollOutbox.advance,
   };
@@ -66,6 +70,8 @@ class PayrollGestureOutboxHandler
     StaffContractWriteDao.correctionAggregateType,
     PayrollOutbox.settings,
     PayrollOutbox.profile,
+    // Le paiement d'une dépense d'avance fait naître l'avance au serveur (B5).
+    ExpenseWriteDao.gestureAggregateType,
   };
 
   @override

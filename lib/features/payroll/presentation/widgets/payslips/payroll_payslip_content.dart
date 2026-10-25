@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_statement.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_rows.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -29,7 +27,10 @@ class PayrollPayslipContent {
   final PayslipRow gross;
   final List<PayslipRow> deductions;
   final PayslipRow net;
-  final String legalNote;
+
+  /// « Paie nette, sans retenue légale » — `null` dès qu'un IPR ou une CNSS
+  /// est retenu (v2).
+  final String? legalNote;
   final String attendance;
   final String payment;
   final List<String> signatures;
@@ -64,6 +65,7 @@ class PayrollPayslipContent {
     final advances = {for (final a in snapshot.advances) a.id: a};
     final contractFrom = line.contractFrom;
     final kind = StaffLabels.contract(l10n, line.contractKind);
+    final settlement = view.settlementOf(line);
     return PayrollPayslipContent(
       schoolName: school?.name ?? '',
       schoolAddress: [
@@ -89,6 +91,20 @@ class PayrollPayslipContent {
           value: member?.jobTitle ?? '—',
           note: null,
         ),
+        (
+          label: l10n.payrollPayslipGrade,
+          value: PayrollStatement.gradeOf(member) ?? '—',
+          note: null,
+        ),
+        if (line.deductions.workDaysDivisor case final divisor?)
+          (
+            label: l10n.payrollPayslipWorkedDays,
+            value: l10n.payrollPayslipWorkedDaysValue(
+              line.deductions.workedDays ?? divisor,
+              divisor,
+            ),
+            note: null,
+          ),
         (
           label: l10n.payrollPayslipContract,
           value: contractFrom == null
@@ -137,73 +153,47 @@ class PayrollPayslipContent {
         value: money(line.grossInCents),
         note: null,
       ),
-      deductions: [
-        for (final deduction in line.advances)
-          if (deduction.dueInCents > 0)
-            (
-              label: _advanceLabel(
-                l10n,
-                advances[deduction.advanceId],
-                deduction.rank,
-                deduction.installments,
-              ),
-              value: '− ${money(deduction.takenInCents)}',
-              note: deduction.carriedInCents > 0
-                  ? l10n.payrollPayslipCarried(money(deduction.carriedInCents))
-                  : null,
-            ),
-      ],
+      deductions: PayrollPayslipRows.deductions(context, line, advances),
       net: (
         label: l10n.payrollPayslipNet,
         value: money(line.netInCents),
         note: null,
       ),
-      legalNote: l10n.payrollPayslipNoLegal,
-      attendance: l10n.payrollPayslipAttendance(
-        PayrollLabels.month(context, line.attendanceMonth ?? view.month),
-        line.attendance.unjustifiedAbsences,
-        line.attendance.justifiedAbsences,
-        line.attendance.lates,
-        line.attendance.lateMinutes,
-      ),
-      payment: l10n.payrollPayslipPayment(
-        _payment(context, view.disbursements[line.staffMemberId]),
-      ),
+      legalNote: line.deductions.iprInCents + line.deductions.cnssInCents > 0
+          ? null
+          : l10n.payrollPayslipNoLegal,
+      attendance:
+          (line.deductions.absenceInCents > 0
+          ? l10n.payrollPayslipAttendanceDeducted
+          : l10n.payrollPayslipAttendance)(
+            PayrollLabels.month(context, line.attendanceMonth ?? view.month),
+            line.attendance.unjustifiedAbsences,
+            line.attendance.justifiedAbsences,
+            line.attendance.lates,
+            line.attendance.lateMinutes,
+          ),
+      payment: [
+        l10n.payrollPayslipBalance(
+          money(line.netInCents),
+          money(settlement.paidInCents),
+          money(settlement.remainingInCents),
+        ),
+        l10n.payrollPayslipPayment(
+          PayrollPayslipRows.payments(
+            context,
+            view.disbursements[line.staffMemberId],
+          ),
+        ),
+      ].join('\n'),
       signatures: [
-        l10n.payrollPayslipSignAgent,
-        l10n.payrollPayslipSignBursar,
-        l10n.payrollPayslipSignHead,
+        // Les intitulés de l'école (Q8), sinon ceux du modèle papier — le
+        // bulletin scellé du serveur porte les mêmes.
+        snapshot.settings.signatureBeneficiaryLabel ??
+            l10n.payrollPayslipSignAgent,
+        snapshot.settings.signatureDirectorLabel ?? l10n.payrollPayslipSignHead,
+        snapshot.settings.signatureCashierLabel ??
+            l10n.payrollPayslipSignBursar,
       ],
     );
-  }
-
-  static String _advanceLabel(
-    AppLocalizations l10n,
-    SalaryAdvance? advance,
-    int rank,
-    int installments,
-  ) {
-    final count = installments > 0 ? installments : advance?.installments ?? 1;
-    final label = l10n.payrollPayslipAdvance(rank, count);
-    return advance == null
-        ? label
-        : '$label · ${PayrollLabels.reason(l10n, advance.reason)}';
-  }
-
-  /// Le mode et sa preuve, ou « À verser ».
-  static String _payment(BuildContext context, PayrollDisbursement? paid) {
-    final l10n = AppLocalizations.of(context)!;
-    if (paid == null) return l10n.payrollToPay;
-    final mode = PayrollLabels.mode(l10n, paid.mode);
-    final proof = switch (paid.mode) {
-      PayoutMode.cash => paid.signedRegister ? l10n.payrollPaySigned : null,
-      PayoutMode.mobileMoney || PayoutMode.bank => paid.reference,
-    };
-    return [
-      mode,
-      MoneyFormat.format(paid.amount),
-      ?proof,
-      PayrollLabels.day(context, paid.paidAt),
-    ].join(' · ');
   }
 }

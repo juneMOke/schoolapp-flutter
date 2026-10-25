@@ -45,12 +45,17 @@ class PayrollDisbursementDraft {
   final String? bankAccount;
   final bool signedRegister;
 
+  /// Le net figé de la ligne : le dépôt revérifie que ce versement, ajouté à
+  /// ceux déjà posés, ne le dépasse pas. `null` = pas de garde (tests).
+  final int? netInCents;
+
   const PayrollDisbursementDraft({
     required this.month,
     required this.staffMemberId,
     required this.validationGestureId,
     required this.amount,
     required this.mode,
+    this.netInCents,
     this.operator,
     this.payoutPhone,
     this.reference,
@@ -58,4 +63,26 @@ class PayrollDisbursementDraft {
     this.bankAccount,
     this.signedRegister = false,
   });
+
+  /// Le même mode et la même preuve, pour un autre salaire : un versement
+  /// d'arriérés réparti sur plusieurs mois en pose un par mois d'origine.
+  PayrollDisbursementDraft forLine({
+    required String month,
+    required String validationGestureId,
+    required Money amount,
+    required int netInCents,
+  }) => PayrollDisbursementDraft(
+    month: month,
+    staffMemberId: staffMemberId,
+    validationGestureId: validationGestureId,
+    amount: amount,
+    mode: mode,
+    netInCents: netInCents,
+    operator: operator,
+    payoutPhone: payoutPhone,
+    reference: reference,
+    bankName: bankName,
+    bankAccount: bankAccount,
+    signedRegister: signedRegister,
+  );
 }

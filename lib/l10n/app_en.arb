@@ -7734,6 +7734,17 @@
   "expenseRejectedNotOwner": "that gesture belongs to the requester",
   "expenseRejectedReasonRequired": "a refusal needs its reason",
   "expenseRejectedOutOfOrder": "an earlier gesture has not gone out yet",
+  "expenseRejectedStaffAdvanceForbidden": "a staff advance needs payroll access",
+  "expenseRejectedStaffAdvanceDetails": "the advance is missing its staff member or first deduction month",
+  "expenseRejectedStaffAdvanceInvalid": "invalid advance: instalments or first deduction month",
+  "expenseRejectedStaffAdvanceLocked": "an approved or paid advance can no longer be edited",
+  "expenseRejectedStaffAdvancePaid": "a paid advance can be neither withdrawn nor deleted",
+  "expenseRejectedAdvanceMonthLocked": "the first deduction month's payroll is already closed: pay again on a later month",
+  "expenseRejectedAdvanceDeducted": "a deduction of this advance is already frozen",
+  "expenseRejectedAdvanceSignature": "a cash advance needs the signed debt acknowledgement",
+  "expenseRejectedAdvanceProof": "first deduction month in the past, or payment reference too short",
+  "expenseRejectedAdvanceCurrency": "the advance currency is not the one of the staff member's contract",
+  "expenseRejectedAdvanceNoContract": "the staff member has no contract that pays them",
   "expenseDetailGestureRejected": "Gesture refused by the server: {reason}. The request stayed as it was.",
   "@expenseDetailGestureRejected": {"placeholders": {"reason": {"type": "String"}}},
   "expenseThreadRejected": "not sent",
@@ -7796,6 +7807,41 @@
   "expenseFormSupplier": "Supplier / payee (optional)",
   "expenseFormSupplierPlaceholder": "e.g. SNEL, Papyrus bookshop…",
   "expenseFormNoTypes": "Expense types have not reached this device yet. Synchronise, then try again.",
+  "expenseAdvancePayTitle": "Pay out the advance · {amount}",
+  "@expenseAdvancePayTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayApprovedBy": "Approved by {name}",
+  "@expenseAdvancePayApprovedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayMode": "Mode: {mode}",
+  "@expenseAdvancePayMode": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayAcknowledged": "The staff member signed the acknowledgement of debt",
+  "expenseAdvancePayReference": "Transaction reference (at least 6 characters)",
+  "expenseAdvancePayFirstMonth": "First deduction on the payroll of",
+  "expenseAdvancePayConfirm": "Pay out {amount}",
+  "@expenseAdvancePayConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "expenseFormCancel": "Cancel",
   "expenseFormSaveCreate": "Save the expense",
   "expenseFormSaveEdit": "Save changes",
@@ -8548,6 +8594,8 @@
   "@staffFieldCategory": {
     "description": "Champ du poste."
   },
+  "staffFieldGrade": "Grade",
+  "staffFieldGradeHint": "E.g. L2, G3, A2",
   "staffFieldJob": "Job",
   "@staffFieldJob": {
     "description": "Champ du poste."
@@ -9020,7 +9068,7 @@
   "@staffAttendanceCloseTitle": {"placeholders": {"month": {"type": "String"}}},
   "staffAttendanceCloseHours": "{hours} of hourly work, which Payroll reads from the marks",
   "@staffAttendanceCloseHours": {"placeholders": {"hours": {"type": "String"}}},
-  "staffAttendanceCloseAbsences": "{count} unexcused absences, shown on the payslip, never deducted",
+  "staffAttendanceCloseAbsences": "{count} unexcused absences, shown on the payslip",
   "@staffAttendanceCloseAbsences": {"placeholders": {"count": {"type": "int"}}},
   "staffAttendanceCloseLates": "{minutes} min late, for information",
   "@staffAttendanceCloseLates": {"placeholders": {"minutes": {"type": "int"}}},
@@ -9066,12 +9114,146 @@
   "payrollTabLedger": "Payroll ledger",
   "payrollTabLedgerSubtitle": "Net {amount}",
   "@payrollTabLedgerSubtitle": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollTabStatement": "Payroll statement",
+  "payrollTabStatementSubtitle": "The schools' spreadsheet",
+  "payrollStatementColName": "Name",
+  "payrollStatementColGrade": "Grade",
+  "payrollStatementColGross": "Gross",
+  "payrollStatementColWorkedDays": "Days",
+  "payrollStatementColAbsence": "Unexc. abs.",
+  "payrollStatementColLoan": "Loan",
+  "payrollStatementColAdvance": "Adv.",
+  "payrollStatementColChildcare": "PC/E",
+  "payrollStatementColIpr": "IPR",
+  "payrollStatementColCnss": "CNSS",
+  "payrollStatementColNet": "Net pay",
+  "payrollStatementSubtotal": "Subtotal",
+  "payrollStatementTotal": "Grand total",
+  "payrollStatementOther": "Others",
+  "payrollStatementLocked": "Read only: the payroll is no longer a draft.",
+  "payrollStatementControl": "Gross {gross} − deductions {withheld} = net {net}",
+  "@payrollStatementControl": {
+    "placeholders": {
+      "gross": {
+        "type": "String"
+      },
+      "withheld": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsTitle": "Salary arrears",
+  "payrollArrearsDebt": "Salary debt",
+  "payrollArrearsDeferred": "Decided deferral",
+  "payrollArrearsUnpaid": "Unpaid and part-paid",
+  "payrollArrearsOldest": "Oldest",
+  "payrollArrearsAge": "{months, plural, =0{this month} =1{1 month ago} other{{months} months ago}}",
+  "@payrollArrearsAge": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsColMonths": "Months owed",
+  "payrollArrearsColDue": "Due",
+  "payrollArrearsColAge": "Age",
+  "payrollArrearsSince": "{month} · {months, plural, =0{this month} =1{1 month ago} other{{months} months ago}}",
+  "@payrollArrearsSince": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsPriority": "Priority",
+  "payrollArrearsOriginDeferred": "Decided deferral",
+  "payrollArrearsOriginUnpaid": "Unpaid",
+  "payrollArrearsOriginPartial": "Part-paid",
+  "payrollArrearsFilterDeferred": "Decided deferrals",
+  "payrollArrearsFilterUnpaid": "Unpaid",
+  "payrollArrearsFilterPriority": "Priority",
+  "payrollArrearsEmpty": "No salary arrears",
+  "payrollArrearsAgentTitle": "{name} · {amount} owed",
+  "@payrollArrearsAgentTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsNetPaid": "Net {net} · paid {paid}",
+  "@payrollArrearsNetPaid": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsRate": "Paid at {rate} %",
+  "@payrollArrearsRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollArrearsFixed": "Fixed amount {amount}",
+  "@payrollArrearsFixed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPayAll": "All",
+  "payrollArrearsPayOldest": "The oldest",
+  "payrollArrearsPay": "Pay {amount}",
+  "@payrollArrearsPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsPrioritize": "Settle first",
+  "payrollArrearsUnprioritize": "Remove priority",
+  "subMenuPayrollArrears": "Salary arrears",
+  "payrollArrearsBanner": "{count, plural, =1{Salary arrears · 1 agent · {amount} owed by the school} other{Salary arrears · {count} agents · {amount} owed by the school}}",
+  "@payrollArrearsBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollArrearsBannerAction": "Handle the arrears",
+  "payrollStatementPrint": "Print the statement",
+  "payrollStatementFileName": "payroll-statement-{month}",
+  "@payrollStatementFileName": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "payrollTabPayslips": "Payslips",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
-  "payrollTabAdvances": "Advances",
-  "payrollTabAdvancesOngoing": "{count, plural, =1{1 ongoing} other{{count} ongoing}}",
-  "@payrollTabAdvancesOngoing": {"placeholders": {"count": {"type": "int"}}},
-  "payrollTabAdvancesNone": "None ongoing",
   "payrollTabHistory": "History",
   "payrollTabHistorySubtitle": "{count, plural, =1{1 month} other{{count} months}}",
   "@payrollTabHistorySubtitle": {"placeholders": {"count": {"type": "int"}}},
@@ -9100,7 +9282,6 @@
   "payrollActionValidate": "Validate and lock",
   "payrollActionReopen": "Reopen",
   "payrollActionDiffuse": "Send the payslips",
-  "payrollActionSettings": "Payroll settings",
   "payrollReturnedBanner": "Sent back by the head: “{reason}”",
   "@payrollReturnedBanner": {"placeholders": {"reason": {"type": "String"}}},
   "payrollBlockerPrevious": "The previous month's payroll must be validated first.",
@@ -9117,16 +9298,66 @@
   "payrollKpiAdvances": "Advances deducted",
   "payrollKpiAdvancesDetail": "{count, plural, =0{No instalment} =1{1 instalment} other{{count} instalments}}",
   "@payrollKpiAdvancesDetail": {"placeholders": {"count": {"type": "int"}}},
+  "payrollKpiDeductions": "Deductions",
+  "payrollKpiDeductionsDetail": "{count, plural, =0{Absences, IPR/CNSS, PC/E} =1{Absences, IPR/CNSS, PC/E and 1 instalment} other{Absences, IPR/CNSS, PC/E and {count} instalments}}",
+  "@payrollKpiDeductionsDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollKpiNetToPay": "To pay {toPay} · {deferred} in arrears",
+  "@payrollKpiNetToPay": {
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollKpiNet": "Net to pay",
   "payrollKpiPaid": "Paid {paid} / {total}",
   "@payrollKpiPaid": {"placeholders": {"paid": {"type": "int"}, "total": {"type": "int"}}},
+  "payrollAttendanceSignalDeducted": "Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences reduce the days worked.",
+  "@payrollAttendanceSignalDeducted": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      }
+    }
+  },
   "payrollAttendanceSignal": "{month} attendance: {absences} unexcused absences and {lates} late arrivals — shown for information, never deducted.",
   "@payrollAttendanceSignal": {"placeholders": {"month": {"type": "String"}, "absences": {"type": "int"}, "lates": {"type": "int"}}},
   "payrollColAgent": "Staff member",
   "payrollColBase": "Base",
   "payrollColOvertime": "Overtime",
   "payrollColAllowance": "Allow.",
-  "payrollColAdvance": "Advance",
+  "payrollLineToPay": "pay {amount}",
+  "@payrollLineToPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollLineToPayFixed": "pay {amount} · fixed",
+  "@payrollLineToPayFixed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollColAdvance": "Deductions",
   "payrollColNet": "Net",
   "payrollColAttendance": "Attendance",
   "payrollColPayout": "Payment",
@@ -9140,15 +9371,16 @@
   "payrollSignalLates": "{count} late",
   "@payrollSignalLates": {"placeholders": {"count": {"type": "int"}}},
   "payrollSignalNone": "OK",
-  "payrollSignalHint": "For information, never deducted",
+  "payrollSignalHint": "Attendance of the previous month",
   "payrollPayAfterValidation": "After validation",
   "payrollPay": "Pay",
   "payrollToPay": "To pay",
   "payrollNothingToPay": "Nothing to pay",
   "payrollTotal": "Total",
   "payrollFilterAll": "All",
-  "payrollFilterToPay": "To pay",
-  "payrollFilterPaid": "Paid",
+  "payrollFilterUnpaid": "Unpaid",
+  "payrollFilterPartial": "Partly paid",
+  "payrollFilterSettled": "Settled",
   "payrollSearchHint": "Search a staff member",
   "payrollZeroHours": "Hourly staff at 0 h in {month}: {names}. Check the attendance before submitting.",
   "@payrollZeroHours": {"placeholders": {"month": {"type": "String"}, "names": {"type": "String"}}},
@@ -9160,6 +9392,7 @@
   "payrollRegularizeRow": "{name} · {amount} · {month} — {reason}",
   "@payrollRegularizeRow": {"placeholders": {"name": {"type": "String"}, "amount": {"type": "String"}, "month": {"type": "String"}, "reason": {"type": "String"}}},
   "payrollRefusedReopened": "payroll reopened since",
+  "payrollRefusedExceeds": "beyond the balance due",
   "payrollRefusedDouble": "double payment",
   "payrollRefusedOther": "refused ({code})",
   "@payrollRefusedOther": {"placeholders": {"code": {"type": "String"}}},
@@ -9168,6 +9401,110 @@
   "payrollConfirm": "Confirm",
   "payrollClose": "Close",
   "payrollReasonLabel": "Reason *",
+  "payrollPayoutEyebrow": "Payout policy · {month}",
+  "@payrollPayoutEyebrow": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutTitle": "How much of the net to pay this month?",
+  "payrollPayoutRate": "{rate} %",
+  "@payrollPayoutRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutOther": "Other rate (0 to 100)",
+  "payrollPayoutReason": "Reason",
+  "payrollPayoutDue": "Net due",
+  "payrollPayoutToPay": "To pay",
+  "payrollPayoutDeferred": "In arrears",
+  "payrollPayoutFixedKept": "Agents on a fixed amount keep it.",
+  "payrollPayoutApply": "Apply {rate} %",
+  "@payrollPayoutApply": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarActive": "{reduced, plural, =0{This month the school pays {rate} % of the net} =1{This month the school pays {rate} % of the net · 1 agent on reduced pay} other{This month the school pays {rate} % of the net · {reduced} agents on reduced pay}}",
+  "@payrollPayoutBarActive": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      },
+      "reduced": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayoutBarDetail": "To pay {toPay} of {due} due · {deferred} will become arrears at validation",
+  "@payrollPayoutBarDetail": {
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarReason": "“{reason}”",
+  "@payrollPayoutBarReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayoutBarFull": "Full net payout",
+  "payrollPayoutBarEdit": "Change the rate",
+  "payrollPayoutBarSet": "Set a payout rate",
+  "payrollConfirmFixedDeductions": "Deductions (absences, IPR/CNSS, PC/E)",
+  "payrollConfirmToPay": "To pay this month ({rate} %)",
+  "@payrollConfirmToPay": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollConfirmDeferred": "Recorded as arrears",
+  "payrollConfirmDeferredWarning": "{amount} will be recorded as arrears owed to {count, plural, =1{1 agent} other{{count} agents}}.",
+  "@payrollConfirmDeferredWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollAdvanceRequestEyebrow": "New expense request",
+  "payrollAdvanceRequestNote": "The request goes for approval in Expenses ▸ Approvals; nothing is paid or deducted before approval and payout.",
+  "payrollAdvanceRequestSubmit": "File the request",
+  "payrollAdvanceCircuitTitle": "In the expense circuit · {count}",
+  "@payrollAdvanceCircuitTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollAdvanceCircuitOpen": "Open approvals",
+  "payrollAdvanceCircuitVia": "via Expenses",
+  "payrollAdvanceCircuitToApprove": "To approve",
+  "payrollAdvanceCircuitToPay": "To pay out",
+  "payrollPayoutOtherInvalid": "A rate from 0 to 100.",
   "payrollVarsTitle": "Variable items",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Overtime",
@@ -9178,6 +9515,60 @@
   "payrollVarsAllowance": "{children} × {unit} = {amount}",
   "@payrollVarsAllowance": {"placeholders": {"children": {"type": "int"}, "unit": {"type": "String"}, "amount": {"type": "String"}}},
   "payrollVarsAdvances": "Advances — managed in the Advances tab",
+  "payrollVarsWorkedDays": "Days worked",
+  "payrollVarsWorkedDaysValue": "{days} / {divisor} d",
+  "@payrollVarsWorkedDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsWorkedDaysCorrected": "Corrected by hand — attendance says {days} d",
+  "@payrollVarsWorkedDaysCorrected": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsChildcare": "Staff children care (PC/E) this month",
+  "payrollVarsChildcareShort": "Staff children care (PC/E)",
+  "payrollVarsAbsence": "Unexcused absence · {days} d",
+  "@payrollVarsAbsence": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsLegal": "IPR & CNSS",
+  "payrollVarsPayout": "Payout this month",
+  "payrollVarsPayoutRate": "Month rate · {rate} %",
+  "@payrollVarsPayoutRate": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollVarsPayoutFixed": "Fixed amount for this agent",
+  "payrollVarsFixedAmount": "Pay at most",
+  "payrollVarsFixedReason": "Reason",
+  "payrollVarsPayoutPreview": "To pay {toPay} · In arrears {deferred}",
+  "@payrollVarsPayoutPreview": {
+    "placeholders": {
+      "toPay": {
+        "type": "String"
+      },
+      "deferred": {
+        "type": "String"
+      }
+    }
+  },
   "payrollVarsNoOvertime": "Temporary staff have no overtime.",
   "payrollSubmitTitle": "Submit the {month} payroll?",
   "@payrollSubmitTitle": {"placeholders": {"month": {"type": "String"}}},
@@ -9200,6 +9591,69 @@
   "payrollStaleOpen": "Compare",
   "payrollGestureRefused": "The server refused the action: {reason}",
   "@payrollGestureRefused": {"placeholders": {"reason": {"type": "String"}}},
+  "payrollSettleNet": "Net pay for the month",
+  "payrollSettlePaid": "Already paid",
+  "payrollSettleRemaining": "Still to pay",
+  "payrollTrancheRank": "#{rank}",
+  "@payrollTrancheRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayAmount": "Amount ({currency})",
+  "@payrollPayAmount": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayPlanned": "This month's decided share",
+  "payrollPayAllRemaining": "All the rest",
+  "payrollPayShare": "{share} % of the net",
+  "@payrollPayShare": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPaySettles": "This payment settles the salary.",
+  "payrollPayLeaves": "Instalment: {amount} will remain.",
+  "@payrollPayLeaves": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollPayAbovePlan": "Beyond the share decided this month: the head office planned less.",
+  "payrollSettledCount": "Settled · {count} payments",
+  "@payrollSettledCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPartialLeft": "Partly paid · {amount} left",
+  "@payrollPartialLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollDeferredLeft": "Deferred · {amount} in arrears",
+  "@payrollDeferredLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayTitle": "Pay the salary",
   "payrollPayNet": "Net to pay",
   "payrollModeCash": "Cash",
@@ -9241,12 +9695,11 @@
   "@payrollAdvanceFirstMonthNext": {"placeholders": {"month": {"type": "String"}}},
   "payrollAdvancePreview": "{count, plural, =1{1 deduction of {amount} in {month}} other{{count} deductions of {amount} from {month}}}",
   "@payrollAdvancePreview": {"placeholders": {"count": {"type": "int"}, "amount": {"type": "String"}, "month": {"type": "String"}}},
-  "payrollAdvanceHeavy": "The instalment exceeds half the monthly salary: consider spreading it.",
   "payrollAdvanceCancel": "Cancel this advance",
   "payrollAdvancesOutstanding": "Outstanding",
   "payrollAdvancesThisMonth": "Deducted this month",
   "payrollAdvancesSettled": "Settled",
-  "payrollAdvancesFilterOngoing": "Ongoing",
+  "payrollAdvancesFilterOngoing": "Being repaid",
   "payrollAdvancesFilterSettled": "Settled",
   "payrollAdvancesFilterAll": "All",
   "payrollAdvanceColGranted": "Granted on",
@@ -9274,7 +9727,6 @@
   "payrollProfileMode": "Preferred payment mode",
   "payrollProfileOperator": "Operator",
   "payrollProfilePhone": "Payout number",
-  "payrollSettingsTitle": "Payroll settings",
   "payrollSettingsDivisor": "Hours in a full month",
   "payrollSettingsMultiplier": "Overtime premium (%)",
   "payrollSettingsCurrency": "In {currency}",
@@ -9282,6 +9734,10 @@
   "payrollSettingsAllowance": "Allowance per child",
   "payrollSettingsDefaultRate": "Default overtime rate",
   "payrollSettingsStep": "Round the rate to steps of",
+  "payrollSettingsWorkDays": "Days in a full month",
+  "payrollSettingsAbsenceDeduction": "Deduct unexcused absences",
+  "payrollSettingsIpr": "Flat IPR per paid agent",
+  "payrollSettingsCnss": "CNSS (‰ of base pay)",
   "payrollSettingsEligible": "Contracts that open allowances",
   "payrollPayslipTitle": "Payslip",
   "payrollPayslipProvisional": "Provisional — not validated",
@@ -9291,6 +9747,67 @@
   "payrollPayslipContract": "Contract",
   "payrollPayslipContractFrom": "{kind} from {date}",
   "@payrollPayslipContractFrom": {"placeholders": {"kind": {"type": "String"}, "date": {"type": "String"}}},
+  "payrollPayslipGrade": "Grade",
+  "payrollPayslipWorkedDays": "Days worked",
+  "payrollPayslipWorkedDaysValue": "{days} d / {divisor}",
+  "@payrollPayslipWorkedDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipIprCnss": "IPR & CNSS",
+  "payrollPayslipAbsence": "Unexcused absence",
+  "payrollPayslipAbsenceDays": "{days} d",
+  "@payrollPayslipAbsenceDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipSalaryAdvance": "Salary advance",
+  "payrollPayslipLoan": "Loan repayment",
+  "payrollPayslipChildcare": "Staff children care",
+  "payrollPayslipDeductionsTotal": "Total deductions",
+  "payrollPayslipAttendanceDeducted": "Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted from the days worked.",
+  "@payrollPayslipAttendanceDeducted": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "justified": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipBalance": "Net pay {net} · already received {paid} · still to receive {rest}",
+  "@payrollPayslipBalance": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipGains": "Earnings",
   "payrollPayslipBase": "Base salary",
   "payrollPayslipOvertime": "Overtime {hours} h × {rate}",
@@ -9309,9 +9826,9 @@
   "@payrollPayslipAttendance": {"placeholders": {"month": {"type": "String"}, "absences": {"type": "int"}, "justified": {"type": "int"}, "lates": {"type": "int"}, "minutes": {"type": "int"}}},
   "payrollPayslipPayment": "Payment: {detail}",
   "@payrollPayslipPayment": {"placeholders": {"detail": {"type": "String"}}},
-  "payrollPayslipSignAgent": "Staff member",
-  "payrollPayslipSignBursar": "Bursar",
-  "payrollPayslipSignHead": "Head",
+  "payrollPayslipSignAgent": "Beneficiary",
+  "payrollPayslipSignBursar": "Cashier",
+  "payrollPayslipSignHead": "Seen and approved by the head",
   "payrollPayslipDownload": "Download the PDF",
   "payrollPayslipWhatsapp": "Send via WhatsApp",
   "payrollPayslipAll": "All payslips (PDF)",
@@ -9324,8 +9841,41 @@
   "payrollPayslipPosition": "{index} / {count}",
   "@payrollPayslipPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}}},
   "payrollPayslipNoPhone": "No number for this staff member.",
-  "payrollPayslipWhatsappMessage": "Hello {name}, your {month} payslip ({school}): net {net}, {payment}.",
-  "@payrollPayslipWhatsappMessage": {"placeholders": {"name": {"type": "String"}, "month": {"type": "String"}, "school": {"type": "String"}, "net": {"type": "String"}, "payment": {"type": "String"}}},
+  "payrollPayslipWhatsappMessageV2": "Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; days worked {days}; net {net}; received {paid}; remaining {rest}.",
+  "@payrollPayslipWhatsappMessageV2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "school": {
+        "type": "String"
+      },
+      "gross": {
+        "type": "String"
+      },
+      "deductions": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipEmpty": "No staff member on this month's ledger.",
   "payrollHistoryMonths": "Months kept",
   "payrollHistoryPaid": "Total net paid",
@@ -9351,6 +9901,25 @@
   "payrollShowAll": "Show all",
   "payrollCurrentMonth": "Current month",
   "payrollNotYetSynced": "The payroll has not been downloaded on this tablet yet; what shows may be incomplete.",
+  "payrollToastPayoutPolicy": "Month payout rate: {rate} %",
+  "@payrollToastPayoutPolicy": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollToastArrearsPrioritized": "Arrears marked as a priority",
+  "payrollToastArrearsUnprioritized": "Priority removed",
+  "payrollToastAdvanceRequested": "Request for {amount} filed · awaiting approval",
+  "@payrollToastAdvanceRequested": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollAdvanceExpenseTitle": "Staff advance",
   "payrollToastVariables": "Variable items saved — {name}",
   "@payrollToastVariables": {"placeholders": {"name": {"type": "String"}}},
   "payrollToastSubmitted": "Submission saved — it leaves at the next sync",
@@ -9364,7 +9933,7 @@
   "@payrollToastAdvance": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
   "payrollToastAdvanceCancelled": "Advance cancelled",
   "payrollToastProfile": "Pay profile saved",
-  "payrollToastSettings": "Payroll settings saved",
+  "payrollToastSettings": "Pay scale saved",
   "payrollToastWriteFailed": "Saving failed on the tablet.",
   "payrollToastShared": "Payslip opened in WhatsApp",
   "payrollToastDownloaded": "Payslip downloaded",
@@ -9372,6 +9941,7 @@
   "payrollRuleNotEditable": "The payroll is no longer a draft.",
   "payrollRuleWrongPhase": "This action does not apply to the payroll's current state.",
   "payrollRuleReasonRequired": "A reason is required.",
+  "payrollRuleWorkedDaysOutOfRange": "Days worked go from 0 to the number of days in the month.",
   "payrollRuleOvertimeNotAllowed": "Temporary staff have no overtime.",
   "payrollRuleInvalidAmount": "Invalid amount.",
   "payrollRuleInvalidInstallments": "An advance is repaid over 1 to 4 months.",
@@ -9380,6 +9950,9 @@
   "payrollRuleAlreadyDeducted": "An instalment of this advance is already deducted: it can no longer be cancelled.",
   "payrollRuleNotValidated": "The payroll must be validated by the server before any payment.",
   "payrollRuleNothingToDisburse": "Nothing to pay for this staff member.",
+  "payrollRuleExceedsBalance": "This payment exceeds what is still owed on this salary.",
+  "payrollRuleFollowsExpense": "This advance comes from an expense: manage it in Expenses.",
+  "payrollRuleAdvanceTypeMissing": "The \"Staff advance\" expense type is not available yet.",
   "payrollRuleAlreadyDisbursed": "This salary is already paid.",
   "payrollRuleSignatureRequired": "Have the pay sheet signed.",
   "payrollRuleMobileDetails": "Choose the operator and enter a full number.",
@@ -9388,6 +9961,7 @@
   "payrollDecrease": "Less",
   "payrollIncrease": "More",
   "payrollToastDownloadFailed": "The payslip could not be downloaded.",
+  "payrollToastRenderBusy": "The server is already rendering a long document: try again in a moment.",
   "payrollPayslipFileName": "payslip-{month}",
   "@payrollPayslipFileName": {"placeholders": {"month": {"type": "String"}}},
   "payrollPayslipsFileName": "payslips-{month}",
@@ -10945,7 +11519,7 @@
   "hrPresenceMinutes": "{minutes} min",
   "hrPresenceKpiLateSubline": "{minutes} min · punctuality {punctuality} %",
   "hrPresenceKpiUnjustified": "Unexcused absences",
-  "hrPresenceKpiUnjustifiedSubline": "shown on the payslip, never deducted",
+  "hrPresenceKpiUnjustifiedSubline": "shown on the payslip",
   "hrPresenceKpiJustified": "Excused absences",
   "hrPresenceKpiJustifiedSubline": "with a reason",
   "hrPresenceUnscoredTitle": "{count, plural, =1{1 staff-day not marked} other{{count} staff-days not marked}}",
@@ -11079,5 +11653,150 @@
   "hrPresenceYearRowA11y": "{month}: attendance {presence}, late {late}, absent {absent}",
   "@hrPresenceYearRowA11y": {"placeholders": {"month": {"type": "String"}, "presence": {"type": "String"}, "late": {"type": "String"}, "absent": {"type": "String"}}},
   "hrPresenceYearOpen": "See this month",
-  "hrPresenceChartScrollHint": "Swipe the chart to see the start of the period"
+  "hrPresenceChartScrollHint": "Swipe the chart to see the start of the period",
+  "menuHrPayroll": "HR · Payroll",
+  "accueilModuleHrPayrollDescription": "The month's ledger, advances and loans, arrears and the pay scale.",
+  "subMenuPayrollAdvances": "Advances & loans",
+  "subMenuPayrollSettings": "Settings",
+  "payrollSettingsErrorRange": "Between {min} and {max}",
+  "@payrollSettingsErrorRange": {"placeholders": {"min": {"type": "int"}, "max": {"type": "int"}}},
+  "payrollSettingsErrorAmount": "Invalid amount",
+  "payrollSettingsErrorStep": "At least one cent",
+  "payrollSettingsInCurrency": "{label} · {currency}",
+  "@payrollSettingsInCurrency": {"placeholders": {"label": {"type": "String"}, "currency": {"type": "String"}}},
+  "payrollSettingsMonthTitle": "Pay month",
+  "payrollSettingsMonthSubtitle": "Hours and days in a full month; a day not worked = gross ÷ days.",
+  "payrollSettingsLegalTitle": "Statutory deductions",
+  "payrollSettingsLegalSubtitle": "Flat IPR per paid employee, CNSS in ‰ of base pay.",
+  "payrollSettingsOvertimeTitle": "Overtime",
+  "payrollSettingsOvertimeSubtitle": "Premium, default rate and rate rounding step.",
+  "payrollSettingsAllowanceTitle": "Family allowances",
+  "payrollSettingsAllowanceSubtitle": "Amount per child and the statuses entitled to it.",
+  "payrollSettingsStateErrors": "Fix the fields in red before saving.",
+  "payrollSettingsStateDirty": "{count, plural, =1{Unsaved changes · will apply to 1 open payroll} other{Unsaved changes · will apply to {count} open payrolls}}",
+  "@payrollSettingsStateDirty": {"placeholders": {"count": {"type": "int"}}},
+  "payrollSettingsStateClean": "Pay scale up to date",
+  "payrollSettingsReset": "Restore default values",
+  "payrollSettingsSave": "Save the pay scale",
+  "payrollSettingsDiscardMessage": "Unsaved changes to the pay scale will be lost.",
+  "payrollSettingsNotYetSynced": "The pay scale has not been downloaded to this tablet yet: default values are shown.",
+  "payrollSettingsReadOnly": "Read only — only the management can change the pay scale.",
+  "payrollAdvanceApprove": "Approve",
+  "payrollAdvanceRefuse": "Refuse",
+  "payrollAdvanceDisburse": "Disburse",
+  "payrollAdvanceWaitsDirection": "Awaiting management",
+  "payrollAdvanceWaitsCash": "Awaiting the cashier",
+  "payrollAdvanceApprovedOn": "approved on {date} by {name}",
+  "@payrollAdvanceApprovedOn": {"placeholders": {"date": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvanceRefuseTitle": "Refuse the advance request",
+  "payrollAdvanceRefuseConfirm": "Refuse the request",
+  "payrollAdvanceRefuseHint": "The reason is passed on to the bursar; a new request remains possible.",
+  "payrollToastAdvanceApproved": "Request for {amount} approved · {name}",
+  "@payrollToastAdvanceApproved": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollToastAdvanceRefused": "Request refused · {name} — reason passed on to the bursar",
+  "@payrollToastAdvanceRefused": {"placeholders": {"name": {"type": "String"}}},
+  "payrollToastAdvanceDisbursed": "Advance of {amount} disbursed to {name}",
+  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvancesToApprove": "Requests to approve",
+  "payrollAdvancesFilterRefused": "Refused",
+  "payrollAdvancesRefusedEmpty": "No refused request",
+  "payrollAdvanceColDecided": "Decided on",
+  "payrollAdvanceColReason": "Reason",
+  "payrollDashNet": "Net to pay",
+  "payrollDashAbsence": "Unexcused absences",
+  "payrollDashAdvances": "Loans & advances",
+  "payrollDashLegal": "IPR & CNSS",
+  "payrollDashChildcare": "Children's fees",
+  "payrollDashOther": "Other",
+  "payrollDashForecastTitle": "Planned and actual this month",
+  "payrollDashValidatedOn": "Payroll validated on {date}",
+  "@payrollDashValidatedOn": {"placeholders": {"date": {"type": "String"}}},
+  "payrollDashDraftSubtitle": "The actual still moves with attendance and the variables",
+  "payrollDashPlanned": "Planned cost",
+  "payrollDashActual": "Actually to pay",
+  "payrollDashLessThanPlanned": "{amount} less than planned (− {percent} %)",
+  "@payrollDashLessThanPlanned": {"placeholders": {"amount": {"type": "String"}, "percent": {"type": "int"}}},
+  "payrollDashArrearsCarried": "+ {arrears} of prioritised arrears this month: {total} to pay in total",
+  "@payrollDashArrearsCarried": {"placeholders": {"arrears": {"type": "String"}, "total": {"type": "String"}}},
+  "payrollDashPaid": "Paid",
+  "payrollDashDeferred": "Deferred",
+  "payrollDashUnpaid": "Unpaid",
+  "payrollDashNotYet": "Not yet paid",
+  "payrollDashPaidTitle": "Net to pay: paid and unpaid",
+  "payrollDashPaidSummary": "{percent} % paid · {count, plural, =0{no employee settled} =1{1 employee settled} other{{count} employees settled}}",
+  "@payrollDashPaidSummary": {"placeholders": {"percent": {"type": "int"}, "count": {"type": "int"}}},
+  "payrollDashUnpaidSummary": "Partial: {partial} · Nothing paid: {unpaid}",
+  "@payrollDashUnpaidSummary": {"placeholders": {"partial": {"type": "int"}, "unpaid": {"type": "int"}}},
+  "payrollDashNothingBeforeValidation": "Nothing is paid before validation.",
+  "payrollDashPrepare": "Prepare the payroll",
+  "payrollDashByMonth": "Month by month",
+  "payrollDashColumnA11y": "{month}: paid {paid}, remaining {rest}",
+  "@payrollDashColumnA11y": {"placeholders": {"month": {"type": "String"}, "paid": {"type": "String"}, "rest": {"type": "String"}}},
+  "payrollDashAdvancesTitle": "Loans & advances",
+  "payrollDashAdvancesSubtitle": "{count, plural, =1{1 employee repaying} other{{count} employees repaying}} · {due} still due",
+  "@payrollDashAdvancesSubtitle": {"placeholders": {"count": {"type": "int"}, "due": {"type": "String"}}},
+  "payrollDashManage": "Manage",
+  "payrollDashFilterOngoing": "Ongoing",
+  "payrollDashFilterSettled": "Settled",
+  "payrollDashAdvancesEmpty": "No loan or advance ongoing",
+  "payrollDashRemainingOf": "{remaining} left of {amount}",
+  "@payrollDashRemainingOf": {"placeholders": {"remaining": {"type": "String"}, "amount": {"type": "String"}}},
+  "payrollDashTakenThisMonth": "− {amount} this month",
+  "@payrollDashTakenThisMonth": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollDashRepaidA11y": "{percent} % repaid",
+  "@payrollDashRepaidA11y": {"placeholders": {"percent": {"type": "int"}}},
+  "payrollDashArrearsTitle": "Arrears by employee",
+  "payrollDashSettle": "Settle in the payroll",
+  "payrollDashArrearsEmpty": "All salaries of validated payrolls are paid",
+  "payrollDashPriority": "priority",
+  "payrollDashColPlanned": "Planned",
+  "payrollDashColDeductions": "Deductions",
+  "payrollDashColNet": "Month's net",
+  "payrollDashColArrears": "+ Arrears",
+  "payrollDashColReceived": "Received",
+  "payrollDashColRemaining": "Remaining",
+  "payrollDashTotal": "Total {currency}",
+  "@payrollDashTotal": {"placeholders": {"currency": {"type": "String"}}},
+  "payrollDashStatusToDisburse": "To pay out",
+  "payrollDashStatusSettled": "Settled",
+  "payrollDashStatusPartial": "Partial",
+  "payrollDashStatusDue": "Due",
+  "payrollDashStaffTitle": "What each employee receives",
+  "payrollDashPdfFileName": "payroll-situation-{month}",
+  "@payrollDashPdfFileName": {"placeholders": {"month": {"type": "String"}}},
+  "payrollDashProvisional": "Provisional amounts: the payroll is not validated yet",
+  "payrollDashPdf": "PDF",
+  "payrollDashSearchHint": "Search an employee or a job",
+  "payrollDashFilterOutstanding": "Remaining to pay",
+  "payrollDashStaffEmpty": "No employee matches",
+  "payrollDashShowAll": "Show all",
+  "payrollDashOpenPayroll": "Open the payroll",
+  "payrollDashNoPayroll": "No payroll for this month",
+  "payrollDashCurrentMonth": "Current month",
+  "payrollDashNoStaff": "No employee to pay",
+  "payrollDashNotTracked": "Payroll validated before v2: its payments were not recorded, nothing can be tracked.",
+  "payrollDashMore": "{count, plural, =1{+ 1 more — see Advances & loans} other{+ {count} more — see Advances & loans}}",
+  "@payrollDashMore": {"placeholders": {"count": {"type": "int"}}},
+  "payrollAdvanceRetractedNote": "Withdrawn by the requester",
+  "payrollSettingsErrorLabel": "At most {max} characters",
+  "@payrollSettingsErrorLabel": {"placeholders": {"max": {"type": "int"}}},
+  "payrollSettingsAdvancesTitle": "Advances, loans and children's fees",
+  "payrollSettingsAdvancesSubtitle": "Cap of one instalment (a warning on request) and length of a loan.",
+  "payrollSettingsAdvanceMax": "Cap of one instalment (% of base pay)",
+  "payrollSettingsLoanMax": "Longest loan (months)",
+  "payrollSettingsChildcare": "Deduct children's school fees",
+  "payrollSettingsEmployerTitle": "Employer charges",
+  "payrollSettingsEmployerSubtitle": "The employer cost on the dashboard; nothing is deducted on the payslip.",
+  "payrollSettingsCnssEmployer": "Employer CNSS (‰ of gross)",
+  "payrollSettingsInpp": "INPP (‰ of gross)",
+  "payrollSettingsOnem": "ONEM (‰ of gross)",
+  "payrollSettingsPayslipTitle": "Payslip",
+  "payrollSettingsPayslipSubtitle": "The three signature captions; blank keeps the paper model's.",
+  "payrollSettingsSignBeneficiary": "First signature",
+  "payrollSettingsSignDirector": "Second signature",
+  "payrollSettingsSignCashier": "Third signature",
+  "payrollAdvanceOverCap": "The instalment exceeds {percent} % of the monthly salary: management will be told.",
+  "@payrollAdvanceOverCap": {"placeholders": {"percent": {"type": "int"}}},
+  "payrollDashEmployerCost": "+ {amount} of employer charges",
+  "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}}
 }

@@ -20,6 +20,7 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 
 part 'tenant_migrations_evaluation.dart';
 part 'tenant_migrations_parent_portal.dart';
+part 'tenant_migrations_payroll_v2.dart';
 part 'tenant_migrations_presence.dart';
 part 'tenant_migrations_programme.dart';
 part 'tenant_migrations_suspension.dart';
@@ -104,6 +105,12 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(67)) {
     await _repullBoutiqueSales(db);
+  }
+  if (upTo(68)) {
+    await _payrollV2(db);
+  }
+  if (upTo(69)) {
+    await _payrollWideSettings(db);
   }
 }
 

@@ -9,14 +9,15 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledg
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_action_bar.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_arrears_banner.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_kpis.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_filters.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_header.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_table.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_payout_bar.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_regularizations.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_settings_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre de paie du mois : bandeau et circuit, barre d'action, bandeaux,
@@ -38,14 +39,9 @@ class PayrollLedgerTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: PayrollLedgerHeader(state: state)),
-            const PayrollSettingsButton(),
-          ],
-        ),
+        PayrollLedgerHeader(state: state),
         const SizedBox(height: AppSpacing.md),
+        PayrollArrearsBanner(snapshot: state.snapshot, view: view),
         PayrollActionBar(view: view),
         PayrollLedgerNotices(view: view),
         PayrollRegularizations(
@@ -56,6 +52,12 @@ class PayrollLedgerTab extends StatelessWidget {
         if (view.lines.isEmpty)
           _Empty(state: state)
         else ...[
+          PayrollPayoutBar(
+            view: view,
+            canEdit: canWrite && view.isEditable,
+            onEdit: actions.editPayoutPolicy,
+          ),
+          const SizedBox(height: AppSpacing.md),
           PayrollKpis(view: view),
           const SizedBox(height: AppSpacing.lg),
           PayrollLedgerFilters(state: state),
@@ -95,7 +97,7 @@ class _Empty extends StatelessWidget {
         state.hasFilters && (state.view?.lines.isNotEmpty ?? false);
     if (filtered) {
       return EteeloEmptyResult(
-        label: state.payFilter == PayrollPayFilter.toPay
+        label: state.payFilter == PayrollPayFilter.unpaid
             ? l10n.payrollEmptyAllPaid
             : l10n.payrollEmptyFilter,
         medallionIcon: Icons.filter_alt_off_outlined,

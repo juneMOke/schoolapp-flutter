@@ -40,6 +40,7 @@ const _draft = StaffMemberDraft(
   neighborhood: 'Matonge',
   category: StaffCategory.administrative,
   jobTitle: 'Censeur',
+  grade: ' L2 ',
   entryDate: '2023-09-15',
   branches: ['Mathématiques'],
   diplomas: [
@@ -89,6 +90,11 @@ void main() {
     // Un administratif ne porte pas de matières ; une ligne vide ne part pas.
     expect(input.branches, isEmpty);
     expect(input.diplomas.single.title, 'Pédagogie');
+    expect(input.grade, 'L2');
+    expect(
+      request('2026-09-29T08:00:00.000Z').toJson()['staffMember'],
+      containsPair('grade', 'L2'),
+    );
   });
 
   test('le payload figé se relit à l identique (chemin du push)', () {

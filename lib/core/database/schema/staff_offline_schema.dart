@@ -75,7 +75,8 @@ const TableSchema staffMembersTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
       sync_error_code TEXT,
-      updated_at INTEGER NOT NULL DEFAULT 0
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      grade TEXT
     )
   ''',
   createIndexSql: [

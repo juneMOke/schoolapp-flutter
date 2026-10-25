@@ -5,15 +5,18 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_advance_pay_flow.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/bridge/expense_staff_advance_bridge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes du registre, orchestrés : modale, écriture, accusé (spec §9).
@@ -31,15 +34,30 @@ class ExpenseRegisterActions {
   Future<void> create() {
     final snapshot = _cubit.state.snapshot;
     return _openForm(
-      ExpenseFormSeed.blank(types: snapshot.activeTypes, today: DateTime.now()),
+      ExpenseFormSeed.blank(
+        types: [
+          for (final type in snapshot.activeTypes)
+            if (type.code != ExpenseStaffAdvance.typeCode) type,
+        ],
+        today: DateTime.now(),
+      ),
     );
   }
 
   Future<void> edit(Expense expense) =>
       _openForm(ExpenseFormSeed.edit(expense));
 
-  Future<void> duplicate(Expense expense) =>
-      _openForm(ExpenseFormSeed.duplicate(expense, today: DateTime.now()));
+  /// Une avance au personnel ne se duplique pas (B5) : la copie n'aurait pas
+  /// de bloc R.H. et se paierait sans retenue. Caviardée, elle se reconnaît
+  /// à son type.
+  Future<void> duplicate(Expense expense) async {
+    final type = _cubit.state.snapshot.typesById[expense.typeId];
+    if (expense.staffAdvance != null ||
+        type?.code == ExpenseStaffAdvance.typeCode) {
+      return;
+    }
+    await _openForm(ExpenseFormSeed.duplicate(expense, today: DateTime.now()));
+  }
 
   /// Rend la dépense enregistrée, ou `null` si la saisie a été abandonnée ou
   /// refusée. [announce] se tait quand un second geste suit — « corriger et
@@ -50,15 +68,35 @@ class ExpenseRegisterActions {
   }) async {
     final cubit = _cubit;
     final l10n = AppLocalizations.of(context)!;
+    // Une nouvelle demande peut être une avance au personnel : la Paie en
+    // saisit le bloc R.H. (spec « PaieDepBridge »).
+    final bridge = seed.isEdit
+        ? null
+        : ExpenseStaffAdvanceBridge.offeredIn(context);
+    final advanceType = bridge == null
+        ? null
+        : ExpenseStaffAdvanceBridge.typeOf(cubit.state.snapshot.activeTypes);
+    var bridged = false;
     final draft = await showExpenseFormDialog(
       context,
       seed: seed,
-      types: _formTypes(seed.typeId),
+      types: [..._formTypes(seed.typeId), ?advanceType],
       rate: cubit.state.snapshot.usdToCdf,
       today: DateTime.now(),
       recordedByName: _agentName(),
+      staffAdvanceTypeId: advanceType?.id,
+      onStaffAdvance: () => bridged = true,
     );
-    if (draft == null || !context.mounted) return null;
+    if (!context.mounted) return null;
+    if (bridged) {
+      final written = await bridge?.request(context) ?? false;
+      if (!written) return null;
+      // La demande est écrite par la Paie : le registre la relit.
+      await cubit.refresh();
+      if (context.mounted) _notifyLocalWrite();
+      return null;
+    }
+    if (draft == null) return null;
     final result = await cubit.save(draft);
     if (!context.mounted) return null;
     return result.fold(
@@ -171,11 +209,19 @@ class ExpenseRegisterActions {
   }) async {
     final cubit = _cubit;
     final l10n = AppLocalizations.of(context)!;
+    final advance = await ExpenseAdvancePayFlow.run(
+      context,
+      expense,
+      gesture,
+      type: _cubit.state.snapshot.typesById[expense.typeId],
+    );
+    if (!advance.proceed || !context.mounted) return;
     final result = await cubit.applyGesture(
       expense,
       gesture,
       note: note,
       actorName: _agentName(),
+      advancePayment: advance.payment,
     );
     if (!context.mounted) return;
     result.fold(
@@ -236,10 +282,24 @@ class ExpenseRegisterActions {
 
   /// Les types offerts : actifs, plus celui de la dépense modifiée s'il a été
   /// masqué depuis — il la nomme encore.
-  List<ExpenseType> _formTypes(String currentTypeId) => [
-    for (final type in _cubit.state.snapshot.types)
-      if (type.active || type.id == currentTypeId) type,
-  ];
+  /// Les types que le formulaire propose. Une avance au personnel ne se
+  /// dépose que depuis la Paie, avec son bloc R.H. (B5) ; corrigée ici, elle
+  /// garde son type — en changer laisserait le bloc sur une dépense ordinaire.
+  List<ExpenseType> _formTypes(String currentTypeId) {
+    final types = _cubit.state.snapshot.types;
+    for (final type in types) {
+      if (type.id == currentTypeId &&
+          type.code == ExpenseStaffAdvance.typeCode) {
+        return [type];
+      }
+    }
+    return [
+      for (final type in types)
+        if ((type.active || type.id == currentTypeId) &&
+            type.code != ExpenseStaffAdvance.typeCode)
+          type,
+    ];
+  }
 
   static String _name(Expense expense) => expense.number ?? expense.title;
 

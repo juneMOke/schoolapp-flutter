@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
@@ -154,8 +155,15 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
     ExpenseGesture gesture, {
     String note = '',
     String? actorName,
+    ExpenseAdvancePayment? advancePayment,
   }) => _thenRefresh(
-    _gesture(expense, gesture, note: note, actorName: actorName),
+    _gesture(
+      expense,
+      gesture,
+      note: note,
+      actorName: actorName,
+      advancePayment: advancePayment,
+    ),
   );
 
   Future<Either<Failure, Unit>> withdraw(Expense expense) =>

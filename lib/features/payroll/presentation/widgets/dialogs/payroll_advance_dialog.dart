@@ -18,19 +18,28 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_advance_preview.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Accorder une avance : l'agent, le montant dans la devise de son contrat,
-/// le motif, et l'échéancier. La première échéance tombe sur le mois en
-/// cours s'il est encore en brouillon, sinon le suivant. Rend l'avance.
+/// Demander une avance ou un prêt : l'agent, le montant dans la devise de
+/// son contrat, le mode souhaité, le motif, et l'échéancier. Rend la saisie.
+///
+/// [asRequest] (B5) : la saisie part en **demande de dépense** — validée par
+/// la direction, décaissée par la caisse, qui choisit alors la paie de la
+/// première retenue. Sans le type `STAFF_ADVANCE` (serveur pas encore à
+/// jour, T11), l'avance s'accorde en direct, la première échéance sur le
+/// mois en cours s'il est en brouillon, sinon le suivant.
 class PayrollAdvanceDialog extends StatefulWidget {
   final PayrollSnapshot snapshot;
   final String today;
+  final bool asRequest;
 
   const PayrollAdvanceDialog({
     super.key,
     required this.snapshot,
     required this.today,
+    this.asRequest = false,
   });
 
   static Future<SalaryAdvanceDraft?> show(
@@ -103,10 +112,13 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
     );
   }
 
+  PayrollRule? _refusalOf(SalaryAdvanceDraft draft) => widget.asRequest
+      ? RequestSalaryAdvanceUseCase.refusalOf(widget.snapshot, draft)
+      : PayrollAdvanceRules.refusalOf(widget.snapshot, draft);
+
   void _submit() {
     final draft = _draft;
-    if (draft == null ||
-        PayrollAdvanceRules.refusalOf(widget.snapshot, draft) != null) {
+    if (draft == null || _refusalOf(draft) != null) {
       setState(() => _tried = true);
       return;
     }
@@ -117,9 +129,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final draft = _draft;
-    final refusal = draft == null
-        ? null
-        : PayrollAdvanceRules.refusalOf(widget.snapshot, draft);
+    final refusal = draft == null ? null : _refusalOf(draft);
     final currentMonth = widget.today.substring(0, 7);
     final members = [
       for (final member in widget.snapshot.members)
@@ -133,6 +143,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
     ];
     return EteeloFormDialog(
       onSubmit: _submit,
+      eyebrow: widget.asRequest ? l10n.payrollAdvanceRequestEyebrow : null,
       title: l10n.payrollAdvanceTitle,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -191,30 +202,41 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
           ),
           const SizedBox(height: AppSpacing.xs),
           PayrollChoiceChips<int>(
-            values: const [1, 2, 3, PayrollAdvanceRules.maxInstallments],
+            values: [
+              for (
+                var n = 1;
+                n <= PayrollAdvanceRules.maxInstallmentsOf(widget.snapshot);
+                n++
+              )
+                n,
+            ],
             selected: _installments,
             label: (n) =>
                 n == 1 ? l10n.payrollAdvanceOnce : l10n.payrollAdvanceOver(n),
             onSelected: (n) => setState(() => _installments = n),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.payrollAdvanceFirstMonth(
-              PayrollLabels.month(context, _firstMonth),
-            ),
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          if (_firstMonth != currentMonth)
+          if (widget.asRequest)
+            PayrollTone.validated.notice(l10n.payrollAdvanceRequestNote)
+          else ...[
             Text(
-              l10n.payrollAdvanceFirstMonthNext(
-                PayrollLabels.month(context, currentMonth),
+              l10n.payrollAdvanceFirstMonth(
+                PayrollLabels.month(context, _firstMonth),
               ),
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textMutedAa,
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
+            if (_firstMonth != currentMonth)
+              Text(
+                l10n.payrollAdvanceFirstMonthNext(
+                  PayrollLabels.month(context, currentMonth),
+                ),
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textMutedAa,
+                ),
+              ),
+          ],
           if (draft != null)
             PayrollAdvancePreview(snapshot: widget.snapshot, draft: draft),
           if (_tried && (draft == null || refusal != null)) ...[
@@ -239,7 +261,9 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
           fullWidth: false,
         ),
         EteeloButton.primary(
-          label: l10n.payrollAdvanceTitle,
+          label: widget.asRequest
+              ? l10n.payrollAdvanceRequestSubmit
+              : l10n.payrollAdvanceTitle,
           onPressed: _submit,
           fullWidth: false,
         ),

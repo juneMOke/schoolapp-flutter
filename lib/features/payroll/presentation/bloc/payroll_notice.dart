@@ -3,6 +3,11 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule
 
 enum PayrollNoticeKind {
   variablesSaved,
+
+  /// Le taux de versement du mois ; `amount` porte le taux.
+  payoutPolicySaved,
+  arrearsPrioritized,
+  arrearsUnprioritized,
   submitted,
   validated,
   returned,
@@ -10,6 +15,14 @@ enum PayrollNoticeKind {
   paid,
   payCancelled,
   advanceGranted,
+
+  /// Une demande d'avance déposée en validation (B5) ; `amount` mis en forme.
+  advanceRequested,
+
+  /// Une demande d'avance tranchée depuis la Paie ; `name` et `amount`.
+  advanceApproved,
+  advanceRefused,
+  advanceDisbursed,
   advanceCancelled,
   profileSaved,
   settingsSaved,
@@ -21,6 +34,9 @@ enum PayrollNoticeKind {
 
   /// Le serveur n'a pas rendu le bulletin.
   downloadFailed,
+
+  /// Le serveur compose déjà un long document (429) : réessayer plus tard.
+  renderBusy,
 
   /// Une règle refusée avant la file.
   refused,

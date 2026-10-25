@@ -35,6 +35,20 @@ class PayrollSettingsDao {
       'overtimeMultiplierPermille': row['overtime_multiplier_permille'],
       'allowanceEligibleKinds': _decode(row['allowance_eligible_kinds']),
       'currencyRules': _decode(row['by_currency']),
+      'workDaysDivisor': row['work_days_divisor'],
+      'absenceDeductionEnabled': row['absence_deduction_enabled'] == 1,
+      // Q8 : rangés seulement une fois servis ; `NULL` les tait.
+      if (row['childcare_enabled'] != null) ...{
+        'cnssEmployerPermille': row['cnss_employer_permille'],
+        'inppPermille': row['inpp_permille'],
+        'onemPermille': row['onem_permille'],
+        'advanceMaxPercent': row['advance_max_percent'],
+        'loanMaxMonths': row['loan_max_months'],
+        'childcareEnabled': row['childcare_enabled'] == 1,
+      },
+      'signatureBeneficiaryLabel': row['signature_beneficiary_label'],
+      'signatureDirectorLabel': row['signature_director_label'],
+      'signatureCashierLabel': row['signature_cashier_label'],
     });
     if (seed == null) return PayrollSettings.defaults;
     return toEntity(
@@ -119,6 +133,21 @@ class PayrollSettingsDao {
       'overtime_multiplier_permille': seed.overtimeMultiplierPermille,
       'allowance_eligible_kinds': jsonEncode(json['allowanceEligibleKinds']),
       'by_currency': jsonEncode(json['currencyRules']),
+      'work_days_divisor': seed.workDaysDivisor,
+      'absence_deduction_enabled': seed.absenceDeductionEnabled ? 1 : 0,
+      'cnss_employer_permille': seed.cnssEmployerPermille,
+      'inpp_permille': seed.inppPermille,
+      'onem_permille': seed.onemPermille,
+      'advance_max_percent': seed.advanceMaxPercent,
+      'loan_max_months': seed.loanMaxMonths,
+      'childcare_enabled': switch (seed.childcareEnabled) {
+        null => null,
+        true => 1,
+        false => 0,
+      },
+      'signature_beneficiary_label': seed.signatureBeneficiaryLabel,
+      'signature_director_label': seed.signatureDirectorLabel,
+      'signature_cashier_label': seed.signatureCashierLabel,
     };
   }
 
@@ -147,31 +176,68 @@ class PayrollSettingsDao {
           childAllowanceInCents: currency.childAllowanceInCents,
           defaultOvertimeRateInCents: currency.defaultOvertimeRateInCents,
           overtimeRateStepInCents: currency.overtimeRateStepInCents,
+          iprFlatInCents: currency.iprFlatInCents,
+          cnssPermille: currency.cnssPermille,
         ),
     },
+    workDaysDivisor: seed.workDaysDivisor,
+    absenceDeductionEnabled: seed.absenceDeductionEnabled,
+    cnssEmployerPermille:
+        seed.cnssEmployerPermille ??
+        PayrollSettings.defaultCnssEmployerPermille,
+    inppPermille: seed.inppPermille ?? PayrollSettings.defaultInppPermille,
+    onemPermille: seed.onemPermille ?? PayrollSettings.defaultOnemPermille,
+    advanceMaxPercent:
+        seed.advanceMaxPercent ?? PayrollSettings.defaultAdvanceMaxPercent,
+    loanMaxMonths: seed.loanMaxMonths ?? PayrollSettings.defaultLoanMaxMonths,
+    childcareEnabled: seed.childcareEnabled ?? true,
+    signatureBeneficiaryLabel: seed.signatureBeneficiaryLabel,
+    signatureDirectorLabel: seed.signatureDirectorLabel,
+    signatureCashierLabel: seed.signatureCashierLabel,
+    wideSettingsServed: seed.servesWideSettings,
     syncState: syncState,
   );
 
   /// La forme du fil de réglages saisis sur la tablette.
-  static PayrollSettingsSeed toSeed(PayrollSettings settings) =>
-      PayrollSettingsSeed(
-        monthlyHoursDivisor: settings.monthlyHoursDivisor,
-        overtimeMultiplierPermille: settings.overtimeMultiplierPermille,
-        allowanceEligibleKinds: [
-          for (final kind in StaffContractKind.values)
-            if (settings.allowanceEligibleKinds.contains(kind)) kind.wire,
-        ],
-        byCurrency: [
-          for (final entry
-              in (settings.byCurrency.entries.toList()
-                ..sort((a, b) => a.key.compareTo(b.key))))
-            (
-              currency: entry.key,
-              childAllowanceInCents: entry.value.childAllowanceInCents,
-              defaultOvertimeRateInCents:
-                  entry.value.defaultOvertimeRateInCents,
-              overtimeRateStepInCents: entry.value.overtimeRateStepInCents,
-            ),
-        ],
-      );
+  static PayrollSettingsSeed toSeed(
+    PayrollSettings settings,
+  ) => PayrollSettingsSeed(
+    monthlyHoursDivisor: settings.monthlyHoursDivisor,
+    overtimeMultiplierPermille: settings.overtimeMultiplierPermille,
+    allowanceEligibleKinds: [
+      for (final kind in StaffContractKind.values)
+        if (settings.allowanceEligibleKinds.contains(kind)) kind.wire,
+    ],
+    byCurrency: [
+      for (final entry
+          in (settings.byCurrency.entries.toList()
+            ..sort((a, b) => a.key.compareTo(b.key))))
+        (
+          currency: entry.key,
+          childAllowanceInCents: entry.value.childAllowanceInCents,
+          defaultOvertimeRateInCents: entry.value.defaultOvertimeRateInCents,
+          overtimeRateStepInCents: entry.value.overtimeRateStepInCents,
+          iprFlatInCents: entry.value.iprFlatInCents,
+          cnssPermille: entry.value.cnssPermille,
+        ),
+    ],
+    workDaysDivisor: settings.workDaysDivisor,
+    absenceDeductionEnabled: settings.absenceDeductionEnabled,
+    // Pas servis : tus, le serveur garde les siens.
+    cnssEmployerPermille: settings.wideSettingsServed
+        ? settings.cnssEmployerPermille
+        : null,
+    inppPermille: settings.wideSettingsServed ? settings.inppPermille : null,
+    onemPermille: settings.wideSettingsServed ? settings.onemPermille : null,
+    advanceMaxPercent: settings.wideSettingsServed
+        ? settings.advanceMaxPercent
+        : null,
+    loanMaxMonths: settings.wideSettingsServed ? settings.loanMaxMonths : null,
+    childcareEnabled: settings.wideSettingsServed
+        ? settings.childcareEnabled
+        : null,
+    signatureBeneficiaryLabel: settings.signatureBeneficiaryLabel,
+    signatureDirectorLabel: settings.signatureDirectorLabel,
+    signatureCashierLabel: settings.signatureCashierLabel,
+  );
 }

@@ -356,9 +356,6 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // Le Pointage se lit sous `hr.attendance.read` ; pointer et clore sont
     // gardés geste par geste.
     MenuConstants.hrStaffAttendanceId: ModuleAccess([Perm.hrAttendanceRead]),
-    // La Paie se lit sous `hr.pay.read` ; préparer et verser, valider et
-    // régler sont gardés geste par geste.
-    MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
   },
   // RH · Personnel : les deux écrans lisent le MÊME fichier local que les
   // Ressources humaines, sous le même droit. Créer ou modifier une fiche reste
@@ -374,6 +371,18 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     MenuConstants.hrPresenceFicheId: ModuleAccess([Perm.hrAttendanceRead]),
     MenuConstants.hrPresenceRegisterId: ModuleAccess([Perm.hrAttendanceRead]),
     MenuConstants.hrPresenceRecapId: ModuleAccess([Perm.hrAttendanceRead]),
+  },
+  // RH · Paie : tout se lit sous `hr.pay.read` — le barème aussi, que
+  // l'économe consulte ; préparer et verser, valider et régler, modifier le
+  // barème sont gardés geste par geste (write / manage).
+  MenuConstants.hrPayrollMenuId: {
+    // Le tableau de bord lit les mêmes lignes que le livre : même droit. Son
+    // PDF nominatif (Q7) est servi sous `hr.pay.read` seul.
+    MenuConstants.hrPayrollDashboardId: ModuleAccess([Perm.hrPayRead]),
+    MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
+    MenuConstants.hrPayrollAdvancesId: ModuleAccess([Perm.hrPayRead]),
+    MenuConstants.hrPayrollArrearsId: ModuleAccess([Perm.hrPayRead]),
+    MenuConstants.hrPayrollSettingsId: ModuleAccess([Perm.hrPayRead]),
   },
   MenuConstants.communicationMenuId: {
     // Lire suffit à ouvrir la liste et le détail ; écrire et envoyer sont

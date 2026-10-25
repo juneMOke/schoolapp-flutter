@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_draft_validator.dart';
@@ -15,9 +16,11 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_ste
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_branches_field.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_day_field.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_form_block.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/agent/staff_synced_text_input.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Étape 3 · Poste : catégorie, fonction (liste dépendante), date d'entrée et,
+/// Étape 3 · Poste : catégorie, fonction (liste dépendante), date d'entrée,
+/// grade (lu par la paie) et,
 /// pour un enseignant, les matières qu'il déclare pouvoir tenir.
 class StaffJobStep extends StatelessWidget {
   final StaffAgentState state;
@@ -98,6 +101,15 @@ class StaffJobStep extends StatelessWidget {
               errorText: error(StaffField.entryDate),
               onChanged: (v) =>
                   onChanged((d) => d.copyWith(entryDate: () => v)),
+            ),
+            // Un code (`L2`, `A1`) : la saisie part telle quelle.
+            StaffSyncedTextInput(
+              value: draft.grade,
+              label: l10n.staffFieldGrade,
+              placeholder: l10n.staffFieldGradeHint,
+              readOnly: readOnly,
+              capitalization: EteeloTextCapitalization.none,
+              onChanged: (v) => onChanged((d) => d.copyWith(grade: v)),
             ),
           ],
         ),

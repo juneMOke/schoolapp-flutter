@@ -43,6 +43,10 @@ import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_pr
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_recap_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_register_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_advances_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_arrears_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_dashboard_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_settings_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
@@ -153,8 +157,16 @@ class ShellScreen extends StatelessWidget {
         return const StaffFilePage();
       case MenuConstants.hrStaffAttendanceId:
         return const StaffAttendancePage();
+      case MenuConstants.hrPayrollDashboardId:
+        return const PayrollDashboardPage();
       case MenuConstants.hrPayrollId:
         return const PayrollPage();
+      case MenuConstants.hrPayrollAdvancesId:
+        return const PayrollAdvancesPage();
+      case MenuConstants.hrPayrollArrearsId:
+        return const PayrollArrearsPage();
+      case MenuConstants.hrPayrollSettingsId:
+        return const PayrollSettingsPage();
       case MenuConstants.hrPersonnelDashboardId:
         return const HrDashboardPage();
       case MenuConstants.hrPersonnelFileId:

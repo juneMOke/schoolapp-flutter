@@ -208,6 +208,64 @@ void main() {
 
       expect((await dao.read(_school)).monthlyHoursDivisor, 173);
     });
+
+    test(
+      'réglages v2 : relus entiers, défauts v1 quand le fil les tait',
+      () async {
+        final dao = PayrollSettingsDao(db);
+        final v1 = PayrollSettingsSeed.tryParse({
+          'monthlyHoursDivisor': 173,
+          'overtimeMultiplierPermille': 1300,
+          'allowanceEligibleKinds': <String>[],
+          'currencyRules': [
+            {
+              'currency': 'USD',
+              'childAllowanceInCents': 0,
+              'defaultOvertimeRateInCents': 300,
+              'overtimeRateStepInCents': 50,
+            },
+          ],
+        })!;
+        expect(v1.workDaysDivisor, 26);
+        expect(v1.absenceDeductionEnabled, isFalse);
+        expect(v1.byCurrency.single.iprFlatInCents, 0);
+
+        final v2 = PayrollSettingsSeed.tryParse({
+          ...v1.toJson(),
+          'workDaysDivisor': 22,
+          'absenceDeductionEnabled': true,
+          'currencyRules': [
+            {
+              ...(v1.toJson()['currencyRules'] as List).single as Map,
+              'iprFlatInCents': 200,
+              'cnssPermille': 35,
+            },
+          ],
+        })!;
+        await dao.applySeed(v2, schoolId: _school, nowMs: 1);
+        final read = await dao.read(_school);
+
+        expect(read.workDaysDivisor, 22);
+        expect(read.absenceDeductionEnabled, isTrue);
+        expect(read.of('USD').iprFlatInCents, 200);
+        expect(read.of('USD').cnssPermille, 35);
+        expect(PayrollSettingsDao.toSeed(read).toJson(), v2.toJson());
+      },
+    );
+
+    test('réglages v2 : un diviseur hors bornes retombe à 26', () {
+      final seed = PayrollSettingsSeed.tryParse({
+        'monthlyHoursDivisor': 173,
+        'overtimeMultiplierPermille': 1300,
+        'allowanceEligibleKinds': <String>[],
+        'currencyRules': <Object>[],
+        'workDaysDivisor': 40,
+        'absenceDeductionEnabled': 'yes',
+      })!;
+
+      expect(seed.workDaysDivisor, 26);
+      expect(seed.absenceDeductionEnabled, isFalse);
+    });
   });
 
   test('résumés : un agent absent vaut zéro', () async {

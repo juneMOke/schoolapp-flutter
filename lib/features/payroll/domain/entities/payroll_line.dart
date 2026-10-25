@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line_parts.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
 /// La retenue d'une avance sur une ligne : le rang de l'échéance, ce qui était
@@ -62,7 +63,16 @@ class PayrollLine extends Equatable {
   final List<PayrollLineAdvance> advances;
   final int netInCents;
 
-  /// Le Pointage du mois précédent, clos — indicatif, sans retenue.
+  /// `1` : une ligne figée avant la v2, qui ne connaît ni retenues fixes ni
+  /// versement réduit. Tout calcul de la tablette est en [currentFormula].
+  final int formulaVersion;
+  final PayrollLineDeductions deductions;
+
+  /// `null` sur une ligne v1 : tout le net est à verser.
+  final PayrollLinePayout? payout;
+
+  /// Le Pointage du mois précédent, clos — d'où viennent les jours prestés
+  /// (NJP, v2).
   final String? attendanceMonth;
   final AttendanceAgentSummary attendance;
   final bool frozen;
@@ -87,6 +97,9 @@ class PayrollLine extends Equatable {
     this.children = 0,
     this.allowanceInCents = 0,
     this.advances = const [],
+    this.formulaVersion = currentFormula,
+    this.deductions = PayrollLineDeductions.none,
+    this.payout,
     this.attendanceMonth,
     this.attendance = AttendanceAgentSummary.zero,
     this.frozen = false,
@@ -118,10 +131,21 @@ class PayrollLine extends Equatable {
     grossInCents: grossInCents,
     advances: advances,
     netInCents: netInCents,
+    formulaVersion: formulaVersion,
+    deductions: deductions,
+    payout: payout,
     attendanceMonth: attendanceMonth,
     attendance: attendance,
     frozen: frozen,
   );
+
+  static const int currentFormula = 2;
+
+  /// Ce que l'école verse ce mois : tout le net, sauf versement réduit.
+  int get toPayInCents => payout?.toPayInCents ?? netInCents;
+
+  /// La part du net qui deviendra un arriéré à la validation.
+  int get deferredInCents => payout?.deferredInCents ?? 0;
 
   int get advanceInCents =>
       advances.fold(0, (sum, advance) => sum + advance.takenInCents);
@@ -157,6 +181,9 @@ class PayrollLine extends Equatable {
     grossInCents,
     advances,
     netInCents,
+    formulaVersion,
+    deductions,
+    payout,
     attendanceMonth,
     attendance,
     frozen,

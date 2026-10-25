@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_dialog_header.dart';
@@ -175,6 +176,9 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
           footer: [
             ExpenseDetailActions(
               expense: _expense,
+              isStaffAdvance:
+                  _expense.staffAdvance != null ||
+                  widget.type?.code == ExpenseStaffAdvance.typeCode,
               accountId: widget.accountId,
               onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
               onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),

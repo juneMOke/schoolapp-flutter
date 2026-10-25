@@ -27,6 +27,7 @@ class StaffMemberDraft extends Equatable {
   final String address;
   final StaffCategory? category;
   final String jobTitle;
+  final String grade;
   final List<String> branches;
   final List<StaffDiploma> diplomas;
 
@@ -47,6 +48,7 @@ class StaffMemberDraft extends Equatable {
     this.address = '',
     this.category,
     this.jobTitle = '',
+    this.grade = '',
     this.branches = const [],
     this.diplomas = const [],
   });
@@ -68,6 +70,7 @@ class StaffMemberDraft extends Equatable {
     address: member.address ?? '',
     category: member.category,
     jobTitle: member.jobTitle ?? '',
+    grade: member.grade ?? '',
     branches: member.branches,
     diplomas: member.diplomas,
   );
@@ -118,6 +121,7 @@ class StaffMemberDraft extends Equatable {
     String? address,
     StaffCategory? Function()? category,
     String? jobTitle,
+    String? grade,
     List<String>? branches,
     List<StaffDiploma>? diplomas,
   }) => StaffMemberDraft(
@@ -137,6 +141,7 @@ class StaffMemberDraft extends Equatable {
     address: address ?? this.address,
     category: category == null ? this.category : category(),
     jobTitle: jobTitle ?? this.jobTitle,
+    grade: grade ?? this.grade,
     branches: branches ?? this.branches,
     diplomas: diplomas ?? this.diplomas,
   );
@@ -159,6 +164,7 @@ class StaffMemberDraft extends Equatable {
     address,
     category,
     jobTitle,
+    grade,
     branches,
     diplomas,
   ];

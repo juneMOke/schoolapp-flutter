@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 
 /// Ce que le formulaire soumet — création, modification ou duplication.
 ///
@@ -20,6 +21,7 @@ class ExpenseDraft extends Equatable {
   final String currency;
   final DateTime expenseDate;
   final String? supplier;
+  final ExpenseStaffAdvance? staffAdvance;
   final ExpenseFundingSource fundingSource;
 
   /// Nom de l'agent connecté, affiché tant que le serveur n'a pas renvoyé le
@@ -35,6 +37,7 @@ class ExpenseDraft extends Equatable {
     required this.currency,
     required this.expenseDate,
     this.supplier,
+    this.staffAdvance,
     this.fundingSource = ExpenseFundingSource.cash,
     this.recordedByName,
   });
@@ -51,6 +54,7 @@ class ExpenseDraft extends Equatable {
     currency,
     expenseDate,
     supplier,
+    staffAdvance,
     fundingSource,
     recordedByName,
   ];

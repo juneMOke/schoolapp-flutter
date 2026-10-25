@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/expense/data/local/expense_write_dao
 import 'package:school_app_flutter/features/expense/data/sync/expense_error_codes.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Ce que le serveur dit d'une dépense, appliqué au registre local — par
@@ -66,7 +67,12 @@ class ExpenseSyncDao {
       table,
       {
         ...ExpenseDeltaColumns.server(canonical),
-        if (latest) ...ExpenseDeltaColumns.content(canonical),
+        if (latest)
+          ...ExpenseDeltaColumns.content(
+            canonical,
+            localStaffAdvance: row.staffAdvance,
+            advanceTypeId: await _advanceTypeId(txn, schoolId),
+          ),
         if (latest) ...ExpenseDeltaColumns.synced,
         if (row.withdrawalPendingAt == null && !orphanWithdrawal)
           'deleted_at': canonical.deletedAt,
@@ -272,6 +278,7 @@ class ExpenseSyncDao {
     if (deltas.isEmpty) return 0;
     return _db.transaction((txn) async {
       final reader = ExpenseReadDao(txn);
+      final advanceTypeId = await _advanceTypeId(txn, schoolId);
       for (final delta in deltas) {
         final row = await reader.find(delta.id);
         if (row == null) {
@@ -284,7 +291,12 @@ class ExpenseSyncDao {
           table,
           {
             ...ExpenseDeltaColumns.server(delta),
-            if (synced) ...ExpenseDeltaColumns.content(delta),
+            if (synced)
+              ...ExpenseDeltaColumns.content(
+                delta,
+                localStaffAdvance: row.staffAdvance,
+                advanceTypeId: advanceTypeId,
+              ),
             if (row.withdrawalPendingAt == null) 'deleted_at': delta.deletedAt,
             'updated_at': nowMs,
           },
@@ -303,6 +315,22 @@ class ExpenseSyncDao {
   ///
   /// La fraîcheur, elle, ne se pose que si elle avance — un geste écrit ici
   /// et pas encore poussé est plus récent que ce que le serveur connaît.
+  /// Le type `STAFF_ADVANCE` de l'école, masqué compris ; `null` tant que
+  /// les types ne sont pas descendus.
+  static Future<String?> _advanceTypeId(
+    DatabaseExecutor txn,
+    String schoolId,
+  ) async {
+    final rows = await txn.query(
+      'ref_expense_types',
+      columns: ['id'],
+      where: 'school_id = ? AND code = ?',
+      whereArgs: [schoolId, ExpenseStaffAdvance.typeCode],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.single['id'] as String?;
+  }
+
   static Future<void> _applyThread(
     DatabaseExecutor txn,
     ExpenseDeltaDto delta, {

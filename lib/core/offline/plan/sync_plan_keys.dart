@@ -185,6 +185,10 @@ abstract final class SyncPlanKeys {
   static const String hrSalaryAdvances = 'hr.salary-advances';
   static const String hrPayrollDisbursements = 'hr.payroll-disbursements';
 
+  /// Le drapeau « priorité » des arriérés (Paie v2, T9), sous `hr.pay.read`.
+  static const String hrPayrollArrearsPriorities =
+      'hr.payroll-arrear-priorities';
+
   /// La photo de chaque élève (empreinte, date de prise), accordée par
   /// `student.read`. Les octets ne descendent pas : ils se téléchargent à
   /// l'affichage ou au préchargement des vignettes.
@@ -239,6 +243,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.hrStaffAttendanceSummaries: ['staff_attendance_summaries'],
   SyncPlanKeys.hrSalaryAdvances: ['salary_advances'],
   SyncPlanKeys.hrPayrollDisbursements: ['payroll_disbursements'],
+  SyncPlanKeys.hrPayrollArrearsPriorities: ['payroll_arrear_priorities'],
   SyncPlanKeys.studentPhotos: ['student_photos'],
   SyncPlanKeys.enrollmentSuspensions: ['enrollment_suspensions'],
 };
@@ -353,6 +358,7 @@ const Set<String> _kCursorKeyPrefixes = {
   'staff_attendance_summaries',
   'salary_advances',
   'payroll_disbursements',
+  'payroll_arrear_priorities',
   'enrollment_reenrollment_cohort',
   // Cadré par l'école du jeton, comme les flux RH.
   'student_photos',

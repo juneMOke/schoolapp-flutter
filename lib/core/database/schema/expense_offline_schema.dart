@@ -103,7 +103,8 @@ const TableSchema expensesTable = TableSchema(
       decided_at TEXT,
       decision_reason TEXT,
       reminder_count INTEGER NOT NULL DEFAULT 0,
-      last_message_at TEXT
+      last_message_at TEXT,
+      staff_advance TEXT
     )
   ''',
   createIndexSql: [

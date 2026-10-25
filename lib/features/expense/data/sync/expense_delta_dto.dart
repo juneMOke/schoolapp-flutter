@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 
 /// L'état canonique d'une dépense (`ExpenseDelta`) — la même forme dans le
 /// flux de descente et dans l'accusé d'une remontée.
@@ -23,6 +24,15 @@ class ExpenseDeltaDto {
   final String? paidOn;
   final String expenseDate;
   final String? supplier;
+
+  /// Le bloc `staffAdvance` d'une avance au personnel, en JSON ; `null`
+  /// caviardé (T14) ou hors propos.
+  final String? staffAdvance;
+
+  /// Le serveur a-t-il porté un bloc ? Il sérialise `staffAdvance: null`
+  /// aussi bien pour une dépense ordinaire que pour une avance caviardée :
+  /// sans bloc, la tablette n'efface pas ce qu'elle sait.
+  final bool carriesStaffAdvance;
   final String fundingSource;
   final String? recordedById;
   final String? recordedByName;
@@ -64,6 +74,8 @@ class ExpenseDeltaDto {
     this.paidOn,
     required this.expenseDate,
     this.supplier,
+    this.staffAdvance,
+    this.carriesStaffAdvance = false,
     this.fundingSource = 'CASH',
     this.recordedById,
     this.recordedByName,
@@ -134,6 +146,8 @@ class ExpenseDeltaDto {
       paidOn: paidOn == null ? null : ExpenseDay.format(paidOn),
       expenseDate: ExpenseDay.format(expenseDate),
       supplier: text('supplier'),
+      staffAdvance: ExpenseStaffAdvance.tryParse(raw['staffAdvance'])?.encode(),
+      carriesStaffAdvance: raw['staffAdvance'] is Map,
       fundingSource: text('fundingSource')?.toUpperCase() ?? 'CASH',
       recordedById: text('recordedById'),
       recordedByName: text('recordedByName'),
