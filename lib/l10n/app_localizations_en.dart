@@ -14639,7 +14639,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollAdvancesSettled => 'Settled';
 
   @override
-  String get payrollAdvancesFilterOngoing => 'Ongoing';
+  String get payrollAdvancesFilterOngoing => 'Being repaid';
 
   @override
   String get payrollAdvancesFilterSettled => 'Settled';
@@ -19622,4 +19622,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String payrollToastAdvanceDisbursed(String amount, String name) {
     return 'Advance of $amount disbursed to $name';
   }
+
+  @override
+  String get payrollAdvancesToApprove => 'Requests to approve';
+
+  @override
+  String get payrollAdvancesFilterRefused => 'Refused';
+
+  @override
+  String get payrollAdvancesRefusedEmpty => 'No refused request';
+
+  @override
+  String get payrollAdvanceColDecided => 'Decided on';
+
+  @override
+  String get payrollAdvanceColReason => 'Reason';
 }

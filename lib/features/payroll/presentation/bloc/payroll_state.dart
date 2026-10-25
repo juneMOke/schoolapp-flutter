@@ -22,7 +22,9 @@ enum PayrollPayFilter {
   settled,
 }
 
-enum PayrollAdvanceFilter { ongoing, settled, all }
+/// Les filtres du registre des avances (spec §10 bis) ; « Refusées » liste
+/// les demandes closes, qui n'ont jamais fait naître d'avance.
+enum PayrollAdvanceFilter { ongoing, settled, refused, all }
 
 /// L'écran de la paie : ce que la tablette sait, le mois ouvert, son livre
 /// composé, et les filtres en mémoire.

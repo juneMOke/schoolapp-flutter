@@ -10358,9 +10358,9 @@
   "payrollAdvanceHeavy": "L'échéance dépasse la moitié du salaire mensuel : envisagez d'étaler.",
   "payrollAdvanceCancel": "Annuler cette avance",
   "payrollAdvancesOutstanding": "Encours à rembourser",
-  "payrollAdvancesThisMonth": "Déduit ce mois",
+  "payrollAdvancesThisMonth": "Retenu ce mois",
   "payrollAdvancesSettled": "Soldées",
-  "payrollAdvancesFilterOngoing": "En cours",
+  "payrollAdvancesFilterOngoing": "En remboursement",
   "payrollAdvancesFilterSettled": "Soldées",
   "payrollAdvancesFilterAll": "Toutes",
   "payrollAdvanceColGranted": "Accordée le",
@@ -11949,5 +11949,10 @@
   "payrollToastAdvanceRefused": "Demande refusée · {name} — motif transmis à l'économe",
   "@payrollToastAdvanceRefused": {"placeholders": {"name": {"type": "String"}}},
   "payrollToastAdvanceDisbursed": "Avance de {amount} décaissée à {name}",
-  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}}
+  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvancesToApprove": "Demandes à valider",
+  "payrollAdvancesFilterRefused": "Refusées",
+  "payrollAdvancesRefusedEmpty": "Aucune demande refusée",
+  "payrollAdvanceColDecided": "Tranchée le",
+  "payrollAdvanceColReason": "Motif"
 }

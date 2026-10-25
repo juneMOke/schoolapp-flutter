@@ -23002,7 +23002,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollAdvancesFilterOngoing.
   ///
   /// In en, this message translates to:
-  /// **'Ongoing'**
+  /// **'Being repaid'**
   String get payrollAdvancesFilterOngoing;
 
   /// No description provided for @payrollAdvancesFilterSettled.
@@ -30398,6 +30398,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advance of {amount} disbursed to {name}'**
   String payrollToastAdvanceDisbursed(String amount, String name);
+
+  /// No description provided for @payrollAdvancesToApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests to approve'**
+  String get payrollAdvancesToApprove;
+
+  /// No description provided for @payrollAdvancesFilterRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused'**
+  String get payrollAdvancesFilterRefused;
+
+  /// No description provided for @payrollAdvancesRefusedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No refused request'**
+  String get payrollAdvancesRefusedEmpty;
+
+  /// No description provided for @payrollAdvanceColDecided.
+  ///
+  /// In en, this message translates to:
+  /// **'Decided on'**
+  String get payrollAdvanceColDecided;
+
+  /// No description provided for @payrollAdvanceColReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get payrollAdvanceColReason;
 }
 
 class _AppLocalizationsDelegate

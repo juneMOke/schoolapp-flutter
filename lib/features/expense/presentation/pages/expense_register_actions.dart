@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/bridge/expense_staff_advance_bridge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes du registre, orchestrés : modale, écriture, accusé (spec §9).
@@ -67,15 +68,34 @@ class ExpenseRegisterActions {
   }) async {
     final cubit = _cubit;
     final l10n = AppLocalizations.of(context)!;
+    // Une nouvelle demande peut être une avance au personnel : la Paie en
+    // saisit le bloc R.H. (spec « PaieDepBridge »).
+    final bridge = seed.isEdit
+        ? null
+        : ExpenseStaffAdvanceBridge.offeredIn(context);
+    final advanceType = bridge == null
+        ? null
+        : ExpenseStaffAdvanceBridge.typeOf(cubit.state.snapshot.activeTypes);
+    var bridged = false;
     final draft = await showExpenseFormDialog(
       context,
       seed: seed,
-      types: _formTypes(seed.typeId),
+      types: [..._formTypes(seed.typeId), ?advanceType],
       rate: cubit.state.snapshot.usdToCdf,
       today: DateTime.now(),
       recordedByName: _agentName(),
+      staffAdvanceTypeId: advanceType?.id,
+      onStaffAdvance: () => bridged = true,
     );
-    if (draft == null || !context.mounted) return null;
+    if (!context.mounted) return null;
+    if (bridged) {
+      await bridge?.request(context);
+      // La demande est écrite par la Paie : le registre la relit.
+      await cubit.refresh();
+      if (context.mounted) _notifyLocalWrite();
+      return null;
+    }
+    if (draft == null) return null;
     final result = await cubit.save(draft);
     if (!context.mounted) return null;
     return result.fold(

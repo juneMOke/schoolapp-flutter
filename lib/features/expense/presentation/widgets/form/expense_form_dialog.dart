@@ -27,6 +27,8 @@ Future<ExpenseDraft?> showExpenseFormDialog(
   required ExchangeRate? rate,
   required DateTime today,
   String? recordedByName,
+  String? staffAdvanceTypeId,
+  VoidCallback? onStaffAdvance,
 }) => showDialog<ExpenseDraft>(
   context: context,
   barrierDismissible: false,
@@ -36,6 +38,8 @@ Future<ExpenseDraft?> showExpenseFormDialog(
     rate: rate,
     today: today,
     recordedByName: recordedByName,
+    staffAdvanceTypeId: staffAdvanceTypeId,
+    onStaffAdvance: onStaffAdvance,
   ),
 );
 
@@ -49,6 +53,11 @@ class ExpenseFormDialog extends StatefulWidget {
   final DateTime today;
   final String? recordedByName;
 
+  /// Le type « Avance / prêt au personnel » : le choisir ferme ce formulaire
+  /// et passe la main à la Paie ([onStaffAdvance]), qui saisit le bloc R.H.
+  final String? staffAdvanceTypeId;
+  final VoidCallback? onStaffAdvance;
+
   const ExpenseFormDialog({
     super.key,
     required this.seed,
@@ -56,6 +65,8 @@ class ExpenseFormDialog extends StatefulWidget {
     required this.rate,
     required this.today,
     this.recordedByName,
+    this.staffAdvanceTypeId,
+    this.onStaffAdvance,
   });
 
   @override
@@ -164,7 +175,13 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
           date: _form.date,
           today: widget.today,
           onTypeChanged: (id) {
-            if (id != null) setState(() => _form.selectType(id));
+            if (id == null) return;
+            if (id == widget.staffAdvanceTypeId) {
+              Navigator.of(context).pop();
+              widget.onStaffAdvance?.call();
+              return;
+            }
+            setState(() => _form.selectType(id));
           },
           onDateChanged: (value) {
             if (value != null) setState(() => _form.date = value);

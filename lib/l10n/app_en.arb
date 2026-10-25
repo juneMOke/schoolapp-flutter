@@ -9700,7 +9700,7 @@
   "payrollAdvancesOutstanding": "Outstanding",
   "payrollAdvancesThisMonth": "Deducted this month",
   "payrollAdvancesSettled": "Settled",
-  "payrollAdvancesFilterOngoing": "Ongoing",
+  "payrollAdvancesFilterOngoing": "Being repaid",
   "payrollAdvancesFilterSettled": "Settled",
   "payrollAdvancesFilterAll": "All",
   "payrollAdvanceColGranted": "Granted on",
@@ -11697,5 +11697,10 @@
   "payrollToastAdvanceRefused": "Request refused · {name} — reason passed on to the bursar",
   "@payrollToastAdvanceRefused": {"placeholders": {"name": {"type": "String"}}},
   "payrollToastAdvanceDisbursed": "Advance of {amount} disbursed to {name}",
-  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}}
+  "@payrollToastAdvanceDisbursed": {"placeholders": {"amount": {"type": "String"}, "name": {"type": "String"}}},
+  "payrollAdvancesToApprove": "Requests to approve",
+  "payrollAdvancesFilterRefused": "Refused",
+  "payrollAdvancesRefusedEmpty": "No refused request",
+  "payrollAdvanceColDecided": "Decided on",
+  "payrollAdvanceColReason": "Reason"
 }

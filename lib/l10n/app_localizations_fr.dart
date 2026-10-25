@@ -14736,13 +14736,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollAdvancesOutstanding => 'Encours à rembourser';
 
   @override
-  String get payrollAdvancesThisMonth => 'Déduit ce mois';
+  String get payrollAdvancesThisMonth => 'Retenu ce mois';
 
   @override
   String get payrollAdvancesSettled => 'Soldées';
 
   @override
-  String get payrollAdvancesFilterOngoing => 'En cours';
+  String get payrollAdvancesFilterOngoing => 'En remboursement';
 
   @override
   String get payrollAdvancesFilterSettled => 'Soldées';
@@ -19758,4 +19758,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollToastAdvanceDisbursed(String amount, String name) {
     return 'Avance de $amount décaissée à $name';
   }
+
+  @override
+  String get payrollAdvancesToApprove => 'Demandes à valider';
+
+  @override
+  String get payrollAdvancesFilterRefused => 'Refusées';
+
+  @override
+  String get payrollAdvancesRefusedEmpty => 'Aucune demande refusée';
+
+  @override
+  String get payrollAdvanceColDecided => 'Tranchée le';
+
+  @override
+  String get payrollAdvanceColReason => 'Motif';
 }

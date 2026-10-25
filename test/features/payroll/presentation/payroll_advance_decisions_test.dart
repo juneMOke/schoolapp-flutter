@@ -85,6 +85,9 @@ void main() {
             ? '2026-10-21T09:00:00.000Z'
             : null,
         decidedByName: status == ExpenseStatus.approved ? 'Kalala' : null,
+        decisionReason: status == ExpenseStatus.refused
+            ? 'Budget épuisé ce mois'
+            : null,
       ),
     ],
   );
@@ -193,4 +196,17 @@ void main() {
       expect(find.text('Attend la caisse'), findsOneWidget);
     },
   );
+
+  testWidgets('les tuiles et le filtre « Refusées » de la spec', (
+    tester,
+  ) async {
+    await pump(tester, ExpenseStatus.pending, const [Perm.hrPayRead]);
+    expect(find.text('Demandes à valider'), findsOneWidget);
+
+    await pump(tester, ExpenseStatus.refused, const [Perm.hrPayRead]);
+    await tester.tap(find.text('Refusées'));
+    await tester.pumpAndSettle();
+    expect(find.text('Budget épuisé ce mois'), findsOneWidget);
+    expect(find.textContaining('Ruth'), findsOneWidget);
+  });
 }

@@ -39,6 +39,8 @@ import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_settings_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_commands.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_expense_advance_bridge.dart';
+import 'package:school_app_flutter/features/expense/presentation/bridge/expense_staff_advance_bridge.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
 import 'package:school_app_flutter/features/staff/data/repositories/staff_local_writer.dart';
@@ -80,6 +82,13 @@ void _registerPresentation(GetIt getIt) {
       settings: getIt<SavePayrollSettingsUseCase>(),
       share: getIt<RecordPayslipShareUseCase>(),
       payslip: getIt<FetchPayslipUseCase>(),
+    ),
+  );
+  // Dépenses ▸ Nouvelle demande → formulaire d'avance de la Paie.
+  getIt.registerFactory<ExpenseStaffAdvanceBridge>(
+    () => PayrollExpenseAdvanceBridge(
+      load: getIt<LoadPayrollUseCase>(),
+      commands: () => getIt<PayrollCommands>(),
     ),
   );
   getIt.registerFactory<PayrollCubit>(
