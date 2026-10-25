@@ -37,6 +37,18 @@ abstract final class PayrollSettingsBounds {
   /// Le pas d'arrondi d'un taux d'heure sup. : un centime au moins.
   static const int minOvertimeStepInCents = 1;
 
+  /// Q8 — une charge patronale, en pour mille.
+  static const PayrollIntRange employerPermille = PayrollIntRange(0, 1000);
+
+  /// Q8 — le plafond d'une échéance d'avance, en % du salaire de base.
+  static const PayrollIntRange advanceMaxPercent = PayrollIntRange(10, 100);
+
+  /// Q8 — les échéances d'un prêt au plus.
+  static const PayrollIntRange loanMaxMonths = PayrollIntRange(2, 12);
+
+  /// Q8 — un intitulé de signature du bulletin, en caractères.
+  static const int maxSignatureLabel = 40;
+
   static bool isValid(PayrollSettings settings) =>
       monthlyHours.contains(settings.monthlyHoursDivisor) &&
       overtimeMultiplierPermille.contains(
@@ -50,5 +62,18 @@ abstract final class PayrollSettingsBounds {
             currency.overtimeRateStepInCents >= minOvertimeStepInCents &&
             currency.iprFlatInCents >= 0 &&
             cnssPermille.contains(currency.cnssPermille),
-      );
+      ) &&
+      (!settings.wideSettingsServed || _wideValid(settings));
+
+  static bool _wideValid(PayrollSettings settings) =>
+      employerPermille.contains(settings.cnssEmployerPermille) &&
+      employerPermille.contains(settings.inppPermille) &&
+      employerPermille.contains(settings.onemPermille) &&
+      advanceMaxPercent.contains(settings.advanceMaxPercent) &&
+      loanMaxMonths.contains(settings.loanMaxMonths) &&
+      [
+        settings.signatureBeneficiaryLabel,
+        settings.signatureDirectorLabel,
+        settings.signatureCashierLabel,
+      ].every((label) => (label?.length ?? 0) <= maxSignatureLabel);
 }

@@ -28,7 +28,10 @@ typedef SalaryAdvanceStatus = ({SalaryAdvancePhase phase, int rank});
 /// Les règles d'une avance, partagées par l'octroi, l'annulation et l'écran
 /// qui les annonce avant le geste.
 abstract final class PayrollAdvanceRules {
-  static const int maxInstallments = 4;
+  /// Les échéances d'un prêt au plus : le réglage de l'école (Q8), que le
+  /// serveur juge au dépôt — 4 tant qu'il ne l'a pas servi.
+  static int maxInstallmentsOf(PayrollSnapshot snapshot) =>
+      snapshot.settings.loanMaxMonths;
 
   /// Le mois où tombe la première échéance par défaut : le mois en cours si sa
   /// paie est encore en brouillon, sinon le suivant.
@@ -54,7 +57,8 @@ abstract final class PayrollAdvanceRules {
     SalaryAdvanceDraft draft,
   ) {
     if (draft.amount.amountInCents <= 0) return PayrollRule.invalidAmount;
-    if (draft.installments < 1 || draft.installments > maxInstallments) {
+    if (draft.installments < 1 ||
+        draft.installments > maxInstallmentsOf(snapshot)) {
       return PayrollRule.invalidInstallments;
     }
     final contract = contractFor(

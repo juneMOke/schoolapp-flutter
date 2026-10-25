@@ -21,6 +21,26 @@ part of 'tenant_migrations.dart';
 /// - `salary_advances.expense_id` : la demande dont l'avance est née — une
 ///   demande rouverte puis repayée en porte plusieurs, d'identifiants
 ///   différents. Pas de re-pull : aucune avance n'en naît avant Q4.
+/// v69 — le barème élargi du back (Q8) : charges patronales, plafonds
+/// d'avance, PC/E activable, intitulés de signature du bulletin. Un palier à
+/// lui, et non la v68 élargie : une tablette d'essai déjà passée en v68 ne
+/// les recevrait jamais.
+///
+/// Toutes nullables : `NULL` = pas encore servi par le serveur, et donc ni
+/// montré ni remonté. Pas de re-pull : le socle redescend à chaque ouverture.
+Future<void> _payrollWideSettings(DatabaseExecutor db) =>
+    _addColumns(db, 'ref_payroll_settings', const {
+      'cnss_employer_permille': 'INTEGER',
+      'inpp_permille': 'INTEGER',
+      'onem_permille': 'INTEGER',
+      'advance_max_percent': 'INTEGER',
+      'loan_max_months': 'INTEGER',
+      'childcare_enabled': 'INTEGER',
+      'signature_beneficiary_label': 'TEXT',
+      'signature_director_label': 'TEXT',
+      'signature_cashier_label': 'TEXT',
+    });
+
 Future<void> _payrollV2(DatabaseExecutor db) async {
   await _addColumns(db, 'ref_payroll_settings', const {
     'work_days_divisor': 'INTEGER NOT NULL DEFAULT 26',

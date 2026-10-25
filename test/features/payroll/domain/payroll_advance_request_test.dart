@@ -147,12 +147,15 @@ void main() {
       );
     });
 
-    PayrollSnapshot snapshot({String? typeId = 't-advance'}) => PayrollSnapshot(
+    PayrollSnapshot snapshot({
+      String? typeId = 't-advance',
+      PayrollSettings settings = PayrollSettings.defaults,
+    }) => PayrollSnapshot(
       members: [member('m-1')],
       contractsByMember: {
         'm-1': [contract('m-1')],
       },
-      settings: PayrollSettings.defaults,
+      settings: settings,
       profiles: const {},
       headers: const {},
       variables: const {},
@@ -243,5 +246,40 @@ void main() {
         verifyNever(() => save(any()));
       },
     );
+
+    test('le plafond de prêt est celui de l école (Q8)', () async {
+      final useCase = RequestSalaryAdvanceUseCase(save);
+      when(() => save(any())).thenAnswer(
+        (_) async => Left(PayrollRuleFailure(PayrollRule.invalidData)),
+      );
+      final six = snapshot(
+        settings: PayrollSettings.defaults.copyWith(loanMaxMonths: 6),
+      );
+      PayrollRule? rule(Either<dynamic, dynamic> r) =>
+          r.fold((f) => f is PayrollRuleFailure ? f.rule : null, (_) => null);
+
+      expect(
+        rule(
+          await useCase(
+            six,
+            draft(installments: 6),
+            title: 'x',
+            today: DateTime(2026, 10, 5),
+          ),
+        ),
+        isNot(PayrollRule.invalidInstallments),
+      );
+      expect(
+        rule(
+          await useCase(
+            six,
+            draft(installments: 7),
+            title: 'x',
+            today: DateTime(2026, 10, 5),
+          ),
+        ),
+        PayrollRule.invalidInstallments,
+      );
+    });
   });
 }

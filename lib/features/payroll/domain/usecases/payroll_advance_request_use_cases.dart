@@ -68,7 +68,8 @@ class RequestSalaryAdvanceUseCase {
     return saved.map((_) => unit);
   }
 
-  /// Le montant, les échéances (1 à 4) et la devise du contrat en vigueur
+  /// Le montant, les échéances (1 au plafond de l'école) et la devise du
+  /// contrat en vigueur
   /// (T15). Le mois de première retenue se choisit au décaissement.
   static PayrollRule? refusalOf(
     PayrollSnapshot snapshot,
@@ -76,7 +77,7 @@ class RequestSalaryAdvanceUseCase {
   ) {
     if (draft.amount.amountInCents <= 0) return PayrollRule.invalidAmount;
     if (draft.installments < 1 ||
-        draft.installments > PayrollAdvanceRules.maxInstallments) {
+        draft.installments > PayrollAdvanceRules.maxInstallmentsOf(snapshot)) {
       return PayrollRule.invalidInstallments;
     }
     final contract = PayrollAdvanceRules.contractFor(

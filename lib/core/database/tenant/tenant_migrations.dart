@@ -109,6 +109,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(68)) {
     await _payrollV2(db);
   }
+  if (upTo(69)) {
+    await _payrollWideSettings(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les

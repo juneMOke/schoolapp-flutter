@@ -34,7 +34,16 @@ const TableSchema refPayrollSettingsTable = TableSchema(
       sync_error_code TEXT,
       updated_at INTEGER NOT NULL DEFAULT 0,
       work_days_divisor INTEGER NOT NULL DEFAULT 26,
-      absence_deduction_enabled INTEGER NOT NULL DEFAULT 0
+      absence_deduction_enabled INTEGER NOT NULL DEFAULT 0,
+      cnss_employer_permille INTEGER,
+      inpp_permille INTEGER,
+      onem_permille INTEGER,
+      advance_max_percent INTEGER,
+      loan_max_months INTEGER,
+      childcare_enabled INTEGER,
+      signature_beneficiary_label TEXT,
+      signature_director_label TEXT,
+      signature_cashier_label TEXT
     )
   ''',
 );

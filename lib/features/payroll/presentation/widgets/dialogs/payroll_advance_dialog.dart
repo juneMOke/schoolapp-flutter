@@ -202,7 +202,14 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
           ),
           const SizedBox(height: AppSpacing.xs),
           PayrollChoiceChips<int>(
-            values: const [1, 2, 3, PayrollAdvanceRules.maxInstallments],
+            values: [
+              for (
+                var n = 1;
+                n <= PayrollAdvanceRules.maxInstallmentsOf(widget.snapshot);
+                n++
+              )
+                n,
+            ],
             selected: _installments,
             label: (n) =>
                 n == 1 ? l10n.payrollAdvanceOnce : l10n.payrollAdvanceOver(n),

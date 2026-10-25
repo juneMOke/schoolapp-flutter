@@ -831,7 +831,10 @@ class AppConstants {
   // diviseur de jours, retenue d'absence), grade de l'agent
   // (`staff_members.grade`), puis les colonnes et tables des lots suivants.
   // Un seul palier pour la livraison, comme à la v66. Additif. Palier d'école.
-  static const int offlineDbSchemaVersion = 68;
+  // v69 (2026-10-25) : le barème élargi du back (Q8) — charges patronales,
+  // plafonds d'avance, PC/E activable, intitulés du bulletin
+  // (`ref_payroll_settings`). Additif, nullable. Palier d'école.
+  static const int offlineDbSchemaVersion = 69;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

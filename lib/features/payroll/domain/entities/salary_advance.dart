@@ -4,7 +4,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_canc
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
-/// Une avance sur salaire, remboursée en 1 à 4 échéances retenues sur la paie,
+/// Une avance sur salaire, remboursée en une ou plusieurs échéances (au plus
+/// le plafond de prêt de l'école) retenues sur la paie,
 /// à partir de [firstMonth], dans la devise du contrat.
 class SalaryAdvance extends Equatable {
   final String id;

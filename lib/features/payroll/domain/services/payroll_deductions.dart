@@ -50,7 +50,11 @@ abstract final class PayrollDeductions {
     final cnss = take(
       PayrollMath.roundDiv(baseInCents * perCurrency.cnssPermille, 1000),
     );
-    final childcare = take(_positive(variables?.childcareInCents));
+    // Coupée par l'école (Q8), la PC/E compte 0 — le montant saisi reste
+    // rangé, et revient si on la rallume. Même règle au serveur.
+    final childcare = take(
+      settings.childcareEnabled ? _positive(variables?.childcareInCents) : 0,
+    );
     return PayrollLineDeductions(
       workDaysDivisor: hourly ? null : divisor,
       workedDays: worked,
