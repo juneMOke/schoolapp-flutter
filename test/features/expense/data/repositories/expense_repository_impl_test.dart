@@ -69,6 +69,10 @@ class _ClosedPayroll implements ExpenseAdvanceGuard {
 
   @override
   Future<bool> isDeducted(String expenseId) async => false;
+
+  @override
+  Future<bool> isMonthLocked(String expenseId, {String? firstMonth}) async =>
+      false;
 }
 
 void main() {
@@ -378,7 +382,7 @@ void main() {
       expect(expense.staffAdvance, block);
       final entry = (await outbox()).last;
       final payload = jsonDecode(entry['payload']! as String) as Map;
-      expect((payload['expense'] as Map)['rh'], block.toJson());
+      expect((payload['expense'] as Map)['staffAdvance'], block.toWireJson());
     });
 
     test(

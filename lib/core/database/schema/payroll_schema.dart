@@ -233,7 +233,8 @@ const TableSchema salaryAdvancesTable = TableSchema(
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
       sync_error_code TEXT,
-      created_at INTEGER NOT NULL DEFAULT 0
+      created_at INTEGER NOT NULL DEFAULT 0,
+      expense_id TEXT
     )
   ''',
   createIndexSql: [

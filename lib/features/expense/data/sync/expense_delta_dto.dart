@@ -25,11 +25,13 @@ class ExpenseDeltaDto {
   final String expenseDate;
   final String? supplier;
 
-  /// Le bloc `rh` d'une avance au personnel, en JSON ; absent caviardé (T14).
+  /// Le bloc `staffAdvance` d'une avance au personnel, en JSON ; `null`
+  /// caviardé (T14) ou hors propos.
   final String? staffAdvance;
 
-  /// Le serveur a-t-il porté la clé `rh` ? Absente, elle est caviardée (T14)
-  /// ou hors propos : la tablette n'efface pas ce qu'elle sait.
+  /// Le serveur a-t-il porté un bloc ? Il sérialise `staffAdvance: null`
+  /// aussi bien pour une dépense ordinaire que pour une avance caviardée :
+  /// sans bloc, la tablette n'efface pas ce qu'elle sait.
   final bool carriesStaffAdvance;
   final String fundingSource;
   final String? recordedById;
@@ -144,8 +146,8 @@ class ExpenseDeltaDto {
       paidOn: paidOn == null ? null : ExpenseDay.format(paidOn),
       expenseDate: ExpenseDay.format(expenseDate),
       supplier: text('supplier'),
-      staffAdvance: ExpenseStaffAdvance.tryParse(raw['rh'])?.encode(),
-      carriesStaffAdvance: raw.containsKey('rh'),
+      staffAdvance: ExpenseStaffAdvance.tryParse(raw['staffAdvance'])?.encode(),
+      carriesStaffAdvance: raw['staffAdvance'] is Map,
       fundingSource: text('fundingSource')?.toUpperCase() ?? 'CASH',
       recordedById: text('recordedById'),
       recordedByName: text('recordedByName'),

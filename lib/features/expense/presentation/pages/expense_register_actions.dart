@@ -47,9 +47,14 @@ class ExpenseRegisterActions {
       _openForm(ExpenseFormSeed.edit(expense));
 
   /// Une avance au personnel ne se duplique pas (B5) : la copie n'aurait pas
-  /// de bloc R.H. et se paierait sans retenue.
+  /// de bloc R.H. et se paierait sans retenue. Caviardée, elle se reconnaît
+  /// à son type.
   Future<void> duplicate(Expense expense) async {
-    if (expense.staffAdvance != null) return;
+    final type = _cubit.state.snapshot.typesById[expense.typeId];
+    if (expense.staffAdvance != null ||
+        type?.code == ExpenseStaffAdvance.typeCode) {
+      return;
+    }
     await _openForm(ExpenseFormSeed.duplicate(expense, today: DateTime.now()));
   }
 
@@ -183,7 +188,12 @@ class ExpenseRegisterActions {
   }) async {
     final cubit = _cubit;
     final l10n = AppLocalizations.of(context)!;
-    final advance = await ExpenseAdvancePayFlow.run(context, expense, gesture);
+    final advance = await ExpenseAdvancePayFlow.run(
+      context,
+      expense,
+      gesture,
+      type: _cubit.state.snapshot.typesById[expense.typeId],
+    );
     if (!advance.proceed || !context.mounted) return;
     final result = await cubit.applyGesture(
       expense,

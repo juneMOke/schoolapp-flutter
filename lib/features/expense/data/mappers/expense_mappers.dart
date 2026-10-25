@@ -38,7 +38,7 @@ extension ExpenseLocalModelX on ExpenseLocalModel {
     supplier: supplier,
     fundingSource: fundingSource,
     clientUpdatedAt: clientUpdatedAt,
-    rh: ExpenseStaffAdvance.tryParse(staffAdvance)?.toJson(),
+    staffAdvance: ExpenseStaffAdvance.tryParse(staffAdvance)?.toWireJson(),
   );
 }
 

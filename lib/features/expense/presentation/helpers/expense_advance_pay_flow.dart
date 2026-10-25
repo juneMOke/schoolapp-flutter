@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/presence/presentation/presence_labels.da
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/advance/expense_advance_pay_dialog.dart';
 
@@ -12,13 +14,20 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/advance
 abstract final class ExpenseAdvancePayFlow {
   /// `proceed: false` : la caisse a renoncé. Sinon le décaissement, `null`
   /// pour une dépense ordinaire.
+  ///
+  /// [type] nomme l'avance quand son bloc R.H. est caviardé (caisse sans
+  /// `hr.pay.read`) : le geste PAY doit porter le mois et la preuve quand même.
   static Future<({bool proceed, ExpenseAdvancePayment? payment})> run(
     BuildContext context,
     Expense expense,
     ExpenseGesture gesture, {
+    ExpenseType? type,
     DateTime Function() now = DateTime.now,
   }) async {
-    if (gesture != ExpenseGesture.pay || expense.staffAdvance == null) {
+    final isAdvance =
+        expense.staffAdvance != null ||
+        type?.code == ExpenseStaffAdvance.typeCode;
+    if (gesture != ExpenseGesture.pay || !isAdvance) {
       return (proceed: true, payment: null);
     }
     final today = now();

@@ -7,9 +7,13 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_ids.
 
 /// L'avance née d'une dépense payée, **avant** que le serveur ne la rende
 /// (B5, T10) : la tablette qui décaisse hors ligne la projette sous
-/// l'identifiant `uuid5(expenseId, "salary-advance")`, que le serveur lui
-/// donnera — le livre la retient dès le mois choisi, et la vraie avance, une
-/// fois descendue, prend sa place sans doublon.
+/// l'identifiant que le serveur lui donnera — le livre la retient dès le mois
+/// choisi, et la vraie avance, une fois descendue, prend sa place sans
+/// doublon.
+///
+/// L'identifiant suit le rang du paiement, comme au serveur : une avance
+/// vivante déjà née de la demande la représente ; sinon n = les avances déjà
+/// nées de la demande (annulées comprises, une réouverture annule) + 1.
 ///
 /// Un paiement refusé ramène la dépense à « accordée » : la projection
 /// disparaît d'elle-même, sans rien à effacer.
@@ -18,20 +22,31 @@ abstract final class PayrollAdvanceProjection {
     List<PayrollAdvanceRequest> requests,
     List<SalaryAdvance> advances,
   ) {
-    final known = {for (final advance in advances) advance.id};
-    return [for (final request in requests) ?_projected(request, known)];
+    final born = <String, List<SalaryAdvance>>{};
+    for (final advance in advances) {
+      if (advance.expenseId case final expenseId?) {
+        (born[expenseId] ??= []).add(advance);
+      }
+    }
+    return [
+      for (final request in requests)
+        ?_projected(request, born[request.expenseId] ?? const []),
+    ];
   }
 
   static SalaryAdvance? _projected(
     PayrollAdvanceRequest request,
-    Set<String> known,
+    List<SalaryAdvance> born,
   ) {
     final firstMonth = request.block.firstMonth;
     if (request.status != ExpenseStatus.paid || firstMonth == null) {
       return null;
     }
-    final id = PayrollIds.salaryAdvanceIdOf(request.expenseId);
-    if (known.contains(id)) return null;
+    if (born.any((advance) => !advance.isCancelled)) return null;
+    final id = PayrollIds.salaryAdvanceIdOf(
+      request.expenseId,
+      payment: born.length + 1,
+    );
     return SalaryAdvance(
       id: id,
       staffMemberId: request.staffMemberId,

@@ -74,7 +74,12 @@ class ExpenseQueueActions {
     String note = '',
   }) async {
     final l10n = AppLocalizations.of(context)!;
-    final advance = await ExpenseAdvancePayFlow.run(context, expense, gesture);
+    final advance = await ExpenseAdvancePayFlow.run(
+      context,
+      expense,
+      gesture,
+      type: _cubit.state.snapshot.typesById[expense.typeId],
+    );
     if (!advance.proceed || !context.mounted) return;
     final result = await _cubit.applyGesture(
       expense,

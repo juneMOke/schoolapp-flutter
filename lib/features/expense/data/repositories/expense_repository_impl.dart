@@ -129,6 +129,15 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
     }
   }
 
+  Future<bool> _isStaffAdvanceType(String schoolId, Expense expense) async {
+    final types = await _types.typesForSchool(schoolId);
+    return types.any(
+      (type) =>
+          type.id == expense.typeId &&
+          type.code == ExpenseStaffAdvance.typeCode,
+    );
+  }
+
   @override
   Future<Either<Failure, Unit>> applyGesture(
     Expense expense,
@@ -161,10 +170,15 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         return const Left(_staleGesture);
       }
       final staffAdvance = current.staffAdvance;
-      final advance = gesture == ExpenseGesture.pay && staffAdvance != null
+      // Une avance caviardée (sans `hr.pay.read`) arrive sans son bloc : c'est
+      // son type qui la nomme, et sa caisse doit tout de même porter le mois
+      // et la preuve.
+      final isAdvance =
+          staffAdvance != null || await _isStaffAdvanceType(schoolId, current);
+      final advance = gesture == ExpenseGesture.pay && isAdvance
           ? advancePayment
           : null;
-      if (gesture == ExpenseGesture.pay && staffAdvance != null) {
+      if (gesture == ExpenseGesture.pay && isAdvance) {
         if (advance == null ||
             !ExpenseAdvanceRules.proves(advance, current.fundingSource)) {
           return const Left(ExpenseAdvanceRules.proofRequired);
@@ -176,10 +190,17 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
           return const Left(ExpenseAdvanceRules.monthClosed);
         }
       }
-      if (gesture == ExpenseGesture.reopen &&
-          staffAdvance != null &&
-          (await _advanceGuard?.isDeducted(current.id) ?? false)) {
-        return const Left(ExpenseAdvanceRules.deducted);
+      if (gesture == ExpenseGesture.reopen && isAdvance) {
+        if (await _advanceGuard?.isDeducted(current.id) ?? false) {
+          return const Left(ExpenseAdvanceRules.deducted);
+        }
+        if (await _advanceGuard?.isMonthLocked(
+              current.id,
+              firstMonth: staffAdvance?.firstMonth,
+            ) ??
+            false) {
+          return const Left(ExpenseAdvanceRules.monthLocked);
+        }
       }
       final now = _now();
       final messageId = _ids.newId();

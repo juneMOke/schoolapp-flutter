@@ -5,6 +5,12 @@ abstract class ExpenseAdvanceGuard {
   /// dépense ne se rouvre plus : l'argent est en train de revenir.
   Future<bool> isDeducted(String expenseId);
 
+  /// La paie du mois de première retenue, ou une paie suivante, est-elle
+  /// soumise ou validée ? Rouvrir annulerait une avance qu'un livre fermé
+  /// compte déjà. [firstMonth] : le mois choisi sur ce poste, tant que
+  /// l'avance n'est pas descendue.
+  Future<bool> isMonthLocked(String expenseId, {String? firstMonth});
+
   /// La paie de [month] (`YYYY-MM`) peut-elle encore recevoir une première
   /// retenue — absente ou en brouillon ?
   Future<bool> acceptsFirstMonth(String month);

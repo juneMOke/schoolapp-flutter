@@ -97,6 +97,9 @@ class PayrollSnapshotReader {
 
   /// Les avances de la tablette, rattachées à la dépense dont elles sont
   /// nées, plus celles qu'un paiement de dépense laisse attendre (B5).
+  ///
+  /// Le serveur nomme la demande (`expenseId`) ; une avance descendue avant
+  /// qu'il ne le fasse se reconnaît à l'identifiant du premier paiement.
   static List<SalaryAdvance> _advancesOf(
     List<SalaryAdvance> stored,
     List<PayrollAdvanceRequest> requests,
@@ -107,8 +110,8 @@ class PayrollSnapshotReader {
     };
     final linked = [
       for (final advance in stored)
-        if (byAdvanceId[advance.id] case final expenseId?)
-          advance.withExpense(expenseId)
+        if (advance.expenseId == null && byAdvanceId[advance.id] != null)
+          advance.withExpense(byAdvanceId[advance.id]!)
         else
           advance,
     ];

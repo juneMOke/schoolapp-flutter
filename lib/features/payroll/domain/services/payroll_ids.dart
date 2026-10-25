@@ -20,10 +20,15 @@ abstract final class PayrollIds {
   );
 
   /// L'avance née d'une dépense payée (B5, T10) : espace de noms = l'uuid de
-  /// la dépense, nom = `"salary-advance"`. La tablette qui paie hors ligne la
+  /// la dépense, nom = `"salary-advance"` au premier paiement, puis
+  /// `"salary-advance:" + n` quand la demande, rouverte, est payée de nouveau
+  /// ([payment] = n, rang du paiement). La tablette qui paie hors ligne la
   /// projette sous l'identifiant que le serveur lui donnera.
-  static String salaryAdvanceIdOf(String expenseId) =>
-      _uuid.v5(_namespaceOrDerived(expenseId, 'expense'), 'salary-advance');
+  static String salaryAdvanceIdOf(String expenseId, {int payment = 1}) =>
+      _uuid.v5(
+        _namespaceOrDerived(expenseId, 'expense'),
+        payment <= 1 ? 'salary-advance' : 'salary-advance:$payment',
+      );
 
   static String _namespaceOrDerived(String id, String kind) =>
       Uuid.isValidUUID(fromString: id)

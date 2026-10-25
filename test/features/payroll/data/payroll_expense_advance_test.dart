@@ -4,8 +4,10 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_advance_request_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/salary_advance_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/repositories/payroll_expense_advance_guard.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_dto.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/salary_advance_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ids.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -69,41 +71,69 @@ void main() {
     setUp(
       () => guard = PayrollExpenseAdvanceGuard(
         payrolls: PayrollDao(db),
+        advances: SalaryAdvanceDao(db),
         currentUser: CurrentUserContext()..set('u-1', schoolId: school),
       ),
     );
 
-    Future<void> validated(String month, {bool deducting = false}) =>
-        PayrollDao(db).apply(
+    Future<void> served(String id, {String? cancelledAt}) =>
+        SalaryAdvanceDao(db).applyPulled(
           [
-            PayrollDto.tryParse({
-              'id': 'p-$month',
-              'month': month,
-              'status': 'VALIDATED',
-              'validationGestureId': 'g-$month',
-              'lines': [
-                {
-                  'staffMemberId': 'm-1',
-                  'currency': 'USD',
-                  'grossInCents': 30000,
-                  'netInCents': 0,
-                  'advances': [
-                    if (deducting)
-                      {
-                        'advanceId': PayrollIds.salaryAdvanceIdOf(expenseId),
-                        'rank': 1,
-                        'dueInCents': 30000,
-                        'takenInCents': 30000,
-                        'carriedInCents': 0,
-                      },
-                  ],
-                },
-              ],
+            SalaryAdvanceDto.tryParse({
+              'id': id,
+              'staffMemberId': 'm-1',
+              'amountInCents': 30000,
+              'currency': 'USD',
+              'installments': 1,
+              'firstMonth': '2026-11',
+              'reason': 'RENT',
+              'mode': 'CASH',
+              'grantedOn': '2026-10-20',
+              'expenseId': expenseId,
+              'cancelledAt': cancelledAt,
+              'cancellationReason': cancelledAt == null ? null : 'Rouverte',
             })!,
           ],
           schoolId: school,
           nowMs: 1,
         );
+
+    Future<void> validated(
+      String month, {
+      bool deducting = false,
+      String status = 'VALIDATED',
+      String? advanceId,
+    }) => PayrollDao(db).apply(
+      [
+        PayrollDto.tryParse({
+          'id': 'p-$month',
+          'month': month,
+          'status': status,
+          'validationGestureId': 'g-$month',
+          'lines': [
+            {
+              'staffMemberId': 'm-1',
+              'currency': 'USD',
+              'grossInCents': 30000,
+              'netInCents': 0,
+              'advances': [
+                if (deducting)
+                  {
+                    'advanceId':
+                        advanceId ?? PayrollIds.salaryAdvanceIdOf(expenseId),
+                    'rank': 1,
+                    'dueInCents': 30000,
+                    'takenInCents': 30000,
+                    'carriedInCents': 0,
+                  },
+              ],
+            },
+          ],
+        })!,
+      ],
+      schoolId: school,
+      nowMs: 1,
+    );
 
     test('une paie absente reçoit la retenue, une paie validée non', () async {
       await validated('2026-10');
@@ -118,6 +148,41 @@ void main() {
       await validated('2026-11', deducting: true);
 
       expect(await guard.isDeducted(expenseId), isTrue);
+    });
+
+    test('repayée : la retenue de l avance de rang 2 compte aussi', () async {
+      final second = PayrollIds.salaryAdvanceIdOf(expenseId, payment: 2);
+      await served(
+        PayrollIds.salaryAdvanceIdOf(expenseId),
+        cancelledAt: '2026-10-21T09:00:00Z',
+      );
+      await served(second);
+
+      await validated('2026-11', deducting: true, advanceId: second);
+
+      expect(await guard.isDeducted(expenseId), isTrue);
+    });
+
+    test('une paie soumise au mois de la retenue, ou après, bloque', () async {
+      expect(
+        await guard.isMonthLocked(expenseId, firstMonth: '2026-11'),
+        isFalse,
+      );
+
+      await validated('2026-12', status: 'SUBMITTED');
+
+      expect(
+        await guard.isMonthLocked(expenseId, firstMonth: '2026-11'),
+        isTrue,
+      );
+      expect(await guard.isMonthLocked(expenseId), isFalse);
+    });
+
+    test('l avance descendue fixe le mois, pas la saisie du poste', () async {
+      await served(PayrollIds.salaryAdvanceIdOf(expenseId));
+      await validated('2026-11', status: 'SUBMITTED');
+
+      expect(await guard.isMonthLocked(expenseId), isTrue);
     });
   });
 }

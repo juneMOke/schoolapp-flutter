@@ -54,13 +54,17 @@ class ExpenseStaffAdvance extends Equatable {
 
   static const int maxInstallments = 4;
 
-  Map<String, dynamic> toJson() => {
+  /// La forme rangée sur la tablette : celle du fil, plus [firstMonth].
+  Map<String, dynamic> toJson() => {...toWireJson(), 'firstMonth': ?firstMonth};
+
+  /// Le bloc `staffAdvance` du fil. Le mois de première retenue n'en est
+  /// pas : il part avec le geste PAY.
+  Map<String, dynamic> toWireJson() => {
     'staffMemberId': staffMemberId,
-    'kind': kind.wire,
+    'nature': kind.wire,
     'installments': installments,
     'reason': reason,
     'reasonDetail': reasonDetail,
-    'firstMonth': ?firstMonth,
   };
 
   String encode() => jsonEncode(toJson());
@@ -76,11 +80,14 @@ class ExpenseStaffAdvance extends Equatable {
     }
     if (raw is! Map) return null;
     final member = raw['staffMemberId'];
-    final rawKind = raw['kind'];
+    final rawKind = raw['nature'];
     final kind = ExpenseStaffAdvanceKind.fromWire(
       rawKind is String ? rawKind : null,
     );
-    final installments = raw['installments'];
+    // Une avance peut taire son échéance unique.
+    final installments =
+        raw['installments'] ??
+        (kind == ExpenseStaffAdvanceKind.advance ? 1 : null);
     final reason = raw['reason'];
     if (member is! String ||
         member.isEmpty ||

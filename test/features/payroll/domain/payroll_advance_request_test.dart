@@ -7,7 +7,9 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_draf
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_cancellation.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
@@ -62,6 +64,7 @@ void main() {
       final served = advance(
         'm-1',
         id: PayrollIds.salaryAdvanceIdOf(expenseId),
+        expenseId: expenseId,
       );
 
       expect(
@@ -74,6 +77,39 @@ void main() {
         PayrollAdvanceProjection.of([request(firstMonth: null)], const []),
         isEmpty,
       );
+      expect(PayrollAdvanceProjection.of([request()], [served]), isEmpty);
+    });
+
+    test('rouverte puis repayée : le rang du paiement nomme l avance', () {
+      final cancelled = advance(
+        'm-1',
+        id: PayrollIds.salaryAdvanceIdOf(expenseId),
+        expenseId: expenseId,
+        cancellation: const PayrollCancellation(
+          id: 'c-1',
+          reason: 'Demande rouverte',
+          syncState: RecordSyncState.synced,
+          cancelledAt: '2026-10-21T09:00:00.000Z',
+        ),
+      );
+
+      final projected = PayrollAdvanceProjection.of([request()], [cancelled]);
+
+      // uuid5(demande, "salary-advance:2"), recalculé en Python.
+      expect(projected.single.id, 'ce8175a4-7659-5cbc-926f-6c79998585d9');
+      expect(
+        PayrollIds.salaryAdvanceIdOf(expenseId, payment: 2),
+        projected.single.id,
+      );
+    });
+
+    test('une avance vivante née de la demande la représente', () {
+      final served = advance(
+        'm-1',
+        id: PayrollIds.salaryAdvanceIdOf(expenseId, payment: 2),
+        expenseId: expenseId,
+      );
+
       expect(PayrollAdvanceProjection.of([request()], [served]), isEmpty);
     });
   });

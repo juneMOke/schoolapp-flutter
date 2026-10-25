@@ -161,6 +161,7 @@ void _registerStorage(GetIt getIt) {
   getIt.registerLazySingleton<ExpenseAdvanceGuard>(
     () => PayrollExpenseAdvanceGuard(
       payrolls: getIt<PayrollDao>(),
+      advances: getIt<SalaryAdvanceDao>(),
       currentUser: getIt<CurrentUserContext>(),
     ),
   );

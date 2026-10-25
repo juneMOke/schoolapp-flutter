@@ -40,10 +40,15 @@ class ExpenseDetailActions extends StatelessWidget {
   /// que son absence.
   final bool allowShortcuts;
 
+  /// Une avance au personnel, bloc R.H. caviardé compris : elle ne se
+  /// duplique pas (B5).
+  final bool isStaffAdvance;
+
   const ExpenseDetailActions({
     super.key,
     required this.expense,
     required this.accountId,
+    this.isStaffAdvance = false,
     required this.onShortcut,
     required this.onGesture,
     required this.onRefuse,
@@ -109,7 +114,7 @@ class ExpenseDetailActions extends StatelessWidget {
                 children: [
                   // Une avance au personnel ne se duplique pas : elle se
                   // dépose depuis la Paie, avec son bloc R.H. (B5).
-                  if (expense.staffAdvance == null)
+                  if (!isStaffAdvance)
                     EteeloButton.secondary(
                       label: l10n.expenseActionDuplicate,
                       icon: Icons.copy_outlined,

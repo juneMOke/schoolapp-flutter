@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -8,8 +9,10 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
+import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_rh_visibility.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
@@ -154,6 +157,15 @@ void registerExpenseOffline(GetIt getIt) {
       syncMetaDao: getIt<SyncMetaDao>(),
       currentUser: getIt<CurrentUserContext>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      // Un poste qui gagne `hr.pay.read` reprend le flux depuis le début : le
+      // bloc R.H. des avances est caviardé à la descente (T14).
+      rhVisibility: ExpenseRhVisibility(
+        syncMetaDao: getIt<SyncMetaDao>(),
+        readsPayroll: () async {
+          final user = await getIt<AuthLocalDao>().getSessionUser();
+          return user?.permissions?.contains(Perm.hrPayRead.wire);
+        },
+      ),
     ),
   );
   getIt<PullCoordinator>().registerHandler(

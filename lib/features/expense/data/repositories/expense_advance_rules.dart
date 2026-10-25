@@ -21,6 +21,12 @@ abstract final class ExpenseAdvanceRules {
     'Une retenue de cette avance est déjà figée : réouverture impossible.',
   );
 
+  /// La paie de la première retenue, ou une suivante, est fermée : l'avance
+  /// ne se rouvre plus.
+  static const monthLocked = ConflictFailure(
+    'La paie de la première retenue est déjà soumise ou validée : réouverture impossible.',
+  );
+
   /// Espèces : la reconnaissance de dette signée ; sinon une référence.
   static bool proves(
     ExpenseAdvancePayment advance,

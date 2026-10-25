@@ -216,9 +216,9 @@ void main() {
             'status': 'PAID',
             'expenseDate': '2026-09-03',
             'clientUpdatedAt': _sent,
-            'rh': {
+            'staffAdvance': {
               'staffMemberId': 'm-1',
-              'kind': 'ADVANCE',
+              'nature': 'ADVANCE',
               'installments': 1,
               'reason': 'RENT',
             },

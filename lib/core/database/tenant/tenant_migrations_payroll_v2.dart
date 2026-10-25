@@ -18,6 +18,9 @@ part of 'tenant_migrations.dart';
 /// - `payroll_arrears_priorities` : le drapeau « priorité » des arriérés.
 /// - `expenses.staff_advance` : le bloc R.H. d'une avance au personnel
 ///   déposée comme dépense (B5). Pas de re-pull : le type naît avec Q4.
+/// - `salary_advances.expense_id` : la demande dont l'avance est née — une
+///   demande rouverte puis repayée en porte plusieurs, d'identifiants
+///   différents. Pas de re-pull : aucune avance n'en naît avant Q4.
 Future<void> _payrollV2(DatabaseExecutor db) async {
   await _addColumns(db, 'ref_payroll_settings', const {
     'work_days_divisor': 'INTEGER NOT NULL DEFAULT 26',
@@ -31,6 +34,7 @@ Future<void> _payrollV2(DatabaseExecutor db) async {
     'fixed_payout_reason': 'TEXT',
   });
   await _addColumns(db, 'expenses', const {'staff_advance': 'TEXT'});
+  await _addColumns(db, 'salary_advances', const {'expense_id': 'TEXT'});
   await _createTables(db, const [
     payrollPayoutPoliciesTable,
     payrollArrearsPrioritiesTable,

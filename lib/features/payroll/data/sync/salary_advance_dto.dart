@@ -18,6 +18,10 @@ class SalaryAdvanceDto {
   final String clientRecordedAt;
 
   /// Descente seulement.
+  ///
+  /// La demande de dépense dont l'avance est née (B5) ; `null` pour une
+  /// avance directe.
+  final String? expenseId;
   final int? deductedInCents;
   final int? balanceInCents;
   final String? cancelledAt;
@@ -36,6 +40,7 @@ class SalaryAdvanceDto {
     required this.grantedOn,
     required this.clientRecordedAt,
     this.reasonDetail,
+    this.expenseId,
     this.deductedInCents,
     this.balanceInCents,
     this.cancelledAt,
@@ -96,6 +101,7 @@ class SalaryAdvanceDto {
           raw.instant('clientRecordedAt') ??
           raw.instant('recordedAt') ??
           '${grantedOn}T00:00:00.000Z',
+      expenseId: raw.text('expenseId'),
       deductedInCents: raw.integer('deductedInCents'),
       balanceInCents: raw.integer('balanceInCents'),
       cancelledAt: raw.instant('cancelledAt'),

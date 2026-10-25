@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
     show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_rh_visibility.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
@@ -30,6 +31,7 @@ class ExpensePullRepositoryImpl implements ExpensePullRepository {
   final SyncMetaDao _syncMetaDao;
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _requiredAuth;
+  final ExpenseRhVisibility? _rhVisibility;
   final Clock _now;
 
   const ExpensePullRepositoryImpl({
@@ -38,12 +40,14 @@ class ExpensePullRepositoryImpl implements ExpensePullRepository {
     required SyncMetaDao syncMetaDao,
     required CurrentUserContext currentUser,
     required Map<String, dynamic> requiredAuth,
+    ExpenseRhVisibility? rhVisibility,
     Clock now = systemClock,
   }) : _api = api,
        _dao = dao,
        _syncMetaDao = syncMetaDao,
        _currentUser = currentUser,
        _requiredAuth = requiredAuth,
+       _rhVisibility = rhVisibility,
        _now = now;
 
   /// Taille de page keyset.
@@ -64,6 +68,9 @@ class ExpensePullRepositoryImpl implements ExpensePullRepository {
       return const Left(ServerFailure('Aucune école courante'));
     }
     final resource = expensesCursorKey(schoolId);
+    // Un droit `hr.pay.read` tout juste gagné : les avances déjà reçues sans
+    // leur bloc R.H. ne redescendraient jamais par l'incrémental.
+    await _rhVisibility?.rewindIfGained(schoolId, resource);
     final stored = await _syncMetaDao.getCursor(resource);
 
     final first = await _attempt(resource, schoolId, syncedAt, from: stored);

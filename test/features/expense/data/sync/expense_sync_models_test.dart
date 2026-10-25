@@ -176,16 +176,15 @@ void main() {
   });
 
   group('avance au personnel (B5, T13, T14)', () {
-    const rh = {
+    const block = {
       'staffMemberId': 'm-1',
-      'kind': 'LOAN',
+      'nature': 'LOAN',
       'installments': 3,
       'reason': 'MEDICAL',
       'reasonDetail': null,
-      'firstMonth': '2026-10',
     };
 
-    test('le bloc rh descend ; caviardé, il est absent', () {
+    test('le bloc staffAdvance descend ; caviardé, il vaut null', () {
       final base = {
         'id': 'e-1',
         'typeId': 't-1',
@@ -196,11 +195,33 @@ void main() {
         'expenseDate': '2026-10-05',
         'clientUpdatedAt': '2026-10-05T09:00:00Z',
       };
-      final withRh = ExpenseDeltaDto.tryParse({...base, 'rh': rh})!;
-      final redacted = ExpenseDeltaDto.tryParse(base)!;
+      final carried = ExpenseDeltaDto.tryParse({
+        ...base,
+        'staffAdvance': block,
+      })!;
+      // Le serveur sérialise le null : la clé présente ne prouve rien.
+      final redacted = ExpenseDeltaDto.tryParse({
+        ...base,
+        'staffAdvance': null,
+      })!;
 
-      expect(ExpenseStaffAdvance.tryParse(withRh.staffAdvance)?.toJson(), rh);
+      expect(
+        ExpenseStaffAdvance.tryParse(carried.staffAdvance)?.toWireJson(),
+        block,
+      );
+      expect(carried.carriesStaffAdvance, isTrue);
       expect(redacted.staffAdvance, isNull);
+      expect(redacted.carriesStaffAdvance, isFalse);
+    });
+
+    test('une avance peut taire son échéance unique', () {
+      final advance = ExpenseStaffAdvance.tryParse({
+        'staffMemberId': 'm-1',
+        'nature': 'ADVANCE',
+        'reason': 'RENT',
+      });
+
+      expect(advance?.installments, 1);
     });
 
     test('le geste PAY porte advance sur le fil, et lui seul', () {
