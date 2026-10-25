@@ -11678,6 +11678,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'a paid advance can be neither withdrawn nor deleted';
 
   @override
+  String get expenseRejectedAdvanceMonthLocked =>
+      'the first deduction month\'s payroll is already closed: pay again on a later month';
+
+  @override
+  String get expenseRejectedAdvanceDeducted =>
+      'a deduction of this advance is already frozen';
+
+  @override
+  String get expenseRejectedAdvanceSignature =>
+      'a cash advance needs the signed debt acknowledgement';
+
+  @override
+  String get expenseRejectedAdvanceProof =>
+      'first deduction month in the past, or payment reference too short';
+
+  @override
+  String get expenseRejectedAdvanceCurrency =>
+      'the advance currency is not the one of the staff member\'s contract';
+
+  @override
+  String get expenseRejectedAdvanceNoContract =>
+      'the staff member has no contract that pays them';
+
+  @override
   String expenseDetailGestureRejected(String reason) {
     return 'Gesture refused by the server: $reason. The request stayed as it was.';
   }

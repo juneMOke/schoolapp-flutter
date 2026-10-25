@@ -11771,6 +11771,30 @@ class AppLocalizationsFr extends AppLocalizations {
       'une avance payée ne se retire ni ne se supprime';
 
   @override
+  String get expenseRejectedAdvanceMonthLocked =>
+      'la paie de la première retenue est déjà fermée : payez de nouveau sur un mois suivant';
+
+  @override
+  String get expenseRejectedAdvanceDeducted =>
+      'une retenue de cette avance est déjà figée';
+
+  @override
+  String get expenseRejectedAdvanceSignature =>
+      'la reconnaissance de dette signée est requise pour une avance en espèces';
+
+  @override
+  String get expenseRejectedAdvanceProof =>
+      'mois de première retenue passé, ou référence de paiement trop courte';
+
+  @override
+  String get expenseRejectedAdvanceCurrency =>
+      'la devise de l\'avance n\'est pas celle du contrat de l\'agent';
+
+  @override
+  String get expenseRejectedAdvanceNoContract =>
+      'l\'agent n\'a pas de contrat qui le paie';
+
+  @override
   String expenseDetailGestureRejected(String reason) {
     return 'Geste refusé par le serveur : $reason. La demande est restée telle qu\'elle était.';
   }

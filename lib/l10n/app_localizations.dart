@@ -18296,6 +18296,42 @@ abstract class AppLocalizations {
   /// **'a paid advance can be neither withdrawn nor deleted'**
   String get expenseRejectedStaffAdvancePaid;
 
+  /// No description provided for @expenseRejectedAdvanceMonthLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'the first deduction month\'s payroll is already closed: pay again on a later month'**
+  String get expenseRejectedAdvanceMonthLocked;
+
+  /// No description provided for @expenseRejectedAdvanceDeducted.
+  ///
+  /// In en, this message translates to:
+  /// **'a deduction of this advance is already frozen'**
+  String get expenseRejectedAdvanceDeducted;
+
+  /// No description provided for @expenseRejectedAdvanceSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'a cash advance needs the signed debt acknowledgement'**
+  String get expenseRejectedAdvanceSignature;
+
+  /// No description provided for @expenseRejectedAdvanceProof.
+  ///
+  /// In en, this message translates to:
+  /// **'first deduction month in the past, or payment reference too short'**
+  String get expenseRejectedAdvanceProof;
+
+  /// No description provided for @expenseRejectedAdvanceCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'the advance currency is not the one of the staff member\'s contract'**
+  String get expenseRejectedAdvanceCurrency;
+
+  /// No description provided for @expenseRejectedAdvanceNoContract.
+  ///
+  /// In en, this message translates to:
+  /// **'the staff member has no contract that pays them'**
+  String get expenseRejectedAdvanceNoContract;
+
   /// No description provided for @expenseDetailGestureRejected.
   ///
   /// In en, this message translates to:

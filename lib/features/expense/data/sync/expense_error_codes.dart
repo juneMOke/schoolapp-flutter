@@ -68,6 +68,19 @@ abstract final class ExpenseErrorCodes {
   /// **422** — une avance payée ne se retire ni ne se supprime.
   static const String staffAdvancePaid = 'STAFF_ADVANCE_PAID';
 
+  /// **409** — l'agent de l'avance n'est pas encore remonté : une attente,
+  /// rejouée, jamais un refus.
+  static const String staffMemberNotYetSynced = 'STAFF_MEMBER_NOT_YET_SYNCED';
+
+  // Les gardes de la Paie, atteintes par le PAY ou la réouverture d'une
+  // avance : des refus du geste, jamais du contenu.
+  static const String advanceMonthLocked = 'ADVANCE_MONTH_LOCKED';
+  static const String advanceAlreadyDeducted = 'ADVANCE_ALREADY_DEDUCTED';
+  static const String signatureRequired = 'SIGNATURE_REQUIRED';
+  static const String invalidAdvance = 'INVALID_ADVANCE';
+  static const String advanceCurrencyMismatch = 'ADVANCE_CURRENCY_MISMATCH';
+  static const String staffNotOnPayroll = 'STAFF_NOT_ON_PAYROLL';
+
   /// Les refus qui viennent d'un **geste**, et non d'une saisie.
   ///
   /// La distinction se paie à deux endroits : l'écran ne conseille pas de
@@ -81,5 +94,13 @@ abstract final class ExpenseErrorCodes {
     selfApprovalForbidden,
     notRequestOwner,
     staffAdvancePaid,
+    staffAdvanceDetailsRequired,
+    invalidStaffAdvance,
+    advanceMonthLocked,
+    advanceAlreadyDeducted,
+    signatureRequired,
+    invalidAdvance,
+    advanceCurrencyMismatch,
+    staffNotOnPayroll,
   };
 }

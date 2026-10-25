@@ -57,7 +57,9 @@ class ExpensePushFailure {
       status == null ||
       status! >= 500 ||
       transientStatuses.contains(status) ||
-      (status == 409 && detailCode == null);
+      (status == 409 &&
+          (detailCode == null ||
+              detailCode == ExpenseErrorCodes.staffMemberNotYetSynced));
 
   /// 409 `TRANSITION_OUT_OF_ORDER` — le geste est arrivé avant son
   /// prédécesseur. **Rejouer, ne jamais réaligner** : la ligne locale est

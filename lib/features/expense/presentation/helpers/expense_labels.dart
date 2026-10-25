@@ -62,6 +62,15 @@ String expenseRejectionLabel(
   ExpenseErrorCodes.staffAdvanceLocked =>
     l10n.expenseRejectedStaffAdvanceLocked,
   ExpenseErrorCodes.staffAdvancePaid => l10n.expenseRejectedStaffAdvancePaid,
+  ExpenseErrorCodes.advanceMonthLocked =>
+    l10n.expenseRejectedAdvanceMonthLocked,
+  ExpenseErrorCodes.advanceAlreadyDeducted =>
+    l10n.expenseRejectedAdvanceDeducted,
+  ExpenseErrorCodes.signatureRequired => l10n.expenseRejectedAdvanceSignature,
+  ExpenseErrorCodes.invalidAdvance => l10n.expenseRejectedAdvanceProof,
+  ExpenseErrorCodes.advanceCurrencyMismatch =>
+    l10n.expenseRejectedAdvanceCurrency,
+  ExpenseErrorCodes.staffNotOnPayroll => l10n.expenseRejectedAdvanceNoContract,
   'HTTP_403' => l10n.expenseRejectedForbidden,
   _ => l10n.expenseRejectedGeneric,
 };

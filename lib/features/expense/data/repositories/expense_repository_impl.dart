@@ -190,7 +190,11 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
           return const Left(ExpenseAdvanceRules.monthClosed);
         }
       }
-      if (gesture == ExpenseGesture.reopen && isAdvance) {
+      // Le serveur ne consulte la Paie qu'à la réouverture d'une avance
+      // payée : avant, aucune avance n'est née.
+      if (gesture == ExpenseGesture.reopen &&
+          isAdvance &&
+          current.status == ExpenseStatus.paid) {
         if (await _advanceGuard?.isDeducted(current.id) ?? false) {
           return const Left(ExpenseAdvanceRules.deducted);
         }

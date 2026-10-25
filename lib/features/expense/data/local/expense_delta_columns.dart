@@ -14,10 +14,17 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_staf
 abstract final class ExpenseDeltaColumns {
   /// [localStaffAdvance] : le bloc R.H. de la ligne locale, que le delta ne
   /// remplace que s'il en porte un (T14), et dont il garde le mois de
-  /// première retenue tant que le serveur ne l'a pas encore repris (B6).
+  /// première retenue tant que la demande reste payée (B6) — le serveur ne
+  /// le redit jamais.
+  ///
+  /// [advanceTypeId] : le type `STAFF_ADVANCE` de l'école. Une demande passée
+  /// à un autre type perd son bloc : le serveur l'a effacé, et un bloc resté
+  /// ici projetterait une avance que personne n'a accordée. Inconnu, rien
+  /// n'est effacé.
   static Map<String, Object?> content(
     ExpenseDeltaDto d, {
     String? localStaffAdvance,
+    String? advanceTypeId,
   }) => {
     'type_id': d.typeId,
     'title': d.title,
@@ -27,7 +34,13 @@ abstract final class ExpenseDeltaColumns {
     'expense_date': d.expenseDate,
     'supplier': d.supplier,
     if (d.carriesStaffAdvance)
-      'staff_advance': _staffAdvance(d.staffAdvance, localStaffAdvance),
+      'staff_advance': _staffAdvance(
+        d.staffAdvance,
+        localStaffAdvance,
+        paid: d.status == ExpenseStatus.paid.wireValue,
+      )
+    else if (advanceTypeId != null && d.typeId != advanceTypeId)
+      'staff_advance': null,
     'funding_source': d.fundingSource,
     'client_updated_at': d.clientUpdatedAt,
   };
@@ -103,10 +116,15 @@ abstract final class ExpenseDeltaColumns {
     return left.isAtSameMomentAs(right);
   }
 
-  static String? _staffAdvance(String? served, String? local) {
+  static String? _staffAdvance(
+    String? served,
+    String? local, {
+    required bool paid,
+  }) {
     final server = ExpenseStaffAdvance.tryParse(served);
     final mine = ExpenseStaffAdvance.tryParse(local);
-    final first = mine?.firstMonth;
+    // Sortie de « payée » (rouverte), la demande oublie son ancien mois.
+    final first = paid ? mine?.firstMonth : null;
     if (server == null ||
         server.firstMonth != null ||
         first == null ||
