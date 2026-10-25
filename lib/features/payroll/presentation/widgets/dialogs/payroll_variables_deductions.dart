@@ -20,6 +20,9 @@ class PayrollVariablesDeductions extends StatelessWidget {
   /// Les jours prestés que dit le Pointage, sans correction.
   final int? attendanceWorkedDays;
   final TextEditingController childcare;
+
+  /// Coupée par l'école (Q8), la PC/E ne se saisit pas : elle compterait 0.
+  final bool childcareEnabled;
   final ValueChanged<int> onWorkedDays;
   final VoidCallback onChanged;
 
@@ -28,6 +31,7 @@ class PayrollVariablesDeductions extends StatelessWidget {
     required this.preview,
     required this.attendanceWorkedDays,
     required this.childcare,
+    this.childcareEnabled = true,
     required this.onWorkedDays,
     required this.onChanged,
   });
@@ -67,13 +71,14 @@ class PayrollVariablesDeductions extends StatelessWidget {
           ],
           const SizedBox(height: AppSpacing.sm),
         ],
-        EteeloTextInput(
-          controller: childcare,
-          label: l10n.payrollVarsChildcare,
-          keyboardType: EteeloTextInputType.number,
-          capitalization: EteeloTextCapitalization.none,
-          onChanged: (_) => onChanged(),
-        ),
+        if (childcareEnabled)
+          EteeloTextInput(
+            controller: childcare,
+            label: l10n.payrollVarsChildcare,
+            keyboardType: EteeloTextInputType.number,
+            capitalization: EteeloTextCapitalization.none,
+            onChanged: (_) => onChanged(),
+          ),
         if (deductions.absenceInCents > 0)
           PayrollAmountRow(
             l10n.payrollVarsAbsence(deductions.absentDays ?? 0),

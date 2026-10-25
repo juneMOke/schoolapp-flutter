@@ -14623,10 +14623,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get payrollAdvanceHeavy =>
-      'The instalment exceeds half the monthly salary: consider spreading it.';
-
-  @override
   String get payrollAdvanceCancel => 'Cancel this advance';
 
   @override
@@ -19876,4 +19872,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollAdvanceRetractedNote => 'Withdrawn by the requester';
+
+  @override
+  String payrollSettingsErrorLabel(int max) {
+    return 'At most $max characters';
+  }
+
+  @override
+  String get payrollSettingsAdvancesTitle =>
+      'Advances, loans and children\'s fees';
+
+  @override
+  String get payrollSettingsAdvancesSubtitle =>
+      'Cap of one instalment (a warning on request) and length of a loan.';
+
+  @override
+  String get payrollSettingsAdvanceMax =>
+      'Cap of one instalment (% of base pay)';
+
+  @override
+  String get payrollSettingsLoanMax => 'Longest loan (months)';
+
+  @override
+  String get payrollSettingsChildcare => 'Deduct children\'s school fees';
+
+  @override
+  String get payrollSettingsEmployerTitle => 'Employer charges';
+
+  @override
+  String get payrollSettingsEmployerSubtitle =>
+      'The employer cost on the dashboard; nothing is deducted on the payslip.';
+
+  @override
+  String get payrollSettingsCnssEmployer => 'Employer CNSS (‰ of gross)';
+
+  @override
+  String get payrollSettingsInpp => 'INPP (‰ of gross)';
+
+  @override
+  String get payrollSettingsOnem => 'ONEM (‰ of gross)';
+
+  @override
+  String get payrollSettingsPayslipTitle => 'Payslip';
+
+  @override
+  String get payrollSettingsPayslipSubtitle =>
+      'The three signature captions; blank keeps the paper model\'s.';
+
+  @override
+  String get payrollSettingsSignBeneficiary => 'First signature';
+
+  @override
+  String get payrollSettingsSignDirector => 'Second signature';
+
+  @override
+  String get payrollSettingsSignCashier => 'Third signature';
+
+  @override
+  String payrollAdvanceOverCap(int percent) {
+    return 'The instalment exceeds $percent % of the monthly salary: management will be told.';
+  }
+
+  @override
+  String payrollDashEmployerCost(String amount) {
+    return '+ $amount of employer charges';
+  }
 }

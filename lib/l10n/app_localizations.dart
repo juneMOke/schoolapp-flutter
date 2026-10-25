@@ -22969,12 +22969,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 deduction of {amount} in {month}} other{{count} deductions of {amount} from {month}}}'**
   String payrollAdvancePreview(int count, String amount, String month);
 
-  /// No description provided for @payrollAdvanceHeavy.
-  ///
-  /// In en, this message translates to:
-  /// **'The instalment exceeds half the monthly salary: consider spreading it.'**
-  String get payrollAdvanceHeavy;
-
   /// No description provided for @payrollAdvanceCancel.
   ///
   /// In en, this message translates to:
@@ -30806,6 +30800,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Withdrawn by the requester'**
   String get payrollAdvanceRetractedNote;
+
+  /// No description provided for @payrollSettingsErrorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {max} characters'**
+  String payrollSettingsErrorLabel(int max);
+
+  /// No description provided for @payrollSettingsAdvancesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advances, loans and children\'s fees'**
+  String get payrollSettingsAdvancesTitle;
+
+  /// No description provided for @payrollSettingsAdvancesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cap of one instalment (a warning on request) and length of a loan.'**
+  String get payrollSettingsAdvancesSubtitle;
+
+  /// No description provided for @payrollSettingsAdvanceMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Cap of one instalment (% of base pay)'**
+  String get payrollSettingsAdvanceMax;
+
+  /// No description provided for @payrollSettingsLoanMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest loan (months)'**
+  String get payrollSettingsLoanMax;
+
+  /// No description provided for @payrollSettingsChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduct children\'s school fees'**
+  String get payrollSettingsChildcare;
+
+  /// No description provided for @payrollSettingsEmployerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Employer charges'**
+  String get payrollSettingsEmployerTitle;
+
+  /// No description provided for @payrollSettingsEmployerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The employer cost on the dashboard; nothing is deducted on the payslip.'**
+  String get payrollSettingsEmployerSubtitle;
+
+  /// No description provided for @payrollSettingsCnssEmployer.
+  ///
+  /// In en, this message translates to:
+  /// **'Employer CNSS (‰ of gross)'**
+  String get payrollSettingsCnssEmployer;
+
+  /// No description provided for @payrollSettingsInpp.
+  ///
+  /// In en, this message translates to:
+  /// **'INPP (‰ of gross)'**
+  String get payrollSettingsInpp;
+
+  /// No description provided for @payrollSettingsOnem.
+  ///
+  /// In en, this message translates to:
+  /// **'ONEM (‰ of gross)'**
+  String get payrollSettingsOnem;
+
+  /// No description provided for @payrollSettingsPayslipTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payslip'**
+  String get payrollSettingsPayslipTitle;
+
+  /// No description provided for @payrollSettingsPayslipSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The three signature captions; blank keeps the paper model\'s.'**
+  String get payrollSettingsPayslipSubtitle;
+
+  /// No description provided for @payrollSettingsSignBeneficiary.
+  ///
+  /// In en, this message translates to:
+  /// **'First signature'**
+  String get payrollSettingsSignBeneficiary;
+
+  /// No description provided for @payrollSettingsSignDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Second signature'**
+  String get payrollSettingsSignDirector;
+
+  /// No description provided for @payrollSettingsSignCashier.
+  ///
+  /// In en, this message translates to:
+  /// **'Third signature'**
+  String get payrollSettingsSignCashier;
+
+  /// No description provided for @payrollAdvanceOverCap.
+  ///
+  /// In en, this message translates to:
+  /// **'The instalment exceeds {percent} % of the monthly salary: management will be told.'**
+  String payrollAdvanceOverCap(int percent);
+
+  /// No description provided for @payrollDashEmployerCost.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {amount} of employer charges'**
+  String payrollDashEmployerCost(String amount);
 }
 
 class _AppLocalizationsDelegate

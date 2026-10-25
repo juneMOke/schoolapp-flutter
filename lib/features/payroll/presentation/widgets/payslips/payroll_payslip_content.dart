@@ -186,9 +186,13 @@ class PayrollPayslipContent {
         ),
       ].join('\n'),
       signatures: [
-        l10n.payrollPayslipSignAgent,
-        l10n.payrollPayslipSignHead,
-        l10n.payrollPayslipSignBursar,
+        // Les intitulés de l'école (Q8), sinon ceux du modèle papier — le
+        // bulletin scellé du serveur porte les mêmes.
+        snapshot.settings.signatureBeneficiaryLabel ??
+            l10n.payrollPayslipSignAgent,
+        snapshot.settings.signatureDirectorLabel ?? l10n.payrollPayslipSignHead,
+        snapshot.settings.signatureCashierLabel ??
+            l10n.payrollPayslipSignBursar,
       ],
     );
   }

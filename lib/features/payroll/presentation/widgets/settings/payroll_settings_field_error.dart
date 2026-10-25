@@ -20,3 +20,9 @@ class PayrollSettingsBadAmount extends PayrollSettingsFieldError {
 class PayrollSettingsBelowMin extends PayrollSettingsFieldError {
   const PayrollSettingsBelowMin();
 }
+
+/// Un intitulé plus long que ce que le bulletin imprime.
+class PayrollSettingsLabelTooLong extends PayrollSettingsFieldError {
+  final int max;
+  const PayrollSettingsLabelTooLong(this.max);
+}

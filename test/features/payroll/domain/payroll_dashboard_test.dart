@@ -259,4 +259,13 @@ void main() {
     expect(PayrollDashboard.isTracked(v1), isFalse);
     expect(PayrollDashboard.progressOf(v1, 'USD').totalInCents, 0);
   });
+
+  test('le coût employeur : charges patronales sur le brut, au centime', () {
+    const forecast = PayrollForecast(grossInCents: 120000);
+    expect(
+      PayrollDashboard.employerChargesOf(forecast, PayrollSettings.defaults),
+      // 130 + 20 + 2 = 152 ‰ de 1 200 $.
+      18240,
+    );
+  });
 }

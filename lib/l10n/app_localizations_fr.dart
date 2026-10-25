@@ -14726,10 +14726,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get payrollAdvanceHeavy =>
-      'L\'échéance dépasse la moitié du salaire mensuel : envisagez d\'étaler.';
-
-  @override
   String get payrollAdvanceCancel => 'Annuler cette avance';
 
   @override
@@ -20012,4 +20008,69 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollAdvanceRetractedNote => 'Retirée par le demandeur';
+
+  @override
+  String payrollSettingsErrorLabel(int max) {
+    return '$max caractères au plus';
+  }
+
+  @override
+  String get payrollSettingsAdvancesTitle => 'Avances, prêts et PC/E';
+
+  @override
+  String get payrollSettingsAdvancesSubtitle =>
+      'Plafond d\'une échéance (avertissement à la demande) et durée d\'un prêt.';
+
+  @override
+  String get payrollSettingsAdvanceMax =>
+      'Plafond d\'une échéance (% du salaire de base)';
+
+  @override
+  String get payrollSettingsLoanMax => 'Durée maximale d\'un prêt (mois)';
+
+  @override
+  String get payrollSettingsChildcare =>
+      'Retenir la PC/E (frais scolaires des enfants du personnel)';
+
+  @override
+  String get payrollSettingsEmployerTitle => 'Charges patronales';
+
+  @override
+  String get payrollSettingsEmployerSubtitle =>
+      'Le coût employeur du tableau de bord ; aucune retenue sur le bulletin.';
+
+  @override
+  String get payrollSettingsCnssEmployer => 'CNSS patronale (‰ du brut)';
+
+  @override
+  String get payrollSettingsInpp => 'INPP (‰ du brut)';
+
+  @override
+  String get payrollSettingsOnem => 'ONEM (‰ du brut)';
+
+  @override
+  String get payrollSettingsPayslipTitle => 'Bulletin de paie';
+
+  @override
+  String get payrollSettingsPayslipSubtitle =>
+      'Les intitulés des trois signatures ; vides, ceux du modèle papier.';
+
+  @override
+  String get payrollSettingsSignBeneficiary => 'Première signature';
+
+  @override
+  String get payrollSettingsSignDirector => 'Deuxième signature';
+
+  @override
+  String get payrollSettingsSignCashier => 'Troisième signature';
+
+  @override
+  String payrollAdvanceOverCap(int percent) {
+    return 'L\'échéance dépasse $percent % du salaire mensuel : la direction en sera avertie.';
+  }
+
+  @override
+  String payrollDashEmployerCost(String amount) {
+    return '+ $amount de charges employeur';
+  }
 }

@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_draft.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_form.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_save_bar.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_wide_settings_cards.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -139,6 +140,8 @@ class _SettingsEditorState extends State<_SettingsEditor> {
               EteeloNotice.warning(l10n.payrollSettingsNotYetSynced),
             if (!canManage) EteeloNotice.warning(l10n.payrollSettingsReadOnly),
             PayrollSettingsForm(draft: _draft, readOnly: !canManage),
+            if (_draft.showsWide)
+              PayrollWideSettingsCards(draft: _draft, readOnly: !canManage),
             if (canManage) ...[
               PayrollSettingsSaveBar(
                 dirty: _draft.isDirty,

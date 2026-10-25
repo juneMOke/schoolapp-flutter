@@ -79,11 +79,16 @@ class _DashboardBodyState extends State<PayrollDashboardBody> {
           PayrollDashboard.progressOf(month, currency),
         ),
     ];
+    final figures = PayrollDashboard.forecastOf(view, currency);
+    final settings = state.snapshot.settings;
     final forecast = PayrollDashboardForecastCard(
       view: view,
-      forecast: PayrollDashboard.forecastOf(view, currency),
+      forecast: figures,
       currency: currency,
       prioritizedArrearsInCents: prioritized,
+      employerChargesInCents: settings.wideSettingsServed
+          ? PayrollDashboard.employerChargesOf(figures, settings)
+          : null,
     );
     final paid = PayrollDashboardPaidCard(
       progress: PayrollDashboard.progressOf(view, currency),

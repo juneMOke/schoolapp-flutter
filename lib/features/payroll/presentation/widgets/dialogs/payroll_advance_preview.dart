@@ -10,8 +10,9 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.da
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « 3 déductions de 20 $ à partir d'octobre », et l'avertissement non
-/// bloquant quand l'échéance dépasse la moitié du salaire mensuel (un
-/// vacataire à l'heure n'en a pas : aucun avertissement).
+/// bloquant quand l'échéance dépasse le plafond de l'école (Q8, 50 % par
+/// défaut) du salaire mensuel — un vacataire à l'heure n'en a pas : aucun
+/// avertissement.
 class PayrollAdvancePreview extends StatelessWidget {
   final PayrollSnapshot snapshot;
   final SalaryAdvanceDraft draft;
@@ -37,6 +38,7 @@ class PayrollAdvancePreview extends StatelessWidget {
     final monthly = contract?.payMode == StaffPayMode.hourly
         ? null
         : contract?.amount?.amountInCents ?? contract?.bonus?.amountInCents;
+    final cap = snapshot.settings.advanceMaxPercent;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -49,10 +51,10 @@ class PayrollAdvancePreview extends StatelessWidget {
           ),
           icon: Icons.event_repeat,
         ),
-        if (monthly != null && installment * 2 > monthly) ...[
+        if (monthly != null && installment * 100 > monthly * cap) ...[
           const SizedBox(height: AppSpacing.sm),
           PayrollTone.submitted.notice(
-            l10n.payrollAdvanceHeavy,
+            l10n.payrollAdvanceOverCap(cap),
             icon: Icons.warning_amber_rounded,
           ),
         ],

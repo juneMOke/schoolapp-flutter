@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
-import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
-import 'package:school_app_flutter/features/configuration/presentation/widgets/configuration_field_grid.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_draft.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_inputs.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
@@ -28,26 +25,15 @@ class PayrollSettingsForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    String? error(PayrollSettingsFieldError? error) => switch (error) {
-      null => null,
-      PayrollSettingsOutOfRange(:final range) => l10n.payrollSettingsErrorRange(
-        range.min,
-        range.max,
-      ),
-      PayrollSettingsBadAmount() => l10n.payrollSettingsErrorAmount,
-      PayrollSettingsBelowMin() => l10n.payrollSettingsErrorStep,
-    };
     Widget field(
       TextEditingController controller,
       String label,
       PayrollSettingsFieldError? fieldError,
-    ) => EteeloTextInput(
+    ) => PayrollSettingsNumberField(
       controller: controller,
       label: label,
-      keyboardType: EteeloTextInputType.number,
-      capitalization: EteeloTextCapitalization.none,
-      enabled: !readOnly,
-      errorText: error(fieldError),
+      error: fieldError,
+      readOnly: readOnly,
     );
     Widget amount(String currency, PayrollCurrencyField which, String label) =>
         field(
@@ -59,7 +45,7 @@ class PayrollSettingsForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Card(
+        PayrollSettingsCard(
           title: l10n.payrollSettingsMonthTitle,
           subtitle: l10n.payrollSettingsMonthSubtitle,
           icon: Icons.calendar_month_outlined,
@@ -75,13 +61,13 @@ class PayrollSettingsForm extends StatelessWidget {
               draft.errorOfDays(),
             ),
           ],
-          footer: _Toggle(
+          footer: PayrollSettingsToggle(
             label: l10n.payrollSettingsAbsenceDeduction,
             selected: draft.absence,
             onTap: readOnly ? null : draft.toggleAbsence,
           ),
         ),
-        _Card(
+        PayrollSettingsCard(
           title: l10n.payrollSettingsLegalTitle,
           subtitle: l10n.payrollSettingsLegalSubtitle,
           icon: Icons.account_balance_outlined,
@@ -103,7 +89,7 @@ class PayrollSettingsForm extends StatelessWidget {
             ],
           ],
         ),
-        _Card(
+        PayrollSettingsCard(
           title: l10n.payrollSettingsOvertimeTitle,
           subtitle: l10n.payrollSettingsOvertimeSubtitle,
           icon: Icons.more_time_outlined,
@@ -127,7 +113,7 @@ class PayrollSettingsForm extends StatelessWidget {
             ],
           ],
         ),
-        _Card(
+        PayrollSettingsCard(
           title: l10n.payrollSettingsAllowanceTitle,
           subtitle: l10n.payrollSettingsAllowanceSubtitle,
           icon: Icons.family_restroom_outlined,
@@ -168,61 +154,4 @@ class PayrollSettingsForm extends StatelessWidget {
       ],
     );
   }
-}
-
-class _Card extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final List<Widget> fields;
-  final Widget? footer;
-
-  const _Card({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.fields,
-    this.footer,
-  });
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-    child: BiToneSectionCard(
-      title: title,
-      subtitle: subtitle,
-      icon: icon,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ConfigurationFieldGrid(children: fields),
-          if (footer != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            footer!,
-          ],
-        ],
-      ),
-    ),
-  );
-}
-
-class _Toggle extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  const _Toggle({required this.label, required this.selected, this.onTap});
-
-  @override
-  Widget build(BuildContext context) => Align(
-    alignment: AlignmentDirectional.centerStart,
-    child: EteeloFilterChip(
-      label: label,
-      selected: selected,
-      color: AppColors.terreCuite,
-      soft: AppColors.terreCuiteSoft,
-      ink: AppColors.terreCuiteDark,
-      onTap: onTap,
-    ),
-  );
 }

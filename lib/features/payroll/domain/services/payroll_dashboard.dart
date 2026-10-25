@@ -2,6 +2,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arre
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_dashboard_figures.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_math.dart';
 
 /// Le tableau de bord de la paie (spec TB 1-2), calculé sur la tablette à
 /// partir des mêmes lignes que le livre : le PDF du serveur (Q7) applique
@@ -83,6 +85,16 @@ abstract final class PayrollDashboard {
       unpaidCount: none,
     );
   }
+
+  /// Les charges patronales (CNSS, INPP, ONEM) sur le brut du mois, arrondies
+  /// au centime : le coût employeur, que rien ne retient sur le bulletin.
+  static int employerChargesOf(
+    PayrollForecast forecast,
+    PayrollSettings settings,
+  ) => PayrollMath.roundDiv(
+    forecast.grossInCents * settings.employerChargesPermille,
+    1000,
+  );
 
   /// Une paie validée avant la v2 : on payait sans saisir le versement, rien
   /// ne s'y suit (le serveur refuse son PDF : `PAYROLL_NOT_TRACKED`).

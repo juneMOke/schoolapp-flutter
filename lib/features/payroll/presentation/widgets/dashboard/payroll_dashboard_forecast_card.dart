@@ -21,12 +21,17 @@ class PayrollDashboardForecastCard extends StatelessWidget {
   /// Arriérés marqués « en priorité » à verser avec ce mois, ou 0.
   final int prioritizedArrearsInCents;
 
+  /// Les charges patronales du mois (Q8), ou `null` tant que le serveur ne
+  /// sert pas leurs taux.
+  final int? employerChargesInCents;
+
   const PayrollDashboardForecastCard({
     super.key,
     required this.view,
     required this.forecast,
     required this.currency,
     this.prioritizedArrearsInCents = 0,
+    this.employerChargesInCents,
   });
 
   @override
@@ -82,6 +87,12 @@ class PayrollDashboardForecastCard extends StatelessWidget {
                 label: l10n.payrollDashPlanned,
                 value: money(gross),
                 color: AppColors.textPrimary,
+                note: switch (employerChargesInCents) {
+                  final charges? when charges > 0 =>
+                    l10n.payrollDashEmployerCost(money(charges)),
+                  _ => null,
+                },
+                noteColor: AppColors.textSecondary,
               ),
               _Figure(
                 label: l10n.payrollDashActual,
@@ -129,12 +140,14 @@ class _Figure extends StatelessWidget {
   final String value;
   final Color color;
   final String? note;
+  final Color noteColor;
 
   const _Figure({
     required this.label,
     required this.value,
     required this.color,
     this.note,
+    this.noteColor = AppColors.payrollChartNet,
   });
 
   @override
@@ -150,12 +163,7 @@ class _Figure extends StatelessWidget {
       ),
       Text(value, style: AppTypography.money.copyWith(color: color)),
       if (note case final note?)
-        Text(
-          note,
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.payrollChartNet,
-          ),
-        ),
+        Text(note, style: AppTypography.bodySmall.copyWith(color: noteColor)),
     ],
   );
 }

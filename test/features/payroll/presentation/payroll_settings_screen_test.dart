@@ -166,4 +166,72 @@ void main() {
     expect(find.text('Barème à jour'), findsOneWidget);
     verifyNever(() => pumped.repository.saveSettings(any()));
   });
+
+  testWidgets('barème élargi servi : ses cartes, et la durée d un prêt part '
+      'avec l enregistrement', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 3200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final pumped = await pumpPayrollScreen(
+      tester,
+      snapshot: PayrollSnapshot(
+        members: snapshot.members,
+        contractsByMember: const {},
+        settings: const PayrollSettings(
+          monthlyHoursDivisor: 173,
+          overtimeMultiplierPermille: 1300,
+          allowanceEligibleKinds: {},
+          byCurrency: {
+            'USD': PayrollCurrencySettings(
+              childAllowanceInCents: 500,
+              defaultOvertimeRateInCents: 300,
+              overtimeRateStepInCents: 50,
+            ),
+          },
+          wideSettingsServed: true,
+        ),
+        profiles: const {},
+        headers: snapshot.headers,
+        variables: const {},
+        frozenLines: const {},
+        summaries: const {},
+        gestures: const [],
+        advances: const [],
+        disbursements: const [],
+        schoolYears: snapshot.schoolYears,
+        shareTraces: const {},
+        hasEverSynced: true,
+      ),
+      permissions: direction,
+      child: const PayrollSettingsScreen(),
+    );
+    when(
+      () => pumped.repository.saveSettings(any()),
+    ).thenAnswer((_) async => const Right(unit));
+
+    expect(find.text('Charges patronales'), findsOneWidget);
+    expect(find.text('Bulletin de paie'), findsOneWidget);
+    await tester.enterText(field("Durée maximale d'un prêt (mois)"), '6');
+    await tester.pump();
+    await tester.tap(find.text('Enregistrer le barème'));
+    await tester.pumpAndSettle();
+
+    final saved =
+        verify(
+              () => pumped.repository.saveSettings(captureAny()),
+            ).captured.single
+            as PayrollSettings;
+    expect(saved.loanMaxMonths, 6);
+  });
+
+  testWidgets('pas servi : ni charges patronales ni bulletin', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpPayrollScreen(
+      tester,
+      snapshot: snapshot,
+      permissions: direction,
+      child: const PayrollSettingsScreen(),
+    );
+    expect(find.text('Charges patronales'), findsNothing);
+  });
 }

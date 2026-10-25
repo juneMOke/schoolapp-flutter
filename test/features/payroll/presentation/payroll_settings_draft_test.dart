@@ -55,4 +55,49 @@ void main() {
     expect(saved.overtimeMultiplierPermille, 1500);
     expect(saved.of('USD').iprFlatInCents, 200);
   });
+
+  test('barème élargi servi : intact à l ouverture, saisi, puis remonté', () {
+    final served = usdOnly.copyWith(
+      childcareEnabled: false,
+      loanMaxMonths: 6,
+      signatures: (beneficiary: 'L’agent', director: null, cashier: null),
+    );
+    final wide = PayrollSettings(
+      monthlyHoursDivisor: served.monthlyHoursDivisor,
+      overtimeMultiplierPermille: served.overtimeMultiplierPermille,
+      allowanceEligibleKinds: served.allowanceEligibleKinds,
+      byCurrency: served.byCurrency,
+      childcareEnabled: false,
+      loanMaxMonths: 6,
+      signatureBeneficiaryLabel: 'L’agent',
+      wideSettingsServed: true,
+    );
+    final draft = PayrollSettingsDraft(wide);
+    addTearDown(draft.dispose);
+
+    expect(draft.showsWide, isTrue);
+    expect(draft.isDirty, isFalse);
+
+    draft.wide.loanMax.text = '13';
+    expect(draft.hasErrors, isTrue);
+    draft.wide.loanMax.text = '8';
+    draft.toggleChildcare();
+    draft.wide.beneficiaryLabel.text = '';
+
+    final saved = draft.settings!;
+    expect(saved.loanMaxMonths, 8);
+    expect(saved.childcareEnabled, isTrue);
+    // Vidé : l'intitulé du modèle papier.
+    expect(saved.signatureBeneficiaryLabel, isNull);
+  });
+
+  test('pas servi : le barème élargi reste hors du brouillon', () {
+    final draft = PayrollSettingsDraft(usdOnly);
+    addTearDown(draft.dispose);
+    draft.wide.loanMax.text = '99';
+
+    expect(draft.showsWide, isFalse);
+    expect(draft.hasErrors, isFalse);
+    expect(draft.settings!.loanMaxMonths, PayrollSettings.defaultLoanMaxMonths);
+  });
 }

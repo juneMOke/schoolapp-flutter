@@ -160,6 +160,7 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
             preview: preview,
             attendanceWorkedDays: _attendanceWorkedDays,
             childcare: _childcare,
+            childcareEnabled: widget.settings.childcareEnabled,
             onWorkedDays: (days) => setState(() => _workedDays = days),
             onChanged: () => setState(() {}),
           ),
