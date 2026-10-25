@@ -30,6 +30,9 @@ enum PayrollNoticeKind {
   /// Le serveur n'a pas rendu le bulletin.
   downloadFailed,
 
+  /// Le serveur compose déjà un long document (429) : réessayer plus tard.
+  renderBusy,
+
   /// Une règle refusée avant la file.
   refused,
 

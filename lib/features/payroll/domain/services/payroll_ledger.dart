@@ -101,6 +101,7 @@ abstract final class PayrollLedger {
         payoutRatePercent:
             snapshot.payoutPolicies[month]?.ratePercent ??
             PayrollPayoutPolicy.full,
+        payoutReason: snapshot.payoutPolicies[month]?.reason,
         advances: PayrollAdvanceSchedule.statesOf(
           snapshot.advances,
           month,
@@ -129,6 +130,7 @@ abstract final class PayrollLedger {
         attendance: input.attendance,
         advances: input.advances,
         payoutRatePercent: input.payoutRatePercent,
+        payoutReason: input.payoutReason,
       ),
     ).lines;
     return lines.isEmpty ? null : lines.single;

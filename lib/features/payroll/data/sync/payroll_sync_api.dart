@@ -51,8 +51,8 @@ abstract class PayrollSyncApi {
     @Query('limit') int? limit,
   );
 
-  @PUT(AppConstants.syncPayrollPayoutPoliciesEndpoint)
-  Future<dynamic> putPayoutPolicy(
+  @POST(AppConstants.syncPayrollPayoutPoliciesEndpoint)
+  Future<dynamic> submitPayoutPolicy(
     @Extras() Map<String, dynamic> extras,
     @Body() Map<String, dynamic> body,
   );

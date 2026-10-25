@@ -36,7 +36,7 @@ class PayrollVariablesDto {
       overtimeMinutes: raw.integer('overtimeMinutes'),
       overtimeRateInCents: raw.integer('overtimeRateInCents'),
       dependentChildren: raw.integer('dependentChildren'),
-      workedDays: raw.integer('workedDays'),
+      workedDays: raw.integer('daysWorked'),
       childcareInCents: raw.integer('childcareInCents'),
       fixedPayoutInCents: raw.integer('fixedPayoutInCents'),
       fixedPayoutReason: raw.text('fixedPayoutReason'),
@@ -56,18 +56,23 @@ class PayrollPayoutPolicyDto {
     this.reason,
   });
 
-  /// `null` hors bornes : un taux qu'on ne sait pas lire ne s'applique pas.
-  static PayrollPayoutPolicyDto? tryParse(Object? raw) {
-    if (raw is! Map) return null;
-    final rate = raw.integer('ratePercent');
-    final at = raw.instant('clientUpdatedAt');
-    if (rate == null || rate < 0 || rate > 100 || at == null) return null;
+  /// Lu à plat sur la paie (`payoutPercent`, `payoutReason`,
+  /// `payoutClientUpdatedAt`). `null` hors bornes — un taux qu'on ne sait
+  /// pas lire ne s'applique pas — et pour le 100 % jamais posé.
+  static PayrollPayoutPolicyDto? tryParse(Map<dynamic, dynamic> payroll) {
+    final rate = payroll.integer('payoutPercent');
+    final at = payroll.instant('payoutClientUpdatedAt');
+    if (rate == null || rate < 0 || rate > 100) return null;
+    if (at == null && rate == 100) return null;
     return PayrollPayoutPolicyDto(
       ratePercent: rate,
-      clientUpdatedAt: at,
-      reason: raw.text('reason'),
+      // Sans horloge, le taux du serveur cède à toute saisie locale.
+      clientUpdatedAt: at ?? _epoch,
+      reason: payroll.text('payoutReason'),
     );
   }
+
+  static const String _epoch = '1970-01-01T00:00:00.000Z';
 }
 
 /// Un geste du circuit, tel que le serveur l'a enregistré.
@@ -118,7 +123,7 @@ class PayrollDto {
   final List<PayrollVariablesDto> variables;
   final List<PayrollGestureDto> gestures;
 
-  /// `null` : le serveur n'en porte pas (100 %), ou une paie v1.
+  /// `null` : 100 % jamais réglé, ou une paie v1.
   final PayrollPayoutPolicyDto? payoutPolicy;
 
   /// Liste vide hors `VALIDATED` ; `null` si le champ manque (ne rien
@@ -172,7 +177,7 @@ class PayrollDto {
         if (gestures is List)
           for (final item in gestures) ?PayrollGestureDto.tryParse(item),
       ],
-      payoutPolicy: PayrollPayoutPolicyDto.tryParse(raw['payoutPolicy']),
+      payoutPolicy: PayrollPayoutPolicyDto.tryParse(raw),
       lines: lines is List
           ? [
               for (final l in lines)

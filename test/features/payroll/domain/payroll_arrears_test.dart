@@ -18,8 +18,14 @@ import '../../staff/staff_builders.dart';
 /// Le registre des arriérés (B4) : dérivé des paies validées, imputé au mois
 /// d'origine, réparti du plus ancien au plus récent.
 void main() {
-  PayrollLine line(String month, {int net = 20000, int? toPay}) => PayrollLine(
+  PayrollLine line(
+    String month, {
+    int net = 20000,
+    int? toPay,
+    int formula = PayrollLine.currentFormula,
+  }) => PayrollLine(
     month: month,
+    formulaVersion: formula,
     staffMemberId: 'm-1',
     currency: 'USD',
     baseInCents: net,
@@ -122,6 +128,20 @@ void main() {
     );
 
     expect(agents, isEmpty);
+  });
+
+  test('une paie validée avant la v2 ne compte jamais comme arriéré', () {
+    final agents = PayrollArrears.of(
+      snapshotOf(
+        lines: {
+          '2026-08': line('2026-08', formula: 1),
+          '2026-09': line('2026-09'),
+        },
+      ),
+      currentMonth: '2026-10',
+    );
+
+    expect([for (final a in agents.single.months) a.month], ['2026-09']);
   });
 
   test('le drapeau priorité suit le mois d origine', () {

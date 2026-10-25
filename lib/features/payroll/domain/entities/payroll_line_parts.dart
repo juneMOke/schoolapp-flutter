@@ -57,14 +57,24 @@ class PayrollLinePayout extends Equatable {
 
   /// Le taux appliqué, en % ; `null` quand un montant fixe a primé.
   final int? ratePercent;
-  final bool fixed;
+
+  /// Le montant fixe saisi pour l'agent, tel quel (il peut dépasser le net,
+  /// borné dans [toPayInCents]) ; `null` sans montant fixe.
+  final int? fixedInCents;
+
+  /// Le motif du taux réduit ou du montant fixe ; `null` à 100 %.
+  final String? reason;
 
   const PayrollLinePayout({
     required this.toPayInCents,
     required this.deferredInCents,
     this.ratePercent,
-    this.fixed = false,
+    this.fixedInCents,
+    this.reason,
   });
+
+  /// Un montant fixe a primé sur le taux du mois.
+  bool get fixed => fixedInCents != null;
 
   /// Versement intégral du net.
   factory PayrollLinePayout.full(int netInCents) => PayrollLinePayout(
@@ -80,6 +90,7 @@ class PayrollLinePayout extends Equatable {
     toPayInCents,
     deferredInCents,
     ratePercent,
-    fixed,
+    fixedInCents,
+    reason,
   ];
 }

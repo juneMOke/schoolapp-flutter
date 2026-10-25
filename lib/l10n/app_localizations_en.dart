@@ -11658,6 +11658,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'an earlier gesture has not gone out yet';
 
   @override
+  String get expenseRejectedStaffAdvanceForbidden =>
+      'a staff advance needs payroll access';
+
+  @override
+  String get expenseRejectedStaffAdvanceDetails =>
+      'the advance is missing its staff member or first deduction month';
+
+  @override
+  String get expenseRejectedStaffAdvanceInvalid =>
+      'invalid advance: instalments or first deduction month';
+
+  @override
+  String get expenseRejectedStaffAdvanceLocked =>
+      'an approved or paid advance can no longer be edited';
+
+  @override
+  String get expenseRejectedStaffAdvancePaid =>
+      'a paid advance can be neither withdrawn nor deleted';
+
+  @override
   String expenseDetailGestureRejected(String reason) {
     return 'Gesture refused by the server: $reason. The request stayed as it was.';
   }
@@ -15149,6 +15169,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payrollToastDownloadFailed =>
       'The payslip could not be downloaded.';
+
+  @override
+  String get payrollToastRenderBusy =>
+      'The server is already rendering a long document: try again in a moment.';
 
   @override
   String payrollPayslipFileName(String month) {

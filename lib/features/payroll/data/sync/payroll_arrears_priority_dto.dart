@@ -68,7 +68,7 @@ class PayrollArrearsPriorityPageDto
       );
 }
 
-/// `POST /sync/payroll-arrears-priorities` — `{ priority, authorId }`,
+/// `POST /sync/payroll-arrear-priorities` — `{ priority, authorId }`,
 /// dernier écrit gagne.
 class PayrollArrearsPriorityRequestDto {
   final PayrollArrearsPriorityDto priority;

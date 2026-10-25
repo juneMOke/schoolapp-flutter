@@ -18266,6 +18266,36 @@ abstract class AppLocalizations {
   /// **'an earlier gesture has not gone out yet'**
   String get expenseRejectedOutOfOrder;
 
+  /// No description provided for @expenseRejectedStaffAdvanceForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'a staff advance needs payroll access'**
+  String get expenseRejectedStaffAdvanceForbidden;
+
+  /// No description provided for @expenseRejectedStaffAdvanceDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'the advance is missing its staff member or first deduction month'**
+  String get expenseRejectedStaffAdvanceDetails;
+
+  /// No description provided for @expenseRejectedStaffAdvanceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'invalid advance: instalments or first deduction month'**
+  String get expenseRejectedStaffAdvanceInvalid;
+
+  /// No description provided for @expenseRejectedStaffAdvanceLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'an approved or paid advance can no longer be edited'**
+  String get expenseRejectedStaffAdvanceLocked;
+
+  /// No description provided for @expenseRejectedStaffAdvancePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'a paid advance can be neither withdrawn nor deleted'**
+  String get expenseRejectedStaffAdvancePaid;
+
   /// No description provided for @expenseDetailGestureRejected.
   ///
   /// In en, this message translates to:
@@ -23855,6 +23885,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The payslip could not be downloaded.'**
   String get payrollToastDownloadFailed;
+
+  /// No description provided for @payrollToastRenderBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is already rendering a long document: try again in a moment.'**
+  String get payrollToastRenderBusy;
 
   /// No description provided for @payrollPayslipFileName.
   ///

@@ -56,6 +56,8 @@ void showPayrollNotice(
       AppSnackBar.showWarning(context, l10n.payrollToastOffline);
     case PayrollNoticeKind.downloadFailed:
       AppSnackBar.showError(context, l10n.payrollToastDownloadFailed);
+    case PayrollNoticeKind.renderBusy:
+      AppSnackBar.showWarning(context, l10n.payrollToastRenderBusy);
     case PayrollNoticeKind.refused:
       final rule = notice.rule;
       if (rule != null) {

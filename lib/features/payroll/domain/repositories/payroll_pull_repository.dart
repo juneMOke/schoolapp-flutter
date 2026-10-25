@@ -9,7 +9,7 @@ const String kStaffPayProfilesResource = 'staff_pay_profiles';
 const String kStaffAttendanceSummariesResource = 'staff_attendance_summaries';
 const String kSalaryAdvancesResource = 'salary_advances';
 const String kPayrollDisbursementsResource = 'payroll_disbursements';
-const String kPayrollArrearsPrioritiesResource = 'payroll_arrears_priorities';
+const String kPayrollArrearsPrioritiesResource = 'payroll_arrear_priorities';
 
 /// Ce que l'écran de la paie lit : les agents et leurs contrats, puis les
 /// six flux de la paie.

@@ -11751,6 +11751,26 @@ class AppLocalizationsFr extends AppLocalizations {
       'un geste antérieur n\'est pas encore parti';
 
   @override
+  String get expenseRejectedStaffAdvanceForbidden =>
+      'une avance au personnel demande l\'accès à la paie';
+
+  @override
+  String get expenseRejectedStaffAdvanceDetails =>
+      'il manque l\'agent de l\'avance ou le mois de sa première retenue';
+
+  @override
+  String get expenseRejectedStaffAdvanceInvalid =>
+      'avance invalide : échéances ou mois de première retenue';
+
+  @override
+  String get expenseRejectedStaffAdvanceLocked =>
+      'une avance accordée ou payée ne se modifie plus';
+
+  @override
+  String get expenseRejectedStaffAdvancePaid =>
+      'une avance payée ne se retire ni ne se supprime';
+
+  @override
   String expenseDetailGestureRejected(String reason) {
     return 'Geste refusé par le serveur : $reason. La demande est restée telle qu\'elle était.';
   }
@@ -15256,6 +15276,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get payrollToastDownloadFailed =>
       'Le bulletin n\'a pas pu être téléchargé.';
+
+  @override
+  String get payrollToastRenderBusy =>
+      'Le serveur compose déjà un long document : réessayez dans un instant.';
 
   @override
   String payrollPayslipFileName(String month) {

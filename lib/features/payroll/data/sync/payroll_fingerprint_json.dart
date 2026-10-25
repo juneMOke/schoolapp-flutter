@@ -11,8 +11,10 @@ abstract final class PayrollFingerprintJson {
         {
           'currency': total.currency,
           'grossInCents': total.grossInCents,
+          'deductionInCents': ?total.deductionInCents,
           'advanceInCents': total.advanceInCents,
           'netInCents': total.netInCents,
+          'toPayInCents': ?total.toPayInCents,
         },
     ],
     'linesDigest': fingerprint.linesDigest,
@@ -27,7 +29,10 @@ abstract final class PayrollFingerprintJson {
             'advanceInCents': line.advanceInCents,
             'netInCents': line.netInCents,
             if (line.formulaVersion >= 2) ...{
-              'fixedDeductionsInCents': line.fixedDeductionsInCents,
+              'absenceInCents': line.absenceInCents,
+              'iprInCents': line.iprInCents,
+              'cnssInCents': line.cnssInCents,
+              'childcareInCents': line.childcareInCents,
               'toPayInCents': line.toPayInCents,
             },
           },
@@ -66,6 +71,8 @@ abstract final class PayrollFingerprintJson {
       grossInCents: raw.integer('grossInCents') ?? 0,
       advanceInCents: raw.integer('advanceInCents') ?? 0,
       netInCents: raw.integer('netInCents') ?? 0,
+      deductionInCents: raw.integer('deductionInCents'),
+      toPayInCents: raw.integer('toPayInCents'),
     );
   }
 
@@ -81,7 +88,10 @@ abstract final class PayrollFingerprintJson {
       advanceInCents: raw.integer('advanceInCents') ?? 0,
       netInCents: raw.integer('netInCents') ?? 0,
       formulaVersion: version,
-      fixedDeductionsInCents: raw.integer('fixedDeductionsInCents') ?? 0,
+      absenceInCents: raw.integer('absenceInCents') ?? 0,
+      iprInCents: raw.integer('iprInCents') ?? 0,
+      cnssInCents: raw.integer('cnssInCents') ?? 0,
+      childcareInCents: raw.integer('childcareInCents') ?? 0,
       toPayInCents: raw.integer('toPayInCents'),
     );
   }

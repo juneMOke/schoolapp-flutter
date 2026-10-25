@@ -34,6 +34,9 @@ class PayrollEngineInput {
   /// Le taux de versement du mois, en % — 100 tant que l'école verse tout.
   final int payoutRatePercent;
 
+  /// Le motif du taux du mois, figé sur les lignes qu'il réduit.
+  final String? payoutReason;
+
   const PayrollEngineInput({
     required this.month,
     required this.settings,
@@ -43,6 +46,7 @@ class PayrollEngineInput {
     this.attendance,
     this.advances = const {},
     this.payoutRatePercent = 100,
+    this.payoutReason,
   });
 }
 
@@ -181,6 +185,8 @@ abstract final class PayrollEngine {
         netInCents: net,
         ratePercent: input.payoutRatePercent,
         fixedInCents: variables?.fixedPayoutInCents,
+        rateReason: input.payoutReason,
+        fixedReason: variables?.fixedPayoutReason,
       ),
       attendanceMonth: hoursMonth,
       attendance: summary,

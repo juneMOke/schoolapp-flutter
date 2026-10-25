@@ -2,6 +2,7 @@ import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_fingerprint_json.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 // Les remontées de la paie qui ne sont pas des faits : réglages, éléments
@@ -68,6 +69,10 @@ class PayrollVariablesRequestDto {
     this.fixedPayoutReason,
   });
 
+  /// La formule que la tablette calcule : jours prestés, PC/E et montant
+  /// fixe ne s'écrivent qu'en v2.
+  static const int formulaVersion = PayrollLine.currentFormula;
+
   Map<String, dynamic> toJson() => {
     'variables': {
       'month': month,
@@ -75,10 +80,12 @@ class PayrollVariablesRequestDto {
       'overtimeMinutes': overtimeMinutes,
       'overtimeRateInCents': overtimeRateInCents,
       'dependentChildren': dependentChildren,
-      'workedDays': workedDays,
+      'daysWorked': workedDays,
       'childcareInCents': childcareInCents,
       'fixedPayoutInCents': fixedPayoutInCents,
       'fixedPayoutReason': fixedPayoutReason,
+      // Sans lui, le serveur ignore les trois champs v2 et garde les siens.
+      'formulaVersion': formulaVersion,
       'clientUpdatedAt': clientUpdatedAt,
     },
     kOutboxAuthorIdKey: authorId,
@@ -103,7 +110,7 @@ class PayrollVariablesRequestDto {
       overtimeMinutes: inner.integer('overtimeMinutes'),
       overtimeRateInCents: inner.integer('overtimeRateInCents'),
       dependentChildren: inner.integer('dependentChildren'),
-      workedDays: inner.integer('workedDays'),
+      workedDays: inner.integer('daysWorked'),
       childcareInCents: inner.integer('childcareInCents'),
       fixedPayoutInCents: inner.integer('fixedPayoutInCents'),
       fixedPayoutReason: inner.text('fixedPayoutReason'),
@@ -174,8 +181,8 @@ class PayrollGestureRequestDto {
   }
 }
 
-/// `PUT /sync/payroll-payout-policies` — le taux de versement d'un mois et
-/// son motif, dernier écrit gagne, brouillon seulement (v2).
+/// `POST /sync/payroll-payouts` — le taux de versement d'un mois et son
+/// motif, dernier écrit gagne, brouillon seulement (v2).
 class PayrollPayoutPolicyRequestDto {
   final String month;
   final int ratePercent;
@@ -192,9 +199,9 @@ class PayrollPayoutPolicyRequestDto {
   });
 
   Map<String, dynamic> toJson() => {
-    'policy': {
+    'payout': {
       'month': month,
-      'ratePercent': ratePercent,
+      'percent': ratePercent,
       'reason': reason,
       'clientUpdatedAt': clientUpdatedAt,
     },
@@ -203,10 +210,10 @@ class PayrollPayoutPolicyRequestDto {
 
   static PayrollPayoutPolicyRequestDto? tryParse(Object? raw) {
     if (raw is! Map) return null;
-    final inner = raw['policy'];
+    final inner = raw['payout'];
     if (inner is! Map) return null;
     final month = inner.yearMonth('month');
-    final rate = inner.integer('ratePercent');
+    final rate = inner.integer('percent');
     final at = inner.instant('clientUpdatedAt');
     final author = raw.text(kOutboxAuthorIdKey);
     if (month == null || rate == null || at == null || author == null) {

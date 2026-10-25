@@ -138,7 +138,7 @@ const Set<String> _kSuffixedCursorResources = {
   'staff_attendance_summaries',
   'salary_advances',
   'payroll_disbursements',
-  'payroll_arrears_priorities',
+  'payroll_arrear_priorities',
   'enrollment_reenrollment_cohort',
   'student_photos',
   'enrollment_suspensions',
@@ -416,7 +416,7 @@ void main() {
       'staff_attendance_summaries',
       'salary_advances',
       'payroll_disbursements',
-      'payroll_arrears_priorities',
+      'payroll_arrear_priorities',
     ]);
   });
 

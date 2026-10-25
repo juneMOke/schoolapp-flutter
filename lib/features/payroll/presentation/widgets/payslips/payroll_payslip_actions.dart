@@ -2,14 +2,17 @@ import 'package:dartz/dartz.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
@@ -63,6 +66,16 @@ class PayrollPayslipActions {
       );
       return;
     }
+    // Un bulletin scellé s'émet : le serveur exige `editique.write`.
+    if (!PermissionGate.allows(context, const [Perm.editiqueWrite])) {
+      cubit.announce(
+        const PayrollNotice(
+          PayrollNoticeKind.refused,
+          rule: PayrollRule.forbidden,
+        ),
+      );
+      return;
+    }
     if (line == null) {
       await _serverPdf(
         cubit.commands.monthPayslips(view.month),
@@ -75,11 +88,11 @@ class PayrollPayslipActions {
     if (!context.mounted || cubit.isClosed) return;
     await result.fold(
       (failure) async => cubit.announce(
-        PayrollNotice(
-          failure is NetworkFailure
-              ? PayrollNoticeKind.offline
-              : PayrollNoticeKind.downloadFailed,
-        ),
+        PayrollNotice(switch (failure) {
+          NetworkFailure() => PayrollNoticeKind.offline,
+          TooManyRequestsFailure() => PayrollNoticeKind.renderBusy,
+          _ => PayrollNoticeKind.downloadFailed,
+        }),
       ),
       (bytes) async {
         await cubit.commands.recordShare(
@@ -122,11 +135,11 @@ class PayrollPayslipActions {
     if (!context.mounted || cubit.isClosed) return;
     await result.fold(
       (failure) async => cubit.announce(
-        PayrollNotice(
-          failure is NetworkFailure
-              ? PayrollNoticeKind.offline
-              : PayrollNoticeKind.downloadFailed,
-        ),
+        PayrollNotice(switch (failure) {
+          NetworkFailure() => PayrollNoticeKind.offline,
+          TooManyRequestsFailure() => PayrollNoticeKind.renderBusy,
+          _ => PayrollNoticeKind.downloadFailed,
+        }),
       ),
       (bytes) => showEteeloDocumentViewer(
         context,

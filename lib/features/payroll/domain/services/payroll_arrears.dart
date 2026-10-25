@@ -11,6 +11,9 @@ abstract final class PayrollArrears {
   ///
   /// Le mois en cours ([currentMonth]) n'y entre que pour sa part différée
   /// par décision : un salaire du mois pas encore versé n'est pas en retard.
+  ///
+  /// Une ligne figée en v1 n'y entre jamais : avant la v2, on pouvait payer
+  /// sans enregistrer le versement, et son reste n'est pas une dette.
   static List<PayrollArrearsAgent> of(
     PayrollSnapshot snapshot, {
     required String currentMonth,
@@ -29,6 +32,7 @@ abstract final class PayrollArrears {
       }
       final view = PayrollLedger.monthView(snapshot, month);
       for (final line in lines) {
+        if (line.formulaVersion < 2) continue;
         final settlement = view.settlementOf(line);
         final remaining = settlement.remainingInCents;
         if (remaining <= 0) continue;
@@ -60,9 +64,13 @@ abstract final class PayrollArrears {
             prioritized: snapshot.arrearsPriorities.contains(
               priorityKey(month, line.staffMemberId),
             ),
-            reason: line.payout?.fixed ?? false
-                ? variables?.fixedPayoutReason
-                : snapshot.payoutPolicies[month]?.reason,
+            // Le motif figé sur la ligne ; une ligne sans motif (calculée
+            // avant qu'il y soit porté) le relit dans la saisie du mois.
+            reason:
+                line.payout?.reason ??
+                (line.payout?.fixed ?? false
+                    ? variables?.fixedPayoutReason
+                    : snapshot.payoutPolicies[month]?.reason),
           ),
         );
       }

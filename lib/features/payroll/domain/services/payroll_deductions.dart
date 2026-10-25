@@ -79,11 +79,14 @@ abstract final class PayrollDeductions {
   }
 
   /// Le versement du mois : le montant fixe de l'agent prime (borné au net),
-  /// sinon `roundDiv(net × taux, 100)`.
+  /// sinon `roundDiv(net × taux, 100)`. Le motif suit ce qui a joué : celui
+  /// du montant fixe, ou celui du taux — aucun à 100 %.
   static PayrollLinePayout payout({
     required int netInCents,
     required int ratePercent,
     required int? fixedInCents,
+    String? rateReason,
+    String? fixedReason,
   }) {
     if (fixedInCents != null) {
       final fixed = _positive(fixedInCents);
@@ -91,7 +94,8 @@ abstract final class PayrollDeductions {
       return PayrollLinePayout(
         toPayInCents: toPay,
         deferredInCents: netInCents - toPay,
-        fixed: true,
+        fixedInCents: fixed,
+        reason: fixedReason,
       );
     }
     final rate = ratePercent.clamp(0, 100);
@@ -100,6 +104,7 @@ abstract final class PayrollDeductions {
       toPayInCents: toPay,
       deferredInCents: netInCents - toPay,
       ratePercent: rate,
+      reason: rate == 100 ? null : rateReason,
     );
   }
 

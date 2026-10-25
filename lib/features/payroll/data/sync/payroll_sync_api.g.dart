@@ -112,7 +112,7 @@ class _PayrollSyncApi implements PayrollSyncApi {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/sync/payroll-arrears-priorities',
+            '/api/v1/sync/payroll-arrear-priorities',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -143,7 +143,7 @@ class _PayrollSyncApi implements PayrollSyncApi {
           Options(method: 'GET', headers: _headers, extra: _extra)
               .compose(
                 _dio.options,
-                '/api/v1/sync/payroll-arrears-priorities',
+                '/api/v1/sync/payroll-arrear-priorities',
                 queryParameters: queryParameters,
                 data: _data,
               )
@@ -164,7 +164,7 @@ class _PayrollSyncApi implements PayrollSyncApi {
   }
 
   @override
-  Future<dynamic> putPayoutPolicy(
+  Future<dynamic> submitPayoutPolicy(
     Map<String, dynamic> extras,
     Map<String, dynamic> body,
   ) async {
@@ -175,10 +175,10 @@ class _PayrollSyncApi implements PayrollSyncApi {
     final _data = <String, dynamic>{};
     _data.addAll(body);
     final _options = _setStreamType<dynamic>(
-      Options(method: 'PUT', headers: _headers, extra: _extra)
+      Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/sync/payroll-payout-policies',
+            '/api/v1/sync/payroll-payouts',
             queryParameters: queryParameters,
             data: _data,
           )

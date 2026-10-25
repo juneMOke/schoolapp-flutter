@@ -197,7 +197,7 @@ class PayrollPayoutPolicyOutboxHandler
     PayrollPayoutPolicyRequestDto request,
     String schoolId,
   ) async {
-    await _api.putPayoutPolicy(extras, request.toJson());
+    await _api.submitPayoutPolicy(extras, request.toJson());
     await _dao.settle(request, schoolId: schoolId, failed: false);
   }
 

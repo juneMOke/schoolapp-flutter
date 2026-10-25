@@ -96,11 +96,14 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'REASON_REQUIRED' => PayrollRule.reasonRequired,
   'PAYROLL_NOT_DRAFT' => PayrollRule.notEditable,
   'OVERTIME_NOT_ALLOWED' => PayrollRule.overtimeNotAllowed,
-  'WORKED_DAYS_OUT_OF_RANGE' => PayrollRule.workedDaysOutOfRange,
+  'INVALID_DAYS_WORKED' => PayrollRule.workedDaysOutOfRange,
   'STAFF_NOT_ON_PAYROLL' => PayrollRule.noContract,
   'ADVANCE_MONTH_LOCKED' => PayrollRule.monthLocked,
-  'ADVANCE_CURRENCY_MISMATCH' || 'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,
+  'ADVANCE_CURRENCY_MISMATCH' ||
+  'DISBURSEMENT_CURRENCY_MISMATCH' ||
+  'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,
   'ADVANCE_ALREADY_DEDUCTED' => PayrollRule.alreadyDeducted,
+  'ADVANCE_FROM_EXPENSE' => PayrollRule.followsExpense,
   'ALREADY_DISBURSED' => PayrollRule.alreadyDisbursed,
   'DISBURSEMENT_EXCEEDS_BALANCE' => PayrollRule.exceedsBalance,
   'NOTHING_TO_DISBURSE' => PayrollRule.nothingToDisburse,
@@ -116,7 +119,8 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'INVALID_ADVANCE' ||
   'INVALID_DISBURSEMENT' ||
   'INVALID_PAY_PROFILE' ||
-  'INVALID_PAYROLL_SETTINGS' => PayrollRule.invalidData,
+  'INVALID_PAYROLL_SETTINGS' ||
+  'INVALID_PAYOUT' => PayrollRule.invalidData,
   final code? when code.endsWith('_ID_CONFLICT') => PayrollRule.invalidData,
   _ => null,
 };

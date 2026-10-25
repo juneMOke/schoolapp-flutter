@@ -1258,15 +1258,15 @@ class AppConstants {
   static const String syncPayrollVariablesEndpoint =
       '/api/v1/sync/payroll-variables';
 
-  /// Taux de versement d'un mois (PUT, brouillon seulement, dernier écrit
-  /// gagne) — Paie v2, route proposée par la tablette.
+  /// Taux de versement d'un mois (POST, brouillon seulement, dernier écrit
+  /// gagne) — Paie v2.
   static const String syncPayrollPayoutPoliciesEndpoint =
-      '/api/v1/sync/payroll-payout-policies';
+      '/api/v1/sync/payroll-payouts';
 
   /// Drapeau « priorité » d'un arriéré (POST, dernier écrit gagne) et
-  /// descente (GET, flux `hr.payroll-arrears-priorities`) — Paie v2, T9.
+  /// descente (GET, flux `hr.payroll-arrear-priorities`) — Paie v2, T9.
   static const String syncPayrollArrearsPrioritiesEndpoint =
-      '/api/v1/sync/payroll-arrears-priorities';
+      '/api/v1/sync/payroll-arrear-priorities';
 
   /// Gestes du circuit (POST, un par requête : `SUBMIT`, `RETURN`, `VALIDATE`,
   /// `REOPEN`), idempotents par `gestureId`.
@@ -1299,12 +1299,14 @@ class AppConstants {
       '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}.pdf';
 
   /// Les bulletins scellés d'un mois validé en un PDF, une page par agent
-  /// (Paie v2, T16) — composé par le serveur ; route proposée par la tablette.
+  /// (Paie v2, T16) — composé par le serveur, sous `hr.pay.read` et
+  /// `editique.write`.
   static const String payrollMonthPayslipsEndpoint =
       '/api/v1/hr/payrolls/{month}/payslips.pdf';
 
   /// L'état de paie d'un mois validé, A4 paysage, signatures économe,
-  /// caissier(e) et DG (Paie v2, T16) — composé par le serveur.
+  /// caissier(e) et DG (Paie v2, T16) — composé par le serveur ; 429 tant
+  /// qu'un autre long rendu tourne.
   static const String payrollStatementEndpoint =
       '/api/v1/hr/payrolls/{month}/statement.pdf';
 

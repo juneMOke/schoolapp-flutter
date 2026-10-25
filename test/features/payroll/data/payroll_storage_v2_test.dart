@@ -16,13 +16,14 @@ import '../../offline_full_db.dart';
 /// La Paie v2 dans la base : variables v2, taux du mois, lignes figées v2.
 const _school = 's-1';
 
+/// Le taux du mois descend à plat sur la paie (`payoutPercent`…).
 PayrollDto _draft({Map<String, dynamic>? policy, List? variables}) =>
     PayrollDto.tryParse({
       'id': 'p-10',
       'month': '2026-10',
       'status': 'DRAFT',
       'variables': ?variables,
-      'payoutPolicy': ?policy,
+      ...?policy,
     })!;
 
 void main() {
@@ -40,7 +41,7 @@ void main() {
             variables: [
               {
                 'staffMemberId': 'm-1',
-                'workedDays': 20,
+                'daysWorked': 20,
                 'childcareInCents': 1500,
                 'fixedPayoutInCents': 10000,
                 'fixedPayoutReason': 'Trésorerie',
@@ -81,15 +82,43 @@ void main() {
     );
   });
 
+  test('le fil v2 : daysWorked, formulaVersion 2, payout.percent', () {
+    const variables = PayrollVariablesRequestDto(
+      month: '2026-10',
+      staffMemberId: 'm-1',
+      workedDays: 22,
+      clientUpdatedAt: '2026-10-21T09:00:00.000Z',
+      authorId: 'u-1',
+    );
+    const payout = PayrollPayoutPolicyRequestDto(
+      month: '2026-10',
+      ratePercent: 60,
+      reason: 'Trésorerie',
+      clientUpdatedAt: '2026-10-21T09:00:00.000Z',
+      authorId: 'u-1',
+    );
+
+    final sent = variables.toJson()['variables'] as Map;
+    expect(sent['daysWorked'], 22);
+    expect(sent['formulaVersion'], 2);
+    expect(sent.containsKey('workedDays'), isFalse);
+    expect(payout.toJson()['payout'], {
+      'month': '2026-10',
+      'percent': 60,
+      'reason': 'Trésorerie',
+      'clientUpdatedAt': '2026-10-21T09:00:00.000Z',
+    });
+  });
+
   group('taux du mois', () {
     test('descend avec la paie', () async {
       await PayrollDao(db).apply(
         [
           _draft(
             policy: {
-              'ratePercent': 60,
-              'reason': 'Trésorerie tendue',
-              'clientUpdatedAt': '2026-10-20T09:00:00Z',
+              'payoutPercent': 60,
+              'payoutReason': 'Trésorerie tendue',
+              'payoutClientUpdatedAt': '2026-10-20T09:00:00Z',
             },
           ),
         ],
@@ -125,8 +154,8 @@ void main() {
           [
             _draft(
               policy: {
-                'ratePercent': 100,
-                'clientUpdatedAt': '2026-10-20T09:00:00Z',
+                'payoutPercent': 100,
+                'payoutClientUpdatedAt': '2026-10-20T09:00:00Z',
               },
             ),
           ],
@@ -143,27 +172,34 @@ void main() {
     );
 
     test(
-      'un serveur qui n en porte pas n efface rien ; hors bornes = ignoré',
+      'le 100 % jamais réglé n efface rien ; hors bornes = ignoré',
       () async {
         await PayrollDao(db).apply(
           [
             _draft(
               policy: {
-                'ratePercent': 75,
-                'clientUpdatedAt': '2026-10-20T09:00:00Z',
+                'payoutPercent': 75,
+                'payoutReason': 'Caisse',
+                'payoutClientUpdatedAt': '2026-10-20T09:00:00Z',
               },
             ),
           ],
           schoolId: _school,
           nowMs: 1,
         );
-        await PayrollDao(db).apply([_draft()], schoolId: _school, nowMs: 2);
+        await PayrollDao(db).apply(
+          [
+            _draft(policy: {'payoutPercent': 100}),
+          ],
+          schoolId: _school,
+          nowMs: 2,
+        );
         await PayrollDao(db).apply(
           [
             _draft(
               policy: {
-                'ratePercent': 140,
-                'clientUpdatedAt': '2026-10-22T09:00:00Z',
+                'payoutPercent': 140,
+                'payoutClientUpdatedAt': '2026-10-22T09:00:00Z',
               },
             ),
           ],
@@ -198,11 +234,16 @@ void main() {
             'formulaVersion': 2,
             'deductions': {
               'workDaysDivisor': 26,
-              'workedDays': 13,
+              'daysWorked': 13,
               'absenceInCents': 15000,
               'iprInCents': 200,
             },
-            'payout': {'toPayInCents': 8880, 'ratePercent': 60},
+            'payout': {
+              'toPayInCents': 8880,
+              'deferredInCents': 5920,
+              'percent': 60,
+              'reason': 'Trésorerie',
+            },
           },
         ),
         month: '2026-10',
@@ -213,6 +254,31 @@ void main() {
       expect(parsed.deductions.totalInCents, 15200);
       expect(parsed.toPayInCents, 8880);
       expect(parsed.deferredInCents, 5920);
+      expect(parsed.payout?.ratePercent, 60);
+      expect(parsed.payout?.reason, 'Trésorerie');
+      expect(parsed.payout?.fixed, isFalse);
+    });
+
+    test('v2 : un montant fixe se lit à son montant', () {
+      final parsed = PayrollLineJson.tryParse(
+        line(
+          extra: {
+            'formulaVersion': 2,
+            'payout': {
+              'toPayInCents': 14800,
+              'deferredInCents': 0,
+              'percent': null,
+              'fixedInCents': 20000,
+              'reason': 'Accord',
+            },
+          },
+        ),
+        month: '2026-10',
+      )!;
+
+      expect(parsed.payout?.fixed, isTrue);
+      expect(parsed.payout?.fixedInCents, 20000);
+      expect(parsed.toPayInCents, 14800);
     });
 
     test(

@@ -37,12 +37,15 @@ void main() {
           ),
         ];
 
-        // Forme v2 (proposition tablette) — recalculée en Python :
-        // deux lignes triées, la seconde '9a1c…|CDF|185000000|0|0|…'.
+        // Forme v2 du serveur — recalculée en Python : deux lignes triées,
+        // la seconde '9a1c…|CDF|185000000|0|0|0|0|0|185000000|185000000'.
+        final v2 = await PayrollFingerprinter.of(lines);
         expect(
-          (await PayrollFingerprinter.of(lines)).linesDigest,
-          'ad7a940ed2a14a4e3ad373b90a68e2d855e5826cd48dc9e97a401202d6b314eb',
+          v2.linesDigest,
+          '6130d2862d98e3d4d9568c2c22f55459a1efdc3bc271e723edac9eaaa722f5dc',
         );
+        expect(v2.totals.last.deductionInCents, 0);
+        expect(v2.totals.last.toPayInCents, 27500);
 
         // Forme v1 : celle des paies figées avant la v2.
         final fingerprint = await PayrollFingerprinter.of(

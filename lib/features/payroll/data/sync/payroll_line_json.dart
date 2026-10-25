@@ -70,7 +70,7 @@ abstract final class PayrollLineJson {
     if (raw is! Map) return PayrollLineDeductions.none;
     return PayrollLineDeductions(
       workDaysDivisor: raw.integer('workDaysDivisor'),
-      workedDays: raw.integer('workedDays'),
+      workedDays: raw.integer('daysWorked'),
       absenceInCents: raw.integer('absenceInCents') ?? 0,
       iprInCents: raw.integer('iprInCents') ?? 0,
       cnssInCents: raw.integer('cnssInCents') ?? 0,
@@ -87,8 +87,9 @@ abstract final class PayrollLineJson {
     return PayrollLinePayout(
       toPayInCents: toPay,
       deferredInCents: net - toPay,
-      ratePercent: raw.integer('ratePercent'),
-      fixed: raw['fixed'] == true,
+      ratePercent: raw.integer('percent'),
+      fixedInCents: raw.integer('fixedInCents'),
+      reason: raw.text('reason'),
     );
   }
 
