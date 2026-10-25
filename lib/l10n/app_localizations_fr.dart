@@ -13537,7 +13537,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String staffAttendanceCloseAbsences(int count) {
-    return '$count absences non justifiées, signalées sur le bulletin, sans retenue';
+    return '$count absences non justifiées, signalées sur le bulletin';
   }
 
   @override
@@ -13860,6 +13860,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollArrearsBannerAction => 'Traiter les arriérés';
 
   @override
+  String get payrollStatementPrint => 'Imprimer l\'état';
+
+  @override
+  String payrollStatementFileName(String month) {
+    return 'etat-de-paie-$month';
+  }
+
+  @override
   String get payrollTabPayslips => 'Bulletins';
 
   @override
@@ -14144,7 +14152,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollSignalNone => 'RAS';
 
   @override
-  String get payrollSignalHint => 'Indicatif, sans retenue';
+  String get payrollSignalHint => 'Pointage du mois précédent';
 
   @override
   String get payrollPayAfterValidation => 'Après validation';
@@ -14850,6 +14858,56 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get payrollPayslipGrade => 'Grade';
+
+  @override
+  String get payrollPayslipWorkedDays => 'Jours prestés';
+
+  @override
+  String payrollPayslipWorkedDaysValue(int days, int divisor) {
+    return '$days jrs / $divisor';
+  }
+
+  @override
+  String get payrollPayslipIprCnss => 'IPR & CNSS';
+
+  @override
+  String get payrollPayslipAbsence => 'Absence non justifiée';
+
+  @override
+  String payrollPayslipAbsenceDays(int days) {
+    return '$days j';
+  }
+
+  @override
+  String get payrollPayslipSalaryAdvance => 'Avance sur salaire';
+
+  @override
+  String get payrollPayslipLoan => 'Remboursement prêt';
+
+  @override
+  String get payrollPayslipChildcare => 'Prise en charge enfant du personnel';
+
+  @override
+  String get payrollPayslipDeductionsTotal => 'Total retenues';
+
+  @override
+  String payrollPayslipAttendanceDeducted(
+    String month,
+    int absences,
+    int justified,
+    int lates,
+    int minutes,
+  ) {
+    return 'Pointage de $month : $absences absences non justifiées, $justified justifiées, $lates retards ($minutes min) — les absences non justifiées sont retenues sur les jours prestés.';
+  }
+
+  @override
+  String payrollPayslipBalance(String net, String paid, String rest) {
+    return 'Net à payer $net · déjà perçu $paid · reste à percevoir $rest';
+  }
+
+  @override
   String get payrollPayslipGains => 'Gains';
 
   @override
@@ -14904,13 +14962,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get payrollPayslipSignAgent => 'L\'agent';
+  String get payrollPayslipSignAgent => 'Bénéficiaire';
 
   @override
-  String get payrollPayslipSignBursar => 'L\'économe';
+  String get payrollPayslipSignBursar => 'Caissier(e)';
 
   @override
-  String get payrollPayslipSignHead => 'La direction';
+  String get payrollPayslipSignHead => 'Vu et approuvé par le DG';
 
   @override
   String get payrollPayslipDownload => 'Télécharger le PDF';
@@ -14946,14 +15004,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollPayslipNoPhone => 'Aucun numéro pour cet agent.';
 
   @override
-  String payrollPayslipWhatsappMessage(
+  String payrollPayslipWhatsappMessageV2(
     String name,
     String month,
     String school,
+    String gross,
+    String deductions,
+    String total,
+    String days,
     String net,
-    String payment,
+    String paid,
+    String rest,
   ) {
-    return 'Bonjour $name, votre bulletin de paie de $month ($school) : net $net, $payment.';
+    return 'Bonjour $name, votre bulletin de paie de $month ($school) : brut $gross ; retenues $deductions ; total retenues $total ; jours prestés $days ; net $net ; perçu $paid ; reste $rest.';
   }
 
   @override
@@ -19070,8 +19133,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hrPresenceKpiUnjustified => 'Absences non justifiées';
 
   @override
-  String get hrPresenceKpiUnjustifiedSubline =>
-      'signalées sur le bulletin, sans retenue';
+  String get hrPresenceKpiUnjustifiedSubline => 'signalées sur le bulletin';
 
   @override
   String get hrPresenceKpiJustified => 'Absences justifiées';

@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
@@ -7,6 +9,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
@@ -60,7 +63,14 @@ class PayrollPayslipActions {
       );
       return;
     }
-    if (line == null) return;
+    if (line == null) {
+      await _serverPdf(
+        cubit.commands.monthPayslips(view.month),
+        title: _l10n.payrollPayslipSealed,
+        fileName: '$name.pdf',
+      );
+      return;
+    }
     final result = await cubit.commands.payslip(view.month, line.staffMemberId);
     if (!context.mounted || cubit.isClosed) return;
     await result.fold(
@@ -88,6 +98,44 @@ class PayrollPayslipActions {
     );
   }
 
+  /// L'état de paie du mois validé (A4 paysage), composé par le serveur —
+  /// en ligne seulement (T16).
+  Future<void> openStatement() async {
+    final view = _state.view;
+    if (view == null || !view.phase.isLocked) return;
+    await _serverPdf(
+      _cubit.commands.statement(view.month),
+      title: _l10n.payrollStatementPrint,
+      fileName: '${_l10n.payrollStatementFileName(view.month)}.pdf',
+    );
+  }
+
+  /// Un PDF composé par le serveur : la visionneuse, ou l'annonce de ce qui
+  /// l'empêche (hors ligne, refus).
+  Future<void> _serverPdf(
+    Future<Either<Failure, Uint8List>> request, {
+    required String title,
+    required String fileName,
+  }) async {
+    final cubit = _cubit;
+    final result = await request;
+    if (!context.mounted || cubit.isClosed) return;
+    await result.fold(
+      (failure) async => cubit.announce(
+        PayrollNotice(
+          failure is NetworkFailure
+              ? PayrollNoticeKind.offline
+              : PayrollNoticeKind.downloadFailed,
+        ),
+      ),
+      (bytes) => showEteeloDocumentViewer(
+        context,
+        title: title,
+        document: PrintableDocument(bytes: bytes, fileName: fileName),
+      ),
+    );
+  }
+
   /// Le numéro WhatsApp d'un agent : celui du profil de paie, sinon celui de
   /// sa fiche.
   String? phoneOf(String staffMemberId) {
@@ -110,12 +158,12 @@ class PayrollPayslipActions {
       view: view,
       line: line,
     );
-    final message = _l10n.payrollPayslipWhatsappMessage(
-      member?.firstName ?? member?.fullName ?? '',
-      content.monthLabel,
-      content.schoolName,
-      PayrollLabels.money(line.netInCents, line.currency),
-      content.payment,
+    final message = _whatsappMessage(
+      line,
+      view,
+      name: member?.firstName ?? member?.fullName ?? '',
+      month: content.monthLabel,
+      school: content.schoolName,
     );
     final digits = PhoneNumberFormat.canonicalE164(phone).replaceAll('+', '');
     final uri = Uri.https(AppConstants.whatsappHost, '/$digits', {
@@ -130,5 +178,47 @@ class PayrollPayslipActions {
     if (cubit.isClosed) return;
     cubit.announce(const PayrollNotice(PayrollNoticeKind.shared));
     await cubit.refresh();
+  }
+
+  /// Le message prérempli (v2) : le brut, les retenues non nulles et leur
+  /// total, les jours prestés, le net, ce qui est perçu et ce qui reste.
+  String _whatsappMessage(
+    PayrollLine line,
+    PayrollMonthView view, {
+    required String name,
+    required String month,
+    required String school,
+  }) {
+    final l10n = _l10n;
+    String money(int cents) => PayrollLabels.money(cents, line.currency);
+    final d = line.deductions;
+    final withheld = [
+      if (d.iprInCents + d.cnssInCents > 0)
+        '${l10n.payrollPayslipIprCnss} ${money(d.iprInCents + d.cnssInCents)}',
+      if (d.absenceInCents > 0)
+        '${l10n.payrollPayslipAbsence} ${money(d.absenceInCents)}',
+      if (line.advanceInCents > 0)
+        '${l10n.payrollPayslipSalaryAdvance} ${money(line.advanceInCents)}',
+      if (d.childcareInCents > 0)
+        '${l10n.payrollPayslipChildcare} ${money(d.childcareInCents)}',
+    ];
+    final settlement = view.settlementOf(line);
+    return l10n.payrollPayslipWhatsappMessageV2(
+      name,
+      month,
+      school,
+      money(line.grossInCents),
+      withheld.isEmpty ? '—' : withheld.join(', '),
+      money(d.totalInCents + line.advanceInCents),
+      d.workDaysDivisor == null
+          ? '—'
+          : l10n.payrollPayslipWorkedDaysValue(
+              d.workedDays ?? d.workDaysDivisor!,
+              d.workDaysDivisor!,
+            ),
+      money(line.netInCents),
+      money(settlement.paidInCents),
+      money(settlement.remainingInCents),
+    );
   }
 }

@@ -21161,7 +21161,7 @@ abstract class AppLocalizations {
   /// No description provided for @staffAttendanceCloseAbsences.
   ///
   /// In en, this message translates to:
-  /// **'{count} unexcused absences, shown on the payslip, never deducted'**
+  /// **'{count} unexcused absences, shown on the payslip'**
   String staffAttendanceCloseAbsences(int count);
 
   /// No description provided for @staffAttendanceCloseLates.
@@ -21656,6 +21656,18 @@ abstract class AppLocalizations {
   /// **'Handle the arrears'**
   String get payrollArrearsBannerAction;
 
+  /// No description provided for @payrollStatementPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the statement'**
+  String get payrollStatementPrint;
+
+  /// No description provided for @payrollStatementFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'payroll-statement-{month}'**
+  String payrollStatementFileName(String month);
+
   /// No description provided for @payrollTabPayslips.
   ///
   /// In en, this message translates to:
@@ -22055,7 +22067,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollSignalHint.
   ///
   /// In en, this message translates to:
-  /// **'For information, never deducted'**
+  /// **'Attendance of the previous month'**
   String get payrollSignalHint;
 
   /// No description provided for @payrollPayAfterValidation.
@@ -23197,6 +23209,84 @@ abstract class AppLocalizations {
   /// **'{kind} from {date}'**
   String payrollPayslipContractFrom(String kind, String date);
 
+  /// No description provided for @payrollPayslipGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get payrollPayslipGrade;
+
+  /// No description provided for @payrollPayslipWorkedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days worked'**
+  String get payrollPayslipWorkedDays;
+
+  /// No description provided for @payrollPayslipWorkedDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d / {divisor}'**
+  String payrollPayslipWorkedDaysValue(int days, int divisor);
+
+  /// No description provided for @payrollPayslipIprCnss.
+  ///
+  /// In en, this message translates to:
+  /// **'IPR & CNSS'**
+  String get payrollPayslipIprCnss;
+
+  /// No description provided for @payrollPayslipAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused absence'**
+  String get payrollPayslipAbsence;
+
+  /// No description provided for @payrollPayslipAbsenceDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d'**
+  String payrollPayslipAbsenceDays(int days);
+
+  /// No description provided for @payrollPayslipSalaryAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary advance'**
+  String get payrollPayslipSalaryAdvance;
+
+  /// No description provided for @payrollPayslipLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan repayment'**
+  String get payrollPayslipLoan;
+
+  /// No description provided for @payrollPayslipChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff children care'**
+  String get payrollPayslipChildcare;
+
+  /// No description provided for @payrollPayslipDeductionsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total deductions'**
+  String get payrollPayslipDeductionsTotal;
+
+  /// No description provided for @payrollPayslipAttendanceDeducted.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted from the days worked.'**
+  String payrollPayslipAttendanceDeducted(
+    String month,
+    int absences,
+    int justified,
+    int lates,
+    int minutes,
+  );
+
+  /// No description provided for @payrollPayslipBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Net pay {net} · already received {paid} · still to receive {rest}'**
+  String payrollPayslipBalance(String net, String paid, String rest);
+
   /// No description provided for @payrollPayslipGains.
   ///
   /// In en, this message translates to:
@@ -23278,19 +23368,19 @@ abstract class AppLocalizations {
   /// No description provided for @payrollPayslipSignAgent.
   ///
   /// In en, this message translates to:
-  /// **'Staff member'**
+  /// **'Beneficiary'**
   String get payrollPayslipSignAgent;
 
   /// No description provided for @payrollPayslipSignBursar.
   ///
   /// In en, this message translates to:
-  /// **'Bursar'**
+  /// **'Cashier'**
   String get payrollPayslipSignBursar;
 
   /// No description provided for @payrollPayslipSignHead.
   ///
   /// In en, this message translates to:
-  /// **'Head'**
+  /// **'Seen and approved by the head'**
   String get payrollPayslipSignHead;
 
   /// No description provided for @payrollPayslipDownload.
@@ -23347,16 +23437,21 @@ abstract class AppLocalizations {
   /// **'No number for this staff member.'**
   String get payrollPayslipNoPhone;
 
-  /// No description provided for @payrollPayslipWhatsappMessage.
+  /// No description provided for @payrollPayslipWhatsappMessageV2.
   ///
   /// In en, this message translates to:
-  /// **'Hello {name}, your {month} payslip ({school}): net {net}, {payment}.'**
-  String payrollPayslipWhatsappMessage(
+  /// **'Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; days worked {days}; net {net}; received {paid}; remaining {rest}.'**
+  String payrollPayslipWhatsappMessageV2(
     String name,
     String month,
     String school,
+    String gross,
+    String deductions,
+    String total,
+    String days,
     String net,
-    String payment,
+    String paid,
+    String rest,
   );
 
   /// No description provided for @payrollPayslipEmpty.
@@ -29416,7 +29511,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceKpiUnjustifiedSubline.
   ///
   /// In en, this message translates to:
-  /// **'shown on the payslip, never deducted'**
+  /// **'shown on the payslip'**
   String get hrPresenceKpiUnjustifiedSubline;
 
   /// No description provided for @hrPresenceKpiJustified.

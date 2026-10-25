@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_statement.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -29,7 +30,10 @@ class PayrollPayslipContent {
   final PayslipRow gross;
   final List<PayslipRow> deductions;
   final PayslipRow net;
-  final String legalNote;
+
+  /// « Paie nette, sans retenue légale » — `null` dès qu'un IPR ou une CNSS
+  /// est retenu (v2).
+  final String? legalNote;
   final String attendance;
   final String payment;
   final List<String> signatures;
@@ -64,6 +68,7 @@ class PayrollPayslipContent {
     final advances = {for (final a in snapshot.advances) a.id: a};
     final contractFrom = line.contractFrom;
     final kind = StaffLabels.contract(l10n, line.contractKind);
+    final settlement = view.settlementOf(line);
     return PayrollPayslipContent(
       schoolName: school?.name ?? '',
       schoolAddress: [
@@ -89,6 +94,20 @@ class PayrollPayslipContent {
           value: member?.jobTitle ?? '—',
           note: null,
         ),
+        (
+          label: l10n.payrollPayslipGrade,
+          value: PayrollStatement.gradeOf(member) ?? '—',
+          note: null,
+        ),
+        if (line.deductions.workDaysDivisor case final divisor?)
+          (
+            label: l10n.payrollPayslipWorkedDays,
+            value: l10n.payrollPayslipWorkedDaysValue(
+              line.deductions.workedDays ?? divisor,
+              divisor,
+            ),
+            note: null,
+          ),
         (
           label: l10n.payrollPayslipContract,
           value: contractFrom == null
@@ -137,44 +156,109 @@ class PayrollPayslipContent {
         value: money(line.grossInCents),
         note: null,
       ),
-      deductions: [
-        for (final deduction in line.advances)
-          if (deduction.dueInCents > 0)
-            (
-              label: _advanceLabel(
-                l10n,
-                advances[deduction.advanceId],
-                deduction.rank,
-                deduction.installments,
-              ),
-              value: '− ${money(deduction.takenInCents)}',
-              note: deduction.carriedInCents > 0
-                  ? l10n.payrollPayslipCarried(money(deduction.carriedInCents))
-                  : null,
-            ),
-      ],
+      deductions: _deductions(context, line, advances),
       net: (
         label: l10n.payrollPayslipNet,
         value: money(line.netInCents),
         note: null,
       ),
-      legalNote: l10n.payrollPayslipNoLegal,
-      attendance: l10n.payrollPayslipAttendance(
-        PayrollLabels.month(context, line.attendanceMonth ?? view.month),
-        line.attendance.unjustifiedAbsences,
-        line.attendance.justifiedAbsences,
-        line.attendance.lates,
-        line.attendance.lateMinutes,
-      ),
-      payment: l10n.payrollPayslipPayment(
-        _payments(context, view.disbursements[line.staffMemberId]),
-      ),
+      legalNote: line.deductions.iprInCents + line.deductions.cnssInCents > 0
+          ? null
+          : l10n.payrollPayslipNoLegal,
+      attendance:
+          (line.deductions.absenceInCents > 0
+          ? l10n.payrollPayslipAttendanceDeducted
+          : l10n.payrollPayslipAttendance)(
+            PayrollLabels.month(context, line.attendanceMonth ?? view.month),
+            line.attendance.unjustifiedAbsences,
+            line.attendance.justifiedAbsences,
+            line.attendance.lates,
+            line.attendance.lateMinutes,
+          ),
+      payment: [
+        l10n.payrollPayslipBalance(
+          money(line.netInCents),
+          money(settlement.paidInCents),
+          money(settlement.remainingInCents),
+        ),
+        l10n.payrollPayslipPayment(
+          _payments(context, view.disbursements[line.staffMemberId]),
+        ),
+      ].join('\n'),
       signatures: [
         l10n.payrollPayslipSignAgent,
-        l10n.payrollPayslipSignBursar,
         l10n.payrollPayslipSignHead,
+        l10n.payrollPayslipSignBursar,
       ],
     );
+  }
+
+  /// Les cinq retenues du modèle des écoles, **toujours** listées dans
+  /// l'ordre du papier — « — » quand elles sont nulles —, puis leur total :
+  /// chaque montant rangé par le calcul dans sa ligne.
+  static List<PayslipRow> _deductions(
+    BuildContext context,
+    PayrollLine line,
+    Map<String, SalaryAdvance> advances,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    String money(int cents) =>
+        cents == 0 ? '—' : '− ${PayrollLabels.money(cents, line.currency)}';
+    final d = line.deductions;
+    int taken(bool loan) => line.advances
+        .where((a) => (a.installments > 1) == loan)
+        .fold(0, (sum, a) => sum + a.takenInCents);
+    String? notes(bool loan) {
+      final parts = [
+        for (final a in line.advances)
+          if ((a.installments > 1) == loan && a.dueInCents > 0) ...[
+            _advanceLabel(l10n, advances[a.advanceId], a.rank, a.installments),
+            if (a.carriedInCents > 0)
+              l10n.payrollPayslipCarried(
+                PayrollLabels.money(a.carriedInCents, line.currency),
+              ),
+          ],
+      ];
+      return parts.isEmpty ? null : parts.join(' · ');
+    }
+
+    final total = d.totalInCents + line.advanceInCents;
+    return [
+      (
+        label: l10n.payrollPayslipIprCnss,
+        value: money(d.iprInCents + d.cnssInCents),
+        note: null,
+      ),
+      (
+        label: l10n.payrollPayslipAbsence,
+        value: money(d.absenceInCents),
+        note: d.absenceInCents > 0 && d.absentDays != null
+            ? l10n.payrollPayslipAbsenceDays(d.absentDays!)
+            : null,
+      ),
+      (
+        label: l10n.payrollPayslipSalaryAdvance,
+        value: money(taken(false)),
+        note: notes(false),
+      ),
+      (
+        label: l10n.payrollPayslipLoan,
+        value: money(taken(true)),
+        note: notes(true),
+      ),
+      (
+        label: l10n.payrollPayslipChildcare,
+        value: money(d.childcareInCents),
+        note: null,
+      ),
+      (
+        label: l10n.payrollPayslipDeductionsTotal,
+        value: total == 0
+            ? '—'
+            : '− ${PayrollLabels.money(total, line.currency)}',
+        note: null,
+      ),
+    ];
   }
 
   static String _advanceLabel(

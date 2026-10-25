@@ -25,6 +25,14 @@ class FetchPayslipUseCase {
 
   Future<Either<Failure, Uint8List>> call(String month, String staffMemberId) =>
       _repository.payslip(month, staffMemberId);
+
+  /// Tous les bulletins scellés du mois, en un PDF.
+  Future<Either<Failure, Uint8List>> month(String month) =>
+      _repository.monthPayslips(month);
+
+  /// L'état de paie du mois.
+  Future<Either<Failure, Uint8List>> statement(String month) =>
+      _repository.statement(month);
 }
 
 /// Note sur la tablette qu'un bulletin l'a quittée (WhatsApp ouvert, PDF).

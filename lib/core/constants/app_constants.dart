@@ -1298,6 +1298,16 @@ class AppConstants {
   static const String payrollPayslipEndpoint =
       '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}.pdf';
 
+  /// Les bulletins scellés d'un mois validé en un PDF, une page par agent
+  /// (Paie v2, T16) — composé par le serveur ; route proposée par la tablette.
+  static const String payrollMonthPayslipsEndpoint =
+      '/api/v1/hr/payrolls/{month}/payslips.pdf';
+
+  /// L'état de paie d'un mois validé, A4 paysage, signatures économe,
+  /// caissier(e) et DG (Paie v2, T16) — composé par le serveur.
+  static const String payrollStatementEndpoint =
+      '/api/v1/hr/payrolls/{month}/statement.pdf';
+
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :
   ///  - **POST** = push de l'agrégat `{session, absences[]}` (upsert clé

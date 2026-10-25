@@ -9481,7 +9481,7 @@
   "staffAttendanceClose": "Clôturer le mois",
   "staffAttendanceCloseTitle": "Clôturer {month} ?",
   "staffAttendanceCloseHours": "{hours} de vacation, que la Paie relit dans les pointages",
-  "staffAttendanceCloseAbsences": "{count} absences non justifiées, signalées sur le bulletin, sans retenue",
+  "staffAttendanceCloseAbsences": "{count} absences non justifiées, signalées sur le bulletin",
   "staffAttendanceCloseLates": "{minutes} min de retard, à titre indicatif",
   "staffAttendanceCloseNotMarked": "{count} jours-agent sans pointage : un jour non pointé d'un vacataire vaut 0 h payée",
   "presenceMarkCloseIrreversible": "La clôture verrouille le mois : elle ne se rouvre pas depuis la tablette.",
@@ -9771,6 +9771,19 @@
   "@payrollArrearsBannerAction": {
     "description": "Bouton de la bannière."
   },
+  "payrollStatementPrint": "Imprimer l'état",
+  "@payrollStatementPrint": {
+    "description": "Bouton : état de paie A4 composé par le serveur."
+  },
+  "payrollStatementFileName": "etat-de-paie-{month}",
+  "@payrollStatementFileName": {
+    "description": "Nom de fichier de l'état de paie.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "payrollTabPayslips": "Bulletins",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
   "payrollTabAdvances": "Avances",
@@ -9889,7 +9902,7 @@
   "payrollSignalAbsences": "{count} abs",
   "payrollSignalLates": "{count} ret",
   "payrollSignalNone": "RAS",
-  "payrollSignalHint": "Indicatif, sans retenue",
+  "payrollSignalHint": "Pointage du mois précédent",
   "payrollPayAfterValidation": "Après validation",
   "payrollPay": "Verser",
   "payrollToPay": "À verser",
@@ -10391,6 +10404,95 @@
   "payrollPayslipJob": "Fonction",
   "payrollPayslipContract": "Contrat",
   "payrollPayslipContractFrom": "{kind} du {date}",
+  "payrollPayslipGrade": "Grade",
+  "@payrollPayslipGrade": {
+    "description": "Ligne d'identité du bulletin."
+  },
+  "payrollPayslipWorkedDays": "Jours prestés",
+  "@payrollPayslipWorkedDays": {
+    "description": "Ligne d'identité du bulletin."
+  },
+  "payrollPayslipWorkedDaysValue": "{days} jrs / {divisor}",
+  "@payrollPayslipWorkedDaysValue": {
+    "description": "Valeur des jours prestés.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipIprCnss": "IPR & CNSS",
+  "@payrollPayslipIprCnss": {
+    "description": "Retenue du bulletin."
+  },
+  "payrollPayslipAbsence": "Absence non justifiée",
+  "@payrollPayslipAbsence": {
+    "description": "Retenue du bulletin."
+  },
+  "payrollPayslipAbsenceDays": "{days} j",
+  "@payrollPayslipAbsenceDays": {
+    "description": "Jours retenus.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipSalaryAdvance": "Avance sur salaire",
+  "@payrollPayslipSalaryAdvance": {
+    "description": "Retenue du bulletin (A/S)."
+  },
+  "payrollPayslipLoan": "Remboursement prêt",
+  "@payrollPayslipLoan": {
+    "description": "Retenue du bulletin (Crédit)."
+  },
+  "payrollPayslipChildcare": "Prise en charge enfant du personnel",
+  "@payrollPayslipChildcare": {
+    "description": "Retenue du bulletin (PC/E)."
+  },
+  "payrollPayslipDeductionsTotal": "Total retenues",
+  "@payrollPayslipDeductionsTotal": {
+    "description": "Total des retenues du bulletin."
+  },
+  "payrollPayslipAttendanceDeducted": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — les absences non justifiées sont retenues sur les jours prestés.",
+  "@payrollPayslipAttendanceDeducted": {
+    "description": "Encart Pointage quand l'école retient les absences.",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "justified": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipBalance": "Net à payer {net} · déjà perçu {paid} · reste à percevoir {rest}",
+  "@payrollPayslipBalance": {
+    "description": "Solde progressif du bulletin.",
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipGains": "Gains",
   "payrollPayslipBase": "Salaire de base",
   "payrollPayslipOvertime": "Heures sup. {hours} h × {rate}",
@@ -10403,9 +10505,9 @@
   "payrollPayslipNoLegal": "Paie nette, sans retenue légale",
   "payrollPayslipAttendance": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — sans incidence sur le montant.",
   "payrollPayslipPayment": "Versement : {detail}",
-  "payrollPayslipSignAgent": "L'agent",
-  "payrollPayslipSignBursar": "L'économe",
-  "payrollPayslipSignHead": "La direction",
+  "payrollPayslipSignAgent": "Bénéficiaire",
+  "payrollPayslipSignBursar": "Caissier(e)",
+  "payrollPayslipSignHead": "Vu et approuvé par le DG",
   "payrollPayslipDownload": "Télécharger le PDF",
   "payrollPayslipWhatsapp": "Envoyer par WhatsApp",
   "payrollPayslipAll": "Tous les bulletins (PDF)",
@@ -10415,7 +10517,42 @@
   "payrollPayslipNext": "Suivant",
   "payrollPayslipPosition": "{index} / {count}",
   "payrollPayslipNoPhone": "Aucun numéro pour cet agent.",
-  "payrollPayslipWhatsappMessage": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : net {net}, {payment}.",
+  "payrollPayslipWhatsappMessageV2": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : brut {gross} ; retenues {deductions} ; total retenues {total} ; jours prestés {days} ; net {net} ; perçu {paid} ; reste {rest}.",
+  "@payrollPayslipWhatsappMessageV2": {
+    "description": "Message WhatsApp v2 du bulletin.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "school": {
+        "type": "String"
+      },
+      "gross": {
+        "type": "String"
+      },
+      "deductions": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipEmpty": "Aucun agent au livre de ce mois.",
   "payrollHistoryMonths": "Mois tenus",
   "payrollHistoryPaid": "Total net versé",
@@ -11657,7 +11794,7 @@
   "hrPresenceMinutes": "{minutes} min",
   "hrPresenceKpiLateSubline": "{minutes} min · ponctualité {punctuality} %",
   "hrPresenceKpiUnjustified": "Absences non justifiées",
-  "hrPresenceKpiUnjustifiedSubline": "signalées sur le bulletin, sans retenue",
+  "hrPresenceKpiUnjustifiedSubline": "signalées sur le bulletin",
   "hrPresenceKpiJustified": "Absences justifiées",
   "hrPresenceKpiJustifiedSubline": "avec un motif",
   "hrPresenceUnscoredTitle": "{count, plural, =1{1 jour-agent non pointé} other{{count} jours-agent non pointés}}",

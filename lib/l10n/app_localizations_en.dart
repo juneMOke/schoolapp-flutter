@@ -13437,7 +13437,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String staffAttendanceCloseAbsences(int count) {
-    return '$count unexcused absences, shown on the payslip, never deducted';
+    return '$count unexcused absences, shown on the payslip';
   }
 
   @override
@@ -13762,6 +13762,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollArrearsBannerAction => 'Handle the arrears';
 
   @override
+  String get payrollStatementPrint => 'Print the statement';
+
+  @override
+  String payrollStatementFileName(String month) {
+    return 'payroll-statement-$month';
+  }
+
+  @override
   String get payrollTabPayslips => 'Payslips';
 
   @override
@@ -14045,7 +14053,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollSignalNone => 'OK';
 
   @override
-  String get payrollSignalHint => 'For information, never deducted';
+  String get payrollSignalHint => 'Attendance of the previous month';
 
   @override
   String get payrollPayAfterValidation => 'After validation';
@@ -14746,6 +14754,56 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get payrollPayslipGrade => 'Grade';
+
+  @override
+  String get payrollPayslipWorkedDays => 'Days worked';
+
+  @override
+  String payrollPayslipWorkedDaysValue(int days, int divisor) {
+    return '$days d / $divisor';
+  }
+
+  @override
+  String get payrollPayslipIprCnss => 'IPR & CNSS';
+
+  @override
+  String get payrollPayslipAbsence => 'Unexcused absence';
+
+  @override
+  String payrollPayslipAbsenceDays(int days) {
+    return '$days d';
+  }
+
+  @override
+  String get payrollPayslipSalaryAdvance => 'Salary advance';
+
+  @override
+  String get payrollPayslipLoan => 'Loan repayment';
+
+  @override
+  String get payrollPayslipChildcare => 'Staff children care';
+
+  @override
+  String get payrollPayslipDeductionsTotal => 'Total deductions';
+
+  @override
+  String payrollPayslipAttendanceDeducted(
+    String month,
+    int absences,
+    int justified,
+    int lates,
+    int minutes,
+  ) {
+    return 'Attendance for $month: $absences unexcused absences, $justified excused, $lates late arrivals ($minutes min) — unexcused absences are deducted from the days worked.';
+  }
+
+  @override
+  String payrollPayslipBalance(String net, String paid, String rest) {
+    return 'Net pay $net · already received $paid · still to receive $rest';
+  }
+
+  @override
   String get payrollPayslipGains => 'Earnings';
 
   @override
@@ -14800,13 +14858,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get payrollPayslipSignAgent => 'Staff member';
+  String get payrollPayslipSignAgent => 'Beneficiary';
 
   @override
-  String get payrollPayslipSignBursar => 'Bursar';
+  String get payrollPayslipSignBursar => 'Cashier';
 
   @override
-  String get payrollPayslipSignHead => 'Head';
+  String get payrollPayslipSignHead => 'Seen and approved by the head';
 
   @override
   String get payrollPayslipDownload => 'Download the PDF';
@@ -14842,14 +14900,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollPayslipNoPhone => 'No number for this staff member.';
 
   @override
-  String payrollPayslipWhatsappMessage(
+  String payrollPayslipWhatsappMessageV2(
     String name,
     String month,
     String school,
+    String gross,
+    String deductions,
+    String total,
+    String days,
     String net,
-    String payment,
+    String paid,
+    String rest,
   ) {
-    return 'Hello $name, your $month payslip ($school): net $net, $payment.';
+    return 'Hello $name, your payslip for $month ($school): gross $gross; deductions $deductions; total deductions $total; days worked $days; net $net; received $paid; remaining $rest.';
   }
 
   @override
@@ -18935,8 +18998,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hrPresenceKpiUnjustified => 'Unexcused absences';
 
   @override
-  String get hrPresenceKpiUnjustifiedSubline =>
-      'shown on the payslip, never deducted';
+  String get hrPresenceKpiUnjustifiedSubline => 'shown on the payslip';
 
   @override
   String get hrPresenceKpiJustified => 'Excused absences';

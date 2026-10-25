@@ -236,6 +236,12 @@ class PayrollCommands {
     String staffMemberId,
   ) => _payslip(month, staffMemberId);
 
+  Future<Either<Failure, Uint8List>> monthPayslips(String month) =>
+      _payslip.month(month);
+
+  Future<Either<Failure, Uint8List>> statement(String month) =>
+      _payslip.statement(month);
+
   static PayrollNotice _notice(
     Either<Failure, Unit> result,
     PayrollNotice success,

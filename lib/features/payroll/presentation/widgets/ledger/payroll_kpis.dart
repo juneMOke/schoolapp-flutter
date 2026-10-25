@@ -12,7 +12,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les quatre indicateurs du livre — masse brute, compléments, avances
 /// déduites, net à payer —, une ligne par devise, jamais une somme. Puis le
-/// signal du Pointage : affiché, jamais retenu.
+/// signal du Pointage : retenu seulement si l'école retient les absences
+/// (jours prestés, v2).
 class PayrollKpis extends StatelessWidget {
   final PayrollMonthView view;
 

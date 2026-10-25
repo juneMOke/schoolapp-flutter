@@ -31,10 +31,7 @@ void main() {
     expect(find.text('90 %'), findsWidgets);
     expect(find.text('18 présences sur 20 pointages'), findsOneWidget);
     expect(find.text('31 min · ponctualité 89 %'), findsOneWidget);
-    expect(
-      find.text('signalées sur le bulletin, sans retenue'),
-      findsOneWidget,
-    );
+    expect(find.text('signalées sur le bulletin'), findsOneWidget);
     expect(find.text('Présence jour par jour'), findsOneWidget);
     expect(find.byType(PresenceRateBars), findsOneWidget);
     expect(

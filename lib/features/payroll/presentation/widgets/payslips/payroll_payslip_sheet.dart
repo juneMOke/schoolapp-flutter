@@ -95,12 +95,13 @@ class PayrollPayslipSheet extends StatelessWidget {
           ],
           const Divider(height: AppSpacing.xl),
           _Amount(content.net, strong: true, large: true),
-          Text(
-            content.legalNote,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textMutedAa,
+          if (content.legalNote case final note?)
+            Text(
+              note,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textMutedAa,
+              ),
             ),
-          ),
           const SizedBox(height: AppSpacing.md),
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),

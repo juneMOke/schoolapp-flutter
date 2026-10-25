@@ -226,7 +226,8 @@ class PayrollLedgerTable extends StatelessWidget {
   }
 }
 
-/// « 1 abs », « 2 ret », ou « RAS » — indicatif, sans retenue.
+/// « 1 abs », « 2 ret », ou « RAS » — le Pointage de M−1 ; l'absence n'est
+/// retenue que si l'école l'a réglé, par les jours prestés (v2).
 class _Signals extends StatelessWidget {
   final PayrollLine line;
 

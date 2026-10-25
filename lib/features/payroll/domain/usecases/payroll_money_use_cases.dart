@@ -53,7 +53,8 @@ class CancelSalaryAdvanceUseCase {
   }
 }
 
-/// Verse le net figé d'un agent. Le montant n'est jamais une saisie.
+/// Verse tout ou partie de ce qui reste dû sur un salaire validé (B3) : le
+/// montant est saisi, jamais au-delà du reste.
 class DisbursePayrollUseCase {
   final PayrollRepository _repository;
 

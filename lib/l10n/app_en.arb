@@ -9057,7 +9057,7 @@
   "@staffAttendanceCloseTitle": {"placeholders": {"month": {"type": "String"}}},
   "staffAttendanceCloseHours": "{hours} of hourly work, which Payroll reads from the marks",
   "@staffAttendanceCloseHours": {"placeholders": {"hours": {"type": "String"}}},
-  "staffAttendanceCloseAbsences": "{count} unexcused absences, shown on the payslip, never deducted",
+  "staffAttendanceCloseAbsences": "{count} unexcused absences, shown on the payslip",
   "@staffAttendanceCloseAbsences": {"placeholders": {"count": {"type": "int"}}},
   "staffAttendanceCloseLates": "{minutes} min late, for information",
   "@staffAttendanceCloseLates": {"placeholders": {"minutes": {"type": "int"}}},
@@ -9232,6 +9232,15 @@
     }
   },
   "payrollArrearsBannerAction": "Handle the arrears",
+  "payrollStatementPrint": "Print the statement",
+  "payrollStatementFileName": "payroll-statement-{month}",
+  "@payrollStatementFileName": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "payrollTabPayslips": "Payslips",
   "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
   "payrollTabAdvances": "Advances",
@@ -9356,7 +9365,7 @@
   "payrollSignalLates": "{count} late",
   "@payrollSignalLates": {"placeholders": {"count": {"type": "int"}}},
   "payrollSignalNone": "OK",
-  "payrollSignalHint": "For information, never deducted",
+  "payrollSignalHint": "Attendance of the previous month",
   "payrollPayAfterValidation": "After validation",
   "payrollPay": "Pay",
   "payrollToPay": "To pay",
@@ -9733,6 +9742,67 @@
   "payrollPayslipContract": "Contract",
   "payrollPayslipContractFrom": "{kind} from {date}",
   "@payrollPayslipContractFrom": {"placeholders": {"kind": {"type": "String"}, "date": {"type": "String"}}},
+  "payrollPayslipGrade": "Grade",
+  "payrollPayslipWorkedDays": "Days worked",
+  "payrollPayslipWorkedDaysValue": "{days} d / {divisor}",
+  "@payrollPayslipWorkedDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "divisor": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipIprCnss": "IPR & CNSS",
+  "payrollPayslipAbsence": "Unexcused absence",
+  "payrollPayslipAbsenceDays": "{days} d",
+  "@payrollPayslipAbsenceDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipSalaryAdvance": "Salary advance",
+  "payrollPayslipLoan": "Loan repayment",
+  "payrollPayslipChildcare": "Staff children care",
+  "payrollPayslipDeductionsTotal": "Total deductions",
+  "payrollPayslipAttendanceDeducted": "Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted from the days worked.",
+  "@payrollPayslipAttendanceDeducted": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "absences": {
+        "type": "int"
+      },
+      "justified": {
+        "type": "int"
+      },
+      "lates": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollPayslipBalance": "Net pay {net} · already received {paid} · still to receive {rest}",
+  "@payrollPayslipBalance": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipGains": "Earnings",
   "payrollPayslipBase": "Base salary",
   "payrollPayslipOvertime": "Overtime {hours} h × {rate}",
@@ -9751,9 +9821,9 @@
   "@payrollPayslipAttendance": {"placeholders": {"month": {"type": "String"}, "absences": {"type": "int"}, "justified": {"type": "int"}, "lates": {"type": "int"}, "minutes": {"type": "int"}}},
   "payrollPayslipPayment": "Payment: {detail}",
   "@payrollPayslipPayment": {"placeholders": {"detail": {"type": "String"}}},
-  "payrollPayslipSignAgent": "Staff member",
-  "payrollPayslipSignBursar": "Bursar",
-  "payrollPayslipSignHead": "Head",
+  "payrollPayslipSignAgent": "Beneficiary",
+  "payrollPayslipSignBursar": "Cashier",
+  "payrollPayslipSignHead": "Seen and approved by the head",
   "payrollPayslipDownload": "Download the PDF",
   "payrollPayslipWhatsapp": "Send via WhatsApp",
   "payrollPayslipAll": "All payslips (PDF)",
@@ -9766,8 +9836,41 @@
   "payrollPayslipPosition": "{index} / {count}",
   "@payrollPayslipPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}}},
   "payrollPayslipNoPhone": "No number for this staff member.",
-  "payrollPayslipWhatsappMessage": "Hello {name}, your {month} payslip ({school}): net {net}, {payment}.",
-  "@payrollPayslipWhatsappMessage": {"placeholders": {"name": {"type": "String"}, "month": {"type": "String"}, "school": {"type": "String"}, "net": {"type": "String"}, "payment": {"type": "String"}}},
+  "payrollPayslipWhatsappMessageV2": "Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; days worked {days}; net {net}; received {paid}; remaining {rest}.",
+  "@payrollPayslipWhatsappMessageV2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "school": {
+        "type": "String"
+      },
+      "gross": {
+        "type": "String"
+      },
+      "deductions": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      },
+      "paid": {
+        "type": "String"
+      },
+      "rest": {
+        "type": "String"
+      }
+    }
+  },
   "payrollPayslipEmpty": "No staff member on this month's ledger.",
   "payrollHistoryMonths": "Months kept",
   "payrollHistoryPaid": "Total net paid",
@@ -11410,7 +11513,7 @@
   "hrPresenceMinutes": "{minutes} min",
   "hrPresenceKpiLateSubline": "{minutes} min · punctuality {punctuality} %",
   "hrPresenceKpiUnjustified": "Unexcused absences",
-  "hrPresenceKpiUnjustifiedSubline": "shown on the payslip, never deducted",
+  "hrPresenceKpiUnjustifiedSubline": "shown on the payslip",
   "hrPresenceKpiJustified": "Excused absences",
   "hrPresenceKpiJustifiedSubline": "with a reason",
   "hrPresenceUnscoredTitle": "{count, plural, =1{1 staff-day not marked} other{{count} staff-days not marked}}",

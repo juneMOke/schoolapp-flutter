@@ -10,4 +10,10 @@ abstract class PayslipRepository {
     String month,
     String staffMemberId,
   );
+
+  /// Les bulletins scellés de [month] en un PDF (T16).
+  Future<Either<Failure, Uint8List>> monthPayslips(String month);
+
+  /// L'état de paie de [month], A4 paysage (T16).
+  Future<Either<Failure, Uint8List>> statement(String month);
 }

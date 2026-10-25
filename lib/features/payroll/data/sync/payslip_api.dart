@@ -22,4 +22,20 @@ abstract class PayslipApi {
     @Path('month') String month,
     @Path('staffMemberId') String staffMemberId,
   );
+
+  @GET(AppConstants.payrollMonthPayslipsEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> monthPayslips(
+    @Extras() Map<String, dynamic> extras,
+    @Path('month') String month,
+  );
+
+  @GET(AppConstants.payrollStatementEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> statement(
+    @Extras() Map<String, dynamic> extras,
+    @Path('month') String month,
+  );
 }

@@ -12,7 +12,9 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_header.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_actions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/statement/payroll_statement_table.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'état de paie du mois : le tableur que les écoles tiennent déjà, groupé
@@ -37,7 +39,36 @@ class PayrollStatementTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PayrollLedgerHeader(state: state),
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
+          children: [
+            PayrollLedgerHeader(state: state, withCircuit: false),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                // L'état est composé par le serveur, sur la paie figée :
+                // après validation seulement, en ligne (T16).
+                if (view.phase.isLocked)
+                  EteeloButton.secondary(
+                    label: l10n.payrollStatementPrint,
+                    icon: Icons.print_outlined,
+                    onPressed: PayrollPayslipActions(context).openStatement,
+                    fullWidth: false,
+                  ),
+                EteeloButton.ghost(
+                  label: l10n.payrollPayslipAll,
+                  icon: Icons.library_books_outlined,
+                  onPressed: () => PayrollPayslipActions(context).openPdf(null),
+                  fullWidth: false,
+                ),
+              ],
+            ),
+          ],
+        ),
         const SizedBox(height: AppSpacing.md),
         if (!view.isEditable)
           PayrollTone.draft.notice(

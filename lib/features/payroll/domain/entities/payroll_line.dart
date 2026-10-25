@@ -71,7 +71,8 @@ class PayrollLine extends Equatable {
   /// `null` sur une ligne v1 : tout le net est à verser.
   final PayrollLinePayout? payout;
 
-  /// Le Pointage du mois précédent, clos — indicatif, sans retenue.
+  /// Le Pointage du mois précédent, clos — d'où viennent les jours prestés
+  /// (NJP, v2).
   final String? attendanceMonth;
   final AttendanceAgentSummary attendance;
   final bool frozen;
