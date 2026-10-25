@@ -3,6 +3,20 @@ import 'package:school_app_flutter/core/di/offline_modules/staff_attendance_di.d
 import 'package:school_app_flutter/core/di/offline_modules/staff_documents_di.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/features/hr_personnel/data/hr_staff_dashboard_api.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_args.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_month_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_cubit.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
+import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
+import 'package:school_app_flutter/features/hr_presence/data/hr_attendance_stats_api.dart';
+import 'package:school_app_flutter/features/hr_presence/data/repositories/hr_attendance_stats_repository_impl.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/repositories/hr_attendance_stats_repository.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_personnel/data/repositories/hr_staff_dashboard_repository_impl.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/repositories/hr_staff_dashboard_repository.dart';
 import 'package:school_app_flutter/features/hr_personnel/domain/usecases/hr_staff_dashboard_use_cases.dart';
@@ -165,6 +179,87 @@ void registerStaffOffline(GetIt getIt) {
   );
   getIt.registerFactory<GetHrStaffListReportUseCase>(
     () => GetHrStaffListReportUseCase(getIt<HrStaffDashboardRepository>()),
+  );
+  // RH · Présences : statistiques en ligne seulement (D1) — tableau de bord,
+  // détail d'un agent, fiche, récapitulatif et PDF sur `/hr/attendance-stats`.
+  // Le registre du jour reste sur le Pointage local.
+  getIt.registerLazySingleton<HrAttendanceStatsApi>(
+    () => HrAttendanceStatsApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<HrAttendanceStatsRepository>(
+    () => HrAttendanceStatsRepositoryImpl(
+      api: getIt<HrAttendanceStatsApi>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerFactory<GetHrAttendanceDashboardUseCase>(
+    () => GetHrAttendanceDashboardUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceAgentMonthUseCase>(
+    () =>
+        GetHrAttendanceAgentMonthUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceAgentYearUseCase>(
+    () => GetHrAttendanceAgentYearUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceProfilesUseCase>(
+    () => GetHrAttendanceProfilesUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceRecapUseCase>(
+    () => GetHrAttendanceRecapUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<GetHrAttendanceReportUseCase>(
+    () => GetHrAttendanceReportUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
+  getIt.registerFactory<HrPresenceDashboardCubit>(
+    () => HrPresenceDashboardCubit(
+      getDashboard: getIt<GetHrAttendanceDashboardUseCase>(),
+      countUnsynced: getIt<CountUnsyncedStaffAttendanceUseCase>(),
+      signals: getIt<StaffSyncSignals>(),
+    ),
+  );
+  getIt.registerFactoryParam<
+    HrPresenceAgentMonthCubit,
+    HrPresenceAgentArgs,
+    void
+  >(
+    (args, _) => HrPresenceAgentMonthCubit(
+      getMonth: getIt<GetHrAttendanceAgentMonthUseCase>(),
+      source: getIt<StaffSnapshotSource>(),
+      agentId: args.agentId,
+      month: args.month,
+      yearStart: args.yearStart,
+    ),
+  );
+  getIt.registerFactoryParam<HrPresenceProfilesCubit, DateTime?, void>(
+    (yearStart, _) => HrPresenceProfilesCubit(
+      getProfiles: getIt<GetHrAttendanceProfilesUseCase>(),
+      yearStart: yearStart,
+    ),
+  );
+  getIt.registerFactoryParam<HrPresenceFicheCubit, HrPresenceFicheArgs, void>(
+    (args, _) => HrPresenceFicheCubit(
+      getMonth: getIt<GetHrAttendanceAgentMonthUseCase>(),
+      getYear: getIt<GetHrAttendanceAgentYearUseCase>(),
+      source: getIt<StaffSnapshotSource>(),
+      args: args,
+    ),
+  );
+  getIt.registerFactoryParam<HrPresenceRecapCubit, DateTime?, void>(
+    (yearStart, _) => HrPresenceRecapCubit(
+      getRecap: getIt<GetHrAttendanceRecapUseCase>(),
+      loadLocal: getIt<LoadStaffAttendanceUseCase>(),
+      countUnsynced: getIt<CountUnsyncedStaffAttendanceUseCase>(),
+      commands: getIt<StaffAttendanceCommands>(),
+      signals: getIt<StaffSyncSignals>(),
+      yearStart: yearStart,
+    ),
+  );
+  getIt.registerFactory<HrAttendanceReportCubit>(
+    () => HrAttendanceReportCubit(
+      getReport: getIt<GetHrAttendanceReportUseCase>(),
+    ),
   );
   getIt.registerFactory<HrStaffStatsCubit>(
     () => HrStaffStatsCubit(getStats: getIt<GetHrStaffStatsUseCase>()),

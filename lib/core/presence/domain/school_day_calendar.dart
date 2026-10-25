@@ -10,6 +10,15 @@ abstract final class SchoolDayCalendar {
   /// `YYYY-MM-DD` d'un instant, dans le fuseau de la tablette.
   static String dayOf(DateTime moment) => _format(moment.toLocal());
 
+  /// [value] est-il un jour civil `YYYY-MM-DD` réel ? (« 2026-02-30 », lu
+  /// dans une adresse tronquée ou tapée à la main, ne l'est pas.)
+  static bool isDay(String value) {
+    if (!_dayPattern.hasMatch(value)) return false;
+    return _format(_parse(value)) == value;
+  }
+
+  static final _dayPattern = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
   /// `YYYY-MM` d'un jour.
   static String monthOf(String day) => day.substring(0, 7);
 

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/beneficiaries_query.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_beneficiaries_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_catalog_use_case.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_state.dart';

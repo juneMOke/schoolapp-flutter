@@ -551,6 +551,13 @@ class AppColors {
   static const presenceMarkNoneBorder = Color(0xFFD9D3C7);
   static const presenceMarkNoneInk = textMutedAa;
 
+  /// Le profil « régulier » (RH · Présences §11), le seul sans statut jumeau :
+  /// le bleu ardoise neutre des tableaux de bord.
+  static const presenceProfileRegular = bleuArdoise;
+  static const presenceProfileRegularSoft = bleuArdoiseSoft;
+  static const presenceProfileRegularBorder = Color(0xFFBFD3E1);
+  static const presenceProfileRegularInk = bleuArdoise; // 8,0:1 sur son voile
+
   /// Le bandeau du jour : un dégradé d'ardoise profonde, et son filet
   /// terre cuite → or → vert.
   static const presenceMarkBannerStart = Color(0xFF0E2D42);

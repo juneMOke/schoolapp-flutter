@@ -233,7 +233,10 @@ void main() {
 
     verifyNever(() => save(any()));
     expect(
-      find.text('Seuls le directeur et le censeur pointent le personnel.'),
+      find.text(
+        'Seuls la direction et le préfet ou le censeur (compte '
+        'administration académique) pointent le personnel.',
+      ),
       findsOneWidget,
     );
     expect(find.text('Valider le rapport'), findsNothing);
@@ -258,13 +261,13 @@ void main() {
       Perm.hrAttendanceRead.wire,
       Perm.hrAttendanceWrite.wire,
     ]);
-    expect(find.text('Clôturer et transmettre à la Paie'), findsNothing);
+    expect(find.text('Clôturer le mois'), findsNothing);
 
     await openPreviousRecap([
       Perm.hrAttendanceRead.wire,
       Perm.hrAttendanceManage.wire,
     ]);
-    expect(find.text('Clôturer et transmettre à la Paie'), findsOneWidget);
+    expect(find.text('Clôturer le mois'), findsOneWidget);
   });
 
   testWidgets('la modale d\'heure tient en paysage, clavier ouvert', (

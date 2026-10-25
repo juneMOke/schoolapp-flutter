@@ -5,11 +5,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_period.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/dashboard/boutique_dashboard_labels.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_period_filter.dart';
-import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_range_fields.dart';
+import 'package:school_app_flutter/core/components/dashboard/dashboard_period_tabs.dart';
+import 'package:school_app_flutter/core/components/dashboard/dashboard_range_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'en-tête : la fenêtre exacte, la période, « Ouvrir la caisse » — et, hors
@@ -78,10 +78,7 @@ class BoutiqueDashboardHeader extends StatelessWidget {
           runSpacing: AppDimensions.spacingS,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            BoutiqueDashboardPeriodFilter(
-              selected: period,
-              onChanged: onPeriodChanged,
-            ),
+            DashboardPeriodTabs(selected: period, onChanged: onPeriodChanged),
             EteeloButton.ghost(
               label: l10n.boutiqueDashboardRefresh,
               icon: Icons.refresh_rounded,
@@ -98,7 +95,7 @@ class BoutiqueDashboardHeader extends StatelessWidget {
         ),
         if (period == DashboardPeriod.custom && window != null) ...[
           const SizedBox(height: AppDimensions.spacingM),
-          BoutiqueDashboardRangeFields(
+          DashboardRangeFields(
             window: window,
             yearStart: yearStart,
             onChanged: onRangeChanged,

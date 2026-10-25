@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/boutique/domain/entities/boutique_ar
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_catalog.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/beneficiaries_query.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_beneficiaries_page.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/pricing_mode.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_beneficiaries_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_catalog_use_case.dart';

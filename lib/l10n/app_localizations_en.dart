@@ -9125,28 +9125,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get boutiqueDashboardPeriodToday => 'Today';
+  String get dashboardPeriodToday => 'Today';
 
   @override
-  String get boutiqueDashboardPeriodWeek => 'This week';
+  String get dashboardPeriodWeek => 'This week';
 
   @override
-  String get boutiqueDashboardPeriodMonth => 'This month';
+  String get dashboardPeriodMonth => 'This month';
 
   @override
-  String get boutiqueDashboardPeriodYear => 'Year';
+  String get dashboardPeriodYear => 'Year';
 
   @override
-  String get boutiqueDashboardPeriodCustom => 'Custom range';
+  String get dashboardPeriodCustom => 'Custom range';
 
   @override
-  String get boutiqueDashboardRangeFieldFrom => 'From';
+  String get dashboardRangeFieldFrom => 'From';
 
   @override
-  String get boutiqueDashboardRangeFieldTo => 'To';
+  String get dashboardRangeFieldTo => 'To';
 
   @override
-  String get boutiqueDashboardPeriodA11y => 'Dashboard period';
+  String get dashboardPeriodA11y => 'Dashboard period';
 
   @override
   String get boutiqueDashboardOpenTill => 'Open the till';
@@ -13329,7 +13329,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String presenceMarkKpiAbsencesDetail(int justified, int unjustified) {
-    return '$justified J · $unjustified U';
+    return '$justified E · $unjustified U';
   }
 
   @override
@@ -13383,24 +13383,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffAttendanceRecapLegend =>
-      'U = unjustified · J = justified · tap a row to open the monthly sheet';
+      'U = unexcused · E = excused · a row opens the monthly sheet';
 
   @override
-  String get staffAttendanceClose => 'Close and send to Payroll';
+  String get staffAttendanceClose => 'Close the month';
 
   @override
   String staffAttendanceCloseTitle(String month) {
-    return 'Send $month to Payroll?';
+    return 'Close $month?';
   }
 
   @override
   String staffAttendanceCloseHours(String hours) {
-    return '$hours of hourly work, added to hourly staff pay';
+    return '$hours of hourly work, which Payroll reads from the marks';
   }
 
   @override
   String staffAttendanceCloseAbsences(int count) {
-    return '$count unjustified absences, flagged in the payroll book, without deduction';
+    return '$count unexcused absences, shown on the payslip, never deducted';
   }
 
   @override
@@ -13410,7 +13410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String staffAttendanceCloseNotMarked(int count) {
-    return '$count staff-days without marks will be treated as present by default';
+    return '$count staff-days without marks: an unmarked day of hourly staff pays 0 h';
   }
 
   @override
@@ -13508,7 +13508,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffAttendanceForbidden =>
-      'Only the head and the deputy head mark staff attendance.';
+      'Only the school management and the prefect or deputy head (academic administration account) mark staff attendance.';
 
   @override
   String get staffAttendanceValidationRefused =>
@@ -18243,4 +18243,618 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get hrStaffReportSessionExpired =>
       'Session expired: sign in again to print the list.';
+
+  @override
+  String get presenceProfileNotEvaluated => 'Not evaluated';
+
+  @override
+  String get presenceProfileAbsentee => 'Often absent';
+
+  @override
+  String get presenceProfileLate => 'Often late';
+
+  @override
+  String get presenceProfileExemplary => 'Exemplary';
+
+  @override
+  String get presenceProfileRegular => 'Regular';
+
+  @override
+  String get presenceProfileRuleNotEvaluated =>
+      'No day marked over the period.';
+
+  @override
+  String get presenceProfileRuleAbsentee =>
+      'Absent on at least 10% of the marked days, or at least 3 unjustified absences.';
+
+  @override
+  String get presenceProfileRuleLate =>
+      'Late on more than 15% of the marked days.';
+
+  @override
+  String get presenceProfileRuleExemplary =>
+      'Present on at least 97% of the marked days, late on 5% at most.';
+
+  @override
+  String get presenceProfileRuleRegular =>
+      'Neither often absent, often late nor exemplary.';
+
+  @override
+  String get menuHrPresence => 'HR · Attendance';
+
+  @override
+  String get subMenuHrPresenceRegister => 'Daily register';
+
+  @override
+  String get accueilModuleHrPresenceDescription =>
+      'Who came in, at what time, and the month\'s totals.';
+
+  @override
+  String get hrPresenceEyebrow => 'HR · Attendance';
+
+  @override
+  String get hrPresenceRegisterSubtitle =>
+      'The prefect or the deputy head marks attendance from the tablet, in class or at the front desk — even offline.';
+
+  @override
+  String get hrPresenceActionMark => 'Mark attendance';
+
+  @override
+  String get hrPresenceRefresh => 'Refresh';
+
+  @override
+  String get hrPresenceDashboardSubtitleBare => 'Staff attendance';
+
+  @override
+  String hrPresenceDashboardSubtitle(String period) {
+    return 'Staff attendance · $period';
+  }
+
+  @override
+  String hrPresenceWindowRange(String from, String to) {
+    return 'from $from to $to';
+  }
+
+  @override
+  String hrPresenceWindowYear(String year, String to) {
+    return 'school year $year · up to $to';
+  }
+
+  @override
+  String hrPresenceWeekdayDay(String weekday, int day) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Mon',
+      '2': 'Tue',
+      '3': 'Wed',
+      '4': 'Thu',
+      '5': 'Fri',
+      '6': 'Sat',
+      'other': 'Sun',
+    });
+    return '$_temp0 $day';
+  }
+
+  @override
+  String hrPresenceMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'Jan',
+      '2': 'Feb',
+      '3': 'Mar',
+      '4': 'Apr',
+      '5': 'May',
+      '6': 'Jun',
+      '7': 'Jul',
+      '8': 'Aug',
+      '9': 'Sep',
+      '10': 'Oct',
+      '11': 'Nov',
+      'other': 'Dec',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceNoValue => '—';
+
+  @override
+  String get hrPresenceKpisA11y => 'Staff attendance over the period';
+
+  @override
+  String get hrPresenceKpiRate => 'Attendance rate';
+
+  @override
+  String hrPresenceKpiRateSubline(int presences, int scored) {
+    String _temp0 = intl.Intl.pluralLogic(
+      presences,
+      locale: localeName,
+      other: '$presences present',
+      one: '1 present',
+      zero: '0 present',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      scored,
+      locale: localeName,
+      other: '$scored marks',
+      one: '1 mark',
+      zero: '0 marks',
+    );
+    return '$_temp0 out of $_temp1';
+  }
+
+  @override
+  String get hrPresenceKpiLate => 'Late arrivals';
+
+  @override
+  String hrPresenceMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String hrPresenceKpiLateSubline(int minutes, int punctuality) {
+    return '$minutes min · punctuality $punctuality %';
+  }
+
+  @override
+  String get hrPresenceKpiUnjustified => 'Unexcused absences';
+
+  @override
+  String get hrPresenceKpiUnjustifiedSubline =>
+      'shown on the payslip, never deducted';
+
+  @override
+  String get hrPresenceKpiJustified => 'Excused absences';
+
+  @override
+  String get hrPresenceKpiJustifiedSubline => 'with a reason';
+
+  @override
+  String hrPresenceUnscoredTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff-days not marked',
+      one: '1 staff-day not marked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceUnscoredBody =>
+      'They count neither as present nor as absent: the rate only uses the marked days.';
+
+  @override
+  String get hrPresenceUnscoredAction => 'Complete the register';
+
+  @override
+  String hrPresenceUnsyncedTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marks still on this tablet',
+      one: '1 mark still on this tablet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceUnsyncedBody =>
+      'These figures come from the server and do not count them yet. They are sent automatically as soon as the network is back.';
+
+  @override
+  String get hrPresenceChartTitleDay => 'Attendance day by day';
+
+  @override
+  String get hrPresenceChartTitleMonth => 'Attendance month by month';
+
+  @override
+  String get hrPresenceChartSubtitle =>
+      'Share of marked staff present (green) and absent (red)';
+
+  @override
+  String get hrPresenceChartLegendPresent => 'Present (on time or late)';
+
+  @override
+  String get hrPresenceChartLegendAbsent => 'Absent';
+
+  @override
+  String get hrPresenceChartLegendEmpty => 'Not marked';
+
+  @override
+  String get hrPresenceChartLegendNarrow =>
+      'Attendance rate in % above each bar';
+
+  @override
+  String hrPresenceBarDescription(
+    String when,
+    int presentPct,
+    int presences,
+    int scored,
+    int absentPct,
+  ) {
+    return '$when · present $presentPct % ($presences/$scored) · absent $absentPct %';
+  }
+
+  @override
+  String hrPresenceBarEmpty(String when) {
+    return '$when · nothing marked';
+  }
+
+  @override
+  String get hrPresenceStaffTitle => 'Attendance by staff member';
+
+  @override
+  String hrPresenceStaffSubtitle(String period) {
+    return '$period · least to most regular';
+  }
+
+  @override
+  String hrPresenceStaffSubtitleTap(String period) {
+    return '$period · least to most regular · open a staff member for details';
+  }
+
+  @override
+  String get hrPresenceStaffSearchLabel => 'Search';
+
+  @override
+  String get hrPresenceStaffSearchPlaceholder => 'Find a staff member…';
+
+  @override
+  String get hrPresenceStaffOpen => 'See details';
+
+  @override
+  String get hrPresenceColAgent => 'Staff member';
+
+  @override
+  String get hrPresenceColJob => 'Job title';
+
+  @override
+  String get hrPresenceColRate => 'Attendance';
+
+  @override
+  String get hrPresenceColLate => 'Late';
+
+  @override
+  String get hrPresenceColJustified => 'Excused';
+
+  @override
+  String get hrPresenceColUnjustified => 'Unexcused';
+
+  @override
+  String hrPresenceLateCell(int count, int minutes) {
+    return '$count · $minutes min';
+  }
+
+  @override
+  String get hrPresenceStaffEmptyTitle => 'No staff member matches';
+
+  @override
+  String hrPresenceStaffEmptyMessage(String text) {
+    return 'Nothing for “$text”.';
+  }
+
+  @override
+  String get hrPresenceStaffShowAll => 'Show all';
+
+  @override
+  String get hrPresenceNoClassDaysTitle => 'No school days in this period';
+
+  @override
+  String get hrPresenceNoClassDaysMessage =>
+      'Weekend or holidays: nothing was to be marked. Pick another period.';
+
+  @override
+  String get hrPresenceNoStaffTitle => 'No staff expected';
+
+  @override
+  String get hrPresenceNoStaffMessage =>
+      'No contract covers this period: there was nobody to mark.';
+
+  @override
+  String get hrPresenceErrorServerTitle => 'The server did not respond';
+
+  @override
+  String get hrPresenceErrorServer =>
+      'Staff attendance could not be read from the server. Try again in a moment; if the problem persists, contact support.';
+
+  @override
+  String get hrPresenceReportTitle => 'Staff attendance';
+
+  @override
+  String get hrPresenceReportTooltip =>
+      'Download this table as a PDF, as shown';
+
+  @override
+  String get hrPresenceReportForbidden =>
+      'You do not have access to staff attendance.';
+
+  @override
+  String get hrPresenceReportNoYear =>
+      'No current school year: the document cannot be numbered.';
+
+  @override
+  String hrPresenceReportTooLarge(int lines, int cap) {
+    return '$lines staff members, over the document\'s $cap: add a search.';
+  }
+
+  @override
+  String get hrPresenceReportFailed =>
+      'The staff attendance document could not be prepared.';
+
+  @override
+  String get hrPresenceAgentTitle => 'Staff member attendance';
+
+  @override
+  String get hrPresenceAllAgents => 'All staff';
+
+  @override
+  String get hrPresenceAgentOpenPayroll => 'Open payroll';
+
+  @override
+  String get hrPresenceAgentMonthRate => 'Attendance this month';
+
+  @override
+  String hrPresenceAgentClassDays(int classDays, int unscored) {
+    String _temp0 = intl.Intl.pluralLogic(
+      classDays,
+      locale: localeName,
+      other: '$classDays school days',
+      one: '1 school day',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      unscored,
+      locale: localeName,
+      other: '$unscored not marked',
+      one: '1 not marked',
+      zero: 'all marked',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get hrPresenceAgentTrendTitle => 'Six-month trend';
+
+  @override
+  String hrPresenceTrendDescription(String when, int pct) {
+    return '$when · attendance $pct %';
+  }
+
+  @override
+  String get subMenuHrPresenceFiche => 'Individual record';
+
+  @override
+  String get hrPresenceFicheSubtitle =>
+      'Pick a staff member: their attendance profile, by month or for the year.';
+
+  @override
+  String get hrPresenceFicheListTitle => 'Staff';
+
+  @override
+  String get hrPresenceFicheSearchPlaceholder =>
+      'Name, job title or staff number…';
+
+  @override
+  String get hrPresenceFicheEmptyMessage =>
+      'No staff member for these criteria.';
+
+  @override
+  String get hrPresenceProfilesLoading => 'Loading attendance profiles';
+
+  @override
+  String get hrPresenceScopeA11y => 'Record scope';
+
+  @override
+  String get hrPresenceScopeMonthly => 'Monthly';
+
+  @override
+  String get hrPresenceScopeYearly => 'Yearly';
+
+  @override
+  String hrPresenceYearScope(String year, String to) {
+    return 'School year $year · up to $to';
+  }
+
+  @override
+  String hrPresenceProfileRates(String presence, String late, String absent) {
+    return '$presence · $late · $absent';
+  }
+
+  @override
+  String hrPresenceProfileRatesA11y(
+    String presence,
+    String late,
+    String absent,
+  ) {
+    return 'Attendance $presence, late $late, absent $absent';
+  }
+
+  @override
+  String get hrPresenceLegendOnTime => 'On time';
+
+  @override
+  String get hrPresenceLegendLate => 'Late';
+
+  @override
+  String get hrPresenceLegendAbsent => 'Absent';
+
+  @override
+  String get hrPresenceLegendShare =>
+      '(% of marked days) · hold or hover a profile for its rule';
+
+  @override
+  String get hrPresenceStaffList => 'Staff list';
+
+  @override
+  String get hrPresenceAgentOpenFiche => 'Open their individual record';
+
+  @override
+  String hrPresenceProfileOf(String scope) {
+    return 'Profile · $scope';
+  }
+
+  @override
+  String hrPresenceScopeYearLabel(String year) {
+    return 'year $year';
+  }
+
+  @override
+  String hrPresenceFicheRateDetail(int presences, int scored) {
+    String _temp0 = intl.Intl.pluralLogic(
+      presences,
+      locale: localeName,
+      other: '$presences days',
+      one: '1 day',
+      zero: '0 days',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      scored,
+      locale: localeName,
+      other: '$scored marked',
+      one: '1 marked',
+    );
+    return '$_temp0 out of $_temp1';
+  }
+
+  @override
+  String get hrPresenceFicheLateRate => 'Late rate';
+
+  @override
+  String hrPresenceFicheLateDetail(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count late arrivals',
+      one: '1 late arrival',
+      zero: 'no late arrival',
+    );
+    return '$_temp0 · $minutes min in all';
+  }
+
+  @override
+  String get hrPresenceFicheAbsenceRate => 'Absence rate';
+
+  @override
+  String get hrPresenceYearTitle => 'Month by month';
+
+  @override
+  String get hrPresenceMonthHoliday => 'School holidays';
+
+  @override
+  String get hrPresenceMonthFuture => 'Upcoming';
+
+  @override
+  String hrPresenceMonthScored(int scored, int classDays) {
+    return '$scored/$classDays days marked';
+  }
+
+  @override
+  String get subMenuHrPresenceRecap => 'Monthly summary';
+
+  @override
+  String get hrPresenceRecapSubtitle =>
+      'Each staff member\'s attendance totals for the month, then its closing. Payroll reads the actual marks.';
+
+  @override
+  String hrPresenceRecapClassDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count school days',
+      one: '1 school day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrPresenceRecapClassDaysToDate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count school days so far',
+      one: '1 school day so far',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceRecapUnsynced => 'Still on this tablet';
+
+  @override
+  String get hrPresenceRecapCurrentMonth => 'Current month';
+
+  @override
+  String get hrPresenceRecapNotClosed => 'Month not closed';
+
+  @override
+  String get hrPresenceRecapCloseExplain =>
+      'Closing locks the month\'s marks. Nothing is sent: Payroll reads the actual marks.';
+
+  @override
+  String hrPresenceRecapCloseFrom(String day) {
+    return 'Can be closed from $day';
+  }
+
+  @override
+  String get hrPresenceRecapClosedOnTablet =>
+      'Closing saved on this tablet, waiting to be sent';
+
+  @override
+  String hrPresenceRecapClosedBy(String when, String by) {
+    return 'on $when by $by';
+  }
+
+  @override
+  String hrPresenceRecapDaysWorked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days worked',
+      one: '1 day worked',
+      zero: 'no day worked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceRecapLegend =>
+      'U = unexcused · E = excused · a row opens the individual record';
+
+  @override
+  String get staffAttendanceCloseIrreversible =>
+      'A closed month cannot be reopened: validated pay depends on it.';
+
+  @override
+  String get hrPresenceNoYearTitle => 'No current school year';
+
+  @override
+  String get hrPresenceNoYearMessage =>
+      'The school is between two years: the yearly view returns when the next one opens.';
+
+  @override
+  String get hrPresenceRecapCloseRefused =>
+      'The server refused the last closing of this month: check the month, then try again.';
+
+  @override
+  String get hrPresenceAgentNotFoundMessage =>
+      'The server does not know this staff member in this school: they may have been removed, or the link comes from another school.';
+
+  @override
+  String get hrPresenceErrorForbidden =>
+      'Your profile does not allow you to view staff attendance.';
+
+  @override
+  String hrPresenceYearRowA11y(
+    String month,
+    String presence,
+    String late,
+    String absent,
+  ) {
+    return '$month: attendance $presence, late $late, absent $absent';
+  }
+
+  @override
+  String get hrPresenceYearOpen => 'See this month';
+
+  @override
+  String get hrPresenceChartScrollHint =>
+      'Swipe the chart to see the start of the period';
 }

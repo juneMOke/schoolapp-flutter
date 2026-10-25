@@ -77,6 +77,9 @@ class AccueilModuleTones {
     // Voisin des Ressources humaines dans la grille : l'ardoise, pour que les
     // deux cartes ne se confondent pas.
     MenuConstants.hrPersonnelMenuId: _bleuArdoise,
+    // Troisième carte RH : retour au bleu profond, que l'ardoise de RH ·
+    // Personnel sépare des Ressources humaines.
+    MenuConstants.hrPresenceMenuId: _bleuProfond,
     MenuConstants.classesMenuId: _terreFoncee,
     MenuConstants.coursesMenuId: _bleuArdoise,
     MenuConstants.resultatsMenuId: _terreFoncee,

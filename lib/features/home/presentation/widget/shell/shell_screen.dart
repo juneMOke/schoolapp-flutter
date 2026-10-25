@@ -39,6 +39,10 @@ import 'package:school_app_flutter/features/finance/presentation/pages/finance_s
 import 'package:school_app_flutter/features/home/presentation/pages/accueil_page.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_dashboard_page.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_personnel_file_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_dashboard_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_recap_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_register_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
@@ -155,6 +159,14 @@ class ShellScreen extends StatelessWidget {
         return const HrDashboardPage();
       case MenuConstants.hrPersonnelFileId:
         return const HrPersonnelFilePage();
+      case MenuConstants.hrPresenceDashboardId:
+        return const HrPresenceDashboardPage();
+      case MenuConstants.hrPresenceFicheId:
+        return const HrPresenceFichePage();
+      case MenuConstants.hrPresenceRecapId:
+        return const HrPresenceRecapPage();
+      case MenuConstants.hrPresenceRegisterId:
+        return const HrPresenceRegisterPage();
       // Scope PROPRE depuis que le contrôle est un module à part : plus rien
       // ne le partage avec la Facturation, donc plus de `ValueKey` à poser
       // pour empêcher Flutter de recycler l'`Element` de l'autre écran — les

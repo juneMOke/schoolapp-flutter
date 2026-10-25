@@ -10,7 +10,7 @@ import 'package:school_app_flutter/features/boutique/data/dashboard/models/bouti
 import 'package:school_app_flutter/features/boutique/data/dashboard/models/boutique_stats_model.dart';
 import 'package:school_app_flutter/features/boutique/data/repositories/boutique_dashboard_repository_impl.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/beneficiaries_query.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';

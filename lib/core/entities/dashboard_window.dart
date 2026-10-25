@@ -2,13 +2,14 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 
 /// Une fenêtre de jours **de l'école**, bornes incluses — la forme exacte du
-/// `from` / `to` de `GET /boutique/stats`.
+/// `from` / `to` des tableaux de bord servis (`GET /boutique/stats`,
+/// `GET /hr/attendance-stats`).
 ///
 /// Les deux bornes sont des jours (minuit, champs de calendrier seuls) : une
 /// heure n'a pas de sens ici, le serveur découpe dans le fuseau de l'école.
 class DashboardWindow extends Equatable {
-  /// La plus large fenêtre que `GET /boutique/stats` accepte, bornes
-  /// comprises — au-delà, un 400.
+  /// La plus large fenêtre que ces routes acceptent, bornes comprises —
+  /// au-delà, un 400.
   static const int maxDayCount = 366;
 
   final DateTime from;

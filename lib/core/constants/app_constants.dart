@@ -1159,6 +1159,49 @@ class AppConstants {
   /// L'attente retenue quand un 429 de la liste n'annonce pas la sienne.
   static const Duration hrStaffListReportRetryFallback = Duration(seconds: 60);
 
+  // ── RH · Présences — statistiques, en ligne (D1) ──
+  /// Le tableau de bord d'une période : `from` / `to` (`AAAA-MM-JJ`, 366 jours
+  /// au plus, `to` ramené à aujourd'hui). `hr.attendance.read`.
+  static const String hrAttendanceStatsEndpoint = '/api/v1/hr/attendance-stats';
+
+  /// Le mois d'un agent : `month=AAAA-MM`, jusqu'au mois courant ; 404 pour un
+  /// agent d'une autre école.
+  static const String hrAttendanceAgentMonthEndpoint =
+      '/api/v1/hr/attendance-stats/staff/{staffMemberId}';
+
+  /// L'année scolaire courante d'un agent, mois par mois.
+  static const String hrAttendanceAgentYearEndpoint =
+      '/api/v1/hr/attendance-stats/staff/{staffMemberId}/year';
+
+  /// La liste de la fiche individuelle : `month=AAAA-MM` **ou** `scope=year`.
+  static const String hrAttendanceProfilesEndpoint =
+      '/api/v1/hr/attendance-stats/profiles';
+
+  /// La valeur de `scope` pour l'année scolaire.
+  static const String hrAttendanceProfilesYearScope = 'year';
+
+  /// Le récapitulatif d'un mois pour la paie : `month=AAAA-MM`. Les montants
+  /// ne sont servis qu'avec `hr.pay.read`.
+  static const String hrAttendanceRecapEndpoint =
+      '/api/v1/hr/attendance-stats/recap';
+
+  /// Le PDF d'assiduité — pièce **AP**, numérotée et horodatée, non archivée.
+  /// Mêmes `from` / `to` que le tableau de bord, plus `q` ; un rendu à la fois
+  /// (429).
+  static const String hrAttendanceReportEndpoint =
+      '/api/v1/hr/attendance-stats.pdf';
+
+  /// Délai de réception du PDF d'assiduité — celui des autres rapports.
+  static const Duration hrAttendanceReportTimeout = Duration(seconds: 60);
+
+  /// L'attente retenue quand un 429 du PDF d'assiduité n'annonce pas la
+  /// sienne.
+  static const Duration hrAttendanceReportRetryFallback = Duration(seconds: 60);
+
+  /// La période précise du tableau de bord des présences s'ouvre sur ces
+  /// jours-là jusqu'à aujourd'hui (spec §1 : J−14 → J).
+  static const int hrPresenceCustomRangeDays = 14;
+
   /// Pointage du personnel : remontée d'**un** pointage par requête (POST,
   /// `hr.attendance.write`) et descente (GET, flux `hr.staff-attendance`).
   static const String syncStaffAttendanceEndpoint =

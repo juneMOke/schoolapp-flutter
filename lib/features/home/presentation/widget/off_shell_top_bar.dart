@@ -23,12 +23,17 @@ class OffShellTopBar extends StatelessWidget implements PreferredSizeWidget {
   /// Le sous-menu que la flèche rejoint quand il n'y a rien à dépiler.
   final String shellSubMenuId;
 
+  /// Remplace la sortie par défaut (dépiler, sinon rejoindre
+  /// [shellSubMenuId]) pour une page qui doit aussi nettoyer l'adresse.
+  final void Function(BuildContext context)? onBack;
+
   const OffShellTopBar({
     super.key,
     required this.eyebrow,
     required this.title,
     required this.backTooltip,
     required this.shellSubMenuId,
+    this.onBack,
   });
 
   @override
@@ -39,7 +44,7 @@ class OffShellTopBar extends StatelessWidget implements PreferredSizeWidget {
     eyebrow: eyebrow,
     title: title,
     backTooltip: backTooltip,
-    onBack: () => _leave(context),
+    onBack: () => (onBack ?? _leave)(context),
   );
 
   void _leave(BuildContext context) {

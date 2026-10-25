@@ -40,6 +40,8 @@ class StaffMonthCloseDialog extends StatelessWidget {
           icon: Icons.timer_outlined,
         ),
       ],
+      // E6 : aucun geste ne rouvre un mois, la paie validée en dépend.
+      irreversibleMessage: l10n.staffAttendanceCloseIrreversible,
       notMarkedWarning: recap.notMarked > 0
           ? l10n.staffAttendanceCloseNotMarked(recap.notMarked)
           : null,

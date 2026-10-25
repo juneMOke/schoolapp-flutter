@@ -77,6 +77,10 @@ void registerStaffAttendance(GetIt getIt) {
   getIt.registerFactory<LoadStaffAttendanceUseCase>(
     () => LoadStaffAttendanceUseCase(getIt<StaffAttendanceRepository>()),
   );
+  getIt.registerFactory<CountUnsyncedStaffAttendanceUseCase>(
+    () =>
+        CountUnsyncedStaffAttendanceUseCase(getIt<StaffAttendanceRepository>()),
+  );
   getIt.registerFactory<SaveStaffAttendanceUseCase>(
     () => SaveStaffAttendanceUseCase(getIt<StaffAttendanceRepository>()),
   );

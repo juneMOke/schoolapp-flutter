@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' show MaterialLocalizations;
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -23,6 +24,26 @@ abstract final class PresenceLabels {
         PresenceStatus.present => l10n.presenceMarkFilterPresent,
         PresenceStatus.late => l10n.presenceMarkFilterLate,
         PresenceStatus.absent => l10n.presenceMarkFilterAbsent,
+      };
+
+  /// Le profil (« Retardataire »).
+  static String profile(AppLocalizations l10n, PresenceProfile profile) =>
+      switch (profile) {
+        PresenceProfile.notEvaluated => l10n.presenceProfileNotEvaluated,
+        PresenceProfile.absentee => l10n.presenceProfileAbsentee,
+        PresenceProfile.late => l10n.presenceProfileLate,
+        PresenceProfile.exemplary => l10n.presenceProfileExemplary,
+        PresenceProfile.regular => l10n.presenceProfileRegular,
+      };
+
+  /// La règle du profil, en clair (infobulle de la puce, carte de profil).
+  static String profileRule(AppLocalizations l10n, PresenceProfile profile) =>
+      switch (profile) {
+        PresenceProfile.notEvaluated => l10n.presenceProfileRuleNotEvaluated,
+        PresenceProfile.absentee => l10n.presenceProfileRuleAbsentee,
+        PresenceProfile.late => l10n.presenceProfileRuleLate,
+        PresenceProfile.exemplary => l10n.presenceProfileRuleExemplary,
+        PresenceProfile.regular => l10n.presenceProfileRuleRegular,
       };
 
   /// « mardi 29 septembre 2026 ».

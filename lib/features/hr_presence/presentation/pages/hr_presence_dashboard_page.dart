@@ -1,0 +1,120 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
+import 'package:school_app_flutter/core/layout/shell_chrome.dart';
+import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_dashboard.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_presence_dashboard_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_agent_page.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/dashboard/hr_presence_dashboard_body.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/hr_dashboard_location.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// RH · Présences ▸ Tableau de bord — qui vient, qui manque, sur la période.
+///
+/// **En ligne** (D1), comme les autres tableaux de bord : indicateurs,
+/// graphique, liste et PDF viennent du serveur, sur les mêmes `from` / `to`.
+/// La tablette n'ajoute que ce qu'elle n'a pas encore envoyé.
+class HrPresenceDashboardPage extends StatelessWidget {
+  const HrPresenceDashboardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) => MultiBlocProvider(
+    providers: [
+      BlocProvider<HrPresenceDashboardCubit>(
+        create: (context) =>
+            getIt<HrPresenceDashboardCubit>()
+              ..start(yearStart: HrPresenceContext.yearStart(context)),
+      ),
+      BlocProvider<HrAttendanceReportCubit>(
+        create: (_) => getIt<HrAttendanceReportCubit>(),
+      ),
+    ],
+    child: HrPresenceDashboardScreen(
+      onOpenAgent: (context, row) {
+        final window = context.read<HrPresenceDashboardCubit>().state.window;
+        if (window == null) return;
+        unawaited(
+          HrPresenceAgentPage.open(
+            context,
+            agentId: row.agent.staffMemberId,
+            // Le mois de fin de période (spec §4).
+            month: SchoolDayCalendar.monthOf(
+              SchoolDayCalendar.dayOf(window.to),
+            ),
+          ),
+        );
+      },
+    ),
+  );
+
+  /// L'ouverture de l'année, si le contexte la connaît déjà.
+}
+
+class HrPresenceDashboardScreen extends StatelessWidget {
+  /// `null` : les lignes d'agent ne s'ouvrent pas.
+  final void Function(BuildContext context, HrAttendanceStaffRow row)?
+  onOpenAgent;
+
+  const HrPresenceDashboardScreen({super.key, this.onOpenAgent});
+
+  /// Dans la coquille, comme un choix du menu : une route seule afficherait
+  /// la page nue, sans barre ni retour.
+  static void openRegister(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    context.read<NavigationBloc>().add(
+      SubMenuItemSelected(
+        menuId: MenuConstants.hrPresenceMenuId,
+        subMenuId: MenuConstants.hrPresenceRegisterId,
+        title: l10n.subMenuHrPresenceRegister,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<HrPresenceDashboardCubit>();
+    // F5 / Ctrl+R : relire le serveur, sans recharger la page web.
+    return PageActionShortcut(
+      action: PageAction.refresh,
+      onInvoke: () => unawaited(cubit.reload()),
+      child: AppPageBackground(
+        width: PageContentWidth.wide,
+        // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
+        appBar: ShellChrome.wraps(context)
+            ? null
+            : ModuleTopBar(
+                eyebrow: l10n.hrPresenceEyebrow,
+                title: l10n.subMenuDashboard,
+              ),
+        child: BlocBuilder<HrPresenceDashboardCubit, HrPresenceDashboardState>(
+          // La recherche ne reconstruit que la liste (HrPresenceDashboardContent).
+          buildWhen: (previous, current) =>
+              previous.copyWith(text: current.text) != current,
+          builder: (context, state) => HrDashboardLocation(
+            state: state,
+            cubit: cubit,
+            child: HrPresenceDashboardBody(
+              state: state,
+              onOpenRegister: () => openRegister(context),
+              onOpen: onOpenAgent == null
+                  ? null
+                  : (row) => onOpenAgent!(context, row),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

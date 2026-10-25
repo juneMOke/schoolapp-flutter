@@ -38,6 +38,7 @@ class AccueilModulesFactory {
       _expenses(l10n),
       _humanResources(l10n),
       _hrPersonnel(l10n),
+      _hrPresence(l10n),
       _classes(l10n),
       _cours(l10n),
       _resultats(l10n),
@@ -281,6 +282,40 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.hrPersonnelFileId,
           title: l10n.subMenuHrPersonnelFile,
+        ),
+      ],
+    );
+  }
+
+  /// RH · Présences — une carte propre, comme le menu.
+  static AccueilModule _hrPresence(AppLocalizations l10n) {
+    const menuId = MenuConstants.hrPresenceMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuHrPresence,
+      description: l10n.accueilModuleHrPresenceDescription,
+      icon: Icons.event_available_outlined,
+      tone: AccueilModuleTones.of(menuId),
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPresenceDashboardId,
+          title: l10n.subMenuDashboard,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPresenceFicheId,
+          title: l10n.subMenuHrPresenceFiche,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPresenceRegisterId,
+          title: l10n.subMenuHrPresenceRegister,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPresenceRecapId,
+          title: l10n.subMenuHrPresenceRecap,
         ),
       ],
     );

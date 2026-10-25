@@ -26,6 +26,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
   final DateTime Function() _now;
   void Function()? _unwatch;
   int _seq = 0;
+  int _readSeq = 0;
 
   StaffAttendanceCubit({
     required LoadStaffAttendanceUseCase load,
@@ -58,11 +59,20 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
   /// Relecture **silencieuse** : jamais de squelette, un échec garde l'écran.
   Future<void> refresh() => _read(loading: false);
 
+  /// F5 : relire la tablette, puis redemander au serveur.
+  Future<void> reload() async {
+    await refresh();
+    if (!isClosed) unawaited(_signals.pull());
+  }
+
   Future<void> _read({required bool loading}) async {
     if (isClosed) return;
+    // Deux lectures se croisent (un lien ?jour= juste après load, un signal
+    // de synchro) : seule la dernière demandée écrit.
+    final ticket = ++_readSeq;
     final (from, to) = _range(state.day, state.month);
     final result = await _load(from: from, to: to);
-    if (isClosed) return;
+    if (isClosed || ticket != _readSeq) return;
     result.fold(
       (failure) {
         if (loading) {
@@ -80,6 +90,12 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
         ),
       ),
     );
+    // Un jour demandé avant que l'année scolaire soit connue (lien, F5) et
+    // qui la précède : le registre revient au dernier jour ouvré.
+    final first = state.firstDay;
+    if (first != null && state.day.compareTo(first) < 0) {
+      await _moveDay(state.lastWorkDay);
+    }
   }
 
   /// Les jours lus : le mois du registre et le mois de la fiche.
@@ -102,6 +118,17 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
       _moveDay(SchoolDayCalendar.stepWorkDay(state.day, direction));
 
   Future<void> goToday() => _moveDay(state.lastWorkDay);
+
+  /// Le jour demandé par l'adresse (`?jour=`). Absent ou illisible : le
+  /// dernier jour ouvré ; un samedi ou un dimanche : le vendredi d'avant.
+  Future<void> showDay(String? day) {
+    if (day == null || !SchoolDayCalendar.isDay(day)) return goToday();
+    return _moveDay(
+      SchoolDayCalendar.isWeekday(day)
+          ? day
+          : SchoolDayCalendar.stepWorkDay(day, -1),
+    );
+  }
 
   /// Jamais au-delà d'aujourd'hui, ni avant le début de l'année scolaire :
   /// le serveur refuserait tout pointage hors de l'année courante.

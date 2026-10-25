@@ -96,6 +96,14 @@ class AppRoutesNames {
       '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelDashboardId}';
   static const String hrPersonnelFile =
       '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelFileId}';
+  static const String hrPresenceDashboard =
+      '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceDashboardId}';
+  static const String hrPresenceFiche =
+      '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceFicheId}';
+  static const String hrPresenceRecap =
+      '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceRecapId}';
+  static const String hrPresenceRegister =
+      '/${MenuConstants.hrPresenceMenuId}/${MenuConstants.hrPresenceRegisterId}';
 
   /// La fiche d'un agent, par-dessus l'écran de RH · Personnel qui l'a
   /// ouverte (`/home/rh-personnel-fichier/{agentId}`) : F5 et un lien

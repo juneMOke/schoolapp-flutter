@@ -81,6 +81,22 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
         );
   }
 
+  @override
+  Future<Either<Failure, int>> unsyncedCount({
+    required String from,
+    required String to,
+  }) async {
+    final session = _local.session();
+    if (session == null) return const Right(0);
+    try {
+      return Right(
+        await _records.unsyncedCount(session.schoolId, from: from, to: to),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Lecture du pointage : $e'));
+    }
+  }
+
   Future<StaffAttendanceSnapshot> _compose(
     String schoolId,
     StaffFileSnapshot file,

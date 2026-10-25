@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_be
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_history_dao.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/data/local/sold_at_bound.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/provisional_sales.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';

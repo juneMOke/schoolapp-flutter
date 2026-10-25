@@ -1,4 +1,4 @@
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_period.dart';
+import 'package:school_app_flutter/core/entities/dashboard_period.dart';
 
 /// La période du tableau de bord, retenue **par utilisateur** d'une visite à
 /// l'autre : un directeur qui suit le mois ne doit pas refaire le geste à chaque

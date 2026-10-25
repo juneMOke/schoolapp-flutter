@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les deux bornes de la période précise.
@@ -13,7 +13,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// pas avant l'ouverture de l'année, pas plus de
 /// [DashboardWindow.maxDayCount] jours. L'utilisateur n'a pas à découvrir ces
 /// règles par une erreur : le sélecteur ne le laisse pas les enfreindre.
-class BoutiqueDashboardRangeFields extends StatelessWidget {
+class DashboardRangeFields extends StatelessWidget {
   final DashboardWindow window;
 
   /// L'ouverture de l'année, si l'année la dit.
@@ -21,7 +21,7 @@ class BoutiqueDashboardRangeFields extends StatelessWidget {
 
   final ValueChanged<DashboardWindow> onChanged;
 
-  const BoutiqueDashboardRangeFields({
+  const DashboardRangeFields({
     super.key,
     required this.window,
     required this.onChanged,
@@ -43,9 +43,9 @@ class BoutiqueDashboardRangeFields extends StatelessWidget {
       runSpacing: AppDimensions.spacingS,
       children: [
         SizedBox(
-          width: AppDimensions.boutiqueDashboardDateFieldWidth,
+          width: AppDimensions.dashboardDateFieldWidth,
           child: EteeloDateInput(
-            label: l10n.boutiqueDashboardRangeFieldFrom,
+            label: l10n.dashboardRangeFieldFrom,
             value: from,
             firstDate: start != null && start.isAfter(earliest)
                 ? start
@@ -55,9 +55,9 @@ class BoutiqueDashboardRangeFields extends StatelessWidget {
           ),
         ),
         SizedBox(
-          width: AppDimensions.boutiqueDashboardDateFieldWidth,
+          width: AppDimensions.dashboardDateFieldWidth,
           child: EteeloDateInput(
-            label: l10n.boutiqueDashboardRangeFieldTo,
+            label: l10n.dashboardRangeFieldTo,
             value: to,
             firstDate: from,
             lastDate: latest.isBefore(today) ? latest : today,

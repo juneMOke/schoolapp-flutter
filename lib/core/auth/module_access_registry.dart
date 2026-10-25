@@ -174,6 +174,10 @@ const ModuleAccess kStaffAttendanceManageAccess = ModuleAccess([
   Perm.hrAttendanceManage,
 ]);
 
+/// Lire la paie : montants, taux horaires, « Voir sa paie du mois »
+/// (`hr.pay.read`) — l'économe et la direction.
+const ModuleAccess kPayrollReadAccess = ModuleAccess([Perm.hrPayRead]);
+
 /// Préparer la paie, la soumettre, verser un salaire, accorder une avance,
 /// tenir le profil de paie d'un agent (`hr.pay.write`).
 ///
@@ -362,6 +366,14 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   MenuConstants.hrPersonnelMenuId: {
     MenuConstants.hrPersonnelDashboardId: ModuleAccess([Perm.hrStaffRead]),
     MenuConstants.hrPersonnelFileId: ModuleAccess([Perm.hrStaffRead]),
+  },
+  // RH · Présences : tout se lit sous `hr.attendance.read` ; pointer, valider,
+  // clore et régler restent gardés geste par geste (write / manage).
+  MenuConstants.hrPresenceMenuId: {
+    MenuConstants.hrPresenceDashboardId: ModuleAccess([Perm.hrAttendanceRead]),
+    MenuConstants.hrPresenceFicheId: ModuleAccess([Perm.hrAttendanceRead]),
+    MenuConstants.hrPresenceRegisterId: ModuleAccess([Perm.hrAttendanceRead]),
+    MenuConstants.hrPresenceRecapId: ModuleAccess([Perm.hrAttendanceRead]),
   },
   MenuConstants.communicationMenuId: {
     // Lire suffit à ouvrir la liste et le détail ; écrire et envoyer sont

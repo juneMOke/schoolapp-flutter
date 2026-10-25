@@ -31,6 +31,7 @@ class MenuFactory {
       _createExpenseMenu(l10n),
       _createHrMenu(l10n),
       _createHrPersonnelMenu(l10n),
+      _createHrPresenceMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
@@ -313,6 +314,38 @@ class MenuFactory {
           id: MenuConstants.hrPersonnelFileId,
           title: l10n.subMenuHrPersonnelFile,
           route: AppRoutesNames.hrPersonnelFile,
+        ),
+      ],
+    );
+  }
+
+  /// RH · Présences — posé après RH · Personnel : tableau de bord, fiche
+  /// individuelle, registre du jour et récapitulatif.
+  static MenuItem _createHrPresenceMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.hrPresenceMenuId,
+      title: l10n.menuHrPresence,
+      icon: Icons.event_available_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.hrPresenceDashboardId,
+          title: l10n.subMenuDashboard,
+          route: AppRoutesNames.hrPresenceDashboard,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPresenceFicheId,
+          title: l10n.subMenuHrPresenceFiche,
+          route: AppRoutesNames.hrPresenceFiche,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPresenceRegisterId,
+          title: l10n.subMenuHrPresenceRegister,
+          route: AppRoutesNames.hrPresenceRegister,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPresenceRecapId,
+          title: l10n.subMenuHrPresenceRecap,
+          route: AppRoutesNames.hrPresenceRecap,
         ),
       ],
     );

@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/boutique/domain/dashboard/stats_buck
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/beneficiaries_query.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_beneficiaries_page.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_stats_snapshot.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_dashboard_repository.dart';
 
 /// Les chiffres du tableau de bord : le serveur d'abord, la dernière photo

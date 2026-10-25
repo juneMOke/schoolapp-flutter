@@ -524,10 +524,10 @@ class AppDimensions {
   /// Champs Du/Au de la fenêtre personnalisée.
   static const enrollmentDashboardDateFieldWidth = 150.0;
 
-  /// Champs Du/Au de la période précise du tableau de bord Boutique — la même
-  /// largeur que ceux des inscriptions, dont il reprend le filtre.
-  static const boutiqueDashboardDateFieldWidth =
-      enrollmentDashboardDateFieldWidth;
+  /// Champs Du/Au de la période précise des tableaux de bord
+  /// (`DashboardRangeFields`) — la même largeur que ceux des inscriptions,
+  /// dont ils reprennent le filtre.
+  static const dashboardDateFieldWidth = enrollmentDashboardDateFieldWidth;
 
   /// Barres. Le rayon 999 fait la pilule quelle que soit la hauteur.
   static const enrollmentDashboardSplitBarHeight = 16.0;
@@ -702,14 +702,74 @@ class AppDimensions {
   static const saisieFocusCardMaxWidth = 560.0;
   static const saisieFocusSideBySideMaxWidth = 880.0;
   static const presenceMarkAvatarSize = 44.0;
+
+  /// Largeur sous laquelle l'en-tête d'une personne du registre range son
+  /// badge (« VAC · H ») sous le nom : avatar, nom lisible et badge ne
+  /// tiennent plus sur une ligne.
+  static const presencePersonHeadingInlineBadgeMinWidth = 220.0;
   static const presenceMarkMedallionSize = 46.0;
   static const presenceMarkMedallionIconSize = 24.0;
 
   /// Bouton d'icône d'un pied de carte (effacer, réessayer).
   static const presenceMarkIconButtonSize = 36.0;
 
-  /// Cible tactile standard du module : puces, flèches, segments.
-  static const presenceMarkTapTarget = 44.0;
+  /// Cible tactile standard du module : puces, flèches, segments. La spec
+  /// disait 44 ; la règle maison est 48.
+  static const presenceMarkTapTarget = minTouchTarget;
+
+  // ── Graphique de présence bichrome (RH · Présences, spec §3) ──
+  /// Hauteur totale : taux, barre pleine hauteur, étiquette d'axe.
+  static const presenceRateBarsHeight = 210.0;
+  static const presenceRateBarValueHeight = 18.0;
+  static const presenceRateBarAxisHeight = 18.0;
+
+  /// Largeur d'une barre : les deux tiers du pas, bornée.
+  static const presenceRateBarWidthShare = 0.66;
+  static const presenceRateBarMin = 8.0;
+  static const presenceRateBarMax = 46.0;
+
+  /// Le pas minimal d'une barre : en deçà (un mois sur téléphone), le
+  /// graphique défile au lieu de serrer ses barres. Barre de 24 dp, taux
+  /// lisible avec son « % ».
+  static const presenceRateBarMinStep = 36.0;
+
+  /// Sous cette largeur, le taux s'écrit sans « % » (la légende le dit).
+  static const presenceRateBarNarrowWidth = 22.0;
+
+  /// Le taux d'absence ne s'écrit dans le rouge qu'à partir de cette hauteur.
+  static const presenceRateBarAbsentLabelMinHeight = 14.0;
+
+  /// Écart minimal entre deux étiquettes d'axe voisines.
+  static const presenceRateBarLabelSpacing = 40.0;
+  static const presenceRateBarRadius = 4.0;
+  static const presenceRateLegendSwatch = 12.0;
+
+  /// La mini-barre de taux d'une ligne d'agent.
+  static const presenceRateMeterWidth = 40.0;
+  static const presenceRateMeterHeight = 6.0;
+
+  // ── Fiche individuelle : profils (spec §10–12) ──
+  static const presenceShareBarHeight = 6.0;
+  static const presenceShareBarWidth = 120.0;
+  static const presenceProfileBadgeIcon = 14.0;
+  static const presenceProfileBadgeIconLarge = 18.0;
+
+  /// Le liseré d'une ligne ou d'une carte de profil, et l'anneau d'avatar.
+  static const presenceProfileAccentWidth = 4.0;
+  static const presenceProfileHeaderAccentWidth = 5.0;
+  static const presenceProfileRingWidth = 2.0;
+  static const presenceProfileHeaderRingWidth = 3.0;
+
+  /// Sous cette largeur, une ligne de profil range sa barre et ses taux sous
+  /// le nom.
+  static const presenceProfileRowInlineMinWidth = 640.0;
+
+  /// La règle du profil, à droite de l'en-tête de fiche : lisible sans
+  /// s'étirer.
+  static const hrPresenceProfileRuleMaxWidth = 360.0;
+
+  /// La colonne du nom de mois dans la vue annuelle.
+  static const hrPresenceYearMonthWidth = 132.0;
 
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
@@ -728,7 +788,10 @@ class AppDimensions {
   /// autour de « 10 h 30 ». À 96, le « + » débordait sur la colonne retard,
   /// et la part débordée ne recevait plus les appuis.
   static const presenceMarkColHours = 160.0;
-  static const presenceMarkColAction = 40.0;
+
+  /// La colonne du bouton de ligne : la cible de 48 dp du bouton y tient
+  /// entière (à 40, ses bords ne recevaient plus les appuis).
+  static const presenceMarkColAction = minTouchTarget;
 
   /// Les modales du pointage.
   static const formDialogMaxWidth = 480.0;
@@ -754,6 +817,13 @@ class AppDimensions {
   static const staffAttendanceRecapColCount = 96.0;
   static const staffAttendanceRecapColSync = 104.0;
   static const staffAttendanceRecapMinWidth = 820.0;
+
+  /// RH · Présences ▸ Récapitulatif : les heures et leur montant.
+  static const hrPresenceRecapColHours = 136.0;
+
+  /// « Assiduité par agent » : sous cette largeur, la table défile plutôt
+  /// que d'écraser ses six colonnes (7″ et 10″ en portrait).
+  static const hrPresenceStaffTableMinWidth = 760.0;
 
   /// Opacité de la grille d'un jour validé : lisible, visiblement figée.
   static const presenceMarkFrozenOpacity = 0.78;
@@ -1055,4 +1125,8 @@ class AppDimensions {
   /// de place — le palier où un tableau se lit déjà en téléphone.
   static const hrCategoryRowStackedMaxWidth = AppBreakpoints.dataTablePhoneMax;
   static const hrInsightIconSize = 20.0;
+
+  /// RH · Présences : le texte d'une alerte de tableau de bord ne s'étire pas
+  /// sur tout un poste — l'action se range à sa droite.
+  static const hrPresenceInsightTextMaxWidth = 560.0;
 }

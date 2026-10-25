@@ -15,7 +15,7 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/attendanc
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le bandeau commun du registre, branché sur le Pointage : navigation de
-/// jour, réglages, restants présents, valider le rapport.
+/// jour, réglages (direction seule), restants présents, valider le rapport.
 class StaffDayBanner extends StatelessWidget {
   final StaffAttendanceState state;
 
@@ -49,7 +49,12 @@ class StaffDayBanner extends StatelessWidget {
       onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
       onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
       onToday: () => unawaited(cubit.goToday()),
-      onSettings: () => unawaited(actions.openSettings()),
+      // Les réglages sont à la direction seule (hr.attendance.manage, E2) :
+      // les autres lisent l'horaire sans pouvoir l'ouvrir.
+      onSettings:
+          PermissionGate.allowsAccess(context, kStaffAttendanceManageAccess)
+          ? () => unawaited(actions.openSettings())
+          : null,
       onMarkRemaining: register.unmarked.isEmpty ? null : actions.markRemaining,
       onValidate: register.isEmpty
           ? null

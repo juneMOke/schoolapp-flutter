@@ -1,9 +1,9 @@
 import 'package:school_app_flutter/core/helpers/school_time.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/dashboard_window.dart';
+import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 
-/// Les cinq fenêtres du tableau de bord de la boutique — **les mêmes que celles
-/// du tableau de bord des inscriptions** : Aujourd'hui, Cette semaine, Ce mois,
-/// Année, Période précise.
+/// Les cinq fenêtres des tableaux de bord servis (Boutique, RH · Présences) —
+/// **les mêmes que celles du tableau de bord des inscriptions** : Aujourd'hui,
+/// Cette semaine, Ce mois, Année, Période précise.
 ///
 /// **Calendaires, et qui finissent aujourd'hui** : « Cette semaine » part du
 /// lundi, « Ce mois » du 1er, « Année » de l'ouverture de l'année scolaire. Un
