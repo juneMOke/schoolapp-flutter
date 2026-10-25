@@ -13820,23 +13820,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollTabPayslipsSubtitle => 'PDF · WhatsApp';
 
   @override
-  String get payrollTabAdvances => 'Advances';
-
-  @override
-  String payrollTabAdvancesOngoing(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count ongoing',
-      one: '1 ongoing',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get payrollTabAdvancesNone => 'None ongoing';
-
-  @override
   String get payrollTabHistory => 'History';
 
   @override
@@ -13932,9 +13915,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollActionDiffuse => 'Send the payslips';
-
-  @override
-  String get payrollActionSettings => 'Payroll settings';
 
   @override
   String payrollReturnedBanner(String reason) {
@@ -14739,9 +14719,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollProfilePhone => 'Payout number';
 
   @override
-  String get payrollSettingsTitle => 'Payroll settings';
-
-  @override
   String get payrollSettingsDivisor => 'Hours in a full month';
 
   @override
@@ -15095,7 +15072,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollToastProfile => 'Pay profile saved';
 
   @override
-  String get payrollToastSettings => 'Payroll settings saved';
+  String get payrollToastSettings => 'Pay scale saved';
 
   @override
   String get payrollToastWriteFailed => 'Saving failed on the tablet.';
@@ -19507,4 +19484,97 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get hrPresenceChartScrollHint =>
       'Swipe the chart to see the start of the period';
+
+  @override
+  String get menuHrPayroll => 'HR · Payroll';
+
+  @override
+  String get accueilModuleHrPayrollDescription =>
+      'The month\'s ledger, advances and loans, arrears and the pay scale.';
+
+  @override
+  String get subMenuPayrollAdvances => 'Advances & loans';
+
+  @override
+  String get subMenuPayrollSettings => 'Settings';
+
+  @override
+  String payrollSettingsErrorRange(int min, int max) {
+    return 'Between $min and $max';
+  }
+
+  @override
+  String get payrollSettingsErrorAmount => 'Invalid amount';
+
+  @override
+  String get payrollSettingsErrorStep => 'At least one cent';
+
+  @override
+  String payrollSettingsInCurrency(String label, String currency) {
+    return '$label · $currency';
+  }
+
+  @override
+  String get payrollSettingsMonthTitle => 'Pay month';
+
+  @override
+  String get payrollSettingsMonthSubtitle =>
+      'Hours and days in a full month; a day not worked = gross ÷ days.';
+
+  @override
+  String get payrollSettingsLegalTitle => 'Statutory deductions';
+
+  @override
+  String get payrollSettingsLegalSubtitle =>
+      'Flat IPR per paid employee, CNSS in ‰ of base pay.';
+
+  @override
+  String get payrollSettingsOvertimeTitle => 'Overtime';
+
+  @override
+  String get payrollSettingsOvertimeSubtitle =>
+      'Premium, default rate and rate rounding step.';
+
+  @override
+  String get payrollSettingsAllowanceTitle => 'Family allowances';
+
+  @override
+  String get payrollSettingsAllowanceSubtitle =>
+      'Amount per child and the statuses entitled to it.';
+
+  @override
+  String get payrollSettingsStateErrors =>
+      'Fix the fields in red before saving.';
+
+  @override
+  String payrollSettingsStateDirty(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Unsaved changes · will apply to $count open payrolls',
+      one: 'Unsaved changes · will apply to 1 open payroll',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollSettingsStateClean => 'Pay scale up to date';
+
+  @override
+  String get payrollSettingsReset => 'Restore default values';
+
+  @override
+  String get payrollSettingsSave => 'Save the pay scale';
+
+  @override
+  String get payrollSettingsDiscardMessage =>
+      'Unsaved changes to the pay scale will be lost.';
+
+  @override
+  String get payrollSettingsNotYetSynced =>
+      'The pay scale has not been downloaded to this tablet yet: default values are shown.';
+
+  @override
+  String get payrollSettingsReadOnly =>
+      'Read only — only the management can change the pay scale.';
 }

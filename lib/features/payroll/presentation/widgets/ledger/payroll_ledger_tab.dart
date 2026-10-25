@@ -18,7 +18,6 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_table.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_payout_bar.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_regularizations.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_settings_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre de paie du mois : bandeau et circuit, barre d'action, bandeaux,
@@ -40,13 +39,7 @@ class PayrollLedgerTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: PayrollLedgerHeader(state: state)),
-            const PayrollSettingsButton(),
-          ],
-        ),
+        PayrollLedgerHeader(state: state),
         const SizedBox(height: AppSpacing.md),
         PayrollArrearsBanner(snapshot: state.snapshot, view: view),
         PayrollActionBar(view: view),

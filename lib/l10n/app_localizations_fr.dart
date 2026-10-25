@@ -13918,23 +13918,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollTabPayslipsSubtitle => 'PDF · WhatsApp';
 
   @override
-  String get payrollTabAdvances => 'Avances';
-
-  @override
-  String payrollTabAdvancesOngoing(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count en cours',
-      one: '1 en cours',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get payrollTabAdvancesNone => 'Aucune en cours';
-
-  @override
   String get payrollTabHistory => 'Historique';
 
   @override
@@ -14031,9 +14014,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollActionDiffuse => 'Diffuser les bulletins';
-
-  @override
-  String get payrollActionSettings => 'Réglages de paie';
 
   @override
   String payrollReturnedBanner(String reason) {
@@ -14842,9 +14822,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollProfilePhone => 'Numéro de versement';
 
   @override
-  String get payrollSettingsTitle => 'Réglages de paie';
-
-  @override
   String get payrollSettingsDivisor => 'Heures d\'un mois plein';
 
   @override
@@ -15200,7 +15177,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollToastProfile => 'Profil de paie enregistré';
 
   @override
-  String get payrollToastSettings => 'Réglages de paie enregistrés';
+  String get payrollToastSettings => 'Barème de paie enregistré';
 
   @override
   String get payrollToastWriteFailed => 'L\'écriture a échoué sur la tablette.';
@@ -19642,4 +19619,98 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get hrPresenceChartScrollHint =>
       'Faites glisser le graphique pour voir le début de la période';
+
+  @override
+  String get menuHrPayroll => 'RH · Paie';
+
+  @override
+  String get accueilModuleHrPayrollDescription =>
+      'Le livre du mois, les avances et prêts, les arriérés et le barème.';
+
+  @override
+  String get subMenuPayrollAdvances => 'Avances & prêts';
+
+  @override
+  String get subMenuPayrollSettings => 'Configuration';
+
+  @override
+  String payrollSettingsErrorRange(int min, int max) {
+    return 'Entre $min et $max';
+  }
+
+  @override
+  String get payrollSettingsErrorAmount => 'Montant invalide';
+
+  @override
+  String get payrollSettingsErrorStep => 'Au moins un centime';
+
+  @override
+  String payrollSettingsInCurrency(String label, String currency) {
+    return '$label · $currency';
+  }
+
+  @override
+  String get payrollSettingsMonthTitle => 'Mois de salaire';
+
+  @override
+  String get payrollSettingsMonthSubtitle =>
+      'Heures et jours d\'un mois plein ; une journée non prestée = brut ÷ jours.';
+
+  @override
+  String get payrollSettingsLegalTitle => 'Retenues légales';
+
+  @override
+  String get payrollSettingsLegalSubtitle =>
+      'IPR forfaitaire par agent payé, CNSS en ‰ de la base.';
+
+  @override
+  String get payrollSettingsOvertimeTitle => 'Heures supplémentaires';
+
+  @override
+  String get payrollSettingsOvertimeSubtitle =>
+      'Majoration, taux par défaut et pas d\'arrondi du taux.';
+
+  @override
+  String get payrollSettingsAllowanceTitle => 'Allocations familiales';
+
+  @override
+  String get payrollSettingsAllowanceSubtitle =>
+      'Montant par enfant et statuts qui y ouvrent droit.';
+
+  @override
+  String get payrollSettingsStateErrors =>
+      'Corrigez les champs en rouge avant d\'enregistrer.';
+
+  @override
+  String payrollSettingsStateDirty(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Modifications non enregistrées · s\'appliqueront à $count paies en cours',
+      one: 'Modifications non enregistrées · s\'appliqueront à 1 paie en cours',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollSettingsStateClean => 'Barème à jour';
+
+  @override
+  String get payrollSettingsReset => 'Rétablir les valeurs par défaut';
+
+  @override
+  String get payrollSettingsSave => 'Enregistrer le barème';
+
+  @override
+  String get payrollSettingsDiscardMessage =>
+      'Les modifications du barème non enregistrées seront perdues.';
+
+  @override
+  String get payrollSettingsNotYetSynced =>
+      'Le barème n\'a pas encore été téléchargé sur cette tablette : les valeurs affichées sont celles par défaut.';
+
+  @override
+  String get payrollSettingsReadOnly =>
+      'Lecture seule — seule la direction modifie le barème.';
 }

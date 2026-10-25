@@ -133,6 +133,21 @@ class PayrollSettings extends Equatable {
     syncState: syncState,
   );
 
+  /// Les mêmes règles de calcul, quel que soit l'état d'envoi : un barème
+  /// enregistré puis relu « en attente » n'est pas une modification.
+  bool sameRulesAs(PayrollSettings other) =>
+      copyWith() == other._withSyncState(syncState);
+
+  PayrollSettings _withSyncState(RecordSyncState state) => PayrollSettings(
+    monthlyHoursDivisor: monthlyHoursDivisor,
+    overtimeMultiplierPermille: overtimeMultiplierPermille,
+    allowanceEligibleKinds: allowanceEligibleKinds,
+    byCurrency: byCurrency,
+    workDaysDivisor: workDaysDivisor,
+    absenceDeductionEnabled: absenceDeductionEnabled,
+    syncState: state,
+  );
+
   @override
   List<Object?> get props => [
     monthlyHoursDivisor,

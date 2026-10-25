@@ -395,12 +395,10 @@ void main() {
     expect(find.text('Synchroniser puis revoir'), findsOneWidget);
   });
 
-  testWidgets('les autres onglets s ouvrent', (tester) async {
+  testWidgets('les autres onglets s ouvrent — quatre, sans les avances', (
+    tester,
+  ) async {
     await pump(tester, snapshot: snapshotOf());
-
-    await tester.tap(find.text('Avances').first);
-    await tester.pumpAndSettle();
-    expect(find.text('Aucune avance accordée'), findsOneWidget);
 
     await tester.tap(find.text('Historique').first);
     await tester.pumpAndSettle();
@@ -421,12 +419,7 @@ void main() {
         permissions: [..._write, Perm.hrPayManage],
         size: size,
       );
-      for (final tab in [
-        'Bulletins',
-        'Avances',
-        'Historique',
-        'Livre de paie',
-      ]) {
+      for (final tab in ['Bulletins', 'Historique', 'Livre de paie']) {
         await tester.tap(find.text(tab).first);
         await tester.pumpAndSettle();
       }

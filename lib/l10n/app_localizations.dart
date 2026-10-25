@@ -21746,24 +21746,6 @@ abstract class AppLocalizations {
   /// **'PDF · WhatsApp'**
   String get payrollTabPayslipsSubtitle;
 
-  /// No description provided for @payrollTabAdvances.
-  ///
-  /// In en, this message translates to:
-  /// **'Advances'**
-  String get payrollTabAdvances;
-
-  /// No description provided for @payrollTabAdvancesOngoing.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 ongoing} other{{count} ongoing}}'**
-  String payrollTabAdvancesOngoing(int count);
-
-  /// No description provided for @payrollTabAdvancesNone.
-  ///
-  /// In en, this message translates to:
-  /// **'None ongoing'**
-  String get payrollTabAdvancesNone;
-
   /// No description provided for @payrollTabHistory.
   ///
   /// In en, this message translates to:
@@ -21919,12 +21901,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send the payslips'**
   String get payrollActionDiffuse;
-
-  /// No description provided for @payrollActionSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Payroll settings'**
-  String get payrollActionSettings;
 
   /// No description provided for @payrollReturnedBanner.
   ///
@@ -23167,12 +23143,6 @@ abstract class AppLocalizations {
   /// **'Payout number'**
   String get payrollProfilePhone;
 
-  /// No description provided for @payrollSettingsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Payroll settings'**
-  String get payrollSettingsTitle;
-
   /// No description provided for @payrollSettingsDivisor.
   ///
   /// In en, this message translates to:
@@ -23757,7 +23727,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollToastSettings.
   ///
   /// In en, this message translates to:
-  /// **'Payroll settings saved'**
+  /// **'Pay scale saved'**
   String get payrollToastSettings;
 
   /// No description provided for @payrollToastWriteFailed.
@@ -30212,6 +30182,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Swipe the chart to see the start of the period'**
   String get hrPresenceChartScrollHint;
+
+  /// No description provided for @menuHrPayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'HR · Payroll'**
+  String get menuHrPayroll;
+
+  /// No description provided for @accueilModuleHrPayrollDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The month\'s ledger, advances and loans, arrears and the pay scale.'**
+  String get accueilModuleHrPayrollDescription;
+
+  /// No description provided for @subMenuPayrollAdvances.
+  ///
+  /// In en, this message translates to:
+  /// **'Advances & loans'**
+  String get subMenuPayrollAdvances;
+
+  /// No description provided for @subMenuPayrollSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get subMenuPayrollSettings;
+
+  /// No description provided for @payrollSettingsErrorRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Between {min} and {max}'**
+  String payrollSettingsErrorRange(int min, int max);
+
+  /// No description provided for @payrollSettingsErrorAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid amount'**
+  String get payrollSettingsErrorAmount;
+
+  /// No description provided for @payrollSettingsErrorStep.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one cent'**
+  String get payrollSettingsErrorStep;
+
+  /// No description provided for @payrollSettingsInCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {currency}'**
+  String payrollSettingsInCurrency(String label, String currency);
+
+  /// No description provided for @payrollSettingsMonthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay month'**
+  String get payrollSettingsMonthTitle;
+
+  /// No description provided for @payrollSettingsMonthSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours and days in a full month; a day not worked = gross ÷ days.'**
+  String get payrollSettingsMonthSubtitle;
+
+  /// No description provided for @payrollSettingsLegalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statutory deductions'**
+  String get payrollSettingsLegalTitle;
+
+  /// No description provided for @payrollSettingsLegalSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat IPR per paid employee, CNSS in ‰ of base pay.'**
+  String get payrollSettingsLegalSubtitle;
+
+  /// No description provided for @payrollSettingsOvertimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Overtime'**
+  String get payrollSettingsOvertimeTitle;
+
+  /// No description provided for @payrollSettingsOvertimeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium, default rate and rate rounding step.'**
+  String get payrollSettingsOvertimeSubtitle;
+
+  /// No description provided for @payrollSettingsAllowanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family allowances'**
+  String get payrollSettingsAllowanceTitle;
+
+  /// No description provided for @payrollSettingsAllowanceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount per child and the statuses entitled to it.'**
+  String get payrollSettingsAllowanceSubtitle;
+
+  /// No description provided for @payrollSettingsStateErrors.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the fields in red before saving.'**
+  String get payrollSettingsStateErrors;
+
+  /// No description provided for @payrollSettingsStateDirty.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Unsaved changes · will apply to 1 open payroll} other{Unsaved changes · will apply to {count} open payrolls}}'**
+  String payrollSettingsStateDirty(int count);
+
+  /// No description provided for @payrollSettingsStateClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay scale up to date'**
+  String get payrollSettingsStateClean;
+
+  /// No description provided for @payrollSettingsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default values'**
+  String get payrollSettingsReset;
+
+  /// No description provided for @payrollSettingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the pay scale'**
+  String get payrollSettingsSave;
+
+  /// No description provided for @payrollSettingsDiscardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes to the pay scale will be lost.'**
+  String get payrollSettingsDiscardMessage;
+
+  /// No description provided for @payrollSettingsNotYetSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'The pay scale has not been downloaded to this tablet yet: default values are shown.'**
+  String get payrollSettingsNotYetSynced;
+
+  /// No description provided for @payrollSettingsReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only — only the management can change the pay scale.'**
+  String get payrollSettingsReadOnly;
 }
 
 class _AppLocalizationsDelegate

@@ -10,7 +10,6 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_mont
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advances_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/history/payroll_history_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/statement/payroll_statement_tab.dart';
@@ -21,8 +20,8 @@ import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Ressources humaines ▸ Paie — le livre du mois, les bulletins, les avances
-/// et l'historique.
+/// RH · Paie ▸ Paie — le livre du mois, l'état de paie, les bulletins et
+/// l'historique. Les avances et le barème ont leur sous-module.
 ///
 /// Lecture 100 % locale, écriture 100 % file d'envoi : la tablette calcule le
 /// livre pour l'afficher, le serveur le recalcule pour le figer.
@@ -91,7 +90,6 @@ class PayrollScreen extends StatelessWidget {
           PayrollTab.ledger => PayrollLedgerTab(state: state),
           PayrollTab.statement => PayrollStatementTab(state: state),
           PayrollTab.payslips => PayrollPayslipsTab(state: state),
-          PayrollTab.advances => PayrollAdvancesTab(state: state),
           PayrollTab.history => PayrollHistoryTab(state: state),
         },
       ],

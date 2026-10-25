@@ -6,7 +6,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/core/components/controls/eteelo_card_tabs.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les cinq onglets de la paie, en cartes comme ceux du Pointage.
+/// Les quatre onglets de la paie, en cartes comme ceux du Pointage.
 class PayrollTabs extends StatelessWidget {
   final PayrollState state;
   final ValueChanged<PayrollTab> onSelect;
@@ -21,9 +21,6 @@ class PayrollTabs extends StatelessWidget {
       for (final total in view?.totals ?? const <PayrollTotal>[])
         (total.netInCents, total.currency),
     ]).join(' · ');
-    final ongoing = state.snapshot.advances
-        .where((advance) => advance.isOngoing)
-        .length;
     final months = state.snapshot.headers.length;
     return EteeloCardTabs<PayrollTab>(
       active: state.tab,
@@ -51,14 +48,6 @@ class PayrollTabs extends StatelessWidget {
           icon: Icons.description_outlined,
           title: l10n.payrollTabPayslips,
           subtitle: l10n.payrollTabPayslipsSubtitle,
-        ),
-        EteeloCardTab(
-          id: PayrollTab.advances,
-          icon: Icons.volunteer_activism_outlined,
-          title: l10n.payrollTabAdvances,
-          subtitle: ongoing == 0
-              ? l10n.payrollTabAdvancesNone
-              : l10n.payrollTabAdvancesOngoing(ongoing),
         ),
         EteeloCardTab(
           id: PayrollTab.history,

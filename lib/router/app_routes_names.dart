@@ -119,9 +119,13 @@ class AppRoutesNames {
   static const String hrStaffAttendance =
       '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffAttendanceId}';
   static const String hrPayroll =
-      '/${MenuConstants.hrMenuId}/${MenuConstants.hrPayrollId}';
+      '/${MenuConstants.hrPayrollMenuId}/${MenuConstants.hrPayrollId}';
+  static const String hrPayrollAdvances =
+      '/${MenuConstants.hrPayrollMenuId}/${MenuConstants.hrPayrollAdvancesId}';
   static const String hrPayrollArrears =
-      '/${MenuConstants.hrMenuId}/${MenuConstants.hrPayrollArrearsId}';
+      '/${MenuConstants.hrPayrollMenuId}/${MenuConstants.hrPayrollArrearsId}';
+  static const String hrPayrollSettings =
+      '/${MenuConstants.hrPayrollMenuId}/${MenuConstants.hrPayrollSettingsId}';
 
   static const String classesDashboard =
       '/classes/${MenuConstants.classesDashboardId}';

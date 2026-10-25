@@ -80,6 +80,9 @@ class AccueilModuleTones {
     // Troisième carte RH : retour au bleu profond, que l'ardoise de RH ·
     // Personnel sépare des Ressources humaines.
     MenuConstants.hrPresenceMenuId: _bleuProfond,
+    // Quatrième carte RH, entre RH · Présences (bleu profond) et les Classes
+    // (terre) : l'ardoise, distincte de ses deux voisines.
+    MenuConstants.hrPayrollMenuId: _bleuArdoise,
     MenuConstants.classesMenuId: _terreFoncee,
     MenuConstants.coursesMenuId: _bleuArdoise,
     MenuConstants.resultatsMenuId: _terreFoncee,

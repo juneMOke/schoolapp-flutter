@@ -39,6 +39,7 @@ class AccueilModulesFactory {
       _humanResources(l10n),
       _hrPersonnel(l10n),
       _hrPresence(l10n),
+      _hrPayroll(l10n),
       _classes(l10n),
       _cours(l10n),
       _resultats(l10n),
@@ -254,16 +255,6 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.hrStaffAttendanceId,
           title: l10n.subMenuStaffAttendance,
         ),
-        _page(
-          menuId: menuId,
-          subMenuId: MenuConstants.hrPayrollId,
-          title: l10n.subMenuPayroll,
-        ),
-        _page(
-          menuId: menuId,
-          subMenuId: MenuConstants.hrPayrollArrearsId,
-          title: l10n.subMenuPayrollArrears,
-        ),
       ],
     );
   }
@@ -287,6 +278,40 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.hrPersonnelFileId,
           title: l10n.subMenuHrPersonnelFile,
+        ),
+      ],
+    );
+  }
+
+  /// RH · Paie — une carte propre, comme le menu.
+  static AccueilModule _hrPayroll(AppLocalizations l10n) {
+    const menuId = MenuConstants.hrPayrollMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuHrPayroll,
+      description: l10n.accueilModuleHrPayrollDescription,
+      icon: Icons.payments_outlined,
+      tone: AccueilModuleTones.of(menuId),
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPayrollId,
+          title: l10n.subMenuPayroll,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPayrollAdvancesId,
+          title: l10n.subMenuPayrollAdvances,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPayrollArrearsId,
+          title: l10n.subMenuPayrollArrears,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.hrPayrollSettingsId,
+          title: l10n.subMenuPayrollSettings,
         ),
       ],
     );

@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_settings_bounds.dart';
 
 /// Enregistre le profil de paie d'un agent.
 class SaveStaffPayProfileUseCase {
@@ -33,16 +34,9 @@ class SavePayrollSettingsUseCase {
   const SavePayrollSettingsUseCase(this._repository);
 
   Future<Either<Failure, Unit>> call(PayrollSettings settings) async {
-    final invalid =
-        settings.monthlyHoursDivisor <= 0 ||
-        settings.overtimeMultiplierPermille < 1000 ||
-        settings.byCurrency.values.any(
-          (currency) =>
-              currency.childAllowanceInCents < 0 ||
-              currency.defaultOvertimeRateInCents < 0 ||
-              currency.overtimeRateStepInCents < 0,
-        );
-    if (invalid) return Left(PayrollRuleFailure(PayrollRule.invalidAmount));
+    if (!PayrollSettingsBounds.isValid(settings)) {
+      return Left(PayrollRuleFailure(PayrollRule.invalidAmount));
+    }
     return _repository.saveSettings(settings);
   }
 }

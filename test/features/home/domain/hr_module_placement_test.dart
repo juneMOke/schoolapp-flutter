@@ -8,14 +8,15 @@ import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Les ressources humaines ont leur PROPRE menu : le fichier du personnel,
-/// gardé par `hr.staff.read`, le Pointage, gardé par `hr.attendance.read`,
-/// puis la Paie, gardée par `hr.pay.read`. Chaque sous-menu disparaît sans son
-/// droit ; le menu entier, sans aucun des trois. Ces tests tiennent la place et les gardes.
+/// gardé par `hr.staff.read`, puis le Pointage, gardé par `hr.attendance.read`.
+/// La Paie a quitté ce menu pour RH · Paie. Chaque sous-menu disparaît sans son
+/// droit ; le menu entier, sans aucun des deux. Ces tests tiennent la place et
+/// les gardes.
 void main() {
   final l10n = AppLocalizationsFr();
   final tousDroits = Perm.values.map((p) => p.wire).toList();
 
-  test('un menu propre : le fichier du personnel, le Pointage, la Paie', () {
+  test('un menu propre : le fichier du personnel, puis le Pointage', () {
     final menus = MenuFactory.createMenuItems(l10n, permissions: tousDroits);
     final rh = menus.firstWhere((menu) => menu.id == MenuConstants.hrMenuId);
 
@@ -23,22 +24,11 @@ void main() {
     expect(rh.subMenus.map((sub) => sub.id), [
       MenuConstants.hrStaffFileId,
       MenuConstants.hrStaffAttendanceId,
-      MenuConstants.hrPayrollId,
-      MenuConstants.hrPayrollArrearsId,
     ]);
     expect(rh.subMenus.first.title, 'Fichier du personnel');
     expect(rh.subMenus.first.route, AppRoutesNames.hrStaffFile);
     expect(rh.subMenus[1].title, 'Pointage & présences');
     expect(rh.subMenus[1].route, AppRoutesNames.hrStaffAttendance);
-    expect(rh.subMenus[2].title, 'Paie');
-    expect(rh.subMenus[2].route, AppRoutesNames.hrPayroll);
-    expect(rh.subMenus.last.title, 'Arriérés de salaire');
-    expect(rh.subMenus.last.route, AppRoutesNames.hrPayrollArrears);
-    expect(
-      AppRoutesNames.hrPayrollArrears,
-      '/ressources-humaines/paie-arrieres',
-    );
-    expect(AppRoutesNames.hrPayroll, '/ressources-humaines/paie');
     expect(
       AppRoutesNames.hrStaffFile,
       '/ressources-humaines/fichier-du-personnel',
@@ -58,14 +48,13 @@ void main() {
     );
   });
 
-  test('sans `hr.staff.read`, `hr.attendance.read` ni `hr.pay.read`, le menu '
-      'ENTIER disparaît', () {
+  test('sans `hr.staff.read` ni `hr.attendance.read`, le menu ENTIER '
+      'disparaît', () {
     final sansLecture = tousDroits
         .where(
           (wire) =>
               wire != Perm.hrStaffRead.wire &&
-              wire != Perm.hrAttendanceRead.wire &&
-              wire != Perm.hrPayRead.wire,
+              wire != Perm.hrAttendanceRead.wire,
         )
         .toList();
 
@@ -108,24 +97,14 @@ void main() {
     expect(canAccessLocation(route, [Perm.hrAttendanceRead.wire]), isTrue);
   });
 
-  test('`hr.pay.read` seul ouvre la Paie, et sa route', () {
-    final rh = MenuFactory.createMenuItems(
+  test('`hr.pay.read` seul ne l ouvre plus : la Paie est ailleurs', () {
+    final ids = MenuFactory.createMenuItems(
       l10n,
       permissions: [Perm.hrPayRead.wire],
-    ).firstWhere((menu) => menu.id == MenuConstants.hrMenuId);
+    ).map((menu) => menu.id);
 
-    expect(rh.subMenus.map((sub) => sub.id), [
-      MenuConstants.hrPayrollId,
-      MenuConstants.hrPayrollArrearsId,
-    ]);
-    for (final path in [
-      AppRoutesNames.hrPayroll,
-      AppRoutesNames.hrPayrollArrears,
-    ]) {
-      final route = Uri.parse(path);
-      expect(canAccessLocation(route, [Perm.hrStaffRead.wire]), isFalse);
-      expect(canAccessLocation(route, [Perm.hrPayRead.wire]), isTrue);
-    }
+    expect(ids, isNot(contains(MenuConstants.hrMenuId)));
+    expect(ids, contains(MenuConstants.hrPayrollMenuId));
   });
 
   test('la route refuse qui ne lit pas le fichier', () {
@@ -145,8 +124,6 @@ void main() {
     expect(rh.subModules.map((sub) => sub.target.subMenuId), [
       MenuConstants.hrStaffFileId,
       MenuConstants.hrStaffAttendanceId,
-      MenuConstants.hrPayrollId,
-      MenuConstants.hrPayrollArrearsId,
     ]);
   });
 }

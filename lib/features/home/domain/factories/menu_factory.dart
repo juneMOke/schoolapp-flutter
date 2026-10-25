@@ -32,6 +32,7 @@ class MenuFactory {
       _createHrMenu(l10n),
       _createHrPersonnelMenu(l10n),
       _createHrPresenceMenu(l10n),
+      _createHrPayrollMenu(l10n),
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
@@ -288,16 +289,6 @@ class MenuFactory {
           title: l10n.subMenuStaffAttendance,
           route: AppRoutesNames.hrStaffAttendance,
         ),
-        SubMenuItem(
-          id: MenuConstants.hrPayrollId,
-          title: l10n.subMenuPayroll,
-          route: AppRoutesNames.hrPayroll,
-        ),
-        SubMenuItem(
-          id: MenuConstants.hrPayrollArrearsId,
-          title: l10n.subMenuPayrollArrears,
-          route: AppRoutesNames.hrPayrollArrears,
-        ),
       ],
     );
   }
@@ -351,6 +342,38 @@ class MenuFactory {
           id: MenuConstants.hrPresenceRecapId,
           title: l10n.subMenuHrPresenceRecap,
           route: AppRoutesNames.hrPresenceRecap,
+        ),
+      ],
+    );
+  }
+
+  /// RH · Paie — posé après RH · Présences, dont il lit le Pointage clos :
+  /// la paie, les avances et prêts, les arriérés, puis le barème.
+  static MenuItem _createHrPayrollMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.hrPayrollMenuId,
+      title: l10n.menuHrPayroll,
+      icon: Icons.payments_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.hrPayrollId,
+          title: l10n.subMenuPayroll,
+          route: AppRoutesNames.hrPayroll,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPayrollAdvancesId,
+          title: l10n.subMenuPayrollAdvances,
+          route: AppRoutesNames.hrPayrollAdvances,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPayrollArrearsId,
+          title: l10n.subMenuPayrollArrears,
+          route: AppRoutesNames.hrPayrollArrears,
+        ),
+        SubMenuItem(
+          id: MenuConstants.hrPayrollSettingsId,
+          title: l10n.subMenuPayrollSettings,
+          route: AppRoutesNames.hrPayrollSettings,
         ),
       ],
     );
