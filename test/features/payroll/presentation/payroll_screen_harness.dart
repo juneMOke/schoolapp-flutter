@@ -47,6 +47,9 @@ pumpPayrollScreen(
 
   /// Les dépenses, pour trancher une demande d'avance depuis la Paie.
   ExpenseRepository? expenses,
+
+  /// Les PDF du serveur (bulletins, état de paie, tableau de bord).
+  PayslipRepository? payslips,
 }) async {
   final repository = MockPayrollRepository();
   when(() => repository.load()).thenAnswer((_) async => Right(snapshot));
@@ -78,7 +81,7 @@ pumpPayrollScreen(
       profile: SaveStaffPayProfileUseCase(repository),
       settings: SavePayrollSettingsUseCase(repository),
       share: RecordPayslipShareUseCase(repository),
-      payslip: FetchPayslipUseCase(_MockPayslips()),
+      payslip: FetchPayslipUseCase(payslips ?? _MockPayslips()),
     ),
     now: () => DateTime(2026, 10, 26, 10),
   );

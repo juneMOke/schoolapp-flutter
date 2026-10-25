@@ -30428,6 +30428,366 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reason'**
   String get payrollAdvanceColReason;
+
+  /// No description provided for @payrollDashNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net to pay'**
+  String get payrollDashNet;
+
+  /// No description provided for @payrollDashAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused absences'**
+  String get payrollDashAbsence;
+
+  /// No description provided for @payrollDashAdvances.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans & advances'**
+  String get payrollDashAdvances;
+
+  /// No description provided for @payrollDashLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'IPR & CNSS'**
+  String get payrollDashLegal;
+
+  /// No description provided for @payrollDashChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Children\'s fees'**
+  String get payrollDashChildcare;
+
+  /// No description provided for @payrollDashOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get payrollDashOther;
+
+  /// No description provided for @payrollDashForecastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned and actual this month'**
+  String get payrollDashForecastTitle;
+
+  /// No description provided for @payrollDashValidatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll validated on {date}'**
+  String payrollDashValidatedOn(String date);
+
+  /// No description provided for @payrollDashDraftSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The actual still moves with attendance and the variables'**
+  String get payrollDashDraftSubtitle;
+
+  /// No description provided for @payrollDashPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned cost'**
+  String get payrollDashPlanned;
+
+  /// No description provided for @payrollDashActual.
+  ///
+  /// In en, this message translates to:
+  /// **'Actually to pay'**
+  String get payrollDashActual;
+
+  /// No description provided for @payrollDashLessThanPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} less than planned (− {percent} %)'**
+  String payrollDashLessThanPlanned(String amount, int percent);
+
+  /// No description provided for @payrollDashArrearsCarried.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {arrears} of prioritised arrears this month: {total} to pay in total'**
+  String payrollDashArrearsCarried(String arrears, String total);
+
+  /// No description provided for @payrollDashPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get payrollDashPaid;
+
+  /// No description provided for @payrollDashDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Deferred'**
+  String get payrollDashDeferred;
+
+  /// No description provided for @payrollDashUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get payrollDashUnpaid;
+
+  /// No description provided for @payrollDashNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet paid'**
+  String get payrollDashNotYet;
+
+  /// No description provided for @payrollDashPaidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Net to pay: paid and unpaid'**
+  String get payrollDashPaidTitle;
+
+  /// No description provided for @payrollDashPaidSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} % paid · {count, plural, =0{no employee settled} =1{1 employee settled} other{{count} employees settled}}'**
+  String payrollDashPaidSummary(int percent, int count);
+
+  /// No description provided for @payrollDashUnpaidSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial: {partial} · Nothing paid: {unpaid}'**
+  String payrollDashUnpaidSummary(int partial, int unpaid);
+
+  /// No description provided for @payrollDashNothingBeforeValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is paid before validation.'**
+  String get payrollDashNothingBeforeValidation;
+
+  /// No description provided for @payrollDashPrepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare the payroll'**
+  String get payrollDashPrepare;
+
+  /// No description provided for @payrollDashByMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month by month'**
+  String get payrollDashByMonth;
+
+  /// No description provided for @payrollDashColumnA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}: paid {paid}, remaining {rest}'**
+  String payrollDashColumnA11y(String month, String paid, String rest);
+
+  /// No description provided for @payrollDashAdvancesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans & advances'**
+  String get payrollDashAdvancesTitle;
+
+  /// No description provided for @payrollDashAdvancesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 employee repaying} other{{count} employees repaying}} · {due} still due'**
+  String payrollDashAdvancesSubtitle(int count, String due);
+
+  /// No description provided for @payrollDashManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get payrollDashManage;
+
+  /// No description provided for @payrollDashFilterOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get payrollDashFilterOngoing;
+
+  /// No description provided for @payrollDashFilterSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get payrollDashFilterSettled;
+
+  /// No description provided for @payrollDashAdvancesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No loan or advance ongoing'**
+  String get payrollDashAdvancesEmpty;
+
+  /// No description provided for @payrollDashRemainingOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} left of {amount}'**
+  String payrollDashRemainingOf(String remaining, String amount);
+
+  /// No description provided for @payrollDashTakenThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'− {amount} this month'**
+  String payrollDashTakenThisMonth(String amount);
+
+  /// No description provided for @payrollDashRepaidA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} % repaid'**
+  String payrollDashRepaidA11y(int percent);
+
+  /// No description provided for @payrollDashArrearsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrears by employee'**
+  String get payrollDashArrearsTitle;
+
+  /// No description provided for @payrollDashSettle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle in the payroll'**
+  String get payrollDashSettle;
+
+  /// No description provided for @payrollDashArrearsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'All salaries of validated payrolls are paid'**
+  String get payrollDashArrearsEmpty;
+
+  /// No description provided for @payrollDashPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'priority'**
+  String get payrollDashPriority;
+
+  /// No description provided for @payrollDashColPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get payrollDashColPlanned;
+
+  /// No description provided for @payrollDashColDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions'**
+  String get payrollDashColDeductions;
+
+  /// No description provided for @payrollDashColNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Month\'s net'**
+  String get payrollDashColNet;
+
+  /// No description provided for @payrollDashColArrears.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Arrears'**
+  String get payrollDashColArrears;
+
+  /// No description provided for @payrollDashColReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get payrollDashColReceived;
+
+  /// No description provided for @payrollDashColRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get payrollDashColRemaining;
+
+  /// No description provided for @payrollDashTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {currency}'**
+  String payrollDashTotal(String currency);
+
+  /// No description provided for @payrollDashStatusToDisburse.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay out'**
+  String get payrollDashStatusToDisburse;
+
+  /// No description provided for @payrollDashStatusSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get payrollDashStatusSettled;
+
+  /// No description provided for @payrollDashStatusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get payrollDashStatusPartial;
+
+  /// No description provided for @payrollDashStatusDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get payrollDashStatusDue;
+
+  /// No description provided for @payrollDashStaffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What each employee receives'**
+  String get payrollDashStaffTitle;
+
+  /// No description provided for @payrollDashPdfFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'payroll-situation-{month}'**
+  String payrollDashPdfFileName(String month);
+
+  /// No description provided for @payrollDashProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional amounts: the payroll is not validated yet'**
+  String get payrollDashProvisional;
+
+  /// No description provided for @payrollDashPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get payrollDashPdf;
+
+  /// No description provided for @payrollDashSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search an employee or a job'**
+  String get payrollDashSearchHint;
+
+  /// No description provided for @payrollDashFilterOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining to pay'**
+  String get payrollDashFilterOutstanding;
+
+  /// No description provided for @payrollDashStaffEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No employee matches'**
+  String get payrollDashStaffEmpty;
+
+  /// No description provided for @payrollDashShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get payrollDashShowAll;
+
+  /// No description provided for @payrollDashOpenPayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the payroll'**
+  String get payrollDashOpenPayroll;
+
+  /// No description provided for @payrollDashNoPayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'No payroll for this month'**
+  String get payrollDashNoPayroll;
+
+  /// No description provided for @payrollDashCurrentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Current month'**
+  String get payrollDashCurrentMonth;
+
+  /// No description provided for @payrollDashNoStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'No employee to pay'**
+  String get payrollDashNoStaff;
 }
 
 class _AppLocalizationsDelegate

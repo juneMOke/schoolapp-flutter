@@ -28,6 +28,7 @@ import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_pr
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_register_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_advances_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_arrears_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_dashboard_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_settings_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_attendance_page.dart';
@@ -526,6 +527,10 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.hrStaffAttendance,
       builder: (context, state) => const StaffAttendancePage(),
+    ),
+    GoRoute(
+      path: AppRoutesNames.hrPayrollDashboard,
+      builder: (context, state) => const PayrollDashboardPage(),
     ),
     GoRoute(
       path: AppRoutesNames.hrPayroll,

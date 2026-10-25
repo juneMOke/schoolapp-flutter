@@ -16,4 +16,11 @@ abstract class PayslipRepository {
 
   /// L'état de paie de [month], A4 paysage (T16).
   Future<Either<Failure, Uint8List>> statement(String month);
+
+  /// « Ce que chaque salarié perçoit » de [month] (Q7), filtré comme l'écran.
+  Future<Either<Failure, Uint8List>> dashboard(
+    String month, {
+    required String filter,
+    String? query,
+  });
 }

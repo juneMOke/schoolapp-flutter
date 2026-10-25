@@ -13,12 +13,14 @@ void main() {
   final l10n = AppLocalizationsFr();
   final tousDroits = Perm.values.map((p) => p.wire).toList();
   const sousModules = [
+    MenuConstants.hrPayrollDashboardId,
     MenuConstants.hrPayrollId,
     MenuConstants.hrPayrollAdvancesId,
     MenuConstants.hrPayrollArrearsId,
     MenuConstants.hrPayrollSettingsId,
   ];
   const routes = [
+    AppRoutesNames.hrPayrollDashboard,
     AppRoutesNames.hrPayroll,
     AppRoutesNames.hrPayrollAdvances,
     AppRoutesNames.hrPayrollArrears,
@@ -30,7 +32,8 @@ void main() {
     permissions: permissions,
   ).map((menu) => menu.id).toList();
 
-  test('un menu propre : paie, avances et prêts, arriérés, configuration', () {
+  test('un menu propre : tableau de bord, paie, avances et prêts, arriérés, '
+      'configuration', () {
     final module = MenuFactory.createMenuItems(
       l10n,
       permissions: tousDroits,
@@ -39,6 +42,7 @@ void main() {
     expect(module.title, 'RH · Paie');
     expect(module.subMenus.map((sub) => sub.id), sousModules);
     expect(module.subMenus.map((sub) => sub.title), [
+      'Tableau de bord',
       'Paie',
       'Avances & prêts',
       'Arriérés de salaire',

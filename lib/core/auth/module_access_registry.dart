@@ -376,6 +376,9 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // l'économe consulte ; préparer et verser, valider et régler, modifier le
   // barème sont gardés geste par geste (write / manage).
   MenuConstants.hrPayrollMenuId: {
+    // Le tableau de bord lit les mêmes lignes que le livre : même droit. Son
+    // PDF nominatif (Q7) est servi sous `hr.pay.read` seul.
+    MenuConstants.hrPayrollDashboardId: ModuleAccess([Perm.hrPayRead]),
     MenuConstants.hrPayrollId: ModuleAccess([Perm.hrPayRead]),
     MenuConstants.hrPayrollAdvancesId: ModuleAccess([Perm.hrPayRead]),
     MenuConstants.hrPayrollArrearsId: ModuleAccess([Perm.hrPayRead]),

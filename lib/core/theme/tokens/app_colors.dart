@@ -580,6 +580,26 @@ class AppColors {
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
   static const payrollWhatsapp = Color(0xFF1B7A4A);
 
+  // Tableau de bord de la paie (spec TB 1) : ce qui sépare le brut du net, et
+  // où en est le net. Chaque segment est aussi écrit dans la légende : la
+  // couleur ne porte jamais seule l'information.
+  static const payrollChartNet = vertSavane;
+  static const payrollChartAbsence = error;
+  static const payrollChartAdvances = Color(0xFFA66A00);
+  static const payrollChartLegal = Color(0xFF7A4E68);
+  static const payrollChartChildcare = info;
+  static const payrollChartPaid = vertSavane;
+  static const payrollChartDeferred = Color(0xFF5E8FB0);
+  static const payrollChartUnpaid = error;
+  static const payrollChartNotYet = Color(0xFFC9C3B6);
+
+  /// Le mois affiché, cerné dans la série « mois par mois ».
+  static const payrollChartFocus = terreCuite;
+
+  /// Les autres mois : le liseré existe (la colonne ne bouge pas au focus),
+  /// sans se voir.
+  static const payrollChartNoFocus = Color(0x00000000);
+
   // ── Photo de l'élève ──────────────────────────────────────────────────────
   /// Liseré intérieur d'une photo d'avatar : il détache un visage clair d'un
   /// fond clair sans dessiner de bordure visible.

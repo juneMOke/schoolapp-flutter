@@ -38,4 +38,14 @@ abstract class PayslipApi {
     @Extras() Map<String, dynamic> extras,
     @Path('month') String month,
   );
+
+  @GET(AppConstants.payrollDashboardPdfEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> dashboard(
+    @Extras() Map<String, dynamic> extras,
+    @Path('month') String month,
+    @Query('filter') String filter,
+    @Query('q') String? query,
+  );
 }

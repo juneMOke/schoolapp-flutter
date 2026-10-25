@@ -19637,4 +19637,225 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollAdvanceColReason => 'Reason';
+
+  @override
+  String get payrollDashNet => 'Net to pay';
+
+  @override
+  String get payrollDashAbsence => 'Unexcused absences';
+
+  @override
+  String get payrollDashAdvances => 'Loans & advances';
+
+  @override
+  String get payrollDashLegal => 'IPR & CNSS';
+
+  @override
+  String get payrollDashChildcare => 'Children\'s fees';
+
+  @override
+  String get payrollDashOther => 'Other';
+
+  @override
+  String get payrollDashForecastTitle => 'Planned and actual this month';
+
+  @override
+  String payrollDashValidatedOn(String date) {
+    return 'Payroll validated on $date';
+  }
+
+  @override
+  String get payrollDashDraftSubtitle =>
+      'The actual still moves with attendance and the variables';
+
+  @override
+  String get payrollDashPlanned => 'Planned cost';
+
+  @override
+  String get payrollDashActual => 'Actually to pay';
+
+  @override
+  String payrollDashLessThanPlanned(String amount, int percent) {
+    return '$amount less than planned (− $percent %)';
+  }
+
+  @override
+  String payrollDashArrearsCarried(String arrears, String total) {
+    return '+ $arrears of prioritised arrears this month: $total to pay in total';
+  }
+
+  @override
+  String get payrollDashPaid => 'Paid';
+
+  @override
+  String get payrollDashDeferred => 'Deferred';
+
+  @override
+  String get payrollDashUnpaid => 'Unpaid';
+
+  @override
+  String get payrollDashNotYet => 'Not yet paid';
+
+  @override
+  String get payrollDashPaidTitle => 'Net to pay: paid and unpaid';
+
+  @override
+  String payrollDashPaidSummary(int percent, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count employees settled',
+      one: '1 employee settled',
+      zero: 'no employee settled',
+    );
+    return '$percent % paid · $_temp0';
+  }
+
+  @override
+  String payrollDashUnpaidSummary(int partial, int unpaid) {
+    return 'Partial: $partial · Nothing paid: $unpaid';
+  }
+
+  @override
+  String get payrollDashNothingBeforeValidation =>
+      'Nothing is paid before validation.';
+
+  @override
+  String get payrollDashPrepare => 'Prepare the payroll';
+
+  @override
+  String get payrollDashByMonth => 'Month by month';
+
+  @override
+  String payrollDashColumnA11y(String month, String paid, String rest) {
+    return '$month: paid $paid, remaining $rest';
+  }
+
+  @override
+  String get payrollDashAdvancesTitle => 'Loans & advances';
+
+  @override
+  String payrollDashAdvancesSubtitle(int count, String due) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count employees repaying',
+      one: '1 employee repaying',
+    );
+    return '$_temp0 · $due still due';
+  }
+
+  @override
+  String get payrollDashManage => 'Manage';
+
+  @override
+  String get payrollDashFilterOngoing => 'Ongoing';
+
+  @override
+  String get payrollDashFilterSettled => 'Settled';
+
+  @override
+  String get payrollDashAdvancesEmpty => 'No loan or advance ongoing';
+
+  @override
+  String payrollDashRemainingOf(String remaining, String amount) {
+    return '$remaining left of $amount';
+  }
+
+  @override
+  String payrollDashTakenThisMonth(String amount) {
+    return '− $amount this month';
+  }
+
+  @override
+  String payrollDashRepaidA11y(int percent) {
+    return '$percent % repaid';
+  }
+
+  @override
+  String get payrollDashArrearsTitle => 'Arrears by employee';
+
+  @override
+  String get payrollDashSettle => 'Settle in the payroll';
+
+  @override
+  String get payrollDashArrearsEmpty =>
+      'All salaries of validated payrolls are paid';
+
+  @override
+  String get payrollDashPriority => 'priority';
+
+  @override
+  String get payrollDashColPlanned => 'Planned';
+
+  @override
+  String get payrollDashColDeductions => 'Deductions';
+
+  @override
+  String get payrollDashColNet => 'Month\'s net';
+
+  @override
+  String get payrollDashColArrears => '+ Arrears';
+
+  @override
+  String get payrollDashColReceived => 'Received';
+
+  @override
+  String get payrollDashColRemaining => 'Remaining';
+
+  @override
+  String payrollDashTotal(String currency) {
+    return 'Total $currency';
+  }
+
+  @override
+  String get payrollDashStatusToDisburse => 'To pay out';
+
+  @override
+  String get payrollDashStatusSettled => 'Settled';
+
+  @override
+  String get payrollDashStatusPartial => 'Partial';
+
+  @override
+  String get payrollDashStatusDue => 'Due';
+
+  @override
+  String get payrollDashStaffTitle => 'What each employee receives';
+
+  @override
+  String payrollDashPdfFileName(String month) {
+    return 'payroll-situation-$month';
+  }
+
+  @override
+  String get payrollDashProvisional =>
+      'Provisional amounts: the payroll is not validated yet';
+
+  @override
+  String get payrollDashPdf => 'PDF';
+
+  @override
+  String get payrollDashSearchHint => 'Search an employee or a job';
+
+  @override
+  String get payrollDashFilterOutstanding => 'Remaining to pay';
+
+  @override
+  String get payrollDashStaffEmpty => 'No employee matches';
+
+  @override
+  String get payrollDashShowAll => 'Show all';
+
+  @override
+  String get payrollDashOpenPayroll => 'Open the payroll';
+
+  @override
+  String get payrollDashNoPayroll => 'No payroll for this month';
+
+  @override
+  String get payrollDashCurrentMonth => 'Current month';
+
+  @override
+  String get payrollDashNoStaff => 'No employee to pay';
 }

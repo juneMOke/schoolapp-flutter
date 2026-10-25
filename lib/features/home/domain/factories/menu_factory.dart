@@ -348,13 +348,19 @@ class MenuFactory {
   }
 
   /// RH · Paie — posé après RH · Présences, dont il lit le Pointage clos :
-  /// la paie, les avances et prêts, les arriérés, puis le barème.
+  /// le tableau de bord, la paie, les avances et prêts, les arriérés, puis le
+  /// barème.
   static MenuItem _createHrPayrollMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.hrPayrollMenuId,
       title: l10n.menuHrPayroll,
       icon: Icons.payments_outlined,
       subMenus: [
+        SubMenuItem(
+          id: MenuConstants.hrPayrollDashboardId,
+          title: l10n.subMenuDashboard,
+          route: AppRoutesNames.hrPayrollDashboard,
+        ),
         SubMenuItem(
           id: MenuConstants.hrPayrollId,
           title: l10n.subMenuPayroll,

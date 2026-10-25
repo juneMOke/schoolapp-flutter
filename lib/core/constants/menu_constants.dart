@@ -123,6 +123,10 @@ class MenuConstants {
   /// agent et le récapitulatif du mois.
   static const String hrStaffAttendanceId = 'pointage';
 
+  /// RH · Paie ▸ Tableau de bord : prévu et réel, payé et non payé, prêts,
+  /// arriérés, et ce que chaque salarié perçoit (spec TB).
+  static const String hrPayrollDashboardId = 'paie-tableau-de-bord';
+
   /// RH · Paie ▸ Paie : le livre du mois, l'état de paie, les bulletins et
   /// l'historique.
   static const String hrPayrollId = 'paie';

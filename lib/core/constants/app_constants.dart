@@ -1310,6 +1310,13 @@ class AppConstants {
   static const String payrollStatementEndpoint =
       '/api/v1/hr/payrolls/{month}/statement.pdf';
 
+  /// « Ce que chaque salarié perçoit » (pièce SP, Q7) — sous `hr.pay.read`
+  /// seul, sur les mêmes paramètres que l'écran : `filter`
+  /// (`ALL` | `OUTSTANDING` | `SETTLED`) et `q` (nom ou fonction). Un brouillon
+  /// porte « montants provisoires » ; 429 pendant un autre long rendu.
+  static const String payrollDashboardPdfEndpoint =
+      '/api/v1/hr/payrolls/{month}/dashboard.pdf';
+
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :
   ///  - **POST** = push de l'agrégat `{session, absences[]}` (upsert clé
