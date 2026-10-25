@@ -30,21 +30,32 @@ abstract final class PayrollArrears {
       final view = PayrollLedger.monthView(snapshot, month);
       for (final line in lines) {
         final settlement = view.settlementOf(line);
-        if (settlement.remainingInCents <= 0) continue;
-        final origin = switch (settlement.status) {
-          PayrollSettlementStatus.deferred => PayrollArrearOrigin.deferred,
-          PayrollSettlementStatus.partial => PayrollArrearOrigin.partial,
-          _ => PayrollArrearOrigin.unpaid,
-        };
-        if (month == currentMonth && origin != PayrollArrearOrigin.deferred) {
-          continue;
-        }
+        final remaining = settlement.remainingInCents;
+        if (remaining <= 0) continue;
+        final current = month == currentMonth;
+        // Le mois en cours : la part différée par décision, quoi qu'on ait
+        // déjà versé de la part prévue — le reste n'est pas en retard.
+        if (current && line.deferredInCents <= 0) continue;
+        final due = current
+            ? (line.deferredInCents < remaining
+                  ? line.deferredInCents
+                  : remaining)
+            : remaining;
+        final origin = current
+            ? PayrollArrearOrigin.deferred
+            : switch (settlement.status) {
+                PayrollSettlementStatus.deferred =>
+                  PayrollArrearOrigin.deferred,
+                PayrollSettlementStatus.partial => PayrollArrearOrigin.partial,
+                _ => PayrollArrearOrigin.unpaid,
+              };
         final variables = snapshot.variables[month]?[line.staffMemberId];
         (byAgent[line.staffMemberId] ??= []).add(
           PayrollArrear(
             line: line,
             validationGestureId: validation,
             paidInCents: settlement.paidInCents,
+            dueInCents: due,
             origin: origin,
             prioritized: snapshot.arrearsPriorities.contains(
               priorityKey(month, line.staffMemberId),

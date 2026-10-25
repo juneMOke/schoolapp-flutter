@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense.dart
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -62,31 +63,43 @@ ExpenseDraft _draft({String? id, DateTime? day}) => ExpenseDraft(
   recordedByName: 'Moke Junior',
 );
 
+class _ClosedPayroll implements ExpenseAdvanceGuard {
+  @override
+  Future<bool> acceptsFirstMonth(String month) async => false;
+
+  @override
+  Future<bool> isDeducted(String expenseId) async => false;
+}
+
 void main() {
   late Database db;
   late ExpenseRepositoryImpl repo;
   late CurrentUserContext user;
 
-  ExpenseRepositoryImpl build({SyncEngine? engine, IdGenerator? ids}) =>
-      ExpenseRepositoryImpl(
-        reader: ExpenseReadDao(db),
-        writer: ExpenseWriteDao(db),
-        types: ExpenseTypeDao(db),
-        messages: ExpenseMessageDao(db),
-        currentUser: user,
-        ids: ids ?? _Ids(),
-        rates: _Rates([
-          ExchangeRate(
-            base: 'USD',
-            quote: 'CDF',
-            rateMicros: 2800 * ExchangeRate.scale,
-            effectiveFrom: DateTime.utc(2026, 9, 1),
-          ),
-        ]),
-        schoolYearStart: () async => DateTime(2025, 9, 7),
-        syncEngine: engine,
-        now: () => _now,
-      );
+  ExpenseRepositoryImpl build({
+    SyncEngine? engine,
+    IdGenerator? ids,
+    ExpenseAdvanceGuard? guard,
+  }) => ExpenseRepositoryImpl(
+    reader: ExpenseReadDao(db),
+    writer: ExpenseWriteDao(db),
+    types: ExpenseTypeDao(db),
+    messages: ExpenseMessageDao(db),
+    currentUser: user,
+    ids: ids ?? _Ids(),
+    rates: _Rates([
+      ExchangeRate(
+        base: 'USD',
+        quote: 'CDF',
+        rateMicros: 2800 * ExchangeRate.scale,
+        effectiveFrom: DateTime.utc(2026, 9, 1),
+      ),
+    ]),
+    schoolYearStart: () async => DateTime(2025, 9, 7),
+    syncEngine: engine,
+    advanceGuard: guard,
+    now: () => _now,
+  );
 
   setUp(() async {
     db = await openFullOfflineDb();
@@ -387,6 +400,48 @@ void main() {
         expect((await outbox()).length, before);
       },
     );
+
+    test('corriger une avance garde son bloc R.H.', () async {
+      final expense = await saved(
+        ExpenseDraft(
+          typeId: 't-1',
+          title: 'Avance au personnel',
+          amountInCents: 30000,
+          currency: 'USD',
+          expenseDate: _now,
+          staffAdvance: block,
+        ),
+      );
+
+      final edited = await saved(
+        ExpenseDraft(
+          id: expense.id,
+          typeId: 't-1',
+          title: 'Avance au personnel',
+          amountInCents: 25000,
+          currency: 'USD',
+          expenseDate: _now,
+        ),
+      );
+
+      expect(edited.staffAdvance, block);
+    });
+
+    test('payer sur une paie fermée entre-temps : refusé', () async {
+      final gestes = build(ids: _SeqIds(), guard: _ClosedPayroll());
+      final expense = await approvedAdvance(gestes);
+
+      final result = await gestes.applyGesture(
+        expense,
+        ExpenseGesture.pay,
+        advancePayment: const ExpenseAdvancePayment(
+          firstMonth: '2026-09',
+          debtAcknowledged: true,
+        ),
+      );
+
+      expect(result.isLeft(), isTrue);
+    });
 
     test('payer porte le bloc advance et fixe la première retenue', () async {
       final gestes = build(ids: _SeqIds());

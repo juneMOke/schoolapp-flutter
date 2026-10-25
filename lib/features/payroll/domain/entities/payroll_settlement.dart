@@ -33,8 +33,10 @@ class PayrollSettlement extends Equatable {
 
   int get netInCents => line.netInCents;
 
-  int get paidInCents =>
-      disbursements.fold(0, (sum, d) => sum + d.amount.amountInCents);
+  /// Dans la devise de la ligne seulement, comme la garde du dépôt.
+  int get paidInCents => disbursements
+      .where((d) => d.amount.currency == line.currency)
+      .fold(0, (sum, d) => sum + d.amount.amountInCents);
 
   int get remainingInCents {
     final remaining = netInCents - paidInCents;

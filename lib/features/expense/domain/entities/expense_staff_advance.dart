@@ -76,7 +76,10 @@ class ExpenseStaffAdvance extends Equatable {
     }
     if (raw is! Map) return null;
     final member = raw['staffMemberId'];
-    final kind = ExpenseStaffAdvanceKind.fromWire(raw['kind'] as String?);
+    final rawKind = raw['kind'];
+    final kind = ExpenseStaffAdvanceKind.fromWire(
+      rawKind is String ? rawKind : null,
+    );
     final installments = raw['installments'];
     final reason = raw['reason'];
     if (member is! String ||

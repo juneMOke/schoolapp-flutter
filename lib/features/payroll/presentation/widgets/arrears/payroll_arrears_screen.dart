@@ -205,10 +205,18 @@ class _PayrollArrearsScreenState extends State<PayrollArrearsScreen> {
     }
     final proof = outcome.proof;
     if (proof == null) return;
+    // Le registre a pu bouger pendant la saisie (un pull, un autre poste) :
+    // la répartition se refait sur l'agent tel qu'il est maintenant.
+    final snapshot = cubit.state.snapshot;
+    final fresh = PayrollArrears.of(
+      snapshot,
+      currentMonth: currentMonth,
+    ).where((a) => a.staffMemberId == agent.staffMemberId).firstOrNull;
+    if (fresh == null) return;
     await cubit.perform(
       (commands) => commands.payArrears(
-        cubit.state.snapshot,
-        agent,
+        snapshot,
+        fresh,
         currency: outcome.currency,
         amountInCents: outcome.amountInCents,
         proof: proof,

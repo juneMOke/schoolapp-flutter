@@ -10109,6 +10109,10 @@
   "@payrollAdvanceCircuitToPay": {
     "description": "Statut d'une demande accordée."
   },
+  "payrollPayoutOtherInvalid": "Un taux de 0 à 100.",
+  "@payrollPayoutOtherInvalid": {
+    "description": "Erreur du taux libre."
+  },
   "payrollVarsTitle": "Éléments variables",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Heures supplémentaires",

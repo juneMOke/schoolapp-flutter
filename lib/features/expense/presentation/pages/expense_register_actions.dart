@@ -46,8 +46,12 @@ class ExpenseRegisterActions {
   Future<void> edit(Expense expense) =>
       _openForm(ExpenseFormSeed.edit(expense));
 
-  Future<void> duplicate(Expense expense) =>
-      _openForm(ExpenseFormSeed.duplicate(expense, today: DateTime.now()));
+  /// Une avance au personnel ne se duplique pas (B5) : la copie n'aurait pas
+  /// de bloc R.H. et se paierait sans retenue.
+  Future<void> duplicate(Expense expense) async {
+    if (expense.staffAdvance != null) return;
+    await _openForm(ExpenseFormSeed.duplicate(expense, today: DateTime.now()));
+  }
 
   /// Rend la dépense enregistrée, ou `null` si la saisie a été abandonnée ou
   /// refusée. [announce] se tait quand un second geste suit — « corriger et

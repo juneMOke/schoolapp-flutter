@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_variables_dao.dart';
@@ -108,6 +109,28 @@ void main() {
   );
 
   group('geste du circuit', () {
+    test('attend le taux du mois posé avant lui (empreinte v2)', () async {
+      await PayrollPayoutPolicyDao(db).save(
+        const PayrollPayoutPolicyRequestDto(
+          month: '2026-10',
+          ratePercent: 50,
+          reason: 'Trésorerie',
+          clientUpdatedAt: '2026-10-20T09:00:00Z',
+          authorId: 'u-1',
+        ),
+        schoolId: _school,
+        nowMs: 10,
+      );
+      await submit(nowMs: 20);
+
+      final result = await gestureHandler().dispatch(
+        await entry(PayrollGestureDao.entryId('g-1')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+      verifyNever(() => api.submitGesture(any(), any()));
+    });
+
     test('attend les éléments variables du mois posés avant lui', () async {
       await writeVariables(nowMs: 10);
       await submit(nowMs: 20);

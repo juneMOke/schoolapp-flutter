@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/features/expense/data/local/expense_local_model.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_delta_dto.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 
 /// Les colonnes de `expenses` qu'écrit l'état canonique d'une dépense
 /// (`ExpenseDelta`), rangées en deux familles — c'est leur séparation qui
@@ -11,7 +12,13 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 /// - [server] : ce que le serveur attribue (numéro, agent, version, retrait
 ///   tel qu'il le voit) — toujours posé.
 abstract final class ExpenseDeltaColumns {
-  static Map<String, Object?> content(ExpenseDeltaDto d) => {
+  /// [localStaffAdvance] : le bloc R.H. de la ligne locale, que le delta ne
+  /// remplace que s'il en porte un (T14), et dont il garde le mois de
+  /// première retenue tant que le serveur ne l'a pas encore repris (B6).
+  static Map<String, Object?> content(
+    ExpenseDeltaDto d, {
+    String? localStaffAdvance,
+  }) => {
     'type_id': d.typeId,
     'title': d.title,
     'description': d.description,
@@ -19,7 +26,8 @@ abstract final class ExpenseDeltaColumns {
     'currency': d.currency,
     'expense_date': d.expenseDate,
     'supplier': d.supplier,
-    'staff_advance': d.staffAdvance,
+    if (d.carriesStaffAdvance)
+      'staff_advance': _staffAdvance(d.staffAdvance, localStaffAdvance),
     'funding_source': d.fundingSource,
     'client_updated_at': d.clientUpdatedAt,
   };
@@ -93,5 +101,18 @@ abstract final class ExpenseDeltaColumns {
     final right = DateTime.tryParse(b);
     if (left == null || right == null) return a == b;
     return left.isAtSameMomentAs(right);
+  }
+
+  static String? _staffAdvance(String? served, String? local) {
+    final server = ExpenseStaffAdvance.tryParse(served);
+    final mine = ExpenseStaffAdvance.tryParse(local);
+    final first = mine?.firstMonth;
+    if (server == null ||
+        server.firstMonth != null ||
+        first == null ||
+        server.withFirstMonth(first) != mine) {
+      return served;
+    }
+    return mine!.encode();
   }
 }

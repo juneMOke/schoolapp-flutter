@@ -9498,6 +9498,7 @@
   "payrollAdvanceCircuitVia": "via Expenses",
   "payrollAdvanceCircuitToApprove": "To approve",
   "payrollAdvanceCircuitToPay": "To pay out",
+  "payrollPayoutOtherInvalid": "A rate from 0 to 100.",
   "payrollVarsTitle": "Variable items",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Overtime",

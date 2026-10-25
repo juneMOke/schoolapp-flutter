@@ -104,6 +104,17 @@ void main() {
     expect(agents.single.dueIn('USD'), 43000);
   });
 
+  test('mois en cours : la part différée compte, même rien versé', () {
+    final agents = PayrollArrears.of(
+      snapshotOf(lines: {'2026-10': line('2026-10', toPay: 12000)}),
+      currentMonth: '2026-10',
+    );
+
+    final arrear = agents.single.months.single;
+    expect(arrear.origin, PayrollArrearOrigin.deferred);
+    expect(arrear.dueInCents, 8000);
+  });
+
   test('le mois en cours non versé n est pas un arriéré', () {
     final agents = PayrollArrears.of(
       snapshotOf(lines: {'2026-10': line('2026-10')}),

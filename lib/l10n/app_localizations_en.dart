@@ -14271,6 +14271,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollAdvanceCircuitToPay => 'To pay out';
 
   @override
+  String get payrollPayoutOtherInvalid => 'A rate from 0 to 100.';
+
+  @override
   String get payrollVarsTitle => 'Variable items';
 
   @override

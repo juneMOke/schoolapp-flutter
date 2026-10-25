@@ -107,12 +107,16 @@ class ExpenseDetailActions extends StatelessWidget {
                 spacing: AppDimensions.spacingS,
                 runSpacing: AppDimensions.spacingS,
                 children: [
-                  EteeloButton.secondary(
-                    label: l10n.expenseActionDuplicate,
-                    icon: Icons.copy_outlined,
-                    onPressed: () => onShortcut(ExpenseDetailChoice.duplicate),
-                    fullWidth: false,
-                  ),
+                  // Une avance au personnel ne se duplique pas : elle se
+                  // dépose depuis la Paie, avec son bloc R.H. (B5).
+                  if (expense.staffAdvance == null)
+                    EteeloButton.secondary(
+                      label: l10n.expenseActionDuplicate,
+                      icon: Icons.copy_outlined,
+                      onPressed: () =>
+                          onShortcut(ExpenseDetailChoice.duplicate),
+                      fullWidth: false,
+                    ),
                   // Modifier suit la même règle que les gestes du demandeur :
                   // tant que personne n'a décidé, et sur sa propre demande. Une
                   // dépense accordée dont on réécrirait le montant ne serait

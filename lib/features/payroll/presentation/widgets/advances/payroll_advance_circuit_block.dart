@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -51,16 +53,21 @@ class PayrollAdvanceCircuitBlock extends StatelessWidget {
                   l10n.payrollAdvanceCircuitTitle(requests.length),
                   style: AppTypography.labelLarge,
                 ),
-                EteeloButton.secondary(
-                  label: l10n.payrollAdvanceCircuitOpen,
-                  icon: Icons.fact_check_outlined,
-                  onPressed: () => context.go(
-                    AppRoutesNames.homeSubMenuPath(
-                      MenuConstants.expenseQueueId,
+                // La file appartient aux Dépenses : à qui peut l'ouvrir.
+                if (canAccessSubMenu(
+                  MenuConstants.expenseQueueId,
+                  PermissionGate.maybeBlocOf(context)?.state.permissions,
+                ))
+                  EteeloButton.secondary(
+                    label: l10n.payrollAdvanceCircuitOpen,
+                    icon: Icons.fact_check_outlined,
+                    onPressed: () => context.go(
+                      AppRoutesNames.homeSubMenuPath(
+                        MenuConstants.expenseQueueId,
+                      ),
                     ),
+                    fullWidth: false,
                   ),
-                  fullWidth: false,
-                ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),

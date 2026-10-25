@@ -22,6 +22,10 @@ class PayrollArrear extends Equatable {
   /// La validation sous laquelle se verse le reste.
   final String validationGestureId;
   final int paidInCents;
+
+  /// Ce qui reste dû sur ce mois d'origine — le reste du net, ou, pour le
+  /// mois en cours, la seule part différée par décision.
+  final int dueInCents;
   final PayrollArrearOrigin origin;
   final bool prioritized;
 
@@ -32,6 +36,7 @@ class PayrollArrear extends Equatable {
     required this.line,
     required this.validationGestureId,
     required this.paidInCents,
+    required this.dueInCents,
     required this.origin,
     this.prioritized = false,
     this.reason,
@@ -42,13 +47,13 @@ class PayrollArrear extends Equatable {
   /// `YYYY-MM`.
   String get month => line.month;
   String get currency => line.currency;
-  int get dueInCents => line.netInCents - paidInCents;
 
   @override
   List<Object?> get props => [
     line,
     validationGestureId,
     paidInCents,
+    dueInCents,
     origin,
     prioritized,
     reason,

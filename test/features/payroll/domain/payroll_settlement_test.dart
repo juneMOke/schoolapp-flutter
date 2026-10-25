@@ -63,4 +63,24 @@ void main() {
       expect(status(line(net: 0), []), PayrollSettlementStatus.nothingToPay);
     },
   );
+
+  test('le versé ne compte que la devise de la ligne', () {
+    final settlement = PayrollSettlement(
+      line: line(),
+      disbursements: [
+        paid(8800),
+        const PayrollDisbursement(
+          id: 'd-cdf',
+          month: '2026-10',
+          staffMemberId: 'm-1',
+          validationGestureId: 'g-v',
+          amount: Money(500000, 'CDF'),
+          mode: PayoutMode.cash,
+          paidAt: '2026-10-28T09:00:00.000Z',
+        ),
+      ],
+    );
+
+    expect(settlement.paidInCents, 8800);
+  });
 }

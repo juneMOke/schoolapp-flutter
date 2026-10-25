@@ -62,14 +62,21 @@ class _PayrollPayoutPolicyDialogState extends State<PayrollPayoutPolicyDialog> {
     super.dispose();
   }
 
+  /// Un taux « Autre » saisi mais hors de 0-100 : rien ne s'applique.
+  bool _otherInvalid = false;
+
   bool get _complete =>
-      _rate >= 100 || _reason.text.trim().length >= minPayoutReasonLength;
+      !_otherInvalid &&
+      (_rate >= 100 || _reason.text.trim().length >= minPayoutReasonLength);
 
   void _typed(String text) {
-    final value = int.tryParse(text.trim());
-    if (value != null && value >= 0 && value <= 100) {
-      setState(() => _rate = value);
-    }
+    final trimmed = text.trim();
+    final value = int.tryParse(trimmed);
+    setState(() {
+      _otherInvalid =
+          trimmed.isNotEmpty && (value == null || value < 0 || value > 100);
+      if (value != null && !_otherInvalid) _rate = value;
+    });
   }
 
   @override
@@ -106,6 +113,7 @@ class _PayrollPayoutPolicyDialogState extends State<PayrollPayoutPolicyDialog> {
                   ink: AppColors.terreCuiteDark,
                   onTap: () => setState(() {
                     _rate = preset;
+                    _otherInvalid = false;
                     _other.clear();
                   }),
                 ),
@@ -115,6 +123,7 @@ class _PayrollPayoutPolicyDialogState extends State<PayrollPayoutPolicyDialog> {
           EteeloTextInput(
             controller: _other,
             label: l10n.payrollPayoutOther,
+            errorText: _otherInvalid ? l10n.payrollPayoutOtherInvalid : null,
             keyboardType: EteeloTextInputType.number,
             capitalization: EteeloTextCapitalization.none,
             onChanged: _typed,

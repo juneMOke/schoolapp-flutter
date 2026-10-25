@@ -27,6 +27,10 @@ class ExpenseDeltaDto {
 
   /// Le bloc `rh` d'une avance au personnel, en JSON ; absent caviardé (T14).
   final String? staffAdvance;
+
+  /// Le serveur a-t-il porté la clé `rh` ? Absente, elle est caviardée (T14)
+  /// ou hors propos : la tablette n'efface pas ce qu'elle sait.
+  final bool carriesStaffAdvance;
   final String fundingSource;
   final String? recordedById;
   final String? recordedByName;
@@ -69,6 +73,7 @@ class ExpenseDeltaDto {
     required this.expenseDate,
     this.supplier,
     this.staffAdvance,
+    this.carriesStaffAdvance = false,
     this.fundingSource = 'CASH',
     this.recordedById,
     this.recordedByName,
@@ -140,6 +145,7 @@ class ExpenseDeltaDto {
       expenseDate: ExpenseDay.format(expenseDate),
       supplier: text('supplier'),
       staffAdvance: ExpenseStaffAdvance.tryParse(raw['rh'])?.encode(),
+      carriesStaffAdvance: raw.containsKey('rh'),
       fundingSource: text('fundingSource')?.toUpperCase() ?? 'CASH',
       recordedById: text('recordedById'),
       recordedByName: text('recordedByName'),

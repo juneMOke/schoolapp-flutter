@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disb
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_fingerprint.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
@@ -159,6 +160,23 @@ class PayrollRepositoryImpl implements PayrollRepository {
     ),
   );
 
+  /// Le net figé de la ligne, tel que la tablette le tient — la garde du reste
+  /// ne se fie pas au net que l'écran lui passe.
+  Future<int?> _frozenNet(PayrollDisbursementDraft draft) async {
+    final session = _writer.session();
+    if (session == null) return null;
+    final lines = (await _local.payrolls.frozenLines(
+      session.schoolId,
+    ))[draft.month];
+    for (final line in lines ?? const <PayrollLine>[]) {
+      if (line.staffMemberId == draft.staffMemberId &&
+          line.currency == draft.amount.currency) {
+        return line.netInCents;
+      }
+    }
+    return null;
+  }
+
   @override
   Future<Either<Failure, Unit>> disburseAll(
     List<PayrollDisbursementDraft> drafts,
@@ -190,7 +208,7 @@ class PayrollRepositoryImpl implements PayrollRepository {
 
   @override
   Future<Either<Failure, Unit>> disburse(PayrollDisbursementDraft draft) async {
-    final net = draft.netInCents;
+    final net = await _frozenNet(draft) ?? draft.netInCents;
     if (net != null) {
       final paid = await _local.disbursements.liveTotal(
         draft.month,

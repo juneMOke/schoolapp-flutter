@@ -68,6 +68,7 @@ abstract final class PayrollDeductions {
     required int? variable,
     required AttendanceAgentSummary? attendance,
   }) {
+    if (divisor <= 0) return 0;
     final raw =
         variable ??
         (attendance == null

@@ -164,6 +164,7 @@ class PayrollAdvancesTab extends StatelessWidget {
           title: l10n.payrollAdvanceExpenseTitle,
           today: DateTime.parse(state.today),
           amount: MoneyFormat.format(draft.amount),
+          recordedByName: _agentName(context),
         ),
       );
       return;
@@ -176,6 +177,14 @@ class PayrollAdvancesTab extends StatelessWidget {
         amount: MoneyFormat.format(draft.amount),
       ),
     );
+  }
+
+  /// Le demandeur, affiché dans la file des validations.
+  static String? _agentName(BuildContext context) {
+    final user = PermissionGate.maybeBlocOf(context)?.state.user;
+    if (user == null) return null;
+    final name = '${user.lastName} ${user.firstName}'.trim();
+    return name.isEmpty ? null : name;
   }
 
   Future<void> _cancel(BuildContext context, SalaryAdvance advance) async {

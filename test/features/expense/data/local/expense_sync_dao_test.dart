@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -173,6 +174,65 @@ void main() {
   });
 
   group('applyPulled', () {
+    test('T14 : un delta sans rh ne vide pas le bloc R.H. local', () async {
+      await db.insert(
+        'expenses',
+        ExpenseLocalModel(
+          id: 'e-1',
+          schoolId: 'school-1',
+          typeId: 't-advance',
+          title: 'Avance au personnel',
+          amountInCents: 500,
+          currency: 'USD',
+          status: 'PAID',
+          expenseDate: '2026-09-03',
+          clientUpdatedAt: _sent,
+          staffAdvance: const ExpenseStaffAdvance(
+            staffMemberId: 'm-1',
+            kind: ExpenseStaffAdvanceKind.advance,
+            installments: 1,
+            reason: 'RENT',
+            firstMonth: '2026-10',
+          ).encode(),
+          syncStatus: 'SYNCED',
+        ).toMap(),
+      );
+
+      await dao.applyPulled([_canonical()], schoolId: 'school-1', nowMs: 1);
+      expect(
+        ExpenseStaffAdvance.tryParse((await row()).staffAdvance)?.firstMonth,
+        '2026-10',
+      );
+
+      // Le serveur renvoie le bloc sans encore le mois : la tablette le garde.
+      await dao.applyPulled(
+        [
+          ExpenseDeltaDto.tryParse({
+            'id': 'e-1',
+            'typeId': 't-advance',
+            'title': 'Avance au personnel',
+            'amountInCents': 500,
+            'currency': 'USD',
+            'status': 'PAID',
+            'expenseDate': '2026-09-03',
+            'clientUpdatedAt': _sent,
+            'rh': {
+              'staffMemberId': 'm-1',
+              'kind': 'ADVANCE',
+              'installments': 1,
+              'reason': 'RENT',
+            },
+          })!,
+        ],
+        schoolId: 'school-1',
+        nowMs: 2,
+      );
+      expect(
+        ExpenseStaffAdvance.tryParse((await row()).staffAdvance)?.firstMonth,
+        '2026-10',
+      );
+    });
+
     test('inconnue → insérée ; synchronisée → remplacée', () async {
       expect(
         await dao.applyPulled([_canonical()], schoolId: 'school-1', nowMs: 1),

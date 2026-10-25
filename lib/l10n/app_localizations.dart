@@ -22393,6 +22393,12 @@ abstract class AppLocalizations {
   /// **'To pay out'**
   String get payrollAdvanceCircuitToPay;
 
+  /// No description provided for @payrollPayoutOtherInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'A rate from 0 to 100.'**
+  String get payrollPayoutOtherInvalid;
+
   /// No description provided for @payrollVarsTitle.
   ///
   /// In en, this message translates to:

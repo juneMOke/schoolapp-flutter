@@ -11,6 +11,11 @@ abstract final class ExpenseAdvanceRules {
     'Avance au personnel : mois de première retenue et preuve requis.',
   );
 
+  /// La paie du mois de première retenue n'est plus en brouillon.
+  static const monthClosed = ConflictFailure(
+    'La paie choisie pour la première retenue est fermée : choisissez-en une autre.',
+  );
+
   /// Une retenue est figée : l'avance ne se rouvre plus.
   static const deducted = ConflictFailure(
     'Une retenue de cette avance est déjà figée : réouverture impossible.',

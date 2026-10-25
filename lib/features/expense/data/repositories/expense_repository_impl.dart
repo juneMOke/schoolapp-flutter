@@ -26,6 +26,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_adva
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
@@ -168,6 +169,12 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
             !ExpenseAdvanceRules.proves(advance, current.fundingSource)) {
           return const Left(ExpenseAdvanceRules.proofRequired);
         }
+        // La paie choisie a pu se fermer depuis l'ouverture de la modale
+        // (un autre poste a soumis) : la retenue tomberait sur un mois figé.
+        if (!(await _advanceGuard?.acceptsFirstMonth(advance.firstMonth) ??
+            true)) {
+          return const Left(ExpenseAdvanceRules.monthClosed);
+        }
       }
       if (gesture == ExpenseGesture.reopen &&
           staffAdvance != null &&
@@ -263,7 +270,11 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
         paidOn: ExpenseDay.tryParse(previous?.paidOn),
         expenseDate: ExpenseDay.of(draft.expenseDate),
         supplier: _blankToNull(draft.supplier),
-        staffAdvance: draft.staffAdvance,
+        // Le formulaire des Dépenses ne porte pas le bloc R.H. : corrigée ici,
+        // une avance le garde — sans lui, elle se paierait sans retenue.
+        staffAdvance:
+            draft.staffAdvance ??
+            ExpenseStaffAdvance.tryParse(previous?.staffAdvance),
         fundingSource: draft.fundingSource,
         recordedById: authorId,
         recordedByName: draft.recordedByName,

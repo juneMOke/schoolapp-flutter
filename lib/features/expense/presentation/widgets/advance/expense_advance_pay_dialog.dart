@@ -42,7 +42,7 @@ class ExpenseAdvancePayDialog extends StatefulWidget {
 }
 
 class _ExpenseAdvancePayDialogState extends State<ExpenseAdvancePayDialog> {
-  late String _month = widget.months.last;
+  late String _month = widget.months.first;
   bool _acknowledged = false;
   final TextEditingController _reference = TextEditingController();
 

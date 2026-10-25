@@ -14372,6 +14372,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollAdvanceCircuitToPay => 'À décaisser';
 
   @override
+  String get payrollPayoutOtherInvalid => 'Un taux de 0 à 100.';
+
+  @override
   String get payrollVarsTitle => 'Éléments variables';
 
   @override

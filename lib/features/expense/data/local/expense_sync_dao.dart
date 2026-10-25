@@ -66,7 +66,11 @@ class ExpenseSyncDao {
       table,
       {
         ...ExpenseDeltaColumns.server(canonical),
-        if (latest) ...ExpenseDeltaColumns.content(canonical),
+        if (latest)
+          ...ExpenseDeltaColumns.content(
+            canonical,
+            localStaffAdvance: row.staffAdvance,
+          ),
         if (latest) ...ExpenseDeltaColumns.synced,
         if (row.withdrawalPendingAt == null && !orphanWithdrawal)
           'deleted_at': canonical.deletedAt,
@@ -284,7 +288,11 @@ class ExpenseSyncDao {
           table,
           {
             ...ExpenseDeltaColumns.server(delta),
-            if (synced) ...ExpenseDeltaColumns.content(delta),
+            if (synced)
+              ...ExpenseDeltaColumns.content(
+                delta,
+                localStaffAdvance: row.staffAdvance,
+              ),
             if (row.withdrawalPendingAt == null) 'deleted_at': delta.deletedAt,
             'updated_at': nowMs,
           },
