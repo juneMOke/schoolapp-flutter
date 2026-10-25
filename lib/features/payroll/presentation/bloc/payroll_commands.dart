@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
@@ -29,6 +30,7 @@ class PayrollCommands {
   final SavePayrollPayoutPolicyUseCase _payoutPolicy;
   final PayPayrollArrearsUseCase? _payArrears;
   final SetPayrollArrearsPriorityUseCase? _priority;
+  final RequestSalaryAdvanceUseCase? _request;
   final RecordPayrollGestureUseCase _gesture;
   final DisbursePayrollUseCase _disburse;
   final CancelPayrollDisbursementUseCase _cancelDisbursement;
@@ -44,6 +46,7 @@ class PayrollCommands {
     required SavePayrollPayoutPolicyUseCase payoutPolicy,
     PayPayrollArrearsUseCase? payArrears,
     SetPayrollArrearsPriorityUseCase? priority,
+    RequestSalaryAdvanceUseCase? request,
     required RecordPayrollGestureUseCase gesture,
     required DisbursePayrollUseCase disburse,
     required CancelPayrollDisbursementUseCase cancelDisbursement,
@@ -57,6 +60,7 @@ class PayrollCommands {
        _payoutPolicy = payoutPolicy,
        _payArrears = payArrears,
        _priority = priority,
+       _request = request,
        _gesture = gesture,
        _disburse = disburse,
        _cancelDisbursement = cancelDisbursement,
@@ -173,6 +177,31 @@ class PayrollCommands {
     await _grant(snapshot, draft),
     PayrollNotice(PayrollNoticeKind.advanceGranted, name: name, amount: amount),
   );
+
+  /// Une avance demandée par le circuit des dépenses (B5).
+  Future<PayrollNotice> requestAdvance(
+    PayrollSnapshot snapshot,
+    SalaryAdvanceDraft draft, {
+    required String title,
+    required DateTime today,
+    required String amount,
+    String? recordedByName,
+  }) async {
+    final request = _request;
+    if (request == null) {
+      return const PayrollNotice(PayrollNoticeKind.writeFailed);
+    }
+    return _notice(
+      await request(
+        snapshot,
+        draft,
+        title: title,
+        today: today,
+        recordedByName: recordedByName,
+      ),
+      PayrollNotice(PayrollNoticeKind.advanceRequested, amount: amount),
+    );
+  }
 
   Future<PayrollNotice> cancelAdvance(
     PayrollSnapshot snapshot,

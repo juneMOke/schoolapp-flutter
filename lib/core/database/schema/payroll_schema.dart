@@ -28,13 +28,13 @@ const TableSchema refPayrollSettingsTable = TableSchema(
       overtime_multiplier_permille INTEGER NOT NULL,
       allowance_eligible_kinds TEXT NOT NULL,
       by_currency TEXT NOT NULL,
-      work_days_divisor INTEGER NOT NULL DEFAULT 26,
-      absence_deduction_enabled INTEGER NOT NULL DEFAULT 0,
       client_updated_at TEXT,
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
       sync_error_code TEXT,
-      updated_at INTEGER NOT NULL DEFAULT 0
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      work_days_divisor INTEGER NOT NULL DEFAULT 26,
+      absence_deduction_enabled INTEGER NOT NULL DEFAULT 0
     )
   ''',
 );
@@ -113,15 +113,15 @@ const TableSchema payrollVariablesTable = TableSchema(
       overtime_minutes INTEGER,
       overtime_rate_in_cents INTEGER,
       dependent_children INTEGER,
-      worked_days INTEGER,
-      childcare_in_cents INTEGER,
-      fixed_payout_in_cents INTEGER,
-      fixed_payout_reason TEXT,
       client_updated_at TEXT NOT NULL,
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
       sync_error_code TEXT,
       updated_at INTEGER NOT NULL DEFAULT 0,
+      worked_days INTEGER,
+      childcare_in_cents INTEGER,
+      fixed_payout_in_cents INTEGER,
+      fixed_payout_reason TEXT,
       PRIMARY KEY (school_id, month, staff_member_id)
     )
   ''',

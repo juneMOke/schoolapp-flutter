@@ -15,6 +15,9 @@ enum PayrollNoticeKind {
   paid,
   payCancelled,
   advanceGranted,
+
+  /// Une demande d'avance déposée en validation (B5) ; `amount` mis en forme.
+  advanceRequested,
   advanceCancelled,
   profileSaved,
   settingsSaved,

@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/offline/outbox_author.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 
 /// Le payload d'outbox d'un **geste du circuit**, et son corps de requête.
@@ -42,6 +43,9 @@ class ExpenseGesturePayload {
 
   final String? authorId;
 
+  /// Le décaissement d'une avance au personnel (T13) : lu par `/pay` seul.
+  final ExpenseAdvancePayment? advance;
+
   const ExpenseGesturePayload({
     required this.expenseId,
     required this.gesture,
@@ -50,6 +54,7 @@ class ExpenseGesturePayload {
     required this.decidedAt,
     this.expectedClientUpdatedAt,
     this.authorId,
+    this.advance,
   });
 
   /// La route du geste, identifiant compris.
@@ -76,6 +81,7 @@ class ExpenseGesturePayload {
     'decidedAt': decidedAt,
     'message': {'id': messageId, 'body': body},
     'expectedClientUpdatedAt': ?expectedClientUpdatedAt,
+    if (gesture == ExpenseGesture.pay) 'advance': ?advance?.toJson(),
     kOutboxAuthorIdKey: ?authorId,
   };
 
@@ -87,6 +93,7 @@ class ExpenseGesturePayload {
     'body': body,
     'decidedAt': decidedAt,
     'expectedClientUpdatedAt': ?expectedClientUpdatedAt,
+    'advance': ?advance?.toJson(),
     kOutboxAuthorIdKey: ?authorId,
   };
 
@@ -105,5 +112,6 @@ class ExpenseGesturePayload {
         decidedAt: j['decidedAt'] as String,
         expectedClientUpdatedAt: j['expectedClientUpdatedAt'] as String?,
         authorId: j[kOutboxAuthorIdKey] as String?,
+        advance: ExpenseAdvancePayment.tryParse(j['advance']),
       );
 }

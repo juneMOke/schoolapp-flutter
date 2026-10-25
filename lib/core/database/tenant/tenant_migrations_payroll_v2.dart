@@ -16,6 +16,8 @@ part of 'tenant_migrations.dart';
 ///   montant fixe versé et son motif.
 /// - `payroll_payout_policies` : le taux de versement du mois.
 /// - `payroll_arrears_priorities` : le drapeau « priorité » des arriérés.
+/// - `expenses.staff_advance` : le bloc R.H. d'une avance au personnel
+///   déposée comme dépense (B5). Pas de re-pull : le type naît avec Q4.
 Future<void> _payrollV2(DatabaseExecutor db) async {
   await _addColumns(db, 'ref_payroll_settings', const {
     'work_days_divisor': 'INTEGER NOT NULL DEFAULT 26',
@@ -28,6 +30,7 @@ Future<void> _payrollV2(DatabaseExecutor db) async {
     'fixed_payout_in_cents': 'INTEGER',
     'fixed_payout_reason': 'TEXT',
   });
+  await _addColumns(db, 'expenses', const {'staff_advance': 'TEXT'});
   await _createTables(db, const [
     payrollPayoutPoliciesTable,
     payrollArrearsPrioritiesTable,

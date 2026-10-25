@@ -21,6 +21,7 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_pull_handl
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_withdrawal_outbox_handler.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_pull_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_register_use_case.dart';
@@ -76,6 +77,11 @@ void registerExpenseOffline(GetIt getIt) {
           (await getIt<AcademicYearContextRepository>().loadCurrentContext())
               .fold((_) => null, (context) => context.academicYear.startDate),
       syncEngine: getIt<SyncEngine>(),
+      // Tenu par la Paie, enregistrée après ce module : lu à la première
+      // résolution du dépôt, pas à l'enregistrement.
+      advanceGuard: getIt.isRegistered<ExpenseAdvanceGuard>()
+          ? getIt<ExpenseAdvanceGuard>()
+          : null,
     ),
   );
   getIt.registerFactory<LoadExpenseRegisterUseCase>(

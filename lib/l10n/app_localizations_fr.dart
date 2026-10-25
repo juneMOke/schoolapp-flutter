@@ -11886,6 +11886,37 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les types de dépense ne sont pas encore descendus sur cet appareil. Synchronisez, puis réessayez.';
 
   @override
+  String expenseAdvancePayTitle(String amount) {
+    return 'Décaisser l\'avance · $amount';
+  }
+
+  @override
+  String expenseAdvancePayApprovedBy(String name) {
+    return 'Accordée par $name';
+  }
+
+  @override
+  String expenseAdvancePayMode(String mode) {
+    return 'Mode : $mode';
+  }
+
+  @override
+  String get expenseAdvancePayAcknowledged =>
+      'L\'agent a signé la reconnaissance de dette';
+
+  @override
+  String get expenseAdvancePayReference =>
+      'Référence de l\'opération (6 caractères au moins)';
+
+  @override
+  String get expenseAdvancePayFirstMonth => 'Première retenue sur la paie de';
+
+  @override
+  String expenseAdvancePayConfirm(String amount) {
+    return 'Décaisser $amount';
+  }
+
+  @override
   String get expenseFormCancel => 'Annuler';
 
   @override
@@ -14306,6 +14337,33 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get payrollAdvanceRequestEyebrow => 'Nouvelle demande de dépense';
+
+  @override
+  String get payrollAdvanceRequestNote =>
+      'La demande part en validation et rejoint la file Dépenses ▸ Validations ; rien n\'est versé ni retenu avant approbation et décaissement.';
+
+  @override
+  String get payrollAdvanceRequestSubmit => 'Déposer la demande';
+
+  @override
+  String payrollAdvanceCircuitTitle(int count) {
+    return 'Dans le circuit de dépense · $count';
+  }
+
+  @override
+  String get payrollAdvanceCircuitOpen => 'Ouvrir les validations';
+
+  @override
+  String get payrollAdvanceCircuitVia => 'via Dépenses';
+
+  @override
+  String get payrollAdvanceCircuitToApprove => 'À valider';
+
+  @override
+  String get payrollAdvanceCircuitToPay => 'À décaisser';
+
+  @override
   String get payrollVarsTitle => 'Éléments variables';
 
   @override
@@ -14986,6 +15044,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollToastArrearsUnprioritized => 'Priorité retirée';
 
   @override
+  String payrollToastAdvanceRequested(String amount) {
+    return 'Demande de $amount déposée · en attente de validation';
+  }
+
+  @override
+  String get payrollAdvanceExpenseTitle => 'Avance au personnel';
+
+  @override
   String payrollToastVariables(String name) {
     return 'Éléments variables enregistrés — $name';
   }
@@ -15086,6 +15152,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get payrollRuleExceedsBalance =>
       'Ce versement dépasse ce qui reste dû sur ce salaire.';
+
+  @override
+  String get payrollRuleFollowsExpense =>
+      'Cette avance est née d\'une dépense : elle se gère dans les Dépenses.';
+
+  @override
+  String get payrollRuleAdvanceTypeMissing =>
+      'Le type de dépense « Avance au personnel » n\'est pas encore disponible.';
 
   @override
   String get payrollRuleAlreadyDisbursed =>

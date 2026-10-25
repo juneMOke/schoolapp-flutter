@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/salary_advan
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advance_circuit_block.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advance_table.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_advance_dialog.dart';
@@ -85,6 +86,8 @@ class PayrollAdvancesTab extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
+        PayrollAdvanceCircuitBlock(snapshot: state.snapshot),
+        const SizedBox(height: AppSpacing.md),
         Wrap(
           alignment: WrapAlignment.spaceBetween,
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -138,13 +141,33 @@ class PayrollAdvancesTab extends StatelessWidget {
     );
   }
 
+  /// Une demande de dépense dès que le type `STAFF_ADVANCE` est semé (B5) ;
+  /// avant, l'avance s'accorde en direct (T11).
   Future<void> _grant(BuildContext context) async {
     final cubit = context.read<PayrollCubit>();
+    final l10n = AppLocalizations.of(context)!;
+    final asRequest = state.snapshot.staffAdvanceTypeId != null;
     final draft = await PayrollAdvanceDialog.show(
       context,
-      PayrollAdvanceDialog(snapshot: state.snapshot, today: state.today),
+      PayrollAdvanceDialog(
+        snapshot: state.snapshot,
+        today: state.today,
+        asRequest: asRequest,
+      ),
     );
     if (draft == null || !context.mounted) return;
+    if (asRequest) {
+      await cubit.perform(
+        (commands) => commands.requestAdvance(
+          cubit.state.snapshot,
+          draft,
+          title: l10n.payrollAdvanceExpenseTitle,
+          today: DateTime.parse(state.today),
+          amount: MoneyFormat.format(draft.amount),
+        ),
+      );
+      return;
+    }
     await cubit.perform(
       (commands) => commands.grantAdvance(
         cubit.state.snapshot,

@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
@@ -37,10 +38,14 @@ abstract class ExpenseRepository {
   ///
   /// La demande passée sert à décider quoi offrir ; le dépôt **relit** la
   /// ligne avant d'écrire, et refuse le geste si l'état a changé entre-temps.
+  ///
+  /// [advancePayment] : exigé pour payer une avance au personnel (T13),
+  /// ignoré ailleurs.
   Future<Either<Failure, Unit>> applyGesture(
     Expense expense,
     ExpenseGesture gesture, {
     String note = '',
     String? actorName,
+    ExpenseAdvancePayment? advancePayment,
   });
 }

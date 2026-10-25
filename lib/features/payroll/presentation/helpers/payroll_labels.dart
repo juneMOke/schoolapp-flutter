@@ -95,6 +95,8 @@ abstract final class PayrollLabels {
     PayrollRule.monthLocked => l10n.payrollRuleMonthLocked,
     PayrollRule.noContract => l10n.payrollRuleNoContract,
     PayrollRule.alreadyDeducted => l10n.payrollRuleAlreadyDeducted,
+    PayrollRule.followsExpense => l10n.payrollRuleFollowsExpense,
+    PayrollRule.advanceTypeMissing => l10n.payrollRuleAdvanceTypeMissing,
     PayrollRule.notValidated => l10n.payrollRuleNotValidated,
     PayrollRule.nothingToDisburse => l10n.payrollRuleNothingToDisburse,
     PayrollRule.alreadyDisbursed => l10n.payrollRuleAlreadyDisbursed,

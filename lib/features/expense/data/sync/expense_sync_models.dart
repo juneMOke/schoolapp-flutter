@@ -28,6 +28,9 @@ class ExpenseInputDto {
   final String? supplier;
   final String fundingSource;
 
+  /// Le bloc `rh` d'une avance au personnel (T12) ; absent ailleurs.
+  final Map<String, dynamic>? rh;
+
   /// Horloge d'arbitrage, ISO-8601 UTC — c'est aussi la valeur que l'accusé
   /// compare à la ligne locale pour savoir si une saisie plus récente attend.
   final String clientUpdatedAt;
@@ -45,6 +48,7 @@ class ExpenseInputDto {
     this.supplier,
     required this.fundingSource,
     required this.clientUpdatedAt,
+    this.rh,
   });
 
   Map<String, dynamic> toJson() => {
@@ -60,6 +64,7 @@ class ExpenseInputDto {
     'supplier': supplier,
     'fundingSource': fundingSource,
     'clientUpdatedAt': clientUpdatedAt,
+    'rh': ?rh,
   };
 
   /// Relecture du payload d'outbox — **stricte** : un payload qui ne se relit
@@ -77,6 +82,7 @@ class ExpenseInputDto {
     supplier: j['supplier'] as String?,
     fundingSource: (j['fundingSource'] as String?) ?? 'CASH',
     clientUpdatedAt: j['clientUpdatedAt'] as String,
+    rh: j['rh'] is Map ? Map<String, dynamic>.from(j['rh'] as Map) : null,
   );
 }
 

@@ -18488,6 +18488,48 @@ abstract class AppLocalizations {
   /// **'Expense types have not reached this device yet. Synchronise, then try again.'**
   String get expenseFormNoTypes;
 
+  /// No description provided for @expenseAdvancePayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay out the advance · {amount}'**
+  String expenseAdvancePayTitle(String amount);
+
+  /// No description provided for @expenseAdvancePayApprovedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by {name}'**
+  String expenseAdvancePayApprovedBy(String name);
+
+  /// No description provided for @expenseAdvancePayMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode: {mode}'**
+  String expenseAdvancePayMode(String mode);
+
+  /// No description provided for @expenseAdvancePayAcknowledged.
+  ///
+  /// In en, this message translates to:
+  /// **'The staff member signed the acknowledgement of debt'**
+  String get expenseAdvancePayAcknowledged;
+
+  /// No description provided for @expenseAdvancePayReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction reference (at least 6 characters)'**
+  String get expenseAdvancePayReference;
+
+  /// No description provided for @expenseAdvancePayFirstMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'First deduction on the payroll of'**
+  String get expenseAdvancePayFirstMonth;
+
+  /// No description provided for @expenseAdvancePayConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay out {amount}'**
+  String expenseAdvancePayConfirm(String amount);
+
   /// No description provided for @expenseFormCancel.
   ///
   /// In en, this message translates to:
@@ -22291,6 +22333,54 @@ abstract class AppLocalizations {
   /// **'{amount} will be recorded as arrears owed to {count, plural, =1{1 agent} other{{count} agents}}.'**
   String payrollConfirmDeferredWarning(String amount, int count);
 
+  /// No description provided for @payrollAdvanceRequestEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'New expense request'**
+  String get payrollAdvanceRequestEyebrow;
+
+  /// No description provided for @payrollAdvanceRequestNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The request goes for approval in Expenses ▸ Approvals; nothing is paid or deducted before approval and payout.'**
+  String get payrollAdvanceRequestNote;
+
+  /// No description provided for @payrollAdvanceRequestSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'File the request'**
+  String get payrollAdvanceRequestSubmit;
+
+  /// No description provided for @payrollAdvanceCircuitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In the expense circuit · {count}'**
+  String payrollAdvanceCircuitTitle(int count);
+
+  /// No description provided for @payrollAdvanceCircuitOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open approvals'**
+  String get payrollAdvanceCircuitOpen;
+
+  /// No description provided for @payrollAdvanceCircuitVia.
+  ///
+  /// In en, this message translates to:
+  /// **'via Expenses'**
+  String get payrollAdvanceCircuitVia;
+
+  /// No description provided for @payrollAdvanceCircuitToApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'To approve'**
+  String get payrollAdvanceCircuitToApprove;
+
+  /// No description provided for @payrollAdvanceCircuitToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay out'**
+  String get payrollAdvanceCircuitToPay;
+
   /// No description provided for @payrollVarsTitle.
   ///
   /// In en, this message translates to:
@@ -23425,6 +23515,18 @@ abstract class AppLocalizations {
   /// **'Priority removed'**
   String get payrollToastArrearsUnprioritized;
 
+  /// No description provided for @payrollToastAdvanceRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Request for {amount} filed · awaiting approval'**
+  String payrollToastAdvanceRequested(String amount);
+
+  /// No description provided for @payrollAdvanceExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff advance'**
+  String get payrollAdvanceExpenseTitle;
+
   /// No description provided for @payrollToastVariables.
   ///
   /// In en, this message translates to:
@@ -23592,6 +23694,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This payment exceeds what is still owed on this salary.'**
   String get payrollRuleExceedsBalance;
+
+  /// No description provided for @payrollRuleFollowsExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'This advance comes from an expense: manage it in Expenses.'**
+  String get payrollRuleFollowsExpense;
+
+  /// No description provided for @payrollRuleAdvanceTypeMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"Staff advance\" expense type is not available yet.'**
+  String get payrollRuleAdvanceTypeMissing;
 
   /// No description provided for @payrollRuleAlreadyDisbursed.
   ///

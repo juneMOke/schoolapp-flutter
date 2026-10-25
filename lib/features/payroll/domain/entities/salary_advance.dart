@@ -26,6 +26,10 @@ class SalaryAdvance extends Equatable {
   final int deductedInCents;
   final int? balanceInCents;
   final PayrollCancellation? cancellation;
+
+  /// La dépense dont l'avance est née (B5) ; `null` pour une avance directe.
+  /// Une telle avance ne s'annule pas ici : elle suit sa dépense.
+  final String? expenseId;
   final RecordSyncState syncState;
   final String? syncError;
   final String? syncErrorCode;
@@ -43,10 +47,31 @@ class SalaryAdvance extends Equatable {
     this.deductedInCents = 0,
     this.balanceInCents,
     this.cancellation,
+    this.expenseId,
     this.syncState = RecordSyncState.synced,
     this.syncError,
     this.syncErrorCode,
   });
+
+  /// La même avance, rattachée à la dépense [id] dont elle est née.
+  SalaryAdvance withExpense(String id) => SalaryAdvance(
+    id: this.id,
+    staffMemberId: staffMemberId,
+    amount: amount,
+    installments: installments,
+    firstMonth: firstMonth,
+    reason: reason,
+    mode: mode,
+    grantedOn: grantedOn,
+    reasonDetail: reasonDetail,
+    deductedInCents: deductedInCents,
+    balanceInCents: balanceInCents,
+    cancellation: cancellation,
+    expenseId: id,
+    syncState: syncState,
+    syncError: syncError,
+    syncErrorCode: syncErrorCode,
+  );
 
   /// Refusée par le serveur : elle n'existe pas pour lui — mais l'argent est
   /// sorti, elle reste listée à régulariser.
@@ -84,6 +109,7 @@ class SalaryAdvance extends Equatable {
     deductedInCents,
     balanceInCents,
     cancellation,
+    expenseId,
     syncState,
     syncError,
     syncErrorCode,

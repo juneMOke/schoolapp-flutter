@@ -43,6 +43,9 @@ class CancelSalaryAdvanceUseCase {
       return Left(PayrollRuleFailure(PayrollRule.reasonRequired));
     }
     if (advance.isCancelled) return const Right(unit);
+    if (advance.expenseId != null) {
+      return Left(PayrollRuleFailure(PayrollRule.followsExpense));
+    }
     if (PayrollAdvanceRules.hasFrozenDeduction(snapshot, advance)) {
       return Left(PayrollRuleFailure(PayrollRule.alreadyDeducted));
     }

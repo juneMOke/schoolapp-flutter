@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
@@ -31,6 +32,13 @@ class PayrollSnapshot {
 
   /// `mois|agent` des arriérés que la direction a mis en priorité.
   final Set<String> arrearsPriorities;
+
+  /// Les avances demandées par le circuit des dépenses (B5).
+  final List<PayrollAdvanceRequest> advanceRequests;
+
+  /// Le type de dépense `STAFF_ADVANCE` de l'école ; `null` tant que le
+  /// serveur ne l'a pas semé — une avance s'accorde alors en direct (T11).
+  final String? staffAdvanceTypeId;
   final Map<String, List<PayrollLine>> frozenLines;
   final Map<String, AttendanceSummary> summaries;
 
@@ -67,6 +75,8 @@ class PayrollSnapshot {
     required this.hasEverSynced,
     this.payoutPolicies = const {},
     this.arrearsPriorities = const {},
+    this.advanceRequests = const [],
+    this.staffAdvanceTypeId,
     this.school,
   });
 

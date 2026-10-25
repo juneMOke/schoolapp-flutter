@@ -7796,6 +7796,41 @@
   "expenseFormSupplier": "Supplier / payee (optional)",
   "expenseFormSupplierPlaceholder": "e.g. SNEL, Papyrus bookshop…",
   "expenseFormNoTypes": "Expense types have not reached this device yet. Synchronise, then try again.",
+  "expenseAdvancePayTitle": "Pay out the advance · {amount}",
+  "@expenseAdvancePayTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayApprovedBy": "Approved by {name}",
+  "@expenseAdvancePayApprovedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayMode": "Mode: {mode}",
+  "@expenseAdvancePayMode": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayAcknowledged": "The staff member signed the acknowledgement of debt",
+  "expenseAdvancePayReference": "Transaction reference (at least 6 characters)",
+  "expenseAdvancePayFirstMonth": "First deduction on the payroll of",
+  "expenseAdvancePayConfirm": "Pay out {amount}",
+  "@expenseAdvancePayConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "expenseFormCancel": "Cancel",
   "expenseFormSaveCreate": "Save the expense",
   "expenseFormSaveEdit": "Save changes",
@@ -9439,6 +9474,21 @@
       }
     }
   },
+  "payrollAdvanceRequestEyebrow": "New expense request",
+  "payrollAdvanceRequestNote": "The request goes for approval in Expenses ▸ Approvals; nothing is paid or deducted before approval and payout.",
+  "payrollAdvanceRequestSubmit": "File the request",
+  "payrollAdvanceCircuitTitle": "In the expense circuit · {count}",
+  "@payrollAdvanceCircuitTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollAdvanceCircuitOpen": "Open approvals",
+  "payrollAdvanceCircuitVia": "via Expenses",
+  "payrollAdvanceCircuitToApprove": "To approve",
+  "payrollAdvanceCircuitToPay": "To pay out",
   "payrollVarsTitle": "Variable items",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Overtime",
@@ -9753,6 +9803,15 @@
   },
   "payrollToastArrearsPrioritized": "Arrears marked as a priority",
   "payrollToastArrearsUnprioritized": "Priority removed",
+  "payrollToastAdvanceRequested": "Request for {amount} filed · awaiting approval",
+  "@payrollToastAdvanceRequested": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollAdvanceExpenseTitle": "Staff advance",
   "payrollToastVariables": "Variable items saved — {name}",
   "@payrollToastVariables": {"placeholders": {"name": {"type": "String"}}},
   "payrollToastSubmitted": "Submission saved — it leaves at the next sync",
@@ -9784,6 +9843,8 @@
   "payrollRuleNotValidated": "The payroll must be validated by the server before any payment.",
   "payrollRuleNothingToDisburse": "Nothing to pay for this staff member.",
   "payrollRuleExceedsBalance": "This payment exceeds what is still owed on this salary.",
+  "payrollRuleFollowsExpense": "This advance comes from an expense: manage it in Expenses.",
+  "payrollRuleAdvanceTypeMissing": "The \"Staff advance\" expense type is not available yet.",
   "payrollRuleAlreadyDisbursed": "This salary is already paid.",
   "payrollRuleSignatureRequired": "Have the pay sheet signed.",
   "payrollRuleMobileDetails": "Choose the operator and enter a full number.",

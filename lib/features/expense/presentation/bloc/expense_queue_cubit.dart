@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
@@ -116,12 +117,14 @@ class ExpenseQueueCubit extends Cubit<ExpenseQueueState> {
     ExpenseGesture gesture, {
     String note = '',
     String? actorName,
+    ExpenseAdvancePayment? advancePayment,
   }) async {
     final result = await _gesture(
       expense,
       gesture,
       note: note,
       actorName: actorName,
+      advancePayment: advancePayment,
     );
     await refresh();
     return result;

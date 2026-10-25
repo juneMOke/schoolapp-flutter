@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
+import 'package:school_app_flutter/features/payroll/data/repositories/payroll_expense_advance_guard.dart';
 import 'package:school_app_flutter/core/di/offline_modules/payroll_sync_di.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -11,6 +13,7 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_calendar_
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_advance_request_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
@@ -26,6 +29,8 @@ import 'package:school_app_flutter/features/payroll/data/sync/payslip_api.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_pull_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
@@ -60,6 +65,7 @@ void _registerPresentation(GetIt getIt) {
       payoutPolicy: getIt<SavePayrollPayoutPolicyUseCase>(),
       payArrears: getIt<PayPayrollArrearsUseCase>(),
       priority: getIt<SetPayrollArrearsPriorityUseCase>(),
+      request: RequestSalaryAdvanceUseCase(getIt<SaveExpenseUseCase>()),
       gesture: getIt<RecordPayrollGestureUseCase>(),
       disburse: getIt<DisbursePayrollUseCase>(),
       cancelDisbursement: getIt<CancelPayrollDisbursementUseCase>(),
@@ -98,6 +104,7 @@ void _registerDomain(GetIt getIt) {
       variables: getIt<PayrollVariablesDao>(),
       payoutPolicies: getIt<PayrollPayoutPolicyDao>(),
       arrearsPriorities: getIt<PayrollArrearsPriorityDao>(),
+      advanceRequests: PayrollAdvanceRequestDao(getIt<Database>()),
       gestures: getIt<PayrollGestureDao>(),
       summaries: getIt<AttendanceSummaryDao>(),
       advances: getIt<SalaryAdvanceDao>(),
@@ -150,6 +157,13 @@ void _registerDomain(GetIt getIt) {
 }
 
 void _registerStorage(GetIt getIt) {
+  // Le port des Dépenses (B6) : réouverture et première retenue d'une avance.
+  getIt.registerLazySingleton<ExpenseAdvanceGuard>(
+    () => PayrollExpenseAdvanceGuard(
+      payrolls: getIt<PayrollDao>(),
+      currentUser: getIt<CurrentUserContext>(),
+    ),
+  );
   getIt.registerLazySingleton<PayrollSettingsDao>(
     () => PayrollSettingsDao(getIt<Database>()),
   );

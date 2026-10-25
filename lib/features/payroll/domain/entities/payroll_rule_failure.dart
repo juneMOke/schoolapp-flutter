@@ -31,6 +31,12 @@ enum PayrollRule {
 
   /// Une retenue de cette avance est déjà figée.
   alreadyDeducted,
+
+  /// L'avance est née d'une dépense : elle se gère dans les Dépenses (B5).
+  followsExpense,
+
+  /// Le type « Avance au personnel » n'est pas encore semé (T12).
+  advanceTypeMissing,
   notValidated,
   nothingToDisburse,
   alreadyDisbursed,

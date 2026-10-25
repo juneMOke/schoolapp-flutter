@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -171,5 +173,63 @@ void main() {
         );
       },
     );
+  });
+
+  group('avance au personnel (B5, T13, T14)', () {
+    const rh = {
+      'staffMemberId': 'm-1',
+      'kind': 'LOAN',
+      'installments': 3,
+      'reason': 'MEDICAL',
+      'reasonDetail': null,
+      'firstMonth': '2026-10',
+    };
+
+    test('le bloc rh descend ; caviardé, il est absent', () {
+      final base = {
+        'id': 'e-1',
+        'typeId': 't-1',
+        'title': 'Avance au personnel',
+        'amountInCents': 30000,
+        'currency': 'USD',
+        'status': 'PAID',
+        'expenseDate': '2026-10-05',
+        'clientUpdatedAt': '2026-10-05T09:00:00Z',
+      };
+      final withRh = ExpenseDeltaDto.tryParse({...base, 'rh': rh})!;
+      final redacted = ExpenseDeltaDto.tryParse(base)!;
+
+      expect(ExpenseStaffAdvance.tryParse(withRh.staffAdvance)?.toJson(), rh);
+      expect(redacted.staffAdvance, isNull);
+    });
+
+    test('le geste PAY porte advance sur le fil, et lui seul', () {
+      const payment = ExpenseAdvancePayment(
+        firstMonth: '2026-10',
+        reference: 'MP-123456',
+      );
+      final pay = const ExpenseGesturePayload(
+        expenseId: 'e-1',
+        gesture: ExpenseGesture.pay,
+        messageId: 'm-1',
+        body: '',
+        decidedAt: '2026-10-05T09:00:00.000Z',
+        advance: payment,
+      );
+      final reread = ExpenseGesturePayload.fromJson(
+        jsonDecode(jsonEncode(pay.toJson())) as Map<String, dynamic>,
+      );
+      final approve = const ExpenseGesturePayload(
+        expenseId: 'e-1',
+        gesture: ExpenseGesture.approve,
+        messageId: 'm-2',
+        body: '',
+        decidedAt: '2026-10-05T09:00:00.000Z',
+        advance: payment,
+      );
+
+      expect(reread.toWireJson()['advance'], payment.toJson());
+      expect(approve.toWireJson().containsKey('advance'), isFalse);
+    });
   });
 }

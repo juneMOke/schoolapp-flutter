@@ -11791,6 +11791,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'Expense types have not reached this device yet. Synchronise, then try again.';
 
   @override
+  String expenseAdvancePayTitle(String amount) {
+    return 'Pay out the advance · $amount';
+  }
+
+  @override
+  String expenseAdvancePayApprovedBy(String name) {
+    return 'Approved by $name';
+  }
+
+  @override
+  String expenseAdvancePayMode(String mode) {
+    return 'Mode: $mode';
+  }
+
+  @override
+  String get expenseAdvancePayAcknowledged =>
+      'The staff member signed the acknowledgement of debt';
+
+  @override
+  String get expenseAdvancePayReference =>
+      'Transaction reference (at least 6 characters)';
+
+  @override
+  String get expenseAdvancePayFirstMonth => 'First deduction on the payroll of';
+
+  @override
+  String expenseAdvancePayConfirm(String amount) {
+    return 'Pay out $amount';
+  }
+
+  @override
   String get expenseFormCancel => 'Cancel';
 
   @override
@@ -14205,6 +14236,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get payrollAdvanceRequestEyebrow => 'New expense request';
+
+  @override
+  String get payrollAdvanceRequestNote =>
+      'The request goes for approval in Expenses ▸ Approvals; nothing is paid or deducted before approval and payout.';
+
+  @override
+  String get payrollAdvanceRequestSubmit => 'File the request';
+
+  @override
+  String payrollAdvanceCircuitTitle(int count) {
+    return 'In the expense circuit · $count';
+  }
+
+  @override
+  String get payrollAdvanceCircuitOpen => 'Open approvals';
+
+  @override
+  String get payrollAdvanceCircuitVia => 'via Expenses';
+
+  @override
+  String get payrollAdvanceCircuitToApprove => 'To approve';
+
+  @override
+  String get payrollAdvanceCircuitToPay => 'To pay out';
+
+  @override
   String get payrollVarsTitle => 'Variable items';
 
   @override
@@ -14881,6 +14939,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollToastArrearsUnprioritized => 'Priority removed';
 
   @override
+  String payrollToastAdvanceRequested(String amount) {
+    return 'Request for $amount filed · awaiting approval';
+  }
+
+  @override
+  String get payrollAdvanceExpenseTitle => 'Staff advance';
+
+  @override
   String payrollToastVariables(String name) {
     return 'Variable items saved — $name';
   }
@@ -14981,6 +15047,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payrollRuleExceedsBalance =>
       'This payment exceeds what is still owed on this salary.';
+
+  @override
+  String get payrollRuleFollowsExpense =>
+      'This advance comes from an expense: manage it in Expenses.';
+
+  @override
+  String get payrollRuleAdvanceTypeMissing =>
+      'The \"Staff advance\" expense type is not available yet.';
 
   @override
   String get payrollRuleAlreadyDisbursed => 'This salary is already paid.';

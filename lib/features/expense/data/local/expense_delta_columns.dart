@@ -19,6 +19,7 @@ abstract final class ExpenseDeltaColumns {
     'currency': d.currency,
     'expense_date': d.expenseDate,
     'supplier': d.supplier,
+    'staff_advance': d.staffAdvance,
     'funding_source': d.fundingSource,
     'client_updated_at': d.clientUpdatedAt,
   };

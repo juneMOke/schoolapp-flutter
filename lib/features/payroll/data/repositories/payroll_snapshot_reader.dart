@@ -1,7 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_local.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_projection.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_ids.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_contract_dao.dart';
@@ -46,6 +50,11 @@ class PayrollSnapshotReader {
                 for (final contract in list) contract.id: contract,
             };
             final frozen = await _local.payrolls.frozenLines(schoolId);
+            final requests = await _local.advanceRequests.forSchool(schoolId);
+            final advances = _advancesOf(
+              await _local.advances.forSchool(schoolId),
+              requests,
+            );
             return Right(
               PayrollSnapshot(
                 members: file.members,
@@ -66,7 +75,10 @@ class PayrollSnapshotReader {
                 },
                 summaries: await _local.summaries.forSchool(schoolId),
                 gestures: await _local.gestures.forSchool(schoolId),
-                advances: await _local.advances.forSchool(schoolId),
+                advances: advances,
+                advanceRequests: requests,
+                staffAdvanceTypeId: await _local.advanceRequests
+                    .staffAdvanceTypeId(schoolId),
                 disbursements: await _local.disbursements.forSchool(schoolId),
                 schoolYears: await _local.calendar.schoolYears(schoolId),
                 shareTraces: await _local.shares.forSchool(schoolId),
@@ -82,6 +94,26 @@ class PayrollSnapshotReader {
           }
         },
       );
+
+  /// Les avances de la tablette, rattachées à la dépense dont elles sont
+  /// nées, plus celles qu'un paiement de dépense laisse attendre (B5).
+  static List<SalaryAdvance> _advancesOf(
+    List<SalaryAdvance> stored,
+    List<PayrollAdvanceRequest> requests,
+  ) {
+    final byAdvanceId = {
+      for (final request in requests)
+        PayrollIds.salaryAdvanceIdOf(request.expenseId): request.expenseId,
+    };
+    final linked = [
+      for (final advance in stored)
+        if (byAdvanceId[advance.id] case final expenseId?)
+          advance.withExpense(expenseId)
+        else
+          advance,
+    ];
+    return [...linked, ...PayrollAdvanceProjection.of(requests, linked)];
+  }
 
   /// Le serveur ne redit pas le début du contrat retenu : la tablette le lit
   /// dans ses contrats, pour « contrat du 15/09 ».

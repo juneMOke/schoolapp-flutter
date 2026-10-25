@@ -7997,6 +7997,54 @@
   "expenseFormSupplier": "Fournisseur / bénéficiaire (facultatif)",
   "expenseFormSupplierPlaceholder": "ex. SNEL, Librairie Papyrus…",
   "expenseFormNoTypes": "Les types de dépense ne sont pas encore descendus sur cet appareil. Synchronisez, puis réessayez.",
+  "expenseAdvancePayTitle": "Décaisser l'avance · {amount}",
+  "@expenseAdvancePayTitle": {
+    "description": "Titre de la modale de décaissement d'une avance.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayApprovedBy": "Accordée par {name}",
+  "@expenseAdvancePayApprovedBy": {
+    "description": "Rappel de l'accord.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayMode": "Mode : {mode}",
+  "@expenseAdvancePayMode": {
+    "description": "Rappel de la source des fonds.",
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseAdvancePayAcknowledged": "L'agent a signé la reconnaissance de dette",
+  "@expenseAdvancePayAcknowledged": {
+    "description": "Preuve en espèces."
+  },
+  "expenseAdvancePayReference": "Référence de l'opération (6 caractères au moins)",
+  "@expenseAdvancePayReference": {
+    "description": "Preuve hors espèces."
+  },
+  "expenseAdvancePayFirstMonth": "Première retenue sur la paie de",
+  "@expenseAdvancePayFirstMonth": {
+    "description": "Choix du mois de première retenue."
+  },
+  "expenseAdvancePayConfirm": "Décaisser {amount}",
+  "@expenseAdvancePayConfirm": {
+    "description": "Bouton de décaissement.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "expenseFormCancel": "Annuler",
   "expenseFormSaveCreate": "Enregistrer la dépense",
   "expenseFormSaveEdit": "Enregistrer les modifications",
@@ -10011,6 +10059,43 @@
       }
     }
   },
+  "payrollAdvanceRequestEyebrow": "Nouvelle demande de dépense",
+  "@payrollAdvanceRequestEyebrow": {
+    "description": "Sur-titre du dépôt d'une avance."
+  },
+  "payrollAdvanceRequestNote": "La demande part en validation et rejoint la file Dépenses ▸ Validations ; rien n'est versé ni retenu avant approbation et décaissement.",
+  "@payrollAdvanceRequestNote": {
+    "description": "Note du dépôt d'une avance."
+  },
+  "payrollAdvanceRequestSubmit": "Déposer la demande",
+  "@payrollAdvanceRequestSubmit": {
+    "description": "Bouton du dépôt d'une avance."
+  },
+  "payrollAdvanceCircuitTitle": "Dans le circuit de dépense · {count}",
+  "@payrollAdvanceCircuitTitle": {
+    "description": "Titre du bloc des demandes d'avance.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "payrollAdvanceCircuitOpen": "Ouvrir les validations",
+  "@payrollAdvanceCircuitOpen": {
+    "description": "Bouton vers Dépenses ▸ Validations."
+  },
+  "payrollAdvanceCircuitVia": "via Dépenses",
+  "@payrollAdvanceCircuitVia": {
+    "description": "Mention d'une avance demandée."
+  },
+  "payrollAdvanceCircuitToApprove": "À valider",
+  "@payrollAdvanceCircuitToApprove": {
+    "description": "Statut d'une demande en attente."
+  },
+  "payrollAdvanceCircuitToPay": "À décaisser",
+  "@payrollAdvanceCircuitToPay": {
+    "description": "Statut d'une demande accordée."
+  },
   "payrollVarsTitle": "Éléments variables",
   "payrollVarsBase": "Base",
   "payrollVarsOvertime": "Heures supplémentaires",
@@ -10371,6 +10456,19 @@
   "@payrollToastArrearsUnprioritized": {
     "description": "Toast du drapeau priorité."
   },
+  "payrollToastAdvanceRequested": "Demande de {amount} déposée · en attente de validation",
+  "@payrollToastAdvanceRequested": {
+    "description": "Toast du dépôt d'une demande d'avance.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payrollAdvanceExpenseTitle": "Avance au personnel",
+  "@payrollAdvanceExpenseTitle": {
+    "description": "Intitulé de la dépense d'une avance (sans nom, T14)."
+  },
   "payrollToastVariables": "Éléments variables enregistrés — {name}",
   "payrollToastSubmitted": "Soumission enregistrée — elle part à la prochaine synchronisation",
   "payrollToastValidated": "Validation enregistrée — la paie sera verrouillée à la confirmation du serveur",
@@ -10404,6 +10502,14 @@
   "payrollRuleExceedsBalance": "Ce versement dépasse ce qui reste dû sur ce salaire.",
   "@payrollRuleExceedsBalance": {
     "description": "Règle : versement au-delà du reste."
+  },
+  "payrollRuleFollowsExpense": "Cette avance est née d'une dépense : elle se gère dans les Dépenses.",
+  "@payrollRuleFollowsExpense": {
+    "description": "Règle : avance née d'une dépense."
+  },
+  "payrollRuleAdvanceTypeMissing": "Le type de dépense « Avance au personnel » n'est pas encore disponible.",
+  "@payrollRuleAdvanceTypeMissing": {
+    "description": "Règle : type STAFF_ADVANCE absent."
   },
   "payrollRuleAlreadyDisbursed": "Ce salaire est déjà entièrement versé.",
   "payrollRuleSignatureRequired": "Faites signer l'état d'émargement.",

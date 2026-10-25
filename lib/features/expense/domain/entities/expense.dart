@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 
 /// Une dépense du registre — un fait plat, sans jointure.
 ///
@@ -47,6 +48,10 @@ class Expense extends Equatable {
   /// Date de la dépense, pas de la saisie.
   final DateTime expenseDate;
   final String? supplier;
+
+  /// Le bloc R.H. d'une avance au personnel (`STAFF_ADVANCE`) ; `null`
+  /// ailleurs, ou caviardé pour qui ne lit pas la paie (T14).
+  final ExpenseStaffAdvance? staffAdvance;
   final ExpenseFundingSource fundingSource;
   final String? recordedById;
 
@@ -82,6 +87,7 @@ class Expense extends Equatable {
     this.lastMessageAt,
     required this.expenseDate,
     this.supplier,
+    this.staffAdvance,
     this.fundingSource = ExpenseFundingSource.cash,
     this.recordedById,
     this.recordedByName,
@@ -145,6 +151,7 @@ class Expense extends Equatable {
     lastMessageAt,
     expenseDate,
     supplier,
+    staffAdvance,
     fundingSource,
     recordedById,
     recordedByName,
