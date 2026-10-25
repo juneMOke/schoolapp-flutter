@@ -12026,5 +12026,9 @@
   "payrollDashOpenPayroll": "Ouvrir la paie",
   "payrollDashNoPayroll": "Aucune paie pour ce mois",
   "payrollDashCurrentMonth": "Mois en cours",
-  "payrollDashNoStaff": "Aucun agent à payer"
+  "payrollDashNoStaff": "Aucun agent à payer",
+  "payrollDashNotTracked": "Paie validée avant la v2 : ses versements n'étaient pas saisis, rien ne s'y suit.",
+  "payrollDashMore": "{count, plural, =1{+ 1 autre — voir Avances & prêts} other{+ {count} autres — voir Avances & prêts}}",
+  "@payrollDashMore": {"placeholders": {"count": {"type": "int"}}},
+  "payrollAdvanceRetractedNote": "Retirée par le demandeur"
 }

@@ -19858,4 +19858,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollDashNoStaff => 'No employee to pay';
+
+  @override
+  String get payrollDashNotTracked =>
+      'Payroll validated before v2: its payments were not recorded, nothing can be tracked.';
+
+  @override
+  String payrollDashMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count more — see Advances & loans',
+      one: '+ 1 more — see Advances & loans',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAdvanceRetractedNote => 'Withdrawn by the requester';
 }

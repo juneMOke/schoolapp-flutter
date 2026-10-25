@@ -55,7 +55,7 @@ class PayrollSettingsForm extends StatelessWidget {
           l10n.payrollSettingsInCurrency(label, currency),
           draft.errorOfAmount(currency, which),
         );
-    const currencies = PayrollSettingsDraft.currencies;
+    final currencies = draft.currencies;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

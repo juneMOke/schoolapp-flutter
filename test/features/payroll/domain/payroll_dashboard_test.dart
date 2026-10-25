@@ -187,4 +187,76 @@ void main() {
     );
     expect(PayrollDashboardFilter.outstanding.wire, 'OUTSTANDING');
   });
+
+  test(
+    'un agent sans ligne ce mois garde sa ligne d arriérés, comme au PDF',
+    () {
+      // m-1 doit 20 000 sur août mais n'a plus de salaire en septembre.
+      final withoutM1 = PayrollLedger.monthView(
+        PayrollSnapshot(
+          members: const [],
+          contractsByMember: const {},
+          settings: PayrollSettings.defaults,
+          profiles: const {},
+          headers: snapshot.headers,
+          variables: const {},
+          frozenLines: {
+            '2026-08': snapshot.frozenLines['2026-08']!,
+            '2026-09': [line('m-3', '2026-09')],
+          },
+          summaries: const {},
+          gestures: const [],
+          advances: const [],
+          disbursements: snapshot.disbursements,
+          schoolYears: const [(start: '2025-09-01', end: '2027-07-02')],
+          shareTraces: const {},
+          hasEverSynced: true,
+        ),
+        '2026-09',
+      );
+      final rows = PayrollDashboard.rowsOf(withoutM1, arrears);
+      final m1 = rows.singleWhere((row) => row.staffMemberId == 'm-1');
+      expect(m1.netInCents, 0);
+      expect(m1.arrearsInCents, 20000);
+      expect(m1.remainingInCents, 20000);
+      expect(m1.status, PayrollDashboardStatus.due);
+    },
+  );
+
+  test('une paie d avant la v2 ne se suit pas : ni payé, ni non payé', () {
+    final v1 = PayrollLedger.monthView(
+      PayrollSnapshot(
+        members: const [],
+        contractsByMember: const {},
+        settings: PayrollSettings.defaults,
+        profiles: const {},
+        headers: {'2026-06': validated('2026-06')},
+        variables: const {},
+        frozenLines: {
+          '2026-06': [
+            const PayrollLine(
+              month: '2026-06',
+              staffMemberId: 'm-1',
+              currency: 'USD',
+              baseInCents: 30000,
+              grossInCents: 30000,
+              netInCents: 30000,
+              formulaVersion: 1,
+              frozen: true,
+            ),
+          ],
+        },
+        summaries: const {},
+        gestures: const [],
+        advances: const [],
+        disbursements: const [],
+        schoolYears: const [(start: '2025-09-01', end: '2027-07-02')],
+        shareTraces: const {},
+        hasEverSynced: true,
+      ),
+      '2026-06',
+    );
+    expect(PayrollDashboard.isTracked(v1), isFalse);
+    expect(PayrollDashboard.progressOf(v1, 'USD').totalInCents, 0);
+  });
 }

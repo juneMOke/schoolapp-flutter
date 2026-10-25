@@ -89,7 +89,8 @@ class ExpenseRegisterActions {
     );
     if (!context.mounted) return null;
     if (bridged) {
-      await bridge?.request(context);
+      final written = await bridge?.request(context) ?? false;
+      if (!written) return null;
       // La demande est écrite par la Paie : le registre la relit.
       await cubit.refresh();
       if (context.mounted) _notifyLocalWrite();

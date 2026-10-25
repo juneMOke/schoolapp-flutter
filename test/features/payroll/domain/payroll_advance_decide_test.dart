@@ -96,4 +96,64 @@ void main() {
       );
     },
   );
+
+  test(
+    'décaisser par mobile money sans référence : la référence est nommée',
+    () async {
+      final mobile = Expense(
+        id: 'e-2',
+        typeId: 't-adv',
+        title: 'Avance',
+        amountInCents: 30000,
+        currency: 'USD',
+        status: ExpenseStatus.approved,
+        expenseDate: DateTime(2026, 10, 20),
+        clientUpdatedAt: DateTime.utc(2026, 10, 20),
+        fundingSource: ExpenseFundingSource.mobileMoney,
+      );
+      when(
+        () => expenses.applyGesture(
+          mobile,
+          any(),
+          note: any(named: 'note'),
+          actorName: any(named: 'actorName'),
+          advancePayment: any(named: 'advancePayment'),
+        ),
+      ).thenAnswer((_) async => const Left(ValidationFailure('preuve')));
+      expect(
+        ruleOf(await decide(mobile, ExpenseGesture.pay)),
+        PayrollRule.invalidReference,
+      );
+    },
+  );
+
+  test(
+    'décaisser refusé sur une demande encore accordée : le mois est fermé',
+    () async {
+      final approved = Expense(
+        id: 'e-3',
+        typeId: 't-adv',
+        title: 'Avance',
+        amountInCents: 30000,
+        currency: 'USD',
+        status: ExpenseStatus.approved,
+        expenseDate: DateTime(2026, 10, 20),
+        clientUpdatedAt: DateTime.utc(2026, 10, 20),
+      );
+      when(
+        () => expenses.applyGesture(
+          approved,
+          any(),
+          note: any(named: 'note'),
+          actorName: any(named: 'actorName'),
+          advancePayment: any(named: 'advancePayment'),
+        ),
+      ).thenAnswer((_) async => const Left(ConflictFailure('mois fermé')));
+      when(() => expenses.find('e-3')).thenAnswer((_) async => Right(approved));
+      expect(
+        ruleOf(await decide(approved, ExpenseGesture.pay)),
+        PayrollRule.monthLocked,
+      );
+    },
+  );
 }

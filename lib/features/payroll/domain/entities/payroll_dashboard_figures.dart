@@ -1,5 +1,3 @@
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
-
 /// Le statut d'une ligne du tableau « Ce que chaque salarié perçoit » —
 /// mêmes mots au PDF du serveur (Q7) qu'à l'écran.
 enum PayrollDashboardStatus {
@@ -29,9 +27,13 @@ enum PayrollDashboardFilter {
 
 /// Une ligne de « Ce que chaque salarié perçoit », définitions figées avec le
 /// back (doc back, « P1 : définitions des colonnes ») — centimes, devise de
-/// la ligne.
+/// la ligne. Un agent sans salaire ce mois dans cette devise a quand même sa
+/// ligne s'il lui reste des arriérés : ce qui est dû ne disparaît pas du
+/// tableau (comme `PayrollSituationReader.arrearsOnly` au serveur).
 class PayrollDashboardRow {
-  final PayrollLine line;
+  final String staffMemberId;
+  final String currency;
+  final int netInCents;
 
   /// Brut.
   final int plannedInCents;
@@ -48,17 +50,15 @@ class PayrollDashboardRow {
   final PayrollDashboardStatus status;
 
   const PayrollDashboardRow({
-    required this.line,
+    required this.staffMemberId,
+    required this.currency,
+    required this.netInCents,
     required this.plannedInCents,
     required this.deductionsInCents,
     required this.arrearsInCents,
     required this.receivedInCents,
     required this.status,
   });
-
-  String get staffMemberId => line.staffMemberId;
-  String get currency => line.currency;
-  int get netInCents => line.netInCents;
 
   /// Net du mois + arriérés − perçu.
   int get remainingInCents {

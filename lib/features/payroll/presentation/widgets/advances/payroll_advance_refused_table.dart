@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
@@ -67,7 +68,9 @@ class PayrollAdvanceRefusedTable extends StatelessWidget {
               ),
             ),
             Text(
-              request.decisionReason ?? '—',
+              request.status == ExpenseStatus.retracted
+                  ? l10n.payrollAdvanceRetractedNote
+                  : request.decisionReason ?? '—',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.bodySmall,

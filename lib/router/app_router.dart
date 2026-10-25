@@ -53,6 +53,7 @@ import 'package:school_app_flutter/features/home/presentation/pages/home_page.da
 import 'package:school_app_flutter/features/splash/presentation/pages/splash_page.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 // Debug import — uniquement accédé via kDebugMode
@@ -528,6 +529,17 @@ class AppRouter {
       path: AppRoutesNames.hrStaffAttendance,
       builder: (context, state) => const StaffAttendancePage(),
     ),
+    // Les anciennes adresses de la Paie, sous Ressources humaines : un
+    // favori ou un lien partagé retrouve RH · Paie.
+    for (final subMenuId in const [
+      MenuConstants.hrPayrollId,
+      MenuConstants.hrPayrollArrearsId,
+    ])
+      GoRoute(
+        path: '/${MenuConstants.hrMenuId}/$subMenuId',
+        redirect: (context, state) =>
+            '/${MenuConstants.hrPayrollMenuId}/$subMenuId',
+      ),
     GoRoute(
       path: AppRoutesNames.hrPayrollDashboard,
       builder: (context, state) => const PayrollDashboardPage(),

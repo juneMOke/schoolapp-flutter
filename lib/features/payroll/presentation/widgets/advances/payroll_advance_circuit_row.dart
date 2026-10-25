@@ -18,7 +18,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Une demande dans le circuit : l'agent, le montant, où elle en est, et le
 /// seul geste possible à qui en a le droit — la direction approuve ou
 /// refuse, la caisse décaisse. Les autres lisent qui est attendu.
-class PayrollAdvanceCircuitRow extends StatelessWidget {
+class PayrollAdvanceCircuitRow extends StatefulWidget {
   final PayrollSnapshot snapshot;
   final PayrollAdvanceRequest request;
 
@@ -29,7 +29,29 @@ class PayrollAdvanceCircuitRow extends StatelessWidget {
   });
 
   @override
+  State<PayrollAdvanceCircuitRow> createState() => _CircuitRowState();
+}
+
+class _CircuitRowState extends State<PayrollAdvanceCircuitRow> {
+  /// Un geste en vol : un second toucher ne repart pas avec la même copie.
+  bool _busy = false;
+
+  Future<void> _decide(ExpenseGesture gesture, String name) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    await PayrollAdvanceDecisions.run(
+      context,
+      widget.request,
+      gesture,
+      name: name,
+    );
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final snapshot = widget.snapshot;
+    final request = widget.request;
     final l10n = AppLocalizations.of(context)!;
     final pending = request.status == ExpenseStatus.pending;
     final tone = pending ? PayrollTone.submitted : PayrollTone.validated;
@@ -57,8 +79,8 @@ class PayrollAdvanceCircuitRow extends StatelessWidget {
         if (PermissionGate.allowsAccess(context, expenseGestureAccess(gesture)))
           gesture,
     ];
-    void decide(ExpenseGesture gesture) =>
-        PayrollAdvanceDecisions.run(context, request, gesture, name: name);
+    VoidCallback? decide(ExpenseGesture gesture) =>
+        _busy ? null : () => _decide(gesture, name);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Column(
@@ -85,22 +107,24 @@ class PayrollAdvanceCircuitRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    MoneyFormat.format(request.amount),
-                    style: AppTypography.labelLarge.copyWith(
-                      fontFeatures: const [FontFeature.tabularFigures()],
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      MoneyFormat.format(request.amount),
+                      style: AppTypography.labelLarge.copyWith(
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
-                  ),
-                  Text(
-                    pending
-                        ? l10n.payrollAdvanceCircuitToApprove
-                        : l10n.payrollAdvanceCircuitToPay,
-                    style: AppTypography.labelSmall.copyWith(color: tone.ink),
-                  ),
-                ],
+                    Text(
+                      pending
+                          ? l10n.payrollAdvanceCircuitToApprove
+                          : l10n.payrollAdvanceCircuitToPay,
+                      style: AppTypography.labelSmall.copyWith(color: tone.ink),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -125,19 +149,19 @@ class PayrollAdvanceCircuitRow extends StatelessWidget {
                           ExpenseGesture.refuse => EteeloButton.secondary(
                             label: l10n.payrollAdvanceRefuse,
                             icon: Icons.cancel_outlined,
-                            onPressed: () => decide(gesture),
+                            onPressed: decide(gesture),
                             fullWidth: false,
                           ),
                           ExpenseGesture.approve => EteeloButton.primary(
                             label: l10n.payrollAdvanceApprove,
                             icon: Icons.verified_outlined,
-                            onPressed: () => decide(gesture),
+                            onPressed: decide(gesture),
                             fullWidth: false,
                           ),
                           _ => EteeloButton.primary(
                             label: l10n.payrollAdvanceDisburse,
                             icon: Icons.payments_outlined,
-                            onPressed: () => decide(gesture),
+                            onPressed: decide(gesture),
                             fullWidth: false,
                           ),
                         },

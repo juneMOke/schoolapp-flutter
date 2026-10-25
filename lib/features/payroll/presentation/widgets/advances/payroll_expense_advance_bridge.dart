@@ -35,10 +35,10 @@ class PayrollExpenseAdvanceBridge implements ExpenseStaffAdvanceBridge {
       permissions.contains(Perm.expenseWrite.wire);
 
   @override
-  Future<void> request(BuildContext context) async {
+  Future<bool> request(BuildContext context) async {
     final today = SchoolDayCalendar.dayOf(_now());
     final snapshot = (await _load()).fold((_) => null, (s) => s);
-    if (!context.mounted) return;
+    if (!context.mounted) return false;
     void announce(PayrollNotice notice) => showPayrollNotice(
       context,
       notice,
@@ -46,13 +46,13 @@ class PayrollExpenseAdvanceBridge implements ExpenseStaffAdvanceBridge {
     );
     if (snapshot == null) {
       announce(const PayrollNotice(PayrollNoticeKind.writeFailed));
-      return;
+      return false;
     }
     final draft = await PayrollAdvanceDialog.show(
       context,
       PayrollAdvanceDialog(snapshot: snapshot, today: today, asRequest: true),
     );
-    if (draft == null || !context.mounted) return;
+    if (draft == null || !context.mounted) return false;
     final notice = await _commands().requestAdvance(
       snapshot,
       draft,
@@ -62,5 +62,6 @@ class PayrollExpenseAdvanceBridge implements ExpenseStaffAdvanceBridge {
       recordedByName: PayrollAdvanceDecisions.sessionAgentName(context),
     );
     if (context.mounted) announce(notice);
+    return notice.kind == PayrollNoticeKind.advanceRequested;
   }
 }

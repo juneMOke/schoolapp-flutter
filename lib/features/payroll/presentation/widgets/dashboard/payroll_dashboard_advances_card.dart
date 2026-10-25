@@ -40,6 +40,9 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
   ];
   PayrollAdvanceFilter _filter = PayrollAdvanceFilter.ongoing;
 
+  /// Une carte, pas un registre.
+  static const int _maxRows = 5;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -95,8 +98,21 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
                 ),
               ),
             )
-          else
-            for (final advance in visible) _row(context, advance),
+          else ...[
+            for (final advance in visible.take(_maxRows))
+              _row(context, advance),
+            // Le registre complet vit dans Avances & prêts.
+            if (visible.length > _maxRows)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(
+                  l10n.payrollDashMore(visible.length - _maxRows),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+          ],
         ],
       ),
     );
@@ -137,12 +153,16 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
                   style: AppTypography.labelLarge,
                 ),
               ),
-              Text(
-                l10n.payrollDashRemainingOf(
-                  money(advance.remainingInCents),
-                  money(amount),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  l10n.payrollDashRemainingOf(
+                    money(advance.remainingInCents),
+                    money(amount),
+                  ),
+                  textAlign: TextAlign.end,
+                  style: AppTypography.labelMedium,
                 ),
-                style: AppTypography.labelMedium,
               ),
             ],
           ),

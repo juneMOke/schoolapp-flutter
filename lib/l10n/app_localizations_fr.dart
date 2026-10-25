@@ -19994,4 +19994,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollDashNoStaff => 'Aucun agent à payer';
+
+  @override
+  String get payrollDashNotTracked =>
+      'Paie validée avant la v2 : ses versements n\'étaient pas saisis, rien ne s\'y suit.';
+
+  @override
+  String payrollDashMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count autres — voir Avances & prêts',
+      one: '+ 1 autre — voir Avances & prêts',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAdvanceRetractedNote => 'Retirée par le demandeur';
 }

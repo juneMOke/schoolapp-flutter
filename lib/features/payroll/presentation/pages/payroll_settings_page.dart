@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enum
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_local_write.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_draft.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_form.dart';
@@ -50,7 +51,9 @@ class PayrollSettingsScreen extends StatelessWidget {
       ),
       buildWhen: (previous, current) =>
           previous.load != current.load ||
-          previous.snapshot.settings != current.snapshot.settings,
+          previous.snapshot.settings != current.snapshot.settings ||
+          previous.snapshot.hasEverSynced != current.snapshot.hasEverSynced ||
+          previous.snapshot.headers != current.snapshot.headers,
       builder: (context, state) => switch (state.load) {
         PayrollLoad.failure => StaffResultsErrorState(
           failure: state.failure,
@@ -109,6 +112,7 @@ class _SettingsEditorState extends State<_SettingsEditor> {
       (commands) => commands.saveSettings(settings),
     );
     if (!mounted) return;
+    notifyPayrollLocalWrite(context);
     setState(() => _saving = false);
   }
 

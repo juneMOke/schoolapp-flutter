@@ -134,19 +134,41 @@ class DecideSalaryAdvanceUseCase {
       actorName: actorName,
       advancePayment: advancePayment,
     );
-    // Les refus du dépôt des dépenses, dits dans la langue de la Paie : un
-    // état qui a bougé (un collègue a tranché, la paie choisie s'est fermée),
-    // ou une preuve de décaissement manquante.
-    return result.leftMap(
-      (failure) => switch (failure) {
-        ConflictFailure() => PayrollRuleFailure(PayrollRule.wrongPhase),
-        ValidationFailure() => PayrollRuleFailure(
-          gesture == ExpenseGesture.pay
+    final failure = result.fold((failure) => failure, (_) => null);
+    if (failure == null) return result;
+    return Left(await _inPayrollTerms(failure, expense, gesture));
+  }
+
+  /// Les refus du dépôt des dépenses, dits dans la langue de la Paie.
+  Future<Failure> _inPayrollTerms(
+    Failure failure,
+    Expense expense,
+    ExpenseGesture gesture,
+  ) async {
+    switch (failure) {
+      case ConflictFailure():
+        // Décaisser refusé sur une demande toujours accordée : c'est le mois
+        // de première retenue qui s'est fermé — en choisir un autre. Sinon
+        // un collègue a tranché entre-temps.
+        if (gesture == ExpenseGesture.pay) {
+          final current = (await _find(expense.id)).fold((_) => null, (e) => e);
+          if (current?.status == ExpenseStatus.approved) {
+            return PayrollRuleFailure(PayrollRule.monthLocked);
+          }
+        }
+        return PayrollRuleFailure(PayrollRule.wrongPhase);
+      case ValidationFailure() when gesture == ExpenseGesture.refuse:
+        return PayrollRuleFailure(PayrollRule.reasonRequired);
+      // La preuve d'un décaissement : l'émargement en espèces, sinon la
+      // référence de l'opération.
+      case ValidationFailure() when gesture == ExpenseGesture.pay:
+        return PayrollRuleFailure(
+          expense.fundingSource == ExpenseFundingSource.cash
               ? PayrollRule.signatureRequired
-              : PayrollRule.reasonRequired,
-        ),
-        _ => failure,
-      },
-    );
+              : PayrollRule.invalidReference,
+        );
+      default:
+        return failure;
+    }
   }
 }

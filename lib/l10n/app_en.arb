@@ -11774,5 +11774,9 @@
   "payrollDashOpenPayroll": "Open the payroll",
   "payrollDashNoPayroll": "No payroll for this month",
   "payrollDashCurrentMonth": "Current month",
-  "payrollDashNoStaff": "No employee to pay"
+  "payrollDashNoStaff": "No employee to pay",
+  "payrollDashNotTracked": "Payroll validated before v2: its payments were not recorded, nothing can be tracked.",
+  "payrollDashMore": "{count, plural, =1{+ 1 more — see Advances & loans} other{+ {count} more — see Advances & loans}}",
+  "@payrollDashMore": {"placeholders": {"count": {"type": "int"}}},
+  "payrollAdvanceRetractedNote": "Withdrawn by the requester"
 }

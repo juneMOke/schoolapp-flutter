@@ -30788,6 +30788,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No employee to pay'**
   String get payrollDashNoStaff;
+
+  /// No description provided for @payrollDashNotTracked.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll validated before v2: its payments were not recorded, nothing can be tracked.'**
+  String get payrollDashNotTracked;
+
+  /// No description provided for @payrollDashMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+ 1 more — see Advances & loans} other{+ {count} more — see Advances & loans}}'**
+  String payrollDashMore(int count);
+
+  /// No description provided for @payrollAdvanceRetractedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn by the requester'**
+  String get payrollAdvanceRetractedNote;
 }
 
 class _AppLocalizationsDelegate

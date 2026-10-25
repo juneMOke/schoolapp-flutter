@@ -16,22 +16,28 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class PayrollDashboardArrearsCard extends StatelessWidget {
   final PayrollSnapshot snapshot;
   final List<PayrollArrearsAgent> agents;
+
+  /// La devise du tableau de bord : le classement se fait dans celle-ci —
+  /// des centimes de francs et de dollars ne s'additionnent pas.
+  final String currency;
   final VoidCallback onSettle;
 
   const PayrollDashboardArrearsCard({
     super.key,
     required this.snapshot,
     required this.agents,
+    required this.currency,
     required this.onSettle,
   });
 
-  static int _total(PayrollArrearsAgent agent) =>
-      agent.months.fold(0, (sum, arrear) => sum + arrear.dueInCents);
+  int _due(PayrollArrearsAgent agent) => agent.months
+      .where((arrear) => arrear.currency == currency)
+      .fold(0, (sum, arrear) => sum + arrear.dueInCents);
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final sorted = [...agents]..sort((a, b) => _total(b).compareTo(_total(a)));
+    final sorted = [...agents]..sort((a, b) => _due(b).compareTo(_due(a)));
     return PayrollDashboardCard(
       title: l10n.payrollDashArrearsTitle,
       trailing: sorted.isEmpty
@@ -77,11 +83,15 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
                   style: AppTypography.labelLarge,
                 ),
               ),
-              Text(
-                PayrollLabels.perCurrency(
-                  agent.months.map((a) => (a.dueInCents, a.currency)),
-                ).join(' · '),
-                style: AppTypography.labelLarge,
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  PayrollLabels.perCurrency(
+                    agent.months.map((a) => (a.dueInCents, a.currency)),
+                  ).join(' · '),
+                  textAlign: TextAlign.end,
+                  style: AppTypography.labelLarge,
+                ),
               ),
             ],
           ),

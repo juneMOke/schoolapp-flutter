@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
@@ -59,6 +60,12 @@ class PayrollAdvancesTab extends StatelessWidget {
       context,
       kPayrollWriteAccess.requires,
     );
+    // Une demande est une dépense : le serveur exige `hr.pay.read` et le
+    // droit d'écrire une dépense — la même règle que Dépenses ▸ Nouvelle
+    // demande. L'octroi direct d'avant le type (T11) reste sous `hr.pay.write`.
+    final canRequest = state.snapshot.staffAdvanceTypeId != null
+        ? PermissionGate.allows(context, [Perm.hrPayRead, Perm.expenseWrite])
+        : canWrite;
     final advances = state.snapshot.advances;
     final ongoing = advances.where((a) => a.isOngoing);
     final toApprove = state.snapshot.advanceRequests
@@ -132,7 +139,7 @@ class PayrollAdvancesTab extends StatelessWidget {
               count: (filter) => counts[filter],
               onSelected: cubit.setAdvanceFilter,
             ),
-            if (canWrite)
+            if (canRequest)
               EteeloButton.primary(
                 label: l10n.payrollAdvanceNew,
                 icon: Icons.add,
@@ -158,7 +165,7 @@ class PayrollAdvancesTab extends StatelessWidget {
                 ? l10n.payrollAdvancesEmpty
                 : l10n.payrollAdvancesEmptyFilter,
             medallionIcon: Icons.volunteer_activism_outlined,
-            primaryAction: advances.isEmpty && canWrite
+            primaryAction: advances.isEmpty && canRequest
                 ? EteeloButton.secondary(
                     label: l10n.payrollAdvanceNew,
                     onPressed: () => _grant(context),

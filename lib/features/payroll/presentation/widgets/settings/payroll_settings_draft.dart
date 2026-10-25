@@ -5,28 +5,10 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_settings_bounds.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_field_error.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
-/// Ce qui ne va pas dans un champ du barème.
-sealed class PayrollSettingsFieldError {
-  const PayrollSettingsFieldError();
-}
-
-/// Un entier hors de ses bornes, ou illisible.
-class PayrollSettingsOutOfRange extends PayrollSettingsFieldError {
-  final PayrollIntRange range;
-  const PayrollSettingsOutOfRange(this.range);
-}
-
-/// Un montant illisible.
-class PayrollSettingsBadAmount extends PayrollSettingsFieldError {
-  const PayrollSettingsBadAmount();
-}
-
-/// Un montant sous son plancher (le pas d'arrondi : un centime au moins).
-class PayrollSettingsBelowMin extends PayrollSettingsFieldError {
-  const PayrollSettingsBelowMin();
-}
+export 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_field_error.dart';
 
 /// Les montants d'une devise, dans l'ordre du formulaire.
 enum PayrollCurrencyField { allowance, defaultRate, step, ipr }
@@ -34,32 +16,47 @@ enum PayrollCurrencyField { allowance, defaultRate, step, ipr }
 /// Le barème en cours de saisie : les champs, leurs erreurs, et l'écart avec
 /// le barème enregistré. Un champ montant vidé vaut zéro — rien n'est inventé.
 class PayrollSettingsDraft extends ChangeNotifier {
-  static const List<String> currencies = [CurrencyCode.usd, CurrencyCode.cdf];
+  /// Les devises que l'école a réglées, dollar et franc d'abord : une devise
+  /// qu'elle n'a pas réglée n'est pas inventée à l'enregistrement.
+  final List<String> currencies;
 
   PayrollSettings _base;
 
   final TextEditingController hours = TextEditingController();
   final TextEditingController premium = TextEditingController();
   final TextEditingController days = TextEditingController();
-  final Map<String, Map<PayrollCurrencyField, TextEditingController>> amounts =
-      {
-        for (final currency in currencies)
-          currency: {
-            for (final field in PayrollCurrencyField.values)
-              field: TextEditingController(),
-          },
-      };
-  final Map<String, TextEditingController> cnss = {
+  late final Map<String, Map<PayrollCurrencyField, TextEditingController>>
+  amounts = {
+    for (final currency in currencies)
+      currency: {
+        for (final field in PayrollCurrencyField.values)
+          field: TextEditingController(),
+      },
+  };
+  late final Map<String, TextEditingController> cnss = {
     for (final currency in currencies) currency: TextEditingController(),
   };
   bool _absence = false;
   final Set<StaffContractKind> _eligible = {};
 
-  PayrollSettingsDraft(PayrollSettings saved) : _base = saved {
+  PayrollSettingsDraft(PayrollSettings saved)
+    : _base = saved,
+      currencies = _currenciesOf(saved) {
     _fill(saved);
     for (final controller in _controllers) {
       controller.addListener(notifyListeners);
     }
+  }
+
+  static List<String> _currenciesOf(PayrollSettings settings) {
+    const first = [CurrencyCode.usd, CurrencyCode.cdf];
+    final set = settings.byCurrency.keys.toSet();
+    if (set.isEmpty) return const [CurrencyCode.usd];
+    return [
+      for (final code in first)
+        if (set.contains(code)) code,
+      ...(set.difference(first.toSet()).toList()..sort()),
+    ];
   }
 
   Iterable<TextEditingController> get _controllers => [
@@ -83,25 +80,43 @@ class PayrollSettingsDraft extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Le barème enregistré a changé (synchronisation, enregistrement) : une
-  /// saisie en cours n'est jamais écrasée.
+  /// Le barème enregistré a changé (synchronisation, enregistrement) : chaque
+  /// champ que personne n'a touché prend la nouvelle valeur ; une saisie en
+  /// cours n'est jamais écrasée — et un champ intact ne réécrit jamais
+  /// l'ancienne valeur par-dessus celle d'un autre poste.
   void rebase(PayrollSettings saved) {
     if (saved.sameRulesAs(_base)) return;
-    final untouched = !isDirty;
+    final before = _textsOf(_base);
+    final after = _textsOf(saved);
+    for (final entry in before.entries) {
+      if (entry.key.text == entry.value) entry.key.text = after[entry.key]!;
+    }
+    if (_absence == _base.absenceDeductionEnabled) {
+      _absence = saved.absenceDeductionEnabled;
+    }
+    if (_eligible.length == _base.allowanceEligibleKinds.length &&
+        _eligible.containsAll(_base.allowanceEligibleKinds)) {
+      _eligible
+        ..clear()
+        ..addAll(saved.allowanceEligibleKinds);
+    }
     _base = saved;
-    if (untouched) _fill(saved);
+    notifyListeners();
   }
 
   /// « Rétablir les valeurs par défaut » remplit le brouillon, à enregistrer.
   void resetToDefaults() => _fill(PayrollSettings.defaults);
 
-  void _fill(PayrollSettings settings) {
-    hours.text = '${settings.monthlyHoursDivisor}';
-    premium.text = '${(settings.overtimeMultiplierPermille - 1000) ~/ 10}';
-    days.text = '${settings.workDaysDivisor}';
+  /// Le texte que chaque champ montre pour [settings].
+  Map<TextEditingController, String> _textsOf(PayrollSettings settings) {
+    final texts = <TextEditingController, String>{
+      hours: '${settings.monthlyHoursDivisor}',
+      premium: '${(settings.overtimeMultiplierPermille - 1000) ~/ 10}',
+      days: '${settings.workDaysDivisor}',
+    };
     for (final currency in currencies) {
-      // Une devise que l'école n'a pas réglée part des valeurs de la spec :
-      // un pas d'arrondi nul serait refusé par le serveur.
+      // Les défauts de la spec ne servent qu'à « Rétablir » : un barème servi
+      // porte toujours ses devises.
       final rules =
           settings.byCurrency[currency] ??
           PayrollSettings.defaults.of(currency);
@@ -112,11 +127,18 @@ class PayrollSettingsDraft extends ChangeNotifier {
         PayrollCurrencyField.ipr: rules.iprFlatInCents,
       };
       for (final entry in cents.entries) {
-        amounts[currency]![entry.key]!.text = MoneyFormat.amountOnly(
+        texts[amounts[currency]![entry.key]!] = MoneyFormat.amountOnly(
           Money(entry.value, currency),
         );
       }
-      cnss[currency]!.text = '${rules.cnssPermille}';
+      texts[cnss[currency]!] = '${rules.cnssPermille}';
+    }
+    return texts;
+  }
+
+  void _fill(PayrollSettings settings) {
+    for (final entry in _textsOf(settings).entries) {
+      entry.key.text = entry.value;
     }
     _absence = settings.absenceDeductionEnabled;
     _eligible

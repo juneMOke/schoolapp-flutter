@@ -60,8 +60,13 @@ class PayrollMonthColumns extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              for (final column in columns)
+              for (final (index, column) in columns.indexed)
                 _Column(
+                  // L'année sous la première colonne et sous chaque janvier :
+                  // deux « janv. » ne se confondent pas.
+                  year: index == 0 || column.month.endsWith('-01')
+                      ? column.month.substring(0, 4)
+                      : null,
                   column: column,
                   scale: scale,
                   focused: column.month == focusedMonth,
@@ -115,10 +120,12 @@ class _Column extends StatelessWidget {
   final int scale;
   final bool focused;
   final String label;
+  final String? year;
   final String semantics;
   final VoidCallback onTap;
 
   const _Column({
+    this.year,
     required this.column,
     required this.scale,
     required this.focused,
@@ -176,11 +183,21 @@ class _Column extends StatelessWidget {
               Text(
                 label,
                 maxLines: 1,
-                overflow: TextOverflow.clip,
+                softWrap: false,
+                overflow: TextOverflow.visible,
                 style: AppTypography.labelSmall.copyWith(
                   color: focused ? AppColors.payrollChartFocus : null,
                 ),
               ),
+              if (year case final year?)
+                Text(
+                  year,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
             ],
           ),
         ),

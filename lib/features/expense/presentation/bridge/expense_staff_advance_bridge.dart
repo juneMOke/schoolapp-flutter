@@ -18,8 +18,8 @@ abstract class ExpenseStaffAdvanceBridge {
   bool allows(List<String>? permissions);
 
   /// Ouvre la saisie de la Paie et dépose la demande ; annonce lui-même son
-  /// issue.
-  Future<void> request(BuildContext context);
+  /// issue. `true` : une demande est écrite dans la file.
+  Future<bool> request(BuildContext context);
 
   /// Le pont, si la Paie est montée et que la session peut déposer une
   /// avance ; sinon `null`, et le type reste hors du formulaire.

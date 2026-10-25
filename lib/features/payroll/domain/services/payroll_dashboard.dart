@@ -1,7 +1,6 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_dashboard_figures.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 
 /// Le tableau de bord de la paie (spec TB 1-2), calculé sur la tablette à
@@ -47,6 +46,9 @@ abstract final class PayrollDashboard {
     final lines = view.lines.where(
       (line) => line.currency == currency && line.netInCents > 0,
     );
+    // Une paie d'avant la v2 : ses versements n'étaient pas saisis, un
+    // « non payé » y serait faux.
+    if (!isTracked(view)) return const PayrollNetProgress();
     if (!_validated(view)) {
       return PayrollNetProgress(
         notYetInCents: lines.fold(0, (sum, line) => sum + line.netInCents),
@@ -82,54 +84,83 @@ abstract final class PayrollDashboard {
     );
   }
 
-  /// Une ligne par agent payé ce mois, arriérés antérieurs compris.
+  /// Une paie validée avant la v2 : on payait sans saisir le versement, rien
+  /// ne s'y suit (le serveur refuse son PDF : `PAYROLL_NOT_TRACKED`).
+  static bool isTracked(PayrollMonthView view) =>
+      view.lines.every((line) => line.formulaVersion >= 2);
+
+  /// Une ligne par agent payé ce mois, arriérés antérieurs compris ; plus une
+  /// ligne par agent et devise que seuls ses arriérés y mettent.
   static List<PayrollDashboardRow> rowsOf(
     PayrollMonthView view,
     List<PayrollArrearsAgent> arrears,
   ) {
     final validated = _validated(view);
-    final arrearsOf = <String, List<PayrollArrear>>{
-      for (final agent in arrears) agent.staffMemberId: agent.months,
-    };
-    return [
+    // Les arriérés des mois antérieurs, par agent puis devise.
+    final owed = <String, Map<String, int>>{};
+    for (final agent in arrears) {
+      for (final arrear in agent.months) {
+        if (arrear.month.compareTo(view.month) >= 0) continue;
+        final byCurrency = owed[agent.staffMemberId] ??= {};
+        byCurrency[arrear.currency] =
+            (byCurrency[arrear.currency] ?? 0) + arrear.dueInCents;
+      }
+    }
+    final rows = [
       for (final line in view.lines)
         _row(
-          line,
-          validated: validated,
+          staffMemberId: line.staffMemberId,
+          currency: line.currency,
+          planned: line.grossInCents,
+          deductions: line.deductions.totalInCents + line.advanceInCents,
+          net: line.netInCents,
+          arrears: owed[line.staffMemberId]?.remove(line.currency) ?? 0,
           received: validated ? view.settlementOf(line).paidInCents : 0,
-          arrears: [
-            for (final arrear in arrearsOf[line.staffMemberId] ?? const [])
-              if (arrear.month.compareTo(view.month) < 0 &&
-                  arrear.currency == line.currency)
-                arrear,
-          ],
+          validated: validated,
         ),
     ];
+    owed.forEach((staffMemberId, byCurrency) {
+      byCurrency.forEach((currency, due) {
+        if (due <= 0) return;
+        rows.add(
+          _row(
+            staffMemberId: staffMemberId,
+            currency: currency,
+            planned: 0,
+            deductions: 0,
+            net: 0,
+            arrears: due,
+            received: 0,
+            validated: validated,
+          ),
+        );
+      });
+    });
+    return rows;
   }
 
-  static PayrollDashboardRow _row(
-    PayrollLine line, {
-    required bool validated,
+  static PayrollDashboardRow _row({
+    required String staffMemberId,
+    required String currency,
+    required int planned,
+    required int deductions,
+    required int net,
+    required int arrears,
     required int received,
-    required List<PayrollArrear> arrears,
+    required bool validated,
   }) {
-    final arrearsInCents = arrears.fold(0, (sum, a) => sum + a.dueInCents);
-    final row = PayrollDashboardRow(
-      line: line,
-      plannedInCents: line.grossInCents,
-      deductionsInCents: line.deductions.totalInCents + line.advanceInCents,
-      arrearsInCents: arrearsInCents,
-      receivedInCents: received,
-      status: PayrollDashboardStatus.toDisburse,
-    );
-    if (!validated) return row;
+    final remaining = net + arrears - received;
     return PayrollDashboardRow(
-      line: line,
-      plannedInCents: row.plannedInCents,
-      deductionsInCents: row.deductionsInCents,
-      arrearsInCents: arrearsInCents,
+      staffMemberId: staffMemberId,
+      currency: currency,
+      netInCents: net,
+      plannedInCents: planned,
+      deductionsInCents: deductions,
+      arrearsInCents: arrears,
       receivedInCents: received,
-      status: row.remainingInCents == 0
+      status: !validated
+          ? PayrollDashboardStatus.toDisburse
+          : remaining <= 0
           ? PayrollDashboardStatus.settled
           : received > 0
           ? PayrollDashboardStatus.partial

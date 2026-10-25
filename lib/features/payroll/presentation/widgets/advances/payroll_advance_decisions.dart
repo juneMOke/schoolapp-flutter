@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_local_write.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_reason_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -64,6 +65,7 @@ abstract final class PayrollAdvanceDecisions {
         advancePayment: payment,
       ),
     );
+    if (context.mounted) notifyPayrollLocalWrite(context);
   }
 
   /// Le nom de la session, affiché dans le fil de la demande ; c'est son

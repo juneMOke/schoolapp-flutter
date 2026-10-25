@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -101,6 +102,7 @@ class _DashboardBodyState extends State<PayrollDashboardBody> {
     final arrearsCard = PayrollDashboardArrearsCard(
       snapshot: state.snapshot,
       agents: arrears,
+      currency: currency,
       onSettle: () => _go(MenuConstants.hrPayrollArrearsId),
     );
     return Column(
@@ -143,7 +145,11 @@ class _DashboardBodyState extends State<PayrollDashboardBody> {
                     fullWidth: false,
                   ),
           )
-        else ...[
+        else if (!PayrollDashboard.isTracked(view)) ...[
+          forecast,
+          const SizedBox(height: AppSpacing.lg),
+          EteeloNotice.warning(l10n.payrollDashNotTracked),
+        ] else ...[
           _pair(forecast, paid),
           const SizedBox(height: AppSpacing.lg),
           _pair(advances, arrearsCard),

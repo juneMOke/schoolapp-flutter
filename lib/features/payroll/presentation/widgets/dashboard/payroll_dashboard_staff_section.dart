@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -13,7 +14,6 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_no
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_card.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_staff_table.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -42,27 +42,42 @@ class _StaffSectionState extends State<PayrollDashboardStaffSection> {
   PayrollDashboardFilter _filter = PayrollDashboardFilter.all;
   bool _printing = false;
 
-  List<PayrollDashboardRow> get _visible => [
-    for (final row in widget.rows)
-      if (_filter.keeps(row.status) && _matches(row)) row,
-  ];
+  /// Par devise puis par nom, comme les sections du PDF.
+  List<PayrollDashboardRow> get _visible {
+    String name(PayrollDashboardRow row) =>
+        widget.snapshot.member(row.staffMemberId)?.fullName ?? '';
+    return [
+      for (final row in widget.rows)
+        if (_filter.keeps(row.status) && _matches(row)) row,
+    ]..sort((a, b) {
+      final byCurrency = a.currency.compareTo(b.currency);
+      return byCurrency != 0 ? byCurrency : name(a).compareTo(name(b));
+    });
+  }
 
-  /// Nom ou fonction, sans égard à la casse ni aux accents — comme `q` côté
-  /// serveur.
+  /// Tous les mots, sans casse ni accents, dans le nom complet ou la
+  /// fonction — exactement ce que le serveur cherche avec `q`.
   bool _matches(PayrollDashboardRow row) {
     final needle = _search.trim();
     if (needle.isEmpty) return true;
     final member = widget.snapshot.member(row.staffMemberId);
-    return member != null && StaffMemberSearch.matches(member, needle);
+    return member != null &&
+        SearchNormalizationHelper.containsAllWords([
+          member.lastName,
+          member.middleName,
+          member.firstName,
+          member.jobTitle,
+        ], needle);
   }
 
   Future<void> _pdf() async {
     final cubit = context.read<PayrollCubit>();
     final l10n = AppLocalizations.of(context)!;
     setState(() => _printing = true);
+    final month = widget.month;
     final query = _search.trim();
     final result = await cubit.commands.dashboardPdf(
-      widget.month,
+      month,
       filter: _filter.wire,
       query: query.isEmpty ? null : query,
     );
@@ -81,7 +96,7 @@ class _StaffSectionState extends State<PayrollDashboardStaffSection> {
         title: l10n.payrollDashStaffTitle,
         document: PrintableDocument(
           bytes: bytes,
-          fileName: '${l10n.payrollDashPdfFileName(widget.month)}.pdf',
+          fileName: '${l10n.payrollDashPdfFileName(month)}.pdf',
         ),
       ),
     );
@@ -98,7 +113,7 @@ class _StaffSectionState extends State<PayrollDashboardStaffSection> {
         label: l10n.payrollDashPdf,
         icon: Icons.picture_as_pdf_outlined,
         isLoading: _printing,
-        onPressed: widget.rows.isEmpty ? null : _pdf,
+        onPressed: visible.isEmpty ? null : _pdf,
         fullWidth: false,
       ),
       child: Column(
