@@ -12043,12 +12043,14 @@
   "payrollSettingsInpp": "INPP (‰ du brut)",
   "payrollSettingsOnem": "ONEM (‰ du brut)",
   "payrollSettingsPayslipTitle": "Bulletin de paie",
-  "payrollSettingsPayslipSubtitle": "Les intitulés des trois signatures ; vides, ceux du modèle papier.",
+  "payrollSettingsPayslipSubtitle": "Les intitulés des trois signatures ; effacer un intitulé rétablit celui du modèle papier.",
   "payrollSettingsSignBeneficiary": "Première signature",
   "payrollSettingsSignDirector": "Deuxième signature",
   "payrollSettingsSignCashier": "Troisième signature",
-  "payrollAdvanceOverCap": "L'échéance dépasse {percent} % du salaire mensuel : la direction en sera avertie.",
+  "payrollAdvanceOverCap": "L'échéance dépasse {percent} % du salaire mensuel : envisagez d'étaler.",
   "@payrollAdvanceOverCap": {"placeholders": {"percent": {"type": "int"}}},
   "payrollDashEmployerCost": "+ {amount} de charges employeur",
-  "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}}
+  "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollDashEmployerCostCurrent": "+ {amount} de charges employeur, aux taux actuels",
+  "@payrollDashEmployerCostCurrent": {"placeholders": {"amount": {"type": "String"}}}
 }

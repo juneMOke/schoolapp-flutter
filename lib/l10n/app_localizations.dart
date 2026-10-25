@@ -30876,7 +30876,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollSettingsPayslipSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'The three signature captions; blank keeps the paper model\'s.'**
+  /// **'The three signature captions; clearing one restores the paper model\'s.'**
   String get payrollSettingsPayslipSubtitle;
 
   /// No description provided for @payrollSettingsSignBeneficiary.
@@ -30900,7 +30900,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollAdvanceOverCap.
   ///
   /// In en, this message translates to:
-  /// **'The instalment exceeds {percent} % of the monthly salary: management will be told.'**
+  /// **'The instalment exceeds {percent}% of the monthly salary: consider spreading it.'**
   String payrollAdvanceOverCap(int percent);
 
   /// No description provided for @payrollDashEmployerCost.
@@ -30908,6 +30908,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'+ {amount} of employer charges'**
   String payrollDashEmployerCost(String amount);
+
+  /// No description provided for @payrollDashEmployerCostCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {amount} of employer charges, at current rates'**
+  String payrollDashEmployerCostCurrent(String amount);
 }
 
 class _AppLocalizationsDelegate

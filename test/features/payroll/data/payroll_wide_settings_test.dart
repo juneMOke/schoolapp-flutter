@@ -105,4 +105,32 @@ void main() {
       isFalse,
     );
   });
+
+  test(
+    'un enregistrement sans barème élargi n efface pas celui rangé',
+    () async {
+      final dao = PayrollSettingsDao(db);
+      await dao.applySeed(
+        PayrollSettingsSeed.tryParse(_section())!,
+        schoolId: _school,
+        nowMs: 1,
+      );
+
+      // L'écran ouvert avant le pull n'avait pas le barème élargi.
+      await dao.save(
+        PayrollSettingsRequestDto(
+          settings: PayrollSettingsSeed.tryParse(_section(wide: false))!,
+          clientUpdatedAt: '2026-10-25T11:00:00.000Z',
+          authorId: 'u-1',
+        ),
+        schoolId: _school,
+        nowMs: 2,
+      );
+
+      final settings = await dao.read(_school);
+      expect(settings.wideSettingsServed, isTrue);
+      expect(settings.childcareEnabled, isFalse);
+      expect(settings.loanMaxMonths, 6);
+    },
+  );
 }

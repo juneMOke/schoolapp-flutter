@@ -11791,12 +11791,14 @@
   "payrollSettingsInpp": "INPP (‰ of gross)",
   "payrollSettingsOnem": "ONEM (‰ of gross)",
   "payrollSettingsPayslipTitle": "Payslip",
-  "payrollSettingsPayslipSubtitle": "The three signature captions; blank keeps the paper model's.",
+  "payrollSettingsPayslipSubtitle": "The three signature captions; clearing one restores the paper model's.",
   "payrollSettingsSignBeneficiary": "First signature",
   "payrollSettingsSignDirector": "Second signature",
   "payrollSettingsSignCashier": "Third signature",
-  "payrollAdvanceOverCap": "The instalment exceeds {percent} % of the monthly salary: management will be told.",
+  "payrollAdvanceOverCap": "The instalment exceeds {percent}% of the monthly salary: consider spreading it.",
   "@payrollAdvanceOverCap": {"placeholders": {"percent": {"type": "int"}}},
   "payrollDashEmployerCost": "+ {amount} of employer charges",
-  "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}}
+  "@payrollDashEmployerCost": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollDashEmployerCostCurrent": "+ {amount} of employer charges, at current rates",
+  "@payrollDashEmployerCostCurrent": {"placeholders": {"amount": {"type": "String"}}}
 }

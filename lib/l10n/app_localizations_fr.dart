@@ -20053,7 +20053,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollSettingsPayslipSubtitle =>
-      'Les intitulés des trois signatures ; vides, ceux du modèle papier.';
+      'Les intitulés des trois signatures ; effacer un intitulé rétablit celui du modèle papier.';
 
   @override
   String get payrollSettingsSignBeneficiary => 'Première signature';
@@ -20066,11 +20066,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String payrollAdvanceOverCap(int percent) {
-    return 'L\'échéance dépasse $percent % du salaire mensuel : la direction en sera avertie.';
+    return 'L\'échéance dépasse $percent % du salaire mensuel : envisagez d\'étaler.';
   }
 
   @override
   String payrollDashEmployerCost(String amount) {
     return '+ $amount de charges employeur';
+  }
+
+  @override
+  String payrollDashEmployerCostCurrent(String amount) {
+    return '+ $amount de charges employeur, aux taux actuels';
   }
 }

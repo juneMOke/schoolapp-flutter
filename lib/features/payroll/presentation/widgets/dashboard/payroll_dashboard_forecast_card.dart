@@ -88,8 +88,12 @@ class PayrollDashboardForecastCard extends StatelessWidget {
                 value: money(gross),
                 color: AppColors.textPrimary,
                 note: switch (employerChargesInCents) {
+                  // Aucun taux n'est figé par mois : un mois validé se lit aux
+                  // taux d'aujourd'hui, et le dit.
                   final charges? when charges > 0 =>
-                    l10n.payrollDashEmployerCost(money(charges)),
+                    view.header?.status == PayrollStatus.validated
+                        ? l10n.payrollDashEmployerCostCurrent(money(charges))
+                        : l10n.payrollDashEmployerCost(money(charges)),
                   _ => null,
                 },
                 noteColor: AppColors.textSecondary,

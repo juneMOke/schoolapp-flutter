@@ -135,19 +135,20 @@ class PayrollSettingsDao {
       'by_currency': jsonEncode(json['currencyRules']),
       'work_days_divisor': seed.workDaysDivisor,
       'absence_deduction_enabled': seed.absenceDeductionEnabled ? 1 : 0,
-      'cnss_employer_permille': seed.cnssEmployerPermille,
-      'inpp_permille': seed.inppPermille,
-      'onem_permille': seed.onemPermille,
-      'advance_max_percent': seed.advanceMaxPercent,
-      'loan_max_months': seed.loanMaxMonths,
-      'childcare_enabled': switch (seed.childcareEnabled) {
-        null => null,
-        true => 1,
-        false => 0,
+      // Q8 tus (pas servis, ou saisis sur un écran qui ne les avait pas
+      // encore) : les colonnes gardent ce qu'elles ont. Écrire `NULL` par-
+      // dessus des valeurs servies rallumerait la PC/E d'ici l'accusé.
+      if (seed.servesWideSettings) ...{
+        'cnss_employer_permille': seed.cnssEmployerPermille,
+        'inpp_permille': seed.inppPermille,
+        'onem_permille': seed.onemPermille,
+        'advance_max_percent': seed.advanceMaxPercent,
+        'loan_max_months': seed.loanMaxMonths,
+        'childcare_enabled': seed.childcareEnabled! ? 1 : 0,
+        'signature_beneficiary_label': seed.signatureBeneficiaryLabel,
+        'signature_director_label': seed.signatureDirectorLabel,
+        'signature_cashier_label': seed.signatureCashierLabel,
       },
-      'signature_beneficiary_label': seed.signatureBeneficiaryLabel,
-      'signature_director_label': seed.signatureDirectorLabel,
-      'signature_cashier_label': seed.signatureCashierLabel,
     };
   }
 

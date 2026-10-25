@@ -19917,7 +19917,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollSettingsPayslipSubtitle =>
-      'The three signature captions; blank keeps the paper model\'s.';
+      'The three signature captions; clearing one restores the paper model\'s.';
 
   @override
   String get payrollSettingsSignBeneficiary => 'First signature';
@@ -19930,11 +19930,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String payrollAdvanceOverCap(int percent) {
-    return 'The instalment exceeds $percent % of the monthly salary: management will be told.';
+    return 'The instalment exceeds $percent% of the monthly salary: consider spreading it.';
   }
 
   @override
   String payrollDashEmployerCost(String amount) {
     return '+ $amount of employer charges';
+  }
+
+  @override
+  String payrollDashEmployerCostCurrent(String amount) {
+    return '+ $amount of employer charges, at current rates';
   }
 }
