@@ -213,13 +213,22 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
         ],
       ),
     );
-    if (!widget.frozenFirstColumn) return table;
+    final framed = tone == null
+        ? table
+        : DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: AppRadius.brSm,
+              border: Border.all(color: tone.border),
+            ),
+            child: table,
+          );
+    if (!widget.frozenFirstColumn) return framed;
     return LayoutBuilder(
       builder: (context, constraints) => EteeloFrozenColumn(
         controller: _scroll,
         width: _frozenWidth,
         active: constraints.maxWidth < widget.minWidth,
-        child: table,
+        child: framed,
       ),
     );
   }

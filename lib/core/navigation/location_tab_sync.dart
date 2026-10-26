@@ -37,6 +37,13 @@ class _LocationTabSyncState<T extends Enum> extends State<LocationTabSync<T>> {
 
   bool _bound = false;
 
+  /// Une écriture de l'écran attend le prochain rendu. Tant qu'elle n'est pas
+  /// partie, l'adresse est plus ancienne que l'écran : un autre lien de la
+  /// même page qui écrit d'abord (l'onglet, puis le mois) réveillerait ce
+  /// widget sur l'ancienne valeur, et il défairait le geste qu'on vient de
+  /// faire.
+  bool _writePending = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -58,6 +65,7 @@ class _LocationTabSyncState<T extends Enum> extends State<LocationTabSync<T>> {
     super.didUpdateWidget(oldWidget);
     // Après la reconstruction : changer d'adresse la relance.
     if (oldWidget.current != widget.current) {
+      _writePending = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _writeLocation());
     }
   }
@@ -72,7 +80,7 @@ class _LocationTabSyncState<T extends Enum> extends State<LocationTabSync<T>> {
   /// onglet), l'écran revient au premier.
   void _followLocation({bool bareMeansFirst = true}) {
     final router = _router;
-    if (!mounted || router == null) return;
+    if (!mounted || router == null || _writePending) return;
     final name = LocationQuery.read(router, LocationTabSync.param);
     final tab = name == null
         ? (bareMeansFirst ? widget.values.first : null)
@@ -81,6 +89,7 @@ class _LocationTabSyncState<T extends Enum> extends State<LocationTabSync<T>> {
   }
 
   void _writeLocation() {
+    _writePending = false;
     final router = _router;
     if (!mounted || router == null) return;
     // Le premier onglet est l'adresse nue : `/home/paie` reste `/home/paie`.

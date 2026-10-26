@@ -62,17 +62,33 @@ void main() {
     expect(stacked.first.isStacked, isTrue);
   });
 
-  testWidgets('les parts non nulles s empilent de bas en haut', (tester) async {
+  testWidgets('les parts s empilent de bas en haut, une part nulle à plat', (
+    tester,
+  ) async {
     await pump(tester, stacked);
 
     final first = rods(tester).first;
     expect(first.toY, 1000);
-    expect(first.rodStackItems, hasLength(2));
+    // La part nulle garde sa place : la pile a la même longueur d'un mois à
+    // l'autre, et l'animation ne mêle pas les teintes.
+    expect(first.rodStackItems, hasLength(3));
     expect(first.rodStackItems[0].fromY, 0);
     expect(first.rodStackItems[0].toY, 600);
     expect(first.rodStackItems[0].color, AppColors.success);
-    expect(first.rodStackItems[1].fromY, 600);
-    expect(first.rodStackItems[1].toY, 1000);
+    expect(first.rodStackItems[1].fromY, first.rodStackItems[1].toY);
+    expect(first.rodStackItems[2].fromY, 600);
+    expect(first.rodStackItems[2].toY, 1000);
+  });
+
+  testWidgets('une barre qui s ouvre se touche sur toute sa colonne', (
+    tester,
+  ) async {
+    await pump(tester, stacked, onBarTap: (_) {});
+
+    final data = tester.widget<BarChart>(find.byType(BarChart)).data;
+    expect(data.barTouchData.allowTouchBarBackDraw, isTrue);
+    expect(rods(tester).first.backDrawRodData.show, isTrue);
+    expect(rods(tester).first.backDrawRodData.toY, data.maxY);
   });
 
   testWidgets('seule la barre en relief porte un liseré', (tester) async {

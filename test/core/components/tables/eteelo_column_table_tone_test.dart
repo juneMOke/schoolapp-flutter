@@ -102,4 +102,60 @@ void main() {
     expect(find.byType(EteeloColumnTableCards), findsNothing);
     expect(_materialColorAbove(tester, 'Agent 1'), isNull);
   });
+
+  testWidgets('teinté : le tableau porte le cadre de sa teinte', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_table());
+
+    final framed = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox));
+    expect(
+      framed.any((box) {
+        final decoration = box.decoration;
+        return decoration is BoxDecoration &&
+            decoration.border == Border.all(color: _tone.border);
+      }),
+      isTrue,
+    );
+  });
+
+  testWidgets('en cartes, un intertitre de groupe reste un titre', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 360,
+            child: EteeloColumnTable(
+              minWidth: 300,
+              widths: _widths,
+              headers: const ['Agent', 'Net'],
+              tone: _tone,
+              cardsBelow: 600,
+              rowCount: 2,
+              row: (context, index) => EteeloColumnTableRow(
+                widths: _widths,
+                cells: index == 0
+                    ? const [Text('Enseignants'), SizedBox.shrink()]
+                    : const [Text('Agent 1'), Text('10 \$')],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.ancestor(
+        of: find.text('Enseignants'),
+        matching: find.byType(InkWell),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.ancestor(of: find.text('Agent 1'), matching: find.byType(InkWell)),
+      findsOneWidget,
+    );
+  });
 }

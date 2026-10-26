@@ -51,6 +51,17 @@ class EteeloColumnTableCards extends StatelessWidget {
 
   Widget _card(Widget row) {
     if (row is! EteeloColumnTableRow) return row;
+    // Un intertitre de groupe (seule sa première cellule parle) n'est pas une
+    // ligne : il se pose en titre, sans cadre de carte.
+    if (row.cells.skip(1).every(_isBlank)) {
+      return Padding(
+        padding: const EdgeInsets.only(
+          top: AppSpacing.sm,
+          bottom: AppSpacing.xs,
+        ),
+        child: row.cells.first,
+      );
+    }
     final fields = [
       for (var i = 1; i < row.cells.length && i < headers.length; i++)
         if (!_isBlank(row.cells[i]))
@@ -65,8 +76,11 @@ class EteeloColumnTableCards extends StatelessWidget {
                   color: AppColors.textMutedAa,
                 ),
               ),
+              // `widthFactor` : la valeur garde sa largeur, le nom de colonne
+              // prend le reste ; sans lui, l'Align remplissait toujours 60 %.
               trailing: Align(
                 alignment: AlignmentDirectional.centerEnd,
+                widthFactor: 1,
                 child: row.cells[i],
               ),
             ),

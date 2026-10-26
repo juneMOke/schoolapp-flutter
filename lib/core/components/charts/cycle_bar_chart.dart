@@ -144,12 +144,13 @@ class CycleBarChart extends StatelessWidget {
         : null;
     if (item.isStacked) {
       // Une barre empilée mesure exactement la somme de ses parts : aucun
-      // plancher, qui fausserait la proportion entre elles.
+      // plancher, qui fausserait la proportion entre elles. Une part nulle
+      // reste dans la pile (hauteur zéro) : l'animation interpole part à
+      // part, et une pile qui changerait de longueur mêlerait leurs teintes.
       var from = 0.0;
       final stack = <BarChartRodStackItem>[];
       for (final segment in item.segments) {
-        if (segment.value <= 0) continue;
-        final to = from + segment.value;
+        final to = from + (segment.value < 0 ? 0 : segment.value);
         stack.add(BarChartRodStackItem(lerp(from), lerp(to), segment.color));
         from = to;
       }
@@ -160,6 +161,7 @@ class CycleBarChart extends StatelessWidget {
         width: barWidth,
         borderRadius: BorderRadius.circular(barRadius),
         borderSide: border,
+        backDrawRodData: _tapColumn(),
       );
     }
     return BarChartRodData(
@@ -174,8 +176,26 @@ class CycleBarChart extends StatelessWidget {
       width: barWidth,
       borderRadius: BorderRadius.circular(barRadius),
       borderSide: border,
+      backDrawRodData: _tapColumn(),
     );
   }
+
+  /// Le haut de l'axe : 25 % au-dessus de la plus haute barre, jamais sous
+  /// [minTop].
+  double get _topY {
+    final maxVal = items.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+    return (maxVal * 1.25).ceilToDouble().clamp(minTop, double.infinity);
+  }
+
+  /// Le fond invisible d'une barre qui s'ouvre : il porte le toucher sur
+  /// toute la hauteur du tracé.
+  BackgroundBarChartRodData? _tapColumn() => onBarTap == null
+      ? null
+      : BackgroundBarChartRodData(
+          show: true,
+          toY: _topY,
+          color: Colors.transparent,
+        );
 
   /// Cette barre porte-t-elle son montant en permanence ?
   bool _labelsAlways(int index) =>
@@ -207,8 +227,7 @@ class CycleBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
-    final maxVal = items.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-    final topY = (maxVal * 1.25).ceilToDouble().clamp(minTop, double.infinity);
+    final topY = _topY;
 
     // Des libellés pivotés mangent la hauteur du tracé : on rend au dessinateur
     // ce que l'axe lui prend, pour que les barres gardent leur amplitude.
@@ -261,6 +280,18 @@ class CycleBarChart extends StatelessWidget {
                     barTouchData: BarTouchData(
                       enabled: !showValueLabels || onBarTap != null,
                       handleBuiltInTouches: !showValueLabels,
+                      // Une barre qui s'ouvre se touche sur toute sa colonne,
+                      // pas sur ses seuls pixels : une barre basse (ou nulle)
+                      // reste une cible d'au moins 48 dp.
+                      allowTouchBarBackDraw: onBarTap != null,
+                      touchExtraThreshold: onBarTap == null
+                          ? null
+                          : EdgeInsets.symmetric(
+                              horizontal:
+                                  (AppDimensions.minTouchTarget - barWidth)
+                                      .clamp(4, AppDimensions.minTouchTarget) /
+                                  2,
+                            ),
                       touchCallback: onBarTap == null
                           ? null
                           : (event, response) {
