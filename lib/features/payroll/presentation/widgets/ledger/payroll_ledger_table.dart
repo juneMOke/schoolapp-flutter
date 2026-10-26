@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -51,6 +53,8 @@ class PayrollLedgerTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EteeloColumnTable(
+      tone: ListingTones.table,
+      cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollLedgerMinWidth,
       // Sur une tablette en portrait, le livre défile de côté : l'agent reste
       // à l'écran pendant que ses montants passent.

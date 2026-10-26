@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -40,6 +42,8 @@ class PayrollDashboardStaffTable extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final currencies = {for (final row in rows) row.currency}.toList()..sort();
     return EteeloColumnTable(
+      tone: ListingTones.table,
+      cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollDashStaffMinWidth,
       widths: _widths,
       endAligned: const {1, 2, 3, 4, 5, 6},

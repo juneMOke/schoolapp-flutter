@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -48,6 +50,8 @@ class PayrollAdvanceTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return EteeloColumnTable(
+      tone: ListingTones.table,
+      cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollAdvancesMinWidth,
       widths: _widths,
       endAligned: const {2},

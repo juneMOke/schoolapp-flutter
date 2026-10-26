@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_kpi_card.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
@@ -81,6 +83,8 @@ class PayrollHistoryTab extends StatelessWidget {
           )
         else
           EteeloColumnTable(
+            tone: ListingTones.table,
+            cardsBelow: AppBreakpoints.dataTableCardsMax,
             minWidth: AppDimensions.payrollHistoryMinWidth,
             widths: _widths,
             endAligned: const {2, 3, 4, 5},
