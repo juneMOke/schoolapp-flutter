@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cu
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_body.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_month_location.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -30,7 +31,7 @@ class PayrollDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<PayrollCubit>(
     create: (_) => getIt<PayrollCubit>()..load(),
-    child: const PayrollDashboardScreen(),
+    child: const PayrollMonthLocation(child: PayrollDashboardScreen()),
   );
 }
 

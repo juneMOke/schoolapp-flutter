@@ -20098,4 +20098,34 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get payrollToastPreviewUnsynced =>
       'Des saisies du mois attendent encore l\'envoi : le provisoire ne les montre pas.';
+
+  @override
+  String payrollMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'janv.',
+      '2': 'févr.',
+      '3': 'mars',
+      '4': 'avr.',
+      '5': 'mai',
+      '6': 'juin',
+      '7': 'juil.',
+      '8': 'août',
+      '9': 'sept.',
+      '10': 'oct.',
+      '11': 'nov.',
+      'other': 'déc.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollMonthStripA11y => 'Mois de paie';
+
+  @override
+  String payrollMonthPillA11y(String month, String status) {
+    return '$month · $status';
+  }
+
+  @override
+  String get payrollMonthNoPayroll => 'Pas de paie';
 }

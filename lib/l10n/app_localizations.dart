@@ -30944,6 +30944,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some of this month\'s entries are still waiting to be sent: the provisional payslip does not show them.'**
   String get payrollToastPreviewUnsynced;
+
+  /// No description provided for @payrollMonthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}'**
+  String payrollMonthShort(String month);
+
+  /// No description provided for @payrollMonthStripA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll months'**
+  String get payrollMonthStripA11y;
+
+  /// No description provided for @payrollMonthPillA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} · {status}'**
+  String payrollMonthPillA11y(String month, String status);
+
+  /// No description provided for @payrollMonthNoPayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'No payroll'**
+  String get payrollMonthNoPayroll;
 }
 
 class _AppLocalizationsDelegate

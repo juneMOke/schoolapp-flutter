@@ -911,6 +911,10 @@ class AppDimensions {
   static const payrollModeTileHeight = 52.0;
   static const payrollProgressHeight = 8.0;
 
+  /// Une pastille de la frise des mois : assez large pour « sept. » au texte
+  /// ×1,3 ; la hauteur, elle, part de [minTouchTarget].
+  static const payrollMonthPillWidth = 64.0;
+
   // ── Photo de l'élève (spec « Photo de l'élève », 1 px = 1 dp) ────────────
   /// Le panneau de capture : largeur maximale, rayon, et en dessous de quelle
   /// largeur d'écran il passe en plein écran.

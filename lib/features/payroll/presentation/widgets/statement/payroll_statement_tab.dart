@@ -39,38 +39,32 @@ class PayrollStatementTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.sm,
-          children: [
-            PayrollLedgerHeader(state: state, withCircuit: false),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                // L'état est composé par le serveur, sur la paie figée :
-                // après validation seulement, en ligne (T16).
-                if (view.phase.isLocked)
-                  EteeloButton.secondary(
-                    label: l10n.payrollStatementPrint,
-                    icon: Icons.print_outlined,
-                    onPressed: PayrollPayslipActions(context).openStatement,
-                    fullWidth: false,
-                  ),
-                // Le recueil des bulletins : scellé, après validation (P8).
-                if (view.phase.isLocked)
-                  EteeloButton.ghost(
-                    label: l10n.payrollPayslipAll,
-                    icon: Icons.library_books_outlined,
-                    onPressed: () =>
-                        PayrollPayslipActions(context).openPdf(null),
-                    fullWidth: false,
-                  ),
-              ],
-            ),
-          ],
+        PayrollLedgerHeader(
+          state: state,
+          withCircuit: false,
+          trailing: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              // L'état est composé par le serveur, sur la paie figée :
+              // après validation seulement, en ligne (T16).
+              if (view.phase.isLocked)
+                EteeloButton.secondary(
+                  label: l10n.payrollStatementPrint,
+                  icon: Icons.print_outlined,
+                  onPressed: PayrollPayslipActions(context).openStatement,
+                  fullWidth: false,
+                ),
+              // Le recueil des bulletins : scellé, après validation (P8).
+              if (view.phase.isLocked)
+                EteeloButton.ghost(
+                  label: l10n.payrollPayslipAll,
+                  icon: Icons.library_books_outlined,
+                  onPressed: () => PayrollPayslipActions(context).openPdf(null),
+                  fullWidth: false,
+                ),
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
         if (!view.isEditable)

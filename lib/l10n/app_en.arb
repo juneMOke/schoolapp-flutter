@@ -11806,5 +11806,11 @@
   "payrollPayslipPreviewFileName": "provisional-payslip-{month}",
   "@payrollPayslipPreviewFileName": {"placeholders": {"month": {"type": "String"}}},
   "payrollToastValidatedMeanwhile": "The payroll has just been validated: request the sealed payslip instead.",
-  "payrollToastPreviewUnsynced": "Some of this month's entries are still waiting to be sent: the provisional payslip does not show them."
+  "payrollToastPreviewUnsynced": "Some of this month's entries are still waiting to be sent: the provisional payslip does not show them.",
+  "payrollMonthShort": "{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}",
+  "@payrollMonthShort": {"placeholders": {"month": {"type": "String"}}},
+  "payrollMonthStripA11y": "Payroll months",
+  "payrollMonthPillA11y": "{month} · {status}",
+  "@payrollMonthPillA11y": {"placeholders": {"month": {"type": "String"}, "status": {"type": "String"}}},
+  "payrollMonthNoPayroll": "No payroll"
 }

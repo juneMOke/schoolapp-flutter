@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/widgets/history/payroll_history_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/statement/payroll_statement_tab.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_month_location.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_tabs.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslips_tab.dart';
@@ -36,7 +37,7 @@ class PayrollPage extends StatelessWidget {
       values: PayrollTab.values,
       tabOf: (state) => state.tab,
       select: (cubit, tab) => cubit.setTab(tab),
-      child: const PayrollScreen(),
+      child: const PayrollMonthLocation(child: PayrollScreen()),
     ),
   );
 }

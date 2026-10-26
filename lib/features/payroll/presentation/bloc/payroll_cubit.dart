@@ -104,6 +104,17 @@ class PayrollCubit extends Cubit<PayrollState> {
 
   void goCurrentMonth() => _openMonth(state.currentMonth);
 
+  /// Le mois d'une pastille ou de l'adresse (`?mois=`). Absent ou illisible :
+  /// le mois en cours ; ramené entre le premier contrat et le mois en cours.
+  void showMonth(String? month) {
+    final current = state.currentMonth;
+    final first = state.snapshot.firstMonth;
+    var wanted = PayrollMonth.parse(month) ?? current;
+    if (wanted.compareTo(current) > 0) wanted = current;
+    if (first != null && wanted.compareTo(first) < 0) wanted = first;
+    _openMonth(wanted);
+  }
+
   /// Un mois de l'historique ouvre son livre.
   void openMonth(String month) {
     _openMonth(month);

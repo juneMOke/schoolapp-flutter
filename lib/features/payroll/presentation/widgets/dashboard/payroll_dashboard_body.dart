@@ -113,20 +113,15 @@ class _DashboardBodyState extends State<PayrollDashboardBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.sm,
-          children: [
-            PayrollLedgerHeader(state: state, withCircuit: false),
-            EteeloButton.secondary(
-              label: l10n.payrollDashOpenPayroll,
-              icon: Icons.receipt_long_outlined,
-              onPressed: () => _go(MenuConstants.hrPayrollId),
-              fullWidth: false,
-            ),
-          ],
+        PayrollLedgerHeader(
+          state: state,
+          withCircuit: false,
+          trailing: EteeloButton.secondary(
+            label: l10n.payrollDashOpenPayroll,
+            icon: Icons.receipt_long_outlined,
+            onPressed: () => _go(MenuConstants.hrPayrollId),
+            fullWidth: false,
+          ),
         ),
         if (currencies.length > 1) ...[
           const SizedBox(height: AppSpacing.sm),
