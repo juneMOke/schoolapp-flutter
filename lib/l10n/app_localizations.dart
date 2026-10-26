@@ -30938,6 +30938,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The payroll has just been validated: request the sealed payslip instead.'**
   String get payrollToastValidatedMeanwhile;
+
+  /// No description provided for @payrollToastPreviewUnsynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of this month\'s entries are still waiting to be sent: the provisional payslip does not show them.'**
+  String get payrollToastPreviewUnsynced;
 }
 
 class _AppLocalizationsDelegate

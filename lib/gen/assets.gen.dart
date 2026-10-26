@@ -161,15 +161,25 @@ class $LibFeaturesAuthDataDatasourcesGen {
   String get authRemoteDataSource =>
       'lib/features/auth/data/datasources/auth_remote_data_source.dart';
 
+  /// File path: lib/features/auth/data/datasources/auth_remote_data_source.g.dart
+  String get authRemoteDataSourceG =>
+      'lib/features/auth/data/datasources/auth_remote_data_source.g.dart';
+
   /// File path: lib/features/auth/data/datasources/forgot_password_remote_data_source.dart
   String get forgotPasswordRemoteDataSource =>
       'lib/features/auth/data/datasources/forgot_password_remote_data_source.dart';
+
+  /// File path: lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart
+  String get forgotPasswordRemoteDataSourceG =>
+      'lib/features/auth/data/datasources/forgot_password_remote_data_source.g.dart';
 
   /// List of all assets
   List<String> get values => [
     authLocalDataSource,
     authRemoteDataSource,
+    authRemoteDataSourceG,
     forgotPasswordRemoteDataSource,
+    forgotPasswordRemoteDataSourceG,
   ];
 }
 

@@ -20094,4 +20094,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get payrollToastValidatedMeanwhile =>
       'La paie vient d\'être validée : demandez désormais le bulletin scellé.';
+
+  @override
+  String get payrollToastPreviewUnsynced =>
+      'Des saisies du mois attendent encore l\'envoi : le provisoire ne les montre pas.';
 }

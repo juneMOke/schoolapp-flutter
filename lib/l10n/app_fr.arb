@@ -12057,5 +12057,6 @@
   "payrollPayslipOnlineOnly": "Disponible en ligne seulement : le provisoire est rendu par le serveur.",
   "payrollPayslipPreviewFileName": "bulletin-provisoire-{month}",
   "@payrollPayslipPreviewFileName": {"placeholders": {"month": {"type": "String"}}},
-  "payrollToastValidatedMeanwhile": "La paie vient d'être validée : demandez désormais le bulletin scellé."
+  "payrollToastValidatedMeanwhile": "La paie vient d'être validée : demandez désormais le bulletin scellé.",
+  "payrollToastPreviewUnsynced": "Des saisies du mois attendent encore l'envoi : le provisoire ne les montre pas."
 }

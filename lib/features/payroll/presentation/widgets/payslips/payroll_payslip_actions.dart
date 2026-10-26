@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/components/documents/printable_document.
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
@@ -50,7 +51,7 @@ class PayrollPayslipActions {
     if (!sealed) {
       // Le recueil du mois n'existe qu'en scellé ; un brouillon se lit agent
       // par agent (P8).
-      if (line != null) await _preview(line, name);
+      if (line != null) await openPreview(line);
       return;
     }
     // Un bulletin scellé s'émet : le serveur exige `editique.write`.
@@ -100,12 +101,19 @@ class PayrollPayslipActions {
 
   /// Le bulletin provisoire d'un agent, rendu par le serveur sur le gabarit
   /// du définitif, sans numéro ni QR (P8) — en ligne seulement. La file part
-  /// d'abord : le PDF doit voir les dernières variables. Il ne se garde ni ne
-  /// se partage : le redemander donne l'état du moment.
-  Future<void> _preview(PayrollLine line, String name) async {
+  /// d'abord, envoi en cours compris : le PDF doit voir les dernières
+  /// variables ; s'il en reste en file, on le dit. Il ne se garde, ne se
+  /// partage ni ne s'imprime : le redemander donne l'état du moment.
+  Future<void> openPreview(PayrollLine line) async {
     final cubit = _cubit;
     final month = line.month;
     await cubit.flushOutbox();
+    if (cubit.isClosed) return;
+    await cubit.refresh();
+    if (cubit.isClosed) return;
+    if (_hasUnsentWrites(cubit.state, month)) {
+      cubit.announce(const PayrollNotice(PayrollNoticeKind.previewUnsynced));
+    }
     final result = await cubit.commands.payslipPreview(
       month,
       line.staffMemberId,
@@ -118,6 +126,7 @@ class PayrollPayslipActions {
           // Validée entre-temps : relire, puis proposer le scellé — jamais
           // le demander d'office.
           await cubit.syncAndRefresh();
+          if (cubit.isClosed) return;
           cubit.announce(
             const PayrollNotice(PayrollNoticeKind.validatedMeanwhile),
           );
@@ -125,6 +134,13 @@ class PayrollPayslipActions {
         }
         cubit.announce(switch (failure) {
           NetworkFailure() => const PayrollNotice(PayrollNoticeKind.offline),
+          TooManyRequestsFailure() => const PayrollNotice(
+            PayrollNoticeKind.renderBusy,
+          ),
+          UnauthorizedFailure() => const PayrollNotice(
+            PayrollNoticeKind.refused,
+            rule: PayrollRule.forbidden,
+          ),
           _ when code == _notOnPayroll => const PayrollNotice(
             PayrollNoticeKind.refused,
             rule: PayrollRule.noContract,
@@ -137,11 +153,24 @@ class PayrollPayslipActions {
         title: _l10n.payrollPayslipProvisional,
         document: PrintableDocument(
           bytes: bytes,
-          fileName: '${_l10n.payrollPayslipPreviewFileName(month)}.pdf',
+          fileName:
+              '${_l10n.payrollPayslipPreviewFileName(month)}'
+              '-${line.staffMemberId}.pdf',
         ),
         canShare: false,
+        canPrint: false,
       ),
     );
+  }
+
+  /// Une variable ou le taux du mois encore sur la tablette : le serveur ne
+  /// les connaît pas, le PDF différera de l'écran.
+  static bool _hasUnsentWrites(PayrollState state, String month) {
+    final variables = state.snapshot.variables[month]?.values ?? const [];
+    return variables.any((v) => v.syncState != RecordSyncState.synced) ||
+        (state.snapshot.payoutPolicies[month]?.syncState ??
+                RecordSyncState.synced) !=
+            RecordSyncState.synced;
   }
 
   static const String _alreadyValidated = 'PAYROLL_ALREADY_VALIDATED';

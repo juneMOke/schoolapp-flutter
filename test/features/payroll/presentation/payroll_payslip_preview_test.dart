@@ -1,7 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/network_status_cubit.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
@@ -10,12 +13,15 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_sett
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 
 import '../../staff/staff_builders.dart';
 import '../payroll_builders.dart';
 import 'payroll_screen_harness.dart';
 
 class _MockPayslips extends Mock implements PayslipRepository {}
+
+class _MockConnectivity extends Mock implements ConnectivityService {}
 
 /// Le bulletin provisoire (P8) : rendu par le serveur, agent par agent, en
 /// ligne seulement ; jamais composé sur la tablette, jamais de recueil.
@@ -61,6 +67,8 @@ void main() {
   );
 
   late _MockPayslips payslips;
+  late StaffSyncSignals signals;
+  late MockPayrollRepository repository;
 
   Future<void> openPayslips(
     WidgetTester tester,
@@ -74,6 +82,8 @@ void main() {
       snapshot: snapshot,
       payslips: payslips,
     );
+    signals = pumped.signals;
+    repository = pumped.repository;
     pumped.cubit.setTab(PayrollTab.payslips);
     await tester.pumpAndSettle();
   }
@@ -90,8 +100,66 @@ void main() {
     await tester.tap(find.text('Bulletin provisoire (PDF)'));
     await tester.pumpAndSettle();
 
-    verify(() => payslips.payslipPreview('2026-10', 'm-1')).called(1);
+    // La file part d'abord : le PDF doit voir les dernières saisies.
+    verifyInOrder([
+      () => signals.flush(),
+      () => payslips.payslipPreview('2026-10', 'm-1'),
+    ]);
     verifyNever(() => payslips.payslip(any(), any()));
+  });
+
+  for (final (name, failure, message) in [
+    (
+      'agent hors du livre',
+      const ApiValidationFailure(
+        code: ApiErrorCode.unprocessable,
+        detailCode: 'STAFF_NOT_ON_PAYROLL',
+      ),
+      "Cet agent n'a pas de contrat qui le paie ce mois-là.",
+    ),
+    (
+      'droit absent (403)',
+      const UnauthorizedFailure(),
+      'Votre compte n\'a pas le droit de faire ce geste.',
+    ),
+  ]) {
+    testWidgets('refus nommé : $name', (tester) async {
+      await openPayslips(tester, snapshotOf());
+      when(
+        () => payslips.payslipPreview(any(), any()),
+      ).thenAnswer((_) async => Left(failure));
+
+      await tester.tap(find.text('Bulletin provisoire (PDF)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(message), findsOneWidget);
+    });
+  }
+
+  testWidgets('hors ligne : le bouton se désactive et dit pourquoi', (
+    tester,
+  ) async {
+    final connectivity = _MockConnectivity();
+    when(connectivity.isOnline).thenAnswer((_) async => false);
+    when(
+      () => connectivity.onStatusChange,
+    ).thenAnswer((_) => const Stream.empty());
+    GetIt.instance.registerFactory<NetworkStatusCubit>(
+      () => NetworkStatusCubit(connectivity),
+    );
+    addTearDown(() => GetIt.instance.unregister<NetworkStatusCubit>());
+
+    await openPayslips(tester, snapshotOf());
+
+    expect(
+      find.text(
+        'Disponible en ligne seulement : le provisoire est rendu par le serveur.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Bulletin provisoire (PDF)'));
+    await tester.pumpAndSettle();
+    verifyNever(() => payslips.payslipPreview(any(), any()));
   });
 
   testWidgets('validée entre-temps : la paie se relit, le scellé est proposé', (
@@ -116,7 +184,12 @@ void main() {
       ),
       findsOneWidget,
     );
-    // Jamais de scellé demandé d'office.
+    // La paie est relue (tirée puis lue), jamais de scellé demandé d'office.
+    verifyInOrder([
+      () => payslips.payslipPreview('2026-10', 'm-1'),
+      () => signals.pull(),
+    ]);
+    verify(() => repository.load()).called(greaterThan(1));
     verifyNever(() => payslips.payslip(any(), any()));
   });
 

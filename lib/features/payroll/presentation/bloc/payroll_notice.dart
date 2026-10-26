@@ -42,6 +42,10 @@ enum PayrollNoticeKind {
   /// c'est désormais le bulletin scellé qu'il faut demander.
   validatedMeanwhile,
 
+  /// Des saisies du mois attendent encore l'envoi : le provisoire du
+  /// serveur ne les montre pas.
+  previewUnsynced,
+
   /// Une règle refusée avant la file.
   refused,
 

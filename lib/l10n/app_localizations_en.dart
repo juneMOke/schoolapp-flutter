@@ -19958,4 +19958,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payrollToastValidatedMeanwhile =>
       'The payroll has just been validated: request the sealed payslip instead.';
+
+  @override
+  String get payrollToastPreviewUnsynced =>
+      'Some of this month\'s entries are still waiting to be sent: the provisional payslip does not show them.';
 }

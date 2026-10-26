@@ -11805,5 +11805,6 @@
   "payrollPayslipOnlineOnly": "Available online only: the server renders the provisional payslip.",
   "payrollPayslipPreviewFileName": "provisional-payslip-{month}",
   "@payrollPayslipPreviewFileName": {"placeholders": {"month": {"type": "String"}}},
-  "payrollToastValidatedMeanwhile": "The payroll has just been validated: request the sealed payslip instead."
+  "payrollToastValidatedMeanwhile": "The payroll has just been validated: request the sealed payslip instead.",
+  "payrollToastPreviewUnsynced": "Some of this month's entries are still waiting to be sent: the provisional payslip does not show them."
 }

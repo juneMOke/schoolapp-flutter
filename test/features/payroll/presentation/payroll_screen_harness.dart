@@ -38,7 +38,13 @@ class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
 /// L'écran de la paie ([child], par défaut celui de la Paie) sur [snapshot],
 /// la taille de la fenêtre laissée à l'appelant (tests de formats). Rend le
 /// cubit, pour ouvrir un onglet, et le dépôt, pour vérifier une écriture.
-Future<({PayrollCubit cubit, MockPayrollRepository repository})>
+Future<
+  ({
+    PayrollCubit cubit,
+    MockPayrollRepository repository,
+    StaffSyncSignals signals,
+  })
+>
 pumpPayrollScreen(
   WidgetTester tester, {
   required PayrollSnapshot snapshot,
@@ -109,5 +115,5 @@ pumpPayrollScreen(
   );
   await tester.pump();
   await tester.pump();
-  return (cubit: cubit, repository: repository);
+  return (cubit: cubit, repository: repository, signals: signals);
 }

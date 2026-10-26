@@ -16,8 +16,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_online_only.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_actions.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_preview_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le panneau du bulletin : diffuser (PDF, WhatsApp) et ce qui en reste sur
@@ -74,20 +74,7 @@ class PayrollPayslipPanel extends StatelessWidget {
             )
           else
             // Le provisoire est rendu par le serveur (P8) : en ligne seulement.
-            PayrollOnlineOnly(
-              builder: (context, online) => Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  EteeloButton.secondary(
-                    label: l10n.payrollPayslipDownloadProvisional,
-                    icon: Icons.picture_as_pdf_outlined,
-                    onPressed: online ? () => actions.openPdf(line) : null,
-                  ),
-                  if (!online)
-                    Text(l10n.payrollPayslipOnlineOnly, style: muted),
-                ],
-              ),
-            ),
+            PayrollPreviewButton(line: line),
           if (locked) ...[
             const SizedBox(height: AppSpacing.sm),
             EteeloButton.primary(
