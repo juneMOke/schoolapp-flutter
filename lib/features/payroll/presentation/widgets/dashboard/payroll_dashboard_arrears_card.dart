@@ -1,53 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// « Arriérés par salarié » (spec TB 2) : le reste dû sur les paies validées,
-/// groupé par agent, le plus lourd d'abord, une puce par mois d'origine.
+/// « Arriérés par salarié » : le reste dû sur les paies validées, servi par
+/// le serveur à l'instant du calcul, le plus lourd d'abord dans la devise
+/// affichée, une puce par mois d'origine.
 class PayrollDashboardArrearsCard extends StatelessWidget {
-  final PayrollSnapshot snapshot;
-  final List<PayrollArrearsAgent> agents;
-
-  /// La devise du tableau de bord : le classement se fait dans celle-ci —
-  /// des centimes de francs et de dollars ne s'additionnent pas.
+  final List<PayrollDashboardArrears> arrears;
   final String currency;
   final VoidCallback onSettle;
 
   const PayrollDashboardArrearsCard({
     super.key,
-    required this.snapshot,
-    required this.agents,
+    required this.arrears,
     required this.currency,
     required this.onSettle,
   });
 
-  int _due(PayrollArrearsAgent agent) => agent.months
-      .where((arrear) => arrear.currency == currency)
-      .fold(0, (sum, arrear) => sum + arrear.dueInCents);
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final sorted = [...agents]..sort((a, b) => _due(b).compareTo(_due(a)));
-    return PayrollDashboardCard(
+    final sorted = [
+      for (final agent in arrears)
+        if (agent.dues.isNotEmpty) agent,
+    ]..sort((a, b) => b.dueIn(currency).compareTo(a.dueIn(currency)));
+    return EteeloStatsCard(
       title: l10n.payrollDashArrearsTitle,
-      trailing: sorted.isEmpty
-          ? null
-          : EteeloButton.ghost(
-              label: l10n.payrollDashSettle,
-              icon: Icons.arrow_forward,
-              onPressed: onSettle,
-              fullWidth: false,
-            ),
+      icon: Icons.account_balance_outlined,
+      tone: DashboardSense.manquant,
+      toneStrength: DashboardTones.forceDe(DashboardSense.manquant),
+      actions: [
+        if (sorted.isNotEmpty)
+          EteeloButton.ghost(
+            label: l10n.payrollDashSettle,
+            icon: Icons.arrow_forward,
+            onPressed: onSettle,
+            fullWidth: false,
+          ),
+      ],
       child: sorted.isEmpty
           ? Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
@@ -65,9 +64,9 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, PayrollArrearsAgent agent) {
+  Widget _row(BuildContext context, PayrollDashboardArrears agent) {
     final l10n = AppLocalizations.of(context)!;
-    final tone = PayrollTone.submitted;
+    final tone = PayrollTone.alert;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Column(
@@ -77,8 +76,7 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  snapshot.member(agent.staffMemberId)?.fullName ??
-                      agent.staffMemberId,
+                  agent.fullName,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLarge,
                 ),
@@ -87,7 +85,7 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   PayrollLabels.perCurrency(
-                    agent.months.map((a) => (a.dueInCents, a.currency)),
+                    agent.dues.map((due) => (due.dueInCents, due.currency)),
                   ).join(' · '),
                   textAlign: TextAlign.end,
                   style: AppTypography.labelLarge,
@@ -100,7 +98,7 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
             spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: [
-              for (final arrear in agent.months)
+              for (final due in agent.dues)
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: tone.soft,
@@ -113,9 +111,9 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
                     ),
                     child: Text(
                       [
-                        PayrollLabels.month(context, arrear.month),
-                        PayrollLabels.money(arrear.dueInCents, arrear.currency),
-                        if (arrear.prioritized) l10n.payrollDashPriority,
+                        PayrollLabels.month(context, due.month),
+                        PayrollLabels.money(due.dueInCents, due.currency),
+                        if (due.prioritized) l10n.payrollDashPriority,
                       ].join(' · '),
                       style: AppTypography.labelSmall.copyWith(color: tone.ink),
                     ),

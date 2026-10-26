@@ -581,13 +581,6 @@ class AppColors {
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
   static const payrollWhatsapp = Color(0xFF1B7A4A);
 
-  /// Le mois affiché, cerné dans la série « mois par mois ».
-  static const payrollChartFocus = terreCuite;
-
-  /// Les autres mois : le liseré existe (la colonne ne bouge pas au focus),
-  /// sans se voir.
-  static const payrollChartNoFocus = Color(0x00000000);
-
   // ── Photo de l'élève ──────────────────────────────────────────────────────
   /// Liseré intérieur d'une photo d'avatar : il détache un visage clair d'un
   /// fond clair sans dessiner de bordure visible.

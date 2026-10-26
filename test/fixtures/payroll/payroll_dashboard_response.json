@@ -1,0 +1,110 @@
+{
+  "month": "2026-09",
+  "status": "VALIDATED",
+  "validatedAt": "2026-09-27T14:00:00Z",
+  "provisional": false,
+  "situationAt": "2026-10-26T09:00:00Z",
+  "tracked": true,
+  "currencies": [
+    {
+      "currency": "USD",
+      "forecast": {
+        "grossInCents": 40000,
+        "absenceInCents": 1000,
+        "advancesInCents": 2000,
+        "legalInCents": 1500,
+        "childcareInCents": 500,
+        "netInCents": 35000,
+        "employerChargesInCents": 6080
+      },
+      "priorityArrearsInCents": 3000,
+      "progress": {
+        "paidInCents": 20000,
+        "deferredInCents": 5000,
+        "unpaidInCents": 10000,
+        "notYetInCents": 0,
+        "settledCount": 1,
+        "partialCount": 1,
+        "unpaidCount": 0
+      },
+      "rows": [
+        {
+          "staffMemberId": "8f0e2c1a-0000-4000-8000-000000000001",
+          "fullName": "KABASELE Marie",
+          "jobTitle": "Enseignante",
+          "plannedInCents": 22000,
+          "deductionsInCents": 2000,
+          "netInCents": 20000,
+          "arrearsInCents": 0,
+          "receivedInCents": 20000,
+          "remainingInCents": 0,
+          "status": "SETTLED"
+        },
+        {
+          "staffMemberId": "8f0e2c1a-0000-4000-8000-000000000002",
+          "fullName": "MAYALA Ruth",
+          "jobTitle": null,
+          "plannedInCents": 18000,
+          "deductionsInCents": 3000,
+          "netInCents": 15000,
+          "arrearsInCents": 3000,
+          "receivedInCents": 0,
+          "remainingInCents": 18000,
+          "status": "DUE"
+        }
+      ],
+      "totals": {
+        "plannedInCents": 40000,
+        "deductionsInCents": 5000,
+        "netInCents": 35000,
+        "arrearsInCents": 3000,
+        "receivedInCents": 20000,
+        "remainingInCents": 18000
+      }
+    }
+  ],
+  "months": [
+    {
+      "month": "2026-08",
+      "status": "VALIDATED",
+      "tracked": true,
+      "currencies": [
+        {"currency": "USD", "paidInCents": 35000, "deferredInCents": 0, "unpaidInCents": 0, "notYetInCents": 0}
+      ]
+    },
+    {
+      "month": "2026-09",
+      "status": "VALIDATED",
+      "tracked": true,
+      "currencies": [
+        {"currency": "USD", "paidInCents": 20000, "deferredInCents": 5000, "unpaidInCents": 10000, "notYetInCents": 0}
+      ]
+    }
+  ],
+  "advances": [
+    {
+      "advanceId": "a1000000-0000-4000-8000-000000000001",
+      "staffMemberId": "8f0e2c1a-0000-4000-8000-000000000002",
+      "fullName": "MAYALA Ruth",
+      "nature": "LOAN",
+      "installments": 4,
+      "reason": "MEDICAL",
+      "reasonDetail": null,
+      "grantedOn": "2026-07-03",
+      "amountInCents": 8000,
+      "currency": "USD",
+      "remainingInCents": 4000,
+      "takenThisMonthInCents": 2000,
+      "phase": "IN_PROGRESS"
+    }
+  ],
+  "arrears": [
+    {
+      "staffMemberId": "8f0e2c1a-0000-4000-8000-000000000002",
+      "fullName": "MAYALA Ruth",
+      "dues": [
+        {"month": "2026-08", "currency": "USD", "dueInCents": 3000, "prioritized": true}
+      ]
+    }
+  ]
+}

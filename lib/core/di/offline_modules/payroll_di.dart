@@ -1,3 +1,9 @@
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/dashboard/payroll_dashboard_cubit.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_dashboard_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_dashboard_repository.dart';
+import 'package:school_app_flutter/features/payroll/data/dashboard/payroll_dashboard_repository_impl.dart';
+import 'package:school_app_flutter/features/payroll/data/dashboard/payroll_dashboard_api.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
@@ -91,6 +97,22 @@ void _registerPresentation(GetIt getIt) {
       commands: () => getIt<PayrollCommands>(),
     ),
   );
+  getIt.registerFactory<PayrollDashboardCubit>(
+    () => PayrollDashboardCubit(
+      read: getIt<GetPayrollDashboardUseCase>(),
+      documents: getIt<FetchPayslipUseCase>(),
+      // Seule la file d'envoi de la paie compte ici : l'écran ne lit rien de
+      // local, mais il doit voir les derniers versements partis.
+      signals: StaffSyncSignals(
+        pulls: SyncStaffPullsUseCase(
+          getIt<PullCoordinator>(),
+          resources: kPayrollScreenResources,
+        ),
+        bus: getIt<PullCompletionBus>(),
+        engine: getIt<SyncEngine>(),
+      ),
+    ),
+  );
   getIt.registerFactory<PayrollCubit>(
     () => PayrollCubit(
       load: getIt<LoadPayrollUseCase>(),
@@ -151,6 +173,19 @@ void _registerDomain(GetIt getIt) {
       api: getIt<PayslipApi>(),
       extras: getIt<Map<String, dynamic>>(),
     ),
+  );
+  getIt.registerLazySingleton<PayrollDashboardApi>(
+    () => PayrollDashboardApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<PayrollDashboardRepository>(
+    () => PayrollDashboardRepositoryImpl(
+      api: getIt<PayrollDashboardApi>(),
+      connectivity: getIt<ConnectivityService>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt.registerFactory(
+    () => GetPayrollDashboardUseCase(getIt<PayrollDashboardRepository>()),
   );
   PayrollRepository repository() => getIt<PayrollRepository>();
   getIt
