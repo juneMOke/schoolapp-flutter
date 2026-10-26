@@ -288,6 +288,9 @@ class AppDimensions {
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;
 
+  /// Liseré d'une barre mise en relief (`CycleBarChart.highlightBorderColor`).
+  static const chartHighlightBorderWidth = 2.0;
+
   // Géométrie des barres verticales (CycleBarChart).
   //
   // La largeur d'une barre est une **part du pas**, pas une valeur absolue :
