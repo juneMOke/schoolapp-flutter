@@ -11812,5 +11812,8 @@
   "payrollMonthStripA11y": "Payroll months",
   "payrollMonthPillA11y": "{month} · {status}",
   "@payrollMonthPillA11y": {"placeholders": {"month": {"type": "String"}, "status": {"type": "String"}}},
-  "payrollMonthNoPayroll": "No payroll"
+  "payrollMonthNoPayroll": "No payroll",
+  "payrollNoticesMore": "{count, plural, =1{1 more point} other{{count} more points}}",
+  "@payrollNoticesMore": {"placeholders": {"count": {"type": "int"}}},
+  "payrollNoticesLess": "Hide"
 }

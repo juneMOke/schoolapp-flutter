@@ -19,13 +19,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Les bandeaux du livre, du plus grave au plus doux : refus du dernier geste,
 /// renvoi motivé, ce qui empêche le geste suivant, et ce qu'il faut vérifier
 /// avant de soumettre.
-class PayrollLedgerNotices extends StatelessWidget {
-  final PayrollMonthView view;
-
-  const PayrollLedgerNotices({super.key, required this.view});
-
-  @override
-  Widget build(BuildContext context) {
+abstract final class PayrollLedgerNotices {
+  /// Les bandeaux du mois, du plus grave au plus doux.
+  static List<Widget> of(BuildContext context, PayrollMonthView view) {
     final l10n = AppLocalizations.of(context)!;
     final actions = PayrollLedgerActions(context);
     final canWrite = PermissionGate.allows(
@@ -131,19 +127,7 @@ class PayrollLedgerNotices extends StatelessWidget {
           ],
         ),
     ];
-    if (notices.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final (index, notice) in notices.indexed) ...[
-            if (index > 0) const SizedBox(height: AppSpacing.sm),
-            notice,
-          ],
-        ],
-      ),
-    );
+    return notices;
   }
 
   /// La navigation de la coquille ; `null` hors d'elle (page ouverte par sa

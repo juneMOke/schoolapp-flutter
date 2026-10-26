@@ -20128,4 +20128,18 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollMonthNoPayroll => 'Pas de paie';
+
+  @override
+  String payrollNoticesMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count autres points',
+      one: '1 autre point',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollNoticesLess => 'Masquer';
 }

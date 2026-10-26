@@ -33,7 +33,6 @@ class PayrollRegularizations extends StatelessWidget {
     final actions = PayrollLedgerActions(context);
     final tone = PayrollTone.alert;
     return Container(
-      margin: const EdgeInsets.only(top: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: tone.soft,

@@ -30968,6 +30968,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No payroll'**
   String get payrollMonthNoPayroll;
+
+  /// No description provided for @payrollNoticesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more point} other{{count} more points}}'**
+  String payrollNoticesMore(int count);
+
+  /// No description provided for @payrollNoticesLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get payrollNoticesLess;
 }
 
 class _AppLocalizationsDelegate
