@@ -110,4 +110,18 @@ void main() {
       expect(cubit.state.month, '2026-08');
     },
   );
+
+  testWidgets('un mois d adresse lu avant la tablette est borné à sa lecture', (
+    tester,
+  ) async {
+    final harness = await pumpPayrollScreen(
+      tester,
+      snapshot: snapshot(),
+      // Avant la lecture, le premier contrat est inconnu : rien ne borne.
+      beforeLoad: (cubit) => cubit.showMonth('2019-01'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(harness.cubit.state.month, '2026-06');
+  });
 }

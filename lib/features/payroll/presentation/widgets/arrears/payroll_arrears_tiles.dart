@@ -55,7 +55,8 @@ class PayrollArrearsTiles extends StatelessWidget {
             all,
             (a) => a.origin == PayrollArrearOrigin.deferred,
           ),
-          accent: DashboardSense.attendu,
+          // Différé par décision : une attente, pas un statut « validée ».
+          accent: DashboardSense.attente,
           icon: Icons.hourglass_bottom,
         ),
         PayrollKpiCard.of(
@@ -72,7 +73,7 @@ class PayrollArrearsTiles extends StatelessWidget {
           valueLines: [
             oldest == null ? '—' : PayrollLabels.month(context, oldest),
           ],
-          accent: DashboardSense.attente,
+          accent: DashboardSense.marque,
           icon: Icons.history,
           subline: oldest == null
               ? null

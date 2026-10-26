@@ -68,11 +68,18 @@ class PayrollCubit extends Cubit<PayrollState> {
         }
       },
       (snapshot) {
-        final view = PayrollLedger.monthView(snapshot, state.month);
+        // Un mois lu dans l'adresse avant que la tablette ne soit lue n'a pas
+        // pu être borné : il l'est ici, au premier contrat de l'école.
+        final first = snapshot.firstMonth;
+        final month = first != null && state.month.compareTo(first) < 0
+            ? first
+            : state.month;
+        final view = PayrollLedger.monthView(snapshot, month);
         final today = SchoolDayCalendar.dayOf(_now());
         emit(
           state.copyWith(
             load: PayrollLoad.ready,
+            month: month,
             snapshot: snapshot,
             today: today,
             view: view,

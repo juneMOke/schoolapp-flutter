@@ -108,7 +108,8 @@ class PayrollAdvancesTab extends StatelessWidget {
             PayrollKpiCard.of(
               label: l10n.payrollAdvancesThisMonth,
               valueLines: thisMonth,
-              accent: DashboardSense.encaisse,
+              // Une retenue du mois, comme au livre.
+              accent: DashboardSense.manquant,
               icon: Icons.remove_circle_outline,
             ),
           ],

@@ -45,7 +45,10 @@ class _PayrollMonthStripState extends State<PayrollMonthStrip> {
   @override
   void didUpdateWidget(covariant PayrollMonthStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selected != widget.selected) {
+    // Le mois change, ou la frise s'allonge (la tablette vient d'être lue) :
+    // le mois affiché revient à l'écran.
+    if (oldWidget.selected != widget.selected ||
+        oldWidget.months.length != widget.months.length) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _reveal());
     }
   }

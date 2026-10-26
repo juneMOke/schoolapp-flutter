@@ -62,7 +62,8 @@ class PayrollKpis extends StatelessWidget {
             PayrollKpiCard.of(
               label: l10n.payrollKpiComplements,
               valueLines: _perCurrency(lines, (l) => l.complementsInCents),
-              accent: DashboardSense.attente,
+              // Heures et allocations : un gain pour l'agent.
+              accent: DashboardSense.encaisse,
               icon: Icons.add_circle_outline,
               subline: l10n.payrollKpiComplementsDetail,
             ),
@@ -83,7 +84,9 @@ class PayrollKpis extends StatelessWidget {
             PayrollKpiCard.of(
               label: l10n.payrollKpiNet,
               valueLines: _perCurrency(lines, (l) => l.netInCents),
-              accent: DashboardSense.encaisse,
+              // Un décaissement, comme au tableau de bord : rien n'est
+              // « encaissé » sur un brouillon.
+              accent: DashboardSense.marque,
               icon: Icons.payments_outlined,
               subline: locked
                   ? l10n.payrollKpiPaid(view.paidCount, view.payable.length)

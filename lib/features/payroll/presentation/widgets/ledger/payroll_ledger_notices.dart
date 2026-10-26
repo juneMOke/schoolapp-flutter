@@ -20,8 +20,12 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// renvoi motivé, ce qui empêche le geste suivant, et ce qu'il faut vérifier
 /// avant de soumettre.
 abstract final class PayrollLedgerNotices {
-  /// Les bandeaux du mois, du plus grave au plus doux.
-  static List<Widget> of(BuildContext context, PayrollMonthView view) {
+  /// Les bandeaux du mois : les **alertes** — un refus, un renvoi, ce qui
+  /// bloque le geste suivant — et les **informations**.
+  static ({List<Widget> alerts, List<Widget> infos}) of(
+    BuildContext context,
+    PayrollMonthView view,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     final actions = PayrollLedgerActions(context);
     final canWrite = PermissionGate.allows(
@@ -38,12 +42,7 @@ abstract final class PayrollLedgerNotices {
     );
     final refusal = view.lastRefusal;
     final returned = view.header?.returnReason;
-    final notices = <Widget>[
-      if (view.awaitingFrozenLines)
-        PayrollTone.validated.notice(
-          l10n.payrollAwaitingFrozen,
-          icon: Icons.cloud_download_outlined,
-        ),
+    final alerts = <Widget>[
       if (refusal != null && refusal.isStale)
         Row(
           children: [
@@ -82,16 +81,24 @@ abstract final class PayrollLedgerNotices {
           PayrollTone.submitted.notice(
             PayrollLabels.rule(l10n, blocker.rule, month: attendanceMonth),
           ),
-      if (view.phase == PayrollPhase.submitted && canManage) ...[
+      if (view.phase == PayrollPhase.submitted && canManage)
         if (view.validateBlocker case final blocker?)
           PayrollTone.submitted.notice(
             PayrollLabels.rule(l10n, blocker.rule, month: attendanceMonth),
           ),
-        if (view.attendance == PayrollAttendanceState.unverifiable)
-          PayrollTone.draft.notice(
-            l10n.payrollAttendanceUnverifiable(attendanceMonth),
-          ),
-      ],
+    ];
+    final infos = <Widget>[
+      if (view.awaitingFrozenLines)
+        PayrollTone.validated.notice(
+          l10n.payrollAwaitingFrozen,
+          icon: Icons.cloud_download_outlined,
+        ),
+      if (view.phase == PayrollPhase.submitted &&
+          canManage &&
+          view.attendance == PayrollAttendanceState.unverifiable)
+        PayrollTone.draft.notice(
+          l10n.payrollAttendanceUnverifiable(attendanceMonth),
+        ),
       if (view.isEditable && view.zeroHourMembers.isNotEmpty)
         PayrollTone.submitted.notice(
           l10n.payrollZeroHours(
@@ -127,7 +134,7 @@ abstract final class PayrollLedgerNotices {
           ],
         ),
     ];
-    return notices;
+    return (alerts: alerts, infos: infos);
   }
 
   /// La navigation de la coquille ; `null` hors d'elle (page ouverte par sa

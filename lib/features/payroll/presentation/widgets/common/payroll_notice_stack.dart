@@ -3,14 +3,20 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Une seule zone de bandeaux : le premier — le plus grave, l'appelant les
-/// range — reste visible, les autres se replient sous « N autres points ».
-/// Six bandeaux empilés repoussaient le livre sous la ligne de flottaison.
+/// Une seule zone de bandeaux. Les **alertes** — l'argent parti sans trace,
+/// un refus, un renvoi, ce qui bloque le geste suivant — restent toutes
+/// visibles ; des **informations**, la première seulement, les autres se
+/// replient sous « N autres points ». Six bandeaux empilés repoussaient le
+/// livre sous la ligne de flottaison ; une alerte, elle, ne se cache jamais.
 class PayrollNoticeStack extends StatefulWidget {
-  /// Du plus grave au plus doux.
-  final List<Widget> notices;
+  final List<Widget> alerts;
+  final List<Widget> infos;
 
-  const PayrollNoticeStack({super.key, required this.notices});
+  const PayrollNoticeStack({
+    super.key,
+    this.alerts = const [],
+    this.infos = const [],
+  });
 
   @override
   State<PayrollNoticeStack> createState() => _PayrollNoticeStackState();
@@ -21,11 +27,11 @@ class _PayrollNoticeStackState extends State<PayrollNoticeStack> {
 
   @override
   Widget build(BuildContext context) {
-    final notices = widget.notices;
-    if (notices.isEmpty) return const SizedBox.shrink();
+    final infos = widget.infos;
+    final hidden = infos.length - 1;
+    final shown = [...widget.alerts, ...(_expanded ? infos : infos.take(1))];
+    if (shown.isEmpty) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
-    final hidden = notices.length - 1;
-    final shown = _expanded ? notices : notices.take(1);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

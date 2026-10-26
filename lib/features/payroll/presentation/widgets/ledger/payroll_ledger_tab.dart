@@ -50,7 +50,7 @@ class PayrollLedgerTab extends StatelessWidget {
           PayrollKpis(view: view),
           const SizedBox(height: AppSpacing.lg),
         ],
-        PayrollNoticeStack(notices: _notices(context, view, canWrite)),
+        _notices(context, view, canWrite),
         const SizedBox(height: AppSpacing.lg),
         if (view.lines.isEmpty)
           _Empty(state: state)
@@ -83,21 +83,28 @@ class PayrollLedgerTab extends StatelessWidget {
     );
   }
 
-  /// Du plus grave au plus doux : l'argent parti sans trace, les bandeaux du
-  /// mois, puis les arriérés des mois antérieurs.
-  List<Widget> _notices(
-    BuildContext context,
-    PayrollMonthView view,
-    bool canWrite,
-  ) {
+  /// Les alertes d'abord, toutes visibles : l'argent parti sans trace, puis
+  /// les refus, renvois et blocages du mois ; ensuite les informations, dont
+  /// les arriérés des mois antérieurs. Un mois neuf replie à nouveau.
+  Widget _notices(BuildContext context, PayrollMonthView view, bool canWrite) {
     final toRegularize = PayrollLedger.toRegularize(state.snapshot);
-    return [
-      if (toRegularize.isNotEmpty)
-        PayrollRegularizations(disbursements: toRegularize, canWrite: canWrite),
-      ...PayrollLedgerNotices.of(context, view),
-      if (PayrollArrearsBanner.shows(state.snapshot, view))
-        PayrollArrearsBanner(snapshot: state.snapshot, view: view),
-    ];
+    final month = PayrollLedgerNotices.of(context, view);
+    return PayrollNoticeStack(
+      key: ValueKey(view.month),
+      alerts: [
+        if (toRegularize.isNotEmpty)
+          PayrollRegularizations(
+            disbursements: toRegularize,
+            canWrite: canWrite,
+          ),
+        ...month.alerts,
+      ],
+      infos: [
+        ...month.infos,
+        if (PayrollArrearsBanner.shows(state.snapshot, view))
+          PayrollArrearsBanner(snapshot: state.snapshot, view: view),
+      ],
+    );
   }
 }
 

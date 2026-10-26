@@ -56,6 +56,9 @@ pumpPayrollScreen(
 
   /// Les PDF du serveur (bulletins, état de paie, tableau de bord).
   PayslipRepository? payslips,
+
+  /// Un geste posé avant que la tablette ne soit lue (un mois d'adresse).
+  void Function(PayrollCubit cubit)? beforeLoad,
 }) async {
   final repository = MockPayrollRepository();
   when(() => repository.load()).thenAnswer((_) async => Right(snapshot));
@@ -100,6 +103,7 @@ pumpPayrollScreen(
   when(() => auth.state).thenReturn(state);
   whenListen(auth, const Stream<AuthState>.empty(), initialState: state);
   addTearDown(cubit.close);
+  beforeLoad?.call(cubit);
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),

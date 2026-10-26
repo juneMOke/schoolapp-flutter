@@ -210,7 +210,9 @@ class PayrollLedgerTable extends StatelessWidget {
                 (l) => l.baseInCents,
                 (l) => l.overtimeInCents,
                 (l) => l.allowanceInCents,
-                (l) => l.advanceInCents,
+                // La colonne affiche retenues + avance par ligne : le total
+                // somme les mêmes montants.
+                (l) => l.deductions.totalInCents + l.advanceInCents,
                 (l) => l.netInCents,
               ])
                 Text(

@@ -58,7 +58,8 @@ class PayrollHistoryTab extends StatelessWidget {
             PayrollKpiCard.of(
               label: l10n.payrollHistoryMonths,
               value: snapshot.headers.length,
-              accent: DashboardSense.attendu,
+              // Pas le bleu des paies validées, son voisin de bandeau.
+              accent: DashboardSense.marque,
               icon: Icons.calendar_month_outlined,
             ),
             PayrollKpiCard.of(
