@@ -889,11 +889,10 @@ class AppDimensions {
   /// La feuille du bulletin et son panneau latéral.
   static const payrollPayslipMaxWidth = 720.0;
   static const payrollPayslipPanelWidth = 270.0;
-  static const payrollPayslipWideBreakpoint = 1000.0;
 
   /// Le filet or sous l'en-tête du bulletin.
   static const payrollPayslipRule = 3.0;
-  static const payrollStepperButton = 40.0;
+  static const payrollStepperButton = minTouchTarget;
   static const payrollStepperValueWidth = 56.0;
   static const payrollCircuitDot = 30.0;
 
