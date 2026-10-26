@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
@@ -55,10 +56,11 @@ class PayrollDashboardCubit extends Cubit<PayrollDashboardState> {
          ),
        );
 
-  Future<void> load() => _load(skeleton: state.dashboard == null);
+  Future<void> load() => _load(skeleton: state.dashboard == null, flush: true);
 
-  /// F5, « Réessayer », la fin d'un envoi : relit sans squelette.
-  Future<void> refresh() => _load(skeleton: state.dashboard == null);
+  /// F5, « Réessayer » : pousse la file, puis relit sans squelette.
+  Future<void> refresh() =>
+      _load(skeleton: state.dashboard == null, flush: true);
 
   /// Le mois d'une pastille, d'une flèche ou de l'adresse (`?mois=`) ;
   /// absent ou illisible : le mois en cours ; jamais au-delà de lui.
@@ -67,7 +69,7 @@ class PayrollDashboardCubit extends Cubit<PayrollDashboardState> {
     if (wanted.compareTo(state.currentMonth) > 0) wanted = state.currentMonth;
     if (wanted == state.month && state.dashboard != null) return;
     emit(state.copyWith(month: wanted));
-    await _load(skeleton: true);
+    await _load(skeleton: true, flush: true);
   }
 
   /// L'adresse a changé (F5, Précédent, lien) : un seul rechargement pour le
@@ -80,7 +82,7 @@ class PayrollDashboardCubit extends Cubit<PayrollDashboardState> {
     if (wanted.compareTo(state.currentMonth) > 0) wanted = state.currentMonth;
     if (wanted != state.month) {
       emit(state.copyWith(month: wanted, filter: filter));
-      await _load(skeleton: true);
+      await _load(skeleton: true, flush: true);
     } else {
       await setFilter(filter);
     }
@@ -123,7 +125,10 @@ class PayrollDashboardCubit extends Cubit<PayrollDashboardState> {
   void selectCurrency(String currency) =>
       emit(state.copyWith(currency: () => currency));
 
-  Future<void> _load({required bool skeleton}) async {
+  /// [flush] : pousser d'abord la file d'envoi — au chargement, à F5, au
+  /// changement de mois ; pas à chaque filtre ni à chaque frappe, qui
+  /// attendraient un envoi de toute la file.
+  Future<void> _load({required bool skeleton, bool flush = false}) async {
     final ticket = ++_ticket;
     final shown = skeleton ? null : state.dashboard;
     emit(
@@ -133,8 +138,10 @@ class PayrollDashboardCubit extends Cubit<PayrollDashboardState> {
         refreshing: shown != null,
       ),
     );
-    await _signals.flush();
-    if (isClosed || ticket != _ticket) return;
+    if (flush) {
+      await _signals.flush();
+      if (isClosed || ticket != _ticket) return;
+    }
     final asked = (filter: state.filter, search: state.search);
     final result = await _read(
       state.month,
@@ -144,15 +151,36 @@ class PayrollDashboardCubit extends Cubit<PayrollDashboardState> {
     if (isClosed || ticket != _ticket) return;
     if (result.isRight()) _shown = asked;
     result.fold(
-      (failure) => emit(
-        shown == null
-            ? state.copyWith(
-                load: PayrollDashboardLoad.failure,
-                failure: () => failure,
-                refreshing: false,
-              )
-            : state.copyWith(refreshing: false),
-      ),
+      (failure) {
+        final type = EteeloErrorType.fromFailure(failure);
+        // Sans écran, ou session perdue / droit retiré : l'erreur en place,
+        // dans son anatomie (règle n° 10).
+        if (shown == null ||
+            type == EteeloErrorType.unauthorized ||
+            type == EteeloErrorType.forbidden) {
+          emit(
+            state.copyWith(
+              load: PayrollDashboardLoad.failure,
+              failure: () => failure,
+              refreshing: false,
+            ),
+          );
+          return;
+        }
+        // Une relecture qui échoue garde l'écran — et revient au filtre et à
+        // la recherche qu'il montre, pour que puce, tableau et PDF disent la
+        // même chose ; l'échec se dit une fois.
+        final kept = _shown;
+        emit(
+          state.copyWith(
+            refreshing: false,
+            filter: kept?.filter,
+            search: kept?.search,
+            refreshFailure: () => failure,
+            refreshFailureSeq: state.refreshFailureSeq + 1,
+          ),
+        );
+      },
       (dashboard) => emit(
         state.copyWith(
           load: PayrollDashboardLoad.ready,

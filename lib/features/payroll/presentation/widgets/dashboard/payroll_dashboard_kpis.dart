@@ -40,6 +40,7 @@ class PayrollDashboardKpis extends StatelessWidget {
       (sum, agent) => sum + agent.dueIn(currency),
     );
     final validated = dashboard.isValidated && progress != null;
+    final untracked = !dashboard.tracked;
     final net = forecast.netInCents;
     final paidPercent = net == 0 || progress == null
         ? 0
@@ -88,19 +89,32 @@ class PayrollDashboardKpis extends StatelessWidget {
                     paidPercent,
                     progress.settledCount,
                   )
+                : untracked
+                ? l10n.payrollDashNotTrackedKpi
                 : l10n.payrollDashNothingBeforeValidation,
           ),
+          // Un mois d'avant la v2 n'est pas une dette : seuls les arriérés
+          // des mois suivis restent dus.
           PayrollKpiCard.of(
             label: l10n.payrollDashKpiRemaining,
-            valueText: money(
-              (validated ? progress.outstandingInCents : net) + arrears,
-            ),
+            valueText: untracked && arrears == 0
+                ? l10n.payrollNoValue
+                : money(
+                    (validated
+                            ? progress.outstandingInCents
+                            : untracked
+                            ? 0
+                            : net) +
+                        arrears,
+                  ),
             icon: Icons.hourglass_bottom,
             accent: DashboardSense.manquant,
             subline: arrears > 0
                 ? l10n.payrollDashKpiRemainingSubline(money(arrears))
                 : validated
                 ? null
+                : untracked
+                ? l10n.payrollDashNotTrackedKpi
                 : l10n.payrollDashKpiRemainingDraft,
           ),
         ],

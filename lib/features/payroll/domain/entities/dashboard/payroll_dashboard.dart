@@ -58,10 +58,14 @@ class PayrollDashboard extends Equatable {
 
   bool get isValidated => status == PayrollMonthStatus.validated;
 
-  /// Aucune paie ouverte ni aucune ligne servie : rien à montrer.
+  /// Rien à montrer : aucune paie ouverte, aucun brut calculé, ni arriéré ni
+  /// avance. Jugé sur ce que filtre et recherche ne touchent pas — des lignes
+  /// filtrées à zéro laissent l'écran, et son vide de tableau en sortie.
   bool get isEmpty =>
       status == PayrollMonthStatus.none &&
-      currencies.every((section) => section.rows.isEmpty);
+      currencies.every((section) => section.forecast.grossInCents == 0) &&
+      arrears.every((agent) => agent.dues.isEmpty) &&
+      advances.isEmpty;
 
   /// La section d'une devise, ou la première.
   PayrollDashboardCurrency? section(String? currency) {

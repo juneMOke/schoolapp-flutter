@@ -27,6 +27,11 @@ class PayrollDashboardState extends Equatable {
   /// recherche, F5) : le tableau se grise sans clignoter.
   final bool refreshing;
 
+  /// Le dernier échec d'une relecture qui a gardé l'écran, et son numéro :
+  /// l'écran l'annonce une fois par échec.
+  final Failure? refreshFailure;
+  final int refreshFailureSeq;
+
   const PayrollDashboardState({
     required this.month,
     required this.currentMonth,
@@ -37,6 +42,8 @@ class PayrollDashboardState extends Equatable {
     this.search = '',
     this.currency,
     this.refreshing = false,
+    this.refreshFailure,
+    this.refreshFailureSeq = 0,
   });
 
   bool get isCurrentMonth => month == currentMonth;
@@ -56,6 +63,8 @@ class PayrollDashboardState extends Equatable {
     String? search,
     String? Function()? currency,
     bool? refreshing,
+    Failure? Function()? refreshFailure,
+    int? refreshFailureSeq,
   }) => PayrollDashboardState(
     load: load ?? this.load,
     dashboard: dashboard == null ? this.dashboard : dashboard(),
@@ -66,6 +75,10 @@ class PayrollDashboardState extends Equatable {
     search: search ?? this.search,
     currency: currency == null ? this.currency : currency(),
     refreshing: refreshing ?? this.refreshing,
+    refreshFailure: refreshFailure == null
+        ? this.refreshFailure
+        : refreshFailure(),
+    refreshFailureSeq: refreshFailureSeq ?? this.refreshFailureSeq,
   );
 
   @override
@@ -79,5 +92,7 @@ class PayrollDashboardState extends Equatable {
     search,
     currency,
     refreshing,
+    refreshFailure,
+    refreshFailureSeq,
   ];
 }

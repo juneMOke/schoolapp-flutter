@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -48,7 +50,23 @@ class PayrollDashboardScreen extends StatelessWidget {
       onInvoke: () => unawaited(cubit.refresh()),
       child: AppPageBackground(
         width: PageContentWidth.wide,
-        child: BlocBuilder<PayrollDashboardCubit, PayrollDashboardState>(
+        child: BlocConsumer<PayrollDashboardCubit, PayrollDashboardState>(
+          listenWhen: (previous, current) =>
+              current.refreshFailureSeq != previous.refreshFailureSeq,
+          listener: (context, state) {
+            final l10n = AppLocalizations.of(context)!;
+            if (state.refreshFailure is NetworkFailure) {
+              AppSnackBar.showWarning(context, l10n.payrollDashRefreshOffline);
+            } else {
+              AppSnackBar.showError(context, l10n.payrollDashRefreshFailed);
+            }
+          },
+          buildWhen: (previous, current) =>
+              previous.copyWith(
+                refreshFailure: () => current.refreshFailure,
+                refreshFailureSeq: current.refreshFailureSeq,
+              ) !=
+              current,
           builder: (context, state) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -20175,4 +20175,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollNoValue => '—';
+
+  @override
+  String get payrollDashRefreshOffline =>
+      'Hors ligne : le tableau de bord n\'a pas été relu, les chiffres affichés sont ceux d\'avant.';
+
+  @override
+  String get payrollDashRefreshFailed =>
+      'Le tableau de bord n\'a pas pu être relu ; les chiffres affichés sont ceux d\'avant.';
+
+  @override
+  String get payrollDashNotTrackedKpi => 'Non suivi avant la v2';
 }

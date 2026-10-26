@@ -11826,5 +11826,8 @@
   "@payrollDashByMonthSubtitle": {"placeholders": {"currency": {"type": "String"}}},
   "payrollDashKpisA11y": "Key payroll figures for the month",
   "payrollDashSplitTitle": "From gross to net",
-  "payrollNoValue": "—"
+  "payrollNoValue": "—",
+  "payrollDashRefreshOffline": "Offline: the dashboard was not reread; the figures shown are the previous ones.",
+  "payrollDashRefreshFailed": "The dashboard could not be reread; the figures shown are the previous ones.",
+  "payrollDashNotTrackedKpi": "Not tracked before v2"
 }

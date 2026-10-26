@@ -20039,4 +20039,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollNoValue => '—';
+
+  @override
+  String get payrollDashRefreshOffline =>
+      'Offline: the dashboard was not reread; the figures shown are the previous ones.';
+
+  @override
+  String get payrollDashRefreshFailed =>
+      'The dashboard could not be reread; the figures shown are the previous ones.';
+
+  @override
+  String get payrollDashNotTrackedKpi => 'Not tracked before v2';
 }

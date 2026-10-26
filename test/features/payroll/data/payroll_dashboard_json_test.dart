@@ -82,4 +82,11 @@ void main() {
 
     expect(() => PayrollDashboardJson.fromJson(json), throwsA(anything));
   });
+
+  test('des lignes filtrées à zéro ne vident pas le mois', () {
+    final json = payrollDashboardFixture()..['status'] = 'NONE';
+    ((json['currencies'] as List).first as Map)['rows'] = <Object>[];
+
+    expect(PayrollDashboardJson.fromJson(json).isEmpty, isFalse);
+  });
 }

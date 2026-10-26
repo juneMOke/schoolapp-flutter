@@ -190,4 +190,28 @@ void main() {
       ).called(1);
     },
   );
+
+  testWidgets('un mois d avant la v2 : ni versé ni reste inventés', (
+    tester,
+  ) async {
+    final json = payrollDashboardFixture()
+      ..['tracked'] = false
+      ..['arrears'] = <Object>[];
+    ((json['currencies'] as List).first as Map<String, dynamic>)
+      ..remove('progress')
+      ..remove('rows')
+      ..remove('totals');
+    when(
+      () => repository.read(
+        any(),
+        filter: any(named: 'filter'),
+        query: any(named: 'query'),
+      ),
+    ).thenAnswer((_) async => Right(PayrollDashboardJson.fromJson(json)));
+
+    await pump(tester);
+
+    expect(find.text('Non suivi avant la v2'), findsNWidgets(2));
+    expect(find.text('Ce que chaque salarié perçoit'), findsNothing);
+  });
 }

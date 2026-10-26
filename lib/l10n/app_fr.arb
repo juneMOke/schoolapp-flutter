@@ -12078,5 +12078,8 @@
   "@payrollDashByMonthSubtitle": {"placeholders": {"currency": {"type": "String"}}},
   "payrollDashKpisA11y": "Chiffres clés de la paie du mois",
   "payrollDashSplitTitle": "Du brut au net",
-  "payrollNoValue": "—"
+  "payrollNoValue": "—",
+  "payrollDashRefreshOffline": "Hors ligne : le tableau de bord n'a pas été relu, les chiffres affichés sont ceux d'avant.",
+  "payrollDashRefreshFailed": "Le tableau de bord n'a pas pu être relu ; les chiffres affichés sont ceux d'avant.",
+  "payrollDashNotTrackedKpi": "Non suivi avant la v2"
 }

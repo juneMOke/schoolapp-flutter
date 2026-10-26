@@ -88,7 +88,12 @@ class _StaffCardState extends State<PayrollDashboardStaffCard> {
           label: l10n.payrollDashPdf,
           icon: Icons.picture_as_pdf_outlined,
           isLoading: _printing,
-          onPressed: section.rows.isEmpty ? null : () => unawaited(_pdf()),
+          // Le PDF couvre toutes les devises : il s'ouvre dès qu'une a des
+          // lignes, même si l'onglet affiché n'en a pas.
+          onPressed:
+              (state.dashboard?.currencies.every((c) => c.rows.isEmpty) ?? true)
+              ? null
+              : () => unawaited(_pdf()),
           fullWidth: false,
         ),
       ],

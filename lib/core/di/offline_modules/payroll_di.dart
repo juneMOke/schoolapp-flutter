@@ -101,8 +101,9 @@ void _registerPresentation(GetIt getIt) {
     () => PayrollDashboardCubit(
       read: getIt<GetPayrollDashboardUseCase>(),
       documents: getIt<FetchPayslipUseCase>(),
-      // Seule la file d'envoi de la paie compte ici : l'écran ne lit rien de
-      // local, mais il doit voir les derniers versements partis.
+      // L'écran ne lit rien de local : il pousse la file d'envoi (toute la
+      // file, celle du moteur) avant un chargement, pour voir les derniers
+      // versements partis.
       signals: StaffSyncSignals(
         pulls: SyncStaffPullsUseCase(
           getIt<PullCoordinator>(),

@@ -31034,6 +31034,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'—'**
   String get payrollNoValue;
+
+  /// No description provided for @payrollDashRefreshOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: the dashboard was not reread; the figures shown are the previous ones.'**
+  String get payrollDashRefreshOffline;
+
+  /// No description provided for @payrollDashRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The dashboard could not be reread; the figures shown are the previous ones.'**
+  String get payrollDashRefreshFailed;
+
+  /// No description provided for @payrollDashNotTrackedKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tracked before v2'**
+  String get payrollDashNotTrackedKpi;
 }
 
 class _AppLocalizationsDelegate

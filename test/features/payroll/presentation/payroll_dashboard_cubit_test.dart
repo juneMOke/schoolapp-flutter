@@ -193,4 +193,57 @@ void main() {
     ).called(1);
     expect(c.state.filter, PayrollDashboardFilter.settled);
   });
+
+  test(
+    'une relecture qui échoue revient au filtre affiché et le dit',
+    () async {
+      final c = cubit();
+      addTearDown(c.close);
+      await c.load();
+      when(
+        () => repository.read(
+          any(),
+          filter: PayrollDashboardFilter.settled,
+          query: any(named: 'query'),
+        ),
+      ).thenAnswer((_) async => const Left(NetworkFailure()));
+
+      await c.setFilter(PayrollDashboardFilter.settled);
+
+      expect(c.state.filter, PayrollDashboardFilter.all);
+      expect(c.state.refreshFailure, isA<NetworkFailure>());
+      expect(c.state.refreshFailureSeq, 1);
+    },
+  );
+
+  test('un 403 en cours de session remplace l écran par son erreur', () async {
+    final c = cubit();
+    addTearDown(c.close);
+    await c.load();
+    when(
+      () => repository.read(
+        any(),
+        filter: any(named: 'filter'),
+        query: any(named: 'query'),
+      ),
+    ).thenAnswer((_) async => const Left(UnauthorizedFailure()));
+
+    await c.refresh();
+
+    expect(c.state.load, PayrollDashboardLoad.failure);
+    expect(c.state.failure, isA<UnauthorizedFailure>());
+  });
+
+  test('un filtre ou une recherche ne poussent pas la file', () async {
+    final c = cubit();
+    addTearDown(c.close);
+    await c.load();
+    clearInteractions(signals);
+
+    await c.setFilter(PayrollDashboardFilter.outstanding);
+    c.setSearch('Ruth');
+    await pumpEventQueue();
+
+    verifyNever(() => signals.flush());
+  });
 }
