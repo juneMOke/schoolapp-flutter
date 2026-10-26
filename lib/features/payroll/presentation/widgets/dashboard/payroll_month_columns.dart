@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_chart_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -46,10 +47,10 @@ class PayrollMonthColumns extends StatelessWidget {
           : max,
     );
     final legend = [
-      (l10n.payrollDashPaid, AppColors.payrollChartPaid),
-      (l10n.payrollDashDeferred, AppColors.payrollChartDeferred),
-      (l10n.payrollDashUnpaid, AppColors.payrollChartUnpaid),
-      (l10n.payrollDashNotYet, AppColors.payrollChartNotYet),
+      (l10n.payrollDashPaid, PayrollChartTones.paid),
+      (l10n.payrollDashDeferred, PayrollChartTones.deferred),
+      (l10n.payrollDashUnpaid, PayrollChartTones.unpaid),
+      (l10n.payrollDashNotYet, PayrollChartTones.notYet),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,10 +139,10 @@ class _Column extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = column.progress;
     final parts = [
-      (progress.notYetInCents, AppColors.payrollChartNotYet),
-      (progress.unpaidInCents, AppColors.payrollChartUnpaid),
-      (progress.deferredInCents, AppColors.payrollChartDeferred),
-      (progress.paidInCents, AppColors.payrollChartPaid),
+      (progress.notYetInCents, PayrollChartTones.notYet),
+      (progress.unpaidInCents, PayrollChartTones.unpaid),
+      (progress.deferredInCents, PayrollChartTones.deferred),
+      (progress.paidInCents, PayrollChartTones.paid),
     ];
     const height = AppDimensions.payrollDashColumnsHeight;
     return Semantics(

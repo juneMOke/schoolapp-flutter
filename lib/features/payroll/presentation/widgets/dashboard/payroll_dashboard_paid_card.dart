@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_chart_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_split_bar.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -41,16 +42,16 @@ class PayrollDashboardPaidCard extends StatelessWidget {
         ? 0
         : (progress.paidInCents * 100 / total).round();
     final segments = [
-      (l10n.payrollDashPaid, progress.paidInCents, AppColors.payrollChartPaid),
+      (l10n.payrollDashPaid, progress.paidInCents, PayrollChartTones.paid),
       (
         l10n.payrollDashDeferred,
         progress.deferredInCents,
-        AppColors.payrollChartDeferred,
+        PayrollChartTones.deferred,
       ),
       (
         l10n.payrollDashUnpaid,
         progress.unpaidInCents,
-        AppColors.payrollChartUnpaid,
+        PayrollChartTones.unpaid,
       ),
     ];
     return PayrollDashboardCard(

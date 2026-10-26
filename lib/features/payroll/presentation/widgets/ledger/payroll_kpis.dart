@@ -1,6 +1,7 @@
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_kpi_card.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -51,23 +52,21 @@ class PayrollKpis extends StatelessWidget {
       children: [
         EteeloKpiBand(
           cards: [
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollKpiGross,
               valueLines: _perCurrency(lines, (l) => l.grossInCents),
-              accent: AppColors.bleuArdoise,
-              accentSoft: AppColors.bleuArdoiseSoft,
+              accent: DashboardSense.attendu,
               icon: Icons.account_balance_wallet_outlined,
               subline: l10n.payrollKpiAgents(lines.length),
             ),
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollKpiComplements,
               valueLines: _perCurrency(lines, (l) => l.complementsInCents),
-              accent: AppColors.presenceMarkPresentInk,
-              accentSoft: AppColors.presenceMarkPresentSoft,
+              accent: DashboardSense.attente,
               icon: Icons.add_circle_outline,
               subline: l10n.payrollKpiComplementsDetail,
             ),
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: fixed
                   ? l10n.payrollKpiDeductions
                   : l10n.payrollKpiAdvances,
@@ -75,21 +74,17 @@ class PayrollKpis extends StatelessWidget {
                 lines,
                 (l) => l.deductions.totalInCents + l.advanceInCents,
               ),
-              accent: AppColors.presenceMarkAbsentInk,
-              accentSoft: AppColors.presenceMarkAbsentSoft,
+              accent: DashboardSense.manquant,
               icon: Icons.remove_circle_outline,
               subline: fixed
                   ? l10n.payrollKpiDeductionsDetail(installments)
                   : l10n.payrollKpiAdvancesDetail(installments),
             ),
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollKpiNet,
               valueLines: _perCurrency(lines, (l) => l.netInCents),
-              accent: AppColors.presenceMarkOnBanner,
-              accentSoft: AppColors.presenceMarkBannerMid,
+              accent: DashboardSense.encaisse,
               icon: Icons.payments_outlined,
-              filledBackground: AppColors.presenceMarkBannerStart,
-              filledSecondaryInk: AppColors.presenceMarkOnBannerMuted,
               subline: locked
                   ? l10n.payrollKpiPaid(view.paidCount, view.payable.length)
                   : view.hasReducedPayout

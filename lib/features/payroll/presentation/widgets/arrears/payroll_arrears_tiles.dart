@@ -1,10 +1,9 @@
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_kpi_card.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les quatre tuiles du registre : la dette salariale, le différé décidé, les
@@ -43,43 +42,37 @@ class PayrollArrearsTiles extends StatelessWidget {
         : (agents.map((a) => a.oldestMonth).toList()..sort()).first;
     return EteeloKpiBand(
       cards: [
-        EteeloKpiCardData(
+        PayrollKpiCard.of(
           label: l10n.payrollArrearsDebt,
           valueLines: _sum(all, (_) => true),
-          accent: AppColors.presenceMarkOnBanner,
-          accentSoft: AppColors.presenceMarkBannerMid,
+          accent: DashboardSense.manquant,
           icon: Icons.account_balance_outlined,
-          filledBackground: AppColors.presenceMarkBannerStart,
-          filledSecondaryInk: AppColors.presenceMarkOnBannerMuted,
           subline: l10n.payrollKpiAgents(agents.length),
         ),
-        EteeloKpiCardData(
+        PayrollKpiCard.of(
           label: l10n.payrollArrearsDeferred,
           valueLines: _sum(
             all,
             (a) => a.origin == PayrollArrearOrigin.deferred,
           ),
-          accent: PayrollTone.submitted.ink,
-          accentSoft: PayrollTone.submitted.soft,
+          accent: DashboardSense.attendu,
           icon: Icons.hourglass_bottom,
         ),
-        EteeloKpiCardData(
+        PayrollKpiCard.of(
           label: l10n.payrollArrearsUnpaid,
           valueLines: _sum(
             all,
             (a) => a.origin != PayrollArrearOrigin.deferred,
           ),
-          accent: PayrollTone.alert.ink,
-          accentSoft: PayrollTone.alert.soft,
+          accent: DashboardSense.manquant,
           icon: Icons.money_off_outlined,
         ),
-        EteeloKpiCardData(
+        PayrollKpiCard.of(
           label: l10n.payrollArrearsOldest,
           valueLines: [
             oldest == null ? '—' : PayrollLabels.month(context, oldest),
           ],
-          accent: AppColors.bleuArdoise,
-          accentSoft: AppColors.bleuArdoiseSoft,
+          accent: DashboardSense.attente,
           icon: Icons.history,
           subline: oldest == null
               ? null

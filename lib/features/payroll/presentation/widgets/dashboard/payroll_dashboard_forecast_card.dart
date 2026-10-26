@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_chart_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_split_bar.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
@@ -43,26 +44,22 @@ class PayrollDashboardForecastCard extends StatelessWidget {
     final percent = gross == 0 ? 0 : (saved * 100 / gross).round();
     final validatedAt = view.header?.validatedAt;
     final segments = [
-      (l10n.payrollDashNet, forecast.netInCents, AppColors.payrollChartNet),
+      (l10n.payrollDashNet, forecast.netInCents, PayrollChartTones.net),
       (
         l10n.payrollDashAbsence,
         forecast.absenceInCents,
-        AppColors.payrollChartAbsence,
+        PayrollChartTones.absence,
       ),
       (
         l10n.payrollDashAdvances,
         forecast.advancesInCents,
-        AppColors.payrollChartAdvances,
+        PayrollChartTones.advances,
       ),
-      (
-        l10n.payrollDashLegal,
-        forecast.legalInCents,
-        AppColors.payrollChartLegal,
-      ),
+      (l10n.payrollDashLegal, forecast.legalInCents, PayrollChartTones.legal),
       (
         l10n.payrollDashChildcare,
         forecast.childcareInCents,
-        AppColors.payrollChartChildcare,
+        PayrollChartTones.childcare,
       ),
       (l10n.payrollDashOther, forecast.otherInCents, AppColors.textMuted),
     ].where((segment) => segment.$2 > 0).toList();
@@ -101,7 +98,7 @@ class PayrollDashboardForecastCard extends StatelessWidget {
               _Figure(
                 label: l10n.payrollDashActual,
                 value: money(forecast.netInCents),
-                color: AppColors.payrollChartNet,
+                color: PayrollChartTones.net,
                 note: saved > 0
                     ? l10n.payrollDashLessThanPlanned(money(saved), percent)
                     : null,
@@ -151,7 +148,7 @@ class _Figure extends StatelessWidget {
     required this.value,
     required this.color,
     this.note,
-    this.noteColor = AppColors.payrollChartNet,
+    this.noteColor = PayrollChartTones.net,
   });
 
   @override
