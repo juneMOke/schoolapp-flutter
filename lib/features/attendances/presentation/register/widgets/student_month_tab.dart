@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/components/selection/selectable_list_card.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_incident_list.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_calendar.dart';
@@ -133,12 +133,12 @@ class StudentMonthTab extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           StudentMonthKpis(stats: sheet.stats),
           const SizedBox(height: AppSpacing.lg),
-          PresenceCardFrame(
+          EteeloPanelCard(
             title: sheet.student.fullName,
             child: PresenceMonthCalendar(days: sheet.calendar),
           ),
           const SizedBox(height: AppSpacing.lg),
-          PresenceCardFrame(
+          EteeloPanelCard(
             title: l10n.presenceMarkIncidentsTitle,
             child: PresenceIncidentList<AbsenceReason>(
               incidents: sheet.incidents,

@@ -4,7 +4,7 @@ import 'package:school_app_flutter/core/components/status/record_sync_pill.dart'
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -54,7 +54,7 @@ class HrPresenceRecapClosure extends StatelessWidget {
     }
     if (local != null && local.locked) {
       // Posée ici, pas encore reçue : le serveur ne la voit pas encore.
-      return PresenceCardFrame(
+      return EteeloPanelCard(
         child: Wrap(
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.sm,
@@ -76,7 +76,7 @@ class HrPresenceRecapClosure extends StatelessWidget {
       );
     }
     final lastDay = SchoolDayCalendar.daysOf(recap.month).last;
-    return PresenceCardFrame(
+    return EteeloPanelCard(
       title: recap.toDate
           ? l10n.hrPresenceRecapCurrentMonth
           : l10n.hrPresenceRecapNotClosed,

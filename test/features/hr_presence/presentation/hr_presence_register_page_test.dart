@@ -3,6 +3,9 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_results_frame.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
@@ -165,6 +168,15 @@ void main() {
     await tester.tap(find.text('Cartes'));
     await tester.pump();
     expect(find.byType(StaffAttendanceCard), findsWidgets);
+    // Le cadre des tables, et la carte de filtres commune.
+    expect(find.byType(EteeloResultsFrame), findsOneWidget);
+    expect(
+      find.ancestor(
+        of: find.byType(StaffSearchToolbar),
+        matching: find.byType(EteeloPanelCard),
+      ),
+      findsOneWidget,
+    );
   });
 
   testAtReferenceFormats('le registre en liste tient', (tester, format) async {

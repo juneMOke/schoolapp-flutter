@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_rate_tone.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent.dart';
@@ -35,7 +35,7 @@ class HrPresenceAgentIdentity extends StatelessWidget {
         StaffLabels.contract(l10n, agent.contractKind),
       agent.staffNumber,
     ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' · ');
-    return PresenceCardFrame(
+    return EteeloPanelCard(
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
         crossAxisAlignment: WrapCrossAlignment.center,

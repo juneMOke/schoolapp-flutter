@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
-import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_grid.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_list_frame.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
@@ -34,9 +34,7 @@ class ClassRegisterView extends StatelessWidget {
     final rows = register.rows;
     final schedule = register.day.schedule;
     final body = viewMode == CollectionViewMode.grid
-        ? EteeloGridView(
-            padding: EdgeInsets.zero,
-            minItemWidth: AppDimensions.presenceMarkCardMinWidth,
+        ? PresenceCardGrid(
             itemCount: rows.length,
             itemBuilder: (context, index) => PresenceCard(
               key: ValueKey(rows[index].student.id),

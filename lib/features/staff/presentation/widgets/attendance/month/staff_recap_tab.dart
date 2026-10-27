@@ -15,7 +15,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_contract_tone.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
@@ -105,7 +105,7 @@ class StaffRecapTab extends StatelessWidget {
               onShowAll: cubit.resetRecapFilters,
             )
           else
-            PresenceCardFrame(
+            EteeloPanelCard(
               child: StaffRecapTable(
                 rows: recap.rows,
                 onOpen: (row) => cubit.openAgent(row.member.id),

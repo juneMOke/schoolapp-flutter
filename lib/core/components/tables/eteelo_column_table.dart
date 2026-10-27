@@ -215,13 +215,7 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
     );
     final framed = tone == null
         ? table
-        : DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.brSm,
-              border: Border.all(color: tone.border),
-            ),
-            child: table,
-          );
+        : DecoratedBox(decoration: tone.frame, child: table);
     if (!widget.frozenFirstColumn) return framed;
     return LayoutBuilder(
       builder: (context, constraints) => EteeloFrozenColumn(

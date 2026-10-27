@@ -9,7 +9,7 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_month_st
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_tile.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
@@ -95,12 +95,12 @@ class StaffAgentMonthTab extends StatelessWidget {
         else ...[
           _Kpis(stats: month.stats),
           const SizedBox(height: AppSpacing.lg),
-          PresenceCardFrame(
+          EteeloPanelCard(
             title: member.fullName,
             child: PresenceMonthCalendar(days: month.calendar),
           ),
           const SizedBox(height: AppSpacing.lg),
-          PresenceCardFrame(
+          EteeloPanelCard(
             title: l10n.presenceMarkIncidentsTitle,
             child: PresenceIncidentList<StaffAbsenceReason>(
               incidents: [

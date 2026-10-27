@@ -4,12 +4,14 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
-/// Un bloc titré des onglets du mois (calendrier, incidents, tableau).
-class PresenceCardFrame extends StatelessWidget {
+/// Une carte de surface bordée, à titre facultatif : la barre de filtres d'une
+/// collection, un bloc d'onglet (calendrier, incidents, tableau). Le cadre
+/// qui détache un bloc du fond de page, écrit une fois.
+class EteeloPanelCard extends StatelessWidget {
   final String? title;
   final Widget child;
 
-  const PresenceCardFrame({super.key, required this.child, this.title});
+  const EteeloPanelCard({super.key, required this.child, this.title});
 
   @override
   Widget build(BuildContext context) {

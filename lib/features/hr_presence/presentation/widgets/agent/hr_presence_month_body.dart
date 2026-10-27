@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_month_views.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_incident_list.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_calendar.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_rate_bars.dart';
@@ -32,7 +32,7 @@ class HrPresenceMonthBody extends StatelessWidget {
     final dates = MaterialLocalizations.of(context);
     final days = {for (final day in month.days) day.date: day};
     final weekdays = days.keys.toList()..sort();
-    final calendar = PresenceCardFrame(
+    final calendar = EteeloPanelCard(
       title: dates.formatMonthYear(DateTime.parse('${month.month}-01')),
       child: PresenceMonthCalendar(
         days: weekdays.isEmpty
@@ -45,7 +45,7 @@ class HrPresenceMonthBody extends StatelessWidget {
               ),
       ),
     );
-    final incidents = PresenceCardFrame(
+    final incidents = EteeloPanelCard(
       title: l10n.presenceMarkIncidentsTitle,
       child: PresenceIncidentList<StaffAbsenceReason>(
         incidents: [
@@ -67,7 +67,7 @@ class HrPresenceMonthBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (withTrend && month.trend.isNotEmpty) ...[
-            PresenceCardFrame(
+            EteeloPanelCard(
               title: l10n.hrPresenceAgentTrendTitle,
               child: PresenceRateBars(
                 bars: [
