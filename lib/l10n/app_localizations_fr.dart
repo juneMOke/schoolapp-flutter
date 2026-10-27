@@ -20538,4 +20538,121 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceSheetUnsentConfirm => 'Télécharger quand même';
+
+  @override
+  String get payrollAgentTitle => 'Fiche de l\'agent';
+
+  @override
+  String get payrollAgentEyebrow => 'Situation de paie';
+
+  @override
+  String get payrollAgentPrevious => 'Agent précédent';
+
+  @override
+  String get payrollAgentNext => 'Agent suivant';
+
+  @override
+  String payrollAgentUsualPayout(String detail) {
+    return 'Versement habituel · $detail';
+  }
+
+  @override
+  String get payrollAgentPayoutCash => 'Espèces · caisse';
+
+  @override
+  String get payrollAgentEditProfile => 'Modifier le profil de paie';
+
+  @override
+  String get payrollAgentOwed => 'Reste dû par l\'école';
+
+  @override
+  String payrollAgentOwedMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mois non soldés',
+      one: '1 mois non soldé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAgentOwedNone => 'Aucun arriéré';
+
+  @override
+  String get payrollAgentLoans => 'Prêts & avances en cours';
+
+  @override
+  String get payrollAgentLoansHint => 'À retenir sur les paies à venir';
+
+  @override
+  String get payrollAgentLoansNone => 'Aucun encours';
+
+  @override
+  String payrollAgentPaidYear(String year) {
+    return 'Perçu en $year';
+  }
+
+  @override
+  String payrollAgentPaidYearOf(int count, String due) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'sur $due dus · $count mois validés',
+      one: 'sur $due dus · 1 mois validé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAgentPaidYearNone => 'Aucun mois validé';
+
+  @override
+  String payrollAgentUpcoming(String month) {
+    return 'Net prévu · $month';
+  }
+
+  @override
+  String payrollAgentMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Fiches de paie · $count mois',
+      one: 'Fiches de paie · 1 mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payrollAgentMonthPaid(String amount) {
+    return 'perçu $amount';
+  }
+
+  @override
+  String get payrollSettlementUnpaid => 'Non payé';
+
+  @override
+  String get payrollSettlementPartial => 'Partiel';
+
+  @override
+  String get payrollSettlementDeferred => 'Différé';
+
+  @override
+  String get payrollSettlementSettled => 'Soldé';
+
+  @override
+  String get payrollSettlementNothing => 'Rien à verser';
+
+  @override
+  String get payrollAgentEmpty => 'Aucune fiche de paie';
+
+  @override
+  String get payrollAgentEmptyHint =>
+      'L\'agent figurera dans la paie du mois dès que son contrat sera enregistré au Fichier du personnel.';
+
+  @override
+  String get payrollAgentBackToLedger => 'Retour au livre de paie';
+
+  @override
+  String get payrollLedgerOpenAgent => 'Ouvrir la fiche de l\'agent';
 }

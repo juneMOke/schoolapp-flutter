@@ -31442,6 +31442,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download anyway'**
   String get hrPresenceSheetUnsentConfirm;
+
+  /// No description provided for @payrollAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent sheet'**
+  String get payrollAgentTitle;
+
+  /// No description provided for @payrollAgentEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay situation'**
+  String get payrollAgentEyebrow;
+
+  /// No description provided for @payrollAgentPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous agent'**
+  String get payrollAgentPrevious;
+
+  /// No description provided for @payrollAgentNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next agent'**
+  String get payrollAgentNext;
+
+  /// No description provided for @payrollAgentUsualPayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Usual payout · {detail}'**
+  String payrollAgentUsualPayout(String detail);
+
+  /// No description provided for @payrollAgentPayoutCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash · till'**
+  String get payrollAgentPayoutCash;
+
+  /// No description provided for @payrollAgentEditProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the pay profile'**
+  String get payrollAgentEditProfile;
+
+  /// No description provided for @payrollAgentOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'Still owed by the school'**
+  String get payrollAgentOwed;
+
+  /// No description provided for @payrollAgentOwedMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 month not settled} other{{count} months not settled}}'**
+  String payrollAgentOwedMonths(int count);
+
+  /// No description provided for @payrollAgentOwedNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No arrears'**
+  String get payrollAgentOwedNone;
+
+  /// No description provided for @payrollAgentLoans.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans & advances outstanding'**
+  String get payrollAgentLoans;
+
+  /// No description provided for @payrollAgentLoansHint.
+  ///
+  /// In en, this message translates to:
+  /// **'To be withheld from coming pay'**
+  String get payrollAgentLoansHint;
+
+  /// No description provided for @payrollAgentLoansNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing outstanding'**
+  String get payrollAgentLoansNone;
+
+  /// No description provided for @payrollAgentPaidYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Received in {year}'**
+  String payrollAgentPaidYear(String year);
+
+  /// No description provided for @payrollAgentPaidYearOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{of {due} due · 1 validated month} other{of {due} due · {count} validated months}}'**
+  String payrollAgentPaidYearOf(int count, String due);
+
+  /// No description provided for @payrollAgentPaidYearNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No validated month'**
+  String get payrollAgentPaidYearNone;
+
+  /// No description provided for @payrollAgentUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected net · {month}'**
+  String payrollAgentUpcoming(String month);
+
+  /// No description provided for @payrollAgentMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Payslips · 1 month} other{Payslips · {count} months}}'**
+  String payrollAgentMonths(int count);
+
+  /// No description provided for @payrollAgentMonthPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'received {amount}'**
+  String payrollAgentMonthPaid(String amount);
+
+  /// No description provided for @payrollSettlementUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get payrollSettlementUnpaid;
+
+  /// No description provided for @payrollSettlementPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get payrollSettlementPartial;
+
+  /// No description provided for @payrollSettlementDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Deferred'**
+  String get payrollSettlementDeferred;
+
+  /// No description provided for @payrollSettlementSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get payrollSettlementSettled;
+
+  /// No description provided for @payrollSettlementNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to pay'**
+  String get payrollSettlementNothing;
+
+  /// No description provided for @payrollAgentEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payslip'**
+  String get payrollAgentEmpty;
+
+  /// No description provided for @payrollAgentEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The agent will appear in the month\'s payroll once their contract is recorded in the staff file.'**
+  String get payrollAgentEmptyHint;
+
+  /// No description provided for @payrollAgentBackToLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the payroll ledger'**
+  String get payrollAgentBackToLedger;
+
+  /// No description provided for @payrollLedgerOpenAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the agent sheet'**
+  String get payrollLedgerOpenAgent;
 }
 
 class _AppLocalizationsDelegate

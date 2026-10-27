@@ -580,6 +580,19 @@ class AppColors {
   static const payrollValidatedBorder = Color(0xFFD7C9DF);
   static const payrollValidatedInk = boutiqueActesAccent;
 
+  // Le bandeau de la fiche d'un agent : le même dégradé que le bandeau des
+  // registres de présence, pour que les fiches RH se ressemblent.
+  static const payrollAgentBannerStart = presenceMarkBannerStart;
+  static const payrollAgentBannerMid = presenceMarkBannerMid;
+  static const payrollAgentBannerEnd = presenceMarkBannerEnd;
+  static const payrollAgentOnBanner = presenceMarkOnBanner;
+  static const payrollAgentOnBannerMuted = presenceMarkOnBannerMuted;
+  static const payrollAgentOnBannerFaint = presenceMarkOnBannerFaint;
+  // Le fond d'une tuile chiffrée du bandeau, et le vert d'un compte à zéro
+  // (« aucun arriéré ») : 9,4:1 sur le bleu profond.
+  static const payrollAgentBannerTile = Color(0x1AFFFFFF);
+  static const payrollAgentBannerGood = Color(0xFF9FD3AE);
+
   /// Le bouton d'envoi WhatsApp, et lui seul. Le vert de la spec (#25A162)
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
   static const payrollWhatsapp = Color(0xFF1B7A4A);

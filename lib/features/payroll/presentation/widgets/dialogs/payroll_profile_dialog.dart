@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/core/money/mobile_money_operator.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -28,6 +30,24 @@ class PayrollProfileDialog extends StatefulWidget {
     BuildContext context,
     PayrollProfileDialog dialog,
   ) => EteeloFormDialog.show<StaffPayProfile>(context, dialog);
+
+  /// Ouvre le profil de [staffMemberId] et confie l'enregistrement au cubit
+  /// de la paie.
+  static Future<void> edit(BuildContext context, String staffMemberId) async {
+    final cubit = context.read<PayrollCubit>();
+    final snapshot = cubit.state.snapshot;
+    final profile = await show(
+      context,
+      PayrollProfileDialog(
+        name: snapshot.member(staffMemberId)?.fullName ?? staffMemberId,
+        profile:
+            snapshot.profiles[staffMemberId] ??
+            StaffPayProfile.empty(staffMemberId),
+      ),
+    );
+    if (profile == null || !context.mounted) return;
+    await cubit.perform((commands) => commands.saveProfile(profile));
+  }
 
   @override
   State<PayrollProfileDialog> createState() => _PayrollProfileDialogState();

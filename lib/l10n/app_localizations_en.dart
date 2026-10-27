@@ -20402,4 +20402,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceSheetUnsentConfirm => 'Download anyway';
+
+  @override
+  String get payrollAgentTitle => 'Agent sheet';
+
+  @override
+  String get payrollAgentEyebrow => 'Pay situation';
+
+  @override
+  String get payrollAgentPrevious => 'Previous agent';
+
+  @override
+  String get payrollAgentNext => 'Next agent';
+
+  @override
+  String payrollAgentUsualPayout(String detail) {
+    return 'Usual payout · $detail';
+  }
+
+  @override
+  String get payrollAgentPayoutCash => 'Cash · till';
+
+  @override
+  String get payrollAgentEditProfile => 'Edit the pay profile';
+
+  @override
+  String get payrollAgentOwed => 'Still owed by the school';
+
+  @override
+  String payrollAgentOwedMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count months not settled',
+      one: '1 month not settled',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAgentOwedNone => 'No arrears';
+
+  @override
+  String get payrollAgentLoans => 'Loans & advances outstanding';
+
+  @override
+  String get payrollAgentLoansHint => 'To be withheld from coming pay';
+
+  @override
+  String get payrollAgentLoansNone => 'Nothing outstanding';
+
+  @override
+  String payrollAgentPaidYear(String year) {
+    return 'Received in $year';
+  }
+
+  @override
+  String payrollAgentPaidYearOf(int count, String due) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'of $due due · $count validated months',
+      one: 'of $due due · 1 validated month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAgentPaidYearNone => 'No validated month';
+
+  @override
+  String payrollAgentUpcoming(String month) {
+    return 'Expected net · $month';
+  }
+
+  @override
+  String payrollAgentMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Payslips · $count months',
+      one: 'Payslips · 1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payrollAgentMonthPaid(String amount) {
+    return 'received $amount';
+  }
+
+  @override
+  String get payrollSettlementUnpaid => 'Unpaid';
+
+  @override
+  String get payrollSettlementPartial => 'Partial';
+
+  @override
+  String get payrollSettlementDeferred => 'Deferred';
+
+  @override
+  String get payrollSettlementSettled => 'Settled';
+
+  @override
+  String get payrollSettlementNothing => 'Nothing to pay';
+
+  @override
+  String get payrollAgentEmpty => 'No payslip';
+
+  @override
+  String get payrollAgentEmptyHint =>
+      'The agent will appear in the month\'s payroll once their contract is recorded in the staff file.';
+
+  @override
+  String get payrollAgentBackToLedger => 'Back to the payroll ledger';
+
+  @override
+  String get payrollLedgerOpenAgent => 'Open the agent sheet';
 }

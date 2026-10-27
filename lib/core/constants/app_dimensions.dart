@@ -876,8 +876,12 @@ class AppDimensions {
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
   // Le livre défile horizontalement sous 920 dp ; les colonnes de montant sont
   // alignées à droite, en chiffres tabulaires.
-  static const payrollLedgerMinWidth = 920.0;
+  static const payrollLedgerMinWidth = 968.0;
   static const payrollColAmount = 100.0;
+
+  /// La dernière colonne du livre : le crayon des éléments variables en
+  /// brouillon, sinon le chevron qui dit que la ligne ouvre la fiche.
+  static const payrollColOpen = minTouchTarget;
 
   /// L'état de paie : onze colonnes du tableur des écoles.
   static const payrollStatementMinWidth = 1120.0;
@@ -916,6 +920,17 @@ class AppDimensions {
   /// Une pastille de la frise des mois : assez large pour « sept. » au texte
   /// ×1,3 ; la hauteur, elle, part de [minTouchTarget].
   static const payrollMonthPillWidth = 64.0;
+
+  /// La fiche d'un agent : la colonne gauche (mois, prêts, arriérés,
+  /// cumuls) entre 300 et 380 dp, le panneau du mois prend le reste.
+  static const payrollAgentSideMin = 300.0;
+  static const payrollAgentSideMax = 380.0;
+  static const payrollAgentAvatar = 60.0;
+
+  /// Une tuile chiffrée du bandeau : quatre en ligne en paysage, 2 × 2 en
+  /// portrait.
+  static const payrollAgentTileMin = 150.0;
+  static const payrollAgentMonthTileMin = 56.0;
 
   // ── Photo de l'élève (spec « Photo de l'élève », 1 px = 1 dp) ────────────
   /// Le panneau de capture : largeur maximale, rayon, et en dessous de quelle

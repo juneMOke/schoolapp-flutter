@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
-import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_profile_dialog.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -101,7 +98,8 @@ class PayrollPayslipPanel extends StatelessWidget {
             EteeloButton.ghost(
               label: l10n.payrollProfileEdit,
               icon: Icons.badge_outlined,
-              onPressed: () => _editProfile(context),
+              onPressed: () =>
+                  PayrollProfileDialog.edit(context, line.staffMemberId),
             ),
           ],
           const Divider(height: AppSpacing.xl),
@@ -138,19 +136,5 @@ class PayrollPayslipPanel extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _editProfile(BuildContext context) async {
-    final cubit = context.read<PayrollCubit>();
-    final id = line.staffMemberId;
-    final profile = await PayrollProfileDialog.show(
-      context,
-      PayrollProfileDialog(
-        name: state.snapshot.member(id)?.fullName ?? id,
-        profile: state.snapshot.profiles[id] ?? StaffPayProfile.empty(id),
-      ),
-    );
-    if (profile == null || !context.mounted) return;
-    await cubit.perform((commands) => commands.saveProfile(profile));
   }
 }

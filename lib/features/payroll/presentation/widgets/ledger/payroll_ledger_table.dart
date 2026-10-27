@@ -18,14 +18,18 @@ import 'package:school_app_flutter/core/components/tables/eteelo_column_table.da
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre : une ligne par agent, montants à droite en chiffres tabulaires,
-/// ligne de total par devise en pied. Toucher une ligne ouvre ses éléments
-/// variables (brouillon, économe), sinon son bulletin.
+/// ligne de total par devise en pied. Toucher une ligne ouvre la fiche de
+/// l'agent ; en brouillon, le crayon de fin de ligne ouvre directement ses
+/// éléments variables — la saisie du mois reste d'un seul geste.
 class PayrollLedgerTable extends StatelessWidget {
   final PayrollMonthView view;
   final PayrollSnapshot snapshot;
   final List<PayrollLine> lines;
   final ValueChanged<PayrollLine> onOpen;
   final ValueChanged<PayrollLine> onPayout;
+
+  /// `null` : pas de crayon (paie verrouillée, ou compte sans écriture).
+  final ValueChanged<PayrollLine>? onEdit;
   final bool canWrite;
 
   const PayrollLedgerTable({
@@ -35,6 +39,7 @@ class PayrollLedgerTable extends StatelessWidget {
     required this.lines,
     required this.onOpen,
     required this.onPayout,
+    required this.onEdit,
     required this.canWrite,
   });
 
@@ -47,6 +52,7 @@ class PayrollLedgerTable extends StatelessWidget {
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAttendance,
     AppDimensions.payrollColPayout,
+    AppDimensions.payrollColOpen,
   ];
 
   @override
@@ -70,6 +76,7 @@ class PayrollLedgerTable extends StatelessWidget {
         l10n.payrollColNet,
         l10n.payrollColAttendance,
         l10n.payrollColPayout,
+        '',
       ],
       rowCount: lines.length,
       row: (context, index) => _row(context, lines[index]),
@@ -182,6 +189,7 @@ class PayrollLedgerTable extends StatelessWidget {
           canWrite: canWrite,
           onPayout: () => onPayout(line),
         ),
+        _OpenCell(onEdit: onEdit == null ? null : () => onEdit!(line)),
       ],
     );
   }
@@ -223,6 +231,7 @@ class PayrollLedgerTable extends StatelessWidget {
                   textAlign: TextAlign.end,
                   style: EteeloColumnTableRow.figures(strong: true),
                 ),
+              const SizedBox.shrink(),
               const SizedBox.shrink(),
               const SizedBox.shrink(),
             ],
@@ -273,6 +282,30 @@ class _Signals extends StatelessWidget {
         ),
         style: AppTypography.bodySmall,
       ),
+    );
+  }
+}
+
+/// Le bout de ligne : le crayon des éléments variables en brouillon, sinon
+/// le chevron qui dit que la ligne ouvre la fiche de l'agent.
+class _OpenCell extends StatelessWidget {
+  final VoidCallback? onEdit;
+
+  const _OpenCell({required this.onEdit});
+
+  @override
+  Widget build(BuildContext context) {
+    final onEdit = this.onEdit;
+    if (onEdit == null) {
+      return Tooltip(
+        message: AppLocalizations.of(context)!.payrollLedgerOpenAgent,
+        child: const Icon(Icons.chevron_right, color: AppColors.textMutedAa),
+      );
+    }
+    return IconButton(
+      tooltip: AppLocalizations.of(context)!.payrollVarsTitle,
+      onPressed: onEdit,
+      icon: const Icon(Icons.edit_outlined),
     );
   }
 }

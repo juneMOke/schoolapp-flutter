@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_mont
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_action_bar.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_arrears_banner.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_kpis.dart';
@@ -72,11 +73,14 @@ class PayrollLedgerTab extends StatelessWidget {
               lines: state.visibleLines,
               canWrite: canWrite,
               onPayout: (line) => actions.openPayout(line, canWrite: canWrite),
-              onOpen: (line) => view.isEditable && canWrite
-                  ? actions.editVariables(line)
-                  : context.read<PayrollCubit>().openPayslip(
-                      line.staffMemberId,
-                    ),
+              onOpen: (line) => PayrollAgentNavigation.open(
+                context,
+                agentId: line.staffMemberId,
+                month: view.month,
+              ),
+              onEdit: view.isEditable && canWrite
+                  ? actions.editVariables
+                  : null,
             ),
         ],
       ],

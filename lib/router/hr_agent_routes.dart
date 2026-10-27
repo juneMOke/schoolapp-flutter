@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_agent_page.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
@@ -10,7 +11,8 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// La fiche d'un agent, enfant de l'écran de la coquille qui l'a ouverte :
 /// `/home/{sousMenu}/{agentId}` — sa fiche du personnel sous RH · Personnel,
-/// sa présence du mois (`?mois=`) sous le tableau de bord de RH · Présences. Une adresse rechargée rebâtit la coquille
+/// sa présence du mois (`?mois=`) sous le tableau de bord de RH · Présences,
+/// sa situation de paie sous RH · Paie ▸ Paie. Une adresse rechargée rebâtit la coquille
 /// (même clé de page) et pose la fiche par-dessus ; Retour rend l'écran.
 abstract final class HrAgentRoutes {
   /// Les écrans qui ouvrent une fiche d'agent — les autres sous-menus n'ont
@@ -21,6 +23,7 @@ abstract final class HrAgentRoutes {
     MenuConstants.hrPresenceDashboardId,
     MenuConstants.hrPresenceFicheId,
     MenuConstants.hrPresenceRecapId,
+    MenuConstants.hrPayrollId,
   };
 
   static GoRoute agent() => GoRoute(
@@ -55,6 +58,15 @@ abstract final class HrAgentRoutes {
           ),
           onClosed: onClosed,
           shellSubMenuId: subMenuId!,
+        );
+      }
+      if (subMenuId == MenuConstants.hrPayrollId) {
+        return PayrollAgentPage(
+          args: (
+            agentId: state.pathParameters['agentId'] ?? '',
+            month: state.uri.queryParameters[HrAgentAddress.monthParam],
+          ),
+          onClosed: onClosed,
         );
       }
       return HrAgentRoutePage(
