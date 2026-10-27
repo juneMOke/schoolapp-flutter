@@ -20289,4 +20289,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String hrPresenceEvidenceCoverage(int scored, int classDays) {
     return '$scored marked days out of $classDays class days';
   }
+
+  @override
+  String get presenceCalendarPending => 'to send';
+
+  @override
+  String hrPresenceDaySheetTitle(String day) {
+    return 'Attendance on $day';
+  }
+
+  @override
+  String get hrPresenceDaySheetSaved =>
+      'Each change is saved on the tablet and sent to the server as soon as possible; the sheet\'s rates will follow.';
+
+  @override
+  String get hrPresenceDayReadOnlyRight =>
+      'Your account can view this record but not change it.';
+
+  @override
+  String get hrPresenceDayMonthClosed =>
+      'The month is closed: this day can no longer be changed.';
+
+  @override
+  String get hrPresenceDayValidated =>
+      'This day\'s report is validated: reopen it in the register to correct it.';
+
+  @override
+  String get hrPresenceDayMissing =>
+      'The tablet has not yet received this day as the server knows it. It is reading it again; you can also correct it in the register.';
+
+  @override
+  String get hrPresenceDayDivergent =>
+      'The tablet and the server disagree about this day. Correct it in the register, which shows the tablet\'s version.';
+
+  @override
+  String get hrPresenceDayOpenRegister => 'Open in the register';
+
+  @override
+  String get hrPresenceDayLoading => 'Reading the day on the tablet';
+
+  @override
+  String hrPresenceDayArrival(String time) {
+    return 'Arrived $time';
+  }
+
+  @override
+  String hrPresenceDayDeparture(String time) {
+    return 'Left $time';
+  }
+
+  @override
+  String hrPresenceDayPendingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days corrected on the tablet',
+      one: '1 day corrected on the tablet',
+    );
+    return '$_temp0: rates and profile will be recomputed once the server has received it.';
+  }
 }

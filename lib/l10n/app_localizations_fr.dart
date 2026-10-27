@@ -20424,4 +20424,63 @@ class AppLocalizationsFr extends AppLocalizations {
   String hrPresenceEvidenceCoverage(int scored, int classDays) {
     return '$scored jours pointés sur $classDays jours de classe';
   }
+
+  @override
+  String get presenceCalendarPending => 'à envoyer';
+
+  @override
+  String hrPresenceDaySheetTitle(String day) {
+    return 'Pointage du $day';
+  }
+
+  @override
+  String get hrPresenceDaySheetSaved =>
+      'Chaque geste s\'enregistre sur la tablette et part au serveur dès que possible ; les taux de la fiche suivront.';
+
+  @override
+  String get hrPresenceDayReadOnlyRight =>
+      'Votre compte consulte ce pointage sans pouvoir le modifier.';
+
+  @override
+  String get hrPresenceDayMonthClosed =>
+      'Le mois est clos : ce jour ne se modifie plus.';
+
+  @override
+  String get hrPresenceDayValidated =>
+      'Le rapport de ce jour est validé : rouvrez-le dans le registre pour le corriger.';
+
+  @override
+  String get hrPresenceDayMissing =>
+      'La tablette n\'a pas encore reçu ce jour tel que le serveur le connaît. Elle le relit ; vous pouvez aussi le corriger dans le registre.';
+
+  @override
+  String get hrPresenceDayDivergent =>
+      'La tablette et le serveur ne disent pas la même chose pour ce jour. Corrigez-le dans le registre, qui montre la version de la tablette.';
+
+  @override
+  String get hrPresenceDayOpenRegister => 'Ouvrir dans le registre';
+
+  @override
+  String get hrPresenceDayLoading => 'Lecture du jour sur la tablette';
+
+  @override
+  String hrPresenceDayArrival(String time) {
+    return 'Arrivée $time';
+  }
+
+  @override
+  String hrPresenceDayDeparture(String time) {
+    return 'Départ $time';
+  }
+
+  @override
+  String hrPresenceDayPendingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours corrigés sur la tablette',
+      one: '1 jour corrigé sur la tablette',
+    );
+    return '$_temp0 : les taux et le profil seront recalculés quand le serveur l\'aura reçu.';
+  }
 }

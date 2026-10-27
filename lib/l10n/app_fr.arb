@@ -12120,5 +12120,18 @@
   "hrPresenceEvidenceAbsences": "{count, plural, =1{1 absence} other{{count} absences}} sur {scored} jours pointés, soit {pct} % (seuil : 10 %)",
   "hrPresenceEvidenceLates": "{count, plural, =1{1 retard} other{{count} retards}} sur {scored} jours pointés, soit {pct} % (seuil : plus de 15 %)",
   "hrPresenceEvidenceRates": "Présence {presence} %, retards {late} % des jours pointés",
-  "hrPresenceEvidenceCoverage": "{scored} jours pointés sur {classDays} jours de classe"
+  "hrPresenceEvidenceCoverage": "{scored} jours pointés sur {classDays} jours de classe",
+  "presenceCalendarPending": "à envoyer",
+  "hrPresenceDaySheetTitle": "Pointage du {day}",
+  "hrPresenceDaySheetSaved": "Chaque geste s'enregistre sur la tablette et part au serveur dès que possible ; les taux de la fiche suivront.",
+  "hrPresenceDayReadOnlyRight": "Votre compte consulte ce pointage sans pouvoir le modifier.",
+  "hrPresenceDayMonthClosed": "Le mois est clos : ce jour ne se modifie plus.",
+  "hrPresenceDayValidated": "Le rapport de ce jour est validé : rouvrez-le dans le registre pour le corriger.",
+  "hrPresenceDayMissing": "La tablette n'a pas encore reçu ce jour tel que le serveur le connaît. Elle le relit ; vous pouvez aussi le corriger dans le registre.",
+  "hrPresenceDayDivergent": "La tablette et le serveur ne disent pas la même chose pour ce jour. Corrigez-le dans le registre, qui montre la version de la tablette.",
+  "hrPresenceDayOpenRegister": "Ouvrir dans le registre",
+  "hrPresenceDayLoading": "Lecture du jour sur la tablette",
+  "hrPresenceDayArrival": "Arrivée {time}",
+  "hrPresenceDayDeparture": "Départ {time}",
+  "hrPresenceDayPendingNotice": "{count, plural, =1{1 jour corrigé sur la tablette} other{{count} jours corrigés sur la tablette}} : les taux et le profil seront recalculés quand le serveur l'aura reçu."
 }

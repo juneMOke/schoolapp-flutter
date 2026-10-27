@@ -31286,6 +31286,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{scored} marked days out of {classDays} class days'**
   String hrPresenceEvidenceCoverage(int scored, int classDays);
+
+  /// No description provided for @presenceCalendarPending.
+  ///
+  /// In en, this message translates to:
+  /// **'to send'**
+  String get presenceCalendarPending;
+
+  /// No description provided for @hrPresenceDaySheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance on {day}'**
+  String hrPresenceDaySheetTitle(String day);
+
+  /// No description provided for @hrPresenceDaySheetSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Each change is saved on the tablet and sent to the server as soon as possible; the sheet\'s rates will follow.'**
+  String get hrPresenceDaySheetSaved;
+
+  /// No description provided for @hrPresenceDayReadOnlyRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account can view this record but not change it.'**
+  String get hrPresenceDayReadOnlyRight;
+
+  /// No description provided for @hrPresenceDayMonthClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'The month is closed: this day can no longer be changed.'**
+  String get hrPresenceDayMonthClosed;
+
+  /// No description provided for @hrPresenceDayValidated.
+  ///
+  /// In en, this message translates to:
+  /// **'This day\'s report is validated: reopen it in the register to correct it.'**
+  String get hrPresenceDayValidated;
+
+  /// No description provided for @hrPresenceDayMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The tablet has not yet received this day as the server knows it. It is reading it again; you can also correct it in the register.'**
+  String get hrPresenceDayMissing;
+
+  /// No description provided for @hrPresenceDayDivergent.
+  ///
+  /// In en, this message translates to:
+  /// **'The tablet and the server disagree about this day. Correct it in the register, which shows the tablet\'s version.'**
+  String get hrPresenceDayDivergent;
+
+  /// No description provided for @hrPresenceDayOpenRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in the register'**
+  String get hrPresenceDayOpenRegister;
+
+  /// No description provided for @hrPresenceDayLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the day on the tablet'**
+  String get hrPresenceDayLoading;
+
+  /// No description provided for @hrPresenceDayArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived {time}'**
+  String hrPresenceDayArrival(String time);
+
+  /// No description provided for @hrPresenceDayDeparture.
+  ///
+  /// In en, this message translates to:
+  /// **'Left {time}'**
+  String hrPresenceDayDeparture(String time);
+
+  /// No description provided for @hrPresenceDayPendingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day corrected on the tablet} other{{count} days corrected on the tablet}}: rates and profile will be recomputed once the server has received it.'**
+  String hrPresenceDayPendingNotice(int count);
 }
 
 class _AppLocalizationsDelegate

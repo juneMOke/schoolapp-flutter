@@ -16,10 +16,10 @@ import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
-import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_month_body.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_profile_evidence.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_agent_scope.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_kpis.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_month_body.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_sheet.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_card.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_year_list.dart';
@@ -206,7 +206,11 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
           kpis: month.kpis,
           hourly: month.agent.isHourly,
         ),
-        body: HrPresenceMonthBody(month: month, withTrend: false),
+        body: HrPresenceFicheMonthBody(
+          month: month,
+          state: state,
+          cubit: cubit,
+        ),
       ),
       HrPresenceFicheStatus.ready => const EteeloListSkeleton(rowCount: 5),
     };

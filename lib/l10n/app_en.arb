@@ -11884,5 +11884,22 @@
   "hrPresenceEvidenceRates": "Attendance {presence}%, late {late}% of marked days",
   "@hrPresenceEvidenceRates": {"placeholders": {"presence": {"type": "int"}, "late": {"type": "int"}}},
   "hrPresenceEvidenceCoverage": "{scored} marked days out of {classDays} class days",
-  "@hrPresenceEvidenceCoverage": {"placeholders": {"scored": {"type": "int"}, "classDays": {"type": "int"}}}
+  "@hrPresenceEvidenceCoverage": {"placeholders": {"scored": {"type": "int"}, "classDays": {"type": "int"}}},
+  "presenceCalendarPending": "to send",
+  "hrPresenceDaySheetTitle": "Attendance on {day}",
+  "@hrPresenceDaySheetTitle": {"placeholders": {"day": {"type": "String"}}},
+  "hrPresenceDaySheetSaved": "Each change is saved on the tablet and sent to the server as soon as possible; the sheet's rates will follow.",
+  "hrPresenceDayReadOnlyRight": "Your account can view this record but not change it.",
+  "hrPresenceDayMonthClosed": "The month is closed: this day can no longer be changed.",
+  "hrPresenceDayValidated": "This day's report is validated: reopen it in the register to correct it.",
+  "hrPresenceDayMissing": "The tablet has not yet received this day as the server knows it. It is reading it again; you can also correct it in the register.",
+  "hrPresenceDayDivergent": "The tablet and the server disagree about this day. Correct it in the register, which shows the tablet's version.",
+  "hrPresenceDayOpenRegister": "Open in the register",
+  "hrPresenceDayLoading": "Reading the day on the tablet",
+  "hrPresenceDayArrival": "Arrived {time}",
+  "@hrPresenceDayArrival": {"placeholders": {"time": {"type": "String"}}},
+  "hrPresenceDayDeparture": "Left {time}",
+  "@hrPresenceDayDeparture": {"placeholders": {"time": {"type": "String"}}},
+  "hrPresenceDayPendingNotice": "{count, plural, =1{1 day corrected on the tablet} other{{count} days corrected on the tablet}}: rates and profile will be recomputed once the server has received it.",
+  "@hrPresenceDayPendingNotice": {"placeholders": {"count": {"type": "int"}}}
 }
