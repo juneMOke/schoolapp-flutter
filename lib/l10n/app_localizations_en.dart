@@ -13651,6 +13651,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String staffAttendanceResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff members',
+      one: '1 staff member',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String presenceMarkToastCleared(String name) {
     return '$name back to mark';
   }
@@ -15492,6 +15503,17 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count students marked absent',
       one: '1 student marked absent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '1 student',
     );
     return '$_temp0';
   }

@@ -21428,6 +21428,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 staff member marked absent} other{{count} staff members marked absent}}'**
   String staffAttendanceToastRemainingAbsent(int count);
 
+  /// No description provided for @staffAttendanceResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 staff member} other{{count} staff members}}'**
+  String staffAttendanceResultsCount(int count);
+
   /// No description provided for @presenceMarkToastCleared.
   ///
   /// In en, this message translates to:
@@ -24299,6 +24305,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 student marked absent} other{{count} students marked absent}}'**
   String classPresenceToastRemainingAbsent(int count);
+
+  /// No description provided for @classPresenceResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student} other{{count} students}}'**
+  String classPresenceResultsCount(int count);
 
   /// No description provided for @classPresenceToastValidated.
   ///

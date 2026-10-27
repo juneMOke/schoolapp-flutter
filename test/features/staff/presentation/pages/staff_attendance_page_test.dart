@@ -3,7 +3,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_page_section.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_results_bar.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_bulk_mark_button.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_row.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
@@ -272,6 +275,22 @@ void main() {
       expect(cubit.state.dayQuery.status, PresenceStatus.none);
     },
   );
+
+  testWidgets('deux sections sur un fin fond ; la barre de résultats porte '
+      'le compte et le pointage en masse', (tester) async {
+    await pump(tester);
+
+    expect(find.byType(EteeloPageSection), findsNWidgets(2));
+    final bar = find.byType(EteeloResultsBar);
+    expect(
+      find.descendant(of: bar, matching: find.text('2 agents · 1 à pointer')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: bar, matching: find.byType(PresenceBulkMarkButton)),
+      findsOneWidget,
+    );
+  });
 
   group('pointer les non pointés en une fois', () {
     testWidgets('« Présents à l\'heure » pointe les seuls non pointés', (

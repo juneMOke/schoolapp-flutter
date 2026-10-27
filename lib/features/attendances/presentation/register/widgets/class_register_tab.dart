@@ -17,7 +17,8 @@ import 'package:school_app_flutter/features/attendances/presentation/register/wi
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_empty_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_bulk_mark_button.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_register_sections.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_results_bar.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_actions.dart';
 
 /// L'onglet « Registre du jour » d'une classe.
@@ -42,15 +43,14 @@ class ClassRegisterTab extends StatelessWidget {
     final day = register.day;
     final query = state.dayQuery;
     final lock = classDayLockIn(context, day, today: state.today);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ClassDayBanner(
-          state: state,
-          register: register,
-          classroomName: classroomName,
-        ),
-        const SizedBox(height: AppSpacing.md),
+    final actions = ClassRegisterActions(context);
+    return PresenceRegisterSections(
+      banner: ClassDayBanner(
+        state: state,
+        register: register,
+        classroomName: classroomName,
+      ),
+      dayNotices: [
         if (day.validated)
           ClassValidatedBanner(state: state, register: register),
         if (day.reopened && lock == ClassDayLock.needsAmend)
@@ -67,39 +67,41 @@ class ClassRegisterTab extends StatelessWidget {
             message: l10n.classPresenceMonthClosedBanner,
           ),
         ],
-        const SizedBox(height: AppSpacing.lg),
-        if (register.isEmpty)
-          AttendanceResultsEmptyState(
-            onOpenComposition: () => openClassComposition(context),
-          )
-        else ...[
-          PresenceRegisterFilters(
-            total: register.all.length,
-            countOf: register.count,
-            selected: query.status,
-            onStatus: cubit.setDayStatus,
-            viewMode: state.viewMode,
-            showLegend: lock == null,
-            toJustify: register.toJustify,
-            bulkAction: _bulkAction(context),
-            toolbar: EteeloSearchToolbar(
-              text: query.text,
-              label: l10n.classPresenceSearchLabel,
-              placeholder: l10n.classPresenceSearchPlaceholder,
-              onTextChanged: cubit.setDayText,
-              viewMode: state.viewMode,
-              onViewModeChanged: cubit.setViewMode,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          if (register.isFilteredEmpty)
-            PresenceFilterEmpty(
+      ],
+      empty: register.isEmpty
+          ? AttendanceResultsEmptyState(
+              onOpenComposition: () => openClassComposition(context),
+            )
+          : null,
+      filters: PresenceRegisterFilters(
+        total: register.all.length,
+        countOf: register.count,
+        selected: query.status,
+        onStatus: cubit.setDayStatus,
+        viewMode: state.viewMode,
+        showLegend: lock == null,
+        toJustify: register.toJustify,
+        toolbar: EteeloSearchToolbar(
+          text: query.text,
+          label: l10n.classPresenceSearchLabel,
+          placeholder: l10n.classPresenceSearchPlaceholder,
+          onTextChanged: cubit.setDayText,
+          viewMode: state.viewMode,
+          onViewModeChanged: cubit.setViewMode,
+        ),
+      ),
+      resultsBar: PresenceResultsBar(
+        countLabel: l10n.classPresenceResultsCount(register.rows.length),
+        unmarked: register.shownUnmarked.length,
+        onMarkUnmarked: actions.canEditDay ? actions.markUnmarked : null,
+      ),
+      results: register.isFilteredEmpty
+          ? PresenceFilterEmpty(
               label: l10n.classPresenceEmptyFilterTitle,
               allMarked: query.status == PresenceStatus.none,
               onShowAll: cubit.resetDayFilters,
             )
-          else
-            ClassRegisterView(
+          : ClassRegisterView(
               register: register,
               viewMode: state.viewMode,
               classroomName: classroomName,
@@ -112,19 +114,6 @@ class ClassRegisterTab extends StatelessWidget {
                   ) ==
                   null,
             ),
-        ],
-      ],
-    );
-  }
-
-  /// Le pointage en masse des « à pointer » affichés, quand l'appel s'écrit.
-  Widget? _bulkAction(BuildContext context) {
-    final actions = ClassRegisterActions(context);
-    final shown = register.shownUnmarked;
-    if (shown.isEmpty || !actions.canEditDay) return null;
-    return PresenceBulkMarkButton(
-      count: shown.length,
-      onMark: actions.markUnmarked,
     );
   }
 }
