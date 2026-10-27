@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// ‹ septembre 2026 › — partagé par la fiche mensuelle et le récapitulatif ;
-/// jamais au-delà du mois en cours.
+/// jamais au-delà du mois en cours. Avec [onPick], le mois ouvre le
+/// sélecteur de mois : une icône le dit, et la zone d'appui fait 48 dp.
 class PresenceMonthNav extends StatelessWidget {
   /// `YYYY-MM`.
   final String month;
@@ -18,6 +21,9 @@ class PresenceMonthNav extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onCurrent;
 
+  /// `null` : le mois se lit seulement.
+  final VoidCallback? onPick;
+
   const PresenceMonthNav({
     super.key,
     required this.month,
@@ -25,6 +31,7 @@ class PresenceMonthNav extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.onCurrent,
+    this.onPick,
   });
 
   @override
@@ -47,12 +54,7 @@ class PresenceMonthNav extends StatelessWidget {
       spacing: AppSpacing.sm,
       children: [
         arrow(Icons.chevron_left, l10n.presenceMarkPreviousMonth, onPrevious),
-        Text(
-          PresenceLabels.month(MaterialLocalizations.of(context), month),
-          style: AppTypography.titleMedium.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
+        _label(context, l10n),
         arrow(
           Icons.chevron_right,
           l10n.presenceMarkNextMonth,
@@ -64,6 +66,39 @@ class PresenceMonthNav extends StatelessWidget {
             child: Text(l10n.presenceMarkCurrentMonth),
           ),
       ],
+    );
+  }
+
+  Widget _label(BuildContext context, AppLocalizations l10n) {
+    final label = Text(
+      PresenceLabels.month(MaterialLocalizations.of(context), month),
+      style: AppTypography.titleMedium.copyWith(color: AppColors.textPrimary),
+    );
+    final onPick = this.onPick;
+    if (onPick == null) return label;
+    return Tooltip(
+      message: l10n.presenceMarkPickMonth,
+      child: InkWell(
+        onTap: onPick,
+        borderRadius: AppRadius.brSm,
+        child: TouchTarget(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(child: label),
+                const SizedBox(width: AppSpacing.sm),
+                const Icon(
+                  Icons.calendar_month_outlined,
+                  size: AppSpacing.xl,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -11862,5 +11862,8 @@
   "payrollNoValue": "—",
   "payrollDashRefreshOffline": "Offline: the dashboard was not reread; the figures shown are the previous ones.",
   "payrollDashRefreshFailed": "The dashboard could not be reread; the figures shown are the previous ones.",
-  "payrollDashNotTrackedKpi": "Not tracked before v2"
+  "payrollDashNotTrackedKpi": "Not tracked before v2",
+  "presenceMarkPickMonth": "Pick a month",
+  "presenceMonthShort": "{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}",
+  "@presenceMonthShort": {"placeholders": {"month": {"type": "String"}}}
 }

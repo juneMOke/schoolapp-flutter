@@ -12105,5 +12105,7 @@
   "payrollNoValue": "—",
   "payrollDashRefreshOffline": "Hors ligne : le tableau de bord n'a pas été relu, les chiffres affichés sont ceux d'avant.",
   "payrollDashRefreshFailed": "Le tableau de bord n'a pas pu être relu ; les chiffres affichés sont ceux d'avant.",
-  "payrollDashNotTrackedKpi": "Non suivi avant la v2"
+  "payrollDashNotTrackedKpi": "Non suivi avant la v2",
+  "presenceMarkPickMonth": "Choisir un mois",
+  "presenceMonthShort": "{month, select, 1{janv.} 2{févr.} 3{mars} 4{avr.} 5{mai} 6{juin} 7{juil.} 8{août} 9{sept.} 10{oct.} 11{nov.} other{déc.}}"
 }

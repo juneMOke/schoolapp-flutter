@@ -31196,6 +31196,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not tracked before v2'**
   String get payrollDashNotTrackedKpi;
+
+  /// No description provided for @presenceMarkPickMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a month'**
+  String get presenceMarkPickMonth;
+
+  /// No description provided for @presenceMonthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}'**
+  String presenceMonthShort(String month);
 }
 
 class _AppLocalizationsDelegate
