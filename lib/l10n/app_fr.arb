@@ -12133,5 +12133,18 @@
   "hrPresenceDayLoading": "Lecture du jour sur la tablette",
   "hrPresenceDayArrival": "Arrivée {time}",
   "hrPresenceDayDeparture": "Départ {time}",
-  "hrPresenceDayPendingNotice": "{count, plural, =1{1 jour corrigé sur la tablette} other{{count} jours corrigés sur la tablette}} : les taux et le profil seront recalculés quand le serveur l'aura reçu."
+  "hrPresenceDayPendingNotice": "{count, plural, =1{1 jour corrigé sur la tablette} other{{count} jours corrigés sur la tablette}} : les taux et le profil seront recalculés quand le serveur l'aura reçu.",
+  "hrPresenceProfilesReportTitle": "Fiche individuelle du personnel",
+  "hrPresenceProfilesReportTooltip": "Télécharger la liste affichée en PDF, avec ses filtres",
+  "hrPresenceProfilesReportFailed": "La liste de la fiche individuelle n'a pas pu être préparée.",
+  "hrPresenceSheetTitle": "Fiche de présence",
+  "hrPresenceSheetTooltip": "Télécharger la fiche de présence en PDF",
+  "hrPresenceSheetTooltipSealed": "Télécharger la fiche de présence du mois clos : pièce scellée",
+  "hrPresenceSheetTooltipDraft": "Télécharger la fiche de présence : provisoire, la période n'est pas close",
+  "hrPresenceSheetForbidden": "La fiche d'un mois clos est une pièce scellée : il faut aussi le droit d'émettre des documents.",
+  "hrPresenceSheetNotFound": "Cet agent, ou l'année scolaire du mois, est introuvable sur le serveur.",
+  "hrPresenceSheetFailed": "La fiche de présence n'a pas pu être préparée.",
+  "hrPresenceSheetUnsentTitle": "Des pointages attendent l'envoi",
+  "hrPresenceSheetUnsentMessage": "{count, plural, =1{1 pointage de cet agent n'est pas encore envoyé} other{{count} pointages de cet agent ne sont pas encore envoyés}} au serveur : la fiche ne les comptera pas.",
+  "hrPresenceSheetUnsentConfirm": "Télécharger quand même"
 }

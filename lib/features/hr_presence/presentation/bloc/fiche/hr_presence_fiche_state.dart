@@ -17,6 +17,11 @@ typedef HrPresenceFicheArgs = ({
   DateTime? yearStart,
 });
 
+/// Ce que la tablette sait de la portée affichée, pour le PDF de la fiche :
+/// le mois est-il clos (la pièce sera scellée), et combien de pointages de
+/// l'agent n'ont pas encore été envoyés (le serveur ne les comptera pas).
+typedef HrPresenceSheetLocal = ({bool monthClosed, int unsent});
+
 class HrPresenceFicheState extends Equatable {
   final String agentId;
   final bool yearly;
@@ -36,6 +41,10 @@ class HrPresenceFicheState extends Equatable {
   /// les montre ; les taux, eux, attendent le serveur.
   final Map<String, StaffAttendanceRecord?> localDays;
 
+  /// `null` : pas encore lu, ou illisible — le bouton PDF reste offert, sans
+  /// avertissement.
+  final HrPresenceSheetLocal? local;
+
   const HrPresenceFicheState({
     required this.agentId,
     required this.month,
@@ -48,6 +57,7 @@ class HrPresenceFicheState extends Equatable {
     this.failure,
     this.members = const [],
     this.localDays = const {},
+    this.local,
   });
 
   bool get isCurrentMonth => month == currentMonth;
@@ -67,6 +77,7 @@ class HrPresenceFicheState extends Equatable {
     Object? failure = _undefined,
     List<StaffMember>? members,
     Map<String, StaffAttendanceRecord?>? localDays,
+    Object? local = _undefined,
   }) => HrPresenceFicheState(
     agentId: agentId ?? this.agentId,
     yearly: yearly ?? this.yearly,
@@ -85,6 +96,9 @@ class HrPresenceFicheState extends Equatable {
         : failure as Failure?,
     members: members ?? this.members,
     localDays: localDays ?? this.localDays,
+    local: identical(local, _undefined)
+        ? this.local
+        : local as HrPresenceSheetLocal?,
   );
 
   @override
@@ -100,5 +114,6 @@ class HrPresenceFicheState extends Equatable {
     failure,
     members,
     localDays,
+    local,
   ];
 }

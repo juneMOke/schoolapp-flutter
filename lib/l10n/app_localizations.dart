@@ -31364,6 +31364,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 day corrected on the tablet} other{{count} days corrected on the tablet}}: rates and profile will be recomputed once the server has received it.'**
   String hrPresenceDayPendingNotice(int count);
+
+  /// No description provided for @hrPresenceProfilesReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff individual sheet'**
+  String get hrPresenceProfilesReportTitle;
+
+  /// No description provided for @hrPresenceProfilesReportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the list shown as a PDF, with its filters'**
+  String get hrPresenceProfilesReportTooltip;
+
+  /// No description provided for @hrPresenceProfilesReportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The individual sheet list could not be prepared.'**
+  String get hrPresenceProfilesReportFailed;
+
+  /// No description provided for @hrPresenceSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance sheet'**
+  String get hrPresenceSheetTitle;
+
+  /// No description provided for @hrPresenceSheetTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the attendance sheet as a PDF'**
+  String get hrPresenceSheetTooltip;
+
+  /// No description provided for @hrPresenceSheetTooltipSealed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the closed month\'s attendance sheet: sealed document'**
+  String get hrPresenceSheetTooltipSealed;
+
+  /// No description provided for @hrPresenceSheetTooltipDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the attendance sheet: provisional, the period is not closed'**
+  String get hrPresenceSheetTooltipDraft;
+
+  /// No description provided for @hrPresenceSheetForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'A closed month\'s sheet is a sealed document: issuing documents is also required.'**
+  String get hrPresenceSheetForbidden;
+
+  /// No description provided for @hrPresenceSheetNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This staff member, or the month\'s school year, cannot be found on the server.'**
+  String get hrPresenceSheetNotFound;
+
+  /// No description provided for @hrPresenceSheetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The attendance sheet could not be prepared.'**
+  String get hrPresenceSheetFailed;
+
+  /// No description provided for @hrPresenceSheetUnsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Records waiting to be sent'**
+  String get hrPresenceSheetUnsentTitle;
+
+  /// No description provided for @hrPresenceSheetUnsentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 record of this staff member has not been sent} other{{count} records of this staff member have not been sent}} to the server yet: the sheet will not count them.'**
+  String hrPresenceSheetUnsentMessage(int count);
+
+  /// No description provided for @hrPresenceSheetUnsentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Download anyway'**
+  String get hrPresenceSheetUnsentConfirm;
 }
 
 class _AppLocalizationsDelegate

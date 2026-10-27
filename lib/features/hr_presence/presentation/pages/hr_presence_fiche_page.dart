@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/layout/shell_chrome.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_profiles.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profiles_body.dart';
@@ -22,10 +23,17 @@ class HrPresenceFichePage extends StatelessWidget {
   const HrPresenceFichePage({super.key});
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-    create: (context) => getIt<HrPresenceProfilesCubit>(
-      param1: HrPresenceContext.yearStart(context),
-    )..load(),
+  Widget build(BuildContext context) => MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (context) => getIt<HrPresenceProfilesCubit>(
+          param1: HrPresenceContext.yearStart(context),
+        )..load(),
+      ),
+      BlocProvider<HrAttendanceReportCubit>(
+        create: (_) => getIt<HrAttendanceReportCubit>(),
+      ),
+    ],
     child: HrPresenceFicheScreen(
       onOpenAgent: (context, row) {
         final state = context.read<HrPresenceProfilesCubit>().state;

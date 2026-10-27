@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -20,18 +22,22 @@ class HrPresenceFicheCubit extends Cubit<HrPresenceFicheState> {
   final GetHrAttendanceAgentMonthUseCase _getMonth;
   final GetHrAttendanceAgentYearUseCase _getYear;
   final StaffSnapshotSource _source;
+  final LoadStaffAttendanceUseCase? _loadAttendance;
   int _ticket = 0;
+  int _localTicket = 0;
   void Function()? _unwatch;
 
   HrPresenceFicheCubit({
     required GetHrAttendanceAgentMonthUseCase getMonth,
     required GetHrAttendanceAgentYearUseCase getYear,
     required StaffSnapshotSource source,
+    LoadStaffAttendanceUseCase? loadAttendance,
     required HrPresenceFicheArgs args,
     DateTime Function() now = DateTime.now,
   }) : _getMonth = getMonth,
        _getYear = getYear,
        _source = source,
+       _loadAttendance = loadAttendance,
        super(_initial(args, now()));
 
   static HrPresenceFicheState _initial(HrPresenceFicheArgs args, DateTime now) {
@@ -104,6 +110,37 @@ class HrPresenceFicheCubit extends Cubit<HrPresenceFicheState> {
   void noteLocalDay(String day, StaffAttendanceRecord? record) {
     emit(state.copyWith(localDays: {...state.localDays, day: record}));
     _unwatch ??= _source.watch(() => unawaited(_reread()));
+    unawaited(_readLocal());
+  }
+
+  /// Le verrou du mois et les pointages de l'agent pas encore envoyés, sur la
+  /// portée affichée — lus sur la tablette, sans réseau.
+  Future<void> _readLocal() async {
+    final load = _loadAttendance;
+    if (load == null) return;
+    final ticket = ++_localTicket;
+    final first = state.yearly
+        ? state.firstMonth ?? state.currentMonth
+        : state.month;
+    final last = state.yearly ? state.currentMonth : state.month;
+    final result = await load(
+      from: SchoolDayCalendar.firstOf(first),
+      to: SchoolDayCalendar.daysOf(last).last,
+    );
+    if (isClosed || ticket != _localTicket) return;
+    result.fold((_) => emit(state.copyWith(local: null)), (snapshot) {
+      final records = snapshot.records[state.agentId]?.values ?? const [];
+      emit(
+        state.copyWith(
+          local: (
+            monthClosed: !state.yearly && snapshot.isMonthClosed(state.month),
+            unsent: records
+                .where((r) => r.syncState != RecordSyncState.synced)
+                .length,
+          ),
+        ),
+      );
+    });
   }
 
   /// Relecture **silencieuse** du mois : jamais de squelette, un échec garde
@@ -143,6 +180,7 @@ class HrPresenceFicheCubit extends Cubit<HrPresenceFicheState> {
 
   Future<void> _read() async {
     final ticket = ++_ticket;
+    unawaited(_readLocal());
     emit(
       state.copyWith(
         status: HrPresenceFicheStatus.loading,

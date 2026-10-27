@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_picker.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_person_picker.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_scope_bar.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_sheet_button.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -51,9 +53,14 @@ class HrPresenceFicheAgentScope extends StatelessWidget {
         }
       },
       yearLabel: state.yearData?.schoolYear?.name,
-      trailing: members.isEmpty
-          ? null
-          : PresencePersonPicker<StaffMember>(
+      // Le choix d'un autre agent, et la fiche en PDF.
+      trailing: Wrap(
+        spacing: AppSpacing.md,
+        runSpacing: AppSpacing.sm,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (members.isNotEmpty)
+            PresencePersonPicker<StaffMember>(
               entries: [
                 for (final m in members)
                   PresencePickerEntry(
@@ -71,6 +78,9 @@ class HrPresenceFicheAgentScope extends StatelessWidget {
               matches: StaffMemberSearch.matches,
               onSelected: (picked) => unawaited(cubit.openAgent(picked.id)),
             ),
+          HrPresenceSheetButton(state: state),
+        ],
+      ),
     );
   }
 }

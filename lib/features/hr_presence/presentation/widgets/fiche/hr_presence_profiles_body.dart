@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_profiles.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_labels.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/dashboard/hr_attendance_report_button.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_chips.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_row.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_scope_bar.dart';
@@ -117,6 +118,21 @@ class HrPresenceProfilesBody extends StatelessWidget {
           icon: Icons.badge_outlined,
           tone: DashboardSense.attendu,
           toneStrength: DashboardTones.forceDe(DashboardSense.attendu),
+          // La liste affichée, sur la même question que l'écran : période,
+          // recherche, catégorie et profil (règle 14).
+          actions: [
+            HrAttendanceReportButton(
+              kind: HrAttendanceReportKind.profiles,
+              onDownload: rows.isEmpty
+                  ? null
+                  : (report) => report.downloadProfiles(
+                      state.scope,
+                      search: state.text,
+                      category: state.category,
+                      profile: state.profile,
+                    ),
+            ),
+          ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -15,6 +15,7 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_profile_evidence.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_agent_scope.dart';
@@ -64,15 +65,22 @@ class HrPresenceFicheAgentPage extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-    create: (context) => getIt<HrPresenceFicheCubit>(
-      param1: (
-        agentId: args.agentId,
-        yearly: args.yearly,
-        month: args.month,
-        yearStart: args.yearStart ?? HrPresenceContext.yearStart(context),
+  Widget build(BuildContext context) => MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (context) => getIt<HrPresenceFicheCubit>(
+          param1: (
+            agentId: args.agentId,
+            yearly: args.yearly,
+            month: args.month,
+            yearStart: args.yearStart ?? HrPresenceContext.yearStart(context),
+          ),
+        )..load(),
       ),
-    )..load(),
+      BlocProvider<HrAttendanceReportCubit>(
+        create: (_) => getIt<HrAttendanceReportCubit>(),
+      ),
+    ],
     child: HrClosingNotifier(
       onClosed: onClosed,
       child: HrPresenceFicheAgentScreen(shellSubMenuId: shellSubMenuId),

@@ -20483,4 +20483,59 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0 : les taux et le profil seront recalculés quand le serveur l\'aura reçu.';
   }
+
+  @override
+  String get hrPresenceProfilesReportTitle => 'Fiche individuelle du personnel';
+
+  @override
+  String get hrPresenceProfilesReportTooltip =>
+      'Télécharger la liste affichée en PDF, avec ses filtres';
+
+  @override
+  String get hrPresenceProfilesReportFailed =>
+      'La liste de la fiche individuelle n\'a pas pu être préparée.';
+
+  @override
+  String get hrPresenceSheetTitle => 'Fiche de présence';
+
+  @override
+  String get hrPresenceSheetTooltip =>
+      'Télécharger la fiche de présence en PDF';
+
+  @override
+  String get hrPresenceSheetTooltipSealed =>
+      'Télécharger la fiche de présence du mois clos : pièce scellée';
+
+  @override
+  String get hrPresenceSheetTooltipDraft =>
+      'Télécharger la fiche de présence : provisoire, la période n\'est pas close';
+
+  @override
+  String get hrPresenceSheetForbidden =>
+      'La fiche d\'un mois clos est une pièce scellée : il faut aussi le droit d\'émettre des documents.';
+
+  @override
+  String get hrPresenceSheetNotFound =>
+      'Cet agent, ou l\'année scolaire du mois, est introuvable sur le serveur.';
+
+  @override
+  String get hrPresenceSheetFailed =>
+      'La fiche de présence n\'a pas pu être préparée.';
+
+  @override
+  String get hrPresenceSheetUnsentTitle => 'Des pointages attendent l\'envoi';
+
+  @override
+  String hrPresenceSheetUnsentMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pointages de cet agent ne sont pas encore envoyés',
+      one: '1 pointage de cet agent n\'est pas encore envoyé',
+    );
+    return '$_temp0 au serveur : la fiche ne les comptera pas.';
+  }
+
+  @override
+  String get hrPresenceSheetUnsentConfirm => 'Télécharger quand même';
 }

@@ -11901,5 +11901,19 @@
   "hrPresenceDayDeparture": "Left {time}",
   "@hrPresenceDayDeparture": {"placeholders": {"time": {"type": "String"}}},
   "hrPresenceDayPendingNotice": "{count, plural, =1{1 day corrected on the tablet} other{{count} days corrected on the tablet}}: rates and profile will be recomputed once the server has received it.",
-  "@hrPresenceDayPendingNotice": {"placeholders": {"count": {"type": "int"}}}
+  "@hrPresenceDayPendingNotice": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceProfilesReportTitle": "Staff individual sheet",
+  "hrPresenceProfilesReportTooltip": "Download the list shown as a PDF, with its filters",
+  "hrPresenceProfilesReportFailed": "The individual sheet list could not be prepared.",
+  "hrPresenceSheetTitle": "Attendance sheet",
+  "hrPresenceSheetTooltip": "Download the attendance sheet as a PDF",
+  "hrPresenceSheetTooltipSealed": "Download the closed month's attendance sheet: sealed document",
+  "hrPresenceSheetTooltipDraft": "Download the attendance sheet: provisional, the period is not closed",
+  "hrPresenceSheetForbidden": "A closed month's sheet is a sealed document: issuing documents is also required.",
+  "hrPresenceSheetNotFound": "This staff member, or the month's school year, cannot be found on the server.",
+  "hrPresenceSheetFailed": "The attendance sheet could not be prepared.",
+  "hrPresenceSheetUnsentTitle": "Records waiting to be sent",
+  "hrPresenceSheetUnsentMessage": "{count, plural, =1{1 record of this staff member has not been sent} other{{count} records of this staff member have not been sent}} to the server yet: the sheet will not count them.",
+  "@hrPresenceSheetUnsentMessage": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceSheetUnsentConfirm": "Download anyway"
 }

@@ -20348,4 +20348,58 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0: rates and profile will be recomputed once the server has received it.';
   }
+
+  @override
+  String get hrPresenceProfilesReportTitle => 'Staff individual sheet';
+
+  @override
+  String get hrPresenceProfilesReportTooltip =>
+      'Download the list shown as a PDF, with its filters';
+
+  @override
+  String get hrPresenceProfilesReportFailed =>
+      'The individual sheet list could not be prepared.';
+
+  @override
+  String get hrPresenceSheetTitle => 'Attendance sheet';
+
+  @override
+  String get hrPresenceSheetTooltip => 'Download the attendance sheet as a PDF';
+
+  @override
+  String get hrPresenceSheetTooltipSealed =>
+      'Download the closed month\'s attendance sheet: sealed document';
+
+  @override
+  String get hrPresenceSheetTooltipDraft =>
+      'Download the attendance sheet: provisional, the period is not closed';
+
+  @override
+  String get hrPresenceSheetForbidden =>
+      'A closed month\'s sheet is a sealed document: issuing documents is also required.';
+
+  @override
+  String get hrPresenceSheetNotFound =>
+      'This staff member, or the month\'s school year, cannot be found on the server.';
+
+  @override
+  String get hrPresenceSheetFailed =>
+      'The attendance sheet could not be prepared.';
+
+  @override
+  String get hrPresenceSheetUnsentTitle => 'Records waiting to be sent';
+
+  @override
+  String hrPresenceSheetUnsentMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count records of this staff member have not been sent',
+      one: '1 record of this staff member has not been sent',
+    );
+    return '$_temp0 to the server yet: the sheet will not count them.';
+  }
+
+  @override
+  String get hrPresenceSheetUnsentConfirm => 'Download anyway';
 }
