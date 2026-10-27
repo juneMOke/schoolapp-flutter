@@ -9,10 +9,9 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_mont
 /// bord ([DashboardSense]) : brouillon neutre, soumise en attente (ocre),
 /// versée encaissée (vert), alerte manquante (rouge).
 ///
-/// ⚠️ La paie validée garde son jeton propre, `payrollValidated` (décision du
-/// 2026-10-26). Sa valeur, `#1B4D6B`, est **la même** que le bleu ardoise de
-/// [DashboardSense.attendu] : un chiffre « attendu » et un statut « validée »
-/// ne se distinguent donc pas à l'œil — éviter de les poser côte à côte.
+/// La paie validée garde son jeton propre, `payrollValidated` : l'aubergine
+/// des actes administratifs, qu'aucun autre sens ne porte (décision du
+/// 2026-10-27, à l'essai).
 class PayrollTone {
   /// L'accent, pour une surface : point, filet, segment, liseré.
   final Color color;

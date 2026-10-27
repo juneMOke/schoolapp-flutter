@@ -568,14 +568,17 @@ class AppColors {
   static const presenceMarkOnBannerFaint = Color(0x33FFFFFF);
 
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
-  // Validée (bleu profond de la spec) : l'encre #1B4D6B tient 7,7:1 sur son
-  // voile. C'est la seule teinte propre à la Paie : les autres statuts et ses
-  // graphiques prennent les sens partagés (`DashboardSense`, `PayrollTone`,
-  // `PayrollChartTones`).
-  static const payrollValidated = Color(0xFF1B4D6B);
-  static const payrollValidatedSoft = Color(0xFFE6EEF4);
-  static const payrollValidatedBorder = Color(0xFFB9CEDD);
-  static const payrollValidatedInk = Color(0xFF1B4D6B);
+  // Validée : l'aubergine des actes administratifs (`boutiqueActesAccent`).
+  // Le bleu ardoise d'avant était aussi « attendu », « Permanent » et le
+  // focus, et se fondait dans le bandeau bleu profond de la fiche agent
+  // (1,6:1 ; l'aubergine y tient 2,2:1). L'encre tient 6,4:1 sur blanc et
+  // 5,5:1 sur son voile. C'est la seule teinte propre à la Paie : les autres
+  // statuts et ses graphiques prennent les sens partagés (`DashboardSense`,
+  // `PayrollTone`, `PayrollChartTones`).
+  static const payrollValidated = boutiqueActesAccent;
+  static const payrollValidatedSoft = Color(0xFFF2EDF4);
+  static const payrollValidatedBorder = Color(0xFFD7C9DF);
+  static const payrollValidatedInk = boutiqueActesAccent;
 
   /// Le bouton d'envoi WhatsApp, et lui seul. Le vert de la spec (#25A162)
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
