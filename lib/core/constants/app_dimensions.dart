@@ -772,6 +772,14 @@ class AppDimensions {
   /// La colonne du nom de mois dans la vue annuelle.
   static const hrPresenceYearMonthWidth = 132.0;
 
+  /// Vue annuelle en table : la barre de répartition, un taux, les jours
+  /// pointés, le profil ; sous la largeur plancher, elle défile de côté.
+  static const hrPresenceYearColShare = 144.0;
+  static const hrPresenceYearColRate = 96.0;
+  static const hrPresenceYearColScored = 104.0;
+  static const hrPresenceYearColProfile = 152.0;
+  static const hrPresenceYearMinWidth = 880.0;
+
   /// Le médaillon d'icône d'une tête de fiche (dépense, rapport validé).
   static const medallionSize = 44.0;
   static const medallionIconSize = 22.0;

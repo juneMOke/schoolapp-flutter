@@ -11865,5 +11865,11 @@
   "payrollDashNotTrackedKpi": "Not tracked before v2",
   "presenceMarkPickMonth": "Pick a month",
   "presenceMonthShort": "{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}",
-  "@presenceMonthShort": {"placeholders": {"month": {"type": "String"}}}
+  "@presenceMonthShort": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceYearColMonth": "Month",
+  "hrPresenceYearColShare": "Breakdown",
+  "hrPresenceYearColPresence": "Attendance",
+  "hrPresenceYearColScored": "Days marked",
+  "hrPresenceYearColProfile": "Profile",
+  "hrPresenceYearTotal": "Year"
 }

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_year.dart';
@@ -117,6 +118,23 @@ void main() {
     await tester.pump();
     verify(() => mocks.month('a-1', month: '2026-09')).called(1);
     expect(find.byType(PresenceMonthCalendar), findsOneWidget);
+  });
+
+  testWidgets('vue annuelle en table : une colonne par taux, l\'année en '
+      'pied', (tester) async {
+    await pump(tester, yearly: true);
+
+    expect(find.byType(EteeloColumnTable), findsOneWidget);
+    // Les en-têtes de table s'écrivent en majuscules.
+    for (final header in ['MOIS', 'RÉPARTITION', 'PRÉSENCE', 'PROFIL']) {
+      expect(find.text(header), findsOneWidget);
+    }
+    // Septembre : trois taux, chacun dans sa colonne, et ses jours pointés.
+    expect(find.text('95 %'), findsOneWidget);
+    expect(find.text('22 / 22'), findsOneWidget);
+    // Le pied totalise les jours de classe des mois (22 + 17).
+    expect(find.text('Année'), findsOneWidget);
+    expect(find.textContaining('/ 39'), findsOneWidget);
   });
 
   testWidgets('la bascule Annuelle relit l\'année', (tester) async {

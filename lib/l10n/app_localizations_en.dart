@@ -20220,4 +20220,22 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get hrPresenceYearColMonth => 'Month';
+
+  @override
+  String get hrPresenceYearColShare => 'Breakdown';
+
+  @override
+  String get hrPresenceYearColPresence => 'Attendance';
+
+  @override
+  String get hrPresenceYearColScored => 'Days marked';
+
+  @override
+  String get hrPresenceYearColProfile => 'Profile';
+
+  @override
+  String get hrPresenceYearTotal => 'Year';
 }

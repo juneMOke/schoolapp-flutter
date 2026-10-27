@@ -210,6 +210,8 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           HrPresenceYearList(
             months: year.months,
+            total: year.kpis,
+            totalProfile: year.profile,
             onOpenMonth: (m) => unawaited(cubit.openMonth(m)),
           ),
         ],

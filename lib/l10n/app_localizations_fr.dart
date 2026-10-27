@@ -20355,4 +20355,22 @@ class AppLocalizationsFr extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get hrPresenceYearColMonth => 'Mois';
+
+  @override
+  String get hrPresenceYearColShare => 'Répartition';
+
+  @override
+  String get hrPresenceYearColPresence => 'Présence';
+
+  @override
+  String get hrPresenceYearColScored => 'Jours pointés';
+
+  @override
+  String get hrPresenceYearColProfile => 'Profil';
+
+  @override
+  String get hrPresenceYearTotal => 'Année';
 }

@@ -31208,6 +31208,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}'**
   String presenceMonthShort(String month);
+
+  /// No description provided for @hrPresenceYearColMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get hrPresenceYearColMonth;
+
+  /// No description provided for @hrPresenceYearColShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown'**
+  String get hrPresenceYearColShare;
+
+  /// No description provided for @hrPresenceYearColPresence.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get hrPresenceYearColPresence;
+
+  /// No description provided for @hrPresenceYearColScored.
+  ///
+  /// In en, this message translates to:
+  /// **'Days marked'**
+  String get hrPresenceYearColScored;
+
+  /// No description provided for @hrPresenceYearColProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get hrPresenceYearColProfile;
+
+  /// No description provided for @hrPresenceYearTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get hrPresenceYearTotal;
 }
 
 class _AppLocalizationsDelegate
