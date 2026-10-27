@@ -122,7 +122,7 @@ notes à 52 dp ; tout raccourci clavier a son équivalent tactile.
 | T-H4 | Gênant | Cibles tactiles au guichet : case de frais 24×24, ligne non tapable ; « Tout régler » `minimumSize: Size(0,0)` ; chip de devise compact. Appel : segment P/R/A 40 dp, icônes 36 dp. | `facturation_create_payment_charge_group_line.dart:292,433`, `…_charge_allocation_line.dart:222`, `presence_row_controls.dart:53,119,168` |
 | T-H5 | Gênant | Faible hauteur (600 dp) : double barre de titre boutique (~140 dp) ; saisie de notes Focus empilée (défilement à chaque élève, pas de côte à côte en paysage) ; total de l'encaissement en `bottomNavigationBar` sous le clavier (à vérifier sur appareil). | `boutique_page.dart:218`, `saisie_focus.dart:121-150`, `facturation_create_payment_page.dart:778` |
 | T-H6 | Gênant | Barre gestuelle sur la barre d'enregistrement des notes et le pied de fiche d'évaluation (pas de `SafeArea`). | `eval_saisie_page.dart:177`, `eval_detail_page.dart:230` |
-| T-M1 | Confort | Vue liste de l'appel ≥ 900 dp : à 800 elle défile de côté sans ascenseur (`EteeloMinWidthScroll` sans `Scrollbar`). | `presence_list_frame.dart:35` |
+| T-M1 | Confort | Vue liste de l'appel ≥ 900 dp : à 800 elle défile de côté sans ascenseur (`EteeloMinWidthScroll` sans `Scrollbar`). | `presence_table.dart` (ex `presence_list_frame.dart`) |
 | T-M2 | Confort | Pastilles du dossier d'inscription en icône seule sous 1024 (libellé à l'appui long), même en 7" paysage. | `enrollment_journey_pill_button.dart:35` |
 | T-M3 | Confort | Encaissement en une colonne de 880 dp même à 1280 ; tableaux en 12 sp / en-têtes 11 sp ; `autofocus: true` forcé dans le dialogue bénéficiaire boutique ; `eval_creation_modal.dart:42` hors `EteeloDialogBody`. | — |
 

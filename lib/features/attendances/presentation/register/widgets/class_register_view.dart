@@ -3,7 +3,7 @@ import 'package:school_app_flutter/core/components/controls/collection_view_mode
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_grid.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_list_frame.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_table.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_presence_view.dart';
@@ -47,7 +47,7 @@ class ClassRegisterView extends StatelessWidget {
               schedule: schedule,
             ),
           )
-        : PresenceListFrame(
+        : PresenceTable(
             personColumn: l10n.classPresenceColStudent,
             rows: [
               for (final line in rows)

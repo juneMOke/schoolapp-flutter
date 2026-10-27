@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_results_frame.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
@@ -182,6 +184,12 @@ void main() {
   testAtReferenceFormats('le registre en liste tient', (tester, format) async {
     await pump(tester);
     expect(find.byType(StaffAttendanceRow), findsWidgets);
+    // La table teintée des autres écrans, colonne de l'agent figée.
+    final table = tester.widget<EteeloColumnTable>(
+      find.byType(EteeloColumnTable),
+    );
+    expect(table.tone, ListingTones.table);
+    expect(table.frozenFirstColumn, isTrue);
   });
 
   group('l\'adresse', () {

@@ -777,7 +777,6 @@ class AppDimensions {
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;
-  static const presenceMarkAccentWidth = 4.0;
 
   /// La vue liste : largeur plancher avant défilement, et ses colonnes. Sous
   /// ~880, le nom de l'élève n'avait plus qu'une centaine de dp (« KABONGO
@@ -833,9 +832,6 @@ class AppDimensions {
 
   /// Au-delà, les quatre indicateurs de la fiche tiennent sur une ligne.
   static const presenceMarkKpiWideBreakpoint = 720.0;
-
-  /// Part de la ligne du registre couverte par le voile de son statut.
-  static const presenceMarkRowTintStop = 0.3;
 
   /// Opacité d'un jour à venir dans le calendrier de la fiche mensuelle.
   static const presenceMarkUpcomingOpacity = 0.4;

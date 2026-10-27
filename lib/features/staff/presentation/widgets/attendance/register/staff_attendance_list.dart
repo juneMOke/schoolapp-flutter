@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_list_frame.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_table.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -15,7 +15,7 @@ class StaffAttendanceList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final showHours = register.showsHours;
-    return PresenceListFrame(
+    return PresenceTable(
       personColumn: l10n.staffAttendanceColAgent,
       timesColumn: l10n.staffAttendanceColTimes,
       hoursColumn: showHours ? l10n.staffAttendanceColHours : null,
