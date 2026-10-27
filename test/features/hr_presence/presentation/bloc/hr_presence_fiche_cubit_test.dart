@@ -79,4 +79,12 @@ void main() {
     await cubit.openAgent('a-2');
     verify(() => year('a-2')).called(1);
   });
+
+  test('le sélecteur : le mois déjà affiché ne relit rien', () async {
+    final cubit = build(asked: '2026-09');
+    await cubit.load();
+    verify(() => month('a-1', month: '2026-09')).called(1);
+    await cubit.openMonth('2026-09');
+    verifyNever(() => month('a-1', month: '2026-09'));
+  });
 }

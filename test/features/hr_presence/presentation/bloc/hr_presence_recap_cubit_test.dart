@@ -183,4 +183,15 @@ void main() {
     await cubit.applyLocation('2026-09');
     expect(cubit.state.month, '2026-09');
   });
+
+  test('le sélecteur : un mois permis, sinon rien', () async {
+    final cubit = build();
+    await cubit.load();
+    await cubit.showMonth('2026-09');
+    expect(cubit.state.month, '2026-09');
+    await cubit.showMonth('2026-11');
+    expect(cubit.state.month, '2026-09');
+    await cubit.showMonth('2026-08');
+    expect(cubit.state.month, '2026-09');
+  });
 }

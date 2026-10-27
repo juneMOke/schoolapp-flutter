@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_picker.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_person_picker.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -123,44 +124,48 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
   ) {
     final dates = MaterialLocalizations.of(context);
     final members = state.members;
-    final toolbar = Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: AppSpacing.lg,
-      runSpacing: AppSpacing.md,
-      children: [
-        HrPresenceScopeBar(
-          yearly: state.yearly,
-          onYearly: (yearly) => unawaited(cubit.setYearly(yearly)),
+    final toolbar = HrPresenceScopeBar(
+      yearly: state.yearly,
+      onYearly: (yearly) => unawaited(cubit.setYearly(yearly)),
+      month: state.month,
+      isCurrentMonth: state.isCurrentMonth,
+      onPrevious: state.canStepBack
+          ? () => unawaited(cubit.stepMonth(-1))
+          : null,
+      onNext: () => unawaited(cubit.stepMonth(1)),
+      onCurrent: () => unawaited(cubit.goCurrentMonth()),
+      onPickMonth: () async {
+        final picked = await pickPresenceMonth(
+          context,
           month: state.month,
-          isCurrentMonth: state.isCurrentMonth,
-          onPrevious: state.canStepBack
-              ? () => unawaited(cubit.stepMonth(-1))
-              : null,
-          onNext: () => unawaited(cubit.stepMonth(1)),
-          onCurrent: () => unawaited(cubit.goCurrentMonth()),
-          yearLabel: state.yearData?.schoolYear?.name,
-        ),
-        if (members.isNotEmpty)
-          PresencePersonPicker<StaffMember>(
-            entries: [
-              for (final m in members)
-                PresencePickerEntry(
-                  value: m,
-                  id: m.id,
-                  firstName: m.firstName,
-                  lastName: m.lastName,
-                  fullName: m.fullName,
-                  detail: m.jobTitle,
-                ),
-            ],
-            selectedId: state.agentId,
-            label: l10n.staffAttendanceTabAgent,
-            placeholder: l10n.staffAttendanceAgentPicker,
-            matches: StaffMemberSearch.matches,
-            onSelected: (picked) => unawaited(cubit.openAgent(picked.id)),
-          ),
-      ],
+          firstMonth: state.firstMonth,
+          lastMonth: state.currentMonth,
+        );
+        if (picked != null && !cubit.isClosed) {
+          unawaited(cubit.openMonth(picked));
+        }
+      },
+      yearLabel: state.yearData?.schoolYear?.name,
+      trailing: members.isEmpty
+          ? null
+          : PresencePersonPicker<StaffMember>(
+              entries: [
+                for (final m in members)
+                  PresencePickerEntry(
+                    value: m,
+                    id: m.id,
+                    firstName: m.firstName,
+                    lastName: m.lastName,
+                    fullName: m.fullName,
+                    detail: m.jobTitle,
+                  ),
+              ],
+              selectedId: state.agentId,
+              label: l10n.staffAttendanceTabAgent,
+              placeholder: l10n.staffAttendanceAgentPicker,
+              matches: StaffMemberSearch.matches,
+              onSelected: (picked) => unawaited(cubit.openAgent(picked.id)),
+            ),
     );
     final month = state.monthData;
     final year = state.yearData;

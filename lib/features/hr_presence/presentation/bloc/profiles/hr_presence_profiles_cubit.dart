@@ -60,6 +60,16 @@ class HrPresenceProfilesCubit extends Cubit<HrPresenceProfilesState> {
     return _read();
   }
 
+  /// Le mois choisi dans le sélecteur ; à venir ou d'avant la rentrée, rien.
+  Future<void> showMonth(String month) {
+    final asked = _validMonth(month);
+    if (asked == null || (asked == state.month && !state.yearly)) {
+      return Future.value();
+    }
+    emit(state.copyWith(month: asked, yearly: false));
+    return _read();
+  }
+
   /// La portée lue dans l'adresse ; un mois illisible, à venir ou d'avant la
   /// rentrée vaut le mois en cours.
   Future<void> applyLocation({required bool yearly, String? month}) {

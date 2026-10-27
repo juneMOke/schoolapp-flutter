@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleto
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_picker.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -59,6 +60,17 @@ class HrPresenceProfilesBody extends StatelessWidget {
               : null,
           onNext: () => unawaited(cubit.stepMonth(1)),
           onCurrent: () => unawaited(cubit.goCurrentMonth()),
+          onPickMonth: () async {
+            final picked = await pickPresenceMonth(
+              context,
+              month: state.month,
+              firstMonth: state.firstMonth,
+              lastMonth: state.currentMonth,
+            );
+            if (picked != null && !cubit.isClosed) {
+              unawaited(cubit.showMonth(picked));
+            }
+          },
           yearLabel: year == null || to == null
               ? null
               : l10n.hrPresenceYearScope(

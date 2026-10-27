@@ -168,8 +168,9 @@ class HrPresenceFicheCubit extends Cubit<HrPresenceFicheState> {
     return _read();
   }
 
-  /// Depuis la vue annuelle : la vue mensuelle de ce mois.
+  /// Depuis la vue annuelle ou le sélecteur : la vue mensuelle de ce mois.
   Future<void> openMonth(String month) {
+    if (month == state.month && !state.yearly) return Future.value();
     emit(state.copyWith(month: month, yearly: false));
     return _read();
   }
