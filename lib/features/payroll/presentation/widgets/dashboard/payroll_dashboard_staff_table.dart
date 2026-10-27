@@ -18,7 +18,14 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class PayrollDashboardStaffTable extends StatelessWidget {
   final PayrollDashboardCurrency section;
 
-  const PayrollDashboardStaffTable({super.key, required this.section});
+  /// Toucher une ligne : la fiche de l'agent ; `null` : lignes inertes.
+  final ValueChanged<String>? onOpen;
+
+  const PayrollDashboardStaffTable({
+    super.key,
+    required this.section,
+    this.onOpen,
+  });
 
   static const List<double?> _widths = [
     null,
@@ -61,8 +68,10 @@ class PayrollDashboardStaffTable extends StatelessWidget {
   Widget _row(BuildContext context, PayrollDashboardRow row) {
     final none = AppLocalizations.of(context)!.payrollNoValue;
     String money(int cents) => PayrollLabels.money(cents, section.currency);
+    final onOpen = this.onOpen;
     return EteeloColumnTableRow(
       widths: _widths,
+      onTap: onOpen == null ? null : () => onOpen(row.staffMemberId),
       cells: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

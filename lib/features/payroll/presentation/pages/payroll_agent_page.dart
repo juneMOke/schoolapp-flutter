@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/keyboard/route_key_shortcut.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -34,7 +35,15 @@ class PayrollAgentPage extends StatelessWidget {
   final PayrollAgentArgs args;
   final VoidCallback? onClosed;
 
-  const PayrollAgentPage({super.key, required this.args, this.onClosed});
+  /// L'écran qui l'a ouverte : le livre, le tableau de bord ou les arriérés.
+  final String shellSubMenuId;
+
+  const PayrollAgentPage({
+    super.key,
+    required this.args,
+    this.onClosed,
+    this.shellSubMenuId = PayrollAgentNavigation.subMenuId,
+  });
 
   @override
   Widget build(BuildContext context) => BlocProvider<PayrollCubit>(
@@ -47,6 +56,7 @@ class PayrollAgentPage extends StatelessWidget {
         child: PayrollAgentScreen(
           agentId: args.agentId,
           entryMonth: args.month,
+          shellSubMenuId: shellSubMenuId,
         ),
       ),
     ),
@@ -58,11 +68,13 @@ class PayrollAgentScreen extends StatelessWidget {
 
   /// `null` : le mois en cours.
   final String? entryMonth;
+  final String shellSubMenuId;
 
   const PayrollAgentScreen({
     super.key,
     required this.agentId,
     required this.entryMonth,
+    this.shellSubMenuId = PayrollAgentNavigation.subMenuId,
   });
 
   @override
@@ -73,9 +85,14 @@ class PayrollAgentScreen extends StatelessWidget {
       appBar: OffShellTopBar(
         eyebrow: l10n.menuHrPayroll,
         title: l10n.payrollAgentTitle,
-        backTooltip: l10n.payrollTabLedger,
-        shellSubMenuId: PayrollAgentNavigation.subMenuId,
-        onBack: PayrollAgentNavigation.leave,
+        backTooltip: switch (shellSubMenuId) {
+          MenuConstants.hrPayrollDashboardId => l10n.subMenuDashboard,
+          MenuConstants.hrPayrollArrearsId => l10n.subMenuPayrollArrears,
+          _ => l10n.payrollTabLedger,
+        },
+        shellSubMenuId: shellSubMenuId,
+        onBack: (context) =>
+            PayrollAgentNavigation.leave(context, from: shellSubMenuId),
       ),
       child: BlocConsumer<PayrollCubit, PayrollState>(
         listenWhen: (previous, current) =>

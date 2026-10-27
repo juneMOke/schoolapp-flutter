@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_agent_page.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
@@ -23,7 +24,7 @@ abstract final class HrAgentRoutes {
     MenuConstants.hrPresenceDashboardId,
     MenuConstants.hrPresenceFicheId,
     MenuConstants.hrPresenceRecapId,
-    MenuConstants.hrPayrollId,
+    ...PayrollAgentNavigation.origins,
   };
 
   static GoRoute agent() => GoRoute(
@@ -60,13 +61,14 @@ abstract final class HrAgentRoutes {
           shellSubMenuId: subMenuId!,
         );
       }
-      if (subMenuId == MenuConstants.hrPayrollId) {
+      if (PayrollAgentNavigation.origins.contains(subMenuId)) {
         return PayrollAgentPage(
           args: (
             agentId: state.pathParameters['agentId'] ?? '',
             month: state.uri.queryParameters[HrAgentAddress.monthParam],
           ),
           onClosed: onClosed,
+          shellSubMenuId: subMenuId!,
         );
       }
       return HrAgentRoutePage(

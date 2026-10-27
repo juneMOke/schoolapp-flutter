@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -133,7 +135,16 @@ class _StaffCardState extends State<PayrollDashboardStaffCard> {
                   : null,
             )
           else
-            PayrollDashboardStaffTable(section: section),
+            PayrollDashboardStaffTable(
+              section: section,
+              // Une ligne ouvre la fiche de l'agent, sur le mois affiché.
+              onOpen: (agentId) => PayrollAgentNavigation.open(
+                context,
+                agentId: agentId,
+                month: state.month,
+                from: MenuConstants.hrPayrollDashboardId,
+              ),
+            ),
         ],
       ),
     );
