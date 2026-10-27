@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
@@ -7,6 +8,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_head
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_agent_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_tranche_list.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_sheet.dart';
 
 import '../../../test_helpers/reference_formats.dart';
 import '../../staff/staff_builders.dart';
@@ -111,6 +114,62 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(pumped.cubit.state.month, '2026-09');
+  });
+
+  testWidgets('le détail du calcul, puis le bulletin du même mois', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpAgent(tester, snapshot: snapshotOf());
+
+    expect(find.text('GAINS'), findsOneWidget);
+    expect(find.text('Salaire brut (A)'), findsOneWidget);
+    expect(find.text('Total retenues (B)'), findsOneWidget);
+    expect(find.text('Éléments variables'), findsOneWidget);
+    expect(
+      find.text('Les versements seront possibles après validation.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Bulletin'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PayrollPayslipSheet), findsOneWidget);
+    expect(find.text('Salaire brut (A)'), findsNothing);
+  });
+
+  testWidgets('un mois validé non soldé : verser le reste, ses versements', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpAgent(tester, snapshot: snapshotOf(paid: [paid(10000)]));
+    await tester.tap(find.text('Septembre 2026'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Verser · reste'), findsOneWidget);
+    expect(find.text('Éléments variables'), findsNothing);
+    expect(find.byType(PayrollTrancheList), findsOneWidget);
+  });
+
+  testWidgets('la direction consulte les versements, sans verser', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpPayrollScreen(
+      tester,
+      snapshot: snapshotOf(paid: [paid(10000)]),
+      permissions: const [Perm.hrPayRead, Perm.hrPayManage],
+      child: const PayrollAgentScreen(agentId: 'm-1', entryMonth: '2026-10'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Septembre 2026'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Verser · reste'), findsNothing);
+    expect(find.text('Versements'), findsOneWidget);
   });
 
   testWidgets('un agent sans paie : la fiche le dit et ramène au livre', (

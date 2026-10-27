@@ -20519,4 +20519,108 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollLedgerOpenAgent => 'Open the agent sheet';
+
+  @override
+  String get payrollAgentPanelEyebrow => 'Payslip';
+
+  @override
+  String get payrollAgentSegmentCalc => 'Calculation';
+
+  @override
+  String get payrollAgentSegmentPayslip => 'Payslip';
+
+  @override
+  String payrollAgentPayRemaining(String amount) {
+    return 'Pay · $amount left';
+  }
+
+  @override
+  String get payrollAgentPayments => 'Payments';
+
+  @override
+  String get payrollAgentWhatsappAgain => 'Send again by WhatsApp';
+
+  @override
+  String payrollAgentScaleFrozen(int days, String absences) {
+    return 'Scale frozen at validation: $days reference days · absences $absences.';
+  }
+
+  @override
+  String payrollAgentScaleCurrent(int days, String absences) {
+    return 'Scale in force: $days reference days · absences $absences.';
+  }
+
+  @override
+  String get payrollAgentAbsencesDeducted => 'deducted';
+
+  @override
+  String get payrollAgentAbsencesIndicative => 'indicative only';
+
+  @override
+  String get payrollCalcGains => 'Earnings';
+
+  @override
+  String get payrollCalcDeductions => 'Deductions';
+
+  @override
+  String get payrollCalcNet => 'Net';
+
+  @override
+  String get payrollCalcPayout => 'Payout';
+
+  @override
+  String get payrollCalcGross => 'Gross salary (A)';
+
+  @override
+  String get payrollCalcDeductionsTotal => 'Total deductions (B)';
+
+  @override
+  String get payrollCalcNetToPay => 'Net to pay for the month · (A) − (B)';
+
+  @override
+  String payrollCalcAbsenceFormula(int days, String perDay, int divisor) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days not worked',
+      one: '1 day not worked',
+    );
+    return '$_temp0 × $perDay / day (base ÷ $divisor days)';
+  }
+
+  @override
+  String payrollCalcAbsenceIndicative(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days not worked',
+      one: '1 day not worked',
+    );
+    return '$_temp0 · not deducted (school scale)';
+  }
+
+  @override
+  String get payrollCalcAbsenceHourly => 'Paid by the hour — not applicable';
+
+  @override
+  String payrollCalcRate(int percent) {
+    return 'Payout rate for the month · $percent %';
+  }
+
+  @override
+  String get payrollCalcRateFull =>
+      'Payout rate for the month · 100 % — full net paid';
+
+  @override
+  String get payrollCalcFixed => 'Fixed amount';
+
+  @override
+  String get payrollCalcToPay => 'To pay this month';
+
+  @override
+  String get payrollCalcDeferred => 'Unpaid share → arrears';
+
+  @override
+  String get payrollCalcAfterValidation =>
+      'Payments will be possible after validation.';
 }

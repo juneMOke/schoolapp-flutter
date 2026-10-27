@@ -31610,6 +31610,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open the agent sheet'**
   String get payrollLedgerOpenAgent;
+
+  /// No description provided for @payrollAgentPanelEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payslip'**
+  String get payrollAgentPanelEyebrow;
+
+  /// No description provided for @payrollAgentSegmentCalc.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation'**
+  String get payrollAgentSegmentCalc;
+
+  /// No description provided for @payrollAgentSegmentPayslip.
+  ///
+  /// In en, this message translates to:
+  /// **'Payslip'**
+  String get payrollAgentSegmentPayslip;
+
+  /// No description provided for @payrollAgentPayRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay · {amount} left'**
+  String payrollAgentPayRemaining(String amount);
+
+  /// No description provided for @payrollAgentPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get payrollAgentPayments;
+
+  /// No description provided for @payrollAgentWhatsappAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again by WhatsApp'**
+  String get payrollAgentWhatsappAgain;
+
+  /// No description provided for @payrollAgentScaleFrozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale frozen at validation: {days} reference days · absences {absences}.'**
+  String payrollAgentScaleFrozen(int days, String absences);
+
+  /// No description provided for @payrollAgentScaleCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale in force: {days} reference days · absences {absences}.'**
+  String payrollAgentScaleCurrent(int days, String absences);
+
+  /// No description provided for @payrollAgentAbsencesDeducted.
+  ///
+  /// In en, this message translates to:
+  /// **'deducted'**
+  String get payrollAgentAbsencesDeducted;
+
+  /// No description provided for @payrollAgentAbsencesIndicative.
+  ///
+  /// In en, this message translates to:
+  /// **'indicative only'**
+  String get payrollAgentAbsencesIndicative;
+
+  /// No description provided for @payrollCalcGains.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings'**
+  String get payrollCalcGains;
+
+  /// No description provided for @payrollCalcDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions'**
+  String get payrollCalcDeductions;
+
+  /// No description provided for @payrollCalcNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get payrollCalcNet;
+
+  /// No description provided for @payrollCalcPayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout'**
+  String get payrollCalcPayout;
+
+  /// No description provided for @payrollCalcGross.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross salary (A)'**
+  String get payrollCalcGross;
+
+  /// No description provided for @payrollCalcDeductionsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total deductions (B)'**
+  String get payrollCalcDeductionsTotal;
+
+  /// No description provided for @payrollCalcNetToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Net to pay for the month · (A) − (B)'**
+  String get payrollCalcNetToPay;
+
+  /// No description provided for @payrollCalcAbsenceFormula.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day not worked} other{{days} days not worked}} × {perDay} / day (base ÷ {divisor} days)'**
+  String payrollCalcAbsenceFormula(int days, String perDay, int divisor);
+
+  /// No description provided for @payrollCalcAbsenceIndicative.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day not worked} other{{days} days not worked}} · not deducted (school scale)'**
+  String payrollCalcAbsenceIndicative(int days);
+
+  /// No description provided for @payrollCalcAbsenceHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid by the hour — not applicable'**
+  String get payrollCalcAbsenceHourly;
+
+  /// No description provided for @payrollCalcRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout rate for the month · {percent} %'**
+  String payrollCalcRate(int percent);
+
+  /// No description provided for @payrollCalcRateFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Payout rate for the month · 100 % — full net paid'**
+  String get payrollCalcRateFull;
+
+  /// No description provided for @payrollCalcFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed amount'**
+  String get payrollCalcFixed;
+
+  /// No description provided for @payrollCalcToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay this month'**
+  String get payrollCalcToPay;
+
+  /// No description provided for @payrollCalcDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid share → arrears'**
+  String get payrollCalcDeferred;
+
+  /// No description provided for @payrollCalcAfterValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments will be possible after validation.'**
+  String get payrollCalcAfterValidation;
 }
 
 class _AppLocalizationsDelegate

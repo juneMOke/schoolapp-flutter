@@ -20655,4 +20655,108 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollLedgerOpenAgent => 'Ouvrir la fiche de l\'agent';
+
+  @override
+  String get payrollAgentPanelEyebrow => 'Fiche de paie';
+
+  @override
+  String get payrollAgentSegmentCalc => 'Détail du calcul';
+
+  @override
+  String get payrollAgentSegmentPayslip => 'Bulletin';
+
+  @override
+  String payrollAgentPayRemaining(String amount) {
+    return 'Verser · reste $amount';
+  }
+
+  @override
+  String get payrollAgentPayments => 'Versements';
+
+  @override
+  String get payrollAgentWhatsappAgain => 'Renvoyer par WhatsApp';
+
+  @override
+  String payrollAgentScaleFrozen(int days, String absences) {
+    return 'Barème figé à la validation : $days j de référence · absences $absences.';
+  }
+
+  @override
+  String payrollAgentScaleCurrent(int days, String absences) {
+    return 'Barème en vigueur : $days j de référence · absences $absences.';
+  }
+
+  @override
+  String get payrollAgentAbsencesDeducted => 'retenues';
+
+  @override
+  String get payrollAgentAbsencesIndicative => 'indicatives';
+
+  @override
+  String get payrollCalcGains => 'Gains';
+
+  @override
+  String get payrollCalcDeductions => 'Retenues';
+
+  @override
+  String get payrollCalcNet => 'Net';
+
+  @override
+  String get payrollCalcPayout => 'Versement';
+
+  @override
+  String get payrollCalcGross => 'Salaire brut (A)';
+
+  @override
+  String get payrollCalcDeductionsTotal => 'Total retenues (B)';
+
+  @override
+  String get payrollCalcNetToPay => 'Net à payer du mois · (A) − (B)';
+
+  @override
+  String payrollCalcAbsenceFormula(int days, String perDay, int divisor) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days j non prestés',
+      one: '1 j non presté',
+    );
+    return '$_temp0 × $perDay / j (base ÷ $divisor j)';
+  }
+
+  @override
+  String payrollCalcAbsenceIndicative(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days j non prestés',
+      one: '1 j non presté',
+    );
+    return '$_temp0 · non retenus (barème de l\'école)';
+  }
+
+  @override
+  String get payrollCalcAbsenceHourly => 'Payé aux heures — sans objet';
+
+  @override
+  String payrollCalcRate(int percent) {
+    return 'Taux de versement du mois · $percent %';
+  }
+
+  @override
+  String get payrollCalcRateFull =>
+      'Taux de versement du mois · 100 % — versement intégral du net';
+
+  @override
+  String get payrollCalcFixed => 'Montant fixe';
+
+  @override
+  String get payrollCalcToPay => 'À verser ce mois';
+
+  @override
+  String get payrollCalcDeferred => 'Part non versée → arriéré';
+
+  @override
+  String get payrollCalcAfterValidation =>
+      'Les versements seront possibles après validation.';
 }
