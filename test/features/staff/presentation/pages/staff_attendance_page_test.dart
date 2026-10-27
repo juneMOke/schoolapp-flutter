@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_row.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_status_segment.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:mocktail/mocktail.dart';
@@ -293,6 +294,21 @@ void main() {
       expect(find.text(title), findsOneWidget);
 
       await tester.tap(find.text('Rester'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.day, _day);
+    });
+
+    testWidgets('« Valider et quitter » ouvre la validation ; l\'annuler '
+        'garde le jour', (tester) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Valider et quitter'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PresenceReportDialog), findsOneWidget);
+
+      await tester.tap(find.text('Annuler'));
       await tester.pumpAndSettle();
       expect(cubit.state.day, _day);
     });

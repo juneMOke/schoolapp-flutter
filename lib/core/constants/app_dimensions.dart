@@ -801,9 +801,10 @@ class AppDimensions {
   static const formDialogMaxWidth = 480.0;
   static const formDialogMaxHeight = 640.0;
 
-  /// Sous cette largeur, les actions d'une modale carte s'empilent,
+  /// La largeur qu'une action d'une modale carte réclame côte à côte : en
+  /// dessous (deux actions sous 420 dp, trois sous 630), elles s'empilent,
   /// l'action principale en tête.
-  static const dialogActionsStackBelow = 420.0;
+  static const dialogActionMinWidth = 210.0;
 
   /// Carte d'étape de l'assistant d'inscription : large, bornée sur très
   /// grand écran ; la barre d'étapes et le pied s'alignent sur elle.

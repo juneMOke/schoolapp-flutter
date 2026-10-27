@@ -27,7 +27,7 @@ void main() {
   testWidgets('en largeur : côte à côte, la principale à droite', (
     tester,
   ) async {
-    await pump(tester, AppDimensions.dialogActionsStackBelow + 100);
+    await pump(tester, 2 * AppDimensions.dialogActionMinWidth + 100);
 
     final cancel = tester.getCenter(find.text('Annuler'));
     final validate = tester.getCenter(find.text('Valider'));
@@ -36,7 +36,7 @@ void main() {
   });
 
   testWidgets('en étroit : empilées, la principale en tête', (tester) async {
-    await pump(tester, AppDimensions.dialogActionsStackBelow - 100);
+    await pump(tester, 2 * AppDimensions.dialogActionMinWidth - 100);
 
     final cancel = tester.getCenter(find.text('Annuler'));
     final validate = tester.getCenter(find.text('Valider'));

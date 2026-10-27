@@ -50,6 +50,7 @@ class StaffRegisterActions {
     message: () => AppLocalizations.of(
       context,
     )!.staffAttendanceLeaveMessage(_cubit.state.register.unmarked.length),
+    validate: () => validate(_cubit.state.register),
   );
 
   /// Flèches, Aujourd'hui, calendrier : le jour choisi passe par le cubit,
@@ -88,7 +89,9 @@ class StaffRegisterActions {
     ),
   );
 
-  Future<void> validate(StaffDayRegister register) async {
+  /// Valide la journée après sa modale ; rend `true` quand le jour est
+  /// validé (« Valider et quitter » ne part qu'à cette condition).
+  Future<bool> validate(StaffDayRegister register) async {
     final l10n = AppLocalizations.of(context)!;
     final unmarked = register.unmarked;
     final choice = await EteeloCardDialog.show<PresenceReportChoice>(
@@ -109,8 +112,8 @@ class StaffRegisterActions {
         confirmLabel: l10n.staffAttendanceReportConfirm,
       ),
     );
-    if (choice == null || !context.mounted) return;
-    if (days.reviewIfAsked(choice)) return;
+    if (choice == null || !context.mounted) return false;
+    if (days.reviewIfAsked(choice)) return false;
     await _cubit.perform(
       (c) => c.validateDay(
         _cubit.state.snapshot,
@@ -118,6 +121,7 @@ class StaffRegisterActions {
         markRemaining: choice.markRemaining,
       ),
     );
+    return _cubit.state.register.frozen;
   }
 
   void reopen() => unawaited(

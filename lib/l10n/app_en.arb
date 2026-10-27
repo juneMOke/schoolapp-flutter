@@ -8943,6 +8943,8 @@
   "presenceMarkUnmarkedChoiceHint": "First choose what happens to the unmarked people.",
   "presenceMarkLeaveConfirm": "Leave without validating",
   "presenceMarkLeaveStay": "Stay",
+  "presenceMarkLeaveEyebrow": "Before you leave",
+  "presenceMarkLeaveValidate": "Validate and leave",
   "staffAttendanceLeaveTitle": "The report for {day} is not validated",
   "@staffAttendanceLeaveTitle": {"placeholders": {"day": {"type": "String"}}},
   "staffAttendanceLeaveMessage": "{count, plural, =0{Your marks are saved. Until the report is validated, the day stays open to changes.} =1{Your marks are saved. Until the report is validated, the day stays open to changes. 1 staff member is not marked yet.} other{Your marks are saved. Until the report is validated, the day stays open to changes. {count} staff members are not marked yet.}}",

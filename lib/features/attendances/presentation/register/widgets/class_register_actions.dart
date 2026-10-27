@@ -55,7 +55,16 @@ class ClassRegisterActions {
     message: () => AppLocalizations.of(
       context,
     )!.classPresenceLeaveMessage(_cubit.state.register?.unmarked.length ?? 0),
+    validate: _validateShown,
   );
+
+  /// L'appel affiché, validé depuis la garde.
+  Future<bool> _validateShown() async {
+    final state = _cubit.state;
+    final register = state.register;
+    if (register == null) return false;
+    return validate(register, state.classroom?.name ?? '');
+  }
 
   /// Flèches, Aujourd'hui, calendrier.
   PresenceRegisterDayActions get days =>
@@ -75,7 +84,9 @@ class ClassRegisterActions {
   void markRemaining() =>
       unawaited(_cubit.perform((c, day) => c.markRemainingPresent(day)));
 
-  Future<void> validate(ClassDayRegister register, String classroomName) async {
+  /// Valide l'appel après sa modale ; rend `true` quand il est validé
+  /// (« Valider et quitter » ne part qu'à cette condition).
+  Future<bool> validate(ClassDayRegister register, String classroomName) async {
     final l10n = AppLocalizations.of(context)!;
     final unmarked = register.unmarked;
     final choice = await EteeloCardDialog.show<PresenceReportChoice>(
@@ -100,11 +111,12 @@ class ClassRegisterActions {
         confirmLabel: l10n.classPresenceValidate,
       ),
     );
-    if (choice == null || !context.mounted) return;
-    if (days.reviewIfAsked(choice)) return;
+    if (choice == null || !context.mounted) return false;
+    if (days.reviewIfAsked(choice)) return false;
     await _cubit.perform(
       (c, day) => c.validate(day, classroomName: classroomName),
     );
+    return _cubit.state.register?.frozen ?? false;
   }
 
   void reopen() => unawaited(_cubit.perform((c, day) => c.reopen(day)));

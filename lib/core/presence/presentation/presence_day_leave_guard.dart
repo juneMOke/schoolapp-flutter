@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_card_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_leave_dialog.dart';
 
 /// La garde d'un jour pointé mais pas validé, partagée par les registres (le
 /// Pointage du personnel, l'appel d'une classe) : chaque module la construit
 /// en disant quand son jour est en attente et ce que la popin en dit.
 ///
 /// Rien n'est perdu en partant : les pointages sont sur la tablette. Ce qui
-/// manque, c'est la validation — la question est un rappel, posée avec la
-/// popin de la charte (celle de l'inscription), jamais un blocage.
+/// manque, c'est la validation — la question est un rappel, en modale carte
+/// ([PresenceLeaveDialog]), qui offre aussi de valider avant de partir ;
+/// jamais un blocage.
 class PresenceDayLeaveGuard {
   final BuildContext context;
 
@@ -24,11 +24,16 @@ class PresenceDayLeaveGuard {
   /// Ce qui est gardé, et combien restent à pointer.
   final String Function() message;
 
+  /// « Valider et quitter » : la validation du module (sa modale comprise),
+  /// qui rend `true` quand le jour est validé. `null` : pas d'action.
+  final Future<bool> Function()? validate;
+
   const PresenceDayLeaveGuard(
     this.context, {
     required this.isPending,
     required this.title,
     required this.message,
+    this.validate,
   });
 
   /// Une question à la fois, toutes gardes confondues : un Précédent du
@@ -48,18 +53,24 @@ class PresenceDayLeaveGuard {
     }
   }
 
-  Future<bool> _ask() {
-    final l10n = AppLocalizations.of(context)!;
-    return showAppConfirmationDialog(
-      context: context,
-      title: title(),
-      message: message(),
-      confirmLabel: l10n.presenceMarkLeaveConfirm,
-      cancelLabel: l10n.presenceMarkLeaveStay,
-      headerIcon: Icons.pending_actions_outlined,
-      headerIconColor: AppColors.presenceMarkLateInk,
-      confirmIcon: Icons.logout_rounded,
+  /// La popin de sortie. « Valider et quitter » enchaîne la validation :
+  /// on ne part que si le jour est validé, sinon on reste dessus.
+  Future<bool> _ask() async {
+    final validate = this.validate;
+    final choice = await EteeloCardDialog.show<PresenceLeaveChoice>(
+      context,
+      PresenceLeaveDialog(
+        title: title(),
+        message: message(),
+        canValidate: validate != null,
+      ),
     );
+    return switch (choice) {
+      PresenceLeaveChoice.leave => true,
+      PresenceLeaveChoice.validate =>
+        validate != null && context.mounted && await validate(),
+      PresenceLeaveChoice.stay || null => false,
+    };
   }
 
   /// Quitte le jour ([move]) après la question, s'il y a lieu ; rend `false`

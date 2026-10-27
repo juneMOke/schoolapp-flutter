@@ -13108,6 +13108,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presenceMarkLeaveStay => 'Stay';
 
   @override
+  String get presenceMarkLeaveEyebrow => 'Before you leave';
+
+  @override
+  String get presenceMarkLeaveValidate => 'Validate and leave';
+
+  @override
   String staffAttendanceLeaveTitle(String day) {
     return 'The report for $day is not validated';
   }

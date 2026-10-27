@@ -9390,6 +9390,8 @@
   "presenceMarkUnmarkedChoiceHint": "Choisissez d'abord le sort des non-pointés.",
   "presenceMarkLeaveConfirm": "Quitter sans valider",
   "presenceMarkLeaveStay": "Rester",
+  "presenceMarkLeaveEyebrow": "Avant de partir",
+  "presenceMarkLeaveValidate": "Valider et quitter",
   "staffAttendanceLeaveTitle": "Le rapport du {day} n'est pas validé",
   "staffAttendanceLeaveMessage": "{count, plural, =0{Vos pointages sont enregistrés. Tant que le rapport n'est pas validé, la journée reste modifiable.} =1{Vos pointages sont enregistrés. Tant que le rapport n'est pas validé, la journée reste modifiable. 1 agent n'est pas encore pointé.} other{Vos pointages sont enregistrés. Tant que le rapport n'est pas validé, la journée reste modifiable. {count} agents ne sont pas encore pointés.}}",
   "classPresenceLeaveTitle": "L'appel du {day} · {classroom} n'est pas validé",

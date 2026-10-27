@@ -20612,6 +20612,18 @@ abstract class AppLocalizations {
   /// **'Stay'**
   String get presenceMarkLeaveStay;
 
+  /// No description provided for @presenceMarkLeaveEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you leave'**
+  String get presenceMarkLeaveEyebrow;
+
+  /// No description provided for @presenceMarkLeaveValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate and leave'**
+  String get presenceMarkLeaveValidate;
+
   /// No description provided for @staffAttendanceLeaveTitle.
   ///
   /// In en, this message translates to:
