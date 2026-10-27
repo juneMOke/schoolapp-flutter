@@ -624,8 +624,6 @@ class AppDimensions {
   /// côté des faits (cf. `AppBreakpoints.expenseDetailTwoColMin`).
   static const expenseDetailDialogWideMaxWidth = 960.0;
   static const expenseDetailThreadColumnWidth = 340.0;
-  static const expenseDetailMedallionSize = 44.0;
-  static const expenseDetailMedallionIconSize = 22.0;
   static const expenseDetailLabelWidth = 150.0;
 
   /// Chaîne de validation : trois jalons accolés en tête de fiche.
@@ -773,6 +771,10 @@ class AppDimensions {
 
   /// La colonne du nom de mois dans la vue annuelle.
   static const hrPresenceYearMonthWidth = 132.0;
+
+  /// Le médaillon d'icône d'une tête de fiche (dépense, rapport validé).
+  static const medallionSize = 44.0;
+  static const medallionIconSize = 22.0;
 
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_tile.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_row.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_unmarked_notice.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -83,13 +82,6 @@ class _PresenceReportDialogState extends State<PresenceReportDialog> {
     final l10n = AppLocalizations.of(context)!;
     final unmarked = widget.unmarked;
     final present = widget.present + (_marks ? unmarked : 0);
-    Widget tile(PresenceStatus status, int value) => Expanded(
-      child: PresenceCountTile(
-        tone: status,
-        label: PresenceLabels.filter(l10n, status),
-        value: '$value',
-      ),
-    );
     void submit() => Navigator.of(
       context,
     ).pop(PresenceReportChoice(markRemaining: _marks && unmarked > 0));
@@ -101,14 +93,10 @@ class _PresenceReportDialogState extends State<PresenceReportDialog> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              tile(PresenceStatus.present, present),
-              const SizedBox(width: AppSpacing.sm),
-              tile(PresenceStatus.late, widget.late),
-              const SizedBox(width: AppSpacing.sm),
-              tile(PresenceStatus.absent, widget.absent),
-            ],
+          PresenceCountRow(
+            present: present,
+            late: widget.late,
+            absent: widget.absent,
           ),
           if (unmarked > 0) ...[
             const SizedBox(height: AppSpacing.md),

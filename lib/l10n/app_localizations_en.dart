@@ -13381,13 +13381,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily report validated — marks locked';
 
   @override
-  String presenceMarkValidatedBy(String name, String when) {
-    return 'By $name · $when';
-  }
+  String get presenceMarkValidatedBadge => 'Validated';
 
   @override
-  String presenceMarkValidatedCounts(int present, int late, int absent) {
-    return '$present present, $late late, $absent absent';
+  String presenceMarkValidatedBy(String name, String when) {
+    return 'By $name · $when';
   }
 
   @override

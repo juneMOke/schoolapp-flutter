@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_row.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -211,6 +213,16 @@ void main() {
     await pump(tester, validated: true, view: CollectionViewMode.grid);
 
     expect(find.byType(StaffValidatedBanner), findsOneWidget);
+    // La tête de fiche : badge « Validé » et les compteurs de la modale.
+    final banner = find.byType(PresenceValidatedBanner);
+    expect(
+      find.descendant(of: banner, matching: find.text('Validé')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: banner, matching: find.byType(PresenceCountRow)),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Kalala Mutombo'));
     await tester.pump();
 

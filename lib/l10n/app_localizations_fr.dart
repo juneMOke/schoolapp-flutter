@@ -13482,13 +13482,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Rapport journalier validé — pointages verrouillés';
 
   @override
-  String presenceMarkValidatedBy(String name, String when) {
-    return 'Par $name · $when';
-  }
+  String get presenceMarkValidatedBadge => 'Validé';
 
   @override
-  String presenceMarkValidatedCounts(int present, int late, int absent) {
-    return '$present présents, $late retards, $absent absents';
+  String presenceMarkValidatedBy(String name, String when) {
+    return 'Par $name · $when';
   }
 
   @override

@@ -21044,17 +21044,17 @@ abstract class AppLocalizations {
   /// **'Daily report validated — marks locked'**
   String get staffAttendanceValidatedTitle;
 
+  /// No description provided for @presenceMarkValidatedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get presenceMarkValidatedBadge;
+
   /// No description provided for @presenceMarkValidatedBy.
   ///
   /// In en, this message translates to:
   /// **'By {name} · {when}'**
   String presenceMarkValidatedBy(String name, String when);
-
-  /// No description provided for @presenceMarkValidatedCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'{present} present, {late} late, {absent} absent'**
-  String presenceMarkValidatedCounts(int present, int late, int absent);
 
   /// No description provided for @presenceMarkReopen.
   ///

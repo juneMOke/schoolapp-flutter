@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_icon_medallion.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -41,22 +42,11 @@ class ExpenseDetailBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: AppDimensions.expenseDetailMedallionSize,
-            height: AppDimensions.expenseDetailMedallionSize,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceRaised,
-              borderRadius: BorderRadius.circular(
-                AppDimensions.expenseInsetRadius,
-              ),
-            ),
-            child: Icon(
-              type == null
-                  ? ExpenseTypeVisuals.fallbackIcon
-                  : ExpenseTypeVisuals.icon(type!.icon),
-              size: AppDimensions.expenseDetailMedallionIconSize,
-              color: colors.color,
-            ),
+          EteeloIconMedallion(
+            icon: type == null
+                ? ExpenseTypeVisuals.fallbackIcon
+                : ExpenseTypeVisuals.icon(type!.icon),
+            color: colors.color,
           ),
           const SizedBox(width: AppDimensions.spacingM),
           Expanded(
