@@ -51,7 +51,7 @@ class PayrollCalcPayout extends StatelessWidget {
             ink: PayrollTone.submitted.ink,
           ),
         const SizedBox(height: AppSpacing.md),
-        if (month.view.canPay) ...[
+        if (month.view.canPay && !month.isLegacy) ...[
           PayrollSettlementBand(settlement: settlement),
           if (settlement.disbursements.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -66,7 +66,7 @@ class PayrollCalcPayout extends StatelessWidget {
               ),
             ),
           ],
-        ] else
+        ] else if (!month.view.canPay)
           PayrollTone.draft.notice(
             l10n.payrollCalcAfterValidation,
             icon: Icons.lock_clock_outlined,

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_rules.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_tone_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le statut d'une avance au mois affiché : refusée, annulée, soldée, à
@@ -48,20 +46,6 @@ class PayrollAdvanceStatusPill extends StatelessWidget {
         PayrollTone.submitted,
       ),
     };
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs / 2,
-      ),
-      decoration: BoxDecoration(
-        color: tone.soft,
-        borderRadius: AppRadius.brPill,
-      ),
-      child: Text(
-        label,
-        overflow: TextOverflow.ellipsis,
-        style: AppTypography.labelSmall.copyWith(color: tone.ink),
-      ),
-    );
+    return PayrollTonePill(label: label, tone: tone);
   }
 }

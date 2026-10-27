@@ -31317,12 +31317,6 @@ abstract class AppLocalizations {
   /// **'The agent will appear in the month\'s payroll once their contract is recorded in the staff file.'**
   String get payrollAgentEmptyHint;
 
-  /// No description provided for @payrollAgentBackToLedger.
-  ///
-  /// In en, this message translates to:
-  /// **'Back to the payroll ledger'**
-  String get payrollAgentBackToLedger;
-
   /// No description provided for @payrollLedgerOpenAgent.
   ///
   /// In en, this message translates to:
@@ -31434,8 +31428,8 @@ abstract class AppLocalizations {
   /// No description provided for @payrollCalcAbsenceFormula.
   ///
   /// In en, this message translates to:
-  /// **'{days, plural, =1{1 day not worked} other{{days} days not worked}} × {perDay} / day (base ÷ {divisor} days)'**
-  String payrollCalcAbsenceFormula(int days, String perDay, int divisor);
+  /// **'{days, plural, =1{1 day not worked} other{{days} days not worked}} · base {base} ÷ {divisor} days'**
+  String payrollCalcAbsenceFormula(int days, String base, int divisor);
 
   /// No description provided for @payrollCalcAbsenceIndicative.
   ///
@@ -31548,7 +31542,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollAgentArrearsEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Every validated month is settled.'**
+  /// **'No arrears: no past month is overdue.'**
   String get payrollAgentArrearsEmpty;
 
   /// No description provided for @payrollAgentArrearsSettle.
@@ -31604,6 +31598,28 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{Over 1 validated month.} other{Over {count} validated months.}}'**
   String payrollAgentTotalsMonths(int count);
+
+  /// No description provided for @payrollAgentTotalsNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Net due'**
+  String get payrollAgentTotalsNet;
+
+  /// No description provided for @payrollAgentNextInstallmentCarried.
+  ///
+  /// In en, this message translates to:
+  /// **'Next instalment: {amount} on the {month} payroll · {carried} carried over'**
+  String payrollAgentNextInstallmentCarried(
+    String amount,
+    String month,
+    String carried,
+  );
+
+  /// No description provided for @payrollAgentArrearsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'See the detail'**
+  String get payrollAgentArrearsDetail;
 }
 
 class _AppLocalizationsDelegate

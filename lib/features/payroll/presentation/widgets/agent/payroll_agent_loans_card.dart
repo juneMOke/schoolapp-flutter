@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
@@ -15,6 +14,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_advance_status_pill.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_repayment_bar.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_tone_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les avances et prêts de l'agent, tous statuts : ce qui est rendu, ce qui
@@ -115,12 +115,20 @@ class _AdvanceRow extends StatelessWidget {
               money(advance.remainingInCents),
             ),
           ),
+        // Ce que le mois retiendra vraiment : le brut peut ne pas couvrir
+        // l'échéance, le reste glisse au mois suivant.
         if (next != null && upcoming != null)
           Text(
-            l10n.payrollAgentNextInstallment(
-              money(next.dueInCents),
-              PayrollLabels.month(context, upcoming.month),
-            ),
+            next.carriedInCents > 0
+                ? l10n.payrollAgentNextInstallmentCarried(
+                    money(next.takenInCents),
+                    PayrollLabels.month(context, upcoming.month),
+                    money(next.carriedInCents),
+                  )
+                : l10n.payrollAgentNextInstallment(
+                    money(next.takenInCents),
+                    PayrollLabels.month(context, upcoming.month),
+                  ),
             style: muted,
           ),
       ],
@@ -154,20 +162,7 @@ class _RequestRow extends StatelessWidget {
         request.amount.amountInCents,
         request.amount.currency,
       ),
-      pill: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs / 2,
-        ),
-        decoration: BoxDecoration(
-          color: tone.soft,
-          borderRadius: AppRadius.brPill,
-        ),
-        child: Text(
-          label,
-          style: AppTypography.labelSmall.copyWith(color: tone.ink),
-        ),
-      ),
+      pill: PayrollTonePill(label: label, tone: tone),
       children: const [],
     );
   }

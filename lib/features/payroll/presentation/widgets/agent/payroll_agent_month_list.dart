@@ -68,7 +68,7 @@ class _MonthTile extends StatelessWidget {
     final label = PayrollLabels.month(context, month.month);
     final detail = month.isLocked
         ? l10n.payrollAgentMonthPaid(
-            PayrollLabels.money(settlement.paidInCents, line.currency),
+            PayrollLabels.money(month.paidInCents, line.currency),
           )
         : PayrollLabels.phase(l10n, month.phase);
     final border = selected ? PayrollTone.current.color : AppColors.border;
@@ -116,24 +116,22 @@ class _MonthTile extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          PayrollLabels.money(line.netInCents, line.currency),
-                          style: AppTypography.labelLarge.copyWith(
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        PayrollLabels.money(line.netInCents, line.currency),
+                        style: AppTypography.labelLarge.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
-                        const SizedBox(height: AppSpacing.xs / 2),
-                        if (month.isLocked)
-                          PayrollSettlementPill(status: settlement.status)
-                        else
-                          PayrollStatusPill(phase: month.phase),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs / 2),
+                      if (month.isFrozen && !month.isLegacy)
+                        PayrollSettlementPill(status: settlement.status)
+                      else
+                        PayrollStatusPill(phase: month.phase),
+                    ],
                   ),
                 ],
               ),

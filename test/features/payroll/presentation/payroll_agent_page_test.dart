@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
@@ -188,13 +189,31 @@ void main() {
     expect(find.text('Sur 1 mois validé.'), findsOneWidget);
   });
 
+  testWidgets('un livre sans paie au serveur : la fiche s ouvre sur ce mois', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final pumped = await pumpPayrollScreen(
+      tester,
+      snapshot: snapshotOf(),
+      child: const PayrollAgentScreen(agentId: 'm-1', entryMonth: '2026-08'),
+      beforeLoad: (cubit) => cubit.showMonth('2026-08'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(pumped.cubit.state.month, '2026-08');
+    expect(find.text('Août 2026'), findsWidgets);
+    expect(find.text('1 / 2'), findsOneWidget);
+  });
+
   testWidgets('un agent sans paie : la fiche le dit et ramène au livre', (
     tester,
   ) async {
     await pumpAgent(tester, snapshot: snapshotOf(), agentId: 'm-404');
 
     expect(find.text('Aucune fiche de paie'), findsOneWidget);
-    expect(find.text('Retour au livre de paie'), findsOneWidget);
+    expect(find.widgetWithText(EteeloButton, 'Livre de paie'), findsOneWidget);
   });
 
   testWidgets('livre en brouillon : le crayon ouvre les éléments variables', (

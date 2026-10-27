@@ -20481,9 +20481,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'agent figurera dans la paie du mois dès que son contrat sera enregistré au Fichier du personnel.';
 
   @override
-  String get payrollAgentBackToLedger => 'Retour au livre de paie';
-
-  @override
   String get payrollLedgerOpenAgent => 'Ouvrir la fiche de l\'agent';
 
   @override
@@ -20544,14 +20541,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollCalcNetToPay => 'Net à payer du mois · (A) − (B)';
 
   @override
-  String payrollCalcAbsenceFormula(int days, String perDay, int divisor) {
+  String payrollCalcAbsenceFormula(int days, String base, int divisor) {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
       other: '$days j non prestés',
       one: '1 j non presté',
     );
-    return '$_temp0 × $perDay / j (base ÷ $divisor j)';
+    return '$_temp0 · base $base ÷ $divisor j';
   }
 
   @override
@@ -20628,7 +20625,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollAgentArrearPriority => 'à solder en priorité';
 
   @override
-  String get payrollAgentArrearsEmpty => 'Tous les mois validés sont soldés.';
+  String get payrollAgentArrearsEmpty =>
+      'Aucun arriéré : aucun mois passé n\'est en retard.';
 
   @override
   String get payrollAgentArrearsSettle => 'Régler les arriérés';
@@ -20666,4 +20664,19 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get payrollAgentTotalsNet => 'Net dû';
+
+  @override
+  String payrollAgentNextInstallmentCarried(
+    String amount,
+    String month,
+    String carried,
+  ) {
+    return 'Prochaine retenue : $amount sur la paie de $month · $carried reportés';
+  }
+
+  @override
+  String get payrollAgentArrearsDetail => 'Voir le détail';
 }

@@ -77,6 +77,7 @@ class PayrollAgentTotalsCard extends StatelessWidget {
         ink: ink(t.advancesInCents),
       ),
       const Divider(height: AppSpacing.md),
+      PayrollAmountRow(l10n.payrollAgentTotalsNet, money(t.netInCents)),
       PayrollAmountRow(l10n.payrollAgentTotalsPaid, money(t.paidInCents)),
     ];
   }

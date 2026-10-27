@@ -54,14 +54,14 @@ class PayrollAgentHeroTiles extends StatelessWidget {
       ),
       _Tile(
         label: l10n.payrollAgentLoans,
-        values: loans.isEmpty ? const ['—'] : loans,
+        values: loans.isEmpty ? [l10n.payrollNoValue] : loans,
         detail: loans.isEmpty
             ? l10n.payrollAgentLoansNone
             : l10n.payrollAgentLoansHint,
       ),
       _Tile(
         label: l10n.payrollAgentPaidYear(situation.year),
-        values: paid.isEmpty ? const ['—'] : paid,
+        values: paid.isEmpty ? [l10n.payrollNoValue] : paid,
         detail: totals.isEmpty
             ? l10n.payrollAgentPaidYearNone
             : l10n.payrollAgentPaidYearOf(months, due.join(' · ')),

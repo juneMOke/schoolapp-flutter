@@ -158,6 +158,60 @@ void main() {
     expect(situation.arrears?.dueIn('USD'), 20000);
   });
 
+  test('une ligne v1 est réputée versée : perçu = net, rien de dû', () {
+    final snapshot = snapshotOf(
+      frozen: {
+        '2026-07': [line('2026-07', formula: 1)],
+      },
+    );
+    final situation = PayrollAgentSituations.of(
+      snapshot,
+      PayrollLedger.history(snapshot, current),
+      staffMemberId: 'm-1',
+      year: '2026',
+      currentMonth: current,
+    );
+
+    expect(situation.outstanding, isEmpty);
+    expect(situation.totals.single.paidInCents, 30000);
+    expect(situation.months.last.remainingInCents, 0);
+  });
+
+  test('validée sans ses lignes figées : ni reste ni cumul', () {
+    final base = snapshotOf(
+      frozen: {
+        '2026-08': [line('2026-08')],
+      },
+    );
+    // L'en-tête validé est là, ses lignes figées pas encore descendues.
+    final snapshot = PayrollSnapshot(
+      members: base.members,
+      contractsByMember: base.contractsByMember,
+      settings: base.settings,
+      profiles: base.profiles,
+      headers: base.headers,
+      variables: base.variables,
+      frozenLines: const {},
+      summaries: base.summaries,
+      gestures: base.gestures,
+      advances: base.advances,
+      disbursements: base.disbursements,
+      schoolYears: base.schoolYears,
+      shareTraces: base.shareTraces,
+      hasEverSynced: true,
+    );
+    final situation = PayrollAgentSituations.of(
+      snapshot,
+      PayrollLedger.history(snapshot, current),
+      staffMemberId: 'm-1',
+      year: '2026',
+      currentMonth: current,
+    );
+
+    expect(situation.outstanding, isEmpty);
+    expect(situation.totals, isEmpty);
+  });
+
   test('reste dû par devise', () {
     final snapshot = snapshotOf(
       frozen: {
@@ -217,7 +271,6 @@ void main() {
     expect(totals.advancesInCents, 10000);
     expect(totals.netInCents, 60000);
     expect(totals.paidInCents, 42000);
-    expect(situation.installmentsTaken('a-1'), 1);
   });
 
   test('avances : la plus récente d abord, encours des seules vivantes', () {

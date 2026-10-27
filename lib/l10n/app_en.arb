@@ -11877,7 +11877,6 @@
   "payrollSettlementNothing": "Nothing to pay",
   "payrollAgentEmpty": "No payslip",
   "payrollAgentEmptyHint": "The agent will appear in the month's payroll once their contract is recorded in the staff file.",
-  "payrollAgentBackToLedger": "Back to the payroll ledger",
   "payrollLedgerOpenAgent": "Open the agent sheet",
   "payrollAgentPanelEyebrow": "Payslip",
   "payrollAgentSegmentCalc": "Calculation",
@@ -11899,8 +11898,8 @@
   "payrollCalcGross": "Gross salary (A)",
   "payrollCalcDeductionsTotal": "Total deductions (B)",
   "payrollCalcNetToPay": "Net to pay for the month · (A) − (B)",
-  "payrollCalcAbsenceFormula": "{days, plural, =1{1 day not worked} other{{days} days not worked}} × {perDay} / day (base ÷ {divisor} days)",
-  "@payrollCalcAbsenceFormula": {"placeholders": {"days": {"type": "int"}, "perDay": {"type": "String"}, "divisor": {"type": "int"}}},
+  "payrollCalcAbsenceFormula": "{days, plural, =1{1 day not worked} other{{days} days not worked}} · base {base} ÷ {divisor} days",
+  "@payrollCalcAbsenceFormula": {"placeholders": {"days": {"type": "int"}, "base": {"type": "String"}, "divisor": {"type": "int"}}},
   "payrollCalcAbsenceIndicative": "{days, plural, =1{1 day not worked} other{{days} days not worked}} · not deducted (school scale)",
   "@payrollCalcAbsenceIndicative": {"placeholders": {"days": {"type": "int"}}},
   "payrollCalcAbsenceHourly": "Paid by the hour — not applicable",
@@ -11924,7 +11923,7 @@
   "payrollAgentArrearPaid": "received {paid} / {net}",
   "@payrollAgentArrearPaid": {"placeholders": {"paid": {"type": "String"}, "net": {"type": "String"}}},
   "payrollAgentArrearPriority": "to settle first",
-  "payrollAgentArrearsEmpty": "Every validated month is settled.",
+  "payrollAgentArrearsEmpty": "No arrears: no past month is overdue.",
   "payrollAgentArrearsSettle": "Settle the arrears",
   "payrollAgentTotalsTitle": "Totals · {year}",
   "@payrollAgentTotalsTitle": {"placeholders": {"year": {"type": "String"}}},
@@ -11935,5 +11934,9 @@
   "payrollAgentTotalsAdvances": "Advances & loans repaid",
   "payrollAgentTotalsPaid": "Net received",
   "payrollAgentTotalsMonths": "{count, plural, =1{Over 1 validated month.} other{Over {count} validated months.}}",
-  "@payrollAgentTotalsMonths": {"placeholders": {"count": {"type": "int"}}}
+  "@payrollAgentTotalsMonths": {"placeholders": {"count": {"type": "int"}}},
+  "payrollAgentTotalsNet": "Net due",
+  "payrollAgentNextInstallmentCarried": "Next instalment: {amount} on the {month} payroll · {carried} carried over",
+  "@payrollAgentNextInstallmentCarried": {"placeholders": {"amount": {"type": "String"}, "month": {"type": "String"}, "carried": {"type": "String"}}},
+  "payrollAgentArrearsDetail": "See the detail"
 }

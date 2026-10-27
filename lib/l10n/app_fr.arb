@@ -12057,7 +12057,6 @@
   "payrollSettlementNothing": "Rien à verser",
   "payrollAgentEmpty": "Aucune fiche de paie",
   "payrollAgentEmptyHint": "L'agent figurera dans la paie du mois dès que son contrat sera enregistré au Fichier du personnel.",
-  "payrollAgentBackToLedger": "Retour au livre de paie",
   "payrollLedgerOpenAgent": "Ouvrir la fiche de l'agent",
   "payrollAgentPanelEyebrow": "Fiche de paie",
   "payrollAgentSegmentCalc": "Détail du calcul",
@@ -12079,8 +12078,8 @@
   "payrollCalcGross": "Salaire brut (A)",
   "payrollCalcDeductionsTotal": "Total retenues (B)",
   "payrollCalcNetToPay": "Net à payer du mois · (A) − (B)",
-  "payrollCalcAbsenceFormula": "{days, plural, =1{1 j non presté} other{{days} j non prestés}} × {perDay} / j (base ÷ {divisor} j)",
-  "@payrollCalcAbsenceFormula": {"placeholders": {"days": {"type": "int"}, "perDay": {"type": "String"}, "divisor": {"type": "int"}}},
+  "payrollCalcAbsenceFormula": "{days, plural, =1{1 j non presté} other{{days} j non prestés}} · base {base} ÷ {divisor} j",
+  "@payrollCalcAbsenceFormula": {"placeholders": {"days": {"type": "int"}, "base": {"type": "String"}, "divisor": {"type": "int"}}},
   "payrollCalcAbsenceIndicative": "{days, plural, =1{1 j non presté} other{{days} j non prestés}} · non retenus (barème de l'école)",
   "@payrollCalcAbsenceIndicative": {"placeholders": {"days": {"type": "int"}}},
   "payrollCalcAbsenceHourly": "Payé aux heures — sans objet",
@@ -12104,7 +12103,7 @@
   "payrollAgentArrearPaid": "perçu {paid} / {net}",
   "@payrollAgentArrearPaid": {"placeholders": {"paid": {"type": "String"}, "net": {"type": "String"}}},
   "payrollAgentArrearPriority": "à solder en priorité",
-  "payrollAgentArrearsEmpty": "Tous les mois validés sont soldés.",
+  "payrollAgentArrearsEmpty": "Aucun arriéré : aucun mois passé n'est en retard.",
   "payrollAgentArrearsSettle": "Régler les arriérés",
   "payrollAgentTotalsTitle": "Cumuls · {year}",
   "@payrollAgentTotalsTitle": {"placeholders": {"year": {"type": "String"}}},
@@ -12115,5 +12114,9 @@
   "payrollAgentTotalsAdvances": "Avances & prêts remboursés",
   "payrollAgentTotalsPaid": "Net perçu",
   "payrollAgentTotalsMonths": "{count, plural, =1{Sur 1 mois validé.} other{Sur {count} mois validés.}}",
-  "@payrollAgentTotalsMonths": {"placeholders": {"count": {"type": "int"}}}
+  "@payrollAgentTotalsMonths": {"placeholders": {"count": {"type": "int"}}},
+  "payrollAgentTotalsNet": "Net dû",
+  "payrollAgentNextInstallmentCarried": "Prochaine retenue : {amount} sur la paie de {month} · {carried} reportés",
+  "@payrollAgentNextInstallmentCarried": {"placeholders": {"amount": {"type": "String"}, "month": {"type": "String"}, "carried": {"type": "String"}}},
+  "payrollAgentArrearsDetail": "Voir le détail"
 }

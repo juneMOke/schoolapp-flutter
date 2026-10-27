@@ -27,13 +27,9 @@ abstract final class PayrollAgentSituations {
     var unsettled = 0;
     final totals = <String, PayrollAgentTotals>{};
     for (final month in months) {
-      if (!month.isLocked) continue;
+      if (!month.isFrozen) continue;
       final line = month.line;
-      // Une ligne figée en v1 n'est jamais une dette : on payait alors sans
-      // enregistrer le versement (même règle que le registre des arriérés).
-      final remaining = line.formulaVersion < 2
-          ? 0
-          : month.settlement.remainingInCents;
+      final remaining = month.remainingInCents;
       if (remaining > 0) {
         unsettled++;
         outstanding[line.currency] =

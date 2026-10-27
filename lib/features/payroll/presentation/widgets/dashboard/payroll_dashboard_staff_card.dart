@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_location.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -41,6 +42,26 @@ class PayrollDashboardStaffCard extends StatefulWidget {
 
 class _StaffCardState extends State<PayrollDashboardStaffCard> {
   bool _printing = false;
+
+  /// Une ligne ouvre la fiche de l'agent sur le mois affiché ; au retour,
+  /// le tableau de bord se relit — un versement a pu y être posé.
+  Future<void> _openAgent(String agentId) async {
+    final cubit = context.read<PayrollDashboardCubit>();
+    final state = cubit.state;
+    await PayrollAgentNavigation.open(
+      context,
+      agentId: agentId,
+      month: state.month,
+      from: MenuConstants.hrPayrollDashboardId,
+      screenQuery: {
+        if (!state.isCurrentMonth)
+          PayrollDashboardLocation.monthParam: state.month,
+        PayrollDashboardLocation.filterParam: ?state.filter.address,
+      },
+    );
+    if (!mounted || cubit.isClosed) return;
+    await cubit.refresh();
+  }
 
   Future<void> _pdf() async {
     final cubit = context.read<PayrollDashboardCubit>();
@@ -135,16 +156,7 @@ class _StaffCardState extends State<PayrollDashboardStaffCard> {
                   : null,
             )
           else
-            PayrollDashboardStaffTable(
-              section: section,
-              // Une ligne ouvre la fiche de l'agent, sur le mois affiché.
-              onOpen: (agentId) => PayrollAgentNavigation.open(
-                context,
-                agentId: agentId,
-                month: state.month,
-                from: MenuConstants.hrPayrollDashboardId,
-              ),
-            ),
+            PayrollDashboardStaffTable(section: section, onOpen: _openAgent),
         ],
       ),
     );

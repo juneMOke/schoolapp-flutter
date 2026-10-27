@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/keyboard/route_key_shortcut.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
-import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -16,6 +15,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_st
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_body.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_stepper.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_refresh_shortcut.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
@@ -35,7 +35,7 @@ class PayrollAgentPage extends StatelessWidget {
   final PayrollAgentArgs args;
   final VoidCallback? onClosed;
 
-  /// L'écran qui l'a ouverte : le livre, le tableau de bord ou les arriérés.
+  /// L'écran qui l'a ouverte : le livre ou le tableau de bord.
   final String shellSubMenuId;
 
   const PayrollAgentPage({
@@ -85,11 +85,7 @@ class PayrollAgentScreen extends StatelessWidget {
       appBar: OffShellTopBar(
         eyebrow: l10n.menuHrPayroll,
         title: l10n.payrollAgentTitle,
-        backTooltip: switch (shellSubMenuId) {
-          MenuConstants.hrPayrollDashboardId => l10n.subMenuDashboard,
-          MenuConstants.hrPayrollArrearsId => l10n.subMenuPayrollArrears,
-          _ => l10n.payrollTabLedger,
-        },
+        backTooltip: PayrollAgentNavigation.backLabel(l10n, shellSubMenuId),
         shellSubMenuId: shellSubMenuId,
         onBack: (context) =>
             PayrollAgentNavigation.leave(context, from: shellSubMenuId),
@@ -130,13 +126,13 @@ class PayrollAgentScreen extends StatelessWidget {
       activators: const [
         SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true),
       ],
-      isEnabled: () => stepper.previous != null,
+      // Toujours prise, même sans voisin : Alt+← est aussi le « Précédent »
+      // du navigateur, qui ferait quitter la fiche.
       onPressed: () => stepper.previous?.call(),
       child: RouteKeyShortcut(
         activators: const [
           SingleActivator(LogicalKeyboardKey.arrowRight, alt: true),
         ],
-        isEnabled: () => stepper.next != null,
         onPressed: () => stepper.next?.call(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -145,7 +141,16 @@ class PayrollAgentScreen extends StatelessWidget {
               EteeloNotice.warning(
                 AppLocalizations.of(context)!.payrollNotYetSynced,
               ),
-            PayrollAgentBody(state: state, agentId: agentId, stepper: stepper),
+            // Un autre agent rebâtit la fiche : son mois d'entrée, le haut
+            // de page, le calcul affiché.
+            PayrollAgentBody(
+              key: ValueKey(agentId),
+              state: state,
+              agentId: agentId,
+              entryMonth: entryMonth ?? state.currentMonth,
+              origin: shellSubMenuId,
+              stepper: stepper,
+            ),
           ],
         ),
       ),

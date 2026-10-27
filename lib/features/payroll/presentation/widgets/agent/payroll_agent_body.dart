@@ -19,58 +19,29 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/p
 import 'package:school_app_flutter/features/payroll/presentation/widgets/arrears/payroll_arrears_actions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_month_list.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_month_panel.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_stepper.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_profile_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le rang de l'agent dans le livre d'entrée, et de quoi passer à son voisin
-/// — `null` aux extrémités, ou hors du livre.
-class PayrollAgentStepper {
-  final int index;
-  final int count;
-  final VoidCallback? previous;
-  final VoidCallback? next;
-
-  const PayrollAgentStepper._(this.index, this.count, this.previous, this.next);
-
-  factory PayrollAgentStepper.of(
-    BuildContext context,
-    PayrollState state, {
-    required String agentId,
-    required String entryMonth,
-  }) {
-    final view = state.history.where((v) => v.month == entryMonth).firstOrNull;
-    final roster = view == null
-        ? const <String>[]
-        : PayrollAgentSituations.roster(state.snapshot, view);
-    final index = roster.indexOf(agentId);
-    VoidCallback? to(int at) => index < 0 || at < 0 || at >= roster.length
-        ? null
-        : () => PayrollAgentNavigation.step(
-            context,
-            agentId: roster[at],
-            month: entryMonth,
-          );
-    return PayrollAgentStepper._(
-      index,
-      index < 0 ? 0 : roster.length,
-      to(index - 1),
-      to(index + 1),
-    );
-  }
-}
-
 /// La fiche une fois la tablette lue : le bandeau, puis la colonne des
 /// mois et des engagements à côté du panneau du mois — l'un sous l'autre sur
-/// un écran étroit, le mois choisi avant les prêts et les cumuls.
+/// un écran étroit, le mois choisi en tête, puis la liste des mois, les
+/// prêts et les cumuls.
 class PayrollAgentBody extends StatefulWidget {
   final PayrollState state;
   final String agentId;
+  final String entryMonth;
+
+  /// L'écran sous la fiche (le livre, le tableau de bord).
+  final String origin;
   final PayrollAgentStepper stepper;
 
   const PayrollAgentBody({
     super.key,
     required this.state,
     required this.agentId,
+    required this.entryMonth,
+    required this.origin,
     required this.stepper,
   });
 
@@ -80,6 +51,24 @@ class PayrollAgentBody extends StatefulWidget {
 
 class _PayrollAgentBodyState extends State<PayrollAgentBody> {
   final _panelKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // Passer à l'agent voisin garde le cubit de la page : la fiche repart
+    // du mois d'entrée et du haut de page, comme un F5 sur son adresse.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final cubit = context.read<PayrollCubit>();
+      if (cubit.state.month != widget.entryMonth) {
+        cubit.showMonth(widget.entryMonth);
+      }
+      final scroll = Scrollable.maybeOf(context)?.position;
+      if (scroll != null && scroll.hasPixels && scroll.pixels > 0) {
+        scroll.jumpTo(scroll.minScrollExtent);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,15 +88,17 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
         medallionIcon: Icons.receipt_long_outlined,
         fullWidthCard: true,
         primaryAction: EteeloButton.primary(
-          label: l10n.payrollAgentBackToLedger,
+          label: PayrollAgentNavigation.backLabel(l10n, widget.origin),
           icon: Icons.arrow_back,
-          onPressed: () => PayrollAgentNavigation.leave(context),
+          size: EteeloButtonSize.regular,
+          onPressed: () =>
+              PayrollAgentNavigation.leave(context, from: widget.origin),
           fullWidth: false,
         ),
       );
     }
     final shown = situation.monthOf(state.month) ?? situation.months.first;
-    if (shown.month != state.month) _follow(shown.month);
+    if (shown.month != state.month) _follow(shown.month, seen: state.month);
     final canWrite = PermissionGate.allows(
       context,
       kPayrollWriteAccess.requires,
@@ -146,9 +137,10 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
             children: [
               hero,
               const SizedBox(height: AppSpacing.lg),
-              months,
-              const SizedBox(height: AppSpacing.lg),
+              // Le mois choisi d'abord : la liste des mois peut être longue.
               panel,
+              const SizedBox(height: AppSpacing.lg),
+              months,
               for (final card in side) ...[
                 const SizedBox(height: AppSpacing.lg),
                 card,
@@ -209,21 +201,25 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
       PayrollAgentArrearsCard(
         arrears: arrears,
         onSelectMonth: (month) => _select(month, scroll: !wide),
-        onSettle: canWrite && arrears != null
-            ? () => PayrollArrearsActions(
-                context,
-              ).open(arrears, state.currentMonth)
-            : null,
+        canWrite: canWrite,
+        onOpen: () {
+          if (arrears != null) {
+            PayrollArrearsActions(context).open(arrears, state.currentMonth);
+          }
+        },
       ),
       if (situation.totals.isNotEmpty)
         PayrollAgentTotalsCard(year: situation.year, totals: situation.totals),
     ];
   }
 
-  /// Le mois affiché porte les gestes du cubit : il le suit.
-  void _follow(String month) =>
+  /// Le mois affiché porte les gestes du cubit : il le suit — sauf si le
+  /// cubit a changé de mois entre-temps (retour au mois d'entrée).
+  void _follow(String month, {required String seen}) =>
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.read<PayrollCubit>().showMonth(month);
+        if (!mounted) return;
+        final cubit = context.read<PayrollCubit>();
+        if (cubit.state.month == seen) cubit.showMonth(month);
       });
 
   void _select(String month, {required bool scroll}) {

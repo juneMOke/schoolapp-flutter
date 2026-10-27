@@ -20,7 +20,22 @@ class PayrollAgentMonth extends Equatable {
   /// Validée (ou versée) : les montants sont figés, le reste est une dette.
   bool get isLocked => phase.isLocked;
 
+  /// Validée **et** ses lignes figées descendues : ce que le serveur a figé,
+  /// pas un calcul de la tablette — seul ce mois-là compte dans les restes
+  /// et les cumuls (même garde que le registre des arriérés).
+  bool get isFrozen => view.canPay && line.frozen;
+
+  /// Une ligne v1 : avant la v2, on payait sans enregistrer le versement —
+  /// son reste n'est pas une dette, elle est réputée versée.
+  bool get isLegacy => line.formulaVersion < 2;
+
   PayrollSettlement get settlement => view.settlementOf(line);
+
+  /// Ce que l'école doit encore sur ce mois ; rien pour une ligne v1.
+  int get remainingInCents => isLegacy ? 0 : settlement.remainingInCents;
+
+  /// Ce que l'agent a perçu sur ce mois ; une ligne v1, tout son net.
+  int get paidInCents => isLegacy ? line.netInCents : settlement.paidInCents;
 
   @override
   List<Object?> get props => [view, line];
@@ -62,7 +77,7 @@ class PayrollAgentTotals extends Equatable {
       childcareInCents: childcareInCents + d.childcareInCents,
       advancesInCents: advancesInCents + line.advanceInCents,
       netInCents: netInCents + line.netInCents,
-      paidInCents: paidInCents + month.settlement.paidInCents,
+      paidInCents: paidInCents + month.paidInCents,
     );
   }
 
@@ -147,16 +162,6 @@ class PayrollAgentSituation extends Equatable {
     }
     return null;
   }
-
-  /// Les échéances de [advanceId] déjà retenues sur des mois validés.
-  int installmentsTaken(String advanceId) => months
-      .where((month) => month.isLocked)
-      .where(
-        (month) => month.line.advances.any(
-          (a) => a.advanceId == advanceId && a.takenInCents > 0,
-        ),
-      )
-      .length;
 
   /// L'échéance de [advanceId] sur le mois à venir, s'il y en a une.
   PayrollLineAdvance? nextInstallment(String advanceId) {

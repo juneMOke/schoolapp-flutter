@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
@@ -12,6 +14,7 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledg
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_month_location.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_action_bar.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_arrears_banner.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_kpis.dart';
@@ -85,16 +88,22 @@ class PayrollLedgerView extends StatelessWidget {
           if (state.visibleLines.isEmpty)
             _Empty(state: state)
           else
-            PayrollLedgerViewle(
+            PayrollLedgerTable(
               view: view,
               snapshot: state.snapshot,
               lines: state.visibleLines,
               canWrite: canWrite,
               onPayout: (line) => actions.openPayout(line, canWrite: canWrite),
-              onOpen: (line) => PayrollAgentNavigation.open(
-                context,
-                agentId: line.staffMemberId,
-                month: view.month,
+              onOpen: (line) => unawaited(
+                PayrollAgentNavigation.open(
+                  context,
+                  agentId: line.staffMemberId,
+                  month: view.month,
+                  screenQuery: {
+                    if (!state.isCurrentMonth)
+                      PayrollMonthLocation.monthParam: view.month,
+                  },
+                ),
               ),
               onEdit: view.isEditable && canWrite
                   ? actions.editVariables

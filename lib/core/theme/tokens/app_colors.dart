@@ -589,7 +589,8 @@ class AppColors {
   static const payrollAgentOnBannerMuted = presenceMarkOnBannerMuted;
   static const payrollAgentOnBannerFaint = presenceMarkOnBannerFaint;
   // Le fond d'une tuile chiffrée du bandeau, et le vert d'un compte à zéro
-  // (« aucun arriéré ») : 9,4:1 sur le bleu profond.
+  // (« aucun arriéré ») : 8,4:1 sur le bleu profond, 5,3:1 sur le bleu
+  // ardoise du milieu.
   static const payrollAgentBannerTile = Color(0x1AFFFFFF);
   static const payrollAgentBannerGood = Color(0xFF9FD3AE);
 

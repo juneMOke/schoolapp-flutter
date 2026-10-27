@@ -43,6 +43,10 @@ class PayrollDiffuseDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<PayrollCubit, PayrollState>(
+      buildWhen: (previous, current) =>
+          previous.snapshot != current.snapshot ||
+          previous.view != current.view ||
+          previous.month != current.month,
       builder: (context, state) {
         final view = state.view;
         final lines = view == null
@@ -61,6 +65,7 @@ class PayrollDiffuseDialog extends StatelessWidget {
                   label: l10n.payrollPayslipAll,
                   icon: Icons.library_books_outlined,
                   onPressed: onCollection,
+                  size: EteeloButtonSize.regular,
                   fullWidth: false,
                 ),
               ),
@@ -78,6 +83,7 @@ class PayrollDiffuseDialog extends StatelessWidget {
             EteeloButton.secondary(
               label: l10n.payrollClose,
               onPressed: () => Navigator.of(context).pop(),
+              size: EteeloButtonSize.regular,
               fullWidth: false,
             ),
           ],
@@ -144,9 +150,8 @@ class _AgentRow extends StatelessWidget {
                 ? l10n.payrollPayslipWhatsapp
                 : l10n.payrollAgentWhatsappAgain,
             icon: Icons.chat_outlined,
-            size: EteeloButtonSize.compact,
+            size: EteeloButtonSize.regular,
             onPressed: phone == null ? null : onWhatsapp,
-            fullWidth: false,
           ),
         ],
       ),

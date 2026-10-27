@@ -37,7 +37,8 @@ class PayrollAgentMonthActions extends StatelessWidget {
     final ledger = PayrollLedgerActions(context);
     final payslips = PayrollPayslipActions(context);
     final settlement = month.settlement;
-    final remaining = settlement.remainingInCents;
+    // Une ligne v1 est réputée versée : rien à verser, jamais deux fois.
+    final remaining = month.remainingInCents;
     final shared =
         snapshot.shareTraces[PayrollSnapshot.traceKey(
           month.month,
@@ -54,6 +55,7 @@ class PayrollAgentMonthActions extends StatelessWidget {
             label: l10n.payrollVarsTitle,
             icon: Icons.edit_outlined,
             onPressed: () => ledger.editVariables(line),
+            size: EteeloButtonSize.regular,
             fullWidth: false,
           ),
         if (month.isLocked)
@@ -61,6 +63,7 @@ class PayrollAgentMonthActions extends StatelessWidget {
             label: l10n.payrollPayslipDownload,
             icon: Icons.picture_as_pdf_outlined,
             onPressed: () => payslips.openPdf(line),
+            size: EteeloButtonSize.regular,
             fullWidth: false,
           )
         else
@@ -72,6 +75,7 @@ class PayrollAgentMonthActions extends StatelessWidget {
                 : l10n.payrollPayslipWhatsapp,
             icon: Icons.chat_outlined,
             onPressed: phone == null ? null : () => payslips.whatsapp(line),
+            size: EteeloButtonSize.regular,
             fullWidth: false,
           ),
         if (view.canPay && canWrite && remaining > 0)
@@ -88,6 +92,7 @@ class PayrollAgentMonthActions extends StatelessWidget {
             label: l10n.payrollAgentPayments,
             icon: Icons.receipt_long_outlined,
             onPressed: () => ledger.openPayout(line, canWrite: canWrite),
+            size: EteeloButtonSize.regular,
             fullWidth: false,
           ),
       ],

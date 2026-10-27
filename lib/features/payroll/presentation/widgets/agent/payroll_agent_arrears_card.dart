@@ -18,14 +18,16 @@ class PayrollAgentArrearsCard extends StatelessWidget {
   final PayrollArrearsAgent? arrears;
   final ValueChanged<String> onSelectMonth;
 
-  /// `null` : le compte ne verse pas (lecture) — la fiche s'ouvre quand même.
-  final VoidCallback? onSettle;
+  /// La fiche d'arriérés : régler pour l'économe, consulter sinon.
+  final VoidCallback onOpen;
+  final bool canWrite;
 
   const PayrollAgentArrearsCard({
     super.key,
     required this.arrears,
     required this.onSelectMonth,
-    required this.onSettle,
+    required this.onOpen,
+    required this.canWrite,
   });
 
   @override
@@ -49,7 +51,6 @@ class PayrollAgentArrearsCard extends StatelessWidget {
         ),
       );
     }
-    final onSettle = this.onSettle;
     return EteeloPanelCard(
       title: l10n.payrollAgentArrearsTitle,
       child: Column(
@@ -60,18 +61,21 @@ class PayrollAgentArrearsCard extends StatelessWidget {
               arrear: arrear,
               onTap: () => onSelectMonth(arrear.month),
             ),
-          if (onSettle != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: EteeloButton.secondary(
-                label: l10n.payrollAgentArrearsSettle,
-                icon: Icons.payments_outlined,
-                onPressed: onSettle,
-                fullWidth: false,
-              ),
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: EteeloButton.secondary(
+              label: canWrite
+                  ? l10n.payrollAgentArrearsSettle
+                  : l10n.payrollAgentArrearsDetail,
+              icon: canWrite
+                  ? Icons.payments_outlined
+                  : Icons.visibility_outlined,
+              size: EteeloButtonSize.regular,
+              onPressed: onOpen,
+              fullWidth: false,
             ),
-          ],
+          ),
         ],
       ),
     );

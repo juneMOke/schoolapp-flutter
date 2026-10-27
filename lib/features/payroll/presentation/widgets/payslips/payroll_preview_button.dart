@@ -54,6 +54,9 @@ class _PayrollPreviewButtonState extends State<PayrollPreviewButton> {
             isLoading: _busy,
             onPressed: online ? _open : null,
             fullWidth: !widget.inline,
+            size: widget.inline
+                ? EteeloButtonSize.regular
+                : EteeloButtonSize.compact,
           ),
           if (!online)
             Text(

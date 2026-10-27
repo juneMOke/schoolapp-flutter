@@ -75,13 +75,16 @@ abstract final class PayrollLedger {
     );
   }
 
-  /// L'historique : les mois tenus et le mois en cours, du plus récent au
-  /// plus ancien — composé une fois par lecture, pas à chaque rendu.
+  /// L'historique : les mois tenus, le mois en cours et les mois [opened]
+  /// à l'écran (un mois sans paie au serveur s'affiche aussi), du plus
+  /// récent au plus ancien — composé une fois par lecture, pas à chaque
+  /// rendu.
   static List<PayrollMonthView> history(
     PayrollSnapshot snapshot,
-    String currentMonth,
-  ) {
-    final months = {...snapshot.headers.keys, currentMonth}.toList()
+    String currentMonth, {
+    Iterable<String> opened = const [],
+  }) {
+    final months = {...snapshot.headers.keys, currentMonth, ...opened}.toList()
       ..sort((a, b) => b.compareTo(a));
     return [for (final month in months) monthView(snapshot, month)];
   }

@@ -11,6 +11,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Les lignes calculées du bulletin : les retenues du modèle et les
 /// versements reçus — mises en mots une fois, pour l'écran et le PDF.
 abstract final class PayrollPayslipRows {
+  /// Le montant d'une retenue nulle : la ligne reste listée (modèle papier).
+  static const none = '—';
+
+  /// Le rang de l'absence parmi [deductions] — le détail du calcul y ajoute
+  /// sa formule.
+  static const absenceIndex = 1;
+
   /// Les cinq retenues du modèle des écoles, **toujours** listées dans
   /// l'ordre du papier — « — » quand elles sont nulles —, puis leur total :
   /// chaque montant rangé par le calcul dans sa ligne.
@@ -21,7 +28,7 @@ abstract final class PayrollPayslipRows {
   ) {
     final l10n = AppLocalizations.of(context)!;
     String money(int cents) =>
-        cents == 0 ? '—' : '− ${PayrollLabels.money(cents, line.currency)}';
+        cents == 0 ? none : '− ${PayrollLabels.money(cents, line.currency)}';
     final d = line.deductions;
     int taken(bool loan) => line.advances
         .where((a) => (a.installments > 1) == loan)
@@ -72,7 +79,7 @@ abstract final class PayrollPayslipRows {
       (
         label: l10n.payrollPayslipDeductionsTotal,
         value: total == 0
-            ? '—'
+            ? none
             : '− ${PayrollLabels.money(total, line.currency)}',
         note: null,
       ),

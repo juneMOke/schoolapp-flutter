@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_cells.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_payout_cell.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
@@ -21,7 +22,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// ligne de total par devise en pied. Toucher une ligne ouvre la fiche de
 /// l'agent ; en brouillon, le crayon de fin de ligne ouvre directement ses
 /// éléments variables — la saisie du mois reste d'un seul geste.
-class PayrollLedgerViewle extends StatelessWidget {
+class PayrollLedgerTable extends StatelessWidget {
   final PayrollMonthView view;
   final PayrollSnapshot snapshot;
   final List<PayrollLine> lines;
@@ -32,7 +33,7 @@ class PayrollLedgerViewle extends StatelessWidget {
   final ValueChanged<PayrollLine>? onEdit;
   final bool canWrite;
 
-  const PayrollLedgerViewle({
+  const PayrollLedgerTable({
     super.key,
     required this.view,
     required this.snapshot,
@@ -182,14 +183,16 @@ class PayrollLedgerViewle extends StatelessWidget {
               ),
           ],
         ),
-        _Signals(line: line),
+        PayrollLedgerSignals(line: line),
         PayrollPayoutCell(
           view: view,
           line: line,
           canWrite: canWrite,
           onPayout: () => onPayout(line),
         ),
-        _OpenCell(onEdit: onEdit == null ? null : () => onEdit!(line)),
+        PayrollLedgerOpenCell(
+          onEdit: onEdit == null ? null : () => onEdit!(line),
+        ),
       ],
     );
   }
@@ -237,75 +240,6 @@ class PayrollLedgerViewle extends StatelessWidget {
             ],
           ),
       ],
-    );
-  }
-}
-
-/// « 1 abs », « 2 ret », ou « RAS » — le Pointage de M−1 ; l'absence n'est
-/// retenue que si l'école l'a réglé, par les jours prestés (v2).
-class _Signals extends StatelessWidget {
-  final PayrollLine line;
-
-  const _Signals({required this.line});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final attendance = line.attendance;
-    final parts = [
-      if (attendance.unjustifiedAbsences > 0)
-        (
-          l10n.payrollSignalAbsences(attendance.unjustifiedAbsences),
-          PayrollTone.alert.ink,
-        ),
-      if (attendance.lates > 0)
-        (l10n.payrollSignalLates(attendance.lates), PayrollTone.submitted.ink),
-    ];
-    return Tooltip(
-      message: l10n.payrollSignalHint,
-      child: Text.rich(
-        TextSpan(
-          children: parts.isEmpty
-              ? [
-                  TextSpan(
-                    text: l10n.payrollSignalNone,
-                    style: const TextStyle(color: AppColors.textMutedAa),
-                  ),
-                ]
-              : [
-                  for (final (index, (text, color)) in parts.indexed)
-                    TextSpan(
-                      text: index == 0 ? text : ' · $text',
-                      style: TextStyle(color: color),
-                    ),
-                ],
-        ),
-        style: AppTypography.bodySmall,
-      ),
-    );
-  }
-}
-
-/// Le bout de ligne : le crayon des éléments variables en brouillon, sinon
-/// le chevron qui dit que la ligne ouvre la fiche de l'agent.
-class _OpenCell extends StatelessWidget {
-  final VoidCallback? onEdit;
-
-  const _OpenCell({required this.onEdit});
-
-  @override
-  Widget build(BuildContext context) {
-    final onEdit = this.onEdit;
-    if (onEdit == null) {
-      return Tooltip(
-        message: AppLocalizations.of(context)!.payrollLedgerOpenAgent,
-        child: const Icon(Icons.chevron_right, color: AppColors.textMutedAa),
-      );
-    }
-    return IconButton(
-      tooltip: AppLocalizations.of(context)!.payrollVarsTitle,
-      onPressed: onEdit,
-      icon: const Icon(Icons.edit_outlined),
     );
   }
 }

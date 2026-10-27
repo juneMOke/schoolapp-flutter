@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_calc_payout.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_content.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_rows.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le détail du calcul d'un mois : chaque montant avec sa formule, pour
@@ -48,11 +49,12 @@ class PayrollCalcView extends StatelessWidget {
           value: content.gross.value,
         ),
         _Section(number: 2, title: l10n.payrollCalcDeductions),
-        for (final row in deductions.take(deductions.length - 1))
+        for (final (index, row)
+            in deductions.take(deductions.length - 1).indexed)
           _CalcRow(
             sign: '−',
             label: row.label,
-            note: row.label == l10n.payrollPayslipAbsence
+            note: index == PayrollPayslipRows.absenceIndex
                 ? _absenceNote(context) ?? row.note
                 : row.note,
             value: row.value,
@@ -87,8 +89,9 @@ class PayrollCalcView extends StatelessWidget {
     );
   }
 
-  /// « 1 j non presté × 13,46 $ / j (base ÷ 26 j) » — ou pourquoi rien
-  /// n'est retenu.
+  /// « 1 j non presté · base 350 $ ÷ 26 j » — sans produit affiché : le
+  /// moteur arrondit le total et le plafonne au brut restant. Ou pourquoi
+  /// rien n'est retenu.
   String? _absenceNote(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final line = month.line;
@@ -100,7 +103,7 @@ class PayrollCalcView extends StatelessWidget {
     if (d.absenceInCents <= 0) return l10n.payrollCalcAbsenceIndicative(days);
     return l10n.payrollCalcAbsenceFormula(
       days,
-      PayrollLabels.money(line.baseInCents ~/ divisor, line.currency),
+      PayrollLabels.money(line.baseInCents, line.currency),
       divisor,
     );
   }
@@ -160,7 +163,7 @@ class _CalcRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final empty = value == '—';
+    final empty = value == PayrollPayslipRows.none;
     final color = empty ? AppColors.textMutedAa : null;
     final figures = AppTypography.labelLarge.copyWith(
       color: empty ? AppColors.textMutedAa : ink,

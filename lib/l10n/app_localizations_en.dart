@@ -20345,9 +20345,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The agent will appear in the month\'s payroll once their contract is recorded in the staff file.';
 
   @override
-  String get payrollAgentBackToLedger => 'Back to the payroll ledger';
-
-  @override
   String get payrollLedgerOpenAgent => 'Open the agent sheet';
 
   @override
@@ -20408,14 +20405,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollCalcNetToPay => 'Net to pay for the month · (A) − (B)';
 
   @override
-  String payrollCalcAbsenceFormula(int days, String perDay, int divisor) {
+  String payrollCalcAbsenceFormula(int days, String base, int divisor) {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
       other: '$days days not worked',
       one: '1 day not worked',
     );
-    return '$_temp0 × $perDay / day (base ÷ $divisor days)';
+    return '$_temp0 · base $base ÷ $divisor days';
   }
 
   @override
@@ -20493,7 +20490,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollAgentArrearPriority => 'to settle first';
 
   @override
-  String get payrollAgentArrearsEmpty => 'Every validated month is settled.';
+  String get payrollAgentArrearsEmpty =>
+      'No arrears: no past month is overdue.';
 
   @override
   String get payrollAgentArrearsSettle => 'Settle the arrears';
@@ -20531,4 +20529,19 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get payrollAgentTotalsNet => 'Net due';
+
+  @override
+  String payrollAgentNextInstallmentCarried(
+    String amount,
+    String month,
+    String carried,
+  ) {
+    return 'Next instalment: $amount on the $month payroll · $carried carried over';
+  }
+
+  @override
+  String get payrollAgentArrearsDetail => 'See the detail';
 }

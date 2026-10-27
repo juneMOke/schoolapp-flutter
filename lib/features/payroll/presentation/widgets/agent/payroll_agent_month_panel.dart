@@ -70,7 +70,7 @@ class _PayrollAgentMonthPanelState extends State<PayrollAgentMonthPanel> {
           runSpacing: AppSpacing.xs,
           children: [
             PayrollStatusPill(phase: month.phase),
-            if (month.isLocked)
+            if (month.isFrozen && !month.isLegacy)
               PayrollSettlementPill(status: month.settlement.status),
           ],
         ),
@@ -136,7 +136,13 @@ class _PayrollAgentMonthPanelState extends State<PayrollAgentMonthPanel> {
     final month = widget.month;
     final days = month.line.deductions.workDaysDivisor;
     if (days == null) return null;
-    final absences = month.view.absenceDeductionEnabled
+    // Une ligne figée dit elle-même si l'absence a été retenue ; le réglage
+    // de l'école a pu changer depuis la validation.
+    final d = month.line.deductions;
+    final deducted = month.line.frozen && (d.absentDays ?? 0) > 0
+        ? d.absenceInCents > 0
+        : month.view.absenceDeductionEnabled;
+    final absences = deducted
         ? l10n.payrollAgentAbsencesDeducted
         : l10n.payrollAgentAbsencesIndicative;
     return month.line.frozen
