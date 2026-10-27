@@ -162,6 +162,14 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState>
   Future<void> goToday() =>
       _moveDay(ClassPresenceState.lastSchoolDayOf(state.today));
 
+  /// Un jour choisi au calendrier ; un samedi ou un dimanche ramène au
+  /// vendredi d'avant.
+  Future<void> showDay(String day) => _moveDay(
+    SchoolDayCalendar.isWeekday(day)
+        ? day
+        : SchoolDayCalendar.stepWorkDay(day, -1),
+  );
+
   /// Jamais au-delà d'aujourd'hui, ni avant la rentrée : le serveur refuse
   /// un appel hors de l'année scolaire.
   Future<void> _moveDay(String day) async {

@@ -61,6 +61,7 @@ class ClassDayBanner extends StatelessWidget {
       onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
       onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
       onToday: () => unawaited(cubit.goToday()),
+      onPickDay: () => unawaited(actions.pickDay()),
       onSettings: () => unawaited(actions.openSchedule()),
       onMarkRemaining: unmarked == 0 ? null : actions.markRemaining,
       onValidate: register.isEmpty

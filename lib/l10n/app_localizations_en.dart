@@ -13071,6 +13071,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presenceMarkPreviousDay => 'Previous day';
 
   @override
+  String get presenceMarkPickDay => 'Pick a day';
+
+  @override
+  String presenceMarkUnmarkedNames(String names) {
+    return 'Not marked yet: $names.';
+  }
+
+  @override
+  String presenceMarkUnmarkedNamesMore(String names, int rest) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rest,
+      locale: localeName,
+      other: 'Not marked yet: $names and $rest others.',
+      one: 'Not marked yet: $names and 1 other.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceMarkReviewUnmarked => 'Show the list';
+
+  @override
   String get presenceMarkNextDay => 'Next day';
 
   @override

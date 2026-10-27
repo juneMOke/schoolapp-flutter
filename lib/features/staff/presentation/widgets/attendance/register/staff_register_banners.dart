@@ -49,6 +49,7 @@ class StaffDayBanner extends StatelessWidget {
       onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
       onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
       onToday: () => unawaited(cubit.goToday()),
+      onPickDay: () => unawaited(actions.pickDay()),
       // Les réglages sont à la direction seule (hr.attendance.manage, E2) :
       // les autres lisent l'horaire sans pouvoir l'ouvrir.
       onSettings:

@@ -9,11 +9,11 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
 
 /// Le jour et les filtres du registre tenus dans l'adresse :
-/// `?jour=2026-10-21&vue=list&categorie=teacher&statut=absent`. F5 rouvre le
+/// `?jour=2026-10-21&vue=grid&categorie=teacher&statut=absent`. F5 rouvre le
 /// même jour, un lien partagé aussi, Précédent revient au jour d'avant.
 ///
 /// La recherche n'y va pas : chaque frappe serait une entrée d'historique.
-/// Les valeurs par défaut (dernier jour ouvré, cartes, tout le personnel)
+/// Les valeurs par défaut (dernier jour ouvré, liste, tout le personnel)
 /// laissent l'adresse nue.
 class HrRegisterLocation extends StatelessWidget {
   static const dayParam = 'jour';
@@ -38,7 +38,7 @@ class HrRegisterLocation extends StatelessWidget {
     return LocationParamsSync(
       current: {
         dayParam: state.isToday ? null : state.day,
-        viewParam: state.viewMode == CollectionViewMode.grid
+        viewParam: state.viewMode == CollectionViewMode.list
             ? null
             : state.viewMode.name,
         categoryParam: query.category?.name,
@@ -48,7 +48,7 @@ class HrRegisterLocation extends StatelessWidget {
         cubit
           ..setViewMode(
             _byName(CollectionViewMode.values, values[viewParam]) ??
-                CollectionViewMode.grid,
+                CollectionViewMode.list,
           )
           ..setDayCategory(_byName(StaffCategory.values, values[categoryParam]))
           ..setDayStatus(_byName(PresenceStatus.values, values[statusParam]));

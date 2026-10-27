@@ -65,7 +65,8 @@ class StaffAttendanceState extends Equatable {
     day: day,
     month: today.substring(0, 7),
     dayQuery: StaffDayQuery.none,
-    viewMode: CollectionViewMode.grid,
+    // La liste d'abord, comme les autres tables de l'application.
+    viewMode: CollectionViewMode.list,
     recapQuery: StaffRecapQuery.none,
   );
 

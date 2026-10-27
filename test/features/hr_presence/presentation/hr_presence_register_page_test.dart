@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_banner.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_banner_parts.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -142,30 +143,32 @@ void main() {
 
   String address() => router.routerDelegate.currentConfiguration.uri.toString();
 
-  testWidgets('le registre seul : ses cartes, sans les onglets du Pointage', (
-    tester,
-  ) async {
-    await pump(tester);
+  testWidgets(
+    'le registre seul, en liste par défaut, sans les onglets du Pointage',
+    (tester) async {
+      await pump(tester);
 
-    expect(find.byType(StaffAttendanceCard), findsNWidgets(2));
-    expect(
-      find.textContaining('Le préfet ou le censeur pointe'),
-      findsOneWidget,
-    );
-    expect(find.text('Fiche mensuelle'), findsNothing);
-    expect(find.text('Récapitulatif du mois'), findsNothing);
-  });
+      expect(find.byType(StaffAttendanceRow), findsNWidgets(2));
+      expect(find.byType(StaffAttendanceCard), findsNothing);
+      expect(
+        find.textContaining('Le préfet ou le censeur pointe'),
+        findsOneWidget,
+      );
+      expect(find.text('Fiche mensuelle'), findsNothing);
+      expect(find.text('Récapitulatif du mois'), findsNothing);
+    },
+  );
 
   testAtReferenceFormats('le registre en cartes tient', (tester, format) async {
     await pump(tester);
+    await tester.ensureVisible(find.text('Cartes'));
+    await tester.tap(find.text('Cartes'));
+    await tester.pump();
     expect(find.byType(StaffAttendanceCard), findsWidgets);
   });
 
   testAtReferenceFormats('le registre en liste tient', (tester, format) async {
     await pump(tester);
-    await tester.ensureVisible(find.text('Liste'));
-    await tester.tap(find.text('Liste'));
-    await tester.pump();
     expect(find.byType(StaffAttendanceRow), findsWidgets);
   });
 
@@ -176,15 +179,35 @@ void main() {
       final cubit = await pump(
         tester,
         location:
-            '/rh-presences/registre?jour=2026-09-25&vue=list'
+            '/rh-presences/registre?jour=2026-09-25&vue=grid'
             '&categorie=teacher&statut=none',
       );
       await tester.pumpAndSettle();
 
       expect(cubit.state.day, '2026-09-25');
-      expect(cubit.state.viewMode, CollectionViewMode.list);
+      expect(cubit.state.viewMode, CollectionViewMode.grid);
       expect(cubit.state.dayQuery.category, StaffCategory.teacher);
       expect(cubit.state.dayQuery.status, PresenceStatus.none);
+    });
+
+    testWidgets('la date ouvre le calendrier ; le jour choisi s\'inscrit', (
+      tester,
+    ) async {
+      await pump(tester, location: '/rh-presences/registre');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Choisir un jour'));
+      await tester.pumpAndSettle();
+      final dialog = find.byType(DatePickerDialog);
+      final picker = tester.widget<DatePickerDialog>(dialog);
+      // Bornes des flèches : la rentrée → le dernier jour ouvré.
+      expect(picker.firstDate, DateTime(2026, 9, 1));
+      expect(picker.lastDate, DateTime(2026, 9, 29));
+      expect(picker.selectableDayPredicate!(DateTime(2026, 9, 26)), isFalse);
+      Navigator.of(tester.element(dialog)).pop(DateTime(2026, 9, 22));
+      await tester.pumpAndSettle();
+
+      expect(address(), '/rh-presences/registre?jour=2026-09-22');
     });
 
     testWidgets('changer de jour s\'inscrit ; « Aujourd\'hui » rend '

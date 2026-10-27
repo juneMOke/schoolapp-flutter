@@ -70,6 +70,12 @@ abstract final class SchoolDayCalendar {
     return [for (var i = 0; i < count; i++) addDays(firstOf(month), i)];
   }
 
+  /// Le jour `YYYY-MM-DD` en date locale à minuit, pour un sélecteur de date.
+  static DateTime localDateOf(String day) {
+    final utc = _parse(day);
+    return DateTime(utc.year, utc.month, utc.day);
+  }
+
   static DateTime _parse(String day) {
     final parts = day.split('-').map(int.parse).toList(growable: false);
     return DateTime.utc(parts[0], parts[1], parts.length > 2 ? parts[2] : 1);

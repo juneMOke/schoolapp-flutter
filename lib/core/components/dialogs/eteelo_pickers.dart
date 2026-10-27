@@ -20,6 +20,7 @@ Future<DateTime?> showEteeloDatePicker({
   String? helpText,
   String? cancelText,
   String? confirmText,
+  SelectableDayPredicate? selectableDayPredicate,
   TransitionBuilder? builder,
 }) => showDatePicker(
   context: context,
@@ -31,6 +32,7 @@ Future<DateTime?> showEteeloDatePicker({
   helpText: helpText,
   cancelText: cancelText,
   confirmText: confirmText,
+  selectableDayPredicate: selectableDayPredicate,
   builder: builder,
 );
 

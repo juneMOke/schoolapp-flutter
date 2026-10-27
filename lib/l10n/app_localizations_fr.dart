@@ -13168,6 +13168,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get presenceMarkPreviousDay => 'Jour précédent';
 
   @override
+  String get presenceMarkPickDay => 'Choisir un jour';
+
+  @override
+  String presenceMarkUnmarkedNames(String names) {
+    return 'Pas encore pointés : $names.';
+  }
+
+  @override
+  String presenceMarkUnmarkedNamesMore(String names, int rest) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rest,
+      locale: localeName,
+      other: 'Pas encore pointés : $names et $rest autres.',
+      one: 'Pas encore pointés : $names et 1 autre.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceMarkReviewUnmarked => 'Voir la liste';
+
+  @override
   String get presenceMarkNextDay => 'Jour suivant';
 
   @override

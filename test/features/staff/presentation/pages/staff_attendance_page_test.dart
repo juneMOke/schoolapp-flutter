@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -101,6 +102,7 @@ void main() {
     Size size = const Size(1280, 1000),
     List<String>? permissions,
     DateTime? now,
+    CollectionViewMode? view,
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -127,6 +129,7 @@ void main() {
       ),
       now: () => now ?? DateTime(2026, 9, 29, 7, 35),
     );
+    if (view != null) cubit.setViewMode(view);
     Widget screen = BlocProvider.value(
       value: cubit..load(),
       child: const StaffAttendanceScreen(),
@@ -155,10 +158,19 @@ void main() {
     return cubit;
   }
 
-  testWidgets('le registre montre une carte par agent et les onglets', (
+  testWidgets('le registre s\'ouvre en liste, comme les autres tables', (
     tester,
   ) async {
     await pump(tester);
+
+    expect(find.byType(StaffAttendanceRow), findsNWidgets(2));
+    expect(find.byType(StaffAttendanceCard), findsNothing);
+  });
+
+  testWidgets('le registre montre une carte par agent et les onglets', (
+    tester,
+  ) async {
+    await pump(tester, view: CollectionViewMode.grid);
 
     expect(find.byType(StaffAttendanceCard), findsNWidgets(2));
     expect(find.text('Registre du jour'), findsWidgets);
@@ -171,7 +183,7 @@ void main() {
   testWidgets('toucher une carte « à pointer » la pointe présente', (
     tester,
   ) async {
-    await pump(tester);
+    await pump(tester, view: CollectionViewMode.grid);
 
     await tester.tap(find.text('Kalala Mutombo'));
     await tester.pump();
@@ -196,7 +208,7 @@ void main() {
   testWidgets('un jour validé montre le bandeau et refuse les gestes', (
     tester,
   ) async {
-    await pump(tester, validated: true);
+    await pump(tester, validated: true, view: CollectionViewMode.grid);
 
     expect(find.byType(StaffValidatedBanner), findsOneWidget);
     await tester.tap(find.text('Kalala Mutombo'));
@@ -226,7 +238,11 @@ void main() {
   testWidgets('en lecture seule, toucher une carte ne met rien en file', (
     tester,
   ) async {
-    await pump(tester, permissions: [Perm.hrAttendanceRead.wire]);
+    await pump(
+      tester,
+      permissions: [Perm.hrAttendanceRead.wire],
+      view: CollectionViewMode.grid,
+    );
 
     await tester.tap(find.text('Kalala Mutombo'));
     await tester.pump();

@@ -20558,6 +20558,30 @@ abstract class AppLocalizations {
   /// **'Previous day'**
   String get presenceMarkPreviousDay;
 
+  /// No description provided for @presenceMarkPickDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a day'**
+  String get presenceMarkPickDay;
+
+  /// No description provided for @presenceMarkUnmarkedNames.
+  ///
+  /// In en, this message translates to:
+  /// **'Not marked yet: {names}.'**
+  String presenceMarkUnmarkedNames(String names);
+
+  /// No description provided for @presenceMarkUnmarkedNamesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{rest, plural, =1{Not marked yet: {names} and 1 other.} other{Not marked yet: {names} and {rest} others.}}'**
+  String presenceMarkUnmarkedNamesMore(String names, int rest);
+
+  /// No description provided for @presenceMarkReviewUnmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the list'**
+  String get presenceMarkReviewUnmarked;
+
   /// No description provided for @presenceMarkNextDay.
   ///
   /// In en, this message translates to:

@@ -3,24 +3,35 @@ import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.da
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_tile.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_unmarked_notice.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que rend la modale de validation : valider, en marquant ou non les
-/// personnes encore « à pointer ».
+/// personnes encore « à pointer » — ou revenir au registre pour les voir
+/// ([reviewUnmarked]), sans rien valider.
 class PresenceReportChoice {
   final bool markRemaining;
+  final bool reviewUnmarked;
 
-  const PresenceReportChoice({required this.markRemaining});
+  const PresenceReportChoice({required this.markRemaining})
+    : reviewUnmarked = false;
+
+  /// Ne rien valider : revenir au registre filtré sur les non pointés.
+  const PresenceReportChoice.reviewUnmarked()
+    : markRemaining = false,
+      reviewUnmarked = true;
 }
 
 /// Valider la journée : le résumé, les avertissements, et le sort des non
 /// pointés.
 ///
-/// Avec [unmarkedOptional], une case (cochée par défaut) laisse choisir de les
-/// marquer présents ; sans, ils le sont d'office et la modale le dit
+/// Les non pointés sont nommés ([unmarkedNames]) en tête, avec un retour au
+/// registre filtré sur eux. Avec [unmarkedOptional], une case — décochée par
+/// défaut : marquer présent est un choix, jamais un réflexe — laisse choisir
+/// de les marquer présents ; sans, ils le sont d'office et la modale le dit
 /// ([unmarkedLabel] porte alors la phrase).
 class PresenceReportDialog extends StatefulWidget {
   final String eyebrow;
@@ -31,6 +42,9 @@ class PresenceReportDialog extends StatefulWidget {
 
   /// Ceux qu'on peut marquer présents d'office.
   final int unmarked;
+
+  /// Leurs noms, dans l'ordre du registre.
+  final List<String> unmarkedNames;
 
   /// Retards et absences sans justification.
   final int unjustified;
@@ -47,6 +61,7 @@ class PresenceReportDialog extends StatefulWidget {
     required this.late,
     required this.absent,
     required this.unmarked,
+    this.unmarkedNames = const [],
     required this.unjustified,
     required this.unmarkedLabel,
     required this.lockMessage,
@@ -59,7 +74,7 @@ class PresenceReportDialog extends StatefulWidget {
 }
 
 class _PresenceReportDialogState extends State<PresenceReportDialog> {
-  bool _markRemaining = true;
+  bool _markRemaining = false;
 
   bool get _marks => _markRemaining || !widget.unmarkedOptional;
 
@@ -97,6 +112,15 @@ class _PresenceReportDialogState extends State<PresenceReportDialog> {
           ),
           if (unmarked > 0) ...[
             const SizedBox(height: AppSpacing.md),
+            if (widget.unmarkedNames.isNotEmpty) ...[
+              PresenceUnmarkedNotice(
+                names: widget.unmarkedNames,
+                onReview: () => Navigator.of(
+                  context,
+                ).pop(const PresenceReportChoice.reviewUnmarked()),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
             if (widget.unmarkedOptional)
               CheckboxListTile(
                 value: _markRemaining,

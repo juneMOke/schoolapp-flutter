@@ -62,7 +62,8 @@ class ClassPresenceState extends Equatable {
     this.classroom,
     this.presenceDay,
     this.dayQuery = ClassDayQuery.none,
-    this.viewMode = CollectionViewMode.grid,
+    // La liste d'abord, comme les autres tables de l'application.
+    this.viewMode = CollectionViewMode.list,
     this.tab = ClassPresenceTab.register,
     this.monthData,
     this.monthFailed = false,
@@ -80,6 +81,13 @@ class ClassPresenceState extends Equatable {
       : SchoolDayCalendar.stepWorkDay(today, -1);
 
   bool get isToday => day == lastSchoolDayOf(today);
+
+  /// Le premier jour que le registre peut montrer : la rentrée, quand elle
+  /// est connue.
+  String? get firstDay => schoolYear?.start;
+
+  /// Le dernier jour que le registre peut montrer.
+  String get lastSchoolDay => lastSchoolDayOf(today);
 
   /// Le registre peut-il reculer d'un jour de classe ? Pas avant la rentrée.
   bool get canStepBack {

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_picker.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_schedule_dialog.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
@@ -32,12 +33,25 @@ class ClassRegisterActions {
     );
   }
 
+  /// Le calendrier du registre.
+  Future<void> pickDay() async {
+    final state = _cubit.state;
+    final day = await pickPresenceDay(
+      context,
+      day: state.day,
+      firstDay: state.firstDay,
+      lastDay: state.lastSchoolDay,
+    );
+    if (day == null || !context.mounted) return;
+    await _cubit.showDay(day);
+  }
+
   void markRemaining() =>
       unawaited(_cubit.perform((c, day) => c.markRemainingPresent(day)));
 
   Future<void> validate(ClassDayRegister register, String classroomName) async {
     final l10n = AppLocalizations.of(context)!;
-    final unmarked = register.unmarked.length;
+    final unmarked = register.unmarked;
     final choice = await EteeloFormDialog.show<PresenceReportChoice>(
       context,
       PresenceReportDialog(
@@ -49,16 +63,21 @@ class ClassRegisterActions {
         present: register.count(PresenceStatus.present),
         late: register.count(PresenceStatus.late),
         absent: register.count(PresenceStatus.absent),
-        unmarked: unmarked,
+        unmarked: unmarked.length,
+        unmarkedNames: [for (final line in unmarked) line.student.fullName],
         unjustified: register.toJustify,
         // Décision 2 : l'appel envoyé ne connaît pas « à pointer ».
         unmarkedOptional: false,
-        unmarkedLabel: l10n.classPresenceReportUnmarked(unmarked),
+        unmarkedLabel: l10n.classPresenceReportUnmarked(unmarked.length),
         lockMessage: l10n.classPresenceReportLock,
         confirmLabel: l10n.classPresenceValidate,
       ),
     );
     if (choice == null || !context.mounted) return;
+    if (choice.reviewUnmarked) {
+      _cubit.setDayStatus(PresenceStatus.none);
+      return;
+    }
     await _cubit.perform(
       (c, day) => c.validate(day, classroomName: classroomName),
     );

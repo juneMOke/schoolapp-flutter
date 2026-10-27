@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/presence/presentation/presence_labels.da
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_schedule_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_picker.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
@@ -47,6 +48,20 @@ class StaffRegisterActions {
     );
   }
 
+  /// Le calendrier du registre : le jour choisi passe par le cubit, donc par
+  /// l'adresse (`?jour=`).
+  Future<void> pickDay() async {
+    final state = _cubit.state;
+    final day = await pickPresenceDay(
+      context,
+      day: state.day,
+      firstDay: state.firstDay,
+      lastDay: state.lastWorkDay,
+    );
+    if (day == null || !context.mounted) return;
+    await _cubit.showDay(day);
+  }
+
   void markRemaining() => unawaited(
     _cubit.perform(
       (c) =>
@@ -56,7 +71,7 @@ class StaffRegisterActions {
 
   Future<void> validate(StaffDayRegister register) async {
     final l10n = AppLocalizations.of(context)!;
-    final unmarked = register.unmarked.length;
+    final unmarked = register.unmarked;
     final choice = await EteeloFormDialog.show<PresenceReportChoice>(
       context,
       PresenceReportDialog(
@@ -69,14 +84,19 @@ class StaffRegisterActions {
         late: register.count(PresenceStatus.late),
         absent: register.count(PresenceStatus.absent),
         // Seuls ceux qu'un contrat couvre ce jour-là sont marqués d'office.
-        unmarked: unmarked,
+        unmarked: unmarked.length,
+        unmarkedNames: [for (final row in unmarked) row.member.fullName],
         unjustified: register.toJustify,
-        unmarkedLabel: l10n.staffAttendanceReportMarkRemaining(unmarked),
+        unmarkedLabel: l10n.staffAttendanceReportMarkRemaining(unmarked.length),
         lockMessage: l10n.staffAttendanceReportLock,
         confirmLabel: l10n.staffAttendanceReportConfirm,
       ),
     );
     if (choice == null || !context.mounted) return;
+    if (choice.reviewUnmarked) {
+      _cubit.setDayStatus(PresenceStatus.none);
+      return;
+    }
     await _cubit.perform(
       (c) => c.validateDay(
         _cubit.state.snapshot,

@@ -5,9 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/core/offline/resource_sync_signals.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
@@ -64,6 +68,7 @@ void main() {
     WidgetTester tester, {
     required ClassPresenceDay day,
     List<String> permissions = teacher,
+    CollectionViewMode? view,
   }) async {
     await tester.binding.setSurfaceSize(const Size(1280, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -112,6 +117,7 @@ void main() {
       await cubit.stepDay(-1);
     }
     expect(cubit.state.day, day.day);
+    if (view != null) cubit.setViewMode(view);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -149,10 +155,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('une touche sur une carte pointe l élève au brouillon', (
+  testWidgets('l\'appel s\'ouvre en liste, comme les autres tables', (
     tester,
   ) async {
     await pump(tester, day: presenceDay());
+
+    expect(find.byType(PresenceRow), findsNWidgets(3));
+    expect(find.byType(PresenceCard), findsNothing);
+  });
+
+  testWidgets('une touche sur une carte pointe l élève au brouillon', (
+    tester,
+  ) async {
+    await pump(tester, day: presenceDay(), view: CollectionViewMode.grid);
 
     await tester.tap(find.text('Zola'));
     await tester.pumpAndSettle();
@@ -186,10 +201,33 @@ void main() {
     expect(lines.every((l) => l.status.isMarked), isTrue);
   });
 
+  testWidgets('valider : la modale nomme les non pointés ; « Voir la liste » '
+      'filtre le registre sans rien valider', (tester) async {
+    await pump(tester, day: presenceDay());
+
+    await tester.tap(find.text("Valider l'appel"));
+    await tester.pumpAndSettle();
+    expect(find.text('Pas encore pointés : Esther Zola.'), findsOneWidget);
+
+    await tester.tap(find.text('Voir la liste'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pas encore pointés : Esther Zola.'), findsNothing);
+    final cubit = tester
+        .element(find.byType(ClassRegisterTab))
+        .read<ClassPresenceCubit>();
+    expect(cubit.state.dayQuery.status, PresenceStatus.none);
+    verifyNever(() => validate(any(), any()));
+  });
+
   testWidgets(
     'jour passé validé, sans attendance.amend : pas de Rouvrir, touche refusée',
     (tester) async {
-      await pump(tester, day: presenceDay(day: '2026-09-30', validated: true));
+      await pump(
+        tester,
+        day: presenceDay(day: '2026-09-30', validated: true),
+        view: CollectionViewMode.grid,
+      );
 
       expect(find.text('Rouvrir'), findsNothing);
       expect(
