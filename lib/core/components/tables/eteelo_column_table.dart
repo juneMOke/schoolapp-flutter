@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_row_scope.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_rule.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table_cards.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_frozen_column.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -33,16 +35,24 @@ class EteeloColumns extends StatelessWidget {
     this.frozenInset = AppSpacing.sm,
   }) : assert(widths.length == cells.length);
 
-  Widget _sized(int index, Widget cell) => widths[index] == null
-      ? Expanded(child: cell)
-      : SizedBox(width: widths[index], child: cell);
+  Widget _sized(int index, Widget cell, EteeloColumnRule? rule) {
+    final padding = rule?.paddingOf(index);
+    final spaced = padding == null
+        ? cell
+        : Padding(padding: padding, child: cell);
+    return widths[index] == null
+        ? Expanded(child: spaced)
+        : SizedBox(width: widths[index], child: spaced);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final rule = EteeloColumnRule.maybeOf(context);
+    Widget sized(int index, Widget cell) => _sized(index, cell, rule);
     final frozen = EteeloFrozenColumn.maybeOf(context);
     if (frozen == null || !frozen.active) {
       return Row(
-        children: [for (final (i, cell) in cells.indexed) _sized(i, cell)],
+        children: [for (final (i, cell) in cells.indexed) sized(i, cell)],
       );
     }
     // Disposée de droite à gauche, la rangée peint sa première cellule en
@@ -52,8 +62,8 @@ class EteeloColumns extends StatelessWidget {
     return Row(
       textDirection: TextDirection.rtl,
       children: [
-        for (var i = cells.length - 1; i > 0; i--) _sized(i, cells[i]),
-        _sized(0, _frozenLead(frozen)),
+        for (var i = cells.length - 1; i > 0; i--) sized(i, cells[i]),
+        sized(0, _frozenLead(frozen)),
       ],
     );
   }
@@ -112,6 +122,14 @@ class EteeloColumnTable extends StatefulWidget {
   /// défilement de côté sous [minWidth].
   final double? cardsBelow;
 
+  /// Un filet vertical après cette colonne, sur toute la hauteur du tableau :
+  /// il sépare deux groupes de colonnes. `null` — le défaut — : aucun.
+  final int? ruleAfter;
+
+  /// Le tableau mis en avant : posé sur une carte blanche, ombrée et
+  /// arrondie, son en-tête collé au cadre. Faux — le défaut — : à plat.
+  final bool raised;
+
   const EteeloColumnTable({
     super.key,
     required this.minWidth,
@@ -124,6 +142,8 @@ class EteeloColumnTable extends StatefulWidget {
     this.frozenFirstColumn = false,
     this.tone,
     this.cardsBelow,
+    this.ruleAfter,
+    this.raised = false,
   });
 
   @override
@@ -189,7 +209,7 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: headerBackground,
-              borderRadius: AppRadius.brSm,
+              borderRadius: widget.raised ? null : AppRadius.brSm,
             ),
             child: EteeloColumns(
               widths: widget.widths,
@@ -213,9 +233,28 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
         ],
       ),
     );
-    final framed = tone == null
+    final ruleAfter = widget.ruleAfter;
+    final ruled = ruleAfter == null
         ? table
-        : DecoratedBox(decoration: tone.frame, child: table);
+        : EteeloColumnRule(
+            after: ruleAfter,
+            widths: widget.widths,
+            color: tone?.border ?? AppColors.border,
+            child: table,
+          );
+    final framed = widget.raised
+        ? DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceRaised,
+              borderRadius: AppRadius.brLg,
+              border: Border.all(color: tone?.border ?? AppColors.border),
+              boxShadow: AppElevation.shadowCard,
+            ),
+            child: ClipRRect(borderRadius: AppRadius.brLg, child: ruled),
+          )
+        : tone == null
+        ? ruled
+        : DecoratedBox(decoration: tone.frame, child: ruled);
     if (!widget.frozenFirstColumn) return framed;
     return LayoutBuilder(
       builder: (context, constraints) => EteeloFrozenColumn(
@@ -264,15 +303,18 @@ class EteeloColumnTableRow extends StatelessWidget {
       color: background,
       child: InkWell(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(color: AppColors.border)),
-          ),
-          child: EteeloColumns(
-            widths: widths,
-            cells: cells,
-            frozenBackground: background ?? AppColors.surfaceRaised,
+        child: EteeloColumnRule.under(
+          context,
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: AppColors.border)),
+            ),
+            child: EteeloColumns(
+              widths: widths,
+              cells: cells,
+              frozenBackground: background ?? AppColors.surfaceRaised,
+            ),
           ),
         ),
       ),
