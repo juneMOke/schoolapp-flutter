@@ -288,6 +288,9 @@ class AppDimensions {
   static const enrollmentStatsChartRadius = 12.0;
   static const enrollmentStatsChartBorderRadius = 8.0;
 
+  /// Liseré d'une barre mise en relief (`CycleBarChart.highlightBorderColor`).
+  static const chartHighlightBorderWidth = 2.0;
+
   // Géométrie des barres verticales (CycleBarChart).
   //
   // La largeur d'une barre est une **part du pas**, pas une valeur absolue :
@@ -886,27 +889,22 @@ class AppDimensions {
   /// La feuille du bulletin et son panneau latéral.
   static const payrollPayslipMaxWidth = 720.0;
   static const payrollPayslipPanelWidth = 270.0;
-  static const payrollPayslipWideBreakpoint = 1000.0;
 
   /// Le filet or sous l'en-tête du bulletin.
   static const payrollPayslipRule = 3.0;
-  static const payrollStepperButton = 40.0;
+  static const payrollStepperButton = minTouchTarget;
   static const payrollStepperValueWidth = 56.0;
   static const payrollCircuitDot = 30.0;
-
-  /// Tableau de bord de la paie : la série « mois par mois » (spec TB 1 —
-  /// histogramme de 170 dp) et la largeur d'une colonne, cible de toucher
-  /// comprise.
-  static const payrollDashColumnsHeight = 170.0;
-  static const payrollDashColumnWidth = 48.0;
-  static const payrollDashColumnBarWidth = 28.0;
-  static const payrollDashFocusBorder = 2.0;
 
   /// Le tableau « Ce que chaque salarié perçoit » (spec TB 2 : min 860).
   static const payrollDashStaffMinWidth = 960.0;
   static const payrollCircuitLink = 14.0;
   static const payrollModeTileHeight = 52.0;
   static const payrollProgressHeight = 8.0;
+
+  /// Une pastille de la frise des mois : assez large pour « sept. » au texte
+  /// ×1,3 ; la hauteur, elle, part de [minTouchTarget].
+  static const payrollMonthPillWidth = 64.0;
 
   // ── Photo de l'élève (spec « Photo de l'élève », 1 px = 1 dp) ────────────
   /// Le panneau de capture : largeur maximale, rayon, et en dessous de quelle

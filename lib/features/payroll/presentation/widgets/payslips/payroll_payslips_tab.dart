@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -82,7 +83,7 @@ class PayrollPayslipsTab extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         LayoutBuilder(
           builder: (context, constraints) =>
-              constraints.maxWidth >= AppDimensions.payrollPayslipWideBreakpoint
+              constraints.maxWidth >= AppBreakpoints.payrollPayslipSideBySideMin
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

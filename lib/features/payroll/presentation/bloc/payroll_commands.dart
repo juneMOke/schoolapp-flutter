@@ -292,13 +292,6 @@ class PayrollCommands {
     String staffMemberId,
   ) => _payslip.preview(month, staffMemberId);
 
-  /// Le PDF du tableau « Ce que chaque salarié perçoit » — en ligne (Q7).
-  Future<Either<Failure, Uint8List>> dashboardPdf(
-    String month, {
-    required String filter,
-    String? query,
-  }) => _payslip.dashboard(month, filter: filter, query: query);
-
   static PayrollNotice _notice(
     Either<Failure, Unit> result,
     PayrollNotice success,

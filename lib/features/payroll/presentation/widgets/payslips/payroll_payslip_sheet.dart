@@ -30,23 +30,25 @@ class PayrollPayslipSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // L'école à gauche, le titre à droite ; sur un téléphone, le titre
+          // passe sous l'école plutôt que de déborder.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.sm,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(content.schoolName, style: AppTypography.titleMedium),
-                    if (address != null && address.isNotEmpty)
-                      Text(
-                        address,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textMutedAa,
-                        ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(content.schoolName, style: AppTypography.titleMedium),
+                  if (address != null && address.isNotEmpty)
+                    Text(
+                      address,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textMutedAa,
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -57,10 +59,12 @@ class PayrollPayslipSheet extends StatelessWidget {
                       color: AppColors.bleuProfond,
                     ),
                   ),
+                  // L'or est une couleur de surface (filet) : écrit, il tombe
+                  // sous le seuil ; son encre lisible est l'ambre.
                   Text(
                     content.monthLabel,
                     style: AppTypography.labelLarge.copyWith(
-                      color: AppColors.orDoux,
+                      color: AppColors.ambreInk,
                     ),
                   ),
                 ],

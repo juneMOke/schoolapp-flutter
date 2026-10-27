@@ -68,11 +68,18 @@ class PayrollCubit extends Cubit<PayrollState> {
         }
       },
       (snapshot) {
-        final view = PayrollLedger.monthView(snapshot, state.month);
+        // Un mois lu dans l'adresse avant que la tablette ne soit lue n'a pas
+        // pu être borné : il l'est ici, au premier contrat de l'école.
+        final first = snapshot.firstMonth;
+        final month = first != null && state.month.compareTo(first) < 0
+            ? first
+            : state.month;
+        final view = PayrollLedger.monthView(snapshot, month);
         final today = SchoolDayCalendar.dayOf(_now());
         emit(
           state.copyWith(
             load: PayrollLoad.ready,
+            month: month,
             snapshot: snapshot,
             today: today,
             view: view,
@@ -103,6 +110,17 @@ class PayrollCubit extends Cubit<PayrollState> {
   }
 
   void goCurrentMonth() => _openMonth(state.currentMonth);
+
+  /// Le mois d'une pastille ou de l'adresse (`?mois=`). Absent ou illisible :
+  /// le mois en cours ; ramené entre le premier contrat et le mois en cours.
+  void showMonth(String? month) {
+    final current = state.currentMonth;
+    final first = state.snapshot.firstMonth;
+    var wanted = PayrollMonth.parse(month) ?? current;
+    if (wanted.compareTo(current) > 0) wanted = current;
+    if (first != null && wanted.compareTo(first) < 0) wanted = first;
+    _openMonth(wanted);
+  }
 
   /// Un mois de l'historique ouvre son livre.
   void openMonth(String month) {

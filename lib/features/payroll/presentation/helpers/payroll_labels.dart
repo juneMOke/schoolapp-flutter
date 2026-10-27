@@ -30,6 +30,10 @@ abstract final class PayrollLabels {
   static String month(BuildContext context, String month) =>
       PresenceLabels.month(MaterialLocalizations.of(context), month);
 
+  /// « oct. » : le mois seul, abrégé (frise, axe d'un graphique).
+  static String monthShort(AppLocalizations l10n, String month) =>
+      l10n.payrollMonthShort(int.parse(month.substring(5)).toString());
+
   /// « 12 oct. 2026 » depuis un jour ou un instant.
   static String day(BuildContext context, String iso) {
     final date = DateTime.tryParse(iso)?.toLocal();

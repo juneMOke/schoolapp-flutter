@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_row_scope.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table_cards.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_frozen_column.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -100,6 +103,15 @@ class EteeloColumnTable extends StatefulWidget {
   /// défile de côté (cf. [EteeloFrozenColumn]).
   final bool frozenFirstColumn;
 
+  /// Habillage teinté : bandeau d'en-tête plein, zébrure, cadre. `null` — le
+  /// défaut — garde l'en-tête gris historique.
+  final DataTableTone? tone;
+
+  /// Sous cette largeur reçue, une carte par ligne
+  /// ([EteeloColumnTableCards]) ; `null` — le défaut — : toujours en colonnes,
+  /// défilement de côté sous [minWidth].
+  final double? cardsBelow;
+
   const EteeloColumnTable({
     super.key,
     required this.minWidth,
@@ -110,6 +122,8 @@ class EteeloColumnTable extends StatefulWidget {
     this.endAligned = const {},
     this.footer,
     this.frozenFirstColumn = false,
+    this.tone,
+    this.cardsBelow,
   });
 
   @override
@@ -136,8 +150,36 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
     return widget.minWidth - others - 2 * AppSpacing.sm;
   }
 
+  List<Widget> _rows(BuildContext context) => [
+    for (var index = 0; index < widget.rowCount; index++)
+      EteeloColumnRowScope(
+        zebra: index.isOdd ? widget.tone?.zebra : null,
+        child: Builder(builder: (context) => widget.row(context, index)),
+      ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final cardsBelow = widget.cardsBelow;
+    if (cardsBelow == null) return _table(context);
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.maxWidth < cardsBelow
+          ? EteeloColumnTableCards(
+              headers: widget.headers,
+              rows: [
+                for (var index = 0; index < widget.rowCount; index++)
+                  widget.row(context, index),
+              ],
+              footer: widget.footer,
+              tone: widget.tone,
+            )
+          : _table(context),
+    );
+  }
+
+  Widget _table(BuildContext context) {
+    final tone = widget.tone;
+    final headerBackground = tone?.header ?? AppColors.surfaceAlt;
     final table = EteeloMinWidthScroll(
       minWidth: widget.minWidth,
       controller: _scroll,
@@ -145,13 +187,13 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceAlt,
+            decoration: BoxDecoration(
+              color: headerBackground,
               borderRadius: AppRadius.brSm,
             ),
             child: EteeloColumns(
               widths: widget.widths,
-              frozenBackground: AppColors.surfaceAlt,
+              frozenBackground: headerBackground,
               cells: [
                 for (final (index, text) in widget.headers.indexed)
                   EteeloOverflowText(
@@ -160,25 +202,33 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
                         ? TextAlign.end
                         : TextAlign.start,
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textMutedAa,
+                      color: tone?.headerInk ?? AppColors.textMutedAa,
                     ),
                   ),
               ],
             ),
           ),
-          for (var index = 0; index < widget.rowCount; index++)
-            widget.row(context, index),
+          ..._rows(context),
           ?widget.footer,
         ],
       ),
     );
-    if (!widget.frozenFirstColumn) return table;
+    final framed = tone == null
+        ? table
+        : DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: AppRadius.brSm,
+              border: Border.all(color: tone.border),
+            ),
+            child: table,
+          );
+    if (!widget.frozenFirstColumn) return framed;
     return LayoutBuilder(
       builder: (context, constraints) => EteeloFrozenColumn(
         controller: _scroll,
         width: _frozenWidth,
         active: constraints.maxWidth < widget.minWidth,
-        child: table,
+        child: framed,
       ),
     );
   }
@@ -211,22 +261,27 @@ class EteeloColumnTableRow extends StatelessWidget {
   // de l'`InkWell` (survol, focus, appui) se peint SOUS l'enfant, et un fond
   // opaque posé dessus la masquait — la ligne ne réagissait plus à rien.
   @override
-  Widget build(BuildContext context) => Material(
-    type: background == null ? MaterialType.transparency : MaterialType.canvas,
-    color: background,
-    child: InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: AppColors.border)),
-        ),
-        child: EteeloColumns(
-          widths: widths,
-          cells: cells,
-          frozenBackground: background ?? AppColors.surfaceRaised,
+  Widget build(BuildContext context) {
+    final background = this.background ?? EteeloColumnRowScope.zebraOf(context);
+    return Material(
+      type: background == null
+          ? MaterialType.transparency
+          : MaterialType.canvas,
+      color: background,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: AppColors.border)),
+          ),
+          child: EteeloColumns(
+            widths: widths,
+            cells: cells,
+            frozenBackground: background ?? AppColors.surfaceRaised,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

@@ -42,6 +42,13 @@ class _LocationParamsSyncState extends State<LocationParamsSync> {
   GoRouter? _router;
   bool _bound = false;
 
+  /// Une écriture de l'écran attend le prochain rendu. Tant qu'elle n'est pas
+  /// partie, l'adresse est plus ancienne que l'écran : un autre lien de la
+  /// même page qui écrit d'abord (l'onglet, puis le mois) réveillerait ce
+  /// widget sur l'ancienne valeur, et il défairait le geste qu'on vient de
+  /// faire.
+  bool _writePending = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -61,6 +68,7 @@ class _LocationParamsSyncState extends State<LocationParamsSync> {
     super.didUpdateWidget(oldWidget);
     // Après la reconstruction : changer d'adresse la relance.
     if (!mapEquals(oldWidget.current, widget.current)) {
+      _writePending = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _writeLocation());
     }
   }
@@ -79,7 +87,7 @@ class _LocationParamsSyncState extends State<LocationParamsSync> {
   /// à ses valeurs par défaut.
   void _followLocation({bool bareMeansDefault = true}) {
     final router = _router;
-    if (!mounted || router == null) return;
+    if (!mounted || router == null || _writePending) return;
     final read = _read(router);
     if (!bareMeansDefault && read.values.every((value) => value == null)) {
       return;
@@ -89,6 +97,7 @@ class _LocationParamsSyncState extends State<LocationParamsSync> {
   }
 
   void _writeLocation() {
+    _writePending = false;
     final router = _router;
     if (!mounted || router == null) return;
     if (mapEquals(_read(router), widget.current)) return;

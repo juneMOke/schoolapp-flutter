@@ -1,9 +1,12 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_kpi_card.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -52,25 +55,23 @@ class PayrollHistoryTab extends StatelessWidget {
       children: [
         EteeloKpiBand(
           cards: [
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollHistoryMonths,
               value: snapshot.headers.length,
-              accent: AppColors.bleuArdoise,
-              accentSoft: AppColors.bleuArdoiseSoft,
+              // Pas le bleu des paies validées, son voisin de bandeau.
+              accent: DashboardSense.marque,
               icon: Icons.calendar_month_outlined,
             ),
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollHistoryPaid,
               valueLines: paid,
-              accent: AppColors.presenceMarkPresentInk,
-              accentSoft: AppColors.presenceMarkPresentSoft,
+              accent: DashboardSense.encaisse,
               icon: Icons.payments_outlined,
             ),
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollHistoryLocked,
               value: locked,
-              accent: AppColors.payrollValidated,
-              accentSoft: AppColors.payrollValidatedSoft,
+              accent: PayrollTone.validated.color,
               icon: Icons.lock_outline,
             ),
           ],
@@ -83,6 +84,8 @@ class PayrollHistoryTab extends StatelessWidget {
           )
         else
           EteeloColumnTable(
+            tone: ListingTones.table,
+            cardsBelow: AppBreakpoints.dataTableCardsMax,
             minWidth: AppDimensions.payrollHistoryMinWidth,
             widths: _widths,
             endAligned: const {2, 3, 4, 5},
@@ -119,7 +122,7 @@ class PayrollHistoryTab extends StatelessWidget {
     final figures = EteeloColumnTableRow.figures();
     return EteeloColumnTableRow(
       widths: _widths,
-      background: current ? AppColors.terreCuiteSoft : null,
+      background: current ? PayrollTone.current.soft : null,
       onTap: () => cubit.openMonth(view.month),
       cells: [
         Column(
@@ -133,7 +136,7 @@ class PayrollHistoryTab extends StatelessWidget {
               Text(
                 l10n.payrollHistoryCurrent,
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.terreCuiteDark,
+                  color: PayrollTone.current.ink,
                 ),
               ),
           ],
@@ -165,7 +168,7 @@ class PayrollHistoryTab extends StatelessWidget {
               Text(
                 l10n.payrollHistoryRemaining(remaining.join(' · ')),
                 style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.presenceMarkLateInk,
+                  color: PayrollTone.submitted.ink,
                 ),
               ),
           ],

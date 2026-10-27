@@ -1,103 +1,163 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/payroll/data/dashboard/payroll_dashboard_json.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
+import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_dashboard_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_dashboard_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/dashboard/payroll_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_dashboard_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_month_pill.dart';
+import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../test_helpers/reference_formats.dart';
-import '../../staff/staff_builders.dart';
-import 'payroll_screen_harness.dart';
+import '../data/payroll_dashboard_json_test.dart' show payrollDashboardFixture;
+
+class _MockRepository extends Mock implements PayrollDashboardRepository {}
 
 class _MockPayslips extends Mock implements PayslipRepository {}
 
-/// RH · Paie ▸ Tableau de bord : prévu et réel, payé et non payé, prêts,
-/// arriérés, ce que chaque salarié perçoit — et le PDF du serveur sur les
-/// mêmes paramètres que l'écran.
-void main() {
-  PayrollLine line(String id, String month, int net) => PayrollLine(
-    month: month,
-    staffMemberId: id,
-    currency: 'USD',
-    baseInCents: net,
-    grossInCents: net,
-    netInCents: net,
-    formulaVersion: 2,
-    frozen: true,
-  );
+class _MockSignals extends Mock implements StaffSyncSignals {}
 
-  final snapshot = PayrollSnapshot(
-    members: [
-      member('m-1', lastName: 'Kabasele', firstName: 'Marie'),
-      member('m-2', lastName: 'Mayala', firstName: 'Ruth'),
-    ],
-    contractsByMember: const {},
-    settings: PayrollSettings.defaults,
-    profiles: const {},
-    headers: {
-      for (final month in ['2026-08', '2026-09'])
-        month: PayrollHeader(
-          id: 'p-$month',
-          month: month,
-          status: PayrollStatus.validated,
-          validationGestureId: 'g-$month',
-        ),
-    },
-    variables: const {},
-    frozenLines: {
-      '2026-08': [line('m-1', '2026-08', 20000), line('m-2', '2026-08', 15000)],
-      '2026-09': [line('m-1', '2026-09', 20000), line('m-2', '2026-09', 15000)],
-    },
-    summaries: const {},
-    gestures: const [],
-    advances: const [],
-    disbursements: const [
-      PayrollDisbursement(
-        id: 'd-1',
-        month: '2026-09',
-        staffMemberId: 'm-1',
-        validationGestureId: 'g-2026-09',
-        amount: Money(20000, 'USD'),
-        mode: PayoutMode.cash,
-        paidAt: '2026-09-28T09:00:00.000Z',
-        signedRegister: true,
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
+/// RH · Paie ▸ Tableau de bord, en ligne : l'écran entier sur la réponse du
+/// serveur, et le PDF sur les mêmes paramètres.
+void main() {
+  final dashboard = PayrollDashboardJson.fromJson(payrollDashboardFixture());
+  late _MockRepository repository;
+  late _MockPayslips payslips;
+
+  setUpAll(() => registerFallbackValue(PayrollDashboardFilter.all));
+
+  setUp(() {
+    repository = _MockRepository();
+    payslips = _MockPayslips();
+    when(
+      () => repository.read(
+        any(),
+        filter: any(named: 'filter'),
+        query: any(named: 'query'),
       ),
-    ],
-    schoolYears: const [(start: '2025-09-01', end: '2027-07-02')],
-    shareTraces: const {},
-    hasEverSynced: true,
-  );
+    ).thenAnswer((_) async => Right(dashboard));
+  });
+
+  Future<PayrollDashboardCubit> pump(WidgetTester tester) async {
+    final signals = _MockSignals();
+    when(() => signals.flush()).thenAnswer((_) async {});
+    final cubit = PayrollDashboardCubit(
+      read: GetPayrollDashboardUseCase(repository),
+      documents: FetchPayslipUseCase(payslips),
+      signals: signals,
+      now: () => DateTime(2026, 9, 28, 10),
+      debounce: Duration.zero,
+    );
+    addTearDown(cubit.close);
+    final auth = _MockAuthBloc();
+    const state = AuthState(status: AuthStatus.authenticated);
+    when(() => auth.state).thenReturn(state);
+    whenListen(auth, const Stream<AuthState>.empty(), initialState: state);
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: MultiBlocProvider(
+            providers: [
+              BlocProvider<AuthBloc>.value(value: auth),
+              BlocProvider.value(value: cubit..load()),
+            ],
+            child: const PayrollDashboardScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return cubit;
+  }
 
   testAtReferenceFormats('Tableau de bord de la paie', (tester, format) async {
-    final pumped = await pumpPayrollScreen(
-      tester,
-      snapshot: snapshot,
-      child: const PayrollDashboardScreen(),
-    );
-    // Octobre n'a pas de paie sur cette tablette : le mois le dit.
-    expect(find.text('Aucune paie pour ce mois'), findsOneWidget);
+    await pump(tester);
 
-    pumped.cubit.openMonth('2026-09');
-    await tester.pumpAndSettle();
-    expect(find.text('Prévu et réel du mois'), findsOneWidget);
-    expect(find.text('Ce que chaque salarié perçoit'), findsOneWidget);
+    expect(find.text('COÛT PRÉVU'), findsOneWidget);
+    expect(find.text('RESTE DÛ'), findsOneWidget);
+    expect(find.text('Mois par mois'), findsOneWidget);
     expect(find.text('Arriérés par salarié'), findsOneWidget);
+    // La frise garde le mois affiché à l'écran, quelle que soit la largeur.
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is PayrollMonthPill && w.month == '2026-09' && w.selected,
+      ),
+      findsOneWidget,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Ce que chaque salarié perçoit'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('MAYALA Ruth'), findsWidgets);
+  });
+
+  testWidgets('hors ligne au premier chargement : l erreur réseau', (
+    tester,
+  ) async {
+    when(
+      () => repository.read(
+        any(),
+        filter: any(named: 'filter'),
+        query: any(named: 'query'),
+      ),
+    ).thenAnswer((_) async => const Left(NetworkFailure()));
+
+    await pump(tester);
+
+    expect(find.text('Réessayer'), findsOneWidget);
+    expect(find.text('COÛT PRÉVU'), findsNothing);
+  });
+
+  testWidgets('aucune paie ce mois : le vide propose de la préparer', (
+    tester,
+  ) async {
+    when(
+      () => repository.read(
+        any(),
+        filter: any(named: 'filter'),
+        query: any(named: 'query'),
+      ),
+    ).thenAnswer(
+      (_) async => const Right(
+        PayrollDashboard(
+          month: '2026-09',
+          status: PayrollMonthStatus.none,
+          situationAt: '2026-09-28T09:00:00Z',
+        ),
+      ),
+    );
+
+    await pump(tester);
+
+    expect(find.text('Aucune paie pour ce mois'), findsOneWidget);
+    expect(find.text('Préparer la paie'), findsOneWidget);
   });
 
   testWidgets(
     'le PDF part avec le mois, le filtre et la recherche de l écran',
     (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1440, 2400));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final payslips = _MockPayslips();
+      tester.view.physicalSize = const Size(1440, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       when(
         () => payslips.dashboard(
           any(),
@@ -105,21 +165,22 @@ void main() {
           query: any(named: 'query'),
         ),
       ).thenAnswer((_) async => const Left(NetworkFailure()));
-      final pumped = await pumpPayrollScreen(
-        tester,
-        snapshot: snapshot,
-        payslips: payslips,
-        child: const PayrollDashboardScreen(),
-      );
-      pumped.cubit.openMonth('2026-09');
-      await tester.pumpAndSettle();
+      await pump(tester);
 
       await tester.tap(find.text('Reste à payer'));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, 'Mayala');
       await tester.pumpAndSettle();
       await tester.tap(find.text('PDF'));
       await tester.pumpAndSettle();
 
+      verify(
+        () => repository.read(
+          '2026-09',
+          filter: PayrollDashboardFilter.outstanding,
+          query: 'Mayala',
+        ),
+      ).called(1);
       verify(
         () => payslips.dashboard(
           '2026-09',
@@ -129,4 +190,28 @@ void main() {
       ).called(1);
     },
   );
+
+  testWidgets('un mois d avant la v2 : ni versé ni reste inventés', (
+    tester,
+  ) async {
+    final json = payrollDashboardFixture()
+      ..['tracked'] = false
+      ..['arrears'] = <Object>[];
+    ((json['currencies'] as List).first as Map<String, dynamic>)
+      ..remove('progress')
+      ..remove('rows')
+      ..remove('totals');
+    when(
+      () => repository.read(
+        any(),
+        filter: any(named: 'filter'),
+        query: any(named: 'query'),
+      ),
+    ).thenAnswer((_) async => Right(PayrollDashboardJson.fromJson(json)));
+
+    await pump(tester);
+
+    expect(find.text('Non suivi avant la v2'), findsNWidgets(2));
+    expect(find.text('Ce que chaque salarié perçoit'), findsNothing);
+  });
 }

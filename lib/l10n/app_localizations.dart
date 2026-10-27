@@ -30453,12 +30453,6 @@ abstract class AppLocalizations {
   /// **'Children\'s fees'**
   String get payrollDashChildcare;
 
-  /// No description provided for @payrollDashOther.
-  ///
-  /// In en, this message translates to:
-  /// **'Other'**
-  String get payrollDashOther;
-
   /// No description provided for @payrollDashForecastTitle.
   ///
   /// In en, this message translates to:
@@ -30482,12 +30476,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Planned cost'**
   String get payrollDashPlanned;
-
-  /// No description provided for @payrollDashActual.
-  ///
-  /// In en, this message translates to:
-  /// **'Actually to pay'**
-  String get payrollDashActual;
 
   /// No description provided for @payrollDashLessThanPlanned.
   ///
@@ -30531,12 +30519,6 @@ abstract class AppLocalizations {
   /// **'Net to pay: paid and unpaid'**
   String get payrollDashPaidTitle;
 
-  /// No description provided for @payrollDashPaidSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{percent} % paid · {count, plural, =0{no employee settled} =1{1 employee settled} other{{count} employees settled}}'**
-  String payrollDashPaidSummary(int percent, int count);
-
   /// No description provided for @payrollDashUnpaidSummary.
   ///
   /// In en, this message translates to:
@@ -30560,12 +30542,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Month by month'**
   String get payrollDashByMonth;
-
-  /// No description provided for @payrollDashColumnA11y.
-  ///
-  /// In en, this message translates to:
-  /// **'{month}: paid {paid}, remaining {rest}'**
-  String payrollDashColumnA11y(String month, String paid, String rest);
 
   /// No description provided for @payrollDashAdvancesTitle.
   ///
@@ -30777,12 +30753,6 @@ abstract class AppLocalizations {
   /// **'Current month'**
   String get payrollDashCurrentMonth;
 
-  /// No description provided for @payrollDashNoStaff.
-  ///
-  /// In en, this message translates to:
-  /// **'No employee to pay'**
-  String get payrollDashNoStaff;
-
   /// No description provided for @payrollDashNotTracked.
   ///
   /// In en, this message translates to:
@@ -30944,6 +30914,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some of this month\'s entries are still waiting to be sent: the provisional payslip does not show them.'**
   String get payrollToastPreviewUnsynced;
+
+  /// No description provided for @payrollMonthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} other{Dec}}'**
+  String payrollMonthShort(String month);
+
+  /// No description provided for @payrollMonthStripA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll months'**
+  String get payrollMonthStripA11y;
+
+  /// No description provided for @payrollMonthPillA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} · {status}'**
+  String payrollMonthPillA11y(String month, String status);
+
+  /// No description provided for @payrollMonthNoPayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'No payroll'**
+  String get payrollMonthNoPayroll;
+
+  /// No description provided for @payrollNoticesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more point} other{{count} more points}}'**
+  String payrollNoticesMore(int count);
+
+  /// No description provided for @payrollNoticesLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get payrollNoticesLess;
+
+  /// No description provided for @payrollDashErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not answer'**
+  String get payrollDashErrorServerTitle;
+
+  /// No description provided for @payrollDashErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The payroll dashboard could not be read from the server. Try again in a moment; if the problem persists, contact support.'**
+  String get payrollDashErrorServer;
+
+  /// No description provided for @payrollDashErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account cannot read the payroll. Ask the school administrator for this right.'**
+  String get payrollDashErrorForbidden;
+
+  /// No description provided for @payrollDashRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get payrollDashRefresh;
+
+  /// No description provided for @payrollDashSituationAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Situation as of {date}'**
+  String payrollDashSituationAt(String date);
+
+  /// No description provided for @payrollDashKpiPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get payrollDashKpiPaid;
+
+  /// No description provided for @payrollDashKpiPaidSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of net · {count, plural, =0{no staff member settled} =1{1 staff member settled} other{{count} staff members settled}} for the month'**
+  String payrollDashKpiPaidSubline(int percent, int count);
+
+  /// No description provided for @payrollDashKpiRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Still due'**
+  String get payrollDashKpiRemaining;
+
+  /// No description provided for @payrollDashKpiRemainingSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'including {arrears} of arrears from validated months'**
+  String payrollDashKpiRemainingSubline(String arrears);
+
+  /// No description provided for @payrollDashKpiRemainingDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay once validated'**
+  String get payrollDashKpiRemainingDraft;
+
+  /// No description provided for @payrollDashByMonthSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Net of each payroll month, in {currency} — tap a month to open it'**
+  String payrollDashByMonthSubtitle(String currency);
+
+  /// No description provided for @payrollDashKpisA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Key payroll figures for the month'**
+  String get payrollDashKpisA11y;
+
+  /// No description provided for @payrollDashSplitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From gross to net'**
+  String get payrollDashSplitTitle;
+
+  /// No description provided for @payrollNoValue.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get payrollNoValue;
+
+  /// No description provided for @payrollDashRefreshOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: the dashboard was not reread; the figures shown are the previous ones.'**
+  String get payrollDashRefreshOffline;
+
+  /// No description provided for @payrollDashRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The dashboard could not be reread; the figures shown are the previous ones.'**
+  String get payrollDashRefreshFailed;
+
+  /// No description provided for @payrollDashNotTrackedKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tracked before v2'**
+  String get payrollDashNotTrackedKpi;
 }
 
 class _AppLocalizationsDelegate
