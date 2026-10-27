@@ -20460,4 +20460,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollKpiLoans => 'Advances & loans';
+
+  @override
+  String get payrollAgentLoansTitle => 'Loans & advances';
+
+  @override
+  String get payrollAgentAdvanceSingle => 'Salary advance';
+
+  @override
+  String payrollAgentAdvanceLoan(int count) {
+    return 'Loan · $count months';
+  }
+
+  @override
+  String payrollAgentNextInstallment(String amount, String month) {
+    return 'Next instalment: $amount on the $month payroll';
+  }
+
+  @override
+  String get payrollAgentLoansEmpty =>
+      'No advance or loan. Requests are made in HR · Payroll ▸ Advances & loans.';
+
+  @override
+  String get payrollAgentArrearsTitle => 'Salary arrears';
+
+  @override
+  String payrollAgentArrearPaid(String paid, String net) {
+    return 'received $paid / $net';
+  }
+
+  @override
+  String get payrollAgentArrearPriority => 'to settle first';
+
+  @override
+  String get payrollAgentArrearsEmpty => 'Every validated month is settled.';
+
+  @override
+  String get payrollAgentArrearsSettle => 'Settle the arrears';
+
+  @override
+  String payrollAgentTotalsTitle(String year) {
+    return 'Totals · $year';
+  }
+
+  @override
+  String get payrollAgentTotalsGross => 'Gross salary';
+
+  @override
+  String get payrollAgentTotalsIprCnss => 'IPR & CNSS';
+
+  @override
+  String get payrollAgentTotalsAbsence => 'Absences deducted';
+
+  @override
+  String get payrollAgentTotalsChildcare => 'Childcare';
+
+  @override
+  String get payrollAgentTotalsAdvances => 'Advances & loans repaid';
+
+  @override
+  String get payrollAgentTotalsPaid => 'Net received';
+
+  @override
+  String payrollAgentTotalsMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Over $count validated months.',
+      one: 'Over 1 validated month.',
+    );
+    return '$_temp0';
+  }
 }

@@ -12,7 +12,11 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_agen
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_arrears_card.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_hero.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_loans_card.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_totals_card.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/arrears/payroll_arrears_actions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_month_list.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_month_panel.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_profile_dialog.dart';
@@ -135,7 +139,7 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
           key: _panelKey,
           child: PayrollAgentMonthPanel(snapshot: state.snapshot, month: shown),
         );
-        final side = _side(situation);
+        final side = _side(situation, shown, canWrite: canWrite, wide: wide);
         if (!wide) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -188,7 +192,33 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
   }
 
   /// Les engagements de l'agent : prêts, arriérés, cumuls.
-  List<Widget> _side(PayrollAgentSituation situation) => const [];
+  List<Widget> _side(
+    PayrollAgentSituation situation,
+    PayrollAgentMonth shown, {
+    required bool canWrite,
+    required bool wide,
+  }) {
+    final state = widget.state;
+    final arrears = situation.arrears;
+    return [
+      PayrollAgentLoansCard(
+        situation: situation,
+        snapshot: state.snapshot,
+        view: shown.view,
+      ),
+      PayrollAgentArrearsCard(
+        arrears: arrears,
+        onSelectMonth: (month) => _select(month, scroll: !wide),
+        onSettle: canWrite && arrears != null
+            ? () => PayrollArrearsActions(
+                context,
+              ).open(arrears, state.currentMonth)
+            : null,
+      ),
+      if (situation.totals.isNotEmpty)
+        PayrollAgentTotalsCard(year: situation.year, totals: situation.totals),
+    ];
+  }
 
   /// Le mois affiché porte les gestes du cubit : il le suit.
   void _follow(String month) =>

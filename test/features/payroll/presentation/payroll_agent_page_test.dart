@@ -110,7 +110,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(pumped.cubit.state.month, '2026-10');
 
-    await tester.tap(find.text('Septembre 2026'));
+    await tester.tap(find.text('Septembre 2026').first);
     await tester.pumpAndSettle();
 
     expect(pumped.cubit.state.month, '2026-09');
@@ -145,7 +145,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1400, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await pumpAgent(tester, snapshot: snapshotOf(paid: [paid(10000)]));
-    await tester.tap(find.text('Septembre 2026'));
+    await tester.tap(find.text('Septembre 2026').first);
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Verser · reste'), findsOneWidget);
@@ -165,11 +165,27 @@ void main() {
       child: const PayrollAgentScreen(agentId: 'm-1', entryMonth: '2026-10'),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Septembre 2026'));
+    await tester.tap(find.text('Septembre 2026').first);
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Verser · reste'), findsNothing);
     expect(find.text('Versements'), findsOneWidget);
+  });
+
+  testWidgets('la colonne gauche : prêt, arriéré du mois, cumuls de l année', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await pumpAgent(tester, snapshot: snapshotOf(paid: [paid(10000)]));
+
+    expect(find.text('Prêts & avances'), findsOneWidget);
+    expect(find.text('Prêt · 3 mois'), findsOneWidget);
+    expect(find.textContaining('Prochaine retenue'), findsOneWidget);
+    expect(find.text('Arriérés de salaire'), findsOneWidget);
+    expect(find.text('Régler les arriérés'), findsOneWidget);
+    expect(find.text('Cumuls · 2026'), findsOneWidget);
+    expect(find.text('Sur 1 mois validé.'), findsOneWidget);
   });
 
   testWidgets('un agent sans paie : la fiche le dit et ramène au livre', (

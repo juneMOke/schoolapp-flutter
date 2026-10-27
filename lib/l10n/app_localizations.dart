@@ -31496,6 +31496,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advances & loans'**
   String get payrollKpiLoans;
+
+  /// No description provided for @payrollAgentLoansTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans & advances'**
+  String get payrollAgentLoansTitle;
+
+  /// No description provided for @payrollAgentAdvanceSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary advance'**
+  String get payrollAgentAdvanceSingle;
+
+  /// No description provided for @payrollAgentAdvanceLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan · {count} months'**
+  String payrollAgentAdvanceLoan(int count);
+
+  /// No description provided for @payrollAgentNextInstallment.
+  ///
+  /// In en, this message translates to:
+  /// **'Next instalment: {amount} on the {month} payroll'**
+  String payrollAgentNextInstallment(String amount, String month);
+
+  /// No description provided for @payrollAgentLoansEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No advance or loan. Requests are made in HR · Payroll ▸ Advances & loans.'**
+  String get payrollAgentLoansEmpty;
+
+  /// No description provided for @payrollAgentArrearsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary arrears'**
+  String get payrollAgentArrearsTitle;
+
+  /// No description provided for @payrollAgentArrearPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'received {paid} / {net}'**
+  String payrollAgentArrearPaid(String paid, String net);
+
+  /// No description provided for @payrollAgentArrearPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'to settle first'**
+  String get payrollAgentArrearPriority;
+
+  /// No description provided for @payrollAgentArrearsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Every validated month is settled.'**
+  String get payrollAgentArrearsEmpty;
+
+  /// No description provided for @payrollAgentArrearsSettle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle the arrears'**
+  String get payrollAgentArrearsSettle;
+
+  /// No description provided for @payrollAgentTotalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals · {year}'**
+  String payrollAgentTotalsTitle(String year);
+
+  /// No description provided for @payrollAgentTotalsGross.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross salary'**
+  String get payrollAgentTotalsGross;
+
+  /// No description provided for @payrollAgentTotalsIprCnss.
+  ///
+  /// In en, this message translates to:
+  /// **'IPR & CNSS'**
+  String get payrollAgentTotalsIprCnss;
+
+  /// No description provided for @payrollAgentTotalsAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences deducted'**
+  String get payrollAgentTotalsAbsence;
+
+  /// No description provided for @payrollAgentTotalsChildcare.
+  ///
+  /// In en, this message translates to:
+  /// **'Childcare'**
+  String get payrollAgentTotalsChildcare;
+
+  /// No description provided for @payrollAgentTotalsAdvances.
+  ///
+  /// In en, this message translates to:
+  /// **'Advances & loans repaid'**
+  String get payrollAgentTotalsAdvances;
+
+  /// No description provided for @payrollAgentTotalsPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Net received'**
+  String get payrollAgentTotalsPaid;
+
+  /// No description provided for @payrollAgentTotalsMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Over 1 validated month.} other{Over {count} validated months.}}'**
+  String payrollAgentTotalsMonths(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -20595,4 +20595,75 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollKpiLoans => 'Avances & prêts';
+
+  @override
+  String get payrollAgentLoansTitle => 'Prêts & avances';
+
+  @override
+  String get payrollAgentAdvanceSingle => 'Avance sur salaire';
+
+  @override
+  String payrollAgentAdvanceLoan(int count) {
+    return 'Prêt · $count mois';
+  }
+
+  @override
+  String payrollAgentNextInstallment(String amount, String month) {
+    return 'Prochaine retenue : $amount sur la paie de $month';
+  }
+
+  @override
+  String get payrollAgentLoansEmpty =>
+      'Aucune avance ni prêt. Les demandes se font dans RH · Paie ▸ Avances & prêts.';
+
+  @override
+  String get payrollAgentArrearsTitle => 'Arriérés de salaire';
+
+  @override
+  String payrollAgentArrearPaid(String paid, String net) {
+    return 'perçu $paid / $net';
+  }
+
+  @override
+  String get payrollAgentArrearPriority => 'à solder en priorité';
+
+  @override
+  String get payrollAgentArrearsEmpty => 'Tous les mois validés sont soldés.';
+
+  @override
+  String get payrollAgentArrearsSettle => 'Régler les arriérés';
+
+  @override
+  String payrollAgentTotalsTitle(String year) {
+    return 'Cumuls · $year';
+  }
+
+  @override
+  String get payrollAgentTotalsGross => 'Salaire brut';
+
+  @override
+  String get payrollAgentTotalsIprCnss => 'IPR & CNSS';
+
+  @override
+  String get payrollAgentTotalsAbsence => 'Absences retenues';
+
+  @override
+  String get payrollAgentTotalsChildcare => 'PC/E';
+
+  @override
+  String get payrollAgentTotalsAdvances => 'Avances & prêts remboursés';
+
+  @override
+  String get payrollAgentTotalsPaid => 'Net perçu';
+
+  @override
+  String payrollAgentTotalsMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sur $count mois validés.',
+      one: 'Sur 1 mois validé.',
+    );
+    return '$_temp0';
+  }
 }
