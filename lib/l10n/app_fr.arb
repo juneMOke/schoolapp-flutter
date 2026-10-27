@@ -9548,90 +9548,6 @@
   "presenceMarkStartTooLate": "Les cours commencent au plus tard à {latest}.",
   "subMenuPayroll": "Paie",
   "payrollTabLedger": "Livre de paie",
-  "payrollTabLedgerSubtitle": "Net {amount}",
-  "payrollTabStatement": "État de paie",
-  "@payrollTabStatement": {
-    "description": "Onglet de l'état de paie."
-  },
-  "payrollTabStatementSubtitle": "Le tableur des écoles",
-  "@payrollTabStatementSubtitle": {
-    "description": "Sous-titre de l'onglet."
-  },
-  "payrollStatementColName": "Nom et postnom",
-  "@payrollStatementColName": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementColGrade": "Grade",
-  "@payrollStatementColGrade": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementColGross": "Sal. brut",
-  "@payrollStatementColGross": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementColWorkedDays": "NJP",
-  "@payrollStatementColWorkedDays": {
-    "description": "Colonne de l'état : jours prestés."
-  },
-  "payrollStatementColAbsence": "Abs. non just.",
-  "@payrollStatementColAbsence": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementColLoan": "Crédit",
-  "@payrollStatementColLoan": {
-    "description": "Colonne de l'état : prêt."
-  },
-  "payrollStatementColAdvance": "A/S",
-  "@payrollStatementColAdvance": {
-    "description": "Colonne de l'état : avance sur salaire."
-  },
-  "payrollStatementColChildcare": "PC/E",
-  "@payrollStatementColChildcare": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementColIpr": "IPR",
-  "@payrollStatementColIpr": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementColCnss": "CNSS",
-  "@payrollStatementColCnss": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementColNet": "Net à payer",
-  "@payrollStatementColNet": {
-    "description": "Colonne de l'état."
-  },
-  "payrollStatementSubtotal": "Sous-total",
-  "@payrollStatementSubtotal": {
-    "description": "Ligne de sous-total d'un groupe."
-  },
-  "payrollStatementTotal": "Total général",
-  "@payrollStatementTotal": {
-    "description": "Ligne de total général."
-  },
-  "payrollStatementOther": "Autres",
-  "@payrollStatementOther": {
-    "description": "Groupe d'une catégorie inconnue."
-  },
-  "payrollStatementLocked": "Lecture seule : la paie n'est plus en brouillon.",
-  "@payrollStatementLocked": {
-    "description": "Bandeau cadenas de l'état."
-  },
-  "payrollStatementControl": "Brut {gross} − retenues {withheld} = net {net}",
-  "@payrollStatementControl": {
-    "description": "Ligne de contrôle de l'état.",
-    "placeholders": {
-      "gross": {
-        "type": "String"
-      },
-      "withheld": {
-        "type": "String"
-      },
-      "net": {
-        "type": "String"
-      }
-    }
-  },
   "payrollArrearsTitle": "Arriérés de salaire",
   "@payrollArrearsTitle": {
     "description": "Titre du registre des arriérés."
@@ -9804,7 +9720,7 @@
   "@payrollArrearsBannerAction": {
     "description": "Bouton de la bannière."
   },
-  "payrollStatementPrint": "Imprimer l'état",
+  "payrollStatementPrint": "Imprimer l'état de paie",
   "@payrollStatementPrint": {
     "description": "Bouton : état de paie A4 composé par le serveur."
   },
@@ -9817,10 +9733,6 @@
       }
     }
   },
-  "payrollTabPayslips": "Bulletins",
-  "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
-  "payrollTabHistory": "Historique",
-  "payrollTabHistorySubtitle": "{count, plural, =1{1 mois} other{{count} mois}}",
   "payrollPhaseDraft": "Brouillon",
   "payrollPhaseSubmitting": "Soumission envoyée",
   "payrollPhaseSubmitted": "Soumise",
@@ -9852,23 +9764,8 @@
   "payrollAttendanceUnverifiable": "Clôture du pointage de {month} non vérifiable hors ligne : le serveur tranchera.",
   "payrollKpiGross": "Masse brute",
   "payrollKpiAgents": "{count, plural, =1{1 agent} other{{count} agents}}",
-  "payrollKpiComplements": "Compléments",
-  "payrollKpiComplementsDetail": "Heures sup. et allocations",
   "payrollKpiAdvances": "Avances déduites",
   "payrollKpiAdvancesDetail": "{count, plural, =0{Aucune échéance} =1{1 échéance} other{{count} échéances}}",
-  "payrollKpiDeductions": "Retenues",
-  "@payrollKpiDeductions": {
-    "description": "KPI v2 : retenues fixes et avances."
-  },
-  "payrollKpiDeductionsDetail": "{count, plural, =0{Absences, IPR/CNSS, PC/E} =1{Absences, IPR/CNSS, PC/E et 1 échéance} other{Absences, IPR/CNSS, PC/E et {count} échéances}}",
-  "@payrollKpiDeductionsDetail": {
-    "description": "Sous-titre du KPI des retenues.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "payrollKpiNetToPay": "À verser {toPay} · {deferred} en arriéré",
   "@payrollKpiNetToPay": {
     "description": "Sous-titre du net quand le versement est réduit.",
@@ -10400,7 +10297,6 @@
   "payrollAdvancesEmpty": "Aucune avance accordée",
   "payrollAdvancesEmptyFilter": "Aucune avance dans ce filtre",
   "payrollProfileTitle": "Profil de paie",
-  "payrollProfileEdit": "Profil de paie",
   "payrollProfileChildren": "Enfants à charge",
   "payrollProfileMode": "Mode de versement préféré",
   "payrollProfileOperator": "Opérateur",
@@ -10430,7 +10326,6 @@
   "payrollSettingsEligible": "Statuts qui ouvrent les allocations",
   "payrollPayslipTitle": "Bulletin de paie",
   "payrollPayslipProvisional": "Provisoire — non validée",
-  "payrollPayslipUnsealed": "Non authentifié — le bulletin scellé se télécharge en ligne",
   "payrollPayslipStaffNumber": "Matricule",
   "payrollPayslipJob": "Fonction",
   "payrollPayslipContract": "Contrat",
@@ -10543,9 +10438,6 @@
   "payrollPayslipWhatsapp": "Envoyer par WhatsApp",
   "payrollPayslipAll": "Tous les bulletins (PDF)",
   "payrollPayslipOpenedWhatsapp": "Ouvert dans WhatsApp le {date}",
-  "payrollPayslipDownloaded": "PDF téléchargé le {date}",
-  "payrollPayslipPrevious": "Précédent",
-  "payrollPayslipNext": "Suivant",
   "payrollPayslipPosition": "{index} / {count}",
   "payrollPayslipNoPhone": "Aucun numéro pour cet agent.",
   "payrollPayslipWhatsappMessageV2": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : brut {gross} ; retenues {deductions} ; total retenues {total} ; jours prestés {days} ; net {net} ; perçu {paid} ; reste {rest}.",
@@ -10584,21 +10476,6 @@
       }
     }
   },
-  "payrollPayslipEmpty": "Aucun agent au livre de ce mois.",
-  "payrollHistoryMonths": "Mois tenus",
-  "payrollHistoryPaid": "Total net versé",
-  "payrollHistoryLocked": "Mois verrouillés",
-  "payrollHistoryColMonth": "Mois",
-  "payrollHistoryColStatus": "Statut",
-  "payrollHistoryColAgents": "Agents",
-  "payrollHistoryColGross": "Brut",
-  "payrollHistoryColAdvances": "Avances",
-  "payrollHistoryColNet": "Net",
-  "payrollHistoryColValidated": "Validée",
-  "payrollHistoryCurrent": "mois en cours",
-  "payrollHistoryRemaining": "reste {amount}",
-  "payrollHistoryValidatedBy": "{date} · {name}",
-  "payrollHistoryEmpty": "Aucune paie tenue",
   "payrollEmptyStaff": "Aucun agent à payer",
   "payrollEmptyStaffHint": "Le livre se remplit avec les contrats du fichier du personnel.",
   "payrollEmptyMonth": "Aucune paie pour ce mois",
@@ -12211,7 +12088,9 @@
   "@payrollCalcRate": {"placeholders": {"percent": {"type": "int"}}},
   "payrollCalcRateFull": "Taux de versement du mois · 100 % — versement intégral du net",
   "payrollCalcFixed": "Montant fixe",
-  "payrollCalcToPay": "À verser ce mois",
   "payrollCalcDeferred": "Part non versée → arriéré",
-  "payrollCalcAfterValidation": "Les versements seront possibles après validation."
+  "payrollCalcAfterValidation": "Les versements seront possibles après validation.",
+  "payrollKpiSchoolDeductions": "Retenues école",
+  "payrollKpiSchoolDeductionsDetail": "Absences · IPR/CNSS · PC/E",
+  "payrollKpiLoans": "Avances & prêts"
 }

@@ -37,7 +37,6 @@ class PayrollKpis extends StatelessWidget {
           sum + line.advances.where((a) => a.takenInCents > 0).length,
     );
     final locked = view.phase.isLocked;
-    final fixed = lines.any((l) => l.deductions.totalInCents > 0);
     final deferred = _perCurrency(lines, (l) => l.deferredInCents);
     final absences = lines.fold<int>(
       0,
@@ -59,27 +58,21 @@ class PayrollKpis extends StatelessWidget {
               icon: Icons.account_balance_wallet_outlined,
               subline: l10n.payrollKpiAgents(lines.length),
             ),
+            // Ce que l'école retient, séparé de ce que l'agent rembourse :
+            // une échéance d'avance rend son propre argent.
             PayrollKpiCard.of(
-              label: l10n.payrollKpiComplements,
-              valueLines: _perCurrency(lines, (l) => l.complementsInCents),
-              // Heures et allocations : un gain pour l'agent.
-              accent: DashboardSense.encaisse,
-              icon: Icons.add_circle_outline,
-              subline: l10n.payrollKpiComplementsDetail,
-            ),
-            PayrollKpiCard.of(
-              label: fixed
-                  ? l10n.payrollKpiDeductions
-                  : l10n.payrollKpiAdvances,
-              valueLines: _perCurrency(
-                lines,
-                (l) => l.deductions.totalInCents + l.advanceInCents,
-              ),
+              label: l10n.payrollKpiSchoolDeductions,
+              valueLines: _perCurrency(lines, (l) => l.deductions.totalInCents),
               accent: DashboardSense.manquant,
               icon: Icons.remove_circle_outline,
-              subline: fixed
-                  ? l10n.payrollKpiDeductionsDetail(installments)
-                  : l10n.payrollKpiAdvancesDetail(installments),
+              subline: l10n.payrollKpiSchoolDeductionsDetail,
+            ),
+            PayrollKpiCard.of(
+              label: l10n.payrollKpiLoans,
+              valueLines: _perCurrency(lines, (l) => l.advanceInCents),
+              accent: DashboardSense.attente,
+              icon: Icons.handshake_outlined,
+              subline: l10n.payrollKpiAdvancesDetail(installments),
             ),
             PayrollKpiCard.of(
               label: l10n.payrollKpiNet,

@@ -11,8 +11,6 @@ import 'package:school_app_flutter/features/staff/domain/services/staff_member_s
 
 enum PayrollLoad { loading, ready, failure }
 
-enum PayrollTab { ledger, statement, payslips, history }
-
 /// Les puces du règlement (B3) : un salaire se règle en plusieurs fois.
 enum PayrollPayFilter {
   all,
@@ -37,22 +35,19 @@ class PayrollState extends Equatable {
   /// `YYYY-MM-DD` — borne la navigation et date les écritures.
   final String today;
 
-  /// `YYYY-MM`, partagé par le livre et les bulletins.
+  /// `YYYY-MM` : le livre affiché, ou le mois choisi dans une fiche.
   final String month;
-  final PayrollTab tab;
 
   /// Le livre de [month], recomposé quand la tablette ou le mois change.
   final PayrollMonthView? view;
 
-  /// Les livres de l'historique, recomposés à chaque lecture de la tablette.
+  /// Les livres de tous les mois tenus, pour la fiche d'un agent —
+  /// recomposés à chaque lecture de la tablette.
   final List<PayrollMonthView> history;
   final StaffContractKind? contractFilter;
   final PayrollPayFilter payFilter;
   final String search;
   final PayrollAdvanceFilter advanceFilter;
-
-  /// L'agent dont le bulletin est ouvert ; `null` = le premier du livre.
-  final String? payslipMemberId;
   final PayrollNotice? notice;
 
   const PayrollState({
@@ -61,14 +56,12 @@ class PayrollState extends Equatable {
     required this.today,
     required this.month,
     this.failure,
-    this.tab = PayrollTab.ledger,
     this.view,
     this.history = const [],
     this.contractFilter,
     this.payFilter = PayrollPayFilter.all,
     this.search = '',
     this.advanceFilter = PayrollAdvanceFilter.ongoing,
-    this.payslipMemberId,
     this.notice,
   });
 
@@ -138,14 +131,12 @@ class PayrollState extends Equatable {
     PayrollSnapshot? snapshot,
     String? today,
     String? month,
-    PayrollTab? tab,
     PayrollMonthView? view,
     List<PayrollMonthView>? history,
     StaffContractKind? Function()? contractFilter,
     PayrollPayFilter? payFilter,
     String? search,
     PayrollAdvanceFilter? advanceFilter,
-    String? Function()? payslipMemberId,
     PayrollNotice? notice,
   }) => PayrollState(
     load: load ?? this.load,
@@ -153,7 +144,6 @@ class PayrollState extends Equatable {
     snapshot: snapshot ?? this.snapshot,
     today: today ?? this.today,
     month: month ?? this.month,
-    tab: tab ?? this.tab,
     view: view ?? this.view,
     history: history ?? this.history,
     contractFilter: contractFilter == null
@@ -162,9 +152,6 @@ class PayrollState extends Equatable {
     payFilter: payFilter ?? this.payFilter,
     search: search ?? this.search,
     advanceFilter: advanceFilter ?? this.advanceFilter,
-    payslipMemberId: payslipMemberId == null
-        ? this.payslipMemberId
-        : payslipMemberId(),
     notice: notice ?? this.notice,
   );
 
@@ -175,14 +162,12 @@ class PayrollState extends Equatable {
     snapshot,
     today,
     month,
-    tab,
     view,
     history,
     contractFilter,
     payFilter,
     search,
     advanceFilter,
-    payslipMemberId,
     notice,
   ];
 }

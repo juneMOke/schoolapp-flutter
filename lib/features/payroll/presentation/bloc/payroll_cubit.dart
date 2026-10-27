@@ -96,10 +96,6 @@ class PayrollCubit extends Cubit<PayrollState> {
 
   // ── Navigation ────────────────────────────────────────────────────────
 
-  void setTab(PayrollTab tab) {
-    if (tab != state.tab) emit(state.copyWith(tab: tab));
-  }
-
   /// Le mois précédent ou suivant ; jamais au-delà du mois en cours, ni
   /// avant le premier contrat de l'école.
   void stepMonth(int direction) {
@@ -122,34 +118,16 @@ class PayrollCubit extends Cubit<PayrollState> {
     _openMonth(wanted);
   }
 
-  /// Un mois de l'historique ouvre son livre.
-  void openMonth(String month) {
-    _openMonth(month);
-    setTab(PayrollTab.ledger);
-  }
-
   void _openMonth(String month) {
     if (month == state.month) return;
     emit(
       state.copyWith(
         month: month,
         view: PayrollLedger.monthView(state.snapshot, month),
-        payslipMemberId: () => null,
         payFilter: PayrollPayFilter.all,
       ),
     );
   }
-
-  /// Une ligne du livre ouvre le bulletin de son agent.
-  void openPayslip(String staffMemberId) => emit(
-    state.copyWith(
-      payslipMemberId: () => staffMemberId,
-      tab: PayrollTab.payslips,
-    ),
-  );
-
-  void selectPayslip(String staffMemberId) =>
-      emit(state.copyWith(payslipMemberId: () => staffMemberId));
 
   // ── Filtres ───────────────────────────────────────────────────────────
 

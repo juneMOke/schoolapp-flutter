@@ -9141,39 +9141,6 @@
   "@presenceMarkStartTooLate": {"placeholders": {"latest": {"type": "String"}}},
   "subMenuPayroll": "Payroll",
   "payrollTabLedger": "Payroll ledger",
-  "payrollTabLedgerSubtitle": "Net {amount}",
-  "@payrollTabLedgerSubtitle": {"placeholders": {"amount": {"type": "String"}}},
-  "payrollTabStatement": "Payroll statement",
-  "payrollTabStatementSubtitle": "The schools' spreadsheet",
-  "payrollStatementColName": "Name",
-  "payrollStatementColGrade": "Grade",
-  "payrollStatementColGross": "Gross",
-  "payrollStatementColWorkedDays": "Days",
-  "payrollStatementColAbsence": "Unexc. abs.",
-  "payrollStatementColLoan": "Loan",
-  "payrollStatementColAdvance": "Adv.",
-  "payrollStatementColChildcare": "PC/E",
-  "payrollStatementColIpr": "IPR",
-  "payrollStatementColCnss": "CNSS",
-  "payrollStatementColNet": "Net pay",
-  "payrollStatementSubtotal": "Subtotal",
-  "payrollStatementTotal": "Grand total",
-  "payrollStatementOther": "Others",
-  "payrollStatementLocked": "Read only: the payroll is no longer a draft.",
-  "payrollStatementControl": "Gross {gross} − deductions {withheld} = net {net}",
-  "@payrollStatementControl": {
-    "placeholders": {
-      "gross": {
-        "type": "String"
-      },
-      "withheld": {
-        "type": "String"
-      },
-      "net": {
-        "type": "String"
-      }
-    }
-  },
   "payrollArrearsTitle": "Salary arrears",
   "payrollArrearsDebt": "Salary debt",
   "payrollArrearsDeferred": "Decided deferral",
@@ -9272,7 +9239,7 @@
     }
   },
   "payrollArrearsBannerAction": "Handle the arrears",
-  "payrollStatementPrint": "Print the statement",
+  "payrollStatementPrint": "Print the payroll statement",
   "payrollStatementFileName": "payroll-statement-{month}",
   "@payrollStatementFileName": {
     "placeholders": {
@@ -9281,11 +9248,6 @@
       }
     }
   },
-  "payrollTabPayslips": "Payslips",
-  "payrollTabPayslipsSubtitle": "PDF · WhatsApp",
-  "payrollTabHistory": "History",
-  "payrollTabHistorySubtitle": "{count, plural, =1{1 month} other{{count} months}}",
-  "@payrollTabHistorySubtitle": {"placeholders": {"count": {"type": "int"}}},
   "payrollPhaseDraft": "Draft",
   "payrollPhaseSubmitting": "Submission sent",
   "payrollPhaseSubmitted": "Submitted",
@@ -9322,20 +9284,9 @@
   "payrollKpiGross": "Gross payroll",
   "payrollKpiAgents": "{count, plural, =1{1 staff member} other{{count} staff members}}",
   "@payrollKpiAgents": {"placeholders": {"count": {"type": "int"}}},
-  "payrollKpiComplements": "Additions",
-  "payrollKpiComplementsDetail": "Overtime and allowances",
   "payrollKpiAdvances": "Advances deducted",
   "payrollKpiAdvancesDetail": "{count, plural, =0{No instalment} =1{1 instalment} other{{count} instalments}}",
   "@payrollKpiAdvancesDetail": {"placeholders": {"count": {"type": "int"}}},
-  "payrollKpiDeductions": "Deductions",
-  "payrollKpiDeductionsDetail": "{count, plural, =0{Absences, IPR/CNSS, PC/E} =1{Absences, IPR/CNSS, PC/E and 1 instalment} other{Absences, IPR/CNSS, PC/E and {count} instalments}}",
-  "@payrollKpiDeductionsDetail": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "payrollKpiNetToPay": "To pay {toPay} · {deferred} in arrears",
   "@payrollKpiNetToPay": {
     "placeholders": {
@@ -9751,7 +9702,6 @@
   "payrollAdvancesEmpty": "No advance granted",
   "payrollAdvancesEmptyFilter": "No advance in this filter",
   "payrollProfileTitle": "Pay profile",
-  "payrollProfileEdit": "Pay profile",
   "payrollProfileChildren": "Dependent children",
   "payrollProfileMode": "Preferred payment mode",
   "payrollProfileOperator": "Operator",
@@ -9770,7 +9720,6 @@
   "payrollSettingsEligible": "Contracts that open allowances",
   "payrollPayslipTitle": "Payslip",
   "payrollPayslipProvisional": "Provisional — not validated",
-  "payrollPayslipUnsealed": "Not authenticated — the sealed payslip downloads online",
   "payrollPayslipStaffNumber": "Staff number",
   "payrollPayslipJob": "Position",
   "payrollPayslipContract": "Contract",
@@ -9863,10 +9812,6 @@
   "payrollPayslipAll": "All payslips (PDF)",
   "payrollPayslipOpenedWhatsapp": "Opened in WhatsApp on {date}",
   "@payrollPayslipOpenedWhatsapp": {"placeholders": {"date": {"type": "String"}}},
-  "payrollPayslipDownloaded": "PDF downloaded on {date}",
-  "@payrollPayslipDownloaded": {"placeholders": {"date": {"type": "String"}}},
-  "payrollPayslipPrevious": "Previous",
-  "payrollPayslipNext": "Next",
   "payrollPayslipPosition": "{index} / {count}",
   "@payrollPayslipPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}}},
   "payrollPayslipNoPhone": "No number for this staff member.",
@@ -9905,23 +9850,6 @@
       }
     }
   },
-  "payrollPayslipEmpty": "No staff member on this month's ledger.",
-  "payrollHistoryMonths": "Months kept",
-  "payrollHistoryPaid": "Total net paid",
-  "payrollHistoryLocked": "Locked months",
-  "payrollHistoryColMonth": "Month",
-  "payrollHistoryColStatus": "Status",
-  "payrollHistoryColAgents": "Staff",
-  "payrollHistoryColGross": "Gross",
-  "payrollHistoryColAdvances": "Advances",
-  "payrollHistoryColNet": "Net",
-  "payrollHistoryColValidated": "Validated",
-  "payrollHistoryCurrent": "current month",
-  "payrollHistoryRemaining": "{amount} left",
-  "@payrollHistoryRemaining": {"placeholders": {"amount": {"type": "String"}}},
-  "payrollHistoryValidatedBy": "{date} · {name}",
-  "@payrollHistoryValidatedBy": {"placeholders": {"date": {"type": "String"}, "name": {"type": "String"}}},
-  "payrollHistoryEmpty": "No payroll kept",
   "payrollEmptyStaff": "No staff member to pay",
   "payrollEmptyStaffHint": "The ledger fills with the contracts of the staff file.",
   "payrollEmptyMonth": "No payroll for this month",
@@ -11980,7 +11908,9 @@
   "@payrollCalcRate": {"placeholders": {"percent": {"type": "int"}}},
   "payrollCalcRateFull": "Payout rate for the month · 100 % — full net paid",
   "payrollCalcFixed": "Fixed amount",
-  "payrollCalcToPay": "To pay this month",
   "payrollCalcDeferred": "Unpaid share → arrears",
-  "payrollCalcAfterValidation": "Payments will be possible after validation."
+  "payrollCalcAfterValidation": "Payments will be possible after validation.",
+  "payrollKpiSchoolDeductions": "School deductions",
+  "payrollKpiSchoolDeductionsDetail": "Absences · IPR/CNSS · childcare",
+  "payrollKpiLoans": "Advances & loans"
 }

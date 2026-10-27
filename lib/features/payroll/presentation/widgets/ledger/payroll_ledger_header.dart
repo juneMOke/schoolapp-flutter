@@ -10,20 +10,11 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/common/
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_status_pill.dart';
 
 /// ‹ octobre 2026 › · statut · circuit, puis la frise des mois — le mois
-/// affiché une seule fois, partagé par le livre, l'état et les bulletins.
+/// affiché une seule fois.
 class PayrollLedgerHeader extends StatelessWidget {
   final PayrollState state;
-  final bool withCircuit;
 
-  /// À droite du mois, à la place du circuit : les actions de l'onglet.
-  final Widget? trailing;
-
-  const PayrollLedgerHeader({
-    super.key,
-    required this.state,
-    this.withCircuit = true,
-    this.trailing,
-  });
+  const PayrollLedgerHeader({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +45,7 @@ class PayrollLedgerHeader extends StatelessWidget {
                 if (view != null) PayrollStatusPill(phase: view.phase),
               ],
             ),
-            if (withCircuit && view != null) PayrollCircuit(view: view),
-            ?trailing,
+            if (view != null) PayrollCircuit(view: view),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),

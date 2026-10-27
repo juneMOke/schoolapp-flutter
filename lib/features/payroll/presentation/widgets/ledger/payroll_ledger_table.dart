@@ -21,7 +21,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// ligne de total par devise en pied. Toucher une ligne ouvre la fiche de
 /// l'agent ; en brouillon, le crayon de fin de ligne ouvre directement ses
 /// éléments variables — la saisie du mois reste d'un seul geste.
-class PayrollLedgerTable extends StatelessWidget {
+class PayrollLedgerViewle extends StatelessWidget {
   final PayrollMonthView view;
   final PayrollSnapshot snapshot;
   final List<PayrollLine> lines;
@@ -32,7 +32,7 @@ class PayrollLedgerTable extends StatelessWidget {
   final ValueChanged<PayrollLine>? onEdit;
   final bool canWrite;
 
-  const PayrollLedgerTable({
+  const PayrollLedgerViewle({
     super.key,
     required this.view,
     required this.snapshot,

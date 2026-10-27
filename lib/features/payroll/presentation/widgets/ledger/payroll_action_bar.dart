@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -8,9 +7,9 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
-import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
-import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_diffuse_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une phrase d'état et le seul geste possible, selon l'état affiché et les
@@ -32,6 +31,7 @@ class PayrollActionBar extends StatelessWidget {
       kPayrollManageAccess.requires,
     );
     final actions = PayrollLedgerActions(context);
+    final payslips = PayrollPayslipActions(context);
     // Un geste bloqué reste visible mais inactif : le bandeau dit pourquoi.
     Widget primary(
       String label,
@@ -88,11 +88,23 @@ class PayrollActionBar extends StatelessWidget {
               Icons.lock_open_outlined,
               actions.reopen,
             ),
+          // L'état de paie du mois, composé par le serveur (T16) — Ctrl+P.
+          secondary(
+            l10n.payrollStatementPrint,
+            Icons.print_outlined,
+            payslips.openStatement,
+          ),
           primary(
             l10n.payrollActionDiffuse,
             Icons.share_outlined,
-            () async =>
-                context.read<PayrollCubit>().setTab(PayrollTab.payslips),
+            () => PayrollDiffuseDialog.show(
+              context,
+              PayrollDiffuseDialog(
+                onCollection: () => payslips.openPdf(null),
+                onWhatsapp: payslips.whatsapp,
+                phoneOf: payslips.phoneOf,
+              ),
+            ),
           ),
         ],
       ),

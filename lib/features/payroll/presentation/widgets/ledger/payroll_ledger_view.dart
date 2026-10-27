@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_actions.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -25,10 +27,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre de paie du mois : bandeau et circuit, barre d'action, bandeaux,
 /// indicateurs, filtres et tableau.
-class PayrollLedgerTab extends StatelessWidget {
+class PayrollLedgerView extends StatelessWidget {
   final PayrollState state;
 
-  const PayrollLedgerTab({super.key, required this.state});
+  const PayrollLedgerView({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,22 @@ class PayrollLedgerTab extends StatelessWidget {
       kPayrollWriteAccess.requires,
     );
     final actions = PayrollLedgerActions(context);
+    // Ctrl+P : l'état de paie du mois validé, composé par le serveur (T16).
+    return PageActionShortcut(
+      action: PageAction.print,
+      onInvoke: view.phase.isLocked
+          ? PayrollPayslipActions(context).openStatement
+          : null,
+      child: _ledger(context, view, actions, canWrite),
+    );
+  }
+
+  Widget _ledger(
+    BuildContext context,
+    PayrollMonthView view,
+    PayrollLedgerActions actions,
+    bool canWrite,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -67,7 +85,7 @@ class PayrollLedgerTab extends StatelessWidget {
           if (state.visibleLines.isEmpty)
             _Empty(state: state)
           else
-            PayrollLedgerTable(
+            PayrollLedgerViewle(
               view: view,
               snapshot: state.snapshot,
               lines: state.visibleLines,
