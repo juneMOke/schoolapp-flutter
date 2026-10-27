@@ -20624,6 +20624,48 @@ abstract class AppLocalizations {
   /// **'Validate and leave'**
   String get presenceMarkLeaveValidate;
 
+  /// No description provided for @presenceMarkBulkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Mark 1 unmarked} other{Mark the {count} unmarked}}'**
+  String presenceMarkBulkLabel(int count);
+
+  /// No description provided for @presenceMarkBulkPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present on time'**
+  String get presenceMarkBulkPresent;
+
+  /// No description provided for @presenceMarkBulkAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get presenceMarkBulkAbsent;
+
+  /// No description provided for @presenceMarkBulkEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk marking'**
+  String get presenceMarkBulkEyebrow;
+
+  /// No description provided for @presenceMarkBulkAbsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Mark 1 person absent?} other{Mark {count} people absent?}}'**
+  String presenceMarkBulkAbsentTitle(int count);
+
+  /// No description provided for @presenceMarkBulkAbsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the unmarked people shown are affected; each absence will still need its own justification.'**
+  String get presenceMarkBulkAbsentBody;
+
+  /// No description provided for @presenceMarkBulkAbsentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark absent'**
+  String get presenceMarkBulkAbsentConfirm;
+
   /// No description provided for @staffAttendanceLeaveTitle.
   ///
   /// In en, this message translates to:
@@ -20671,12 +20713,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} on the tablet'**
   String presenceMarkOnTablet(int count);
-
-  /// No description provided for @presenceMarkMarkRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark everyone still to mark as present at the start time'**
-  String get presenceMarkMarkRemaining;
 
   /// No description provided for @staffAttendanceValidateReport.
   ///
@@ -21385,6 +21421,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 staff member marked present} other{{count} staff members marked present}}'**
   String staffAttendanceToastRemaining(int count);
+
+  /// No description provided for @staffAttendanceToastRemainingAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 staff member marked absent} other{{count} staff members marked absent}}'**
+  String staffAttendanceToastRemainingAbsent(int count);
 
   /// No description provided for @presenceMarkToastCleared.
   ///
@@ -24251,6 +24293,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 student marked present} other{{count} students marked present}}'**
   String classPresenceToastRemaining(int count);
+
+  /// No description provided for @classPresenceToastRemainingAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student marked absent} other{{count} students marked absent}}'**
+  String classPresenceToastRemainingAbsent(int count);
 
   /// No description provided for @classPresenceToastValidated.
   ///

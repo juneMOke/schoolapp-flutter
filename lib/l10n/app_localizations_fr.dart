@@ -13210,6 +13210,44 @@ class AppLocalizationsFr extends AppLocalizations {
   String get presenceMarkLeaveValidate => 'Valider et quitter';
 
   @override
+  String presenceMarkBulkLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pointer les $count non-pointés',
+      one: 'Pointer 1 non-pointé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceMarkBulkPresent => 'Présents à l\'heure';
+
+  @override
+  String get presenceMarkBulkAbsent => 'Absents';
+
+  @override
+  String get presenceMarkBulkEyebrow => 'Pointage en masse';
+
+  @override
+  String presenceMarkBulkAbsentTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Marquer $count personnes absentes ?',
+      one: 'Marquer 1 personne absente ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceMarkBulkAbsentBody =>
+      'Seuls les non-pointés affichés sont concernés ; chaque absence restera à justifier une par une.';
+
+  @override
+  String get presenceMarkBulkAbsentConfirm => 'Marquer absents';
+
+  @override
   String staffAttendanceLeaveTitle(String day) {
     return 'Le rapport du $day n\'est pas validé';
   }
@@ -13266,10 +13304,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String presenceMarkOnTablet(int count) {
     return '$count sur la tablette';
   }
-
-  @override
-  String get presenceMarkMarkRemaining =>
-      'Marquer tous les « À pointer » présents à l’heure de début';
 
   @override
   String get staffAttendanceValidateReport => 'Valider le rapport';
@@ -13699,6 +13733,17 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count agents marqués présents',
       one: '1 agent marqué présent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceToastRemainingAbsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents marqués absents',
+      one: '1 agent marqué absent',
     );
     return '$_temp0';
   }
@@ -15543,6 +15588,17 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count élèves marqués présents',
       one: '1 élève marqué présent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceToastRemainingAbsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves marqués absents',
+      one: '1 élève marqué absent',
     );
     return '$_temp0';
   }

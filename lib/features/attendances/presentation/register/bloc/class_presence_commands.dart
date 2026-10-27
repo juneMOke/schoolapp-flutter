@@ -122,18 +122,36 @@ class ClassPresenceCommands {
     return _outcome(await _validate(_key(day), lines), done);
   }
 
-  /// Marque tous les « à pointer » présents à l'heure de début.
-  Future<ClassPresenceNotice?> markRemainingPresent(
+  /// Pointe d'un geste les « à pointer » de [studentIds] — ceux que le
+  /// registre affiche : présents à l'heure de début, ou absents. Un
+  /// pointage existant n'est jamais touché.
+  Future<ClassPresenceNotice?> markUnmarked(
     ClassPresenceDay day,
+    Set<String> studentIds,
+    PresenceStatus status,
   ) async {
     final frozen = _frozen(day);
     if (frozen != null) return frozen;
-    final marks = _remaining(day);
+    final editor = _editor(day);
+    final marks = {
+      for (final line in day.lines)
+        if (line.status == PresenceStatus.none &&
+            studentIds.contains(line.student.id))
+          line.student.id: status == PresenceStatus.absent
+              ? editor.mark(
+                  line.mark,
+                  PresenceStatus.absent,
+                  ClockTime.of(_now()),
+                )
+              : editor.setArrival(line.mark, day.schedule.start),
+    };
     if (marks.isEmpty) return null;
     return _outcome(
       await _save(_key(day), marks),
       ClassPresenceNotice(
-        ClassPresenceNoticeKind.remainingMarked,
+        status == PresenceStatus.absent
+            ? ClassPresenceNoticeKind.remainingMarkedAbsent
+            : ClassPresenceNoticeKind.remainingMarked,
         count: marks.length,
       ),
     );

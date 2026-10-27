@@ -82,12 +82,21 @@ class StaffRegisterActions {
     );
   }
 
-  void markRemaining() => unawaited(
-    _cubit.perform(
-      (c) =>
-          c.markRemainingPresent(_cubit.state.snapshot, _cubit.state.register),
-    ),
-  );
+  /// Pointe d'un geste les « à pointer » affichés (cf.
+  /// `StaffDayRegister.shownUnmarked`), présents ou absents.
+  void markUnmarked(PresenceStatus status) {
+    final state = _cubit.state;
+    unawaited(
+      _cubit.perform(
+        (c) => c.markUnmarked(
+          state.snapshot,
+          state.register,
+          state.register.shownUnmarked,
+          status,
+        ),
+      ),
+    );
+  }
 
   /// Valide la journée après sa modale ; rend `true` quand le jour est
   /// validé (« Valider et quitter » ne part qu'à cette condition).

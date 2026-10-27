@@ -128,19 +128,33 @@ class StaffAttendanceCommands {
     ),
   );
 
-  /// Marque tous les « à pointer » du jour présents à l'heure de début.
-  Future<StaffAttendanceNotice?> markRemainingPresent(
+  /// Pointe d'un geste les « à pointer » de [rows] — ceux que le registre
+  /// affiche : présents à l'heure de début, ou absents. Un pointage existant
+  /// n'est jamais touché.
+  Future<StaffAttendanceNotice?> markUnmarked(
     StaffAttendanceSnapshot snapshot,
     StaffDayRegister register,
+    List<StaffDayRow> rows,
+    PresenceStatus status,
   ) async {
     final frozen = StaffCommandOutcome.frozen(snapshot, register.day);
     if (frozen != null) return frozen;
-    final records = _remaining(snapshot, register);
+    final editor = StaffAttendanceEditor(PresenceRules(snapshot.settings));
+    final now = ClockTime.of(_now());
+    final records = [
+      for (final row in rows)
+        if (row.status == PresenceStatus.none && row.hasContract)
+          status == PresenceStatus.absent
+              ? editor.mark(_recordOf(row), PresenceStatus.absent, now)
+              : editor.setArrival(_recordOf(row), snapshot.settings.start),
+    ];
     if (records.isEmpty) return null;
     return StaffCommandOutcome.of(
       await _save(records),
       StaffAttendanceNotice(
-        StaffAttendanceNoticeKind.remainingMarked,
+        status == PresenceStatus.absent
+            ? StaffAttendanceNoticeKind.remainingMarkedAbsent
+            : StaffAttendanceNoticeKind.remainingMarked,
         count: records.length,
       ),
     );

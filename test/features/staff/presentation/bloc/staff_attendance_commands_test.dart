@@ -160,24 +160,84 @@ void main() {
     );
     final snapshot = _snapshot();
 
-    final notice = await commands.markRemainingPresent(
+    final register = registerOf(snapshot);
+
+    final notice = await commands.markUnmarked(
       snapshot,
-      registerOf(snapshot),
+      register,
+      register.shownUnmarked,
+      PresenceStatus.present,
     );
 
     expect(notice?.kind, StaffAttendanceNoticeKind.dayFrozen);
   });
 
-  test('restants présents annonce combien', () async {
-    final snapshot = _snapshot();
+  group('pointer les non pointés', () {
+    test('présents à l\'heure de début, et annonce combien', () async {
+      final snapshot = _snapshot();
+      final register = registerOf(snapshot);
 
-    final notice = await commands.markRemainingPresent(
-      snapshot,
-      registerOf(snapshot),
-    );
+      final notice = await commands.markUnmarked(
+        snapshot,
+        register,
+        register.shownUnmarked,
+        PresenceStatus.present,
+      );
 
-    expect(notice?.kind, StaffAttendanceNoticeKind.remainingMarked);
-    expect(notice?.count, 2);
+      expect(notice?.kind, StaffAttendanceNoticeKind.remainingMarked);
+      expect(notice?.count, 2);
+      expect(
+        saved().map((record) => record.arrival),
+        everyElement(snapshot.settings.start),
+      );
+    });
+
+    test('absents : sans heure d\'arrivée, annonce à part', () async {
+      final snapshot = _snapshot();
+      final register = registerOf(snapshot);
+
+      final notice = await commands.markUnmarked(
+        snapshot,
+        register,
+        register.shownUnmarked,
+        PresenceStatus.absent,
+      );
+
+      expect(notice?.kind, StaffAttendanceNoticeKind.remainingMarkedAbsent);
+      final records = saved();
+      expect(records.map((r) => r.status), everyElement(PresenceStatus.absent));
+      expect(records.map((r) => r.arrival), everyElement(isNull));
+    });
+
+    test('seulement les lignes données (les affichées)', () async {
+      final snapshot = _snapshot();
+      final register = registerOf(snapshot);
+
+      final notice = await commands.markUnmarked(
+        snapshot,
+        register,
+        register.shownUnmarked.take(1).toList(),
+        PresenceStatus.present,
+      );
+
+      expect(notice?.count, 1);
+      expect(saved(), hasLength(1));
+    });
+
+    test('rien à pointer : aucun envoi', () async {
+      final snapshot = _snapshot();
+      final register = registerOf(snapshot);
+
+      final notice = await commands.markUnmarked(
+        snapshot,
+        register,
+        const [],
+        PresenceStatus.present,
+      );
+
+      expect(notice, isNull);
+      verifyNever(() => save(any()));
+    });
   });
 
   test('clore un mois pose le geste sur son 1er jour', () async {

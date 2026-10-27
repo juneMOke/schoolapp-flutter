@@ -28,6 +28,10 @@ class PresenceRegisterFilters extends StatelessWidget {
   final bool showLegend;
   final int toJustify;
 
+  /// Le pointage en masse des « à pointer » affichés ; `null` : rien à
+  /// pointer, ou pas le droit.
+  final Widget? bulkAction;
+
   const PresenceRegisterFilters({
     super.key,
     required this.total,
@@ -38,6 +42,7 @@ class PresenceRegisterFilters extends StatelessWidget {
     required this.viewMode,
     required this.showLegend,
     required this.toJustify,
+    this.bulkAction,
   });
 
   @override
@@ -67,12 +72,13 @@ class PresenceRegisterFilters extends StatelessWidget {
               for (final status in PresenceStatus.values) _chip(l10n, status),
             ],
           ),
-          if (showLegend || toJustify > 0) ...[
+          if (showLegend || toJustify > 0 || bulkAction != null) ...[
             const SizedBox(height: AppSpacing.sm),
             _Footer(
               viewMode: viewMode,
               showLegend: showLegend,
               toJustify: toJustify,
+              bulkAction: bulkAction,
             ),
           ],
         ],
@@ -100,11 +106,13 @@ class _Footer extends StatelessWidget {
   final CollectionViewMode viewMode;
   final bool showLegend;
   final int toJustify;
+  final Widget? bulkAction;
 
   const _Footer({
     required this.viewMode,
     required this.showLegend,
     required this.toJustify,
+    required this.bulkAction,
   });
 
   @override
@@ -112,7 +120,9 @@ class _Footer extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
       spacing: AppSpacing.md,
+      runSpacing: AppSpacing.sm,
       children: [
         if (showLegend)
           Text(
@@ -130,6 +140,7 @@ class _Footer extends StatelessWidget {
               color: AppColors.presenceMarkLateInk,
             ),
           ),
+        ?bulkAction,
       ],
     );
   }

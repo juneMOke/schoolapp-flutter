@@ -52,7 +52,6 @@ class StaffDayBanner extends StatelessWidget {
           PermissionGate.allowsAccess(context, kStaffAttendanceManageAccess)
           ? () => unawaited(actions.openSettings())
           : null,
-      onMarkRemaining: register.unmarked.isEmpty ? null : actions.markRemaining,
       onValidate: register.isEmpty
           ? null
           : () => unawaited(actions.validate(register)),

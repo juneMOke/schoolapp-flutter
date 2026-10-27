@@ -81,8 +81,15 @@ class ClassRegisterActions {
     );
   }
 
-  void markRemaining() =>
-      unawaited(_cubit.perform((c, day) => c.markRemainingPresent(day)));
+  /// Pointe d'un geste les « à pointer » affichés (cf.
+  /// `ClassDayRegister.shownUnmarked`), présents ou absents.
+  void markUnmarked(PresenceStatus status) {
+    final shown = <String>{
+      for (final line in _cubit.state.register?.shownUnmarked ?? const [])
+        line.student.id,
+    };
+    unawaited(_cubit.perform((c, day) => c.markUnmarked(day, shown, status)));
+  }
 
   /// Valide l'appel après sa modale ; rend `true` quand il est validé
   /// (« Valider et quitter » ne part qu'à cette condition).

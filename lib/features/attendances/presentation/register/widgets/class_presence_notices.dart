@@ -15,6 +15,11 @@ void showClassPresenceNotice(BuildContext context, ClassPresenceNotice notice) {
         context,
         l10n.classPresenceToastRemaining(notice.count ?? 0),
       );
+    case ClassPresenceNoticeKind.remainingMarkedAbsent:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.classPresenceToastRemainingAbsent(notice.count ?? 0),
+      );
     case ClassPresenceNoticeKind.cleared:
       AppSnackBar.showInfo(context, l10n.presenceMarkToastCleared(name));
     case ClassPresenceNoticeKind.justified:

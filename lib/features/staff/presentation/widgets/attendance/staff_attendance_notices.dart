@@ -29,6 +29,11 @@ void showStaffAttendanceNotice(
         context,
         l10n.staffAttendanceToastRemaining(notice.count ?? 0),
       );
+    case StaffAttendanceNoticeKind.remainingMarkedAbsent:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.staffAttendanceToastRemainingAbsent(notice.count ?? 0),
+      );
     case StaffAttendanceNoticeKind.cleared:
       AppSnackBar.showInfo(context, l10n.presenceMarkToastCleared(name));
     case StaffAttendanceNoticeKind.justified:

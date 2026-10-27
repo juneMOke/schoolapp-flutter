@@ -59,7 +59,6 @@ class ClassDayBanner extends StatelessWidget {
       onToday: days.goToday,
       onPickDay: () => unawaited(days.pickDay()),
       onSettings: () => unawaited(actions.openSchedule()),
-      onMarkRemaining: unmarked == 0 ? null : actions.markRemaining,
       onValidate: register.isEmpty
           ? null
           : () => unawaited(actions.validate(register, classroomName)),

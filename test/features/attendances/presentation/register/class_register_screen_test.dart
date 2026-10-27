@@ -249,6 +249,22 @@ void main() {
     expect(cubit.state.day, '2026-09-25');
   });
 
+  testWidgets('« Pointer 1 non-pointé » → présents : seule l\'élève à '
+      'pointer est marquée', (tester) async {
+    await pump(tester, day: presenceDay());
+
+    await tester.tap(find.text('Pointer 1 non-pointé'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Présents à l\'heure'));
+    await tester.pumpAndSettle();
+
+    final marks =
+        verify(() => save(any(), captureAny())).captured.single
+            as Map<String, PresenceMark<AbsenceReason>>;
+    expect(marks.keys, ['s3']);
+    expect(marks['s3']?.status, PresenceStatus.present);
+  });
+
   group('quitter un appel pointé mais pas validé', () {
     /// Monte l'appel et pointe une élève : l'appel devient « touché ».
     Future<ClassPresenceCubit> pumpEdited(WidgetTester tester) async {

@@ -17,6 +17,8 @@ import 'package:school_app_flutter/features/attendances/presentation/register/wi
 import 'package:school_app_flutter/features/attendances/presentation/widgets/states/attendance_results_empty_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_bulk_mark_button.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_actions.dart';
 
 /// L'onglet « Registre du jour » d'une classe.
 class ClassRegisterTab extends StatelessWidget {
@@ -79,6 +81,7 @@ class ClassRegisterTab extends StatelessWidget {
             viewMode: state.viewMode,
             showLegend: lock == null,
             toJustify: register.toJustify,
+            bulkAction: _bulkAction(context),
             toolbar: EteeloSearchToolbar(
               text: query.text,
               label: l10n.classPresenceSearchLabel,
@@ -111,6 +114,17 @@ class ClassRegisterTab extends StatelessWidget {
             ),
         ],
       ],
+    );
+  }
+
+  /// Le pointage en masse des « à pointer » affichés, quand l'appel s'écrit.
+  Widget? _bulkAction(BuildContext context) {
+    final actions = ClassRegisterActions(context);
+    final shown = register.shownUnmarked;
+    if (shown.isEmpty || !actions.canEditDay) return null;
+    return PresenceBulkMarkButton(
+      count: shown.length,
+      onMark: actions.markUnmarked,
     );
   }
 }

@@ -273,6 +273,63 @@ void main() {
     },
   );
 
+  group('pointer les non pointés en une fois', () {
+    testWidgets('« Présents à l\'heure » pointe les seuls non pointés', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      await tester.tap(find.text('Pointer 1 non-pointé'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Présents à l\'heure'));
+      await tester.pumpAndSettle();
+
+      final records =
+          verify(() => save(captureAny())).captured.single
+              as List<StaffAttendanceRecord>;
+      expect(records.single.staffMemberId, 'm-1');
+      expect(records.single.status, PresenceStatus.present);
+    });
+
+    testWidgets('« Absents » demande confirmation', (tester) async {
+      await pump(tester);
+
+      await tester.tap(find.text('Pointer 1 non-pointé'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(MenuItemButton, 'Absents'));
+      await tester.pumpAndSettle();
+      expect(find.text('Marquer 1 personne absente ?'), findsOneWidget);
+
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+      verifyNever(() => save(any()));
+
+      await tester.tap(find.text('Pointer 1 non-pointé'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(MenuItemButton, 'Absents'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Marquer absents'));
+      await tester.pumpAndSettle();
+
+      final records =
+          verify(() => save(captureAny())).captured.single
+              as List<StaffAttendanceRecord>;
+      expect(records.single.status, PresenceStatus.absent);
+    });
+
+    testWidgets('la recherche réduit la portée', (tester) async {
+      final cubit = await pump(tester);
+      cubit.setDayText('Mayala');
+      await tester.pumpAndSettle();
+      expect(find.text('Pointer 1 non-pointé'), findsNothing);
+    });
+
+    testWidgets('un jour validé ne propose rien', (tester) async {
+      await pump(tester, validated: true);
+      expect(find.text('Pointer 1 non-pointé'), findsNothing);
+    });
+  });
+
   group('quitter un jour pointé mais pas validé', () {
     const title = 'Le rapport du mardi 29 septembre 2026 n\'est pas validé';
 

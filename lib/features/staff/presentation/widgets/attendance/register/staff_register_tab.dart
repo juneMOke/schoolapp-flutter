@@ -19,6 +19,8 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/attendanc
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_empty.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_bulk_mark_button.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_actions.dart';
 
 /// L'onglet « Registre du jour ».
 class StaffRegisterTab extends StatelessWidget {
@@ -79,6 +81,7 @@ class StaffRegisterTab extends StatelessWidget {
               kStaffAttendanceWriteAccess,
             ),
             toJustify: register.toJustify,
+            bulkAction: _bulkAction(context),
             toolbar: StaffSearchToolbar(
               text: query.text,
               label: l10n.staffAttendanceSearchLabel,
@@ -111,6 +114,17 @@ class StaffRegisterTab extends StatelessWidget {
             ),
         ],
       ],
+    );
+  }
+
+  /// Le pointage en masse des « à pointer » affichés, quand le jour s'écrit.
+  Widget? _bulkAction(BuildContext context) {
+    final actions = StaffRegisterActions(context);
+    final shown = state.register.shownUnmarked;
+    if (shown.isEmpty || !actions.canEditDay) return null;
+    return PresenceBulkMarkButton(
+      count: shown.length,
+      onMark: actions.markUnmarked,
     );
   }
 }

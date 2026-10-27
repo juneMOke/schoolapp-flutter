@@ -10,7 +10,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le bandeau d'un registre du jour : navigation de jour, horaire, progression
-/// et actions (restants présents, valider). La date ouvre le calendrier quand
+/// et validation. La date ouvre le calendrier quand
 /// [onPickDay] est fourni. Les actions disparaissent quand
 /// [showActions] est faux — jour validé, ou compte sans droit d'écriture.
 class PresenceDayBanner extends StatelessWidget {
@@ -44,9 +44,6 @@ class PresenceDayBanner extends StatelessWidget {
   /// rien ouvrir.
   final VoidCallback? onSettings;
 
-  /// `null` : personne à marquer.
-  final VoidCallback? onMarkRemaining;
-
   /// `null` : rien à valider.
   final VoidCallback? onValidate;
 
@@ -66,7 +63,6 @@ class PresenceDayBanner extends StatelessWidget {
     required this.onToday,
     this.onPickDay,
     this.onSettings,
-    required this.onMarkRemaining,
     required this.onValidate,
   });
 
@@ -170,25 +166,14 @@ class PresenceDayBanner extends StatelessWidget {
                   ),
                 ],
               ),
+              // Le pointage en masse vit avec les résultats qu'il touche
+              // (la barre du registre) ; le bandeau garde la validation.
               if (showActions)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PresenceBannerButton(
-                      icon: Icons.checklist,
-                      tooltip: l10n.presenceMarkMarkRemaining,
-                      onPressed: onMarkRemaining,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(
-                      child: EteeloButton.primary(
-                        label: validateLabel,
-                        icon: Icons.task_alt,
-                        onPressed: onValidate,
-                        fullWidth: false,
-                      ),
-                    ),
-                  ],
+                EteeloButton.primary(
+                  label: validateLabel,
+                  icon: Icons.task_alt,
+                  onPressed: onValidate,
+                  fullWidth: false,
                 ),
             ],
           ),
