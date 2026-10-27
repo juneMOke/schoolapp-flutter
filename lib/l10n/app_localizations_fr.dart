@@ -20333,4 +20333,209 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollDashNotTrackedKpi => 'Non suivi avant la v2';
+
+  @override
+  String get presenceMarkPickMonth => 'Choisir un mois';
+
+  @override
+  String presenceMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'janv.',
+      '2': 'févr.',
+      '3': 'mars',
+      '4': 'avr.',
+      '5': 'mai',
+      '6': 'juin',
+      '7': 'juil.',
+      '8': 'août',
+      '9': 'sept.',
+      '10': 'oct.',
+      '11': 'nov.',
+      'other': 'déc.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get hrPresenceYearColMonth => 'Mois';
+
+  @override
+  String get hrPresenceYearColShare => 'Répartition';
+
+  @override
+  String get hrPresenceYearColPresence => 'Présence';
+
+  @override
+  String get hrPresenceYearColScored => 'Jours pointés';
+
+  @override
+  String get hrPresenceYearColProfile => 'Profil';
+
+  @override
+  String get hrPresenceYearTotal => 'Année';
+
+  @override
+  String hrPresenceCalendarLate(int minutes) {
+    return '+$minutes min';
+  }
+
+  @override
+  String get hrPresenceCalendarUnjustified => 'Non justifiée';
+
+  @override
+  String hrPresenceEvidenceUnjustified(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count absences non justifiées',
+      one: '1 absence non justifiée',
+    );
+    return '$_temp0 (seuil : 3)';
+  }
+
+  @override
+  String hrPresenceEvidenceAbsences(int count, int scored, int pct) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count absences',
+      one: '1 absence',
+    );
+    return '$_temp0 sur $scored jours pointés, soit $pct % (seuil : 10 %)';
+  }
+
+  @override
+  String hrPresenceEvidenceLates(int count, int scored, int pct) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retards',
+      one: '1 retard',
+    );
+    return '$_temp0 sur $scored jours pointés, soit $pct % (seuil : plus de 15 %)';
+  }
+
+  @override
+  String hrPresenceEvidenceRates(int presence, int late) {
+    return 'Présence $presence %, retards $late % des jours pointés';
+  }
+
+  @override
+  String hrPresenceEvidenceCoverage(int scored, int classDays) {
+    return '$scored jours pointés sur $classDays jours de classe';
+  }
+
+  @override
+  String get presenceCalendarPending => 'à envoyer';
+
+  @override
+  String hrPresenceDaySheetTitle(String day) {
+    return 'Pointage du $day';
+  }
+
+  @override
+  String get hrPresenceDaySheetSaved =>
+      'Chaque geste s\'enregistre sur la tablette et part au serveur dès que possible ; les taux de la fiche suivront.';
+
+  @override
+  String get hrPresenceDayReadOnlyRight =>
+      'Votre compte consulte ce pointage sans pouvoir le modifier.';
+
+  @override
+  String get hrPresenceDayMonthClosed =>
+      'Le mois est clos : ce jour ne se modifie plus.';
+
+  @override
+  String get hrPresenceDayValidated =>
+      'Le rapport de ce jour est validé : rouvrez-le dans le registre pour le corriger.';
+
+  @override
+  String get hrPresenceDayMissing =>
+      'La tablette n\'a pas encore reçu ce jour tel que le serveur le connaît. Elle le relit ; vous pouvez aussi le corriger dans le registre.';
+
+  @override
+  String get hrPresenceDayDivergent =>
+      'La tablette et le serveur ne disent pas la même chose pour ce jour. Corrigez-le dans le registre, qui montre la version de la tablette.';
+
+  @override
+  String get hrPresenceDayOpenRegister => 'Ouvrir dans le registre';
+
+  @override
+  String get hrPresenceDayLoading => 'Lecture du jour sur la tablette';
+
+  @override
+  String hrPresenceDayArrival(String time) {
+    return 'Arrivée $time';
+  }
+
+  @override
+  String hrPresenceDayDeparture(String time) {
+    return 'Départ $time';
+  }
+
+  @override
+  String hrPresenceDayPendingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours corrigés sur la tablette',
+      one: '1 jour corrigé sur la tablette',
+    );
+    return '$_temp0 : les taux et le profil seront recalculés quand le serveur l\'aura reçu.';
+  }
+
+  @override
+  String get hrPresenceProfilesReportTitle => 'Fiche individuelle du personnel';
+
+  @override
+  String get hrPresenceProfilesReportTooltip =>
+      'Télécharger la liste affichée en PDF, avec ses filtres';
+
+  @override
+  String get hrPresenceProfilesReportFailed =>
+      'La liste de la fiche individuelle n\'a pas pu être préparée.';
+
+  @override
+  String get hrPresenceSheetTitle => 'Fiche de présence';
+
+  @override
+  String get hrPresenceSheetTooltip =>
+      'Télécharger la fiche de présence en PDF';
+
+  @override
+  String get hrPresenceSheetTooltipSealed =>
+      'Télécharger la fiche de présence du mois clos : pièce scellée';
+
+  @override
+  String get hrPresenceSheetTooltipDraft =>
+      'Télécharger la fiche de présence : provisoire, la période n\'est pas close';
+
+  @override
+  String get hrPresenceSheetForbidden =>
+      'La fiche d\'un mois clos est une pièce scellée : il faut aussi le droit d\'émettre des documents.';
+
+  @override
+  String get hrPresenceSheetNotFound =>
+      'Cet agent, ou l\'année scolaire du mois, est introuvable sur le serveur.';
+
+  @override
+  String get hrPresenceSheetFailed =>
+      'La fiche de présence n\'a pas pu être préparée.';
+
+  @override
+  String get hrPresenceSheetUnsentTitle => 'Des pointages attendent l\'envoi';
+
+  @override
+  String hrPresenceSheetUnsentMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pointages de cet agent ne sont pas encore envoyés',
+      one: '1 pointage de cet agent n\'est pas encore envoyé',
+    );
+    return '$_temp0 au serveur : la fiche ne les comptera pas.';
+  }
+
+  @override
+  String get hrPresenceSheetUnsentConfirm => 'Télécharger quand même';
 }

@@ -1,3 +1,7 @@
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
+import 'package:retrofit/retrofit.dart' show HttpResponse;
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
@@ -101,29 +105,80 @@ class HrAttendanceStatsRepositoryImpl implements HrAttendanceStatsRepository {
   Future<Either<Failure, HrAttendanceReport>> report(
     DashboardWindow window, {
     String search = '',
+  }) => _document(
+    () => _api.getReport(
+      _requiredAuth,
+      _day(window.from),
+      _day(window.to),
+      _search(search),
+      // Le délai de guichet expirerait pendant le rendu, et l'appel suivant
+      // tomberait sur le 429 d'un rendu qu'on croirait abandonné.
+      Options(receiveTimeout: AppConstants.hrAttendanceReportTimeout),
+    ),
+  );
+
+  @override
+  Future<Either<Failure, HrAttendanceReport>> profilesReport(
+    HrProfileScope scope, {
+    String search = '',
+    StaffCategory? category,
+    PresenceProfile? profile,
+  }) => _document(
+    () => _api.getProfilesReport(
+      _requiredAuth,
+      scope.month,
+      scope.isYear ? AppConstants.hrAttendanceProfilesYearScope : null,
+      _search(search),
+      category?.wire,
+      profile?.wire,
+      Options(receiveTimeout: AppConstants.hrAttendanceReportTimeout),
+    ),
+    fallbackFileName: _profilesFileName,
+  );
+
+  @override
+  Future<Either<Failure, HrAttendanceReport>> agentSheet(
+    String staffMemberId, {
+    String? month,
+  }) => _document(
+    () => month == null
+        ? _api.getAgentYearSheet(_requiredAuth, staffMemberId)
+        : _api.getAgentMonthSheet(_requiredAuth, staffMemberId, month),
+    fallbackFileName: _sheetFileName,
+  );
+
+  static const _profilesFileName = 'fiche-individuelle-personnel.pdf';
+  static const _sheetFileName = 'fiche-presence.pdf';
+
+  /// Une recherche blanche ne part pas : le PDF couvre tout le monde.
+  static String? _search(String search) {
+    final trimmed = search.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// Un PDF de présence : le réseau d'abord, puis la lecture commune.
+  Future<Either<Failure, HrAttendanceReport>> _document(
+    Future<HttpResponse<Uint8List>> Function() call, {
+    String? fallbackFileName,
   }) async {
     if (!await _connectivity.isOnline()) {
       return const Left(NetworkFailure('Aucune connexion.'));
     }
-    final trimmed = search.trim();
     try {
-      final response = await _api.getReport(
-        _requiredAuth,
-        _day(window.from),
-        _day(window.to),
-        // Une recherche blanche ne part pas : le PDF couvre tout le monde.
-        trimmed.isEmpty ? null : trimmed,
-        // Le délai de guichet expirerait pendant le rendu, et l'appel suivant
-        // tomberait sur le 429 d'un rendu qu'on croirait abandonné.
-        Options(receiveTimeout: AppConstants.hrAttendanceReportTimeout),
-      );
-      return HrAttendanceReportMapper.map(response);
+      final response = await call();
+      return fallbackFileName == null
+          ? HrAttendanceReportMapper.map(response)
+          : HrAttendanceReportMapper.map(
+              response,
+              fallbackFileName: fallbackFileName,
+            );
     } on DioException catch (e) {
-      // Le message du serveur porte l'information utile (429, 400) et
+      // Le message du serveur porte l'information utile (429, 400, 403) et
       // l'intercepteur l'écrase.
       return Left(EditiqueFailureMapper.fromDioException(e));
     } catch (_) {
-      // Rien à réconcilier : la pièce n'est pas archivée, elle se redemande.
+      // Rien à réconcilier : une FP scellée se resert à l'identique, une
+      // pièce horodatée ou un provisoire se redemande.
       return const Left(ServerFailure('Unexpected error occurred'));
     }
   }

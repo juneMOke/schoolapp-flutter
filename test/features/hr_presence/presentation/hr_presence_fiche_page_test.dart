@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_profiles.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_row.dart';
@@ -17,8 +19,15 @@ import '../hr_presence_builders.dart';
 
 class _MockGet extends Mock implements GetHrAttendanceProfilesUseCase {}
 
+class _MockReport extends Mock implements GetHrAttendanceReportUseCase {}
+
+class _MockProfilesReport extends Mock
+    implements GetHrAttendanceProfilesReportUseCase {}
+
 void main() {
   setUpAll(() => registerFallbackValue(const HrProfileScope.year()));
+
+  late _MockProfilesReport profilesReport;
 
   Future<List<HrAttendanceProfileRow>> pump(
     WidgetTester tester, {
@@ -42,14 +51,31 @@ void main() {
       now: () => DateTime(2026, 10, 23, 10),
     );
     addTearDown(cubit.close);
+    profilesReport = _MockProfilesReport();
+    when(
+      () => profilesReport(
+        any(),
+        search: any(named: 'search'),
+        category: any(named: 'category'),
+        profile: any(named: 'profile'),
+      ),
+    ).thenAnswer((_) async => const Left(ServerFailure('—')));
+    final report = HrAttendanceReportCubit(
+      getReport: _MockReport(),
+      getProfilesReport: profilesReport,
+    );
+    addTearDown(report.close);
     final opened = <HrAttendanceProfileRow>[];
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: BlocProvider.value(
-          value: cubit..load(),
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: cubit..load()),
+            BlocProvider.value(value: report),
+          ],
           child: HrPresenceFicheScreen(
             onOpenAgent: (_, row) => opened.add(row),
           ),
@@ -70,6 +96,26 @@ void main() {
     expect(find.text('79 % · 9 % · 21 %'), findsOneWidget);
     // Une puce et un badge par profil présent.
     expect(find.text('Absentéiste'), findsNWidgets(2));
+  });
+
+  testWidgets('le PDF de la liste part sur la question de l\'écran : '
+      'période, recherche, catégorie, profil', (tester) async {
+    await pump(tester);
+    await tester.tap(find.text('Absentéiste').first);
+    await tester.pump();
+
+    await tester.tap(find.text('PDF'));
+    await tester.pump();
+    await tester.pump();
+
+    verify(
+      () => profilesReport(
+        const HrProfileScope.month('2026-10'),
+        search: '',
+        category: null,
+        profile: PresenceProfile.absentee,
+      ),
+    ).called(1);
   });
 
   testWidgets('une puce filtre ; un second appui rend la liste', (

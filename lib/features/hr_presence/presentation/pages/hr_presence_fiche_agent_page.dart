@@ -10,21 +10,21 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_person_picker.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
-import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_month_body.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_profile_evidence.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_agent_scope.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_kpis.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_month_body.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_sheet.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_card.dart';
-import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_scope_bar.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_year_list.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/states/hr_presence_results_error_state.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -65,15 +65,22 @@ class HrPresenceFicheAgentPage extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-    create: (context) => getIt<HrPresenceFicheCubit>(
-      param1: (
-        agentId: args.agentId,
-        yearly: args.yearly,
-        month: args.month,
-        yearStart: args.yearStart ?? HrPresenceContext.yearStart(context),
+  Widget build(BuildContext context) => MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (context) => getIt<HrPresenceFicheCubit>(
+          param1: (
+            agentId: args.agentId,
+            yearly: args.yearly,
+            month: args.month,
+            yearStart: args.yearStart ?? HrPresenceContext.yearStart(context),
+          ),
+        )..load(),
       ),
-    )..load(),
+      BlocProvider<HrAttendanceReportCubit>(
+        create: (_) => getIt<HrAttendanceReportCubit>(),
+      ),
+    ],
     child: HrClosingNotifier(
       onClosed: onClosed,
       child: HrPresenceFicheAgentScreen(shellSubMenuId: shellSubMenuId),
@@ -122,46 +129,8 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
     HrPresenceFicheState state,
   ) {
     final dates = MaterialLocalizations.of(context);
-    final members = state.members;
-    final toolbar = Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: AppSpacing.lg,
-      runSpacing: AppSpacing.md,
-      children: [
-        HrPresenceScopeBar(
-          yearly: state.yearly,
-          onYearly: (yearly) => unawaited(cubit.setYearly(yearly)),
-          month: state.month,
-          isCurrentMonth: state.isCurrentMonth,
-          onPrevious: state.canStepBack
-              ? () => unawaited(cubit.stepMonth(-1))
-              : null,
-          onNext: () => unawaited(cubit.stepMonth(1)),
-          onCurrent: () => unawaited(cubit.goCurrentMonth()),
-          yearLabel: state.yearData?.schoolYear?.name,
-        ),
-        if (members.isNotEmpty)
-          PresencePersonPicker<StaffMember>(
-            entries: [
-              for (final m in members)
-                PresencePickerEntry(
-                  value: m,
-                  id: m.id,
-                  firstName: m.firstName,
-                  lastName: m.lastName,
-                  fullName: m.fullName,
-                  detail: m.jobTitle,
-                ),
-            ],
-            selectedId: state.agentId,
-            label: l10n.staffAttendanceTabAgent,
-            placeholder: l10n.staffAttendanceAgentPicker,
-            matches: StaffMemberSearch.matches,
-            onSelected: (picked) => unawaited(cubit.openAgent(picked.id)),
-          ),
-      ],
-    );
+    Widget scope({required bool framed}) =>
+        HrPresenceFicheAgentScope(state: state, cubit: cubit, framed: framed);
     final month = state.monthData;
     final year = state.yearData;
     final Widget content = switch (state.status) {
@@ -192,50 +161,74 @@ class HrPresenceFicheAgentScreen extends StatelessWidget {
           medallionIcon: Icons.event_busy_outlined,
           fullWidthCard: true,
         ),
-      HrPresenceFicheStatus.ready when year != null => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          HrPresenceProfileCard(
-            agent: year.agent,
-            profile: year.profile,
-            scopeLabel: l10n.hrPresenceScopeYearLabel(year.schoolYear!.name),
+      HrPresenceFicheStatus.ready when year != null => HrPresenceFicheSheet(
+        header: HrPresenceProfileCard(
+          embedded: true,
+          agent: year.agent,
+          profile: year.profile,
+          scopeLabel: l10n.hrPresenceScopeYearLabel(year.schoolYear!.name),
+          evidence: HrPresenceProfileEvidence.of(l10n, year.profile, year.kpis),
+          coverage: HrPresenceProfileEvidence.coverage(
+            l10n,
+            year.kpis,
+            classDays: year.months.fold(0, (sum, m) => sum + m.classDays),
+            hourly: year.agent.isHourly,
           ),
-          const SizedBox(height: AppSpacing.lg),
-          HrPresenceFicheKpis(kpis: year.kpis, hourly: year.agent.isHourly),
-          const SizedBox(height: AppSpacing.lg),
-          HrPresenceYearList(
-            months: year.months,
-            onOpenMonth: (m) => unawaited(cubit.openMonth(m)),
-          ),
-        ],
+        ),
+        scope: scope(framed: false),
+        kpis: HrPresenceFicheKpis(kpis: year.kpis, hourly: year.agent.isHourly),
+        body: HrPresenceYearList(
+          months: year.months,
+          total: year.kpis,
+          totalProfile: year.profile,
+          onOpenMonth: (m) => unawaited(cubit.openMonth(m)),
+        ),
       ),
       HrPresenceFicheStatus.ready when month != null && month.classDays == 0 =>
         PresenceHolidayState(
           month: state.month,
           onCurrent: () => unawaited(cubit.goCurrentMonth()),
         ),
-      HrPresenceFicheStatus.ready when month != null => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          HrPresenceProfileCard(
-            agent: month.agent,
-            profile: month.profile,
-            scopeLabel: dates.formatMonthYear(
-              DateTime.parse('${month.month}-01'),
-            ),
+      HrPresenceFicheStatus.ready when month != null => HrPresenceFicheSheet(
+        header: HrPresenceProfileCard(
+          embedded: true,
+          agent: month.agent,
+          profile: month.profile,
+          scopeLabel: dates.formatMonthYear(
+            DateTime.parse('${month.month}-01'),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          HrPresenceFicheKpis(kpis: month.kpis, hourly: month.agent.isHourly),
-          const SizedBox(height: AppSpacing.lg),
-          HrPresenceMonthBody(month: month, withTrend: false),
-        ],
+          evidence: HrPresenceProfileEvidence.of(
+            l10n,
+            month.profile,
+            month.kpis,
+          ),
+          coverage: HrPresenceProfileEvidence.coverage(
+            l10n,
+            month.kpis,
+            classDays: month.classDays,
+            hourly: month.agent.isHourly,
+          ),
+        ),
+        scope: scope(framed: false),
+        kpis: HrPresenceFicheKpis(
+          kpis: month.kpis,
+          hourly: month.agent.isHourly,
+        ),
+        body: HrPresenceFicheMonthBody(
+          month: month,
+          state: state,
+          cubit: cubit,
+        ),
       ),
       HrPresenceFicheStatus.ready => const EteeloListSkeleton(rowCount: 5),
     };
+    // Les données là, la feuille porte aussi la portée ; sinon la portée
+    // reste dans sa carte, au-dessus de l'état (chargement, erreur, vide).
+    if (content is HrPresenceFicheSheet) return content;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        toolbar,
+        scope(framed: true),
         const SizedBox(height: AppSpacing.lg),
         content,
       ],

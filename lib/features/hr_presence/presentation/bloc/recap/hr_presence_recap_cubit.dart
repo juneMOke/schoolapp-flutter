@@ -80,20 +80,26 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
     return _read();
   }
 
+  /// Le mois choisi dans le sélecteur ; à venir ou d'avant la rentrée, rien.
+  Future<void> showMonth(String month) {
+    if (!_isValid(month) || month == state.month) return Future.value();
+    emit(state.copyWith(month: month));
+    return _read();
+  }
+
   /// Le mois lu dans l'adresse ; illisible, à venir ou d'avant la rentrée,
   /// le mois en cours.
   Future<void> applyLocation(String? month) {
-    var asked = state.currentMonth;
-    if (month != null &&
-        SchoolDayCalendar.isDay('$month-01') &&
-        month.compareTo(state.currentMonth) <= 0 &&
-        (state.firstMonth == null || month.compareTo(state.firstMonth!) >= 0)) {
-      asked = month;
-    }
+    final asked = month != null && _isValid(month) ? month : state.currentMonth;
     if (asked == state.month) return Future.value();
     emit(state.copyWith(month: asked));
     return _read();
   }
+
+  bool _isValid(String month) =>
+      SchoolDayCalendar.isDay('$month-01') &&
+      month.compareTo(state.currentMonth) <= 0 &&
+      (state.firstMonth == null || month.compareTo(state.firstMonth!) >= 0);
 
   void setText(String text) {
     if (text != state.text) emit(state.copyWith(text: text));

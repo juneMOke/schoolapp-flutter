@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleto
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_picker.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -17,6 +18,7 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_profiles.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/profiles/hr_presence_profiles_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_labels.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/dashboard/hr_attendance_report_button.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_chips.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_profile_row.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_scope_bar.dart';
@@ -59,6 +61,17 @@ class HrPresenceProfilesBody extends StatelessWidget {
               : null,
           onNext: () => unawaited(cubit.stepMonth(1)),
           onCurrent: () => unawaited(cubit.goCurrentMonth()),
+          onPickMonth: () async {
+            final picked = await pickPresenceMonth(
+              context,
+              month: state.month,
+              firstMonth: state.firstMonth,
+              lastMonth: state.currentMonth,
+            );
+            if (picked != null && !cubit.isClosed) {
+              unawaited(cubit.showMonth(picked));
+            }
+          },
           yearLabel: year == null || to == null
               ? null
               : l10n.hrPresenceYearScope(
@@ -105,6 +118,21 @@ class HrPresenceProfilesBody extends StatelessWidget {
           icon: Icons.badge_outlined,
           tone: DashboardSense.attendu,
           toneStrength: DashboardTones.forceDe(DashboardSense.attendu),
+          // La liste affichée, sur la même question que l'écran : période,
+          // recherche, catégorie et profil (règle 14).
+          actions: [
+            HrAttendanceReportButton(
+              kind: HrAttendanceReportKind.profiles,
+              onDownload: rows.isEmpty
+                  ? null
+                  : (report) => report.downloadProfiles(
+                      state.scope,
+                      search: state.text,
+                      category: state.category,
+                      profile: state.profile,
+                    ),
+            ),
+          ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

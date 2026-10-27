@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -39,5 +41,21 @@ abstract class HrAttendanceStatsRepository {
   Future<Either<Failure, HrAttendanceReport>> report(
     DashboardWindow window, {
     String search,
+  });
+
+  /// La liste de la fiche individuelle en PDF (pièce PR) sur [scope],
+  /// filtrée comme l'écran : recherche, catégorie, profil.
+  Future<Either<Failure, HrAttendanceReport>> profilesReport(
+    HrProfileScope scope, {
+    String search,
+    StaffCategory? category,
+    PresenceProfile? profile,
+  });
+
+  /// La fiche de présence d'un agent : son mois `AAAA-MM` ([month]), ou son
+  /// année scolaire courante (`null`).
+  Future<Either<Failure, HrAttendanceReport>> agentSheet(
+    String staffMemberId, {
+    String? month,
   });
 }

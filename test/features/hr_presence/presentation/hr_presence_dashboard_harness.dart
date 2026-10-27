@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'dart:typed_data';
 
 import 'package:bloc_test/bloc_test.dart';
@@ -102,6 +104,20 @@ class FakeHrAttendanceStats implements HrAttendanceStatsRepository {
   @override
   Future<Either<Failure, HrAttendanceRecap>> recap(String month) =>
       throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, HrAttendanceReport>> profilesReport(
+    HrProfileScope scope, {
+    String search = '',
+    StaffCategory? category,
+    PresenceProfile? profile,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, HrAttendanceReport>> agentSheet(
+    String staffMemberId, {
+    String? month,
+  }) => throw UnimplementedError();
 }
 
 class HrPresenceDashboardHarness {

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart'
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_picker.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -46,30 +47,45 @@ class HrPresenceRecapBody extends StatelessWidget {
       children: [
         HrPersonnelHeader(subtitle: l10n.hrPresenceRecapSubtitle),
         const SizedBox(height: AppSpacing.md),
-        Wrap(
-          spacing: AppSpacing.lg,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            PresenceMonthNav(
-              month: state.month,
-              isCurrent: state.isCurrentMonth,
-              onPrevious: state.canStepBack
-                  ? () => unawaited(cubit.stepMonth(-1))
-                  : null,
-              onNext: () => unawaited(cubit.stepMonth(1)),
-              onCurrent: () => unawaited(cubit.goCurrentMonth()),
-            ),
-            if (recap != null && recap.classDays > 0)
-              Text(
-                recap.toDate
-                    ? l10n.hrPresenceRecapClassDaysToDate(recap.classDays)
-                    : l10n.hrPresenceRecapClassDays(recap.classDays),
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+        // Dans la carte de filtres commune, comme la portée de la fiche : le
+        // mois pilote tout l'écran, il doit se voir.
+        EteeloPanelCard(
+          child: Wrap(
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              PresenceMonthNav(
+                month: state.month,
+                isCurrent: state.isCurrentMonth,
+                onPrevious: state.canStepBack
+                    ? () => unawaited(cubit.stepMonth(-1))
+                    : null,
+                onNext: () => unawaited(cubit.stepMonth(1)),
+                onCurrent: () => unawaited(cubit.goCurrentMonth()),
+                onPick: () async {
+                  final picked = await pickPresenceMonth(
+                    context,
+                    month: state.month,
+                    firstMonth: state.firstMonth,
+                    lastMonth: state.currentMonth,
+                  );
+                  if (picked != null && !cubit.isClosed) {
+                    unawaited(cubit.showMonth(picked));
+                  }
+                },
               ),
-          ],
+              if (recap != null && recap.classDays > 0)
+                Text(
+                  recap.toDate
+                      ? l10n.hrPresenceRecapClassDaysToDate(recap.classDays)
+                      : l10n.hrPresenceRecapClassDays(recap.classDays),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         _content(context, l10n, cubit),

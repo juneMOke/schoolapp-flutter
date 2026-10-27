@@ -10,8 +10,10 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/utils/content_disposition_parser.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_report.dart';
 
-/// Lit la réponse de `GET /hr/attendance-stats.pdf` : un 200 dont le corps
-/// n'est pas un PDF est une erreur, pas un document vide.
+/// Lit la réponse d'un PDF de présence (`GET /hr/attendance-stats.pdf`, la
+/// liste de la fiche, la fiche d'un agent) : un 200 dont le corps n'est pas
+/// un PDF est une erreur, pas un document vide. `X-Document-Id` dit une
+/// pièce scellée.
 ///
 /// La même lecture que les autres rapports servis (liste du personnel,
 /// caisse, recouvrement) : chacun garde la sienne, avec son nom par défaut.
@@ -22,9 +24,11 @@ class HrAttendanceReportMapper {
 
   static const String _fallbackFileName = 'assiduite-personnel.pdf';
 
+  /// [fallbackFileName] : le nom quand `Content-Disposition` n'en donne pas.
   static Either<Failure, HrAttendanceReport> map(
-    HttpResponse<Uint8List> response,
-  ) {
+    HttpResponse<Uint8List> response, {
+    String fallbackFileName = _fallbackFileName,
+  }) {
     final bytes = response.data;
     final headers = response.response.headers;
 
@@ -55,8 +59,16 @@ class HrAttendanceReportMapper {
             ContentDispositionParser.fileName(
               headers.map['content-disposition']?.firstOrNull,
             ) ??
-            _fallbackFileName,
+            fallbackFileName,
+        documentId: _documentId(
+          headers.map[AppConstants.documentIdHeader]?.firstOrNull,
+        ),
       ),
     );
+  }
+
+  static String? _documentId(String? value) {
+    final id = value?.trim();
+    return id == null || id.isEmpty ? null : id;
   }
 }

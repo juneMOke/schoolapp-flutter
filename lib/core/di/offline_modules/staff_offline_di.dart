@@ -212,6 +212,15 @@ void registerStaffOffline(GetIt getIt) {
   getIt.registerFactory<GetHrAttendanceReportUseCase>(
     () => GetHrAttendanceReportUseCase(getIt<HrAttendanceStatsRepository>()),
   );
+  getIt.registerFactory<GetHrAttendanceProfilesReportUseCase>(
+    () => GetHrAttendanceProfilesReportUseCase(
+      getIt<HrAttendanceStatsRepository>(),
+    ),
+  );
+  getIt.registerFactory<GetHrAttendanceAgentSheetUseCase>(
+    () =>
+        GetHrAttendanceAgentSheetUseCase(getIt<HrAttendanceStatsRepository>()),
+  );
   getIt.registerFactory<HrPresenceDashboardCubit>(
     () => HrPresenceDashboardCubit(
       getDashboard: getIt<GetHrAttendanceDashboardUseCase>(),
@@ -243,6 +252,7 @@ void registerStaffOffline(GetIt getIt) {
       getMonth: getIt<GetHrAttendanceAgentMonthUseCase>(),
       getYear: getIt<GetHrAttendanceAgentYearUseCase>(),
       source: getIt<StaffSnapshotSource>(),
+      loadAttendance: getIt<LoadStaffAttendanceUseCase>(),
       args: args,
     ),
   );
@@ -259,6 +269,8 @@ void registerStaffOffline(GetIt getIt) {
   getIt.registerFactory<HrAttendanceReportCubit>(
     () => HrAttendanceReportCubit(
       getReport: getIt<GetHrAttendanceReportUseCase>(),
+      getProfilesReport: getIt<GetHrAttendanceProfilesReportUseCase>(),
+      getAgentSheet: getIt<GetHrAttendanceAgentSheetUseCase>(),
     ),
   );
   getIt.registerFactory<HrStaffStatsCubit>(

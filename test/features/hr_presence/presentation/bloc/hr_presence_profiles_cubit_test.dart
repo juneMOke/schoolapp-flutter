@@ -125,4 +125,22 @@ void main() {
     await cubit.applyLocation(yearly: true);
     expect(cubit.state.yearly, isTrue);
   });
+
+  test(
+    'le sélecteur : un mois permis quitte l\'année ; hors bornes, rien',
+    () async {
+      final cubit = build();
+      await cubit.load();
+      await cubit.setYearly(true);
+      await cubit.showMonth('2026-09');
+      expect(cubit.state.month, '2026-09');
+      expect(cubit.state.yearly, isFalse);
+      clearInteractions(get);
+      await cubit.showMonth('2026-11');
+      await cubit.showMonth('2026-08');
+      await cubit.showMonth('2026-09');
+      expect(cubit.state.month, '2026-09');
+      verifyNever(() => get(any()));
+    },
+  );
 }

@@ -63,8 +63,9 @@ class HrPresenceStaffCard extends StatelessWidget {
       toneStrength: DashboardTones.forceDe(tone),
       actions: [
         HrAttendanceReportButton(
-          window: rows.isEmpty ? null : window,
-          search: text,
+          onDownload: rows.isEmpty
+              ? null
+              : (cubit) => cubit.download(window, search: text),
         ),
       ],
       child: Column(

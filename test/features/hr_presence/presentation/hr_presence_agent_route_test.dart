@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_args.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/agent/hr_presence_agent_month_cubit.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/bloc/dashboard/hr_attendance_report_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_agent_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
@@ -25,6 +26,8 @@ class _MockGet extends Mock implements GetHrAttendanceAgentMonthUseCase {}
 class _MockSource extends Mock implements StaffSnapshotSource {}
 
 class _MockYear extends Mock implements GetHrAttendanceAgentYearUseCase {}
+
+class _MockReport extends Mock implements GetHrAttendanceReportUseCase {}
 
 /// Le détail d'un agent a son adresse sous le tableau de bord :
 /// `/home/rh-presences-tableau-de-bord/{agentId}?mois=AAAA-MM`.
@@ -67,6 +70,9 @@ void main() {
         args: args,
         now: () => DateTime(2026, 10, 23, 10),
       ),
+    );
+    getIt.registerFactory<HrAttendanceReportCubit>(
+      () => HrAttendanceReportCubit(getReport: _MockReport()),
     );
   });
   tearDown(() async => getIt.reset());
