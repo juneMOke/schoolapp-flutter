@@ -15,15 +15,19 @@ class PresenceCalendarDay extends Equatable {
   /// « +12 min », le motif) ; `null` : l'icône du statut.
   final String? detail;
 
+  /// Écrit sur la tablette, pas encore reçu par le serveur.
+  final bool pending;
+
   const PresenceCalendarDay({
     required this.day,
     required this.upcoming,
     this.status = PresenceStatus.none,
     this.detail,
+    this.pending = false,
   });
 
   @override
-  List<Object?> get props => [day, upcoming, status, detail];
+  List<Object?> get props => [day, upcoming, status, detail, pending];
 }
 
 /// Un retard ou une absence du mois, tel que la fiche le liste.
@@ -61,6 +65,7 @@ List<PresenceCalendarDay?> presenceCalendar({
   required bool Function(String day) upcoming,
   required PresenceStatus Function(String day) statusOf,
   String? Function(String day)? detailOf,
+  bool Function(String day)? pendingOf,
 }) => [
   for (var i = 0; i < firstWeekday - 1; i++) null,
   for (final day in weekdays)
@@ -69,5 +74,6 @@ List<PresenceCalendarDay?> presenceCalendar({
       upcoming: upcoming(day),
       status: statusOf(day),
       detail: detailOf?.call(day),
+      pending: pendingOf?.call(day) ?? false,
     ),
 ];

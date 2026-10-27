@@ -16,7 +16,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class PresenceMonthCalendar extends StatelessWidget {
   final List<PresenceCalendarDay?> days;
 
-  const PresenceMonthCalendar({super.key, required this.days});
+  /// `null` : les cases se lisent seulement. Sinon un jour passé s'ouvre
+  /// (jamais un jour à venir).
+  final ValueChanged<String>? onTapDay;
+
+  const PresenceMonthCalendar({super.key, required this.days, this.onTapDay});
 
   static const int _columns = 5;
 
@@ -63,7 +67,7 @@ class PresenceMonthCalendar extends StatelessWidget {
                               height:
                                   AppDimensions.presenceMarkCalendarCellHeight,
                             )
-                          : _DayCell(day: cell),
+                          : _DayCell(day: cell, onTap: onTapDay),
                     ),
                   ),
               ],
@@ -76,8 +80,9 @@ class PresenceMonthCalendar extends StatelessWidget {
 
 class _DayCell extends StatelessWidget {
   final PresenceCalendarDay day;
+  final ValueChanged<String>? onTap;
 
-  const _DayCell({required this.day});
+  const _DayCell({required this.day, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -96,46 +101,82 @@ class _DayCell extends StatelessWidget {
               date,
               PresenceLabels.status(l10n, day.status),
               ?detail,
+              if (day.pending) l10n.presenceCalendarPending,
             ].join(' · '),
       child: Opacity(
         opacity: day.upcoming ? AppDimensions.presenceMarkUpcomingOpacity : 1,
-        child: Container(
-          height: AppDimensions.presenceMarkCalendarCellHeight,
-          decoration: BoxDecoration(
-            color: marked ? tone.soft : AppColors.surfaceRaised,
-            borderRadius: AppRadius.brSm,
-            border: Border.all(color: marked ? tone.border : AppColors.border),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${int.parse(day.day.substring(8))}',
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+        child: _tappable(
+          Container(
+            height: AppDimensions.presenceMarkCalendarCellHeight,
+            decoration: BoxDecoration(
+              color: marked ? tone.soft : AppColors.surfaceRaised,
+              borderRadius: AppRadius.brSm,
+              border: Border.all(
+                color: marked ? tone.border : AppColors.border,
               ),
-              if (!day.upcoming && detail != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xs,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${int.parse(day.day.substring(8))}',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textPrimary,
                   ),
-                  child: Text(
-                    detail,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelSmall.copyWith(color: tone.ink),
-                  ),
-                )
-              else if (!day.upcoming)
-                Icon(
-                  marked ? tone.icon : Icons.more_horiz,
-                  size: AppSpacing.lg,
-                  color: tone.ink,
                 ),
-            ],
+                if (!day.upcoming && detail != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                    ),
+                    child: Text(
+                      detail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.labelSmall.copyWith(color: tone.ink),
+                    ),
+                  )
+                else if (!day.upcoming)
+                  Icon(
+                    marked ? tone.icon : Icons.more_horiz,
+                    size: AppSpacing.lg,
+                    color: tone.ink,
+                  ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// La case, et par-dessus la marque « à envoyer » ; touchable quand la
+  /// fiche le permet et que le jour est passé — 56 dp de haut, la cible tient.
+  Widget _tappable(Widget cell) {
+    final onTap = this.onTap;
+    final marked = day.pending
+        ? Stack(
+            children: [
+              cell,
+              const Positioned(
+                top: AppSpacing.xs,
+                right: AppSpacing.xs,
+                child: Icon(
+                  Icons.cloud_upload_outlined,
+                  size: AppSpacing.md,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          )
+        : cell;
+    if (onTap == null || day.upcoming) return marked;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () => onTap(day.day),
+        borderRadius: AppRadius.brSm,
+        child: marked,
       ),
     );
   }
