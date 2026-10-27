@@ -13171,29 +13171,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get presenceMarkPickDay => 'Choisir un jour';
 
   @override
-  String presenceMarkUnmarkedNames(int count, String names) {
+  String get presenceMarkReviewUnmarked => 'Voir dans le registre';
+
+  @override
+  String presenceMarkUnmarkedListTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Pas encore pointés : $names.',
-      one: 'Pas encore pointé : $names.',
+      other: '$count personnes pas encore pointées',
+      one: '1 personne pas encore pointée',
     );
     return '$_temp0';
   }
 
   @override
-  String presenceMarkUnmarkedNamesMore(String names, int rest) {
-    String _temp0 = intl.Intl.pluralLogic(
-      rest,
-      locale: localeName,
-      other: 'Pas encore pointés : $names et $rest autres.',
-      one: 'Pas encore pointés : $names et 1 autre.',
-    );
-    return '$_temp0';
-  }
+  String get presenceMarkUnmarkedKeep => 'Les laisser à pointer';
 
   @override
-  String get presenceMarkReviewUnmarked => 'Voir la liste';
+  String get presenceMarkUnmarkedMarkPresent => 'Les marquer présents';
+
+  @override
+  String get presenceMarkUnmarkedChoiceLabel => 'Que faire des non-pointés ?';
+
+  @override
+  String get presenceMarkUnmarkedChoiceHint =>
+      'Choisissez d\'abord le sort des non-pointés.';
 
   @override
   String get presenceMarkLeaveConfirm => 'Quitter sans valider';
@@ -13497,19 +13499,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceReportTitle => 'Valider le rapport du jour';
 
   @override
-  String staffAttendanceReportMarkRemaining(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count agents non pointés — les marquer présents à l’heure',
-      one: '1 agent non pointé — le marquer présent à l’heure',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get presenceMarkReportUnmarkedReminder =>
-      'Sans cette case, ils seront comptés présents par défaut à la clôture du mois.';
+      'Laissés à pointer, ils seront comptés présents par défaut à la clôture du mois.';
 
   @override
   String presenceMarkReportUnjustified(int count) {

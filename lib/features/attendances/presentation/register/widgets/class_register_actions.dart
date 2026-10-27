@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_card_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
@@ -12,6 +13,7 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_s
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_day_access.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_presence_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes de la journée entière : horaire, restants présents, valider,
@@ -76,10 +78,10 @@ class ClassRegisterActions {
   Future<void> validate(ClassDayRegister register, String classroomName) async {
     final l10n = AppLocalizations.of(context)!;
     final unmarked = register.unmarked;
-    final choice = await EteeloFormDialog.show<PresenceReportChoice>(
+    final choice = await EteeloCardDialog.show<PresenceReportChoice>(
       context,
       PresenceReportDialog(
-        eyebrow: PresenceLabels.longDay(
+        dayLabel: PresenceLabels.longDay(
           MaterialLocalizations.of(context),
           register.day.day,
         ),
@@ -87,8 +89,9 @@ class ClassRegisterActions {
         present: register.count(PresenceStatus.present),
         late: register.count(PresenceStatus.late),
         absent: register.count(PresenceStatus.absent),
-        unmarked: unmarked.length,
-        unmarkedNames: [for (final line in unmarked) line.student.fullName],
+        unmarked: [
+          for (final line in unmarked) line.presenceView(l10n, classroomName),
+        ],
         unjustified: register.toJustify,
         // Décision 2 : l'appel envoyé ne connaît pas « à pointer ».
         unmarkedOptional: false,

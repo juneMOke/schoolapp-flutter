@@ -254,20 +254,23 @@ void main() {
     verifyNever(() => save(any()));
   });
 
-  testWidgets('« Voir la liste » lève la recherche et filtre sur les non '
-      'pointés', (tester) async {
-    final cubit = await pump(tester);
-    cubit.setDayText('Mayala');
-    await tester.pump();
+  testWidgets(
+    '« Voir dans le registre » lève la recherche et filtre sur les non '
+    'pointés',
+    (tester) async {
+      final cubit = await pump(tester);
+      cubit.setDayText('Mayala');
+      await tester.pump();
 
-    await tester.tap(find.text('Valider le rapport'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Voir la liste'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Valider le rapport'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Voir dans le registre'));
+      await tester.pumpAndSettle();
 
-    expect(cubit.state.dayQuery.text, isEmpty);
-    expect(cubit.state.dayQuery.status, PresenceStatus.none);
-  });
+      expect(cubit.state.dayQuery.text, isEmpty);
+      expect(cubit.state.dayQuery.status, PresenceStatus.none);
+    },
+  );
 
   group('quitter un jour pointé mais pas validé', () {
     const title = 'Le rapport du mardi 29 septembre 2026 n\'est pas validé';

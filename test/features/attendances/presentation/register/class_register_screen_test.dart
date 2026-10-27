@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
@@ -207,18 +208,29 @@ void main() {
     expect(lines.every((l) => l.status.isMarked), isTrue);
   });
 
-  testWidgets('valider : la modale nomme les non pointés ; « Voir la liste » '
-      'filtre le registre sans rien valider', (tester) async {
+  testWidgets('valider : la modale liste les non pointés ; « Voir dans le '
+      'registre » filtre sans rien valider', (tester) async {
     await pump(tester, day: presenceDay());
 
     await tester.tap(find.text("Valider l'appel"));
     await tester.pumpAndSettle();
-    expect(find.text('Pas encore pointé : Esther Zola.'), findsOneWidget);
+    final dialog = find.byType(PresenceReportDialog);
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.text('1 personne pas encore pointée'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text('Zola')),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.text('Voir la liste'));
+    await tester.tap(find.text('Voir dans le registre'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pas encore pointé : Esther Zola.'), findsNothing);
+    expect(dialog, findsNothing);
     final cubit = tester
         .element(find.byType(ClassRegisterTab))
         .read<ClassPresenceCubit>();

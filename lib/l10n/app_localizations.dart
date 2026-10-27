@@ -20564,23 +20564,41 @@ abstract class AppLocalizations {
   /// **'Pick a day'**
   String get presenceMarkPickDay;
 
-  /// No description provided for @presenceMarkUnmarkedNames.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Not marked yet: {names}.} other{Not marked yet: {names}.}}'**
-  String presenceMarkUnmarkedNames(int count, String names);
-
-  /// No description provided for @presenceMarkUnmarkedNamesMore.
-  ///
-  /// In en, this message translates to:
-  /// **'{rest, plural, =1{Not marked yet: {names} and 1 other.} other{Not marked yet: {names} and {rest} others.}}'**
-  String presenceMarkUnmarkedNamesMore(String names, int rest);
-
   /// No description provided for @presenceMarkReviewUnmarked.
   ///
   /// In en, this message translates to:
-  /// **'Show the list'**
+  /// **'Show in the register'**
   String get presenceMarkReviewUnmarked;
+
+  /// No description provided for @presenceMarkUnmarkedListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person not marked yet} other{{count} people not marked yet}}'**
+  String presenceMarkUnmarkedListTitle(int count);
+
+  /// No description provided for @presenceMarkUnmarkedKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave them unmarked'**
+  String get presenceMarkUnmarkedKeep;
+
+  /// No description provided for @presenceMarkUnmarkedMarkPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark them present'**
+  String get presenceMarkUnmarkedMarkPresent;
+
+  /// No description provided for @presenceMarkUnmarkedChoiceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What about the unmarked people?'**
+  String get presenceMarkUnmarkedChoiceLabel;
+
+  /// No description provided for @presenceMarkUnmarkedChoiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First choose what happens to the unmarked people.'**
+  String get presenceMarkUnmarkedChoiceHint;
 
   /// No description provided for @presenceMarkLeaveConfirm.
   ///
@@ -21044,16 +21062,10 @@ abstract class AppLocalizations {
   /// **'Validate the daily report'**
   String get staffAttendanceReportTitle;
 
-  /// No description provided for @staffAttendanceReportMarkRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 staff member not marked — mark present on time} other{{count} staff members not marked — mark them present on time}}'**
-  String staffAttendanceReportMarkRemaining(int count);
-
   /// No description provided for @presenceMarkReportUnmarkedReminder.
   ///
   /// In en, this message translates to:
-  /// **'Otherwise they will be counted present by default when the month is closed.'**
+  /// **'Left unmarked, they will be counted present by default when the month is closed.'**
   String get presenceMarkReportUnmarkedReminder;
 
   /// No description provided for @presenceMarkReportUnjustified.

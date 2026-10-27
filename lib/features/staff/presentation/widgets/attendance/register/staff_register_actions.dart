@@ -7,10 +7,12 @@ import 'package:school_app_flutter/features/auth/presentation/widgets/permission
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
+import 'package:school_app_flutter/features/staff/presentation/helpers/staff_presence_view.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_register_day_actions.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_card_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_schedule_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
@@ -89,10 +91,10 @@ class StaffRegisterActions {
   Future<void> validate(StaffDayRegister register) async {
     final l10n = AppLocalizations.of(context)!;
     final unmarked = register.unmarked;
-    final choice = await EteeloFormDialog.show<PresenceReportChoice>(
+    final choice = await EteeloCardDialog.show<PresenceReportChoice>(
       context,
       PresenceReportDialog(
-        eyebrow: PresenceLabels.longDay(
+        dayLabel: PresenceLabels.longDay(
           MaterialLocalizations.of(context),
           register.day,
         ),
@@ -101,10 +103,8 @@ class StaffRegisterActions {
         late: register.count(PresenceStatus.late),
         absent: register.count(PresenceStatus.absent),
         // Seuls ceux qu'un contrat couvre ce jour-là sont marqués d'office.
-        unmarked: unmarked.length,
-        unmarkedNames: [for (final row in unmarked) row.member.fullName],
+        unmarked: [for (final row in unmarked) row.presenceView(l10n)],
         unjustified: register.toJustify,
-        unmarkedLabel: l10n.staffAttendanceReportMarkRemaining(unmarked.length),
         lockMessage: l10n.staffAttendanceReportLock,
         confirmLabel: l10n.staffAttendanceReportConfirm,
       ),
