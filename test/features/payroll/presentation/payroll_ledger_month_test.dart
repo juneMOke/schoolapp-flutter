@@ -5,7 +5,9 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_head
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_month_pill.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_header.dart';
 
 import '../../staff/staff_builders.dart';
 import '../payroll_builders.dart';
@@ -51,46 +53,62 @@ void main() {
     });
   });
 
-  testWidgets('une pastille par mois, du premier contrat au mois en cours', (
+  testWidgets('le mois du bandeau ouvre le sélecteur, qui ouvre un mois', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await pumpPayrollScreen(tester, snapshot: snapshot());
-    await tester.pumpAndSettle();
-
-    final pills = tester
-        .widgetList<PayrollMonthPill>(find.byType(PayrollMonthPill))
-        .toList();
-    expect(pills.map((p) => p.month), [
-      '2026-10',
-      '2026-09',
-      '2026-08',
-      '2026-07',
-      '2026-06',
-    ]);
-    expect(pills.firstWhere((p) => p.month == '2026-09').phase, isNotNull);
-    expect(pills.firstWhere((p) => p.month == '2026-07').phase, isNull);
-    expect(pills.firstWhere((p) => p.month == '2026-10').selected, isTrue);
-  });
-
-  testWidgets('toucher une pastille ouvre son mois', (tester) async {
-    tester.view.physicalSize = const Size(1440, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
     final harness = await pumpPayrollScreen(tester, snapshot: snapshot());
     await tester.pumpAndSettle();
-
-    await tester.tap(
-      find.byWidgetPredicate(
-        (w) => w is PayrollMonthPill && w.month == '2026-09',
-      ),
+    // Plus de frise : le mois se lit une seule fois, dans le bandeau.
+    expect(find.byType(PayrollMonthPill), findsNothing);
+    expect(
+      tester.getSize(find.byTooltip('Choisir un mois')).height,
+      greaterThanOrEqualTo(48),
     );
+
+    await tester.tap(find.byTooltip('Choisir un mois'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('septembre 2026'));
     await tester.pumpAndSettle();
 
     expect(harness.cubit.state.month, '2026-09');
     expect(find.text('septembre 2026'), findsOneWidget);
+  });
+
+  group('PayrollLedgerHeader.firstPickable', () {
+    PayrollState state(String month, PayrollSnapshot snapshot) => PayrollState(
+      load: PayrollLoad.ready,
+      snapshot: snapshot,
+      today: '2026-10-15',
+      month: month,
+    );
+
+    test('les douze mois qui finissent au mois en cours', () {
+      expect(
+        PayrollLedgerHeader.firstPickable(
+          state('2026-08', PayrollSnapshot.empty),
+        ),
+        '2025-11',
+      );
+    });
+
+    test('un mois plus ancien ouvre les douze mois qui partent de lui', () {
+      expect(
+        PayrollLedgerHeader.firstPickable(
+          state('2024-03', PayrollSnapshot.empty),
+        ),
+        '2024-03',
+      );
+    });
+
+    test('jamais avant le premier contrat', () {
+      expect(
+        PayrollLedgerHeader.firstPickable(state('2026-08', snapshot())),
+        '2026-06',
+      );
+    });
   });
 
   testWidgets(

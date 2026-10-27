@@ -11938,5 +11938,11 @@
   "payrollAgentTotalsNet": "Net due",
   "payrollAgentNextInstallmentCarried": "Next instalment: {amount} on the {month} payroll · {carried} carried over",
   "@payrollAgentNextInstallmentCarried": {"placeholders": {"amount": {"type": "String"}, "month": {"type": "String"}, "carried": {"type": "String"}}},
-  "payrollAgentArrearsDetail": "See the detail"
+  "payrollAgentArrearsDetail": "See the detail",
+  "payrollBarDraftWriteDetail": "Tap a staff member to open their sheet; the pencil on their row opens this month's variable items directly.",
+  "payrollBarSubmittedManageDetail": "Check the ledger, then validate it, or send it back to the bursar with a reason.",
+  "payrollBarValidatedDetail": "Amounts are frozen: pay each staff member from their row, then send out the payslips.",
+  "payrollPayoutBarFullDetail": "If cash does not cover everything, set a rate for the month, or a fixed amount in a staff member's pay profile.",
+  "payrollArrearsBannerDetail": "Still to pay for {months}. An arrear is settled on its original month, from the arrears register.",
+  "@payrollArrearsBannerDetail": {"placeholders": {"months": {"type": "String"}}}
 }

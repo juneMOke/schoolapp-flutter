@@ -20679,4 +20679,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollAgentArrearsDetail => 'Voir le détail';
+
+  @override
+  String get payrollBarDraftWriteDetail =>
+      'Touchez un agent pour ouvrir sa fiche ; le crayon de sa ligne ouvre directement ses éléments variables du mois.';
+
+  @override
+  String get payrollBarSubmittedManageDetail =>
+      'Vérifiez le livre, puis validez-la, ou renvoyez-la à l\'économe avec un motif.';
+
+  @override
+  String get payrollBarValidatedDetail =>
+      'Les montants sont figés : versez chaque agent depuis sa ligne, puis diffusez les bulletins.';
+
+  @override
+  String get payrollPayoutBarFullDetail =>
+      'Si la trésorerie ne permet pas de tout payer, fixez un taux pour le mois, ou un montant fixe dans le profil de paie d\'un agent.';
+
+  @override
+  String payrollArrearsBannerDetail(String months) {
+    return 'Reste à payer sur $months. Un arriéré se règle sur son mois d\'origine, depuis le registre des arriérés.';
+  }
 }

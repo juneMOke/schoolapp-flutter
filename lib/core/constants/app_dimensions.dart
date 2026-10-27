@@ -874,36 +874,28 @@ class AppDimensions {
   static const classRecapWatchDot = 8.0;
 
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
-  // Le livre défile horizontalement sous 920 dp ; les colonnes de montant sont
+  // Le livre défile horizontalement sous 976 dp ; les colonnes de montant sont
   // alignées à droite, en chiffres tabulaires.
-  static const payrollLedgerMinWidth = 968.0;
+  static const payrollLedgerMinWidth = 976.0;
   static const payrollColAmount = 100.0;
 
   /// La dernière colonne du livre : le crayon des éléments variables en
   /// brouillon, sinon le chevron qui dit que la ligne ouvre la fiche.
   static const payrollColOpen = minTouchTarget;
 
-  /// L'état de paie : onze colonnes du tableur des écoles.
-  static const payrollStatementMinWidth = 1120.0;
-  static const payrollColCode = 64.0;
-
   /// Le registre des arriérés : l'agent, ses mois dus, le dû, l'ancienneté.
   static const payrollArrearsMinWidth = 880.0;
   static const payrollColArrearsMonths = 300.0;
   static const payrollColSmallAmount = 80.0;
-  static const payrollColAttendance = 88.0;
+  static const payrollColAttendance = 96.0;
   static const payrollColPayout = 136.0;
   static const payrollAdvancesMinWidth = 880.0;
   static const payrollColDate = 104.0;
   static const payrollColSchedule = 150.0;
   static const payrollColStatus = 120.0;
-  static const payrollHistoryMinWidth = 820.0;
-  static const payrollColMonth = 150.0;
-  static const payrollColCount = 72.0;
 
-  /// La feuille du bulletin et son panneau latéral.
+  /// La feuille du bulletin.
   static const payrollPayslipMaxWidth = 720.0;
-  static const payrollPayslipPanelWidth = 270.0;
 
   /// Le filet or sous l'en-tête du bulletin.
   static const payrollPayslipRule = 3.0;
@@ -914,6 +906,12 @@ class AppDimensions {
   /// Le tableau « Ce que chaque salarié perçoit » (spec TB 2 : min 860).
   static const payrollDashStaffMinWidth = 960.0;
   static const payrollCircuitLink = 14.0;
+
+  /// Le liseré tricolore sous le bandeau de paie.
+  static const payrollBannerStripe = 3.0;
+
+  /// Le carreau d'icône d'un bandeau du livre (arriérés, geste, versement).
+  static const payrollCalloutIcon = 40.0;
   static const payrollModeTileHeight = 52.0;
   static const payrollProgressHeight = 8.0;
 

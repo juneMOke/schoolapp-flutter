@@ -31620,6 +31620,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See the detail'**
   String get payrollAgentArrearsDetail;
+
+  /// No description provided for @payrollBarDraftWriteDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a staff member to open their sheet; the pencil on their row opens this month\'s variable items directly.'**
+  String get payrollBarDraftWriteDetail;
+
+  /// No description provided for @payrollBarSubmittedManageDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the ledger, then validate it, or send it back to the bursar with a reason.'**
+  String get payrollBarSubmittedManageDetail;
+
+  /// No description provided for @payrollBarValidatedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts are frozen: pay each staff member from their row, then send out the payslips.'**
+  String get payrollBarValidatedDetail;
+
+  /// No description provided for @payrollPayoutBarFullDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If cash does not cover everything, set a rate for the month, or a fixed amount in a staff member\'s pay profile.'**
+  String get payrollPayoutBarFullDetail;
+
+  /// No description provided for @payrollArrearsBannerDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to pay for {months}. An arrear is settled on its original month, from the arrears register.'**
+  String payrollArrearsBannerDetail(String months);
 }
 
 class _AppLocalizationsDelegate

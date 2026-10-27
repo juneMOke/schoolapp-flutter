@@ -3,15 +3,14 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_banner_parts.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_agent_situation.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_hero_tiles.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_banner.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
@@ -124,38 +123,18 @@ class PayrollAgentHero extends StatelessWidget {
         ),
       ],
     );
-    return ClipRRect(
-      borderRadius: AppRadius.brCard,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.payrollAgentBannerStart,
-              AppColors.payrollAgentBannerMid,
-              AppColors.payrollAgentBannerEnd,
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            const KubaPatternLayer(),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) => identity(
-                      constraints.maxWidth < AppBreakpoints.dataTableCardsMax,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  PayrollAgentHeroTiles(situation: situation),
-                ],
-              ),
+    return PayrollBanner(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) => identity(
+              constraints.maxWidth < AppBreakpoints.dataTableCardsMax,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          PayrollAgentHeroTiles(situation: situation),
+        ],
       ),
     );
   }

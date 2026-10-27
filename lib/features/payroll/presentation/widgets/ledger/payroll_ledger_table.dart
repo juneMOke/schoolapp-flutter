@@ -44,6 +44,8 @@ class PayrollLedgerTable extends StatelessWidget {
     required this.canWrite,
   });
 
+  static const int _netColumn = 5;
+
   static const List<double?> _widths = [
     null,
     AppDimensions.payrollColAmount,
@@ -66,6 +68,10 @@ class PayrollLedgerTable extends StatelessWidget {
       // Sur une tablette en portrait, le livre défile de côté : l'agent reste
       // à l'écran pendant que ses montants passent.
       frozenFirstColumn: true,
+      // Le livre mis en avant, et un filet entre les montants (jusqu'au net)
+      // et ce qui les commente : pointage, versement.
+      raised: true,
+      ruleAfter: _netColumn,
       widths: _widths,
       endAligned: const {1, 2, 3, 4, 5},
       headers: [

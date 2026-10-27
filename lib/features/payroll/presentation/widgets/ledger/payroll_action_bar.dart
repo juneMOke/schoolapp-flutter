@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_callout.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_diffuse_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Une phrase d'état et le seul geste possible, selon l'état affiché et les
+/// Une phrase d'état, ce qu'elle demande, et le seul geste possible, selon l'état affiché et les
 /// droits de la session — plus de bascule de rôle : le rôle vient du jeton.
 class PayrollActionBar extends StatelessWidget {
   final PayrollMonthView view;
@@ -51,9 +49,16 @@ class PayrollActionBar extends StatelessWidget {
           onPressed: on,
           fullWidth: false,
         );
-    final (String message, List<Widget> buttons) = switch (view.phase) {
+    final (
+      String message,
+      String? detail,
+      IconData icon,
+      List<Widget> buttons,
+    ) = switch (view.phase) {
       PayrollPhase.draft when canWrite => (
         l10n.payrollBarDraftWrite,
+        l10n.payrollBarDraftWriteDetail,
+        Icons.edit_outlined,
         [
           primary(
             l10n.payrollActionSubmit,
@@ -63,9 +68,16 @@ class PayrollActionBar extends StatelessWidget {
           ),
         ],
       ),
-      PayrollPhase.draft => (l10n.payrollBarDraftRead, <Widget>[]),
+      PayrollPhase.draft => (
+        l10n.payrollBarDraftRead,
+        null,
+        Icons.edit_note_outlined,
+        <Widget>[],
+      ),
       PayrollPhase.submitted when canManage => (
         l10n.payrollBarSubmittedManage,
+        l10n.payrollBarSubmittedManageDetail,
+        Icons.fact_check_outlined,
         [
           secondary(l10n.payrollActionReturn, Icons.reply, actions.sendBack),
           primary(
@@ -76,11 +88,18 @@ class PayrollActionBar extends StatelessWidget {
           ),
         ],
       ),
-      PayrollPhase.submitted => (l10n.payrollBarSubmittedWrite, <Widget>[]),
+      PayrollPhase.submitted => (
+        l10n.payrollBarSubmittedWrite,
+        null,
+        Icons.hourglass_top_outlined,
+        <Widget>[],
+      ),
       PayrollPhase.validated || PayrollPhase.paid => (
         view.phase == PayrollPhase.paid
             ? l10n.payrollBarPaid
             : l10n.payrollBarValidated(view.remainingCount),
+        view.phase == PayrollPhase.paid ? null : l10n.payrollBarValidatedDetail,
+        view.phase == PayrollPhase.paid ? Icons.task_alt : Icons.lock_outline,
         [
           if (canManage && view.reopenBlocker == null)
             secondary(
@@ -108,33 +127,25 @@ class PayrollActionBar extends StatelessWidget {
           ),
         ],
       ),
-      _ => (l10n.payrollBarInFlight, <Widget>[]),
+      _ => (
+        l10n.payrollBarInFlight,
+        null,
+        Icons.cloud_upload_outlined,
+        <Widget>[],
+      ),
     };
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceRaised,
-        borderRadius: AppRadius.brLg,
-      ),
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: AppSpacing.md,
-        runSpacing: AppSpacing.sm,
-        children: [
-          Text(
-            message,
-            style: AppTypography.bodyLarge.copyWith(
-              color: AppColors.textPrimary,
+    return PayrollCallout(
+      icon: icon,
+      title: message,
+      details: [?detail],
+      action: buttons.isEmpty
+          ? null
+          : Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              alignment: WrapAlignment.end,
+              children: buttons,
             ),
-          ),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: buttons,
-          ),
-        ],
-      ),
     );
   }
 }

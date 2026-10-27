@@ -7,8 +7,11 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_mont
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les quatre jalons du circuit — préparée, soumise, validée, versée : faits
-/// en vert coché, le courant en terre cuite, dates sous soumise et validée.
+/// Les quatre jalons du circuit, sur le bandeau sombre du livre — préparée,
+/// soumise, validée, versée : faits en vert coché, le courant en terre cuite
+/// cerné, les suivants en verre ; le libellé sous la pastille, la date sous
+/// soumise et validée. Réduit d'un bloc plutôt que de passer à la ligne sur
+/// un téléphone.
 class PayrollCircuit extends StatelessWidget {
   final PayrollMonthView view;
 
@@ -36,28 +39,37 @@ class PayrollCircuit extends StatelessWidget {
       (l10n.payrollCircuitValidated, header?.validatedAt),
       (l10n.payrollCircuitPaid, null),
     ];
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        for (final (index, (label, date)) in labels.indexed) ...[
-          if (index > 0)
-            Container(
-              width: AppDimensions.payrollCircuitLink,
-              height: AppDimensions.presenceMarkBorderWidth,
-              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              color: index <= step ? AppColors.vertSavane : AppColors.border,
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerEnd,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (index, (label, date)) in labels.indexed) ...[
+            if (index > 0)
+              Container(
+                width: AppDimensions.payrollCircuitLink,
+                height: AppDimensions.presenceMarkBorderWidth,
+                margin: const EdgeInsets.only(
+                  top: AppDimensions.payrollCircuitDot / 2,
+                ),
+                color: index <= step
+                    ? AppColors.payrollAgentBannerGood
+                    : AppColors.payrollAgentOnBannerFaint,
+              ),
+            _Milestone(
+              index: index,
+              label: label,
+              date: step >= index && date != null
+                  ? PayrollLabels.day(context, date)
+                  : null,
+              done: index < step || (index == 3 && step == 3),
+              current: index == step && step < 3,
             ),
-          _Milestone(
-            index: index,
-            label: label,
-            date: step >= index && date != null
-                ? PayrollLabels.day(context, date)
-                : null,
-            done: index < step || (index == 3 && step == 3),
-            current: index == step && step < 3,
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -83,55 +95,63 @@ class _Milestone extends StatelessWidget {
         ? AppColors.vertSavane
         : current
         ? AppColors.terreCuite
-        : AppColors.surfaceAlt;
-    final ink = done || current ? AppColors.textOnDark : AppColors.textMuted;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: AppDimensions.payrollCircuitDot,
-          height: AppDimensions.payrollCircuitDot,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            boxShadow: current
-                ? [
-                    const BoxShadow(
-                      color: AppColors.terreCuiteSoft,
-                      spreadRadius: AppSpacing.xs,
+        : AppColors.payrollAgentBannerTile;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: AppDimensions.payrollCircuitDot,
+            height: AppDimensions.payrollCircuitDot,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: done || current
+                  ? null
+                  : Border.all(color: AppColors.payrollAgentOnBannerMuted),
+              boxShadow: current
+                  ? [
+                      const BoxShadow(
+                        color: AppColors.payrollAgentOnBannerFaint,
+                        spreadRadius: AppSpacing.xs,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: done
+                ? const Icon(
+                    Icons.check,
+                    size: AppSpacing.lg,
+                    color: AppColors.payrollAgentOnBanner,
+                  )
+                : Text(
+                    '${index + 1}',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: AppColors.payrollAgentOnBanner,
                     ),
-                  ]
-                : null,
+                  ),
           ),
-          child: done
-              ? Icon(Icons.check, size: AppSpacing.lg, color: ink)
-              : Text(
-                  '${index + 1}',
-                  style: AppTypography.labelMedium.copyWith(color: ink),
-                ),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            label,
+            style: AppTypography.labelMedium.copyWith(
+              color: done || current
+                  ? AppColors.payrollAgentOnBanner
+                  : AppColors.payrollAgentOnBannerMuted,
+              fontWeight: current ? FontWeight.w700 : null,
+            ),
+          ),
+          if (date != null)
             Text(
-              label,
-              style: AppTypography.labelMedium.copyWith(
-                color: AppColors.textPrimary,
+              date!,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.payrollAgentOnBannerMuted,
               ),
             ),
-            if (date != null)
-              Text(
-                date!,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textMutedAa,
-                ),
-              ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

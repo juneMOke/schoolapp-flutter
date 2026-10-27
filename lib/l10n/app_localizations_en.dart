@@ -20544,4 +20544,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollAgentArrearsDetail => 'See the detail';
+
+  @override
+  String get payrollBarDraftWriteDetail =>
+      'Tap a staff member to open their sheet; the pencil on their row opens this month\'s variable items directly.';
+
+  @override
+  String get payrollBarSubmittedManageDetail =>
+      'Check the ledger, then validate it, or send it back to the bursar with a reason.';
+
+  @override
+  String get payrollBarValidatedDetail =>
+      'Amounts are frozen: pay each staff member from their row, then send out the payslips.';
+
+  @override
+  String get payrollPayoutBarFullDetail =>
+      'If cash does not cover everything, set a rate for the month, or a fixed amount in a staff member\'s pay profile.';
+
+  @override
+  String payrollArrearsBannerDetail(String months) {
+    return 'Still to pay for $months. An arrear is settled on its original month, from the arrears register.';
+  }
 }
