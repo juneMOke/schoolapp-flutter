@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_day_access.dart';
 import 'package:school_app_flutter/core/components/search/eteelo_search_toolbar.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
@@ -12,7 +11,6 @@ import 'package:school_app_flutter/features/attendances/domain/services/class_da
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
-import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_actions.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_banners.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_month_placeholder.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_view.dart';
@@ -42,7 +40,7 @@ class ClassRegisterTab extends StatelessWidget {
     final day = register.day;
     final query = state.dayQuery;
     final lock = classDayLockIn(context, day, today: state.today);
-    final content = Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ClassDayBanner(
@@ -113,10 +111,6 @@ class ClassRegisterTab extends StatelessWidget {
             ),
         ],
       ],
-    );
-    return PresenceDayExitGuard(
-      guard: ClassRegisterActions(context),
-      child: content,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_results_frame.dart';
@@ -50,6 +51,8 @@ class _MockSettings extends Mock
     implements SaveStaffAttendanceSettingsUseCase {}
 
 void main() {
+  setUpAll(() => registerFallbackValue(<StaffAttendanceRecord>[]));
+
   final snapshot = StaffAttendanceSnapshot(
     members: [
       member(
@@ -77,8 +80,11 @@ void main() {
     WidgetTester tester, {
     List<String>? permissions,
     String? location,
+    StaffAttendanceSnapshot? data,
   }) async {
     final load = _MockLoad();
+    final save = _MockSave();
+    when(() => save(any())).thenAnswer((_) async => const Right(unit));
     final signals = _MockSignals();
     when(() => signals.watch(any())).thenReturn(() {});
     when(() => signals.pull()).thenAnswer((_) async {});
@@ -87,12 +93,12 @@ void main() {
         from: any(named: 'from'),
         to: any(named: 'to'),
       ),
-    ).thenAnswer((_) async => Right(snapshot));
+    ).thenAnswer((_) async => Right(data ?? snapshot));
     final cubit = StaffAttendanceCubit(
       load: load,
       signals: signals,
       commands: StaffAttendanceCommands(
-        save: _MockSave(),
+        save: save,
         gesture: _MockGesture(),
         settings: _MockSettings(),
         now: () => DateTime(2026, 9, 29, 7, 35),
@@ -228,6 +234,60 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(address(), '/rh-presences/registre?jour=2026-09-22');
+    });
+
+    testWidgets('Précédent du navigateur après un geste pose la question ; '
+        '« Rester » remet l\'adresse sur le jour affiché', (tester) async {
+      // Ruth est déjà pointée en retard ; pointer Didier touche le jour.
+      final cubit = await pump(
+        tester,
+        location: '/rh-presences/registre?vue=grid',
+        data: StaffAttendanceSnapshot(
+          members: snapshot.members,
+          records: const {
+            'm-2': {
+              '2026-09-29': StaffAttendanceRecord(
+                id: 'r-2',
+                staffMemberId: 'm-2',
+                workDate: '2026-09-29',
+                status: PresenceStatus.late,
+                lateMinutes: 22,
+              ),
+            },
+          },
+          locks: const {},
+          settings: StaffAttendanceSettings.defaults,
+          schoolYear: const SchoolYearBounds(start: '2026-09-01'),
+          hasEverSynced: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byType(StaffAttendanceCard).first);
+      await tester.tap(find.byType(StaffAttendanceCard).first);
+      await tester.pumpAndSettle();
+
+      // Ce que fait Précédent : l'adresse change, la route reste.
+      router.go('/rh-presences/registre?jour=2026-09-25&vue=grid');
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Le rapport du mardi 29 septembre 2026 n\'est pas validé'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Rester'));
+      await tester.pumpAndSettle();
+
+      expect(cubit.state.day, '2026-09-29');
+      expect(address(), '/rh-presences/registre?vue=grid');
+    });
+
+    testWidgets('passer en cartes s\'inscrit dans l\'adresse', (tester) async {
+      await pump(tester, location: '/rh-presences/registre');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cartes'));
+      await tester.pumpAndSettle();
+
+      expect(address(), '/rh-presences/registre?vue=grid');
     });
 
     testWidgets('changer de jour s\'inscrit ; « Aujourd\'hui » rend '

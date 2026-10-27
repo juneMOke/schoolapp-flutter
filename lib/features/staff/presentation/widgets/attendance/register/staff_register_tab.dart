@@ -6,7 +6,6 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_register_filters.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
@@ -16,7 +15,6 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attend
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_grid.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_list.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_actions.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_banners.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_empty.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
@@ -41,7 +39,7 @@ class StaffRegisterTab extends StatelessWidget {
       SchoolDayCalendar.monthOf(state.day),
     );
     final query = state.dayQuery;
-    final content = Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         StaffDayBanner(state: state),
@@ -113,10 +111,6 @@ class StaffRegisterTab extends StatelessWidget {
             ),
         ],
       ],
-    );
-    return PresenceDayExitGuard(
-      guard: StaffRegisterActions(context),
-      child: content,
     );
   }
 }

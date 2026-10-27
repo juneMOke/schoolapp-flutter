@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_row.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_status_segment.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
@@ -28,7 +29,7 @@ import 'package:school_app_flutter/features/staff/presentation/pages/staff_atten
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_row.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_tab.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/staff_attendance_tabs.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_banners.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -201,7 +202,7 @@ void main() {
   });
 
   testWidgets('la liste donne un segment de statut par agent', (tester) async {
-    await pump(tester);
+    await pump(tester, view: CollectionViewMode.grid);
 
     await tester.tap(find.text('Liste'));
     await tester.pump();
@@ -237,21 +238,56 @@ void main() {
     );
   });
 
+  testWidgets('un jour validé refuse aussi les gestes de la liste', (
+    tester,
+  ) async {
+    await pump(tester, validated: true);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PresenceStatusSegment).first,
+        matching: find.text('Absent'),
+      ),
+    );
+    await tester.pump();
+
+    verifyNever(() => save(any()));
+  });
+
+  testWidgets('« Voir la liste » lève la recherche et filtre sur les non '
+      'pointés', (tester) async {
+    final cubit = await pump(tester);
+    cubit.setDayText('Mayala');
+    await tester.pump();
+
+    await tester.tap(find.text('Valider le rapport'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Voir la liste'));
+    await tester.pumpAndSettle();
+
+    expect(cubit.state.dayQuery.text, isEmpty);
+    expect(cubit.state.dayQuery.status, PresenceStatus.none);
+  });
+
   group('quitter un jour pointé mais pas validé', () {
     const title = 'Le rapport du mardi 29 septembre 2026 n\'est pas validé';
+
+    /// Monte l'écran et pointe un agent : le jour devient « touché ».
+    Future<StaffAttendanceCubit> pumpEdited(WidgetTester tester) async {
+      final cubit = await pump(tester, view: CollectionViewMode.grid);
+      await tester.tap(find.text('Kalala Mutombo'));
+      await tester.pumpAndSettle();
+      return cubit;
+    }
 
     testWidgets('changer de jour pose la question ; « Rester » garde le jour', (
       tester,
     ) async {
-      final cubit = await pump(tester);
+      final cubit = await pumpEdited(tester);
 
       await tester.tap(find.byTooltip('Jour précédent'));
       await tester.pumpAndSettle();
       expect(find.text(title), findsOneWidget);
-      expect(
-        find.textContaining('1 agent n\'est pas encore pointé'),
-        findsOneWidget,
-      );
 
       await tester.tap(find.text('Rester'));
       await tester.pumpAndSettle();
@@ -259,7 +295,7 @@ void main() {
     });
 
     testWidgets('« Quitter sans valider » change de jour', (tester) async {
-      final cubit = await pump(tester);
+      final cubit = await pumpEdited(tester);
 
       await tester.tap(find.byTooltip('Jour précédent'));
       await tester.pumpAndSettle();
@@ -269,11 +305,14 @@ void main() {
       expect(cubit.state.day, '2026-09-28');
     });
 
-    testWidgets('quitter l\'écran pose la même question', (tester) async {
-      await pump(tester);
+    testWidgets('quitter l\'écran pose la même question, même depuis un autre '
+        'onglet', (tester) async {
+      await pumpEdited(tester);
+      await tester.tap(find.text('Récapitulatif du mois'));
+      await tester.pumpAndSettle();
 
       final leaving = RouteExitGuard.mayLeave(
-        tester.element(find.byType(StaffRegisterTab)),
+        tester.element(find.byType(StaffAttendanceTabs)),
       );
       await tester.pumpAndSettle();
       expect(find.text(title), findsOneWidget);
@@ -283,8 +322,39 @@ void main() {
       expect(await leaving, isTrue);
     });
 
+    testWidgets('un jour seulement consulté part sans question', (
+      tester,
+    ) async {
+      // Des pointages d'un autre poste, aucun geste ici : rien à rappeler.
+      final cubit = await pump(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(title), findsNothing);
+      expect(cubit.state.day, '2026-09-28');
+    });
+
     testWidgets('un jour validé part sans question', (tester) async {
       final cubit = await pump(tester, validated: true);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(title), findsNothing);
+      expect(cubit.state.day, '2026-09-28');
+    });
+
+    testWidgets('en lecture seule, un geste refusé ne garde rien', (
+      tester,
+    ) async {
+      final cubit = await pump(
+        tester,
+        permissions: [Perm.hrAttendanceRead.wire],
+        view: CollectionViewMode.grid,
+      );
+      await tester.tap(find.text('Kalala Mutombo'));
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byTooltip('Jour précédent'));
       await tester.pumpAndSettle();

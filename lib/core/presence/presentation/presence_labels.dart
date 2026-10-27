@@ -75,10 +75,11 @@ abstract final class PresenceLabels {
   /// Combien de noms une alerte cite avant de résumer (« et 3 autres »).
   static const int namedLimit = 5;
 
-  /// « Pas encore pointés : Mbala, Ilunga et 3 autres. »
+  /// « Pas encore pointés : Mbala, Ilunga et 3 autres. » — « pointé » au
+  /// singulier pour un seul nom.
   static String unmarkedNames(AppLocalizations l10n, List<String> names) {
     if (names.length <= namedLimit) {
-      return l10n.presenceMarkUnmarkedNames(names.join(', '));
+      return l10n.presenceMarkUnmarkedNames(names.length, names.join(', '));
     }
     return l10n.presenceMarkUnmarkedNamesMore(
       names.take(namedLimit).join(', '),

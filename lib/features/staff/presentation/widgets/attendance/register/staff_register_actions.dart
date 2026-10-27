@@ -8,11 +8,11 @@ import 'package:school_app_flutter/features/staff/domain/entities/staff_attendan
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_register_day_actions.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_schedule_dialog.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_picker.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
@@ -20,45 +20,40 @@ import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
 /// Les gestes du jour entier : réglages, restants présents, valider, rouvrir.
 /// Chacun ouvre sa modale s'il en a une, puis confie le geste au cubit.
 ///
-/// Quitter un jour pointé mais pas validé — changer de jour, quitter
-/// l'écran — passe par la garde commune ([PresenceDayLeaveGuard]).
-class StaffRegisterActions with PresenceDayLeaveGuard {
-  @override
+/// Les gestes de jour ([days]) et les sorties d'écran passent par la garde
+/// commune ([leaveGuard]) : quitter un jour pointé mais pas validé demande.
+class StaffRegisterActions {
   final BuildContext context;
 
-  StaffRegisterActions(this.context);
+  const StaffRegisterActions(this.context);
 
   StaffAttendanceCubit get _cubit => context.read<StaffAttendanceCubit>();
 
-  @override
-  bool get hasPendingDay {
-    final register = _cubit.state.register;
-    return register.marked > 0 &&
-        !register.frozen &&
-        PermissionGate.allowsAccess(context, kStaffAttendanceWriteAccess);
-  }
+  /// Le jour affiché s'écrit : ni validé ni d'un mois clos, et le compte a
+  /// le droit d'écrire. Le bandeau en tire ses actions, la garde son attente.
+  bool get canEditDay =>
+      !_cubit.state.register.frozen &&
+      PermissionGate.allowsAccess(context, kStaffAttendanceWriteAccess);
 
-  @override
-  String get leaveTitle =>
-      AppLocalizations.of(context)!.staffAttendanceLeaveTitle(
-        PresenceLabels.longDay(
-          MaterialLocalizations.of(context),
-          _cubit.state.day,
-        ),
-      );
+  PresenceDayLeaveGuard get leaveGuard => PresenceDayLeaveGuard(
+    context,
+    isPending: () =>
+        _cubit.shownDayEdited && _cubit.state.register.marked > 0 && canEditDay,
+    title: () => AppLocalizations.of(context)!.staffAttendanceLeaveTitle(
+      PresenceLabels.longDay(
+        MaterialLocalizations.of(context),
+        _cubit.state.day,
+      ),
+    ),
+    message: () => AppLocalizations.of(
+      context,
+    )!.staffAttendanceLeaveMessage(_cubit.state.register.unmarked.length),
+  );
 
-  @override
-  String get leaveMessage =>
-      AppLocalizations.of(context)!.staffAttendanceLeaveMessage(
-        _cubit.state.register.count(PresenceStatus.none),
-      );
-
-  /// Le jour ouvré précédent ou suivant, après la garde.
-  void stepDay(int direction) =>
-      unawaited(leaveDayThen(() => _cubit.stepDay(direction)));
-
-  /// Le dernier jour ouvré, après la garde.
-  void goToday() => unawaited(leaveDayThen(_cubit.goToday));
+  /// Flèches, Aujourd'hui, calendrier : le jour choisi passe par le cubit,
+  /// donc par l'adresse (`?jour=`).
+  PresenceRegisterDayActions get days =>
+      PresenceRegisterDayActions(context, days: _cubit, guard: leaveGuard);
 
   Future<void> openSettings() async {
     final editable = PermissionGate.allowsAccess(
@@ -80,21 +75,8 @@ class StaffRegisterActions with PresenceDayLeaveGuard {
           toleranceMinutes: schedule.toleranceMinutes,
         ),
       ),
+      touchesDay: false,
     );
-  }
-
-  /// Le calendrier du registre : le jour choisi passe par le cubit, donc par
-  /// l'adresse (`?jour=`).
-  Future<void> pickDay() async {
-    final state = _cubit.state;
-    final day = await pickPresenceDay(
-      context,
-      day: state.day,
-      firstDay: state.firstDay,
-      lastDay: state.lastWorkDay,
-    );
-    if (day == null || day == state.day || !context.mounted) return;
-    await leaveDayThen(() => _cubit.showDay(day));
   }
 
   void markRemaining() => unawaited(
@@ -128,10 +110,7 @@ class StaffRegisterActions with PresenceDayLeaveGuard {
       ),
     );
     if (choice == null || !context.mounted) return;
-    if (choice.reviewUnmarked) {
-      _cubit.setDayStatus(PresenceStatus.none);
-      return;
-    }
+    if (days.reviewIfAsked(choice)) return;
     await _cubit.perform(
       (c) => c.validateDay(
         _cubit.state.snapshot,

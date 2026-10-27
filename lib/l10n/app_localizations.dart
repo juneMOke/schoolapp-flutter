@@ -20567,8 +20567,8 @@ abstract class AppLocalizations {
   /// No description provided for @presenceMarkUnmarkedNames.
   ///
   /// In en, this message translates to:
-  /// **'Not marked yet: {names}.'**
-  String presenceMarkUnmarkedNames(String names);
+  /// **'{count, plural, =1{Not marked yet: {names}.} other{Not marked yet: {names}.}}'**
+  String presenceMarkUnmarkedNames(int count, String names);
 
   /// No description provided for @presenceMarkUnmarkedNamesMore.
   ///

@@ -86,12 +86,9 @@ class ClassPresenceState extends Equatable {
   /// est connue.
   String? get firstDay => schoolYear?.start;
 
-  /// Le dernier jour que le registre peut montrer.
-  String get lastSchoolDay => lastSchoolDayOf(today);
-
   /// Le registre peut-il reculer d'un jour de classe ? Pas avant la rentrée.
   bool get canStepBack {
-    final first = schoolYear?.start;
+    final first = firstDay;
     return first == null ||
         SchoolDayCalendar.stepWorkDay(day, -1).compareTo(first) >= 0;
   }
@@ -101,7 +98,7 @@ class ClassPresenceState extends Equatable {
   /// La fiche et le récapitulatif peuvent-ils reculer d'un mois ? Pas avant
   /// le mois de la rentrée.
   bool get canStepMonthBack {
-    final first = schoolYear?.start;
+    final first = firstDay;
     return first == null || month.compareTo(first.substring(0, 7)) > 0;
   }
 

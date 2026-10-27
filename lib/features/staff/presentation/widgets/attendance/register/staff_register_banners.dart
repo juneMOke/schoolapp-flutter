@@ -25,6 +25,7 @@ class StaffDayBanner extends StatelessWidget {
   Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final actions = StaffRegisterActions(context);
+    final days = actions.days;
     final register = state.register;
     return PresenceDayBanner(
       eyebrow: state.isToday
@@ -39,14 +40,12 @@ class StaffDayBanner extends StatelessWidget {
         l10n.presenceMarkBadgeToMark(register.count(PresenceStatus.none)),
         if (register.pending > 0) l10n.presenceMarkOnTablet(register.pending),
       ].join(' · '),
-      showActions:
-          !register.frozen &&
-          PermissionGate.allowsAccess(context, kStaffAttendanceWriteAccess),
+      showActions: actions.canEditDay,
       validateLabel: l10n.staffAttendanceValidateReport,
-      onPrevious: state.canStepBack ? () => actions.stepDay(-1) : null,
-      onNext: state.isToday ? null : () => actions.stepDay(1),
-      onToday: actions.goToday,
-      onPickDay: () => unawaited(actions.pickDay()),
+      onPrevious: state.canStepBack ? () => days.stepDay(-1) : null,
+      onNext: state.isToday ? null : () => days.stepDay(1),
+      onToday: days.goToday,
+      onPickDay: () => unawaited(days.pickDay()),
       // Les réglages sont à la direction seule (hr.attendance.manage, E2) :
       // les autres lisent l'horaire sans pouvoir l'ouvrir.
       onSettings:

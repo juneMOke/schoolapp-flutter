@@ -136,7 +136,10 @@ class StaffRecapTab extends StatelessWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await cubit.perform((c) => c.closeMonth(recap.ledger.month));
+    await cubit.perform(
+      (c) => c.closeMonth(recap.ledger.month),
+      touchesDay: false,
+    );
   }
 }
 

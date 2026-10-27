@@ -67,6 +67,15 @@ void main() {
     );
   });
 
+  testWidgets('cinq noms tiennent sans résumé', (tester) async {
+    await open(tester, ['Mbala', 'Ilunga', 'Zola', 'Kasongo', 'Lukusa']);
+
+    expect(
+      find.text('Pas encore pointés : Mbala, Ilunga, Zola, Kasongo, Lukusa.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('la case « marquer présents » est décochée par défaut', (
     tester,
   ) async {
@@ -83,7 +92,7 @@ void main() {
 
   testWidgets('« Voir la liste » referme sans valider', (tester) async {
     final result = await open(tester, ['Zola']);
-    expect(find.text('Pas encore pointés : Zola.'), findsOneWidget);
+    expect(find.text('Pas encore pointé : Zola.'), findsOneWidget);
 
     await tester.tap(find.text('Voir la liste'));
     await tester.pumpAndSettle();

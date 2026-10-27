@@ -5,35 +5,55 @@ import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La garde d'un jour pointé mais pas validé, partagée par les registres (le
-/// Pointage du personnel, l'appel d'une classe).
+/// Pointage du personnel, l'appel d'une classe) : chaque module la construit
+/// en disant quand son jour est en attente et ce que la popin en dit.
 ///
 /// Rien n'est perdu en partant : les pointages sont sur la tablette. Ce qui
 /// manque, c'est la validation — la question est un rappel, posée avec la
 /// popin de la charte (celle de l'inscription), jamais un blocage.
-///
-/// Les gestes du jour entier d'un registre la mêlent ; chacun dit quand le
-/// jour est en attente et ce que la popin en dit.
-mixin PresenceDayLeaveGuard {
-  BuildContext get context;
+class PresenceDayLeaveGuard {
+  final BuildContext context;
 
   /// Le jour affiché a des pointages, n'est pas validé, et le compte peut le
-  /// valider.
-  bool get hasPendingDay;
+  /// valider. Relu à chaque question : l'état a pu changer depuis.
+  final bool Function() isPending;
 
   /// « Le rapport du mardi 27 octobre n'est pas validé ».
-  String get leaveTitle;
+  final String Function() title;
 
   /// Ce qui est gardé, et combien restent à pointer.
-  String get leaveMessage;
+  final String Function() message;
+
+  const PresenceDayLeaveGuard(
+    this.context, {
+    required this.isPending,
+    required this.title,
+    required this.message,
+  });
+
+  /// Une question à la fois, toutes gardes confondues : un Précédent du
+  /// navigateur pendant la popin d'un changement de jour n'en superpose pas
+  /// une seconde.
+  static bool _asking = false;
 
   /// Peut-on quitter le jour affiché ? Sans attente, sans question.
-  Future<bool> mayLeaveDay() async {
-    if (!hasPendingDay) return true;
+  Future<bool> mayLeave() async {
+    if (!isPending()) return true;
+    if (_asking) return false;
+    _asking = true;
+    try {
+      return await _ask();
+    } finally {
+      _asking = false;
+    }
+  }
+
+  Future<bool> _ask() {
     final l10n = AppLocalizations.of(context)!;
     return showAppConfirmationDialog(
       context: context,
-      title: leaveTitle,
-      message: leaveMessage,
+      title: title(),
+      message: message(),
       confirmLabel: l10n.presenceMarkLeaveConfirm,
       cancelLabel: l10n.presenceMarkLeaveStay,
       headerIcon: Icons.pending_actions_outlined,
@@ -42,10 +62,12 @@ mixin PresenceDayLeaveGuard {
     );
   }
 
-  /// Change de jour ([move]) après la question, s'il y a lieu.
-  Future<void> leaveDayThen(Future<void> Function() move) async {
-    if (!await mayLeaveDay() || !context.mounted) return;
+  /// Quitte le jour ([move]) après la question, s'il y a lieu ; rend `false`
+  /// quand on reste.
+  Future<bool> leaveThen(Future<void> Function() move) async {
+    if (!await mayLeave() || !context.mounted) return false;
     await move();
+    return true;
   }
 }
 
@@ -64,8 +86,8 @@ class PresenceDayExitGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RouteExitGuard(
-    hasUnsavedWork: () => guard.hasPendingDay,
-    confirmExit: guard.mayLeaveDay,
+    hasUnsavedWork: guard.isPending,
+    confirmExit: guard.mayLeave,
     child: child,
   );
 }

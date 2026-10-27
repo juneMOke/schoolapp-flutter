@@ -13171,8 +13171,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get presenceMarkPickDay => 'Choisir un jour';
 
   @override
-  String presenceMarkUnmarkedNames(String names) {
-    return 'Pas encore pointés : $names.';
+  String presenceMarkUnmarkedNames(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pas encore pointés : $names.',
+      one: 'Pas encore pointé : $names.',
+    );
+    return '$_temp0';
   }
 
   @override

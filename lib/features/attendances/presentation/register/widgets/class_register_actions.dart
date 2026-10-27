@@ -6,7 +6,7 @@ import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.da
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_picker.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_register_day_actions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_schedule_dialog.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
@@ -18,48 +18,46 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// rouvrir, relancer l'envoi. Chacun ouvre sa modale s'il en a une, puis
 /// confie le geste au cubit.
 ///
-/// Quitter un appel pointé mais pas validé — changer de jour ou de classe,
-/// quitter l'écran — passe par la garde commune ([PresenceDayLeaveGuard]).
-class ClassRegisterActions with PresenceDayLeaveGuard {
-  @override
+/// Les gestes de jour ([days]), le changement de classe et les sorties
+/// d'écran passent par la garde commune ([leaveGuard]) : quitter un appel
+/// pointé mais pas validé demande.
+class ClassRegisterActions {
   final BuildContext context;
 
-  ClassRegisterActions(this.context);
+  const ClassRegisterActions(this.context);
 
   ClassPresenceCubit get _cubit => context.read<ClassPresenceCubit>();
 
-  @override
-  bool get hasPendingDay {
+  /// L'appel affiché s'écrit (cf. `classDayLock`) : le bandeau en tire ses
+  /// actions, la garde son attente.
+  bool get canEditDay {
     final state = _cubit.state;
-    final register = state.register;
-    return register != null &&
-        register.marked > 0 &&
-        !register.frozen &&
-        classDayLockIn(context, register.day, today: state.today) == null;
+    final day = state.presenceDay;
+    return day != null &&
+        classDayLockIn(context, day, today: state.today) == null;
   }
 
-  @override
-  String get leaveTitle =>
-      AppLocalizations.of(context)!.classPresenceLeaveTitle(
-        PresenceLabels.longDay(
-          MaterialLocalizations.of(context),
-          _cubit.state.day,
-        ),
-        _cubit.state.classroom?.name ?? '',
-      );
+  PresenceDayLeaveGuard get leaveGuard => PresenceDayLeaveGuard(
+    context,
+    isPending: () =>
+        _cubit.shownDayEdited &&
+        (_cubit.state.register?.marked ?? 0) > 0 &&
+        canEditDay,
+    title: () => AppLocalizations.of(context)!.classPresenceLeaveTitle(
+      PresenceLabels.longDay(
+        MaterialLocalizations.of(context),
+        _cubit.state.day,
+      ),
+      _cubit.state.classroom?.name ?? '',
+    ),
+    message: () => AppLocalizations.of(
+      context,
+    )!.classPresenceLeaveMessage(_cubit.state.register?.unmarked.length ?? 0),
+  );
 
-  @override
-  String get leaveMessage =>
-      AppLocalizations.of(context)!.classPresenceLeaveMessage(
-        _cubit.state.register?.count(PresenceStatus.none) ?? 0,
-      );
-
-  /// Le jour de classe précédent ou suivant, après la garde.
-  void stepDay(int direction) =>
-      unawaited(leaveDayThen(() => _cubit.stepDay(direction)));
-
-  /// Le dernier jour de classe, après la garde.
-  void goToday() => unawaited(leaveDayThen(_cubit.goToday));
+  /// Flèches, Aujourd'hui, calendrier.
+  PresenceRegisterDayActions get days =>
+      PresenceRegisterDayActions(context, days: _cubit, guard: leaveGuard);
 
   /// L'horaire se lit ici ; il se règle au Pointage du personnel, sous le
   /// droit des RH (décision 5).
@@ -70,19 +68,6 @@ class ClassRegisterActions with PresenceDayLeaveGuard {
       context,
       PresenceScheduleDialog(schedule: day.schedule, editable: false),
     );
-  }
-
-  /// Le calendrier du registre.
-  Future<void> pickDay() async {
-    final state = _cubit.state;
-    final day = await pickPresenceDay(
-      context,
-      day: state.day,
-      firstDay: state.firstDay,
-      lastDay: state.lastSchoolDay,
-    );
-    if (day == null || day == state.day || !context.mounted) return;
-    await leaveDayThen(() => _cubit.showDay(day));
   }
 
   void markRemaining() =>
@@ -113,10 +98,7 @@ class ClassRegisterActions with PresenceDayLeaveGuard {
       ),
     );
     if (choice == null || !context.mounted) return;
-    if (choice.reviewUnmarked) {
-      _cubit.setDayStatus(PresenceStatus.none);
-      return;
-    }
+    if (days.reviewIfAsked(choice)) return;
     await _cubit.perform(
       (c, day) => c.validate(day, classroomName: classroomName),
     );

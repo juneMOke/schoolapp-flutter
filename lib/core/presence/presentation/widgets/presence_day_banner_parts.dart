@@ -58,23 +58,28 @@ class PresenceBannerDay extends StatelessWidget {
       ),
     );
     if (onPick == null) return label;
-    return Tooltip(
-      message: AppLocalizations.of(context)!.presenceMarkPickDay,
-      child: InkWell(
-        onTap: onPick,
-        borderRadius: AppRadius.brSm,
-        child: TouchTarget(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(child: label),
-              const SizedBox(width: AppSpacing.sm),
-              const Icon(
-                Icons.calendar_month_outlined,
-                size: AppSpacing.xl,
-                color: AppColors.presenceMarkOnBannerMuted,
-              ),
-            ],
+    // Un bouton pour le lecteur d'écran : il annonce l'action, pas la date
+    // seule.
+    return Semantics(
+      button: true,
+      child: Tooltip(
+        message: AppLocalizations.of(context)!.presenceMarkPickDay,
+        child: InkWell(
+          onTap: onPick,
+          borderRadius: AppRadius.brSm,
+          child: TouchTarget(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(child: label),
+                const SizedBox(width: AppSpacing.sm),
+                const Icon(
+                  Icons.calendar_month_outlined,
+                  size: AppSpacing.xl,
+                  color: AppColors.presenceMarkOnBannerMuted,
+                ),
+              ],
+            ),
           ),
         ),
       ),

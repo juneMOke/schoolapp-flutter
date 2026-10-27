@@ -19,6 +19,8 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/attendanc
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/staff_attendance_notices.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_actions.dart';
 
 /// RH · Présences ▸ Registre du jour — le registre du Pointage, seul, sans les
 /// onglets de l'ancien écran.
@@ -64,11 +66,18 @@ class HrPresenceRegisterScreen extends StatelessWidget {
               showStaffAttendanceNotice(context, state.notice!),
           buildWhen: (previous, current) =>
               previous.copyWith(notice: current.notice) != current,
-          builder: (context, state) => HrRegisterLocation(
-            state: state,
-            cubit: context.read<StaffAttendanceCubit>(),
-            child: _body(context, state),
-          ),
+          builder: (context, state) {
+            final guard = StaffRegisterActions(context).leaveGuard;
+            return PresenceDayExitGuard(
+              guard: guard,
+              child: HrRegisterLocation(
+                state: state,
+                cubit: context.read<StaffAttendanceCubit>(),
+                guard: guard,
+                child: _body(context, state),
+              ),
+            );
+          },
         ),
       ),
     );

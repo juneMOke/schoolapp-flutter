@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_edited_days.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_day_navigation.dart';
 import 'package:school_app_flutter/core/offline/resource_sync_signals.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_classroom.dart';
@@ -9,6 +11,7 @@ import 'package:school_app_flutter/features/attendances/domain/services/class_da
 import 'package:school_app_flutter/features/attendances/domain/services/class_month_recap.dart';
 import 'package:school_app_flutter/features/attendances/domain/usecases/register/class_presence_use_cases.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_commands.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_day_view.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_filters.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_notice.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
@@ -19,7 +22,8 @@ import 'package:school_app_flutter/features/attendances/presentation/register/bl
 /// La tablette relit le jour affiché à chaque changement (classe, jour,
 /// geste) et quand un pull ou un flush le périme.
 class ClassPresenceCubit extends Cubit<ClassPresenceState>
-    with ClassPresenceFilters {
+    with ClassPresenceFilters, ClassPresenceDayView
+    implements PresenceDayNavigation {
   final LoadClassPresenceDayUseCase _load;
   final LoadClassPresenceMonthUseCase _loadMonth;
   final ResourceSyncSignals _signals;
@@ -153,17 +157,26 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState>
     );
   }
 
+  final _edited = PresenceEditedDays();
+
+  /// L'appel affiché a reçu un geste depuis l'ouverture de l'écran.
+  bool get shownDayEdited =>
+      _edited.contains('${state.classroom?.id}|${state.day}');
+
   // ── Navigation ────────────────────────────────────────────────────────
 
   /// Le jour de classe précédent ou suivant ; jamais au-delà d'aujourd'hui.
+  @override
   Future<void> stepDay(int direction) =>
       _moveDay(SchoolDayCalendar.stepWorkDay(state.day, direction));
 
+  @override
   Future<void> goToday() =>
       _moveDay(ClassPresenceState.lastSchoolDayOf(state.today));
 
   /// Un jour choisi au calendrier ; un samedi ou un dimanche ramène au
   /// vendredi d'avant.
+  @override
   Future<void> showDay(String day) => _moveDay(
     SchoolDayCalendar.isWeekday(day)
         ? day
@@ -239,6 +252,7 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState>
   ) async {
     final day = state.presenceDay;
     if (day == null || day.day != state.day || _busy) return;
+    _edited.mark('${day.classroomId}|${day.day}');
     _busy = true;
     try {
       final notice = await gesture(commands, day);

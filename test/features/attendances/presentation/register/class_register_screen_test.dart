@@ -12,6 +12,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
@@ -27,6 +28,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/reference_formats.dart';
 import 'class_presence_fixtures.dart';
 
 class _Auth extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
@@ -69,9 +71,13 @@ void main() {
     required ClassPresenceDay day,
     List<String> permissions = teacher,
     CollectionViewMode? view,
+    bool fixedSurface = true,
   }) async {
-    await tester.binding.setSurfaceSize(const Size(1280, 1600));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // Un test de formats pose lui-même la fenêtre.
+    if (fixedSurface) {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+    }
     final auth = _Auth();
     final authState = AuthState(
       status: AuthStatus.authenticated,
@@ -207,12 +213,12 @@ void main() {
 
     await tester.tap(find.text("Valider l'appel"));
     await tester.pumpAndSettle();
-    expect(find.text('Pas encore pointés : Esther Zola.'), findsOneWidget);
+    expect(find.text('Pas encore pointé : Esther Zola.'), findsOneWidget);
 
     await tester.tap(find.text('Voir la liste'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pas encore pointés : Esther Zola.'), findsNothing);
+    expect(find.text('Pas encore pointé : Esther Zola.'), findsNothing);
     final cubit = tester
         .element(find.byType(ClassRegisterTab))
         .read<ClassPresenceCubit>();
@@ -220,24 +226,71 @@ void main() {
     verifyNever(() => validate(any(), any()));
   });
 
-  testWidgets('changer de jour avec un appel pointé non validé pose la '
-      'question ; « Rester » garde le jour', (tester) async {
+  testWidgets('un dimanche choisi ramène au vendredi d\'avant', (tester) async {
     await pump(tester, day: presenceDay());
     final cubit = tester
         .element(find.byType(ClassRegisterTab))
         .read<ClassPresenceCubit>();
 
-    await tester.tap(find.byTooltip('Jour précédent'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('· 6e A n\'est pas validé'), findsOneWidget);
-    expect(
-      find.textContaining('1 élève n\'est pas encore pointé'),
-      findsOneWidget,
-    );
+    await cubit.showDay('2026-09-27');
 
-    await tester.tap(find.text('Rester'));
-    await tester.pumpAndSettle();
-    expect(cubit.state.day, '2026-10-01');
+    expect(cubit.state.day, '2026-09-25');
+  });
+
+  group('quitter un appel pointé mais pas validé', () {
+    /// Monte l'appel et pointe une élève : l'appel devient « touché ».
+    Future<ClassPresenceCubit> pumpEdited(WidgetTester tester) async {
+      await pump(tester, day: presenceDay(), view: CollectionViewMode.grid);
+      await tester.tap(find.text('Zola'));
+      await tester.pumpAndSettle();
+      return tester
+          .element(find.byType(ClassRegisterTab))
+          .read<ClassPresenceCubit>();
+    }
+
+    testWidgets('changer de jour pose la question ; « Rester » garde le jour', (
+      tester,
+    ) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('· 6e A n\'est pas validé'), findsOneWidget);
+      expect(
+        find.textContaining('l\'appel ne part qu\'à la validation'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Rester'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.day, '2026-10-01');
+    });
+
+    testWidgets('« Quitter sans valider » change de jour', (tester) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quitter sans valider'));
+      await tester.pumpAndSettle();
+
+      expect(cubit.state.day, '2026-09-30');
+    });
+
+    testWidgets('un appel seulement consulté part sans question', (
+      tester,
+    ) async {
+      await pump(tester, day: presenceDay());
+      final cubit = tester
+          .element(find.byType(ClassRegisterTab))
+          .read<ClassPresenceCubit>();
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('n\'est pas validé'), findsNothing);
+      expect(cubit.state.day, '2026-09-30');
+    });
   });
 
   testWidgets(
@@ -324,5 +377,18 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => validate(any(), any())).called(1);
+  });
+
+  testAtReferenceFormats('l\'appel en liste tient', (tester, format) async {
+    await pump(tester, day: presenceDay(), fixedSurface: false);
+    expect(find.byType(PresenceRow), findsNWidgets(3));
+  });
+
+  testAtReferenceFormats('l\'appel validé et son bandeau tiennent', (
+    tester,
+    format,
+  ) async {
+    await pump(tester, day: presenceDay(validated: true), fixedSurface: false);
+    expect(find.byType(PresenceValidatedBanner), findsOneWidget);
   });
 }

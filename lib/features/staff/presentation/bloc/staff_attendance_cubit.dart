@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_edited_days.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_day_navigation.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
@@ -19,7 +21,8 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 /// La tablette lit **deux mois** au plus — celui du registre et celui de la
 /// fiche et du récapitulatif — et ne relit la base qu'en changeant de plage,
 /// après un geste, ou quand un pull ou un flush la périme.
-class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
+class StaffAttendanceCubit extends Cubit<StaffAttendanceState>
+    implements PresenceDayNavigation {
   final LoadStaffAttendanceUseCase _load;
   final StaffSyncSignals _signals;
   final StaffAttendanceCommands commands;
@@ -27,6 +30,11 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
   void Function()? _unwatch;
   int _seq = 0;
   int _readSeq = 0;
+
+  final _edited = PresenceEditedDays();
+
+  /// Le jour affiché a reçu un geste depuis l'ouverture de l'écran.
+  bool get shownDayEdited => _edited.contains(state.day);
 
   StaffAttendanceCubit({
     required LoadStaffAttendanceUseCase load,
@@ -109,18 +117,30 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   // ── Navigation ────────────────────────────────────────────────────────
 
+  @override
+  String get shownDay => state.day;
+
+  @override
+  String? get firstShownDay => state.firstDay;
+
+  @override
+  String get lastShownDay => state.lastWorkDay;
+
   void setTab(StaffAttendanceTab tab) {
     if (tab != state.tab) emit(state.copyWith(tab: tab));
   }
 
   /// Le jour ouvré précédent ou suivant ; jamais au-delà d'aujourd'hui.
+  @override
   Future<void> stepDay(int direction) =>
       _moveDay(SchoolDayCalendar.stepWorkDay(state.day, direction));
 
+  @override
   Future<void> goToday() => _moveDay(state.lastWorkDay);
 
   /// Le jour demandé par l'adresse (`?jour=`). Absent ou illisible : le
   /// dernier jour ouvré ; un samedi ou un dimanche : le vendredi d'avant.
+  @override
   Future<void> showDay(String? day) {
     if (day == null || !SchoolDayCalendar.isDay(day)) return goToday();
     return _moveDay(
@@ -167,6 +187,12 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
 
   // ── Filtres ───────────────────────────────────────────────────────────
 
+  @override
+  void showOnlyUnmarked() {
+    resetDayFilters();
+    setDayStatus(PresenceStatus.none);
+  }
+
   void setDayStatus(PresenceStatus? status) =>
       emit(state.copyWith(dayQuery: state.dayQuery.withStatus(status)));
 
@@ -204,10 +230,15 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState> {
       emit(state.copyWith(notice: notice.withSeq(++_seq)));
 
   /// Exécute un geste des [commands], relit la tablette et annonce l'issue.
+  ///
+  /// [touchesDay] : faux pour un geste qui n'écrit pas le jour affiché
+  /// (réglages, clôture du mois).
   Future<void> perform(
     Future<StaffAttendanceNotice?> Function(StaffAttendanceCommands commands)
-    gesture,
-  ) async {
+    gesture, {
+    bool touchesDay = true,
+  }) async {
+    if (touchesDay) _edited.mark(state.day);
     final notice = await gesture(commands);
     if (isClosed) return;
     await refresh();
