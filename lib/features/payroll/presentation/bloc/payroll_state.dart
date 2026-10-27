@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_agent_situations.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
@@ -98,22 +99,15 @@ class PayrollState extends Equatable {
     final view = this.view;
     if (view == null) return const [];
     final needle = search.trim();
-    final order = {
-      for (final (index, member) in snapshot.members.indexed) member.id: index,
-    };
     // Les lignes du livre, et non les fiches : la ligne figée d'un agent
     // retiré depuis la validation reste au livre.
-    return [
+    return PayrollAgentSituations.ordered(snapshot, [
       for (final line in view.lines)
         if ((contractFilter == null || line.contractKind == contractFilter) &&
             _matchesPay(view, line) &&
             _matchesSearch(line, needle))
           line,
-    ]..sort(
-      (a, b) => (order[a.staffMemberId] ?? order.length).compareTo(
-        order[b.staffMemberId] ?? order.length,
-      ),
-    );
+    ]);
   }
 
   bool _matchesSearch(PayrollLine line, String needle) {
