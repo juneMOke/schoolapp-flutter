@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/attendances/presentation/register/bl
 import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_picker_options.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_picker_button.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_picker_dialog.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_actions.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_no_class.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_notices.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_tabs.dart';
@@ -30,6 +31,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_bloc.dart';
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
 
 /// Disciplines ▸ Présences — l'appel d'une classe : le registre du jour.
 ///
@@ -106,8 +108,14 @@ class _ClassPresenceScreenState extends State<ClassPresenceScreen> {
       context,
       ClassPickerDialog(cycles: cycles, selectedId: cubit.state.classroom?.id),
     );
-    if (picked == null || !mounted) return;
-    await cubit.selectClassroom(picked);
+    if (picked == null || picked.id == cubit.state.classroom?.id || !mounted) {
+      return;
+    }
+    // Changer de classe quitte l'appel affiché : même garde qu'un changement
+    // de jour.
+    await ClassRegisterActions(
+      context,
+    ).leaveGuard.leaveThen(() => cubit.selectClassroom(picked));
   }
 
   @override
@@ -165,19 +173,24 @@ class _Body extends StatelessWidget {
             showClassPresenceNotice(context, state.notice!),
         buildWhen: (previous, current) =>
             previous.copyWith(notice: current.notice) != current,
-        builder: (context, state) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ClassPickerButton(
-                classroom: state.classroom,
-                onTap: cycles.isEmpty ? null : onPick,
+        // La garde de l'écran entier, tous onglets : rebâtie à chaque état,
+        // elle tient aussi le rappel du navigateur à jour.
+        builder: (context, state) => PresenceDayExitGuard(
+          guard: ClassRegisterActions(context).leaveGuard,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ClassPickerButton(
+                  classroom: state.classroom,
+                  onTap: cycles.isEmpty ? null : onPick,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            _content(context, state),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              _content(context, state),
+            ],
+          ),
         ),
       );
 

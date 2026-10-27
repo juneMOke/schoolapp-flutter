@@ -147,6 +147,13 @@ class StaffDayRegister extends Equatable {
       if (row.status == PresenceStatus.none && row.hasContract) row,
   ];
 
+  /// Les « à pointer » que la liste filtrée affiche, sous contrat ce jour-là :
+  /// la portée du pointage en masse.
+  List<StaffDayRow> get shownUnmarked => [
+    for (final row in rows)
+      if (row.status == PresenceStatus.none && row.hasContract) row,
+  ];
+
   /// La liste filtrée contient-elle un vacataire à l'heure ? La colonne des
   /// heures n'apparaît qu'alors.
   bool get showsHours => rows.any((row) => row.isHourly);

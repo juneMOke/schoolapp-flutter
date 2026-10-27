@@ -3,6 +3,15 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_page_section.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_results_bar.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_bulk_mark_button.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_row.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_status_segment.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -24,6 +33,7 @@ import 'package:school_app_flutter/features/staff/presentation/pages/staff_atten
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_row.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/staff_attendance_tabs.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_banners.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -101,6 +111,7 @@ void main() {
     Size size = const Size(1280, 1000),
     List<String>? permissions,
     DateTime? now,
+    CollectionViewMode? view,
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -127,6 +138,7 @@ void main() {
       ),
       now: () => now ?? DateTime(2026, 9, 29, 7, 35),
     );
+    if (view != null) cubit.setViewMode(view);
     Widget screen = BlocProvider.value(
       value: cubit..load(),
       child: const StaffAttendanceScreen(),
@@ -155,10 +167,19 @@ void main() {
     return cubit;
   }
 
-  testWidgets('le registre montre une carte par agent et les onglets', (
+  testWidgets('le registre s\'ouvre en liste, comme les autres tables', (
     tester,
   ) async {
     await pump(tester);
+
+    expect(find.byType(StaffAttendanceRow), findsNWidgets(2));
+    expect(find.byType(StaffAttendanceCard), findsNothing);
+  });
+
+  testWidgets('le registre montre une carte par agent et les onglets', (
+    tester,
+  ) async {
+    await pump(tester, view: CollectionViewMode.grid);
 
     expect(find.byType(StaffAttendanceCard), findsNWidgets(2));
     expect(find.text('Registre du jour'), findsWidgets);
@@ -171,7 +192,7 @@ void main() {
   testWidgets('toucher une carte « à pointer » la pointe présente', (
     tester,
   ) async {
-    await pump(tester);
+    await pump(tester, view: CollectionViewMode.grid);
 
     await tester.tap(find.text('Kalala Mutombo'));
     await tester.pump();
@@ -185,7 +206,7 @@ void main() {
   });
 
   testWidgets('la liste donne un segment de statut par agent', (tester) async {
-    await pump(tester);
+    await pump(tester, view: CollectionViewMode.grid);
 
     await tester.tap(find.text('Liste'));
     await tester.pump();
@@ -196,9 +217,19 @@ void main() {
   testWidgets('un jour validé montre le bandeau et refuse les gestes', (
     tester,
   ) async {
-    await pump(tester, validated: true);
+    await pump(tester, validated: true, view: CollectionViewMode.grid);
 
     expect(find.byType(StaffValidatedBanner), findsOneWidget);
+    // La tête de fiche : badge « Validé » et les compteurs de la modale.
+    final banner = find.byType(PresenceValidatedBanner);
+    expect(
+      find.descendant(of: banner, matching: find.text('Validé')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: banner, matching: find.byType(PresenceCountRow)),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Kalala Mutombo'));
     await tester.pump();
 
@@ -209,6 +240,223 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('un jour validé refuse aussi les gestes de la liste', (
+    tester,
+  ) async {
+    await pump(tester, validated: true);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PresenceStatusSegment).first,
+        matching: find.text('Absent'),
+      ),
+    );
+    await tester.pump();
+
+    verifyNever(() => save(any()));
+  });
+
+  testWidgets(
+    '« Voir dans le registre » lève la recherche et filtre sur les non '
+    'pointés',
+    (tester) async {
+      final cubit = await pump(tester);
+      cubit.setDayText('Mayala');
+      await tester.pump();
+
+      await tester.tap(find.text('Valider le rapport'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Voir dans le registre'));
+      await tester.pumpAndSettle();
+
+      expect(cubit.state.dayQuery.text, isEmpty);
+      expect(cubit.state.dayQuery.status, PresenceStatus.none);
+    },
+  );
+
+  testWidgets('deux sections sur un fin fond ; la barre de résultats porte '
+      'le compte et le pointage en masse', (tester) async {
+    await pump(tester);
+
+    expect(find.byType(EteeloPageSection), findsNWidgets(2));
+    final bar = find.byType(EteeloResultsBar);
+    expect(
+      find.descendant(of: bar, matching: find.text('2 agents · 1 à pointer')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: bar, matching: find.byType(PresenceBulkMarkButton)),
+      findsOneWidget,
+    );
+  });
+
+  group('pointer les non pointés en une fois', () {
+    testWidgets('« Présents à l\'heure » pointe les seuls non pointés', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      await tester.tap(find.text('Pointer 1 non-pointé'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Présents à l\'heure'));
+      await tester.pumpAndSettle();
+
+      final records =
+          verify(() => save(captureAny())).captured.single
+              as List<StaffAttendanceRecord>;
+      expect(records.single.staffMemberId, 'm-1');
+      expect(records.single.status, PresenceStatus.present);
+    });
+
+    testWidgets('« Absents » demande confirmation', (tester) async {
+      await pump(tester);
+
+      await tester.tap(find.text('Pointer 1 non-pointé'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(MenuItemButton, 'Absents'));
+      await tester.pumpAndSettle();
+      expect(find.text('Marquer 1 personne absente ?'), findsOneWidget);
+
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+      verifyNever(() => save(any()));
+
+      await tester.tap(find.text('Pointer 1 non-pointé'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(MenuItemButton, 'Absents'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Marquer absents'));
+      await tester.pumpAndSettle();
+
+      final records =
+          verify(() => save(captureAny())).captured.single
+              as List<StaffAttendanceRecord>;
+      expect(records.single.status, PresenceStatus.absent);
+    });
+
+    testWidgets('la recherche réduit la portée', (tester) async {
+      final cubit = await pump(tester);
+      cubit.setDayText('Mayala');
+      await tester.pumpAndSettle();
+      expect(find.text('Pointer 1 non-pointé'), findsNothing);
+    });
+
+    testWidgets('un jour validé ne propose rien', (tester) async {
+      await pump(tester, validated: true);
+      expect(find.text('Pointer 1 non-pointé'), findsNothing);
+    });
+  });
+
+  group('quitter un jour pointé mais pas validé', () {
+    const title = 'Le rapport du mardi 29 septembre 2026 n\'est pas validé';
+
+    /// Monte l'écran et pointe un agent : le jour devient « touché ».
+    Future<StaffAttendanceCubit> pumpEdited(WidgetTester tester) async {
+      final cubit = await pump(tester, view: CollectionViewMode.grid);
+      await tester.tap(find.text('Kalala Mutombo'));
+      await tester.pumpAndSettle();
+      return cubit;
+    }
+
+    testWidgets('changer de jour pose la question ; « Rester » garde le jour', (
+      tester,
+    ) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      expect(find.text(title), findsOneWidget);
+
+      await tester.tap(find.text('Rester'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.day, _day);
+    });
+
+    testWidgets('« Valider et quitter » ouvre la validation ; l\'annuler '
+        'garde le jour', (tester) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Valider et quitter'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PresenceReportDialog), findsOneWidget);
+
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.day, _day);
+    });
+
+    testWidgets('« Quitter sans valider » change de jour', (tester) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quitter sans valider'));
+      await tester.pumpAndSettle();
+
+      expect(cubit.state.day, '2026-09-28');
+    });
+
+    testWidgets('quitter l\'écran pose la même question, même depuis un autre '
+        'onglet', (tester) async {
+      await pumpEdited(tester);
+      await tester.tap(find.text('Récapitulatif du mois'));
+      await tester.pumpAndSettle();
+
+      final leaving = RouteExitGuard.mayLeave(
+        tester.element(find.byType(StaffAttendanceTabs)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(title), findsOneWidget);
+
+      await tester.tap(find.text('Quitter sans valider'));
+      await tester.pumpAndSettle();
+      expect(await leaving, isTrue);
+    });
+
+    testWidgets('un jour seulement consulté part sans question', (
+      tester,
+    ) async {
+      // Des pointages d'un autre poste, aucun geste ici : rien à rappeler.
+      final cubit = await pump(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(title), findsNothing);
+      expect(cubit.state.day, '2026-09-28');
+    });
+
+    testWidgets('un jour validé part sans question', (tester) async {
+      final cubit = await pump(tester, validated: true);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(title), findsNothing);
+      expect(cubit.state.day, '2026-09-28');
+    });
+
+    testWidgets('en lecture seule, un geste refusé ne garde rien', (
+      tester,
+    ) async {
+      final cubit = await pump(
+        tester,
+        permissions: [Perm.hrAttendanceRead.wire],
+        view: CollectionViewMode.grid,
+      );
+      await tester.tap(find.text('Kalala Mutombo'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(title), findsNothing);
+      expect(cubit.state.day, '2026-09-28');
+    });
   });
 
   testWidgets('le récapitulatif ouvre la fiche d\'un agent', (tester) async {
@@ -226,7 +474,11 @@ void main() {
   testWidgets('en lecture seule, toucher une carte ne met rien en file', (
     tester,
   ) async {
-    await pump(tester, permissions: [Perm.hrAttendanceRead.wire]);
+    await pump(
+      tester,
+      permissions: [Perm.hrAttendanceRead.wire],
+      view: CollectionViewMode.grid,
+    );
 
     await tester.tap(find.text('Kalala Mutombo'));
     await tester.pump();

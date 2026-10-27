@@ -8,6 +8,12 @@ import 'package:school_app_flutter/features/attendances/presentation/register/bl
 /// Les filtres de l'appel, en mémoire : ceux du registre du jour et ceux du
 /// récapitulatif. Rien n'est relu.
 mixin ClassPresenceFilters on Cubit<ClassPresenceState> {
+  /// Le registre filtré sur les seuls « à pointer », recherche levée.
+  void showOnlyUnmarked() {
+    resetDayFilters();
+    setDayStatus(PresenceStatus.none);
+  }
+
   void setDayStatus(PresenceStatus? status) =>
       emit(state.copyWith(dayQuery: state.dayQuery.withStatus(status)));
 

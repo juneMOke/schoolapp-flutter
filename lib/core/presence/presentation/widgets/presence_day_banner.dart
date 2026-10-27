@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_banner_parts.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_progress_ring.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le bandeau d'un registre du jour : navigation de jour, horaire, progression
-/// et actions (restants présents, valider). Les actions disparaissent quand
+/// et validation. La date ouvre le calendrier quand
+/// [onPickDay] est fourni. Les actions disparaissent quand
 /// [showActions] est faux — jour validé, ou compte sans droit d'écriture.
 class PresenceDayBanner extends StatelessWidget {
   /// « Registre du jour », « Appel du jour · 6e A »…
@@ -38,12 +37,12 @@ class PresenceDayBanner extends StatelessWidget {
   final VoidCallback? onNext;
   final VoidCallback onToday;
 
+  /// `null` : pas de calendrier, la date se lit seulement.
+  final VoidCallback? onPickDay;
+
   /// `null` : le compte ne règle pas l'horaire — la pastille le montre, sans
   /// rien ouvrir.
   final VoidCallback? onSettings;
-
-  /// `null` : personne à marquer.
-  final VoidCallback? onMarkRemaining;
 
   /// `null` : rien à valider.
   final VoidCallback? onValidate;
@@ -62,8 +61,8 @@ class PresenceDayBanner extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.onToday,
+    this.onPickDay,
     this.onSettings,
-    required this.onMarkRemaining,
     required this.onValidate,
   });
 
@@ -111,15 +110,9 @@ class PresenceDayBanner extends StatelessWidget {
                         color: AppColors.presenceMarkOnBannerMuted,
                       ),
                     ),
-                    Text(
-                      PresenceLabels.longDay(
-                        MaterialLocalizations.of(context),
-                        day,
-                      ),
-                      style: AppTypography.titleLarge.copyWith(color: onBanner),
-                    ),
+                    PresenceBannerDay(day: day, onPick: onPickDay),
                     const SizedBox(height: AppSpacing.xs),
-                    _SchedulePill(schedule: schedule, onTap: onSettings),
+                    PresenceSchedulePill(schedule: schedule, onTap: onSettings),
                   ],
                 ),
               ),
@@ -173,112 +166,19 @@ class PresenceDayBanner extends StatelessWidget {
                   ),
                 ],
               ),
+              // Le pointage en masse vit avec les résultats qu'il touche
+              // (la barre du registre) ; le bandeau garde la validation.
               if (showActions)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PresenceBannerButton(
-                      icon: Icons.checklist,
-                      tooltip: l10n.presenceMarkMarkRemaining,
-                      onPressed: onMarkRemaining,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(
-                      child: EteeloButton.primary(
-                        label: validateLabel,
-                        icon: Icons.task_alt,
-                        onPressed: onValidate,
-                        fullWidth: false,
-                      ),
-                    ),
-                  ],
+                EteeloButton.primary(
+                  label: validateLabel,
+                  icon: Icons.task_alt,
+                  onPressed: onValidate,
+                  fullWidth: false,
                 ),
             ],
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Un bouton d'icône posé sur le bandeau sombre (jour précédent, restants
-/// présents).
-class PresenceBannerButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-
-  const PresenceBannerButton({
-    super.key,
-    required this.icon,
-    required this.tooltip,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: AppDimensions.presenceMarkTapTarget,
-    child: IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      color: AppColors.presenceMarkOnBanner,
-      disabledColor: AppColors.presenceMarkOnBannerFaint,
-      icon: Icon(icon),
-      style: IconButton.styleFrom(
-        side: const BorderSide(color: AppColors.presenceMarkOnBannerMuted),
-      ),
-    ),
-  );
-}
-
-class _SchedulePill extends StatelessWidget {
-  final PresenceSchedule schedule;
-  final VoidCallback? onTap;
-
-  const _SchedulePill({required this.schedule, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final onTap = this.onTap;
-    final pill = Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.brPill,
-        border: Border.all(color: AppColors.presenceMarkOnBannerMuted),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            // Le réglage s'ouvre (tune) ou se lit seulement (horloge).
-            onTap == null ? Icons.schedule : Icons.tune,
-            size: AppSpacing.lg,
-            color: AppColors.presenceMarkOnBanner,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Flexible(
-            child: Text(
-              AppLocalizations.of(context)!.presenceMarkSettingsPill(
-                schedule.start.wire,
-                schedule.toleranceMinutes,
-              ),
-              style: AppTypography.labelMedium.copyWith(
-                color: AppColors.presenceMarkOnBanner,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (onTap == null) return pill;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.brPill,
-      // La pastille reste fine ; sa zone d'appui fait 48 dp.
-      child: TouchTarget(child: pill),
     );
   }
 }

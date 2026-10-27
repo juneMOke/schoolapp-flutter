@@ -5,9 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/core/offline/resource_sync_signals.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_mark.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_report_dialog.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_row.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/absence_reason.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
@@ -23,6 +29,7 @@ import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.da
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/reference_formats.dart';
 import 'class_presence_fixtures.dart';
 
 class _Auth extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
@@ -64,9 +71,14 @@ void main() {
     WidgetTester tester, {
     required ClassPresenceDay day,
     List<String> permissions = teacher,
+    CollectionViewMode? view,
+    bool fixedSurface = true,
   }) async {
-    await tester.binding.setSurfaceSize(const Size(1280, 1600));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // Un test de formats pose lui-même la fenêtre.
+    if (fixedSurface) {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+    }
     final auth = _Auth();
     final authState = AuthState(
       status: AuthStatus.authenticated,
@@ -112,6 +124,7 @@ void main() {
       await cubit.stepDay(-1);
     }
     expect(cubit.state.day, day.day);
+    if (view != null) cubit.setViewMode(view);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -149,10 +162,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('une touche sur une carte pointe l élève au brouillon', (
+  testWidgets('l\'appel s\'ouvre en liste, comme les autres tables', (
     tester,
   ) async {
     await pump(tester, day: presenceDay());
+
+    expect(find.byType(PresenceRow), findsNWidgets(3));
+    expect(find.byType(PresenceCard), findsNothing);
+  });
+
+  testWidgets('une touche sur une carte pointe l élève au brouillon', (
+    tester,
+  ) async {
+    await pump(tester, day: presenceDay(), view: CollectionViewMode.grid);
 
     await tester.tap(find.text('Zola'));
     await tester.pumpAndSettle();
@@ -186,10 +208,127 @@ void main() {
     expect(lines.every((l) => l.status.isMarked), isTrue);
   });
 
+  testWidgets('valider : la modale liste les non pointés ; « Voir dans le '
+      'registre » filtre sans rien valider', (tester) async {
+    await pump(tester, day: presenceDay());
+
+    await tester.tap(find.text("Valider l'appel"));
+    await tester.pumpAndSettle();
+    final dialog = find.byType(PresenceReportDialog);
+    expect(
+      find.descendant(
+        of: dialog,
+        matching: find.text('1 personne pas encore pointée'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: dialog, matching: find.text('Zola')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Voir dans le registre'));
+    await tester.pumpAndSettle();
+
+    expect(dialog, findsNothing);
+    final cubit = tester
+        .element(find.byType(ClassRegisterTab))
+        .read<ClassPresenceCubit>();
+    expect(cubit.state.dayQuery.status, PresenceStatus.none);
+    verifyNever(() => validate(any(), any()));
+  });
+
+  testWidgets('un dimanche choisi ramène au vendredi d\'avant', (tester) async {
+    await pump(tester, day: presenceDay());
+    final cubit = tester
+        .element(find.byType(ClassRegisterTab))
+        .read<ClassPresenceCubit>();
+
+    await cubit.showDay('2026-09-27');
+
+    expect(cubit.state.day, '2026-09-25');
+  });
+
+  testWidgets('« Pointer 1 non-pointé » → présents : seule l\'élève à '
+      'pointer est marquée', (tester) async {
+    await pump(tester, day: presenceDay());
+
+    await tester.tap(find.text('Pointer 1 non-pointé'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Présents à l\'heure'));
+    await tester.pumpAndSettle();
+
+    final marks =
+        verify(() => save(any(), captureAny())).captured.single
+            as Map<String, PresenceMark<AbsenceReason>>;
+    expect(marks.keys, ['s3']);
+    expect(marks['s3']?.status, PresenceStatus.present);
+  });
+
+  group('quitter un appel pointé mais pas validé', () {
+    /// Monte l'appel et pointe une élève : l'appel devient « touché ».
+    Future<ClassPresenceCubit> pumpEdited(WidgetTester tester) async {
+      await pump(tester, day: presenceDay(), view: CollectionViewMode.grid);
+      await tester.tap(find.text('Zola'));
+      await tester.pumpAndSettle();
+      return tester
+          .element(find.byType(ClassRegisterTab))
+          .read<ClassPresenceCubit>();
+    }
+
+    testWidgets('changer de jour pose la question ; « Rester » garde le jour', (
+      tester,
+    ) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('· 6e A n\'est pas validé'), findsOneWidget);
+      expect(
+        find.textContaining('l\'appel ne part qu\'à la validation'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Rester'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.day, '2026-10-01');
+    });
+
+    testWidgets('« Quitter sans valider » change de jour', (tester) async {
+      final cubit = await pumpEdited(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quitter sans valider'));
+      await tester.pumpAndSettle();
+
+      expect(cubit.state.day, '2026-09-30');
+    });
+
+    testWidgets('un appel seulement consulté part sans question', (
+      tester,
+    ) async {
+      await pump(tester, day: presenceDay());
+      final cubit = tester
+          .element(find.byType(ClassRegisterTab))
+          .read<ClassPresenceCubit>();
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('n\'est pas validé'), findsNothing);
+      expect(cubit.state.day, '2026-09-30');
+    });
+  });
+
   testWidgets(
     'jour passé validé, sans attendance.amend : pas de Rouvrir, touche refusée',
     (tester) async {
-      await pump(tester, day: presenceDay(day: '2026-09-30', validated: true));
+      await pump(
+        tester,
+        day: presenceDay(day: '2026-09-30', validated: true),
+        view: CollectionViewMode.grid,
+      );
 
       expect(find.text('Rouvrir'), findsNothing);
       expect(
@@ -266,5 +405,18 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => validate(any(), any())).called(1);
+  });
+
+  testAtReferenceFormats('l\'appel en liste tient', (tester, format) async {
+    await pump(tester, day: presenceDay(), fixedSurface: false);
+    expect(find.byType(PresenceRow), findsNWidgets(3));
+  });
+
+  testAtReferenceFormats('l\'appel validé et son bandeau tiennent', (
+    tester,
+    format,
+  ) async {
+    await pump(tester, day: presenceDay(validated: true), fixedSurface: false);
+    expect(find.byType(PresenceValidatedBanner), findsOneWidget);
   });
 }

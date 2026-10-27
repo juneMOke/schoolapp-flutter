@@ -3,10 +3,17 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_results_frame.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_banner.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_banner_parts.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -44,6 +51,8 @@ class _MockSettings extends Mock
     implements SaveStaffAttendanceSettingsUseCase {}
 
 void main() {
+  setUpAll(() => registerFallbackValue(<StaffAttendanceRecord>[]));
+
   final snapshot = StaffAttendanceSnapshot(
     members: [
       member(
@@ -71,8 +80,11 @@ void main() {
     WidgetTester tester, {
     List<String>? permissions,
     String? location,
+    StaffAttendanceSnapshot? data,
   }) async {
     final load = _MockLoad();
+    final save = _MockSave();
+    when(() => save(any())).thenAnswer((_) async => const Right(unit));
     final signals = _MockSignals();
     when(() => signals.watch(any())).thenReturn(() {});
     when(() => signals.pull()).thenAnswer((_) async {});
@@ -81,12 +93,12 @@ void main() {
         from: any(named: 'from'),
         to: any(named: 'to'),
       ),
-    ).thenAnswer((_) async => Right(snapshot));
+    ).thenAnswer((_) async => Right(data ?? snapshot));
     final cubit = StaffAttendanceCubit(
       load: load,
       signals: signals,
       commands: StaffAttendanceCommands(
-        save: _MockSave(),
+        save: save,
         gesture: _MockGesture(),
         settings: _MockSettings(),
         now: () => DateTime(2026, 9, 29, 7, 35),
@@ -142,31 +154,48 @@ void main() {
 
   String address() => router.routerDelegate.currentConfiguration.uri.toString();
 
-  testWidgets('le registre seul : ses cartes, sans les onglets du Pointage', (
-    tester,
-  ) async {
-    await pump(tester);
+  testWidgets(
+    'le registre seul, en liste par défaut, sans les onglets du Pointage',
+    (tester) async {
+      await pump(tester);
 
-    expect(find.byType(StaffAttendanceCard), findsNWidgets(2));
-    expect(
-      find.textContaining('Le préfet ou le censeur pointe'),
-      findsOneWidget,
-    );
-    expect(find.text('Fiche mensuelle'), findsNothing);
-    expect(find.text('Récapitulatif du mois'), findsNothing);
-  });
+      expect(find.byType(StaffAttendanceRow), findsNWidgets(2));
+      expect(find.byType(StaffAttendanceCard), findsNothing);
+      expect(
+        find.textContaining('Le préfet ou le censeur pointe'),
+        findsOneWidget,
+      );
+      expect(find.text('Fiche mensuelle'), findsNothing);
+      expect(find.text('Récapitulatif du mois'), findsNothing);
+    },
+  );
 
   testAtReferenceFormats('le registre en cartes tient', (tester, format) async {
     await pump(tester);
+    await tester.ensureVisible(find.text('Cartes'));
+    await tester.tap(find.text('Cartes'));
+    await tester.pump();
     expect(find.byType(StaffAttendanceCard), findsWidgets);
+    // Le cadre des tables, et la carte de filtres commune.
+    expect(find.byType(EteeloResultsFrame), findsOneWidget);
+    expect(
+      find.ancestor(
+        of: find.byType(StaffSearchToolbar),
+        matching: find.byType(EteeloPanelCard),
+      ),
+      findsOneWidget,
+    );
   });
 
   testAtReferenceFormats('le registre en liste tient', (tester, format) async {
     await pump(tester);
-    await tester.ensureVisible(find.text('Liste'));
-    await tester.tap(find.text('Liste'));
-    await tester.pump();
     expect(find.byType(StaffAttendanceRow), findsWidgets);
+    // La table teintée des autres écrans, colonne de l'agent figée.
+    final table = tester.widget<EteeloColumnTable>(
+      find.byType(EteeloColumnTable),
+    );
+    expect(table.tone, ListingTones.table);
+    expect(table.frozenFirstColumn, isTrue);
   });
 
   group('l\'adresse', () {
@@ -176,15 +205,89 @@ void main() {
       final cubit = await pump(
         tester,
         location:
-            '/rh-presences/registre?jour=2026-09-25&vue=list'
+            '/rh-presences/registre?jour=2026-09-25&vue=grid'
             '&categorie=teacher&statut=none',
       );
       await tester.pumpAndSettle();
 
       expect(cubit.state.day, '2026-09-25');
-      expect(cubit.state.viewMode, CollectionViewMode.list);
+      expect(cubit.state.viewMode, CollectionViewMode.grid);
       expect(cubit.state.dayQuery.category, StaffCategory.teacher);
       expect(cubit.state.dayQuery.status, PresenceStatus.none);
+    });
+
+    testWidgets('la date ouvre le calendrier ; le jour choisi s\'inscrit', (
+      tester,
+    ) async {
+      await pump(tester, location: '/rh-presences/registre');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Choisir un jour'));
+      await tester.pumpAndSettle();
+      final dialog = find.byType(DatePickerDialog);
+      final picker = tester.widget<DatePickerDialog>(dialog);
+      // Bornes des flèches : la rentrée → le dernier jour ouvré.
+      expect(picker.firstDate, DateTime(2026, 9, 1));
+      expect(picker.lastDate, DateTime(2026, 9, 29));
+      expect(picker.selectableDayPredicate!(DateTime(2026, 9, 26)), isFalse);
+      Navigator.of(tester.element(dialog)).pop(DateTime(2026, 9, 22));
+      await tester.pumpAndSettle();
+
+      expect(address(), '/rh-presences/registre?jour=2026-09-22');
+    });
+
+    testWidgets('Précédent du navigateur après un geste pose la question ; '
+        '« Rester » remet l\'adresse sur le jour affiché', (tester) async {
+      // Ruth est déjà pointée en retard ; pointer Didier touche le jour.
+      final cubit = await pump(
+        tester,
+        location: '/rh-presences/registre?vue=grid',
+        data: StaffAttendanceSnapshot(
+          members: snapshot.members,
+          records: const {
+            'm-2': {
+              '2026-09-29': StaffAttendanceRecord(
+                id: 'r-2',
+                staffMemberId: 'm-2',
+                workDate: '2026-09-29',
+                status: PresenceStatus.late,
+                lateMinutes: 22,
+              ),
+            },
+          },
+          locks: const {},
+          settings: StaffAttendanceSettings.defaults,
+          schoolYear: const SchoolYearBounds(start: '2026-09-01'),
+          hasEverSynced: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byType(StaffAttendanceCard).first);
+      await tester.tap(find.byType(StaffAttendanceCard).first);
+      await tester.pumpAndSettle();
+
+      // Ce que fait Précédent : l'adresse change, la route reste.
+      router.go('/rh-presences/registre?jour=2026-09-25&vue=grid');
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Le rapport du mardi 29 septembre 2026 n\'est pas validé'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Rester'));
+      await tester.pumpAndSettle();
+
+      expect(cubit.state.day, '2026-09-29');
+      expect(address(), '/rh-presences/registre?vue=grid');
+    });
+
+    testWidgets('passer en cartes s\'inscrit dans l\'adresse', (tester) async {
+      await pump(tester, location: '/rh-presences/registre');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cartes'));
+      await tester.pumpAndSettle();
+
+      expect(address(), '/rh-presences/registre?vue=grid');
     });
 
     testWidgets('changer de jour s\'inscrit ; « Aujourd\'hui » rend '

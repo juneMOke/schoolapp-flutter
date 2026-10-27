@@ -7,7 +7,7 @@ import 'package:school_app_flutter/core/components/search/eteelo_search_toolbar.
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_rate_tone.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
@@ -78,7 +78,7 @@ class ClassRecapTab extends StatelessWidget {
               onShowAll: cubit.resetRecapFilters,
             )
           else
-            PresenceCardFrame(
+            EteeloPanelCard(
               child: ClassRecapTable(
                 rows: recap.rows,
                 sync: recap.month.sync,

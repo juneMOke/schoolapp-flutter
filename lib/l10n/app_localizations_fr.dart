@@ -13168,6 +13168,126 @@ class AppLocalizationsFr extends AppLocalizations {
   String get presenceMarkPreviousDay => 'Jour précédent';
 
   @override
+  String get presenceMarkPickDay => 'Choisir un jour';
+
+  @override
+  String get presenceMarkReviewUnmarked => 'Voir dans le registre';
+
+  @override
+  String presenceMarkUnmarkedListTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personnes pas encore pointées',
+      one: '1 personne pas encore pointée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceMarkUnmarkedKeep => 'Les laisser à pointer';
+
+  @override
+  String get presenceMarkUnmarkedMarkPresent => 'Les marquer présents';
+
+  @override
+  String get presenceMarkUnmarkedChoiceLabel => 'Que faire des non-pointés ?';
+
+  @override
+  String get presenceMarkUnmarkedChoiceHint =>
+      'Choisissez d\'abord le sort des non-pointés.';
+
+  @override
+  String get presenceMarkLeaveConfirm => 'Quitter sans valider';
+
+  @override
+  String get presenceMarkLeaveStay => 'Rester';
+
+  @override
+  String get presenceMarkLeaveEyebrow => 'Avant de partir';
+
+  @override
+  String get presenceMarkLeaveValidate => 'Valider et quitter';
+
+  @override
+  String presenceMarkBulkLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pointer les $count non-pointés',
+      one: 'Pointer 1 non-pointé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceMarkBulkPresent => 'Présents à l\'heure';
+
+  @override
+  String get presenceMarkBulkAbsent => 'Absents';
+
+  @override
+  String get presenceMarkBulkEyebrow => 'Pointage en masse';
+
+  @override
+  String presenceMarkBulkAbsentTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Marquer $count personnes absentes ?',
+      one: 'Marquer 1 personne absente ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get presenceMarkBulkAbsentBody =>
+      'Seuls les non-pointés affichés sont concernés ; chaque absence restera à justifier une par une.';
+
+  @override
+  String get presenceMarkBulkAbsentConfirm => 'Marquer absents';
+
+  @override
+  String staffAttendanceLeaveTitle(String day) {
+    return 'Le rapport du $day n\'est pas validé';
+  }
+
+  @override
+  String staffAttendanceLeaveMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Vos pointages sont enregistrés. Tant que le rapport n\'est pas validé, la journée reste modifiable. $count agents ne sont pas encore pointés.',
+      one:
+          'Vos pointages sont enregistrés. Tant que le rapport n\'est pas validé, la journée reste modifiable. 1 agent n\'est pas encore pointé.',
+      zero:
+          'Vos pointages sont enregistrés. Tant que le rapport n\'est pas validé, la journée reste modifiable.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceLeaveTitle(String day, String classroom) {
+    return 'L\'appel du $day · $classroom n\'est pas validé';
+  }
+
+  @override
+  String classPresenceLeaveMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Vos pointages sont gardés sur la tablette ; l\'appel ne part qu\'à la validation. $count élèves ne sont pas encore pointés.',
+      one:
+          'Vos pointages sont gardés sur la tablette ; l\'appel ne part qu\'à la validation. 1 élève n\'est pas encore pointé.',
+      zero:
+          'Vos pointages sont gardés sur la tablette ; l\'appel ne part qu\'à la validation.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get presenceMarkNextDay => 'Jour suivant';
 
   @override
@@ -13184,10 +13304,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String presenceMarkOnTablet(int count) {
     return '$count sur la tablette';
   }
-
-  @override
-  String get presenceMarkMarkRemaining =>
-      'Marquer tous les « À pointer » présents à l’heure de début';
 
   @override
   String get staffAttendanceValidateReport => 'Valider le rapport';
@@ -13423,19 +13539,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceReportTitle => 'Valider le rapport du jour';
 
   @override
-  String staffAttendanceReportMarkRemaining(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count agents non pointés — les marquer présents à l’heure',
-      one: '1 agent non pointé — le marquer présent à l’heure',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get presenceMarkReportUnmarkedReminder =>
-      'Sans cette case, ils seront comptés présents par défaut à la clôture du mois.';
+      'Laissés à pointer, ils seront comptés présents par défaut à la clôture du mois.';
 
   @override
   String presenceMarkReportUnjustified(int count) {
@@ -13460,13 +13565,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Rapport journalier validé — pointages verrouillés';
 
   @override
-  String presenceMarkValidatedBy(String name, String when) {
-    return 'Par $name · $when';
-  }
+  String get presenceMarkValidatedBadge => 'Validé';
 
   @override
-  String presenceMarkValidatedCounts(int present, int late, int absent) {
-    return '$present présents, $late retards, $absent absents';
+  String presenceMarkValidatedBy(String name, String when) {
+    return 'Par $name · $when';
   }
 
   @override
@@ -13630,6 +13733,28 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count agents marqués présents',
       one: '1 agent marqué présent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceToastRemainingAbsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents marqués absents',
+      one: '1 agent marqué absent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents',
+      one: '1 agent',
     );
     return '$_temp0';
   }
@@ -15474,6 +15599,28 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count élèves marqués présents',
       one: '1 élève marqué présent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceToastRemainingAbsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves marqués absents',
+      one: '1 élève marqué absent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceResultsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count élèves',
+      one: '1 élève',
     );
     return '$_temp0';
   }

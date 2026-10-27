@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/attendanc
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/staff_attendance_tabs.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_actions.dart';
 
 /// Ressources humaines ▸ Pointage & présences — le registre du jour, la fiche
 /// mensuelle d'un agent et le récapitulatif du mois.
@@ -74,6 +76,16 @@ class StaffAttendanceScreen extends StatelessWidget {
       case StaffAttendanceLoad.ready:
         break;
     }
+    // La garde de l'écran entier : quitter depuis la fiche ou le récap ne
+    // laisse pas non plus un jour pointé sans le rappel.
+    return PresenceDayExitGuard(
+      guard: StaffRegisterActions(context).leaveGuard,
+      child: _tabs(context, state),
+    );
+  }
+
+  Widget _tabs(BuildContext context, StaffAttendanceState state) {
+    final cubit = context.read<StaffAttendanceCubit>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_profile_badge.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_share_bar.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -30,7 +30,7 @@ class HrPresenceYearList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return PresenceCardFrame(
+    return EteeloPanelCard(
       title: l10n.hrPresenceYearTitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

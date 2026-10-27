@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_card_frame.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
@@ -127,7 +127,7 @@ class HrPresenceRecapBody extends StatelessWidget {
                 onShowAll: cubit.clearFilters,
               )
             else
-              PresenceCardFrame(
+              EteeloPanelCard(
                 child: HrPresenceRecapTable(rows: rows, onOpen: onOpen),
               ),
             const SizedBox(height: AppSpacing.sm),

@@ -3,8 +3,13 @@ import 'package:equatable/equatable.dart';
 /// Ce qu'un geste du Pointage annonce à l'écran (un toast), sans texte : les
 /// libellés sont l'affaire de la vue.
 enum StaffAttendanceNoticeKind {
-  /// « Restants présents » : [StaffAttendanceNotice.count] agents marqués.
+  /// Pointage en masse : [StaffAttendanceNotice.count] agents marqués
+  /// présents.
   remainingMarked,
+
+  /// Pointage en masse : [StaffAttendanceNotice.count] agents marqués
+  /// absents.
+  remainingMarkedAbsent,
 
   /// Un statut effacé : [StaffAttendanceNotice.name] remis à pointer.
   cleared,

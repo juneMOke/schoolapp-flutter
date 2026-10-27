@@ -20558,6 +20558,138 @@ abstract class AppLocalizations {
   /// **'Previous day'**
   String get presenceMarkPreviousDay;
 
+  /// No description provided for @presenceMarkPickDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a day'**
+  String get presenceMarkPickDay;
+
+  /// No description provided for @presenceMarkReviewUnmarked.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in the register'**
+  String get presenceMarkReviewUnmarked;
+
+  /// No description provided for @presenceMarkUnmarkedListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person not marked yet} other{{count} people not marked yet}}'**
+  String presenceMarkUnmarkedListTitle(int count);
+
+  /// No description provided for @presenceMarkUnmarkedKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave them unmarked'**
+  String get presenceMarkUnmarkedKeep;
+
+  /// No description provided for @presenceMarkUnmarkedMarkPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark them present'**
+  String get presenceMarkUnmarkedMarkPresent;
+
+  /// No description provided for @presenceMarkUnmarkedChoiceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What about the unmarked people?'**
+  String get presenceMarkUnmarkedChoiceLabel;
+
+  /// No description provided for @presenceMarkUnmarkedChoiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First choose what happens to the unmarked people.'**
+  String get presenceMarkUnmarkedChoiceHint;
+
+  /// No description provided for @presenceMarkLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave without validating'**
+  String get presenceMarkLeaveConfirm;
+
+  /// No description provided for @presenceMarkLeaveStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get presenceMarkLeaveStay;
+
+  /// No description provided for @presenceMarkLeaveEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you leave'**
+  String get presenceMarkLeaveEyebrow;
+
+  /// No description provided for @presenceMarkLeaveValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate and leave'**
+  String get presenceMarkLeaveValidate;
+
+  /// No description provided for @presenceMarkBulkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Mark 1 unmarked} other{Mark the {count} unmarked}}'**
+  String presenceMarkBulkLabel(int count);
+
+  /// No description provided for @presenceMarkBulkPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present on time'**
+  String get presenceMarkBulkPresent;
+
+  /// No description provided for @presenceMarkBulkAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get presenceMarkBulkAbsent;
+
+  /// No description provided for @presenceMarkBulkEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk marking'**
+  String get presenceMarkBulkEyebrow;
+
+  /// No description provided for @presenceMarkBulkAbsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Mark 1 person absent?} other{Mark {count} people absent?}}'**
+  String presenceMarkBulkAbsentTitle(int count);
+
+  /// No description provided for @presenceMarkBulkAbsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the unmarked people shown are affected; each absence will still need its own justification.'**
+  String get presenceMarkBulkAbsentBody;
+
+  /// No description provided for @presenceMarkBulkAbsentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark absent'**
+  String get presenceMarkBulkAbsentConfirm;
+
+  /// No description provided for @staffAttendanceLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The report for {day} is not validated'**
+  String staffAttendanceLeaveTitle(String day);
+
+  /// No description provided for @staffAttendanceLeaveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Your marks are saved. Until the report is validated, the day stays open to changes.} =1{Your marks are saved. Until the report is validated, the day stays open to changes. 1 staff member is not marked yet.} other{Your marks are saved. Until the report is validated, the day stays open to changes. {count} staff members are not marked yet.}}'**
+  String staffAttendanceLeaveMessage(int count);
+
+  /// No description provided for @classPresenceLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The roll call of {day} · {classroom} is not validated'**
+  String classPresenceLeaveTitle(String day, String classroom);
+
+  /// No description provided for @classPresenceLeaveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Your marks are kept on the tablet; the roll call is only sent once validated.} =1{Your marks are kept on the tablet; the roll call is only sent once validated. 1 student is not marked yet.} other{Your marks are kept on the tablet; the roll call is only sent once validated. {count} students are not marked yet.}}'**
+  String classPresenceLeaveMessage(int count);
+
   /// No description provided for @presenceMarkNextDay.
   ///
   /// In en, this message translates to:
@@ -20581,12 +20713,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} on the tablet'**
   String presenceMarkOnTablet(int count);
-
-  /// No description provided for @presenceMarkMarkRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Mark everyone still to mark as present at the start time'**
-  String get presenceMarkMarkRemaining;
 
   /// No description provided for @staffAttendanceValidateReport.
   ///
@@ -20984,16 +21110,10 @@ abstract class AppLocalizations {
   /// **'Validate the daily report'**
   String get staffAttendanceReportTitle;
 
-  /// No description provided for @staffAttendanceReportMarkRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 staff member not marked — mark present on time} other{{count} staff members not marked — mark them present on time}}'**
-  String staffAttendanceReportMarkRemaining(int count);
-
   /// No description provided for @presenceMarkReportUnmarkedReminder.
   ///
   /// In en, this message translates to:
-  /// **'Otherwise they will be counted present by default when the month is closed.'**
+  /// **'Left unmarked, they will be counted present by default when the month is closed.'**
   String get presenceMarkReportUnmarkedReminder;
 
   /// No description provided for @presenceMarkReportUnjustified.
@@ -21020,17 +21140,17 @@ abstract class AppLocalizations {
   /// **'Daily report validated — marks locked'**
   String get staffAttendanceValidatedTitle;
 
+  /// No description provided for @presenceMarkValidatedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Validated'**
+  String get presenceMarkValidatedBadge;
+
   /// No description provided for @presenceMarkValidatedBy.
   ///
   /// In en, this message translates to:
   /// **'By {name} · {when}'**
   String presenceMarkValidatedBy(String name, String when);
-
-  /// No description provided for @presenceMarkValidatedCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'{present} present, {late} late, {absent} absent'**
-  String presenceMarkValidatedCounts(int present, int late, int absent);
 
   /// No description provided for @presenceMarkReopen.
   ///
@@ -21301,6 +21421,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 staff member marked present} other{{count} staff members marked present}}'**
   String staffAttendanceToastRemaining(int count);
+
+  /// No description provided for @staffAttendanceToastRemainingAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 staff member marked absent} other{{count} staff members marked absent}}'**
+  String staffAttendanceToastRemainingAbsent(int count);
+
+  /// No description provided for @staffAttendanceResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 staff member} other{{count} staff members}}'**
+  String staffAttendanceResultsCount(int count);
 
   /// No description provided for @presenceMarkToastCleared.
   ///
@@ -24167,6 +24299,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 student marked present} other{{count} students marked present}}'**
   String classPresenceToastRemaining(int count);
+
+  /// No description provided for @classPresenceToastRemainingAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student marked absent} other{{count} students marked absent}}'**
+  String classPresenceToastRemainingAbsent(int count);
+
+  /// No description provided for @classPresenceResultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 student} other{{count} students}}'**
+  String classPresenceResultsCount(int count);
 
   /// No description provided for @classPresenceToastValidated.
   ///

@@ -86,6 +86,13 @@ class ClassDayRegister extends Equatable {
   /// L'appel est validé, ou le mois clos : rien ne se pointe.
   bool get frozen => day.validated || day.monthClosed;
 
+  /// Les « à pointer » que la liste filtrée affiche : la portée du pointage
+  /// en masse.
+  List<ClassPresenceLine> get shownUnmarked => [
+    for (final line in rows)
+      if (line.status == PresenceStatus.none) line,
+  ];
+
   bool get isEmpty => all.isEmpty;
 
   bool get isFilteredEmpty => all.isNotEmpty && rows.isEmpty;

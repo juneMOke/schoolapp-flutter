@@ -624,8 +624,6 @@ class AppDimensions {
   /// côté des faits (cf. `AppBreakpoints.expenseDetailTwoColMin`).
   static const expenseDetailDialogWideMaxWidth = 960.0;
   static const expenseDetailThreadColumnWidth = 340.0;
-  static const expenseDetailMedallionSize = 44.0;
-  static const expenseDetailMedallionIconSize = 22.0;
   static const expenseDetailLabelWidth = 150.0;
 
   /// Chaîne de validation : trois jalons accolés en tête de fiche.
@@ -774,10 +772,13 @@ class AppDimensions {
   /// La colonne du nom de mois dans la vue annuelle.
   static const hrPresenceYearMonthWidth = 132.0;
 
+  /// Le médaillon d'icône d'une tête de fiche (dépense, rapport validé).
+  static const medallionSize = 44.0;
+  static const medallionIconSize = 22.0;
+
   static const presenceMarkRingSize = 64.0;
   static const presenceMarkRingStroke = 7.0;
   static const presenceMarkBorderWidth = 2.0;
-  static const presenceMarkAccentWidth = 4.0;
 
   /// La vue liste : largeur plancher avant défilement, et ses colonnes. Sous
   /// ~880, le nom de l'élève n'avait plus qu'une centaine de dp (« KABONGO
@@ -799,6 +800,11 @@ class AppDimensions {
   /// Les modales du pointage.
   static const formDialogMaxWidth = 480.0;
   static const formDialogMaxHeight = 640.0;
+
+  /// La largeur qu'une action d'une modale carte réclame côte à côte : en
+  /// dessous (deux actions sous 420 dp, trois sous 630), elles s'empilent,
+  /// l'action principale en tête.
+  static const dialogActionMinWidth = 210.0;
 
   /// Carte d'étape de l'assistant d'inscription : large, bornée sur très
   /// grand écran ; la barre d'étapes et le pied s'alignent sur elle.
@@ -833,9 +839,6 @@ class AppDimensions {
 
   /// Au-delà, les quatre indicateurs de la fiche tiennent sur une ligne.
   static const presenceMarkKpiWideBreakpoint = 720.0;
-
-  /// Part de la ligne du registre couverte par le voile de son statut.
-  static const presenceMarkRowTintStop = 0.3;
 
   /// Opacité d'un jour à venir dans le calendrier de la fiche mensuelle.
   static const presenceMarkUpcomingOpacity = 0.4;

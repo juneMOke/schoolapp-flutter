@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
@@ -9,7 +8,6 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_d
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -26,8 +24,8 @@ class StaffDayBanner extends StatelessWidget {
 
   Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<StaffAttendanceCubit>();
     final actions = StaffRegisterActions(context);
+    final days = actions.days;
     final register = state.register;
     return PresenceDayBanner(
       eyebrow: state.isToday
@@ -42,20 +40,18 @@ class StaffDayBanner extends StatelessWidget {
         l10n.presenceMarkBadgeToMark(register.count(PresenceStatus.none)),
         if (register.pending > 0) l10n.presenceMarkOnTablet(register.pending),
       ].join(' · '),
-      showActions:
-          !register.frozen &&
-          PermissionGate.allowsAccess(context, kStaffAttendanceWriteAccess),
+      showActions: actions.canEditDay,
       validateLabel: l10n.staffAttendanceValidateReport,
-      onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
-      onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
-      onToday: () => unawaited(cubit.goToday()),
+      onPrevious: state.canStepBack ? () => days.stepDay(-1) : null,
+      onNext: state.isToday ? null : () => days.stepDay(1),
+      onToday: days.goToday,
+      onPickDay: () => unawaited(days.pickDay()),
       // Les réglages sont à la direction seule (hr.attendance.manage, E2) :
       // les autres lisent l'horaire sans pouvoir l'ouvrir.
       onSettings:
           PermissionGate.allowsAccess(context, kStaffAttendanceManageAccess)
           ? () => unawaited(actions.openSettings())
           : null,
-      onMarkRemaining: register.unmarked.isEmpty ? null : actions.markRemaining,
       onValidate: register.isEmpty
           ? null
           : () => unawaited(actions.validate(register)),

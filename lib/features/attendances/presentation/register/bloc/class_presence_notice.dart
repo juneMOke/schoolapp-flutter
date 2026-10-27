@@ -4,8 +4,11 @@ import 'package:school_app_flutter/features/attendances/domain/services/class_da
 /// Ce qu'un geste de l'appel annonce à l'écran (un toast), sans texte : les
 /// libellés sont l'affaire de la vue.
 enum ClassPresenceNoticeKind {
-  /// « Restants présents » : [ClassPresenceNotice.count] élèves marqués.
+  /// Pointage en masse : [ClassPresenceNotice.count] élèves marqués présents.
   remainingMarked,
+
+  /// Pointage en masse : [ClassPresenceNotice.count] élèves marqués absents.
+  remainingMarkedAbsent,
 
   /// Un statut effacé : [ClassPresenceNotice.name] remis à pointer.
   cleared,

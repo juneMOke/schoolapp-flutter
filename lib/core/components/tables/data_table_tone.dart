@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 
 /// Habillage **teinté** d'une table (spec Première inscription §04).
 ///
@@ -55,6 +56,14 @@ class DataTableTone {
     required this.zebra,
     required this.border,
   });
+
+  /// Le cadre : ce bord, arrondi. Partagé par la table et par la grille de
+  /// cartes qui en tient lieu, pour que passer de l'une à l'autre ne change
+  /// que le contenu.
+  BoxDecoration get frame => BoxDecoration(
+    borderRadius: AppRadius.brSm,
+    border: Border.all(color: border),
+  );
 
   @override
   bool operator ==(Object other) =>

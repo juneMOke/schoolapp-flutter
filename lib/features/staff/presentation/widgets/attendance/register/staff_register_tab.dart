@@ -19,6 +19,9 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/attendanc
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_empty.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_register_sections.dart';
+import 'package:school_app_flutter/core/presence/presentation/widgets/presence_results_bar.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_actions.dart';
 
 /// L'onglet « Registre du jour ».
 class StaffRegisterTab extends StatelessWidget {
@@ -39,11 +42,10 @@ class StaffRegisterTab extends StatelessWidget {
       SchoolDayCalendar.monthOf(state.day),
     );
     final query = state.dayQuery;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        StaffDayBanner(state: state),
-        const SizedBox(height: AppSpacing.md),
+    final actions = StaffRegisterActions(context);
+    return PresenceRegisterSections(
+      banner: StaffDayBanner(state: state),
+      dayNotices: [
         if (lock != null && lock.locked)
           StaffValidatedBanner(
             state: state,
@@ -64,41 +66,42 @@ class StaffRegisterTab extends StatelessWidget {
             message: l10n.staffAttendanceMonthClosedBanner,
           ),
         ],
-        const SizedBox(height: AppSpacing.lg),
-        if (register.isEmpty)
-          const StaffRegisterEmpty()
-        else ...[
-          PresenceRegisterFilters(
-            total: register.all.length,
-            countOf: register.count,
-            selected: query.status,
-            onStatus: cubit.setDayStatus,
-            viewMode: state.viewMode,
-            showLegend: PermissionGate.allowsAccess(
-              context,
-              kStaffAttendanceWriteAccess,
-            ),
-            toJustify: register.toJustify,
-            toolbar: StaffSearchToolbar(
-              text: query.text,
-              label: l10n.staffAttendanceSearchLabel,
-              placeholder: l10n.staffAttendanceSearchPlaceholder,
-              onTextChanged: cubit.setDayText,
-              category: query.category,
-              onCategoryChanged: cubit.setDayCategory,
-              viewMode: state.viewMode,
-              onViewModeChanged: cubit.setViewMode,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          if (register.isFilteredEmpty)
-            PresenceFilterEmpty(
+      ],
+      empty: register.isEmpty ? const StaffRegisterEmpty() : null,
+      filters: PresenceRegisterFilters(
+        total: register.all.length,
+        countOf: register.count,
+        selected: query.status,
+        onStatus: cubit.setDayStatus,
+        viewMode: state.viewMode,
+        showLegend: PermissionGate.allowsAccess(
+          context,
+          kStaffAttendanceWriteAccess,
+        ),
+        toJustify: register.toJustify,
+        toolbar: StaffSearchToolbar(
+          text: query.text,
+          label: l10n.staffAttendanceSearchLabel,
+          placeholder: l10n.staffAttendanceSearchPlaceholder,
+          onTextChanged: cubit.setDayText,
+          category: query.category,
+          onCategoryChanged: cubit.setDayCategory,
+          viewMode: state.viewMode,
+          onViewModeChanged: cubit.setViewMode,
+        ),
+      ),
+      resultsBar: PresenceResultsBar(
+        countLabel: l10n.staffAttendanceResultsCount(register.rows.length),
+        unmarked: register.shownUnmarked.length,
+        onMarkUnmarked: actions.canEditDay ? actions.markUnmarked : null,
+      ),
+      results: register.isFilteredEmpty
+          ? PresenceFilterEmpty(
               label: l10n.staffAttendanceEmptyFilterTitle,
               allMarked: query.status == PresenceStatus.none,
               onShowAll: cubit.resetDayFilters,
             )
-          else
-            Opacity(
+          : Opacity(
               opacity: register.frozen
                   ? AppDimensions.presenceMarkFrozenOpacity
                   : 1,
@@ -109,8 +112,6 @@ class StaffRegisterTab extends StatelessWidget {
                     )
                   : StaffAttendanceList(register: register),
             ),
-        ],
-      ],
     );
   }
 }
