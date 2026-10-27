@@ -66,4 +66,39 @@ abstract class HrAttendanceStatsApi {
     @Query('q') String? search,
     @DioOptions() Options options,
   );
+
+  /// La liste de la fiche individuelle en PDF (pièce PR) : `month` ou
+  /// `scope=year`, et les filtres de l'écran.
+  @GET(AppConstants.hrAttendanceProfilesReportEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> getProfilesReport(
+    @Extras() Map<String, dynamic> extras,
+    @Query('month') String? month,
+    @Query('scope') String? scope,
+    @Query('q') String? search,
+    @Query('category') String? category,
+    @Query('profile') String? profile,
+    @DioOptions() Options options,
+  );
+
+  /// La fiche de présence du mois d'un agent : FP scellée (mois clos) ou
+  /// provisoire — le serveur choisit.
+  @GET(AppConstants.hrAttendanceAgentMonthSheetEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> getAgentMonthSheet(
+    @Extras() Map<String, dynamic> extras,
+    @Path('staffMemberId') String staffMemberId,
+    @Query('month') String month,
+  );
+
+  /// La fiche de présence de l'année d'un agent — provisoire en V1.
+  @GET(AppConstants.hrAttendanceAgentYearSheetEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> getAgentYearSheet(
+    @Extras() Map<String, dynamic> extras,
+    @Path('staffMemberId') String staffMemberId,
+  );
 }

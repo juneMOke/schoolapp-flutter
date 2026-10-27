@@ -1201,6 +1201,21 @@ class AppConstants {
   /// Délai de réception du PDF d'assiduité — celui des autres rapports.
   static const Duration hrAttendanceReportTimeout = Duration(seconds: 60);
 
+  /// La liste de la fiche individuelle en PDF (pièce PR), filtrée comme
+  /// l'écran.
+  static const String hrAttendanceProfilesReportEndpoint =
+      '/api/v1/hr/attendance-stats/profiles.pdf';
+
+  /// La fiche de présence d'un agent : le mois (pièce FP scellée si le mois
+  /// est clos, provisoire sinon) et l'année (provisoire en V1).
+  static const String hrAttendanceAgentMonthSheetEndpoint =
+      '/api/v1/hr/attendance-stats/staff/{staffMemberId}.pdf';
+  static const String hrAttendanceAgentYearSheetEndpoint =
+      '/api/v1/hr/attendance-stats/staff/{staffMemberId}/year.pdf';
+
+  /// L'identifiant d'archive d'une pièce scellée ; absent d'un provisoire.
+  static const String documentIdHeader = 'x-document-id';
+
   /// L'attente retenue quand un 429 du PDF d'assiduité n'annonce pas la
   /// sienne.
   static const Duration hrAttendanceReportRetryFallback = Duration(seconds: 60);

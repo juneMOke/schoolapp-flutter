@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/entities/dashboard_window.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -65,4 +67,34 @@ class GetHrAttendanceReportUseCase {
     DashboardWindow window, {
     String search = '',
   }) => _repository.report(window, search: search);
+}
+
+class GetHrAttendanceProfilesReportUseCase {
+  final HrAttendanceStatsRepository _repository;
+
+  const GetHrAttendanceProfilesReportUseCase(this._repository);
+
+  Future<Either<Failure, HrAttendanceReport>> call(
+    HrProfileScope scope, {
+    String search = '',
+    StaffCategory? category,
+    PresenceProfile? profile,
+  }) => _repository.profilesReport(
+    scope,
+    search: search,
+    category: category,
+    profile: profile,
+  );
+}
+
+class GetHrAttendanceAgentSheetUseCase {
+  final HrAttendanceStatsRepository _repository;
+
+  const GetHrAttendanceAgentSheetUseCase(this._repository);
+
+  /// [month] `null` : l'année scolaire courante.
+  Future<Either<Failure, HrAttendanceReport>> call(
+    String staffMemberId, {
+    String? month,
+  }) => _repository.agentSheet(staffMemberId, month: month);
 }

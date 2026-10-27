@@ -240,4 +240,124 @@ void main() {
       verifyNever(() => api.getReport(any(), any(), any(), any(), any()));
     });
   });
+
+  group('PDF de la fiche individuelle', () {
+    HttpResponse<Uint8List> pdf({String? fileName, String? documentId}) =>
+        HttpResponse(
+          Uint8List.fromList('%PDF-1.7'.codeUnits),
+          Response(
+            requestOptions: RequestOptions(path: '/api/v1/hr/attendance-stats'),
+            statusCode: 200,
+            headers: Headers.fromMap({
+              Headers.contentTypeHeader: ['application/pdf'],
+              if (fileName != null)
+                'content-disposition': ['attachment; filename="$fileName"'],
+              if (documentId != null) 'x-document-id': [documentId],
+            }),
+          ),
+        );
+
+    test(
+      'la liste : le mois et les filtres de l\'écran, en valeurs du fil',
+      () async {
+        when(
+          () => api.getProfilesReport(
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+          ),
+        ).thenAnswer((_) async => pdf(fileName: 'CF-PR-2026-000004.pdf'));
+
+        final report = _right(
+          await repo.profilesReport(
+            const HrProfileScope.month('2026-10'),
+            search: ' AG-0012 ',
+            category: StaffCategory.teacher,
+            profile: PresenceProfile.absentee,
+          ),
+        );
+
+        verify(
+          () => api.getProfilesReport(
+            any(),
+            '2026-10',
+            any(that: isNull),
+            'AG-0012',
+            'ENSEIGNANT',
+            'ABSENTEISTE',
+            any(),
+          ),
+        );
+        expect(report.fileName, 'CF-PR-2026-000004.pdf');
+        expect(report.isSealed, isFalse);
+      },
+    );
+
+    test('la liste de l\'année : scope=year, sans mois ni filtre', () async {
+      when(
+        () => api.getProfilesReport(
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+          any(),
+        ),
+      ).thenAnswer((_) async => pdf());
+
+      final report = _right(
+        await repo.profilesReport(const HrProfileScope.year(), search: '  '),
+      );
+
+      verify(
+        () => api.getProfilesReport(
+          any(),
+          any(that: isNull),
+          'year',
+          any(that: isNull),
+          any(that: isNull),
+          any(that: isNull),
+          any(),
+        ),
+      );
+      expect(report.fileName, 'fiche-individuelle-personnel.pdf');
+    });
+
+    test('la fiche d\'un mois clos : scellée, X-Document-Id lu', () async {
+      when(() => api.getAgentMonthSheet(any(), any(), any())).thenAnswer(
+        (_) async =>
+            pdf(fileName: 'CF-FP-2026-000012.pdf', documentId: 'doc-1'),
+      );
+
+      final report = _right(await repo.agentSheet('a-1', month: '2026-09'));
+
+      verify(() => api.getAgentMonthSheet(any(), 'a-1', '2026-09'));
+      expect(report.isSealed, isTrue);
+      expect(report.documentId, 'doc-1');
+    });
+
+    test('la fiche de l\'année : la route de l\'année, provisoire', () async {
+      when(() => api.getAgentYearSheet(any(), any())).thenAnswer(
+        (_) async =>
+            pdf(fileName: 'fiche-presence-provisoire-AG-0012-2026-2027.pdf'),
+      );
+
+      final report = _right(await repo.agentSheet('a-1'));
+
+      verify(() => api.getAgentYearSheet(any(), 'a-1'));
+      verifyNever(() => api.getAgentMonthSheet(any(), any(), any()));
+      expect(report.isSealed, isFalse);
+    });
+
+    test('hors ligne : l’erreur réseau, sans rendu demandé', () async {
+      when(() => connectivity.isOnline()).thenAnswer((_) async => false);
+      expect(_left(await repo.agentSheet('a-1')), isA<NetworkFailure>());
+      verifyNever(() => api.getAgentYearSheet(any(), any()));
+    });
+  });
 }
