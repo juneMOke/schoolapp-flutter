@@ -20373,4 +20373,55 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceYearTotal => 'Année';
+
+  @override
+  String hrPresenceCalendarLate(int minutes) {
+    return '+$minutes min';
+  }
+
+  @override
+  String get hrPresenceCalendarUnjustified => 'Non justifiée';
+
+  @override
+  String hrPresenceEvidenceUnjustified(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count absences non justifiées',
+      one: '1 absence non justifiée',
+    );
+    return '$_temp0 (seuil : 3)';
+  }
+
+  @override
+  String hrPresenceEvidenceAbsences(int count, int scored, int pct) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count absences',
+      one: '1 absence',
+    );
+    return '$_temp0 sur $scored jours pointés, soit $pct % (seuil : 10 %)';
+  }
+
+  @override
+  String hrPresenceEvidenceLates(int count, int scored, int pct) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retards',
+      one: '1 retard',
+    );
+    return '$_temp0 sur $scored jours pointés, soit $pct % (seuil : plus de 15 %)';
+  }
+
+  @override
+  String hrPresenceEvidenceRates(int presence, int late) {
+    return 'Présence $presence %, retards $late % des jours pointés';
+  }
+
+  @override
+  String hrPresenceEvidenceCoverage(int scored, int classDays) {
+    return '$scored jours pointés sur $classDays jours de classe';
+  }
 }

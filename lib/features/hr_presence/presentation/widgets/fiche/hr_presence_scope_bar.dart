@@ -33,6 +33,9 @@ class HrPresenceScopeBar extends StatelessWidget {
   /// Au bout de la carte (le choix de l'agent, dans sa fiche).
   final Widget? trailing;
 
+  /// Dans sa carte (par défaut), ou nue dans une feuille qui l'encadre déjà.
+  final bool framed;
+
   const HrPresenceScopeBar({
     super.key,
     required this.yearly,
@@ -45,6 +48,7 @@ class HrPresenceScopeBar extends StatelessWidget {
     this.onPickMonth,
     this.yearLabel,
     this.trailing,
+    this.framed = true,
   });
 
   @override
@@ -52,57 +56,56 @@ class HrPresenceScopeBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final label = yearLabel;
     final trailing = this.trailing;
-    return EteeloPanelCard(
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        spacing: AppSpacing.lg,
-        runSpacing: AppSpacing.md,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Wrap(
-            spacing: AppSpacing.lg,
-            runSpacing: AppSpacing.md,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              SegmentedTabFilter<bool>(
-                semanticsLabel: l10n.hrPresenceScopeA11y,
-                style: SegmentedTabFilterStyle.window,
-                selected: yearly,
-                onSelected: onYearly,
-                options: [
-                  SegmentedTabOption(
-                    label: l10n.hrPresenceScopeMonthly,
-                    value: false,
-                    icon: Icons.calendar_view_month_outlined,
-                  ),
-                  SegmentedTabOption(
-                    label: l10n.hrPresenceScopeYearly,
-                    value: true,
-                    icon: Icons.date_range_outlined,
-                  ),
-                ],
-              ),
-              if (!yearly)
-                PresenceMonthNav(
-                  month: month,
-                  isCurrent: isCurrentMonth,
-                  onPrevious: onPrevious,
-                  onNext: onNext,
-                  onCurrent: onCurrent,
-                  onPick: onPickMonth,
-                )
-              else if (label != null)
-                Text(
-                  label,
-                  style: AppTypography.titleSmall.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
+    final bar = Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      spacing: AppSpacing.lg,
+      runSpacing: AppSpacing.md,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Wrap(
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.md,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            SegmentedTabFilter<bool>(
+              semanticsLabel: l10n.hrPresenceScopeA11y,
+              style: SegmentedTabFilterStyle.window,
+              selected: yearly,
+              onSelected: onYearly,
+              options: [
+                SegmentedTabOption(
+                  label: l10n.hrPresenceScopeMonthly,
+                  value: false,
+                  icon: Icons.calendar_view_month_outlined,
                 ),
-            ],
-          ),
-          ?trailing,
-        ],
-      ),
+                SegmentedTabOption(
+                  label: l10n.hrPresenceScopeYearly,
+                  value: true,
+                  icon: Icons.date_range_outlined,
+                ),
+              ],
+            ),
+            if (!yearly)
+              PresenceMonthNav(
+                month: month,
+                isCurrent: isCurrentMonth,
+                onPrevious: onPrevious,
+                onNext: onNext,
+                onCurrent: onCurrent,
+                onPick: onPickMonth,
+              )
+            else if (label != null)
+              Text(
+                label,
+                style: AppTypography.titleSmall.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+          ],
+        ),
+        ?trailing,
+      ],
     );
+    return framed ? EteeloPanelCard(child: bar) : bar;
   }
 }

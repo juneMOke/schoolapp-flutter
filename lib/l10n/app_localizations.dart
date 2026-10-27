@@ -31244,6 +31244,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Year'**
   String get hrPresenceYearTotal;
+
+  /// No description provided for @hrPresenceCalendarLate.
+  ///
+  /// In en, this message translates to:
+  /// **'+{minutes} min'**
+  String hrPresenceCalendarLate(int minutes);
+
+  /// No description provided for @hrPresenceCalendarUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unjustified'**
+  String get hrPresenceCalendarUnjustified;
+
+  /// No description provided for @hrPresenceEvidenceUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unjustified absence} other{{count} unjustified absences}} (threshold: 3)'**
+  String hrPresenceEvidenceUnjustified(int count);
+
+  /// No description provided for @hrPresenceEvidenceAbsences.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 absence} other{{count} absences}} over {scored} marked days, i.e. {pct}% (threshold: 10%)'**
+  String hrPresenceEvidenceAbsences(int count, int scored, int pct);
+
+  /// No description provided for @hrPresenceEvidenceLates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 late arrival} other{{count} late arrivals}} over {scored} marked days, i.e. {pct}% (threshold: over 15%)'**
+  String hrPresenceEvidenceLates(int count, int scored, int pct);
+
+  /// No description provided for @hrPresenceEvidenceRates.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance {presence}%, late {late}% of marked days'**
+  String hrPresenceEvidenceRates(int presence, int late);
+
+  /// No description provided for @hrPresenceEvidenceCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'{scored} marked days out of {classDays} class days'**
+  String hrPresenceEvidenceCoverage(int scored, int classDays);
 }
 
 class _AppLocalizationsDelegate

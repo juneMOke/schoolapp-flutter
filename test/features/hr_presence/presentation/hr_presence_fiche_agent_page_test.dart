@@ -10,6 +10,8 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_m
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/fiche/hr_presence_fiche_cubit.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_fiche_sheet.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_scope_bar.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/fiche/hr_presence_year_list.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
@@ -118,6 +120,18 @@ void main() {
     await tester.pump();
     verify(() => mocks.month('a-1', month: '2026-09')).called(1);
     expect(find.byType(PresenceMonthCalendar), findsOneWidget);
+  });
+
+  testWidgets('la fiche mensuelle en une feuille : la règle chiffrée, et le '
+      'détail de chaque jour dans le calendrier', (tester) async {
+    await pump(tester);
+
+    expect(find.byType(HrPresenceFicheSheet), findsOneWidget);
+    // La portée vit dans la feuille, pas dans une carte à part.
+    expect(find.byType(HrPresenceScopeBar), findsOneWidget);
+    expect(find.textContaining('jours de classe'), findsOneWidget);
+    // Un présent écrit son arrivée dans sa case.
+    expect(find.text('07:25'), findsWidgets);
   });
 
   testWidgets('vue annuelle en table : une colonne par taux, l\'année en '

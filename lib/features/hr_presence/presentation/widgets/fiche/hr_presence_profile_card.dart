@@ -25,25 +25,40 @@ class HrPresenceProfileCard extends StatelessWidget {
   /// « octobre 2026 », ou « année 2026-2027 ».
   final String scopeLabel;
 
+  /// La règle avec les chiffres de l'agent ; `null` : la règle seule.
+  final String? evidence;
+
+  /// « 21 jours pointés sur 23 jours de classe » ; `null` : rien.
+  final String? coverage;
+
+  /// En tête d'une feuille ([HrPresenceFicheSheet]) : sans bord ni coins
+  /// propres, la feuille les porte.
+  final bool embedded;
+
   const HrPresenceProfileCard({
     super.key,
     required this.agent,
     required this.profile,
     required this.scopeLabel,
+    this.evidence,
+    this.coverage,
+    this.embedded = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tone = PresenceProfileTone.of(profile);
+    final evidence = this.evidence;
+    final coverage = this.coverage;
     final detail = [
       agent.jobTitle,
       if (agent.category != null) StaffLabels.category(l10n, agent.category!),
     ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' · ');
     return Container(
       decoration: BoxDecoration(
-        borderRadius: AppRadius.brLg,
-        border: Border.all(color: tone.border),
+        borderRadius: embedded ? null : AppRadius.brLg,
+        border: embedded ? null : Border.all(color: tone.border),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -143,6 +158,22 @@ class HrPresenceProfileCard extends StatelessWidget {
                       PresenceLabels.profileRule(l10n, profile),
                       style: AppTypography.bodySmall.copyWith(color: tone.ink),
                     ),
+                    if (evidence != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        evidence,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: tone.ink,
+                        ),
+                      ),
+                    ],
+                    if (coverage != null)
+                      Text(
+                        coverage,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                   ],
                 ),
               ),

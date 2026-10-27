@@ -12113,5 +12113,12 @@
   "hrPresenceYearColPresence": "Présence",
   "hrPresenceYearColScored": "Jours pointés",
   "hrPresenceYearColProfile": "Profil",
-  "hrPresenceYearTotal": "Année"
+  "hrPresenceYearTotal": "Année",
+  "hrPresenceCalendarLate": "+{minutes} min",
+  "hrPresenceCalendarUnjustified": "Non justifiée",
+  "hrPresenceEvidenceUnjustified": "{count, plural, =1{1 absence non justifiée} other{{count} absences non justifiées}} (seuil : 3)",
+  "hrPresenceEvidenceAbsences": "{count, plural, =1{1 absence} other{{count} absences}} sur {scored} jours pointés, soit {pct} % (seuil : 10 %)",
+  "hrPresenceEvidenceLates": "{count, plural, =1{1 retard} other{{count} retards}} sur {scored} jours pointés, soit {pct} % (seuil : plus de 15 %)",
+  "hrPresenceEvidenceRates": "Présence {presence} %, retards {late} % des jours pointés",
+  "hrPresenceEvidenceCoverage": "{scored} jours pointés sur {classDays} jours de classe"
 }

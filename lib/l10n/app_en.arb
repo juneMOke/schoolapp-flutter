@@ -11871,5 +11871,18 @@
   "hrPresenceYearColPresence": "Attendance",
   "hrPresenceYearColScored": "Days marked",
   "hrPresenceYearColProfile": "Profile",
-  "hrPresenceYearTotal": "Year"
+  "hrPresenceYearTotal": "Year",
+  "hrPresenceCalendarLate": "+{minutes} min",
+  "@hrPresenceCalendarLate": {"placeholders": {"minutes": {"type": "int"}}},
+  "hrPresenceCalendarUnjustified": "Unjustified",
+  "hrPresenceEvidenceUnjustified": "{count, plural, =1{1 unjustified absence} other{{count} unjustified absences}} (threshold: 3)",
+  "@hrPresenceEvidenceUnjustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceEvidenceAbsences": "{count, plural, =1{1 absence} other{{count} absences}} over {scored} marked days, i.e. {pct}% (threshold: 10%)",
+  "@hrPresenceEvidenceAbsences": {"placeholders": {"count": {"type": "int"}, "scored": {"type": "int"}, "pct": {"type": "int"}}},
+  "hrPresenceEvidenceLates": "{count, plural, =1{1 late arrival} other{{count} late arrivals}} over {scored} marked days, i.e. {pct}% (threshold: over 15%)",
+  "@hrPresenceEvidenceLates": {"placeholders": {"count": {"type": "int"}, "scored": {"type": "int"}, "pct": {"type": "int"}}},
+  "hrPresenceEvidenceRates": "Attendance {presence}%, late {late}% of marked days",
+  "@hrPresenceEvidenceRates": {"placeholders": {"presence": {"type": "int"}, "late": {"type": "int"}}},
+  "hrPresenceEvidenceCoverage": "{scored} marked days out of {classDays} class days",
+  "@hrPresenceEvidenceCoverage": {"placeholders": {"scored": {"type": "int"}, "classDays": {"type": "int"}}}
 }

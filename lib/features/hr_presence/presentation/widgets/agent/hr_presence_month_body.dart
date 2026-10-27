@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/presence/domain/clock_time.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_month_views.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_incident_list.dart';
@@ -42,6 +43,7 @@ class HrPresenceMonthBody extends StatelessWidget {
                 firstWeekday: SchoolDayCalendar.weekdayOf(weekdays.first),
                 upcoming: (day) => days[day]!.future,
                 statusOf: (day) => days[day]!.status,
+                detailOf: (day) => _detail(days[day]!, l10n),
               ),
       ),
     );
@@ -61,7 +63,10 @@ class HrPresenceMonthBody extends StatelessWidget {
         reasonLabel: (reason) => StaffAttendanceLabels.reason(l10n, reason),
       ),
     );
+    // Le calendrier prend la plus grande part : c'est lui qu'on lit.
     return HrTwoColumns(
+      firstFlex: 3,
+      secondFlex: 2,
       first: calendar,
       second: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -83,6 +88,22 @@ class HrPresenceMonthBody extends StatelessWidget {
       ),
     );
   }
+
+  /// Le détail d'une case : l'arrivée d'un présent, le retard, le motif
+  /// d'une absence ou « non justifiée » ; rien pour un jour non pointé.
+  static String? _detail(HrAttendanceDay day, AppLocalizations l10n) =>
+      switch (day.status) {
+        PresenceStatus.present => ClockTime.tryParse(day.arrival)?.wire,
+        PresenceStatus.late =>
+          day.lateMinutes > 0
+              ? l10n.hrPresenceCalendarLate(day.lateMinutes)
+              : ClockTime.tryParse(day.arrival)?.wire,
+        PresenceStatus.absent =>
+          day.reason == null
+              ? l10n.hrPresenceCalendarUnjustified
+              : StaffAttendanceLabels.reason(l10n, day.reason!),
+        PresenceStatus.none => null,
+      };
 
   PresenceRateBarData _trendBar(
     HrAttendanceTrendPoint point,
