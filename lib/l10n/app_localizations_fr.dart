@@ -13190,6 +13190,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get presenceMarkReviewUnmarked => 'Voir la liste';
 
   @override
+  String get presenceMarkLeaveConfirm => 'Quitter sans valider';
+
+  @override
+  String get presenceMarkLeaveStay => 'Rester';
+
+  @override
+  String staffAttendanceLeaveTitle(String day) {
+    return 'Le rapport du $day n\'est pas validé';
+  }
+
+  @override
+  String staffAttendanceLeaveMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Vos pointages sont enregistrés. Tant que le rapport n\'est pas validé, la journée reste modifiable. $count agents ne sont pas encore pointés.',
+      one:
+          'Vos pointages sont enregistrés. Tant que le rapport n\'est pas validé, la journée reste modifiable. 1 agent n\'est pas encore pointé.',
+      zero:
+          'Vos pointages sont enregistrés. Tant que le rapport n\'est pas validé, la journée reste modifiable.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceLeaveTitle(String day, String classroom) {
+    return 'L\'appel du $day · $classroom n\'est pas validé';
+  }
+
+  @override
+  String classPresenceLeaveMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Vos pointages sont gardés sur la tablette ; l\'appel ne part qu\'à la validation. $count élèves ne sont pas encore pointés.',
+      one:
+          'Vos pointages sont gardés sur la tablette ; l\'appel ne part qu\'à la validation. 1 élève n\'est pas encore pointé.',
+      zero:
+          'Vos pointages sont gardés sur la tablette ; l\'appel ne part qu\'à la validation.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get presenceMarkNextDay => 'Jour suivant';
 
   @override

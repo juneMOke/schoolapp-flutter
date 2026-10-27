@@ -20582,6 +20582,42 @@ abstract class AppLocalizations {
   /// **'Show the list'**
   String get presenceMarkReviewUnmarked;
 
+  /// No description provided for @presenceMarkLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave without validating'**
+  String get presenceMarkLeaveConfirm;
+
+  /// No description provided for @presenceMarkLeaveStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get presenceMarkLeaveStay;
+
+  /// No description provided for @staffAttendanceLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The report for {day} is not validated'**
+  String staffAttendanceLeaveTitle(String day);
+
+  /// No description provided for @staffAttendanceLeaveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Your marks are saved. Until the report is validated, the day stays open to changes.} =1{Your marks are saved. Until the report is validated, the day stays open to changes. 1 staff member is not marked yet.} other{Your marks are saved. Until the report is validated, the day stays open to changes. {count} staff members are not marked yet.}}'**
+  String staffAttendanceLeaveMessage(int count);
+
+  /// No description provided for @classPresenceLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The roll call of {day} · {classroom} is not validated'**
+  String classPresenceLeaveTitle(String day, String classroom);
+
+  /// No description provided for @classPresenceLeaveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Your marks are kept on the tablet; the roll call is only sent once validated.} =1{Your marks are kept on the tablet; the roll call is only sent once validated. 1 student is not marked yet.} other{Your marks are kept on the tablet; the roll call is only sent once validated. {count} students are not marked yet.}}'**
+  String classPresenceLeaveMessage(int count);
+
   /// No description provided for @presenceMarkNextDay.
   ///
   /// In en, this message translates to:

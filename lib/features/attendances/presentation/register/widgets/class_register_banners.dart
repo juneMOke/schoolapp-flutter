@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
@@ -12,7 +11,6 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_w
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/attendances/domain/services/class_day_register.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/helpers/class_day_access.dart';
-import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_cubit.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/bloc/class_presence_state.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_actions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
@@ -36,7 +34,6 @@ class ClassDayBanner extends StatelessWidget {
 
   Widget _build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<ClassPresenceCubit>();
     final actions = ClassRegisterActions(context);
     final unmarked = register.count(PresenceStatus.none);
     return PresenceDayBanner(
@@ -58,9 +55,9 @@ class ClassDayBanner extends StatelessWidget {
       showActions:
           classDayLockIn(context, register.day, today: state.today) == null,
       validateLabel: l10n.classPresenceValidate,
-      onPrevious: state.canStepBack ? () => unawaited(cubit.stepDay(-1)) : null,
-      onNext: state.isToday ? null : () => unawaited(cubit.stepDay(1)),
-      onToday: () => unawaited(cubit.goToday()),
+      onPrevious: state.canStepBack ? () => actions.stepDay(-1) : null,
+      onNext: state.isToday ? null : () => actions.stepDay(1),
+      onToday: actions.goToday,
       onPickDay: () => unawaited(actions.pickDay()),
       onSettings: () => unawaited(actions.openSchedule()),
       onMarkRemaining: unmarked == 0 ? null : actions.markRemaining,

@@ -13093,6 +13093,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get presenceMarkReviewUnmarked => 'Show the list';
 
   @override
+  String get presenceMarkLeaveConfirm => 'Leave without validating';
+
+  @override
+  String get presenceMarkLeaveStay => 'Stay';
+
+  @override
+  String staffAttendanceLeaveTitle(String day) {
+    return 'The report for $day is not validated';
+  }
+
+  @override
+  String staffAttendanceLeaveMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Your marks are saved. Until the report is validated, the day stays open to changes. $count staff members are not marked yet.',
+      one:
+          'Your marks are saved. Until the report is validated, the day stays open to changes. 1 staff member is not marked yet.',
+      zero:
+          'Your marks are saved. Until the report is validated, the day stays open to changes.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classPresenceLeaveTitle(String day, String classroom) {
+    return 'The roll call of $day · $classroom is not validated';
+  }
+
+  @override
+  String classPresenceLeaveMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Your marks are kept on the tablet; the roll call is only sent once validated. $count students are not marked yet.',
+      one:
+          'Your marks are kept on the tablet; the roll call is only sent once validated. 1 student is not marked yet.',
+      zero:
+          'Your marks are kept on the tablet; the roll call is only sent once validated.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get presenceMarkNextDay => 'Next day';
 
   @override

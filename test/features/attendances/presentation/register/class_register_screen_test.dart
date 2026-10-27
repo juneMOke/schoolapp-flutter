@@ -220,6 +220,26 @@ void main() {
     verifyNever(() => validate(any(), any()));
   });
 
+  testWidgets('changer de jour avec un appel pointé non validé pose la '
+      'question ; « Rester » garde le jour', (tester) async {
+    await pump(tester, day: presenceDay());
+    final cubit = tester
+        .element(find.byType(ClassRegisterTab))
+        .read<ClassPresenceCubit>();
+
+    await tester.tap(find.byTooltip('Jour précédent'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('· 6e A n\'est pas validé'), findsOneWidget);
+    expect(
+      find.textContaining('1 élève n\'est pas encore pointé'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Rester'));
+    await tester.pumpAndSettle();
+    expect(cubit.state.day, '2026-10-01');
+  });
+
   testWidgets(
     'jour passé validé, sans attendance.amend : pas de Rouvrir, touche refusée',
     (tester) async {

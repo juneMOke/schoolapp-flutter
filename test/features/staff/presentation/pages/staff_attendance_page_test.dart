@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_count_row.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_validated_banner.dart';
 import 'package:mocktail/mocktail.dart';
@@ -27,6 +28,7 @@ import 'package:school_app_flutter/features/staff/presentation/pages/staff_atten
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_time_dialog.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_attendance_row.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_tab.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_banners.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -233,6 +235,63 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  group('quitter un jour pointé mais pas validé', () {
+    const title = 'Le rapport du mardi 29 septembre 2026 n\'est pas validé';
+
+    testWidgets('changer de jour pose la question ; « Rester » garde le jour', (
+      tester,
+    ) async {
+      final cubit = await pump(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      expect(find.text(title), findsOneWidget);
+      expect(
+        find.textContaining('1 agent n\'est pas encore pointé'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Rester'));
+      await tester.pumpAndSettle();
+      expect(cubit.state.day, _day);
+    });
+
+    testWidgets('« Quitter sans valider » change de jour', (tester) async {
+      final cubit = await pump(tester);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quitter sans valider'));
+      await tester.pumpAndSettle();
+
+      expect(cubit.state.day, '2026-09-28');
+    });
+
+    testWidgets('quitter l\'écran pose la même question', (tester) async {
+      await pump(tester);
+
+      final leaving = RouteExitGuard.mayLeave(
+        tester.element(find.byType(StaffRegisterTab)),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(title), findsOneWidget);
+
+      await tester.tap(find.text('Quitter sans valider'));
+      await tester.pumpAndSettle();
+      expect(await leaving, isTrue);
+    });
+
+    testWidgets('un jour validé part sans question', (tester) async {
+      final cubit = await pump(tester, validated: true);
+
+      await tester.tap(find.byTooltip('Jour précédent'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(title), findsNothing);
+      expect(cubit.state.day, '2026-09-28');
+    });
   });
 
   testWidgets('le récapitulatif ouvre la fiche d\'un agent', (tester) async {
