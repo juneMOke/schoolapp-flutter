@@ -1,11 +1,11 @@
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_kpi_card.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -92,25 +92,24 @@ class PayrollAdvancesTab extends StatelessWidget {
       children: [
         EteeloKpiBand(
           cards: [
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollAdvancesToApprove,
               value: toApprove,
-              accent: AppColors.presenceMarkLateInk,
-              accentSoft: AppColors.presenceMarkLateSoft,
+              accent: DashboardSense.attente,
               icon: Icons.pending_actions_outlined,
             ),
-            EteeloKpiCardData(
+            // Ce que les agents doivent encore : un dû, pas un manque.
+            PayrollKpiCard.of(
               label: l10n.payrollAdvancesOutstanding,
               valueLines: outstanding,
-              accent: AppColors.presenceMarkPresentInk,
-              accentSoft: AppColors.presenceMarkPresentSoft,
+              accent: DashboardSense.attendu,
               icon: Icons.hourglass_bottom,
             ),
-            EteeloKpiCardData(
+            PayrollKpiCard.of(
               label: l10n.payrollAdvancesThisMonth,
               valueLines: thisMonth,
-              accent: AppColors.presenceMarkAbsentInk,
-              accentSoft: AppColors.presenceMarkAbsentSoft,
+              // Une retenue du mois, comme au livre.
+              accent: DashboardSense.manquant,
               icon: Icons.remove_circle_outline,
             ),
           ],

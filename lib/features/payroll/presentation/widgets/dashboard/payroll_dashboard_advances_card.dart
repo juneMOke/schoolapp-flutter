@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// « Prêts & avances » (spec TB 2) : qui rembourse, ce qui reste dû, ce que
-/// le mois retient — le détail se gère dans Avances & prêts.
+/// « Prêts & avances » : qui rembourse, ce qui reste dû, ce que le mois
+/// retient — servis par le serveur à l'instant du calcul. Le détail se gère
+/// dans Avances & prêts.
 class PayrollDashboardAdvancesCard extends StatefulWidget {
-  final PayrollSnapshot snapshot;
-  final PayrollMonthView view;
+  final List<PayrollDashboardAdvance> advances;
   final VoidCallback onManage;
 
   const PayrollDashboardAdvancesCard({
     super.key,
-    required this.snapshot,
-    required this.view,
+    required this.advances,
     required this.onManage,
   });
 
@@ -46,21 +44,22 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final advances = widget.snapshot.advances;
-    final ongoing = advances.where((a) => a.isOngoing).toList();
+    final advances = widget.advances;
+    final ongoing = advances.where((a) => a.phase.isOngoing).toList();
     final visible = [
       for (final advance in advances)
         if (switch (_filter) {
-          PayrollAdvanceFilter.ongoing => advance.isOngoing,
-          PayrollAdvanceFilter.settled => advance.isSettled,
+          PayrollAdvanceFilter.ongoing => advance.phase.isOngoing,
+          PayrollAdvanceFilter.settled =>
+            advance.phase == PayrollAdvancePhase.settled,
           _ => true,
         })
           advance,
     ];
     final due = PayrollLabels.perCurrency(
-      ongoing.map((a) => (a.remainingInCents, a.amount.currency)),
+      ongoing.map((a) => (a.remainingInCents, a.currency)),
     ).join(' · ');
-    return PayrollDashboardCard(
+    return EteeloStatsCard(
       title: l10n.payrollDashAdvancesTitle,
       subtitle: ongoing.isEmpty
           ? null
@@ -68,12 +67,17 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
               {for (final a in ongoing) a.staffMemberId}.length,
               due,
             ),
-      trailing: EteeloButton.ghost(
-        label: l10n.payrollDashManage,
-        icon: Icons.arrow_forward,
-        onPressed: widget.onManage,
-        fullWidth: false,
-      ),
+      icon: Icons.handshake_outlined,
+      tone: DashboardSense.attente,
+      toneStrength: DashboardTones.forceDe(DashboardSense.attente),
+      actions: [
+        EteeloButton.ghost(
+          label: l10n.payrollDashManage,
+          icon: Icons.arrow_forward,
+          onPressed: widget.onManage,
+          fullWidth: false,
+        ),
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -100,8 +104,7 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
             )
           else ...[
             for (final advance in visible.take(_maxRows))
-              _row(context, advance),
-            // Le registre complet vit dans Avances & prêts.
+              _AdvanceRow(advance: advance),
             if (visible.length > _maxRows)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
@@ -117,26 +120,26 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
       ),
     );
   }
+}
 
-  Widget _row(BuildContext context, SalaryAdvance advance) {
+class _AdvanceRow extends StatelessWidget {
+  final PayrollDashboardAdvance advance;
+
+  const _AdvanceRow({required this.advance});
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final currency = advance.amount.currency;
-    String money(int cents) => PayrollLabels.money(cents, currency);
-    final amount = advance.amount.amountInCents;
-    final repaid = amount == 0
-        ? 0.0
-        : (amount - advance.remainingInCents) / amount;
-    final takenThisMonth = [
-      for (final line in widget.view.lines)
-        for (final part in line.advances)
-          if (part.advanceId == advance.id) part.takenInCents,
-    ].fold(0, (sum, cents) => sum + cents);
+    String money(int cents) => PayrollLabels.money(cents, advance.currency);
+    final repaid = advance.repaidShare;
     final details = [
       advance.installments > 1
           ? l10n.payrollAdvanceOver(advance.installments)
           : l10n.payrollAdvanceOnce,
-      PayrollLabels.reason(l10n, advance.reason),
+      if (advance.reason case final reason?) PayrollLabels.reason(l10n, reason),
       PayrollLabels.day(context, advance.grantedOn),
+      if (advance.takenThisMonthInCents > 0)
+        l10n.payrollDashTakenThisMonth(money(advance.takenThisMonthInCents)),
     ].join(' · ');
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
@@ -147,8 +150,7 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
             children: [
               Expanded(
                 child: Text(
-                  widget.snapshot.member(advance.staffMemberId)?.fullName ??
-                      advance.staffMemberId,
+                  advance.fullName,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLarge,
                 ),
@@ -158,7 +160,7 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
                 child: Text(
                   l10n.payrollDashRemainingOf(
                     money(advance.remainingInCents),
-                    money(amount),
+                    money(advance.amountInCents),
                   ),
                   textAlign: TextAlign.end,
                   style: AppTypography.labelMedium,
@@ -167,9 +169,7 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
             ],
           ),
           Text(
-            takenThisMonth > 0
-                ? '$details · ${l10n.payrollDashTakenThisMonth(money(takenThisMonth))}'
-                : details,
+            details,
             style: AppTypography.bodySmall.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -178,10 +178,12 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
           ClipRRect(
             borderRadius: AppRadius.brPill,
             child: LinearProgressIndicator(
-              value: repaid.clamp(0, 1),
+              value: repaid,
               minHeight: AppDimensions.payrollProgressHeight,
               backgroundColor: AppColors.surfaceAlt,
-              color: repaid >= 1 ? AppColors.vertSavane : AppColors.orDoux,
+              color: repaid >= 1
+                  ? DashboardSense.encaisse
+                  : DashboardSense.attente,
               semanticsLabel: l10n.payrollDashRepaidA11y(
                 (repaid * 100).round(),
               ),

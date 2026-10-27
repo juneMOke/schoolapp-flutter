@@ -29,7 +29,7 @@ class ExpenseStaffAdvance extends Equatable {
   final String staffMemberId;
   final ExpenseStaffAdvanceKind kind;
 
-  /// 1 pour une avance ; 2 à 4 pour un prêt (B8).
+  /// 1 pour une avance ; 2 au plafond de l'école pour un prêt (B8, Q8).
   final int installments;
 
   /// Valeur du fil de `SalaryAdvanceReason` (`MEDICAL`…).
@@ -51,8 +51,6 @@ class ExpenseStaffAdvance extends Equatable {
   /// Le code stable du type semé par le serveur (T12) — le seul type que la
   /// tablette reconnaît par son code.
   static const String typeCode = 'STAFF_ADVANCE';
-
-  static const int maxInstallments = 4;
 
   /// La forme rangée sur la tablette : celle du fil, plus [firstMonth].
   Map<String, dynamic> toJson() => {...toWireJson(), 'firstMonth': ?firstMonth};

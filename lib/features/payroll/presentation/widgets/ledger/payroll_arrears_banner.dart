@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_arrears.dart';
@@ -26,13 +27,26 @@ class PayrollArrearsBanner extends StatelessWidget {
     required this.view,
   });
 
+  static List<PayrollArrearsAgent> _agents(
+    PayrollSnapshot snapshot,
+    PayrollMonthView view,
+  ) => !view.isEditable
+      ? const []
+      : [
+          for (final agent in PayrollArrears.of(
+            snapshot,
+            currentMonth: view.month,
+          ))
+            if (agent.oldestMonth.compareTo(view.month) < 0) agent,
+        ];
+
+  /// Le bandeau a-t-il quelque chose à dire ?
+  static bool shows(PayrollSnapshot snapshot, PayrollMonthView view) =>
+      _agents(snapshot, view).isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
-    if (!view.isEditable) return const SizedBox.shrink();
-    final agents = [
-      for (final agent in PayrollArrears.of(snapshot, currentMonth: view.month))
-        if (agent.oldestMonth.compareTo(view.month) < 0) agent,
-    ];
+    final agents = _agents(snapshot, view);
     if (agents.isEmpty) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
     final due = PayrollLabels.perCurrency([
@@ -42,38 +56,35 @@ class PayrollArrearsBanner extends StatelessWidget {
             (arrear.dueInCents, arrear.currency),
     ]).join(' · ');
     final tone = PayrollTone.submitted;
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.md),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: tone.soft,
-          borderRadius: AppRadius.brMd,
-          border: Border.all(color: tone.color),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.sm,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                l10n.payrollArrearsBanner(agents.length, due),
-                style: AppTypography.labelLarge.copyWith(color: tone.ink),
-              ),
-              EteeloButton.secondary(
-                label: l10n.payrollArrearsBannerAction,
-                icon: Icons.account_balance_outlined,
-                onPressed: () => context.go(
-                  AppRoutesNames.homeSubMenuPath(
-                    MenuConstants.hrPayrollArrearsId,
-                  ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: tone.soft,
+        borderRadius: AppRadius.brMd,
+        border: Border.all(color: tone.color),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.sm,
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              l10n.payrollArrearsBanner(agents.length, due),
+              style: AppTypography.labelLarge.copyWith(color: tone.ink),
+            ),
+            EteeloButton.secondary(
+              label: l10n.payrollArrearsBannerAction,
+              icon: Icons.account_balance_outlined,
+              onPressed: () => context.go(
+                AppRoutesNames.homeSubMenuPath(
+                  MenuConstants.hrPayrollArrearsId,
                 ),
-                fullWidth: false,
               ),
-            ],
-          ),
+              fullWidth: false,
+            ),
+          ],
         ),
       ),
     );

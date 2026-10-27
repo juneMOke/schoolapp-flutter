@@ -31,18 +31,18 @@ class PayrollWideSettingsCards extends StatelessWidget {
       error: error,
       readOnly: readOnly,
     );
-    Widget label(TextEditingController controller, String label, String hint) =>
-        EteeloTextInput(
-          controller: controller,
-          label: label,
-          placeholder: hint,
-          capitalization: EteeloTextCapitalization.sentence,
-          enabled: !readOnly,
-          errorText: payrollSettingsErrorText(
-            l10n,
-            wide.errorOfLabel(controller),
-          ),
-        );
+    Widget caption(
+      TextEditingController controller,
+      String fieldLabel,
+      String hint,
+    ) => EteeloTextInput(
+      controller: controller,
+      label: fieldLabel,
+      placeholder: hint,
+      capitalization: EteeloTextCapitalization.sentence,
+      enabled: !readOnly,
+      errorText: payrollSettingsErrorText(l10n, wide.errorOfLabel(controller)),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -95,17 +95,17 @@ class PayrollWideSettingsCards extends StatelessWidget {
           subtitle: l10n.payrollSettingsPayslipSubtitle,
           icon: Icons.draw_outlined,
           fields: [
-            label(
+            caption(
               wide.beneficiaryLabel,
               l10n.payrollSettingsSignBeneficiary,
               l10n.payrollPayslipSignAgent,
             ),
-            label(
+            caption(
               wide.directorLabel,
               l10n.payrollSettingsSignDirector,
               l10n.payrollPayslipSignHead,
             ),
-            label(
+            caption(
               wide.cashierLabel,
               l10n.payrollSettingsSignCashier,
               l10n.payrollPayslipSignBursar,

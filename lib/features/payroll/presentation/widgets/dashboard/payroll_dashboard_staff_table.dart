@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_dashboard_figures.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// « Ce que chaque salarié perçoit » (spec TB 2) : prévu, retenues, net du
-/// mois, arriérés antérieurs, perçu, reste et statut — les mêmes colonnes,
-/// aux mêmes définitions, que le PDF du serveur. Une ligne Total par devise.
+/// « Ce que chaque salarié perçoit » : prévu, retenues, net du mois,
+/// arriérés antérieurs, perçu, reste et statut — les lignes et le total
+/// servis par le serveur, aux mêmes définitions que son PDF.
 class PayrollDashboardStaffTable extends StatelessWidget {
-  final List<PayrollDashboardRow> rows;
-  final PayrollSnapshot snapshot;
+  final PayrollDashboardCurrency section;
 
-  const PayrollDashboardStaffTable({
-    super.key,
-    required this.rows,
-    required this.snapshot,
-  });
+  const PayrollDashboardStaffTable({super.key, required this.section});
 
   static const List<double?> _widths = [
     null,
@@ -38,8 +34,11 @@ class PayrollDashboardStaffTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final currencies = {for (final row in rows) row.currency}.toList()..sort();
+    final rows = section.rows;
+    final totals = section.totals;
     return EteeloColumnTable(
+      tone: ListingTones.table,
+      cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollDashStaffMinWidth,
       widths: _widths,
       endAligned: const {1, 2, 3, 4, 5, 6},
@@ -55,22 +54,13 @@ class PayrollDashboardStaffTable extends StatelessWidget {
       ],
       rowCount: rows.length,
       row: (context, index) => _row(context, rows[index]),
-      footer: Column(
-        children: [
-          for (final currency in currencies)
-            _total(
-              context,
-              currency,
-              rows.where((row) => row.currency == currency),
-            ),
-        ],
-      ),
+      footer: totals == null ? null : _total(context, totals),
     );
   }
 
   Widget _row(BuildContext context, PayrollDashboardRow row) {
-    final member = snapshot.member(row.staffMemberId);
-    String money(int cents) => PayrollLabels.money(cents, row.currency);
+    final none = AppLocalizations.of(context)!.payrollNoValue;
+    String money(int cents) => PayrollLabels.money(cents, section.currency);
     return EteeloColumnTableRow(
       widths: _widths,
       cells: [
@@ -78,11 +68,11 @@ class PayrollDashboardStaffTable extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              member?.fullName ?? row.staffMemberId,
+              row.fullName,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.labelLarge,
             ),
-            if (member?.jobTitle case final job? when job.isNotEmpty)
+            if (row.jobTitle case final job? when job.isNotEmpty)
               Text(
                 job,
                 overflow: TextOverflow.ellipsis,
@@ -95,12 +85,12 @@ class PayrollDashboardStaffTable extends StatelessWidget {
         _figure(money(row.plannedInCents)),
         _figure(
           row.deductionsInCents == 0
-              ? '—'
+              ? none
               : '− ${money(row.deductionsInCents)}',
         ),
         _figure(money(row.netInCents), strong: true),
         _figure(
-          row.arrearsInCents == 0 ? '—' : '+ ${money(row.arrearsInCents)}',
+          row.arrearsInCents == 0 ? none : '+ ${money(row.arrearsInCents)}',
         ),
         _figure(money(row.receivedInCents)),
         _figure(money(row.remainingInCents), strong: true),
@@ -109,26 +99,23 @@ class PayrollDashboardStaffTable extends StatelessWidget {
     );
   }
 
-  Widget _total(
-    BuildContext context,
-    String currency,
-    Iterable<PayrollDashboardRow> rows,
-  ) {
+  Widget _total(BuildContext context, PayrollDashboardTotals totals) {
     final l10n = AppLocalizations.of(context)!;
-    int sum(int Function(PayrollDashboardRow row) of) =>
-        rows.fold(0, (total, row) => total + of(row));
-    String money(int cents) => PayrollLabels.money(cents, currency);
+    String money(int cents) => PayrollLabels.money(cents, section.currency);
     return EteeloColumnTableRow(
       widths: _widths,
       background: AppColors.surfaceAlt,
       cells: [
-        Text(l10n.payrollDashTotal(currency), style: AppTypography.labelLarge),
-        _figure(money(sum((r) => r.plannedInCents)), strong: true),
-        _figure('− ${money(sum((r) => r.deductionsInCents))}', strong: true),
-        _figure(money(sum((r) => r.netInCents)), strong: true),
-        _figure('+ ${money(sum((r) => r.arrearsInCents))}', strong: true),
-        _figure(money(sum((r) => r.receivedInCents)), strong: true),
-        _figure(money(sum((r) => r.remainingInCents)), strong: true),
+        Text(
+          l10n.payrollDashTotal(section.currency),
+          style: AppTypography.labelLarge,
+        ),
+        _figure(money(totals.plannedInCents), strong: true),
+        _figure('− ${money(totals.deductionsInCents)}', strong: true),
+        _figure(money(totals.netInCents), strong: true),
+        _figure('+ ${money(totals.arrearsInCents)}', strong: true),
+        _figure(money(totals.receivedInCents), strong: true),
+        _figure(money(totals.remainingInCents), strong: true),
         const SizedBox.shrink(),
       ],
     );

@@ -286,12 +286,11 @@ class PayrollCommands {
   Future<Either<Failure, Uint8List>> statement(String month) =>
       _payslip.statement(month);
 
-  /// Le PDF du tableau « Ce que chaque salarié perçoit » — en ligne (Q7).
-  Future<Either<Failure, Uint8List>> dashboardPdf(
-    String month, {
-    required String filter,
-    String? query,
-  }) => _payslip.dashboard(month, filter: filter, query: query);
+  /// Le bulletin provisoire d'un agent, rendu par le serveur (P8).
+  Future<Either<Failure, Uint8List>> payslipPreview(
+    String month,
+    String staffMemberId,
+  ) => _payslip.preview(month, staffMemberId);
 
   static PayrollNotice _notice(
     Either<Failure, Unit> result,

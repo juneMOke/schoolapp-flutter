@@ -163,6 +163,9 @@ class AppBreakpoints {
   // Fiche d'une dépense : le fil passe en colonne quand le corps de la
   // modale dépasse ~820 dp — 340 de fil, 480 de faits au moins.
   static const double expenseDetailTwoColMin = 820.0;
+  // Bulletin de paie : feuille (720 max) et panneau d'actions (270) côte à
+  // côte au-delà de ~1000 dp de contenu — une 10″ paysage, barre repliée.
+  static const double payrollPayslipSideBySideMin = 1000.0;
   // Composition des classes — vue répartie.
   // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
   // en deçà, le basculeur passe dessous.

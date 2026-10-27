@@ -19650,9 +19650,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollDashChildcare => 'Children\'s fees';
 
   @override
-  String get payrollDashOther => 'Other';
-
-  @override
   String get payrollDashForecastTitle => 'Planned and actual this month';
 
   @override
@@ -19666,9 +19663,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollDashPlanned => 'Planned cost';
-
-  @override
-  String get payrollDashActual => 'Actually to pay';
 
   @override
   String payrollDashLessThanPlanned(String amount, int percent) {
@@ -19696,18 +19690,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollDashPaidTitle => 'Net to pay: paid and unpaid';
 
   @override
-  String payrollDashPaidSummary(int percent, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count employees settled',
-      one: '1 employee settled',
-      zero: 'no employee settled',
-    );
-    return '$percent % paid · $_temp0';
-  }
-
-  @override
   String payrollDashUnpaidSummary(int partial, int unpaid) {
     return 'Partial: $partial · Nothing paid: $unpaid';
   }
@@ -19721,11 +19703,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollDashByMonth => 'Month by month';
-
-  @override
-  String payrollDashColumnA11y(String month, String paid, String rest) {
-    return '$month: paid $paid, remaining $rest';
-  }
 
   @override
   String get payrollDashAdvancesTitle => 'Loans & advances';
@@ -19853,9 +19830,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollDashCurrentMonth => 'Current month';
 
   @override
-  String get payrollDashNoStaff => 'No employee to pay';
-
-  @override
   String get payrollDashNotTracked =>
       'Payroll validated before v2: its payments were not recorded, nothing can be tracked.';
 
@@ -19917,7 +19891,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollSettingsPayslipSubtitle =>
-      'The three signature captions; blank keeps the paper model\'s.';
+      'The three signature captions; clearing one restores the paper model\'s.';
 
   @override
   String get payrollSettingsSignBeneficiary => 'First signature';
@@ -19930,11 +19904,150 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String payrollAdvanceOverCap(int percent) {
-    return 'The instalment exceeds $percent % of the monthly salary: management will be told.';
+    return 'The instalment exceeds $percent% of the monthly salary: consider spreading it.';
   }
 
   @override
   String payrollDashEmployerCost(String amount) {
     return '+ $amount of employer charges';
   }
+
+  @override
+  String payrollDashEmployerCostCurrent(String amount) {
+    return '+ $amount of employer charges, at current rates';
+  }
+
+  @override
+  String get payrollPayslipDownloadProvisional => 'Provisional payslip (PDF)';
+
+  @override
+  String get payrollPayslipOnlineOnly =>
+      'Available online only: the server renders the provisional payslip.';
+
+  @override
+  String payrollPayslipPreviewFileName(String month) {
+    return 'provisional-payslip-$month';
+  }
+
+  @override
+  String get payrollToastValidatedMeanwhile =>
+      'The payroll has just been validated: request the sealed payslip instead.';
+
+  @override
+  String get payrollToastPreviewUnsynced =>
+      'Some of this month\'s entries are still waiting to be sent: the provisional payslip does not show them.';
+
+  @override
+  String payrollMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'Jan',
+      '2': 'Feb',
+      '3': 'Mar',
+      '4': 'Apr',
+      '5': 'May',
+      '6': 'Jun',
+      '7': 'Jul',
+      '8': 'Aug',
+      '9': 'Sep',
+      '10': 'Oct',
+      '11': 'Nov',
+      'other': 'Dec',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollMonthStripA11y => 'Payroll months';
+
+  @override
+  String payrollMonthPillA11y(String month, String status) {
+    return '$month · $status';
+  }
+
+  @override
+  String get payrollMonthNoPayroll => 'No payroll';
+
+  @override
+  String payrollNoticesMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more points',
+      one: '1 more point',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollNoticesLess => 'Hide';
+
+  @override
+  String get payrollDashErrorServerTitle => 'The server did not answer';
+
+  @override
+  String get payrollDashErrorServer =>
+      'The payroll dashboard could not be read from the server. Try again in a moment; if the problem persists, contact support.';
+
+  @override
+  String get payrollDashErrorForbidden =>
+      'Your account cannot read the payroll. Ask the school administrator for this right.';
+
+  @override
+  String get payrollDashRefresh => 'Refresh';
+
+  @override
+  String payrollDashSituationAt(String date) {
+    return 'Situation as of $date';
+  }
+
+  @override
+  String get payrollDashKpiPaid => 'Paid';
+
+  @override
+  String payrollDashKpiPaidSubline(int percent, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count staff members settled',
+      one: '1 staff member settled',
+      zero: 'no staff member settled',
+    );
+    return '$percent% of net · $_temp0 for the month';
+  }
+
+  @override
+  String get payrollDashKpiRemaining => 'Still due';
+
+  @override
+  String payrollDashKpiRemainingSubline(String arrears) {
+    return 'including $arrears of arrears from validated months';
+  }
+
+  @override
+  String get payrollDashKpiRemainingDraft => 'To pay once validated';
+
+  @override
+  String payrollDashByMonthSubtitle(String currency) {
+    return 'Net of each payroll month, in $currency — tap a month to open it';
+  }
+
+  @override
+  String get payrollDashKpisA11y => 'Key payroll figures for the month';
+
+  @override
+  String get payrollDashSplitTitle => 'From gross to net';
+
+  @override
+  String get payrollNoValue => '—';
+
+  @override
+  String get payrollDashRefreshOffline =>
+      'Offline: the dashboard was not reread; the figures shown are the previous ones.';
+
+  @override
+  String get payrollDashRefreshFailed =>
+      'The dashboard could not be reread; the figures shown are the previous ones.';
+
+  @override
+  String get payrollDashNotTrackedKpi => 'Not tracked before v2';
 }

@@ -26,6 +26,31 @@ class ResourceSyncSignals {
   /// Tire les flux de l'écran.
   Future<void> pull() => _pull();
 
+  /// Pousse la file d'envoi tout de suite — avant un appel en ligne qui doit
+  /// voir les dernières saisies. Un envoi déjà en cours (celui qui suit une
+  /// écriture) est attendu d'abord : sinon le moteur sauterait celui-ci, et
+  /// l'appel partirait avant la saisie. Ne lève jamais : un échec d'envoi se
+  /// lit ensuite dans l'état des lignes.
+  Future<void> flush() async {
+    try {
+      if (_engine.isFlushing) {
+        final done = Completer<void>();
+        final remove = _engine.addFlushCompleteListener(() {
+          if (!done.isCompleted) done.complete();
+        });
+        await done.future.timeout(_inFlightWait, onTimeout: () {});
+        remove();
+      }
+      await _engine.flush();
+    } catch (_) {
+      // L'appel qui suit garde son propre traitement d'échec.
+    }
+  }
+
+  /// Au-delà, on n'attend plus l'envoi en cours : l'appel part, et l'écart
+  /// éventuel se dit à l'écran.
+  static const Duration _inFlightWait = Duration(seconds: 30);
+
   /// Appelle [onChanged] à chaque signal ; rend la fonction qui désabonne.
   ///
   /// [onFlush] : `false` pour un écran qui ne lit rien que l'outbox puisse

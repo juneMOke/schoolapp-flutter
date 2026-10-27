@@ -1,6 +1,9 @@
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
@@ -64,6 +67,8 @@ class PayrollStatementTable extends StatelessWidget {
       ],
     ];
     return EteeloColumnTable(
+      tone: ListingTones.table,
+      cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollStatementMinWidth,
       frozenFirstColumn: true,
       widths: _widths,
@@ -169,7 +174,7 @@ class PayrollStatementTable extends StatelessWidget {
   }) {
     final currencies = {for (final row in rows) row.line.currency}.toList()
       ..sort();
-    final ink = grand ? AppColors.presenceMarkOnBanner : null;
+    final ink = grand ? DashboardTones.inkValeur : null;
     Widget figure(String text) => Text(
       text,
       textAlign: TextAlign.end,
@@ -188,7 +193,7 @@ class PayrollStatementTable extends StatelessWidget {
           EteeloColumnTableRow(
             widths: _widths,
             background: grand
-                ? AppColors.presenceMarkBannerStart
+                ? DashboardTones.pave(DashboardSense.attendu)
                 : AppColors.surfaceAlt,
             cells: [
               Text(

@@ -1,5 +1,7 @@
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
@@ -89,7 +91,9 @@ class PayrollSettingsCard extends StatelessWidget {
   );
 }
 
-/// Un réglage oui / non du barème, en puce.
+/// Un réglage oui / non du barème : un interrupteur, son libellé à gauche —
+/// comme les sections de frais de la Configuration. Toute la ligne bascule
+/// (cible ≥ 48 dp) ; [onTap] nul, elle se lit sans se changer.
 class PayrollSettingsToggle extends StatelessWidget {
   final String label;
   final bool selected;
@@ -103,15 +107,34 @@ class PayrollSettingsToggle extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Align(
-    alignment: AlignmentDirectional.centerStart,
-    child: EteeloFilterChip(
-      label: label,
-      selected: selected,
-      color: AppColors.terreCuite,
-      soft: AppColors.terreCuiteSoft,
-      ink: AppColors.terreCuiteDark,
+  Widget build(BuildContext context) => MergeSemantics(
+    child: InkWell(
       onTap: onTap,
+      borderRadius: AppRadius.brMd,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: AppDimensions.minTouchTarget,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: onTap == null
+                      ? AppColors.textMutedAa
+                      : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Switch(
+              value: selected,
+              onChanged: onTap == null ? null : (_) => onTap!(),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }

@@ -22,6 +22,7 @@ import 'package:school_app_flutter/core/di/offline_modules/enrollment_finance_of
 import 'package:school_app_flutter/core/database/database_key_service.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
+import 'package:school_app_flutter/core/offline/network_status_cubit.dart';
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -211,6 +212,11 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
   getIt.registerLazySingleton<Connectivity>(() => Connectivity());
   getIt.registerLazySingleton<ConnectivityService>(
     () => ConnectivityService(getIt<Connectivity>()),
+  );
+  // En ligne ou non, en direct, pour un écran qui doit le dire (factory : un
+  // par écran, il se ferme avec lui).
+  getIt.registerFactory<NetworkStatusCubit>(
+    () => NetworkStatusCubit(getIt<ConnectivityService>()),
   );
 
   getIt.registerLazySingleton<SyncEngine>(

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
-/// Le bandeau bleu profond d'un net : éléments variables, versement.
+/// Le bandeau plein d'un net, au fond d'un pavé « encaissé » : éléments variables, versement.
 class PayrollNetBanner extends StatelessWidget {
   final String label;
   final String amount;
@@ -21,14 +21,9 @@ class PayrollNetBanner extends StatelessWidget {
       horizontal: AppSpacing.lg,
       vertical: AppSpacing.md,
     ),
-    decoration: const BoxDecoration(
+    decoration: BoxDecoration(
       borderRadius: AppRadius.brMd,
-      gradient: LinearGradient(
-        colors: [
-          AppColors.presenceMarkBannerStart,
-          AppColors.presenceMarkBannerMid,
-        ],
-      ),
+      color: DashboardTones.pave(DashboardSense.encaisse),
     ),
     child: Row(
       children: [
@@ -36,14 +31,14 @@ class PayrollNetBanner extends StatelessWidget {
           child: Text(
             label,
             style: AppTypography.labelLarge.copyWith(
-              color: AppColors.presenceMarkOnBannerMuted,
+              color: DashboardTones.inkLibelle,
             ),
           ),
         ),
         Text(
           amount,
           style: AppTypography.headlineMedium.copyWith(
-            color: AppColors.presenceMarkOnBanner,
+            color: DashboardTones.inkValeur,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),

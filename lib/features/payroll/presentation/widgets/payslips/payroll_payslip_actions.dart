@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/components/documents/printable_document.
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/phone_number_format.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
@@ -16,14 +17,14 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
-import 'package:school_app_flutter/features/payroll/presentation/export/payroll_payslip_pdf.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_content.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Les sorties d'un bulletin : le PDF (scellé par le serveur après
-/// validation, provisoire sur la tablette avant), et WhatsApp.
+/// Les sorties d'un bulletin : le PDF — scellé par le serveur après
+/// validation, provisoire rendu par le serveur avant (P8, en ligne) — et
+/// WhatsApp.
 class PayrollPayslipActions {
   final BuildContext context;
 
@@ -36,7 +37,7 @@ class PayrollPayslipActions {
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   /// Un agent, ou tout le livre quand [line] est `null` — ce recueil-là
-  /// n'existe qu'en provisoire : le serveur ne scelle les bulletins qu'un à un.
+  /// n'existe qu'en scellé.
   Future<void> openPdf(PayrollLine? line) async {
     // Le cubit est pris avant le premier `await` : la page peut se fermer
     // pendant le téléchargement ou l'aperçu.
@@ -48,22 +49,9 @@ class PayrollPayslipActions {
         ? _l10n.payrollPayslipsFileName(view.month)
         : '${_l10n.payrollPayslipFileName(view.month)}-${line.staffMemberId}';
     if (!sealed) {
-      final bytes = await PayrollPayslipPdf.build([
-        for (final l in line == null ? view.lines : [line])
-          PayrollPayslipContent.of(
-            context,
-            snapshot: _state.snapshot,
-            view: view,
-            line: l,
-          ),
-      ]);
-      if (!context.mounted) return;
-      await showEteeloDocumentViewer(
-        context,
-        title: _l10n.payrollPayslipProvisional,
-        document: PrintableDocument(bytes: bytes, fileName: '$name.pdf'),
-        canShare: false,
-      );
+      // Le recueil du mois n'existe qu'en scellé ; un brouillon se lit agent
+      // par agent (P8).
+      if (line != null) await openPreview(line);
       return;
     }
     // Un bulletin scellé s'émet : le serveur exige `editique.write`.
@@ -110,6 +98,83 @@ class PayrollPayslipActions {
       },
     );
   }
+
+  /// Le bulletin provisoire d'un agent, rendu par le serveur sur le gabarit
+  /// du définitif, sans numéro ni QR (P8) — en ligne seulement. La file part
+  /// d'abord, envoi en cours compris : le PDF doit voir les dernières
+  /// variables ; s'il en reste en file, on le dit. Il ne se garde, ne se
+  /// partage ni ne s'imprime : le redemander donne l'état du moment.
+  Future<void> openPreview(PayrollLine line) async {
+    final cubit = _cubit;
+    final month = line.month;
+    await cubit.flushOutbox();
+    if (cubit.isClosed) return;
+    await cubit.refresh();
+    if (cubit.isClosed) return;
+    if (_hasUnsentWrites(cubit.state, month)) {
+      cubit.announce(const PayrollNotice(PayrollNoticeKind.previewUnsynced));
+    }
+    final result = await cubit.commands.payslipPreview(
+      month,
+      line.staffMemberId,
+    );
+    if (!context.mounted || cubit.isClosed) return;
+    await result.fold(
+      (failure) async {
+        final code = failure is ApiErrorDetails ? failure.detailCode : null;
+        if (code == _alreadyValidated) {
+          // Validée entre-temps : relire, puis proposer le scellé — jamais
+          // le demander d'office.
+          await cubit.syncAndRefresh();
+          if (cubit.isClosed) return;
+          cubit.announce(
+            const PayrollNotice(PayrollNoticeKind.validatedMeanwhile),
+          );
+          return;
+        }
+        cubit.announce(switch (failure) {
+          NetworkFailure() => const PayrollNotice(PayrollNoticeKind.offline),
+          TooManyRequestsFailure() => const PayrollNotice(
+            PayrollNoticeKind.renderBusy,
+          ),
+          UnauthorizedFailure() => const PayrollNotice(
+            PayrollNoticeKind.refused,
+            rule: PayrollRule.forbidden,
+          ),
+          _ when code == _notOnPayroll => const PayrollNotice(
+            PayrollNoticeKind.refused,
+            rule: PayrollRule.noContract,
+          ),
+          _ => const PayrollNotice(PayrollNoticeKind.downloadFailed),
+        });
+      },
+      (bytes) => showEteeloDocumentViewer(
+        context,
+        title: _l10n.payrollPayslipProvisional,
+        document: PrintableDocument(
+          bytes: bytes,
+          fileName:
+              '${_l10n.payrollPayslipPreviewFileName(month)}'
+              '-${line.staffMemberId}.pdf',
+        ),
+        canShare: false,
+        canPrint: false,
+      ),
+    );
+  }
+
+  /// Une variable ou le taux du mois encore sur la tablette : le serveur ne
+  /// les connaît pas, le PDF différera de l'écran.
+  static bool _hasUnsentWrites(PayrollState state, String month) {
+    final variables = state.snapshot.variables[month]?.values ?? const [];
+    return variables.any((v) => v.syncState != RecordSyncState.synced) ||
+        (state.snapshot.payoutPolicies[month]?.syncState ??
+                RecordSyncState.synced) !=
+            RecordSyncState.synced;
+  }
+
+  static const String _alreadyValidated = 'PAYROLL_ALREADY_VALIDATED';
+  static const String _notOnPayroll = 'STAFF_NOT_ON_PAYROLL';
 
   /// L'état de paie du mois validé (A4 paysage), composé par le serveur —
   /// en ligne seulement (T16).

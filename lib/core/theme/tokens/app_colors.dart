@@ -569,8 +569,9 @@ class AppColors {
 
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
   // Validée (bleu profond de la spec) : l'encre #1B4D6B tient 7,7:1 sur son
-  // voile. Les trois autres statuts reprennent les teintes du Pointage
-  // (brouillon gris, soumise ambre, versée vert).
+  // voile. C'est la seule teinte propre à la Paie : les autres statuts et ses
+  // graphiques prennent les sens partagés (`DashboardSense`, `PayrollTone`,
+  // `PayrollChartTones`).
   static const payrollValidated = Color(0xFF1B4D6B);
   static const payrollValidatedSoft = Color(0xFFE6EEF4);
   static const payrollValidatedBorder = Color(0xFFB9CEDD);
@@ -579,26 +580,6 @@ class AppColors {
   /// Le bouton d'envoi WhatsApp, et lui seul. Le vert de la spec (#25A162)
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
   static const payrollWhatsapp = Color(0xFF1B7A4A);
-
-  // Tableau de bord de la paie (spec TB 1) : ce qui sépare le brut du net, et
-  // où en est le net. Chaque segment est aussi écrit dans la légende : la
-  // couleur ne porte jamais seule l'information.
-  static const payrollChartNet = vertSavane;
-  static const payrollChartAbsence = error;
-  static const payrollChartAdvances = Color(0xFFA66A00);
-  static const payrollChartLegal = Color(0xFF7A4E68);
-  static const payrollChartChildcare = info;
-  static const payrollChartPaid = vertSavane;
-  static const payrollChartDeferred = Color(0xFF5E8FB0);
-  static const payrollChartUnpaid = error;
-  static const payrollChartNotYet = Color(0xFFC9C3B6);
-
-  /// Le mois affiché, cerné dans la série « mois par mois ».
-  static const payrollChartFocus = terreCuite;
-
-  /// Les autres mois : le liseré existe (la colonne ne bouge pas au focus),
-  /// sans se voir.
-  static const payrollChartNoFocus = Color(0x00000000);
 
   // ── Photo de l'élève ──────────────────────────────────────────────────────
   /// Liseré intérieur d'une photo d'avatar : il détache un visage clair d'un

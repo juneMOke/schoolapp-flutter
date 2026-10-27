@@ -201,7 +201,8 @@ void main() {
     tester,
   ) async {
     await pump(tester, ExpenseStatus.pending, const [Perm.hrPayRead]);
-    expect(find.text('Demandes à valider'), findsOneWidget);
+    // Un pavé plein écrit son libellé en capitales.
+    expect(find.text('DEMANDES À VALIDER'), findsOneWidget);
 
     await pump(tester, ExpenseStatus.refused, const [Perm.hrPayRead]);
     await tester.tap(find.text('Refusées'));

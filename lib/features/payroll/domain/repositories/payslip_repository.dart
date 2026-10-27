@@ -11,6 +11,13 @@ abstract class PayslipRepository {
     String staffMemberId,
   );
 
+  /// Le bulletin provisoire d'un agent, rendu par le serveur sur la ligne du
+  /// moment (P8) — paie non validée seulement ; rien n'est émis.
+  Future<Either<Failure, Uint8List>> payslipPreview(
+    String month,
+    String staffMemberId,
+  );
+
   /// Les bulletins scellés de [month] en un PDF (T16).
   Future<Either<Failure, Uint8List>> monthPayslips(String month);
 

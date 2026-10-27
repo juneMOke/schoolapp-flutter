@@ -85,6 +85,18 @@ class CycleBarChart extends StatelessWidget {
   /// leur rendu ne bouge pas.
   final bool labelHighlightedBars;
 
+  /// Ce que fait un toucher sur une barre, avec son index. `null` — le
+  /// défaut — : les barres se lisent sans s'ouvrir.
+  ///
+  /// ⚠️ Le tracé n'est pas atteignable au lecteur d'écran : un écran qui ouvre
+  /// une barre au toucher offre aussi un autre chemin (liste, sélecteur).
+  final ValueChanged<int>? onBarTap;
+
+  /// Liseré des barres mises en relief, ou `null` — le défaut — pour n'en
+  /// marquer que le libellé. Utile sur une barre **empilée**, dont la teinte
+  /// ne peut pas porter le relief : ses parts ont déjà chacune la leur.
+  final Color? highlightBorderColor;
+
   const CycleBarChart({
     super.key,
     required this.items,
@@ -99,7 +111,91 @@ class CycleBarChart extends StatelessWidget {
     this.showLeftAxis = true,
     this.minimumBarHeight = 0,
     this.labelHighlightedBars = false,
+    this.onBarTap,
+    this.highlightBorderColor,
   });
+
+  /// La bulle d'une barre empilée : son libellé, puis chaque part non nulle.
+  String _stackedTooltip(BarChartItem item) {
+    final format =
+        valueLabelFormatter ?? NumberFormatterHelper.formatYAxisLabel;
+    return [
+      item.label,
+      for (final segment in item.segments)
+        if (segment.value > 0) '${segment.label} : ${format(segment.value)}',
+    ].join('\n');
+  }
+
+  /// La barre [i] telle que fl_chart la dessine, à l'instant [lerp] de
+  /// l'entrée.
+  BarChartRodData _rod(
+    int i, {
+    required double barWidth,
+    required double minToY,
+    required double Function(double) lerp,
+  }) {
+    final item = items[i];
+    final border =
+        highlightBorderColor != null && highlightedIndexes.contains(i)
+        ? BorderSide(
+            color: highlightBorderColor!,
+            width: AppDimensions.chartHighlightBorderWidth,
+          )
+        : null;
+    if (item.isStacked) {
+      // Une barre empilée mesure exactement la somme de ses parts : aucun
+      // plancher, qui fausserait la proportion entre elles. Une part nulle
+      // reste dans la pile (hauteur zéro) : l'animation interpole part à
+      // part, et une pile qui changerait de longueur mêlerait leurs teintes.
+      var from = 0.0;
+      final stack = <BarChartRodStackItem>[];
+      for (final segment in item.segments) {
+        final to = from + (segment.value < 0 ? 0 : segment.value);
+        stack.add(BarChartRodStackItem(lerp(from), lerp(to), segment.color));
+        from = to;
+      }
+      return BarChartRodData(
+        toY: lerp(from),
+        color: item.color,
+        rodStackItems: stack,
+        width: barWidth,
+        borderRadius: BorderRadius.circular(barRadius),
+        borderSide: border,
+        backDrawRodData: _tapColumn(),
+      );
+    }
+    return BarChartRodData(
+      // Zéro reste zéro : le plancher ne s'applique qu'à une valeur réellement
+      // encaissée.
+      toY: lerp(
+        item.value <= 0
+            ? item.value
+            : (item.value < minToY ? minToY : item.value),
+      ),
+      color: item.color,
+      width: barWidth,
+      borderRadius: BorderRadius.circular(barRadius),
+      borderSide: border,
+      backDrawRodData: _tapColumn(),
+    );
+  }
+
+  /// Le haut de l'axe : 25 % au-dessus de la plus haute barre, jamais sous
+  /// [minTop].
+  double get _topY {
+    final maxVal = items.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+    return (maxVal * 1.25).ceilToDouble().clamp(minTop, double.infinity);
+  }
+
+  /// Le fond invisible d'une barre qui s'ouvre : il porte le toucher sur
+  /// toute la hauteur du tracé.
+  BackgroundBarChartRodData? _tapColumn() => onBarTap == null
+      ? null
+      : BackgroundBarChartRodData(
+          show: true,
+          toY: _topY,
+          color: Colors.transparent,
+        );
 
   /// Cette barre porte-t-elle son montant en permanence ?
   bool _labelsAlways(int index) =>
@@ -131,8 +227,7 @@ class CycleBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
-    final maxVal = items.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-    final topY = (maxVal * 1.25).ceilToDouble().clamp(minTop, double.infinity);
+    final topY = _topY;
 
     // Des libellés pivotés mangent la hauteur du tracé : on rend au dessinateur
     // ce que l'axe lui prend, pour que les barres gardent leur amplitude.
@@ -183,8 +278,33 @@ class CycleBarChart extends StatelessWidget {
                   BarChartData(
                     maxY: topY,
                     barTouchData: BarTouchData(
-                      enabled: !showValueLabels,
+                      enabled: !showValueLabels || onBarTap != null,
                       handleBuiltInTouches: !showValueLabels,
+                      // Une barre qui s'ouvre se touche sur toute sa colonne,
+                      // pas sur ses seuls pixels : une barre basse (ou nulle)
+                      // reste une cible d'au moins 48 dp.
+                      allowTouchBarBackDraw: onBarTap != null,
+                      touchExtraThreshold: onBarTap == null
+                          ? null
+                          : EdgeInsets.symmetric(
+                              horizontal:
+                                  (AppDimensions.minTouchTarget - barWidth)
+                                      .clamp(4, AppDimensions.minTouchTarget) /
+                                  2,
+                            ),
+                      touchCallback: onBarTap == null
+                          ? null
+                          : (event, response) {
+                              final spot = response?.spot;
+                              if (event is FlTapUpEvent && spot != null) {
+                                onBarTap!(spot.touchedBarGroupIndex);
+                              }
+                            },
+                      mouseCursorResolver: onBarTap == null
+                          ? null
+                          : (event, response) => response?.spot == null
+                                ? MouseCursor.defer
+                                : SystemMouseCursors.click,
                       touchTooltipData: BarTouchTooltipData(
                         // Transparent sous une étiquette permanente : c'est un
                         // montant posé sur la barre, pas une bulle.
@@ -234,7 +354,9 @@ class CycleBarChart extends StatelessWidget {
                             );
                           }
                           return BarTooltipItem(
-                            '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(value)}',
+                            item.isStacked
+                                ? _stackedTooltip(item)
+                                : '${item.label}\n${NumberFormatterHelper.formatYAxisLabel(value)}',
                             AppTextStyles.caption.copyWith(
                               color: AppColors.textOnDark,
                               fontWeight: FontWeight.w600,
@@ -314,19 +436,11 @@ class CycleBarChart extends StatelessWidget {
                               ? const [0]
                               : const [],
                           barRods: [
-                            BarChartRodData(
-                              // Zéro reste zéro : le plancher ne s'applique qu'à
-                              // une valeur réellement encaissée.
-                              toY: motion.lerpValue(
-                                items[i].value <= 0
-                                    ? items[i].value
-                                    : (items[i].value < minToY
-                                          ? minToY
-                                          : items[i].value),
-                              ),
-                              color: items[i].color,
-                              width: barWidth,
-                              borderRadius: BorderRadius.circular(barRadius),
+                            _rod(
+                              i,
+                              barWidth: barWidth,
+                              minToY: minToY,
+                              lerp: motion.lerpValue,
                             ),
                           ],
                         ),

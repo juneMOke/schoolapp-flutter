@@ -27,6 +27,12 @@ class PayslipRepositoryImpl implements PayslipRepository {
   ) => _fetch(() => _api.payslip(_extras, month, staffMemberId));
 
   @override
+  Future<Either<Failure, Uint8List>> payslipPreview(
+    String month,
+    String staffMemberId,
+  ) => _fetch(() => _api.payslipPreview(_extras, month, staffMemberId));
+
+  @override
   Future<Either<Failure, Uint8List>> monthPayslips(String month) =>
       _fetch(() => _api.monthPayslips(_extras, month));
 

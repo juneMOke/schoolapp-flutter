@@ -68,6 +68,10 @@ void showPayrollNotice(
       AppSnackBar.showWarning(context, l10n.payrollToastOffline);
     case PayrollNoticeKind.downloadFailed:
       AppSnackBar.showError(context, l10n.payrollToastDownloadFailed);
+    case PayrollNoticeKind.previewUnsynced:
+      AppSnackBar.showWarning(context, l10n.payrollToastPreviewUnsynced);
+    case PayrollNoticeKind.validatedMeanwhile:
+      AppSnackBar.showInfo(context, l10n.payrollToastValidatedMeanwhile);
     case PayrollNoticeKind.renderBusy:
       AppSnackBar.showWarning(context, l10n.payrollToastRenderBusy);
     case PayrollNoticeKind.refused:

@@ -38,7 +38,13 @@ class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
 /// L'écran de la paie ([child], par défaut celui de la Paie) sur [snapshot],
 /// la taille de la fenêtre laissée à l'appelant (tests de formats). Rend le
 /// cubit, pour ouvrir un onglet, et le dépôt, pour vérifier une écriture.
-Future<({PayrollCubit cubit, MockPayrollRepository repository})>
+Future<
+  ({
+    PayrollCubit cubit,
+    MockPayrollRepository repository,
+    StaffSyncSignals signals,
+  })
+>
 pumpPayrollScreen(
   WidgetTester tester, {
   required PayrollSnapshot snapshot,
@@ -50,6 +56,9 @@ pumpPayrollScreen(
 
   /// Les PDF du serveur (bulletins, état de paie, tableau de bord).
   PayslipRepository? payslips,
+
+  /// Un geste posé avant que la tablette ne soit lue (un mois d'adresse).
+  void Function(PayrollCubit cubit)? beforeLoad,
 }) async {
   final repository = MockPayrollRepository();
   when(() => repository.load()).thenAnswer((_) async => Right(snapshot));
@@ -59,6 +68,7 @@ pumpPayrollScreen(
   final signals = _MockSignals();
   when(() => signals.watch(any())).thenReturn(() {});
   when(() => signals.pull()).thenAnswer((_) async {});
+  when(() => signals.flush()).thenAnswer((_) async {});
   final cubit = PayrollCubit(
     load: LoadPayrollUseCase(repository),
     signals: signals,
@@ -93,6 +103,7 @@ pumpPayrollScreen(
   when(() => auth.state).thenReturn(state);
   whenListen(auth, const Stream<AuthState>.empty(), initialState: state);
   addTearDown(cubit.close);
+  beforeLoad?.call(cubit);
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
@@ -108,5 +119,5 @@ pumpPayrollScreen(
   );
   await tester.pump();
   await tester.pump();
-  return (cubit: cubit, repository: repository);
+  return (cubit: cubit, repository: repository, signals: signals);
 }

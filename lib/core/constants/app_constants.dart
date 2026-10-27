@@ -1313,12 +1313,28 @@ class AppConstants {
   static const String payrollStatementEndpoint =
       '/api/v1/hr/payrolls/{month}/statement.pdf';
 
+  /// Le bulletin provisoire d'un agent (P8) : le gabarit BP sur la ligne
+  /// calculée à l'instant, sans numéro ni QR, filigrané « ne vaut pas
+  /// bulletin ». `hr.pay.read` seul ; paie non validée seulement (sinon 422
+  /// `PAYROLL_ALREADY_VALIDATED`). Rien n'est émis ni rangé.
+  static const String payrollPayslipPreviewEndpoint =
+      '/api/v1/hr/payrolls/{month}/payslips/{staffMemberId}/preview.pdf';
+
   /// « Ce que chaque salarié perçoit » (pièce SP, Q7) — sous `hr.pay.read`
   /// seul, sur les mêmes paramètres que l'écran : `filter`
   /// (`ALL` | `OUTSTANDING` | `SETTLED`) et `q` (nom ou fonction). Un brouillon
   /// porte « montants provisoires » ; 429 pendant un autre long rendu.
   static const String payrollDashboardPdfEndpoint =
       '/api/v1/hr/payrolls/{month}/dashboard.pdf';
+
+  /// Le tableau de bord de la paie d'un mois en JSON (P9, Q10) — sous
+  /// `hr.pay.read` seul, `no-store`, ni 429 : prévu et réel par devise, net
+  /// payé ou non, « ce que chaque salarié perçoit » (mêmes `filter` et `q` que
+  /// [payrollDashboardPdfEndpoint]), mois par mois sur 12 mois glissants,
+  /// prêts et avances, arriérés. 422 `PAYROLL_MONTH_OUT_OF_RANGE` sur un mois
+  /// à venir.
+  static const String payrollDashboardEndpoint =
+      '/api/v1/hr/payrolls/{month}/dashboard';
 
   // ── Offline sync — Classe/Présence/Discipline ──
   /// Agrégat d'appel Présence (contrat openapi_attendance_sync 1.2.0) :

@@ -38,6 +38,14 @@ enum PayrollNoticeKind {
   /// Le serveur compose déjà un long document (429) : réessayer plus tard.
   renderBusy,
 
+  /// La paie a été validée pendant qu'on demandait son provisoire (P8) :
+  /// c'est désormais le bulletin scellé qu'il faut demander.
+  validatedMeanwhile,
+
+  /// Des saisies du mois attendent encore l'envoi : le provisoire du
+  /// serveur ne les montre pas.
+  previewUnsynced,
+
   /// Une règle refusée avant la file.
   refused,
 

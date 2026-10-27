@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_advances_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 
 import '../../../test_helpers/reference_formats.dart';
@@ -75,5 +76,30 @@ void main() {
     await pumpPayrollScreen(tester, snapshot: snapshot);
 
     expect(find.text('Modifier le taux'), findsOneWidget);
+  });
+
+  testAtReferenceFormats('Bulletins', (tester, format) async {
+    final pumped = await pumpPayrollScreen(tester, snapshot: snapshot);
+    pumped.cubit.setTab(PayrollTab.payslips);
+    await tester.pumpAndSettle();
+  });
+
+  testAtReferenceFormats('Historique', (tester, format) async {
+    final pumped = await pumpPayrollScreen(tester, snapshot: snapshot);
+    pumped.cubit.setTab(PayrollTab.history);
+    await tester.pumpAndSettle();
+
+    expect(find.text('mois en cours'), findsOneWidget);
+  });
+
+  testAtReferenceFormats('Avances & prêts', (tester, format) async {
+    await pumpPayrollScreen(
+      tester,
+      snapshot: snapshot,
+      child: const PayrollAdvancesScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Mayala'), findsWidgets);
   });
 }
