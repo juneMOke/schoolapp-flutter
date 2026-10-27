@@ -11,14 +11,19 @@ class PresenceCalendarDay extends Equatable {
   final bool upcoming;
   final PresenceStatus status;
 
+  /// Ce que la case écrit sous le jour à la place de l'icône (« 07:52 »,
+  /// « +12 min », le motif) ; `null` : l'icône du statut.
+  final String? detail;
+
   const PresenceCalendarDay({
     required this.day,
     required this.upcoming,
     this.status = PresenceStatus.none,
+    this.detail,
   });
 
   @override
-  List<Object?> get props => [day, upcoming, status];
+  List<Object?> get props => [day, upcoming, status, detail];
 }
 
 /// Un retard ou une absence du mois, tel que la fiche le liste.
@@ -48,12 +53,14 @@ class PresenceIncident<R extends Object> extends Equatable {
 /// pour une case avant le 1er. [upcoming] dit d'un jour de semaine s'il est
 /// à venir ou hors de l'année scolaire (estompé) ; [statusOf] donne son
 /// statut, qu'il soit à venir ou non (une ligne reçue hors des bornes garde
-/// sa couleur).
+/// sa couleur). [detailOf], facultatif, écrit le détail d'un jour dans sa
+/// case.
 List<PresenceCalendarDay?> presenceCalendar({
   required List<String> weekdays,
   required int firstWeekday,
   required bool Function(String day) upcoming,
   required PresenceStatus Function(String day) statusOf,
+  String? Function(String day)? detailOf,
 }) => [
   for (var i = 0; i < firstWeekday - 1; i++) null,
   for (final day in weekdays)
@@ -61,5 +68,6 @@ List<PresenceCalendarDay?> presenceCalendar({
       day: day,
       upcoming: upcoming(day),
       status: statusOf(day),
+      detail: detailOf?.call(day),
     ),
 ];

@@ -11,7 +11,8 @@ import 'package:school_app_flutter/core/presence/presentation/presence_tone.dart
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le mois d'une personne, lundi → vendredi : une case par jour, dans la teinte
-/// de son statut ; jours à venir estompés, non pointés en pointillé.
+/// de son statut ; jours à venir estompés, non pointés en pointillé. Une case
+/// écrit son détail (arrivée, retard, motif) quand l'appelant le donne.
 class PresenceMonthCalendar extends StatelessWidget {
   final List<PresenceCalendarDay?> days;
 
@@ -83,6 +84,7 @@ class _DayCell extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final tone = PresenceTone.of(day.status);
     final marked = day.status != PresenceStatus.none;
+    final detail = day.detail;
     final date = PresenceLabels.longDay(
       MaterialLocalizations.of(context),
       day.day,
@@ -90,7 +92,11 @@ class _DayCell extends StatelessWidget {
     return Tooltip(
       message: day.upcoming
           ? date
-          : '$date · ${PresenceLabels.status(l10n, day.status)}',
+          : [
+              date,
+              PresenceLabels.status(l10n, day.status),
+              ?detail,
+            ].join(' · '),
       child: Opacity(
         opacity: day.upcoming ? AppDimensions.presenceMarkUpcomingOpacity : 1,
         child: Container(
@@ -109,7 +115,19 @@ class _DayCell extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              if (!day.upcoming)
+              if (!day.upcoming && detail != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                  ),
+                  child: Text(
+                    detail,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelSmall.copyWith(color: tone.ink),
+                  ),
+                )
+              else if (!day.upcoming)
                 Icon(
                   marked ? tone.icon : Icons.more_horiz,
                   size: AppSpacing.lg,

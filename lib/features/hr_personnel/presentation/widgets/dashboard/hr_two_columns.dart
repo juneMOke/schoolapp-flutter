@@ -9,7 +9,17 @@ class HrTwoColumns extends StatelessWidget {
   final Widget first;
   final Widget second;
 
-  const HrTwoColumns({super.key, required this.first, required this.second});
+  /// Les parts de largeur des deux colonnes côte à côte (1 : 1 par défaut).
+  final int firstFlex;
+  final int secondFlex;
+
+  const HrTwoColumns({
+    super.key,
+    required this.first,
+    required this.second,
+    this.firstFlex = 1,
+    this.secondFlex = 1,
+  });
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -27,9 +37,9 @@ class HrTwoColumns extends StatelessWidget {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: first),
+          Expanded(flex: firstFlex, child: first),
           const SizedBox(width: AppSpacing.lg),
-          Expanded(child: second),
+          Expanded(flex: secondFlex, child: second),
         ],
       );
     },
