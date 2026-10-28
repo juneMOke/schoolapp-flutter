@@ -24,6 +24,9 @@ class HrPresenceRecapState extends Equatable {
 
   /// Pointages du mois encore sur la tablette (D1).
   final int unsynced;
+
+  /// Les mêmes, par agent : sa ligne servie ne les compte pas encore.
+  final Map<String, int> unsyncedByAgent;
   final String text;
 
   /// `null` : tous les contrats.
@@ -41,6 +44,7 @@ class HrPresenceRecapState extends Equatable {
     this.failure,
     this.localLock,
     this.unsynced = 0,
+    this.unsyncedByAgent = const {},
     this.text = '',
     this.contract,
     this.closing = false,
@@ -57,6 +61,9 @@ class HrPresenceRecapState extends Equatable {
   bool get isClosed => (recap?.closed ?? false) || (localLock?.locked ?? false);
 
   bool get hasFilters => text.trim().isNotEmpty || contract != null;
+
+  /// Pointages de cet agent encore sur la tablette.
+  int unsyncedOf(String staffMemberId) => unsyncedByAgent[staffMemberId] ?? 0;
 
   List<HrAttendanceRecapRow> get _searched => [
     for (final row in recap?.staff ?? const <HrAttendanceRecapRow>[])
@@ -97,6 +104,7 @@ class HrPresenceRecapState extends Equatable {
     Object? failure = _undefined,
     Object? localLock = _undefined,
     int? unsynced,
+    Map<String, int>? unsyncedByAgent,
     String? text,
     Object? contract = _undefined,
     bool? closing,
@@ -115,6 +123,7 @@ class HrPresenceRecapState extends Equatable {
         ? this.localLock
         : localLock as StaffAttendanceLock?,
     unsynced: unsynced ?? this.unsynced,
+    unsyncedByAgent: unsyncedByAgent ?? this.unsyncedByAgent,
     text: text ?? this.text,
     contract: identical(contract, _undefined)
         ? this.contract
@@ -132,6 +141,7 @@ class HrPresenceRecapState extends Equatable {
     failure,
     localLock,
     unsynced,
+    unsyncedByAgent,
     text,
     contract,
     closing,

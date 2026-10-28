@@ -2,10 +2,12 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_cubit.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
@@ -28,9 +30,10 @@ class _MockSignals extends Mock implements StaffSyncSignals {}
 
 StaffAttendanceSnapshot snapshotWith({
   StaffAttendanceLock? lock,
+  Map<String, Map<String, StaffAttendanceRecord>> records = const {},
 }) => StaffAttendanceSnapshot(
   members: const [],
-  records: const {},
+  records: records,
   locks: lock == null
       ? const {}
       : {StaffAttendanceSnapshot.lockKey(lock.kind, lock.periodStart): lock},
@@ -194,4 +197,59 @@ void main() {
     await cubit.showMonth('2026-08');
     expect(cubit.state.month, '2026-09');
   });
+
+  test('l\'adresse porte aussi le contrat', () async {
+    final cubit = build();
+    await cubit.load();
+    cubit.applyContract(StaffContractFilter.vacataire);
+    expect(cubit.state.contract, StaffContractFilter.vacataire);
+    cubit.applyContract(null);
+    expect(cubit.state.contract, isNull);
+  });
+
+  test(
+    'les pointages en attente, agent par agent ; un refusé n\'en est pas',
+    () async {
+      StaffAttendanceRecord record(
+        String id,
+        String agent,
+        RecordSyncState sync,
+      ) => StaffAttendanceRecord(
+        id: id,
+        staffMemberId: agent,
+        workDate: '2026-10-2${id.length}',
+        status: PresenceStatus.present,
+        syncState: sync,
+      );
+      when(
+        () => load(
+          from: any(named: 'from'),
+          to: any(named: 'to'),
+        ),
+      ).thenAnswer(
+        (_) async => Right(
+          snapshotWith(
+            records: {
+              'a-1': {
+                '2026-10-20': record('r-1', 'a-1', RecordSyncState.pending),
+                '2026-10-21': record('r-22', 'a-1', RecordSyncState.pending),
+              },
+              'a-2': {
+                '2026-10-20': record('r-3', 'a-2', RecordSyncState.failed),
+              },
+              'a-3': {
+                '2026-10-20': record('r-4', 'a-3', RecordSyncState.synced),
+              },
+            },
+          ),
+        ),
+      );
+      final cubit = build();
+      await cubit.load();
+      await settle();
+
+      expect(cubit.state.unsyncedByAgent, {'a-1': 2});
+      expect(cubit.state.unsyncedOf('a-2'), 0);
+    },
+  );
 }
