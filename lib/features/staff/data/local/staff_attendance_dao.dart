@@ -39,13 +39,25 @@ class StaffAttendanceDao {
     required String from,
     required String to,
   }) async {
-    if (schoolId.isEmpty) return 0;
+    final byAgent = await unsyncedByAgent(schoolId, from: from, to: to);
+    return byAgent.values.fold<int>(0, (sum, n) => sum + n);
+  }
+
+  /// [unsyncedCount], agent par agent (les agents sans rien en file n'y
+  /// sont pas).
+  Future<Map<String, int>> unsyncedByAgent(
+    String schoolId, {
+    required String from,
+    required String to,
+  }) async {
+    if (schoolId.isEmpty) return const {};
     final rows = await _db.rawQuery(
-      'SELECT COUNT(*) AS n FROM $table r '
+      'SELECT r.staff_member_id AS agent, COUNT(*) AS n FROM $table r '
       'JOIN ${OutboxDao.table} o '
       "ON o.id = '${StaffAttendanceWriteDao.aggregateType}:' || r.id "
       'WHERE r.school_id = ? AND r.work_date >= ? AND r.work_date <= ? '
-      'AND r.sync_status = ? AND o.status = ?',
+      'AND r.sync_status = ? AND o.status = ? '
+      'GROUP BY r.staff_member_id',
       [
         schoolId,
         from,
@@ -54,7 +66,10 @@ class StaffAttendanceDao {
         OutboxStatus.pending.dbValue,
       ],
     );
-    return (rows.single['n'] as int?) ?? 0;
+    return {
+      for (final row in rows)
+        if (row['agent'] case final String agent) agent: row['n']! as int,
+    };
   }
 
   Future<StaffAttendanceLocalModel?> find(String id) async {

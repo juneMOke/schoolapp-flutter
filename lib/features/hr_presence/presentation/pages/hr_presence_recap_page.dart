@@ -79,7 +79,7 @@ class HrPresenceRecapScreen extends StatelessWidget {
                   ? null
                   : state.month,
               HrPresenceRecapPage.contractParam: state.contract?.name,
-              HrPresenceRecapPage.deductedParam: state.deductedOnly
+              HrPresenceRecapPage.deductedParam: state.deductedFilter
                   ? '1'
                   : null,
             },

@@ -1,12 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_state.dart';
-import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
@@ -195,7 +193,7 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
     final from = SchoolDayCalendar.firstOf(month);
     final to = SchoolDayCalendar.daysOf(month).last;
     final local = await _loadLocal(from: from, to: to);
-    final count = await _countUnsynced(from: from, to: to);
+    final byAgent = await _countUnsynced.byAgent(from: from, to: to);
     if (isClosed || ticket != _ticket) return;
     emit(
       state.copyWith(
@@ -203,25 +201,14 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
           (_) => state.localLock,
           (s) => s.monthLock(month),
         ),
-        unsynced: count.fold((_) => state.unsynced, (n) => n),
-        unsyncedByAgent: local.fold(
-          (_) => state.unsyncedByAgent,
-          _pendingByAgent,
+        unsynced: byAgent.fold(
+          (_) => state.unsynced,
+          (counts) => counts.values.fold<int>(0, (sum, n) => sum + n),
         ),
+        unsyncedByAgent: byAgent.fold((_) => state.unsyncedByAgent, (c) => c),
       ),
     );
   }
-
-  /// Les pointages en attente d'envoi, par agent. Un pointage refusé n'en
-  /// est pas : il ne repartira pas seul.
-  static Map<String, int> _pendingByAgent(StaffAttendanceSnapshot snapshot) => {
-    for (final MapEntry(key: agent, value: days) in snapshot.records.entries)
-      if (days.values
-              .where((r) => r.syncState == RecordSyncState.pending)
-              .length
-          case final n when n > 0)
-        agent: n,
-  };
 
   @override
   Future<void> close() {

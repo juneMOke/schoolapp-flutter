@@ -241,6 +241,14 @@ class HrAttendanceRecap extends Equatable {
     required this.staff,
   });
 
+  /// L'argent du mois, pour qui lit la paie : les lignes le portent. Pas
+  /// `totals.amounts`, qu'un serveur d'avant la paie au mois M sert encore
+  /// pour les seules heures.
+  bool get hasPay => staff.any((row) => row.pay != null);
+
+  /// La retenue d'absence se montre-t-elle (colonne, filtre) ?
+  bool get showsDeduction => hasPay && absenceDeductionEnabled;
+
   @override
   List<Object?> get props => [
     month,

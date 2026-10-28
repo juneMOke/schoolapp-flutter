@@ -64,15 +64,20 @@ abstract final class HrAttendanceRecapModel {
       (json[key] as num?)?.toInt();
 
   /// Les montants d'une ligne : tous `null` sans `hr.pay.read` ou sans ligne
-  /// de paie — la devise suffit à le dire.
+  /// de paie — la devise suffit à le dire. Une devise sans ses montants ne
+  /// s'affiche pas en « 0,00 » : la ligne reste sans argent.
   static HrAttendanceRecapPay? _pay(Map<String, dynamic> row) {
     final currency = row['currency'] as String?;
-    if (currency == null) return null;
+    final base = _cents(row, 'baseInCents');
+    final gross = _cents(row, 'grossInCents');
+    final grossAfter = _cents(row, 'grossAfterAbsenceInCents');
+    if (currency == null || base == null || gross == null) return null;
+    if (grossAfter == null) return null;
     return HrAttendanceRecapPay(
       currency: currency,
-      baseInCents: _cents(row, 'baseInCents') ?? 0,
-      grossInCents: _cents(row, 'grossInCents') ?? 0,
-      grossAfterAbsenceInCents: _cents(row, 'grossAfterAbsenceInCents') ?? 0,
+      baseInCents: base,
+      grossInCents: gross,
+      grossAfterAbsenceInCents: grossAfter,
       dailyRateInCents: _cents(row, 'dailyRateInCents'),
       absenceDeductionInCents: _cents(row, 'absenceDeductionInCents'),
       hourlyRateInCents: _cents(row, 'hourlyRateInCents'),

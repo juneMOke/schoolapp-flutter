@@ -97,6 +97,22 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Map<String, int>>> unsyncedByAgent({
+    required String from,
+    required String to,
+  }) async {
+    final session = _local.session();
+    if (session == null) return const Right({});
+    try {
+      return Right(
+        await _records.unsyncedByAgent(session.schoolId, from: from, to: to),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Lecture du pointage : $e'));
+    }
+  }
+
   Future<StaffAttendanceSnapshot> _compose(
     String schoolId,
     StaffFileSnapshot file,

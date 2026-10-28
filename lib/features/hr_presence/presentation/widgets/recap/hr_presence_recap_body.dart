@@ -98,7 +98,7 @@ class HrPresenceRecapBody extends StatelessWidget {
               onText: cubit.setText,
               // Seulement là où une retenue peut exister.
               deducted: HrPresenceRecapColumns.of(recap).deduction
-                  ? (count: state.deductedCount, selected: state.deductedOnly)
+                  ? (count: state.deductedCount, selected: state.deductedFilter)
                   : null,
               onDeducted: cubit.toggleDeducted,
             ),

@@ -61,11 +61,11 @@ void main() {
       ),
     ).thenAnswer((_) async => Right(snapshotWith()));
     when(
-      () => count(
+      () => count.byAgent(
         from: any(named: 'from'),
         to: any(named: 'to'),
       ),
-    ).thenAnswer((_) async => const Right(2));
+    ).thenAnswer((_) async => const Right({'a-1': 2}));
   });
 
   HrPresenceRecapCubit build() {
@@ -95,7 +95,7 @@ void main() {
     await settle();
 
     verify(() => recap('2026-10')).called(1);
-    verify(() => count(from: '2026-10-01', to: '2026-10-31')).called(1);
+    verify(() => count.byAgent(from: '2026-10-01', to: '2026-10-31')).called(1);
     expect(cubit.state.status, HrPresenceRecapStatus.ready);
     expect(cubit.state.unsynced, 2);
     expect(cubit.state.isClosed, isFalse);
@@ -207,49 +207,34 @@ void main() {
     expect(cubit.state.contract, isNull);
   });
 
-  test(
-    'les pointages en attente, agent par agent ; un refusé n\'en est pas',
-    () async {
-      StaffAttendanceRecord record(
-        String id,
-        String agent,
-        RecordSyncState sync,
-      ) => StaffAttendanceRecord(
-        id: id,
-        staffMemberId: agent,
-        workDate: '2026-10-2${id.length}',
-        status: PresenceStatus.present,
-        syncState: sync,
-      );
-      when(
-        () => load(
-          from: any(named: 'from'),
-          to: any(named: 'to'),
-        ),
-      ).thenAnswer(
-        (_) async => Right(
-          snapshotWith(
-            records: {
-              'a-1': {
-                '2026-10-20': record('r-1', 'a-1', RecordSyncState.pending),
-                '2026-10-21': record('r-22', 'a-1', RecordSyncState.pending),
-              },
-              'a-2': {
-                '2026-10-20': record('r-3', 'a-2', RecordSyncState.failed),
-              },
-              'a-3': {
-                '2026-10-20': record('r-4', 'a-3', RecordSyncState.synced),
-              },
-            },
-          ),
-        ),
-      );
-      final cubit = build();
-      await cubit.load();
-      await settle();
+  test('les pointages en attente, agent par agent, font le total', () async {
+    when(
+      () => count.byAgent(
+        from: any(named: 'from'),
+        to: any(named: 'to'),
+      ),
+    ).thenAnswer((_) async => const Right({'a-1': 2, 'a-3': 1}));
+    final cubit = build();
+    await cubit.load();
+    await settle();
 
-      expect(cubit.state.unsyncedByAgent, {'a-1': 2});
-      expect(cubit.state.unsyncedOf('a-2'), 0);
-    },
-  );
+    expect(cubit.state.unsyncedByAgent, {'a-1': 2, 'a-3': 1});
+    expect(cubit.state.unsynced, 3);
+    expect(cubit.state.unsyncedOf('a-2'), 0);
+  });
+
+  test('« avec retenue » venu de l\'adresse ne filtre pas une école qui ne '
+      'retient pas', () async {
+    when(
+      () => recap(any()),
+    ).thenAnswer((_) async => Right(recapOf(absenceDeductionEnabled: false)));
+    final cubit = build();
+    await cubit.load();
+    await settle();
+    cubit.applyDeducted(true);
+
+    expect(cubit.state.deductedFilter, isFalse);
+    expect(cubit.state.hasFilters, isFalse);
+    expect(cubit.state.visibleRows.length, cubit.state.recap!.staff.length);
+  });
 }

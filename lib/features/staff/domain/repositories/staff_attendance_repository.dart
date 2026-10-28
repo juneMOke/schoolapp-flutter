@@ -48,4 +48,10 @@ abstract class StaffAttendanceRepository {
     required String from,
     required String to,
   });
+
+  /// [unsyncedCount], agent par agent.
+  Future<Either<Failure, Map<String, int>>> unsyncedByAgent({
+    required String from,
+    required String to,
+  });
 }

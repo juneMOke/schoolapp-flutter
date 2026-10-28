@@ -46,7 +46,7 @@ class KubaBannerMonth extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final status = this.status;
     final onCurrent = this.onCurrent;
-    return Row(
+    final months = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         PresenceBannerButton(
@@ -92,16 +92,23 @@ class KubaBannerMonth extends StatelessWidget {
           tooltip: l10n.presenceMarkNextMonth,
           onPressed: onNext,
         ),
-        if (onCurrent != null) ...[
-          const SizedBox(width: AppSpacing.sm),
-          TextButton(
-            onPressed: onCurrent,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.presenceMarkOnBanner,
-            ),
-            child: Text(l10n.presenceMarkCurrentMonth),
+      ],
+    );
+    if (onCurrent == null) return months;
+    // Wrap : sur téléphone « Mois en cours » passe sous les flèches au lieu
+    // de les pousser hors du bandeau.
+    return Wrap(
+      spacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        months,
+        TextButton(
+          onPressed: onCurrent,
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.presenceMarkOnBanner,
           ),
-        ],
+          child: Text(l10n.presenceMarkCurrentMonth),
+        ),
       ],
     );
   }

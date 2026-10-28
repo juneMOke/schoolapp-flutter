@@ -76,8 +76,13 @@ class HrPresenceRecapState extends Equatable {
     return (recap?.closed ?? false) || (local?.locked ?? false);
   }
 
+  /// « Avec retenue » ne filtre que là où sa puce s'affiche : venu d'une
+  /// adresse sur une école qui ne retient pas, il viderait l'écran sans
+  /// moyen de le défaire.
+  bool get deductedFilter => deductedOnly && (recap?.showsDeduction ?? true);
+
   bool get hasFilters =>
-      text.trim().isNotEmpty || contract != null || deductedOnly;
+      text.trim().isNotEmpty || contract != null || deductedFilter;
 
   /// Pointages de cet agent encore sur la tablette.
   int unsyncedOf(String staffMemberId) => unsyncedByAgent[staffMemberId] ?? 0;
@@ -122,7 +127,7 @@ class HrPresenceRecapState extends Equatable {
 
   List<HrAttendanceRecapRow> get visibleRows => [
     for (final row in _byContract)
-      if (!deductedOnly || _deducted(row)) row,
+      if (!deductedFilter || _deducted(row)) row,
   ];
 
   HrPresenceRecapState copyWith({

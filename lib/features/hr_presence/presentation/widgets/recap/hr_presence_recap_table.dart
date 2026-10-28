@@ -19,10 +19,9 @@ class HrPresenceRecapColumns {
   const HrPresenceRecapColumns({this.pay = false, this.deduction = false});
 
   factory HrPresenceRecapColumns.of(HrAttendanceRecap recap) {
-    final pay = recap.totals.amounts != null;
     return HrPresenceRecapColumns(
-      pay: pay,
-      deduction: pay && recap.absenceDeductionEnabled,
+      pay: recap.hasPay,
+      deduction: recap.showsDeduction,
     );
   }
 

@@ -28,6 +28,13 @@ class CountUnsyncedStaffAttendanceUseCase {
     required String from,
     required String to,
   }) => _repository.unsyncedCount(from: from, to: to);
+
+  /// Les mêmes, agent par agent : la pastille d'une ligne et le total du
+  /// bandeau comptent ainsi la même chose.
+  Future<Either<Failure, Map<String, int>>> byAgent({
+    required String from,
+    required String to,
+  }) => _repository.unsyncedByAgent(from: from, to: to);
 }
 
 /// Enregistre des pointages et les met en file d'envoi.

@@ -16,6 +16,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/hr_presence/data/models/hr_attendance_recap_model.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_recap.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_cubit.dart';
@@ -30,6 +31,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_s
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../test_helpers/reference_formats.dart';
+import '../data/hr_attendance_fixtures.dart' as fx;
 import '../hr_presence_builders.dart';
 
 class _MockRecap extends Mock implements GetHrAttendanceRecapUseCase {}
@@ -56,7 +58,7 @@ void main() {
     HrAttendanceRecap? answer,
     List<String>? permissions,
     StaffAttendanceLock? lock,
-    int unsynced = 0,
+    Map<String, int> unsynced = const {},
     Map<String, Map<String, StaffAttendanceRecord>> records = const {},
     Size? size = const Size(1280, 1600),
   }) async {
@@ -96,7 +98,7 @@ void main() {
       ),
     );
     when(
-      () => count(
+      () => count.byAgent(
         from: any(named: 'from'),
         to: any(named: 'to'),
       ),
@@ -236,6 +238,30 @@ void main() {
     expect(find.textContaining('Total ·'), findsNothing);
   });
 
+  HrPresenceRecapCubit cubitOf(WidgetTester tester) =>
+      BlocProvider.of<HrPresenceRecapCubit>(
+        tester.element(find.byType(HrPresenceRecapScreen)),
+      );
+
+  testWidgets('un serveur d\'avant la paie au mois M : les heures, jamais un '
+      'brut à 0', (tester) async {
+    await pump(
+      tester,
+      answer: HrAttendanceRecapModel.fromJson(fx.recap(legacy: true)),
+    );
+
+    expect(find.text('HEURES VAC.'), findsOneWidget);
+    expect(find.text('BRUT PRÉVU'), findsNothing);
+    // Le montant des heures, pas un brut vide à « 0,00 ».
+    expect(find.textContaining('160,00'), findsWidgets);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && (w.data ?? '').startsWith('0,00'),
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets('sans hr.pay.read : les heures, sans argent du mois', (
     tester,
   ) async {
@@ -246,7 +272,7 @@ void main() {
   });
 
   testWidgets('le bandeau garde le mois et dit ce qui manque', (tester) async {
-    await pump(tester, unsynced: 2);
+    await pump(tester, unsynced: {'a-1': 2});
 
     expect(find.text('RÉCAPITULATIF POUR LA PAIE'), findsOneWidget);
     expect(find.text('Jours non pointés'), findsOneWidget);
@@ -274,20 +300,7 @@ void main() {
   testWidgets('la pastille dit l\'agent dont un pointage attend l\'envoi', (
     tester,
   ) async {
-    await pump(
-      tester,
-      records: {
-        'a-1': {
-          '2026-10-22': const StaffAttendanceRecord(
-            id: 'r-1',
-            staffMemberId: 'a-1',
-            workDate: '2026-10-22',
-            status: PresenceStatus.present,
-            syncState: RecordSyncState.pending,
-          ),
-        },
-      },
-    );
+    await pump(tester, unsynced: {'a-1': 1});
 
     expect(find.text('Sur la tablette'), findsOneWidget);
   });
@@ -460,8 +473,20 @@ void main() {
   });
 
   testAtReferenceFormats('le récapitulatif tient', (tester, format) async {
-    await pump(tester, size: null, permissions: manage, unsynced: 3);
+    await pump(tester, size: null, permissions: manage, unsynced: {'a-1': 3});
     expect(find.byType(HrPresenceRecapTable), findsOneWidget);
+  });
+
+  testAtReferenceFormats('un mois passé tient, avec « Mois en cours »', (
+    tester,
+    format,
+  ) async {
+    await pump(tester, size: null, permissions: manage);
+    await cubitOf(tester).stepMonth(-1);
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Mois en cours'), findsOneWidget);
   });
 
   testAtReferenceFormats('le récapitulatif clos tient', (tester, format) async {
