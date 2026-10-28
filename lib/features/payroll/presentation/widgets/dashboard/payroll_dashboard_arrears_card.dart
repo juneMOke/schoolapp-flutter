@@ -5,10 +5,10 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_link.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Arriérés par salarié » : le reste dû sur les paies validées, servi par
@@ -46,13 +46,13 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
       icon: Icons.schedule_outlined,
       tone: DashboardSense.manquant,
       toneStrength: DashboardTones.forceDe(DashboardSense.manquant),
+      toneSurface: false,
+      actionsBeside: true,
       actions: [
         if (sorted.isNotEmpty)
-          EteeloButton.ghost(
+          PayrollDashboardLink(
             label: l10n.payrollDashSettle,
-            icon: Icons.arrow_forward,
             onPressed: onSettle,
-            fullWidth: false,
           ),
       ],
       child: sorted.isEmpty
@@ -68,8 +68,11 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final agent in sorted) ...[
-                  const Divider(height: 1, color: AppColors.border),
+                // Le trait de l'en-tête ouvre la liste : un filet ENTRE deux
+                // agents seulement.
+                for (final (index, agent) in sorted.indexed) ...[
+                  if (index > 0)
+                    const Divider(height: 1, color: AppColors.border),
                   _row(context, agent),
                 ],
               ],
@@ -92,7 +95,9 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
                   Text(
                     agent.fullName,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelLarge,
+                    style: AppTypography.titleSmall.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Wrap(
@@ -140,8 +145,9 @@ class PayrollDashboardArrearsCard extends StatelessWidget {
                   agent.dues.map((due) => (due.dueInCents, due.currency)),
                 ).join(' · '),
                 textAlign: TextAlign.end,
-                style: AppTypography.titleSmall.copyWith(
-                  color: tone.ink,
+                style: AppTypography.titleMedium.copyWith(
+                  color: DashboardSense.manquant,
+                  fontWeight: FontWeight.w700,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),

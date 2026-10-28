@@ -7,16 +7,17 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_link.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Prêts & avances » : qui rembourse, ce qui reste dû, ce que le mois
-/// retient — servis par le serveur à l'instant du calcul. Le détail se gère
-/// dans Avances & prêts.
+/// retient — servis par le serveur à l'instant du calcul. Carte blanche, le
+/// ton dans le médaillon et la barre seuls. Le détail se gère dans Avances &
+/// prêts.
 class PayrollDashboardAdvancesCard extends StatefulWidget {
   final List<PayrollDashboardAdvance> advances;
   final VoidCallback onManage;
@@ -60,6 +61,9 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
     final due = PayrollLabels.perCurrency(
       ongoing.map((a) => (a.remainingInCents, a.currency)),
     ).join(' · ');
+    final muted = AppTypography.bodySmall.copyWith(
+      color: AppColors.textSecondary,
+    );
     return EteeloStatsCard(
       title: l10n.payrollDashAdvancesTitle,
       subtitle: ongoing.isEmpty
@@ -71,12 +75,12 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
       icon: Icons.handshake_outlined,
       tone: DashboardSense.attente,
       toneStrength: DashboardTones.forceDe(DashboardSense.attente),
+      toneSurface: false,
+      actionsBeside: true,
       actions: [
-        EteeloButton.ghost(
+        PayrollDashboardLink(
           label: l10n.payrollDashManage,
-          icon: Icons.arrow_forward,
           onPressed: widget.onManage,
-          fullWidth: false,
         ),
       ],
       child: Column(
@@ -108,12 +112,7 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
           if (visible.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Text(
-                l10n.payrollDashAdvancesEmpty,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
+              child: Text(l10n.payrollDashAdvancesEmpty, style: muted),
             )
           else ...[
             for (final advance in visible.take(_maxRows)) ...[
@@ -125,9 +124,7 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   l10n.payrollDashMore(visible.length - _maxRows),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  style: muted,
                 ),
               ),
           ],
@@ -178,8 +175,11 @@ class _AdvanceRow extends StatelessWidget {
                     Text(
                       advance.fullName,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelLarge,
+                      style: AppTypography.titleSmall.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(details, style: muted),
                   ],
                 ),
@@ -190,7 +190,9 @@ class _AdvanceRow extends StatelessWidget {
                 children: [
                   Text(
                     money(advance.remainingInCents),
-                    style: AppTypography.titleSmall.copyWith(
+                    style: AppTypography.titleMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
@@ -214,10 +216,10 @@ class _AdvanceRow extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: repaid,
                       minHeight: AppDimensions.payrollProgressHeight,
-                      backgroundColor: AppColors.surfaceRaised,
+                      backgroundColor: PayrollTone.submitted.soft,
                       color: repaid >= 1
                           ? DashboardSense.encaisse
-                          : DashboardSense.attente,
+                          : PayrollTone.submitted.ink,
                       semanticsLabel: l10n.payrollDashRepaidA11y(
                         (repaid * 100).round(),
                       ),
@@ -237,7 +239,9 @@ class _AdvanceRow extends StatelessWidget {
                         : l10n.payrollDashNothingThisMonth,
                     textAlign: TextAlign.end,
                     style: taken > 0
-                        ? muted.copyWith(color: PayrollTone.submitted.ink)
+                        ? AppTypography.labelMedium.copyWith(
+                            color: PayrollTone.submitted.ink,
+                          )
                         : muted,
                   ),
                 ),

@@ -316,6 +316,11 @@ class AppDimensions {
   /// calquée sur celle d'EteeloKpiCard.
   static const statsCardIconBadgeRadius = 8.0;
   static const statsCardIconSize = 16.0;
+
+  /// Largeur de carte à partir de laquelle des actions posées « à côté »
+  /// restent à droite du titre ([EteeloStatsCard.actionsBeside]) ; en deçà,
+  /// elles passent dessous.
+  static const statsCardActionsBesideMinWidth = 360.0;
   static const enrollmentStatsChartBottomTitleHeight = 28.0;
   static const enrollmentStatsChartVerticalLabelMaxExtent = 84.0;
   static const enrollmentStatsPeriodFilterHeight = 38.0;
