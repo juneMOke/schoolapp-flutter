@@ -7,7 +7,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
-import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -106,10 +105,7 @@ class PayrollKpis extends StatelessWidget {
                 (view.absenceDeductionEnabled
                     ? l10n.payrollAttendanceSignalDeducted
                     : l10n.payrollAttendanceSignal)(
-                  PayrollLabels.month(
-                    context,
-                    PayrollMonth.previous(view.month),
-                  ),
+                  PayrollLabels.month(context, view.month),
                   absences,
                   lates,
                 ),

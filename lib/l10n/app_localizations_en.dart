@@ -14100,7 +14100,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollSignalNone => 'OK';
 
   @override
-  String get payrollSignalHint => 'Attendance of the previous month';
+  String get payrollSignalHint => 'Attendance of the month';
 
   @override
   String get payrollPayAfterValidation => 'After validation';
@@ -14347,19 +14347,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollVarsAdvances => 'Advances — managed in the Advances tab';
-
-  @override
-  String get payrollVarsWorkedDays => 'Days worked';
-
-  @override
-  String payrollVarsWorkedDaysValue(int days, int divisor) {
-    return '$days / $divisor d';
-  }
-
-  @override
-  String payrollVarsWorkedDaysCorrected(int days) {
-    return 'Corrected by hand — attendance says $days d';
-  }
 
   @override
   String get payrollVarsChildcare => 'Staff children care (PC/E) this month';
@@ -14753,9 +14740,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollSettingsStep => 'Round the rate to steps of';
-
-  @override
-  String get payrollSettingsWorkDays => 'Days in a full month';
 
   @override
   String get payrollSettingsAbsenceDeduction => 'Deduct unexcused absences';
@@ -19347,7 +19331,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapSubtitle =>
-      'Each staff member\'s attendance totals for the month, then its closing. Payroll reads the actual marks.';
+      'Each staff member\'s attendance totals for the month, then its closing: the month\'s pay is computed from these figures.';
 
   @override
   String hrPresenceRecapClassDays(int count) {
@@ -19382,7 +19366,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapCloseExplain =>
-      'Closing locks the month\'s marks. Nothing is sent: Payroll reads the actual marks.';
+      'Closing freezes the month\'s marks: that month\'s pay can then be computed from them.';
 
   @override
   String hrPresenceRecapCloseFrom(String day) {
@@ -20391,7 +20375,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String payrollAgentScaleCurrent(int days, String absences) {
-    return 'Scale in force: $days reference days · absences $absences.';
+    return 'Scale in force: $days working days in the month · absences $absences.';
   }
 
   @override
@@ -20426,8 +20410,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days days not worked',
-      one: '1 day not worked',
+      other: '$days days absent',
+      one: '1 day absent',
     );
     return '$_temp0 · base $base ÷ $divisor days';
   }
@@ -20437,8 +20421,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days days not worked',
-      one: '1 day not worked',
+      other: '$days days absent',
+      one: '1 day absent',
     );
     return '$_temp0 · not deducted (school scale)';
   }
@@ -20698,4 +20682,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get hrPresenceRecapReopenedOnTablet =>
       'Reopening saved on this tablet, waiting to be sent';
+
+  @override
+  String get payrollPayslipUnjustifiedLabel => 'Unexcused absences';
+
+  @override
+  String payrollPayslipAbsenceDaysValue(int absences, int days) {
+    return '$absences unexcused d of $days working days';
+  }
 }

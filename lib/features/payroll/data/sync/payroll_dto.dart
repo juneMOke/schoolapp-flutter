@@ -7,7 +7,6 @@ class PayrollVariablesDto {
   final int? overtimeMinutes;
   final int? overtimeRateInCents;
   final int? dependentChildren;
-  final int? workedDays;
   final int? childcareInCents;
   final int? fixedPayoutInCents;
   final String? fixedPayoutReason;
@@ -19,7 +18,6 @@ class PayrollVariablesDto {
     this.overtimeMinutes,
     this.overtimeRateInCents,
     this.dependentChildren,
-    this.workedDays,
     this.childcareInCents,
     this.fixedPayoutInCents,
     this.fixedPayoutReason,
@@ -36,7 +34,6 @@ class PayrollVariablesDto {
       overtimeMinutes: raw.integer('overtimeMinutes'),
       overtimeRateInCents: raw.integer('overtimeRateInCents'),
       dependentChildren: raw.integer('dependentChildren'),
-      workedDays: raw.integer('daysWorked'),
       childcareInCents: raw.integer('childcareInCents'),
       fixedPayoutInCents: raw.integer('fixedPayoutInCents'),
       fixedPayoutReason: raw.text('fixedPayoutReason'),

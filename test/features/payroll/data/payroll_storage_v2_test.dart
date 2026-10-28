@@ -32,43 +32,39 @@ void main() {
   setUp(() async => db = await openFullOfflineDb());
   tearDown(() => db.close());
 
-  test(
-    'variables v2 : NJP, PC/E et montant fixe descendent et se relisent',
-    () async {
-      await PayrollDao(db).apply(
-        [
-          _draft(
-            variables: [
-              {
-                'staffMemberId': 'm-1',
-                'daysWorked': 20,
-                'childcareInCents': 1500,
-                'fixedPayoutInCents': 10000,
-                'fixedPayoutReason': 'Trésorerie',
-                'clientUpdatedAt': '2026-10-20T09:00:00Z',
-              },
-            ],
-          ),
-        ],
-        schoolId: _school,
-        nowMs: 1,
-      );
+  test('variables : PC/E et montant fixe descendent et se relisent, plus les '
+      'jours prestés', () async {
+    await PayrollDao(db).apply(
+      [
+        _draft(
+          variables: [
+            {
+              'staffMemberId': 'm-1',
+              'daysWorked': 20,
+              'childcareInCents': 1500,
+              'fixedPayoutInCents': 10000,
+              'fixedPayoutReason': 'Trésorerie',
+              'clientUpdatedAt': '2026-10-20T09:00:00Z',
+            },
+          ],
+        ),
+      ],
+      schoolId: _school,
+      nowMs: 1,
+    );
 
-      final v = (await PayrollVariablesDao(
-        db,
-      ).forSchool(_school))['2026-10']!['m-1']!;
-      expect(v.workedDays, 20);
-      expect(v.childcareInCents, 1500);
-      expect(v.fixedPayoutInCents, 10000);
-      expect(v.fixedPayoutReason, 'Trésorerie');
-    },
-  );
+    final v = (await PayrollVariablesDao(
+      db,
+    ).forSchool(_school))['2026-10']!['m-1']!;
+    expect(v.childcareInCents, 1500);
+    expect(v.fixedPayoutInCents, 10000);
+    expect(v.fixedPayoutReason, 'Trésorerie');
+  });
 
   test('variables v2 : la requête figée se relit à l identique', () {
     const sent = PayrollVariablesRequestDto(
       month: '2026-10',
       staffMemberId: 'm-1',
-      workedDays: 22,
       childcareInCents: 500,
       fixedPayoutInCents: 9000,
       fixedPayoutReason: 'Accord',
@@ -82,11 +78,10 @@ void main() {
     );
   });
 
-  test('le fil v2 : daysWorked, formulaVersion 2, payout.percent', () {
+  test('le fil : plus de daysWorked, formulaVersion 3, payout.percent', () {
     const variables = PayrollVariablesRequestDto(
       month: '2026-10',
       staffMemberId: 'm-1',
-      workedDays: 22,
       clientUpdatedAt: '2026-10-21T09:00:00.000Z',
       authorId: 'u-1',
     );
@@ -99,8 +94,8 @@ void main() {
     );
 
     final sent = variables.toJson()['variables'] as Map;
-    expect(sent['daysWorked'], 22);
-    expect(sent['formulaVersion'], 2);
+    expect(sent.containsKey('daysWorked'), isFalse);
+    expect(sent['formulaVersion'], 3);
     expect(sent.containsKey('workedDays'), isFalse);
     expect(payout.toJson()['payout'], {
       'month': '2026-10',

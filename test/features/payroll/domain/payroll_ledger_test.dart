@@ -147,7 +147,8 @@ void main() {
     });
 
     test('août hors de toute année : compte comme clos (R1, N3)', () {
-      final view = PayrollLedger.monthView(snapshot(), '2026-09');
+      // Formule 3 : la paie d'août lit le Pointage d'août.
+      final view = PayrollLedger.monthView(snapshot(), '2026-08');
 
       expect(view.attendance, PayrollAttendanceState.outOfYear);
       expect(view.validateBlocker, isNull);

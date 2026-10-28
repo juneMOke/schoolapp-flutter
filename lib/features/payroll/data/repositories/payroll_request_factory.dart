@@ -39,7 +39,6 @@ class PayrollRequestFactory {
         overtimeMinutes: v.overtimeMinutes,
         overtimeRateInCents: v.overtimeRateInCents,
         dependentChildren: v.dependentChildren,
-        workedDays: v.workedDays,
         childcareInCents: v.childcareInCents,
         fixedPayoutInCents: v.fixedPayoutInCents,
         fixedPayoutReason: v.fixedPayoutInCents == null

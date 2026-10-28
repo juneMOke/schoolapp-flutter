@@ -6,7 +6,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// « 1 abs », « 2 ret », ou « RAS » — le Pointage de M−1 ; l'absence n'est
+/// « 1 abs », « 2 ret », ou « RAS » — le Pointage du mois ; l'absence n'est
 /// retenue que si l'école l'a réglé, par les jours prestés (v2).
 class PayrollLedgerSignals extends StatelessWidget {
   final PayrollLine line;

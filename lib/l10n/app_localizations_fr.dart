@@ -14198,7 +14198,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollSignalNone => 'RAS';
 
   @override
-  String get payrollSignalHint => 'Pointage du mois précédent';
+  String get payrollSignalHint => 'Pointage du mois';
 
   @override
   String get payrollPayAfterValidation => 'Après validation';
@@ -14447,19 +14447,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollVarsAdvances => 'Avances — gérées dans l\'onglet Avances';
-
-  @override
-  String get payrollVarsWorkedDays => 'Jours prestés (NJP)';
-
-  @override
-  String payrollVarsWorkedDaysValue(int days, int divisor) {
-    return '$days / $divisor j';
-  }
-
-  @override
-  String payrollVarsWorkedDaysCorrected(int days) {
-    return 'Corrigé à la main — le Pointage dit $days j';
-  }
 
   @override
   String get payrollVarsChildcare =>
@@ -14855,9 +14842,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollSettingsStep => 'Arrondi du taux au pas de';
-
-  @override
-  String get payrollSettingsWorkDays => 'Jours d\'un mois plein';
 
   @override
   String get payrollSettingsAbsenceDeduction =>
@@ -19481,7 +19465,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceRecapSubtitle =>
-      'Les totaux de présence du mois par agent, puis sa clôture. La Paie relit les pointages réels.';
+      'Les totaux de présence du mois par agent, puis sa clôture : la paie du mois se calcule sur ces chiffres.';
 
   @override
   String hrPresenceRecapClassDays(int count) {
@@ -19516,7 +19500,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceRecapCloseExplain =>
-      'Clôturer verrouille les pointages du mois. Rien n\'est transmis : la Paie relit les pointages réels.';
+      'Clôturer fige les pointages du mois : la paie de ce mois pourra être calculée sur eux.';
 
   @override
   String hrPresenceRecapCloseFrom(String day) {
@@ -20527,7 +20511,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String payrollAgentScaleCurrent(int days, String absences) {
-    return 'Barème en vigueur : $days j de référence · absences $absences.';
+    return 'Barème en vigueur : $days jours ouvrés dans le mois · absences $absences.';
   }
 
   @override
@@ -20562,8 +20546,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days j non prestés',
-      one: '1 j non presté',
+      other: '$days j d\'absence',
+      one: '1 j d\'absence',
     );
     return '$_temp0 · base $base ÷ $divisor j';
   }
@@ -20573,8 +20557,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days j non prestés',
-      one: '1 j non presté',
+      other: '$days j d\'absence',
+      one: '1 j d\'absence',
     );
     return '$_temp0 · non retenus (barème de l\'école)';
   }
@@ -20834,4 +20818,12 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get hrPresenceRecapReopenedOnTablet =>
       'Réouverture enregistrée sur la tablette, en attente d\'envoi';
+
+  @override
+  String get payrollPayslipUnjustifiedLabel => 'Absences non justifiées';
+
+  @override
+  String payrollPayslipAbsenceDaysValue(int absences, int days) {
+    return '$absences j NJ sur $days jours ouvrés';
+  }
 }

@@ -288,12 +288,7 @@ class PayrollPayslipActions {
       money(line.grossInCents),
       withheld.isEmpty ? '—' : withheld.join(', '),
       money(d.totalInCents + line.advanceInCents),
-      d.workDaysDivisor == null
-          ? '—'
-          : l10n.payrollPayslipWorkedDaysValue(
-              d.workedDays ?? d.workDaysDivisor!,
-              d.workDaysDivisor!,
-            ),
+      PayrollLabels.attendanceDays(l10n, d)?.value ?? '—',
       money(line.netInCents),
       money(settlement.paidInCents),
       money(settlement.remainingInCents),

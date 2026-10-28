@@ -121,16 +121,6 @@ void main() {
       () => registerFallbackValue(const PayrollVariables(staffMemberId: 's')),
     );
 
-    test('NJP au-delà du diviseur : refusé avant la file', () async {
-      final result = await SavePayrollVariablesUseCase(repository)(
-        view(PayrollStatus.draft),
-        const PayrollVariables(staffMemberId: 'm-1', workedDays: 27),
-      );
-
-      expect(ruleOf(result), PayrollRule.workedDaysOutOfRange);
-      verifyNever(() => repository.saveVariables(any(), any()));
-    });
-
     test('un montant fixe sans motif est refusé', () async {
       final result = await SavePayrollVariablesUseCase(repository)(
         view(PayrollStatus.draft),
@@ -142,15 +132,6 @@ void main() {
       );
 
       expect(ruleOf(result), PayrollRule.reasonRequired);
-    });
-
-    test('NJP dans les bornes : part', () async {
-      final result = await SavePayrollVariablesUseCase(repository)(
-        view(PayrollStatus.draft),
-        const PayrollVariables(staffMemberId: 'm-1', workedDays: 20),
-      );
-
-      expect(result.isRight(), isTrue);
     });
 
     test('taux sous 100 % sans motif : refusé ; avec motif : part', () async {

@@ -3,14 +3,17 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_math.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_working_days.dart';
 
-/// Les retenues fixes et le versement du mois (formule v2) : des fonctions
+/// Les retenues fixes et le versement du mois (formule 3) : des fonctions
 /// pures, en centimes, une seule division par montant (T2).
 ///
 /// ```text
-/// NJP      variable ?? diviseur − absences NJ du Pointage M−1    [0, diviseur]
-///          M−1 hors année : diviseur (T1) · vacataire à l'heure : sans objet
-/// absence  réglage actif ? roundDiv(base × (diviseur − NJP), diviseur) : 0
+/// J        jours ouvrés du mois civil M : lundi au vendredi, vacances
+///          comprises, sans fériés (V1)
+/// NJ       absences non justifiées du Pointage de M, bornées à [0, J]
+///          mois ouvert ou hors année : 0 · vacataire à l'heure : sans objet
+/// absence  réglage actif ? min(roundDiv(base × NJ, J), base) : 0
 /// IPR      brut > 0 ? forfait[devise] : 0
 /// CNSS     roundDiv(base × ‰[devise], 1000)        (base avant absence, T4)
 /// PC/E     variable ?? 0
@@ -18,22 +21,19 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_math
 /// Pris sur le brut dans cet ordre, chacun borné à ce qui reste (T3).
 abstract final class PayrollDeductions {
   static PayrollLineDeductions compute({
+    required String month,
     required bool hourly,
     required int baseInCents,
     required int grossInCents,
     required PayrollSettings settings,
     required PayrollCurrencySettings perCurrency,
     required PayrollVariables? variables,
-    required AttendanceAgentSummary? attendance,
+    required AttendanceAgentSummary attendance,
   }) {
-    final divisor = settings.workDaysDivisor;
-    final worked = hourly
+    final workingDays = hourly ? null : PayrollWorkingDays.of(month);
+    final absences = workingDays == null
         ? null
-        : workedDaysOf(
-            divisor: divisor,
-            variable: variables?.workedDays,
-            attendance: attendance,
-          );
+        : unjustifiedAbsences(attendance, workingDays);
     var capacity = grossInCents;
     int take(int amount) {
       final taken = amount < capacity ? amount : capacity;
@@ -42,8 +42,11 @@ abstract final class PayrollDeductions {
     }
 
     final absence = take(
-      worked != null && settings.absenceDeductionEnabled && divisor > 0
-          ? PayrollMath.roundDiv(baseInCents * (divisor - worked), divisor)
+      workingDays != null &&
+              absences != null &&
+              settings.absenceDeductionEnabled &&
+              workingDays > 0
+          ? _absence(baseInCents, absences, workingDays)
           : 0,
     );
     final ipr = take(grossInCents > 0 ? perCurrency.iprFlatInCents : 0);
@@ -56,8 +59,8 @@ abstract final class PayrollDeductions {
       settings.childcareEnabled ? _positive(variables?.childcareInCents) : 0,
     );
     return PayrollLineDeductions(
-      workDaysDivisor: hourly ? null : divisor,
-      workedDays: worked,
+      workDaysDivisor: workingDays,
+      unjustifiedAbsences: absences,
       absenceInCents: absence,
       iprInCents: ipr,
       cnssInCents: cnss,
@@ -65,21 +68,16 @@ abstract final class PayrollDeductions {
     );
   }
 
-  /// Les jours prestés : la saisie de l'économe, sinon le Pointage de M−1 ;
-  /// sans résumé (M−1 hors année), le mois entier.
-  static int workedDaysOf({
-    required int divisor,
-    required int? variable,
-    required AttendanceAgentSummary? attendance,
-  }) {
-    if (divisor <= 0) return 0;
-    final raw =
-        variable ??
-        (attendance == null
-            ? divisor
-            : divisor - attendance.unjustifiedAbsences);
-    if (raw < 0) return 0;
-    return raw > divisor ? divisor : raw;
+  /// NJ : les absences non justifiées du mois, bornées à [0, J].
+  static int unjustifiedAbsences(
+    AttendanceAgentSummary attendance,
+    int workingDays,
+  ) => attendance.unjustifiedAbsences.clamp(0, workingDays);
+
+  /// `min(roundDiv(base × NJ, J), base)` : jamais plus que la base.
+  static int _absence(int base, int absences, int workingDays) {
+    final amount = PayrollMath.roundDiv(base * absences, workingDays);
+    return amount < base ? amount : base;
   }
 
   /// Le versement du mois : le montant fixe de l'agent prime (borné au net),

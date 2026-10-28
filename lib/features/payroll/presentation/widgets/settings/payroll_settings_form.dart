@@ -55,11 +55,6 @@ class PayrollSettingsForm extends StatelessWidget {
               l10n.payrollSettingsDivisor,
               draft.errorOfHours(),
             ),
-            field(
-              draft.days,
-              l10n.payrollSettingsWorkDays,
-              draft.errorOfDays(),
-            ),
           ],
           footer: PayrollSettingsToggle(
             label: l10n.payrollSettingsAbsenceDeduction,

@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
@@ -46,10 +45,7 @@ class PayrollScreen extends StatelessWidget {
       listener: (context, state) => showPayrollNotice(
         context,
         state.notice!,
-        monthLabel: PayrollLabels.month(
-          context,
-          PayrollMonth.previous(state.month),
-        ),
+        monthLabel: PayrollLabels.month(context, state.month),
       ),
       buildWhen: (previous, current) =>
           previous.copyWith(notice: current.notice) != current,

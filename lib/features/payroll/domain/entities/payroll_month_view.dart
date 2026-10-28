@@ -37,7 +37,7 @@ enum PayrollBlocker {
   /// La paie du mois précédent existe et n'est pas validée (E9).
   previousNotValidated,
 
-  /// Le Pointage de M−1 n'est pas clos (A1, A9).
+  /// Le Pointage du mois n'est pas clos (formule 3).
   attendanceOpen,
 
   /// Un versement vivant existe : la paie ne se rouvre plus (A4).
@@ -68,7 +68,7 @@ class PayrollMonthView {
   /// Les agents sans aucun contrat : « contrat à poser ».
   final List<String> withoutContract;
 
-  /// Les vacataires à l'heure sans minute pointée en M−1 (N4).
+  /// Les vacataires à l'heure sans minute pointée dans le mois (N4).
   final List<String> zeroHourMembers;
   final PayrollAttendanceState attendance;
 

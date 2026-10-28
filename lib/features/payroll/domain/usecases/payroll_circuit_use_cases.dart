@@ -35,13 +35,6 @@ class SavePayrollVariablesUseCase {
         (variables.fixedPayoutInCents ?? 0) < 0) {
       return Left(PayrollRuleFailure(PayrollRule.invalidAmount));
     }
-    // NJP ∈ [0, diviseur] ; un vacataire à l'heure n'en a pas (T5).
-    if (variables.workedDays case final days?) {
-      final divisor = line.deductions.workDaysDivisor;
-      if (divisor == null || days < 0 || days > divisor) {
-        return Left(PayrollRuleFailure(PayrollRule.workedDaysOutOfRange));
-      }
-    }
     if (variables.fixedPayoutInCents != null &&
         (variables.fixedPayoutReason?.trim().length ?? 0) <
             minPayoutReasonLength) {

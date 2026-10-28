@@ -52,6 +52,7 @@ void main() {
     Perm.hrAttendanceRead: 'hr.attendance.read',
     Perm.hrAttendanceWrite: 'hr.attendance.write',
     Perm.hrAttendanceManage: 'hr.attendance.manage',
+    Perm.hrAttendanceReopen: 'hr.attendance.reopen',
     Perm.classroomRead: 'classroom.read',
     Perm.classroomWrite: 'classroom.write',
     Perm.classroomDelete: 'classroom.delete',
@@ -97,7 +98,7 @@ void main() {
   };
 
   test(
-    'le catalogue compte 77 permissions (v1.8 du catalogue serveur + RH + programme + publication + désactivation)',
+    'le catalogue compte 81 permissions (v1.8 du catalogue serveur + RH + programme + publication + désactivation + réouverture)',
     () {
       // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
       // le prendre. Un ajout, pas un renommage — aucune ligne de
@@ -166,7 +167,10 @@ void main() {
       // (`communication.announcement.read`, `.send`,
       // `communication.template.write`), semés sur SECRETARY et DIRECTOR par
       // la migration back V180.
-      expect(Perm.values, hasLength(80));
+      // 80 → 81 : `hr.attendance.reopen`, rouvrir un mois clos du Pointage
+      // (DIRECTOR, SUPER_ADMIN — migration back V199, contrat « Paie au
+      // mois M » du 2026-10-28).
+      expect(Perm.values, hasLength(81));
     },
   );
 

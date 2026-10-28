@@ -9,7 +9,6 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_adva
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_contract_picker.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_deductions.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_math.dart';
-import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 
@@ -24,7 +23,8 @@ class PayrollEngineInput {
   final Map<String, PayrollVariables> variables;
   final Map<String, StaffPayProfile> profiles;
 
-  /// Le résumé du Pointage de M−1 ; `null` = mois hors année, vide (R1).
+  /// Le résumé du Pointage de M, clos ; `null` = mois encore ouvert ou hors
+  /// année : vide, aucune absence ni heure (R1).
   final AttendanceSummary? attendance;
 
   /// Par agent : l'état de ses avances pour [month]
@@ -109,7 +109,8 @@ abstract final class PayrollEngine {
     final currency = currencyOf(contract, fallback: settings.firstCurrency);
     final amount = contract.amount?.amountInCents ?? 0;
     final perCurrency = settings.of(currency);
-    final hoursMonth = PayrollMonth.previous(input.month);
+    // Formule 3 : les heures et les absences du mois même.
+    final hoursMonth = input.month;
     final summary =
         input.attendance?.of(memberId) ?? AttendanceAgentSummary.zero;
 
@@ -143,13 +144,14 @@ abstract final class PayrollEngine {
 
     final gross = base + overtime + allowance;
     final deductions = PayrollDeductions.compute(
+      month: input.month,
       hourly: hourly,
       baseInCents: base,
       grossInCents: gross,
       settings: settings,
       perCurrency: perCurrency,
       variables: variables,
-      attendance: input.attendance == null ? null : summary,
+      attendance: summary,
     );
     final advances = PayrollAdvanceSchedule.deduct(
       month: input.month,

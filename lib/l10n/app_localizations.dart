@@ -22079,7 +22079,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollSignalHint.
   ///
   /// In en, this message translates to:
-  /// **'Attendance of the previous month'**
+  /// **'Attendance of the month'**
   String get payrollSignalHint;
 
   /// No description provided for @payrollPayAfterValidation.
@@ -22458,24 +22458,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Advances — managed in the Advances tab'**
   String get payrollVarsAdvances;
-
-  /// No description provided for @payrollVarsWorkedDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Days worked'**
-  String get payrollVarsWorkedDays;
-
-  /// No description provided for @payrollVarsWorkedDaysValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{days} / {divisor} d'**
-  String payrollVarsWorkedDaysValue(int days, int divisor);
-
-  /// No description provided for @payrollVarsWorkedDaysCorrected.
-  ///
-  /// In en, this message translates to:
-  /// **'Corrected by hand — attendance says {days} d'**
-  String payrollVarsWorkedDaysCorrected(int days);
 
   /// No description provided for @payrollVarsChildcare.
   ///
@@ -23136,12 +23118,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Round the rate to steps of'**
   String get payrollSettingsStep;
-
-  /// No description provided for @payrollSettingsWorkDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Days in a full month'**
-  String get payrollSettingsWorkDays;
 
   /// No description provided for @payrollSettingsAbsenceDeduction.
   ///
@@ -29905,7 +29881,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceRecapSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Each staff member\'s attendance totals for the month, then its closing. Payroll reads the actual marks.'**
+  /// **'Each staff member\'s attendance totals for the month, then its closing: the month\'s pay is computed from these figures.'**
   String get hrPresenceRecapSubtitle;
 
   /// No description provided for @hrPresenceRecapClassDays.
@@ -29941,7 +29917,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceRecapCloseExplain.
   ///
   /// In en, this message translates to:
-  /// **'Closing locks the month\'s marks. Nothing is sent: Payroll reads the actual marks.'**
+  /// **'Closing freezes the month\'s marks: that month\'s pay can then be computed from them.'**
   String get hrPresenceRecapCloseExplain;
 
   /// No description provided for @hrPresenceRecapCloseFrom.
@@ -31380,7 +31356,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollAgentScaleCurrent.
   ///
   /// In en, this message translates to:
-  /// **'Scale in force: {days} reference days · absences {absences}.'**
+  /// **'Scale in force: {days} working days in the month · absences {absences}.'**
   String payrollAgentScaleCurrent(int days, String absences);
 
   /// No description provided for @payrollAgentAbsencesDeducted.
@@ -31440,13 +31416,13 @@ abstract class AppLocalizations {
   /// No description provided for @payrollCalcAbsenceFormula.
   ///
   /// In en, this message translates to:
-  /// **'{days, plural, =1{1 day not worked} other{{days} days not worked}} · base {base} ÷ {divisor} days'**
+  /// **'{days, plural, =1{1 day absent} other{{days} days absent}} · base {base} ÷ {divisor} days'**
   String payrollCalcAbsenceFormula(int days, String base, int divisor);
 
   /// No description provided for @payrollCalcAbsenceIndicative.
   ///
   /// In en, this message translates to:
-  /// **'{days, plural, =1{1 day not worked} other{{days} days not worked}} · not deducted (school scale)'**
+  /// **'{days, plural, =1{1 day absent} other{{days} days absent}} · not deducted (school scale)'**
   String payrollCalcAbsenceIndicative(int days);
 
   /// No description provided for @payrollCalcAbsenceHourly.
@@ -31818,6 +31794,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reopening saved on this tablet, waiting to be sent'**
   String get hrPresenceRecapReopenedOnTablet;
+
+  /// No description provided for @payrollPayslipUnjustifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused absences'**
+  String get payrollPayslipUnjustifiedLabel;
+
+  /// No description provided for @payrollPayslipAbsenceDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{absences} unexcused d of {days} working days'**
+  String payrollPayslipAbsenceDaysValue(int absences, int days);
 }
 
 class _AppLocalizationsDelegate

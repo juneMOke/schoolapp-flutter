@@ -26,11 +26,6 @@ abstract final class PayrollSettingsBounds {
   /// La même, saisie en pour cent au-dessus du taux.
   static const PayrollIntRange overtimePremiumPercent = PayrollIntRange(0, 400);
 
-  static const PayrollIntRange workDays = PayrollIntRange(
-    PayrollSettings.minWorkDaysDivisor,
-    PayrollSettings.maxWorkDaysDivisor,
-  );
-
   /// CNSS de l'agent, en pour mille de la base.
   static const PayrollIntRange cnssPermille = PayrollIntRange(0, 1000);
 
@@ -54,7 +49,6 @@ abstract final class PayrollSettingsBounds {
       overtimeMultiplierPermille.contains(
         settings.overtimeMultiplierPermille,
       ) &&
-      workDays.contains(settings.workDaysDivisor) &&
       settings.byCurrency.values.every(
         (currency) =>
             currency.childAllowanceInCents >= 0 &&
