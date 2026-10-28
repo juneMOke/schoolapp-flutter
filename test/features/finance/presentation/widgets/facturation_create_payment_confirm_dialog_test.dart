@@ -10,6 +10,9 @@ import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/receipt_number_watch_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
@@ -32,6 +35,9 @@ class _MockFinanceOfflineBloc
 
 class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
 
 /// Le reçu tel que la tablette le connaît, réglable par test.
 class _FakeReceipts implements PaymentReceiptResolver {
@@ -109,43 +115,58 @@ void main() {
   Future<FacturationCollectOutcome?> open(
     WidgetTester tester, {
     List<FacturationConfirmAllocationGroup>? allocations,
+    List<String>? permissions,
   }) async {
     FacturationCollectOutcome? outcome;
+    Widget withAuth(Widget child) {
+      if (permissions == null) return child;
+      final auth = _MockAuthBloc();
+      final state = AuthState(
+        status: AuthStatus.authenticated,
+        permissions: permissions,
+      );
+      when(() => auth.state).thenReturn(state);
+      whenListen(auth, Stream<AuthState>.value(state), initialState: state);
+      return BlocProvider<AuthBloc>.value(value: auth, child: child);
+    }
+
     await tester.pumpWidget(
-      // Le cubit de synchro est fourni AU-DESSUS de MaterialApp (comme à la
-      // racine en prod) pour que la modale, poussée sur le root navigator, le
-      // trouve via context.read.
-      BlocProvider<SyncStatusCubit>.value(
-        value: syncCubit,
-        child: MaterialApp(
-          locale: const Locale('fr'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => TextButton(
-                onPressed: () async {
-                  outcome = await showFacturationCreatePaymentConfirmDialog(
-                    context,
-                    financeOfflineBloc: bloc,
-                    totalLabel: '7 000 CDF',
-                    studentName: 'Kabeya Junior',
-                    payerName: 'Mukendi Paul',
-                    payerPhone: '+243816939060',
-                    request: _request,
-                    allocations:
-                        allocations ??
-                        const [
-                          // Une nature d'une seule tranche : pas d'enfant, la
-                          // ligne EST la tranche (GE-5).
-                          FacturationConfirmAllocationGroup(
-                            label: 'Frais de scolarité',
-                            amount: '7 000 CDF',
-                          ),
-                        ],
-                  );
-                },
-                child: const Text('open'),
+      withAuth(
+        // Le cubit de synchro est fourni AU-DESSUS de MaterialApp (comme à la
+        // racine en prod) pour que la modale, poussée sur le root navigator, le
+        // trouve via context.read.
+        BlocProvider<SyncStatusCubit>.value(
+          value: syncCubit,
+          child: MaterialApp(
+            locale: const Locale('fr'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () async {
+                    outcome = await showFacturationCreatePaymentConfirmDialog(
+                      context,
+                      financeOfflineBloc: bloc,
+                      totalLabel: '7 000 CDF',
+                      studentName: 'Kabeya Junior',
+                      payerName: 'Mukendi Paul',
+                      payerPhone: '+243816939060',
+                      request: _request,
+                      allocations:
+                          allocations ??
+                          const [
+                            // Une nature d'une seule tranche : pas d'enfant, la
+                            // ligne EST la tranche (GE-5).
+                            FacturationConfirmAllocationGroup(
+                              label: 'Frais de scolarité',
+                              amount: '7 000 CDF',
+                            ),
+                          ],
+                    );
+                  },
+                  child: const Text('open'),
+                ),
               ),
             ),
           ),
@@ -294,6 +315,25 @@ void main() {
       );
       return (tester.widget(found.first) as ButtonStyleButton).enabled;
     }
+
+    // Retour du back du 2026-10-28 : l'invite suit le droit de la file.
+    testWidgets('sans editique.read : pas d\'invite d\'impression', (
+      tester,
+    ) async {
+      await open(
+        tester,
+        permissions: const ['finance.payment.write', 'editique.write'],
+      );
+      await tester.tap(find.text('Confirmer'));
+      await tester.pump();
+      states.add(const FinanceOfflinePaymentPendingSync('pay-42'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(find.text('Imprimer le ticket de perception'), findsNothing);
+      expect(find.text('Attribution du numéro du reçu…'), findsNothing);
+      expect(find.text('Fermer'), findsOneWidget);
+    });
 
     testWidgets('numéro connu : il s\'affiche, et le ticket peut sortir', (
       tester,

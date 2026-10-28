@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
@@ -11,6 +12,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_queue_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
@@ -28,10 +30,15 @@ class TicketsToPrintBanner extends StatelessWidget {
 
   const TicketsToPrintBanner({super.key, this.padding = EdgeInsets.zero});
 
+  /// Sans `editique.read`, ni bandeau ni lecture de la file : la page qu'il
+  /// ouvre est fermée, et aucun ticket n'y deviendrait imprimable.
   @override
-  Widget build(BuildContext context) => BlocProvider<TicketPrintQueueCubit>(
-    create: (_) => getIt<TicketPrintQueueCubit>()..load(),
-    child: _Banner(padding: padding),
+  Widget build(BuildContext context) => PermissionGate.access(
+    kTicketPrintAccess,
+    child: BlocProvider<TicketPrintQueueCubit>(
+      create: (_) => getIt<TicketPrintQueueCubit>()..load(),
+      child: _Banner(padding: padding),
+    ),
   );
 }
 

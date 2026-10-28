@@ -20,6 +20,8 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/common/
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
@@ -201,6 +203,11 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   /// succès seulement — les phases précédentes n'en ont pas l'usage.
   ReceiptNumberWatchCubit? _receiptWatch;
 
+  /// L'invite d'impression suit le droit de la file (`editique.read`) : c'est
+  /// le pull des pièces qui apporte le numéro sans lequel rien ne sort.
+  bool get _canPrintTicket =>
+      PermissionGate.allowsAccess(context, kTicketPrintAccess);
+
   @override
   void dispose() {
     _receiptWatch?.close();
@@ -214,7 +221,11 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
       // Retenu pour le ticket : c'est la seule clé disponible à cet instant, et
       // l'écran de succès était jusqu'ici un cul-de-sac (ADR-012 D-3).
       _paymentId = state.paymentId;
-      _receiptWatch = getIt<ReceiptNumberWatchCubit>()..watch(state.paymentId);
+      // Sans `editique.read`, aucun ticket à offrir : rien à attendre non plus.
+      if (_canPrintTicket) {
+        _receiptWatch = getIt<ReceiptNumberWatchCubit>()
+          ..watch(state.paymentId);
+      }
       // Encaissement écrit localement (en attente de synchro) : on allume la
       // pastille globale et le rafraîchissement du détail est déclenché APRÈS
       // fermeture de la popin (cf. _onCollect).
@@ -424,6 +435,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                 context,
               ).pop(FacturationCollectOutcome.succeeded),
               stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+              showSecondary: _receiptWatch != null,
             ),
           ],
         );

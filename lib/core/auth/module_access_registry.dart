@@ -525,6 +525,28 @@ const Map<String, ModuleAccess> kStandaloneRouteAccess = {
   'student-photo': kStudentPhotoWriteAccess,
 };
 
+/// Imprimer les tickets de caisse dus (« Tickets à imprimer », son bandeau,
+/// l'invite de l'écran de succès). **`editique.read`** : c'est le pull des
+/// pièces qui apporte le numéro définitif — sans ce droit, la file ne se
+/// remplirait jamais de rien d'imprimable (réponse du back du 2026-10-28).
+///
+/// Encaisser exige déjà `editique.write`, et les gabarits serveur donnent
+/// toujours la lecture avec l'écriture ; mais les droits se règlent école par
+/// école, et rien n'interdit de retirer l'une sans l'autre.
+const ModuleAccess kTicketPrintAccess = ModuleAccess([Perm.editiqueRead]);
+
+/// « Relancer » le reçu qu'un accusé n'a pas rapporté
+/// (`POST /finance/payments/{id}/receipt`).
+const ModuleAccess kTicketReceiptRetryAccess = ModuleAccess([
+  Perm.editiqueWrite,
+]);
+
+/// Pages imbriquées SOUS un sous-menu, et plus fermées que lui : leur segment
+/// littéral, n'importe où après le sous-menu, ajoute son exigence à la sienne.
+const Map<String, ModuleAccess> kNestedRouteAccess = {
+  'tickets-a-imprimer': kTicketPrintAccess,
+};
+
 /// Vrai si [location] est atteignable avec [permissions].
 ///
 /// Les routes de la coquille ont la forme `/{menu}/{sousMenu}[/…]` : le second
@@ -551,7 +573,18 @@ bool canAccessLocation(Uri location, List<String>? permissions) {
   }
 
   if (segments.length < 2) return true;
-  return canAccessSubMenu(segments[1], permissions);
+  if (!canAccessSubMenu(segments[1], permissions)) return false;
+  for (final segment in segments.skip(2)) {
+    final nested = kNestedRouteAccess[segment];
+    if (nested == null) continue;
+    final allowed = canAccess(
+      requires: nested.requires,
+      permissions: permissions,
+      requiresAll: nested.requiresAll,
+    );
+    if (!allowed) return false;
+  }
+  return true;
 }
 
 ModuleAccess? _accessOf(String subMenuId) {
