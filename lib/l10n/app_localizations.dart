@@ -29980,6 +29980,24 @@ abstract class AppLocalizations {
   /// **'The server refused the last action on this month (closing or reopening): check the month, then try again.'**
   String get hrPresenceRecapCloseRefused;
 
+  /// No description provided for @hrPresenceRecapRefusedForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopening refused by the server: this account may not reopen a month.'**
+  String get hrPresenceRecapRefusedForbidden;
+
+  /// No description provided for @hrPresenceRecapRefusedPayroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopening refused by the server: this month\'s payroll is validated, it can no longer be reopened.'**
+  String get hrPresenceRecapRefusedPayroll;
+
+  /// No description provided for @hrPresenceRecapRefusedOutOfYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopening refused by the server: this month is outside the current school year.'**
+  String get hrPresenceRecapRefusedOutOfYear;
+
   /// No description provided for @hrPresenceAgentNotFoundMessage.
   ///
   /// In en, this message translates to:

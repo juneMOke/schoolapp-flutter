@@ -759,6 +759,7 @@ void main() {
         to: '2026-09-30',
       );
       expect(shown.single.locked, isFalse);
+      expect(shown.single.syncErrorCode, 'MONTH_CLOSED');
     });
   });
 }

@@ -19553,6 +19553,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le dernier geste sur ce mois (clôture ou réouverture) a été refusé par le serveur : vérifiez le mois, puis recommencez.';
 
   @override
+  String get hrPresenceRecapRefusedForbidden =>
+      'Réouverture refusée par le serveur : ce compte n\'a pas le droit de rouvrir un mois.';
+
+  @override
+  String get hrPresenceRecapRefusedPayroll =>
+      'Réouverture refusée par le serveur : la paie de ce mois est validée, il ne se rouvre plus.';
+
+  @override
+  String get hrPresenceRecapRefusedOutOfYear =>
+      'Réouverture refusée par le serveur : ce mois n\'appartient pas à l\'année scolaire en cours.';
+
+  @override
   String get hrPresenceAgentNotFoundMessage =>
       'Le serveur ne connaît pas cet agent dans cette école : il a pu être retiré du fichier, ou le lien vient d\'une autre école.';
 

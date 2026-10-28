@@ -22,6 +22,10 @@ class StaffAttendanceLock extends Equatable {
   /// [RecordSyncState.synced] quand il n'y en a pas.
   final RecordSyncState syncState;
 
+  /// Le code du refus quand ce dernier geste a été refusé
+  /// (`PAYROLL_ALREADY_VALIDATED`…) ; `null` sinon.
+  final String? syncErrorCode;
+
   const StaffAttendanceLock({
     required this.kind,
     required this.periodStart,
@@ -29,6 +33,7 @@ class StaffAttendanceLock extends Equatable {
     this.lockedAt,
     this.lockedByName,
     this.syncState = RecordSyncState.synced,
+    this.syncErrorCode,
   });
 
   @override
@@ -39,5 +44,6 @@ class StaffAttendanceLock extends Equatable {
     lockedAt,
     lockedByName,
     syncState,
+    syncErrorCode,
   ];
 }

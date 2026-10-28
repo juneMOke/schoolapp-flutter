@@ -7,7 +7,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
-import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
@@ -463,6 +462,28 @@ void main() {
       ),
     );
     expect(find.textContaining('refusé par le serveur'), findsOneWidget);
+  });
+
+  testWidgets('une réouverture refusée, paie validée : le dire sans inviter '
+      'à recommencer', (tester) async {
+    await pump(
+      tester,
+      permissions: manage,
+      answer: recapOf(closed: true),
+      lock: const StaffAttendanceLock(
+        kind: StaffAttendanceLockKind.month,
+        periodStart: '2026-10-01',
+        locked: true,
+        syncState: RecordSyncState.failed,
+        syncErrorCode: 'PAYROLL_ALREADY_VALIDATED',
+      ),
+    );
+
+    expect(
+      find.textContaining('la paie de ce mois est validée'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('recommencez'), findsNothing);
   });
 
   testWidgets('un mois passé non clôturable ne promet pas de date', (

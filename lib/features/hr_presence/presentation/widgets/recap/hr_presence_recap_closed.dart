@@ -23,6 +23,9 @@ class HrPresenceRecapClosed extends StatelessWidget {
   /// Le dernier geste posé ici sur ce mois — une réouverture — a été
   /// refusé : le dire avant d'offrir de recommencer.
   final bool refused;
+
+  /// Le code du refus : il dit pourquoi, et si recommencer a un sens.
+  final String? refusalCode;
   final bool reopening;
   final VoidCallback onReopen;
 
@@ -30,9 +33,21 @@ class HrPresenceRecapClosed extends StatelessWidget {
     super.key,
     required this.recap,
     this.refused = false,
+    this.refusalCode,
     required this.reopening,
     required this.onReopen,
   });
+
+  /// Un refus définitif ne propose jamais de recommencer (403, paie
+  /// validée, mois hors de l'année) ; les autres gardent le texte général.
+  static String refusalMessage(AppLocalizations l10n, String? code) =>
+      switch (code) {
+        'MONTH_REOPEN_FORBIDDEN' ||
+        'HTTP_403' => l10n.hrPresenceRecapRefusedForbidden,
+        'PAYROLL_ALREADY_VALIDATED' => l10n.hrPresenceRecapRefusedPayroll,
+        'MONTH_REOPEN_OUT_OF_YEAR' => l10n.hrPresenceRecapRefusedOutOfYear,
+        _ => l10n.hrPresenceRecapCloseRefused,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +80,7 @@ class HrPresenceRecapClosed extends StatelessWidget {
           PresenceWarning(
             icon: Icons.sync_problem,
             tone: PresenceStatus.absent,
-            message: l10n.hrPresenceRecapCloseRefused,
+            message: refusalMessage(l10n, refusalCode),
           ),
           const SizedBox(height: AppSpacing.sm),
         ],

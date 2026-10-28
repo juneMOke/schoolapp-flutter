@@ -141,14 +141,16 @@ class StaffAttendanceLockDao {
       if (state == RecordSyncState.synced) continue;
       if (state == RecordSyncState.failed) {
         final current = byKey[key];
+        final code = gesture['sync_error_code'] as String?;
         byKey[key] = current == null
             ? StaffAttendanceLock(
                 kind: _kind(gesture),
                 periodStart: gesture['period_start']! as String,
                 locked: false,
                 syncState: RecordSyncState.failed,
+                syncErrorCode: code,
               )
-            : _withState(current, RecordSyncState.failed);
+            : _withState(current, RecordSyncState.failed, code: code);
         continue;
       }
       byKey[key] = StaffAttendanceLock(
@@ -196,13 +198,15 @@ class StaffAttendanceLockDao {
 
   static StaffAttendanceLock _withState(
     StaffAttendanceLock lock,
-    RecordSyncState state,
-  ) => StaffAttendanceLock(
+    RecordSyncState state, {
+    String? code,
+  }) => StaffAttendanceLock(
     kind: lock.kind,
     periodStart: lock.periodStart,
     locked: lock.locked,
     lockedAt: lock.lockedAt,
     lockedByName: lock.lockedByName,
     syncState: state,
+    syncErrorCode: code,
   );
 }

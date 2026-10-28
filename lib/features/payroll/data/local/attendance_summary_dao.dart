@@ -1,6 +1,11 @@
 import 'dart:convert';
 
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/attendance_summary_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
@@ -49,12 +54,23 @@ class AttendanceSummaryDao {
     return items.length;
   }
 
-  /// Mois → résumé.
+  /// Mois → résumé. Un mois dont la réouverture attend encore son envoi
+  /// n'est plus clos pour la Paie : sinon on validerait une paie que la
+  /// réouverture, partie après, ferait refuser (ou l'inverse).
   Future<Map<String, AttendanceSummary>> forSchool(String schoolId) async {
-    final rows = await _store.db.query(
-      table,
-      where: 'school_id = ?',
-      whereArgs: [schoolId],
+    final rows = await _store.db.rawQuery(
+      'SELECT s.* FROM $table s WHERE s.school_id = ? AND NOT EXISTS ('
+      'SELECT 1 FROM ${StaffAttendanceGestureDao.table} g '
+      'JOIN ${OutboxDao.table} o '
+      "ON o.id = '${StaffAttendanceGestureDao.aggregateType}:' || g.id "
+      "WHERE g.school_id = s.school_id AND g.period_start = s.month || '-01' "
+      'AND g.gesture = ? AND g.sync_status = ? AND o.status = ?)',
+      [
+        schoolId,
+        StaffAttendanceGesture.reopenMonth.wire,
+        RecordSyncState.pending.dbValue,
+        OutboxStatus.pending.dbValue,
+      ],
     );
     return {
       for (final row in rows)
