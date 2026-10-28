@@ -53,23 +53,35 @@ class PayrollLedgerSignals extends StatelessWidget {
 /// Le bout de ligne : le crayon des éléments variables en brouillon, sinon
 /// le chevron qui dit que la ligne ouvre la fiche de l'agent.
 class PayrollLedgerOpenCell extends StatelessWidget {
+  final VoidCallback onOpen;
   final VoidCallback? onEdit;
 
-  const PayrollLedgerOpenCell({super.key, required this.onEdit});
+  const PayrollLedgerOpenCell({
+    super.key,
+    required this.onOpen,
+    required this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final onEdit = this.onEdit;
-    if (onEdit == null) {
-      return Tooltip(
-        message: AppLocalizations.of(context)!.payrollLedgerOpenAgent,
-        child: const Icon(Icons.chevron_right, color: AppColors.textMutedAa),
-      );
-    }
-    return IconButton(
-      tooltip: AppLocalizations.of(context)!.payrollVarsTitle,
-      onPressed: onEdit,
-      icon: const Icon(Icons.edit_outlined),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        IconButton(
+          tooltip: l10n.payrollLedgerOpenAgent,
+          onPressed: onOpen,
+          color: AppColors.textSecondary,
+          icon: const Icon(Icons.visibility_outlined),
+        ),
+        if (onEdit != null)
+          IconButton(
+            tooltip: l10n.payrollVarsTitle,
+            onPressed: onEdit,
+            icon: const Icon(Icons.edit_outlined),
+          ),
+      ],
     );
   }
 }

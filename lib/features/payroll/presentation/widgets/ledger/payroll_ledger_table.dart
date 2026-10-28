@@ -20,8 +20,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre : une ligne par agent, montants à droite en chiffres tabulaires,
 /// ligne de total par devise en pied. Toucher une ligne ouvre la fiche de
-/// l'agent ; en brouillon, le crayon de fin de ligne ouvre directement ses
-/// éléments variables — la saisie du mois reste d'un seul geste.
+/// l'agent, comme l'œil de fin de ligne ; en brouillon, le crayon à côté
+/// ouvre directement ses éléments variables — la saisie du mois reste d'un
+/// seul geste. La colonne du versement prend la place qui reste : l'agent ne
+/// s'étire plus loin de ses montants sur un grand écran.
 class PayrollLedgerTable extends StatelessWidget {
   final PayrollMonthView view;
   final PayrollSnapshot snapshot;
@@ -47,14 +49,14 @@ class PayrollLedgerTable extends StatelessWidget {
   static const int _netColumn = 5;
 
   static const List<double?> _widths = [
-    null,
+    AppDimensions.payrollColAgent,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColSmallAmount,
     AppDimensions.payrollColSmallAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAttendance,
-    AppDimensions.payrollColPayout,
+    null,
     AppDimensions.payrollColOpen,
   ];
 
@@ -197,6 +199,7 @@ class PayrollLedgerTable extends StatelessWidget {
           onPayout: () => onPayout(line),
         ),
         PayrollLedgerOpenCell(
+          onOpen: () => onOpen(line),
           onEdit: onEdit == null ? null : () => onEdit!(line),
         ),
       ],

@@ -874,21 +874,22 @@ class AppDimensions {
   static const classRecapWatchDot = 8.0;
 
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
-  // Le livre défile horizontalement sous 976 dp ; les colonnes de montant sont
-  // alignées à droite, en chiffres tabulaires.
-  static const payrollLedgerMinWidth = 976.0;
+  // Le livre défile horizontalement sous 1024 dp — 220 d'agent, les montants,
+  // 136 de versement au moins, l'œil et le crayon, 16 de marges ; les
+  // colonnes de montant sont alignées à droite, en chiffres tabulaires.
+  static const payrollLedgerMinWidth = 1024.0;
+  static const payrollColAgent = 220.0;
   static const payrollColAmount = 100.0;
 
-  /// La dernière colonne du livre : le crayon des éléments variables en
-  /// brouillon, sinon le chevron qui dit que la ligne ouvre la fiche.
-  static const payrollColOpen = minTouchTarget;
+  /// La dernière colonne du livre : l'œil qui ouvre la fiche, et le crayon
+  /// des éléments variables en brouillon.
+  static const payrollColOpen = minTouchTarget * 2;
 
   /// Le registre des arriérés : l'agent, ses mois dus, le dû, l'ancienneté.
   static const payrollArrearsMinWidth = 880.0;
   static const payrollColArrearsMonths = 300.0;
   static const payrollColSmallAmount = 80.0;
   static const payrollColAttendance = 96.0;
-  static const payrollColPayout = 136.0;
   static const payrollAdvancesMinWidth = 880.0;
   static const payrollColDate = 104.0;
   static const payrollColSchedule = 150.0;
