@@ -8629,6 +8629,42 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le reçu n\'a pas encore son numéro : le ticket sortira après la synchronisation, depuis « Tickets à imprimer ».';
 
   @override
+  String get ticketCancellationTitle => 'Ticket d\'annulation';
+
+  @override
+  String get ticketCancellationReceiptLabel => 'Reçu n°';
+
+  @override
+  String get ticketCancellationMark => 'Annulé';
+
+  @override
+  String get ticketCancellationIssuedAtLabel => 'Émis le :';
+
+  @override
+  String get ticketCancellationAmountLabel => 'Montant annulé :';
+
+  @override
+  String get ticketCancellationCancelledAtLabel => 'Annulé le :';
+
+  @override
+  String get ticketCancellationReasonLabel => 'Motif :';
+
+  @override
+  String get ticketCancellationDetailLabel => 'Précision :';
+
+  @override
+  String get ticketCancellationCashReturnedLabel => 'Argent rendu :';
+
+  @override
+  String get ticketCancellationYes => 'Oui';
+
+  @override
+  String get ticketCancellationNo => 'Non';
+
+  @override
+  String get ticketCancellationByLabel => 'Par :';
+
+  @override
   String get facturationCollectReceiptWaiting =>
       'Attribution du numéro du reçu…';
 

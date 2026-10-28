@@ -8554,6 +8554,42 @@ class AppLocalizationsEn extends AppLocalizations {
       'The receipt has no number yet: the ticket will print after sync, from “Tickets to print”.';
 
   @override
+  String get ticketCancellationTitle => 'Cancellation ticket';
+
+  @override
+  String get ticketCancellationReceiptLabel => 'Receipt no.';
+
+  @override
+  String get ticketCancellationMark => 'Cancelled';
+
+  @override
+  String get ticketCancellationIssuedAtLabel => 'Issued:';
+
+  @override
+  String get ticketCancellationAmountLabel => 'Amount cancelled:';
+
+  @override
+  String get ticketCancellationCancelledAtLabel => 'Cancelled:';
+
+  @override
+  String get ticketCancellationReasonLabel => 'Reason:';
+
+  @override
+  String get ticketCancellationDetailLabel => 'Detail:';
+
+  @override
+  String get ticketCancellationCashReturnedLabel => 'Cash returned:';
+
+  @override
+  String get ticketCancellationYes => 'Yes';
+
+  @override
+  String get ticketCancellationNo => 'No';
+
+  @override
+  String get ticketCancellationByLabel => 'By:';
+
+  @override
   String get facturationCollectReceiptWaiting =>
       'Assigning the receipt number…';
 

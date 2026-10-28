@@ -13710,6 +13710,78 @@ abstract class AppLocalizations {
   /// **'The receipt has no number yet: the ticket will print after sync, from “Tickets to print”.'**
   String get ticketAwaitingNumber;
 
+  /// No description provided for @ticketCancellationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation ticket'**
+  String get ticketCancellationTitle;
+
+  /// No description provided for @ticketCancellationReceiptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt no.'**
+  String get ticketCancellationReceiptLabel;
+
+  /// No description provided for @ticketCancellationMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get ticketCancellationMark;
+
+  /// No description provided for @ticketCancellationIssuedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued:'**
+  String get ticketCancellationIssuedAtLabel;
+
+  /// No description provided for @ticketCancellationAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount cancelled:'**
+  String get ticketCancellationAmountLabel;
+
+  /// No description provided for @ticketCancellationCancelledAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled:'**
+  String get ticketCancellationCancelledAtLabel;
+
+  /// No description provided for @ticketCancellationReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason:'**
+  String get ticketCancellationReasonLabel;
+
+  /// No description provided for @ticketCancellationDetailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail:'**
+  String get ticketCancellationDetailLabel;
+
+  /// No description provided for @ticketCancellationCashReturnedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash returned:'**
+  String get ticketCancellationCashReturnedLabel;
+
+  /// No description provided for @ticketCancellationYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get ticketCancellationYes;
+
+  /// No description provided for @ticketCancellationNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get ticketCancellationNo;
+
+  /// No description provided for @ticketCancellationByLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'By:'**
+  String get ticketCancellationByLabel;
+
   /// No description provided for @facturationCollectReceiptWaiting.
   ///
   /// In en, this message translates to:

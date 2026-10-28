@@ -147,6 +147,14 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/refr
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/watch_ledger_revalidation_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_revalidation_cubit.dart';
+import 'package:school_app_flutter/features/documents/data/local/cancellation_ticket_dao.dart';
+import 'package:school_app_flutter/features/documents/data/local/ticket_print_queue_dao.dart';
+import 'package:school_app_flutter/features/documents/data/repositories/cancellation_ticket_repository_impl.dart';
+import 'package:school_app_flutter/features/documents/data/repositories/ticket_print_queue_repository_impl.dart';
+import 'package:school_app_flutter/features/documents/domain/repositories/cancellation_ticket_repository.dart';
+import 'package:school_app_flutter/features/documents/domain/repositories/ticket_print_queue_repository.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/build_cancellation_ticket_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_queue_use_cases.dart';
 
 /// DI de la branche offline A (Inscription + Facturation).
 ///
@@ -576,6 +584,39 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<BuildProvisionalTicketUseCase>(
     () => BuildProvisionalTicketUseCase(getIt<ProvisionalTicketRepository>()),
+  );
+  // Continuité des tickets RC : le ticket d'annulation (lot B) et la file des
+  // tickets à imprimer (lot D).
+  getIt.registerLazySingleton<CancellationTicketRepository>(
+    () => CancellationTicketRepositoryImpl(
+      tickets: getIt<ProvisionalTicketDao>(),
+      cancellations: CancellationTicketDao(getIt<Database>()),
+      receipts: getIt<PaymentReceiptResolver>(),
+    ),
+  );
+  getIt.registerFactory<BuildCancellationTicketUseCase>(
+    () => BuildCancellationTicketUseCase(getIt<CancellationTicketRepository>()),
+  );
+  getIt.registerLazySingleton<TicketPrintQueueRepository>(
+    () => TicketPrintQueueRepositoryImpl(
+      queue: TicketPrintQueueDao(getIt<Database>()),
+      tickets: getIt<ProvisionalTicketDao>(),
+      receipts: getIt<PaymentReceiptResolver>(),
+    ),
+  );
+  getIt.registerFactory<ListPendingTicketJobsUseCase>(
+    () => ListPendingTicketJobsUseCase(getIt<TicketPrintQueueRepository>()),
+  );
+  getIt.registerFactory<MarkTicketJobPrintedUseCase>(
+    () => MarkTicketJobPrintedUseCase(getIt<TicketPrintQueueRepository>()),
+  );
+  getIt.registerFactory<RecordTicketJobProblemUseCase>(
+    () => RecordTicketJobProblemUseCase(getIt<TicketPrintQueueRepository>()),
+  );
+  getIt.registerFactory<MarkCancellationTicketPrintedUseCase>(
+    () => MarkCancellationTicketPrintedUseCase(
+      getIt<TicketPrintQueueRepository>(),
+    ),
   );
 
   getIt.registerFactory<EditiqueEligibilityCubit>(

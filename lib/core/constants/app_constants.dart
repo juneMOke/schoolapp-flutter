@@ -845,7 +845,10 @@ class AppConstants {
   // v69 (2026-10-25) : le barème élargi du back (Q8) — charges patronales,
   // plafonds d'avance, PC/E activable, intitulés du bulletin
   // (`ref_payroll_settings`). Additif, nullable. Palier d'école.
-  static const int offlineDbSchemaVersion = 69;
+  // v70 (2026-10-28) : `ticket_print_jobs`, les tickets que le poste doit
+  // encore imprimer — un ticket ne sort qu'avec le numéro définitif de son
+  // reçu (continuité des tickets RC, lot D). Table neuve. Palier d'école.
+  static const int offlineDbSchemaVersion = 70;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
