@@ -106,6 +106,7 @@ class _StaffCardState extends State<PayrollDashboardStaffCard> {
       icon: Icons.groups_outlined,
       tone: DashboardSense.attendu,
       toneStrength: DashboardTones.forceDe(DashboardSense.attendu),
+      toneSurface: false,
       actions: [
         EteeloButton.secondary(
           label: l10n.payrollDashPdf,

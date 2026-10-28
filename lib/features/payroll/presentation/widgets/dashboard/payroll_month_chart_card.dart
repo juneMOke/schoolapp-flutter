@@ -94,6 +94,7 @@ class PayrollMonthChartCard extends StatelessWidget {
       icon: Icons.bar_chart_rounded,
       tone: DashboardSense.attendu,
       toneStrength: DashboardTones.forceDe(DashboardSense.attendu),
+      toneSurface: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
