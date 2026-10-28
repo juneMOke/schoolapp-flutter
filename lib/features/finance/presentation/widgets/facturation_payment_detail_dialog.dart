@@ -289,6 +289,12 @@ Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
                   )
                 : null,
             ticketPaymentId: ticketOffered ? intent.paymentId : null,
+            // L'annulation acquittée d'un versement numéroté : son papier se
+            // refait comme celui d'un ticket de caisse.
+            cancellationPaymentId:
+                receipt.paymentCancelled && receipt.hasDefinitiveNumber
+                ? intent.paymentId
+                : null,
             // Le serveur a pu annuler le versement depuis que la liste l'a
             // montré : le reçu résolu le dit, et le geste disparaît alors.
             correctionEntry: gestures.cancel && !receipt.paymentCancelled
@@ -351,6 +357,10 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
   /// ticket n'est offert : le pied redevient alors « Fermer ».
   final String? ticketPaymentId;
 
+  /// Le versement annulé dont le ticket d'annulation se réimprime depuis le
+  /// pied (continuité des tickets RC, lot B), `null` sinon.
+  final String? cancellationPaymentId;
+
   const FacturationPaymentDetailDialogView({
     super.key,
     required this.intent,
@@ -363,6 +373,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
     this.ticketPrint,
     this.correctionEntry,
     this.ticketPaymentId,
+    this.cancellationPaymentId,
   });
 
   /// Ce que l'établissement a retiré, et pourquoi quand il l'a dit.
@@ -585,6 +596,7 @@ class FacturationPaymentDetailDialogView extends StatelessWidget {
             const Divider(height: 1, color: AppColors.border),
             FacturationPaymentDetailFooter(
               ticketPaymentId: ticketPaymentId,
+              cancellationPaymentId: cancellationPaymentId,
               onDownloadReceipt: onDownloadReceipt,
               // Le motif doit correspondre au refus, et un bouton éteint sans
               // explication n'en est pas un meilleur qu'un motif faux : les

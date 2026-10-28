@@ -47,6 +47,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/tickets_to_print_page.dart';
 import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_page.dart';
 import 'package:school_app_flutter/features/configuration/presentation/pages/configuration_settings_page.dart';
 import 'package:school_app_flutter/features/home/presentation/pages/home_page.dart';
@@ -440,7 +441,13 @@ class AppRouter {
           path: AppRoutesNames.facturations,
           // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
           builder: (context, state) => const FacturationPage.fromRoute(),
-          routes: [StudentRecordRoutes.facturationDetail()],
+          routes: [
+            StudentRecordRoutes.facturationDetail(),
+            GoRoute(
+              path: 'tickets-a-imprimer',
+              builder: (context, state) => const TicketsToPrintPage(),
+            ),
+          ],
         ),
       ],
     ),

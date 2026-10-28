@@ -13782,6 +13782,174 @@ abstract class AppLocalizations {
   /// **'By:'**
   String get ticketCancellationByLabel;
 
+  /// No description provided for @ticketsToPrintEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get ticketsToPrintEyebrow;
+
+  /// No description provided for @ticketsToPrintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets to print'**
+  String get ticketsToPrintTitle;
+
+  /// No description provided for @ticketsToPrintBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get ticketsToPrintBack;
+
+  /// No description provided for @ticketsToPrintReadySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to print ({count})'**
+  String ticketsToPrintReadySection(int count);
+
+  /// No description provided for @ticketsToPrintAwaitingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting number ({count})'**
+  String ticketsToPrintAwaitingSection(int count);
+
+  /// No description provided for @ticketsToPrintAwaitingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'They become printable after sync, with their receipt\'s final number.'**
+  String get ticketsToPrintAwaitingHint;
+
+  /// No description provided for @ticketsToPrintSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get ticketsToPrintSelectAll;
+
+  /// No description provided for @ticketsToPrintPrintAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Print ({count})'**
+  String ticketsToPrintPrintAction(int count);
+
+  /// No description provided for @ticketsToPrintRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get ticketsToPrintRefresh;
+
+  /// No description provided for @ticketsToPrintEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No ticket waiting'**
+  String get ticketsToPrintEmptyTitle;
+
+  /// No description provided for @ticketsToPrintEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Every ticket from this device has been printed.'**
+  String get ticketsToPrintEmptyDescription;
+
+  /// No description provided for @ticketsToPrintLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket queue unreadable'**
+  String get ticketsToPrintLoadErrorTitle;
+
+  /// No description provided for @ticketsToPrintLoadErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The list of tickets to print could not be read on this device.'**
+  String get ticketsToPrintLoadErrorMessage;
+
+  /// No description provided for @ticketsToPrintRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get ticketsToPrintRetry;
+
+  /// No description provided for @ticketsToPrintKindReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment ticket'**
+  String get ticketsToPrintKindReceipt;
+
+  /// No description provided for @ticketsToPrintKindCancellation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation ticket'**
+  String get ticketsToPrintKindCancellation;
+
+  /// No description provided for @ticketsToPrintNumberPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Number pending'**
+  String get ticketsToPrintNumberPending;
+
+  /// No description provided for @ticketsToPrintUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student not synced yet'**
+  String get ticketsToPrintUnknownStudent;
+
+  /// No description provided for @ticketsToPrintLastProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Last failure: {problem}'**
+  String ticketsToPrintLastProblem(String problem);
+
+  /// No description provided for @ticketsToPrintDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ticket printed} other{{count} tickets printed}}'**
+  String ticketsToPrintDone(int count);
+
+  /// No description provided for @ticketsToPrintStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing stopped: {problem} The remaining tickets are still selected.'**
+  String ticketsToPrintStopped(String problem);
+
+  /// No description provided for @ticketsToPrintSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ticket skipped: student not synced yet.} other{{count} tickets skipped: students not synced yet.}}'**
+  String ticketsToPrintSkipped(int count);
+
+  /// No description provided for @ticketsToPrintBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 ticket ready to print} other{{count} tickets ready to print}}'**
+  String ticketsToPrintBanner(int count);
+
+  /// No description provided for @ticketsToPrintBannerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See tickets'**
+  String get ticketsToPrintBannerAction;
+
+  /// No description provided for @paymentCancelTicketPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the cancellation ticket'**
+  String get paymentCancelTicketPrint;
+
+  /// No description provided for @paymentCancelTicketReprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reprint the cancellation ticket'**
+  String get paymentCancelTicketReprint;
+
+  /// No description provided for @paymentCancelTicketWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'The cancellation ticket will be ready once the server has recorded the cancellation…'**
+  String get paymentCancelTicketWaiting;
+
+  /// No description provided for @paymentCancelTicketDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation ticket to print after sync, from “Tickets to print”.'**
+  String get paymentCancelTicketDeferred;
+
   /// No description provided for @facturationCollectReceiptWaiting.
   ///
   /// In en, this message translates to:

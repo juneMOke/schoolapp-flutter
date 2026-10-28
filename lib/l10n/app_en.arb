@@ -5696,6 +5696,90 @@
   "ticketCancellationYes": "Yes",
   "ticketCancellationNo": "No",
   "ticketCancellationByLabel": "By:",
+  "ticketsToPrintEyebrow": "Finance",
+  "ticketsToPrintTitle": "Tickets to print",
+  "ticketsToPrintBack": "Back",
+  "ticketsToPrintReadySection": "Ready to print ({count})",
+  "@ticketsToPrintReadySection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintAwaitingSection": "Awaiting number ({count})",
+  "@ticketsToPrintAwaitingSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintAwaitingHint": "They become printable after sync, with their receipt's final number.",
+  "ticketsToPrintSelectAll": "Select all",
+  "ticketsToPrintPrintAction": "Print ({count})",
+  "@ticketsToPrintPrintAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintRefresh": "Refresh",
+  "ticketsToPrintEmptyTitle": "No ticket waiting",
+  "ticketsToPrintEmptyDescription": "Every ticket from this device has been printed.",
+  "ticketsToPrintLoadErrorTitle": "Ticket queue unreadable",
+  "ticketsToPrintLoadErrorMessage": "The list of tickets to print could not be read on this device.",
+  "ticketsToPrintRetry": "Try again",
+  "ticketsToPrintKindReceipt": "Payment ticket",
+  "ticketsToPrintKindCancellation": "Cancellation ticket",
+  "ticketsToPrintNumberPending": "Number pending",
+  "ticketsToPrintUnknownStudent": "Student not synced yet",
+  "ticketsToPrintLastProblem": "Last failure: {problem}",
+  "@ticketsToPrintLastProblem": {
+    "placeholders": {
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsToPrintDone": "{count, plural, =1{1 ticket printed} other{{count} tickets printed}}",
+  "@ticketsToPrintDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintStopped": "Printing stopped: {problem} The remaining tickets are still selected.",
+  "@ticketsToPrintStopped": {
+    "placeholders": {
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsToPrintSkipped": "{count, plural, =1{1 ticket skipped: student not synced yet.} other{{count} tickets skipped: students not synced yet.}}",
+  "@ticketsToPrintSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintBanner": "{count, plural, =1{1 ticket ready to print} other{{count} tickets ready to print}}",
+  "@ticketsToPrintBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintBannerAction": "See tickets",
+  "paymentCancelTicketPrint": "Print the cancellation ticket",
+  "paymentCancelTicketReprint": "Reprint the cancellation ticket",
+  "paymentCancelTicketWaiting": "The cancellation ticket will be ready once the server has recorded the cancellation…",
+  "paymentCancelTicketDeferred": "Cancellation ticket to print after sync, from “Tickets to print”.",
   "facturationCollectReceiptWaiting": "Assigning the receipt number…",
   "facturationCollectTicketDeferred": "Ticket to print after sync, from “Tickets to print”. The parent will get the receipt on WhatsApp if a number is on file.",
   "ticketRefusedUnknownStudent": "Printing refused: this tablet does not know the student's name. The payment is recorded — print again after the next sync.",

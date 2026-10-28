@@ -155,6 +155,7 @@ import 'package:school_app_flutter/features/documents/domain/repositories/cancel
 import 'package:school_app_flutter/features/documents/domain/repositories/ticket_print_queue_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_cancellation_ticket_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_queue_use_cases.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_queue_cubit.dart';
 
 /// DI de la branche offline A (Inscription + Facturation).
 ///
@@ -617,6 +618,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     () => MarkCancellationTicketPrintedUseCase(
       getIt<TicketPrintQueueRepository>(),
     ),
+  );
+  // Factory : la page et le bandeau ont chacun le leur.
+  getIt.registerFactory<TicketPrintQueueCubit>(
+    () => TicketPrintQueueCubit(getIt<ListPendingTicketJobsUseCase>()),
   );
 
   getIt.registerFactory<EditiqueEligibilityCubit>(

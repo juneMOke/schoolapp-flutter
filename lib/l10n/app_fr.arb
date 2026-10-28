@@ -5771,6 +5771,90 @@
   "ticketCancellationYes": "Oui",
   "ticketCancellationNo": "Non",
   "ticketCancellationByLabel": "Par :",
+  "ticketsToPrintEyebrow": "Finances",
+  "ticketsToPrintTitle": "Tickets à imprimer",
+  "ticketsToPrintBack": "Retour",
+  "ticketsToPrintReadySection": "Prêts à imprimer ({count})",
+  "@ticketsToPrintReadySection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintAwaitingSection": "Numéro attendu ({count})",
+  "@ticketsToPrintAwaitingSection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintAwaitingHint": "Ils deviendront imprimables après la synchronisation, avec le numéro définitif de leur reçu.",
+  "ticketsToPrintSelectAll": "Tout cocher",
+  "ticketsToPrintPrintAction": "Imprimer ({count})",
+  "@ticketsToPrintPrintAction": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintRefresh": "Actualiser",
+  "ticketsToPrintEmptyTitle": "Aucun ticket en attente",
+  "ticketsToPrintEmptyDescription": "Tous les tickets de ce poste sont imprimés.",
+  "ticketsToPrintLoadErrorTitle": "File des tickets illisible",
+  "ticketsToPrintLoadErrorMessage": "La liste des tickets à imprimer n'a pas pu être lue sur cet appareil.",
+  "ticketsToPrintRetry": "Réessayer",
+  "ticketsToPrintKindReceipt": "Ticket de caisse",
+  "ticketsToPrintKindCancellation": "Ticket d'annulation",
+  "ticketsToPrintNumberPending": "Numéro attendu",
+  "ticketsToPrintUnknownStudent": "Élève pas encore synchronisé",
+  "ticketsToPrintLastProblem": "Dernier échec : {problem}",
+  "@ticketsToPrintLastProblem": {
+    "placeholders": {
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsToPrintDone": "{count, plural, =1{1 ticket imprimé} other{{count} tickets imprimés}}",
+  "@ticketsToPrintDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintStopped": "Impression arrêtée : {problem} Les tickets restants sont toujours cochés.",
+  "@ticketsToPrintStopped": {
+    "placeholders": {
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsToPrintSkipped": "{count, plural, =1{1 ticket écarté : élève pas encore synchronisé.} other{{count} tickets écartés : élèves pas encore synchronisés.}}",
+  "@ticketsToPrintSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintBanner": "{count, plural, =1{1 ticket prêt à imprimer} other{{count} tickets prêts à imprimer}}",
+  "@ticketsToPrintBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ticketsToPrintBannerAction": "Voir les tickets",
+  "paymentCancelTicketPrint": "Imprimer le ticket d'annulation",
+  "paymentCancelTicketReprint": "Réimprimer le ticket d'annulation",
+  "paymentCancelTicketWaiting": "Le ticket d'annulation sera prêt dès que le serveur aura enregistré l'annulation…",
+  "paymentCancelTicketDeferred": "Ticket d'annulation à imprimer après la synchronisation, depuis « Tickets à imprimer ».",
   "facturationCollectReceiptWaiting": "Attribution du numéro du reçu…",
   "facturationCollectTicketDeferred": "Ticket à imprimer après la synchronisation, depuis « Tickets à imprimer ». Le parent recevra son reçu par WhatsApp si un numéro est enregistré.",
   "ticketRefusedUnknownStudent": "Impression refusée : le nom de l'élève n'est pas connu de cette tablette. Le versement est bien enregistré — réimprimez après la prochaine synchronisation.",

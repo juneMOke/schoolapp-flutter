@@ -68,6 +68,12 @@ class AppRoutesNames {
       '/finances/${MenuConstants.facturationsId}'
       '/detail/$studentId/$academicYearId/encaissement';
 
+  /// Tickets à imprimer — les tickets que ce poste doit encore sortir, avec le
+  /// numéro définitif de leur reçu (continuité des tickets RC, lot D). Écran
+  /// plein poussé au-dessus de Facturation, depuis le bandeau d'alerte.
+  static const String ticketsToPrint =
+      '/finances/${MenuConstants.facturationsId}/tickets-a-imprimer';
+
   /// Recouvrement — module propre depuis 2026-09-02, renommé le 2026-09-10 :
   /// le chemin ne passe plus par `/finances`, ni par `/controle-frais`.
   static const String recouvrementDashboard =

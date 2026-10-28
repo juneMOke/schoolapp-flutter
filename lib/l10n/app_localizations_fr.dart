@@ -8665,6 +8665,129 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketCancellationByLabel => 'Par :';
 
   @override
+  String get ticketsToPrintEyebrow => 'Finances';
+
+  @override
+  String get ticketsToPrintTitle => 'Tickets à imprimer';
+
+  @override
+  String get ticketsToPrintBack => 'Retour';
+
+  @override
+  String ticketsToPrintReadySection(int count) {
+    return 'Prêts à imprimer ($count)';
+  }
+
+  @override
+  String ticketsToPrintAwaitingSection(int count) {
+    return 'Numéro attendu ($count)';
+  }
+
+  @override
+  String get ticketsToPrintAwaitingHint =>
+      'Ils deviendront imprimables après la synchronisation, avec le numéro définitif de leur reçu.';
+
+  @override
+  String get ticketsToPrintSelectAll => 'Tout cocher';
+
+  @override
+  String ticketsToPrintPrintAction(int count) {
+    return 'Imprimer ($count)';
+  }
+
+  @override
+  String get ticketsToPrintRefresh => 'Actualiser';
+
+  @override
+  String get ticketsToPrintEmptyTitle => 'Aucun ticket en attente';
+
+  @override
+  String get ticketsToPrintEmptyDescription =>
+      'Tous les tickets de ce poste sont imprimés.';
+
+  @override
+  String get ticketsToPrintLoadErrorTitle => 'File des tickets illisible';
+
+  @override
+  String get ticketsToPrintLoadErrorMessage =>
+      'La liste des tickets à imprimer n\'a pas pu être lue sur cet appareil.';
+
+  @override
+  String get ticketsToPrintRetry => 'Réessayer';
+
+  @override
+  String get ticketsToPrintKindReceipt => 'Ticket de caisse';
+
+  @override
+  String get ticketsToPrintKindCancellation => 'Ticket d\'annulation';
+
+  @override
+  String get ticketsToPrintNumberPending => 'Numéro attendu';
+
+  @override
+  String get ticketsToPrintUnknownStudent => 'Élève pas encore synchronisé';
+
+  @override
+  String ticketsToPrintLastProblem(String problem) {
+    return 'Dernier échec : $problem';
+  }
+
+  @override
+  String ticketsToPrintDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tickets imprimés',
+      one: '1 ticket imprimé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ticketsToPrintStopped(String problem) {
+    return 'Impression arrêtée : $problem Les tickets restants sont toujours cochés.';
+  }
+
+  @override
+  String ticketsToPrintSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tickets écartés : élèves pas encore synchronisés.',
+      one: '1 ticket écarté : élève pas encore synchronisé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ticketsToPrintBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tickets prêts à imprimer',
+      one: '1 ticket prêt à imprimer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ticketsToPrintBannerAction => 'Voir les tickets';
+
+  @override
+  String get paymentCancelTicketPrint => 'Imprimer le ticket d\'annulation';
+
+  @override
+  String get paymentCancelTicketReprint => 'Réimprimer le ticket d\'annulation';
+
+  @override
+  String get paymentCancelTicketWaiting =>
+      'Le ticket d\'annulation sera prêt dès que le serveur aura enregistré l\'annulation…';
+
+  @override
+  String get paymentCancelTicketDeferred =>
+      'Ticket d\'annulation à imprimer après la synchronisation, depuis « Tickets à imprimer ».';
+
+  @override
   String get facturationCollectReceiptWaiting =>
       'Attribution du numéro du reçu…';
 

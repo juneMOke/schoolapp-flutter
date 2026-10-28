@@ -25,6 +25,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/tickets_to_print_banner.dart';
 
 class FacturationPage extends StatefulWidget {
   /// Vrai quand l'écran est ouvert par sa ROUTE, hors de la coquille — poussé
@@ -157,6 +158,11 @@ class _FacturationPageState extends State<FacturationPage> {
                 key: const ValueKey('facturation-content'),
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Là où le caissier encaisse : c'est lui qui a les tickets
+                  // en file (continuité des tickets RC, lot D).
+                  const TicketsToPrintBanner(
+                    padding: EdgeInsets.only(bottom: AppDimensions.spacingM),
+                  ),
                   BlocBuilder<
                     EnrollmentLocalListBloc,
                     EnrollmentLocalListState
