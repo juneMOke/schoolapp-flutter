@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_gap.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_row_scope.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_rule.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table_cards.dart';
@@ -35,8 +36,15 @@ class EteeloColumns extends StatelessWidget {
     this.frozenInset = AppSpacing.sm,
   }) : assert(widths.length == cells.length);
 
-  Widget _sized(int index, Widget cell, EteeloColumnRule? rule) {
-    final padding = rule?.paddingOf(index);
+  Widget _sized(
+    int index,
+    Widget cell,
+    EteeloColumnRule? rule,
+    EteeloColumnGap? gap,
+  ) {
+    // Le filet écarte déjà ses deux voisines ; ailleurs, un montant et la
+    // colonne alignée à gauche qui le suit.
+    final padding = rule?.paddingOf(index) ?? gap?.paddingOf(index);
     final spaced = padding == null
         ? cell
         : Padding(padding: padding, child: cell);
@@ -48,7 +56,8 @@ class EteeloColumns extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rule = EteeloColumnRule.maybeOf(context);
-    Widget sized(int index, Widget cell) => _sized(index, cell, rule);
+    final gap = EteeloColumnGap.maybeOf(context);
+    Widget sized(int index, Widget cell) => _sized(index, cell, rule, gap);
     final frozen = EteeloFrozenColumn.maybeOf(context);
     if (frozen == null || !frozen.active) {
       return Row(
@@ -234,13 +243,14 @@ class _EteeloColumnTableState extends State<EteeloColumnTable> {
       ),
     );
     final ruleAfter = widget.ruleAfter;
+    final gapped = EteeloColumnGap(endAligned: widget.endAligned, child: table);
     final ruled = ruleAfter == null
-        ? table
+        ? gapped
         : EteeloColumnRule(
             after: ruleAfter,
             widths: widget.widths,
             color: tone?.border ?? AppColors.border,
-            child: table,
+            child: gapped,
           );
     final framed = widget.raised
         ? DecoratedBox(

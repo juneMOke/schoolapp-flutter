@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_gap.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_rule.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 
@@ -33,10 +34,29 @@ void main() {
     expect(find.byType(CustomPaint), findsWidgets);
   });
 
-  testWidgets('sans filet, aucune portée ni écart', (tester) async {
+  testWidgets('sans filet, aucune portée de filet', (tester) async {
     await pump(tester);
     expect(find.byType(EteeloColumnRule), findsNothing);
   });
+
+  testWidgets(
+    'sans filet, la colonne qui suit un montant s en écarte quand même',
+    (tester) async {
+      await pump(tester);
+
+      // En-tête et ligne : « NET » / « POINTAGE » ne se touchent plus.
+      expect(
+        tester.getRect(find.text('POINTAGE')).left -
+            tester.getRect(find.text('NET')).right,
+        EteeloColumnGap.gap,
+      );
+      expect(
+        tester.getRect(find.text('RAS')).left -
+            tester.getRect(find.text('12')).right,
+        EteeloColumnGap.gap,
+      );
+    },
+  );
 
   testWidgets('le tableau mis en avant pose une carte ombrée', (tester) async {
     await pump(tester, raised: true);
