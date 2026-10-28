@@ -118,7 +118,19 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
     if (contract != state.contract) emit(state.copyWith(contract: contract));
   }
 
-  void clearFilters() => emit(state.copyWith(text: '', contract: null));
+  /// « Avec retenue » : les seuls agents à qui le mois retient.
+  void toggleDeducted() =>
+      emit(state.copyWith(deductedOnly: !state.deductedOnly));
+
+  /// Le filtre « avec retenue » lu dans l'adresse.
+  void applyDeducted(bool deductedOnly) {
+    if (deductedOnly != state.deductedOnly) {
+      emit(state.copyWith(deductedOnly: deductedOnly));
+    }
+  }
+
+  void clearFilters() =>
+      emit(state.copyWith(text: '', contract: null, deductedOnly: false));
 
   /// Pose la clôture du mois affiché sur la tablette ; l'outbox l'envoie.
   /// Rend l'annonce à faire.

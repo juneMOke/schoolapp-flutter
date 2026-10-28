@@ -31806,6 +31806,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{absences} unexcused d of {days} working days'**
   String payrollPayslipAbsenceDaysValue(int absences, int days);
+
+  /// No description provided for @hrPresenceRecapCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay cost for {month}'**
+  String hrPresenceRecapCost(String month);
+
+  /// No description provided for @hrPresenceRecapCostPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned · paid early {next} · before employer charges'**
+  String hrPresenceRecapCostPlanned(String next);
+
+  /// No description provided for @hrPresenceRecapCostFrozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay validated: figures frozen'**
+  String get hrPresenceRecapCostFrozen;
+
+  /// No description provided for @hrPresenceRecapDeduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Absence deduction'**
+  String get hrPresenceRecapDeduction;
+
+  /// No description provided for @hrPresenceRecapDeductionDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'÷ {days} working days'**
+  String hrPresenceRecapDeductionDetail(int days);
+
+  /// No description provided for @hrPresenceRecapColGross.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned gross'**
+  String get hrPresenceRecapColGross;
+
+  /// No description provided for @hrPresenceRecapColDeduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction'**
+  String get hrPresenceRecapColDeduction;
+
+  /// No description provided for @hrPresenceRecapColGrossAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross after absences'**
+  String get hrPresenceRecapColGrossAfter;
+
+  /// No description provided for @hrPresenceRecapHourlyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} × {rate}'**
+  String hrPresenceRecapHourlyRate(String hours, String rate);
+
+  /// No description provided for @hrPresenceRecapPaidHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'paid by the hour'**
+  String get hrPresenceRecapPaidHourly;
+
+  /// No description provided for @hrPresenceRecapDeductionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} d × {rate}'**
+  String hrPresenceRecapDeductionDays(int days, String rate);
+
+  /// No description provided for @hrPresenceRecapWithDeduction.
+  ///
+  /// In en, this message translates to:
+  /// **'With deduction'**
+  String get hrPresenceRecapWithDeduction;
+
+  /// No description provided for @hrPresenceRecapLegendPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction = base salary ÷ {days} working days of the month × unexcused days · gross before income tax, social security and advances, excluding employer charges'**
+  String hrPresenceRecapLegendPay(int days);
+
+  /// No description provided for @hrPresenceRecapTotalCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · {currency}'**
+  String hrPresenceRecapTotalCurrency(String currency);
+
+  /// No description provided for @hrPresenceRecapStatusPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get hrPresenceRecapStatusPlanned;
+
+  /// No description provided for @hrPresenceRecapStatusFrozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get hrPresenceRecapStatusFrozen;
 }
 
 class _AppLocalizationsDelegate

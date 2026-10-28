@@ -173,7 +173,9 @@ Map<String, dynamic> profiles({String? month = '2026-10'}) => {
   ],
 };
 
-Map<String, dynamic> recap({bool withAmounts = true}) => {
+/// Le récapitulatif tel que le sert `feat/payroll-month-m` (L4) ; [legacy] :
+/// tel qu'un serveur d'avant le servait.
+Map<String, dynamic> recap({bool withAmounts = true, bool legacy = false}) => {
   'month': '2026-10',
   'classDays': 17,
   'toDate': true,
@@ -182,13 +184,28 @@ Map<String, dynamic> recap({bool withAmounts = true}) => {
   'closedBy': null,
   'closable': false,
   'unscored': 6,
+  if (!legacy) ...{
+    'reopenable': false,
+    'absenceDeductionEnabled': true,
+    'workingDays': 22,
+    'payrollStatus': 'DRAFT',
+  },
   'totals': {
     'presenceRatePct': 92,
     'workedMinutes': 2760,
     'unjustifiedAbsences': 11,
     'amounts': withAmounts
         ? [
-            {'currency': 'USD', 'amountInCents': 36800},
+            {
+              'currency': 'USD',
+              'amountInCents': 36800,
+              if (!legacy) ...{
+                'baseInCents': 16000,
+                'grossInCents': 16000,
+                'absenceDeductionInCents': 0,
+                'grossAfterAbsenceInCents': 16000,
+              },
+            },
           ]
         : null,
   },
@@ -206,6 +223,15 @@ Map<String, dynamic> recap({bool withAmounts = true}) => {
       'amount': withAmounts
           ? {'currency': 'USD', 'amountInCents': 16000}
           : null,
+      if (!legacy) ...{
+        'currency': withAmounts ? 'USD' : null,
+        'baseInCents': withAmounts ? 16000 : null,
+        'grossInCents': withAmounts ? 16000 : null,
+        'dailyRateInCents': null,
+        'absenceDeductionInCents': null,
+        'grossAfterAbsenceInCents': withAmounts ? 16000 : null,
+        'hourlyRateInCents': withAmounts ? 800 : null,
+      },
     },
   ],
 };

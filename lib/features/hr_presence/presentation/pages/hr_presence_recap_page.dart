@@ -20,12 +20,14 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// RH · Présences ▸ Récapitulatif — les totaux du mois par agent, lus au
 /// serveur (route 5), et la clôture du mois. Le mois et le contrat tiennent
-/// dans l'adresse (`?mois=AAAA-MM&contrat=vacataire`, nue sur le mois en
-/// cours et tous les contrats). La recherche n'y va pas : chaque frappe
+/// dans l'adresse, avec « avec retenue » (`?mois=AAAA-MM&contrat=vacataire&
+/// retenue=1`, nue sur le mois en cours, tous les contrats et tous les
+/// agents). La recherche n'y va pas : chaque frappe
 /// serait une entrée d'historique.
 class HrPresenceRecapPage extends StatelessWidget {
   static const monthParam = 'mois';
   static const contractParam = 'contrat';
+  static const deductedParam = 'retenue';
 
   const HrPresenceRecapPage({super.key});
 
@@ -77,8 +79,14 @@ class HrPresenceRecapScreen extends StatelessWidget {
                   ? null
                   : state.month,
               HrPresenceRecapPage.contractParam: state.contract?.name,
+              HrPresenceRecapPage.deductedParam: state.deductedOnly
+                  ? '1'
+                  : null,
             },
             onLocation: (values) {
+              cubit.applyDeducted(
+                values[HrPresenceRecapPage.deductedParam] == '1',
+              );
               cubit.applyContract(
                 StaffContractFilter.values
                     .asNameMap()[values[HrPresenceRecapPage.contractParam]],

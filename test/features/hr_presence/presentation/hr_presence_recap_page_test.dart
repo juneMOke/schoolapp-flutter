@@ -158,7 +158,8 @@ void main() {
     expect(find.text('17 jours de classe à ce jour'), findsOneWidget);
     // Au bandeau, puis au pied du tableau.
     expect(find.text('92 %'), findsNWidgets(2));
-    expect(find.textContaining('368,00'), findsNWidgets(2));
+    // Les heures au bandeau ; au pied, les montants du mois les remplacent.
+    expect(find.textContaining('368,00'), findsOneWidget);
     expect(find.byType(HrPresenceRecapTable), findsOneWidget);
     expect(find.text('MWAMBA Clarisse'), findsOneWidget);
   });
@@ -173,6 +174,75 @@ void main() {
   ) async {
     await pump(tester, answer: recapOf(withAmounts: false));
     expect(find.textContaining('368,00'), findsNothing);
+  });
+
+  testWidgets('pour qui lit la paie : le coût du mois et sa retenue', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    expect(find.text('Coût de la paie de octobre 2026'), findsOneWidget);
+    // Au bandeau et au pied : 824,55 $ et − 65,45 $.
+    expect(find.textContaining('824,55'), findsNWidgets(2));
+    expect(find.textContaining('− 65,45'), findsNWidgets(3));
+    expect(find.text('÷ 22 jours ouvrés'), findsOneWidget);
+    expect(find.textContaining('versée début novembre 2026'), findsOneWidget);
+    expect(find.text('Prévu'), findsOneWidget);
+    // La ligne de MWAMBA : 3 NJ × 21,82 $, le vacataire payé à l'heure.
+    expect(find.textContaining('3 j × 21,82'), findsOneWidget);
+    expect(find.text('payé à l\'heure'), findsOneWidget);
+    expect(find.text('BRUT APRÈS ABSENCES'), findsOneWidget);
+    expect(find.text('HEURES VAC.'), findsNothing);
+  });
+
+  testWidgets(
+    'deux devises : une ligne de total chacune, jamais additionnées',
+    (tester) async {
+      await pump(tester, answer: recapOf(withCdf: true));
+      expect(find.text('Total · 3 agents'), findsOneWidget);
+      expect(find.text('Total · USD'), findsOneWidget);
+      expect(find.text('Total · CDF'), findsOneWidget);
+    },
+  );
+
+  testWidgets('une paie validée : chiffres figés', (tester) async {
+    await pump(
+      tester,
+      answer: recapOf(payrollStatus: HrRecapPayrollStatus.validated),
+    );
+    expect(find.text('Figé'), findsOneWidget);
+    expect(find.text('Paie validée : chiffres figés'), findsOneWidget);
+  });
+
+  testWidgets('une école qui ne retient pas : ni colonne ni tuile de retenue', (
+    tester,
+  ) async {
+    await pump(tester, answer: recapOf(absenceDeductionEnabled: false));
+    expect(find.text('RETENUE'), findsNothing);
+    expect(find.text('Retenue pour absences'), findsNothing);
+    expect(find.text('Avec retenue'), findsNothing);
+    expect(find.text('BRUT APRÈS ABSENCES'), findsOneWidget);
+  });
+
+  testWidgets('« Avec retenue » ne garde que les agents retenus', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.widgetWithText(EteeloFilterChip, 'Avec retenue'));
+    await tester.pump();
+
+    expect(find.text('MWAMBA Clarisse'), findsOneWidget);
+    expect(find.text('KALALA Didier'), findsNothing);
+    expect(find.textContaining('Total ·'), findsNothing);
+  });
+
+  testWidgets('sans hr.pay.read : les heures, sans argent du mois', (
+    tester,
+  ) async {
+    await pump(tester, answer: recapOf(withAmounts: false));
+    expect(find.text('HEURES VAC.'), findsOneWidget);
+    expect(find.text('BRUT PRÉVU'), findsNothing);
+    expect(find.textContaining('Coût de la paie'), findsNothing);
   });
 
   testWidgets('le bandeau garde le mois et dit ce qui manque', (tester) async {

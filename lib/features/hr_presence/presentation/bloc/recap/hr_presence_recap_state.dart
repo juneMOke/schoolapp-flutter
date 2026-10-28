@@ -33,6 +33,9 @@ class HrPresenceRecapState extends Equatable {
   /// `null` : tous les contrats.
   final StaffContractFilter? contract;
 
+  /// Les seuls agents à qui le mois retient quelque chose.
+  final bool deductedOnly;
+
   /// Une clôture est en cours d'écriture : le bouton se désarme.
   final bool closing;
 
@@ -51,6 +54,7 @@ class HrPresenceRecapState extends Equatable {
     this.unsyncedByAgent = const {},
     this.text = '',
     this.contract,
+    this.deductedOnly = false,
     this.closing = false,
     this.reopening = false,
   });
@@ -72,7 +76,8 @@ class HrPresenceRecapState extends Equatable {
     return (recap?.closed ?? false) || (local?.locked ?? false);
   }
 
-  bool get hasFilters => text.trim().isNotEmpty || contract != null;
+  bool get hasFilters =>
+      text.trim().isNotEmpty || contract != null || deductedOnly;
 
   /// Pointages de cet agent encore sur la tablette.
   int unsyncedOf(String staffMemberId) => unsyncedByAgent[staffMemberId] ?? 0;
@@ -104,9 +109,20 @@ class HrPresenceRecapState extends Equatable {
 
   int get searchedCount => _searched.length;
 
-  List<HrAttendanceRecapRow> get visibleRows => [
+  static bool _deducted(HrAttendanceRecapRow row) =>
+      (row.pay?.absenceDeductionInCents ?? 0) > 0;
+
+  List<HrAttendanceRecapRow> get _byContract => [
     for (final row in _searched)
       if (contract == null || contract!.matches(row.agent.contractKind)) row,
+  ];
+
+  /// Les agents de la recherche et du contrat à qui le mois retient.
+  int get deductedCount => _byContract.where(_deducted).length;
+
+  List<HrAttendanceRecapRow> get visibleRows => [
+    for (final row in _byContract)
+      if (!deductedOnly || _deducted(row)) row,
   ];
 
   HrPresenceRecapState copyWith({
@@ -119,6 +135,7 @@ class HrPresenceRecapState extends Equatable {
     Map<String, int>? unsyncedByAgent,
     String? text,
     Object? contract = _undefined,
+    bool? deductedOnly,
     bool? closing,
     bool? reopening,
   }) => HrPresenceRecapState(
@@ -141,6 +158,7 @@ class HrPresenceRecapState extends Equatable {
     contract: identical(contract, _undefined)
         ? this.contract
         : contract as StaffContractFilter?,
+    deductedOnly: deductedOnly ?? this.deductedOnly,
     closing: closing ?? this.closing,
     reopening: reopening ?? this.reopening,
   );
@@ -158,6 +176,7 @@ class HrPresenceRecapState extends Equatable {
     unsyncedByAgent,
     text,
     contract,
+    deductedOnly,
     closing,
     reopening,
   ];

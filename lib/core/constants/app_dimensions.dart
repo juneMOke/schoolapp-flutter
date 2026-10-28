@@ -849,6 +849,11 @@ class AppDimensions {
   static const hrPresenceRecapColAbsences = 168.0;
   static const hrPresenceRecapMinWidth = 920.0;
 
+  /// … une colonne d'argent (brut prévu, retenue, brut après absences), et
+  /// la largeur plancher quand elles remplacent les heures.
+  static const hrPresenceRecapColMoney = 128.0;
+  static const hrPresenceRecapPayMinWidth = 1160.0;
+
   /// … une tuile du bandeau, au plus étroit.
   static const hrPresenceRecapTileMin = payrollAgentTileMin;
 

@@ -16,6 +16,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_recap.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_labels.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_absences.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_pay_cells.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_table.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -26,10 +27,11 @@ abstract final class HrPresenceRecapRows {
   /// La ligne d'un agent : qui il est (et ce que la tablette n'a pas encore
   /// envoyé pour lui — sa ligne servie ne le compte pas encore), son contrat,
   /// ses présences sur les jours de classe, ses absences et retards, ses
-  /// jours non pointés, ses heures de vacation.
+  /// jours non pointés, puis ses montants du mois ou ses heures de vacation.
   static EteeloColumnTableRow agent(
     BuildContext context, {
     required HrAttendanceRecapRow row,
+    required HrPresenceRecapColumns columns,
     required int unsynced,
     required ValueChanged<HrAttendanceRecapRow> onOpen,
   }) {
@@ -39,7 +41,7 @@ abstract final class HrPresenceRecapRows {
     final amount = row.amount;
     return EteeloColumnTableRow(
       onTap: () => onOpen(row),
-      widths: HrPresenceRecapTable.widths,
+      widths: columns.widths,
       cells: [
         Row(
           children: [
@@ -95,16 +97,22 @@ abstract final class HrPresenceRecapRows {
               ? style
               : style.copyWith(color: AppColors.presenceMarkLateInk),
         ),
-        Text(
-          agent.isHourly
-              ? [
-                  PresenceLabels.hours(l10n, row.workedMinutes),
-                  if (amount != null) MoneyFormat.format(amount),
-                ].join(' · ')
-              : l10n.hrPresenceNoValue,
-          style: style,
-          textAlign: TextAlign.end,
-        ),
+        if (columns.pay) ...[
+          HrPresenceRecapPayCells.gross(context, row),
+          if (columns.deduction)
+            HrPresenceRecapPayCells.deduction(context, row),
+          HrPresenceRecapPayCells.grossAfter(context, row),
+        ] else
+          Text(
+            agent.isHourly
+                ? [
+                    PresenceLabels.hours(l10n, row.workedMinutes),
+                    if (amount != null) MoneyFormat.format(amount),
+                  ].join(' · ')
+                : l10n.hrPresenceNoValue,
+            style: style,
+            textAlign: TextAlign.end,
+          ),
         // L'œil des tables de l'app : toute la ligne ouvre aussi.
         DataTableTrailingRegistry.build(
           context,
@@ -119,10 +127,13 @@ abstract final class HrPresenceRecapRows {
   }
 
   /// Le pied : le mois entier, tel que le serveur le compte, sur le bandeau
-  /// de l'en-tête comme les totaux de la Paie.
-  static EteeloColumnTableRow total(
+  /// de l'en-tête comme les totaux de la Paie. Avec les montants, une ligne
+  /// par devise : la première porte les comptes, les suivantes leur seul
+  /// argent — deux devises ne s'additionnent jamais.
+  static Widget total(
     BuildContext context, {
     required HrAttendanceRecap recap,
+    required HrPresenceRecapColumns columns,
   }) {
     final l10n = AppLocalizations.of(context)!;
     final ink = ListingTones.table.headerInk;
@@ -131,8 +142,31 @@ abstract final class HrPresenceRecapRows {
     final rate = totals.presenceRatePct;
     int sum(int Function(HrAttendanceRecapRow row) of) =>
         recap.staff.fold(0, (total, row) => total + of(row));
-    return EteeloColumnTableRow(
-      widths: HrPresenceRecapTable.widths,
+    final amounts = columns.pay
+        ? recap.totals.amounts ?? const <HrAttendanceRecapAmount>[]
+        : const <HrAttendanceRecapAmount>[];
+    EteeloColumnTableRow money(HrAttendanceRecapAmount amount) =>
+        EteeloColumnTableRow(
+          widths: columns.widths,
+          background: ListingTones.table.header,
+          labelInk: ink,
+          cells: [
+            Text(
+              l10n.hrPresenceRecapTotalCurrency(amount.currency),
+              style: AppTypography.labelLarge.copyWith(color: ink),
+            ),
+            for (var i = 1; i < HrPresenceRecapColumns.leading; i++)
+              const SizedBox.shrink(),
+            ...HrPresenceRecapPayCells.totals(
+              amount,
+              deduction: columns.deduction,
+              ink: ink,
+            ),
+            const SizedBox.shrink(),
+          ],
+        );
+    final counts = EteeloColumnTableRow(
+      widths: columns.widths,
       background: ListingTones.table.header,
       labelInk: ink,
       cells: [
@@ -157,16 +191,34 @@ abstract final class HrPresenceRecapRows {
           textAlign: TextAlign.end,
           style: style,
         ),
-        Text(
-          [
-            PresenceLabels.hours(l10n, totals.workedMinutes),
-            ...?totals.amounts?.map(MoneyFormat.format),
-          ].join(' · '),
-          textAlign: TextAlign.end,
-          style: style,
-        ),
+        if (columns.pay) ...[
+          // Une seule devise : ses montants tiennent sur la ligne des comptes.
+          if (amounts.length == 1)
+            ...HrPresenceRecapPayCells.totals(
+              amounts.single,
+              deduction: columns.deduction,
+              ink: ink,
+            )
+          else ...[
+            for (var i = 0; i < (columns.deduction ? 3 : 2); i++)
+              const SizedBox.shrink(),
+          ],
+        ] else
+          Text(
+            [
+              PresenceLabels.hours(l10n, totals.workedMinutes),
+              ...?totals.hourAmounts?.map(MoneyFormat.format),
+            ].join(' · '),
+            textAlign: TextAlign.end,
+            style: style,
+          ),
         const SizedBox.shrink(),
       ],
+    );
+    if (amounts.length < 2) return counts;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [counts, for (final amount in amounts) money(amount)],
     );
   }
 }

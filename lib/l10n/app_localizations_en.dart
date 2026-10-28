@@ -20690,4 +20690,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String payrollPayslipAbsenceDaysValue(int absences, int days) {
     return '$absences unexcused d of $days working days';
   }
+
+  @override
+  String hrPresenceRecapCost(String month) {
+    return 'Pay cost for $month';
+  }
+
+  @override
+  String hrPresenceRecapCostPlanned(String next) {
+    return 'Planned · paid early $next · before employer charges';
+  }
+
+  @override
+  String get hrPresenceRecapCostFrozen => 'Pay validated: figures frozen';
+
+  @override
+  String get hrPresenceRecapDeduction => 'Absence deduction';
+
+  @override
+  String hrPresenceRecapDeductionDetail(int days) {
+    return '÷ $days working days';
+  }
+
+  @override
+  String get hrPresenceRecapColGross => 'Planned gross';
+
+  @override
+  String get hrPresenceRecapColDeduction => 'Deduction';
+
+  @override
+  String get hrPresenceRecapColGrossAfter => 'Gross after absences';
+
+  @override
+  String hrPresenceRecapHourlyRate(String hours, String rate) {
+    return '$hours × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapPaidHourly => 'paid by the hour';
+
+  @override
+  String hrPresenceRecapDeductionDays(int days, String rate) {
+    return '$days d × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapWithDeduction => 'With deduction';
+
+  @override
+  String hrPresenceRecapLegendPay(int days) {
+    return 'Deduction = base salary ÷ $days working days of the month × unexcused days · gross before income tax, social security and advances, excluding employer charges';
+  }
+
+  @override
+  String hrPresenceRecapTotalCurrency(String currency) {
+    return 'Total · $currency';
+  }
+
+  @override
+  String get hrPresenceRecapStatusPlanned => 'Planned';
+
+  @override
+  String get hrPresenceRecapStatusFrozen => 'Frozen';
 }

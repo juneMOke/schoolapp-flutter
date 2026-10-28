@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_recap.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:retrofit/retrofit.dart' hide Headers;
 import 'package:school_app_flutter/core/entities/dashboard_window.dart';
@@ -179,11 +180,38 @@ void main() {
         () => api.getRecap(any(), any()),
       ).thenAnswer((_) async => fx.recap());
       final recap = _right(await repo.recap('2026-10'));
-      expect(recap.totals.amounts, [const Money(36800, 'USD')]);
+      expect(recap.totals.hourAmounts, [const Money(36800, 'USD')]);
+      expect(
+        recap.totals.amounts!.single,
+        const HrAttendanceRecapAmount(
+          currency: 'USD',
+          hoursInCents: 36800,
+          baseInCents: 16000,
+          grossInCents: 16000,
+          grossAfterAbsenceInCents: 16000,
+        ),
+      );
       expect(recap.staff.single.agent.isHourly, isTrue);
       expect(recap.staff.single.amount, const Money(16000, 'USD'));
+      expect(recap.staff.single.pay?.hourlyRateInCents, 800);
+      expect(recap.staff.single.pay?.absenceDeductionInCents, isNull);
+      expect(recap.absenceDeductionEnabled, isTrue);
+      expect(recap.workingDays, 22);
+      expect(recap.payrollStatus, HrRecapPayrollStatus.draft);
       expect(recap.closable, isFalse);
       expect(recap.staff.single.unscored, 0);
+    });
+
+    test('un serveur d\'avant la paie au mois M se lit encore', () async {
+      when(
+        () => api.getRecap(any(), any()),
+      ).thenAnswer((_) async => fx.recap(legacy: true));
+      final recap = _right(await repo.recap('2026-10'));
+      expect(recap.totals.hourAmounts, [const Money(36800, 'USD')]);
+      expect(recap.staff.single.pay, isNull);
+      expect(recap.reopenable, isFalse);
+      expect(recap.workingDays, 0);
+      expect(recap.payrollStatus, HrRecapPayrollStatus.none);
     });
 
     test('sans hr.pay.read : aucun montant', () async {
@@ -193,6 +221,7 @@ void main() {
       final recap = _right(await repo.recap('2026-10'));
       expect(recap.totals.amounts, isNull);
       expect(recap.staff.single.amount, isNull);
+      expect(recap.staff.single.pay, isNull);
     });
   });
 

@@ -309,6 +309,7 @@ HrAttendanceRecapRow recapRow(
   int unscored = 1,
   int workedMinutes = 0,
   Money? amount,
+  HrAttendanceRecapPay? pay,
 }) => HrAttendanceRecapRow(
   agent: HrAttendanceAgent(
     staffMemberId: id,
@@ -329,6 +330,7 @@ HrAttendanceRecapRow recapRow(
   unscored: unscored,
   workedMinutes: workedMinutes,
   amount: amount,
+  pay: pay,
 );
 
 HrAttendanceRecap recapOf({
@@ -339,6 +341,9 @@ HrAttendanceRecap recapOf({
   bool closable = false,
   bool reopenable = false,
   bool withAmounts = true,
+  bool absenceDeductionEnabled = true,
+  bool withCdf = false,
+  HrRecapPayrollStatus payrollStatus = HrRecapPayrollStatus.draft,
   List<HrAttendanceRecapRow>? staff,
 }) => HrAttendanceRecap(
   month: month,
@@ -349,12 +354,35 @@ HrAttendanceRecap recapOf({
   closedBy: closed ? 'Mme la Directrice' : null,
   closable: closable,
   reopenable: reopenable,
+  absenceDeductionEnabled: absenceDeductionEnabled,
+  workingDays: 22,
+  payrollStatus: payrollStatus,
   unscored: 6,
   totals: HrAttendanceRecapTotals(
     presenceRatePct: 92,
     workedMinutes: 2760,
     unjustifiedAbsences: 11,
-    amounts: withAmounts ? const [Money(36800, 'USD')] : null,
+    // 480 $ + 160 $ (vacataire, 20 h) + 250 $ ; MWAMBA retient 3 NJ :
+    // roundDiv(48000 × 3, 22) = 6545.
+    amounts: withAmounts
+        ? [
+            const HrAttendanceRecapAmount(
+              currency: 'USD',
+              hoursInCents: 36800,
+              baseInCents: 89000,
+              grossInCents: 89000,
+              absenceDeductionInCents: 6545,
+              grossAfterAbsenceInCents: 82455,
+            ),
+            if (withCdf)
+              const HrAttendanceRecapAmount(
+                currency: 'CDF',
+                baseInCents: 50000000,
+                grossInCents: 50000000,
+                grossAfterAbsenceInCents: 50000000,
+              ),
+          ]
+        : null,
   ),
   staff:
       staff ??
@@ -364,6 +392,16 @@ HrAttendanceRecap recapOf({
           lastName: 'MWAMBA',
           firstName: 'Clarisse',
           unjustified: 3,
+          pay: withAmounts
+              ? const HrAttendanceRecapPay(
+                  currency: 'USD',
+                  baseInCents: 48000,
+                  grossInCents: 48000,
+                  dailyRateInCents: 2182,
+                  absenceDeductionInCents: 6545,
+                  grossAfterAbsenceInCents: 41455,
+                )
+              : null,
         ),
         recapRow(
           'a-2',
@@ -374,12 +412,31 @@ HrAttendanceRecap recapOf({
           unscored: 0,
           workedMinutes: 1200,
           amount: withAmounts ? const Money(16000, 'USD') : null,
+          pay: withAmounts
+              ? const HrAttendanceRecapPay(
+                  currency: 'USD',
+                  baseInCents: 16000,
+                  grossInCents: 16000,
+                  grossAfterAbsenceInCents: 16000,
+                  hourlyRateInCents: 800,
+                )
+              : null,
         ),
         recapRow(
           'a-3',
           lastName: 'MAYALA',
           firstName: 'Ruth',
           contract: StaffContractKind.conventionne,
+          pay: withAmounts
+              ? const HrAttendanceRecapPay(
+                  currency: 'USD',
+                  baseInCents: 25000,
+                  grossInCents: 25000,
+                  dailyRateInCents: 1136,
+                  absenceDeductionInCents: 0,
+                  grossAfterAbsenceInCents: 25000,
+                )
+              : null,
         ),
       ],
 );

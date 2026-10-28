@@ -96,6 +96,11 @@ class HrPresenceRecapBody extends StatelessWidget {
               onContract: cubit.toggleContract,
               text: state.text,
               onText: cubit.setText,
+              // Seulement là où une retenue peut exister.
+              deducted: HrPresenceRecapColumns.of(recap).deduction
+                  ? (count: state.deductedCount, selected: state.deductedOnly)
+                  : null,
+              onDeducted: cubit.toggleDeducted,
             ),
             const SizedBox(height: AppSpacing.md),
             if (rows.isEmpty)
@@ -108,6 +113,7 @@ class HrPresenceRecapBody extends StatelessWidget {
               HrPresenceRecapTable(
                 rows: rows,
                 onOpen: onOpen,
+                columns: HrPresenceRecapColumns.of(recap),
                 unsyncedByAgent: state.unsyncedByAgent,
                 // Filtré, le tableau n'est plus le mois entier : pas de
                 // total, plutôt qu'un total qui ne s'additionne pas.
@@ -115,7 +121,12 @@ class HrPresenceRecapBody extends StatelessWidget {
               ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              l10n.hrPresenceRecapLegend,
+              [
+                if (HrPresenceRecapColumns.of(recap).deduction &&
+                    recap.workingDays > 0)
+                  l10n.hrPresenceRecapLegendPay(recap.workingDays),
+                l10n.hrPresenceRecapLegend,
+              ].join(' · '),
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textMutedAa,
               ),

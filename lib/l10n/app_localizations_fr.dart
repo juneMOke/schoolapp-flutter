@@ -20826,4 +20826,66 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollPayslipAbsenceDaysValue(int absences, int days) {
     return '$absences j NJ sur $days jours ouvrés';
   }
+
+  @override
+  String hrPresenceRecapCost(String month) {
+    return 'Coût de la paie de $month';
+  }
+
+  @override
+  String hrPresenceRecapCostPlanned(String next) {
+    return 'Prévu · versée début $next · hors charges patronales';
+  }
+
+  @override
+  String get hrPresenceRecapCostFrozen => 'Paie validée : chiffres figés';
+
+  @override
+  String get hrPresenceRecapDeduction => 'Retenue pour absences';
+
+  @override
+  String hrPresenceRecapDeductionDetail(int days) {
+    return '÷ $days jours ouvrés';
+  }
+
+  @override
+  String get hrPresenceRecapColGross => 'Brut prévu';
+
+  @override
+  String get hrPresenceRecapColDeduction => 'Retenue';
+
+  @override
+  String get hrPresenceRecapColGrossAfter => 'Brut après absences';
+
+  @override
+  String hrPresenceRecapHourlyRate(String hours, String rate) {
+    return '$hours × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapPaidHourly => 'payé à l\'heure';
+
+  @override
+  String hrPresenceRecapDeductionDays(int days, String rate) {
+    return '$days j × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapWithDeduction => 'Avec retenue';
+
+  @override
+  String hrPresenceRecapLegendPay(int days) {
+    return 'Retenue = salaire de base ÷ $days jours ouvrés du mois × jours NJ · brut avant IPR, CNSS et avances, hors charges patronales';
+  }
+
+  @override
+  String hrPresenceRecapTotalCurrency(String currency) {
+    return 'Total · $currency';
+  }
+
+  @override
+  String get hrPresenceRecapStatusPlanned => 'Prévu';
+
+  @override
+  String get hrPresenceRecapStatusFrozen => 'Figé';
 }
