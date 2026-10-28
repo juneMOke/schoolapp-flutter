@@ -36,9 +36,11 @@ class PayrollChoiceChips<T> extends StatelessWidget {
           icon: icon?.call(value),
           count: count?.call(value),
           selected: value == selected,
-          color: AppColors.payrollValidated,
-          soft: AppColors.payrollValidatedSoft,
-          ink: AppColors.payrollValidatedInk,
+          // Le bleu ardoise, accent de lecture : un choix n'a pas à porter
+          // la couleur d'un statut (l'aubergine dit « validée »).
+          color: AppColors.bleuArdoise,
+          soft: AppColors.bleuArdoiseSoft,
+          ink: AppColors.bleuArdoise,
           onTap: onSelected == null ? null : () => onSelected!(value),
         ),
     ],
