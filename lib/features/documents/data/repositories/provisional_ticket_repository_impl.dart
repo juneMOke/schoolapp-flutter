@@ -95,6 +95,12 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           ValidationFailure('Reçu ou versement annulé : pas de ticket.'),
         );
       }
+      // Un ticket ne sort qu'avec le numéro DÉFINITIF de son reçu
+      // (continuité des tickets RC, lot D) : un `PROV-…` imprimé laissait dans
+      // la pile du promoteur un papier sans numéro de la série.
+      if (!receipt.isDefinitive || (receipt.number?.trim().isEmpty ?? true)) {
+        return const Left(ReceiptAwaitingNumberFailure());
+      }
       // Ce que l'élève a déjà versé cette année, AVANT ce ticket. Le bloc se
       // lit sous le solde : ce que je viens de payer, ce qu'il me reste, ce que
       // j'avais déjà versé.
@@ -138,19 +144,9 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           matriculationNumber: student?.matriculationNumber,
           annualMatriculationNumber: annualMatriculation,
           classroomName: classroomName,
-          // Numéro inconnu (pièces pas encore tirées par le pull) : repli
-          // court, jamais l'UUID entier. Un ticket sans aucune référence
-          // serait irrapprochable.
-          reference:
-              receipt.number ??
-              PaymentReceiptReference.shortFallback(paymentId),
-          // ⚠️ Lu AFFIRMATIVEMENT sur l'absence de `receipt_id`, jamais par
-          // négation d'un numéro. `definitive == null` serait vrai aussi quand
-          // aucune ligne `generated_documents` locale n'existe — cas normal d'un
-          // versement encaissé ailleurs et descendu par pull. La mention
-          // « provisoire » s'imprimerait alors sur des tickets scellés, soit
-          // exactement l'inverse de ce qui est voulu. `receipt_id`, lui, descend.
-          isProvisional: (payment.receiptId?.trim().isEmpty ?? true),
+          reference: receipt.number!,
+          // Toujours scellé : la garde au-dessus refuse un reçu provisoire.
+          isProvisional: false,
           paidAt: _parsePaidAt(payment.paidAt),
           // Les `cashier_*` de ce poste, puis l'attribution serveur : le patch
           // de pull ne réécrit jamais les premiers, donc un versement encaissé

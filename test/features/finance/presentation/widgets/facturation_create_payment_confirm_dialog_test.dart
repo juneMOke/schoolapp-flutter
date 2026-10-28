@@ -9,6 +9,9 @@ import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.da
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/receipt_number_watch_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
@@ -29,6 +32,17 @@ class _MockFinanceOfflineBloc
 
 class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
+
+/// Le reçu tel que la tablette le connaît, réglable par test.
+class _FakeReceipts implements PaymentReceiptResolver {
+  PaymentReceiptReference reference = const PaymentReceiptReference();
+
+  @override
+  Future<PaymentReceiptReference> resolve(String paymentId) async => reference;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 final _request = PaymentsCreateRequested(
   studentId: 's1',
@@ -55,8 +69,21 @@ void main() {
   late _MockFinanceOfflineBloc bloc;
   late _MockSyncStatusCubit syncCubit;
   late StreamController<FinanceOfflineState> states;
+  late _FakeReceipts receipts;
 
   setUp(() {
+    receipts = _FakeReceipts()
+      ..reference = const PaymentReceiptReference(
+        number: 'CF-RC-2627-000802',
+        status: PaymentReceiptStatus.definitive,
+      );
+    getIt.registerFactory<ReceiptNumberWatchCubit>(
+      () => ReceiptNumberWatchCubit(
+        receipts,
+        every: const Duration(seconds: 1),
+        giveUpAfter: const Duration(seconds: 3),
+      ),
+    );
     bloc = _MockFinanceOfflineBloc();
     states = StreamController<FinanceOfflineState>.broadcast();
     whenListen(
@@ -76,6 +103,7 @@ void main() {
 
   tearDown(() async {
     await states.close();
+    await getIt.reset();
   });
 
   Future<FacturationCollectOutcome?> open(
@@ -244,6 +272,81 @@ void main() {
     );
     expect(find.textContaining('Reçu n°'), findsOneWidget);
     expect(find.text('Fermer'), findsOneWidget);
+  });
+
+  // Continuité des tickets RC, lot D : un ticket ne sort qu'avec le numéro
+  // définitif de son reçu, que l'accusé du serveur apporte après l'écriture
+  // locale.
+  group('le ticket attend le numéro définitif', () {
+    Future<void> succeed(WidgetTester tester) async {
+      await open(tester);
+      await tester.tap(find.text('Confirmer'));
+      await tester.pump();
+      states.add(const FinanceOfflinePaymentPendingSync('pay-42'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+    }
+
+    bool printEnabled(WidgetTester tester) {
+      final found = find.ancestor(
+        of: find.text('Imprimer le ticket de perception'),
+        matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+      );
+      return (tester.widget(found.first) as ButtonStyleButton).enabled;
+    }
+
+    testWidgets('numéro connu : il s\'affiche, et le ticket peut sortir', (
+      tester,
+    ) async {
+      await succeed(tester);
+
+      expect(find.text('Reçu n° CF-RC-2627-000802'), findsOneWidget);
+      expect(printEnabled(tester), isTrue);
+    });
+
+    testWidgets('sans accusé : bouton éteint, puis renvoi vers la file', (
+      tester,
+    ) async {
+      receipts.reference = const PaymentReceiptReference(
+        number: 'PROV-1A2B3C4D',
+        status: PaymentReceiptStatus.provisional,
+      );
+      await succeed(tester);
+
+      expect(printEnabled(tester), isFalse);
+      expect(find.text('Attribution du numéro du reçu…'), findsOneWidget);
+      expect(find.text('Reçu n° —'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pump();
+
+      expect(printEnabled(tester), isFalse);
+      expect(
+        find.textContaining('depuis « Tickets à imprimer »'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('l\'accusé arrive pendant l\'attente : le bouton s\'allume', (
+      tester,
+    ) async {
+      receipts.reference = const PaymentReceiptReference(
+        number: 'PROV-1A2B3C4D',
+        status: PaymentReceiptStatus.provisional,
+      );
+      await succeed(tester);
+      expect(printEnabled(tester), isFalse);
+
+      receipts.reference = const PaymentReceiptReference(
+        number: 'CF-RC-2627-000803',
+        status: PaymentReceiptStatus.definitive,
+      );
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+
+      expect(printEnabled(tester), isTrue);
+      expect(find.text('Reçu n° CF-RC-2627-000803'), findsOneWidget);
+    });
   });
 
   // B-9 — cette modale n'a aucun champ, mais elle s'ouvre PAR-DESSUS la saisie

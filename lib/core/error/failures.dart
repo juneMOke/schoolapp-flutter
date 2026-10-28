@@ -111,6 +111,15 @@ class ThermalPrinterFailure extends Failure {
   List<Object?> get props => [message, problem];
 }
 
+/// Le reçu d'un versement n'a pas encore son numéro définitif : aucun ticket
+/// ne sort avant (continuité des tickets RC, lot D). Il sortira depuis
+/// « Tickets à imprimer », une fois le versement acquitté par le serveur.
+class ReceiptAwaitingNumberFailure extends ValidationFailure {
+  const ReceiptAwaitingNumberFailure([
+    super.message = 'Receipt has no definitive number yet',
+  ]);
+}
+
 /// Doublon de numéro de téléphone parent — contrainte APPLICATIVE (DAO),
 /// détectée avant toute écriture. Purement local, jamais de conflit réseau
 /// (distinct de [ConflictFailure], réservée aux 2 usages HTTP 409 ci-dessus).

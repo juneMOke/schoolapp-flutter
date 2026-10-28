@@ -8625,6 +8625,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impression indisponible : le ticket n\'a pas pu être produit.';
 
   @override
+  String get ticketAwaitingNumber =>
+      'Le reçu n\'a pas encore son numéro : le ticket sortira après la synchronisation, depuis « Tickets à imprimer ».';
+
+  @override
+  String get facturationCollectReceiptWaiting =>
+      'Attribution du numéro du reçu…';
+
+  @override
+  String get facturationCollectTicketDeferred =>
+      'Ticket à imprimer après la synchronisation, depuis « Tickets à imprimer ». Le parent recevra son reçu par WhatsApp si un numéro est enregistré.';
+
+  @override
   String get ticketRefusedUnknownStudent =>
       'Impression refusée : le nom de l\'élève n\'est pas connu de cette tablette. Le versement est bien enregistré — réimprimez après la prochaine synchronisation.';
 

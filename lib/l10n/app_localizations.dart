@@ -13704,6 +13704,24 @@ abstract class AppLocalizations {
   /// **'Printing unavailable: the ticket could not be produced.'**
   String get ticketPrintFailed;
 
+  /// No description provided for @ticketAwaitingNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt has no number yet: the ticket will print after sync, from “Tickets to print”.'**
+  String get ticketAwaitingNumber;
+
+  /// No description provided for @facturationCollectReceiptWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigning the receipt number…'**
+  String get facturationCollectReceiptWaiting;
+
+  /// No description provided for @facturationCollectTicketDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket to print after sync, from “Tickets to print”. The parent will get the receipt on WhatsApp if a number is on file.'**
+  String get facturationCollectTicketDeferred;
+
   /// No description provided for @ticketRefusedUnknownStudent.
   ///
   /// In en, this message translates to:

@@ -8550,6 +8550,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Printing unavailable: the ticket could not be produced.';
 
   @override
+  String get ticketAwaitingNumber =>
+      'The receipt has no number yet: the ticket will print after sync, from “Tickets to print”.';
+
+  @override
+  String get facturationCollectReceiptWaiting =>
+      'Assigning the receipt number…';
+
+  @override
+  String get facturationCollectTicketDeferred =>
+      'Ticket to print after sync, from “Tickets to print”. The parent will get the receipt on WhatsApp if a number is on file.';
+
+  @override
   String get ticketRefusedUnknownStudent =>
       'Printing refused: this tablet does not know the student\'s name. The payment is recorded — print again after the next sync.';
 

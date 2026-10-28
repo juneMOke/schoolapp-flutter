@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
+import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
@@ -32,25 +34,24 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// Renvoie `false` si rien n'a pu être produit ou remis au spouleur ; l'appelant
 /// est responsable de le dire à l'utilisateur, jamais d'échouer en silence.
-/// Compose le ticket du versement [paymentId], ou `null` s'il est introuvable.
+/// Compose le ticket du versement [paymentId] — ou dit pourquoi il ne peut pas
+/// sortir (introuvable, annulé, numéro pas encore attribué).
 ///
 /// Séparé de l'impression depuis que le ticket a **deux sorties possibles** :
 /// la thermique d'abord, ce PDF en filet. Les deux doivent rendre le **même**
 /// ticket — un repli qui recomposerait le sien pourrait, à la faveur d'une
 /// écriture concurrente, remettre au parent un papier qui ne dit pas ce que la
 /// thermique n'a pas réussi à imprimer.
-Future<TicketReceiptModel?> buildProvisionalTicket(
+Future<Either<Failure, TicketReceiptModel>> buildProvisionalTicket(
   BuildContext context, {
   required String paymentId,
-}) async {
+}) {
   final labels = provisionalTicketLabels(AppLocalizations.of(context)!);
 
-  final built = await getIt<BuildProvisionalTicketUseCase>()(
+  return getIt<BuildProvisionalTicketUseCase>()(
     paymentId: paymentId,
     labels: labels,
   );
-
-  return built.fold((_) => null, (model) => model);
 }
 
 /// ⚠️ [cutNotice] est passée, pas lue d'un `BuildContext`. Le repli doit

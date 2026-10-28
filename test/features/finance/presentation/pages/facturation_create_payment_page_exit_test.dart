@@ -19,6 +19,9 @@ import 'package:school_app_flutter/features/finance/presentation/context/factura
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_create_payment_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_charge_allocation_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/receipt_number_watch_cubit.dart';
 
 class _MockFinanceOfflineBloc
     extends MockBloc<FinanceOfflineEvent, FinanceOfflineState>
@@ -36,6 +39,19 @@ class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
 /// - la flèche de retour passe par la confirmation de perte de saisie ;
 /// - la page ne rend `true` (le signal de rafraîchissement de la fiche) qu'au
 ///   terme d'un encaissement réellement écrit.
+/// Un reçu déjà scellé : l'écran de succès n'attend rien.
+class _SealedReceipts implements PaymentReceiptResolver {
+  @override
+  Future<PaymentReceiptReference> resolve(String paymentId) async =>
+      const PaymentReceiptReference(
+        number: 'CF-RC-2627-000802',
+        status: PaymentReceiptStatus.definitive,
+      );
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -59,9 +75,15 @@ void main() {
       initialState: const SyncStatusState(status: SyncStatus.synced),
     );
     when(() => syncCubit.notifyLocalWrite()).thenAnswer((_) async {});
+    getIt.registerFactory<ReceiptNumberWatchCubit>(
+      () => ReceiptNumberWatchCubit(_SealedReceipts()),
+    );
   });
 
-  tearDown(() async => states.close());
+  tearDown(() async {
+    await states.close();
+    await getIt.reset();
+  });
 
   const charge = StudentCharge(
     id: 'c-1',

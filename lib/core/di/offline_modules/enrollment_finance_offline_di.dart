@@ -140,6 +140,7 @@ import 'package:school_app_flutter/features/finance/offline/data/receipt/cancell
 import 'package:school_app_flutter/features/finance/offline/data/receipt/payment_receipt_resolver_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_receipt_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/receipt_number_watch_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_ledger_freshness_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/refresh_ledger_before_collection_use_case.dart';
@@ -818,6 +819,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<PaymentReceiptCubit>(
     () => PaymentReceiptCubit(getIt<PaymentReceiptResolver>()),
+  );
+  // Factory : l'attente du numéro vit et meurt avec l'écran de succès.
+  getIt.registerFactory<ReceiptNumberWatchCubit>(
+    () => ReceiptNumberWatchCubit(getIt<PaymentReceiptResolver>()),
   );
 
   // ── Handlers d'outbox → SyncEngine ──────────────────────────────────────────
