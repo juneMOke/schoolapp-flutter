@@ -90,7 +90,7 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
       // Reçu retiré ou versement annulé : aucun papier ne doit plus attester
       // ce versement. La fiche masque déjà la ligne ; ceci ferme les autres
       // chemins d'impression.
-      if (receipt.isCancelled) {
+      if (receipt.isCancelled || await _dao.hasLiveCorrection(paymentId)) {
         return const Left(
           ValidationFailure('Reçu ou versement annulé : pas de ticket.'),
         );

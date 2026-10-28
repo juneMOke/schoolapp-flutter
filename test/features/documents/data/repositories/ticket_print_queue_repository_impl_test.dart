@@ -210,6 +210,14 @@ void main() {
       expect(await jobs(), isEmpty);
     });
 
+    test('numéroté mais élève inconnu ici : il attend l élève', () async {
+      final payment = await collect(15000);
+      receipts.sealed[payment] = 'CF-RC-2627-000802';
+      await db.delete('students');
+
+      expect((await jobs()).single.state, TicketPrintJobState.awaitingStudent);
+    });
+
     test('garde la trace d un échec, et reste dans la file', () async {
       final payment = await collect(15000);
       receipts.sealed[payment] = 'CF-RC-2627-000802';
@@ -276,6 +284,25 @@ void main() {
       },
     );
 
+    // La revue l'a trouvé : un accusé perdu laisse la correction en attente,
+    // mais le pull descend l'annulation. Le serveur fait foi.
+    test('annulation descendue par le pull, accusé perdu : prête', () async {
+      final payment = await collect(15000);
+      receipts.sealed[payment] = 'CF-RC-2627-000802';
+      await corrections.correctPayment(cancelOf(payment));
+
+      await db.update(
+        'payments',
+        {'cancelled_at': 3000},
+        where: 'id = ?',
+        whereArgs: [payment],
+      );
+
+      final job = (await jobs()).single;
+      expect(job.kind, TicketPrintJobKind.cancellation);
+      expect(job.state, TicketPrintJobState.ready);
+    });
+
     test('un ticket déjà sorti a quand même son ticket d annulation', () async {
       final payment = await collect(15000);
       receipts.sealed[payment] = 'CF-RC-2627-000802';
@@ -298,6 +325,23 @@ void main() {
       final origin = await collect(15000);
       receipts.sealed[origin] = 'CF-RC-2627-000802';
       await queue.markPrinted((await jobs()).single);
+
+      final outcome = (await corrections.correctPayment(
+        replaceOf(origin),
+      )).getOrElse(() => throw StateError('refusé'));
+
+      final job = (await jobs()).single;
+      expect(job.kind, TicketPrintJobKind.receipt);
+      expect(job.paymentId, outcome.replacementPaymentId);
+    });
+
+    test('ticket d origine sorti par l ancien chemin : rien de plus', () async {
+      final origin = await collect(15000);
+      receipts.sealed[origin] = 'CF-RC-2627-000802';
+      // L'écran de succès ou le détail : seule la trace du versement est posée.
+      await ProvisionalTicketDao(
+        db,
+      ).markTicketPrinted(origin, DateTime.fromMillisecondsSinceEpoch(4000));
 
       final outcome = (await corrections.correctPayment(
         replaceOf(origin),

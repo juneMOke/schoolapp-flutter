@@ -5759,7 +5759,7 @@
       }
     }
   },
-  "ticketsToPrintSkipped": "{count, plural, =1{1 ticket skipped: student not synced yet.} other{{count} tickets skipped: students not synced yet.}}",
+  "ticketsToPrintSkipped": "{count, plural, =1{1 ticket skipped: not printable for now, it stays in the queue.} other{{count} tickets skipped: not printable for now, they stay in the queue.}}",
   "@ticketsToPrintSkipped": {
     "placeholders": {
       "count": {

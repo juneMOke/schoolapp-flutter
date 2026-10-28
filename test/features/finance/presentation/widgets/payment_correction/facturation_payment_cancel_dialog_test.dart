@@ -198,6 +198,20 @@ void main() {
       );
     });
 
+    // R2 : une origine jamais acceptée par le serveur n'a pas de numéro.
+    testWidgets('annulation locale : aucun ticket promis', (tester) async {
+      when(() => correct(any())).thenAnswer(
+        (_) async => const Right(
+          PaymentCorrectionOutcome(correctionId: 'pc-1', localOnly: true),
+        ),
+      );
+      await cancel(tester);
+
+      expect(find.text('Versement annulé'), findsOneWidget);
+      expect(find.text('Imprimer le ticket d\'annulation'), findsNothing);
+      expect(find.textContaining('Tickets à imprimer'), findsNothing);
+    });
+
     testWidgets('annulation acquittée : le ticket peut sortir', (tester) async {
       receipts.reference = const PaymentReceiptReference(
         number: 'CF-RC-2627-000821',

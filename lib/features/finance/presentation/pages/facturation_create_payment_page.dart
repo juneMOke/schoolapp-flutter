@@ -226,7 +226,8 @@ class _FacturationCreatePaymentViewState
   }
 
   /// Changer d'élève (D1) : les lignes deviennent celles de [charges]. Le jour
-  /// choisi reste. Vers l'élève d'origine, l'origine est de nouveau posée.
+  /// de l'origine reste. Vers l'élève d'origine, l'origine est de nouveau
+  /// posée.
   void _switchStudent(Iterable<StudentCharge> charges, {required bool origin}) {
     // Le champ qui a le curseur appartient peut-être à l'ancien modèle.
     FocusManager.instance.primaryFocus?.unfocus();
@@ -343,10 +344,10 @@ class _FacturationCreatePaymentViewState
   /// une devise par ligne et des taux par paire.
   TenderSettlement _settlement() => TenderSettlement(
     rates: widget.rates,
-    // Le taux qui vaut au jour DÉSIGNÉ, pas celui d'aujourd'hui : un
-    // encaissement rattrapé trois jours plus tard se propose au taux de ce
-    // jour-là — et c'est la même série, à la même date, que le serveur relira
-    // pour juger d'un écart. Proposer le taux du jour ferait signaler comme
+    // Le taux qui vaut au jour du VERSEMENT : aujourd'hui pour un
+    // encaissement, le jour d'origine pour une correction — et c'est la même
+    // série, à la même date, que le serveur relira pour juger d'un écart.
+    // Proposer le taux du jour à une correction ferait signaler comme
     // divergent un versement que personne n'a mal converti.
     at: SchoolTime.composeInstant(day: _model.paidDay, now: _now),
     overriddenRates: _rates.overrides,

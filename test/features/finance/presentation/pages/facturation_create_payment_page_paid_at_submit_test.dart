@@ -105,7 +105,7 @@ void main() {
     status: StudentChargeStatus.due,
   );
 
-  Future<void> ouvrir(WidgetTester tester, {DateTime? now}) async {
+  Future<void> ouvrir(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1280, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -119,7 +119,7 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: FacturationCreatePaymentView(
-              now: now ?? _maintenant,
+              now: _maintenant,
               intent: FacturationCreatePaymentIntent(
                 studentId: 'stu-1',
                 academicYearId: 'ay-1',

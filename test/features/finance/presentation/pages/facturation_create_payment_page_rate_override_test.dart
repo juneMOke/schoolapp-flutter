@@ -39,15 +39,11 @@ class _FakePayerRepo implements FinanceOfflineRepository {
 
 /// TESTS DE CARACTÉRISATION — lot R0, le taux corrigé à la main.
 ///
-/// Deux chemins que la mesure de couverture a trouvés nus, et qui portent tous
-/// deux de l'argent :
-///
-/// - `_rateMicrosOf` (545-553) — la LECTURE du taux corrigé. C'est tout
-///   l'arbitrage A4 : le caissier peut imposer son taux, et le guichet doit
-///   compter avec celui-là.
-/// - `_closeUntouchedRateEditors` (355-360) — au changement de date, une boîte
-///   ouverte mais intacte affiche le taux de l'ANCIEN jour pendant que les
-///   montants repartent du référentiel du nouveau. Elle doit se refermer.
+/// Un chemin que la mesure de couverture a trouvé nu, et qui porte de
+/// l'argent : `_rateMicrosOf` — la LECTURE du taux corrigé. C'est tout
+/// l'arbitrage A4 : le caissier peut imposer son taux, et le guichet doit
+/// compter avec celui-là. (Le changement de date, qui refermait les boîtes
+/// intactes, a disparu avec le lot C.)
 final _tauxAncien = ExchangeRate(
   base: 'USD',
   quote: 'CDF',

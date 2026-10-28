@@ -18,11 +18,17 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// ligne, quelques secondes ; sinon il attend dans « Tickets à imprimer ».
 class PaymentCancelDoneView extends StatefulWidget {
   final String paymentId;
+
+  /// `false` quand le versement n'a jamais eu de numéro (annulation locale,
+  /// R2) : aucun ticket d'annulation n'est dû, rien n'est proposé.
+  final bool ticketOwed;
+
   final VoidCallback onClose;
 
   const PaymentCancelDoneView({
     super.key,
     required this.paymentId,
+    this.ticketOwed = true,
     required this.onClose,
   });
 
@@ -31,20 +37,22 @@ class PaymentCancelDoneView extends StatefulWidget {
 }
 
 class _PaymentCancelDoneViewState extends State<PaymentCancelDoneView> {
-  late final ReceiptNumberWatchCubit _watch;
+  ReceiptNumberWatchCubit? _watch;
   bool _printing = false;
   bool _printed = false;
 
   @override
   void initState() {
     super.initState();
-    _watch = getIt<ReceiptNumberWatchCubit>()
-      ..watch(widget.paymentId, cancellation: true);
+    if (widget.ticketOwed) {
+      _watch = getIt<ReceiptNumberWatchCubit>()
+        ..watch(widget.paymentId, cancellation: true);
+    }
   }
 
   @override
   void dispose() {
-    _watch.close();
+    _watch?.close();
     super.dispose();
   }
 
@@ -52,16 +60,21 @@ class _PaymentCancelDoneViewState extends State<PaymentCancelDoneView> {
     if (_printing) return;
     final messenger = ScaffoldMessenger.maybeOf(context);
     setState(() => _printing = true);
-    final printed = await printCancellationTicket(
-      context,
-      paymentId: widget.paymentId,
-      messenger: messenger,
-    );
-    if (!mounted) return;
-    setState(() {
-      _printing = false;
-      _printed = _printed || printed;
-    });
+    var printed = false;
+    try {
+      printed = await printCancellationTicket(
+        context,
+        paymentId: widget.paymentId,
+        messenger: messenger,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _printing = false;
+          _printed = _printed || printed;
+        });
+      }
+    }
   }
 
   @override
@@ -88,50 +101,53 @@ class _PaymentCancelDoneViewState extends State<PaymentCancelDoneView> {
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppDimensions.spacingM),
-          BlocBuilder<ReceiptNumberWatchCubit, ReceiptNumberWatchState>(
-            bloc: _watch,
-            builder: (context, watch) {
-              final hint = switch (watch.phase) {
-                ReceiptNumberPhase.numbered => null,
-                ReceiptNumberPhase.deferred => l10n.paymentCancelTicketDeferred,
-                _ => l10n.paymentCancelTicketWaiting,
-              };
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (hint != null) ...[
-                    Text(
-                      hint,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textMuted,
+          if (_watch case final watch?)
+            BlocBuilder<ReceiptNumberWatchCubit, ReceiptNumberWatchState>(
+              bloc: watch,
+              builder: (context, watch) {
+                final hint = switch (watch.phase) {
+                  ReceiptNumberPhase.numbered => null,
+                  ReceiptNumberPhase.deferred =>
+                    l10n.paymentCancelTicketDeferred,
+                  _ => l10n.paymentCancelTicketWaiting,
+                };
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (hint != null) ...[
+                      Text(
+                        hint,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.spacingS),
+                    ],
+                    OutlinedButton.icon(
+                      key: const ValueKey('payment-cancel-print-ticket'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(
+                          AppDimensions.minTouchTarget,
+                          AppDimensions.minTouchTarget,
+                        ),
+                      ),
+                      onPressed:
+                          watch.phase == ReceiptNumberPhase.numbered &&
+                              !_printing
+                          ? _print
+                          : null,
+                      icon: const Icon(Icons.print_outlined),
+                      label: Text(
+                        _printed
+                            ? l10n.paymentCancelTicketReprint
+                            : l10n.paymentCancelTicketPrint,
                       ),
                     ),
-                    const SizedBox(height: AppDimensions.spacingS),
                   ],
-                  OutlinedButton.icon(
-                    key: const ValueKey('payment-cancel-print-ticket'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(
-                        AppDimensions.minTouchTarget,
-                        AppDimensions.minTouchTarget,
-                      ),
-                    ),
-                    onPressed:
-                        watch.phase == ReceiptNumberPhase.numbered && !_printing
-                        ? _print
-                        : null,
-                    icon: const Icon(Icons.print_outlined),
-                    label: Text(
-                      _printed
-                          ? l10n.paymentCancelTicketReprint
-                          : l10n.paymentCancelTicketPrint,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+                );
+              },
+            ),
           const SizedBox(height: AppDimensions.spacingL),
           FilledButton(
             key: const ValueKey('payment-correction-done-close'),

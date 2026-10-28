@@ -46,9 +46,15 @@ class TicketsToPrintView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     cubit.printingChanged(true);
-    final outcome = await printTicketBatch(context, jobs: jobs);
+    final TicketBatchOutcome outcome;
+    try {
+      outcome = await printTicketBatch(context, jobs: jobs);
+    } finally {
+      // Quoi qu'il arrive, le bouton se rallume : un lot qui lève ne doit pas
+      // geler la page.
+      if (!cubit.isClosed) cubit.printingChanged(false);
+    }
     if (cubit.isClosed) return;
-    cubit.printingChanged(false);
     await cubit.load();
 
     final problem = outcome.problem;

@@ -49,12 +49,15 @@ class _FacturationPaymentDetailFooterState
     if (printing) return;
     final messenger = ScaffoldMessenger.maybeOf(context);
     setState(() => printing = true);
-    await printCancellationTicket(
-      context,
-      paymentId: paymentId,
-      messenger: messenger,
-    );
-    if (mounted) setState(() => printing = false);
+    try {
+      await printCancellationTicket(
+        context,
+        paymentId: paymentId,
+        messenger: messenger,
+      );
+    } finally {
+      if (mounted) setState(() => printing = false);
+    }
   }
 
   @override

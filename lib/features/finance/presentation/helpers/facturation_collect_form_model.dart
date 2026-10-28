@@ -124,8 +124,8 @@ class FacturationCollectFormModel {
   /// de Kinshasa qui découpe les journées de caisse.
   DateTime get today => SchoolTime.today(nowOf());
 
-  /// Le **jour** porté par le versement : aujourd'hui tant que le caissier n'a
-  /// rien changé.
+  /// Le **jour** porté par le versement : aujourd'hui, ou le jour d'origine
+  /// d'une correction (`prefill`). Aucun autre jour ne se choisit (lot C).
   ///
   /// ⚠️ C'est un aujourd'hui **vivant** — il se recalcule à chaque lecture.
   /// Figer la valeur à l'ouverture daterait de la veille un versement encaissé

@@ -46,13 +46,16 @@ void main() {
   late int appelsAuReglement;
   late List<ExchangeRate> serie;
 
-  FacturationCollectFormModel modele({int tranches = 3}) {
+  FacturationCollectFormModel modele({
+    int tranches = 3,
+    DateTime Function()? nowOf,
+  }) {
     rates = FacturationRateBoard(onChanged: () {});
     appelsAuReglement = 0;
     return FacturationCollectFormModel.fromCharges(
       charges: [for (var i = 1; i <= tranches; i++) _charge(id: 'T$i')],
       rates: rates,
-      nowOf: () => _maintenant,
+      nowOf: nowOf ?? () => _maintenant,
       settlementOf: () {
         appelsAuReglement++;
         return TenderSettlement(rates: serie, at: _maintenant);
@@ -107,6 +110,17 @@ void main() {
   group('le jour du versement', () {
     test('vaut aujourd\'hui tant que rien n\'est choisi', () {
       expect(modele().paidDay, DateTime(2026, 9, 16));
+    });
+
+    // Une tablette laissée allumée toute la nuit : le jour se relit à chaque
+    // fois, il n'est jamais figé à l'ouverture de la page.
+    test('suit l\'horloge de l\'école, minuit compris', () {
+      var now = DateTime.utc(2026, 9, 16, 22, 50); // 23 h 50 à Kinshasa
+      final m = modele(nowOf: () => now);
+      expect(m.paidDay, DateTime(2026, 9, 16));
+
+      now = DateTime.utc(2026, 9, 16, 23, 10); // 00 h 10 le 17
+      expect(m.paidDay, DateTime(2026, 9, 17));
     });
   });
 

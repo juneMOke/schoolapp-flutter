@@ -8753,8 +8753,10 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tickets écartés : élèves pas encore synchronisés.',
-      one: '1 ticket écarté : élève pas encore synchronisé.',
+      other:
+          '$count tickets écartés : ils ne sont plus imprimables pour l\'instant et restent dans la file.',
+      one:
+          '1 ticket écarté : il n\'est plus imprimable pour l\'instant et reste dans la file.',
     );
     return '$_temp0';
   }

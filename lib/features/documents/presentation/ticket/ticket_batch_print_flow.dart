@@ -108,6 +108,8 @@ Future<TicketBatchOutcome> printTicketBatch(
         problem: problem,
       );
     }
+    // Une note de suivi ratée n'annule pas le papier : il est sorti. Le
+    // ticket reste au pire dans la file, et le caissier le voit encore.
     await markPrinted(job);
     printed++;
   }

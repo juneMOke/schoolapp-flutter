@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 
 /// Ce qu'il faut lire, et seulement ça, pour imprimer un reçu provisoire.
@@ -312,6 +313,28 @@ class ProvisionalTicketDao {
     if (rows.isEmpty) return null;
     final at = rows.first['ticket_printed_at'] as int?;
     return at == null ? null : DateTime.fromMillisecondsSinceEpoch(at);
+  }
+
+  /// Une correction en cours ou acquise vise-t-elle ce versement ?
+  ///
+  /// Le versement sort alors des soldes, et son papier sera le ticket
+  /// d'annulation s'il en faut un (continuité des tickets RC) : un ticket de
+  /// caisse imprimé à côté donnerait deux papiers au même numéro.
+  Future<bool> hasLiveCorrection(String paymentId) async {
+    final live = [
+      PaymentCorrectionStatus.pending,
+      PaymentCorrectionStatus.applied,
+      PaymentCorrectionStatus.localOnly,
+    ].map((s) => s.dbValue).toList();
+    final rows = await _db.query(
+      'payment_corrections',
+      columns: const ['id'],
+      where:
+          'payment_id = ? AND status IN (${List.filled(live.length, '?').join(', ')})',
+      whereArgs: [paymentId, ...live],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
   }
 
   /// Les titres de nature de frais de l'école, `code` en MAJUSCULES → libellé.

@@ -19,7 +19,8 @@ class MarkTicketJobPrintedUseCase {
 
   const MarkTicketJobPrintedUseCase(this._repository);
 
-  Future<void> call(TicketPrintJob job) => _repository.markPrinted(job);
+  Future<Either<Failure, Unit>> call(TicketPrintJob job) =>
+      _repository.markPrinted(job);
 }
 
 /// L'envoi d'un ticket de la file a échoué ; il y reste, avec sa cause.
@@ -28,7 +29,7 @@ class RecordTicketJobProblemUseCase {
 
   const RecordTicketJobProblemUseCase(this._repository);
 
-  Future<void> call(TicketPrintJob job, String problem) =>
+  Future<Either<Failure, Unit>> call(TicketPrintJob job, String problem) =>
       _repository.recordProblem(job, problem);
 }
 
@@ -38,6 +39,6 @@ class MarkCancellationTicketPrintedUseCase {
 
   const MarkCancellationTicketPrintedUseCase(this._repository);
 
-  Future<void> call(String paymentId) =>
+  Future<Either<Failure, Unit>> call(String paymentId) =>
       _repository.markCancellationPrinted(paymentId);
 }

@@ -550,6 +550,30 @@ void main() {
     });
   });
 
+  // Continuité des tickets RC : un versement en cours de correction n'a plus
+  // de ticket de caisse — son papier sera le ticket d'annulation.
+  test('refuse un versement visé par une correction en cours', () async {
+    await seedPayment();
+    await db.insert('payment_corrections', {
+      'id': 'pc-1',
+      'payment_id': 'p-1',
+      'student_id': 's-1',
+      'reason_code': 'DUPLICATE',
+      'cash_moved': 0,
+      'client_cancelled_at': '2026-08-05T10:00:00Z',
+      'status': 'PENDING',
+      'created_at': 1,
+      'updated_at': 1,
+    });
+
+    final result = await repository.buildForPayment(
+      paymentId: 'p-1',
+      labels: _labels,
+    );
+
+    expect(result.isLeft(), isTrue);
+  });
+
   test('porte le numéro DÉFINITIF dès que la pièce est scellée', () async {
     await seedPayment();
     await db.update(

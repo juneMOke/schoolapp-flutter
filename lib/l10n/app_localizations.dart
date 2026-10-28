@@ -13911,7 +13911,7 @@ abstract class AppLocalizations {
   /// No description provided for @ticketsToPrintSkipped.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 ticket skipped: student not synced yet.} other{{count} tickets skipped: students not synced yet.}}'**
+  /// **'{count, plural, =1{1 ticket skipped: not printable for now, it stays in the queue.} other{{count} tickets skipped: not printable for now, they stay in the queue.}}'**
   String ticketsToPrintSkipped(int count);
 
   /// No description provided for @ticketsToPrintBanner.

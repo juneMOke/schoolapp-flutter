@@ -40,8 +40,15 @@ class ReceiptNumberWatchCubit extends Cubit<ReceiptNumberWatchState> {
     // Compté en relectures, pas à l'horloge : le délai est celui des
     // battements du minuteur, et il se rejoue tel quel en test.
     final attempts = _giveUpAfter.inMilliseconds ~/ _every.inMilliseconds;
+    var reading = false;
     _timer = Timer.periodic(_every, (timer) async {
-      if (await _check(paymentId, cancellation)) {
+      // Une relecture à la fois : une lecture lente, rattrapée par la suivante,
+      // pourrait sinon conclure « pas de numéro » APRÈS qu'une autre l'a trouvé.
+      if (reading) return;
+      reading = true;
+      final found = await _check(paymentId, cancellation);
+      reading = false;
+      if (found || state.phase == ReceiptNumberPhase.numbered) {
         timer.cancel();
       } else if (timer.tick >= attempts) {
         timer.cancel();

@@ -18,6 +18,10 @@ enum TicketPrintJobState {
   /// Le numéro n'est pas encore attribué — versement ou annulation pas encore
   /// acquittés par le serveur. Il sortira après la synchronisation.
   awaitingNumber,
+
+  /// Numéroté, mais l'élève n'est pas encore descendu sur ce poste : un ticket
+  /// qui ne nomme personne n'atteste rien (ADR-015 F1).
+  awaitingStudent,
 }
 
 /// Un ticket que ce poste doit encore imprimer (continuité RC, lot D).

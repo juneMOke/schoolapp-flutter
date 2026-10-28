@@ -127,6 +127,9 @@ class _FacturationPaymentCancelDialogState
               state.phase == PaymentCorrectionPhase.succeeded
               ? PaymentCancelDoneView(
                   paymentId: widget.paymentId,
+                  // Une origine jamais acceptée par le serveur (R2) n'a pas de
+                  // numéro : aucun papier n'est dû.
+                  ticketOwed: !(state.outcome?.localOnly ?? false),
                   onClose: () => Navigator.of(context).pop(true),
                 )
               : _form(context, l10n, state),

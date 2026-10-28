@@ -8678,8 +8678,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tickets skipped: students not synced yet.',
-      one: '1 ticket skipped: student not synced yet.',
+      other:
+          '$count tickets skipped: not printable for now, they stay in the queue.',
+      one: '1 ticket skipped: not printable for now, it stays in the queue.',
     );
     return '$_temp0';
   }

@@ -9,11 +9,14 @@ abstract class TicketPrintQueueRepository {
   Future<Either<Failure, List<TicketPrintJob>>> pendingJobs();
 
   /// Le papier de [job] est sorti.
-  Future<void> markPrinted(TicketPrintJob job);
+  Future<Either<Failure, Unit>> markPrinted(TicketPrintJob job);
 
   /// L'envoi de [job] a échoué pour [problem] ; il reste dans la file.
-  Future<void> recordProblem(TicketPrintJob job, String problem);
+  Future<Either<Failure, Unit>> recordProblem(
+    TicketPrintJob job,
+    String problem,
+  );
 
   /// Le ticket d'annulation de [paymentId] est sorti hors de la file.
-  Future<void> markCancellationPrinted(String paymentId);
+  Future<Either<Failure, Unit>> markCancellationPrinted(String paymentId);
 }

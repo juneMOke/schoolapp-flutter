@@ -310,10 +310,10 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                         totalLabel: widget.totalLabel,
                         rateLabel: widget.rateLabel,
                         // ⚠️ Lu sur la REQUÊTE, jamais sur un paramètre jumeau :
-                        // le récapitulatif existe pour rattraper une erreur de
-                        // date, il doit donc montrer la valeur qui part
-                        // réellement en base — pas une seconde copie qui
-                        // pourrait diverger sans que rien ne le dise.
+                        // le récapitulatif montre le jour qui part — celui de
+                        // la saisie, ou l'origine d'une correction —, pas une
+                        // seconde copie qui pourrait diverger sans que rien ne
+                        // le dise.
                         paidAt: widget.request.paidAt,
                         studentName: widget.studentName,
                         payerName: widget.payerName,

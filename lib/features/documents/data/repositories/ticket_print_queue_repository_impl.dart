@@ -71,15 +71,25 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
     final numbered =
         receipt.status == PaymentReceiptStatus.definitive &&
         (receipt.number?.trim().isNotEmpty ?? false);
-    final ready = cancellation
-        // L'annulation doit être ACQUITTÉE : le ticket dit qu'elle a eu lieu.
-        ? numbered && row.correctionStatus == PaymentCorrectionStatus.applied
-        : numbered;
+    // L'annulation doit être CONFIRMÉE PAR LE SERVEUR : le ticket dit qu'elle
+    // a eu lieu. Lue sur `payments.cancelled_at`, que seul le serveur écrit
+    // (accusé ou pull), et non sur le statut de la correction : un accusé
+    // perdu laisse la correction en attente alors que le pull, lui, a déjà
+    // descendu l'annulation — le numéro resterait sans papier.
+    final settled = !cancellation || row.paymentCancelledAt != null;
 
     final student = await _tickets.findStudent(
       (await _tickets.findPayment(row.paymentId))?.studentId ?? '',
     );
     final tenders = await _tickets.findTenders(row.paymentId);
+    final named = (student?.fullName.trim() ?? '').isNotEmpty;
+    // Un ticket qui ne nomme personne n'atteste rien (ADR-015 F1) : il attend
+    // que l'élève descende, comme il attendrait son numéro.
+    final state = !numbered || !settled
+        ? TicketPrintJobState.awaitingNumber
+        : named
+        ? TicketPrintJobState.ready
+        : TicketPrintJobState.awaitingStudent;
 
     return TicketPrintJob(
       id: row.id,
@@ -87,9 +97,7 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
       kind: cancellation
           ? TicketPrintJobKind.cancellation
           : TicketPrintJobKind.receipt,
-      state: ready
-          ? TicketPrintJobState.ready
-          : TicketPrintJobState.awaitingNumber,
+      state: state,
       receiptNumber: numbered ? receipt.number : null,
       studentFullName: student?.fullName ?? '',
       amount: MoneyBag.of([
@@ -116,18 +124,40 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
   }
 
   @override
-  Future<void> markPrinted(TicketPrintJob job) => _queue.markPrinted(
-    jobId: job.id,
-    paymentId: job.paymentId,
-    isReceipt: job.kind == TicketPrintJobKind.receipt,
-    nowMs: _now().millisecondsSinceEpoch,
+  Future<Either<Failure, Unit>> markPrinted(TicketPrintJob job) => _write(
+    () => _queue.markPrinted(
+      jobId: job.id,
+      paymentId: job.paymentId,
+      isReceipt: job.kind == TicketPrintJobKind.receipt,
+      nowMs: _now().millisecondsSinceEpoch,
+    ),
   );
 
   @override
-  Future<void> recordProblem(TicketPrintJob job, String problem) =>
-      _queue.recordProblem(job.id, problem);
+  Future<Either<Failure, Unit>> recordProblem(
+    TicketPrintJob job,
+    String problem,
+  ) => _write(() => _queue.recordProblem(job.id, problem));
 
   @override
-  Future<void> markCancellationPrinted(String paymentId) =>
-      _queue.markCancellationPrinted(paymentId, _now().millisecondsSinceEpoch);
+  Future<Either<Failure, Unit>> markCancellationPrinted(String paymentId) =>
+      _write(
+        () => _queue.markCancellationPrinted(
+          paymentId,
+          _now().millisecondsSinceEpoch,
+        ),
+      );
+
+  /// Une écriture de suivi qui échoue ne doit rien emporter avec elle : le
+  /// papier, lui, est sorti — ou pas — indépendamment de ce qu'on en note.
+  static Future<Either<Failure, Unit>> _write(
+    Future<void> Function() write,
+  ) async {
+    try {
+      await write();
+      return const Right(unit);
+    } catch (e) {
+      return Left(StorageFailure('File des tickets non mise à jour : $e'));
+    }
+  }
 }
