@@ -113,11 +113,14 @@ class PayrollDashboardStaffTable extends StatelessWidget {
     String money(int cents) => PayrollLabels.money(cents, section.currency);
     return EteeloColumnTableRow(
       widths: _widths,
-      background: AppColors.surfaceAlt,
+      // Même voile que le total du livre : le pied se détache des lignes.
+      background: ListingTones.barreFond,
       cells: [
         Text(
           l10n.payrollDashTotal(section.currency),
-          style: AppTypography.labelLarge,
+          style: AppTypography.labelLarge.copyWith(
+            color: ListingTones.inkResultat,
+          ),
         ),
         _figure(money(totals.plannedInCents), strong: true),
         _figure('− ${money(totals.deductionsInCents)}', strong: true),

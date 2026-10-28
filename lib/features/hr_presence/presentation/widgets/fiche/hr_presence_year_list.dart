@@ -228,9 +228,15 @@ class _TotalRow extends StatelessWidget {
     final profile = this.profile;
     return EteeloColumnTableRow(
       widths: HrPresenceYearList._widths,
-      background: AppColors.surfaceAlt,
+      // Le voile du ton de la table, comme les totaux de la Paie.
+      background: ListingTones.barreFond,
       cells: [
-        Text(l10n.hrPresenceYearTotal, style: AppTypography.labelLarge),
+        Text(
+          l10n.hrPresenceYearTotal,
+          style: AppTypography.labelLarge.copyWith(
+            color: ListingTones.inkResultat,
+          ),
+        ),
         _share(
           presence: total.presenceRatePct,
           late: total.lateRatePct,
