@@ -3,14 +3,14 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payo
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_advances_page.dart';
-import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_agent_page.dart';
 
 import '../../../test_helpers/reference_formats.dart';
 import '../../staff/staff_builders.dart';
 import '../payroll_builders.dart';
 import 'payroll_screen_harness.dart';
 
-/// L'état de paie et le livre v2 aux formats de référence (AGENTS.md §« Écran
+/// Le livre v2 et la fiche d'un agent aux formats de référence (AGENTS.md §« Écran
 /// neuf ») : deux catégories, deux devises, retenues et versement réduit,
 /// des noms longs — sans débordement.
 void main() {
@@ -63,33 +63,21 @@ void main() {
     },
   );
 
-  testAtReferenceFormats('État de paie v2', (tester, format) async {
-    final pumped = await pumpPayrollScreen(tester, snapshot: snapshot);
-    pumped.cubit.setTab(PayrollTab.statement);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Total général · USD'), findsOneWidget);
-    expect(find.textContaining('Brut'), findsWidgets);
-  });
-
   testAtReferenceFormats('Livre de paie v2', (tester, format) async {
     await pumpPayrollScreen(tester, snapshot: snapshot);
 
     expect(find.text('Modifier le taux'), findsOneWidget);
   });
 
-  testAtReferenceFormats('Bulletins', (tester, format) async {
-    final pumped = await pumpPayrollScreen(tester, snapshot: snapshot);
-    pumped.cubit.setTab(PayrollTab.payslips);
-    await tester.pumpAndSettle();
-  });
-
-  testAtReferenceFormats('Historique', (tester, format) async {
-    final pumped = await pumpPayrollScreen(tester, snapshot: snapshot);
-    pumped.cubit.setTab(PayrollTab.history);
+  testAtReferenceFormats('Fiche de l agent v2', (tester, format) async {
+    await pumpPayrollScreen(
+      tester,
+      snapshot: snapshot,
+      child: const PayrollAgentScreen(agentId: 'm-1', entryMonth: '2026-10'),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.text('mois en cours'), findsOneWidget);
+    expect(find.text('Salaire brut (A)'), findsOneWidget);
   });
 
   testAtReferenceFormats('Avances & prêts', (tester, format) async {

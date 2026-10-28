@@ -63,6 +63,18 @@ class EteeloStatsCard extends StatelessWidget {
   /// carte sans export ne réserve aucune place pour des boutons absents.
   final List<Widget> actions;
 
+  /// Faux : la carte reste **blanche** — bord et filet neutres — et seul le
+  /// médaillon porte le [tone]. Pour une carte de liste, où un fond teinté
+  /// noierait les couleurs des montants et des puces. Vrai — le défaut — :
+  /// la carte se teinte toute.
+  final bool toneSurface;
+
+  /// Vrai : les actions restent à droite du titre, le sous-titre s'enroule
+  /// dessous ; elles ne passent sous le titre que sur une carte plus étroite
+  /// que [AppDimensions.statsCardActionsBesideMinWidth]. Faux — le défaut — :
+  /// elles s'enroulent dès que titre et actions ne tiennent plus côte à côte.
+  final bool actionsBeside;
+
   final Widget child;
 
   const EteeloStatsCard({
@@ -75,6 +87,8 @@ class EteeloStatsCard extends StatelessWidget {
     this.tone,
     this.toneStrength = 10,
     this.actions = const [],
+    this.toneSurface = true,
+    this.actionsBeside = false,
     required this.child,
   }) : assert(
          toneStrength >= toneStrengthMin && toneStrength <= toneStrengthMax,
@@ -99,11 +113,14 @@ class EteeloStatsCard extends StatelessWidget {
   /// plus de contour sur le fond de page.
   static const int _borderStrengthFactor = 3;
 
-  Color get _background => tone == null
+  /// Le ton des surfaces : `null` quand seul le médaillon le porte.
+  Color? get _surfaceTone => toneSurface ? tone : null;
+
+  Color get _background => _surfaceTone == null
       ? AppColors.surfaceRaised
       : ColorMix.tint(AppColors.surfaceRaised, tone!, toneStrength);
 
-  Color get _border => tone == null
+  Color get _border => _surfaceTone == null
       ? AppColors.border
       : ColorMix.tint(
           AppColors.border,
@@ -146,12 +163,17 @@ class EteeloStatsCard extends StatelessWidget {
             iconColor: iconColor ?? tone ?? AppColors.bleuArdoise,
             tone: tone,
             actions: actions,
+            actionsBeside: actionsBeside,
           ),
           const SizedBox(height: AppDimensions.spacingM),
           // Sur une carte teintée, un simple écart ne sépare plus l'en-tête du
-          // contenu : le filet reprend ce rôle.
+          // contenu : le filet reprend ce rôle. Blanche, la carte le trace
+          // neutre et plein.
           if (tone != null) ...[
-            EteeloStatsCardFilet(tone: tone),
+            if (toneSurface)
+              EteeloStatsCardFilet(tone: tone)
+            else
+              const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: AppDimensions.spacingM),
           ],
           child,

@@ -316,6 +316,11 @@ class AppDimensions {
   /// calquée sur celle d'EteeloKpiCard.
   static const statsCardIconBadgeRadius = 8.0;
   static const statsCardIconSize = 16.0;
+
+  /// Largeur de carte à partir de laquelle des actions posées « à côté »
+  /// restent à droite du titre ([EteeloStatsCard.actionsBeside]) ; en deçà,
+  /// elles passent dessous.
+  static const statsCardActionsBesideMinWidth = 360.0;
   static const enrollmentStatsChartBottomTitleHeight = 28.0;
   static const enrollmentStatsChartVerticalLabelMaxExtent = 84.0;
   static const enrollmentStatsPeriodFilterHeight = 38.0;
@@ -874,32 +879,29 @@ class AppDimensions {
   static const classRecapWatchDot = 8.0;
 
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
-  // Le livre défile horizontalement sous 920 dp ; les colonnes de montant sont
-  // alignées à droite, en chiffres tabulaires.
-  static const payrollLedgerMinWidth = 920.0;
+  // Le livre défile horizontalement sous 1024 dp — 220 d'agent, les montants,
+  // 136 de versement au moins, l'œil et le crayon, 16 de marges ; les
+  // colonnes de montant sont alignées à droite, en chiffres tabulaires.
+  static const payrollLedgerMinWidth = 1024.0;
+  static const payrollColAgent = 220.0;
   static const payrollColAmount = 100.0;
 
-  /// L'état de paie : onze colonnes du tableur des écoles.
-  static const payrollStatementMinWidth = 1120.0;
-  static const payrollColCode = 64.0;
+  /// La dernière colonne du livre : l'œil qui ouvre la fiche, et le crayon
+  /// des éléments variables en brouillon.
+  static const payrollColOpen = minTouchTarget * 2;
 
   /// Le registre des arriérés : l'agent, ses mois dus, le dû, l'ancienneté.
   static const payrollArrearsMinWidth = 880.0;
   static const payrollColArrearsMonths = 300.0;
   static const payrollColSmallAmount = 80.0;
-  static const payrollColAttendance = 88.0;
-  static const payrollColPayout = 136.0;
+  static const payrollColAttendance = 96.0;
   static const payrollAdvancesMinWidth = 880.0;
   static const payrollColDate = 104.0;
   static const payrollColSchedule = 150.0;
   static const payrollColStatus = 120.0;
-  static const payrollHistoryMinWidth = 820.0;
-  static const payrollColMonth = 150.0;
-  static const payrollColCount = 72.0;
 
-  /// La feuille du bulletin et son panneau latéral.
+  /// La feuille du bulletin.
   static const payrollPayslipMaxWidth = 720.0;
-  static const payrollPayslipPanelWidth = 270.0;
 
   /// Le filet or sous l'en-tête du bulletin.
   static const payrollPayslipRule = 3.0;
@@ -908,14 +910,31 @@ class AppDimensions {
   static const payrollCircuitDot = 30.0;
 
   /// Le tableau « Ce que chaque salarié perçoit » (spec TB 2 : min 860).
-  static const payrollDashStaffMinWidth = 960.0;
+  static const payrollDashStaffMinWidth = 960.0 + minTouchTarget;
   static const payrollCircuitLink = 14.0;
+
+  /// Le liseré tricolore sous le bandeau de paie.
+  static const payrollBannerStripe = 3.0;
+
+  /// Le carreau d'icône d'un bandeau du livre (arriérés, geste, versement).
+  static const payrollCalloutIcon = 40.0;
   static const payrollModeTileHeight = 52.0;
   static const payrollProgressHeight = 8.0;
 
   /// Une pastille de la frise des mois : assez large pour « sept. » au texte
   /// ×1,3 ; la hauteur, elle, part de [minTouchTarget].
   static const payrollMonthPillWidth = 64.0;
+
+  /// La fiche d'un agent : la colonne gauche (mois, prêts, arriérés,
+  /// cumuls) entre 300 et 380 dp, le panneau du mois prend le reste.
+  static const payrollAgentSideMin = 300.0;
+  static const payrollAgentSideMax = 380.0;
+  static const payrollAgentAvatar = 60.0;
+
+  /// Une tuile chiffrée du bandeau : quatre en ligne en paysage, 2 × 2 en
+  /// portrait.
+  static const payrollAgentTileMin = 150.0;
+  static const payrollAgentMonthTileMin = 56.0;
 
   // ── Photo de l'élève (spec « Photo de l'élève », 1 px = 1 dp) ────────────
   /// Le panneau de capture : largeur maximale, rayon, et en dessous de quelle

@@ -13841,68 +13841,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollTabLedger => 'Livre de paie';
 
   @override
-  String payrollTabLedgerSubtitle(String amount) {
-    return 'Net $amount';
-  }
-
-  @override
-  String get payrollTabStatement => 'État de paie';
-
-  @override
-  String get payrollTabStatementSubtitle => 'Le tableur des écoles';
-
-  @override
-  String get payrollStatementColName => 'Nom et postnom';
-
-  @override
-  String get payrollStatementColGrade => 'Grade';
-
-  @override
-  String get payrollStatementColGross => 'Sal. brut';
-
-  @override
-  String get payrollStatementColWorkedDays => 'NJP';
-
-  @override
-  String get payrollStatementColAbsence => 'Abs. non just.';
-
-  @override
-  String get payrollStatementColLoan => 'Crédit';
-
-  @override
-  String get payrollStatementColAdvance => 'A/S';
-
-  @override
-  String get payrollStatementColChildcare => 'PC/E';
-
-  @override
-  String get payrollStatementColIpr => 'IPR';
-
-  @override
-  String get payrollStatementColCnss => 'CNSS';
-
-  @override
-  String get payrollStatementColNet => 'Net à payer';
-
-  @override
-  String get payrollStatementSubtotal => 'Sous-total';
-
-  @override
-  String get payrollStatementTotal => 'Total général';
-
-  @override
-  String get payrollStatementOther => 'Autres';
-
-  @override
-  String get payrollStatementLocked =>
-      'Lecture seule : la paie n\'est plus en brouillon.';
-
-  @override
-  String payrollStatementControl(String gross, String withheld, String net) {
-    return 'Brut $gross − retenues $withheld = net $net';
-  }
-
-  @override
   String get payrollArrearsTitle => 'Arriérés de salaire';
 
   @override
@@ -14029,31 +13967,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollArrearsBannerAction => 'Traiter les arriérés';
 
   @override
-  String get payrollStatementPrint => 'Imprimer l\'état';
+  String get payrollStatementPrint => 'Imprimer l\'état de paie';
 
   @override
   String payrollStatementFileName(String month) {
     return 'etat-de-paie-$month';
-  }
-
-  @override
-  String get payrollTabPayslips => 'Bulletins';
-
-  @override
-  String get payrollTabPayslipsSubtitle => 'PDF · WhatsApp';
-
-  @override
-  String get payrollTabHistory => 'Historique';
-
-  @override
-  String payrollTabHistorySubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count mois',
-      one: '1 mois',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -14178,12 +14096,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get payrollKpiComplements => 'Compléments';
-
-  @override
-  String get payrollKpiComplementsDetail => 'Heures sup. et allocations';
-
-  @override
   String get payrollKpiAdvances => 'Avances déduites';
 
   @override
@@ -14194,21 +14106,6 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$count échéances',
       one: '1 échéance',
       zero: 'Aucune échéance',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get payrollKpiDeductions => 'Retenues';
-
-  @override
-  String payrollKpiDeductionsDetail(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Absences, IPR/CNSS, PC/E et $count échéances',
-      one: 'Absences, IPR/CNSS, PC/E et 1 échéance',
-      zero: 'Absences, IPR/CNSS, PC/E',
     );
     return '$_temp0';
   }
@@ -14928,9 +14825,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollProfileTitle => 'Profil de paie';
 
   @override
-  String get payrollProfileEdit => 'Profil de paie';
-
-  @override
   String get payrollProfileChildren => 'Enfants à charge';
 
   @override
@@ -14985,10 +14879,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollPayslipProvisional => 'Provisoire — non validée';
 
   @override
-  String get payrollPayslipUnsealed =>
-      'Non authentifié — le bulletin scellé se télécharge en ligne';
-
-  @override
   String get payrollPayslipStaffNumber => 'Matricule';
 
   @override
@@ -15034,7 +14924,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollPayslipChildcare => 'Prise en charge enfant du personnel';
 
   @override
-  String get payrollPayslipDeductionsTotal => 'Total retenues';
+  String get payrollPayslipDeductionsTotal => 'Total retenues (B)';
 
   @override
   String payrollPayslipAttendanceDeducted(
@@ -15045,11 +14935,6 @@ class AppLocalizationsFr extends AppLocalizations {
     int minutes,
   ) {
     return 'Pointage de $month : $absences absences non justifiées, $justified justifiées, $lates retards ($minutes min) — les absences non justifiées sont retenues sur les jours prestés.';
-  }
-
-  @override
-  String payrollPayslipBalance(String net, String paid, String rest) {
-    return 'Net à payer $net · déjà perçu $paid · reste à percevoir $rest';
   }
 
   @override
@@ -15130,17 +15015,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String payrollPayslipDownloaded(String date) {
-    return 'PDF téléchargé le $date';
-  }
-
-  @override
-  String get payrollPayslipPrevious => 'Précédent';
-
-  @override
-  String get payrollPayslipNext => 'Suivant';
-
-  @override
   String payrollPayslipPosition(int index, int count) {
     return '$index / $count';
   }
@@ -15163,55 +15037,6 @@ class AppLocalizationsFr extends AppLocalizations {
   ) {
     return 'Bonjour $name, votre bulletin de paie de $month ($school) : brut $gross ; retenues $deductions ; total retenues $total ; jours prestés $days ; net $net ; perçu $paid ; reste $rest.';
   }
-
-  @override
-  String get payrollPayslipEmpty => 'Aucun agent au livre de ce mois.';
-
-  @override
-  String get payrollHistoryMonths => 'Mois tenus';
-
-  @override
-  String get payrollHistoryPaid => 'Total net versé';
-
-  @override
-  String get payrollHistoryLocked => 'Mois verrouillés';
-
-  @override
-  String get payrollHistoryColMonth => 'Mois';
-
-  @override
-  String get payrollHistoryColStatus => 'Statut';
-
-  @override
-  String get payrollHistoryColAgents => 'Agents';
-
-  @override
-  String get payrollHistoryColGross => 'Brut';
-
-  @override
-  String get payrollHistoryColAdvances => 'Avances';
-
-  @override
-  String get payrollHistoryColNet => 'Net';
-
-  @override
-  String get payrollHistoryColValidated => 'Validée';
-
-  @override
-  String get payrollHistoryCurrent => 'mois en cours';
-
-  @override
-  String payrollHistoryRemaining(String amount) {
-    return 'reste $amount';
-  }
-
-  @override
-  String payrollHistoryValidatedBy(String date, String name) {
-    return '$date · $name';
-  }
-
-  @override
-  String get payrollHistoryEmpty => 'Aucune paie tenue';
 
   @override
   String get payrollEmptyStaff => 'Aucun agent à payer';
@@ -19998,7 +19823,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$count agents remboursent',
       one: '1 agent rembourse',
     );
-    return '$_temp0 · $due encore dus';
+    return '$_temp0 · $due encore dus à l\'école';
   }
 
   @override
@@ -20014,8 +19839,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollDashAdvancesEmpty => 'Aucun prêt ni avance en cours';
 
   @override
-  String payrollDashRemainingOf(String remaining, String amount) {
-    return 'reste $remaining sur $amount';
+  String payrollDashLeftOf(String amount) {
+    return 'reste sur $amount';
+  }
+
+  @override
+  String get payrollDashNothingThisMonth => 'rien ce mois';
+
+  @override
+  String payrollDashGrantedOn(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'le $dateString';
+  }
+
+  @override
+  String payrollDashArrearsSubtitle(String due, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count agents',
+      one: '1 agent',
+    );
+    return '$due dus à $_temp0 sur des paies validées';
   }
 
   @override
@@ -20538,4 +20385,379 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceSheetUnsentConfirm => 'Télécharger quand même';
+
+  @override
+  String get payrollAgentTitle => 'Fiche de l\'agent';
+
+  @override
+  String get payrollAgentEyebrow => 'Situation de paie';
+
+  @override
+  String get payrollAgentPrevious => 'Agent précédent';
+
+  @override
+  String get payrollAgentNext => 'Agent suivant';
+
+  @override
+  String payrollAgentUsualPayout(String detail) {
+    return 'Versement habituel · $detail';
+  }
+
+  @override
+  String get payrollAgentPayoutCash => 'Espèces · caisse';
+
+  @override
+  String get payrollAgentEditProfile => 'Modifier le profil de paie';
+
+  @override
+  String get payrollAgentOwed => 'Reste dû par l\'école';
+
+  @override
+  String payrollAgentOwedMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mois non soldés',
+      one: '1 mois non soldé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAgentOwedNone => 'Aucun arriéré';
+
+  @override
+  String get payrollAgentLoans => 'Prêts & avances en cours';
+
+  @override
+  String get payrollAgentLoansHint => 'À retenir sur les paies à venir';
+
+  @override
+  String get payrollAgentLoansNone => 'Aucun encours';
+
+  @override
+  String payrollAgentPaidYear(String year) {
+    return 'Perçu en $year';
+  }
+
+  @override
+  String payrollAgentPaidYearOf(int count, String due) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'sur $due dus · $count mois validés',
+      one: 'sur $due dus · 1 mois validé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAgentPaidYearNone => 'Aucun mois validé';
+
+  @override
+  String payrollAgentUpcoming(String month) {
+    return 'Net prévu · $month';
+  }
+
+  @override
+  String payrollAgentMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Fiches de paie · $count mois',
+      one: 'Fiches de paie · 1 mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payrollAgentMonthPaid(String amount) {
+    return 'perçu $amount';
+  }
+
+  @override
+  String get payrollSettlementUnpaid => 'Non payé';
+
+  @override
+  String get payrollSettlementPartial => 'Partiel';
+
+  @override
+  String get payrollSettlementDeferred => 'Différé';
+
+  @override
+  String get payrollSettlementSettled => 'Soldé';
+
+  @override
+  String get payrollSettlementNothing => 'Rien à verser';
+
+  @override
+  String get payrollAgentEmpty => 'Aucune fiche de paie';
+
+  @override
+  String get payrollAgentEmptyHint =>
+      'L\'agent figurera dans la paie du mois dès que son contrat sera enregistré au Fichier du personnel.';
+
+  @override
+  String get payrollLedgerOpenAgent => 'Ouvrir la fiche de l\'agent';
+
+  @override
+  String get payrollAgentPanelEyebrow => 'Fiche de paie';
+
+  @override
+  String get payrollAgentSegmentCalc => 'Détail du calcul';
+
+  @override
+  String get payrollAgentSegmentPayslip => 'Bulletin';
+
+  @override
+  String payrollAgentPayRemaining(String amount) {
+    return 'Verser · reste $amount';
+  }
+
+  @override
+  String get payrollAgentPayments => 'Versements';
+
+  @override
+  String get payrollAgentWhatsappAgain => 'Renvoyer par WhatsApp';
+
+  @override
+  String payrollAgentScaleFrozen(int days, String absences) {
+    return 'Barème figé à la validation : $days j de référence · absences $absences.';
+  }
+
+  @override
+  String payrollAgentScaleCurrent(int days, String absences) {
+    return 'Barème en vigueur : $days j de référence · absences $absences.';
+  }
+
+  @override
+  String get payrollAgentAbsencesDeducted => 'retenues';
+
+  @override
+  String get payrollAgentAbsencesIndicative => 'indicatives';
+
+  @override
+  String get payrollCalcGains => 'Gains';
+
+  @override
+  String get payrollCalcDeductions => 'Retenues';
+
+  @override
+  String get payrollCalcNet => 'Net';
+
+  @override
+  String get payrollCalcPayout => 'Versement';
+
+  @override
+  String get payrollCalcGross => 'Salaire brut (A)';
+
+  @override
+  String get payrollCalcDeductionsTotal => 'Total retenues (B)';
+
+  @override
+  String get payrollCalcNetToPay => 'Net à payer du mois · (A) − (B)';
+
+  @override
+  String payrollCalcAbsenceFormula(int days, String base, int divisor) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days j non prestés',
+      one: '1 j non presté',
+    );
+    return '$_temp0 · base $base ÷ $divisor j';
+  }
+
+  @override
+  String payrollCalcAbsenceIndicative(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days j non prestés',
+      one: '1 j non presté',
+    );
+    return '$_temp0 · non retenus (barème de l\'école)';
+  }
+
+  @override
+  String get payrollCalcAbsenceHourly => 'Payé aux heures — sans objet';
+
+  @override
+  String payrollCalcRate(int percent) {
+    return 'Taux de versement du mois · $percent %';
+  }
+
+  @override
+  String get payrollCalcRateFull =>
+      'Taux de versement du mois · 100 % — versement intégral du net';
+
+  @override
+  String get payrollCalcFixed => 'Montant fixe';
+
+  @override
+  String get payrollCalcDeferred => 'Part non versée → arriéré';
+
+  @override
+  String get payrollCalcAfterValidation =>
+      'Les versements seront possibles après validation.';
+
+  @override
+  String get payrollKpiSchoolDeductions => 'Retenues école';
+
+  @override
+  String get payrollKpiSchoolDeductionsDetail => 'Absences · IPR/CNSS · PC/E';
+
+  @override
+  String get payrollKpiLoans => 'Avances & prêts';
+
+  @override
+  String get payrollAgentLoansTitle => 'Prêts & avances';
+
+  @override
+  String get payrollAgentAdvanceSingle => 'Avance sur salaire';
+
+  @override
+  String payrollAgentAdvanceLoan(int count) {
+    return 'Prêt · $count mois';
+  }
+
+  @override
+  String payrollAgentNextInstallment(String amount, String month) {
+    return 'Prochaine retenue : $amount sur la paie de $month';
+  }
+
+  @override
+  String get payrollAgentLoansEmpty =>
+      'Aucune avance ni prêt. Les demandes se font dans RH · Paie ▸ Avances & prêts.';
+
+  @override
+  String get payrollAgentArrearsTitle => 'Arriérés de salaire';
+
+  @override
+  String payrollAgentArrearPaid(String paid, String net) {
+    return 'perçu $paid / $net';
+  }
+
+  @override
+  String get payrollAgentArrearPriority => 'à solder en priorité';
+
+  @override
+  String get payrollAgentArrearsEmpty =>
+      'Aucun arriéré : aucun mois passé n\'est en retard.';
+
+  @override
+  String get payrollAgentArrearsSettle => 'Régler les arriérés';
+
+  @override
+  String payrollAgentTotalsTitle(String year) {
+    return 'Cumuls · $year';
+  }
+
+  @override
+  String get payrollAgentTotalsGross => 'Salaire brut';
+
+  @override
+  String get payrollAgentTotalsIprCnss => 'IPR & CNSS';
+
+  @override
+  String get payrollAgentTotalsAbsence => 'Absences retenues';
+
+  @override
+  String get payrollAgentTotalsChildcare => 'PC/E';
+
+  @override
+  String get payrollAgentTotalsAdvances => 'Avances & prêts remboursés';
+
+  @override
+  String get payrollAgentTotalsPaid => 'Net perçu';
+
+  @override
+  String payrollAgentTotalsMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sur $count mois validés.',
+      one: 'Sur 1 mois validé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollAgentTotalsNet => 'Net dû';
+
+  @override
+  String payrollAgentNextInstallmentCarried(
+    String amount,
+    String month,
+    String carried,
+  ) {
+    return 'Prochaine retenue : $amount sur la paie de $month · $carried reportés';
+  }
+
+  @override
+  String get payrollAgentArrearsDetail => 'Voir le détail';
+
+  @override
+  String get payrollBarDraftWriteDetail =>
+      'Touchez un agent pour ouvrir sa fiche ; le crayon de sa ligne ouvre directement ses éléments variables du mois.';
+
+  @override
+  String get payrollBarSubmittedManageDetail =>
+      'Vérifiez le livre, puis validez-la, ou renvoyez-la à l\'économe avec un motif.';
+
+  @override
+  String get payrollBarValidatedDetail =>
+      'Les montants sont figés : versez chaque agent depuis sa ligne, puis diffusez les bulletins.';
+
+  @override
+  String get payrollPayoutBarFullDetail =>
+      'Si la trésorerie ne permet pas de tout payer, fixez un taux pour le mois, ou un montant fixe dans le profil de paie d\'un agent.';
+
+  @override
+  String payrollArrearsBannerDetail(String months) {
+    return 'Reste à payer sur $months. Un arriéré se règle sur son mois d\'origine, depuis le registre des arriérés.';
+  }
+
+  @override
+  String get payrollPayslipProvisionalBanner =>
+      'Provisoire — paie non encore validée par la direction';
+
+  @override
+  String get payrollPayslipName => 'Nom et postnom';
+
+  @override
+  String get payrollPayslipGrossA => 'Salaire brut (A)';
+
+  @override
+  String get payrollPayslipAmount => 'Montant';
+
+  @override
+  String get payrollPayslipNetDue =>
+      'Rémunération due (net à payer) · (A) − (B)';
+
+  @override
+  String get payrollPayslipBalancePaid => 'Montant déjà perçu';
+
+  @override
+  String get payrollPayslipBalanceRest => 'Reste à percevoir';
+
+  @override
+  String payrollPayslipBalanceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versements',
+      one: '1 versement',
+      zero: 'aucun versement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollPayslipBalanceDebt => 'dette de l\'école envers l\'agent';
+
+  @override
+  String payrollPayslipBalanceRatio(int percent) {
+    return '$percent % réglé';
+  }
 }

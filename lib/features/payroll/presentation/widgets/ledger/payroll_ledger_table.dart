@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_cells.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_payout_cell.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_avatar.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
@@ -18,14 +19,20 @@ import 'package:school_app_flutter/core/components/tables/eteelo_column_table.da
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre : une ligne par agent, montants à droite en chiffres tabulaires,
-/// ligne de total par devise en pied. Toucher une ligne ouvre ses éléments
-/// variables (brouillon, économe), sinon son bulletin.
+/// ligne de total par devise en pied, du ton de l'en-tête. Toucher une ligne ouvre la fiche de
+/// l'agent, comme l'œil de fin de ligne ; en brouillon, le crayon à côté
+/// ouvre directement ses éléments variables — la saisie du mois reste d'un
+/// seul geste. La colonne du versement prend la place qui reste : l'agent ne
+/// s'étire plus loin de ses montants sur un grand écran.
 class PayrollLedgerTable extends StatelessWidget {
   final PayrollMonthView view;
   final PayrollSnapshot snapshot;
   final List<PayrollLine> lines;
   final ValueChanged<PayrollLine> onOpen;
   final ValueChanged<PayrollLine> onPayout;
+
+  /// `null` : pas de crayon (paie verrouillée, ou compte sans écriture).
+  final ValueChanged<PayrollLine>? onEdit;
   final bool canWrite;
 
   const PayrollLedgerTable({
@@ -35,18 +42,22 @@ class PayrollLedgerTable extends StatelessWidget {
     required this.lines,
     required this.onOpen,
     required this.onPayout,
+    required this.onEdit,
     required this.canWrite,
   });
 
+  static const int _netColumn = 5;
+
   static const List<double?> _widths = [
-    null,
+    AppDimensions.payrollColAgent,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColSmallAmount,
     AppDimensions.payrollColSmallAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAttendance,
-    AppDimensions.payrollColPayout,
+    null,
+    AppDimensions.payrollColOpen,
   ];
 
   @override
@@ -59,6 +70,10 @@ class PayrollLedgerTable extends StatelessWidget {
       // Sur une tablette en portrait, le livre défile de côté : l'agent reste
       // à l'écran pendant que ses montants passent.
       frozenFirstColumn: true,
+      // Le livre mis en avant, et un filet entre les montants (jusqu'au net)
+      // et ce qui les commente : pointage, versement.
+      raised: true,
+      ruleAfter: _netColumn,
       widths: _widths,
       endAligned: const {1, 2, 3, 4, 5},
       headers: [
@@ -70,6 +85,7 @@ class PayrollLedgerTable extends StatelessWidget {
         l10n.payrollColNet,
         l10n.payrollColAttendance,
         l10n.payrollColPayout,
+        '',
       ],
       rowCount: lines.length,
       row: (context, index) => _row(context, lines[index]),
@@ -175,12 +191,16 @@ class PayrollLedgerTable extends StatelessWidget {
               ),
           ],
         ),
-        _Signals(line: line),
+        PayrollLedgerSignals(line: line),
         PayrollPayoutCell(
           view: view,
           line: line,
           canWrite: canWrite,
           onPayout: () => onPayout(line),
+        ),
+        PayrollLedgerOpenCell(
+          onOpen: () => onOpen(line),
+          onEdit: onEdit == null ? null : () => onEdit!(line),
         ),
       ],
     );
@@ -195,16 +215,20 @@ class PayrollLedgerTable extends StatelessWidget {
     final currencies = byCurrency.keys.toList()..sort();
     int sum(List<PayrollLine> of, int Function(PayrollLine) amount) =>
         of.fold(0, (total, line) => total + amount(line));
+    final tone = ListingTones.table;
     return Column(
       children: [
         for (final currency in currencies)
           EteeloColumnTableRow(
             widths: _widths,
-            background: AppColors.surfaceAlt,
+            // Le bandeau de l'en-tête, repris en pied : le total ferme le
+            // tableau comme l'en-tête l'ouvre.
+            background: tone.header,
+            labelInk: tone.headerInk,
             cells: [
               Text(
                 l10n.payrollTotalIn(currency),
-                style: AppTypography.labelLarge,
+                style: AppTypography.labelLarge.copyWith(color: tone.headerInk),
               ),
               for (final amountOf in <int Function(PayrollLine)>[
                 (l) => l.baseInCents,
@@ -221,58 +245,17 @@ class PayrollLedgerTable extends StatelessWidget {
                     currency,
                   ),
                   textAlign: TextAlign.end,
-                  style: EteeloColumnTableRow.figures(strong: true),
+                  style: EteeloColumnTableRow.figures(
+                    color: tone.headerInk,
+                    strong: true,
+                  ),
                 ),
+              const SizedBox.shrink(),
               const SizedBox.shrink(),
               const SizedBox.shrink(),
             ],
           ),
       ],
-    );
-  }
-}
-
-/// « 1 abs », « 2 ret », ou « RAS » — le Pointage de M−1 ; l'absence n'est
-/// retenue que si l'école l'a réglé, par les jours prestés (v2).
-class _Signals extends StatelessWidget {
-  final PayrollLine line;
-
-  const _Signals({required this.line});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final attendance = line.attendance;
-    final parts = [
-      if (attendance.unjustifiedAbsences > 0)
-        (
-          l10n.payrollSignalAbsences(attendance.unjustifiedAbsences),
-          PayrollTone.alert.ink,
-        ),
-      if (attendance.lates > 0)
-        (l10n.payrollSignalLates(attendance.lates), PayrollTone.submitted.ink),
-    ];
-    return Tooltip(
-      message: l10n.payrollSignalHint,
-      child: Text.rich(
-        TextSpan(
-          children: parts.isEmpty
-              ? [
-                  TextSpan(
-                    text: l10n.payrollSignalNone,
-                    style: const TextStyle(color: AppColors.textMutedAa),
-                  ),
-                ]
-              : [
-                  for (final (index, (text, color)) in parts.indexed)
-                    TextSpan(
-                      text: index == 0 ? text : ' · $text',
-                      style: TextStyle(color: color),
-                    ),
-                ],
-        ),
-        style: AppTypography.bodySmall,
-      ),
     );
   }
 }

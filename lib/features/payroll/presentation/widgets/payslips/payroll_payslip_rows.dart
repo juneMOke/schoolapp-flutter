@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_content.dart';
@@ -11,6 +12,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Les lignes calculées du bulletin : les retenues du modèle et les
 /// versements reçus — mises en mots une fois, pour l'écran et le PDF.
 abstract final class PayrollPayslipRows {
+  /// Le montant d'une retenue nulle : la ligne reste listée (modèle papier).
+  static const none = '—';
+
+  /// Le rang de l'absence parmi [deductions] — le détail du calcul y ajoute
+  /// sa formule.
+  static const absenceIndex = 1;
+
   /// Les cinq retenues du modèle des écoles, **toujours** listées dans
   /// l'ordre du papier — « — » quand elles sont nulles —, puis leur total :
   /// chaque montant rangé par le calcul dans sa ligne.
@@ -21,7 +29,7 @@ abstract final class PayrollPayslipRows {
   ) {
     final l10n = AppLocalizations.of(context)!;
     String money(int cents) =>
-        cents == 0 ? '—' : '− ${PayrollLabels.money(cents, line.currency)}';
+        cents == 0 ? none : '− ${PayrollLabels.money(cents, line.currency)}';
     final d = line.deductions;
     int taken(bool loan) => line.advances
         .where((a) => (a.installments > 1) == loan)
@@ -72,7 +80,7 @@ abstract final class PayrollPayslipRows {
       (
         label: l10n.payrollPayslipDeductionsTotal,
         value: total == 0
-            ? '—'
+            ? none
             : '− ${PayrollLabels.money(total, line.currency)}',
         note: null,
       ),
@@ -90,6 +98,34 @@ abstract final class PayrollPayslipRows {
     return advance == null
         ? label
         : '$label · ${PayrollLabels.reason(l10n, advance.reason)}';
+  }
+
+  /// Le solde vu de l'agent : net, déjà perçu (et en combien de
+  /// versements), reste à percevoir, part réglée.
+  static PayslipBalance balance(
+    BuildContext context,
+    PayrollSettlement settlement,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    String money(int cents) =>
+        PayrollLabels.money(cents, settlement.line.currency);
+    final net = settlement.netInCents;
+    final ratio = net <= 0
+        ? 1.0
+        : (settlement.paidInCents / net).clamp(0.0, 1.0).toDouble();
+    return (
+      net: money(net),
+      paid: money(settlement.paidInCents),
+      paidNote: l10n.payrollPayslipBalanceCount(
+        settlement.disbursements.length,
+      ),
+      rest: money(settlement.remainingInCents),
+      restNote: settlement.remainingInCents > 0
+          ? l10n.payrollPayslipBalanceDebt
+          : null,
+      ratio: ratio,
+      ratioLabel: l10n.payrollPayslipBalanceRatio((ratio * 100).floor()),
+    );
   }
 
   /// Chaque versement reçu — mode, montant, preuve, date —, une ligne

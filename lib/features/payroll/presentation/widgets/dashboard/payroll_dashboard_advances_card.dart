@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_choice_chips.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_link.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Prêts & avances » : qui rembourse, ce qui reste dû, ce que le mois
-/// retient — servis par le serveur à l'instant du calcul. Le détail se gère
-/// dans Avances & prêts.
+/// retient — servis par le serveur à l'instant du calcul. Carte blanche, le
+/// ton dans le médaillon et la barre seuls. Le détail se gère dans Avances &
+/// prêts.
 class PayrollDashboardAdvancesCard extends StatefulWidget {
   final List<PayrollDashboardAdvance> advances;
   final VoidCallback onManage;
@@ -59,6 +61,9 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
     final due = PayrollLabels.perCurrency(
       ongoing.map((a) => (a.remainingInCents, a.currency)),
     ).join(' · ');
+    final muted = AppTypography.bodySmall.copyWith(
+      color: AppColors.textSecondary,
+    );
     return EteeloStatsCard(
       title: l10n.payrollDashAdvancesTitle,
       subtitle: ongoing.isEmpty
@@ -70,49 +75,56 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
       icon: Icons.handshake_outlined,
       tone: DashboardSense.attente,
       toneStrength: DashboardTones.forceDe(DashboardSense.attente),
+      toneSurface: false,
+      actionsBeside: true,
       actions: [
-        EteeloButton.ghost(
+        PayrollDashboardLink(
           label: l10n.payrollDashManage,
-          icon: Icons.arrow_forward,
           onPressed: widget.onManage,
-          fullWidth: false,
         ),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PayrollChoiceChips<PayrollAdvanceFilter>(
-            values: _filters,
-            selected: _filter,
-            label: (filter) => switch (filter) {
-              PayrollAdvanceFilter.ongoing => l10n.payrollDashFilterOngoing,
-              PayrollAdvanceFilter.settled => l10n.payrollDashFilterSettled,
-              _ => l10n.payrollAdvancesFilterAll,
-            },
-            onSelected: (filter) => setState(() => _filter = filter),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: SegmentedTabFilter<PayrollAdvanceFilter>(
+              semanticsLabel: l10n.payrollDashAdvancesTitle,
+              style: SegmentedTabFilterStyle.window,
+              selected: _filter,
+              onSelected: (filter) => setState(() => _filter = filter),
+              options: [
+                for (final filter in _filters)
+                  SegmentedTabOption(
+                    value: filter,
+                    label: switch (filter) {
+                      PayrollAdvanceFilter.ongoing =>
+                        l10n.payrollDashFilterOngoing,
+                      PayrollAdvanceFilter.settled =>
+                        l10n.payrollDashFilterSettled,
+                      _ => l10n.payrollAdvancesFilterAll,
+                    },
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           if (visible.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Text(
-                l10n.payrollDashAdvancesEmpty,
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
+              child: Text(l10n.payrollDashAdvancesEmpty, style: muted),
             )
           else ...[
-            for (final advance in visible.take(_maxRows))
+            for (final advance in visible.take(_maxRows)) ...[
+              const Divider(height: 1, color: AppColors.border),
               _AdvanceRow(advance: advance),
+            ],
             if (visible.length > _maxRows)
               Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   l10n.payrollDashMore(visible.length - _maxRows),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                  style: muted,
                 ),
               ),
           ],
@@ -122,6 +134,8 @@ class _AdvancesCardState extends State<PayrollDashboardAdvancesCard> {
   }
 }
 
+/// Une ligne : qui et pourquoi à gauche, le reste dû en gros à droite, puis
+/// la barre du remboursé et ce que le mois retient.
 class _AdvanceRow extends StatelessWidget {
   final PayrollDashboardAdvance advance;
 
@@ -132,61 +146,106 @@ class _AdvanceRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     String money(int cents) => PayrollLabels.money(cents, advance.currency);
     final repaid = advance.repaidShare;
+    final settled = advance.phase == PayrollAdvancePhase.settled;
+    final taken = advance.takenThisMonthInCents;
     final details = [
-      advance.installments > 1
-          ? l10n.payrollAdvanceOver(advance.installments)
-          : l10n.payrollAdvanceOnce,
+      advance.isLoan
+          ? l10n.payrollAgentAdvanceLoan(advance.installments)
+          : l10n.payrollAgentAdvanceSingle,
       if (advance.reason case final reason?) PayrollLabels.reason(l10n, reason),
-      PayrollLabels.day(context, advance.grantedOn),
-      if (advance.takenThisMonthInCents > 0)
-        l10n.payrollDashTakenThisMonth(money(advance.takenThisMonthInCents)),
+      // « le 18 oct. 2026 » : sans le jour de la semaine, qui n'apprend rien.
+      if (DateTime.tryParse(advance.grantedOn) case final granted?)
+        l10n.payrollDashGrantedOn(granted),
     ].join(' · ');
+    final muted = AppTypography.bodySmall.copyWith(
+      color: AppColors.textSecondary,
+    );
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Text(
-                  advance.fullName,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelLarge,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      advance.fullName,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.titleSmall.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(details, style: muted),
+                  ],
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Flexible(
-                child: Text(
-                  l10n.payrollDashRemainingOf(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
                     money(advance.remainingInCents),
-                    money(advance.amountInCents),
+                    style: AppTypography.titleMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                  textAlign: TextAlign.end,
-                  style: AppTypography.labelMedium,
-                ),
+                  Text(
+                    l10n.payrollDashLeftOf(money(advance.amountInCents)),
+                    style: muted,
+                  ),
+                ],
               ),
             ],
           ),
-          Text(
-            details,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          ClipRRect(
-            borderRadius: AppRadius.brPill,
-            child: LinearProgressIndicator(
-              value: repaid,
-              minHeight: AppDimensions.payrollProgressHeight,
-              backgroundColor: AppColors.surfaceAlt,
-              color: repaid >= 1
-                  ? DashboardSense.encaisse
-                  : DashboardSense.attente,
-              semanticsLabel: l10n.payrollDashRepaidA11y(
-                (repaid * 100).round(),
-              ),
+          const SizedBox(height: AppSpacing.sm),
+          // La barre prend la largeur ; ce que le mois retient se lit au
+          // bout, sans jamais lui prendre plus que la moitié.
+          LayoutBuilder(
+            builder: (context, constraints) => Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: AppRadius.brPill,
+                    child: LinearProgressIndicator(
+                      value: repaid,
+                      minHeight: AppDimensions.payrollProgressHeight,
+                      backgroundColor: PayrollTone.submitted.soft,
+                      color: repaid >= 1
+                          ? DashboardSense.encaisse
+                          : PayrollTone.submitted.ink,
+                      semanticsLabel: l10n.payrollDashRepaidA11y(
+                        (repaid * 100).round(),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth / 2,
+                  ),
+                  child: Text(
+                    taken > 0
+                        ? l10n.payrollDashTakenThisMonth(money(taken))
+                        : settled
+                        ? l10n.payrollDashStatusSettled
+                        : l10n.payrollDashNothingThisMonth,
+                    textAlign: TextAlign.end,
+                    style: taken > 0
+                        ? AppTypography.labelMedium.copyWith(
+                            color: PayrollTone.submitted.ink,
+                          )
+                        : muted,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

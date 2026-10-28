@@ -24,6 +24,9 @@ class EteeloStatsCardHeader extends StatelessWidget {
 
   final List<Widget> actions;
 
+  /// Cf. [EteeloStatsCard.actionsBeside].
+  final bool actionsBeside;
+
   const EteeloStatsCardHeader({
     super.key,
     required this.title,
@@ -33,6 +36,7 @@ class EteeloStatsCardHeader extends StatelessWidget {
     required this.iconColor,
     required this.tone,
     required this.actions,
+    this.actionsBeside = false,
   });
 
   @override
@@ -93,6 +97,32 @@ class EteeloStatsCardHeader extends StatelessWidget {
       return SizedBox(width: double.infinity, child: heading);
     }
 
+    if (actionsBeside) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth <
+              AppDimensions.statsCardActionsBesideMinWidth) {
+            return _wrapped(heading, trailing);
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: heading),
+              const SizedBox(width: AppDimensions.spacingM),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: AppDimensions.spacingS,
+                children: trailing,
+              ),
+            ],
+          );
+        },
+      );
+    }
+    return _wrapped(heading, trailing);
+  }
+
+  Widget _wrapped(Widget heading, List<Widget> trailing) {
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       crossAxisAlignment: WrapCrossAlignment.center,

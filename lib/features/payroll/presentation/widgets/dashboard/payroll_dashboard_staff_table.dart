@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_cells.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Ce que chaque salarié perçoit » : prévu, retenues, net du mois,
@@ -18,7 +19,16 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class PayrollDashboardStaffTable extends StatelessWidget {
   final PayrollDashboardCurrency section;
 
-  const PayrollDashboardStaffTable({super.key, required this.section});
+  /// Toucher une ligne : la fiche de l'agent ; `null` : lignes inertes.
+  final ValueChanged<String>? onOpen;
+
+  const PayrollDashboardStaffTable({
+    super.key,
+    required this.section,
+    this.onOpen,
+  });
+
+  static const int _remainingColumn = 6;
 
   static const List<double?> _widths = [
     null,
@@ -29,6 +39,8 @@ class PayrollDashboardStaffTable extends StatelessWidget {
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColStatus,
+    // L'œil seul : pas de crayon ici, le tableau de bord ne saisit rien.
+    AppDimensions.minTouchTarget,
   ];
 
   @override
@@ -41,6 +53,9 @@ class PayrollDashboardStaffTable extends StatelessWidget {
       cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollDashStaffMinWidth,
       widths: _widths,
+      // Un filet entre les montants et le statut, comme au livre : il les
+      // écarte aussi, et « Reste » ne se colle plus à « Statut ».
+      ruleAfter: _remainingColumn,
       endAligned: const {1, 2, 3, 4, 5, 6},
       headers: [
         l10n.payrollColAgent,
@@ -51,6 +66,7 @@ class PayrollDashboardStaffTable extends StatelessWidget {
         l10n.payrollDashColReceived,
         l10n.payrollDashColRemaining,
         l10n.payrollAdvanceColStatus,
+        '',
       ],
       rowCount: rows.length,
       row: (context, index) => _row(context, rows[index]),
@@ -61,8 +77,10 @@ class PayrollDashboardStaffTable extends StatelessWidget {
   Widget _row(BuildContext context, PayrollDashboardRow row) {
     final none = AppLocalizations.of(context)!.payrollNoValue;
     String money(int cents) => PayrollLabels.money(cents, section.currency);
+    final onOpen = this.onOpen;
     return EteeloColumnTableRow(
       widths: _widths,
+      onTap: onOpen == null ? null : () => onOpen(row.staffMemberId),
       cells: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,6 +113,14 @@ class PayrollDashboardStaffTable extends StatelessWidget {
         _figure(money(row.receivedInCents)),
         _figure(money(row.remainingInCents), strong: true),
         _Status(status: row.status),
+        // L'œil du livre : la ligne entière ouvre déjà la fiche, il le dit.
+        if (onOpen == null)
+          const SizedBox.shrink()
+        else
+          PayrollLedgerOpenCell(
+            onOpen: () => onOpen(row.staffMemberId),
+            onEdit: null,
+          ),
       ],
     );
   }
@@ -102,30 +128,36 @@ class PayrollDashboardStaffTable extends StatelessWidget {
   Widget _total(BuildContext context, PayrollDashboardTotals totals) {
     final l10n = AppLocalizations.of(context)!;
     String money(int cents) => PayrollLabels.money(cents, section.currency);
+    final ink = ListingTones.table.headerInk;
+    Widget total(String text) => _figure(text, strong: true, color: ink);
     return EteeloColumnTableRow(
       widths: _widths,
-      background: AppColors.surfaceAlt,
+      // Le bandeau de l'en-tête, comme le total du livre.
+      background: ListingTones.table.header,
+      labelInk: ink,
       cells: [
         Text(
           l10n.payrollDashTotal(section.currency),
-          style: AppTypography.labelLarge,
+          style: AppTypography.labelLarge.copyWith(color: ink),
         ),
-        _figure(money(totals.plannedInCents), strong: true),
-        _figure('− ${money(totals.deductionsInCents)}', strong: true),
-        _figure(money(totals.netInCents), strong: true),
-        _figure('+ ${money(totals.arrearsInCents)}', strong: true),
-        _figure(money(totals.receivedInCents), strong: true),
-        _figure(money(totals.remainingInCents), strong: true),
+        total(money(totals.plannedInCents)),
+        total('− ${money(totals.deductionsInCents)}'),
+        total(money(totals.netInCents)),
+        total('+ ${money(totals.arrearsInCents)}'),
+        total(money(totals.receivedInCents)),
+        total(money(totals.remainingInCents)),
+        const SizedBox.shrink(),
         const SizedBox.shrink(),
       ],
     );
   }
 
-  static Widget _figure(String text, {bool strong = false}) => Text(
-    text,
-    textAlign: TextAlign.end,
-    style: EteeloColumnTableRow.figures(strong: strong),
-  );
+  static Widget _figure(String text, {bool strong = false, Color? color}) =>
+      Text(
+        text,
+        textAlign: TextAlign.end,
+        style: EteeloColumnTableRow.figures(color: color, strong: strong),
+      );
 }
 
 class _Status extends StatelessWidget {

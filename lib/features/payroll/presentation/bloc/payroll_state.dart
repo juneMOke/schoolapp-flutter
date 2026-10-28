@@ -4,13 +4,12 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_agent_situations.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_member_search.dart';
 
 enum PayrollLoad { loading, ready, failure }
-
-enum PayrollTab { ledger, statement, payslips, history }
 
 /// Les puces du règlement (B3) : un salaire se règle en plusieurs fois.
 enum PayrollPayFilter {
@@ -36,22 +35,19 @@ class PayrollState extends Equatable {
   /// `YYYY-MM-DD` — borne la navigation et date les écritures.
   final String today;
 
-  /// `YYYY-MM`, partagé par le livre et les bulletins.
+  /// `YYYY-MM` : le livre affiché, ou le mois choisi dans une fiche.
   final String month;
-  final PayrollTab tab;
 
   /// Le livre de [month], recomposé quand la tablette ou le mois change.
   final PayrollMonthView? view;
 
-  /// Les livres de l'historique, recomposés à chaque lecture de la tablette.
+  /// Les livres de tous les mois tenus, pour la fiche d'un agent —
+  /// recomposés à chaque lecture de la tablette.
   final List<PayrollMonthView> history;
   final StaffContractKind? contractFilter;
   final PayrollPayFilter payFilter;
   final String search;
   final PayrollAdvanceFilter advanceFilter;
-
-  /// L'agent dont le bulletin est ouvert ; `null` = le premier du livre.
-  final String? payslipMemberId;
   final PayrollNotice? notice;
 
   const PayrollState({
@@ -60,14 +56,12 @@ class PayrollState extends Equatable {
     required this.today,
     required this.month,
     this.failure,
-    this.tab = PayrollTab.ledger,
     this.view,
     this.history = const [],
     this.contractFilter,
     this.payFilter = PayrollPayFilter.all,
     this.search = '',
     this.advanceFilter = PayrollAdvanceFilter.ongoing,
-    this.payslipMemberId,
     this.notice,
   });
 
@@ -98,22 +92,15 @@ class PayrollState extends Equatable {
     final view = this.view;
     if (view == null) return const [];
     final needle = search.trim();
-    final order = {
-      for (final (index, member) in snapshot.members.indexed) member.id: index,
-    };
     // Les lignes du livre, et non les fiches : la ligne figée d'un agent
     // retiré depuis la validation reste au livre.
-    return [
+    return PayrollAgentSituations.ordered(snapshot, [
       for (final line in view.lines)
         if ((contractFilter == null || line.contractKind == contractFilter) &&
             _matchesPay(view, line) &&
             _matchesSearch(line, needle))
           line,
-    ]..sort(
-      (a, b) => (order[a.staffMemberId] ?? order.length).compareTo(
-        order[b.staffMemberId] ?? order.length,
-      ),
-    );
+    ]);
   }
 
   bool _matchesSearch(PayrollLine line, String needle) {
@@ -144,14 +131,12 @@ class PayrollState extends Equatable {
     PayrollSnapshot? snapshot,
     String? today,
     String? month,
-    PayrollTab? tab,
     PayrollMonthView? view,
     List<PayrollMonthView>? history,
     StaffContractKind? Function()? contractFilter,
     PayrollPayFilter? payFilter,
     String? search,
     PayrollAdvanceFilter? advanceFilter,
-    String? Function()? payslipMemberId,
     PayrollNotice? notice,
   }) => PayrollState(
     load: load ?? this.load,
@@ -159,7 +144,6 @@ class PayrollState extends Equatable {
     snapshot: snapshot ?? this.snapshot,
     today: today ?? this.today,
     month: month ?? this.month,
-    tab: tab ?? this.tab,
     view: view ?? this.view,
     history: history ?? this.history,
     contractFilter: contractFilter == null
@@ -168,9 +152,6 @@ class PayrollState extends Equatable {
     payFilter: payFilter ?? this.payFilter,
     search: search ?? this.search,
     advanceFilter: advanceFilter ?? this.advanceFilter,
-    payslipMemberId: payslipMemberId == null
-        ? this.payslipMemberId
-        : payslipMemberId(),
     notice: notice ?? this.notice,
   );
 
@@ -181,14 +162,12 @@ class PayrollState extends Equatable {
     snapshot,
     today,
     month,
-    tab,
     view,
     history,
     contractFilter,
     payFilter,
     search,
     advanceFilter,
-    payslipMemberId,
     notice,
   ];
 }

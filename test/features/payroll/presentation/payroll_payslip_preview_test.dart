@@ -12,7 +12,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
-import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_agent_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 
 import '../../staff/staff_builders.dart';
@@ -81,10 +81,10 @@ void main() {
       tester,
       snapshot: snapshot,
       payslips: payslips,
+      child: const PayrollAgentScreen(agentId: 'm-1', entryMonth: '2026-10'),
     );
     signals = pumped.signals;
     repository = pumped.repository;
-    pumped.cubit.setTab(PayrollTab.payslips);
     await tester.pumpAndSettle();
   }
 
@@ -193,10 +193,12 @@ void main() {
     verifyNever(() => payslips.payslip(any(), any()));
   });
 
-  testWidgets('validée : le scellé, et le recueil du mois', (tester) async {
+  testWidgets('validée : le bulletin scellé à la place du provisoire', (
+    tester,
+  ) async {
     await openPayslips(tester, snapshotOf(status: PayrollStatus.validated));
 
     expect(find.text('Bulletin provisoire (PDF)'), findsNothing);
-    expect(find.text('Tous les bulletins (PDF)'), findsWidgets);
+    expect(find.text('Télécharger le PDF'), findsOneWidget);
   });
 }

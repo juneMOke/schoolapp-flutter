@@ -37,7 +37,7 @@ class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
 
 /// L'écran de la paie ([child], par défaut celui de la Paie) sur [snapshot],
 /// la taille de la fenêtre laissée à l'appelant (tests de formats). Rend le
-/// cubit, pour ouvrir un onglet, et le dépôt, pour vérifier une écriture.
+/// cubit, pour changer de mois, et le dépôt, pour vérifier une écriture.
 Future<
   ({
     PayrollCubit cubit,

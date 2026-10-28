@@ -73,7 +73,7 @@ class EteeloColumnTableCards extends StatelessWidget {
               leading: Text(
                 headers[i],
                 style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.textMutedAa,
+                  color: row.labelInk ?? AppColors.textMutedAa,
                 ),
               ),
               // `widthFactor` : la valeur garde sa largeur, le nom de colonne

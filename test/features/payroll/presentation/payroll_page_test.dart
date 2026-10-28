@@ -189,7 +189,6 @@ void main() {
 
     expect(find.text('Mayala Mutombo Ruth'), findsOneWidget);
     expect(find.text('Kalala Mutombo Didier'), findsOneWidget);
-    expect(find.text('Livre de paie'), findsWidgets);
 
     await tester.tap(find.text('Soumettre à la direction'));
     await tester.pumpAndSettle();
@@ -396,18 +395,18 @@ void main() {
     expect(find.text('Synchroniser puis revoir'), findsOneWidget);
   });
 
-  testWidgets('les autres onglets s ouvrent — quatre, sans les avances', (
+  testWidgets('validée : diffuser ouvre le recueil et un WhatsApp par agent', (
     tester,
   ) async {
-    await pump(tester, snapshot: snapshotOf());
+    await pump(tester, snapshot: snapshotOf(status: PayrollStatus.validated));
 
-    await tester.tap(find.text('Historique').first);
+    expect(find.text('Imprimer l\'état de paie'), findsOneWidget);
+    await tester.tap(find.text('Diffuser les bulletins'));
     await tester.pumpAndSettle();
-    expect(find.text('mois en cours'), findsOneWidget);
 
-    await tester.tap(find.text('Bulletins').first);
-    await tester.pumpAndSettle();
-    expect(find.text('Provisoire — non validée'), findsOneWidget);
+    expect(find.text('Tous les bulletins (PDF)'), findsOneWidget);
+    expect(find.text('Envoyer par WhatsApp'), findsNWidgets(2));
+    expect(find.text('Aucun numéro pour cet agent.'), findsNWidgets(2));
   });
 
   for (final size in const [Size(800, 1280), Size(420, 1800)]) {
@@ -420,10 +419,8 @@ void main() {
         permissions: [..._write, Perm.hrPayManage],
         size: size,
       );
-      for (final tab in ['Bulletins', 'Historique', 'Livre de paie']) {
-        await tester.tap(find.text(tab).first);
-        await tester.pumpAndSettle();
-      }
+      await tester.tap(find.text('Diffuser les bulletins'));
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
   }

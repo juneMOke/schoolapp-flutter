@@ -14,7 +14,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class PayrollPreviewButton extends StatefulWidget {
   final PayrollLine line;
 
-  const PayrollPreviewButton({super.key, required this.line});
+  /// Parmi d'autres boutons d'une ligne : à sa largeur, pas à celle du
+  /// panneau.
+  final bool inline;
+
+  const PayrollPreviewButton({
+    super.key,
+    required this.line,
+    this.inline = false,
+  });
 
   @override
   State<PayrollPreviewButton> createState() => _PayrollPreviewButtonState();
@@ -35,13 +43,20 @@ class _PayrollPreviewButtonState extends State<PayrollPreviewButton> {
     final l10n = AppLocalizations.of(context)!;
     return PayrollOnlineOnly(
       builder: (context, online) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: widget.inline
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.stretch,
         children: [
           EteeloButton.secondary(
             label: l10n.payrollPayslipDownloadProvisional,
             icon: Icons.picture_as_pdf_outlined,
             isLoading: _busy,
             onPressed: online ? _open : null,
+            fullWidth: !widget.inline,
+            size: widget.inline
+                ? EteeloButtonSize.regular
+                : EteeloButtonSize.compact,
           ),
           if (!online)
             Text(

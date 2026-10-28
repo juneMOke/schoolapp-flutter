@@ -26,6 +26,10 @@ class PayrollCubit extends Cubit<PayrollState> {
   /// mois, pas à chaque relecture.
   final Set<String> _frozenPulls = {};
 
+  /// Les mois ouverts à l'écran : la fiche d'un agent y garde le mois du
+  /// livre d'où elle vient, même sans paie au serveur.
+  final Set<String> _opened = {};
+
   PayrollCubit({
     required LoadPayrollUseCase load,
     required StaffSyncSignals signals,
@@ -83,7 +87,11 @@ class PayrollCubit extends Cubit<PayrollState> {
             snapshot: snapshot,
             today: today,
             view: view,
-            history: PayrollLedger.history(snapshot, today.substring(0, 7)),
+            history: PayrollLedger.history(
+              snapshot,
+              today.substring(0, 7),
+              opened: {..._opened, month},
+            ),
             clearFailure: true,
           ),
         );
@@ -95,10 +103,6 @@ class PayrollCubit extends Cubit<PayrollState> {
   }
 
   // ── Navigation ────────────────────────────────────────────────────────
-
-  void setTab(PayrollTab tab) {
-    if (tab != state.tab) emit(state.copyWith(tab: tab));
-  }
 
   /// Le mois précédent ou suivant ; jamais au-delà du mois en cours, ni
   /// avant le premier contrat de l'école.
@@ -122,34 +126,23 @@ class PayrollCubit extends Cubit<PayrollState> {
     _openMonth(wanted);
   }
 
-  /// Un mois de l'historique ouvre son livre.
-  void openMonth(String month) {
-    _openMonth(month);
-    setTab(PayrollTab.ledger);
-  }
-
   void _openMonth(String month) {
     if (month == state.month) return;
+    final view = PayrollLedger.monthView(state.snapshot, month);
+    final known = state.history.any((v) => v.month == month);
+    if (!known) _opened.add(month);
     emit(
       state.copyWith(
         month: month,
-        view: PayrollLedger.monthView(state.snapshot, month),
-        payslipMemberId: () => null,
+        view: view,
+        history: known
+            ? null
+            : ([...state.history, view]
+                ..sort((a, b) => b.month.compareTo(a.month))),
         payFilter: PayrollPayFilter.all,
       ),
     );
   }
-
-  /// Une ligne du livre ouvre le bulletin de son agent.
-  void openPayslip(String staffMemberId) => emit(
-    state.copyWith(
-      payslipMemberId: () => staffMemberId,
-      tab: PayrollTab.payslips,
-    ),
-  );
-
-  void selectPayslip(String staffMemberId) =>
-      emit(state.copyWith(payslipMemberId: () => staffMemberId));
 
   // ── Filtres ───────────────────────────────────────────────────────────
 

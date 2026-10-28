@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
@@ -11,6 +8,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_arrears.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_callout.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -55,37 +53,28 @@ class PayrollArrearsBanner extends StatelessWidget {
           if (arrear.month.compareTo(view.month) < 0)
             (arrear.dueInCents, arrear.currency),
     ]).join(' · ');
-    final tone = PayrollTone.submitted;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: tone.soft,
-        borderRadius: AppRadius.brMd,
-        border: Border.all(color: tone.color),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.sm,
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              l10n.payrollArrearsBanner(agents.length, due),
-              style: AppTypography.labelLarge.copyWith(color: tone.ink),
-            ),
-            EteeloButton.secondary(
-              label: l10n.payrollArrearsBannerAction,
-              icon: Icons.account_balance_outlined,
-              onPressed: () => context.go(
-                AppRoutesNames.homeSubMenuPath(
-                  MenuConstants.hrPayrollArrearsId,
-                ),
-              ),
-              fullWidth: false,
-            ),
-          ],
+    final months = {
+      for (final agent in agents)
+        for (final arrear in agent.months)
+          if (arrear.month.compareTo(view.month) < 0) arrear.month,
+    }.toList()..sort();
+    return PayrollCallout(
+      icon: Icons.warning_amber_rounded,
+      kind: PayrollCalloutKind.tinted,
+      tone: PayrollTone.submitted,
+      title: l10n.payrollArrearsBanner(agents.length, due),
+      details: [
+        l10n.payrollArrearsBannerDetail(
+          months.map((month) => PayrollLabels.month(context, month)).join(', '),
         ),
+      ],
+      action: EteeloButton.primary(
+        label: l10n.payrollArrearsBannerAction,
+        icon: Icons.account_balance_outlined,
+        onPressed: () => context.go(
+          AppRoutesNames.homeSubMenuPath(MenuConstants.hrPayrollArrearsId),
+        ),
+        fullWidth: false,
       ),
     );
   }

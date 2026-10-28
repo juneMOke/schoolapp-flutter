@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_split_bar.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
@@ -82,6 +83,11 @@ class PayrollDashboardSplitCard extends StatelessWidget {
             )
           : l10n.payrollDashDraftSubtitle,
       icon: Icons.stacked_bar_chart_rounded,
+      // Blanche comme ses voisines : le ton dans le médaillon seul, qui prend
+      // la même géométrie que le leur.
+      tone: DashboardSense.attendu,
+      toneStrength: DashboardTones.forceDe(DashboardSense.attendu),
+      toneSurface: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

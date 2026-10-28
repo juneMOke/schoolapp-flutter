@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payslips/payroll_payslip_actions.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -9,6 +13,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_mont
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_ledger.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_month_location.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_action_bar.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_arrears_banner.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_kpis.dart';
@@ -22,12 +28,12 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_regularizations.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le livre de paie du mois : bandeau et circuit, barre d'action, bandeaux,
-/// indicateurs, filtres et tableau.
-class PayrollLedgerTab extends StatelessWidget {
+/// Le livre de paie du mois : bandeau et circuit, bandeaux, geste du mois et
+/// versement, indicateurs, filtres et tableau.
+class PayrollLedgerView extends StatelessWidget {
   final PayrollState state;
 
-  const PayrollLedgerTab({super.key, required this.state});
+  const PayrollLedgerView({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -38,29 +44,52 @@ class PayrollLedgerTab extends StatelessWidget {
       kPayrollWriteAccess.requires,
     );
     final actions = PayrollLedgerActions(context);
+    // Ctrl+P : l'état de paie du mois validé, composé par le serveur (T16).
+    return PageActionShortcut(
+      action: PageAction.print,
+      onInvoke: view.phase.isLocked
+          ? PayrollPayslipActions(context).openStatement
+          : null,
+      child: _ledger(context, view, actions, canWrite),
+    );
+  }
+
+  Widget _ledger(
+    BuildContext context,
+    PayrollMonthView view,
+    PayrollLedgerActions actions,
+    bool canWrite,
+  ) {
+    final gap = const SizedBox(height: AppSpacing.md);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PayrollLedgerHeader(state: state),
-        PayrollActionBar(view: view),
-        const SizedBox(height: AppSpacing.lg),
-        // Les chiffres d'abord, comme sur les autres écrans ; puis une seule
-        // zone de bandeaux, la plus grave visible.
-        if (view.lines.isNotEmpty) ...[
-          PayrollKpis(view: view),
-          const SizedBox(height: AppSpacing.lg),
-        ],
+        gap,
+        // Les alertes d'abord ; puis ce que l'école doit encore, le geste du
+        // mois et sa politique de versement ; enfin les chiffres.
         _notices(context, view, canWrite),
+        if (PayrollArrearsBanner.shows(state.snapshot, view)) ...[
+          PayrollArrearsBanner(snapshot: state.snapshot, view: view),
+          gap,
+        ],
+        PayrollActionBar(view: view),
+        if (view.lines.isNotEmpty) ...[
+          if (view.hasReducedPayout || (canWrite && view.isEditable)) ...[
+            gap,
+            PayrollPayoutBar(
+              view: view,
+              canEdit: canWrite && view.isEditable,
+              onEdit: actions.editPayoutPolicy,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          PayrollKpis(view: view),
+        ],
         const SizedBox(height: AppSpacing.lg),
         if (view.lines.isEmpty)
           _Empty(state: state)
         else ...[
-          PayrollPayoutBar(
-            view: view,
-            canEdit: canWrite && view.isEditable,
-            onEdit: actions.editPayoutPolicy,
-          ),
-          const SizedBox(height: AppSpacing.lg),
           PayrollLedgerFilters(state: state),
           const SizedBox(height: AppSpacing.md),
           if (state.visibleLines.isEmpty)
@@ -72,11 +101,20 @@ class PayrollLedgerTab extends StatelessWidget {
               lines: state.visibleLines,
               canWrite: canWrite,
               onPayout: (line) => actions.openPayout(line, canWrite: canWrite),
-              onOpen: (line) => view.isEditable && canWrite
-                  ? actions.editVariables(line)
-                  : context.read<PayrollCubit>().openPayslip(
-                      line.staffMemberId,
-                    ),
+              onOpen: (line) => unawaited(
+                PayrollAgentNavigation.open(
+                  context,
+                  agentId: line.staffMemberId,
+                  month: view.month,
+                  screenQuery: {
+                    if (!state.isCurrentMonth)
+                      PayrollMonthLocation.monthParam: view.month,
+                  },
+                ),
+              ),
+              onEdit: view.isEditable && canWrite
+                  ? actions.editVariables
+                  : null,
             ),
         ],
       ],
@@ -84,26 +122,24 @@ class PayrollLedgerTab extends StatelessWidget {
   }
 
   /// Les alertes d'abord, toutes visibles : l'argent parti sans trace, puis
-  /// les refus, renvois et blocages du mois ; ensuite les informations, dont
-  /// les arriérés des mois antérieurs. Un mois neuf replie à nouveau.
+  /// les refus, renvois et blocages du mois ; ensuite les informations. Un
+  /// mois neuf replie à nouveau. Rien à dire : rien, pas même un espace.
   Widget _notices(BuildContext context, PayrollMonthView view, bool canWrite) {
     final toRegularize = PayrollLedger.toRegularize(state.snapshot);
     final month = PayrollLedgerNotices.of(context, view);
-    return PayrollNoticeStack(
-      key: ValueKey(view.month),
-      alerts: [
-        if (toRegularize.isNotEmpty)
-          PayrollRegularizations(
-            disbursements: toRegularize,
-            canWrite: canWrite,
-          ),
-        ...month.alerts,
-      ],
-      infos: [
-        ...month.infos,
-        if (PayrollArrearsBanner.shows(state.snapshot, view))
-          PayrollArrearsBanner(snapshot: state.snapshot, view: view),
-      ],
+    final alerts = [
+      if (toRegularize.isNotEmpty)
+        PayrollRegularizations(disbursements: toRegularize, canWrite: canWrite),
+      ...month.alerts,
+    ];
+    if (alerts.isEmpty && month.infos.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: PayrollNoticeStack(
+        key: ValueKey(view.month),
+        alerts: alerts,
+        infos: month.infos,
+      ),
     );
   }
 }

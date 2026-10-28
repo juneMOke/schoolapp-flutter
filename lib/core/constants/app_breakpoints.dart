@@ -166,6 +166,15 @@ class AppBreakpoints {
   // Bulletin de paie : feuille (720 max) et panneau d'actions (270) côte à
   // côte au-delà de ~1000 dp de contenu — une 10″ paysage, barre repliée.
   static const double payrollPayslipSideBySideMin = 1000.0;
+  // Feuille du bulletin : l'identité sur trois colonnes au-delà, deux en
+  // deçà ; le solde (net, perçu, reste) en ligne au-delà, empilé en deçà.
+  static const double payrollPayslipIdentityThreeColMin = 400.0;
+  static const double payrollPayslipBalanceRowMin = 440.0;
+  // Fiche d'un agent (paie) : deux colonnes au-delà de ~820 dp de contenu —
+  // 300 de colonne gauche, 24 d'écart, 480 de panneau du mois au moins.
+  static const double payrollAgentTwoColumnsMin = 820.0;
+  // Bandeau de la fiche : quatre tuiles en ligne au-delà, 2 × 2 en deçà.
+  static const double payrollAgentTilesInRowMin = 720.0;
   // Composition des classes — vue répartie.
   // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
   // en deçà, le basculeur passe dessous.
