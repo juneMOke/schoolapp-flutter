@@ -86,17 +86,24 @@ class StaffAttendanceGestureDao {
   /// [gestureId] ? Un geste attend ses aînés : jamais deux dans le désordre.
   /// L'ordre est strict — `(created_at, rowid)` —, sinon deux gestes posés
   /// dans la même milliseconde s'attendraient l'un l'autre à jamais.
+  ///
+  /// [monthStart] : le geste d'un jour attend aussi les gestes de son mois,
+  /// rangés au 1er — sinon « rouvrir le mois, rouvrir le 15 » enverrait le
+  /// jour sur un mois encore clos dès que la réouverture du mois échoue une
+  /// fois.
   Future<bool> hasOlderQueued(
     String schoolId, {
     required String gestureId,
     required String from,
     required String to,
+    String? monthStart,
   }) => _exists(
     'SELECT 1 FROM $table g $_joinOutbox '
     'JOIN $table me ON me.id = ? '
     'WHERE g.school_id = ? AND g.id != me.id AND o.status = ? '
     'AND g.sync_status = ? '
-    'AND g.period_start >= ? AND g.period_start <= ? '
+    'AND ((g.period_start >= ? AND g.period_start <= ?) '
+    'OR (g.period_start = ? AND g.kind = ?)) '
     'AND (g.created_at < me.created_at '
     'OR (g.created_at = me.created_at AND g.rowid < me.rowid)) LIMIT 1',
     [
@@ -106,6 +113,8 @@ class StaffAttendanceGestureDao {
       RecordSyncState.pending.dbValue,
       from,
       to,
+      monthStart ?? from,
+      monthStart == null ? '' : StaffAttendanceLockKind.month.wire,
     ],
   );
 

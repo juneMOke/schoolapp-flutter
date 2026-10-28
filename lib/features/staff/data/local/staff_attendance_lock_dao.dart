@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_loc
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
 /// Les verrous du Pointage : l'état du serveur (`staff_attendance_locks`), et
@@ -54,17 +55,17 @@ class StaffAttendanceLockDao {
           'updated_at': nowMs,
         }, conflictAlgorithm: ConflictAlgorithm.replace);
         final reopened =
-            lock.kind == StaffAttendanceLockKind.day.wire &&
-            !lock.isLocked &&
-            before.isNotEmpty &&
-            before.single['locked'] == 1;
-        if (reopened) {
+            !lock.isLocked && before.isNotEmpty && before.single['locked'] == 1;
+        if (reopened && lock.kind == StaffAttendanceLockKind.day.wire) {
           await StaffAttendanceSyncDao.requeueDayLockedIn(
             txn,
             schoolId,
             lock.periodStart,
             nowMs: nowMs,
           );
+        }
+        if (reopened && lock.kind == StaffAttendanceLockKind.month.wire) {
+          await _requeueMonthClosedIn(txn, schoolId, lock.periodStart, nowMs);
         }
       }
     });
@@ -86,6 +87,34 @@ class StaffAttendanceLockDao {
       nowMs: nowMs,
     ),
   );
+
+  /// Remet en file les pointages `MONTH_CLOSED` d'un mois rouvert. Appelé à
+  /// l'accusé d'une réouverture de la tablette (idempotent).
+  Future<int> requeueMonthClosed(
+    String schoolId,
+    String monthStart, {
+    required int nowMs,
+  }) => _db.transaction(
+    (txn) => _requeueMonthClosedIn(txn, schoolId, monthStart, nowMs),
+  );
+
+  static Future<int> _requeueMonthClosedIn(
+    DatabaseExecutor txn,
+    String schoolId,
+    String monthStart,
+    int nowMs,
+  ) {
+    final days = SchoolDayCalendar.daysOf(
+      SchoolDayCalendar.monthOf(monthStart),
+    );
+    return StaffAttendanceSyncDao.requeueMonthClosedIn(
+      txn,
+      schoolId,
+      from: days.first,
+      to: days.last,
+      nowMs: nowMs,
+    );
+  }
 
   /// Les verrous tels que l'écran les montre, périodes [from] → [to].
   Future<List<StaffAttendanceLock>> effective(

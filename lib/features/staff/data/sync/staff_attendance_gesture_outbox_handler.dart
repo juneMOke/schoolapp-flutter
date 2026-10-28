@@ -77,6 +77,9 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
       gestureId: request.gestureId,
       from: from,
       to: to,
+      monthStart: gesture.kind == StaffAttendanceLockKind.day
+          ? SchoolDayCalendar.firstOf(SchoolDayCalendar.monthOf(request.date))
+          : null,
     )) {
       return const OutboxDispatchResult.blocked('Un geste plus ancien attend');
     }
@@ -97,6 +100,13 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
         // descente, elle, ne le fait qu'en voyant passer validé → rouvert).
         if (gesture == StaffAttendanceGesture.reopenDay) {
           await _locks.requeueDayLocked(schoolId, request.date, nowMs: _now());
+        }
+        if (gesture == StaffAttendanceGesture.reopenMonth) {
+          await _locks.requeueMonthClosed(
+            schoolId,
+            request.date,
+            nowMs: _now(),
+          );
         }
       },
       reject: (failure) async {
