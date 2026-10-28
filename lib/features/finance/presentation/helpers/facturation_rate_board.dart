@@ -90,27 +90,6 @@ class FacturationRateBoard {
     for (final key in _editing) key: ?microsOf(key),
   };
 
-  /// Referme les boîtes **ouvertes mais restées intactes**.
-  ///
-  /// Elles affichent le taux amorcé à l'ANCIENNE date, pendant que les montants,
-  /// eux, repartent du référentiel du nouveau jour : le champ dirait 2 000,00
-  /// quand le comptoir compte à 1 666,67. Refermées, la ligne réaffiche le taux
-  /// du jour désigné, qui est le bon.
-  ///
-  /// Un taux réellement **corrigé à la main** survit (A4) : c'est une intention
-  /// du caissier, pas une valeur dérivée de la date.
-  void closeUntouched() {
-    final untouched = [
-      for (final key in _editing)
-        if (_controllers[key]?.text == _seeds[key]) key,
-    ];
-    for (final key in untouched) {
-      _editing.remove(key);
-      _seeds.remove(key);
-      _controllers[key]?.clear();
-    }
-  }
-
   void dispose() {
     for (final controller in _controllers.values) {
       controller.dispose();

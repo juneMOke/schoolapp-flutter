@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/ticket_pri
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_target.dart';
@@ -233,6 +234,18 @@ void main() {
     expect(find.text('Tshiala'), findsWidgets);
     expect(tester.widget<TextField>(amountField()).controller!.text, '150');
     expect(cta(tester).label, 'Annuler et remplacer');
+  });
+
+  // Lot C : aucune date ne se choisit, mais une correction montre le jour de
+  // l'origine — celui que garde le remplaçant, donc la pile où il atterrit.
+  testWidgets('le jour de l origine s affiche, en lecture seule', (
+    tester,
+  ) async {
+    await open(tester);
+
+    final date = tester.widget<EteeloDateInput>(find.byType(EteeloDateInput));
+    expect(date.readOnly, isTrue);
+    expect(date.value, DateTime(2026, 9, 25));
   });
 
   // D1 : le frère au lieu de la sœur. Le versement part sur l'autre élève,

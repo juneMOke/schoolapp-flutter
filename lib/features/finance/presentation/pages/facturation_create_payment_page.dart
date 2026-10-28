@@ -6,7 +6,6 @@ import 'package:school_app_flutter/core/components/app_bars/student_detail_app_b
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
@@ -67,27 +66,6 @@ class FacturationCreatePaymentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Borne basse du sélecteur de date (A2) : la rentrée de l'année que ce
-    // versement solde. Le contexte académique est fourni à la racine de
-    // l'application, donc au-dessus de cette route.
-    //
-    // ⚠️ La date n'est retenue que si l'année portée par le contexte est bien
-    // CELLE du versement. Encaisser sur l'année précédente depuis un poste calé
-    // sur l'année courante prendrait sinon la borne à la mauvaise rentrée — et
-    // interdirait précisément les saisies de rattrapage que ce champ existe pour
-    // permettre.
-    // `select` et non `watch` (règle n°9) : seule la rentrée nous intéresse, et
-    // l'état porte aussi les drapeaux de session (401/403, provisioning) qui
-    // reconstruiraient la page pour rien.
-    final earliestPaidAt = context.select<AcademicYearContextBloc, DateTime?>((
-      bloc,
-    ) {
-      final year = bloc.state.context?.academicYear;
-      return year != null && year.id == intent.academicYearId
-          ? year.startDate
-          : null;
-    });
-
     return MultiBlocProvider(
       providers: [
         BlocProvider<FinanceOfflineBloc>(
@@ -128,7 +106,6 @@ class FacturationCreatePaymentPage extends StatelessWidget {
                 intent: intent,
                 rates: rates.rates,
                 sectionTitles: titles,
-                earliestPaidAt: earliestPaidAt,
               ),
             ),
       ),
@@ -148,11 +125,6 @@ class FacturationCreatePaymentView extends StatefulWidget {
   /// localisée, c'est-à-dire l'écran d'avant.
   final FeeSectionTitlesState sectionTitles;
 
-  /// La rentrée de l'année que ce versement solde, quand le référentiel la
-  /// connaît. Borne basse du sélecteur de date (A2) ; `null` retombe sur le même
-  /// jour un an plus tôt.
-  final DateTime? earliestPaidAt;
-
   /// Instant de référence — **injecté par les tests seulement**. `null` =
   /// l'horloge du poste.
   final DateTime? now;
@@ -162,7 +134,6 @@ class FacturationCreatePaymentView extends StatefulWidget {
     required this.intent,
     this.rates = const [],
     this.sectionTitles = const FeeSectionTitlesState(),
-    this.earliestPaidAt,
     this.now,
   });
 
@@ -209,27 +180,6 @@ class _FacturationCreatePaymentViewState
   late final FacturationRateBoard _rates;
 
   DateTime get _now => widget.now ?? DateTime.now();
-
-  /// Borne basse (A2) : la rentrée quand on la connaît, sinon le même jour un an
-  /// plus tôt.
-  DateTime get _firstSelectableDay {
-    final start = widget.earliestPaidAt;
-    // Rentrée inconnue — référentiel muet, ou versement porté par une AUTRE
-    // année que celle du contexte, qui est justement le cas du rattrapage. Une
-    // fenêtre d'un an partant d'aujourd'hui amputerait alors le début de l'année
-    // précédente : on en ouvre deux. Cela écarte toujours une saisie absurde
-    // sans fermer la porte au rattrapage.
-    if (start == null) {
-      return SchoolTime.oneYearBefore(SchoolTime.oneYearBefore(_model.today));
-    }
-    // ⚠️ Champs de calendrier lus BRUTS, et surtout pas via `SchoolTime` : une
-    // date de rentrée est un jour, pas un instant. La faire traverser un fuseau
-    // la reculerait d'un jour sur toute machine à l'est d'UTC+1.
-    final day = DateTime(start.year, start.month, start.day);
-    // Une rentrée postérieure à aujourd'hui (référentiel en avance d'une année)
-    // fermerait le sélecteur sur une plage vide, et `showDatePicker` lève.
-    return day.isAfter(_model.today) ? _model.today : day;
-  }
 
   @override
   void initState() {
@@ -910,22 +860,19 @@ class _FacturationCreatePaymentViewState
           readOnly: _collectInFlight,
         ),
       ),
-      // La date a sa propre section : elle ne dit rien de qui paie, et la
-      // loger sous l'identité du payeur obligeait à expliquer en commentaire
-      // pourquoi elle échappait à la mention « facultatif » qui la précédait.
-      date: FinanceSectionCard(
-        backgroundColor: AppColors.surfaceRaised,
-        borderColor: AppColors.border,
-        child: FacturationCreatePaymentDateSection(
-          paidAt: _model.paidDay,
-          firstPaidAt: _firstSelectableDay,
-          lastPaidAt: _model.today,
-          onPaidAtChanged: _collectInFlight
-              ? null
-              : (day) => _act(() => _model.paidDayChanged(day)),
-          readOnly: _collectInFlight,
-        ),
-      ),
+      // Le versement est daté du jour de sa saisie : aucune date ne se choisit
+      // (continuité des tickets, lot C). Seule une correction montre un jour,
+      // celui de l'origine, que le remplaçant garde — le caissier voit ainsi
+      // dans quelle pile de la caisse son ticket atterrit.
+      date: correction == null
+          ? null
+          : FinanceSectionCard(
+              backgroundColor: AppColors.surfaceRaised,
+              borderColor: AppColors.border,
+              child: FacturationCreatePaymentDateSection(
+                paidAt: _model.paidDay,
+              ),
+            ),
       charges: FacturationCreatePaymentChargesSection(
         // Un modèle neuf (D1) reconstruit toute la section : aucune ligne ne
         // doit garder les champs d'un modèle libéré.

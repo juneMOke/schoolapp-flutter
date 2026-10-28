@@ -7,7 +7,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/finance_offline_repository.dart';
@@ -158,13 +157,6 @@ void main() {
   Finder boutonModifier() => find.widgetWithText(TextButton, 'Modifier');
   Finder champDuTaux() => find.widgetWithText(TextField, 'Taux appliqué');
 
-  Future<void> choisirDate(WidgetTester tester, DateTime jour) async {
-    tester.widget<EteeloDateInput>(find.byType(EteeloDateInput)).onChanged!(
-      jour,
-    );
-    await tester.pumpAndSettle();
-  }
-
   testWidgets('le taux corrigé à la main commande les montants', (
     tester,
   ) async {
@@ -229,53 +221,5 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(comptoir(tester), '62500');
-  });
-
-  testWidgets(
-    'une boîte ouverte mais INTACTE se referme au changement de date',
-    (tester) async {
-      await ouvrir(tester);
-      await cocher(tester);
-      await reglerEnFrancs(tester);
-
-      await tapoter(tester, boutonModifier());
-      // Ouverte et amorcée au taux du 16 — mais le caissier n'y touche pas.
-      expect(champDuTaux(), findsOneWidget);
-
-      await choisirDate(tester, DateTime(2026, 9, 12));
-
-      // Refermée : sinon elle afficherait le taux du 16 pendant que le comptoir
-      // compte à celui du 12.
-      expect(champDuTaux(), findsNothing);
-      expect(boutonModifier(), findsOneWidget);
-      // Et les montants ont bien suivi le référentiel du 12 (1 666,67).
-      expect(comptoir(tester), '50000.10');
-    },
-  );
-
-  testWidgets('un taux VRAIMENT corrigé survit au changement de date (A4)', (
-    tester,
-  ) async {
-    await ouvrir(tester);
-    await cocher(tester);
-    await reglerEnFrancs(tester);
-
-    await tapoter(tester, boutonModifier());
-    await tester.enterText(champDuTaux(), '2500');
-    await tester.pumpAndSettle();
-    await choisirDate(tester, DateTime(2026, 9, 12));
-
-    // La correction est une intention du caissier, pas une valeur dérivée de la
-    // date : elle survit, et la boîte reste ouverte.
-    //
-    // ⚠️ On l'assère sur le CHAMP et sur la DIVERGENCE, jamais sur le comptoir :
-    // celui-ci ne reflète pas la correction (cf. l'écart épinglé au test
-    // précédent), il ne prouverait donc rien ici.
-    expect(champDuTaux(), findsOneWidget);
-    expect(tester.widget<TextField>(champDuTaux()).controller?.text, '2500');
-    expect(
-      find.textContaining('s\'écarte de celui de l\'école'),
-      findsOneWidget,
-    );
   });
 }
