@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/documents/data/repositories/ticket_p
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_write_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/receipt_recovery_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_error_codes.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_offline_repository_impl.dart';
@@ -57,8 +59,10 @@ void main() {
   late PaymentCorrectionRepositoryImpl corrections;
   late _Receipts receipts;
   late TicketPrintQueueRepositoryImpl queue;
+  late int flushes;
 
   setUp(() async {
+    flushes = 0;
     db = await openFullOfflineDb();
     final sync = _MockSyncEngine();
     when(() => sync.flush()).thenAnswer((_) async => const SyncFlushReport());
@@ -84,6 +88,8 @@ void main() {
       queue: TicketPrintQueueDao(db),
       tickets: ProvisionalTicketDao(db),
       receipts: receipts,
+      recoveries: ReceiptRecoveryDao(db),
+      flush: () async => flushes++,
       now: () => DateTime.fromMillisecondsSinceEpoch(5000),
     );
 
@@ -218,6 +224,59 @@ void main() {
       expect((await jobs()).single.state, TicketPrintJobState.awaitingStudent);
     });
 
+    // Retour du back du 2026-10-28 : un accusé peut revenir sans reçu.
+    test(
+      'accusé sans reçu : il le dit, puis devient prêt au rattrapage',
+      () async {
+        final payment = await collect(15000);
+        await ReceiptRecoveryDao.markMissingIn(
+          db,
+          paymentId: payment,
+          nowMs: 3000,
+        );
+
+        expect((await jobs()).single.state, TicketPrintJobState.receiptMissing);
+
+        // Le rattrapage a abouti : l'entrée d'outbox est acquittée puis purgée.
+        await db.delete(
+          'outbox',
+          where: 'aggregate_type = ?',
+          whereArgs: [ReceiptRecoveryDao.aggregateType],
+        );
+        receipts.sealed[payment] = 'CF-RC-2627-000802';
+
+        expect((await jobs()).single.state, TicketPrintJobState.ready);
+      },
+    );
+
+    test('Relancer remet le rattrapage en tête et lance le flush', () async {
+      final payment = await collect(15000);
+      await ReceiptRecoveryDao.markMissingIn(
+        db,
+        paymentId: payment,
+        nowMs: 3000,
+      );
+      await db.update(
+        'outbox',
+        {'status': 'SYNC_ERROR', 'attempts': 4, 'next_attempt_at': 99999},
+        where: 'aggregate_type = ?',
+        whereArgs: [ReceiptRecoveryDao.aggregateType],
+      );
+
+      final result = await queue.retryReceipt((await jobs()).single);
+
+      expect(result.isRight(), isTrue);
+      expect(flushes, 1);
+      final entry = (await db.query(
+        'outbox',
+        where: 'aggregate_type = ?',
+        whereArgs: [ReceiptRecoveryDao.aggregateType],
+      )).single;
+      expect(entry['status'], 'PENDING');
+      expect(entry['attempts'], 0);
+      expect(entry['next_attempt_at'], 0);
+    });
+
     test('garde la trace d un échec, et reste dans la file', () async {
       final payment = await collect(15000);
       receipts.sealed[payment] = 'CF-RC-2627-000802';
@@ -301,6 +360,28 @@ void main() {
       final job = (await jobs()).single;
       expect(job.kind, TicketPrintJobKind.cancellation);
       expect(job.state, TicketPrintJobState.ready);
+    });
+
+    // Retour du back du 2026-10-28 : c'est le refus qui bloque le ticket, pas
+    // la date — elle ne sert qu'à l'affichage.
+    test('déjà corrigé ailleurs, même sans date : plus de ticket', () async {
+      final payment = await collect(15000);
+      receipts.sealed[payment] = 'CF-RC-2627-000802';
+      final outcome = (await corrections.correctPayment(
+        cancelOf(payment),
+      )).getOrElse(() => throw StateError('refusé'));
+
+      await db.update(
+        'payment_corrections',
+        {
+          'status': PaymentCorrectionStatus.rejected.dbValue,
+          'sync_error_code': FinanceErrorCodes.paymentAlreadyCorrected,
+        },
+        where: 'id = ?',
+        whereArgs: [outcome.correctionId],
+      );
+
+      expect(await jobs(), isEmpty);
     });
 
     test('un ticket déjà sorti a quand même son ticket d annulation', () async {

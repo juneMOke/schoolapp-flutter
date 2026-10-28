@@ -26,9 +26,16 @@ class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
 
 class _Queue implements TicketPrintQueueRepository {
   Either<Failure, List<TicketPrintJob>> result = const Right([]);
+  final List<String> retried = [];
 
   @override
   Future<Either<Failure, List<TicketPrintJob>>> pendingJobs() async => result;
+
+  @override
+  Future<Either<Failure, Unit>> retryReceipt(TicketPrintJob job) async {
+    retried.add(job.id);
+    return const Right(unit);
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -40,11 +47,14 @@ TicketPrintJob _job(
   String student = 'Mbala Kasa Amina',
   TicketPrintJobKind kind = TicketPrintJobKind.receipt,
   String? problem,
+  bool receiptMissing = false,
 }) => TicketPrintJob(
   id: id,
   paymentId: 'p-$id',
   kind: kind,
-  state: number == null
+  state: receiptMissing
+      ? TicketPrintJobState.receiptMissing
+      : number == null
       ? TicketPrintJobState.awaitingNumber
       : TicketPrintJobState.ready,
   receiptNumber: number,
@@ -80,7 +90,10 @@ void main() {
       initialState: const SyncStatusState(status: SyncStatus.synced),
     );
     getIt.registerFactory<TicketPrintQueueCubit>(
-      () => TicketPrintQueueCubit(ListPendingTicketJobsUseCase(queue)),
+      () => TicketPrintQueueCubit(
+        ListPendingTicketJobsUseCase(queue),
+        RetryTicketReceiptUseCase(queue),
+      ),
     );
   });
 
@@ -113,11 +126,34 @@ void main() {
     tester,
     _,
   ) async {
-    queue.result = Right(_mixed);
+    queue.result = Right([..._mixed, _job('4', receiptMissing: true)]);
     await open(tester);
 
     expect(find.text('Prêts à imprimer (2)'), findsOneWidget);
-    expect(find.text('Numéro attendu (1)'), findsOneWidget);
+    expect(find.text('Numéro attendu (2)'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Relancer'), 200);
+    expect(find.text('Relancer'), findsOneWidget);
+  });
+
+  // Retour du back du 2026-10-28 : un accusé peut revenir sans reçu.
+  testWidgets('un reçu non scellé se dit, et Relancer le redemande', (
+    tester,
+  ) async {
+    final missing = _job('4', receiptMissing: true);
+    queue.result = Right([missing]);
+    await open(tester);
+
+    expect(
+      find.text('Reçu non scellé par le serveur : la tablette le redemande.'),
+      findsOneWidget,
+    );
+    // Le reçu est revenu entre-temps.
+    queue.result = Right([_job('4', number: 'CF-RC-2627-000804')]);
+    await tester.tap(find.text('Relancer'));
+    await tester.pumpAndSettle();
+
+    expect(queue.retried, ['4']);
+    expect(find.text('Prêts à imprimer (1)'), findsOneWidget);
   });
 
   testWidgets('les prêts se cochent, et le bouton compte la sélection', (

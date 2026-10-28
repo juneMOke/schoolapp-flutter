@@ -127,6 +127,9 @@ import 'package:school_app_flutter/features/finance/offline/data/local/dao/payme
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_sync_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_ack_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_outbox_handler.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/receipt_recovery_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/payment_receipt_recovery_outbox_handler.dart';
+import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/payment_correction_repository_impl.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
@@ -603,6 +606,8 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       queue: TicketPrintQueueDao(getIt<Database>()),
       tickets: getIt<ProvisionalTicketDao>(),
       receipts: getIt<PaymentReceiptResolver>(),
+      recoveries: ReceiptRecoveryDao(getIt<Database>()),
+      flush: () => getIt<SyncEngine>().flush(),
     ),
   );
   getIt.registerFactory<ListPendingTicketJobsUseCase>(
@@ -619,9 +624,15 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
       getIt<TicketPrintQueueRepository>(),
     ),
   );
+  getIt.registerFactory<RetryTicketReceiptUseCase>(
+    () => RetryTicketReceiptUseCase(getIt<TicketPrintQueueRepository>()),
+  );
   // Factory : la page et le bandeau ont chacun le leur.
   getIt.registerFactory<TicketPrintQueueCubit>(
-    () => TicketPrintQueueCubit(getIt<ListPendingTicketJobsUseCase>()),
+    () => TicketPrintQueueCubit(
+      getIt<ListPendingTicketJobsUseCase>(),
+      getIt<RetryTicketReceiptUseCase>(),
+    ),
   );
 
   getIt.registerFactory<EditiqueEligibilityCubit>(
@@ -908,6 +919,15 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
         currentUser: getIt<CurrentUserContext>(),
         ids: getIt<IdGenerator>(),
       ),
+    ),
+  );
+  // Reçu qu'un accusé n'a pas rapporté : rattrapé par la route d'émission,
+  // idempotente (continuité des tickets RC).
+  getIt<SyncEngine>().registerHandler(
+    PaymentReceiptRecoveryOutboxHandler(
+      editique: () => getIt<EditiqueRepository>(),
+      dao: ReceiptRecoveryDao(getIt<Database>()),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 

@@ -4154,6 +4154,7 @@
   },
   "syncAggregateEnrollment": "Enrollment",
   "syncAggregatePayment": "Payment",
+  "syncAggregatePaymentReceipt": "Payment receipt",
   "syncAggregateAttendance": "Attendance",
   "syncAggregateDisciplinaryCase": "Disciplinary case",
   "syncAggregateNotesBatch": "Grade batch",
@@ -5735,6 +5736,8 @@
   "ticketsToPrintKindCancellation": "Cancellation ticket",
   "ticketsToPrintNumberPending": "Number pending",
   "ticketsToPrintUnknownStudent": "Student not synced yet",
+  "ticketsToPrintReceiptMissing": "The server did not seal the receipt: the tablet is asking for it again.",
+  "ticketsToPrintRetryReceipt": "Retry",
   "ticketsToPrintLastProblem": "Last failure: {problem}",
   "@ticketsToPrintLastProblem": {
     "placeholders": {

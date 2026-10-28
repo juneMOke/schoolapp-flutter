@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/documents/data/local/provisional_tic
 import 'package:school_app_flutter/features/documents/data/local/ticket_print_queue_dao.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/ticket_print_queue_repository.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/receipt_recovery_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 
@@ -19,16 +20,22 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
   final TicketPrintQueueDao _queue;
   final ProvisionalTicketDao _tickets;
   final PaymentReceiptResolver _receipts;
+  final ReceiptRecoveryDao _recoveries;
+  final Future<void> Function() _flush;
   final DateTime Function() _now;
 
   TicketPrintQueueRepositoryImpl({
     required TicketPrintQueueDao queue,
     required ProvisionalTicketDao tickets,
     required PaymentReceiptResolver receipts,
+    required ReceiptRecoveryDao recoveries,
+    required Future<void> Function() flush,
     DateTime Function()? now,
   }) : _queue = queue,
        _tickets = tickets,
        _receipts = receipts,
+       _recoveries = recoveries,
+       _flush = flush,
        _now = now ?? DateTime.now;
 
   @override
@@ -58,7 +65,9 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
           status == PaymentCorrectionStatus.localOnly) {
         return null;
       }
-    } else if (row.hasLiveCorrection || row.paymentCancelledAt != null) {
+    } else if (row.hasLiveCorrection ||
+        row.paymentCancelledAt != null ||
+        row.alreadyCorrected) {
       // Le versement est annulé, ou en passe de l'être : son papier sera le
       // ticket d'annulation, s'il en faut un.
       return null;
@@ -85,7 +94,9 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
     final named = (student?.fullName.trim() ?? '').isNotEmpty;
     // Un ticket qui ne nomme personne n'atteste rien (ADR-015 F1) : il attend
     // que l'élève descende, comme il attendrait son numéro.
-    final state = !numbered || !settled
+    final state = !numbered && !cancellation && row.receiptMissing
+        ? TicketPrintJobState.receiptMissing
+        : !numbered || !settled
         ? TicketPrintJobState.awaitingNumber
         : named
         ? TicketPrintJobState.ready
@@ -147,6 +158,18 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
           _now().millisecondsSinceEpoch,
         ),
       );
+
+  @override
+  Future<Either<Failure, Unit>> retryReceipt(TicketPrintJob job) async {
+    final queued = await _write(() => _recoveries.retryNow(job.paymentId));
+    if (queued.isLeft()) return queued;
+    // Le flush rend la main quand l'appel est fait — ou quand il n'a pas pu
+    // l'être : la relecture de la file dira lequel.
+    try {
+      await _flush();
+    } catch (_) {}
+    return queued;
+  }
 
   /// Une écriture de suivi qui échoue ne doit rien emporter avec elle : le
   /// papier, lui, est sorti — ou pas — indépendamment de ce qu'on en note.

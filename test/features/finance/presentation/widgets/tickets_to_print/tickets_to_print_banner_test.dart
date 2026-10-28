@@ -9,6 +9,10 @@ import 'package:school_app_flutter/core/components/status/sync_status_state.dart
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/ticket_print_queue_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_queue_use_cases.dart';
@@ -20,6 +24,9 @@ import '../../../../../test_helpers/reference_formats.dart';
 
 class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
 
 class _Queue implements TicketPrintQueueRepository {
   List<TicketPrintJob> jobs = const [];
@@ -58,23 +65,35 @@ void main() {
       initialState: const SyncStatusState(status: SyncStatus.synced),
     );
     getIt.registerFactory<TicketPrintQueueCubit>(
-      () => TicketPrintQueueCubit(ListPendingTicketJobsUseCase(queue)),
+      () => TicketPrintQueueCubit(
+        ListPendingTicketJobsUseCase(queue),
+        RetryTicketReceiptUseCase(queue),
+      ),
     );
   });
 
   tearDown(() => getIt.reset());
 
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {List<String>? permissions}) async {
+    const app = MaterialApp(
+      locale: Locale('fr'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: TicketsToPrintBanner()),
+    );
+    Widget child = app;
+    if (permissions != null) {
+      final auth = _MockAuthBloc();
+      final state = AuthState(
+        status: AuthStatus.authenticated,
+        permissions: permissions,
+      );
+      when(() => auth.state).thenReturn(state);
+      whenListen(auth, Stream<AuthState>.value(state), initialState: state);
+      child = BlocProvider<AuthBloc>.value(value: auth, child: app);
+    }
     await tester.pumpWidget(
-      BlocProvider<SyncStatusCubit>.value(
-        value: sync,
-        child: const MaterialApp(
-          locale: Locale('fr'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(body: TicketsToPrintBanner()),
-        ),
-      ),
+      BlocProvider<SyncStatusCubit>.value(value: sync, child: child),
     );
     await tester.pumpAndSettle();
   }
@@ -92,6 +111,22 @@ void main() {
     await open(tester);
 
     expect(find.textContaining('prêt'), findsNothing);
+  });
+
+  // Retour du back du 2026-10-28 : sans `editique.read`, la file ne se
+  // remplit jamais de rien d'imprimable.
+  testWidgets('masqué sans editique.read', (tester) async {
+    queue.jobs = [_job('1')];
+    await open(tester, permissions: const ['finance.payment.write']);
+
+    expect(find.textContaining('prêt'), findsNothing);
+  });
+
+  testWidgets('affiché avec editique.read', (tester) async {
+    queue.jobs = [_job('1')];
+    await open(tester, permissions: const ['editique.read']);
+
+    expect(find.text('1 ticket prêt à imprimer'), findsOneWidget);
   });
 
   testAtReferenceFormats('tient sur tous les formats', (tester, _) async {

@@ -14,11 +14,15 @@ class TicketsToPrintList extends StatelessWidget {
   final void Function(String jobId, bool selected) onToggle;
   final ValueChanged<bool> onToggleAll;
 
+  /// « Relancer » le reçu qu'un accusé n'a pas rapporté.
+  final ValueChanged<TicketPrintJob> onRetry;
+
   const TicketsToPrintList({
     super.key,
     required this.state,
     required this.onToggle,
     required this.onToggleAll,
+    required this.onRetry,
   });
 
   @override
@@ -60,7 +64,14 @@ class TicketsToPrintList extends StatelessWidget {
             ),
           ),
           for (final job in awaiting)
-            TicketPrintJobTile(key: ValueKey(job.id), job: job),
+            TicketPrintJobTile(
+              key: ValueKey(job.id),
+              job: job,
+              onRetry: job.state == TicketPrintJobState.receiptMissing
+                  ? () => onRetry(job)
+                  : null,
+              retrying: state.retrying.contains(job.id),
+            ),
         ],
       ],
     );

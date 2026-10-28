@@ -1,5 +1,9 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/documents/data/local/ticket_print_job_writer.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/receipt_recovery_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/data/sync/finance_error_codes.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 
 /// Lecture et suivi de `ticket_print_jobs` (continuité des tickets RC, lot D).
@@ -26,6 +30,14 @@ class TicketPrintQueueDao {
   ///
   /// Le versement manque (refusé puis effacé, R3) : la jointure interne écarte
   /// la ligne — il n'y a plus rien à imprimer.
+  ///
+  /// `already_corrected` : un autre geste a annulé ce versement
+  /// (`PAYMENT_ALREADY_CORRECTED`). Le serveur en donne toujours la date, mais
+  /// c'est le refus qui bloque le ticket, pas elle — elle ne sert qu'à
+  /// l'affichage (réponse du back du 2026-10-28).
+  ///
+  /// `receipt_missing` : l'accusé est revenu sans reçu, et son rattrapage est
+  /// encore en file ([ReceiptRecoveryDao]).
   Future<List<TicketPrintJobRow>> pendingRows() async {
     final live = _live.map((s) => "'${s.dbValue}'").join(', ');
     final rows = await _db.rawQuery('''
@@ -36,7 +48,20 @@ class TicketPrintQueueDao {
                SELECT 1 FROM payment_corrections lc
                 WHERE lc.payment_id = j.payment_id
                   AND lc.status IN ($live)
-             ) AS has_live_correction
+             ) AS has_live_correction,
+             EXISTS (
+               SELECT 1 FROM payment_corrections xc
+                WHERE xc.payment_id = j.payment_id
+                  AND xc.status = '${PaymentCorrectionStatus.rejected.dbValue}'
+                  AND xc.sync_error_code =
+                      '${FinanceErrorCodes.paymentAlreadyCorrected}'
+             ) AS already_corrected,
+             EXISTS (
+               SELECT 1 FROM ${OutboxDao.table} o
+                WHERE o.aggregate_type = '${ReceiptRecoveryDao.aggregateType}'
+                  AND o.aggregate_id = j.payment_id
+                  AND o.status <> '${OutboxStatus.acked.dbValue}'
+             ) AS receipt_missing
         FROM ${TicketPrintJobWriter.table} j
         JOIN payments p ON p.id = j.payment_id
         LEFT JOIN payment_corrections c ON c.id = j.correction_id
@@ -107,6 +132,12 @@ class TicketPrintJobRow {
   /// Une correction en cours ou acquise écarte ce versement des soldes.
   final bool hasLiveCorrection;
 
+  /// Un autre geste a annulé ce versement avant le nôtre.
+  final bool alreadyCorrected;
+
+  /// L'accusé n'a pas rapporté de reçu, et son rattrapage n'a pas abouti.
+  final bool receiptMissing;
+
   const TicketPrintJobRow({
     required this.id,
     required this.paymentId,
@@ -117,6 +148,8 @@ class TicketPrintJobRow {
     this.paymentCancelledAt,
     this.correctionStatus,
     this.hasLiveCorrection = false,
+    this.alreadyCorrected = false,
+    this.receiptMissing = false,
   });
 
   factory TicketPrintJobRow.fromMap(Map<String, Object?> m) {
@@ -133,6 +166,8 @@ class TicketPrintJobRow {
           ? null
           : PaymentCorrectionStatus.fromDbValue(status),
       hasLiveCorrection: (m['has_live_correction'] as int? ?? 0) != 0,
+      alreadyCorrected: (m['already_corrected'] as int? ?? 0) != 0,
+      receiptMissing: (m['receipt_missing'] as int? ?? 0) != 0,
     );
   }
 

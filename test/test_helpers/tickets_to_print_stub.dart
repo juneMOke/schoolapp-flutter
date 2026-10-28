@@ -14,7 +14,10 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ti
 void stubEmptyTicketsToPrint() {
   if (getIt.isRegistered<TicketPrintQueueCubit>()) return;
   getIt.registerFactory<TicketPrintQueueCubit>(
-    () => TicketPrintQueueCubit(ListPendingTicketJobsUseCase(_EmptyQueue())),
+    () => TicketPrintQueueCubit(
+      ListPendingTicketJobsUseCase(_EmptyQueue()),
+      RetryTicketReceiptUseCase(_EmptyQueue()),
+    ),
   );
 }
 

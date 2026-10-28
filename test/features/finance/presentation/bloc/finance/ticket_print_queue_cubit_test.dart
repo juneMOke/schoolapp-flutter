@@ -10,8 +10,16 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ti
 class _Queue implements TicketPrintQueueRepository {
   Either<Failure, List<TicketPrintJob>> result = const Right([]);
 
+  final List<String> retried = [];
+
   @override
   Future<Either<Failure, List<TicketPrintJob>>> pendingJobs() async => result;
+
+  @override
+  Future<Either<Failure, Unit>> retryReceipt(TicketPrintJob job) async {
+    retried.add(job.id);
+    return const Right(unit);
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -27,6 +35,8 @@ TicketPrintJob _job(
   state: state,
   receiptNumber: state == TicketPrintJobState.awaitingNumber
       ? null
+      : state == TicketPrintJobState.receiptMissing
+      ? null
       : 'CF-RC-2627-00080$id',
   studentFullName: 'Mbala Kasa Amina',
   amount: MoneyBag.empty,
@@ -40,7 +50,10 @@ void main() {
 
   setUp(() {
     queue = _Queue();
-    cubit = TicketPrintQueueCubit(ListPendingTicketJobsUseCase(queue));
+    cubit = TicketPrintQueueCubit(
+      ListPendingTicketJobsUseCase(queue),
+      RetryTicketReceiptUseCase(queue),
+    );
   });
 
   tearDown(() => cubit.close());
@@ -92,5 +105,19 @@ void main() {
     await cubit.load();
 
     expect(cubit.state.phase, TicketPrintQueuePhase.failure);
+  });
+
+  test('Relancer redemande le reçu puis relit la file', () async {
+    final missing = _job('1', state: TicketPrintJobState.receiptMissing);
+    queue.result = Right([missing]);
+    await cubit.load();
+
+    // Le reçu est revenu entre-temps.
+    queue.result = Right([_job('1')]);
+    await cubit.retryReceipt(missing);
+
+    expect(queue.retried, ['1']);
+    expect(cubit.state.ready.single.id, '1');
+    expect(cubit.state.retrying, isEmpty);
   });
 }

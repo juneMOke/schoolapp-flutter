@@ -11,6 +11,9 @@ String syncAggregateLabel(AppLocalizations l10n, String aggregateType) {
       return l10n.syncAggregateEnrollment;
     case 'PAYMENT':
       return l10n.syncAggregatePayment;
+    // Le reçu qu'un accusé n'a pas rapporté (continuité des tickets RC).
+    case 'PAYMENT_RECEIPT':
+      return l10n.syncAggregatePaymentReceipt;
     case 'ATTENDANCE':
       return l10n.syncAggregateAttendance;
     case 'DISCIPLINARY_CASE':

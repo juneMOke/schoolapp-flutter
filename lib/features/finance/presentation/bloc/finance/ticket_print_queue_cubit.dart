@@ -10,8 +10,10 @@ import 'package:school_app_flutter/features/documents/domain/usecases/ticket_pri
 /// l'écran, donc un `BuildContext`. La page la mène, puis relit la file.
 class TicketPrintQueueCubit extends Cubit<TicketPrintQueueState> {
   final ListPendingTicketJobsUseCase _list;
+  final RetryTicketReceiptUseCase _retry;
 
-  TicketPrintQueueCubit(this._list) : super(const TicketPrintQueueState());
+  TicketPrintQueueCubit(this._list, this._retry)
+    : super(const TicketPrintQueueState());
 
   /// Relit la file. La sélection survit, réduite aux tickets encore prêts :
   /// un ticket imprimé ou devenu caduc ne reste pas coché en silence.
@@ -53,6 +55,22 @@ class TicketPrintQueueCubit extends Cubit<TicketPrintQueueState> {
     ),
   );
 
+  /// « Relancer » le reçu d'un ticket qui l'attend, puis relire la file : le
+  /// ticket devient prêt si le reçu est revenu, reste en attente sinon.
+  Future<void> retryReceipt(TicketPrintJob job) async {
+    if (state.retrying.contains(job.id)) return;
+    emit(state.copyWith(retrying: {...state.retrying, job.id}));
+    try {
+      await _retry(job);
+      if (isClosed) return;
+      await load();
+    } finally {
+      if (!isClosed) {
+        emit(state.copyWith(retrying: {...state.retrying}..remove(job.id)));
+      }
+    }
+  }
+
   void printingChanged(bool printing) =>
       emit(state.copyWith(printing: printing));
 }
@@ -67,11 +85,15 @@ class TicketPrintQueueState extends Equatable {
   /// Un lot est en cours d'envoi : la sélection et le bouton sont gelés.
   final bool printing;
 
+  /// Les tickets dont le reçu est en train d'être redemandé.
+  final Set<String> retrying;
+
   const TicketPrintQueueState({
     this.phase = TicketPrintQueuePhase.loading,
     this.jobs = const [],
     this.selected = const {},
     this.printing = false,
+    this.retrying = const {},
   });
 
   List<TicketPrintJob> get ready => [
@@ -98,13 +120,15 @@ class TicketPrintQueueState extends Equatable {
     List<TicketPrintJob>? jobs,
     Set<String>? selected,
     bool? printing,
+    Set<String>? retrying,
   }) => TicketPrintQueueState(
     phase: phase ?? this.phase,
     jobs: jobs ?? this.jobs,
     selected: selected ?? this.selected,
     printing: printing ?? this.printing,
+    retrying: retrying ?? this.retrying,
   );
 
   @override
-  List<Object?> get props => [phase, jobs, selected, printing];
+  List<Object?> get props => [phase, jobs, selected, printing, retrying];
 }

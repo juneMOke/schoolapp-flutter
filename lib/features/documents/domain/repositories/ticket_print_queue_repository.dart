@@ -19,4 +19,8 @@ abstract class TicketPrintQueueRepository {
 
   /// Le ticket d'annulation de [paymentId] est sorti hors de la file.
   Future<Either<Failure, Unit>> markCancellationPrinted(String paymentId);
+
+  /// Relance tout de suite le rattrapage du reçu de [job]
+  /// ([TicketPrintJobState.receiptMissing]).
+  Future<Either<Failure, Unit>> retryReceipt(TicketPrintJob job);
 }

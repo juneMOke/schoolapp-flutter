@@ -22,6 +22,10 @@ enum TicketPrintJobState {
   /// Numéroté, mais l'élève n'est pas encore descendu sur ce poste : un ticket
   /// qui ne nomme personne n'atteste rien (ADR-015 F1).
   awaitingStudent,
+
+  /// Le serveur a acquitté le versement sans sceller son reçu : la tablette va
+  /// le chercher, et « Relancer » la presse.
+  receiptMissing,
 }
 
 /// Un ticket que ce poste doit encore imprimer (continuité RC, lot D).

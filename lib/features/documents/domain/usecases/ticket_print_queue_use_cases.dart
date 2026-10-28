@@ -42,3 +42,14 @@ class MarkCancellationTicketPrintedUseCase {
   Future<Either<Failure, Unit>> call(String paymentId) =>
       _repository.markCancellationPrinted(paymentId);
 }
+
+/// « Relancer » : le reçu qu'un accusé n'a pas rapporté est redemandé sans
+/// attendre la prochaine tentative.
+class RetryTicketReceiptUseCase {
+  final TicketPrintQueueRepository _repository;
+
+  const RetryTicketReceiptUseCase(this._repository);
+
+  Future<Either<Failure, Unit>> call(TicketPrintJob job) =>
+      _repository.retryReceipt(job);
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -6,6 +7,8 @@ import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/tickets_to_print_list.dart';
@@ -22,11 +25,19 @@ class TicketPrintJobTile extends StatelessWidget {
   /// `null` : la ligne ne se coche pas (numéro attendu, ou lot en cours).
   final ValueChanged<bool>? onChanged;
 
+  /// « Relancer » le reçu manquant ([TicketPrintJobState.receiptMissing]).
+  final VoidCallback? onRetry;
+
+  /// Le reçu est en train d'être redemandé.
+  final bool retrying;
+
   const TicketPrintJobTile({
     super.key,
     required this.job,
     this.selected = false,
     this.onChanged,
+    this.onRetry,
+    this.retrying = false,
   });
 
   @override
@@ -111,6 +122,8 @@ class TicketPrintJobTile extends StatelessWidget {
                               color: AppColors.danger,
                             ),
                           ),
+                        if (job.state == TicketPrintJobState.receiptMissing)
+                          _ReceiptMissing(onRetry: onRetry, retrying: retrying),
                       ],
                     ),
                   ),
@@ -144,5 +157,40 @@ class TicketPrintJobTile extends StatelessWidget {
       }
     }
     return null;
+  }
+}
+
+/// Le reçu que l'accusé n'a pas rapporté : la tablette le redemande seule, et
+/// « Relancer » (sous `editique.write`) la presse.
+class _ReceiptMissing extends StatelessWidget {
+  final VoidCallback? onRetry;
+  final bool retrying;
+
+  const _ReceiptMissing({required this.onRetry, required this.retrying});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final onRetry = this.onRetry;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.ticketsToPrintReceiptMissing,
+          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+        ),
+        if (onRetry != null)
+          PermissionGate.access(
+            kTicketReceiptRetryAccess,
+            child: EteeloButton.ghost(
+              label: l10n.ticketsToPrintRetryReceipt,
+              icon: Icons.refresh_rounded,
+              fullWidth: false,
+              isLoading: retrying,
+              onPressed: retrying ? null : onRetry,
+            ),
+          ),
+      ],
+    );
   }
 }

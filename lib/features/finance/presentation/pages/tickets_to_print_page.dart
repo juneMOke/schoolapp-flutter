@@ -102,7 +102,8 @@ class TicketsToPrintView extends StatelessWidget {
                   previous.phase != current.phase ||
                   previous.jobs != current.jobs ||
                   previous.selected != current.selected ||
-                  previous.printing != current.printing,
+                  previous.printing != current.printing ||
+                  previous.retrying != current.retrying,
               builder: (context, state) => switch (state.phase) {
                 TicketPrintQueuePhase.loading => EteeloListSkeleton(
                   semanticsLabel: l10n.ticketsToPrintTitle,
@@ -134,6 +135,7 @@ class TicketsToPrintView extends StatelessWidget {
                   state: state,
                   onToggle: cubit.toggle,
                   onToggleAll: cubit.toggleAll,
+                  onRetry: cubit.retryReceipt,
                 ),
               },
             ),

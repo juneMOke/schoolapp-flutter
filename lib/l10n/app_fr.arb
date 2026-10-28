@@ -4124,6 +4124,7 @@
   },
   "syncAggregateEnrollment": "Inscription",
   "syncAggregatePayment": "Paiement",
+  "syncAggregatePaymentReceipt": "Reçu d'un paiement",
   "syncAggregateAttendance": "Présence",
   "syncAggregateDisciplinaryCase": "Cas disciplinaire",
   "syncAggregateNotesBatch": "Lot de notes",
@@ -5810,6 +5811,8 @@
   "ticketsToPrintKindCancellation": "Ticket d'annulation",
   "ticketsToPrintNumberPending": "Numéro attendu",
   "ticketsToPrintUnknownStudent": "Élève pas encore synchronisé",
+  "ticketsToPrintReceiptMissing": "Reçu non scellé par le serveur : la tablette le redemande.",
+  "ticketsToPrintRetryReceipt": "Relancer",
   "ticketsToPrintLastProblem": "Dernier échec : {problem}",
   "@ticketsToPrintLastProblem": {
     "placeholders": {

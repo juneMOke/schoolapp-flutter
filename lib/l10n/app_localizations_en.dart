@@ -6320,6 +6320,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncAggregatePayment => 'Payment';
 
   @override
+  String get syncAggregatePaymentReceipt => 'Payment receipt';
+
+  @override
   String get syncAggregateAttendance => 'Attendance';
 
   @override
@@ -8651,6 +8654,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketsToPrintUnknownStudent => 'Student not synced yet';
+
+  @override
+  String get ticketsToPrintReceiptMissing =>
+      'The server did not seal the receipt: the tablet is asking for it again.';
+
+  @override
+  String get ticketsToPrintRetryReceipt => 'Retry';
 
   @override
   String ticketsToPrintLastProblem(String problem) {

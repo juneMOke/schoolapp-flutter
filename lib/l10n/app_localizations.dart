@@ -10165,6 +10165,12 @@ abstract class AppLocalizations {
   /// **'Payment'**
   String get syncAggregatePayment;
 
+  /// No description provided for @syncAggregatePaymentReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment receipt'**
+  String get syncAggregatePaymentReceipt;
+
   /// No description provided for @syncAggregateAttendance.
   ///
   /// In en, this message translates to:
@@ -13889,6 +13895,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Student not synced yet'**
   String get ticketsToPrintUnknownStudent;
+
+  /// No description provided for @ticketsToPrintReceiptMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not seal the receipt: the tablet is asking for it again.'**
+  String get ticketsToPrintReceiptMissing;
+
+  /// No description provided for @ticketsToPrintRetryReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get ticketsToPrintRetryReceipt;
 
   /// No description provided for @ticketsToPrintLastProblem.
   ///
