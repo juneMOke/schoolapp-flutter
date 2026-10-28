@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
@@ -66,6 +67,10 @@ class PayrollLedgerOpenCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final onEdit = this.onEdit;
+    // 48 dp : le thème d'une ligne de tableau ramène un IconButton à 40.
+    final target = IconButton.styleFrom(
+      minimumSize: const Size.square(AppDimensions.minTouchTarget),
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -73,12 +78,14 @@ class PayrollLedgerOpenCell extends StatelessWidget {
           tooltip: l10n.payrollLedgerOpenAgent,
           onPressed: onOpen,
           color: AppColors.textSecondary,
+          style: target,
           icon: const Icon(Icons.visibility_outlined),
         ),
         if (onEdit != null)
           IconButton(
             tooltip: l10n.payrollVarsTitle,
             onPressed: onEdit,
+            style: target,
             icon: const Icon(Icons.edit_outlined),
           ),
       ],
