@@ -31722,6 +31722,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{percent}% settled'**
   String payrollPayslipBalanceRatio(int percent);
+
+  /// No description provided for @hrPresenceRecapEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payroll summary'**
+  String get hrPresenceRecapEyebrow;
+
+  /// No description provided for @hrPresenceRecapRateDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'excluding hourly staff'**
+  String get hrPresenceRecapRateDetail;
+
+  /// No description provided for @hrPresenceRecapColAbsences.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences and lates'**
+  String get hrPresenceRecapColAbsences;
+
+  /// No description provided for @hrPresenceRecapUnjustified.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} U'**
+  String hrPresenceRecapUnjustified(int count);
+
+  /// No description provided for @hrPresenceRecapJustified.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} E'**
+  String hrPresenceRecapJustified(int count);
+
+  /// No description provided for @hrPresenceRecapNoAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get hrPresenceRecapNoAbsence;
+
+  /// No description provided for @hrPresenceRecapLates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 late · {minutes} min} other{{count} lates · {minutes} min}}'**
+  String hrPresenceRecapLates(int count, int minutes);
+
+  /// No description provided for @hrPresenceRecapTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Total · 1 staff member} other{Total · {count} staff}}'**
+  String hrPresenceRecapTotal(int count);
 }
 
 class _AppLocalizationsDelegate

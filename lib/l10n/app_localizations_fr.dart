@@ -20760,4 +20760,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollPayslipBalanceRatio(int percent) {
     return '$percent % réglé';
   }
+
+  @override
+  String get hrPresenceRecapEyebrow => 'Récapitulatif pour la paie';
+
+  @override
+  String get hrPresenceRecapRateDetail => 'hors vacataires payés à l\'heure';
+
+  @override
+  String get hrPresenceRecapColAbsences => 'Absences et retards';
+
+  @override
+  String hrPresenceRecapUnjustified(int count) {
+    return '$count NJ';
+  }
+
+  @override
+  String hrPresenceRecapJustified(int count) {
+    return '$count J';
+  }
+
+  @override
+  String get hrPresenceRecapNoAbsence => 'Aucune';
+
+  @override
+  String hrPresenceRecapLates(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retards · $minutes min',
+      one: '1 retard · $minutes min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrPresenceRecapTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Total · $count agents',
+      one: 'Total · 1 agent',
+    );
+    return '$_temp0';
+  }
 }

@@ -12126,5 +12126,17 @@
   "@payrollPayslipBalanceCount": {"placeholders": {"count": {"type": "int"}}},
   "payrollPayslipBalanceDebt": "dette de l'école envers l'agent",
   "payrollPayslipBalanceRatio": "{percent} % réglé",
-  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}}
+  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}},
+  "hrPresenceRecapEyebrow": "Récapitulatif pour la paie",
+  "hrPresenceRecapRateDetail": "hors vacataires payés à l'heure",
+  "hrPresenceRecapColAbsences": "Absences et retards",
+  "hrPresenceRecapUnjustified": "{count} NJ",
+  "@hrPresenceRecapUnjustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapJustified": "{count} J",
+  "@hrPresenceRecapJustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapNoAbsence": "Aucune",
+  "hrPresenceRecapLates": "{count, plural, =1{1 retard · {minutes} min} other{{count} retards · {minutes} min}}",
+  "@hrPresenceRecapLates": {"placeholders": {"count": {"type": "int"}, "minutes": {"type": "int"}}},
+  "hrPresenceRecapTotal": "{count, plural, =1{Total · 1 agent} other{Total · {count} agents}}",
+  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}}
 }

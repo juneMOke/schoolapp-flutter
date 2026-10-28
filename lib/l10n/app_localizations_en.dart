@@ -20624,4 +20624,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String payrollPayslipBalanceRatio(int percent) {
     return '$percent% settled';
   }
+
+  @override
+  String get hrPresenceRecapEyebrow => 'Payroll summary';
+
+  @override
+  String get hrPresenceRecapRateDetail => 'excluding hourly staff';
+
+  @override
+  String get hrPresenceRecapColAbsences => 'Absences and lates';
+
+  @override
+  String hrPresenceRecapUnjustified(int count) {
+    return '$count U';
+  }
+
+  @override
+  String hrPresenceRecapJustified(int count) {
+    return '$count E';
+  }
+
+  @override
+  String get hrPresenceRecapNoAbsence => 'None';
+
+  @override
+  String hrPresenceRecapLates(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lates · $minutes min',
+      one: '1 late · $minutes min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrPresenceRecapTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Total · $count staff',
+      one: 'Total · 1 staff member',
+    );
+    return '$_temp0';
+  }
 }

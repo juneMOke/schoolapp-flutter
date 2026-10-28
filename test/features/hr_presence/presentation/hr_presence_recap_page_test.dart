@@ -5,7 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
@@ -54,6 +57,7 @@ void main() {
     List<String>? permissions,
     StaffAttendanceLock? lock,
     int unsynced = 0,
+    Map<String, Map<String, StaffAttendanceRecord>> records = const {},
     Size? size = const Size(1280, 1600),
   }) async {
     if (size != null) {
@@ -79,7 +83,7 @@ void main() {
       (_) async => Right(
         StaffAttendanceSnapshot(
           members: const [],
-          records: const {},
+          records: records,
           locks: lock == null
               ? const {}
               : {
@@ -146,8 +150,9 @@ void main() {
     await pump(tester);
 
     expect(find.text('17 jours de classe à ce jour'), findsOneWidget);
-    expect(find.text('92 %'), findsOneWidget);
-    expect(find.textContaining('368,00'), findsOneWidget);
+    // Au bandeau, puis au pied du tableau.
+    expect(find.text('92 %'), findsNWidgets(2));
+    expect(find.textContaining('368,00'), findsNWidgets(2));
     expect(find.byType(HrPresenceRecapTable), findsOneWidget);
     expect(find.text('MWAMBA Clarisse'), findsOneWidget);
   });
@@ -162,6 +167,63 @@ void main() {
   ) async {
     await pump(tester, answer: recapOf(withAmounts: false));
     expect(find.textContaining('368,00'), findsNothing);
+  });
+
+  testWidgets('le bandeau garde le mois et dit ce qui manque', (tester) async {
+    await pump(tester, unsynced: 2);
+
+    expect(find.text('RÉCAPITULATIF POUR LA PAIE'), findsOneWidget);
+    expect(find.text('Jours non pointés'), findsOneWidget);
+    expect(find.text('Encore sur la tablette'), findsOneWidget);
+    // La carte de clôture le redit en une ligne.
+    expect(
+      find.textContaining('6 jours-agent non pointés', findRichText: true),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('absences et retards sur deux lignes, NJ d\'abord', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    expect(
+      find.textContaining('3 NJ · 1 J', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.text('1 retard · 12 min'), findsWidgets);
+    expect(find.text('Total · 3 agents'), findsOneWidget);
+  });
+
+  testWidgets('la pastille dit l\'agent dont un pointage attend l\'envoi', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      records: {
+        'a-1': {
+          '2026-10-22': const StaffAttendanceRecord(
+            id: 'r-1',
+            staffMemberId: 'a-1',
+            workDate: '2026-10-22',
+            status: PresenceStatus.present,
+            syncState: RecordSyncState.pending,
+          ),
+        },
+      },
+    );
+
+    expect(find.text('Sur la tablette'), findsOneWidget);
+  });
+
+  testWidgets('filtré, le tableau perd son total', (tester) async {
+    await pump(tester);
+    await tester.tap(find.widgetWithText(EteeloFilterChip, 'Vacataire'));
+    await tester.pump();
+
+    expect(find.text('KALALA Didier'), findsOneWidget);
+    expect(find.text('MWAMBA Clarisse'), findsNothing);
+    expect(find.textContaining('Total ·'), findsNothing);
   });
 
   testWidgets('E2 : seule la direction voit « Clôturer »', (tester) async {

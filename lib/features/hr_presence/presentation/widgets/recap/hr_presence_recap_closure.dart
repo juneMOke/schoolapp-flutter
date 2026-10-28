@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
@@ -18,6 +19,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// La clôture du mois (spec §14, revue E2, E4–E6) : un verrou, rien n'est
 /// transmis — la Paie relit les pointages réels. Seule la direction clôt
 /// (`hr.attendance.manage`), un mois fini seulement, et sans retour.
+///
+/// Ouvert, le mois tient en une carte : ce qui manque en une ligne, et le
+/// bouton à côté.
 class HrPresenceRecapClosure extends StatelessWidget {
   final HrPresenceRecapState state;
   final VoidCallback onClose;
@@ -76,28 +80,50 @@ class HrPresenceRecapClosure extends StatelessWidget {
       );
     }
     final lastDay = SchoolDayCalendar.daysOf(recap.month).last;
-    return EteeloPanelCard(
+    // E2 : la direction seule ; les autres ne voient pas le bouton.
+    final canClose = PermissionGate.allowsAccess(
+      context,
+      kStaffAttendanceManageAccess,
+    );
+    final action = Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        EteeloButton.primary(
+          label: l10n.staffAttendanceClose,
+          icon: Icons.lock,
+          isLoading: state.closing,
+          onPressed: recap.closable && !state.closing ? onClose : null,
+          fullWidth: false,
+        ),
+        // E5 : un mois se clôt au plus tôt son dernier jour.
+        if (!recap.closable && recap.toDate) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.hrPresenceRecapCloseFrom(
+              MaterialLocalizations.of(
+                context,
+              ).formatFullDate(DateTime.parse(lastDay)),
+            ),
+            textAlign: TextAlign.end,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textMutedAa,
+            ),
+          ),
+        ],
+      ],
+    );
+    final summary = _Summary(
       title: recap.toDate
           ? l10n.hrPresenceRecapCurrentMonth
           : l10n.hrPresenceRecapNotClosed,
+      unscored: recap.unscored,
+      unsynced: state.unsynced,
+    );
+    return EteeloPanelCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (recap.unscored > 0) ...[
-            PresenceWarning(
-              icon: Icons.back_hand_outlined,
-              message: l10n.hrPresenceUnscoredTitle(recap.unscored),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          if (state.unsynced > 0) ...[
-            PresenceWarning(
-              icon: Icons.cloud_off_outlined,
-              tone: PresenceStatus.none,
-              message: l10n.hrPresenceUnsyncedTitle(state.unsynced),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
           // Une clôture posée ici que le serveur a refusée : le dire avant
           // d'offrir de recommencer.
           if (local != null && local.syncState == RecordSyncState.failed) ...[
@@ -106,49 +132,103 @@ class HrPresenceRecapClosure extends StatelessWidget {
               tone: PresenceStatus.absent,
               message: l10n.hrPresenceRecapCloseRefused,
             ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          Text(
-            l10n.hrPresenceRecapCloseExplain,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          // E2 : la direction seule ; les autres ne voient pas le bouton.
-          if (PermissionGate.allowsAccess(
-            context,
-            kStaffAttendanceManageAccess,
-          )) ...[
             const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.sm,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                EteeloButton.primary(
-                  label: l10n.staffAttendanceClose,
-                  icon: Icons.lock,
-                  isLoading: state.closing,
-                  onPressed: recap.closable && !state.closing ? onClose : null,
-                  fullWidth: false,
-                ),
-                // E5 : un mois se clôt au plus tôt son dernier jour.
-                if (!recap.closable && recap.toDate)
-                  Text(
-                    l10n.hrPresenceRecapCloseFrom(
-                      MaterialLocalizations.of(
-                        context,
-                      ).formatFullDate(DateTime.parse(lastDay)),
-                    ),
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textMutedAa,
-                    ),
-                  ),
-              ],
-            ),
           ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Au large, le bouton à droite de ce qu'il fige ; sur un
+              // téléphone, dessous.
+              if (!canClose) return summary;
+              if (constraints.maxWidth < AppBreakpoints.dataTableCardsMax) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    summary,
+                    const SizedBox(height: AppSpacing.md),
+                    Align(alignment: Alignment.centerRight, child: action),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: summary),
+                  const SizedBox(width: AppSpacing.lg),
+                  action,
+                ],
+              );
+            },
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Le mois en une ligne : ce qui manque (jours non pointés, pointages encore
+/// sur la tablette), puis ce que fait la clôture.
+class _Summary extends StatelessWidget {
+  final String title;
+  final int unscored;
+  final int unsynced;
+
+  const _Summary({
+    required this.title,
+    required this.unscored,
+    required this.unsynced,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final base = AppTypography.bodySmall.copyWith(
+      color: AppColors.textSecondary,
+    );
+    final missing = AppTypography.bodySmall.copyWith(
+      color: AppColors.presenceMarkLateInk,
+      fontWeight: FontWeight.w700,
+    );
+    final parts = [
+      if (unscored > 0)
+        TextSpan(text: l10n.hrPresenceUnscoredTitle(unscored), style: missing),
+      if (unsynced > 0) TextSpan(text: l10n.hrPresenceUnsyncedTitle(unsynced)),
+      TextSpan(text: l10n.hrPresenceRecapCloseExplain),
+    ];
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          unscored > 0 ? Icons.back_hand_outlined : Icons.lock_clock_outlined,
+          color: unscored > 0
+              ? AppColors.presenceMarkLateInk
+              : AppColors.textSecondary,
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTypography.titleSmall.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text.rich(
+                TextSpan(
+                  style: base,
+                  children: [
+                    for (final (i, part) in parts.indexed) ...[
+                      if (i > 0) const TextSpan(text: ' · '),
+                      part,
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

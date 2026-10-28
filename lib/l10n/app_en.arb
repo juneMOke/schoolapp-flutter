@@ -11947,5 +11947,17 @@
   "@payrollPayslipBalanceCount": {"placeholders": {"count": {"type": "int"}}},
   "payrollPayslipBalanceDebt": "owed by the school",
   "payrollPayslipBalanceRatio": "{percent}% settled",
-  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}}
+  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}},
+  "hrPresenceRecapEyebrow": "Payroll summary",
+  "hrPresenceRecapRateDetail": "excluding hourly staff",
+  "hrPresenceRecapColAbsences": "Absences and lates",
+  "hrPresenceRecapUnjustified": "{count} U",
+  "@hrPresenceRecapUnjustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapJustified": "{count} E",
+  "@hrPresenceRecapJustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapNoAbsence": "None",
+  "hrPresenceRecapLates": "{count, plural, =1{1 late · {minutes} min} other{{count} lates · {minutes} min}}",
+  "@hrPresenceRecapLates": {"placeholders": {"count": {"type": "int"}, "minutes": {"type": "int"}}},
+  "hrPresenceRecapTotal": "{count, plural, =1{Total · 1 staff member} other{Total · {count} staff}}",
+  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}}
 }
