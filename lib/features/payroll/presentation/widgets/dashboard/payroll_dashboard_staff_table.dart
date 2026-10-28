@@ -27,6 +27,8 @@ class PayrollDashboardStaffTable extends StatelessWidget {
     this.onOpen,
   });
 
+  static const int _remainingColumn = 6;
+
   static const List<double?> _widths = [
     null,
     AppDimensions.payrollColAmount,
@@ -48,6 +50,9 @@ class PayrollDashboardStaffTable extends StatelessWidget {
       cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollDashStaffMinWidth,
       widths: _widths,
+      // Un filet entre les montants et le statut, comme au livre : il les
+      // écarte aussi, et « Reste » ne se colle plus à « Statut ».
+      ruleAfter: _remainingColumn,
       endAligned: const {1, 2, 3, 4, 5, 6},
       headers: [
         l10n.payrollColAgent,
