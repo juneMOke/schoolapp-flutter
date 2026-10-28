@@ -19,12 +19,17 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// (`reopenable` : année en cours, paie pas validée).
 class HrPresenceRecapClosed extends StatelessWidget {
   final HrAttendanceRecap recap;
+
+  /// Le dernier geste posé ici sur ce mois — une réouverture — a été
+  /// refusé : le dire avant d'offrir de recommencer.
+  final bool refused;
   final bool reopening;
   final VoidCallback onReopen;
 
   const HrPresenceRecapClosed({
     super.key,
     required this.recap,
+    this.refused = false,
     required this.reopening,
     required this.onReopen,
   });
@@ -52,22 +57,32 @@ class HrPresenceRecapClosed extends StatelessWidget {
     final canReopen =
         recap.reopenable &&
         PermissionGate.allowsAccess(context, kStaffAttendanceReopenAccess);
-    if (!canReopen) return banner;
+    if (!canReopen && !refused) return banner;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        banner,
-        const SizedBox(height: AppSpacing.sm),
-        Align(
-          alignment: Alignment.centerRight,
-          child: EteeloButton.secondary(
-            label: l10n.hrPresenceRecapReopen,
-            icon: Icons.lock_open,
-            isLoading: reopening,
-            onPressed: reopening ? null : onReopen,
-            fullWidth: false,
+        if (refused) ...[
+          PresenceWarning(
+            icon: Icons.sync_problem,
+            tone: PresenceStatus.absent,
+            message: l10n.hrPresenceRecapCloseRefused,
           ),
-        ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        banner,
+        if (canReopen) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerRight,
+            child: EteeloButton.secondary(
+              label: l10n.hrPresenceRecapReopen,
+              icon: Icons.lock_open,
+              isLoading: reopening,
+              onPressed: reopening ? null : onReopen,
+              fullWidth: false,
+            ),
+          ),
+        ],
       ],
     );
   }

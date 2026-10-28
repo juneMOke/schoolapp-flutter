@@ -11757,7 +11757,7 @@
   "staffAttendanceCloseIrreversible": "Seule la direction rouvre un mois clôturé, tant que sa paie n'est pas validée.",
   "hrPresenceNoYearTitle": "Aucune année scolaire en cours",
   "hrPresenceNoYearMessage": "L'école est entre deux années : la vue annuelle reviendra à l'ouverture de la prochaine.",
-  "hrPresenceRecapCloseRefused": "La dernière clôture de ce mois a été refusée par le serveur : vérifiez le mois, puis recommencez.",
+  "hrPresenceRecapCloseRefused": "Le dernier geste sur ce mois (clôture ou réouverture) a été refusé par le serveur : vérifiez le mois, puis recommencez.",
   "hrPresenceAgentNotFoundMessage": "Le serveur ne connaît pas cet agent dans cette école : il a pu être retiré du fichier, ou le lien vient d'une autre école.",
   "hrPresenceErrorForbidden": "Votre profil ne permet pas de consulter les présences du personnel.",
   "hrPresenceYearRowA11y": "{month} : présence {presence}, retards {late}, absences {absent}",

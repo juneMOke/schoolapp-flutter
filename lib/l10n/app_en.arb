@@ -11573,7 +11573,7 @@
   "staffAttendanceCloseIrreversible": "Only the management can reopen a closed month, as long as its pay is not validated.",
   "hrPresenceNoYearTitle": "No current school year",
   "hrPresenceNoYearMessage": "The school is between two years: the yearly view returns when the next one opens.",
-  "hrPresenceRecapCloseRefused": "The server refused the last closing of this month: check the month, then try again.",
+  "hrPresenceRecapCloseRefused": "The server refused the last action on this month (closing or reopening): check the month, then try again.",
   "hrPresenceAgentNotFoundMessage": "The server does not know this staff member in this school: they may have been removed, or the link comes from another school.",
   "hrPresenceErrorForbidden": "Your profile does not allow you to view staff attendance.",
   "hrPresenceYearRowA11y": "{month}: attendance {presence}, late {late}, absent {absent}",

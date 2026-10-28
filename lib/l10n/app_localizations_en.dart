@@ -19411,7 +19411,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapCloseRefused =>
-      'The server refused the last closing of this month: check the month, then try again.';
+      'The server refused the last action on this month (closing or reopening): check the month, then try again.';
 
   @override
   String get hrPresenceAgentNotFoundMessage =>

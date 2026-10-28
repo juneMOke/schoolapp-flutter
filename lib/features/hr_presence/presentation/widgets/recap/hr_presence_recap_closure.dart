@@ -46,6 +46,7 @@ class HrPresenceRecapClosure extends StatelessWidget {
     if (recap.closed || (local?.locked ?? false)) {
       return HrPresenceRecapClosed(
         recap: recap,
+        refused: local?.syncState == RecordSyncState.failed,
         reopening: state.reopening,
         onReopen: onReopen,
       );

@@ -327,6 +327,24 @@ void main() {
     expect(reopenButton(), findsNothing);
   });
 
+  testWidgets(
+    'une réouverture refusée par le serveur se dit sur le mois clos',
+    (tester) async {
+      await pump(
+        tester,
+        permissions: manage,
+        answer: recapOf(closed: true),
+        lock: const StaffAttendanceLock(
+          kind: StaffAttendanceLockKind.month,
+          periodStart: '2026-10-01',
+          locked: true,
+          syncState: RecordSyncState.failed,
+        ),
+      );
+      expect(find.textContaining('refusé par le serveur'), findsOneWidget);
+    },
+  );
+
   testWidgets('une réouverture posée ici et pas encore envoyée se dit', (
     tester,
   ) async {
@@ -361,7 +379,7 @@ void main() {
         syncState: RecordSyncState.failed,
       ),
     );
-    expect(find.textContaining('refusée par le serveur'), findsOneWidget);
+    expect(find.textContaining('refusé par le serveur'), findsOneWidget);
   });
 
   testWidgets('un mois passé non clôturable ne promet pas de date', (

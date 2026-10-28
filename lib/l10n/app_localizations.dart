@@ -29971,7 +29971,7 @@ abstract class AppLocalizations {
   /// No description provided for @hrPresenceRecapCloseRefused.
   ///
   /// In en, this message translates to:
-  /// **'The server refused the last closing of this month: check the month, then try again.'**
+  /// **'The server refused the last action on this month (closing or reopening): check the month, then try again.'**
   String get hrPresenceRecapCloseRefused;
 
   /// No description provided for @hrPresenceAgentNotFoundMessage.
