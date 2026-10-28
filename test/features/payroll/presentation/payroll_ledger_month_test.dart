@@ -6,7 +6,6 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_sett
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_month_pill.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_header.dart';
 
 import '../../staff/staff_builders.dart';
@@ -61,8 +60,6 @@ void main() {
     addTearDown(tester.view.reset);
     final harness = await pumpPayrollScreen(tester, snapshot: snapshot());
     await tester.pumpAndSettle();
-    // Plus de frise : le mois se lit une seule fois, dans le bandeau.
-    expect(find.byType(PayrollMonthPill), findsNothing);
     expect(
       tester.getSize(find.byTooltip('Choisir un mois')).height,
       greaterThanOrEqualTo(48),

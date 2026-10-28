@@ -16,7 +16,7 @@ import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_dash
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/dashboard/payroll_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_dashboard_page.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_month_pill.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_header.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -95,19 +95,55 @@ void main() {
     expect(find.text('RESTE DÛ'), findsOneWidget);
     expect(find.text('Mois par mois'), findsOneWidget);
     expect(find.text('Arriérés par salarié'), findsOneWidget);
-    // La frise garde le mois affiché à l'écran, quelle que soit la largeur.
-    expect(
-      find.byWidgetPredicate(
-        (w) => w is PayrollMonthPill && w.month == '2026-09' && w.selected,
-      ),
-      findsOneWidget,
-    );
+    // Le mois se lit une seule fois, dans le bandeau, à toutes les largeurs.
+    expect(find.text('septembre 2026'), findsOneWidget);
+    expect(find.text('TABLEAU DE BORD'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Ce que chaque salarié perçoit'),
       200,
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('MAYALA Ruth'), findsWidgets);
+  });
+
+  testWidgets('le mois du bandeau ouvre le sélecteur, qui ouvre un mois', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final cubit = await pump(tester);
+    expect(
+      tester.getSize(find.byTooltip('Choisir un mois')).height,
+      greaterThanOrEqualTo(48),
+    );
+
+    await tester.tap(find.byTooltip('Choisir un mois'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('août 2026'));
+    await tester.pumpAndSettle();
+
+    expect(cubit.state.month, '2026-08');
+    verify(
+      () => repository.read(
+        '2026-08',
+        filter: any(named: 'filter'),
+        query: any(named: 'query'),
+      ),
+    ).called(1);
+  });
+
+  group('PayrollDashboardHeader.firstPickable', () {
+    PayrollDashboardState state(String month) =>
+        PayrollDashboardState(month: month, currentMonth: '2026-09');
+
+    test('les douze mois qui finissent au mois en cours', () {
+      expect(PayrollDashboardHeader.firstPickable(state('2026-05')), '2025-10');
+    });
+
+    test('un mois plus ancien, atteint aux flèches, reste choisissable', () {
+      expect(PayrollDashboardHeader.firstPickable(state('2024-03')), '2024-03');
+    });
   });
 
   testWidgets('hors ligne au premier chargement : l erreur réseau', (
