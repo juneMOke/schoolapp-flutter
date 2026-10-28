@@ -14924,7 +14924,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollPayslipChildcare => 'Prise en charge enfant du personnel';
 
   @override
-  String get payrollPayslipDeductionsTotal => 'Total retenues';
+  String get payrollPayslipDeductionsTotal => 'Total retenues (B)';
 
   @override
   String payrollPayslipAttendanceDeducted(
@@ -14935,11 +14935,6 @@ class AppLocalizationsFr extends AppLocalizations {
     int minutes,
   ) {
     return 'Pointage de $month : $absences absences non justifiées, $justified justifiées, $lates retards ($minutes min) — les absences non justifiées sont retenues sur les jours prestés.';
-  }
-
-  @override
-  String payrollPayslipBalance(String net, String paid, String rest) {
-    return 'Net à payer $net · déjà perçu $paid · reste à percevoir $rest';
   }
 
   @override
@@ -20699,5 +20694,48 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String payrollArrearsBannerDetail(String months) {
     return 'Reste à payer sur $months. Un arriéré se règle sur son mois d\'origine, depuis le registre des arriérés.';
+  }
+
+  @override
+  String get payrollPayslipProvisionalBanner =>
+      'Provisoire — paie non encore validée par la direction';
+
+  @override
+  String get payrollPayslipName => 'Nom et postnom';
+
+  @override
+  String get payrollPayslipGrossA => 'Salaire brut (A)';
+
+  @override
+  String get payrollPayslipAmount => 'Montant';
+
+  @override
+  String get payrollPayslipNetDue =>
+      'Rémunération due (net à payer) · (A) − (B)';
+
+  @override
+  String get payrollPayslipBalancePaid => 'Montant déjà perçu';
+
+  @override
+  String get payrollPayslipBalanceRest => 'Reste à percevoir';
+
+  @override
+  String payrollPayslipBalanceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count versements',
+      one: '1 versement',
+      zero: 'aucun versement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollPayslipBalanceDebt => 'dette de l\'école envers l\'agent';
+
+  @override
+  String payrollPayslipBalanceRatio(int percent) {
+    return '$percent % réglé';
   }
 }

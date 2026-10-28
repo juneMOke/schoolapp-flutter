@@ -14821,7 +14821,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollPayslipChildcare => 'Staff children care';
 
   @override
-  String get payrollPayslipDeductionsTotal => 'Total deductions';
+  String get payrollPayslipDeductionsTotal => 'Total deductions (B)';
 
   @override
   String payrollPayslipAttendanceDeducted(
@@ -14832,11 +14832,6 @@ class AppLocalizationsEn extends AppLocalizations {
     int minutes,
   ) {
     return 'Attendance for $month: $absences unexcused absences, $justified excused, $lates late arrivals ($minutes min) — unexcused absences are deducted from the days worked.';
-  }
-
-  @override
-  String payrollPayslipBalance(String net, String paid, String rest) {
-    return 'Net pay $net · already received $paid · still to receive $rest';
   }
 
   @override
@@ -20564,5 +20559,47 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String payrollArrearsBannerDetail(String months) {
     return 'Still to pay for $months. An arrear is settled on its original month, from the arrears register.';
+  }
+
+  @override
+  String get payrollPayslipProvisionalBanner =>
+      'Provisional — payroll not yet approved by the head';
+
+  @override
+  String get payrollPayslipName => 'Full name';
+
+  @override
+  String get payrollPayslipGrossA => 'Gross salary (A)';
+
+  @override
+  String get payrollPayslipAmount => 'Amount';
+
+  @override
+  String get payrollPayslipNetDue => 'Pay due (net pay) · (A) − (B)';
+
+  @override
+  String get payrollPayslipBalancePaid => 'Already received';
+
+  @override
+  String get payrollPayslipBalanceRest => 'Still to receive';
+
+  @override
+  String payrollPayslipBalanceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+      zero: 'no payment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payrollPayslipBalanceDebt => 'owed by the school';
+
+  @override
+  String payrollPayslipBalanceRatio(int percent) {
+    return '$percent% settled';
   }
 }

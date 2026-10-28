@@ -9751,7 +9751,7 @@
   "payrollPayslipSalaryAdvance": "Salary advance",
   "payrollPayslipLoan": "Loan repayment",
   "payrollPayslipChildcare": "Staff children care",
-  "payrollPayslipDeductionsTotal": "Total deductions",
+  "payrollPayslipDeductionsTotal": "Total deductions (B)",
   "payrollPayslipAttendanceDeducted": "Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted from the days worked.",
   "@payrollPayslipAttendanceDeducted": {
     "placeholders": {
@@ -9769,20 +9769,6 @@
       },
       "minutes": {
         "type": "int"
-      }
-    }
-  },
-  "payrollPayslipBalance": "Net pay {net} · already received {paid} · still to receive {rest}",
-  "@payrollPayslipBalance": {
-    "placeholders": {
-      "net": {
-        "type": "String"
-      },
-      "paid": {
-        "type": "String"
-      },
-      "rest": {
-        "type": "String"
       }
     }
   },
@@ -11944,5 +11930,17 @@
   "payrollBarValidatedDetail": "Amounts are frozen: pay each staff member from their row, then send out the payslips.",
   "payrollPayoutBarFullDetail": "If cash does not cover everything, set a rate for the month, or a fixed amount in a staff member's pay profile.",
   "payrollArrearsBannerDetail": "Still to pay for {months}. An arrear is settled on its original month, from the arrears register.",
-  "@payrollArrearsBannerDetail": {"placeholders": {"months": {"type": "String"}}}
+  "@payrollArrearsBannerDetail": {"placeholders": {"months": {"type": "String"}}},
+  "payrollPayslipProvisionalBanner": "Provisional — payroll not yet approved by the head",
+  "payrollPayslipName": "Full name",
+  "payrollPayslipGrossA": "Gross salary (A)",
+  "payrollPayslipAmount": "Amount",
+  "payrollPayslipNetDue": "Pay due (net pay) · (A) − (B)",
+  "payrollPayslipBalancePaid": "Already received",
+  "payrollPayslipBalanceRest": "Still to receive",
+  "payrollPayslipBalanceCount": "{count, plural, =0{no payment} =1{1 payment} other{{count} payments}}",
+  "@payrollPayslipBalanceCount": {"placeholders": {"count": {"type": "int"}}},
+  "payrollPayslipBalanceDebt": "owed by the school",
+  "payrollPayslipBalanceRatio": "{percent}% settled",
+  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}}
 }

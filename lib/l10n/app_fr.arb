@@ -10379,7 +10379,7 @@
   "@payrollPayslipChildcare": {
     "description": "Retenue du bulletin (PC/E)."
   },
-  "payrollPayslipDeductionsTotal": "Total retenues",
+  "payrollPayslipDeductionsTotal": "Total retenues (B)",
   "@payrollPayslipDeductionsTotal": {
     "description": "Total des retenues du bulletin."
   },
@@ -10401,21 +10401,6 @@
       },
       "minutes": {
         "type": "int"
-      }
-    }
-  },
-  "payrollPayslipBalance": "Net à payer {net} · déjà perçu {paid} · reste à percevoir {rest}",
-  "@payrollPayslipBalance": {
-    "description": "Solde progressif du bulletin.",
-    "placeholders": {
-      "net": {
-        "type": "String"
-      },
-      "paid": {
-        "type": "String"
-      },
-      "rest": {
-        "type": "String"
       }
     }
   },
@@ -12124,5 +12109,17 @@
   "payrollBarValidatedDetail": "Les montants sont figés : versez chaque agent depuis sa ligne, puis diffusez les bulletins.",
   "payrollPayoutBarFullDetail": "Si la trésorerie ne permet pas de tout payer, fixez un taux pour le mois, ou un montant fixe dans le profil de paie d'un agent.",
   "payrollArrearsBannerDetail": "Reste à payer sur {months}. Un arriéré se règle sur son mois d'origine, depuis le registre des arriérés.",
-  "@payrollArrearsBannerDetail": {"placeholders": {"months": {"type": "String"}}}
+  "@payrollArrearsBannerDetail": {"placeholders": {"months": {"type": "String"}}},
+  "payrollPayslipProvisionalBanner": "Provisoire — paie non encore validée par la direction",
+  "payrollPayslipName": "Nom et postnom",
+  "payrollPayslipGrossA": "Salaire brut (A)",
+  "payrollPayslipAmount": "Montant",
+  "payrollPayslipNetDue": "Rémunération due (net à payer) · (A) − (B)",
+  "payrollPayslipBalancePaid": "Montant déjà perçu",
+  "payrollPayslipBalanceRest": "Reste à percevoir",
+  "payrollPayslipBalanceCount": "{count, plural, =0{aucun versement} =1{1 versement} other{{count} versements}}",
+  "@payrollPayslipBalanceCount": {"placeholders": {"count": {"type": "int"}}},
+  "payrollPayslipBalanceDebt": "dette de l'école envers l'agent",
+  "payrollPayslipBalanceRatio": "{percent} % réglé",
+  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}}
 }

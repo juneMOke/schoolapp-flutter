@@ -137,7 +137,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(PayrollPayslipSheet), findsOneWidget);
-    expect(find.text('Salaire brut (A)'), findsNothing);
+    expect(find.text('GAINS'), findsNothing);
+    expect(
+      find.text('Rémunération due (net à payer) · (A) − (B)'),
+      findsOneWidget,
+    );
+    expect(find.text('RESTE À PERCEVOIR'), findsOneWidget);
   });
 
   testWidgets('un mois validé non soldé : verser le reste, ses versements', (

@@ -11,6 +11,18 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Une ligne libellé → montant (ou valeur) du bulletin.
 typedef PayslipRow = ({String label, String value, String? note});
 
+/// Le solde du bulletin, vu de l'agent : le net du mois, ce qu'il a déjà
+/// perçu et ce qui lui reste dû, et la part réglée.
+typedef PayslipBalance = ({
+  String net,
+  String paid,
+  String paidNote,
+  String rest,
+  String? restNote,
+  double ratio,
+  String ratioLabel,
+});
+
 /// Le bulletin d'un agent, **déjà mis en mots** : l'écran et le PDF le
 /// rendent tous deux, sans refaire un seul calcul ni un seul libellé — deux
 /// rendus d'une même source ne peuvent pas diverger.
@@ -32,7 +44,10 @@ class PayrollPayslipContent {
   /// est retenu (v2).
   final String? legalNote;
   final String attendance;
-  final String payment;
+  final PayslipBalance balance;
+
+  /// Les versements reçus, un par ligne ; `null` tant qu'aucun.
+  final String? payment;
   final List<String> signatures;
 
   const PayrollPayslipContent({
@@ -48,6 +63,7 @@ class PayrollPayslipContent {
     required this.net,
     required this.legalNote,
     required this.attendance,
+    required this.balance,
     required this.payment,
     required this.signatures,
   });
@@ -74,11 +90,18 @@ class PayrollPayslipContent {
       ].whereType<String>().where((part) => part.trim().isNotEmpty).join(' · '),
       title: l10n.payrollPayslipTitle,
       monthLabel: PayrollLabels.month(context, view.month),
-      banner: line.frozen ? null : l10n.payrollPayslipProvisional,
+      banner: line.frozen ? null : l10n.payrollPayslipProvisionalBanner,
+      // Trois par rangée sur la feuille : nom, grade, matricule, puis
+      // fonction, jours prestés, contrat.
       identity: [
         (
-          label: l10n.payrollColAgent,
+          label: l10n.payrollPayslipName,
           value: member?.fullName ?? line.staffMemberId,
+          note: null,
+        ),
+        (
+          label: l10n.payrollPayslipGrade,
+          value: PayrollStatement.gradeOf(member) ?? '—',
           note: null,
         ),
         (
@@ -89,11 +112,6 @@ class PayrollPayslipContent {
         (
           label: l10n.payrollPayslipJob,
           value: member?.jobTitle ?? '—',
-          note: null,
-        ),
-        (
-          label: l10n.payrollPayslipGrade,
-          value: PayrollStatement.gradeOf(member) ?? '—',
           note: null,
         ),
         if (line.deductions.workDaysDivisor case final divisor?)
@@ -149,13 +167,13 @@ class PayrollPayslipContent {
           ),
       ],
       gross: (
-        label: l10n.payrollPayslipGross,
+        label: l10n.payrollPayslipGrossA,
         value: money(line.grossInCents),
         note: null,
       ),
       deductions: PayrollPayslipRows.deductions(context, line, advances),
       net: (
-        label: l10n.payrollPayslipNet,
+        label: l10n.payrollPayslipNetDue,
         value: money(line.netInCents),
         note: null,
       ),
@@ -172,19 +190,12 @@ class PayrollPayslipContent {
             line.attendance.lates,
             line.attendance.lateMinutes,
           ),
-      payment: [
-        l10n.payrollPayslipBalance(
-          money(line.netInCents),
-          money(settlement.paidInCents),
-          money(settlement.remainingInCents),
-        ),
-        l10n.payrollPayslipPayment(
-          PayrollPayslipRows.payments(
-            context,
-            view.disbursements[line.staffMemberId],
-          ),
-        ),
-      ].join('\n'),
+      balance: PayrollPayslipRows.balance(context, settlement),
+      payment: settlement.disbursements.isEmpty
+          ? null
+          : l10n.payrollPayslipPayment(
+              PayrollPayslipRows.payments(context, settlement.disbursements),
+            ),
       signatures: [
         // Les intitulés de l'école (Q8), sinon ceux du modèle papier — le
         // bulletin scellé du serveur porte les mêmes.

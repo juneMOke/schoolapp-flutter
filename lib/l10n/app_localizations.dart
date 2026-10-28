@@ -23260,7 +23260,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollPayslipDeductionsTotal.
   ///
   /// In en, this message translates to:
-  /// **'Total deductions'**
+  /// **'Total deductions (B)'**
   String get payrollPayslipDeductionsTotal;
 
   /// No description provided for @payrollPayslipAttendanceDeducted.
@@ -23274,12 +23274,6 @@ abstract class AppLocalizations {
     int lates,
     int minutes,
   );
-
-  /// No description provided for @payrollPayslipBalance.
-  ///
-  /// In en, this message translates to:
-  /// **'Net pay {net} · already received {paid} · still to receive {rest}'**
-  String payrollPayslipBalance(String net, String paid, String rest);
 
   /// No description provided for @payrollPayslipGains.
   ///
@@ -31650,6 +31644,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Still to pay for {months}. An arrear is settled on its original month, from the arrears register.'**
   String payrollArrearsBannerDetail(String months);
+
+  /// No description provided for @payrollPayslipProvisionalBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional — payroll not yet approved by the head'**
+  String get payrollPayslipProvisionalBanner;
+
+  /// No description provided for @payrollPayslipName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get payrollPayslipName;
+
+  /// No description provided for @payrollPayslipGrossA.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross salary (A)'**
+  String get payrollPayslipGrossA;
+
+  /// No description provided for @payrollPayslipAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get payrollPayslipAmount;
+
+  /// No description provided for @payrollPayslipNetDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay due (net pay) · (A) − (B)'**
+  String get payrollPayslipNetDue;
+
+  /// No description provided for @payrollPayslipBalancePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already received'**
+  String get payrollPayslipBalancePaid;
+
+  /// No description provided for @payrollPayslipBalanceRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to receive'**
+  String get payrollPayslipBalanceRest;
+
+  /// No description provided for @payrollPayslipBalanceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no payment} =1{1 payment} other{{count} payments}}'**
+  String payrollPayslipBalanceCount(int count);
+
+  /// No description provided for @payrollPayslipBalanceDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'owed by the school'**
+  String get payrollPayslipBalanceDebt;
+
+  /// No description provided for @payrollPayslipBalanceRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% settled'**
+  String payrollPayslipBalanceRatio(int percent);
 }
 
 class _AppLocalizationsDelegate
