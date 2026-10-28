@@ -19,7 +19,7 @@ import 'package:school_app_flutter/core/components/tables/eteelo_column_table.da
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre : une ligne par agent, montants à droite en chiffres tabulaires,
-/// ligne de total par devise en pied. Toucher une ligne ouvre la fiche de
+/// ligne de total par devise en pied, sur le voile du ton de la table. Toucher une ligne ouvre la fiche de
 /// l'agent, comme l'œil de fin de ligne ; en brouillon, le crayon à côté
 /// ouvre directement ses éléments variables — la saisie du mois reste d'un
 /// seul geste. La colonne du versement prend la place qui reste : l'agent ne
@@ -220,11 +220,15 @@ class PayrollLedgerTable extends StatelessWidget {
         for (final currency in currencies)
           EteeloColumnTableRow(
             widths: _widths,
-            background: AppColors.surfaceAlt,
+            // Le voile de la barre de résultats, du ton de la table : le total
+            // se détache des lignes zébrées sans parler un statut.
+            background: ListingTones.barreFond,
             cells: [
               Text(
                 l10n.payrollTotalIn(currency),
-                style: AppTypography.labelLarge,
+                style: AppTypography.labelLarge.copyWith(
+                  color: ListingTones.inkResultat,
+                ),
               ),
               for (final amountOf in <int Function(PayrollLine)>[
                 (l) => l.baseInCents,
