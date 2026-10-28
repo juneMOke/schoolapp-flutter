@@ -5,13 +5,13 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 
-/// Le bandeau sombre de la Paie — livre du mois et fiche d'un agent : le
-/// dégradé des registres de présence, le motif kuba, et un liseré terre
-/// cuite, or et savane en pied.
-class PayrollBanner extends StatelessWidget {
+/// Le bandeau sombre des écrans RH — livre de paie, fiche d'un agent,
+/// récapitulatif des présences : le dégradé des registres de présence, le
+/// motif kuba, et un liseré terre cuite, or et savane en pied.
+class KubaBanner extends StatelessWidget {
   final Widget child;
 
-  const PayrollBanner({super.key, required this.child});
+  const KubaBanner({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) => ClipRRect(

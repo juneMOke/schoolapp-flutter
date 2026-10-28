@@ -7,9 +7,10 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_m
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_banner.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_banner_month.dart';
+import 'package:school_app_flutter/core/components/banners/kuba_banner.dart';
+import 'package:school_app_flutter/core/components/banners/kuba_banner_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_circuit.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_status_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le bandeau du livre : ‹ octobre 2026 › et son statut, puis le circuit.
@@ -46,17 +47,17 @@ class PayrollLedgerHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<PayrollCubit>();
     final view = state.view;
-    return PayrollBanner(
+    return KubaBanner(
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: AppSpacing.lg,
         runSpacing: AppSpacing.md,
         children: [
-          PayrollBannerMonth(
+          KubaBannerMonth(
             eyebrow: l10n.payrollTabLedger,
             month: state.month,
-            phase: view?.phase,
+            status: view == null ? null : PayrollStatusPill(phase: view.phase),
             onPrevious: state.canStepBack ? () => cubit.stepMonth(-1) : null,
             onNext: state.isCurrentMonth ? null : () => cubit.stepMonth(1),
             onCurrent: state.isCurrentMonth ? null : cubit.goCurrentMonth,

@@ -12,8 +12,9 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_mont
 import 'package:school_app_flutter/features/payroll/presentation/bloc/dashboard/payroll_dashboard_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_dashboard_months.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_banner.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_banner_month.dart';
+import 'package:school_app_flutter/core/components/banners/kuba_banner.dart';
+import 'package:school_app_flutter/core/components/banners/kuba_banner_month.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_status_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'en-tête : le bandeau sombre du livre — ‹ mois › (qui ouvre le
@@ -57,7 +58,7 @@ class PayrollDashboardHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<PayrollDashboardCubit>();
     final dashboard = state.dashboard;
-    return PayrollBanner(
+    return KubaBanner(
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
         crossAxisAlignment: WrapCrossAlignment.center,
@@ -68,12 +69,15 @@ class PayrollDashboardHeader extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PayrollBannerMonth(
+              KubaBannerMonth(
                 eyebrow: l10n.subMenuDashboard,
                 month: state.month,
-                phase: dashboard == null
+                status: switch (dashboard == null
                     ? null
-                    : PayrollDashboardMonths.phaseOfShown(dashboard),
+                    : PayrollDashboardMonths.phaseOfShown(dashboard)) {
+                  final phase? => PayrollStatusPill(phase: phase),
+                  null => null,
+                },
                 onPrevious: () => unawaited(cubit.stepMonth(-1)),
                 onNext: state.isCurrentMonth
                     ? null
