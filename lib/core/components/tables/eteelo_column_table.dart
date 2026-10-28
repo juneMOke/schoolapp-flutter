@@ -274,12 +274,18 @@ class EteeloColumnTableRow extends StatelessWidget {
   final VoidCallback? onTap;
   final Color? background;
 
+  /// Encre des noms de colonne quand la ligne devient une carte
+  /// ([EteeloColumnTableCards]) : à donner avec un [background] foncé (une
+  /// ligne de total du ton de l'en-tête). `null` — le défaut — : gris atténué.
+  final Color? labelInk;
+
   const EteeloColumnTableRow({
     super.key,
     required this.widths,
     required this.cells,
     this.onTap,
     this.background,
+    this.labelInk,
   });
 
   /// Le style des chiffres d'une cellule : tabulaires, pour qu'ils

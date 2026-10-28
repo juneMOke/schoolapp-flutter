@@ -19,7 +19,7 @@ import 'package:school_app_flutter/core/components/tables/eteelo_column_table.da
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le livre : une ligne par agent, montants à droite en chiffres tabulaires,
-/// ligne de total par devise en pied, sur le voile du ton de la table. Toucher une ligne ouvre la fiche de
+/// ligne de total par devise en pied, du ton de l'en-tête. Toucher une ligne ouvre la fiche de
 /// l'agent, comme l'œil de fin de ligne ; en brouillon, le crayon à côté
 /// ouvre directement ses éléments variables — la saisie du mois reste d'un
 /// seul geste. La colonne du versement prend la place qui reste : l'agent ne
@@ -215,20 +215,20 @@ class PayrollLedgerTable extends StatelessWidget {
     final currencies = byCurrency.keys.toList()..sort();
     int sum(List<PayrollLine> of, int Function(PayrollLine) amount) =>
         of.fold(0, (total, line) => total + amount(line));
+    final tone = ListingTones.table;
     return Column(
       children: [
         for (final currency in currencies)
           EteeloColumnTableRow(
             widths: _widths,
-            // Le voile de la barre de résultats, du ton de la table : le total
-            // se détache des lignes zébrées sans parler un statut.
-            background: ListingTones.barreFond,
+            // Le bandeau de l'en-tête, repris en pied : le total ferme le
+            // tableau comme l'en-tête l'ouvre.
+            background: tone.header,
+            labelInk: tone.headerInk,
             cells: [
               Text(
                 l10n.payrollTotalIn(currency),
-                style: AppTypography.labelLarge.copyWith(
-                  color: ListingTones.inkResultat,
-                ),
+                style: AppTypography.labelLarge.copyWith(color: tone.headerInk),
               ),
               for (final amountOf in <int Function(PayrollLine)>[
                 (l) => l.baseInCents,
@@ -245,7 +245,10 @@ class PayrollLedgerTable extends StatelessWidget {
                     currency,
                   ),
                   textAlign: TextAlign.end,
-                  style: EteeloColumnTableRow.figures(strong: true),
+                  style: EteeloColumnTableRow.figures(
+                    color: tone.headerInk,
+                    strong: true,
+                  ),
                 ),
               const SizedBox.shrink(),
               const SizedBox.shrink(),

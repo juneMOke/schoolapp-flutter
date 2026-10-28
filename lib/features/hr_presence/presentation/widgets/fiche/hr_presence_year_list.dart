@@ -226,28 +226,29 @@ class _TotalRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final profile = this.profile;
+    final ink = ListingTones.table.headerInk;
     return EteeloColumnTableRow(
       widths: HrPresenceYearList._widths,
-      // Le voile du ton de la table, comme les totaux de la Paie.
-      background: ListingTones.barreFond,
+      // Le bandeau de l'en-tête, comme les totaux de la Paie.
+      background: ListingTones.table.header,
+      labelInk: ink,
       cells: [
         Text(
           l10n.hrPresenceYearTotal,
-          style: AppTypography.labelLarge.copyWith(
-            color: ListingTones.inkResultat,
-          ),
+          style: AppTypography.labelLarge.copyWith(color: ink),
         ),
         _share(
           presence: total.presenceRatePct,
           late: total.lateRatePct,
           absent: total.absenceRatePct,
         ),
-        _figure(_rate(l10n, total.presenceRatePct), strong: true),
-        _figure(_rate(l10n, total.lateRatePct), strong: true),
-        _figure(_rate(l10n, total.absenceRatePct), strong: true),
+        _figure(_rate(l10n, total.presenceRatePct), strong: true, color: ink),
+        _figure(_rate(l10n, total.lateRatePct), strong: true, color: ink),
+        _figure(_rate(l10n, total.absenceRatePct), strong: true, color: ink),
         _figure(
           l10n.presenceMarkKpiRatio(total.scored, classDays),
           strong: true,
+          color: ink,
         ),
         if (profile == null)
           const SizedBox.shrink()

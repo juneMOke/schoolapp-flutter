@@ -111,33 +111,35 @@ class PayrollDashboardStaffTable extends StatelessWidget {
   Widget _total(BuildContext context, PayrollDashboardTotals totals) {
     final l10n = AppLocalizations.of(context)!;
     String money(int cents) => PayrollLabels.money(cents, section.currency);
+    final ink = ListingTones.table.headerInk;
+    Widget total(String text) => _figure(text, strong: true, color: ink);
     return EteeloColumnTableRow(
       widths: _widths,
-      // Même voile que le total du livre : le pied se détache des lignes.
-      background: ListingTones.barreFond,
+      // Le bandeau de l'en-tête, comme le total du livre.
+      background: ListingTones.table.header,
+      labelInk: ink,
       cells: [
         Text(
           l10n.payrollDashTotal(section.currency),
-          style: AppTypography.labelLarge.copyWith(
-            color: ListingTones.inkResultat,
-          ),
+          style: AppTypography.labelLarge.copyWith(color: ink),
         ),
-        _figure(money(totals.plannedInCents), strong: true),
-        _figure('− ${money(totals.deductionsInCents)}', strong: true),
-        _figure(money(totals.netInCents), strong: true),
-        _figure('+ ${money(totals.arrearsInCents)}', strong: true),
-        _figure(money(totals.receivedInCents), strong: true),
-        _figure(money(totals.remainingInCents), strong: true),
+        total(money(totals.plannedInCents)),
+        total('− ${money(totals.deductionsInCents)}'),
+        total(money(totals.netInCents)),
+        total('+ ${money(totals.arrearsInCents)}'),
+        total(money(totals.receivedInCents)),
+        total(money(totals.remainingInCents)),
         const SizedBox.shrink(),
       ],
     );
   }
 
-  static Widget _figure(String text, {bool strong = false}) => Text(
-    text,
-    textAlign: TextAlign.end,
-    style: EteeloColumnTableRow.figures(strong: strong),
-  );
+  static Widget _figure(String text, {bool strong = false, Color? color}) =>
+      Text(
+        text,
+        textAlign: TextAlign.end,
+        style: EteeloColumnTableRow.figures(color: color, strong: strong),
+      );
 }
 
 class _Status extends StatelessWidget {
