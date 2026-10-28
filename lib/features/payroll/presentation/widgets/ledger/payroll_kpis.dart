@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -37,6 +38,7 @@ class PayrollKpis extends StatelessWidget {
     );
     final locked = view.phase.isLocked;
     final deferred = _perCurrency(lines, (l) => l.deferredInCents);
+    final attendanceMonth = PayrollLabels.month(context, view.attendanceMonth);
     final absences = lines.fold<int>(
       0,
       (sum, line) => sum + line.attendance.unjustifiedAbsences,
@@ -102,13 +104,15 @@ class PayrollKpis extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
-                (view.absenceDeductionEnabled
-                    ? l10n.payrollAttendanceSignalDeducted
-                    : l10n.payrollAttendanceSignal)(
-                  PayrollLabels.month(context, view.month),
-                  absences,
-                  lates,
-                ),
+                view.attendance == PayrollAttendanceState.open
+                    ? l10n.payrollAttendanceSignalOpen(attendanceMonth)
+                    : (view.absenceDeductionEnabled
+                          ? l10n.payrollAttendanceSignalDeducted
+                          : l10n.payrollAttendanceSignal)(
+                        attendanceMonth,
+                        absences,
+                        lates,
+                      ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textMutedAa,
                 ),

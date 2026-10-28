@@ -9301,7 +9301,7 @@
   "payrollKpiNet": "Net to pay",
   "payrollKpiPaid": "Paid {paid} / {total}",
   "@payrollKpiPaid": {"placeholders": {"paid": {"type": "int"}, "total": {"type": "int"}}},
-  "payrollAttendanceSignalDeducted": "Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences reduce the days worked.",
+  "payrollAttendanceSignalDeducted": "Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences are deducted pro rata to the month's working days.",
   "@payrollAttendanceSignalDeducted": {
     "placeholders": {
       "month": {
@@ -9317,6 +9317,8 @@
   },
   "payrollAttendanceSignal": "{month} attendance: {absences} unexcused absences and {lates} late arrivals — shown for information, never deducted.",
   "@payrollAttendanceSignal": {"placeholders": {"month": {"type": "String"}, "absences": {"type": "int"}, "lates": {"type": "int"}}},
+  "payrollAttendanceSignalOpen": "{month} attendance is not closed yet: absences and hours will count once it is.",
+  "@payrollAttendanceSignalOpen": {"placeholders": {"month": {"type": "String"}}},
   "payrollColAgent": "Staff member",
   "payrollColBase": "Base",
   "payrollColOvertime": "Overtime",
@@ -9731,7 +9733,7 @@
   "payrollPayslipLoan": "Loan repayment",
   "payrollPayslipChildcare": "Staff children care",
   "payrollPayslipDeductionsTotal": "Total deductions (B)",
-  "payrollPayslipAttendanceDeducted": "Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted from the days worked.",
+  "payrollPayslipAttendanceDeducted": "Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted pro rata to the month's working days.",
   "@payrollPayslipAttendanceDeducted": {
     "placeholders": {
       "month": {
@@ -9780,7 +9782,7 @@
   "payrollPayslipPosition": "{index} / {count}",
   "@payrollPayslipPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}}},
   "payrollPayslipNoPhone": "No number for this staff member.",
-  "payrollPayslipWhatsappMessageV2": "Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; days worked {days}; net {net}; received {paid}; remaining {rest}.",
+  "payrollPayslipWhatsappMessageV2": "Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; {days}; net {net}; received {paid}; remaining {rest}.",
   "@payrollPayslipWhatsappMessageV2": {
     "placeholders": {
       "name": {
@@ -11591,7 +11593,7 @@
   "payrollSettingsInCurrency": "{label} · {currency}",
   "@payrollSettingsInCurrency": {"placeholders": {"label": {"type": "String"}, "currency": {"type": "String"}}},
   "payrollSettingsMonthTitle": "Pay month",
-  "payrollSettingsMonthSubtitle": "Hours and days in a full month; a day not worked = gross ÷ days.",
+  "payrollSettingsMonthSubtitle": "Hours in a full month; an unexcused absence = base ÷ the month's working days.",
   "payrollSettingsLegalTitle": "Statutory deductions",
   "payrollSettingsLegalSubtitle": "Flat IPR per paid employee, CNSS in ‰ of base pay.",
   "payrollSettingsOvertimeTitle": "Overtime",

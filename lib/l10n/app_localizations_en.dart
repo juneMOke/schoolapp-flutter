@@ -14031,12 +14031,17 @@ class AppLocalizationsEn extends AppLocalizations {
     int absences,
     int lates,
   ) {
-    return 'Attendance for $month: $absences unexcused absences and $lates late arrivals — unexcused absences reduce the days worked.';
+    return 'Attendance for $month: $absences unexcused absences and $lates late arrivals — unexcused absences are deducted pro rata to the month\'s working days.';
   }
 
   @override
   String payrollAttendanceSignal(String month, int absences, int lates) {
     return '$month attendance: $absences unexcused absences and $lates late arrivals — shown for information, never deducted.';
+  }
+
+  @override
+  String payrollAttendanceSignalOpen(String month) {
+    return '$month attendance is not closed yet: absences and hours will count once it is.';
   }
 
   @override
@@ -14815,7 +14820,7 @@ class AppLocalizationsEn extends AppLocalizations {
     int lates,
     int minutes,
   ) {
-    return 'Attendance for $month: $absences unexcused absences, $justified excused, $lates late arrivals ($minutes min) — unexcused absences are deducted from the days worked.';
+    return 'Attendance for $month: $absences unexcused absences, $justified excused, $lates late arrivals ($minutes min) — unexcused absences are deducted pro rata to the month\'s working days.';
   }
 
   @override
@@ -14916,7 +14921,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String paid,
     String rest,
   ) {
-    return 'Hello $name, your payslip for $month ($school): gross $gross; deductions $deductions; total deductions $total; days worked $days; net $net; received $paid; remaining $rest.';
+    return 'Hello $name, your payslip for $month ($school): gross $gross; deductions $deductions; total deductions $total; $days; net $net; received $paid; remaining $rest.';
   }
 
   @override
@@ -19472,7 +19477,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollSettingsMonthSubtitle =>
-      'Hours and days in a full month; a day not worked = gross ÷ days.';
+      'Hours in a full month; an unexcused absence = base ÷ the month\'s working days.';
 
   @override
   String get payrollSettingsLegalTitle => 'Statutory deductions';

@@ -59,9 +59,13 @@ abstract final class PayrollLedger {
       ),
       disbursements: disbursements,
       withoutContract: computation?.withoutContract ?? const [],
+      // Tant que M n'est pas clos, ses heures ne sont pas encore comptées :
+      // « 0 h » n'alerterait sur rien.
       zeroHourMembers: [
-        for (final line in lines)
-          if (line.isHourly && (line.baseMinutes ?? 0) == 0) line.staffMemberId,
+        if (attendance != PayrollAttendanceState.open)
+          for (final line in lines)
+            if (line.isHourly && (line.baseMinutes ?? 0) == 0)
+              line.staffMemberId,
       ],
       attendance: attendance,
       awaitingFrozenLines: server == PayrollStatus.validated && frozen == null,

@@ -21971,7 +21971,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollAttendanceSignalDeducted.
   ///
   /// In en, this message translates to:
-  /// **'Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences reduce the days worked.'**
+  /// **'Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences are deducted pro rata to the month\'s working days.'**
   String payrollAttendanceSignalDeducted(String month, int absences, int lates);
 
   /// No description provided for @payrollAttendanceSignal.
@@ -21979,6 +21979,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month} attendance: {absences} unexcused absences and {lates} late arrivals — shown for information, never deducted.'**
   String payrollAttendanceSignal(String month, int absences, int lates);
+
+  /// No description provided for @payrollAttendanceSignalOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} attendance is not closed yet: absences and hours will count once it is.'**
+  String payrollAttendanceSignalOpen(String month);
 
   /// No description provided for @payrollColAgent.
   ///
@@ -23242,7 +23248,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollPayslipAttendanceDeducted.
   ///
   /// In en, this message translates to:
-  /// **'Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted from the days worked.'**
+  /// **'Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted pro rata to the month\'s working days.'**
   String payrollPayslipAttendanceDeducted(
     String month,
     int absences,
@@ -23386,7 +23392,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollPayslipWhatsappMessageV2.
   ///
   /// In en, this message translates to:
-  /// **'Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; days worked {days}; net {net}; received {paid}; remaining {rest}.'**
+  /// **'Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; {days}; net {net}; received {paid}; remaining {rest}.'**
   String payrollPayslipWhatsappMessageV2(
     String name,
     String month,
@@ -30066,7 +30072,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollSettingsMonthSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Hours and days in a full month; a day not worked = gross ÷ days.'**
+  /// **'Hours in a full month; an unexcused absence = base ÷ the month\'s working days.'**
   String get payrollSettingsMonthSubtitle;
 
   /// No description provided for @payrollSettingsLegalTitle.

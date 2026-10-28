@@ -14129,12 +14129,17 @@ class AppLocalizationsFr extends AppLocalizations {
     int absences,
     int lates,
   ) {
-    return 'Pointage de $month : $absences absences non justifiées et $lates retards — les absences non justifiées réduisent les jours prestés.';
+    return 'Pointage de $month : $absences absences non justifiées et $lates retards — les absences non justifiées sont retenues au prorata des jours ouvrés.';
   }
 
   @override
   String payrollAttendanceSignal(String month, int absences, int lates) {
     return 'Pointage de $month : $absences absences non justifiées et $lates retards — affichés à titre indicatif, aucune retenue.';
+  }
+
+  @override
+  String payrollAttendanceSignalOpen(String month) {
+    return 'Le pointage de $month n\'est pas encore clos : absences et heures compteront à sa clôture.';
   }
 
   @override
@@ -14918,7 +14923,7 @@ class AppLocalizationsFr extends AppLocalizations {
     int lates,
     int minutes,
   ) {
-    return 'Pointage de $month : $absences absences non justifiées, $justified justifiées, $lates retards ($minutes min) — les absences non justifiées sont retenues sur les jours prestés.';
+    return 'Pointage de $month : $absences absences non justifiées, $justified justifiées, $lates retards ($minutes min) — les absences non justifiées sont retenues au prorata des jours ouvrés.';
   }
 
   @override
@@ -15019,7 +15024,7 @@ class AppLocalizationsFr extends AppLocalizations {
     String paid,
     String rest,
   ) {
-    return 'Bonjour $name, votre bulletin de paie de $month ($school) : brut $gross ; retenues $deductions ; total retenues $total ; jours prestés $days ; net $net ; perçu $paid ; reste $rest.';
+    return 'Bonjour $name, votre bulletin de paie de $month ($school) : brut $gross ; retenues $deductions ; total retenues $total ; $days ; net $net ; perçu $paid ; reste $rest.';
   }
 
   @override
@@ -19606,7 +19611,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollSettingsMonthSubtitle =>
-      'Heures et jours d\'un mois plein ; une journée non prestée = brut ÷ jours.';
+      'Heures d\'un mois plein ; une absence non justifiée = base ÷ jours ouvrés du mois.';
 
   @override
   String get payrollSettingsLegalTitle => 'Retenues légales';

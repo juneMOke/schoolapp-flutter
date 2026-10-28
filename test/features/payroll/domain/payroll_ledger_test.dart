@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
@@ -22,6 +23,7 @@ void main() {
     Map<String, List<PayrollLine>> frozen = const {},
     List<PayrollGesture> gestures = const [],
     List<PayrollDisbursement> disbursements = const [],
+    Map<String, AttendanceSummary> summaries = const {},
     List<PayrollSchoolYear> years = const [
       (start: '2025-09-01', end: '2026-07-02'),
       (start: '2026-09-07', end: '2027-07-02'),
@@ -36,7 +38,7 @@ void main() {
     headers: headers,
     variables: const {},
     frozenLines: frozen,
-    summaries: const {},
+    summaries: summaries,
     gestures: gestures,
     advances: const [],
     disbursements: disbursements,
@@ -139,11 +141,43 @@ void main() {
       expect(view.submitBlocker, PayrollBlocker.previousNotValidated);
     });
 
-    test('M−1 dans une année et non clos : validation bloquée', () {
-      final view = PayrollLedger.monthView(snapshot(), '2026-10');
+    AttendanceSummary closed(String month, {int absences = 0}) =>
+        AttendanceSummary(
+          month: month,
+          closedAt: '$month-28T16:00:00Z',
+          agents: {
+            'm-1': AttendanceAgentSummary(unjustifiedAbsences: absences),
+          },
+        );
+
+    test('M non clos : validation bloquée, même si M−1 l\'est', () {
+      final view = PayrollLedger.monthView(
+        snapshot(summaries: {'2026-09': closed('2026-09', absences: 3)}),
+        '2026-10',
+      );
 
       expect(view.attendance, PayrollAttendanceState.open);
       expect(view.validateBlocker, PayrollBlocker.attendanceOpen);
+      // Ni le Pointage de M−1, ni une alerte « 0 h » sur un mois pas compté.
+      expect(view.lines.single.attendance.unjustifiedAbsences, 0);
+      expect(view.zeroHourMembers, isEmpty);
+    });
+
+    test('M clos : la paie de M lit le Pointage de M (formule 3)', () {
+      final view = PayrollLedger.monthView(
+        snapshot(
+          summaries: {
+            '2026-09': closed('2026-09', absences: 3),
+            '2026-10': closed('2026-10', absences: 2),
+          },
+        ),
+        '2026-10',
+      );
+
+      expect(view.attendance, PayrollAttendanceState.closed);
+      expect(view.validateBlocker, isNull);
+      expect(view.lines.single.attendance.unjustifiedAbsences, 2);
+      expect(view.attendanceMonth, '2026-10');
     });
 
     test('août hors de toute année : compte comme clos (R1, N3)', () {

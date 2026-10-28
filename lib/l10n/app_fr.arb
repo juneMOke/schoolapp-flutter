@@ -9780,7 +9780,7 @@
   },
   "payrollKpiNet": "Net à payer",
   "payrollKpiPaid": "Versé {paid} / {total}",
-  "payrollAttendanceSignalDeducted": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — les absences non justifiées réduisent les jours prestés.",
+  "payrollAttendanceSignalDeducted": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — les absences non justifiées sont retenues au prorata des jours ouvrés.",
   "@payrollAttendanceSignalDeducted": {
     "description": "Signal Pointage quand l'école retient les absences.",
     "placeholders": {
@@ -9796,6 +9796,7 @@
     }
   },
   "payrollAttendanceSignal": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — affichés à titre indicatif, aucune retenue.",
+  "payrollAttendanceSignalOpen": "Le pointage de {month} n'est pas encore clos : absences et heures compteront à sa clôture.",
   "payrollColAgent": "Agent",
   "payrollColBase": "Base",
   "payrollColOvertime": "H. sup",
@@ -10354,7 +10355,7 @@
   "@payrollPayslipDeductionsTotal": {
     "description": "Total des retenues du bulletin."
   },
-  "payrollPayslipAttendanceDeducted": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — les absences non justifiées sont retenues sur les jours prestés.",
+  "payrollPayslipAttendanceDeducted": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — les absences non justifiées sont retenues au prorata des jours ouvrés.",
   "@payrollPayslipAttendanceDeducted": {
     "description": "Encart Pointage quand l'école retient les absences.",
     "placeholders": {
@@ -10396,7 +10397,7 @@
   "payrollPayslipOpenedWhatsapp": "Ouvert dans WhatsApp le {date}",
   "payrollPayslipPosition": "{index} / {count}",
   "payrollPayslipNoPhone": "Aucun numéro pour cet agent.",
-  "payrollPayslipWhatsappMessageV2": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : brut {gross} ; retenues {deductions} ; total retenues {total} ; jours prestés {days} ; net {net} ; perçu {paid} ; reste {rest}.",
+  "payrollPayslipWhatsappMessageV2": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : brut {gross} ; retenues {deductions} ; total retenues {total} ; {days} ; net {net} ; perçu {paid} ; reste {rest}.",
   "@payrollPayslipWhatsappMessageV2": {
     "description": "Message WhatsApp v2 du bulletin.",
     "placeholders": {
@@ -11774,7 +11775,7 @@
   "payrollSettingsInCurrency": "{label} · {currency}",
   "@payrollSettingsInCurrency": {"placeholders": {"label": {"type": "String"}, "currency": {"type": "String"}}},
   "payrollSettingsMonthTitle": "Mois de salaire",
-  "payrollSettingsMonthSubtitle": "Heures et jours d'un mois plein ; une journée non prestée = brut ÷ jours.",
+  "payrollSettingsMonthSubtitle": "Heures d'un mois plein ; une absence non justifiée = base ÷ jours ouvrés du mois.",
   "payrollSettingsLegalTitle": "Retenues légales",
   "payrollSettingsLegalSubtitle": "IPR forfaitaire par agent payé, CNSS en ‰ de la base.",
   "payrollSettingsOvertimeTitle": "Heures supplémentaires",

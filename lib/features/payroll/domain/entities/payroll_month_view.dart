@@ -104,6 +104,15 @@ class PayrollMonthView {
 
   bool get isEditable => phase == PayrollPhase.draft;
 
+  /// Le mois de Pointage que les lignes ont lu : M en formule 3, M−1 sur une
+  /// paie figée en v1/v2.
+  String get attendanceMonth {
+    for (final line in lines) {
+      if (line.attendanceMonth case final month?) return month;
+    }
+    return month;
+  }
+
   /// Un versement réduit ce mois-ci : un taux sous 100 % ou un montant fixe.
   bool get hasReducedPayout => lines.any((line) => line.deferredInCents > 0);
 

@@ -281,6 +281,7 @@ class PayrollPayslipActions {
         '${l10n.payrollPayslipChildcare} ${money(d.childcareInCents)}',
     ];
     final settlement = view.settlementOf(line);
+    final days = PayrollLabels.attendanceDays(l10n, d);
     return l10n.payrollPayslipWhatsappMessageV2(
       name,
       month,
@@ -288,7 +289,7 @@ class PayrollPayslipActions {
       money(line.grossInCents),
       withheld.isEmpty ? '—' : withheld.join(', '),
       money(d.totalInCents + line.advanceInCents),
-      PayrollLabels.attendanceDays(l10n, d)?.value ?? '—',
+      days == null ? '—' : '${days.label} ${days.value}',
       money(line.netInCents),
       money(settlement.paidInCents),
       money(settlement.remainingInCents),
