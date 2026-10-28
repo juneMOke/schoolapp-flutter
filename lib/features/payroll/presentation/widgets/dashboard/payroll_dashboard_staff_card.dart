@@ -107,6 +107,8 @@ class _StaffCardState extends State<PayrollDashboardStaffCard> {
       tone: DashboardSense.attendu,
       toneStrength: DashboardTones.forceDe(DashboardSense.attendu),
       toneSurface: false,
+      // Le PDF au bord droit, comme les liens des cartes voisines.
+      actionsBeside: true,
       actions: [
         EteeloButton.secondary(
           label: l10n.payrollDashPdf,
