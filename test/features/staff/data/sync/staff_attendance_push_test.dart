@@ -123,6 +123,7 @@ void main() {
     StaffAttendanceGesture gesture, {
     String date = '2026-09-29',
     int nowMs = 20,
+    String? reason,
   }) => gestureDao.add(
     StaffAttendanceGestureRequestDto(
       gestureId: id,
@@ -130,6 +131,7 @@ void main() {
       date: date,
       clientRecordedAt: '2026-09-29T16:00:00.000Z',
       authorId: 'u-1',
+      reason: reason,
     ),
     kind: gesture.kind,
     authorName: null,
@@ -300,6 +302,105 @@ void main() {
       expect(settings.start.wire, '08:00');
       expect(settings.toleranceMinutes, 15);
     });
+  });
+
+  group('réouverture du mois', () {
+    test('le motif part avec REOPEN_MONTH, et se relit', () async {
+      await addGesture(
+        'g-1',
+        StaffAttendanceGesture.reopenMonth,
+        date: '2026-09-01',
+        reason: 'Justificatif reçu',
+      );
+
+      final payload =
+          jsonDecode(
+                (await entry(StaffAttendanceGestureDao.entryId('g-1'))).payload,
+              )
+              as Map<String, dynamic>;
+
+      expect(payload['gesture'], 'REOPEN_MONTH');
+      expect(payload['reason'], 'Justificatif reçu');
+      expect(
+        StaffAttendanceGestureRequestDto.tryParse(payload)!.reason,
+        'Justificatif reçu',
+      );
+    });
+
+    test('un geste sans motif n\'en envoie pas', () async {
+      await addGesture('g-1', StaffAttendanceGesture.validateDay);
+
+      final payload =
+          jsonDecode(
+                (await entry(StaffAttendanceGestureDao.entryId('g-1'))).payload,
+              )
+              as Map<String, dynamic>;
+
+      expect(payload.containsKey('reason'), isFalse);
+    });
+
+    test(
+      'la réouverture attend la clôture du même mois encore en file',
+      () async {
+        await addGesture(
+          'g-1',
+          StaffAttendanceGesture.closeMonth,
+          date: '2026-09-01',
+          nowMs: 20,
+        );
+        await addGesture(
+          'g-2',
+          StaffAttendanceGesture.reopenMonth,
+          date: '2026-09-01',
+          nowMs: 30,
+          reason: 'Erreur',
+        );
+
+        final result = await gestures.dispatch(
+          await entry(StaffAttendanceGestureDao.entryId('g-2')),
+        );
+
+        expect(result.outcome, OutboxDispatchOutcome.blocked);
+      },
+    );
+
+    test('un pointage du mois attend la réouverture encore en vol', () async {
+      await seedMember('m-1');
+      await addGesture(
+        'g-1',
+        StaffAttendanceGesture.reopenMonth,
+        date: '2026-09-01',
+        nowMs: 5,
+        reason: 'Erreur',
+      );
+      await writeRecord(_record('r-1'));
+
+      final result = await records.dispatch(
+        await entry(StaffAttendanceWriteDao.entryId('r-1')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+    });
+
+    test(
+      'posée sur la tablette, la réouverture déverrouille le mois',
+      () async {
+        await addGesture(
+          'g-1',
+          StaffAttendanceGesture.reopenMonth,
+          date: '2026-09-01',
+          reason: 'Erreur',
+        );
+
+        final shown = await locks.effective(
+          's-1',
+          from: '2026-09-01',
+          to: '2026-09-30',
+        );
+
+        expect(shown.single.locked, isFalse);
+      },
+    );
   });
 
   group('geste de verrou', () {

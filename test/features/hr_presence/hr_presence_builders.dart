@@ -337,6 +337,7 @@ HrAttendanceRecap recapOf({
   bool toDate = true,
   bool closed = false,
   bool closable = false,
+  bool reopenable = false,
   bool withAmounts = true,
   List<HrAttendanceRecapRow>? staff,
 }) => HrAttendanceRecap(
@@ -347,6 +348,7 @@ HrAttendanceRecap recapOf({
   closedAt: closed ? '2026-10-31T15:05:00Z' : null,
   closedBy: closed ? 'Mme la Directrice' : null,
   closable: closable,
+  reopenable: reopenable,
   unscored: 6,
   totals: HrAttendanceRecapTotals(
     presenceRatePct: 92,

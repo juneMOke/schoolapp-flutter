@@ -6,8 +6,13 @@ import 'package:school_app_flutter/features/payroll/domain/entities/attendance_s
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
-/// Les résumés des mois clos du Pointage (`staff_attendance_summaries`) :
-/// immuables, remplacés tels quels à chaque descente.
+/// Les résumés des mois clos du Pointage (`staff_attendance_summaries`),
+/// remplacés tels quels à chaque descente.
+///
+/// Un mois rouvert par la direction redescend sans clôture (`closedAt: null`,
+/// `agents: []`) : son résumé est **effacé**, pas remplacé — la Paie juge un
+/// mois clos dès que son résumé existe. À la nouvelle clôture, il revient
+/// avec ses nouveaux chiffres.
 class AttendanceSummaryDao {
   final PayrollStore _store;
 
@@ -23,6 +28,14 @@ class AttendanceSummaryDao {
     if (items.isEmpty || schoolId.isEmpty) return 0;
     await _store.transaction((txn) async {
       for (final item in items) {
+        if (item.closedAt == null) {
+          await txn.delete(
+            table,
+            where: 'school_id = ? AND month = ?',
+            whereArgs: [schoolId, item.month],
+          );
+          continue;
+        }
         await txn.insert(table, {
           'school_id': schoolId,
           'month': item.month,

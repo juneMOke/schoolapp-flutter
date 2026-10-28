@@ -29977,7 +29977,7 @@ abstract class AppLocalizations {
   /// No description provided for @staffAttendanceCloseIrreversible.
   ///
   /// In en, this message translates to:
-  /// **'A closed month cannot be reopened: validated pay depends on it.'**
+  /// **'Only the management can reopen a closed month, as long as its pay is not validated.'**
   String get staffAttendanceCloseIrreversible;
 
   /// No description provided for @hrPresenceNoYearTitle.
@@ -31770,6 +31770,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{Total · 1 staff member} other{Total · {count} staff}}'**
   String hrPresenceRecapTotal(int count);
+
+  /// No description provided for @staffAttendanceToastMonthReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} reopened'**
+  String staffAttendanceToastMonthReopened(String month);
+
+  /// No description provided for @hrPresenceRecapReopen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen the month'**
+  String get hrPresenceRecapReopen;
+
+  /// No description provided for @hrPresenceRecapReopenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen {month}?'**
+  String hrPresenceRecapReopenTitle(String month);
+
+  /// No description provided for @hrPresenceRecapReopenCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get hrPresenceRecapReopenCancel;
+
+  /// No description provided for @hrPresenceRecapReopenReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for reopening'**
+  String get hrPresenceRecapReopenReason;
+
+  /// No description provided for @hrPresenceRecapReopenReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A reason is required.'**
+  String get hrPresenceRecapReopenReasonRequired;
+
+  /// No description provided for @hrPresenceRecapReopenHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded with the action. Validated days stay validated: reopen the day to fix, then close again. The month\'s attendance sheet is cancelled.'**
+  String get hrPresenceRecapReopenHelper;
+
+  /// No description provided for @hrPresenceRecapReopenedOnTablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopening saved on this tablet, waiting to be sent'**
+  String get hrPresenceRecapReopenedOnTablet;
 }
 
 class _AppLocalizationsDelegate

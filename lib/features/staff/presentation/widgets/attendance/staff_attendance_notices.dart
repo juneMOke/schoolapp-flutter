@@ -49,6 +49,11 @@ void showStaffAttendanceNotice(
       AppSnackBar.showSuccess(context, l10n.staffAttendanceToastValidated);
     case StaffAttendanceNoticeKind.reportReopened:
       AppSnackBar.showInfo(context, l10n.staffAttendanceToastReopened);
+    case StaffAttendanceNoticeKind.monthReopened:
+      AppSnackBar.showSuccess(
+        context,
+        l10n.staffAttendanceToastMonthReopened(monthLabel),
+      );
     case StaffAttendanceNoticeKind.monthClosed:
       AppSnackBar.showSuccess(
         context,

@@ -174,6 +174,12 @@ const ModuleAccess kStaffAttendanceManageAccess = ModuleAccess([
   Perm.hrAttendanceManage,
 ]);
 
+/// Rouvrir un mois clos, tant que sa paie n'est pas validée — la direction
+/// seule. ⚠️ Le geste part par l'outbox, où un 403 est terminal.
+const ModuleAccess kStaffAttendanceReopenAccess = ModuleAccess([
+  Perm.hrAttendanceReopen,
+]);
+
 /// Lire la paie : montants, taux horaires, « Voir sa paie du mois »
 /// (`hr.pay.read`) — l'économe et la direction.
 const ModuleAccess kPayrollReadAccess = ModuleAccess([Perm.hrPayRead]);

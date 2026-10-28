@@ -101,6 +101,12 @@ void main() {
         to: any(named: 'to'),
       ),
     ).thenAnswer((_) async => Right(unsynced));
+    when(() => commands.reopenMonth(any(), any())).thenAnswer(
+      (_) async => const StaffAttendanceNotice(
+        StaffAttendanceNoticeKind.monthReopened,
+        month: '2026-10',
+      ),
+    );
     when(() => commands.closeMonth(any())).thenAnswer(
       (_) async => const StaffAttendanceNotice(
         StaffAttendanceNoticeKind.monthClosed,
@@ -261,7 +267,7 @@ void main() {
     expect(find.textContaining('Transmettre'), findsNothing);
     expect(
       find.text(
-        'Un mois clôturé ne se rouvre pas : la paie validée en dépend.',
+        "Seule la direction rouvre un mois clôturé, tant que sa paie n'est pas validée.",
       ),
       findsOneWidget,
     );
@@ -276,6 +282,66 @@ void main() {
 
     expect(find.textContaining('Mois clôturé'), findsOneWidget);
     expect(closeButton(), findsNothing);
+  });
+
+  Finder reopenButton() => find.widgetWithText(EteeloButton, 'Rouvrir le mois');
+
+  testWidgets('la direction rouvre un mois clos, motif à l\'appui', (
+    tester,
+  ) async {
+    final commands = await pump(
+      tester,
+      permissions: [...manage, Perm.hrAttendanceReopen.wire],
+      answer: recapOf(closed: true, reopenable: true),
+    );
+    await tester.ensureVisible(reopenButton());
+    await tester.tap(reopenButton());
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'Justificatif reçu');
+    await tester.tap(find.widgetWithText(EteeloButton, 'Rouvrir le mois').last);
+    await tester.pumpAndSettle();
+
+    verify(
+      () => commands.reopenMonth('2026-10', 'Justificatif reçu'),
+    ).called(1);
+  });
+
+  testWidgets('sans hr.attendance.reopen, ou si le serveur refuserait, pas '
+      'de réouverture', (tester) async {
+    await pump(
+      tester,
+      permissions: manage,
+      answer: recapOf(closed: true, reopenable: true),
+    );
+    expect(reopenButton(), findsNothing);
+  });
+
+  testWidgets('un mois non rouvrable (paie validée) ne propose rien', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      permissions: [...manage, Perm.hrAttendanceReopen.wire],
+      answer: recapOf(closed: true),
+    );
+    expect(reopenButton(), findsNothing);
+  });
+
+  testWidgets('une réouverture posée ici et pas encore envoyée se dit', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      permissions: manage,
+      answer: recapOf(closed: true),
+      lock: const StaffAttendanceLock(
+        kind: StaffAttendanceLockKind.month,
+        periodStart: '2026-10-01',
+        locked: false,
+        syncState: RecordSyncState.pending,
+      ),
+    );
+    expect(find.textContaining('Réouverture enregistrée'), findsOneWidget);
   });
 
   testWidgets('un mois de vacances : rien à clôturer', (tester) async {

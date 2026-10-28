@@ -11591,7 +11591,7 @@
   "hrPresenceRecapDaysWorked": "{count, plural, =0{no day worked} =1{1 day worked} other{{count} days worked}}",
   "@hrPresenceRecapDaysWorked": {"placeholders": {"count": {"type": "int"}}},
   "hrPresenceRecapLegend": "U = unexcused · E = excused · a row opens the individual record",
-  "staffAttendanceCloseIrreversible": "A closed month cannot be reopened: validated pay depends on it.",
+  "staffAttendanceCloseIrreversible": "Only the management can reopen a closed month, as long as its pay is not validated.",
   "hrPresenceNoYearTitle": "No current school year",
   "hrPresenceNoYearMessage": "The school is between two years: the yearly view returns when the next one opens.",
   "hrPresenceRecapCloseRefused": "The server refused the last closing of this month: check the month, then try again.",
@@ -11959,5 +11959,15 @@
   "hrPresenceRecapLates": "{count, plural, =1{1 late · {minutes} min} other{{count} lates · {minutes} min}}",
   "@hrPresenceRecapLates": {"placeholders": {"count": {"type": "int"}, "minutes": {"type": "int"}}},
   "hrPresenceRecapTotal": "{count, plural, =1{Total · 1 staff member} other{Total · {count} staff}}",
-  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}}
+  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}},
+  "staffAttendanceToastMonthReopened": "{month} reopened",
+  "@staffAttendanceToastMonthReopened": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopen": "Reopen the month",
+  "hrPresenceRecapReopenTitle": "Reopen {month}?",
+  "@hrPresenceRecapReopenTitle": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopenCancel": "Cancel",
+  "hrPresenceRecapReopenReason": "Reason for reopening",
+  "hrPresenceRecapReopenReasonRequired": "A reason is required.",
+  "hrPresenceRecapReopenHelper": "Recorded with the action. Validated days stay validated: reopen the day to fix, then close again. The month's attendance sheet is cancelled.",
+  "hrPresenceRecapReopenedOnTablet": "Reopening saved on this tablet, waiting to be sent"
 }

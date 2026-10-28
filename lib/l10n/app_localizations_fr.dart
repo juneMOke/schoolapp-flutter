@@ -19550,7 +19550,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffAttendanceCloseIrreversible =>
-      'Un mois clôturé ne se rouvre pas : la paie validée en dépend.';
+      'Seule la direction rouvre un mois clôturé, tant que sa paie n\'est pas validée.';
 
   @override
   String get hrPresenceNoYearTitle => 'Aucune année scolaire en cours';
@@ -20804,4 +20804,34 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String staffAttendanceToastMonthReopened(String month) {
+    return '$month rouvert';
+  }
+
+  @override
+  String get hrPresenceRecapReopen => 'Rouvrir le mois';
+
+  @override
+  String hrPresenceRecapReopenTitle(String month) {
+    return 'Rouvrir $month ?';
+  }
+
+  @override
+  String get hrPresenceRecapReopenCancel => 'Annuler';
+
+  @override
+  String get hrPresenceRecapReopenReason => 'Motif de la réouverture';
+
+  @override
+  String get hrPresenceRecapReopenReasonRequired => 'Le motif est obligatoire.';
+
+  @override
+  String get hrPresenceRecapReopenHelper =>
+      'Consigné avec le geste. Les jours validés le restent : rouvrez le jour à corriger, puis reclôturez. La fiche de présence du mois est annulée.';
+
+  @override
+  String get hrPresenceRecapReopenedOnTablet =>
+      'Réouverture enregistrée sur la tablette, en attente d\'envoi';
 }

@@ -161,8 +161,9 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
   @override
   Future<Either<Failure, Unit>> recordGesture(
     StaffAttendanceGesture gesture,
-    String periodStart,
-  ) async {
+    String periodStart, {
+    String? reason,
+  }) async {
     final session = _local.session();
     if (session == null) return const Left(StaffLocalWriter.noSession);
     final now = _now();
@@ -176,6 +177,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
           date: periodStart,
           clientRecordedAt: recordedAt,
           authorId: session.authorId,
+          reason: reason,
         ),
         kind: gesture.kind,
         authorName: null,

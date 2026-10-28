@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_reason_dialog.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
@@ -27,6 +28,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class HrPresenceRecapBody extends StatelessWidget {
   final HrPresenceRecapState state;
   final ValueChanged<HrAttendanceRecapRow> onOpen;
+
+  /// Le motif d'une réouverture : 1 à 500 caractères (contrat back).
+  static const reopenReasonMax = 500;
 
   const HrPresenceRecapBody({
     super.key,
@@ -82,6 +86,7 @@ class HrPresenceRecapBody extends StatelessWidget {
             HrPresenceRecapClosure(
               state: state,
               onClose: () => unawaited(_close(context, recap)),
+              onReopen: () => unawaited(_reopen(context, recap)),
             ),
             const SizedBox(height: AppSpacing.lg),
             HrPresenceRecapFilters(
@@ -117,6 +122,31 @@ class HrPresenceRecapBody extends StatelessWidget {
             ),
           ],
         );
+    }
+  }
+
+  /// Rouvrir exige un motif : il est consigné avec le geste.
+  Future<void> _reopen(BuildContext context, HrAttendanceRecap recap) async {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<HrPresenceRecapCubit>();
+    final reason = await EteeloReasonDialog.show(
+      context,
+      EteeloReasonDialog(
+        title: l10n.hrPresenceRecapReopenTitle(
+          PresenceLabels.month(MaterialLocalizations.of(context), recap.month),
+        ),
+        confirmLabel: l10n.hrPresenceRecapReopen,
+        cancelLabel: l10n.hrPresenceRecapReopenCancel,
+        fieldLabel: l10n.hrPresenceRecapReopenReason,
+        requiredError: l10n.hrPresenceRecapReopenReasonRequired,
+        helper: l10n.hrPresenceRecapReopenHelper,
+        maxLength: HrPresenceRecapBody.reopenReasonMax,
+      ),
+    );
+    if (reason == null || reason.isEmpty || !context.mounted) return;
+    final notice = await cubit.reopenMonth(reason);
+    if (notice != null && context.mounted) {
+      showStaffAttendanceNotice(context, notice);
     }
   }
 

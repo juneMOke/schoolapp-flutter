@@ -152,6 +152,9 @@ enum Perm {
   hrAttendanceRead('hr.attendance.read'),
   hrAttendanceWrite('hr.attendance.write'),
   hrAttendanceManage('hr.attendance.manage'),
+  // Rouvrir un mois clos (contrat « Paie au mois M », 2026-10-28) : plus haut
+  // que la clôture, la direction seule.
+  hrAttendanceReopen('hr.attendance.reopen'),
 
   // ── Classes ───────────────────────────────────────────────────────────────
   classroomRead('classroom.read'),

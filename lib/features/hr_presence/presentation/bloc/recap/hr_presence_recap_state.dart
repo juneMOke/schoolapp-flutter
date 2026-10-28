@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_recap.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
@@ -35,6 +36,9 @@ class HrPresenceRecapState extends Equatable {
   /// Une clôture est en cours d'écriture : le bouton se désarme.
   final bool closing;
 
+  /// Une réouverture est en cours d'écriture.
+  final bool reopening;
+
   const HrPresenceRecapState({
     required this.month,
     required this.currentMonth,
@@ -48,6 +52,7 @@ class HrPresenceRecapState extends Equatable {
     this.text = '',
     this.contract,
     this.closing = false,
+    this.reopening = false,
   });
 
   bool get isCurrentMonth => month == currentMonth;
@@ -57,8 +62,15 @@ class HrPresenceRecapState extends Equatable {
     return first == null || month.compareTo(first) > 0;
   }
 
-  /// Clos au serveur, ou sur la tablette en attendant l'envoi.
-  bool get isClosed => (recap?.closed ?? false) || (localLock?.locked ?? false);
+  /// Clos au serveur, ou sur la tablette. Un geste posé ici et pas encore
+  /// envoyé — clôture ou réouverture — l'emporte sur ce que dit le serveur.
+  bool get isClosed {
+    final local = localLock;
+    if (local != null && local.syncState == RecordSyncState.pending) {
+      return local.locked;
+    }
+    return (recap?.closed ?? false) || (local?.locked ?? false);
+  }
 
   bool get hasFilters => text.trim().isNotEmpty || contract != null;
 
@@ -108,6 +120,7 @@ class HrPresenceRecapState extends Equatable {
     String? text,
     Object? contract = _undefined,
     bool? closing,
+    bool? reopening,
   }) => HrPresenceRecapState(
     month: month ?? this.month,
     currentMonth: currentMonth,
@@ -129,6 +142,7 @@ class HrPresenceRecapState extends Equatable {
         ? this.contract
         : contract as StaffContractFilter?,
     closing: closing ?? this.closing,
+    reopening: reopening ?? this.reopening,
   );
 
   @override
@@ -145,5 +159,6 @@ class HrPresenceRecapState extends Equatable {
     text,
     contract,
     closing,
+    reopening,
   ];
 }

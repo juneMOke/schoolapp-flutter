@@ -42,7 +42,7 @@ class SaveStaffAttendanceUseCase {
       : _repository.saveRecords(records);
 }
 
-/// Valide ou rouvre un jour, clôt un mois.
+/// Valide ou rouvre un jour, clôt ou rouvre un mois.
 class RecordStaffAttendanceGestureUseCase {
   final StaffAttendanceRepository _repository;
 
@@ -50,8 +50,9 @@ class RecordStaffAttendanceGestureUseCase {
 
   Future<Either<Failure, Unit>> call(
     StaffAttendanceGesture gesture,
-    String periodStart,
-  ) => _repository.recordGesture(gesture, periodStart);
+    String periodStart, {
+    String? reason,
+  }) => _repository.recordGesture(gesture, periodStart, reason: reason);
 }
 
 /// Enregistre le début des cours et la tolérance.

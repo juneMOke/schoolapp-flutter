@@ -66,7 +66,7 @@ class StaffAttendanceGestureRequestDto {
   /// Clé d'idempotence : un geste rejoué n'est jamais réappliqué.
   final String gestureId;
 
-  /// `VALIDATE_DAY` · `REOPEN_DAY` · `CLOSE_MONTH`.
+  /// `VALIDATE_DAY` · `REOPEN_DAY` · `CLOSE_MONTH` · `REOPEN_MONTH`.
   final String gesture;
 
   /// Le jour, ou le 1er du mois.
@@ -77,12 +77,17 @@ class StaffAttendanceGestureRequestDto {
   final String clientRecordedAt;
   final String authorId;
 
+  /// Le motif, exigé pour `REOPEN_MONTH` (1 à 500 caractères), ignoré
+  /// ailleurs.
+  final String? reason;
+
   const StaffAttendanceGestureRequestDto({
     required this.gestureId,
     required this.gesture,
     required this.date,
     required this.clientRecordedAt,
     required this.authorId,
+    this.reason,
   });
 
   Map<String, dynamic> toJson() => {
@@ -90,6 +95,7 @@ class StaffAttendanceGestureRequestDto {
     'gesture': gesture,
     'date': date,
     'clientRecordedAt': clientRecordedAt,
+    'reason': ?reason,
     kOutboxAuthorIdKey: authorId,
   };
 
@@ -113,6 +119,7 @@ class StaffAttendanceGestureRequestDto {
       date: date,
       clientRecordedAt: clientRecordedAt,
       authorId: authorId,
+      reason: raw.text('reason'),
     );
   }
 }

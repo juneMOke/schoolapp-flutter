@@ -32,11 +32,13 @@ abstract class StaffAttendanceRepository {
     List<StaffAttendanceRecord> records,
   );
 
-  /// Pose un geste de verrou sur [periodStart] (le jour, ou le 1er du mois).
+  /// Pose un geste de verrou sur [periodStart] (le jour, ou le 1er du mois),
+  /// avec son motif quand il en exige un (`REOPEN_MONTH`).
   Future<Either<Failure, Unit>> recordGesture(
     StaffAttendanceGesture gesture,
-    String periodStart,
-  );
+    String periodStart, {
+    String? reason,
+  });
 
   Future<Either<Failure, Unit>> saveSettings(StaffAttendanceSettings settings);
 

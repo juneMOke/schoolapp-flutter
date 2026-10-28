@@ -11783,7 +11783,7 @@
   "hrPresenceRecapClosedBy": "le {when} par {by}",
   "hrPresenceRecapDaysWorked": "{count, plural, =0{aucun jour presté} =1{1 jour presté} other{{count} jours prestés}}",
   "hrPresenceRecapLegend": "NJ = non justifiée · J = justifiée · une ligne ouvre la fiche individuelle",
-  "staffAttendanceCloseIrreversible": "Un mois clôturé ne se rouvre pas : la paie validée en dépend.",
+  "staffAttendanceCloseIrreversible": "Seule la direction rouvre un mois clôturé, tant que sa paie n'est pas validée.",
   "hrPresenceNoYearTitle": "Aucune année scolaire en cours",
   "hrPresenceNoYearMessage": "L'école est entre deux années : la vue annuelle reviendra à l'ouverture de la prochaine.",
   "hrPresenceRecapCloseRefused": "La dernière clôture de ce mois a été refusée par le serveur : vérifiez le mois, puis recommencez.",
@@ -12138,5 +12138,15 @@
   "hrPresenceRecapLates": "{count, plural, =1{1 retard · {minutes} min} other{{count} retards · {minutes} min}}",
   "@hrPresenceRecapLates": {"placeholders": {"count": {"type": "int"}, "minutes": {"type": "int"}}},
   "hrPresenceRecapTotal": "{count, plural, =1{Total · 1 agent} other{Total · {count} agents}}",
-  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}}
+  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}},
+  "staffAttendanceToastMonthReopened": "{month} rouvert",
+  "@staffAttendanceToastMonthReopened": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopen": "Rouvrir le mois",
+  "hrPresenceRecapReopenTitle": "Rouvrir {month} ?",
+  "@hrPresenceRecapReopenTitle": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopenCancel": "Annuler",
+  "hrPresenceRecapReopenReason": "Motif de la réouverture",
+  "hrPresenceRecapReopenReasonRequired": "Le motif est obligatoire.",
+  "hrPresenceRecapReopenHelper": "Consigné avec le geste. Les jours validés le restent : rouvrez le jour à corriger, puis reclôturez. La fiche de présence du mois est annulée.",
+  "hrPresenceRecapReopenedOnTablet": "Réouverture enregistrée sur la tablette, en attente d'envoi"
 }

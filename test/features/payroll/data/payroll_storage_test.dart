@@ -289,4 +289,26 @@ void main() {
     expect(summary.of('m-9').workedMinutes, 0);
     expect(jsonEncode(summary.agents.keys.toList()), '["m-2"]');
   });
+
+  test(
+    'un mois rouvert redescend sans clôture : son résumé s\'efface',
+    () async {
+      final dao = AttendanceSummaryDao(db);
+      Future<void> pull(Map<String, Object?> raw) => dao.applyPulled(
+        [AttendanceSummaryDto.tryParse(raw)!],
+        schoolId: _school,
+        nowMs: 1,
+      );
+      await pull({
+        'month': '2026-10',
+        'closedAt': '2026-10-31T15:00:00Z',
+        'agents': [
+          {'staffMemberId': 'm-2', 'unjustifiedAbsences': 2},
+        ],
+      });
+      await pull({'month': '2026-10', 'closedAt': null, 'agents': []});
+
+      expect(await dao.forSchool(_school), isEmpty);
+    },
+  );
 }

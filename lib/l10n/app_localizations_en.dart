@@ -19416,7 +19416,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffAttendanceCloseIrreversible =>
-      'A closed month cannot be reopened: validated pay depends on it.';
+      'Only the management can reopen a closed month, as long as its pay is not validated.';
 
   @override
   String get hrPresenceNoYearTitle => 'No current school year';
@@ -20668,4 +20668,34 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String staffAttendanceToastMonthReopened(String month) {
+    return '$month reopened';
+  }
+
+  @override
+  String get hrPresenceRecapReopen => 'Reopen the month';
+
+  @override
+  String hrPresenceRecapReopenTitle(String month) {
+    return 'Reopen $month?';
+  }
+
+  @override
+  String get hrPresenceRecapReopenCancel => 'Cancel';
+
+  @override
+  String get hrPresenceRecapReopenReason => 'Reason for reopening';
+
+  @override
+  String get hrPresenceRecapReopenReasonRequired => 'A reason is required.';
+
+  @override
+  String get hrPresenceRecapReopenHelper =>
+      'Recorded with the action. Validated days stay validated: reopen the day to fix, then close again. The month\'s attendance sheet is cancelled.';
+
+  @override
+  String get hrPresenceRecapReopenedOnTablet =>
+      'Reopening saved on this tablet, waiting to be sent';
 }

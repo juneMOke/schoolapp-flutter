@@ -79,8 +79,9 @@ class HrAttendanceRecapTotals extends Equatable {
 /// Le récapitulatif d'un mois pour la paie
 /// (`GET /hr/attendance-stats/recap?month=`).
 ///
-/// La clôture n'est qu'un verrou : rien n'est transmis, la Paie relit les
-/// pointages réels (E4). Un mois clos ne se rouvre pas (E6).
+/// La clôture n'est qu'un verrou : rien n'est transmis, la Paie lit le
+/// résumé du mois clos (E4). La direction peut rouvrir un mois clos tant que
+/// sa paie n'est pas validée.
 class HrAttendanceRecap extends Equatable {
   /// `AAAA-MM`.
   final String month;
@@ -97,6 +98,10 @@ class HrAttendanceRecap extends Equatable {
   /// Mois fini et compte autorisé à clore (`hr.attendance.manage`).
   final bool closable;
 
+  /// Le geste `REOPEN_MONTH` serait accepté : mois clos, de l'année en
+  /// cours, paie pas validée, compte autorisé (`hr.attendance.reopen`).
+  final bool reopenable;
+
   /// Jours-agent attendus et non pointés.
   final int unscored;
   final HrAttendanceRecapTotals totals;
@@ -110,6 +115,7 @@ class HrAttendanceRecap extends Equatable {
     this.closedAt,
     this.closedBy,
     required this.closable,
+    this.reopenable = false,
     required this.unscored,
     required this.totals,
     required this.staff,
@@ -124,6 +130,7 @@ class HrAttendanceRecap extends Equatable {
     closedAt,
     closedBy,
     closable,
+    reopenable,
     unscored,
     totals,
     staff,

@@ -18,6 +18,8 @@ abstract final class HrAttendanceRecapModel {
       closedAt: json['closedAt'] as String?,
       closedBy: json['closedBy'] as String?,
       closable: json['closable'] as bool,
+      // Absent d'un serveur d'avant la réouverture : jamais rouvrable.
+      reopenable: json['reopenable'] as bool? ?? false,
       unscored: HrAttendanceJson.count(json, 'unscored'),
       totals: HrAttendanceRecapTotals(
         presenceRatePct: HrAttendanceJson.rate(totals, 'presenceRatePct'),

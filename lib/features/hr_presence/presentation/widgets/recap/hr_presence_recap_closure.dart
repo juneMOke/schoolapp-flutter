@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
-import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_warning.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
@@ -14,22 +12,26 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_state.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_closed.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La clôture du mois (spec §14, revue E2, E4–E6) : un verrou, rien n'est
-/// transmis — la Paie relit les pointages réels. Seule la direction clôt
-/// (`hr.attendance.manage`), un mois fini seulement, et sans retour.
+/// transmis — la Paie lit le résumé du mois clos. Seule la direction clôt
+/// (`hr.attendance.manage`), un mois fini seulement ; elle seule le rouvre
+/// (`hr.attendance.reopen`), tant que sa paie n'est pas validée.
 ///
 /// Ouvert, le mois tient en une carte : ce qui manque en une ligne, et le
 /// bouton à côté.
 class HrPresenceRecapClosure extends StatelessWidget {
   final HrPresenceRecapState state;
   final VoidCallback onClose;
+  final VoidCallback onReopen;
 
   const HrPresenceRecapClosure({
     super.key,
     required this.state,
     required this.onClose,
+    required this.onReopen,
   });
 
   @override
@@ -37,46 +39,15 @@ class HrPresenceRecapClosure extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final recap = state.recap!;
     final local = state.localLock;
-    if (recap.closed) {
-      final when = PresenceLabels.moment(
-        MaterialLocalizations.of(context),
-        recap.closedAt,
-      );
-      final by = recap.closedBy;
-      return PresenceWarning(
-        icon: Icons.lock_outline,
-        tone: PresenceStatus.present,
-        message: [
-          l10n.staffAttendanceMonthClosedBanner,
-          if (when != null && by != null)
-            l10n.hrPresenceRecapClosedBy(when, by)
-          else
-            ?when,
-          l10n.staffAttendanceCloseIrreversible,
-        ].join(' · '),
-      );
+    // Un geste posé ici et pas encore reçu : le serveur ne le voit pas encore.
+    if (local != null && local.syncState == RecordSyncState.pending) {
+      return HrPresenceRecapPendingLock(lock: local);
     }
-    if (local != null && local.locked) {
-      // Posée ici, pas encore reçue : le serveur ne la voit pas encore.
-      return EteeloPanelCard(
-        child: Wrap(
-          spacing: AppSpacing.md,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            const Icon(
-              Icons.lock_clock_outlined,
-              color: AppColors.textSecondary,
-            ),
-            Text(
-              l10n.hrPresenceRecapClosedOnTablet,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-            RecordSyncPill(state: local.syncState),
-          ],
-        ),
+    if (recap.closed || (local?.locked ?? false)) {
+      return HrPresenceRecapClosed(
+        recap: recap,
+        reopening: state.reopening,
+        onReopen: onReopen,
       );
     }
     final lastDay = SchoolDayCalendar.daysOf(recap.month).last;
