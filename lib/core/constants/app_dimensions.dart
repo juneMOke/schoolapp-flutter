@@ -910,7 +910,7 @@ class AppDimensions {
   static const payrollCircuitDot = 30.0;
 
   /// Le tableau « Ce que chaque salarié perçoit » (spec TB 2 : min 860).
-  static const payrollDashStaffMinWidth = 960.0;
+  static const payrollDashStaffMinWidth = 960.0 + minTouchTarget;
   static const payrollCircuitLink = 14.0;
 
   /// Le liseré tricolore sous le bandeau de paie.

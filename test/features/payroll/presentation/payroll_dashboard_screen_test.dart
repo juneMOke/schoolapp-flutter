@@ -104,6 +104,10 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('MAYALA Ruth'), findsWidgets);
+    // L'œil du livre au bout de chaque ligne, à 48 dp au moins.
+    final eyes = find.byTooltip("Ouvrir la fiche de l'agent");
+    expect(eyes, findsNWidgets(2));
+    expect(tester.getSize(eyes.first).height, greaterThanOrEqualTo(48));
   });
 
   testWidgets('le mois du bandeau ouvre le sélecteur, qui ouvre un mois', (

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_cells.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Ce que chaque salarié perçoit » : prévu, retenues, net du mois,
@@ -38,6 +39,8 @@ class PayrollDashboardStaffTable extends StatelessWidget {
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColStatus,
+    // L'œil seul : pas de crayon ici, le tableau de bord ne saisit rien.
+    AppDimensions.minTouchTarget,
   ];
 
   @override
@@ -63,6 +66,7 @@ class PayrollDashboardStaffTable extends StatelessWidget {
         l10n.payrollDashColReceived,
         l10n.payrollDashColRemaining,
         l10n.payrollAdvanceColStatus,
+        '',
       ],
       rowCount: rows.length,
       row: (context, index) => _row(context, rows[index]),
@@ -109,6 +113,14 @@ class PayrollDashboardStaffTable extends StatelessWidget {
         _figure(money(row.receivedInCents)),
         _figure(money(row.remainingInCents), strong: true),
         _Status(status: row.status),
+        // L'œil du livre : la ligne entière ouvre déjà la fiche, il le dit.
+        if (onOpen == null)
+          const SizedBox.shrink()
+        else
+          PayrollLedgerOpenCell(
+            onOpen: () => onOpen(row.staffMemberId),
+            onEdit: null,
+          ),
       ],
     );
   }
@@ -134,6 +146,7 @@ class PayrollDashboardStaffTable extends StatelessWidget {
         total('+ ${money(totals.arrearsInCents)}'),
         total(money(totals.receivedInCents)),
         total(money(totals.remainingInCents)),
+        const SizedBox.shrink(),
         const SizedBox.shrink(),
       ],
     );
