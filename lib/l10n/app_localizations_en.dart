@@ -19688,7 +19688,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count employees repaying',
       one: '1 employee repaying',
     );
-    return '$_temp0 · $due still due';
+    return '$_temp0 · $due still owed to the school';
   }
 
   @override
@@ -19704,8 +19704,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollDashAdvancesEmpty => 'No loan or advance ongoing';
 
   @override
-  String payrollDashRemainingOf(String remaining, String amount) {
-    return '$remaining left of $amount';
+  String payrollDashLeftOf(String amount) {
+    return 'left of $amount';
+  }
+
+  @override
+  String get payrollDashNothingThisMonth => 'nothing this month';
+
+  @override
+  String payrollDashGrantedOn(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'on $dateString';
+  }
+
+  @override
+  String payrollDashArrearsSubtitle(String due, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count employees',
+      one: '1 employee',
+    );
+    return '$due owed to $_temp0 on validated payrolls';
   }
 
   @override

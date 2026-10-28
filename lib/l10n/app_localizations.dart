@@ -30408,7 +30408,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollDashAdvancesSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 employee repaying} other{{count} employees repaying}} · {due} still due'**
+  /// **'{count, plural, =1{1 employee repaying} other{{count} employees repaying}} · {due} still owed to the school'**
   String payrollDashAdvancesSubtitle(int count, String due);
 
   /// No description provided for @payrollDashManage.
@@ -30435,11 +30435,29 @@ abstract class AppLocalizations {
   /// **'No loan or advance ongoing'**
   String get payrollDashAdvancesEmpty;
 
-  /// No description provided for @payrollDashRemainingOf.
+  /// No description provided for @payrollDashLeftOf.
   ///
   /// In en, this message translates to:
-  /// **'{remaining} left of {amount}'**
-  String payrollDashRemainingOf(String remaining, String amount);
+  /// **'left of {amount}'**
+  String payrollDashLeftOf(String amount);
+
+  /// No description provided for @payrollDashNothingThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing this month'**
+  String get payrollDashNothingThisMonth;
+
+  /// No description provided for @payrollDashGrantedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String payrollDashGrantedOn(DateTime date);
+
+  /// No description provided for @payrollDashArrearsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{due} owed to {count, plural, =1{1 employee} other{{count} employees}} on validated payrolls'**
+  String payrollDashArrearsSubtitle(String due, int count);
 
   /// No description provided for @payrollDashTakenThisMonth.
   ///
