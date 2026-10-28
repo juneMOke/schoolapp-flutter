@@ -58,9 +58,14 @@ class TicketBatchOutcome {
 /// Pas de repli PDF ici, contrairement au ticket de l'écran de succès : le
 /// parent n'est plus au guichet, le papier est celui de la pile du promoteur,
 /// et il attend sans dommage que l'imprimante revienne.
+///
+/// [choose] et [send] sont les deux bouts matériels du lot — le sélecteur et
+/// le canal Bluetooth ; les tests y branchent les leurs.
 Future<TicketBatchOutcome> printTicketBatch(
   BuildContext context, {
   required List<TicketPrintJob> jobs,
+  ThermalPrinterChooser choose = chooseThermalPrinter,
+  ThermalBytesSender send = sendThermalBytes,
 }) async {
   if (jobs.isEmpty) return const TicketBatchOutcome();
   final l10n = AppLocalizations.of(context)!;
@@ -73,7 +78,7 @@ Future<TicketBatchOutcome> printTicketBatch(
   final copies = await getIt<ResolveTicketCopiesUseCase>()();
   if (!context.mounted) return const TicketBatchOutcome(cancelled: true);
 
-  final chosen = await chooseThermalPrinter(context, initialCopies: copies);
+  final chosen = await choose(context, initialCopies: copies);
   ThermalPrintChoice? choice;
   ThermalPrinterProblem? refused;
   chosen.fold((outcome) {
@@ -99,7 +104,7 @@ Future<TicketBatchOutcome> printTicketBatch(
       skipped++;
       continue;
     }
-    final problem = await sendThermalBytes(bytes, printer);
+    final problem = await send(bytes, printer);
     if (problem != null) {
       await recordProblem(job, problem.name);
       return TicketBatchOutcome(

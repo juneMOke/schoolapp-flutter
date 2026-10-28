@@ -43,6 +43,16 @@ void main() {
 
   Future<void> wait(int ms) => Future<void>.delayed(Duration(milliseconds: ms));
 
+  /// Attend la phase plutôt qu'un délai fixe : sous la charge de la suite
+  /// complète, un minuteur de 10 ms peut tarder bien au-delà de 25 ms. Le
+  /// cubit compte ses tics, il n'abandonne donc pas plus tôt pour autant.
+  Future<void> reach(ReceiptNumberPhase phase) async {
+    if (watch.state.phase == phase) return;
+    await watch.stream
+        .firstWhere((s) => s.phase == phase)
+        .timeout(const Duration(seconds: 5));
+  }
+
   test('déjà scellé : le numéro tout de suite, sans relecture', () async {
     receipts.reference = _sealed;
 
@@ -61,9 +71,9 @@ void main() {
       expect(watch.state.phase, ReceiptNumberPhase.waiting);
 
       receipts.reference = _sealed;
-      await wait(25);
+      await reach(ReceiptNumberPhase.numbered);
 
-      expect(watch.state.phase, ReceiptNumberPhase.numbered);
+      expect(watch.state.number, 'CF-RC-2627-000802');
       final reads = receipts.reads;
       await wait(40);
       expect(receipts.reads, reads);
@@ -72,9 +82,8 @@ void main() {
 
   test('sans accusé dans le délai : renvoi vers la file', () async {
     await watch.watch('p-1');
-    await wait(80);
+    await reach(ReceiptNumberPhase.deferred);
 
-    expect(watch.state.phase, ReceiptNumberPhase.deferred);
     expect(watch.state.number, isNull);
     final reads = receipts.reads;
     await wait(40);

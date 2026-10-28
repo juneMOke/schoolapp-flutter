@@ -75,6 +75,20 @@ Future<ThermalTicketOutcome> printThermalBytes(
   });
 }
 
+/// La forme de [chooseThermalPrinter], pour qui doit la remplacer.
+typedef ThermalPrinterChooser =
+    Future<Either<ThermalTicketOutcome, ThermalPrintChoice>> Function(
+      BuildContext context, {
+      int initialCopies,
+    });
+
+/// La forme de [sendThermalBytes], pour qui doit la remplacer.
+typedef ThermalBytesSender =
+    Future<ThermalPrinterProblem?> Function(
+      Uint8List bytes,
+      ThermalPrintChoice choice,
+    );
+
 /// Les trois questions avant tout envoi — permission, liste, choix de
 /// l'imprimante et du nombre d'exemplaires —, sans rien envoyer.
 ///
