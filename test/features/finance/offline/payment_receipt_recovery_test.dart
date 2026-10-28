@@ -201,14 +201,101 @@ void main() {
       });
     }
 
-    test('403 : refusé, la marque reste visible', () async {
+    // Revue : la marque n'a pas d'auteur ; un 403 figé en SYNC_ERROR
+    // interdirait à un collègue qui détient le droit de la reprendre.
+    test('403 : se rejoue, un collègue autorisé la reprendra', () async {
       editique.result = const Left(UnauthorizedFailure());
 
       final result = await handler.dispatch(
         entryOf((await recoveries()).single),
       );
 
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+    });
+
+    test('un autre refus nommé : la marque reste visible', () async {
+      editique.result = const Left(
+        ApiValidationFailure(code: ApiErrorCode.validation),
+      );
+
+      final result = await handler.dispatch(
+        entryOf((await recoveries()).single),
+      );
+
       expect(result.outcome, OutboxDispatchOutcome.failed);
+    });
+
+    // Revue : le numéro ne vit que dans `Content-Disposition`.
+    test('reçu rendu sans numéro lisible : la marque reste', () async {
+      editique.result = Right(
+        EditiqueDocument(
+          type: EditiqueDocumentType.paymentReceipt,
+          bytes: Uint8List(0),
+          fileName: 'recu.pdf',
+          documentId: 'doc-1',
+        ),
+      );
+
+      final result = await handler.dispatch(
+        entryOf((await recoveries()).single),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+      expect((await db.query('payments')).single['receipt_id'], 'doc-1');
+    });
+
+    Future<void> owesCancellation() => db.insert('ticket_print_jobs', {
+      'id': 'j-cancel',
+      'payment_id': 'pay1',
+      'kind': 'cancellation',
+      'created_at': 3000,
+    });
+
+    test(
+      'annulé sans reçu jamais scellé : plus de ticket d annulation',
+      () async {
+        await owesCancellation();
+        editique.result = const Left(
+          ApiValidationFailure(
+            code: ApiErrorCode.businessRule,
+            detailCode: FinanceErrorCodes.paymentCancelled,
+          ),
+        );
+
+        await handler.dispatch(entryOf((await recoveries()).single));
+
+        expect(await db.query('ticket_print_jobs'), isEmpty);
+      },
+    );
+
+    test('annulé, numéro pourtant connu ici : le ticket reste dû', () async {
+      await owesCancellation();
+      await db.update('generated_documents', {
+        'number': 'CF-RC-2627-000802',
+        'status': 'DEFINITIVE',
+      });
+      editique.result = const Left(
+        ApiValidationFailure(
+          code: ApiErrorCode.businessRule,
+          detailCode: FinanceErrorCodes.paymentCancelled,
+        ),
+      );
+
+      await handler.dispatch(entryOf((await recoveries()).single));
+
+      expect(await db.query('ticket_print_jobs'), hasLength(1));
+    });
+
+    test('Relancer ne touche pas une marque acquittée', () async {
+      await db.update(
+        'outbox',
+        {'status': 'ACKED'},
+        where: 'aggregate_type = ?',
+        whereArgs: [ReceiptRecoveryDao.aggregateType],
+      );
+
+      expect(await ReceiptRecoveryDao(db).retryNow('pay1'), isFalse);
+      expect((await recoveries()).single['status'], 'ACKED');
     });
 
     test("d'une autre école : attend sa session", () async {

@@ -384,6 +384,22 @@ void main() {
       expect(await jobs(), isEmpty);
     });
 
+    // Revue : sans cela, l'annulation d'un versement au reçu manquant attendait
+    // un numéro que personne n'allait chercher.
+    test('reçu manquant : l annulation le dit aussi, et se relance', () async {
+      final payment = await collect(15000);
+      await ReceiptRecoveryDao.markMissingIn(
+        db,
+        paymentId: payment,
+        nowMs: 3000,
+      );
+      await corrections.correctPayment(cancelOf(payment));
+
+      final job = (await jobs()).single;
+      expect(job.kind, TicketPrintJobKind.cancellation);
+      expect(job.state, TicketPrintJobState.receiptMissing);
+    });
+
     test('un ticket déjà sorti a quand même son ticket d annulation', () async {
       final payment = await collect(15000);
       receipts.sealed[payment] = 'CF-RC-2627-000802';

@@ -8738,6 +8738,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketsToPrintRetryReceipt => 'Relancer';
 
   @override
+  String get ticketsToPrintRetryPending =>
+      'Reçu pas encore récupéré : la tablette réessaiera à la prochaine synchronisation.';
+
+  @override
   String ticketsToPrintLastProblem(String problem) {
     return 'Dernier échec : $problem';
   }

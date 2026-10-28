@@ -5813,6 +5813,7 @@
   "ticketsToPrintUnknownStudent": "Élève pas encore synchronisé",
   "ticketsToPrintReceiptMissing": "Reçu non scellé par le serveur : la tablette le redemande.",
   "ticketsToPrintRetryReceipt": "Relancer",
+  "ticketsToPrintRetryPending": "Reçu pas encore récupéré : la tablette réessaiera à la prochaine synchronisation.",
   "ticketsToPrintLastProblem": "Dernier échec : {problem}",
   "@ticketsToPrintLastProblem": {
     "placeholders": {

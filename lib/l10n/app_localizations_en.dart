@@ -8663,6 +8663,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketsToPrintRetryReceipt => 'Retry';
 
   @override
+  String get ticketsToPrintRetryPending =>
+      'Receipt not recovered yet: the tablet will try again at the next sync.';
+
+  @override
   String ticketsToPrintLastProblem(String problem) {
     return 'Last failure: $problem';
   }

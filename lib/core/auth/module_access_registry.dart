@@ -544,7 +544,7 @@ const ModuleAccess kTicketReceiptRetryAccess = ModuleAccess([
 /// Pages imbriquées SOUS un sous-menu, et plus fermées que lui : leur segment
 /// littéral, n'importe où après le sous-menu, ajoute son exigence à la sienne.
 const Map<String, ModuleAccess> kNestedRouteAccess = {
-  'tickets-a-imprimer': kTicketPrintAccess,
+  MenuConstants.ticketsToPrintSegment: kTicketPrintAccess,
 };
 
 /// Vrai si [location] est atteignable avec [permissions].

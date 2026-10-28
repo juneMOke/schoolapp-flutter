@@ -124,9 +124,24 @@ void main() {
 
   testWidgets('affiché avec editique.read', (tester) async {
     queue.jobs = [_job('1')];
-    await open(tester, permissions: const ['editique.read']);
+    await open(
+      tester,
+      permissions: const ['finance.payment.read', 'editique.read'],
+    );
 
     expect(find.text('1 ticket prêt à imprimer'), findsOneWidget);
+  });
+
+  // Revue : le tableau de bord se voit avec `finance.stats.read` seul ; le
+  // bandeau ne doit pas mener à une page que la garde refuse.
+  testWidgets('masqué sans le sous-menu Facturations', (tester) async {
+    queue.jobs = [_job('1')];
+    await open(
+      tester,
+      permissions: const ['finance.stats.read', 'editique.read'],
+    );
+
+    expect(find.textContaining('prêt'), findsNothing);
   });
 
   testAtReferenceFormats('tient sur tous les formats', (tester, _) async {

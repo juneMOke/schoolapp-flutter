@@ -94,7 +94,10 @@ class TicketPrintQueueRepositoryImpl implements TicketPrintQueueRepository {
     final named = (student?.fullName.trim() ?? '').isNotEmpty;
     // Un ticket qui ne nomme personne n'atteste rien (ADR-015 F1) : il attend
     // que l'élève descende, comme il attendrait son numéro.
-    final state = !numbered && !cancellation && row.receiptMissing
+    // Le reçu manquant bloque aussi l'annulation : elle cite son numéro, et
+    // « Relancer » doit pouvoir aller le chercher avant que le serveur
+    // n'enregistre l'annulation.
+    final state = !numbered && row.receiptMissing
         ? TicketPrintJobState.receiptMissing
         : !numbered || !settled
         ? TicketPrintJobState.awaitingNumber

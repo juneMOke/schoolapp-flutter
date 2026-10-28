@@ -12,6 +12,10 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/ticket_print_queue_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_queue_use_cases.dart';
@@ -23,6 +27,9 @@ import '../../../../test_helpers/reference_formats.dart';
 
 class _MockSyncStatusCubit extends MockCubit<SyncStatusState>
     implements SyncStatusCubit {}
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
 
 class _Queue implements TicketPrintQueueRepository {
   Either<Failure, List<TicketPrintJob>> result = const Right([]);
@@ -99,17 +106,26 @@ void main() {
 
   tearDown(() => getIt.reset());
 
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {List<String>? permissions}) async {
+    const app = MaterialApp(
+      locale: Locale('fr'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: TicketsToPrintPage(),
+    );
+    Widget child = app;
+    if (permissions != null) {
+      final auth = _MockAuthBloc();
+      final state = AuthState(
+        status: AuthStatus.authenticated,
+        permissions: permissions,
+      );
+      when(() => auth.state).thenReturn(state);
+      whenListen(auth, Stream<AuthState>.value(state), initialState: state);
+      child = BlocProvider<AuthBloc>.value(value: auth, child: app);
+    }
     await tester.pumpWidget(
-      BlocProvider<SyncStatusCubit>.value(
-        value: sync,
-        child: const MaterialApp(
-          locale: Locale('fr'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: TicketsToPrintPage(),
-        ),
-      ),
+      BlocProvider<SyncStatusCubit>.value(value: sync, child: child),
     );
     await tester.pumpAndSettle();
   }
@@ -154,6 +170,46 @@ void main() {
 
     expect(queue.retried, ['4']);
     expect(find.text('Prêts à imprimer (1)'), findsOneWidget);
+  });
+
+  // Revue : un bouton qui ne change rien ne doit pas se taire.
+  testWidgets('Relancer sans effet : la page le dit', (tester) async {
+    queue.result = Right([_job('4', receiptMissing: true)]);
+    await open(tester);
+
+    await tester.tap(find.text('Relancer'));
+    await tester.pumpAndSettle();
+
+    expect(queue.retried, ['4']);
+    expect(find.textContaining('Reçu pas encore récupéré'), findsOneWidget);
+  });
+
+  testWidgets('Relancer exige editique.write', (tester) async {
+    queue.result = Right([_job('4', receiptMissing: true)]);
+    await open(
+      tester,
+      permissions: const ['finance.payment.read', 'editique.read'],
+    );
+
+    expect(
+      find.text('Reçu non scellé par le serveur : la tablette le redemande.'),
+      findsOneWidget,
+    );
+    expect(find.text('Relancer'), findsNothing);
+  });
+
+  testWidgets('avec editique.write, Relancer est offert', (tester) async {
+    queue.result = Right([_job('4', receiptMissing: true)]);
+    await open(
+      tester,
+      permissions: const [
+        'finance.payment.read',
+        'editique.read',
+        'editique.write',
+      ],
+    );
+
+    expect(find.text('Relancer'), findsOneWidget);
   });
 
   testWidgets('les prêts se cochent, et le bouton compte la sélection', (

@@ -4,6 +4,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/documents/data/local/ticket_print_job_writer.dart';
 
 /// Le reçu qu'un accusé n'a pas rapporté (continuité des tickets RC).
 ///
@@ -136,9 +137,34 @@ class ReceiptRecoveryDao {
         'next_attempt_at': 0,
         'last_error': null,
       },
-      where: 'aggregate_type = ? AND aggregate_id = ?',
-      whereArgs: [aggregateType, paymentId],
+      // Une marque déjà acquittée a abouti : la relancer l'emporterait sur
+      // l'accusé en vol.
+      where: 'aggregate_type = ? AND aggregate_id = ? AND status <> ?',
+      whereArgs: [aggregateType, paymentId, OutboxStatus.acked.dbValue],
     );
     return changed > 0;
   }
+
+  /// Le versement a été annulé sans que son reçu soit jamais scellé : son
+  /// ticket d'annulation citerait un numéro qui n'existe pas. Il ne doit plus
+  /// rien — sauf si un numéro définitif est connu ici malgré tout.
+  Future<void> dropUnnumberedCancellationTicket(String paymentId) =>
+      _db.rawDelete(
+        '''
+        DELETE FROM ${TicketPrintJobWriter.table}
+         WHERE payment_id = ?
+           AND kind = '${TicketPrintJobWriter.cancellation}'
+           AND printed_at IS NULL
+           AND NOT EXISTS (
+             SELECT 1 FROM generated_documents d
+              WHERE d.payment_id = ? AND d.doc_domain = 'PAYMENT'
+                AND d.doc_type = 'RC' AND d.status = 'DEFINITIVE'
+           )
+           AND NOT EXISTS (
+             SELECT 1 FROM payments p
+              WHERE p.id = ? AND p.receipt_id IS NOT NULL
+           )
+        ''',
+        [paymentId, paymentId, paymentId],
+      );
 }

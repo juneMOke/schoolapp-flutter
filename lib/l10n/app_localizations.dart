@@ -13908,6 +13908,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get ticketsToPrintRetryReceipt;
 
+  /// No description provided for @ticketsToPrintRetryPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt not recovered yet: the tablet will try again at the next sync.'**
+  String get ticketsToPrintRetryPending;
+
   /// No description provided for @ticketsToPrintLastProblem.
   ///
   /// In en, this message translates to:

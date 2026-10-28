@@ -57,13 +57,21 @@ class TicketPrintQueueCubit extends Cubit<TicketPrintQueueState> {
 
   /// « Relancer » le reçu d'un ticket qui l'attend, puis relire la file : le
   /// ticket devient prêt si le reçu est revenu, reste en attente sinon.
-  Future<void> retryReceipt(TicketPrintJob job) async {
-    if (state.retrying.contains(job.id)) return;
+  ///
+  /// Rend `true` quand le reçu n'est plus manquant. `false` couvre tout le
+  /// reste — hors ligne, synchronisation déjà en vol, refus, écriture ratée —
+  /// et la page le dit : un bouton qui ne change rien ne doit pas se taire.
+  Future<bool> retryReceipt(TicketPrintJob job) async {
+    if (state.retrying.contains(job.id)) return false;
     emit(state.copyWith(retrying: {...state.retrying, job.id}));
     try {
-      await _retry(job);
-      if (isClosed) return;
+      final queued = await _retry(job);
+      if (isClosed) return false;
       await load();
+      final still = state.jobs.any(
+        (j) => j.id == job.id && j.state == TicketPrintJobState.receiptMissing,
+      );
+      return queued.isRight() && !still;
     } finally {
       if (!isClosed) {
         emit(state.copyWith(retrying: {...state.retrying}..remove(job.id)));

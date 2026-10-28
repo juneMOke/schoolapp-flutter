@@ -444,7 +444,7 @@ class AppRouter {
           routes: [
             StudentRecordRoutes.facturationDetail(),
             GoRoute(
-              path: 'tickets-a-imprimer',
+              path: MenuConstants.ticketsToPrintSegment,
               builder: (context, state) => const TicketsToPrintPage(),
             ),
           ],

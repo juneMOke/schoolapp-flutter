@@ -61,7 +61,7 @@ class PaymentReceiptRecoveryOutboxHandler implements OutboxSyncHandler {
       academicYearId: scope.academicYearId,
     );
     return result.fold(
-      _classify,
+      (failure) => _refused(paymentId, failure),
       (document) => _recovered(paymentId, document),
     );
   }
@@ -75,23 +75,37 @@ class PaymentReceiptRecoveryOutboxHandler implements OutboxSyncHandler {
       documentId: document.documentId,
       documentNumber: document.documentNumber,
     );
+    // Le numéro ne vit que dans `Content-Disposition` : sans lui, rien ne
+    // rendrait le ticket imprimable, et la marque levée le laisserait
+    // attendre pour toujours. Le rejeu rend le même reçu.
+    final number = document.documentNumber?.trim() ?? '';
+    if (number.isEmpty) {
+      return const OutboxDispatchResult.retry('Reçu rendu sans numéro lisible');
+    }
     return const OutboxDispatchResult.acked();
   }
 
-  /// Un refus nommé tranche ; tout le reste se rejoue sans risque.
-  static OutboxDispatchResult _classify(Failure failure) {
+  Future<OutboxDispatchResult> _refused(
+    String paymentId,
+    Failure failure,
+  ) async {
     final code = failure is ApiErrorDetails ? failure.detailCode : null;
-    // Annulé entre-temps : la marque n'a plus d'objet. `acked` dit ici « le
-    // serveur a tranché », comme pour un agrégat supprimé.
+    // Annulé entre-temps, sans reçu jamais scellé : la marque n'a plus
+    // d'objet, et le ticket d'annulation non plus — il citerait un numéro qui
+    // n'existe pas. `acked` dit ici « le serveur a tranché ».
     if (code == FinanceErrorCodes.paymentCancelled) {
+      await _dao.dropUnnumberedCancellationTicket(paymentId);
       return const OutboxDispatchResult.acked();
     }
     return switch (failure) {
-      // 403 (droit `editique.write` retiré), versement inconnu, autre refus :
-      // la marque reste visible, « Relancer » la fera repartir.
-      UnauthorizedFailure() || NotFoundFailure() || ValidationFailure() =>
-        OutboxDispatchResult.failed(_reasonOf(failure, code)),
-      // Réseau, 401, 409, 429, 5xx, issue inconnue : la route est idempotente.
+      // Versement inconnu, autre refus nommé : la marque reste visible, et
+      // « Relancer » la fera repartir.
+      NotFoundFailure() || ValidationFailure() => OutboxDispatchResult.failed(
+        _reasonOf(failure, code),
+      ),
+      // 403 compris : la marque n'a pas d'auteur, un collègue qui détient
+      // `editique.write` doit pouvoir la reprendre sans geste. Réseau, 401,
+      // 409, 429, 5xx, issue inconnue : la route est idempotente.
       _ => OutboxDispatchResult.retry(_reasonOf(failure, code)),
     };
   }

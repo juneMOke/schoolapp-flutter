@@ -30,15 +30,26 @@ class TicketsToPrintBanner extends StatelessWidget {
 
   const TicketsToPrintBanner({super.key, this.padding = EdgeInsets.zero});
 
-  /// Sans `editique.read`, ni bandeau ni lecture de la file : la page qu'il
-  /// ouvre est fermée, et aucun ticket n'y deviendrait imprimable.
+  /// Ni bandeau ni lecture de la file pour qui la garde refuserait la page :
+  /// sans `editique.read`, aucun ticket n'y deviendrait imprimable ; sans le
+  /// sous-menu Facturations, le bandeau du tableau de bord mènerait à un
+  /// refus. La question posée est celle du routeur, sur la même adresse.
   @override
-  Widget build(BuildContext context) => PermissionGate.access(
-    kTicketPrintAccess,
-    child: BlocProvider<TicketPrintQueueCubit>(
-      create: (_) => getIt<TicketPrintQueueCubit>()..load(),
-      child: _Banner(padding: padding),
-    ),
+  Widget build(BuildContext context) => PermissionAware(
+    builder: (context) {
+      final auth = PermissionGate.maybeBlocOf(context);
+      final allowed =
+          auth == null ||
+          canAccessLocation(
+            Uri.parse(AppRoutesNames.ticketsToPrint),
+            auth.state.permissions,
+          );
+      if (!allowed) return const SizedBox.shrink();
+      return BlocProvider<TicketPrintQueueCubit>(
+        create: (_) => getIt<TicketPrintQueueCubit>()..load(),
+        child: _Banner(padding: padding),
+      );
+    },
   );
 }
 

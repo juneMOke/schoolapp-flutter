@@ -12,6 +12,7 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_batch_print_flow.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_queue_cubit.dart';
@@ -66,6 +67,19 @@ class TicketsToPrintView extends StatelessWidget {
     ];
     if (lines.isNotEmpty) {
       messenger?.showSnackBar(SnackBar(content: Text(lines.join('\n'))));
+    }
+  }
+
+  Future<void> _retry(BuildContext context, TicketPrintJob job) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final l10n = AppLocalizations.of(context)!;
+    final recovered = await context.read<TicketPrintQueueCubit>().retryReceipt(
+      job,
+    );
+    if (!recovered) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l10n.ticketsToPrintRetryPending)),
+      );
     }
   }
 
@@ -135,7 +149,7 @@ class TicketsToPrintView extends StatelessWidget {
                   state: state,
                   onToggle: cubit.toggle,
                   onToggleAll: cubit.toggleAll,
-                  onRetry: cubit.retryReceipt,
+                  onRetry: (job) => _retry(context, job),
                 ),
               },
             ),
