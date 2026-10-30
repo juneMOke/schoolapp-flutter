@@ -1,6 +1,7 @@
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_anomaly_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/provisional_charge_dissolver.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/receipt_recovery_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_anomaly.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart';
@@ -48,7 +49,7 @@ class FinancePaymentAckDao {
       await _applyAllocationRemaps(txn, ack);
       await _applyAuthoritativeCharges(txn, ack, nowMs);
       await _sealDocuments(txn, ack);
-      await _captureReceiptId(txn, ack);
+      await _captureReceiptId(txn, ack, nowMs);
       await _recordOverpaymentAnomaly(txn, ack, nowMs);
 
       // SYNCED **seulement si** le miroir autoritaire a été intégré. C'est le
@@ -183,14 +184,24 @@ class FinancePaymentAckDao {
   /// Le serveur le renvoie depuis toujours — il était parsé puis jeté. C'est le
   /// SEUL identifiant permettant de re-télécharger un reçu définitif par
   /// `GET /editique/documents/{id}` : sans lui, la seule voie est de rejouer le
-  /// POST d'émission. `null` est un cas normal, pour la même raison que
-  /// `documents` vide : le scellement serveur est hors transaction.
+  /// POST d'émission. `null` dit que le scellement serveur a échoué (il est
+  /// hors transaction) : le reçu est alors marqué à récupérer.
   Future<void> _captureReceiptId(
     DatabaseExecutor txn,
     PaymentAggregateResponse ack,
+    int nowMs,
   ) async {
     final receiptId = ack.receiptId;
-    if (receiptId == null || receiptId.isEmpty) return;
+    if (receiptId == null || receiptId.isEmpty) {
+      // Le versement est acquis, son reçu ne l'est pas : rien ne le ramènera
+      // si la tablette ne va pas le chercher (continuité des tickets RC).
+      await ReceiptRecoveryDao.markMissingIn(
+        txn,
+        paymentId: ack.paymentId,
+        nowMs: nowMs,
+      );
+      return;
+    }
 
     await txn.update(
       'payments',

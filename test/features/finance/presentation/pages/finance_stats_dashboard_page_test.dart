@@ -26,6 +26,8 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/finance
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_rate_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/tickets_to_print_stub.dart';
+
 class MockGetFinanceTillUseCase extends Mock implements GetFinanceTillUseCase {}
 
 class MockGetTillReceiptsUseCase extends Mock
@@ -135,7 +137,11 @@ void main() {
   late MockSyncStatusCubit syncCubit;
   late MockExchangeRatesCubit ratesCubit;
 
+  // Le bandeau « Tickets à imprimer » est posé sous l'en-tête.
+  tearDown(unstubTicketsToPrint);
+
   setUp(() {
+    stubEmptyTicketsToPrint();
     mockTill = MockGetFinanceTillUseCase();
     mockReceipts = MockGetTillReceiptsUseCase();
     mockReport = MockGetTillReceiptsReportUseCase();

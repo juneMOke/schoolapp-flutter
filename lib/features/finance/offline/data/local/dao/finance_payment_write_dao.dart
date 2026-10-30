@@ -4,6 +4,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/documents/data/local/ticket_print_job_writer.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
     show GeneratedDocumentLocalModel;
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_models.dart';
@@ -117,6 +118,15 @@ class FinancePaymentWriteDao {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
+
+    // Le ticket de ce versement, dû dès maintenant et imprimable dès que son
+    // reçu aura un numéro définitif. Un encaissement comme le remplaçant d'une
+    // correction : chacun porte son propre numéro (continuité RC, lot D).
+    await TicketPrintJobWriter.enqueueReceipt(
+      txn,
+      paymentId: payment.id,
+      nowMs: payment.updatedAt,
+    );
 
     return _paymentRequest(payment, linked, tenders, authorId);
   }

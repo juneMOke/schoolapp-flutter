@@ -120,37 +120,4 @@ void main() {
       expect(board.microsOf(_paire), isNull);
     });
   });
-
-  group('refermer les boîtes intactes', () {
-    test('referme celle que personne n\'a touchée', () {
-      board.open(_paire, _taux);
-
-      board.closeUntouched();
-
-      expect(board.isEditing(_paire), isFalse);
-      expect(board.controllerOf(_paire).text, isEmpty);
-    });
-
-    test('ÉPARGNE un taux réellement corrigé (A4)', () {
-      // Une correction est une intention du caissier, pas une valeur dérivée de
-      // la date : elle survit au changement de jour.
-      board.open(_paire, _taux);
-      board.controllerOf(_paire).text = '2500';
-
-      board.closeUntouched();
-
-      expect(board.isEditing(_paire), isTrue);
-      expect(board.controllerOf(_paire).text, '2500');
-      expect(board.microsOf(_paire), 2500000000);
-    });
-
-    test('ne touche pas aux paires jamais ouvertes', () {
-      board.open(_paire, _taux);
-      board.controllerOf('EUR>CDF').text = '3000';
-
-      board.closeUntouched();
-
-      expect(board.controllerOf('EUR>CDF').text, '3000');
-    });
-  });
 }

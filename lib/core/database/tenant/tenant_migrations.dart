@@ -16,6 +16,7 @@ import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
+import 'package:school_app_flutter/core/database/schema/ticket_print_jobs_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 part 'tenant_migrations_evaluation.dart';
@@ -112,6 +113,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(69)) {
     await _payrollWideSettings(db);
   }
+  if (upTo(70)) {
+    await _createTables(db, ticketPrintJobsTables);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -203,7 +207,8 @@ Future<void> _paymentCorrections(DatabaseExecutor db) async {
 }
 
 /// v55 — le fichier du personnel ; v56 — le Pointage du personnel ; v57 — la
-/// Paie du personnel ; v59 — la photo de l'élève. Tables
+/// Paie du personnel ; v59 — la photo de l'élève ; v70 — les tickets à
+/// imprimer (continuité des tickets RC). Tables
 /// neuves, création pure.
 ///
 /// ⚠️ Gardes `IF NOT EXISTS`, même raison qu'à la v54 : une base héritée

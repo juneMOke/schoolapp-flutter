@@ -71,6 +71,11 @@ abstract final class FinanceErrorCodes {
   /// back-office). **Terminal** : la première correction a gagné (D4).
   static const String paymentAlreadyCorrected = 'PAYMENT_ALREADY_CORRECTED';
 
+  /// Le reçu d'un versement annulé entre-temps ne se scelle plus
+  /// (`POST /finance/payments/{id}/receipt`). **Terminal, et sans faute** :
+  /// le rattrapage n'a plus d'objet, son ticket non plus.
+  static const String paymentCancelled = 'PAYMENT_CANCELLED';
+
   /// L'élève du remplaçant n'est pas inscrit dans l'année du versement.
   /// **Terminal** — à la différence de [unknownFeeCode], auquel il retombait
   /// avant que le back ne le nomme (R4).

@@ -7,11 +7,11 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/payment_cancel_done_view.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/payment_correction_reason_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -125,7 +125,13 @@ class _FacturationPaymentCancelDialogState
           buildWhen: (a, b) => a != b,
           builder: (context, state) =>
               state.phase == PaymentCorrectionPhase.succeeded
-              ? _Done(onClose: () => Navigator.of(context).pop(true))
+              ? PaymentCancelDoneView(
+                  paymentId: widget.paymentId,
+                  // Une origine jamais acceptée par le serveur (R2) n'a pas de
+                  // numéro : aucun papier n'est dû.
+                  ticketOwed: !(state.outcome?.localOnly ?? false),
+                  onClose: () => Navigator.of(context).pop(true),
+                )
               : _form(context, l10n, state),
         ),
       ),
@@ -221,48 +227,6 @@ class _StruckRecap extends StatelessWidget {
         children: [
           Expanded(child: Text(date, style: struck)),
           Text(amount, style: struck),
-        ],
-      ),
-    );
-  }
-}
-
-/// Le résultat : toujours un succès local. L'incertitude porte sur la
-/// synchronisation, et elle se dit par une note, jamais par un échec.
-class _Done extends StatelessWidget {
-  final VoidCallback onClose;
-
-  const _Done({required this.onClose});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(AppDimensions.spacingL),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const EteeloResultMedallion(kind: EteeloResultKind.success),
-          const SizedBox(height: AppDimensions.spacingM),
-          Text(
-            l10n.paymentCorrectionCancelledDone,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodyStrong.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingS),
-          Text(
-            l10n.paymentCorrectionSavedOnTablet,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: AppDimensions.spacingL),
-          FilledButton(
-            key: const ValueKey('payment-correction-done-close'),
-            onPressed: onClose,
-            child: Text(l10n.facturationPaymentCloseLabel),
-          ),
         ],
       ),
     );

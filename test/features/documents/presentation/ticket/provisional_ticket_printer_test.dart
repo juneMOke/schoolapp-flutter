@@ -155,7 +155,8 @@ Future<bool> _print(WidgetTester tester, {int copies = 1}) async {
   // La composition et l'impression sont deux gestes depuis que le ticket a deux
   // sorties : un modèle introuvable n'atteint jamais le spouleur, et c'est ce
   // que vérifie le cas « encaissement introuvable » ci-dessus.
-  final model = await buildProvisionalTicket(captured, paymentId: 'pay-1');
+  final built = await buildProvisionalTicket(captured, paymentId: 'pay-1');
+  final model = built.fold((_) => null, (model) => model);
   if (model == null) return false;
 
   // Le repli ne prend plus de `BuildContext` : il doit pouvoir se déployer

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -62,10 +63,49 @@ Future<ThermalTicketOutcome> printThermalBytes(
   required Uint8List bytes,
   int initialCopies = TicketCopies.fallback,
 }) async {
+  final chosen = await chooseThermalPrinter(
+    context,
+    initialCopies: initialCopies,
+  );
+  return chosen.fold((outcome) async => outcome, (choice) async {
+    final problem = await sendThermalBytes(bytes, choice);
+    return problem == null
+        ? const ThermalTicketPrinted()
+        : ThermalTicketFailed(problem, copies: choice.copies);
+  });
+}
+
+/// La forme de [chooseThermalPrinter], pour qui doit la remplacer.
+typedef ThermalPrinterChooser =
+    Future<Either<ThermalTicketOutcome, ThermalPrintChoice>> Function(
+      BuildContext context, {
+      int initialCopies,
+    });
+
+/// La forme de [sendThermalBytes], pour qui doit la remplacer.
+typedef ThermalBytesSender =
+    Future<ThermalPrinterProblem?> Function(
+      Uint8List bytes,
+      ThermalPrintChoice choice,
+    );
+
+/// Les trois questions avant tout envoi — permission, liste, choix de
+/// l'imprimante et du nombre d'exemplaires —, sans rien envoyer.
+///
+/// Séparé de l'envoi pour l'impression **par lot** de « Tickets à imprimer »
+/// (continuité des tickets RC, lot D) : l'imprimante s'y choisit une fois pour
+/// tout le lot, et les tickets partent ensuite un par un.
+///
+/// À gauche, l'issue qui dispense d'envoyer : échec, renonciation, surface
+/// disparue.
+Future<Either<ThermalTicketOutcome, ThermalPrintChoice>> chooseThermalPrinter(
+  BuildContext context, {
+  int initialCopies = TicketCopies.fallback,
+}) async {
   final port = getIt<ThermalPrinterPort>();
 
   final ready = await _ensurePermitted(port);
-  if (ready != null) return ThermalTicketFailed(ready);
+  if (ready != null) return Left(ThermalTicketFailed(ready));
 
   final listed = await port.pairedPrinters();
   final printers = listed.fold<List<ThermalPrinter>?>(
@@ -73,41 +113,47 @@ Future<ThermalTicketOutcome> printThermalBytes(
     (all) => all,
   );
   if (printers == null) {
-    return const ThermalTicketFailed(ThermalPrinterProblem.unreachable);
+    return const Left(ThermalTicketFailed(ThermalPrinterProblem.unreachable));
   }
   if (printers.isEmpty) {
-    return const ThermalTicketFailed(ThermalPrinterProblem.noPrinterSelected);
+    return const Left(
+      ThermalTicketFailed(ThermalPrinterProblem.noPrinterSelected),
+    );
   }
 
   // La modale a disparu pendant la préparation : plus personne à qui demander
   // l'imprimante. Ce n'est PAS une renonciation — l'appelant doit encore
   // produire un papier, par le repli.
-  if (!context.mounted) return const ThermalTicketNoSurface();
+  if (!context.mounted) return const Left(ThermalTicketNoSurface());
 
   final chosen = await showThermalPrinterPicker(
     context,
     printers: printers,
     initialCopies: initialCopies,
   );
-  if (chosen == null) return const ThermalTicketCancelled();
+  if (chosen == null) return const Left(ThermalTicketCancelled());
+  return Right(chosen);
+}
 
+/// Envoie [bytes] — **un** exemplaire — à l'imprimante de [choice], autant de
+/// fois qu'il le demande. `null` si l'envoi a réussi, sinon sa cause.
+Future<ThermalPrinterProblem?> sendThermalBytes(
+  Uint8List bytes,
+  ThermalPrintChoice choice,
+) async {
   // Un seul envoi pour tout le ticket, exemplaires compris : le canal natif
   // préfixe chaque appel d'un LF, qui tomberait entre une commande ESC/POS et
   // son argument.
-  final sent = await port.printBytes(
+  final sent = await getIt<ThermalPrinterPort>().printBytes(
     bytes,
-    macAddress: chosen.printer.macAddress,
-    copies: chosen.copies,
+    macAddress: choice.printer.macAddress,
+    copies: choice.copies,
   );
-
   return sent.fold(
-    (failure) => ThermalTicketFailed(
-      failure is ThermalPrinterFailure
-          ? failure.problem
-          : ThermalPrinterProblem.unreachable,
-      copies: chosen.copies,
-    ),
-    (_) => const ThermalTicketPrinted(),
+    (failure) => failure is ThermalPrinterFailure
+        ? failure.problem
+        : ThermalPrinterProblem.unreachable,
+    (_) => null,
   );
 }
 

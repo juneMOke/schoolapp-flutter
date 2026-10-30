@@ -10,6 +10,11 @@ import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
+import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
+import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+
+import '../../../../test_helpers/tickets_to_print_stub.dart';
 
 class _Years
     extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
@@ -21,10 +26,15 @@ class _Enrollments
 
 /// Grand écran : la fiche d'un élève s'ouvre à côté de la liste. Tant
 /// qu'aucun élève n'est choisi, le volet de droite y invite.
+class _Sync extends MockCubit<SyncStatusState> implements SyncStatusCubit {}
+
 void main() {
   final l10n = AppLocalizationsFr();
 
   setUpAll(() => registerFallbackValue(const AcademicYearContextRequested()));
+  // Le bandeau « Tickets à imprimer » est posé en tête de la liste.
+  setUp(stubEmptyTicketsToPrint);
+  tearDown(unstubTicketsToPrint);
 
   Future<void> pump(WidgetTester tester, Size window) async {
     tester.view.physicalSize = window;
@@ -44,6 +54,12 @@ void main() {
       const Stream<AcademicYearContextState>.empty(),
       initialState: yearState,
     );
+    final sync = _Sync();
+    whenListen(
+      sync,
+      const Stream<SyncStatusState>.empty(),
+      initialState: const SyncStatusState(status: SyncStatus.synced),
+    );
     final enrollments = _Enrollments();
     whenListen(
       enrollments,
@@ -54,6 +70,7 @@ void main() {
     await tester.pumpWidget(
       MultiBlocProvider(
         providers: [
+          BlocProvider<SyncStatusCubit>.value(value: sync),
           BlocProvider<AcademicYearContextBloc>.value(value: years),
           BlocProvider<EnrollmentLocalListBloc>.value(value: enrollments),
         ],

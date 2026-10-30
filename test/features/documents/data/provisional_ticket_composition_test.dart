@@ -151,6 +151,10 @@ void main() {
     /// La ligne `generated_documents` est POSÉE PAR LE POSTE qui encaisse : un
     /// versement descendu par pull n'en a aucune en local.
     bool withLocalDocument = true,
+
+    /// Le reçu local est scellé : un ticket ne sort plus qu'avec son numéro
+    /// définitif (continuité des tickets RC, lot D).
+    bool sealed = true,
   }) async {
     await db.insert('students', {
       'id': 's-1',
@@ -177,7 +181,8 @@ void main() {
       'cashier_first_name': cashierFirstName,
       'cashier_last_name': cashierLastName,
       'collected_by_name': collectedByName,
-      'receipt_id': receiptId,
+      'receipt_id':
+          receiptId ?? (sealed && withLocalDocument ? 'rc-802' : null),
       'cancelled_at': cancelledAt,
       'device_id': deviceId,
       'sync_status': 'PENDING_SYNC',
@@ -212,9 +217,9 @@ void main() {
       'payment_id': 'p-1',
       'student_id': 's-1',
       'doc_type': 'RC',
-      'number': 'PROV-A1B2C3-9F8E7D6C',
+      'number': sealed ? 'CF-RC-2627-000802' : 'PROV-A1B2C3-9F8E7D6C',
       'provisional_number': 'PROV-A1B2C3-9F8E7D6C',
-      'status': 'PROVISIONAL',
+      'status': sealed ? 'DEFINITIVE' : 'PROVISIONAL',
       'created_at': 10,
     });
   }
@@ -300,14 +305,20 @@ void main() {
     /// La forme réelle d'un versement descendu par pull : aucune ligne
     /// `generated_documents` locale, aucun `cashier_*` de ce poste, mais
     /// l'attribution serveur et le `receipt_id` qui, eux, descendent.
-    Future<void> seedForeign() => seedPayment(
-      deviceId: 'autre-tablette',
-      cashierFirstName: null,
-      cashierLastName: null,
-      collectedByName: 'Alice Nsimba',
-      receiptId: 'rcpt-77',
-      withLocalDocument: false,
-    );
+    ///
+    /// [known] : le pull des pièces a appris son numéro. Sans lui, aucun
+    /// ticket ne sort (continuité des tickets RC, lot D).
+    Future<void> seedForeign({bool known = true}) async {
+      await seedPayment(
+        deviceId: 'autre-tablette',
+        cashierFirstName: null,
+        cashierLastName: null,
+        collectedByName: 'Alice Nsimba',
+        receiptId: 'rcpt-77',
+        withLocalDocument: false,
+      );
+      if (known) await cache.upsert(_knownReceipt());
+    }
 
     // Le défaut constaté le 26/09/2026 : l'UUID entier du versement
     // s'imprimait en « Réf. », faute de ligne documentaire locale.
@@ -323,17 +334,24 @@ void main() {
       expect(model.reference, 'CF-RC-2627-000279');
     });
 
-    test('inconnue du cache, la référence est le repli court', () async {
-      await seedForeign();
+    // Le repli court (« P1 ») s'imprimait faute de numéro connu : un papier
+    // sans numéro de la série, que la pile du promoteur ne sait pas ranger.
+    test(
+      'inconnue du cache : aucun ticket tant que le numéro manque',
+      () async {
+        await seedForeign(known: false);
 
-      final model = (await repository.buildForPayment(
-        paymentId: 'p-1',
-        labels: _labels,
-      )).getOrElse(() => throw StateError('échec'));
+        final result = await repository.buildForPayment(
+          paymentId: 'p-1',
+          labels: _labels,
+        );
 
-      expect(model.reference, 'P1');
-      expect(model.reference, isNot('p-1'));
-    });
+        expect(
+          result.fold((failure) => failure, (_) => null),
+          isA<ReceiptAwaitingNumberFailure>(),
+        );
+      },
+    );
 
     test('un reçu annulé ne compose aucun ticket', () async {
       await seedForeign();
@@ -433,7 +451,7 @@ void main() {
     final model = result.getOrElse(() => throw StateError('échec'));
     expect(model.studentFullName, 'Mbala Kasa Amina');
     expect(model.matriculationNumber, 'MAT-0042');
-    expect(model.reference, 'PROV-A1B2C3-9F8E7D6C');
+    expect(model.reference, 'CF-RC-2627-000802');
     expect(model.cashierFullName, 'Jean Kabeya');
     expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
     expect(model.allocations.single.label, 'Frais scolaires');
@@ -474,10 +492,11 @@ void main() {
       );
       await db.update(
         'payments',
-        {'receipt_id': 'rc-42'},
+        {'receipt_id': 'rcpt-77'},
         where: 'id = ?',
         whereArgs: ['p-1'],
       );
+      await cache.upsert(_knownReceipt());
 
       final model = (await repository.buildForPayment(
         paymentId: 'p-1',
@@ -491,20 +510,19 @@ void main() {
       );
     });
 
-    /// Le pendant : pas de `receipt_id`, donc pas encore scellé — la mention
-    /// doit être là, quelle que soit la présence d'une ligne locale.
-    test('non scellé : la mention est là', () async {
-      await seedPayment();
+    /// Le pendant : pas encore scellé — plus de ticket « provisoire » : aucun
+    /// ticket du tout, jusqu'au numéro définitif (continuité RC, lot D).
+    test('non scellé : aucun ticket', () async {
+      await seedPayment(sealed: false);
 
-      final model = (await repository.buildForPayment(
+      final result = await repository.buildForPayment(
         paymentId: 'p-1',
         labels: _labels,
-      )).getOrElse(() => throw StateError('échec'));
+      );
 
-      expect(model.isProvisional, isTrue);
       expect(
-        TicketTextLayout.render(model).join('\n'),
-        contains('Réf. provisoire'),
+        result.fold((failure) => failure, (_) => null),
+        isA<ReceiptAwaitingNumberFailure>(),
       );
     });
 
@@ -512,7 +530,7 @@ void main() {
     /// `receipt_id` à `''` — que rien n'interdit en base — rendrait le ticket
     /// officiel sans qu'aucune pièce n'existe.
     test('un receipt_id vide ne scelle rien', () async {
-      await seedPayment();
+      await seedPayment(sealed: false);
       await db.update(
         'payments',
         {'receipt_id': '   '},
@@ -520,13 +538,40 @@ void main() {
         whereArgs: ['p-1'],
       );
 
-      final model = (await repository.buildForPayment(
+      final result = await repository.buildForPayment(
         paymentId: 'p-1',
         labels: _labels,
-      )).getOrElse(() => throw StateError('échec'));
+      );
 
-      expect(model.isProvisional, isTrue);
+      expect(
+        result.fold((failure) => failure, (_) => null),
+        isA<ReceiptAwaitingNumberFailure>(),
+      );
     });
+  });
+
+  // Continuité des tickets RC : un versement en cours de correction n'a plus
+  // de ticket de caisse — son papier sera le ticket d'annulation.
+  test('refuse un versement visé par une correction en cours', () async {
+    await seedPayment();
+    await db.insert('payment_corrections', {
+      'id': 'pc-1',
+      'payment_id': 'p-1',
+      'student_id': 's-1',
+      'reason_code': 'DUPLICATE',
+      'cash_moved': 0,
+      'client_cancelled_at': '2026-08-05T10:00:00Z',
+      'status': 'PENDING',
+      'created_at': 1,
+      'updated_at': 1,
+    });
+
+    final result = await repository.buildForPayment(
+      paymentId: 'p-1',
+      labels: _labels,
+    );
+
+    expect(result.isLeft(), isTrue);
   });
 
   test('porte le numéro DÉFINITIF dès que la pièce est scellée', () async {
@@ -872,7 +917,7 @@ void main() {
     // Le reste du ticket est intact — c'est bien un papier complet et anonyme
     // qui sortirait, pas un rendu cassé.
     expect(model.amountReceived, MoneyBag.of(const [Money(150000, 'CDF')]));
-    expect(model.reference, 'PROV-A1B2C3-9F8E7D6C');
+    expect(model.reference, 'CF-RC-2627-000802');
   });
 
   test('refuse d imprimer un encaissement introuvable', () async {

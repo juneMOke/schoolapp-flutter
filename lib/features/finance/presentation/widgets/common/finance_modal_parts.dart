@@ -136,6 +136,10 @@ class FinanceModalFooter extends StatelessWidget {
   final VoidCallback? onPrimary;
   final double stackBelowWidth;
 
+  /// `false` : l'action secondaire n'est pas offerte du tout — l'utilisateur
+  /// n'en a pas le droit —, la primaire occupe seule le pied.
+  final bool showSecondary;
+
   const FinanceModalFooter({
     super.key,
     required this.secondaryLabel,
@@ -146,6 +150,7 @@ class FinanceModalFooter extends StatelessWidget {
     required this.primaryIcon,
     required this.onPrimary,
     this.stackBelowWidth = 420,
+    this.showSecondary = true,
   });
 
   @override
@@ -163,7 +168,9 @@ class FinanceModalFooter extends StatelessWidget {
 
     // N'a de sens que si l'action secondaire est effectivement inerte : sinon
     // l'explication contredirait un bouton actif.
-    final hint = onSecondary == null ? secondaryHint?.trim() : null;
+    final hint = onSecondary == null && showSecondary
+        ? secondaryHint?.trim()
+        : null;
 
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.spacingM),
@@ -173,6 +180,7 @@ class FinanceModalFooter extends StatelessWidget {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
+              if (!showSecondary) return primary;
               if (constraints.maxWidth < stackBelowWidth) {
                 return Column(
                   mainAxisSize: MainAxisSize.min,

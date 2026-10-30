@@ -4,6 +4,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/documents/data/local/ticket_print_job_writer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_request.dart';
@@ -200,6 +201,20 @@ class PaymentCorrectionWriteDao {
       }
 
       final replacement = write.replacement;
+      if (!write.localOnly &&
+          (replacement == null || !await _ticketPrinted(txn, origin.id))) {
+        // Chaque numéro doit avoir son papier dans la pile (continuité RC,
+        // lot B) : une annulation imprime le sien. Une correction aussi, mais
+        // seulement si le ticket d'origine n'est jamais sorti — sorti, la
+        // 2e pièce dit déjà ce qu'elle remplace. Une origine jamais acceptée
+        // (R2) n'a pas de numéro : aucun papier n'est dû.
+        await TicketPrintJobWriter.enqueueCancellation(
+          txn,
+          paymentId: origin.id,
+          correctionId: write.correctionId,
+          nowMs: nowMs,
+        );
+      }
       await txn.insert('payment_corrections', {
         'id': write.correctionId,
         'payment_id': origin.id,
@@ -285,6 +300,25 @@ class PaymentCorrectionWriteDao {
         ),
       );
     });
+  }
+
+  /// Un papier de ce versement est-il déjà sorti de ce poste ?
+  static Future<bool> _ticketPrinted(
+    DatabaseExecutor txn,
+    String paymentId,
+  ) async {
+    final rows = await txn.rawQuery(
+      '''
+      SELECT 1 FROM payments
+       WHERE id = ? AND ticket_printed_at IS NOT NULL
+      UNION ALL
+      SELECT 1 FROM ${TicketPrintJobWriter.table}
+       WHERE payment_id = ? AND kind = ? AND printed_at IS NOT NULL
+      LIMIT 1
+      ''',
+      [paymentId, paymentId, TicketPrintJobWriter.receipt],
+    );
+    return rows.isNotEmpty;
   }
 
   static Future<CorrectionOrigin?> _findOrigin(

@@ -80,6 +80,11 @@ class MenuConstants {
   static const String financesDashboardId = 'finances-dashboard';
   static const String facturationsId = 'facturations';
 
+  /// « Tickets à imprimer », page imbriquée sous Facturations. Un seul
+  /// littéral pour la route ET sa garde (`kNestedRouteAccess`) : renommer l'un
+  /// sans l'autre ouvrirait la page en silence.
+  static const String ticketsToPrintSegment = 'tickets-a-imprimer';
+
   /// Tableau de bord du Recouvrement : où en est la dette sur une sélection de
   /// frais, quels groupes décrochent, et ce que coûterait un renvoi.
   static const String recouvrementDashboardId = 'recouvrement-dashboard';
