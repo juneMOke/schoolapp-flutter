@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
@@ -13,6 +15,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/hr_presence/data/models/hr_attendance_recap_model.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_recap.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_attendance_stats_use_cases.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_cubit.dart';
@@ -27,6 +30,7 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_s
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../test_helpers/reference_formats.dart';
+import '../data/hr_attendance_fixtures.dart' as fx;
 import '../hr_presence_builders.dart';
 
 class _MockRecap extends Mock implements GetHrAttendanceRecapUseCase {}
@@ -53,7 +57,8 @@ void main() {
     HrAttendanceRecap? answer,
     List<String>? permissions,
     StaffAttendanceLock? lock,
-    int unsynced = 0,
+    Map<String, int> unsynced = const {},
+    Map<String, Map<String, StaffAttendanceRecord>> records = const {},
     Size? size = const Size(1280, 1600),
   }) async {
     if (size != null) {
@@ -79,7 +84,7 @@ void main() {
       (_) async => Right(
         StaffAttendanceSnapshot(
           members: const [],
-          records: const {},
+          records: records,
           locks: lock == null
               ? const {}
               : {
@@ -92,11 +97,17 @@ void main() {
       ),
     );
     when(
-      () => count(
+      () => count.byAgent(
         from: any(named: 'from'),
         to: any(named: 'to'),
       ),
     ).thenAnswer((_) async => Right(unsynced));
+    when(() => commands.reopenMonth(any(), any())).thenAnswer(
+      (_) async => const StaffAttendanceNotice(
+        StaffAttendanceNoticeKind.monthReopened,
+        month: '2026-10',
+      ),
+    );
     when(() => commands.closeMonth(any())).thenAnswer(
       (_) async => const StaffAttendanceNotice(
         StaffAttendanceNoticeKind.monthClosed,
@@ -146,7 +157,9 @@ void main() {
     await pump(tester);
 
     expect(find.text('17 jours de classe à ce jour'), findsOneWidget);
-    expect(find.text('92 %'), findsOneWidget);
+    // Au bandeau, puis au pied du tableau.
+    expect(find.text('92 %'), findsNWidgets(2));
+    // Les heures au bandeau ; au pied, les montants du mois les remplacent.
     expect(find.textContaining('368,00'), findsOneWidget);
     expect(find.byType(HrPresenceRecapTable), findsOneWidget);
     expect(find.text('MWAMBA Clarisse'), findsOneWidget);
@@ -162,6 +175,143 @@ void main() {
   ) async {
     await pump(tester, answer: recapOf(withAmounts: false));
     expect(find.textContaining('368,00'), findsNothing);
+  });
+
+  testWidgets('pour qui lit la paie : le coût du mois et sa retenue', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    expect(find.text('Coût de la paie de octobre 2026'), findsOneWidget);
+    // Au bandeau et au pied : 824,55 $ et − 65,45 $.
+    expect(find.textContaining('824,55'), findsNWidgets(2));
+    expect(find.textContaining('− 65,45'), findsNWidgets(3));
+    expect(find.text('÷ 22 jours ouvrés'), findsOneWidget);
+    expect(find.textContaining('versée début novembre 2026'), findsOneWidget);
+    expect(find.text('Prévu'), findsOneWidget);
+    // La ligne de MWAMBA : 3 NJ × 21,82 $, le vacataire payé à l'heure.
+    expect(find.textContaining('3 j × 21,82'), findsOneWidget);
+    expect(find.text('payé à l\'heure'), findsOneWidget);
+    expect(find.text('BRUT APRÈS ABSENCES'), findsOneWidget);
+    expect(find.text('HEURES VAC.'), findsNothing);
+  });
+
+  testWidgets(
+    'deux devises : une ligne de total chacune, jamais additionnées',
+    (tester) async {
+      await pump(tester, answer: recapOf(withCdf: true));
+      expect(find.text('Total · 3 agents'), findsOneWidget);
+      expect(find.text('Total · USD'), findsOneWidget);
+      expect(find.text('Total · CDF'), findsOneWidget);
+    },
+  );
+
+  testWidgets('une paie validée : chiffres figés', (tester) async {
+    await pump(
+      tester,
+      answer: recapOf(payrollStatus: HrRecapPayrollStatus.validated),
+    );
+    expect(find.text('Figé'), findsOneWidget);
+    expect(find.text('Paie validée : chiffres figés'), findsOneWidget);
+  });
+
+  testWidgets('une école qui ne retient pas : ni colonne ni tuile de retenue', (
+    tester,
+  ) async {
+    await pump(tester, answer: recapOf(absenceDeductionEnabled: false));
+    expect(find.text('RETENUE'), findsNothing);
+    expect(find.text('Retenue pour absences'), findsNothing);
+    expect(find.text('Avec retenue'), findsNothing);
+    expect(find.text('BRUT APRÈS ABSENCES'), findsOneWidget);
+  });
+
+  testWidgets('« Avec retenue » ne garde que les agents retenus', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.widgetWithText(EteeloFilterChip, 'Avec retenue'));
+    await tester.pump();
+
+    expect(find.text('MWAMBA Clarisse'), findsOneWidget);
+    expect(find.text('KALALA Didier'), findsNothing);
+    expect(find.textContaining('Total ·'), findsNothing);
+  });
+
+  HrPresenceRecapCubit cubitOf(WidgetTester tester) =>
+      BlocProvider.of<HrPresenceRecapCubit>(
+        tester.element(find.byType(HrPresenceRecapScreen)),
+      );
+
+  testWidgets('un serveur d\'avant la paie au mois M : les heures, jamais un '
+      'brut à 0', (tester) async {
+    await pump(
+      tester,
+      answer: HrAttendanceRecapModel.fromJson(fx.recap(legacy: true)),
+    );
+
+    expect(find.text('HEURES VAC.'), findsOneWidget);
+    expect(find.text('BRUT PRÉVU'), findsNothing);
+    // Le montant des heures, pas un brut vide à « 0,00 ».
+    expect(find.textContaining('160,00'), findsWidgets);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && (w.data ?? '').startsWith('0,00'),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('sans hr.pay.read : les heures, sans argent du mois', (
+    tester,
+  ) async {
+    await pump(tester, answer: recapOf(withAmounts: false));
+    expect(find.text('HEURES VAC.'), findsOneWidget);
+    expect(find.text('BRUT PRÉVU'), findsNothing);
+    expect(find.textContaining('Coût de la paie'), findsNothing);
+  });
+
+  testWidgets('le bandeau garde le mois et dit ce qui manque', (tester) async {
+    await pump(tester, unsynced: {'a-1': 2});
+
+    expect(find.text('RÉCAPITULATIF POUR LA PAIE'), findsOneWidget);
+    expect(find.text('Jours non pointés'), findsOneWidget);
+    expect(find.text('Encore sur la tablette'), findsOneWidget);
+    // La carte de clôture le redit en une ligne.
+    expect(
+      find.textContaining('6 jours-agent non pointés', findRichText: true),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('absences et retards sur deux lignes, NJ d\'abord', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    expect(
+      find.textContaining('3 NJ · 1 J', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.text('1 retard · 12 min'), findsWidgets);
+    expect(find.text('Total · 3 agents'), findsOneWidget);
+  });
+
+  testWidgets('la pastille dit l\'agent dont un pointage attend l\'envoi', (
+    tester,
+  ) async {
+    await pump(tester, unsynced: {'a-1': 1});
+
+    expect(find.text('Sur la tablette'), findsOneWidget);
+  });
+
+  testWidgets('filtré, le tableau perd son total', (tester) async {
+    await pump(tester);
+    await tester.tap(find.widgetWithText(EteeloFilterChip, 'Vacataire'));
+    await tester.pump();
+
+    expect(find.text('KALALA Didier'), findsOneWidget);
+    expect(find.text('MWAMBA Clarisse'), findsNothing);
+    expect(find.textContaining('Total ·'), findsNothing);
   });
 
   testWidgets('E2 : seule la direction voit « Clôturer »', (tester) async {
@@ -199,7 +349,7 @@ void main() {
     expect(find.textContaining('Transmettre'), findsNothing);
     expect(
       find.text(
-        'Un mois clôturé ne se rouvre pas : la paie validée en dépend.',
+        "Seule la direction rouvre un mois clôturé, tant que sa paie n'est pas validée.",
       ),
       findsOneWidget,
     );
@@ -214,6 +364,84 @@ void main() {
 
     expect(find.textContaining('Mois clôturé'), findsOneWidget);
     expect(closeButton(), findsNothing);
+  });
+
+  Finder reopenButton() => find.widgetWithText(EteeloButton, 'Rouvrir le mois');
+
+  testWidgets('la direction rouvre un mois clos, motif à l\'appui', (
+    tester,
+  ) async {
+    final commands = await pump(
+      tester,
+      permissions: [...manage, Perm.hrAttendanceReopen.wire],
+      answer: recapOf(closed: true, reopenable: true),
+    );
+    await tester.ensureVisible(reopenButton());
+    await tester.tap(reopenButton());
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'Justificatif reçu');
+    await tester.tap(find.widgetWithText(EteeloButton, 'Rouvrir le mois').last);
+    await tester.pumpAndSettle();
+
+    verify(
+      () => commands.reopenMonth('2026-10', 'Justificatif reçu'),
+    ).called(1);
+  });
+
+  testWidgets('sans hr.attendance.reopen, ou si le serveur refuserait, pas '
+      'de réouverture', (tester) async {
+    await pump(
+      tester,
+      permissions: manage,
+      answer: recapOf(closed: true, reopenable: true),
+    );
+    expect(reopenButton(), findsNothing);
+  });
+
+  testWidgets('un mois non rouvrable (paie validée) ne propose rien', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      permissions: [...manage, Perm.hrAttendanceReopen.wire],
+      answer: recapOf(closed: true),
+    );
+    expect(reopenButton(), findsNothing);
+  });
+
+  testWidgets(
+    'une réouverture refusée par le serveur se dit sur le mois clos',
+    (tester) async {
+      await pump(
+        tester,
+        permissions: manage,
+        answer: recapOf(closed: true),
+        lock: const StaffAttendanceLock(
+          kind: StaffAttendanceLockKind.month,
+          periodStart: '2026-10-01',
+          locked: true,
+          syncState: RecordSyncState.failed,
+        ),
+      );
+      expect(find.textContaining('refusé par le serveur'), findsOneWidget);
+    },
+  );
+
+  testWidgets('une réouverture posée ici et pas encore envoyée se dit', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      permissions: manage,
+      answer: recapOf(closed: true),
+      lock: const StaffAttendanceLock(
+        kind: StaffAttendanceLockKind.month,
+        periodStart: '2026-10-01',
+        locked: false,
+        syncState: RecordSyncState.pending,
+      ),
+    );
+    expect(find.textContaining('Réouverture enregistrée'), findsOneWidget);
   });
 
   testWidgets('un mois de vacances : rien à clôturer', (tester) async {
@@ -233,7 +461,29 @@ void main() {
         syncState: RecordSyncState.failed,
       ),
     );
-    expect(find.textContaining('refusée par le serveur'), findsOneWidget);
+    expect(find.textContaining('refusé par le serveur'), findsOneWidget);
+  });
+
+  testWidgets('une réouverture refusée, paie validée : le dire sans inviter '
+      'à recommencer', (tester) async {
+    await pump(
+      tester,
+      permissions: manage,
+      answer: recapOf(closed: true),
+      lock: const StaffAttendanceLock(
+        kind: StaffAttendanceLockKind.month,
+        periodStart: '2026-10-01',
+        locked: true,
+        syncState: RecordSyncState.failed,
+        syncErrorCode: 'PAYROLL_ALREADY_VALIDATED',
+      ),
+    );
+
+    expect(
+      find.textContaining('la paie de ce mois est validée'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('recommencez'), findsNothing);
   });
 
   testWidgets('un mois passé non clôturable ne promet pas de date', (
@@ -244,8 +494,20 @@ void main() {
   });
 
   testAtReferenceFormats('le récapitulatif tient', (tester, format) async {
-    await pump(tester, size: null, permissions: manage, unsynced: 3);
+    await pump(tester, size: null, permissions: manage, unsynced: {'a-1': 3});
     expect(find.byType(HrPresenceRecapTable), findsOneWidget);
+  });
+
+  testAtReferenceFormats('un mois passé tient, avec « Mois en cours »', (
+    tester,
+    format,
+  ) async {
+    await pump(tester, size: null, permissions: manage);
+    await cubitOf(tester).stepMonth(-1);
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Mois en cours'), findsOneWidget);
   });
 
   testAtReferenceFormats('le récapitulatif clos tient', (tester, format) async {

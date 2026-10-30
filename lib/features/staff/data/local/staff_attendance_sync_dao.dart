@@ -106,19 +106,47 @@ class StaffAttendanceSyncDao {
     String schoolId,
     String day, {
     required int nowMs,
+  }) => _requeueRefusedIn(
+    txn,
+    schoolId,
+    from: day,
+    to: day,
+    code: kStaffDayLockedCode,
+    nowMs: nowMs,
+  );
+
+  /// Après la réouverture d'un mois, ses pointages refusés parce que le mois
+  /// était clos repartent d'eux-mêmes. Rend combien.
+  static Future<int> requeueMonthClosedIn(
+    DatabaseExecutor txn,
+    String schoolId, {
+    required String from,
+    required String to,
+    required int nowMs,
+  }) => _requeueRefusedIn(
+    txn,
+    schoolId,
+    from: from,
+    to: to,
+    code: kStaffMonthClosedCode,
+    nowMs: nowMs,
+  );
+
+  static Future<int> _requeueRefusedIn(
+    DatabaseExecutor txn,
+    String schoolId, {
+    required String from,
+    required String to,
+    required String code,
+    required int nowMs,
   }) async {
     final rows = await txn.query(
       table,
       columns: ['id'],
       where:
-          'school_id = ? AND work_date = ? AND sync_status = ? '
-          'AND sync_error_code = ?',
-      whereArgs: [
-        schoolId,
-        day,
-        RecordSyncState.failed.dbValue,
-        kStaffDayLockedCode,
-      ],
+          'school_id = ? AND work_date >= ? AND work_date <= ? '
+          'AND sync_status = ? AND sync_error_code = ?',
+      whereArgs: [schoolId, from, to, RecordSyncState.failed.dbValue, code],
     );
     final outbox = OutboxDao(txn);
     for (final row in rows) {

@@ -114,15 +114,9 @@ class PayrollPayslipContent {
           value: member?.jobTitle ?? '—',
           note: null,
         ),
-        if (line.deductions.workDaysDivisor case final divisor?)
-          (
-            label: l10n.payrollPayslipWorkedDays,
-            value: l10n.payrollPayslipWorkedDaysValue(
-              line.deductions.workedDays ?? divisor,
-              divisor,
-            ),
-            note: null,
-          ),
+        if (PayrollLabels.attendanceDays(l10n, line.deductions)
+            case final days?)
+          (label: days.label, value: days.value, note: null),
         (
           label: l10n.payrollPayslipContract,
           value: contractFrom == null

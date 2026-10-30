@@ -175,6 +175,9 @@ class AppBreakpoints {
   static const double payrollAgentTwoColumnsMin = 820.0;
   // Bandeau de la fiche : quatre tuiles en ligne au-delà, 2 × 2 en deçà.
   static const double payrollAgentTilesInRowMin = 720.0;
+  // Bandeau du récapitulatif des présences : ses cinq tuiles en ligne
+  // au-delà, deux par ligne en deçà.
+  static const double hrPresenceRecapTilesInRowMin = 840.0;
   // Composition des classes — vue répartie.
   // Bandeau de synthèse : au-delà, KPI et basculeur sur une même ligne ;
   // en deçà, le basculeur passe dessous.

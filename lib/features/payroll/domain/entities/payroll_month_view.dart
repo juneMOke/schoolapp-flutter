@@ -37,7 +37,7 @@ enum PayrollBlocker {
   /// La paie du mois précédent existe et n'est pas validée (E9).
   previousNotValidated,
 
-  /// Le Pointage de M−1 n'est pas clos (A1, A9).
+  /// Le Pointage du mois n'est pas clos (formule 3).
   attendanceOpen,
 
   /// Un versement vivant existe : la paie ne se rouvre plus (A4).
@@ -68,7 +68,7 @@ class PayrollMonthView {
   /// Les agents sans aucun contrat : « contrat à poser ».
   final List<String> withoutContract;
 
-  /// Les vacataires à l'heure sans minute pointée en M−1 (N4).
+  /// Les vacataires à l'heure sans minute pointée dans le mois (N4).
   final List<String> zeroHourMembers;
   final PayrollAttendanceState attendance;
 
@@ -103,6 +103,15 @@ class PayrollMonthView {
   });
 
   bool get isEditable => phase == PayrollPhase.draft;
+
+  /// Le mois de Pointage que les lignes ont lu : M en formule 3, M−1 sur une
+  /// paie figée en v1/v2.
+  String get attendanceMonth {
+    for (final line in lines) {
+      if (line.attendanceMonth case final month?) return month;
+    }
+    return month;
+  }
 
   /// Un versement réduit ce mois-ci : un taux sous 100 % ou un montant fixe.
   bool get hasReducedPayout => lines.any((line) => line.deferredInCents > 0);

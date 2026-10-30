@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_write_dao.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto.dart';
@@ -14,24 +15,28 @@ void main() {
   setUp(() async => db = await openFullOfflineDb());
   tearDown(() async => db.close());
 
-  Future<void> write(String id, String day, {String school = 's-1'}) =>
-      StaffAttendanceWriteDao(db).save(
-        [
-          StaffAttendanceSyncRequestDto(
-            staffAttendance: StaffAttendanceDto(
-              id: id,
-              staffMemberId: 'm-$id',
-              workDate: day,
-              status: 'PRESENT',
-              arrivalTime: '07:30',
-              clientUpdatedAt: '${day}T08:00:00.000Z',
-            ),
-            authorId: 'u-1',
-          ),
-        ],
-        schoolId: school,
-        nowMs: 10,
-      );
+  Future<void> write(
+    String id,
+    String day, {
+    String school = 's-1',
+    String? member,
+  }) => StaffAttendanceWriteDao(db).save(
+    [
+      StaffAttendanceSyncRequestDto(
+        staffAttendance: StaffAttendanceDto(
+          id: id,
+          staffMemberId: member ?? 'm-$id',
+          workDate: day,
+          status: 'PRESENT',
+          arrivalTime: '07:30',
+          clientUpdatedAt: '${day}T08:00:00.000Z',
+        ),
+        authorId: 'u-1',
+      ),
+    ],
+    schoolId: school,
+    nowMs: 10,
+  );
 
   test('compte les pointages en file de la fenêtre, de cette école', () async {
     await write('a', '2026-10-05');
@@ -81,6 +86,26 @@ void main() {
         db,
       ).unsyncedCount('s-1', from: '2026-10-01', to: '2026-10-31'),
       0,
+    );
+  });
+
+  test('agent par agent, et une entrée d\'outbox sortie de la file ne compte '
+      'pas : le bandeau et la pastille disent la même chose', () async {
+    await write('a', '2026-10-05', member: 'm-1');
+    await write('b', '2026-10-06', member: 'm-1');
+    await write('c', '2026-10-07', member: 'm-2');
+    await OutboxDao(
+      db,
+    ).markSyncError(StaffAttendanceWriteDao.entryId('c'), 'trop d essais');
+    final dao = StaffAttendanceDao(db);
+
+    expect(
+      await dao.unsyncedByAgent('s-1', from: '2026-10-01', to: '2026-10-31'),
+      {'m-1': 2},
+    );
+    expect(
+      await dao.unsyncedCount('s-1', from: '2026-10-01', to: '2026-10-31'),
+      2,
     );
   });
 }

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/helpers/search_normalization_helper.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_recap.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
@@ -24,13 +25,22 @@ class HrPresenceRecapState extends Equatable {
 
   /// Pointages du mois encore sur la tablette (D1).
   final int unsynced;
+
+  /// Les mêmes, par agent : sa ligne servie ne les compte pas encore.
+  final Map<String, int> unsyncedByAgent;
   final String text;
 
   /// `null` : tous les contrats.
   final StaffContractFilter? contract;
 
+  /// Les seuls agents à qui le mois retient quelque chose.
+  final bool deductedOnly;
+
   /// Une clôture est en cours d'écriture : le bouton se désarme.
   final bool closing;
+
+  /// Une réouverture est en cours d'écriture.
+  final bool reopening;
 
   const HrPresenceRecapState({
     required this.month,
@@ -41,9 +51,12 @@ class HrPresenceRecapState extends Equatable {
     this.failure,
     this.localLock,
     this.unsynced = 0,
+    this.unsyncedByAgent = const {},
     this.text = '',
     this.contract,
+    this.deductedOnly = false,
     this.closing = false,
+    this.reopening = false,
   });
 
   bool get isCurrentMonth => month == currentMonth;
@@ -53,10 +66,26 @@ class HrPresenceRecapState extends Equatable {
     return first == null || month.compareTo(first) > 0;
   }
 
-  /// Clos au serveur, ou sur la tablette en attendant l'envoi.
-  bool get isClosed => (recap?.closed ?? false) || (localLock?.locked ?? false);
+  /// Clos au serveur, ou sur la tablette. Un geste posé ici et pas encore
+  /// envoyé — clôture ou réouverture — l'emporte sur ce que dit le serveur.
+  bool get isClosed {
+    final local = localLock;
+    if (local != null && local.syncState == RecordSyncState.pending) {
+      return local.locked;
+    }
+    return (recap?.closed ?? false) || (local?.locked ?? false);
+  }
 
-  bool get hasFilters => text.trim().isNotEmpty || contract != null;
+  /// « Avec retenue » ne filtre que là où sa puce s'affiche : venu d'une
+  /// adresse sur une école qui ne retient pas, il viderait l'écran sans
+  /// moyen de le défaire.
+  bool get deductedFilter => deductedOnly && (recap?.showsDeduction ?? true);
+
+  bool get hasFilters =>
+      text.trim().isNotEmpty || contract != null || deductedFilter;
+
+  /// Pointages de cet agent encore sur la tablette.
+  int unsyncedOf(String staffMemberId) => unsyncedByAgent[staffMemberId] ?? 0;
 
   List<HrAttendanceRecapRow> get _searched => [
     for (final row in recap?.staff ?? const <HrAttendanceRecapRow>[])
@@ -85,9 +114,20 @@ class HrPresenceRecapState extends Equatable {
 
   int get searchedCount => _searched.length;
 
-  List<HrAttendanceRecapRow> get visibleRows => [
+  static bool _deducted(HrAttendanceRecapRow row) =>
+      (row.pay?.absenceDeductionInCents ?? 0) > 0;
+
+  List<HrAttendanceRecapRow> get _byContract => [
     for (final row in _searched)
       if (contract == null || contract!.matches(row.agent.contractKind)) row,
+  ];
+
+  /// Les agents de la recherche et du contrat à qui le mois retient.
+  int get deductedCount => _byContract.where(_deducted).length;
+
+  List<HrAttendanceRecapRow> get visibleRows => [
+    for (final row in _byContract)
+      if (!deductedFilter || _deducted(row)) row,
   ];
 
   HrPresenceRecapState copyWith({
@@ -97,9 +137,12 @@ class HrPresenceRecapState extends Equatable {
     Object? failure = _undefined,
     Object? localLock = _undefined,
     int? unsynced,
+    Map<String, int>? unsyncedByAgent,
     String? text,
     Object? contract = _undefined,
+    bool? deductedOnly,
     bool? closing,
+    bool? reopening,
   }) => HrPresenceRecapState(
     month: month ?? this.month,
     currentMonth: currentMonth,
@@ -115,11 +158,14 @@ class HrPresenceRecapState extends Equatable {
         ? this.localLock
         : localLock as StaffAttendanceLock?,
     unsynced: unsynced ?? this.unsynced,
+    unsyncedByAgent: unsyncedByAgent ?? this.unsyncedByAgent,
     text: text ?? this.text,
     contract: identical(contract, _undefined)
         ? this.contract
         : contract as StaffContractFilter?,
+    deductedOnly: deductedOnly ?? this.deductedOnly,
     closing: closing ?? this.closing,
+    reopening: reopening ?? this.reopening,
   );
 
   @override
@@ -132,8 +178,11 @@ class HrPresenceRecapState extends Equatable {
     failure,
     localLock,
     unsynced,
+    unsyncedByAgent,
     text,
     contract,
+    deductedOnly,
     closing,
+    reopening,
   ];
 }

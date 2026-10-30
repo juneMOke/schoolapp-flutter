@@ -48,7 +48,6 @@ class PayrollVariablesRequestDto {
   final int? overtimeMinutes;
   final int? overtimeRateInCents;
   final int? dependentChildren;
-  final int? workedDays;
   final int? childcareInCents;
   final int? fixedPayoutInCents;
   final String? fixedPayoutReason;
@@ -63,14 +62,14 @@ class PayrollVariablesRequestDto {
     this.overtimeMinutes,
     this.overtimeRateInCents,
     this.dependentChildren,
-    this.workedDays,
     this.childcareInCents,
     this.fixedPayoutInCents,
     this.fixedPayoutReason,
   });
 
-  /// La formule que la tablette calcule : jours prestés, PC/E et montant
-  /// fixe ne s'écrivent qu'en v2.
+  /// La formule que la tablette calcule : PC/E et montant fixe ne s'écrivent
+  /// qu'à partir de la v2. Les jours prestés ne s'envoient plus (formule 3) :
+  /// le serveur les ignorerait.
   static const int formulaVersion = PayrollLine.currentFormula;
 
   Map<String, dynamic> toJson() => {
@@ -80,7 +79,6 @@ class PayrollVariablesRequestDto {
       'overtimeMinutes': overtimeMinutes,
       'overtimeRateInCents': overtimeRateInCents,
       'dependentChildren': dependentChildren,
-      'daysWorked': workedDays,
       'childcareInCents': childcareInCents,
       'fixedPayoutInCents': fixedPayoutInCents,
       'fixedPayoutReason': fixedPayoutReason,
@@ -110,7 +108,6 @@ class PayrollVariablesRequestDto {
       overtimeMinutes: inner.integer('overtimeMinutes'),
       overtimeRateInCents: inner.integer('overtimeRateInCents'),
       dependentChildren: inner.integer('dependentChildren'),
-      workedDays: inner.integer('daysWorked'),
       childcareInCents: inner.integer('childcareInCents'),
       fixedPayoutInCents: inner.integer('fixedPayoutInCents'),
       fixedPayoutReason: inner.text('fixedPayoutReason'),

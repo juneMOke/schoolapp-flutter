@@ -8,8 +8,8 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_lab
 import 'package:school_app_flutter/features/staff/presentation/widgets/filters/staff_search_toolbar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les puces de contrat — gardées ici, la paie diffère par contrat — et la
-/// recherche.
+/// Les puces de contrat — gardées ici, la paie diffère par contrat —, « Avec
+/// retenue » quand l'école retient les absences, et la recherche.
 class HrPresenceRecapFilters extends StatelessWidget {
   final int total;
   final Map<StaffContractFilter, int> counts;
@@ -17,6 +17,11 @@ class HrPresenceRecapFilters extends StatelessWidget {
   final ValueChanged<StaffContractFilter?> onContract;
   final String text;
   final ValueChanged<String> onText;
+
+  /// `null` : pas de puce « Avec retenue » (pas de paie lue, ou l'école ne
+  /// retient pas les absences).
+  final ({int count, bool selected})? deducted;
+  final VoidCallback? onDeducted;
 
   const HrPresenceRecapFilters({
     super.key,
@@ -26,6 +31,8 @@ class HrPresenceRecapFilters extends StatelessWidget {
     required this.onContract,
     required this.text,
     required this.onText,
+    this.deducted,
+    this.onDeducted,
   });
 
   @override
@@ -62,6 +69,17 @@ class HrPresenceRecapFilters extends StatelessWidget {
                   icon: StaffContractTone.ofFilter(filter).icon,
                   onTap: () => onContract(filter),
                 ),
+            if (deducted case final deducted?)
+              EteeloFilterChip(
+                label: l10n.hrPresenceRecapWithDeduction,
+                count: deducted.count,
+                selected: deducted.selected,
+                color: AppColors.presenceMarkAbsent,
+                soft: AppColors.presenceMarkAbsentSoft,
+                ink: AppColors.presenceMarkAbsentInk,
+                icon: Icons.remove_circle_outline,
+                onTap: onDeducted ?? () {},
+              ),
           ],
         ),
         StaffSearchToolbar(

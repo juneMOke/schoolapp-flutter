@@ -10,7 +10,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enum
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/agent/payroll_agent_hero_tiles.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_banner.dart';
+import 'package:school_app_flutter/core/components/banners/kuba_banner.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member.dart';
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
@@ -123,7 +123,7 @@ class PayrollAgentHero extends StatelessWidget {
         ),
       ],
     );
-    return PayrollBanner(
+    return KubaBanner(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/hr_presence/domain/usecases/hr_atten
 import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/hr_presence_recap_cubit.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_lock.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_record.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_settings.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_snapshot.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
@@ -28,9 +29,10 @@ class _MockSignals extends Mock implements StaffSyncSignals {}
 
 StaffAttendanceSnapshot snapshotWith({
   StaffAttendanceLock? lock,
+  Map<String, Map<String, StaffAttendanceRecord>> records = const {},
 }) => StaffAttendanceSnapshot(
   members: const [],
-  records: const {},
+  records: records,
   locks: lock == null
       ? const {}
       : {StaffAttendanceSnapshot.lockKey(lock.kind, lock.periodStart): lock},
@@ -58,11 +60,11 @@ void main() {
       ),
     ).thenAnswer((_) async => Right(snapshotWith()));
     when(
-      () => count(
+      () => count.byAgent(
         from: any(named: 'from'),
         to: any(named: 'to'),
       ),
-    ).thenAnswer((_) async => const Right(2));
+    ).thenAnswer((_) async => const Right({'a-1': 2}));
   });
 
   HrPresenceRecapCubit build() {
@@ -92,7 +94,7 @@ void main() {
     await settle();
 
     verify(() => recap('2026-10')).called(1);
-    verify(() => count(from: '2026-10-01', to: '2026-10-31')).called(1);
+    verify(() => count.byAgent(from: '2026-10-01', to: '2026-10-31')).called(1);
     expect(cubit.state.status, HrPresenceRecapStatus.ready);
     expect(cubit.state.unsynced, 2);
     expect(cubit.state.isClosed, isFalse);
@@ -193,5 +195,45 @@ void main() {
     expect(cubit.state.month, '2026-09');
     await cubit.showMonth('2026-08');
     expect(cubit.state.month, '2026-09');
+  });
+
+  test('l\'adresse porte aussi le contrat', () async {
+    final cubit = build();
+    await cubit.load();
+    cubit.applyContract(StaffContractFilter.vacataire);
+    expect(cubit.state.contract, StaffContractFilter.vacataire);
+    cubit.applyContract(null);
+    expect(cubit.state.contract, isNull);
+  });
+
+  test('les pointages en attente, agent par agent, font le total', () async {
+    when(
+      () => count.byAgent(
+        from: any(named: 'from'),
+        to: any(named: 'to'),
+      ),
+    ).thenAnswer((_) async => const Right({'a-1': 2, 'a-3': 1}));
+    final cubit = build();
+    await cubit.load();
+    await settle();
+
+    expect(cubit.state.unsyncedByAgent, {'a-1': 2, 'a-3': 1});
+    expect(cubit.state.unsynced, 3);
+    expect(cubit.state.unsyncedOf('a-2'), 0);
+  });
+
+  test('« avec retenue » venu de l\'adresse ne filtre pas une école qui ne '
+      'retient pas', () async {
+    when(
+      () => recap(any()),
+    ).thenAnswer((_) async => Right(recapOf(absenceDeductionEnabled: false)));
+    final cubit = build();
+    await cubit.load();
+    await settle();
+    cubit.applyDeducted(true);
+
+    expect(cubit.state.deductedFilter, isFalse);
+    expect(cubit.state.hasFilters, isFalse);
+    expect(cubit.state.visibleRows.length, cubit.state.recap!.staff.length);
   });
 }

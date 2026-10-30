@@ -18,8 +18,9 @@ class PayrollSettings extends Equatable {
   /// Les statuts qui ouvrent les allocations familiales de l'école.
   final Set<StaffContractKind> allowanceEligibleKinds;
 
-  /// Jours d'un mois plein pour la retenue d'absence (T5) — distinct de
-  /// [monthlyHoursDivisor], qui compte des heures.
+  /// Déprécié depuis la formule 3 : le diviseur de l'absence est le nombre
+  /// de jours ouvrés du mois (`PayrollWorkingDays`). Encore servi par le
+  /// serveur, renvoyé tel quel, jamais lu par le moteur.
   final int workDaysDivisor;
 
   /// Coupée par défaut : une école qui ne règle rien est payée comme en v1.

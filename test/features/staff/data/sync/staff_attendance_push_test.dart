@@ -123,6 +123,7 @@ void main() {
     StaffAttendanceGesture gesture, {
     String date = '2026-09-29',
     int nowMs = 20,
+    String? reason,
   }) => gestureDao.add(
     StaffAttendanceGestureRequestDto(
       gestureId: id,
@@ -130,6 +131,7 @@ void main() {
       date: date,
       clientRecordedAt: '2026-09-29T16:00:00.000Z',
       authorId: 'u-1',
+      reason: reason,
     ),
     kind: gesture.kind,
     authorName: null,
@@ -300,6 +302,235 @@ void main() {
       expect(settings.start.wire, '08:00');
       expect(settings.toleranceMinutes, 15);
     });
+  });
+
+  group('réouverture du mois', () {
+    test('le motif part avec REOPEN_MONTH, et se relit', () async {
+      await addGesture(
+        'g-1',
+        StaffAttendanceGesture.reopenMonth,
+        date: '2026-09-01',
+        reason: 'Justificatif reçu',
+      );
+
+      final payload =
+          jsonDecode(
+                (await entry(StaffAttendanceGestureDao.entryId('g-1'))).payload,
+              )
+              as Map<String, dynamic>;
+
+      expect(payload['gesture'], 'REOPEN_MONTH');
+      expect(payload['reason'], 'Justificatif reçu');
+      expect(
+        StaffAttendanceGestureRequestDto.tryParse(payload)!.reason,
+        'Justificatif reçu',
+      );
+    });
+
+    test('un geste sans motif n\'en envoie pas', () async {
+      await addGesture('g-1', StaffAttendanceGesture.validateDay);
+
+      final payload =
+          jsonDecode(
+                (await entry(StaffAttendanceGestureDao.entryId('g-1'))).payload,
+              )
+              as Map<String, dynamic>;
+
+      expect(payload.containsKey('reason'), isFalse);
+    });
+
+    test(
+      'la réouverture attend la clôture du même mois encore en file',
+      () async {
+        await addGesture(
+          'g-1',
+          StaffAttendanceGesture.closeMonth,
+          date: '2026-09-01',
+          nowMs: 20,
+        );
+        await addGesture(
+          'g-2',
+          StaffAttendanceGesture.reopenMonth,
+          date: '2026-09-01',
+          nowMs: 30,
+          reason: 'Erreur',
+        );
+
+        final result = await gestures.dispatch(
+          await entry(StaffAttendanceGestureDao.entryId('g-2')),
+        );
+
+        expect(result.outcome, OutboxDispatchOutcome.blocked);
+      },
+    );
+
+    test('un pointage du mois attend la réouverture encore en vol', () async {
+      await seedMember('m-1');
+      await addGesture(
+        'g-1',
+        StaffAttendanceGesture.reopenMonth,
+        date: '2026-09-01',
+        nowMs: 5,
+        reason: 'Erreur',
+      );
+      await writeRecord(_record('r-1'));
+
+      final result = await records.dispatch(
+        await entry(StaffAttendanceWriteDao.entryId('r-1')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+    });
+
+    test('un geste d\'un jour attend la réouverture de son mois en file, '
+        'même hors du 1er', () async {
+      await addGesture(
+        'g-1',
+        StaffAttendanceGesture.reopenMonth,
+        date: '2026-09-01',
+        nowMs: 20,
+        reason: 'Erreur',
+      );
+      await addGesture(
+        'g-2',
+        StaffAttendanceGesture.reopenDay,
+        date: '2026-09-15',
+        nowMs: 30,
+      );
+
+      final result = await gestures.dispatch(
+        await entry(StaffAttendanceGestureDao.entryId('g-2')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.blocked);
+      verifyNever(() => api.submitGesture(any(), any()));
+    });
+
+    test(
+      'la réouverture du mois n\'attend pas un geste de jour plus jeune',
+      () async {
+        await addGesture(
+          'g-1',
+          StaffAttendanceGesture.reopenMonth,
+          date: '2026-09-01',
+          nowMs: 20,
+          reason: 'Erreur',
+        );
+        await addGesture(
+          'g-2',
+          StaffAttendanceGesture.reopenDay,
+          date: '2026-09-15',
+          nowMs: 30,
+        );
+        when(() => api.submitGesture(any(), any())).thenAnswer(
+          (_) async => const StaffAttendanceLockDto(
+            kind: 'MONTH',
+            periodStart: '2026-09-01',
+            state: 'OPEN',
+          ),
+        );
+
+        final result = await gestures.dispatch(
+          await entry(StaffAttendanceGestureDao.entryId('g-1')),
+        );
+
+        expect(result.outcome, OutboxDispatchOutcome.acked);
+      },
+    );
+
+    test('une réouverture accusée remet en file les pointages refusés '
+        'MONTH_CLOSED du mois', () async {
+      await seedMember('m-1');
+      await writeRecord(_record('r-1'));
+      await StaffAttendanceSyncDao(db).markRejected(
+        'r-1',
+        sentClientUpdatedAt: '2026-09-29T08:00:00.000Z',
+        code: 'MONTH_CLOSED',
+        reason: 'MONTH_CLOSED',
+        nowMs: 12,
+      );
+      await outbox.markSyncError(StaffAttendanceWriteDao.entryId('r-1'), 'x');
+      await addGesture(
+        'g-1',
+        StaffAttendanceGesture.reopenMonth,
+        date: '2026-09-01',
+        reason: 'Erreur',
+      );
+      when(() => api.submitGesture(any(), any())).thenAnswer(
+        (_) async => const StaffAttendanceLockDto(
+          kind: 'MONTH',
+          periodStart: '2026-09-01',
+          state: 'OPEN',
+        ),
+      );
+
+      final result = await gestures.dispatch(
+        await entry(StaffAttendanceGestureDao.entryId('g-1')),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      expect((await recordRow('r-1'))['sync_status'], 'PENDING_SYNC');
+      expect(
+        (await outbox.pendingAll()).map((e) => e.id),
+        contains(StaffAttendanceWriteDao.entryId('r-1')),
+      );
+    });
+
+    test(
+      'un mois rouvert ailleurs remet en file les pointages MONTH_CLOSED',
+      () async {
+        await seedMember('m-1');
+        const month = StaffAttendanceLockDto(
+          kind: 'MONTH',
+          periodStart: '2026-09-01',
+          state: 'LOCKED',
+        );
+        await locks.applyServer([month], schoolId: 's-1', nowMs: 1);
+        await writeRecord(_record('r-1'));
+        await StaffAttendanceSyncDao(db).markRejected(
+          'r-1',
+          sentClientUpdatedAt: '2026-09-29T08:00:00.000Z',
+          code: 'MONTH_CLOSED',
+          reason: 'MONTH_CLOSED',
+          nowMs: 12,
+        );
+        await outbox.markSyncError(StaffAttendanceWriteDao.entryId('r-1'), 'x');
+
+        await locks.applyServer(
+          [
+            const StaffAttendanceLockDto(
+              kind: 'MONTH',
+              periodStart: '2026-09-01',
+              state: 'OPEN',
+            ),
+          ],
+          schoolId: 's-1',
+          nowMs: 13,
+        );
+
+        expect((await recordRow('r-1'))['sync_status'], 'PENDING_SYNC');
+      },
+    );
+
+    test(
+      'posée sur la tablette, la réouverture déverrouille le mois',
+      () async {
+        await addGesture(
+          'g-1',
+          StaffAttendanceGesture.reopenMonth,
+          date: '2026-09-01',
+          reason: 'Erreur',
+        );
+
+        final shown = await locks.effective(
+          's-1',
+          from: '2026-09-01',
+          to: '2026-09-30',
+        );
+
+        expect(shown.single.locked, isFalse);
+      },
+    );
   });
 
   group('geste de verrou', () {
@@ -528,6 +759,7 @@ void main() {
         to: '2026-09-30',
       );
       expect(shown.single.locked, isFalse);
+      expect(shown.single.syncErrorCode, 'MONTH_CLOSED');
     });
   });
 }

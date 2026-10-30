@@ -3,13 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_reason_dialog.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
-import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_filter_empty.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_holiday_state.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_nav.dart';
-import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_picker.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -19,17 +17,20 @@ import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_close_dialog.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_closure.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_filters.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_hero.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_table.dart';
-import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_totals.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/states/hr_presence_results_error_state.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/staff_attendance_notices.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le récapitulatif sous la barre : le mois et sa navigation, les totaux du
-/// serveur, la clôture, puis les agents.
+/// Le récapitulatif sous la barre : le bandeau (le mois et les totaux du
+/// serveur), la clôture, puis les agents.
 class HrPresenceRecapBody extends StatelessWidget {
   final HrPresenceRecapState state;
   final ValueChanged<HrAttendanceRecapRow> onOpen;
+
+  /// Le motif d'une réouverture : 1 à 500 caractères (contrat back).
+  static const reopenReasonMax = 500;
 
   const HrPresenceRecapBody({
     super.key,
@@ -41,52 +42,14 @@ class HrPresenceRecapBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<HrPresenceRecapCubit>();
-    final recap = state.recap;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         HrPersonnelHeader(subtitle: l10n.hrPresenceRecapSubtitle),
         const SizedBox(height: AppSpacing.md),
-        // Dans la carte de filtres commune, comme la portée de la fiche : le
-        // mois pilote tout l'écran, il doit se voir.
-        EteeloPanelCard(
-          child: Wrap(
-            spacing: AppSpacing.lg,
-            runSpacing: AppSpacing.sm,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              PresenceMonthNav(
-                month: state.month,
-                isCurrent: state.isCurrentMonth,
-                onPrevious: state.canStepBack
-                    ? () => unawaited(cubit.stepMonth(-1))
-                    : null,
-                onNext: () => unawaited(cubit.stepMonth(1)),
-                onCurrent: () => unawaited(cubit.goCurrentMonth()),
-                onPick: () async {
-                  final picked = await pickPresenceMonth(
-                    context,
-                    month: state.month,
-                    firstMonth: state.firstMonth,
-                    lastMonth: state.currentMonth,
-                  );
-                  if (picked != null && !cubit.isClosed) {
-                    unawaited(cubit.showMonth(picked));
-                  }
-                },
-              ),
-              if (recap != null && recap.classDays > 0)
-                Text(
-                  recap.toDate
-                      ? l10n.hrPresenceRecapClassDaysToDate(recap.classDays)
-                      : l10n.hrPresenceRecapClassDays(recap.classDays),
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-            ],
-          ),
-        ),
+        // Le mois pilote tout l'écran : il reste au bandeau pendant le
+        // chargement et sur une erreur.
+        HrPresenceRecapHero(state: state),
         const SizedBox(height: AppSpacing.lg),
         _content(context, l10n, cubit),
       ],
@@ -120,11 +83,10 @@ class HrPresenceRecapBody extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            HrPresenceRecapTotals(recap: recap, unsynced: state.unsynced),
-            const SizedBox(height: AppSpacing.lg),
             HrPresenceRecapClosure(
               state: state,
               onClose: () => unawaited(_close(context, recap)),
+              onReopen: () => unawaited(_reopen(context, recap)),
             ),
             const SizedBox(height: AppSpacing.lg),
             HrPresenceRecapFilters(
@@ -134,6 +96,11 @@ class HrPresenceRecapBody extends StatelessWidget {
               onContract: cubit.toggleContract,
               text: state.text,
               onText: cubit.setText,
+              // Seulement là où une retenue peut exister.
+              deducted: HrPresenceRecapColumns.of(recap).deduction
+                  ? (count: state.deductedCount, selected: state.deductedFilter)
+                  : null,
+              onDeducted: cubit.toggleDeducted,
             ),
             const SizedBox(height: AppSpacing.md),
             if (rows.isEmpty)
@@ -143,18 +110,54 @@ class HrPresenceRecapBody extends StatelessWidget {
                 onShowAll: cubit.clearFilters,
               )
             else
-              EteeloPanelCard(
-                child: HrPresenceRecapTable(rows: rows, onOpen: onOpen),
+              HrPresenceRecapTable(
+                rows: rows,
+                onOpen: onOpen,
+                columns: HrPresenceRecapColumns.of(recap),
+                unsyncedByAgent: state.unsyncedByAgent,
+                // Filtré, le tableau n'est plus le mois entier : pas de
+                // total, plutôt qu'un total qui ne s'additionne pas.
+                total: state.hasFilters ? null : recap,
               ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              l10n.hrPresenceRecapLegend,
+              [
+                if (HrPresenceRecapColumns.of(recap).deduction &&
+                    recap.workingDays > 0)
+                  l10n.hrPresenceRecapLegendPay(recap.workingDays),
+                l10n.hrPresenceRecapLegend,
+              ].join(' · '),
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textMutedAa,
               ),
             ),
           ],
         );
+    }
+  }
+
+  /// Rouvrir exige un motif : il est consigné avec le geste.
+  Future<void> _reopen(BuildContext context, HrAttendanceRecap recap) async {
+    final l10n = AppLocalizations.of(context)!;
+    final cubit = context.read<HrPresenceRecapCubit>();
+    final reason = await EteeloReasonDialog.show(
+      context,
+      EteeloReasonDialog(
+        title: l10n.hrPresenceRecapReopenTitle(
+          PresenceLabels.month(MaterialLocalizations.of(context), recap.month),
+        ),
+        confirmLabel: l10n.hrPresenceRecapReopen,
+        cancelLabel: l10n.hrPresenceRecapReopenCancel,
+        fieldLabel: l10n.hrPresenceRecapReopenReason,
+        requiredError: l10n.hrPresenceRecapReopenReasonRequired,
+        helper: l10n.hrPresenceRecapReopenHelper,
+        maxLength: HrPresenceRecapBody.reopenReasonMax,
+      ),
+    );
+    if (reason == null || reason.isEmpty || !context.mounted) return;
+    final notice = await cubit.reopenMonth(reason);
+    if (notice != null && context.mounted) {
+      showStaffAttendanceNotice(context, notice);
     }
   }
 

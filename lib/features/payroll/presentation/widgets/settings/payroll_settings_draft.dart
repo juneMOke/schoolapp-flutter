@@ -17,7 +17,6 @@ class PayrollSettingsDraft extends ChangeNotifier {
 
   final TextEditingController hours = TextEditingController();
   final TextEditingController premium = TextEditingController();
-  final TextEditingController days = TextEditingController();
 
   /// Les règles par devise : seules celles que l'école a réglées.
   final PayrollCurrencySettingsDraft money;
@@ -45,7 +44,6 @@ class PayrollSettingsDraft extends ChangeNotifier {
   Iterable<TextEditingController> get _controllers => [
     hours,
     premium,
-    days,
     ...money.controllers,
     ...wide.controllers,
   ];
@@ -102,7 +100,6 @@ class PayrollSettingsDraft extends ChangeNotifier {
   Map<TextEditingController, String> _textsOf(PayrollSettings settings) => {
     hours: '${settings.monthlyHoursDivisor}',
     premium: '${(settings.overtimeMultiplierPermille - 1000) ~/ 10}',
-    days: '${settings.workDaysDivisor}',
     ...money.textsOf(settings),
     ...wide.textsOf(settings),
   };
@@ -123,8 +120,6 @@ class PayrollSettingsDraft extends ChangeNotifier {
       _intError(hours, PayrollSettingsBounds.monthlyHours);
   PayrollSettingsFieldError? errorOfPremium() =>
       _intError(premium, PayrollSettingsBounds.overtimePremiumPercent);
-  PayrollSettingsFieldError? errorOfDays() =>
-      _intError(days, PayrollSettingsBounds.workDays);
   PayrollSettingsFieldError? errorOfCnss(String currency) =>
       money.errorOfCnss(currency);
   PayrollSettingsFieldError? errorOfAmount(
@@ -145,7 +140,6 @@ class PayrollSettingsDraft extends ChangeNotifier {
   bool get hasErrors =>
       errorOfHours() != null ||
       errorOfPremium() != null ||
-      errorOfDays() != null ||
       money.hasErrors ||
       (showsWide && wide.hasErrors);
 
@@ -162,7 +156,9 @@ class PayrollSettingsDraft extends ChangeNotifier {
       overtimeMultiplierPermille: unchangedPremium
           ? _base.overtimeMultiplierPermille
           : 1000 + premiumPercent * 10,
-      workDaysDivisor: int.parse(days.text.trim()),
+      // Le diviseur de l'absence n'est plus un réglage (formule 3) : ce
+      // sont les jours ouvrés du mois. L'ancien, servi déprécié, repart tel
+      // quel et le serveur l'ignore.
       absenceDeductionEnabled: _absence,
       allowanceEligibleKinds: {..._eligible},
       byCurrency: money.byCurrency(_base),

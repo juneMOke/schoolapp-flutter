@@ -5,10 +5,16 @@ import 'package:equatable/equatable.dart';
 /// prise en charge des enfants. Chaque montant est **ce qui a été retenu** —
 /// ce qui ne tenait plus dans le brut est perdu, jamais reporté. Centimes.
 class PayrollLineDeductions extends Equatable {
-  /// Le diviseur de jours et les jours prestés (NJP) ; `null` pour un
-  /// vacataire à l'heure, que l'absence ne concerne pas.
+  /// Le diviseur de la retenue : J, les jours ouvrés du mois, depuis la
+  /// formule 3 (le réglage de l'école avant) ; `null` pour un vacataire à
+  /// l'heure, que l'absence ne concerne pas.
   final int? workDaysDivisor;
+
+  /// Les jours prestés (NJP) d'une ligne figée en formule 2 ; `null` depuis.
   final int? workedDays;
+
+  /// NJ, les absences non justifiées retenues — formule 3 seulement.
+  final int? unjustifiedAbsences;
   final int absenceInCents;
   final int iprInCents;
   final int cnssInCents;
@@ -17,6 +23,7 @@ class PayrollLineDeductions extends Equatable {
   const PayrollLineDeductions({
     this.workDaysDivisor,
     this.workedDays,
+    this.unjustifiedAbsences,
     this.absenceInCents = 0,
     this.iprInCents = 0,
     this.cnssInCents = 0,
@@ -29,8 +36,9 @@ class PayrollLineDeductions extends Equatable {
   int get totalInCents =>
       absenceInCents + iprInCents + cnssInCents + childcareInCents;
 
-  /// Les jours d'absence retenus : `diviseur − NJP`.
+  /// Les jours d'absence retenus : NJ en formule 3, `diviseur − NJP` avant.
   int? get absentDays {
+    if (unjustifiedAbsences case final absences?) return absences;
     final divisor = workDaysDivisor;
     final worked = workedDays;
     if (divisor == null || worked == null) return null;
@@ -41,6 +49,7 @@ class PayrollLineDeductions extends Equatable {
   List<Object?> get props => [
     workDaysDivisor,
     workedDays,
+    unjustifiedAbsences,
     absenceInCents,
     iprInCents,
     cnssInCents,

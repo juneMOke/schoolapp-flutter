@@ -15,13 +15,12 @@ void main() {
     expect(PayrollSettingsBounds.isValid(defaults), isTrue);
   });
 
-  test('heures, majoration et jours hors bornes sont refusés', () {
+  test('heures et majoration hors bornes sont refusées', () {
     for (final invalid in [
       defaults.copyWith(monthlyHoursDivisor: 0),
       defaults.copyWith(monthlyHoursDivisor: 745),
       defaults.copyWith(overtimeMultiplierPermille: 999),
       defaults.copyWith(overtimeMultiplierPermille: 5001),
-      defaults.copyWith(workDaysDivisor: 32),
     ]) {
       expect(PayrollSettingsBounds.isValid(invalid), isFalse);
     }

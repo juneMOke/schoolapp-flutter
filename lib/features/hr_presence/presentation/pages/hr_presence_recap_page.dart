@@ -15,13 +15,19 @@ import 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/
 import 'package:school_app_flutter/features/hr_presence/presentation/pages/hr_presence_fiche_agent_page.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/recap/hr_presence_recap_body.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
+import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// RH · Présences ▸ Récapitulatif — les totaux du mois par agent, lus au
-/// serveur (route 5), et la clôture du mois. Le mois tient dans l'adresse
-/// (`?mois=AAAA-MM`, nue sur le mois en cours).
+/// serveur (route 5), et la clôture du mois. Le mois et le contrat tiennent
+/// dans l'adresse, avec « avec retenue » (`?mois=AAAA-MM&contrat=vacataire&
+/// retenue=1`, nue sur le mois en cours, tous les contrats et tous les
+/// agents). La recherche n'y va pas : chaque frappe
+/// serait une entrée d'historique.
 class HrPresenceRecapPage extends StatelessWidget {
   static const monthParam = 'mois';
+  static const contractParam = 'contrat';
+  static const deductedParam = 'retenue';
 
   const HrPresenceRecapPage({super.key});
 
@@ -72,10 +78,23 @@ class HrPresenceRecapScreen extends StatelessWidget {
               HrPresenceRecapPage.monthParam: state.isCurrentMonth
                   ? null
                   : state.month,
+              HrPresenceRecapPage.contractParam: state.contract?.name,
+              HrPresenceRecapPage.deductedParam: state.deductedFilter
+                  ? '1'
+                  : null,
             },
-            onLocation: (values) => unawaited(
-              cubit.applyLocation(values[HrPresenceRecapPage.monthParam]),
-            ),
+            onLocation: (values) {
+              cubit.applyDeducted(
+                values[HrPresenceRecapPage.deductedParam] == '1',
+              );
+              cubit.applyContract(
+                StaffContractFilter.values
+                    .asNameMap()[values[HrPresenceRecapPage.contractParam]],
+              );
+              unawaited(
+                cubit.applyLocation(values[HrPresenceRecapPage.monthParam]),
+              );
+            },
             child: HrPresenceRecapBody(
               state: state,
               onOpen: (row) => onOpenAgent?.call(context, row),

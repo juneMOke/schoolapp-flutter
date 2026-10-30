@@ -9883,7 +9883,7 @@
   },
   "payrollKpiNet": "Net à payer",
   "payrollKpiPaid": "Versé {paid} / {total}",
-  "payrollAttendanceSignalDeducted": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — les absences non justifiées réduisent les jours prestés.",
+  "payrollAttendanceSignalDeducted": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — les absences non justifiées sont retenues au prorata des jours ouvrés.",
   "@payrollAttendanceSignalDeducted": {
     "description": "Signal Pointage quand l'école retient les absences.",
     "placeholders": {
@@ -9899,6 +9899,7 @@
     }
   },
   "payrollAttendanceSignal": "Pointage de {month} : {absences} absences non justifiées et {lates} retards — affichés à titre indicatif, aucune retenue.",
+  "payrollAttendanceSignalOpen": "Le pointage de {month} n'est pas encore clos : absences et heures compteront à sa clôture.",
   "payrollColAgent": "Agent",
   "payrollColBase": "Base",
   "payrollColOvertime": "H. sup",
@@ -9931,7 +9932,7 @@
   "payrollSignalAbsences": "{count} abs",
   "payrollSignalLates": "{count} ret",
   "payrollSignalNone": "RAS",
-  "payrollSignalHint": "Pointage du mois précédent",
+  "payrollSignalHint": "Pointage du mois",
   "payrollPayAfterValidation": "Après validation",
   "payrollPay": "Verser",
   "payrollToPay": "À verser",
@@ -10150,31 +10151,6 @@
   "payrollVarsChildren": "Enfants à charge",
   "payrollVarsAllowance": "{children} × {unit} = {amount}",
   "payrollVarsAdvances": "Avances — gérées dans l'onglet Avances",
-  "payrollVarsWorkedDays": "Jours prestés (NJP)",
-  "@payrollVarsWorkedDays": {
-    "description": "Éléments variables v2 : jours prestés."
-  },
-  "payrollVarsWorkedDaysValue": "{days} / {divisor} j",
-  "@payrollVarsWorkedDaysValue": {
-    "description": "Valeur du stepper NJP.",
-    "placeholders": {
-      "days": {
-        "type": "int"
-      },
-      "divisor": {
-        "type": "int"
-      }
-    }
-  },
-  "payrollVarsWorkedDaysCorrected": "Corrigé à la main — le Pointage dit {days} j",
-  "@payrollVarsWorkedDaysCorrected": {
-    "description": "Écart entre NJP saisi et Pointage.",
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
   "payrollVarsChildcare": "Prise en charge des enfants (PC/E) du mois",
   "@payrollVarsChildcare": {
     "description": "Montant PC/E du mois."
@@ -10410,10 +10386,6 @@
   "payrollSettingsAllowance": "Allocation par enfant",
   "payrollSettingsDefaultRate": "Taux d'heure sup. par défaut",
   "payrollSettingsStep": "Arrondi du taux au pas de",
-  "payrollSettingsWorkDays": "Jours d'un mois plein",
-  "@payrollSettingsWorkDays": {
-    "description": "Réglage v2 : diviseur de la retenue d'absence (1 à 31)."
-  },
   "payrollSettingsAbsenceDeduction": "Retenir les absences non justifiées",
   "@payrollSettingsAbsenceDeduction": {
     "description": "Réglage v2 : active la retenue d'absence ; coupée par défaut."
@@ -10486,7 +10458,7 @@
   "@payrollPayslipDeductionsTotal": {
     "description": "Total des retenues du bulletin."
   },
-  "payrollPayslipAttendanceDeducted": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — les absences non justifiées sont retenues sur les jours prestés.",
+  "payrollPayslipAttendanceDeducted": "Pointage de {month} : {absences} absences non justifiées, {justified} justifiées, {lates} retards ({minutes} min) — les absences non justifiées sont retenues au prorata des jours ouvrés.",
   "@payrollPayslipAttendanceDeducted": {
     "description": "Encart Pointage quand l'école retient les absences.",
     "placeholders": {
@@ -10528,7 +10500,7 @@
   "payrollPayslipOpenedWhatsapp": "Ouvert dans WhatsApp le {date}",
   "payrollPayslipPosition": "{index} / {count}",
   "payrollPayslipNoPhone": "Aucun numéro pour cet agent.",
-  "payrollPayslipWhatsappMessageV2": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : brut {gross} ; retenues {deductions} ; total retenues {total} ; jours prestés {days} ; net {net} ; perçu {paid} ; reste {rest}.",
+  "payrollPayslipWhatsappMessageV2": "Bonjour {name}, votre bulletin de paie de {month} ({school}) : brut {gross} ; retenues {deductions} ; total retenues {total} ; {days} ; net {net} ; perçu {paid} ; reste {rest}.",
   "@payrollPayslipWhatsappMessageV2": {
     "description": "Message WhatsApp v2 du bulletin.",
     "placeholders": {
@@ -11874,22 +11846,25 @@
   "hrPresenceMonthFuture": "À venir",
   "hrPresenceMonthScored": "{scored}/{classDays} j pointés",
   "subMenuHrPresenceRecap": "Récapitulatif",
-  "hrPresenceRecapSubtitle": "Les totaux de présence du mois par agent, puis sa clôture. La Paie relit les pointages réels.",
+  "hrPresenceRecapSubtitle": "Les totaux de présence du mois par agent, puis sa clôture : la paie du mois se calcule sur ces chiffres.",
   "hrPresenceRecapClassDays": "{count, plural, =1{1 jour de classe} other{{count} jours de classe}}",
   "hrPresenceRecapClassDaysToDate": "{count, plural, =1{1 jour de classe à ce jour} other{{count} jours de classe à ce jour}}",
   "hrPresenceRecapUnsynced": "Encore sur la tablette",
   "hrPresenceRecapCurrentMonth": "Mois en cours",
   "hrPresenceRecapNotClosed": "Mois non clôturé",
-  "hrPresenceRecapCloseExplain": "Clôturer verrouille les pointages du mois. Rien n'est transmis : la Paie relit les pointages réels.",
+  "hrPresenceRecapCloseExplain": "Clôturer fige les pointages du mois : la paie de ce mois pourra être calculée sur eux.",
   "hrPresenceRecapCloseFrom": "Clôture possible à partir du {day}",
   "hrPresenceRecapClosedOnTablet": "Clôture enregistrée sur la tablette, en attente d'envoi",
   "hrPresenceRecapClosedBy": "le {when} par {by}",
   "hrPresenceRecapDaysWorked": "{count, plural, =0{aucun jour presté} =1{1 jour presté} other{{count} jours prestés}}",
   "hrPresenceRecapLegend": "NJ = non justifiée · J = justifiée · une ligne ouvre la fiche individuelle",
-  "staffAttendanceCloseIrreversible": "Un mois clôturé ne se rouvre pas : la paie validée en dépend.",
+  "staffAttendanceCloseIrreversible": "Seule la direction rouvre un mois clôturé, tant que sa paie n'est pas validée.",
   "hrPresenceNoYearTitle": "Aucune année scolaire en cours",
   "hrPresenceNoYearMessage": "L'école est entre deux années : la vue annuelle reviendra à l'ouverture de la prochaine.",
-  "hrPresenceRecapCloseRefused": "La dernière clôture de ce mois a été refusée par le serveur : vérifiez le mois, puis recommencez.",
+  "hrPresenceRecapCloseRefused": "Le dernier geste sur ce mois (clôture ou réouverture) a été refusé par le serveur : vérifiez le mois, puis recommencez.",
+  "hrPresenceRecapRefusedForbidden": "Réouverture refusée par le serveur : ce compte n'a pas le droit de rouvrir un mois.",
+  "hrPresenceRecapRefusedPayroll": "Réouverture refusée par le serveur : la paie de ce mois est validée, il ne se rouvre plus.",
+  "hrPresenceRecapRefusedOutOfYear": "Réouverture refusée par le serveur : ce mois n'appartient pas à l'année scolaire en cours.",
   "hrPresenceAgentNotFoundMessage": "Le serveur ne connaît pas cet agent dans cette école : il a pu être retiré du fichier, ou le lien vient d'une autre école.",
   "hrPresenceErrorForbidden": "Votre profil ne permet pas de consulter les présences du personnel.",
   "hrPresenceYearRowA11y": "{month} : présence {presence}, retards {late}, absences {absent}",
@@ -11906,7 +11881,7 @@
   "payrollSettingsInCurrency": "{label} · {currency}",
   "@payrollSettingsInCurrency": {"placeholders": {"label": {"type": "String"}, "currency": {"type": "String"}}},
   "payrollSettingsMonthTitle": "Mois de salaire",
-  "payrollSettingsMonthSubtitle": "Heures et jours d'un mois plein ; une journée non prestée = brut ÷ jours.",
+  "payrollSettingsMonthSubtitle": "Heures d'un mois plein ; une absence non justifiée = base ÷ jours ouvrés du mois.",
   "payrollSettingsLegalTitle": "Retenues légales",
   "payrollSettingsLegalSubtitle": "IPR forfaitaire par agent payé, CNSS en ‰ de la base.",
   "payrollSettingsOvertimeTitle": "Heures supplémentaires",
@@ -12160,7 +12135,7 @@
   "payrollAgentWhatsappAgain": "Renvoyer par WhatsApp",
   "payrollAgentScaleFrozen": "Barème figé à la validation : {days} j de référence · absences {absences}.",
   "@payrollAgentScaleFrozen": {"placeholders": {"days": {"type": "int"}, "absences": {"type": "String"}}},
-  "payrollAgentScaleCurrent": "Barème en vigueur : {days} j de référence · absences {absences}.",
+  "payrollAgentScaleCurrent": "Barème en vigueur : {days} jours ouvrés dans le mois · absences {absences}.",
   "@payrollAgentScaleCurrent": {"placeholders": {"days": {"type": "int"}, "absences": {"type": "String"}}},
   "payrollAgentAbsencesDeducted": "retenues",
   "payrollAgentAbsencesIndicative": "indicatives",
@@ -12171,9 +12146,9 @@
   "payrollCalcGross": "Salaire brut (A)",
   "payrollCalcDeductionsTotal": "Total retenues (B)",
   "payrollCalcNetToPay": "Net à payer du mois · (A) − (B)",
-  "payrollCalcAbsenceFormula": "{days, plural, =1{1 j non presté} other{{days} j non prestés}} · base {base} ÷ {divisor} j",
+  "payrollCalcAbsenceFormula": "{days, plural, =1{1 j d'absence} other{{days} j d'absence}} · base {base} ÷ {divisor} j",
   "@payrollCalcAbsenceFormula": {"placeholders": {"days": {"type": "int"}, "base": {"type": "String"}, "divisor": {"type": "int"}}},
-  "payrollCalcAbsenceIndicative": "{days, plural, =1{1 j non presté} other{{days} j non prestés}} · non retenus (barème de l'école)",
+  "payrollCalcAbsenceIndicative": "{days, plural, =1{1 j d'absence} other{{days} j d'absence}} · non retenus (barème de l'école)",
   "@payrollCalcAbsenceIndicative": {"placeholders": {"days": {"type": "int"}}},
   "payrollCalcAbsenceHourly": "Payé aux heures — sans objet",
   "payrollCalcRate": "Taux de versement du mois · {percent} %",
@@ -12229,5 +12204,53 @@
   "@payrollPayslipBalanceCount": {"placeholders": {"count": {"type": "int"}}},
   "payrollPayslipBalanceDebt": "dette de l'école envers l'agent",
   "payrollPayslipBalanceRatio": "{percent} % réglé",
-  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}}
+  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}},
+  "hrPresenceRecapEyebrow": "Récapitulatif pour la paie",
+  "hrPresenceRecapRateDetail": "hors vacataires payés à l'heure",
+  "hrPresenceRecapColAbsences": "Absences et retards",
+  "hrPresenceRecapUnjustified": "{count} NJ",
+  "@hrPresenceRecapUnjustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapJustified": "{count} J",
+  "@hrPresenceRecapJustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapNoAbsence": "Aucune",
+  "hrPresenceRecapLates": "{count, plural, =1{1 retard · {minutes} min} other{{count} retards · {minutes} min}}",
+  "@hrPresenceRecapLates": {"placeholders": {"count": {"type": "int"}, "minutes": {"type": "int"}}},
+  "hrPresenceRecapTotal": "{count, plural, =1{Total · 1 agent} other{Total · {count} agents}}",
+  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}},
+  "staffAttendanceToastMonthReopened": "{month} rouvert",
+  "@staffAttendanceToastMonthReopened": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopen": "Rouvrir le mois",
+  "hrPresenceRecapReopenTitle": "Rouvrir {month} ?",
+  "@hrPresenceRecapReopenTitle": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopenCancel": "Annuler",
+  "hrPresenceRecapReopenReason": "Motif de la réouverture",
+  "hrPresenceRecapReopenReasonRequired": "Le motif est obligatoire.",
+  "hrPresenceRecapReopenHelper": "Consigné avec le geste. Les jours validés le restent : rouvrez le jour à corriger, puis reclôturez. La fiche de présence du mois est annulée.",
+  "hrPresenceRecapReopenedOnTablet": "Réouverture enregistrée sur la tablette, en attente d'envoi",
+  "payrollPayslipUnjustifiedLabel": "Absences non justifiées",
+  "payrollPayslipAbsenceDaysValue": "{absences} j NJ sur {days} jours ouvrés",
+  "@payrollPayslipAbsenceDaysValue": {"placeholders": {"absences": {"type": "int"}, "days": {"type": "int"}}},
+  "hrPresenceRecapCost": "Coût de la paie de {month}",
+  "@hrPresenceRecapCost": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapCostPlanned": "Prévu · versée début {next} · hors charges patronales",
+  "@hrPresenceRecapCostPlanned": {"placeholders": {"next": {"type": "String"}}},
+  "hrPresenceRecapCostFrozen": "Paie validée : chiffres figés",
+  "hrPresenceRecapDeduction": "Retenue pour absences",
+  "hrPresenceRecapDeductionDetail": "÷ {days} jours ouvrés",
+  "@hrPresenceRecapDeductionDetail": {"placeholders": {"days": {"type": "int"}}},
+  "hrPresenceRecapColGross": "Brut prévu",
+  "hrPresenceRecapColDeduction": "Retenue",
+  "hrPresenceRecapColGrossAfter": "Brut après absences",
+  "hrPresenceRecapHourlyRate": "{hours} × {rate}",
+  "@hrPresenceRecapHourlyRate": {"placeholders": {"hours": {"type": "String"}, "rate": {"type": "String"}}},
+  "hrPresenceRecapPaidHourly": "payé à l'heure",
+  "hrPresenceRecapDeductionDays": "{days} j × {rate}",
+  "@hrPresenceRecapDeductionDays": {"placeholders": {"days": {"type": "int"}, "rate": {"type": "String"}}},
+  "hrPresenceRecapWithDeduction": "Avec retenue",
+  "hrPresenceRecapLegendPay": "Retenue = salaire de base ÷ {days} jours ouvrés du mois × jours NJ · brut avant IPR, CNSS et avances, hors charges patronales",
+  "@hrPresenceRecapLegendPay": {"placeholders": {"days": {"type": "int"}}},
+  "hrPresenceRecapTotalCurrency": "Total · {currency}",
+  "@hrPresenceRecapTotalCurrency": {"placeholders": {"currency": {"type": "String"}}},
+  "hrPresenceRecapStatusPlanned": "Prévu",
+  "hrPresenceRecapStatusFrozen": "Figé"
 }

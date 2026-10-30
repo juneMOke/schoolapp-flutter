@@ -3,7 +3,7 @@ import 'package:school_app_flutter/core/helpers/json_fields.dart';
 
 /// Le résumé d'un mois clos du Pointage (flux `hr.staff-attendance-summaries`,
 /// sous `hr.pay.read`). Les agents restent bruts : ils se relisent à la
-/// lecture.
+/// lecture. Sans [closedAt], le mois a été rouvert : son résumé s'efface.
 class AttendanceSummaryDto {
   final String month;
   final String? closedAt;

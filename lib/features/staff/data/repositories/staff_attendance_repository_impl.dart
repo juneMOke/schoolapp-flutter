@@ -97,6 +97,22 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Map<String, int>>> unsyncedByAgent({
+    required String from,
+    required String to,
+  }) async {
+    final session = _local.session();
+    if (session == null) return const Right({});
+    try {
+      return Right(
+        await _records.unsyncedByAgent(session.schoolId, from: from, to: to),
+      );
+    } catch (e) {
+      return Left(StorageFailure('Lecture du pointage : $e'));
+    }
+  }
+
   Future<StaffAttendanceSnapshot> _compose(
     String schoolId,
     StaffFileSnapshot file,
@@ -161,8 +177,9 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
   @override
   Future<Either<Failure, Unit>> recordGesture(
     StaffAttendanceGesture gesture,
-    String periodStart,
-  ) async {
+    String periodStart, {
+    String? reason,
+  }) async {
     final session = _local.session();
     if (session == null) return const Left(StaffLocalWriter.noSession);
     final now = _now();
@@ -176,6 +193,7 @@ class StaffAttendanceRepositoryImpl implements StaffAttendanceRepository {
           date: periodStart,
           clientRecordedAt: recordedAt,
           authorId: session.authorId,
+          reason: reason,
         ),
         kind: gesture.kind,
         authorName: null,

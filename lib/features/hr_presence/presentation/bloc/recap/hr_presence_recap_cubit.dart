@@ -17,8 +17,9 @@ export 'package:school_app_flutter/features/hr_presence/presentation/bloc/recap/
 /// (route 5, D1), et la clôture **écrite sur la tablette** puis envoyée par
 /// l'outbox, comme au Pointage — elle se pose hors ligne.
 ///
-/// La clôture n'est qu'un verrou : rien n'est transmis, la Paie relit les
-/// pointages réels (E4). Un mois clos ne se rouvre pas (E6).
+/// La clôture n'est qu'un verrou : rien n'est transmis, la Paie lit le
+/// résumé du mois clos (E4). La direction peut le rouvrir, motif à l'appui,
+/// tant que sa paie n'est pas validée.
 class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
   final GetHrAttendanceRecapUseCase _getRecap;
   final LoadStaffAttendanceUseCase _loadLocal;
@@ -110,7 +111,24 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
     state.copyWith(contract: state.contract == contract ? null : contract),
   );
 
-  void clearFilters() => emit(state.copyWith(text: '', contract: null));
+  /// Le contrat lu dans l'adresse ; inconnu, tous.
+  void applyContract(StaffContractFilter? contract) {
+    if (contract != state.contract) emit(state.copyWith(contract: contract));
+  }
+
+  /// « Avec retenue » : les seuls agents à qui le mois retient.
+  void toggleDeducted() =>
+      emit(state.copyWith(deductedOnly: !state.deductedOnly));
+
+  /// Le filtre « avec retenue » lu dans l'adresse.
+  void applyDeducted(bool deductedOnly) {
+    if (deductedOnly != state.deductedOnly) {
+      emit(state.copyWith(deductedOnly: deductedOnly));
+    }
+  }
+
+  void clearFilters() =>
+      emit(state.copyWith(text: '', contract: null, deductedOnly: false));
 
   /// Pose la clôture du mois affiché sur la tablette ; l'outbox l'envoie.
   /// Rend l'annonce à faire.
@@ -120,6 +138,18 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
     final notice = await _commands.closeMonth(state.month);
     if (isClosed) return notice;
     emit(state.copyWith(closing: false));
+    await _readLocal(_ticket);
+    return notice;
+  }
+
+  /// Rouvre le mois affiché, motif à l'appui ; l'outbox l'envoie. Rend
+  /// l'annonce à faire.
+  Future<StaffAttendanceNotice?> reopenMonth(String reason) async {
+    if (state.reopening || !state.isClosed) return null;
+    emit(state.copyWith(reopening: true));
+    final notice = await _commands.reopenMonth(state.month, reason);
+    if (isClosed) return notice;
+    emit(state.copyWith(reopening: false));
     await _readLocal(_ticket);
     return notice;
   }
@@ -134,6 +164,7 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
           failure: null,
           localLock: null,
           unsynced: 0,
+          unsyncedByAgent: const {},
         ),
       );
     }
@@ -162,7 +193,7 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
     final from = SchoolDayCalendar.firstOf(month);
     final to = SchoolDayCalendar.daysOf(month).last;
     final local = await _loadLocal(from: from, to: to);
-    final count = await _countUnsynced(from: from, to: to);
+    final byAgent = await _countUnsynced.byAgent(from: from, to: to);
     if (isClosed || ticket != _ticket) return;
     emit(
       state.copyWith(
@@ -170,7 +201,11 @@ class HrPresenceRecapCubit extends Cubit<HrPresenceRecapState> {
           (_) => state.localLock,
           (s) => s.monthLock(month),
         ),
-        unsynced: count.fold((_) => state.unsynced, (n) => n),
+        unsynced: byAgent.fold(
+          (_) => state.unsynced,
+          (counts) => counts.values.fold<int>(0, (sum, n) => sum + n),
+        ),
+        unsyncedByAgent: byAgent.fold((_) => state.unsyncedByAgent, (c) => c),
       ),
     );
   }

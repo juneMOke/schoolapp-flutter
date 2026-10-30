@@ -10,7 +10,6 @@ import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bl
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
-import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
@@ -36,10 +35,7 @@ abstract final class PayrollLedgerNotices {
       context,
       kPayrollManageAccess.requires,
     );
-    final attendanceMonth = PayrollLabels.month(
-      context,
-      PayrollMonth.previous(view.month),
-    );
+    final attendanceMonth = PayrollLabels.month(context, view.month);
     final refusal = view.lastRefusal;
     final returned = view.header?.returnReason;
     final alerts = <Widget>[

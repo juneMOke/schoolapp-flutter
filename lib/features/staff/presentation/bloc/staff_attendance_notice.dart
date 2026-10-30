@@ -28,6 +28,9 @@ enum StaffAttendanceNoticeKind {
   /// [StaffAttendanceNotice.month] clos.
   monthClosed,
 
+  /// [StaffAttendanceNotice.month] rouvert.
+  monthReopened,
+
   /// L'écriture locale a échoué (base, session).
   writeFailed,
 

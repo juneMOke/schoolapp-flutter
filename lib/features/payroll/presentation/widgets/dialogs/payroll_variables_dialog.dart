@@ -63,7 +63,6 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
           ),
   );
 
-  late int? _workedDays = widget.current.workedDays;
   late final TextEditingController _childcare = _cents(
     widget.current.childcareInCents,
   );
@@ -99,7 +98,6 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
         ? AmountInput.toCents(_rate.text)
         : null,
     dependentChildren: _children,
-    workedDays: _workedDays,
     childcareInCents: AmountInput.toCents(_childcare.text),
     fixedPayoutInCents: _fixed ? AmountInput.toCents(_fixedAmount.text) : null,
     fixedPayoutReason: _fixed ? _fixedReason.text.trim() : null,
@@ -110,17 +108,6 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
       !_fixed ||
       (AmountInput.toCents(_fixedAmount.text) != null &&
           _fixedReason.text.trim().length >= minPayoutReasonLength);
-
-  /// Les jours prestés du Pointage, sans la correction de l'économe.
-  int? get _attendanceWorkedDays => widget
-      .preview(
-        PayrollVariables(
-          staffMemberId: widget.current.staffMemberId,
-          dependentChildren: _children,
-        ),
-      )
-      ?.deductions
-      .workedDays;
 
   @override
   Widget build(BuildContext context) {
@@ -158,10 +145,8 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
           const Divider(),
           PayrollVariablesDeductions(
             preview: preview,
-            attendanceWorkedDays: _attendanceWorkedDays,
             childcare: _childcare,
             childcareEnabled: widget.settings.childcareEnabled,
-            onWorkedDays: (days) => setState(() => _workedDays = days),
             onChanged: () => setState(() {}),
           ),
           if (preview.advances.isNotEmpty) ...[

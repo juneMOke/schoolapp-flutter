@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line_parts.dart';
 import 'package:school_app_flutter/core/money/mobile_money_operator.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
@@ -10,6 +11,30 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les libellés de la paie, en un seul endroit.
 abstract final class PayrollLabels {
+  /// La ligne d'assiduité d'un bulletin : « 2 j NJ sur 22 jours ouvrés » en
+  /// formule 3, « 20 jrs / 26 » sur une ligne figée avant ; `null` pour un
+  /// vacataire à l'heure.
+  static ({String label, String value})? attendanceDays(
+    AppLocalizations l10n,
+    PayrollLineDeductions deductions,
+  ) {
+    final divisor = deductions.workDaysDivisor;
+    if (divisor == null) return null;
+    if (deductions.unjustifiedAbsences case final absences?) {
+      return (
+        label: l10n.payrollPayslipUnjustifiedLabel,
+        value: l10n.payrollPayslipAbsenceDaysValue(absences, divisor),
+      );
+    }
+    return (
+      label: l10n.payrollPayslipWorkedDays,
+      value: l10n.payrollPayslipWorkedDaysValue(
+        deductions.workedDays ?? divisor,
+        divisor,
+      ),
+    );
+  }
+
   static String money(int cents, String currency) =>
       MoneyFormat.format(Money(cents, currency));
 

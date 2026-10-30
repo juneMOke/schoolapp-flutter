@@ -113,9 +113,10 @@ void main() {
 
   group('vacataire à l heure', () {
     test('38 h d août à 6 USD : 228 USD, et jamais d heures sup.', () {
+      // Formule 3 : la paie d'août lit les heures d'août.
       final line = PayrollEngine.compute(
         input(
-          month: '2026-09',
+          month: '2026-08',
           contracts: {
             'm-2': [
               contract(

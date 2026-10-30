@@ -14217,12 +14217,17 @@ class AppLocalizationsEn extends AppLocalizations {
     int absences,
     int lates,
   ) {
-    return 'Attendance for $month: $absences unexcused absences and $lates late arrivals — unexcused absences reduce the days worked.';
+    return 'Attendance for $month: $absences unexcused absences and $lates late arrivals — unexcused absences are deducted pro rata to the month\'s working days.';
   }
 
   @override
   String payrollAttendanceSignal(String month, int absences, int lates) {
     return '$month attendance: $absences unexcused absences and $lates late arrivals — shown for information, never deducted.';
+  }
+
+  @override
+  String payrollAttendanceSignalOpen(String month) {
+    return '$month attendance is not closed yet: absences and hours will count once it is.';
   }
 
   @override
@@ -14286,7 +14291,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollSignalNone => 'OK';
 
   @override
-  String get payrollSignalHint => 'Attendance of the previous month';
+  String get payrollSignalHint => 'Attendance of the month';
 
   @override
   String get payrollPayAfterValidation => 'After validation';
@@ -14533,19 +14538,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollVarsAdvances => 'Advances — managed in the Advances tab';
-
-  @override
-  String get payrollVarsWorkedDays => 'Days worked';
-
-  @override
-  String payrollVarsWorkedDaysValue(int days, int divisor) {
-    return '$days / $divisor d';
-  }
-
-  @override
-  String payrollVarsWorkedDaysCorrected(int days) {
-    return 'Corrected by hand — attendance says $days d';
-  }
 
   @override
   String get payrollVarsChildcare => 'Staff children care (PC/E) this month';
@@ -14941,9 +14933,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollSettingsStep => 'Round the rate to steps of';
 
   @override
-  String get payrollSettingsWorkDays => 'Days in a full month';
-
-  @override
   String get payrollSettingsAbsenceDeduction => 'Deduct unexcused absences';
 
   @override
@@ -15017,7 +15006,7 @@ class AppLocalizationsEn extends AppLocalizations {
     int lates,
     int minutes,
   ) {
-    return 'Attendance for $month: $absences unexcused absences, $justified excused, $lates late arrivals ($minutes min) — unexcused absences are deducted from the days worked.';
+    return 'Attendance for $month: $absences unexcused absences, $justified excused, $lates late arrivals ($minutes min) — unexcused absences are deducted pro rata to the month\'s working days.';
   }
 
   @override
@@ -15118,7 +15107,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String paid,
     String rest,
   ) {
-    return 'Hello $name, your payslip for $month ($school): gross $gross; deductions $deductions; total deductions $total; days worked $days; net $net; received $paid; remaining $rest.';
+    return 'Hello $name, your payslip for $month ($school): gross $gross; deductions $deductions; total deductions $total; $days; net $net; received $paid; remaining $rest.';
   }
 
   @override
@@ -19533,7 +19522,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapSubtitle =>
-      'Each staff member\'s attendance totals for the month, then its closing. Payroll reads the actual marks.';
+      'Each staff member\'s attendance totals for the month, then its closing: the month\'s pay is computed from these figures.';
 
   @override
   String hrPresenceRecapClassDays(int count) {
@@ -19568,7 +19557,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapCloseExplain =>
-      'Closing locks the month\'s marks. Nothing is sent: Payroll reads the actual marks.';
+      'Closing freezes the month\'s marks: that month\'s pay can then be computed from them.';
 
   @override
   String hrPresenceRecapCloseFrom(String day) {
@@ -19602,7 +19591,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffAttendanceCloseIrreversible =>
-      'A closed month cannot be reopened: validated pay depends on it.';
+      'Only the management can reopen a closed month, as long as its pay is not validated.';
 
   @override
   String get hrPresenceNoYearTitle => 'No current school year';
@@ -19613,7 +19602,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapCloseRefused =>
-      'The server refused the last closing of this month: check the month, then try again.';
+      'The server refused the last action on this month (closing or reopening): check the month, then try again.';
+
+  @override
+  String get hrPresenceRecapRefusedForbidden =>
+      'Reopening refused by the server: this account may not reopen a month.';
+
+  @override
+  String get hrPresenceRecapRefusedPayroll =>
+      'Reopening refused by the server: this month\'s payroll is validated, it can no longer be reopened.';
+
+  @override
+  String get hrPresenceRecapRefusedOutOfYear =>
+      'Reopening refused by the server: this month is outside the current school year.';
 
   @override
   String get hrPresenceAgentNotFoundMessage =>
@@ -19674,7 +19675,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollSettingsMonthSubtitle =>
-      'Hours and days in a full month; a day not worked = gross ÷ days.';
+      'Hours in a full month; an unexcused absence = base ÷ the month\'s working days.';
 
   @override
   String get payrollSettingsLegalTitle => 'Statutory deductions';
@@ -20577,7 +20578,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String payrollAgentScaleCurrent(int days, String absences) {
-    return 'Scale in force: $days reference days · absences $absences.';
+    return 'Scale in force: $days working days in the month · absences $absences.';
   }
 
   @override
@@ -20612,8 +20613,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days days not worked',
-      one: '1 day not worked',
+      other: '$days days absent',
+      one: '1 day absent',
     );
     return '$_temp0 · base $base ÷ $divisor days';
   }
@@ -20623,8 +20624,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days days not worked',
-      one: '1 day not worked',
+      other: '$days days absent',
+      one: '1 day absent',
     );
     return '$_temp0 · not deducted (school scale)';
   }
@@ -20810,4 +20811,148 @@ class AppLocalizationsEn extends AppLocalizations {
   String payrollPayslipBalanceRatio(int percent) {
     return '$percent% settled';
   }
+
+  @override
+  String get hrPresenceRecapEyebrow => 'Payroll summary';
+
+  @override
+  String get hrPresenceRecapRateDetail => 'excluding hourly staff';
+
+  @override
+  String get hrPresenceRecapColAbsences => 'Absences and lates';
+
+  @override
+  String hrPresenceRecapUnjustified(int count) {
+    return '$count U';
+  }
+
+  @override
+  String hrPresenceRecapJustified(int count) {
+    return '$count E';
+  }
+
+  @override
+  String get hrPresenceRecapNoAbsence => 'None';
+
+  @override
+  String hrPresenceRecapLates(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lates · $minutes min',
+      one: '1 late · $minutes min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrPresenceRecapTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Total · $count staff',
+      one: 'Total · 1 staff member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceToastMonthReopened(String month) {
+    return '$month reopened';
+  }
+
+  @override
+  String get hrPresenceRecapReopen => 'Reopen the month';
+
+  @override
+  String hrPresenceRecapReopenTitle(String month) {
+    return 'Reopen $month?';
+  }
+
+  @override
+  String get hrPresenceRecapReopenCancel => 'Cancel';
+
+  @override
+  String get hrPresenceRecapReopenReason => 'Reason for reopening';
+
+  @override
+  String get hrPresenceRecapReopenReasonRequired => 'A reason is required.';
+
+  @override
+  String get hrPresenceRecapReopenHelper =>
+      'Recorded with the action. Validated days stay validated: reopen the day to fix, then close again. The month\'s attendance sheet is cancelled.';
+
+  @override
+  String get hrPresenceRecapReopenedOnTablet =>
+      'Reopening saved on this tablet, waiting to be sent';
+
+  @override
+  String get payrollPayslipUnjustifiedLabel => 'Unexcused absences';
+
+  @override
+  String payrollPayslipAbsenceDaysValue(int absences, int days) {
+    return '$absences unexcused d of $days working days';
+  }
+
+  @override
+  String hrPresenceRecapCost(String month) {
+    return 'Pay cost for $month';
+  }
+
+  @override
+  String hrPresenceRecapCostPlanned(String next) {
+    return 'Planned · paid early $next · before employer charges';
+  }
+
+  @override
+  String get hrPresenceRecapCostFrozen => 'Pay validated: figures frozen';
+
+  @override
+  String get hrPresenceRecapDeduction => 'Absence deduction';
+
+  @override
+  String hrPresenceRecapDeductionDetail(int days) {
+    return '÷ $days working days';
+  }
+
+  @override
+  String get hrPresenceRecapColGross => 'Planned gross';
+
+  @override
+  String get hrPresenceRecapColDeduction => 'Deduction';
+
+  @override
+  String get hrPresenceRecapColGrossAfter => 'Gross after absences';
+
+  @override
+  String hrPresenceRecapHourlyRate(String hours, String rate) {
+    return '$hours × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapPaidHourly => 'paid by the hour';
+
+  @override
+  String hrPresenceRecapDeductionDays(int days, String rate) {
+    return '$days d × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapWithDeduction => 'With deduction';
+
+  @override
+  String hrPresenceRecapLegendPay(int days) {
+    return 'Deduction = base salary ÷ $days working days of the month × unexcused days · gross before income tax, social security and advances, excluding employer charges';
+  }
+
+  @override
+  String hrPresenceRecapTotalCurrency(String currency) {
+    return 'Total · $currency';
+  }
+
+  @override
+  String get hrPresenceRecapStatusPlanned => 'Planned';
+
+  @override
+  String get hrPresenceRecapStatusFrozen => 'Frozen';
 }

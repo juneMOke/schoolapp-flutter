@@ -14316,12 +14316,17 @@ class AppLocalizationsFr extends AppLocalizations {
     int absences,
     int lates,
   ) {
-    return 'Pointage de $month : $absences absences non justifiées et $lates retards — les absences non justifiées réduisent les jours prestés.';
+    return 'Pointage de $month : $absences absences non justifiées et $lates retards — les absences non justifiées sont retenues au prorata des jours ouvrés.';
   }
 
   @override
   String payrollAttendanceSignal(String month, int absences, int lates) {
     return 'Pointage de $month : $absences absences non justifiées et $lates retards — affichés à titre indicatif, aucune retenue.';
+  }
+
+  @override
+  String payrollAttendanceSignalOpen(String month) {
+    return 'Le pointage de $month n\'est pas encore clos : absences et heures compteront à sa clôture.';
   }
 
   @override
@@ -14385,7 +14390,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollSignalNone => 'RAS';
 
   @override
-  String get payrollSignalHint => 'Pointage du mois précédent';
+  String get payrollSignalHint => 'Pointage du mois';
 
   @override
   String get payrollPayAfterValidation => 'Après validation';
@@ -14634,19 +14639,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollVarsAdvances => 'Avances — gérées dans l\'onglet Avances';
-
-  @override
-  String get payrollVarsWorkedDays => 'Jours prestés (NJP)';
-
-  @override
-  String payrollVarsWorkedDaysValue(int days, int divisor) {
-    return '$days / $divisor j';
-  }
-
-  @override
-  String payrollVarsWorkedDaysCorrected(int days) {
-    return 'Corrigé à la main — le Pointage dit $days j';
-  }
 
   @override
   String get payrollVarsChildcare =>
@@ -15044,9 +15036,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollSettingsStep => 'Arrondi du taux au pas de';
 
   @override
-  String get payrollSettingsWorkDays => 'Jours d\'un mois plein';
-
-  @override
   String get payrollSettingsAbsenceDeduction =>
       'Retenir les absences non justifiées';
 
@@ -15121,7 +15110,7 @@ class AppLocalizationsFr extends AppLocalizations {
     int lates,
     int minutes,
   ) {
-    return 'Pointage de $month : $absences absences non justifiées, $justified justifiées, $lates retards ($minutes min) — les absences non justifiées sont retenues sur les jours prestés.';
+    return 'Pointage de $month : $absences absences non justifiées, $justified justifiées, $lates retards ($minutes min) — les absences non justifiées sont retenues au prorata des jours ouvrés.';
   }
 
   @override
@@ -15222,7 +15211,7 @@ class AppLocalizationsFr extends AppLocalizations {
     String paid,
     String rest,
   ) {
-    return 'Bonjour $name, votre bulletin de paie de $month ($school) : brut $gross ; retenues $deductions ; total retenues $total ; jours prestés $days ; net $net ; perçu $paid ; reste $rest.';
+    return 'Bonjour $name, votre bulletin de paie de $month ($school) : brut $gross ; retenues $deductions ; total retenues $total ; $days ; net $net ; perçu $paid ; reste $rest.';
   }
 
   @override
@@ -19668,7 +19657,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceRecapSubtitle =>
-      'Les totaux de présence du mois par agent, puis sa clôture. La Paie relit les pointages réels.';
+      'Les totaux de présence du mois par agent, puis sa clôture : la paie du mois se calcule sur ces chiffres.';
 
   @override
   String hrPresenceRecapClassDays(int count) {
@@ -19703,7 +19692,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceRecapCloseExplain =>
-      'Clôturer verrouille les pointages du mois. Rien n\'est transmis : la Paie relit les pointages réels.';
+      'Clôturer fige les pointages du mois : la paie de ce mois pourra être calculée sur eux.';
 
   @override
   String hrPresenceRecapCloseFrom(String day) {
@@ -19737,7 +19726,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffAttendanceCloseIrreversible =>
-      'Un mois clôturé ne se rouvre pas : la paie validée en dépend.';
+      'Seule la direction rouvre un mois clôturé, tant que sa paie n\'est pas validée.';
 
   @override
   String get hrPresenceNoYearTitle => 'Aucune année scolaire en cours';
@@ -19748,7 +19737,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceRecapCloseRefused =>
-      'La dernière clôture de ce mois a été refusée par le serveur : vérifiez le mois, puis recommencez.';
+      'Le dernier geste sur ce mois (clôture ou réouverture) a été refusé par le serveur : vérifiez le mois, puis recommencez.';
+
+  @override
+  String get hrPresenceRecapRefusedForbidden =>
+      'Réouverture refusée par le serveur : ce compte n\'a pas le droit de rouvrir un mois.';
+
+  @override
+  String get hrPresenceRecapRefusedPayroll =>
+      'Réouverture refusée par le serveur : la paie de ce mois est validée, il ne se rouvre plus.';
+
+  @override
+  String get hrPresenceRecapRefusedOutOfYear =>
+      'Réouverture refusée par le serveur : ce mois n\'appartient pas à l\'année scolaire en cours.';
 
   @override
   String get hrPresenceAgentNotFoundMessage =>
@@ -19809,7 +19810,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollSettingsMonthSubtitle =>
-      'Heures et jours d\'un mois plein ; une journée non prestée = brut ÷ jours.';
+      'Heures d\'un mois plein ; une absence non justifiée = base ÷ jours ouvrés du mois.';
 
   @override
   String get payrollSettingsLegalTitle => 'Retenues légales';
@@ -20714,7 +20715,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String payrollAgentScaleCurrent(int days, String absences) {
-    return 'Barème en vigueur : $days j de référence · absences $absences.';
+    return 'Barème en vigueur : $days jours ouvrés dans le mois · absences $absences.';
   }
 
   @override
@@ -20749,8 +20750,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days j non prestés',
-      one: '1 j non presté',
+      other: '$days j d\'absence',
+      one: '1 j d\'absence',
     );
     return '$_temp0 · base $base ÷ $divisor j';
   }
@@ -20760,8 +20761,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: '$days j non prestés',
-      one: '1 j non presté',
+      other: '$days j d\'absence',
+      one: '1 j d\'absence',
     );
     return '$_temp0 · non retenus (barème de l\'école)';
   }
@@ -20947,4 +20948,148 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollPayslipBalanceRatio(int percent) {
     return '$percent % réglé';
   }
+
+  @override
+  String get hrPresenceRecapEyebrow => 'Récapitulatif pour la paie';
+
+  @override
+  String get hrPresenceRecapRateDetail => 'hors vacataires payés à l\'heure';
+
+  @override
+  String get hrPresenceRecapColAbsences => 'Absences et retards';
+
+  @override
+  String hrPresenceRecapUnjustified(int count) {
+    return '$count NJ';
+  }
+
+  @override
+  String hrPresenceRecapJustified(int count) {
+    return '$count J';
+  }
+
+  @override
+  String get hrPresenceRecapNoAbsence => 'Aucune';
+
+  @override
+  String hrPresenceRecapLates(int count, int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retards · $minutes min',
+      one: '1 retard · $minutes min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hrPresenceRecapTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Total · $count agents',
+      one: 'Total · 1 agent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String staffAttendanceToastMonthReopened(String month) {
+    return '$month rouvert';
+  }
+
+  @override
+  String get hrPresenceRecapReopen => 'Rouvrir le mois';
+
+  @override
+  String hrPresenceRecapReopenTitle(String month) {
+    return 'Rouvrir $month ?';
+  }
+
+  @override
+  String get hrPresenceRecapReopenCancel => 'Annuler';
+
+  @override
+  String get hrPresenceRecapReopenReason => 'Motif de la réouverture';
+
+  @override
+  String get hrPresenceRecapReopenReasonRequired => 'Le motif est obligatoire.';
+
+  @override
+  String get hrPresenceRecapReopenHelper =>
+      'Consigné avec le geste. Les jours validés le restent : rouvrez le jour à corriger, puis reclôturez. La fiche de présence du mois est annulée.';
+
+  @override
+  String get hrPresenceRecapReopenedOnTablet =>
+      'Réouverture enregistrée sur la tablette, en attente d\'envoi';
+
+  @override
+  String get payrollPayslipUnjustifiedLabel => 'Absences non justifiées';
+
+  @override
+  String payrollPayslipAbsenceDaysValue(int absences, int days) {
+    return '$absences j NJ sur $days jours ouvrés';
+  }
+
+  @override
+  String hrPresenceRecapCost(String month) {
+    return 'Coût de la paie de $month';
+  }
+
+  @override
+  String hrPresenceRecapCostPlanned(String next) {
+    return 'Prévu · versée début $next · hors charges patronales';
+  }
+
+  @override
+  String get hrPresenceRecapCostFrozen => 'Paie validée : chiffres figés';
+
+  @override
+  String get hrPresenceRecapDeduction => 'Retenue pour absences';
+
+  @override
+  String hrPresenceRecapDeductionDetail(int days) {
+    return '÷ $days jours ouvrés';
+  }
+
+  @override
+  String get hrPresenceRecapColGross => 'Brut prévu';
+
+  @override
+  String get hrPresenceRecapColDeduction => 'Retenue';
+
+  @override
+  String get hrPresenceRecapColGrossAfter => 'Brut après absences';
+
+  @override
+  String hrPresenceRecapHourlyRate(String hours, String rate) {
+    return '$hours × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapPaidHourly => 'payé à l\'heure';
+
+  @override
+  String hrPresenceRecapDeductionDays(int days, String rate) {
+    return '$days j × $rate';
+  }
+
+  @override
+  String get hrPresenceRecapWithDeduction => 'Avec retenue';
+
+  @override
+  String hrPresenceRecapLegendPay(int days) {
+    return 'Retenue = salaire de base ÷ $days jours ouvrés du mois × jours NJ · brut avant IPR, CNSS et avances, hors charges patronales';
+  }
+
+  @override
+  String hrPresenceRecapTotalCurrency(String currency) {
+    return 'Total · $currency';
+  }
+
+  @override
+  String get hrPresenceRecapStatusPlanned => 'Prévu';
+
+  @override
+  String get hrPresenceRecapStatusFrozen => 'Figé';
 }

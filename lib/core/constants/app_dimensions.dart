@@ -843,6 +843,20 @@ class AppDimensions {
   /// RH · Présences ▸ Récapitulatif : les heures et leur montant.
   static const hrPresenceRecapColHours = 136.0;
 
+  /// … le ratio et sa barre, les absences et retards sur deux lignes, et la
+  /// largeur sous laquelle le tableau défile de côté.
+  static const hrPresenceRecapColPresence = 132.0;
+  static const hrPresenceRecapColAbsences = 168.0;
+  static const hrPresenceRecapMinWidth = 920.0;
+
+  /// … une colonne d'argent (brut prévu, retenue, brut après absences), et
+  /// la largeur plancher quand elles remplacent les heures.
+  static const hrPresenceRecapColMoney = 128.0;
+  static const hrPresenceRecapPayMinWidth = 1160.0;
+
+  /// … une tuile du bandeau, au plus étroit.
+  static const hrPresenceRecapTileMin = payrollAgentTileMin;
+
   /// « Assiduité par agent » : sous cette largeur, la table défile plutôt
   /// que d'écraser ses six colonnes (7″ et 10″ en portrait).
   static const hrPresenceStaffTableMinWidth = 760.0;

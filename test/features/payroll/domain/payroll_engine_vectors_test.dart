@@ -11,12 +11,11 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_vari
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
-import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 
-/// Les vecteurs de référence du moteur de paie v2, **le même fichier que le
+/// Les vecteurs de référence du moteur de paie (formule 3), **le même fichier que le
 /// serveur** (`src/test/resources/payroll/engine-vectors.json`), copié tel
 /// quel : un moteur qui diverge fait échouer la CI des deux dépôts. Ne jamais
 /// le retoucher à la main — le recopier du dépôt serveur.
@@ -56,6 +55,11 @@ void main() {
       ], expected['totals']);
       final lines = expected['lines'] as List;
       expect(result.lines, hasLength(lines.length));
+      // La formule 3 ne connaît plus les jours prestés saisis.
+      expect(
+        result.lines.map((l) => l.deductions.workedDays),
+        everyElement(isNull),
+      );
       for (final (index, rawLine) in lines.indexed) {
         final want = rawLine as Map<String, dynamic>;
         final line = result.lines[index];
@@ -74,7 +78,7 @@ void main() {
             'dependentChildren': line.children,
             'allowanceInCents': line.allowanceInCents,
             'grossInCents': line.grossInCents,
-            'daysWorked': line.deductions.workedDays,
+            'unjustifiedAbsences': line.deductions.unjustifiedAbsences,
             'workDaysDivisor': line.deductions.workDaysDivisor,
             'absenceInCents': line.deductions.absenceInCents,
             'iprInCents': line.deductions.iprInCents,
@@ -139,7 +143,6 @@ PayrollEngineInput _input(
             overtimeMinutes: v['overtimeMinutes'] as int?,
             overtimeRateInCents: v['overtimeRateInCents'] as int?,
             dependentChildren: v['dependentChildren'] as int?,
-            workedDays: v['daysWorked'] as int?,
             childcareInCents: v['childcareInCents'] as int?,
             fixedPayoutInCents: v['fixedPayoutInCents'] as int?,
             fixedPayoutReason: v['fixedPayoutReason'] as String?,
@@ -154,7 +157,7 @@ PayrollEngineInput _input(
           ),
     },
     attendance: AttendanceSummary(
-      month: PayrollMonth.previous(month),
+      month: month,
       agents: {
         for (final agent in staff)
           if (agent['attendance'] case final Map a)

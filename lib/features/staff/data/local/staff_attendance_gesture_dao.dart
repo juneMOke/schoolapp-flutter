@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_lock_dto.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -85,17 +86,24 @@ class StaffAttendanceGestureDao {
   /// [gestureId] ? Un geste attend ses aînés : jamais deux dans le désordre.
   /// L'ordre est strict — `(created_at, rowid)` —, sinon deux gestes posés
   /// dans la même milliseconde s'attendraient l'un l'autre à jamais.
+  ///
+  /// [monthStart] : le geste d'un jour attend aussi les gestes de son mois,
+  /// rangés au 1er — sinon « rouvrir le mois, rouvrir le 15 » enverrait le
+  /// jour sur un mois encore clos dès que la réouverture du mois échoue une
+  /// fois.
   Future<bool> hasOlderQueued(
     String schoolId, {
     required String gestureId,
     required String from,
     required String to,
+    String? monthStart,
   }) => _exists(
     'SELECT 1 FROM $table g $_joinOutbox '
     'JOIN $table me ON me.id = ? '
     'WHERE g.school_id = ? AND g.id != me.id AND o.status = ? '
     'AND g.sync_status = ? '
-    'AND g.period_start >= ? AND g.period_start <= ? '
+    'AND ((g.period_start >= ? AND g.period_start <= ?) '
+    'OR (g.period_start = ? AND g.kind = ?)) '
     'AND (g.created_at < me.created_at '
     'OR (g.created_at = me.created_at AND g.rowid < me.rowid)) LIMIT 1',
     [
@@ -105,25 +113,32 @@ class StaffAttendanceGestureDao {
       RecordSyncState.pending.dbValue,
       from,
       to,
+      monthStart ?? from,
+      monthStart == null ? '' : StaffAttendanceLockKind.month.wire,
     ],
   );
 
-  /// Une réouverture de [day], posée au plus tard à [queuedBefore], est-elle
-  /// encore en file ? Un pointage du jour attend alors derrière elle, sinon il
-  /// reviendrait `DAY_LOCKED`. Jamais une réouverture posée après lui : elle
-  /// attend peut-être elle-même une validation qui l'attend.
+  /// Une réouverture de [day] — ou de son mois —, posée au plus tard à
+  /// [queuedBefore], est-elle encore en file ? Un pointage du jour attend
+  /// alors derrière elle, sinon il reviendrait `DAY_LOCKED` ou
+  /// `MONTH_CLOSED`. Jamais une réouverture posée après lui : elle attend
+  /// peut-être elle-même une validation qui l'attend.
   Future<bool> hasQueuedReopen(
     String schoolId,
     String day, {
     required int queuedBefore,
   }) => _exists(
     'SELECT 1 FROM $table g $_joinOutbox '
-    'WHERE g.school_id = ? AND g.period_start = ? AND g.gesture = ? '
+    'WHERE g.school_id = ? '
+    'AND ((g.period_start = ? AND g.gesture = ?) '
+    'OR (g.period_start = ? AND g.gesture = ?)) '
     'AND o.status = ? AND g.sync_status = ? AND g.created_at <= ? LIMIT 1',
     [
       schoolId,
       day,
       StaffAttendanceGesture.reopenDay.wire,
+      SchoolDayCalendar.firstOf(SchoolDayCalendar.monthOf(day)),
+      StaffAttendanceGesture.reopenMonth.wire,
       OutboxStatus.pending.dbValue,
       RecordSyncState.pending.dbValue,
       queuedBefore,

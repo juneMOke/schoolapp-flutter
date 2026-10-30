@@ -9404,7 +9404,7 @@
   "payrollKpiNet": "Net to pay",
   "payrollKpiPaid": "Paid {paid} / {total}",
   "@payrollKpiPaid": {"placeholders": {"paid": {"type": "int"}, "total": {"type": "int"}}},
-  "payrollAttendanceSignalDeducted": "Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences reduce the days worked.",
+  "payrollAttendanceSignalDeducted": "Attendance for {month}: {absences} unexcused absences and {lates} late arrivals — unexcused absences are deducted pro rata to the month's working days.",
   "@payrollAttendanceSignalDeducted": {
     "placeholders": {
       "month": {
@@ -9420,6 +9420,8 @@
   },
   "payrollAttendanceSignal": "{month} attendance: {absences} unexcused absences and {lates} late arrivals — shown for information, never deducted.",
   "@payrollAttendanceSignal": {"placeholders": {"month": {"type": "String"}, "absences": {"type": "int"}, "lates": {"type": "int"}}},
+  "payrollAttendanceSignalOpen": "{month} attendance is not closed yet: absences and hours will count once it is.",
+  "@payrollAttendanceSignalOpen": {"placeholders": {"month": {"type": "String"}}},
   "payrollColAgent": "Staff member",
   "payrollColBase": "Base",
   "payrollColOvertime": "Overtime",
@@ -9454,7 +9456,7 @@
   "payrollSignalLates": "{count} late",
   "@payrollSignalLates": {"placeholders": {"count": {"type": "int"}}},
   "payrollSignalNone": "OK",
-  "payrollSignalHint": "Attendance of the previous month",
+  "payrollSignalHint": "Attendance of the month",
   "payrollPayAfterValidation": "After validation",
   "payrollPay": "Pay",
   "payrollToPay": "To pay",
@@ -9598,26 +9600,6 @@
   "payrollVarsAllowance": "{children} × {unit} = {amount}",
   "@payrollVarsAllowance": {"placeholders": {"children": {"type": "int"}, "unit": {"type": "String"}, "amount": {"type": "String"}}},
   "payrollVarsAdvances": "Advances — managed in the Advances tab",
-  "payrollVarsWorkedDays": "Days worked",
-  "payrollVarsWorkedDaysValue": "{days} / {divisor} d",
-  "@payrollVarsWorkedDaysValue": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      },
-      "divisor": {
-        "type": "int"
-      }
-    }
-  },
-  "payrollVarsWorkedDaysCorrected": "Corrected by hand — attendance says {days} d",
-  "@payrollVarsWorkedDaysCorrected": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
   "payrollVarsChildcare": "Staff children care (PC/E) this month",
   "payrollVarsChildcareShort": "Staff children care (PC/E)",
   "payrollVarsAbsence": "Unexcused absence · {days} d",
@@ -9816,7 +9798,6 @@
   "payrollSettingsAllowance": "Allowance per child",
   "payrollSettingsDefaultRate": "Default overtime rate",
   "payrollSettingsStep": "Round the rate to steps of",
-  "payrollSettingsWorkDays": "Days in a full month",
   "payrollSettingsAbsenceDeduction": "Deduct unexcused absences",
   "payrollSettingsIpr": "Flat IPR per paid agent",
   "payrollSettingsCnss": "CNSS (‰ of base pay)",
@@ -9855,7 +9836,7 @@
   "payrollPayslipLoan": "Loan repayment",
   "payrollPayslipChildcare": "Staff children care",
   "payrollPayslipDeductionsTotal": "Total deductions (B)",
-  "payrollPayslipAttendanceDeducted": "Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted from the days worked.",
+  "payrollPayslipAttendanceDeducted": "Attendance for {month}: {absences} unexcused absences, {justified} excused, {lates} late arrivals ({minutes} min) — unexcused absences are deducted pro rata to the month's working days.",
   "@payrollPayslipAttendanceDeducted": {
     "placeholders": {
       "month": {
@@ -9904,7 +9885,7 @@
   "payrollPayslipPosition": "{index} / {count}",
   "@payrollPayslipPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}}},
   "payrollPayslipNoPhone": "No number for this staff member.",
-  "payrollPayslipWhatsappMessageV2": "Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; days worked {days}; net {net}; received {paid}; remaining {rest}.",
+  "payrollPayslipWhatsappMessageV2": "Hello {name}, your payslip for {month} ({school}): gross {gross}; deductions {deductions}; total deductions {total}; {days}; net {net}; received {paid}; remaining {rest}.",
   "@payrollPayslipWhatsappMessageV2": {
     "placeholders": {
       "name": {
@@ -11677,7 +11658,7 @@
   "hrPresenceMonthScored": "{scored}/{classDays} days marked",
   "@hrPresenceMonthScored": {"placeholders": {"scored": {"type": "int"}, "classDays": {"type": "int"}}},
   "subMenuHrPresenceRecap": "Monthly summary",
-  "hrPresenceRecapSubtitle": "Each staff member's attendance totals for the month, then its closing. Payroll reads the actual marks.",
+  "hrPresenceRecapSubtitle": "Each staff member's attendance totals for the month, then its closing: the month's pay is computed from these figures.",
   "hrPresenceRecapClassDays": "{count, plural, =1{1 school day} other{{count} school days}}",
   "@hrPresenceRecapClassDays": {"placeholders": {"count": {"type": "int"}}},
   "hrPresenceRecapClassDaysToDate": "{count, plural, =1{1 school day so far} other{{count} school days so far}}",
@@ -11685,7 +11666,7 @@
   "hrPresenceRecapUnsynced": "Still on this tablet",
   "hrPresenceRecapCurrentMonth": "Current month",
   "hrPresenceRecapNotClosed": "Month not closed",
-  "hrPresenceRecapCloseExplain": "Closing locks the month's marks. Nothing is sent: Payroll reads the actual marks.",
+  "hrPresenceRecapCloseExplain": "Closing freezes the month's marks: that month's pay can then be computed from them.",
   "hrPresenceRecapCloseFrom": "Can be closed from {day}",
   "@hrPresenceRecapCloseFrom": {"placeholders": {"day": {"type": "String"}}},
   "hrPresenceRecapClosedOnTablet": "Closing saved on this tablet, waiting to be sent",
@@ -11694,10 +11675,13 @@
   "hrPresenceRecapDaysWorked": "{count, plural, =0{no day worked} =1{1 day worked} other{{count} days worked}}",
   "@hrPresenceRecapDaysWorked": {"placeholders": {"count": {"type": "int"}}},
   "hrPresenceRecapLegend": "U = unexcused · E = excused · a row opens the individual record",
-  "staffAttendanceCloseIrreversible": "A closed month cannot be reopened: validated pay depends on it.",
+  "staffAttendanceCloseIrreversible": "Only the management can reopen a closed month, as long as its pay is not validated.",
   "hrPresenceNoYearTitle": "No current school year",
   "hrPresenceNoYearMessage": "The school is between two years: the yearly view returns when the next one opens.",
-  "hrPresenceRecapCloseRefused": "The server refused the last closing of this month: check the month, then try again.",
+  "hrPresenceRecapCloseRefused": "The server refused the last action on this month (closing or reopening): check the month, then try again.",
+  "hrPresenceRecapRefusedForbidden": "Reopening refused by the server: this account may not reopen a month.",
+  "hrPresenceRecapRefusedPayroll": "Reopening refused by the server: this month's payroll is validated, it can no longer be reopened.",
+  "hrPresenceRecapRefusedOutOfYear": "Reopening refused by the server: this month is outside the current school year.",
   "hrPresenceAgentNotFoundMessage": "The server does not know this staff member in this school: they may have been removed, or the link comes from another school.",
   "hrPresenceErrorForbidden": "Your profile does not allow you to view staff attendance.",
   "hrPresenceYearRowA11y": "{month}: attendance {presence}, late {late}, absent {absent}",
@@ -11715,7 +11699,7 @@
   "payrollSettingsInCurrency": "{label} · {currency}",
   "@payrollSettingsInCurrency": {"placeholders": {"label": {"type": "String"}, "currency": {"type": "String"}}},
   "payrollSettingsMonthTitle": "Pay month",
-  "payrollSettingsMonthSubtitle": "Hours and days in a full month; a day not worked = gross ÷ days.",
+  "payrollSettingsMonthSubtitle": "Hours in a full month; an unexcused absence = base ÷ the month's working days.",
   "payrollSettingsLegalTitle": "Statutory deductions",
   "payrollSettingsLegalSubtitle": "Flat IPR per paid employee, CNSS in ‰ of base pay.",
   "payrollSettingsOvertimeTitle": "Overtime",
@@ -11981,7 +11965,7 @@
   "payrollAgentWhatsappAgain": "Send again by WhatsApp",
   "payrollAgentScaleFrozen": "Scale frozen at validation: {days} reference days · absences {absences}.",
   "@payrollAgentScaleFrozen": {"placeholders": {"days": {"type": "int"}, "absences": {"type": "String"}}},
-  "payrollAgentScaleCurrent": "Scale in force: {days} reference days · absences {absences}.",
+  "payrollAgentScaleCurrent": "Scale in force: {days} working days in the month · absences {absences}.",
   "@payrollAgentScaleCurrent": {"placeholders": {"days": {"type": "int"}, "absences": {"type": "String"}}},
   "payrollAgentAbsencesDeducted": "deducted",
   "payrollAgentAbsencesIndicative": "indicative only",
@@ -11992,9 +11976,9 @@
   "payrollCalcGross": "Gross salary (A)",
   "payrollCalcDeductionsTotal": "Total deductions (B)",
   "payrollCalcNetToPay": "Net to pay for the month · (A) − (B)",
-  "payrollCalcAbsenceFormula": "{days, plural, =1{1 day not worked} other{{days} days not worked}} · base {base} ÷ {divisor} days",
+  "payrollCalcAbsenceFormula": "{days, plural, =1{1 day absent} other{{days} days absent}} · base {base} ÷ {divisor} days",
   "@payrollCalcAbsenceFormula": {"placeholders": {"days": {"type": "int"}, "base": {"type": "String"}, "divisor": {"type": "int"}}},
-  "payrollCalcAbsenceIndicative": "{days, plural, =1{1 day not worked} other{{days} days not worked}} · not deducted (school scale)",
+  "payrollCalcAbsenceIndicative": "{days, plural, =1{1 day absent} other{{days} days absent}} · not deducted (school scale)",
   "@payrollCalcAbsenceIndicative": {"placeholders": {"days": {"type": "int"}}},
   "payrollCalcAbsenceHourly": "Paid by the hour — not applicable",
   "payrollCalcRate": "Payout rate for the month · {percent} %",
@@ -12050,5 +12034,53 @@
   "@payrollPayslipBalanceCount": {"placeholders": {"count": {"type": "int"}}},
   "payrollPayslipBalanceDebt": "owed by the school",
   "payrollPayslipBalanceRatio": "{percent}% settled",
-  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}}
+  "@payrollPayslipBalanceRatio": {"placeholders": {"percent": {"type": "int"}}},
+  "hrPresenceRecapEyebrow": "Payroll summary",
+  "hrPresenceRecapRateDetail": "excluding hourly staff",
+  "hrPresenceRecapColAbsences": "Absences and lates",
+  "hrPresenceRecapUnjustified": "{count} U",
+  "@hrPresenceRecapUnjustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapJustified": "{count} E",
+  "@hrPresenceRecapJustified": {"placeholders": {"count": {"type": "int"}}},
+  "hrPresenceRecapNoAbsence": "None",
+  "hrPresenceRecapLates": "{count, plural, =1{1 late · {minutes} min} other{{count} lates · {minutes} min}}",
+  "@hrPresenceRecapLates": {"placeholders": {"count": {"type": "int"}, "minutes": {"type": "int"}}},
+  "hrPresenceRecapTotal": "{count, plural, =1{Total · 1 staff member} other{Total · {count} staff}}",
+  "@hrPresenceRecapTotal": {"placeholders": {"count": {"type": "int"}}},
+  "staffAttendanceToastMonthReopened": "{month} reopened",
+  "@staffAttendanceToastMonthReopened": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopen": "Reopen the month",
+  "hrPresenceRecapReopenTitle": "Reopen {month}?",
+  "@hrPresenceRecapReopenTitle": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapReopenCancel": "Cancel",
+  "hrPresenceRecapReopenReason": "Reason for reopening",
+  "hrPresenceRecapReopenReasonRequired": "A reason is required.",
+  "hrPresenceRecapReopenHelper": "Recorded with the action. Validated days stay validated: reopen the day to fix, then close again. The month's attendance sheet is cancelled.",
+  "hrPresenceRecapReopenedOnTablet": "Reopening saved on this tablet, waiting to be sent",
+  "payrollPayslipUnjustifiedLabel": "Unexcused absences",
+  "payrollPayslipAbsenceDaysValue": "{absences} unexcused d of {days} working days",
+  "@payrollPayslipAbsenceDaysValue": {"placeholders": {"absences": {"type": "int"}, "days": {"type": "int"}}},
+  "hrPresenceRecapCost": "Pay cost for {month}",
+  "@hrPresenceRecapCost": {"placeholders": {"month": {"type": "String"}}},
+  "hrPresenceRecapCostPlanned": "Planned · paid early {next} · before employer charges",
+  "@hrPresenceRecapCostPlanned": {"placeholders": {"next": {"type": "String"}}},
+  "hrPresenceRecapCostFrozen": "Pay validated: figures frozen",
+  "hrPresenceRecapDeduction": "Absence deduction",
+  "hrPresenceRecapDeductionDetail": "÷ {days} working days",
+  "@hrPresenceRecapDeductionDetail": {"placeholders": {"days": {"type": "int"}}},
+  "hrPresenceRecapColGross": "Planned gross",
+  "hrPresenceRecapColDeduction": "Deduction",
+  "hrPresenceRecapColGrossAfter": "Gross after absences",
+  "hrPresenceRecapHourlyRate": "{hours} × {rate}",
+  "@hrPresenceRecapHourlyRate": {"placeholders": {"hours": {"type": "String"}, "rate": {"type": "String"}}},
+  "hrPresenceRecapPaidHourly": "paid by the hour",
+  "hrPresenceRecapDeductionDays": "{days} d × {rate}",
+  "@hrPresenceRecapDeductionDays": {"placeholders": {"days": {"type": "int"}, "rate": {"type": "String"}}},
+  "hrPresenceRecapWithDeduction": "With deduction",
+  "hrPresenceRecapLegendPay": "Deduction = base salary ÷ {days} working days of the month × unexcused days · gross before income tax, social security and advances, excluding employer charges",
+  "@hrPresenceRecapLegendPay": {"placeholders": {"days": {"type": "int"}}},
+  "hrPresenceRecapTotalCurrency": "Total · {currency}",
+  "@hrPresenceRecapTotalCurrency": {"placeholders": {"currency": {"type": "String"}}},
+  "hrPresenceRecapStatusPlanned": "Planned",
+  "hrPresenceRecapStatusFrozen": "Frozen"
 }

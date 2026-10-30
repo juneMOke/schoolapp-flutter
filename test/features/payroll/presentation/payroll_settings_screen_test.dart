@@ -115,15 +115,15 @@ void main() {
       () => pumped.repository.saveSettings(any()),
     ).thenAnswer((_) async => const Right(unit));
 
-    await tester.enterText(field("Jours d'un mois plein"), '0');
+    await tester.enterText(field("Heures d'un mois plein"), '0');
     await tester.pump();
-    expect(find.text('Entre 1 et 31'), findsOneWidget);
+    expect(find.text('Entre 1 et 744'), findsOneWidget);
     expect(
       find.text('Corrigez les champs en rouge avant d\'enregistrer.'),
       findsOneWidget,
     );
 
-    await tester.enterText(field("Jours d'un mois plein"), '22');
+    await tester.enterText(field("Heures d'un mois plein"), '170');
     await tester.pump();
     // Le brouillon d'octobre ; septembre est validé, il garde son barème.
     expect(
@@ -141,8 +141,7 @@ void main() {
               () => pumped.repository.saveSettings(captureAny()),
             ).captured.single
             as PayrollSettings;
-    expect(saved.workDaysDivisor, 22);
-    expect(saved.monthlyHoursDivisor, 173);
+    expect(saved.monthlyHoursDivisor, 170);
     expect(saved.overtimeMultiplierPermille, 1300);
   });
 

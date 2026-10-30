@@ -27,7 +27,7 @@ class HrPresenceCloseDialog extends StatelessWidget {
     );
     final hours = [
       PresenceLabels.hours(l10n, totals.workedMinutes),
-      for (final amount in totals.amounts ?? const [])
+      for (final amount in totals.hourAmounts ?? const [])
         MoneyFormat.format(amount),
     ].join(' · ');
     return PresenceMonthCloseDialog(

@@ -196,7 +196,7 @@ class StaffAttendanceCommands {
     );
   }
 
-  /// Clôt le mois `YYYY-MM` — irréversible depuis la tablette.
+  /// Clôt le mois `YYYY-MM` ; seule la direction le rouvre ([reopenMonth]).
   Future<StaffAttendanceNotice?> closeMonth(String month) async =>
       StaffCommandOutcome.of(
         await _gesture(
@@ -208,6 +208,23 @@ class StaffAttendanceCommands {
           month: month,
         ),
       );
+
+  /// Rouvre le mois clos `YYYY-MM`, avec son motif : la direction corrige
+  /// un pointage, puis reclôt. Ses jours validés le restent.
+  Future<StaffAttendanceNotice?> reopenMonth(
+    String month,
+    String reason,
+  ) async => StaffCommandOutcome.of(
+    await _gesture(
+      StaffAttendanceGesture.reopenMonth,
+      SchoolDayCalendar.firstOf(month),
+      reason: reason,
+    ),
+    StaffAttendanceNotice(
+      StaffAttendanceNoticeKind.monthReopened,
+      month: month,
+    ),
+  );
 
   Future<StaffAttendanceNotice?> saveSettings(
     StaffAttendanceSettings settings,

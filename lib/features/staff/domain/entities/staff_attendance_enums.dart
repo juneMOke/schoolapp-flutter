@@ -62,7 +62,10 @@ enum StaffAttendanceLockKind implements StaffWired {
 enum StaffAttendanceGesture implements StaffWired {
   validateDay('VALIDATE_DAY', StaffAttendanceLockKind.day, locks: true),
   reopenDay('REOPEN_DAY', StaffAttendanceLockKind.day, locks: false),
-  closeMonth('CLOSE_MONTH', StaffAttendanceLockKind.month, locks: true);
+  closeMonth('CLOSE_MONTH', StaffAttendanceLockKind.month, locks: true),
+
+  /// Motivé : la direction rouvre un mois clos pour corriger un pointage.
+  reopenMonth('REOPEN_MONTH', StaffAttendanceLockKind.month, locks: false);
 
   const StaffAttendanceGesture(this.wire, this.kind, {required this.locks});
   @override

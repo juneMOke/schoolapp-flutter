@@ -71,8 +71,8 @@ class PayrollLine extends Equatable {
   /// `null` sur une ligne v1 : tout le net est à verser.
   final PayrollLinePayout? payout;
 
-  /// Le Pointage du mois précédent, clos — d'où viennent les jours prestés
-  /// (NJP, v2).
+  /// Le Pointage lu par la ligne : le mois même depuis la formule 3 (le mois
+  /// précédent avant), clos — d'où viennent les absences retenues.
   final String? attendanceMonth;
   final AttendanceAgentSummary attendance;
   final bool frozen;
@@ -139,7 +139,7 @@ class PayrollLine extends Equatable {
     frozen: frozen,
   );
 
-  static const int currentFormula = 2;
+  static const int currentFormula = 3;
 
   /// Ce que l'école verse ce mois : tout le net, sauf versement réduit.
   int get toPayInCents => payout?.toPayInCents ?? netInCents;

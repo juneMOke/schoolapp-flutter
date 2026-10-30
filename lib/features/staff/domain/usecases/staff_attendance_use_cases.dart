@@ -28,6 +28,13 @@ class CountUnsyncedStaffAttendanceUseCase {
     required String from,
     required String to,
   }) => _repository.unsyncedCount(from: from, to: to);
+
+  /// Les mêmes, agent par agent : la pastille d'une ligne et le total du
+  /// bandeau comptent ainsi la même chose.
+  Future<Either<Failure, Map<String, int>>> byAgent({
+    required String from,
+    required String to,
+  }) => _repository.unsyncedByAgent(from: from, to: to);
 }
 
 /// Enregistre des pointages et les met en file d'envoi.
@@ -42,7 +49,7 @@ class SaveStaffAttendanceUseCase {
       : _repository.saveRecords(records);
 }
 
-/// Valide ou rouvre un jour, clôt un mois.
+/// Valide ou rouvre un jour, clôt ou rouvre un mois.
 class RecordStaffAttendanceGestureUseCase {
   final StaffAttendanceRepository _repository;
 
@@ -50,8 +57,9 @@ class RecordStaffAttendanceGestureUseCase {
 
   Future<Either<Failure, Unit>> call(
     StaffAttendanceGesture gesture,
-    String periodStart,
-  ) => _repository.recordGesture(gesture, periodStart);
+    String periodStart, {
+    String? reason,
+  }) => _repository.recordGesture(gesture, periodStart, reason: reason);
 }
 
 /// Enregistre le début des cours et la tolérance.

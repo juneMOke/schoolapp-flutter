@@ -71,6 +71,7 @@ abstract final class PayrollLineJson {
     return PayrollLineDeductions(
       workDaysDivisor: raw.integer('workDaysDivisor'),
       workedDays: raw.integer('daysWorked'),
+      unjustifiedAbsences: raw.integer('unjustifiedAbsences'),
       absenceInCents: raw.integer('absenceInCents') ?? 0,
       iprInCents: raw.integer('iprInCents') ?? 0,
       cnssInCents: raw.integer('cnssInCents') ?? 0,

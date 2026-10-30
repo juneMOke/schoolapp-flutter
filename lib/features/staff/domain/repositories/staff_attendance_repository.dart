@@ -32,17 +32,25 @@ abstract class StaffAttendanceRepository {
     List<StaffAttendanceRecord> records,
   );
 
-  /// Pose un geste de verrou sur [periodStart] (le jour, ou le 1er du mois).
+  /// Pose un geste de verrou sur [periodStart] (le jour, ou le 1er du mois),
+  /// avec son motif quand il en exige un (`REOPEN_MONTH`).
   Future<Either<Failure, Unit>> recordGesture(
     StaffAttendanceGesture gesture,
-    String periodStart,
-  );
+    String periodStart, {
+    String? reason,
+  });
 
   Future<Either<Failure, Unit>> saveSettings(StaffAttendanceSettings settings);
 
   /// Les pointages des jours [from] → [to] pas encore reçus par le serveur :
   /// ce que ses statistiques ne comptent pas encore (D1).
   Future<Either<Failure, int>> unsyncedCount({
+    required String from,
+    required String to,
+  });
+
+  /// [unsyncedCount], agent par agent.
+  Future<Either<Failure, Map<String, int>>> unsyncedByAgent({
     required String from,
     required String to,
   });

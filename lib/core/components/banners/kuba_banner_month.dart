@@ -5,22 +5,22 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/touch_target.dart';
-import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_status_pill.dart';
+import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le mois d'un [PayrollBanner] — livre et tableau de bord : ‹ le surtitre
-/// de l'écran, le mois (qui ouvre le sélecteur) et son statut › puis
-/// « Mois en cours » quand on s'en est éloigné. Le mois se lit une seule
-/// fois : plus de frise.
-class PayrollBannerMonth extends StatelessWidget {
+/// Le mois d'un [KubaBanner] — livre de paie, tableau de bord, récapitulatif
+/// des présences : ‹ le surtitre de l'écran, le mois (qui ouvre le
+/// sélecteur) et son statut › puis « Mois en cours » quand on s'en est
+/// éloigné. Le mois se lit une seule fois : plus de frise.
+class KubaBannerMonth extends StatelessWidget {
   /// Le surtitre, en capitales or : « LIVRE DE PAIE », « TABLEAU DE BORD ».
   final String eyebrow;
 
   /// `YYYY-MM`.
   final String month;
-  final PayrollPhase? phase;
+
+  /// Le statut du mois à côté de lui (la phase de la paie) ; `null` : rien.
+  final Widget? status;
 
   /// `null` : la flèche est grisée (premier mois, mois en cours).
   final VoidCallback? onPrevious;
@@ -30,11 +30,11 @@ class PayrollBannerMonth extends StatelessWidget {
   final VoidCallback? onCurrent;
   final VoidCallback onPick;
 
-  const PayrollBannerMonth({
+  const KubaBannerMonth({
     super.key,
     required this.eyebrow,
     required this.month,
-    required this.phase,
+    required this.status,
     required this.onPrevious,
     required this.onNext,
     required this.onCurrent,
@@ -44,9 +44,9 @@ class PayrollBannerMonth extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final phase = this.phase;
+    final status = this.status;
     final onCurrent = this.onCurrent;
-    return Row(
+    final months = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         PresenceBannerButton(
@@ -74,10 +74,13 @@ class PayrollBannerMonth extends StatelessWidget {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   _MonthButton(
-                    label: PayrollLabels.month(context, month),
+                    label: PresenceLabels.month(
+                      MaterialLocalizations.of(context),
+                      month,
+                    ),
                     onPick: onPick,
                   ),
-                  if (phase != null) PayrollStatusPill(phase: phase),
+                  ?status,
                 ],
               ),
             ],
@@ -89,16 +92,23 @@ class PayrollBannerMonth extends StatelessWidget {
           tooltip: l10n.presenceMarkNextMonth,
           onPressed: onNext,
         ),
-        if (onCurrent != null) ...[
-          const SizedBox(width: AppSpacing.sm),
-          TextButton(
-            onPressed: onCurrent,
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.payrollAgentOnBanner,
-            ),
-            child: Text(l10n.presenceMarkCurrentMonth),
+      ],
+    );
+    if (onCurrent == null) return months;
+    // Wrap : sur téléphone « Mois en cours » passe sous les flèches au lieu
+    // de les pousser hors du bandeau.
+    return Wrap(
+      spacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        months,
+        TextButton(
+          onPressed: onCurrent,
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.presenceMarkOnBanner,
           ),
-        ],
+          child: Text(l10n.presenceMarkCurrentMonth),
+        ),
       ],
     );
   }
@@ -128,7 +138,7 @@ class _MonthButton extends StatelessWidget {
                 child: Text(
                   label,
                   style: AppTypography.titleLarge.copyWith(
-                    color: AppColors.payrollAgentOnBanner,
+                    color: AppColors.presenceMarkOnBanner,
                   ),
                 ),
               ),
@@ -136,7 +146,7 @@ class _MonthButton extends StatelessWidget {
               const Icon(
                 Icons.calendar_month_outlined,
                 size: AppSpacing.xl,
-                color: AppColors.payrollAgentOnBannerMuted,
+                color: AppColors.presenceMarkOnBannerMuted,
               ),
             ],
           ),

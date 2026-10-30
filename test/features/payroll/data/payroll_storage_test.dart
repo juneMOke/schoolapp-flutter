@@ -12,6 +12,9 @@ import 'package:school_app_flutter/features/payroll/data/sync/attendance_summary
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_dto.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_write_requests.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_attendance_gesture_dao.dart';
+import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_lock_dto.dart';
+import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../offline_full_db.dart';
@@ -288,5 +291,64 @@ void main() {
     expect(summary.of('m-2').workedMinutes, 2280);
     expect(summary.of('m-9').workedMinutes, 0);
     expect(jsonEncode(summary.agents.keys.toList()), '["m-2"]');
+  });
+
+  test(
+    'un mois rouvert redescend sans clôture : son résumé s\'efface',
+    () async {
+      final dao = AttendanceSummaryDao(db);
+      Future<void> pull(Map<String, Object?> raw) => dao.applyPulled(
+        [AttendanceSummaryDto.tryParse(raw)!],
+        schoolId: _school,
+        nowMs: 1,
+      );
+      await pull({
+        'month': '2026-10',
+        'closedAt': '2026-10-31T15:00:00Z',
+        'agents': [
+          {'staffMemberId': 'm-2', 'unjustifiedAbsences': 2},
+        ],
+      });
+      await pull({'month': '2026-10', 'closedAt': null, 'agents': []});
+
+      expect(await dao.forSchool(_school), isEmpty);
+    },
+  );
+
+  test('une réouverture en attente d\'envoi rouvre déjà le mois pour la Paie, '
+      'et un refus le rend clos', () async {
+    final dao = AttendanceSummaryDao(db);
+    await dao.applyPulled(
+      [
+        AttendanceSummaryDto.tryParse({
+          'month': '2026-10',
+          'closedAt': '2026-10-31T15:00:00Z',
+          'agents': <Object>[],
+        })!,
+      ],
+      schoolId: _school,
+      nowMs: 1,
+    );
+    final gestures = StaffAttendanceGestureDao(db);
+    await gestures.add(
+      const StaffAttendanceGestureRequestDto(
+        gestureId: 'g-1',
+        gesture: 'REOPEN_MONTH',
+        date: '2026-10-01',
+        clientRecordedAt: '2026-11-02T09:00:00.000Z',
+        authorId: 'u-1',
+        reason: 'Erreur de pointage',
+      ),
+      kind: StaffAttendanceLockKind.month,
+      authorName: null,
+      recordedAt: '2026-11-02T09:00:00Z',
+      schoolId: _school,
+      nowMs: 2,
+    );
+
+    expect(await dao.forSchool(_school), isEmpty);
+
+    await gestures.mark('g-1', RecordSyncState.failed, code: 'X', reason: 'X');
+    expect((await dao.forSchool(_school)).keys, ['2026-10']);
   });
 }

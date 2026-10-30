@@ -1,5 +1,5 @@
 {
-  "description": "Vecteurs de référence du moteur de paie v2 (hr). Même fichier côté tablette : un moteur qui diverge fait échouer la CI des deux dépôts. Montants en centimes ; mois yyyy-MM ; settings absent = défauts ; childcareEnabled faux = PC/E à 0 ; payout absent = 100 %. net = brut − absence − IPR − CNSS − PC/E − échéances ; à verser = min(net, montant fixe), sinon net × taux ÷ 100 arrondi demi vers le haut. Empreinte : staffMemberId|currency|gross|absence|ipr|cnss|childcare|advance|net|toPay, triées, jointes par \\n, SHA-256.",
+  "description": "Vecteurs de référence du moteur de paie v3 (formule 3) (hr). Même fichier côté tablette : un moteur qui diverge fait échouer la CI des deux dépôts. Montants en centimes ; le pointage lu est celui du mois même ; absence = min(base × NJ ÷ J arrondi demi vers le haut, base), J = jours du lundi au vendredi du mois civil, NJ borné à [0, J], si absenceDeductionEnabled ; mois yyyy-MM ; settings absent = défauts ; childcareEnabled faux = PC/E à 0 ; payout absent = 100 %. net = brut − absence − IPR − CNSS − PC/E − échéances ; à verser = min(net, montant fixe), sinon net × taux ÷ 100 arrondi demi vers le haut. Empreinte : staffMemberId|currency|gross|absence|ipr|cnss|childcare|advance|net|toPay, triées, jointes par \\n, SHA-256.",
   "defaultSettings": {
     "monthlyHoursDivisor": 173,
     "overtimeMultiplierPermille": 1300,
@@ -26,7 +26,6 @@
         "cnssPermille": 0
       }
     ],
-    "workDaysDivisor": 26,
     "absenceDeductionEnabled": false,
     "childcareEnabled": true
   },
@@ -66,7 +65,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000001",
             "contractId": "00000000-0000-4000-8000-000000000901",
             "currency": "USD",
@@ -79,8 +78,8 @@
             "dependentChildren": 3,
             "allowanceInCents": 1500,
             "grossInCents": 37500,
-            "daysWorked": 25,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 1,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -93,11 +92,11 @@
             "payoutReason": null,
             "toPayInCents": 37500,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -113,7 +112,7 @@
       }
     },
     {
-      "name": "vacataire à l'heure : les minutes du mois précédent, pas d'heures sup. même saisies, enfants du mois",
+      "name": "vacataire à l'heure : les minutes du mois même, pas d'heures sup. même saisies, enfants du mois",
       "month": "2026-10",
       "staff": [
         {
@@ -148,20 +147,20 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000002",
             "contractId": "00000000-0000-4000-8000-000000000902",
             "currency": "USD",
             "baseInCents": 22800,
             "baseMinutes": 2280,
-            "hoursMonth": "2026-09",
+            "hoursMonth": "2026-10",
             "overtimeMinutes": 0,
             "overtimeRateInCents": 0,
             "overtimeInCents": 0,
             "dependentChildren": 2,
             "allowanceInCents": 1000,
             "grossInCents": 23800,
-            "daysWorked": null,
+            "unjustifiedAbsences": null,
             "workDaysDivisor": null,
             "absenceInCents": 0,
             "iprInCents": 0,
@@ -175,11 +174,11 @@
             "payoutReason": null,
             "toPayInCents": 23800,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -236,20 +235,20 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000003",
             "contractId": "00000000-0000-4000-8000-000000000903",
             "currency": "USD",
             "baseInCents": 0,
             "baseMinutes": 0,
-            "hoursMonth": "2026-09",
+            "hoursMonth": "2026-10",
             "overtimeMinutes": 0,
             "overtimeRateInCents": 0,
             "overtimeInCents": 0,
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 0,
-            "daysWorked": null,
+            "unjustifiedAbsences": null,
             "workDaysDivisor": null,
             "absenceInCents": 0,
             "iprInCents": 0,
@@ -271,11 +270,11 @@
             "payoutReason": null,
             "toPayInCents": 0,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -318,7 +317,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000004",
             "contractId": "00000000-0000-4000-8000-000000000904",
             "currency": "CDF",
@@ -331,8 +330,8 @@
             "dependentChildren": 1,
             "allowanceInCents": 1400000,
             "grossInCents": 8100000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -345,11 +344,11 @@
             "payoutReason": null,
             "toPayInCents": 8100000,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -389,7 +388,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000005",
             "contractId": "00000000-0000-4000-8000-000000000905",
             "currency": "USD",
@@ -402,8 +401,8 @@
             "dependentChildren": 2,
             "allowanceInCents": 1000,
             "grossInCents": 1000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -416,11 +415,11 @@
             "payoutReason": null,
             "toPayInCents": 1000,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -470,7 +469,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000006",
             "contractId": "00000000-0000-4000-8000-000000000916",
             "currency": "USD",
@@ -483,8 +482,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 40000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -497,11 +496,11 @@
             "payoutReason": null,
             "toPayInCents": 40000,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -546,7 +545,7 @@
         "withoutContract": [
           "00000000-0000-4000-8000-000000000008"
         ],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 0,
         "totals": [],
         "linesDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -612,20 +611,20 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000009",
             "contractId": "00000000-0000-4000-8000-000000000909",
             "currency": "USD",
             "baseInCents": 10000,
             "baseMinutes": 1200,
-            "hoursMonth": "2026-09",
+            "hoursMonth": "2026-10",
             "overtimeMinutes": 0,
             "overtimeRateInCents": 0,
             "overtimeInCents": 0,
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 10000,
-            "daysWorked": null,
+            "unjustifiedAbsences": null,
             "workDaysDivisor": null,
             "absenceInCents": 0,
             "iprInCents": 0,
@@ -654,11 +653,11 @@
             "payoutReason": null,
             "toPayInCents": 0,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -708,7 +707,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000010",
             "contractId": "00000000-0000-4000-8000-000000000910",
             "currency": "USD",
@@ -721,8 +720,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 50000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 23,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -743,11 +742,11 @@
             "payoutReason": null,
             "toPayInCents": 46666,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-11"
+            "attendanceMonth": "2026-12"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -793,20 +792,20 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000011",
             "contractId": "00000000-0000-4000-8000-000000000911",
             "currency": "USD",
             "baseInCents": 2,
             "baseMinutes": 90,
-            "hoursMonth": "2026-09",
+            "hoursMonth": "2026-10",
             "overtimeMinutes": 0,
             "overtimeRateInCents": 0,
             "overtimeInCents": 0,
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 2,
-            "daysWorked": null,
+            "unjustifiedAbsences": null,
             "workDaysDivisor": null,
             "absenceInCents": 0,
             "iprInCents": 0,
@@ -820,11 +819,11 @@
             "payoutReason": null,
             "toPayInCents": 2,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -866,7 +865,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": false,
         "childcareEnabled": true
       },
@@ -913,7 +911,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000012",
             "contractId": "00000000-0000-4000-8000-000000000912",
             "currency": "USD",
@@ -926,8 +924,8 @@
             "dependentChildren": 4,
             "allowanceInCents": 0,
             "grossInCents": 20000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -940,10 +938,10 @@
             "payoutReason": null,
             "toPayInCents": 20000,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           },
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000013",
             "contractId": "00000000-0000-4000-8000-000000000913",
             "currency": "USD",
@@ -956,8 +954,8 @@
             "dependentChildren": 4,
             "allowanceInCents": 2000,
             "grossInCents": 37400,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -970,11 +968,11 @@
             "payoutReason": null,
             "toPayInCents": 37400,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 2,
         "totals": [
           {
@@ -996,14 +994,14 @@
       "expected": {
         "lines": [],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 0,
         "totals": [],
         "linesDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     },
     {
-      "name": "v2 réglages par défaut : la retenue d'absence coupée laisse le net v1, 13 absences affichées seulement",
+      "name": "réglages par défaut : la retenue d'absence coupée laisse le net v1, 13 absences affichées seulement",
       "month": "2026-10",
       "staff": [
         {
@@ -1033,7 +1031,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000021",
             "contractId": "00000000-0000-4000-8000-000000000921",
             "currency": "USD",
@@ -1046,8 +1044,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 30000,
-            "daysWorked": 13,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 13,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -1060,11 +1058,11 @@
             "payoutReason": null,
             "toPayInCents": 30000,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -1080,7 +1078,7 @@
       }
     },
     {
-      "name": "v2 retenue d'absence : 300 $ ÷ 26 × 13 jours = 150,00 $ en une seule division (T2)",
+      "name": "retenue d'absence : 300 $ × 13 NJ ÷ 22 jours ouvrés (octobre) = 177,27 $ en une seule division",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -1108,7 +1106,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": true,
         "childcareEnabled": true
       },
@@ -1140,7 +1137,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000022",
             "contractId": "00000000-0000-4000-8000-000000000922",
             "currency": "USD",
@@ -1153,260 +1150,41 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 30000,
-            "daysWorked": 13,
-            "workDaysDivisor": 26,
-            "absenceInCents": 15000,
+            "unjustifiedAbsences": 13,
+            "workDaysDivisor": 22,
+            "absenceInCents": 17727,
             "iprInCents": 0,
             "cnssInCents": 0,
             "childcareInCents": 0,
             "advances": [],
             "advanceInCents": 0,
-            "netInCents": 15000,
+            "netInCents": 12273,
             "payoutPercent": 100,
             "fixedPayoutInCents": null,
             "payoutReason": null,
-            "toPayInCents": 15000,
+            "toPayInCents": 12273,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
             "currency": "USD",
             "grossInCents": 30000,
-            "deductionInCents": 15000,
+            "deductionInCents": 17727,
             "advanceInCents": 0,
-            "netInCents": 15000,
-            "toPayInCents": 15000
+            "netInCents": 12273,
+            "toPayInCents": 12273
           }
         ],
-        "linesDigest": "3a3793bfbacbb406fdf9addb54368a8bb42bead934a71e846cfeb30e8208db9a"
+        "linesDigest": "ee70b8cf0521ea4e8c2528550351945428bb23f61b08804c7a1b9b729c8543e6"
       }
     },
     {
-      "name": "v2 NJP saisi par l'économe prime sur le pointage ; saisi au-delà du diviseur, il est borné",
-      "month": "2026-10",
-      "settings": {
-        "monthlyHoursDivisor": 173,
-        "overtimeMultiplierPermille": 1300,
-        "allowanceEligibleKinds": [
-          "PERMANENT",
-          "VACATAIRE",
-          "CONVENTIONNE"
-        ],
-        "currencyRules": [
-          {
-            "currency": "USD",
-            "childAllowanceInCents": 500,
-            "defaultOvertimeRateInCents": 300,
-            "overtimeRateStepInCents": 50,
-            "iprFlatInCents": 0,
-            "cnssPermille": 0
-          },
-          {
-            "currency": "CDF",
-            "childAllowanceInCents": 1400000,
-            "defaultOvertimeRateInCents": 850000,
-            "overtimeRateStepInCents": 50000,
-            "iprFlatInCents": 0,
-            "cnssPermille": 0
-          }
-        ],
-        "workDaysDivisor": 22,
-        "absenceDeductionEnabled": true,
-        "childcareEnabled": true
-      },
-      "staff": [
-        {
-          "staffMemberId": "00000000-0000-4000-8000-000000000023",
-          "contracts": [
-            {
-              "id": "00000000-0000-4000-8000-000000000923",
-              "kind": "PERMANENT",
-              "payMode": null,
-              "effectiveFrom": "2025-09-01",
-              "endsOn": null,
-              "amountInCents": 44000,
-              "currency": "USD",
-              "bonusInCents": null,
-              "bonusCurrency": null
-            }
-          ],
-          "attendance": {
-            "workedMinutes": 0,
-            "unjustifiedAbsences": 5,
-            "justifiedAbsences": 0,
-            "lates": 0,
-            "lateMinutes": 0
-          },
-          "variables": {
-            "daysWorked": 20
-          }
-        },
-        {
-          "staffMemberId": "00000000-0000-4000-8000-000000000024",
-          "contracts": [
-            {
-              "id": "00000000-0000-4000-8000-000000000924",
-              "kind": "PERMANENT",
-              "payMode": null,
-              "effectiveFrom": "2025-09-01",
-              "endsOn": null,
-              "amountInCents": 44000,
-              "currency": "USD",
-              "bonusInCents": null,
-              "bonusCurrency": null
-            }
-          ],
-          "attendance": {
-            "workedMinutes": 0,
-            "unjustifiedAbsences": 30,
-            "justifiedAbsences": 0,
-            "lates": 0,
-            "lateMinutes": 0
-          },
-          "variables": {
-            "daysWorked": 25
-          }
-        },
-        {
-          "staffMemberId": "00000000-0000-4000-8000-000000000025",
-          "contracts": [
-            {
-              "id": "00000000-0000-4000-8000-000000000925",
-              "kind": "PERMANENT",
-              "payMode": null,
-              "effectiveFrom": "2025-09-01",
-              "endsOn": null,
-              "amountInCents": 44000,
-              "currency": "USD",
-              "bonusInCents": null,
-              "bonusCurrency": null
-            }
-          ],
-          "attendance": {
-            "workedMinutes": 0,
-            "unjustifiedAbsences": 30,
-            "justifiedAbsences": 0,
-            "lates": 0,
-            "lateMinutes": 0
-          }
-        }
-      ],
-      "expected": {
-        "lines": [
-          {
-            "formulaVersion": 2,
-            "staffMemberId": "00000000-0000-4000-8000-000000000023",
-            "contractId": "00000000-0000-4000-8000-000000000923",
-            "currency": "USD",
-            "baseInCents": 44000,
-            "baseMinutes": null,
-            "hoursMonth": null,
-            "overtimeMinutes": 0,
-            "overtimeRateInCents": 350,
-            "overtimeInCents": 0,
-            "dependentChildren": 0,
-            "allowanceInCents": 0,
-            "grossInCents": 44000,
-            "daysWorked": 20,
-            "workDaysDivisor": 22,
-            "absenceInCents": 4000,
-            "iprInCents": 0,
-            "cnssInCents": 0,
-            "childcareInCents": 0,
-            "advances": [],
-            "advanceInCents": 0,
-            "netInCents": 40000,
-            "payoutPercent": 100,
-            "fixedPayoutInCents": null,
-            "payoutReason": null,
-            "toPayInCents": 40000,
-            "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
-          },
-          {
-            "formulaVersion": 2,
-            "staffMemberId": "00000000-0000-4000-8000-000000000024",
-            "contractId": "00000000-0000-4000-8000-000000000924",
-            "currency": "USD",
-            "baseInCents": 44000,
-            "baseMinutes": null,
-            "hoursMonth": null,
-            "overtimeMinutes": 0,
-            "overtimeRateInCents": 350,
-            "overtimeInCents": 0,
-            "dependentChildren": 0,
-            "allowanceInCents": 0,
-            "grossInCents": 44000,
-            "daysWorked": 22,
-            "workDaysDivisor": 22,
-            "absenceInCents": 0,
-            "iprInCents": 0,
-            "cnssInCents": 0,
-            "childcareInCents": 0,
-            "advances": [],
-            "advanceInCents": 0,
-            "netInCents": 44000,
-            "payoutPercent": 100,
-            "fixedPayoutInCents": null,
-            "payoutReason": null,
-            "toPayInCents": 44000,
-            "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
-          },
-          {
-            "formulaVersion": 2,
-            "staffMemberId": "00000000-0000-4000-8000-000000000025",
-            "contractId": "00000000-0000-4000-8000-000000000925",
-            "currency": "USD",
-            "baseInCents": 44000,
-            "baseMinutes": null,
-            "hoursMonth": null,
-            "overtimeMinutes": 0,
-            "overtimeRateInCents": 350,
-            "overtimeInCents": 0,
-            "dependentChildren": 0,
-            "allowanceInCents": 0,
-            "grossInCents": 44000,
-            "daysWorked": 0,
-            "workDaysDivisor": 22,
-            "absenceInCents": 44000,
-            "iprInCents": 0,
-            "cnssInCents": 0,
-            "childcareInCents": 0,
-            "advances": [],
-            "advanceInCents": 0,
-            "netInCents": 0,
-            "payoutPercent": 100,
-            "fixedPayoutInCents": null,
-            "payoutReason": null,
-            "toPayInCents": 0,
-            "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
-          }
-        ],
-        "withoutContract": [],
-        "formulaVersion": 2,
-        "lineCount": 3,
-        "totals": [
-          {
-            "currency": "USD",
-            "grossInCents": 132000,
-            "deductionInCents": 48000,
-            "advanceInCents": 0,
-            "netInCents": 84000,
-            "toPayInCents": 84000
-          }
-        ],
-        "linesDigest": "be8d8991b8d72d4a6fe5d2c2fe90218639eb08ad39166c2b41d1e3ef7d7dfba6"
-      }
-    },
-    {
-      "name": "v2 vacataire à l'heure : ni NJP ni retenue d'absence, même activée ; IPR et CNSS s'appliquent",
+      "name": "vacataire à l'heure : ni NJ ni retenue d'absence, même activée ; IPR et CNSS s'appliquent",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -1434,7 +1212,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": true,
         "childcareEnabled": true
       },
@@ -1466,20 +1243,20 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000026",
             "contractId": "00000000-0000-4000-8000-000000000926",
             "currency": "USD",
             "baseInCents": 20475,
             "baseMinutes": 2730,
-            "hoursMonth": "2026-09",
+            "hoursMonth": "2026-10",
             "overtimeMinutes": 0,
             "overtimeRateInCents": 0,
             "overtimeInCents": 0,
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 20475,
-            "daysWorked": null,
+            "unjustifiedAbsences": null,
             "workDaysDivisor": null,
             "absenceInCents": 0,
             "iprInCents": 200,
@@ -1493,11 +1270,11 @@
             "payoutReason": null,
             "toPayInCents": 19558,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -1513,7 +1290,7 @@
       }
     },
     {
-      "name": "v2 IPR forfaitaire et CNSS 35 ‰ de la base (heures sup. et allocations hors assiette), PC/E saisie",
+      "name": "IPR forfaitaire et CNSS 35 ‰ de la base (heures sup. et allocations hors assiette), PC/E saisie",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -1541,7 +1318,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": false,
         "childcareEnabled": true
       },
@@ -1571,7 +1347,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000027",
             "contractId": "00000000-0000-4000-8000-000000000927",
             "currency": "USD",
@@ -1584,8 +1360,8 @@
             "dependentChildren": 2,
             "allowanceInCents": 1000,
             "grossInCents": 31500,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 200,
             "cnssInCents": 1050,
@@ -1598,11 +1374,11 @@
             "payoutReason": null,
             "toPayInCents": 27750,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -1618,7 +1394,7 @@
       }
     },
     {
-      "name": "v2 conventionné en francs : la CNSS sur la prime, l'IPR des francs",
+      "name": "conventionné en francs : la CNSS sur la prime, l'IPR des francs",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -1646,7 +1422,6 @@
             "cnssPermille": 50
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": false,
         "childcareEnabled": true
       },
@@ -1671,7 +1446,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000028",
             "contractId": "00000000-0000-4000-8000-000000000928",
             "currency": "CDF",
@@ -1684,8 +1459,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 15000000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 560000,
             "cnssInCents": 750000,
@@ -1698,11 +1473,11 @@
             "payoutReason": null,
             "toPayInCents": 13690000,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -1718,7 +1493,7 @@
       }
     },
     {
-      "name": "v2 agent non payé (brut nul) : pas d'IPR",
+      "name": "agent non payé (brut nul) : pas d'IPR",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -1746,7 +1521,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": false,
         "childcareEnabled": true
       },
@@ -1771,20 +1545,20 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000029",
             "contractId": "00000000-0000-4000-8000-000000000929",
             "currency": "USD",
             "baseInCents": 0,
             "baseMinutes": 0,
-            "hoursMonth": "2026-09",
+            "hoursMonth": "2026-10",
             "overtimeMinutes": 0,
             "overtimeRateInCents": 0,
             "overtimeInCents": 0,
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 0,
-            "daysWorked": null,
+            "unjustifiedAbsences": null,
             "workDaysDivisor": null,
             "absenceInCents": 0,
             "iprInCents": 0,
@@ -1798,11 +1572,11 @@
             "payoutReason": null,
             "toPayInCents": 0,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -1818,7 +1592,7 @@
       }
     },
     {
-      "name": "v2 retenues bornées au brut dans l'ordre absence, IPR, CNSS, PC/E ; le rogné est perdu, l'échéance glisse entière",
+      "name": "retenues bornées au brut dans l'ordre absence, IPR, CNSS, PC/E ; le rogné est perdu, l'échéance glisse entière",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -1846,7 +1620,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": true,
         "childcareEnabled": true
       },
@@ -1892,7 +1665,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000030",
             "contractId": "00000000-0000-4000-8000-000000000930",
             "currency": "USD",
@@ -1905,11 +1678,11 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 2600,
-            "daysWorked": 13,
-            "workDaysDivisor": 26,
-            "absenceInCents": 1300,
+            "unjustifiedAbsences": 13,
+            "workDaysDivisor": 22,
+            "absenceInCents": 1536,
             "iprInCents": 800,
-            "cnssInCents": 500,
+            "cnssInCents": 264,
             "childcareInCents": 0,
             "advances": [
               {
@@ -1927,11 +1700,11 @@
             "payoutReason": null,
             "toPayInCents": 0,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -1943,11 +1716,11 @@
             "toPayInCents": 0
           }
         ],
-        "linesDigest": "8e15346087b6e254ee1dca799c7d2d734ee8fe0f84d76da55b92bd4e92917ad9"
+        "linesDigest": "5d92bd7713f6da0debb8cb9433fc7633ba2a2ccde11cebdf3a0052251f70afdc"
       }
     },
     {
-      "name": "v2 retenues fixes avant les échéances : l'avance prend ce qui reste après IPR et PC/E",
+      "name": "retenues fixes avant les échéances : l'avance prend ce qui reste après IPR et PC/E",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -1975,7 +1748,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": false,
         "childcareEnabled": true
       },
@@ -2014,7 +1786,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000031",
             "contractId": "00000000-0000-4000-8000-000000000931",
             "currency": "USD",
@@ -2027,8 +1799,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 10000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 200,
             "cnssInCents": 0,
@@ -2049,11 +1821,11 @@
             "payoutReason": null,
             "toPayInCents": 0,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -2069,7 +1841,7 @@
       }
     },
     {
-      "name": "v2 taux du mois 60 % arrondi demi vers le haut ; un montant fixe prime sur le taux ; un fixe au-delà du net verse le net",
+      "name": "taux du mois 60 % arrondi demi vers le haut ; un montant fixe prime sur le taux ; un fixe au-delà du net verse le net",
       "month": "2026-10",
       "payout": {
         "percent": 60,
@@ -2136,7 +1908,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000032",
             "contractId": "00000000-0000-4000-8000-000000000932",
             "currency": "USD",
@@ -2149,8 +1921,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 33333,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -2163,10 +1935,10 @@
             "payoutReason": "Trésorerie insuffisante",
             "toPayInCents": 20000,
             "deferredInCents": 13333,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           },
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000033",
             "contractId": "00000000-0000-4000-8000-000000000933",
             "currency": "USD",
@@ -2179,8 +1951,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 40000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -2193,10 +1965,10 @@
             "payoutReason": "Accord avec la direction",
             "toPayInCents": 10000,
             "deferredInCents": 30000,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           },
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000034",
             "contractId": "00000000-0000-4000-8000-000000000934",
             "currency": "USD",
@@ -2209,8 +1981,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 5000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -2223,11 +1995,11 @@
             "payoutReason": "Rattrapage",
             "toPayInCents": 5000,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 3,
         "totals": [
           {
@@ -2243,7 +2015,7 @@
       }
     },
     {
-      "name": "v2 taux du mois 0 % : tout le net est différé",
+      "name": "taux du mois 0 % : tout le net est différé",
       "month": "2026-10",
       "payout": {
         "percent": 0,
@@ -2270,7 +2042,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000035",
             "contractId": "00000000-0000-4000-8000-000000000935",
             "currency": "USD",
@@ -2283,8 +2055,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 25000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 0,
             "cnssInCents": 0,
@@ -2297,11 +2069,11 @@
             "payoutReason": "Caisse vide",
             "toPayInCents": 0,
             "deferredInCents": 25000,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -2317,7 +2089,7 @@
       }
     },
     {
-      "name": "v2 deux devises : totaux séparés, retenues et à verser compris",
+      "name": "deux devises : totaux séparés, retenues et à verser compris",
       "month": "2026-10",
       "payout": {
         "percent": 50,
@@ -2349,7 +2121,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": false,
         "childcareEnabled": true
       },
@@ -2390,7 +2161,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000036",
             "contractId": "00000000-0000-4000-8000-000000000936",
             "currency": "USD",
@@ -2403,8 +2174,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 30001,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 200,
             "cnssInCents": 0,
@@ -2417,10 +2188,10 @@
             "payoutReason": "Moitié ce mois",
             "toPayInCents": 14901,
             "deferredInCents": 14900,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           },
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000037",
             "contractId": "00000000-0000-4000-8000-000000000937",
             "currency": "CDF",
@@ -2433,8 +2204,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 84000000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 560000,
             "cnssInCents": 0,
@@ -2447,11 +2218,11 @@
             "payoutReason": "Moitié ce mois",
             "toPayInCents": 41720000,
             "deferredInCents": 41720000,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 2,
         "totals": [
           {
@@ -2475,7 +2246,7 @@
       }
     },
     {
-      "name": "v2 PC/E coupée : la saisie reste, la retenue vaut 0, l'échéance prend ce qu'elle laissait",
+      "name": "PC/E coupée : la saisie reste, la retenue vaut 0, l'échéance prend ce qu'elle laissait",
       "month": "2026-10",
       "settings": {
         "monthlyHoursDivisor": 173,
@@ -2503,7 +2274,6 @@
             "cnssPermille": 0
           }
         ],
-        "workDaysDivisor": 26,
         "absenceDeductionEnabled": false,
         "childcareEnabled": false
       },
@@ -2542,7 +2312,7 @@
       "expected": {
         "lines": [
           {
-            "formulaVersion": 2,
+            "formulaVersion": 3,
             "staffMemberId": "00000000-0000-4000-8000-000000000038",
             "contractId": "00000000-0000-4000-8000-000000000938",
             "currency": "USD",
@@ -2555,8 +2325,8 @@
             "dependentChildren": 0,
             "allowanceInCents": 0,
             "grossInCents": 10000,
-            "daysWorked": 26,
-            "workDaysDivisor": 26,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
             "absenceInCents": 0,
             "iprInCents": 200,
             "cnssInCents": 0,
@@ -2577,11 +2347,11 @@
             "payoutReason": null,
             "toPayInCents": 800,
             "deferredInCents": 0,
-            "attendanceMonth": "2026-09"
+            "attendanceMonth": "2026-10"
           }
         ],
         "withoutContract": [],
-        "formulaVersion": 2,
+        "formulaVersion": 3,
         "lineCount": 1,
         "totals": [
           {
@@ -2594,6 +2364,537 @@
           }
         ],
         "linesDigest": "1594da973ec60210e1e5663d66f41d1e07005a0c2c521cfe8951b7f572a9492c"
+      }
+    },
+    {
+      "name": "jours ouvrés de novembre 2026 : 21 ; 400 $ × 2 NJ ÷ 21 = 38,10 $ arrondi demi vers le haut",
+      "month": "2026-11",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT",
+          "VACATAIRE",
+          "CONVENTIONNE"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          }
+        ],
+        "absenceDeductionEnabled": true,
+        "childcareEnabled": true
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000101",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000901",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 40000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 2,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000101",
+            "contractId": "00000000-0000-4000-8000-000000000901",
+            "currency": "USD",
+            "baseInCents": 40000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 300,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 40000,
+            "unjustifiedAbsences": 2,
+            "workDaysDivisor": 21,
+            "absenceInCents": 3810,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 36190,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 36190,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-11"
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 40000,
+            "deductionInCents": 3810,
+            "advanceInCents": 0,
+            "netInCents": 36190,
+            "toPayInCents": 36190
+          }
+        ],
+        "linesDigest": "2c74c3aba2deff312f227f04561787f77dff220cb9d8d7b8d495fce660cafcbd"
+      }
+    },
+    {
+      "name": "jours ouvrés de décembre 2026 : 23 ; 400 $ × 2 NJ ÷ 23 = 34,78 $",
+      "month": "2026-12",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT",
+          "VACATAIRE",
+          "CONVENTIONNE"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          }
+        ],
+        "absenceDeductionEnabled": true,
+        "childcareEnabled": true
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000102",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000902",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 40000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 2,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000102",
+            "contractId": "00000000-0000-4000-8000-000000000902",
+            "currency": "USD",
+            "baseInCents": 40000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 300,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 40000,
+            "unjustifiedAbsences": 2,
+            "workDaysDivisor": 23,
+            "absenceInCents": 3478,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 36522,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 36522,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-12"
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 40000,
+            "deductionInCents": 3478,
+            "advanceInCents": 0,
+            "netInCents": 36522,
+            "toPayInCents": 36522
+          }
+        ],
+        "linesDigest": "22658432e4b4633f227ccc21f2ba797ba7076ccd3018cf8d596a1b658eac46b0"
+      }
+    },
+    {
+      "name": "jours ouvrés de février 2027 : 20 ; 400 $ × 2 NJ ÷ 20 = 40,00 $",
+      "month": "2027-02",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT",
+          "VACATAIRE",
+          "CONVENTIONNE"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          }
+        ],
+        "absenceDeductionEnabled": true,
+        "childcareEnabled": true
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000103",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000903",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 40000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 2,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000103",
+            "contractId": "00000000-0000-4000-8000-000000000903",
+            "currency": "USD",
+            "baseInCents": 40000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 300,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 40000,
+            "unjustifiedAbsences": 2,
+            "workDaysDivisor": 20,
+            "absenceInCents": 4000,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 36000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 36000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2027-02"
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 40000,
+            "deductionInCents": 4000,
+            "advanceInCents": 0,
+            "netInCents": 36000,
+            "toPayInCents": 36000
+          }
+        ],
+        "linesDigest": "d2fe9c8cd2cb1f841927b4e6d56e3dd8c236ff92c74b0daf7c6205d5bb82946d"
+      }
+    },
+    {
+      "name": "septembre 2026 (22 jours ouvrés) : NJ à 0 sans retenue ; NJ égal à J retient toute la base, les allocations restent ; NJ au-delà de J est borné à J",
+      "month": "2026-09",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT",
+          "VACATAIRE",
+          "CONVENTIONNE"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          }
+        ],
+        "absenceDeductionEnabled": true,
+        "childcareEnabled": true
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000104",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000904",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 44000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          }
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000105",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000905",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 44000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 22,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "profileChildren": 2
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000106",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-000000000906",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 44000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 30,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          }
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000104",
+            "contractId": "00000000-0000-4000-8000-000000000904",
+            "currency": "USD",
+            "baseInCents": 44000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 350,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 44000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 44000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 44000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-09"
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000105",
+            "contractId": "00000000-0000-4000-8000-000000000905",
+            "currency": "USD",
+            "baseInCents": 44000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 350,
+            "overtimeInCents": 0,
+            "dependentChildren": 2,
+            "allowanceInCents": 1000,
+            "grossInCents": 45000,
+            "unjustifiedAbsences": 22,
+            "workDaysDivisor": 22,
+            "absenceInCents": 44000,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 1000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 1000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-09"
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000106",
+            "contractId": "00000000-0000-4000-8000-000000000906",
+            "currency": "USD",
+            "baseInCents": 44000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 350,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 44000,
+            "unjustifiedAbsences": 22,
+            "workDaysDivisor": 22,
+            "absenceInCents": 44000,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 0,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 0,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-09"
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 3,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 133000,
+            "deductionInCents": 88000,
+            "advanceInCents": 0,
+            "netInCents": 45000,
+            "toPayInCents": 45000
+          }
+        ],
+        "linesDigest": "c1964b69097f15d511780aa4b47c4c852d92f0d8c99c34f3c68c0fb421d6bdc2"
       }
     }
   ]
