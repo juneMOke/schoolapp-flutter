@@ -45,6 +45,11 @@ class EditiqueDocument extends Equatable {
   /// serveur ne le pose pas — pièce non archivée ou serveur antérieur.
   final String? emittedOn;
 
+  /// URL de vérification de la pièce, lue dans `X-Document-Verification-Url`
+  /// — celle que le ticket imprime en QR. `null` quand le serveur ne la pose
+  /// pas.
+  final String? verificationUrl;
+
   const EditiqueDocument({
     required this.type,
     required this.bytes,
@@ -52,6 +57,7 @@ class EditiqueDocument extends Equatable {
     this.documentNumber,
     this.documentId,
     this.emittedOn,
+    this.verificationUrl,
   });
 
   /// Relais de [EditiqueDocumentType.isReplayable] — voir sa documentation
@@ -66,5 +72,6 @@ class EditiqueDocument extends Equatable {
     documentId,
     fileName,
     emittedOn,
+    verificationUrl,
   ];
 }

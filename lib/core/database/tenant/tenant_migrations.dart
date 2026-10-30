@@ -119,6 +119,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(71)) {
     await _addReceiptEmissionDay(db);
   }
+  if (upTo(72)) {
+    await _addColumnIfTable(db, 'generated_documents', 'verification_url');
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -133,6 +136,27 @@ Future<void> migrateDeviceDatabase(
   if (upTo(63)) {
     await _admitEnrollmentSheetInEditiqueCache(db);
   }
+  if (upTo(72)) {
+    await _addColumnIfTable(db, 'editique_cache_entries', 'verification_url');
+  }
+}
+
+/// v72 — l'URL de vérification du reçu scellé, que le ticket imprime en QR
+/// (révision de D-4, 2026-10-30) : `generated_documents.verification_url` côté
+/// école (accusé, récupération), `editique_cache_entries.verification_url`
+/// côté appareil (delta éditique, pour un versement encaissé ailleurs).
+///
+/// Additif, nullable, **aucune reprise** : sans URL, le ticket sort sans QR,
+/// comme avant. Garde de table et de colonne, même raison qu'à la v53.
+Future<void> _addColumnIfTable(
+  DatabaseExecutor db,
+  String table,
+  String column,
+) async {
+  final info = await db.rawQuery('PRAGMA table_info($table)');
+  if (info.isEmpty) return;
+  if (info.any((row) => row['name'] == column)) return;
+  await db.execute('ALTER TABLE $table ADD COLUMN $column TEXT');
 }
 
 /// v71 — `generated_documents.emitted_on`, le jour d'émission du reçu scellé.

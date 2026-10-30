@@ -205,6 +205,25 @@ void main() {
       expect(stored?.emittedAt, 77);
     });
 
+    // Une émission qui n'annonce pas l'URL ne retire pas le QR qu'un delta
+    // avait appris.
+    test(
+      'une URL de vérification connue n est pas effacée par un null',
+      () async {
+        await dao.upsert(
+          cacheEntry(verificationUrl: 'https://api.eteelo.com/verify/RC/doc-1'),
+        );
+
+        await dao.upsert(cacheEntry());
+
+        final stored = await dao.findByDocumentId('doc-1');
+        expect(
+          stored?.verificationUrl,
+          'https://api.eteelo.com/verify/RC/doc-1',
+        );
+      },
+    );
+
     // Un relevé ou un quitus n'est pas archivé par le serveur : la copie locale
     // en serait l'unique exemplaire, et l'éviction LRU la détruirait.
     test('un type non archivé est refusé', () async {

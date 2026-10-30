@@ -252,6 +252,7 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
         schoolId: schoolId,
         ownerUid: currentUser.uid ?? '',
         emittedAt: _emittedAtMs(document.emittedOn),
+        verificationUrl: document.verificationUrl,
         bytes: document.bytes,
       );
     } catch (_) {

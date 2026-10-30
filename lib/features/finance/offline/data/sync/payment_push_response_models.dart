@@ -7,6 +7,7 @@
 // a été physiquement reçu au guichet. Un trop-perçu est ACCEPTÉ puis signalé via
 // [OverpaymentSignal] pour arbitrage admin.
 
+import 'package:school_app_flutter/features/documents/domain/receipt_verification_url.dart';
 import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart'
     show StudentChargeDto;
@@ -83,12 +84,17 @@ class GeneratedDocumentDto {
   /// ajout back du 2026-10-30) ; `null` tant que le serveur ne le sert pas.
   final String? emittedOn;
 
+  /// URL de vérification du reçu, imprimée en QR sur le ticket ; `null` si
+  /// absente ou douteuse (`ReceiptVerificationUrl`).
+  final String? verificationUrl;
+
   const GeneratedDocumentDto({
     required this.type,
     required this.documentNumber,
     required this.status,
     this.url,
     this.emittedOn,
+    this.verificationUrl,
   });
 
   factory GeneratedDocumentDto.fromJson(Map<String, dynamic> j) =>
@@ -98,6 +104,7 @@ class GeneratedDocumentDto {
         status: (j['status'] as String?) ?? 'DEFINITIVE',
         url: j['url'] as String?,
         emittedOn: ReceiptEmissionDay.fromIso(j['emittedAt']),
+        verificationUrl: ReceiptVerificationUrl.normalize(j['verificationUrl']),
       );
 
   /// `doc_type` local de la table `generated_documents` (domaine `PAYMENT`).

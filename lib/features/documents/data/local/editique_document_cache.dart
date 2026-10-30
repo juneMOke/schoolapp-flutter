@@ -111,6 +111,7 @@ class EditiqueDocumentCache {
     required String schoolId,
     String ownerUid = '',
     int? emittedAt,
+    String? verificationUrl,
     required Uint8List bytes,
   }) {
     return _exclusive(() async {
@@ -166,6 +167,7 @@ class EditiqueDocumentCache {
           sizeBytes: stored.clearSizeBytes,
           contentSha256: stored.sha256Hex,
           emittedAt: emittedAt,
+          verificationUrl: verificationUrl,
           // Une pièce déjà connue garde sa date de mise en cache : la remettre
           // à maintenant effacerait son ancienneté réelle.
           createdAt: existing?.createdAt ?? now,
@@ -268,6 +270,8 @@ class EditiqueDocumentCache {
               cancelledAt: document.cancelledAt ?? existing?.cancelledAt,
               cancellationReason:
                   document.cancellationReason ?? existing?.cancellationReason,
+              verificationUrl:
+                  document.verificationUrl ?? existing?.verificationUrl,
               createdAt: existing?.createdAt ?? now,
               lastAccessedAt: existing?.lastAccessedAt ?? now,
             ),

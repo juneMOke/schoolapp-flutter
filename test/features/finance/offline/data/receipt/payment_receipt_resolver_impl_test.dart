@@ -18,6 +18,7 @@ EditiqueCacheEntry _knownOnly({
   int? cancelledAt,
   String? cancellationReason,
   int? emittedAt,
+  String? verificationUrl,
 }) => EditiqueCacheEntry(
   id: 'c-9',
   documentId: 'doc-9',
@@ -30,6 +31,7 @@ EditiqueCacheEntry _knownOnly({
   cancelledAt: cancelledAt,
   cancellationReason: cancellationReason,
   emittedAt: emittedAt,
+  verificationUrl: verificationUrl,
   createdAt: 2000,
   lastAccessedAt: 3000,
 );
@@ -85,6 +87,7 @@ void main() {
     required String status,
     String? provisionalNumber,
     String? emittedOn,
+    String? verificationUrl,
   }) => school.insert('generated_documents', {
     'id': 'gd-1',
     'doc_domain': 'PAYMENT',
@@ -94,6 +97,7 @@ void main() {
     'provisional_number': provisionalNumber,
     'status': status,
     'emitted_on': emittedOn,
+    'verification_url': verificationUrl,
   });
 
   test('le numéro scellé local passe en premier', () async {
@@ -122,6 +126,53 @@ void main() {
     expect(receipt.number, 'CF-RC-2627-000279');
     expect(receipt.isDefinitive, isTrue);
     expect(receipt.cacheEntry?.hasBytes, isFalse);
+  });
+
+  // Le QR du ticket : l'URL du reçu IMPRIMÉ, jamais celle d'une autre pièce.
+  group('URL de vérification', () {
+    const url = 'https://api.eteelo.com/verify/RC/doc-1';
+
+    test('la ligne scellée locale la donne', () async {
+      await seedPayment(receiptId: 'doc-1');
+      await seedLocalDocument(
+        number: 'CF-RC-2627-000263',
+        status: 'DEFINITIVE',
+        verificationUrl: url,
+      );
+
+      expect((await resolver.resolve('p-1')).verificationUrl, url);
+    });
+
+    test('un versement d ailleurs la lit dans le cache', () async {
+      await seedPayment(receiptId: 'doc-9');
+      await cache.upsert(_knownOnly(verificationUrl: url));
+
+      expect((await resolver.resolve('p-1')).verificationUrl, url);
+    });
+
+    test('jamais celle d une pièce rééditée sous un autre numéro', () async {
+      await seedPayment(receiptId: 'doc-9');
+      await seedLocalDocument(
+        number: 'CF-RC-2627-000263',
+        status: 'DEFINITIVE',
+      );
+      await cache.upsert(
+        _knownOnly(documentNumber: 'CF-RC-2627-000279', verificationUrl: url),
+      );
+
+      expect((await resolver.resolve('p-1')).verificationUrl, isNull);
+    });
+
+    test('un reçu encore provisoire n en a pas', () async {
+      await seedPayment();
+      await seedLocalDocument(
+        number: 'PROV-0CB02AF9',
+        status: 'PROVISIONAL',
+        verificationUrl: url,
+      );
+
+      expect((await resolver.resolve('p-1')).verificationUrl, isNull);
+    });
   });
 
   group('jour d émission', () {

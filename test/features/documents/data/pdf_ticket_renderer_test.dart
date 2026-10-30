@@ -18,6 +18,7 @@ const _labels = TicketLabels(
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   enteredAtLabel: 'Saisi le',
+  verificationNotice: 'Scannez pour vérifier ce reçu',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -503,6 +504,33 @@ void main() {
       },
     );
   });
+  // Le PDF dessine le QR depuis la même matrice que la thermique.
+  test(
+    'une ligne QR devient une image, sur le rouleau comme sur la feuille',
+    () async {
+      const lines = [
+        TicketLine('AVANT'),
+        TicketLine.qr('https://api.eteelo.com/verify/RC/9f8e7d6c'),
+      ];
+
+      for (final format in [PdfTicketRenderer.pageFormat, PdfPageFormat.a4]) {
+        final withQr = await PdfTicketRenderer.renderRichLines(
+          lines,
+          format: format,
+        );
+        final without = await PdfTicketRenderer.renderRichLines(const [
+          TicketLine('AVANT'),
+        ], format: format);
+        // Une image se pose par l'opérateur `Do` du flux de page.
+        final drawsImage = RegExp(r'/\w+ Do');
+
+        expect(_visibleText(withQr), contains(drawsImage));
+        expect(_visibleText(without), isNot(contains(drawsImage)));
+        expect(_visibleText(withQr), isNot(contains('eteelo.com')));
+        expect(withQr.length, greaterThan(without.length));
+      }
+    },
+  );
 }
 
 /// Un média 80 mm tel qu'un service d'impression thermique l'annonce : laize

@@ -113,6 +113,14 @@ class TicketReceiptModel extends Equatable {
   /// sur un autre poste. [paidAt] passe alors en mention « Saisi le ».
   final DateTime? receiptIssuedOn;
 
+  /// URL de vérification du reçu scellé, imprimée en QR (révision de D-4,
+  /// 2026-10-30) ; `null` quand elle n'est pas connue.
+  ///
+  /// ⚠️ **Jamais sur un ticket provisoire**, même si elle était connue : le QR
+  /// fait passer le papier pour officiel, et c'est tout ce qu'un `PROV-` ne
+  /// doit pas paraître (D-4). Le gabarit l'ignore donc sous [isProvisional].
+  final String? verificationUrl;
+
   final String? cashierFullName;
 
   /// Le payeur, **quand il y en a un**.
@@ -213,6 +221,7 @@ class TicketReceiptModel extends Equatable {
     required this.isProvisional,
     required this.paidAt,
     this.receiptIssuedOn,
+    this.verificationUrl,
     this.cashierFullName,
     this.payerFullName,
     this.payerPhoneNumber,
@@ -402,6 +411,7 @@ class TicketReceiptModel extends Equatable {
     isProvisional,
     paidAt,
     receiptIssuedOn,
+    verificationUrl,
     cashierFullName,
     tenders,
     allocations,

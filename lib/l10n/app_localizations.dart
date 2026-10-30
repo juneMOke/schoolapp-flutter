@@ -13566,6 +13566,12 @@ abstract class AppLocalizations {
   /// **'Entered on'**
   String get ticketEnteredAtLabel;
 
+  /// No description provided for @ticketVerifyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to verify this receipt'**
+  String get ticketVerifyNotice;
+
   /// No description provided for @ticketPayerLabel.
   ///
   /// In en, this message translates to:

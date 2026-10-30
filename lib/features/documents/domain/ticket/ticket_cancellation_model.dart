@@ -45,6 +45,11 @@ class TicketCancellationModel extends Equatable {
   /// Le compte qui a annulé, `null` tant que le pull ne l'a pas nommé.
   final String? cancelledByName;
 
+  /// URL de vérification du reçu annulé, imprimée en QR : scannée, elle dit
+  /// « annulé » (révision de D-4, 2026-10-30). `null` quand elle n'est pas
+  /// connue — le ticket sort alors sans QR.
+  final String? verificationUrl;
+
   final TicketCancellationLabels labels;
 
   const TicketCancellationModel({
@@ -64,6 +69,7 @@ class TicketCancellationModel extends Equatable {
     this.reasonDetail,
     required this.cashMoved,
     this.cancelledByName,
+    this.verificationUrl,
     required this.labels,
   });
 
@@ -85,6 +91,7 @@ class TicketCancellationModel extends Equatable {
     reasonDetail,
     cashMoved,
     cancelledByName,
+    verificationUrl,
     labels,
   ];
 }
@@ -108,6 +115,9 @@ class TicketCancellationLabels extends Equatable {
   final String schoolPhoneLabel;
   final String tillPhoneLabel;
 
+  /// La légende du QR de vérification, au-dessus de lui.
+  final String verificationNotice;
+
   /// Le motif traduit, par code (`REFUNDED`, `DUPLICATE`…).
   final Map<String, String> reasons;
 
@@ -127,6 +137,7 @@ class TicketCancellationLabels extends Equatable {
     required this.classroomLabel,
     required this.schoolPhoneLabel,
     required this.tillPhoneLabel,
+    required this.verificationNotice,
     required this.reasons,
   });
 
@@ -147,6 +158,7 @@ class TicketCancellationLabels extends Equatable {
     classroomLabel,
     schoolPhoneLabel,
     tillPhoneLabel,
+    verificationNotice,
     reasons,
   ];
 }

@@ -12,6 +12,7 @@ const _labels = TicketLabels(
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   enteredAtLabel: 'Saisi le',
+  verificationNotice: 'Scannez pour vérifier ce reçu',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -48,6 +49,7 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   referenceLabel: _labels.referenceLabel,
   dateLabel: _labels.dateLabel,
   enteredAtLabel: _labels.enteredAtLabel,
+  verificationNotice: _labels.verificationNotice,
   payerLabel: _labels.payerLabel,
   phoneLabel: _labels.phoneLabel,
   cashierLabel: _labels.cashierLabel,
@@ -86,6 +88,9 @@ TicketReceiptModel _model({
 
   /// Le jour d'émission du reçu scellé — date principale d'un ticket définitif.
   DateTime? receiptIssuedOn,
+
+  /// L'URL de vérification du reçu scellé — le QR du ticket.
+  String? verificationUrl,
   String? schoolPhone = '+243 000 000 000',
   String? schoolTillPhone = '+243 811 111 111',
   int? remainingBalanceInCents = 250000,
@@ -130,6 +135,7 @@ TicketReceiptModel _model({
   isProvisional: isProvisional,
   paidAt: DateTime(2026, 8, 4, 14, 7),
   receiptIssuedOn: receiptIssuedOn,
+  verificationUrl: verificationUrl,
   cashierFullName: cashierFullName,
   tenders:
       tenders ??
@@ -1060,6 +1066,7 @@ void main() {
         referenceLabel: _labels.referenceLabel,
         dateLabel: _labels.dateLabel,
         enteredAtLabel: _labels.enteredAtLabel,
+        verificationNotice: _labels.verificationNotice,
         payerLabel: _labels.payerLabel,
         phoneLabel: _labels.phoneLabel,
         cashierLabel: _labels.cashierLabel,
@@ -1115,6 +1122,7 @@ void main() {
       referenceLabel: _labels.referenceLabel,
       dateLabel: _labels.dateLabel,
       enteredAtLabel: _labels.enteredAtLabel,
+      verificationNotice: _labels.verificationNotice,
       payerLabel: _labels.payerLabel,
       phoneLabel: _labels.phoneLabel,
       cashierLabel: _labels.cashierLabel,
@@ -1494,6 +1502,91 @@ void main() {
       expect(out, contains('Date : 04/08/2026'));
       expect(out, isNot(contains('05/08/2026')));
       expect(out, isNot(contains('Saisi le')));
+    });
+  });
+
+  // Révision de D-4 (2026-10-30) : le ticket scellé porte le QR de son reçu,
+  // le ticket provisoire jamais.
+  group('QR de vérification', () {
+    const url = 'https://api.eteelo.com/verify/RC/9f8e7d6c';
+
+    test('scellé : légende puis QR, juste avant le pied', () {
+      final lines = TicketTextLayout.renderRich(
+        _model(isProvisional: false, verificationUrl: url),
+      );
+      final qr = lines.indexWhere((l) => l.isQr);
+
+      expect(lines.where((l) => l.isQr), hasLength(1));
+      expect(lines[qr].qrPayload, url);
+      expect(lines[qr - 1].text.trim(), 'Scannez pour vérifier ce reçu');
+      expect(
+        lines.skip(qr).map((l) => l.text.trim()),
+        contains(_labels.thanksNotice),
+      );
+      expect(
+        lines.take(qr).map((l) => l.text.trim()),
+        isNot(contains(_labels.thanksNotice)),
+      );
+    });
+
+    test('le pivot textuel garde une ligne vide à sa place', () {
+      final rich = TicketTextLayout.renderRich(
+        _model(isProvisional: false, verificationUrl: url),
+      );
+      final text = TicketTextLayout.render(
+        _model(isProvisional: false, verificationUrl: url),
+      );
+
+      expect(text, hasLength(rich.length));
+      expect(text[rich.indexWhere((l) => l.isQr)], '');
+      expect(text.join('\n'), isNot(contains(url)));
+    });
+
+    test('provisoire : jamais de QR, même l URL connue', () {
+      final lines = TicketTextLayout.renderRich(_model(verificationUrl: url));
+
+      expect(lines.where((l) => l.isQr), isEmpty);
+      expect(
+        lines.map((l) => l.text),
+        isNot(contains(contains('Scannez pour vérifier'))),
+      );
+    });
+
+    test(
+      'une URL vide, ou trop longue pour 32 colonnes : ni légende ni QR',
+      () {
+        final long = 'https://api.eteelo.com/verify/${'a' * 300}';
+
+        for (final (verificationUrl, columns) in [('  ', 48), (long, 32)]) {
+          final lines = TicketTextLayout.renderRich(
+            _model(isProvisional: false, verificationUrl: verificationUrl),
+            columns: columns,
+          );
+
+          expect(lines.where((l) => l.isQr), isEmpty);
+          expect(
+            lines.map((l) => l.text),
+            isNot(contains(contains('Scannez pour vérifier'))),
+          );
+        }
+        // La même, à 48 colonnes, tient.
+        expect(
+          TicketTextLayout.renderRich(
+            _model(isProvisional: false, verificationUrl: long),
+          ).where((l) => l.isQr),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('sans URL : ni légende ni QR', () {
+      final lines = TicketTextLayout.renderRich(_model(isProvisional: false));
+
+      expect(lines.where((l) => l.isQr), isEmpty);
+      expect(
+        lines.map((l) => l.text),
+        isNot(contains(contains('Scannez pour vérifier'))),
+      );
     });
   });
 }

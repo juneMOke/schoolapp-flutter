@@ -103,6 +103,7 @@ final TicketReceiptModel _model = TicketReceiptModel(
     referenceLabel: 'Réf.',
     dateLabel: 'Date :',
     enteredAtLabel: 'Saisi le',
+    verificationNotice: 'Scannez pour vérifier ce reçu',
     payerLabel: 'PAYEUR :',
     phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',

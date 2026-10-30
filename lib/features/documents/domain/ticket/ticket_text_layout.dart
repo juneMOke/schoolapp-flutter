@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_qr_band.dart';
 
 /// Met le reçu provisoire en **lignes de caractères**.
 ///
@@ -531,6 +532,19 @@ abstract final class TicketTextLayout {
       lines.add(_rule(width));
     }
 
+    // ── Le QR de vérification, juste avant le pied : scanné, il dit si le
+    // reçu est en vigueur, annulé ou remplacé (révision de D-4). Jamais sur un
+    // ticket provisoire — le QR le ferait passer pour officiel. Sa ligne vaut
+    // `''` dans le pivot textuel ; les renderers le dessinent à cette place.
+    final verificationUrl = model.isProvisional ? null : model.verificationUrl;
+    int? qrAt;
+    if (verificationUrl != null &&
+        TicketQrBand.fits(verificationUrl, columns: width)) {
+      lines.addAll(_centeredWrapped(model.labels.verificationNotice, width));
+      qrAt = lines.length;
+      lines.add('');
+    }
+
     // Le pied, sur les deux sorties et dans tous les cas.
     //
     // L'adresse est sur sa PROPRE ligne, et sans schéma : deux lignes courtes
@@ -543,7 +557,10 @@ abstract final class TicketTextLayout {
 
     return [
       for (var i = 0; i < lines.length; i++)
-        TicketLine(lines[i], bold: bold.contains(i)),
+        if (i == qrAt)
+          TicketLine.qr(verificationUrl!)
+        else
+          TicketLine(lines[i], bold: bold.contains(i)),
     ];
   }
 

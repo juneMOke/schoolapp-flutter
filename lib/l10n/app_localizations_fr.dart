@@ -8554,6 +8554,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketEnteredAtLabel => 'Saisi le';
 
   @override
+  String get ticketVerifyNotice => 'Scannez pour vérifier ce reçu';
+
+  @override
   String get ticketPayerLabel => 'PAYEUR :';
 
   @override

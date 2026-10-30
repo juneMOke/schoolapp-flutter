@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_qr_band.dart';
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -16,6 +17,7 @@ const _labels = TicketLabels(
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   enteredAtLabel: 'Saisi le',
+  verificationNotice: 'Scannez pour vérifier ce reçu',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -461,6 +463,74 @@ void main() {
 
     test('le pointillé tient dans les 48 colonnes', () {
       expect(tear.length - 1, EscPosTicketRenderer.columns);
+    });
+  });
+
+  // Révision de D-4 (2026-10-30) : le QR passe par `GS v 0`, comme le logo —
+  // la commande que la NT-8003DD imprime déjà.
+  group('QR de vérification', () {
+    const url = 'https://api.eteelo.com/verify/RC/9f8e7d6c';
+
+    /// Les positions de `GS v 0` dans le flux.
+    List<int> rasters(List<int> bytes) => [
+      for (var i = 0; i + 2 < bytes.length; i++)
+        if (bytes[i] == 0x1D && bytes[i + 1] == 0x76 && bytes[i + 2] == 0x30) i,
+    ];
+
+    test('une ligne QR devient une image, à sa place', () {
+      final bytes = EscPosTicketRenderer.renderRichLines(const [
+        TicketLine('AVANT'),
+        TicketLine.qr(url),
+        TicketLine('APRES'),
+      ], feedLines: 0);
+      final at = rasters(bytes);
+
+      expect(at, isNotEmpty);
+      expect(at.first, greaterThan(latin1.decode(bytes).indexOf('AVANT')));
+      expect(at.last, lessThan(latin1.decode(bytes).indexOf('APRES')));
+      // Toute la laize de 80 mm : 576 points, soit 72 octets.
+      expect(bytes[at.first + 4], 72);
+      expect(bytes[at.first + 5], 0);
+    });
+
+    // Le fil porte l'encre à 1 : sans l'inversion, le QR sortirait en carré
+    // noir, et rien d'autre ne rougirait.
+    test('le fil porte la matrice inversée, bande par bande', () {
+      final band = TicketQrBand.of(url, paperDots: 576)!;
+      final bytes = EscPosTicketRenderer.renderRichLines(const [
+        TicketLine.qr(url),
+      ], feedLines: 0);
+      final at = rasters(bytes);
+
+      final wire = BytesBuilder();
+      var rowsTotal = 0;
+      for (final start in at) {
+        final rows = bytes[start + 6] | (bytes[start + 7] << 8);
+        expect(rows, lessThanOrEqualTo(128));
+        rowsTotal += rows;
+        wire.add(bytes.sublist(start + 8, start + 8 + rows * 72));
+      }
+      expect(at.length, greaterThan(1));
+      expect(rowsTotal, band.heightDots);
+      expect(wire.takeBytes(), [for (final b in band.bits) ~b & 0xFF]);
+    });
+
+    test('sur 32 colonnes, l image tient la laize de 58 mm', () {
+      final bytes = EscPosTicketRenderer.renderRichLines(
+        const [TicketLine.qr(url)],
+        columns: 32,
+        feedLines: 0,
+      );
+
+      expect(rasters(bytes).map((at) => bytes[at + 4]), everyElement(48));
+    });
+
+    test('le contenu du QR ne part jamais en texte', () {
+      final bytes = EscPosTicketRenderer.renderRichLines(const [
+        TicketLine.qr(url),
+      ], feedLines: 0);
+
+      expect(latin1.decode(bytes), isNot(contains('eteelo.com')));
     });
   });
 }

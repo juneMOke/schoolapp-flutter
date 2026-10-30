@@ -851,7 +851,10 @@ class AppConstants {
   // v71 (2026-10-30) : `generated_documents.emitted_on`, le jour d'émission
   // du reçu scellé — la date principale du ticket définitif. Additif,
   // nullable. Palier d'école.
-  static const int offlineDbSchemaVersion = 71;
+  // v72 (2026-10-30) : l'URL de vérification du reçu scellé, imprimée en QR
+  // sur le ticket — `generated_documents.verification_url` (école) et
+  // `editique_cache_entries.verification_url` (appareil). Additif, nullable.
+  static const int offlineDbSchemaVersion = 72;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

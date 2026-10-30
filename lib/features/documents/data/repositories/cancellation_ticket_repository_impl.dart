@@ -81,6 +81,7 @@ class CancellationTicketRepositoryImpl implements CancellationTicketRepository {
           reasonDetail: cancellation.reason,
           cashMoved: cancellation.cashMoved,
           cancelledByName: cancellation.cancelledByName,
+          verificationUrl: receipt.verificationUrl,
           labels: labels,
         ),
       );

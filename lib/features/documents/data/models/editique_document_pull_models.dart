@@ -6,6 +6,7 @@
 /// les octets un par un, à la demande.
 library;
 
+import 'package:school_app_flutter/features/documents/domain/receipt_verification_url.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
@@ -39,6 +40,9 @@ class PulledEditiqueDocument {
   /// traduit ni ne se reformule.
   final String? cancellationReason;
 
+  /// URL de vérification du reçu scellé, `null` si absente ou douteuse.
+  final String? verificationUrl;
+
   const PulledEditiqueDocument({
     required this.id,
     required this.docType,
@@ -51,6 +55,7 @@ class PulledEditiqueDocument {
     this.supersedesNumber,
     this.cancelledAtMs,
     this.cancellationReason,
+    this.verificationUrl,
   });
 
   factory PulledEditiqueDocument.fromJson(Map<String, dynamic> j) =>
@@ -66,6 +71,7 @@ class PulledEditiqueDocument {
         supersedesNumber: j['supersedesNumber'] as String?,
         cancelledAtMs: _isoToMs(j['cancelledAt'] as String?),
         cancellationReason: j['cancellationReason'] as String?,
+        verificationUrl: ReceiptVerificationUrl.normalize(j['verificationUrl']),
       );
 
   /// Entrée d'index **sans octets** : `contentSha256` reste nul, c'est ce qui
@@ -92,6 +98,7 @@ class PulledEditiqueDocument {
     // partout en aval, sans qu'aucun test ne rougisse.
     cancelledAt: cancelledAtMs,
     cancellationReason: cancellationReason,
+    verificationUrl: verificationUrl,
     createdAt: nowMs,
     lastAccessedAt: nowMs,
   );

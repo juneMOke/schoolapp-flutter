@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_qr_band.dart';
 
 /// Ce que le massicot doit faire en fin de ticket.
 enum TicketCutMode {
@@ -105,6 +106,7 @@ abstract final class EscPosTicketRenderer {
     TicketLogoBand? logoBand,
   }) => renderRichLines(
     TicketTextLayout.renderRich(model, columns: columns),
+    columns: columns,
     codePage: codePage,
     cut: cut,
     feedLines: feedLines,
@@ -152,6 +154,7 @@ abstract final class EscPosTicketRenderer {
   /// jamais.
   static Uint8List renderRichLines(
     List<TicketLine> lines, {
+    int columns = TicketTextLayout.defaultColumns,
     TicketCodePage codePage = TicketCodePage.cp1252,
     TicketCutMode cut = TicketCutMode.none,
     int feedLines = defaultFeedLines,
@@ -175,6 +178,22 @@ abstract final class EscPosTicketRenderer {
     }
 
     for (final line in lines) {
+      // Le QR passe par `GS v 0`, comme la bande de logo : un QR qui ne
+      // s'encode pas ne laisse rien, plutôt qu'un carré illisible.
+      if (line.qrPayload case final payload?) {
+        final band = TicketQrBand.of(
+          payload,
+          paperDots: TicketQrBand.paperDotsFor(columns),
+        );
+        // Un QR impossible garde sa ligne, comme le pivot textuel où il vaut
+        // `''` : le flux reste aligné ligne pour ligne sur le texte.
+        if (band != null && band.isUsable) {
+          out.add(_rasterBand(band));
+        } else {
+          out.addByte(_lf);
+        }
+        continue;
+      }
       // `ESC E 1` / `ESC E 0` — accentuation. Posée et RETIRÉE autour de chaque
       // ligne : `ESC @` en tête remet le mécanisme à zéro, mais rien d'autre ne
       // le ferait si une ligne grasse était la dernière du flux.
@@ -256,20 +275,37 @@ abstract final class EscPosTicketRenderer {
   /// **Aucun centrage** : `ESC a 1` est interdit par le contrat de cette classe
   /// et le flux force `ESC a 0`. La bande arrive donc **déjà centrée dans ses
   /// octets**, le blanc de part et d'autre faisant partie de l'image.
+  ///
+  /// ## Par bandes de [_rasterStripRows] lignes
+  ///
+  /// Une image haute part en plusieurs `GS v 0` collés, sans saut entre eux :
+  /// une imprimante Bluetooth bon marché tronque ou brouille une commande
+  /// plus grosse que son tampon. Un QR de 294 lignes faisait 21 Ko d'un seul
+  /// bloc ; découpé, aucun ne dépasse celui de la bande de logo (128 lignes),
+  /// que la NT-8003DD imprime déjà — et la bande de logo, elle, sort d'un seul
+  /// bloc, octet pour octet comme avant.
+  static const int _rasterStripRows = 128;
+
   static Uint8List _rasterBand(TicketLogoBand band) {
     final widthBytes = band.bytesPerRow;
-    final out = BytesBuilder()
-      ..add(<int>[
+    final out = BytesBuilder();
+
+    for (var top = 0; top < band.heightDots; top += _rasterStripRows) {
+      final rows = band.heightDots - top < _rasterStripRows
+          ? band.heightDots - top
+          : _rasterStripRows;
+      out.add(<int>[
         _gs, 0x76, 0x30, 0x00, //
         widthBytes & 0xFF, (widthBytes >> 8) & 0xFF,
-        band.heightDots & 0xFF, (band.heightDots >> 8) & 0xFF,
+        rows & 0xFF, (rows >> 8) & 0xFF,
       ]);
-
-    final inverted = Uint8List(band.bits.length);
-    for (var i = 0; i < band.bits.length; i++) {
-      inverted[i] = ~band.bits[i] & 0xFF;
+      final from = top * widthBytes;
+      final strip = Uint8List(rows * widthBytes);
+      for (var i = 0; i < strip.length; i++) {
+        strip[i] = ~band.bits[from + i] & 0xFF;
+      }
+      out.add(strip);
     }
-    out.add(inverted);
 
     // La tête revient en début de ligne : sans ce saut, la première ligne de
     // texte s'imprimerait à la suite de la bande plutôt qu'en dessous.

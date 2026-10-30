@@ -32,21 +32,25 @@ class _EntitledAccess implements EditiqueCacheAccess {
 }
 
 /// Un reçu appris par le pull des pièces : métadonnées seules, sans PDF.
-EditiqueCacheEntry _knownReceipt({int? cancelledAt, int? emittedAt}) =>
-    EditiqueCacheEntry(
-      id: 'c-77',
-      documentId: 'rcpt-77',
-      documentNumber: 'CF-RC-2627-000279',
-      docType: 'RC',
-      studentId: 's-1',
-      schoolId: 'school-1',
-      ownerUid: 'u-1',
-      sizeBytes: 0,
-      cancelledAt: cancelledAt,
-      emittedAt: emittedAt,
-      createdAt: 2000,
-      lastAccessedAt: 3000,
-    );
+EditiqueCacheEntry _knownReceipt({
+  int? cancelledAt,
+  int? emittedAt,
+  String? verificationUrl,
+}) => EditiqueCacheEntry(
+  id: 'c-77',
+  documentId: 'rcpt-77',
+  documentNumber: 'CF-RC-2627-000279',
+  docType: 'RC',
+  studentId: 's-1',
+  schoolId: 'school-1',
+  ownerUid: 'u-1',
+  sizeBytes: 0,
+  cancelledAt: cancelledAt,
+  emittedAt: emittedAt,
+  verificationUrl: verificationUrl,
+  createdAt: 2000,
+  lastAccessedAt: 3000,
+);
 
 const _labels = TicketLabels(
   documentTitle: 'Ticket de perception',
@@ -54,6 +58,7 @@ const _labels = TicketLabels(
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
   enteredAtLabel: 'Saisi le',
+  verificationNotice: 'Scannez pour vérifier ce reçu',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -353,6 +358,22 @@ void main() {
       )).getOrElse(() => throw StateError('échec'));
 
       expect(model.receiptIssuedOn, DateTime(2026, 10, 27));
+    });
+
+    test('l URL de vérification du reçu passe au ticket', () async {
+      await seedForeign(known: false);
+      await cache.upsert(
+        _knownReceipt(
+          verificationUrl: 'https://api.eteelo.com/verify/RC/doc-1',
+        ),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.verificationUrl, 'https://api.eteelo.com/verify/RC/doc-1');
     });
 
     test('sans jour connu, le ticket n en invente pas', () async {

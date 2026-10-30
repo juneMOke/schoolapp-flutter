@@ -16,6 +16,7 @@ void main() {
     Object? cancelledAt,
     Object? cancellationReason,
     Object? emittedAt = '2026-06-12T00:00:00Z',
+    Object? verificationUrl,
   }) => {
     'id': 'doc-1',
     'docType': 'RC',
@@ -29,6 +30,7 @@ void main() {
     // pour une pièce qui tient toujours.
     'cancelledAt': ?cancelledAt,
     'cancellationReason': ?cancellationReason,
+    'verificationUrl': ?verificationUrl,
   };
 
   group('PulledEditiqueDocument.fromJson', () {
@@ -40,6 +42,29 @@ void main() {
       expect(document.sizeBytes, 120000);
       expect(document.cancelledAtMs, isNull);
       expect(document.cancellationReason, isNull);
+    });
+
+    test('lit l URL de vérification et la porte jusqu à l index', () {
+      final document = PulledEditiqueDocument.fromJson(
+        payload(verificationUrl: 'https://api.eteelo.com/verify/RC/doc-1'),
+      );
+
+      expect(
+        document.verificationUrl,
+        'https://api.eteelo.com/verify/RC/doc-1',
+      );
+      expect(
+        document.toCacheEntry(schoolId: 'school-1', nowMs: 1).verificationUrl,
+        'https://api.eteelo.com/verify/RC/doc-1',
+      );
+    });
+
+    test('une URL douteuse vaut une absence', () {
+      final document = PulledEditiqueDocument.fromJson(
+        payload(verificationUrl: '/verify/RC/doc-1'),
+      );
+
+      expect(document.verificationUrl, isNull);
     });
 
     test('lit le retrait et son motif', () {

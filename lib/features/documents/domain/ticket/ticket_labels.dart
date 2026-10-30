@@ -38,6 +38,10 @@ class TicketLabels extends Equatable {
   /// la date et l'heure de saisie du versement, en mention secondaire.
   final String enteredAtLabel;
 
+  /// « Scannez pour vérifier ce reçu » — la légende du QR de vérification,
+  /// au-dessus de lui, sur un ticket scellé seulement.
+  final String verificationNotice;
+
   final String cashierLabel;
 
   /// « Tél. Promoteur : » — le téléphone de l'ÉTABLISSEMENT, en en-tête.
@@ -171,6 +175,7 @@ class TicketLabels extends Equatable {
     required this.referenceLabel,
     required this.dateLabel,
     required this.enteredAtLabel,
+    required this.verificationNotice,
     required this.cashierLabel,
     required this.schoolPhoneLabel,
     required this.tillPhoneLabel,
@@ -203,6 +208,7 @@ class TicketLabels extends Equatable {
     referenceLabel,
     dateLabel,
     enteredAtLabel,
+    verificationNotice,
     cashierLabel,
     schoolPhoneLabel,
     tillPhoneLabel,

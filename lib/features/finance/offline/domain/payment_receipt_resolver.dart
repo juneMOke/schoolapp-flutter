@@ -40,6 +40,10 @@ class PaymentReceiptReference extends Equatable {
   /// définitif (`ReceiptEmissionDay` dit comment le lire).
   final String? emittedOn;
 
+  /// URL de vérification du reçu définitif dont [number] s'imprime — le QR du
+  /// ticket ; `null` si inconnue ou si le reçu n'est pas scellé.
+  final String? verificationUrl;
+
   const PaymentReceiptReference({
     this.number,
     this.status = PaymentReceiptStatus.unknown,
@@ -47,6 +51,7 @@ class PaymentReceiptReference extends Equatable {
     this.cacheEntry,
     this.paymentCancelledAt,
     this.emittedOn,
+    this.verificationUrl,
   });
 
   bool get isDefinitive => status == PaymentReceiptStatus.definitive;
@@ -76,6 +81,7 @@ class PaymentReceiptReference extends Equatable {
     cacheEntry,
     paymentCancelledAt,
     emittedOn,
+    verificationUrl,
   ];
 }
 

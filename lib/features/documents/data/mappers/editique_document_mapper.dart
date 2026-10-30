@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/documents/data/utils/content_disposi
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
+import 'package:school_app_flutter/features/documents/domain/receipt_verification_url.dart';
 
 /// Transforme une réponse binaire en [EditiqueDocument], ou refuse.
 ///
@@ -31,6 +32,9 @@ class EditiqueDocumentMapper {
 
   /// Jour d'émission d'une pièce archivée, posé à côté de `X-Document-Id`.
   static const String _emittedAtHeader = 'x-document-emitted-at';
+
+  /// URL de vérification d'une pièce archivée, imprimée en QR sur le ticket.
+  static const String _verificationUrlHeader = 'x-document-verification-url';
 
   static Either<Failure, EditiqueDocument> map(
     HttpResponse<Uint8List> response,
@@ -72,6 +76,9 @@ class EditiqueDocumentMapper {
         documentId: _documentId(headers),
         emittedOn: ReceiptEmissionDay.fromIso(
           _firstHeader(headers, _emittedAtHeader),
+        ),
+        verificationUrl: ReceiptVerificationUrl.normalize(
+          _firstHeader(headers, _verificationUrlHeader),
         ),
       ),
     );

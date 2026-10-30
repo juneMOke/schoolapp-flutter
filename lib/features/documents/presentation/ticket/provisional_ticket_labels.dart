@@ -13,6 +13,7 @@ TicketLabels provisionalTicketLabels(AppLocalizations l10n) => TicketLabels(
   referenceLabel: l10n.ticketReferenceLabel,
   dateLabel: l10n.ticketDateLabel,
   enteredAtLabel: l10n.ticketEnteredAtLabel,
+  verificationNotice: l10n.ticketVerifyNotice,
   payerLabel: l10n.ticketPayerLabel,
   phoneLabel: l10n.ticketPhoneLabel,
   cashierLabel: l10n.ticketCashierLabel,

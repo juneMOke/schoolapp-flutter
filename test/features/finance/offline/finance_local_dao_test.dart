@@ -1895,6 +1895,74 @@ void main() {
       },
     );
 
+    test('ACK avec verificationUrl : le QR du reçu est gardé ; un AUTRE numéro '
+        'sans URL ne garde pas celle de l ancien', () async {
+      await db.insert('generated_documents', {
+        'id': 'gd1',
+        'doc_domain': 'PAYMENT',
+        'payment_id': 'pay1',
+        'student_id': 's1',
+        'doc_type': 'RC',
+        'number': 'PROV-ABCD1234',
+        'status': 'PROVISIONAL',
+        'created_at': 1000,
+      });
+
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: [
+            GeneratedDocumentDto.fromJson(const {
+              'type': 'PAYMENT_RECEIPT',
+              'documentNumber': 'ETL-RP-0042',
+              'status': 'DEFINITIVE',
+              'verificationUrl': 'https://api.eteelo.com/verify/RC/doc-1',
+            }),
+          ],
+        ),
+        nowMs: 5000,
+      );
+      expect(
+        (await db.query('generated_documents')).single['verification_url'],
+        'https://api.eteelo.com/verify/RC/doc-1',
+      );
+
+      // Même numéro, rejeu sans URL : elle reste.
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: const [
+            GeneratedDocumentDto(
+              type: 'PAYMENT_RECEIPT',
+              documentNumber: 'ETL-RP-0042',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+        nowMs: 6000,
+      );
+      expect(
+        (await db.query('generated_documents')).single['verification_url'],
+        'https://api.eteelo.com/verify/RC/doc-1',
+      );
+
+      // Autre numéro, sans URL : celle de l'ancien ne le vérifierait pas.
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: const [
+            GeneratedDocumentDto(
+              type: 'PAYMENT_RECEIPT',
+              documentNumber: 'ETL-RP-0043',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+        nowMs: 7000,
+      );
+      expect(
+        (await db.query('generated_documents')).single['verification_url'],
+        isNull,
+      );
+    });
+
     test(
       'ACK sans document (scellement best-effort en échec, décision G) : le reçu '
       'provisoire est CONSERVÉ, le paiement reste acquis (SYNCED)',

@@ -5735,6 +5735,10 @@
   "ticketReferenceLabel": "Réf.",
   "ticketDateLabel": "Date :",
   "ticketEnteredAtLabel": "Saisi le",
+  "ticketVerifyNotice": "Scannez pour vérifier ce reçu",
+  "@ticketVerifyNotice": {
+    "description": "Légende du QR de vérification imprimé sur un ticket dont le reçu est scellé (perception ou annulation)."
+  },
   "@ticketEnteredAtLabel": {
     "description": "Ticket définitif : coiffe la date et l'heure de saisie du versement, sous la date d'émission du reçu."
   },

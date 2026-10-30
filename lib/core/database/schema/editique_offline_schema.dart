@@ -147,6 +147,9 @@ const TableSchema editiqueCacheEntriesTable = TableSchema(
       cancelled_at INTEGER,
       -- Texte libre saisi par un agent de l'école. Ne se traduit pas.
       cancellation_reason TEXT,
+      -- URL de vérification du reçu scellé (v72), imprimée en QR sur le
+      -- ticket ; NULL tant que le delta ne la sert pas.
+      verification_url TEXT,
       created_at INTEGER NOT NULL,
       last_accessed_at INTEGER NOT NULL,
       CHECK (

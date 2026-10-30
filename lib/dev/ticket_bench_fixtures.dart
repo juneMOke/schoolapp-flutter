@@ -24,6 +24,7 @@ abstract final class TicketBenchFixtures {
     referenceLabel: 'Réf.',
     dateLabel: 'Date :',
     enteredAtLabel: 'Saisi le',
+    verificationNotice: 'Scannez pour vérifier ce reçu',
     payerLabel: 'PAYEUR :',
     phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',
@@ -145,6 +146,26 @@ abstract final class TicketBenchFixtures {
     reference: 'PROV-A1B2C3D4-0001',
     isProvisional: true,
     paidAt: DateTime(2026, 8, 11, 8, 3),
+    tenders: TicketTenderLine.identityFrom(
+      MoneyBag.of(const [Money(500000, 'CDF')]),
+    ),
+    labels: labels,
+  );
+
+  /// Un ticket **scellé** : daté du jour d'émission de son reçu, et portant
+  /// le QR de vérification (révision de D-4, 2026-10-30). C'est lui qu'on
+  /// imprime pour éprouver le QR sur la NT-8003DD — lisible au téléphone, à
+  /// quelle distance, à 48 comme à 32 colonnes.
+  static final TicketReceiptModel sealed = TicketReceiptModel(
+    schoolName: 'EP Kimbanguiste',
+    studentFullName: 'Amina Mbala',
+    reference: 'CF-RC-2627-000802',
+    isProvisional: false,
+    paidAt: DateTime(2026, 10, 27, 14, 32),
+    receiptIssuedOn: DateTime(2026, 10, 28),
+    verificationUrl:
+        'https://api.eteelo.com/api/v1/editique/verify/'
+        '3f2504e0-4f89-41d3-9a0c-0305e82c3301',
     tenders: TicketTenderLine.identityFrom(
       MoneyBag.of(const [Money(500000, 'CDF')]),
     ),

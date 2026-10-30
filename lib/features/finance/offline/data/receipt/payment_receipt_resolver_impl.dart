@@ -61,44 +61,35 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
       _ => _provisional(row),
     };
 
+    // Les faits du reçu scellé — son jour d'émission, son URL de vérification
+    // — ne valent que pour le numéro IMPRIMÉ. La ligne scellée d'abord
+    // (accusé, récupération), puis le delta éditique : un versement encaissé
+    // ailleurs n'a que le second.
+    //
+    // ⚠️ Le cache se lit par `payments.receipt_id`, que le pull peut faire
+    // pointer sur une pièce rééditée alors que la ligne locale garde l'ancien
+    // numéro : ses faits ne valent que si son numéro est celui imprimé, sans
+    // quoi le ticket serait daté d'un autre jour et vérifié contre une autre
+    // pièce.
+    final definitive = status == PaymentReceiptStatus.definitive;
+    final fromLocal = definitive && number == localDefinitive;
+    final fromCache = definitive && number == cachedNumber;
+
     return PaymentReceiptReference(
       number: number,
       status: status,
       documentId: row.receiptId ?? _text(cached?.documentId),
       cacheEntry: cached,
       paymentCancelledAt: row.paymentCancelledAt,
-      emittedOn: status == PaymentReceiptStatus.definitive
-          ? _emittedOn(
-              number: number,
-              localDefinitive: localDefinitive,
-              row: row,
-              cachedNumber: cachedNumber,
-              cached: cached,
-            )
-          : null,
+      emittedOn:
+          (fromLocal ? row.emittedOn : null) ??
+          (fromCache
+              ? ReceiptEmissionDay.fromEpochMs(cached?.emittedAt)
+              : null),
+      verificationUrl:
+          (fromLocal ? row.verificationUrl : null) ??
+          (fromCache ? _text(cached?.verificationUrl) : null),
     );
-  }
-
-  /// Le jour d'émission du reçu dont [number] s'imprime — jamais celui d'une
-  /// autre pièce. La ligne scellée d'abord (accusé, récupération), puis le
-  /// delta éditique : un versement encaissé ailleurs n'a que le second.
-  ///
-  /// ⚠️ Le cache se lit par `payments.receipt_id`, que le pull peut faire
-  /// pointer sur une pièce rééditée alors que la ligne locale garde l'ancien
-  /// numéro : son jour ne vaut que si son numéro est celui imprimé.
-  static String? _emittedOn({
-    required String? number,
-    required String? localDefinitive,
-    required PaymentReceiptLocalRow row,
-    required String? cachedNumber,
-    required EditiqueCacheEntry? cached,
-  }) {
-    if (number == null) return null;
-    final local = number == localDefinitive ? row.emittedOn : null;
-    if (local != null) return local;
-    return number == cachedNumber
-        ? ReceiptEmissionDay.fromEpochMs(cached?.emittedAt)
-        : null;
   }
 
   /// Le `PROV-…` local : la colonne provisoire d'abord (elle survit au

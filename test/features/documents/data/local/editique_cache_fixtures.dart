@@ -21,6 +21,7 @@ EditiqueCacheEntry cacheEntry({
   int? emittedAt = 1000,
   int? cancelledAt,
   String? cancellationReason,
+  String? verificationUrl,
   int createdAt = 2000,
   int lastAccessedAt = 3000,
 }) => EditiqueCacheEntry(
@@ -37,6 +38,7 @@ EditiqueCacheEntry cacheEntry({
   emittedAt: emittedAt,
   cancelledAt: cancelledAt,
   cancellationReason: cancellationReason,
+  verificationUrl: verificationUrl,
   createdAt: createdAt,
   lastAccessedAt: lastAccessedAt,
 );

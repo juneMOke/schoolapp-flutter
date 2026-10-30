@@ -8479,6 +8479,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketEnteredAtLabel => 'Entered on';
 
   @override
+  String get ticketVerifyNotice => 'Scan to verify this receipt';
+
+  @override
   String get ticketPayerLabel => 'PAYER:';
 
   @override

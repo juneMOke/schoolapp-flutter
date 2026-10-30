@@ -26,6 +26,9 @@ class PaymentReceiptLocalRow {
   /// ni l'accusé ni la récupération ne l'ont rapporté.
   final String? emittedOn;
 
+  /// URL de vérification de la ligne scellée (v72), imprimée en QR.
+  final String? verificationUrl;
+
   const PaymentReceiptLocalRow({
     this.paymentFound = false,
     this.receiptId,
@@ -34,6 +37,7 @@ class PaymentReceiptLocalRow {
     this.provisionalNumber,
     this.documentStatus,
     this.emittedOn,
+    this.verificationUrl,
   });
 }
 
@@ -60,7 +64,13 @@ class PaymentReceiptLookupDao {
     // la plus récente du versement.
     final documents = await _db.query(
       'generated_documents',
-      columns: const ['number', 'provisional_number', 'status', 'emitted_on'],
+      columns: const [
+        'number',
+        'provisional_number',
+        'status',
+        'emitted_on',
+        'verification_url',
+      ],
       where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
       whereArgs: [paymentId, 'PAYMENT', 'RC'],
       orderBy: 'created_at DESC',
@@ -76,6 +86,7 @@ class PaymentReceiptLookupDao {
       provisionalNumber: _text(document?['provisional_number']),
       documentStatus: document?['status'] as String?,
       emittedOn: _text(document?['emitted_on']),
+      verificationUrl: _text(document?['verification_url']),
     );
   }
 

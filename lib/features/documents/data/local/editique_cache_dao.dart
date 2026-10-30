@@ -233,6 +233,9 @@ class EditiqueCacheDao {
       // geste explicite, pas un effet de bord d'upsert.
       'cancelled_at',
       'cancellation_reason',
+      // Une émission ou un re-téléchargement qui ne l'annonce pas ne doit pas
+      // retirer le QR qu'un delta avait appris.
+      'verification_url',
     ]) {
       values[field] ??= known[field];
     }

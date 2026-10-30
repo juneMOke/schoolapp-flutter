@@ -150,6 +150,7 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           isProvisional: false,
           paidAt: _parsePaidAt(payment.paidAt),
           receiptIssuedOn: ReceiptEmissionDay.toDate(receipt.emittedOn),
+          verificationUrl: receipt.verificationUrl,
           // Les `cashier_*` de ce poste, puis l'attribution serveur : le patch
           // de pull ne réécrit jamais les premiers, donc un versement encaissé
           // sur une AUTRE caisse n'a que la seconde. Sans ce repli, son ticket
