@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.da
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -130,11 +131,25 @@ FacturationReceiptGesture facturationReceiptGesture({
 /// Un versement que le serveur a **annulé** ferme la ligne pour la même raison
 /// que le reçu retiré : le papier attesterait un encaissement qui n'a plus
 /// cours.
+///
+/// Sans `editique.read` ([canPrint] faux), rien ne s'imprime, réimpression
+/// comprise (retour back du 2026-10-30) — même quand l'accusé de sync a déjà
+/// livré le numéro à la tablette.
 @visibleForTesting
 bool facturationTicketRowOffered({
   required EditiqueCacheEntry? cached,
+  required bool canPrint,
   bool paymentCancelled = false,
-}) => !paymentCancelled && !(cached?.isCancelled ?? false);
+}) => canPrint && !paymentCancelled && !(cached?.isCancelled ?? false);
+
+/// Le ticket d'annulation se refait depuis le détail : versement annulé et
+/// acquitté avec son numéro définitif, et droit d'imprimer (`editique.read`).
+@visibleForTesting
+bool facturationCancellationTicketOffered({
+  required bool paymentCancelled,
+  required bool hasDefinitiveNumber,
+  required bool canPrint,
+}) => canPrint && paymentCancelled && hasDefinitiveNumber;
 
 /// Ce que le caissier a demandé en quittant le détail d'un versement.
 enum FacturationPaymentDetailAction {
@@ -177,6 +192,7 @@ Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
       Perm.editiqueWrite,
     ], requiresAll: true),
   );
+  final canPrint = PermissionGate.allowsAccess(context, kTicketPrintAccess);
   return showDialog<FacturationPaymentDetailAction>(
     context: context,
     barrierDismissible: true,
@@ -219,6 +235,7 @@ Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
         builder: (_, receipt) {
           final ticketOffered = facturationTicketRowOffered(
             cached: receipt.cached,
+            canPrint: canPrint,
             paymentCancelled: receipt.paymentCancelled || intent.isOutOfForce,
           );
           return FacturationPaymentDetailDialogView(
@@ -292,7 +309,11 @@ Future<FacturationPaymentDetailAction?> showFacturationPaymentDetailDialog(
             // L'annulation acquittée d'un versement numéroté : son papier se
             // refait comme celui d'un ticket de caisse.
             cancellationPaymentId:
-                receipt.paymentCancelled && receipt.hasDefinitiveNumber
+                facturationCancellationTicketOffered(
+                  paymentCancelled: receipt.paymentCancelled,
+                  hasDefinitiveNumber: receipt.hasDefinitiveNumber,
+                  canPrint: canPrint,
+                )
                 ? intent.paymentId
                 : null,
             // Le serveur a pu annuler le versement depuis que la liste l'a

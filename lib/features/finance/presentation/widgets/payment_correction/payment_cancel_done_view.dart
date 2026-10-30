@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/cancellation_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/receipt_number_watch_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -44,7 +46,10 @@ class _PaymentCancelDoneViewState extends State<PaymentCancelDoneView> {
   @override
   void initState() {
     super.initState();
-    if (widget.ticketOwed) {
+    // Sans `editique.read`, aucun ticket n'est proposé : imprimer exige ce
+    // droit, réimpression comprise (retour back du 2026-10-30).
+    if (widget.ticketOwed &&
+        PermissionGate.allowsAccess(context, kTicketPrintAccess)) {
       _watch = getIt<ReceiptNumberWatchCubit>()
         ..watch(widget.paymentId, cancellation: true);
     }

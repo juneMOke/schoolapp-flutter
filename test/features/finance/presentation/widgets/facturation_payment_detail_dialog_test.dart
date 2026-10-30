@@ -346,12 +346,60 @@ void main() {
   /// Elle n'était exercée par aucun test — ni avant ni après —, ce qui est la
   /// forme exacte de l'omission qu'on vient de corriger ailleurs : une règle
   /// que le code affirme et que rien ne tient.
+  // Retour back du 2026-10-30 : imprimer exige `editique.read`, réimpression
+  // comprise — le numéro livré par l'accusé de sync ne rouvre rien.
+  group('réimpression sans editique.read', () {
+    test('le ticket de perception n est pas offert', () {
+      expect(
+        facturationTicketRowOffered(canPrint: false, cached: entry()),
+        isFalse,
+      );
+      expect(
+        facturationTicketRowOffered(canPrint: false, cached: null),
+        isFalse,
+      );
+    });
+
+    test('le ticket d annulation n est pas offert', () {
+      expect(
+        facturationCancellationTicketOffered(
+          paymentCancelled: true,
+          hasDefinitiveNumber: true,
+          canPrint: false,
+        ),
+        isFalse,
+      );
+    });
+
+    test('avec le droit, l annulation numérotée se réimprime', () {
+      expect(
+        facturationCancellationTicketOffered(
+          paymentCancelled: true,
+          hasDefinitiveNumber: true,
+          canPrint: true,
+        ),
+        isTrue,
+      );
+      expect(
+        facturationCancellationTicketOffered(
+          paymentCancelled: true,
+          hasDefinitiveNumber: false,
+          canPrint: true,
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('facturationTicketRowOffered', () {
     test('un reçu retiré ferme le ticket', () {
       // Ce qu'on empêche : remettre à une famille un papier qui atteste un
       // versement que l'établissement a annulé.
       expect(
-        facturationTicketRowOffered(cached: entry(cancelledAt: 1786013000000)),
+        facturationTicketRowOffered(
+          canPrint: true,
+          cached: entry(cancelledAt: 1786013000000),
+        ),
         isFalse,
       );
     });
@@ -363,6 +411,7 @@ void main() {
     test('un reçu retiré dont les octets sont partis reste fermé', () {
       expect(
         facturationTicketRowOffered(
+          canPrint: true,
           cached: entry(contentSha256: null, cancelledAt: 1786013000000),
         ),
         isFalse,
@@ -370,7 +419,10 @@ void main() {
     });
 
     test('un reçu en vigueur laisse le ticket ouvert', () {
-      expect(facturationTicketRowOffered(cached: entry()), isTrue);
+      expect(
+        facturationTicketRowOffered(canPrint: true, cached: entry()),
+        isTrue,
+      );
     });
 
     /// ⚠️ Le défaut, et le sens compte. Aucune entrée en cache est le cas
@@ -378,18 +430,26 @@ void main() {
     /// là fermerait le ticket exactement là où il est la seule pièce que la
     /// famille puisse emporter.
     test('aucune entrée connue laisse le ticket ouvert', () {
-      expect(facturationTicketRowOffered(cached: null), isTrue);
+      expect(facturationTicketRowOffered(canPrint: true, cached: null), isTrue);
     });
 
     // T0, R3 : un versement annulé par le serveur n'atteste plus rien, même
     // quand son reçu n'est pas (encore) connu annulé.
     test('un versement annulé ferme le ticket', () {
       expect(
-        facturationTicketRowOffered(cached: null, paymentCancelled: true),
+        facturationTicketRowOffered(
+          canPrint: true,
+          cached: null,
+          paymentCancelled: true,
+        ),
         isFalse,
       );
       expect(
-        facturationTicketRowOffered(cached: entry(), paymentCancelled: true),
+        facturationTicketRowOffered(
+          canPrint: true,
+          cached: entry(),
+          paymentCancelled: true,
+        ),
         isFalse,
       );
     });
@@ -400,6 +460,7 @@ void main() {
     test('une pièce seulement connue du delta n est pas une annulation', () {
       expect(
         facturationTicketRowOffered(
+          canPrint: true,
           cached: entry(documentId: null, contentSha256: null),
         ),
         isTrue,
