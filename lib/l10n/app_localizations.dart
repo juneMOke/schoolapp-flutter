@@ -13560,6 +13560,12 @@ abstract class AppLocalizations {
   /// **'Date:'**
   String get ticketDateLabel;
 
+  /// No description provided for @ticketEnteredAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered on'**
+  String get ticketEnteredAtLabel;
+
   /// No description provided for @ticketPayerLabel.
   ///
   /// In en, this message translates to:

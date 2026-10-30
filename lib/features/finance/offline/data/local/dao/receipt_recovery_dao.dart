@@ -101,11 +101,13 @@ class ReceiptRecoveryDao {
 
   /// Le reçu est revenu : le versement le porte comme si l'accusé l'avait
   /// rapporté — son identifiant d'archive, et le numéro définitif à la place
-  /// du `PROV-…` (même écriture que le scellement à l'accusé).
+  /// du `PROV-…` avec son jour d'émission (même écriture que le scellement à
+  /// l'accusé).
   Future<void> recordRecovered({
     required String paymentId,
     String? documentId,
     String? documentNumber,
+    String? emittedOn,
   }) async {
     if (documentId != null && documentId.isNotEmpty) {
       await _db.update(
@@ -116,9 +118,25 @@ class ReceiptRecoveryDao {
       );
     }
     if (documentNumber != null && documentNumber.isNotEmpty) {
+      // Même règle qu'au scellement à l'accusé : un autre numéro sans jour
+      // n'hérite pas de celui de l'ancien.
+      if (emittedOn == null) {
+        await _db.update(
+          'generated_documents',
+          {'emitted_on': null},
+          where:
+              'payment_id = ? AND doc_domain = ? AND doc_type = ? '
+              'AND number <> ?',
+          whereArgs: [paymentId, 'PAYMENT', 'RC', documentNumber],
+        );
+      }
       await _db.update(
         'generated_documents',
-        {'number': documentNumber, 'status': 'DEFINITIVE'},
+        {
+          'number': documentNumber,
+          'status': 'DEFINITIVE',
+          'emitted_on': ?emittedOn,
+        },
         where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
         whereArgs: [paymentId, 'PAYMENT', 'RC'],
       );

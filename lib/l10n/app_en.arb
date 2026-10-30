@@ -5659,6 +5659,7 @@
   "ticketProvisionalMention": "provisional",
   "ticketReferenceLabel": "Ref.",
   "ticketDateLabel": "Date:",
+  "ticketEnteredAtLabel": "Entered on",
   "ticketPayerLabel": "PAYER:",
   "ticketPhoneLabel": "Tel.",
   "ticketCashierLabel": "Cashier:",

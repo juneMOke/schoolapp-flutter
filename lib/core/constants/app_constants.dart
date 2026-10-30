@@ -848,7 +848,10 @@ class AppConstants {
   // v70 (2026-10-28) : `ticket_print_jobs`, les tickets que le poste doit
   // encore imprimer — un ticket ne sort qu'avec le numéro définitif de son
   // reçu (continuité des tickets RC, lot D). Table neuve. Palier d'école.
-  static const int offlineDbSchemaVersion = 70;
+  // v71 (2026-10-30) : `generated_documents.emitted_on`, le jour d'émission
+  // du reçu scellé — la date principale du ticket définitif. Additif,
+  // nullable. Palier d'école.
+  static const int offlineDbSchemaVersion = 71;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

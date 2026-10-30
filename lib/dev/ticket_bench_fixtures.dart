@@ -23,6 +23,7 @@ abstract final class TicketBenchFixtures {
     provisionalMention: 'provisoire',
     referenceLabel: 'Réf.',
     dateLabel: 'Date :',
+    enteredAtLabel: 'Saisi le',
     payerLabel: 'PAYEUR :',
     phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',

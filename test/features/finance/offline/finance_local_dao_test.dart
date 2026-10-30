@@ -1810,6 +1810,92 @@ void main() {
     );
 
     test(
+      'ACK avec emittedAt : le jour d émission est gardé tel quel, sans '
+      'conversion de fuseau ; un ACK qui ne le porte pas ne l efface pas',
+      () async {
+        await db.insert('generated_documents', {
+          'id': 'gd1',
+          'doc_domain': 'PAYMENT',
+          'payment_id': 'pay1',
+          'student_id': 's1',
+          'doc_type': 'RC',
+          'number': 'PROV-ABCD1234',
+          'status': 'PROVISIONAL',
+          'created_at': 1000,
+        });
+
+        await dao.applyPaymentAck(
+          ackOf(
+            documents: [
+              GeneratedDocumentDto.fromJson(const {
+                'type': 'PAYMENT_RECEIPT',
+                'documentNumber': 'ETL-RP-0042',
+                'status': 'DEFINITIVE',
+                'emittedAt': '2026-10-27T00:00:00Z',
+              }),
+            ],
+          ),
+          nowMs: 5000,
+        );
+        expect(
+          (await db.query('generated_documents')).single['emitted_on'],
+          '2026-10-27',
+        );
+
+        await dao.applyPaymentAck(
+          ackOf(
+            documents: const [
+              GeneratedDocumentDto(
+                type: 'PAYMENT_RECEIPT',
+                documentNumber: 'ETL-RP-0042',
+                status: 'DEFINITIVE',
+              ),
+            ],
+          ),
+          nowMs: 6000,
+        );
+        expect(
+          (await db.query('generated_documents')).single['emitted_on'],
+          '2026-10-27',
+        );
+      },
+    );
+
+    test(
+      'ACK d un AUTRE numéro sans emittedAt : l ancien jour ne lui reste pas',
+      () async {
+        await db.insert('generated_documents', {
+          'id': 'gd1',
+          'doc_domain': 'PAYMENT',
+          'payment_id': 'pay1',
+          'student_id': 's1',
+          'doc_type': 'RC',
+          'number': 'ETL-RP-0042',
+          'status': 'DEFINITIVE',
+          'emitted_on': '2026-10-27',
+          'created_at': 1000,
+        });
+
+        await dao.applyPaymentAck(
+          ackOf(
+            documents: const [
+              GeneratedDocumentDto(
+                type: 'PAYMENT_RECEIPT',
+                documentNumber: 'ETL-RP-0043',
+                status: 'DEFINITIVE',
+              ),
+            ],
+          ),
+          nowMs: 5000,
+        );
+
+        final doc = (await db.query('generated_documents')).single;
+        expect(doc['number'], 'ETL-RP-0043');
+        expect(doc['emitted_on'], isNull);
+      },
+    );
+
+    test(
       'ACK sans document (scellement best-effort en échec, décision G) : le reçu '
       'provisoire est CONSERVÉ, le paiement reste acquis (SYNCED)',
       () async {

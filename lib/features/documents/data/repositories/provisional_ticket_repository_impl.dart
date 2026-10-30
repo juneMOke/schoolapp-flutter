@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/local/provisional_ticket_dao.dart';
@@ -148,6 +149,7 @@ class ProvisionalTicketRepositoryImpl implements ProvisionalTicketRepository {
           // Toujours scellé : la garde au-dessus refuse un reçu provisoire.
           isProvisional: false,
           paidAt: _parsePaidAt(payment.paidAt),
+          receiptIssuedOn: ReceiptEmissionDay.toDate(receipt.emittedOn),
           // Les `cashier_*` de ce poste, puis l'attribution serveur : le patch
           // de pull ne réécrit jamais les premiers, donc un versement encaissé
           // sur une AUTRE caisse n'a que la seconde. Sans ce repli, son ticket

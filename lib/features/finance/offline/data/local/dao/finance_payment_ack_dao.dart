@@ -170,9 +170,31 @@ class FinancePaymentAckDao {
     PaymentAggregateResponse ack,
   ) async {
     for (final doc in ack.documents) {
+      // Un numéro qui change sans jour d'émission n'hérite pas du jour de
+      // l'ancien : sans jour, le ticket retombe sur la date de saisie.
+      if (doc.emittedOn == null) {
+        await txn.update(
+          'generated_documents',
+          {'emitted_on': null},
+          where:
+              'payment_id = ? AND doc_domain = ? AND doc_type = ? '
+              'AND number <> ?',
+          whereArgs: [
+            ack.paymentId,
+            'PAYMENT',
+            doc.localDocType,
+            doc.documentNumber,
+          ],
+        );
+      }
       await txn.update(
         'generated_documents',
-        {'number': doc.documentNumber, 'status': doc.status},
+        {
+          'number': doc.documentNumber,
+          'status': doc.status,
+          // Absent d'un serveur antérieur : le jour déjà connu reste.
+          if (doc.emittedOn != null) 'emitted_on': doc.emittedOn,
+        },
         where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
         whereArgs: [ack.paymentId, 'PAYMENT', doc.localDocType],
       );

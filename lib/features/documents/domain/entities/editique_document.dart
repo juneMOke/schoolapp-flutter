@@ -40,12 +40,18 @@ class EditiqueDocument extends Equatable {
   /// type quand le serveur n'en propose pas).
   final String fileName;
 
+  /// Jour d'émission `AAAA-MM-JJ`, lu dans l'en-tête `X-Document-Emitted-At`
+  /// (une date à minuit UTC, cf. `ReceiptEmissionDay`). `null` quand le
+  /// serveur ne le pose pas — pièce non archivée ou serveur antérieur.
+  final String? emittedOn;
+
   const EditiqueDocument({
     required this.type,
     required this.bytes,
     required this.fileName,
     this.documentNumber,
     this.documentId,
+    this.emittedOn,
   });
 
   /// Relais de [EditiqueDocumentType.isReplayable] — voir sa documentation
@@ -59,5 +65,6 @@ class EditiqueDocument extends Equatable {
     documentNumber,
     documentId,
     fileName,
+    emittedOn,
   ];
 }

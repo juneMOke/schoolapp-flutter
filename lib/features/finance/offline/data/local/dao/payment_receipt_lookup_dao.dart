@@ -22,6 +22,10 @@ class PaymentReceiptLocalRow {
   /// `DEFINITIVE` | `PROVISIONAL` | autre.
   final String? documentStatus;
 
+  /// Jour d'émission `AAAA-MM-JJ` de la ligne scellée (v71), `null` tant que
+  /// ni l'accusé ni la récupération ne l'ont rapporté.
+  final String? emittedOn;
+
   const PaymentReceiptLocalRow({
     this.paymentFound = false,
     this.receiptId,
@@ -29,6 +33,7 @@ class PaymentReceiptLocalRow {
     this.documentNumber,
     this.provisionalNumber,
     this.documentStatus,
+    this.emittedOn,
   });
 }
 
@@ -55,7 +60,7 @@ class PaymentReceiptLookupDao {
     // la plus récente du versement.
     final documents = await _db.query(
       'generated_documents',
-      columns: const ['number', 'provisional_number', 'status'],
+      columns: const ['number', 'provisional_number', 'status', 'emitted_on'],
       where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
       whereArgs: [paymentId, 'PAYMENT', 'RC'],
       orderBy: 'created_at DESC',
@@ -70,6 +75,7 @@ class PaymentReceiptLookupDao {
       documentNumber: _text(document?['number']),
       provisionalNumber: _text(document?['provisional_number']),
       documentStatus: document?['status'] as String?,
+      emittedOn: _text(document?['emitted_on']),
     );
   }
 

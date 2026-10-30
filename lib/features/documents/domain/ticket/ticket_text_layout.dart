@@ -188,12 +188,29 @@ abstract final class TicketTextLayout {
     // gauche sans être nommée. L'heure reste calée à DROITE sur la même ligne :
     // « Date : » + `JJ/MM/AAAA` fait 16 caractères, l'heure 5, il reste 27
     // colonnes de battement à 48 et 11 à 32. Aucune ligne de papier ajoutée.
-    _addPair(
-      lines,
-      '${model.labels.dateLabel} ${_formatDate(model.paidAt)}',
-      _formatTime(model.paidAt),
-      width,
-    );
+    //
+    // Un ticket définitif dont on connaît le jour d'émission prend CE jour en
+    // date principale, sans heure — c'est une date, pas l'instant du
+    // scellement. La saisie passe dessous, date et heure : « Saisi le ».
+    final issuedOn = model.isProvisional ? null : model.receiptIssuedOn;
+    if (issuedOn == null) {
+      _addPair(
+        lines,
+        '${model.labels.dateLabel} ${_formatDate(model.paidAt)}',
+        _formatTime(model.paidAt),
+        width,
+      );
+    } else {
+      lines.addAll(
+        _wrapped('${model.labels.dateLabel} ${_formatDate(issuedOn)}', width),
+      );
+      _addPair(
+        lines,
+        '${model.labels.enteredAtLabel} ${_formatDate(model.paidAt)}',
+        _formatTime(model.paidAt),
+        width,
+      );
+    }
     _addOptional(
       lines,
       model.labels.cashierLabel,

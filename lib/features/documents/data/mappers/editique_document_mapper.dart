@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/utils/content_disposition_parser.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
+import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
 
 /// Transforme une réponse binaire en [EditiqueDocument], ou refuse.
 ///
@@ -27,6 +28,9 @@ class EditiqueDocumentMapper {
   /// En-tête portant l'identifiant d'archive de la pièce rendue. Les en-têtes
   /// dio sont normalisés en minuscules.
   static const String _documentIdHeader = 'x-document-id';
+
+  /// Jour d'émission d'une pièce archivée, posé à côté de `X-Document-Id`.
+  static const String _emittedAtHeader = 'x-document-emitted-at';
 
   static Either<Failure, EditiqueDocument> map(
     HttpResponse<Uint8List> response,
@@ -66,6 +70,9 @@ class EditiqueDocumentMapper {
         fileName: headerFileName ?? _fallbackFileName(type),
         documentNumber: documentNumber,
         documentId: _documentId(headers),
+        emittedOn: ReceiptEmissionDay.fromIso(
+          _firstHeader(headers, _emittedAtHeader),
+        ),
       ),
     );
   }

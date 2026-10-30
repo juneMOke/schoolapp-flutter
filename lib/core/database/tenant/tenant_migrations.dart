@@ -116,6 +116,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(70)) {
     await _createTables(db, ticketPrintJobsTables);
   }
+  if (upTo(71)) {
+    await _addReceiptEmissionDay(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -130,6 +133,25 @@ Future<void> migrateDeviceDatabase(
   if (upTo(63)) {
     await _admitEnrollmentSheetInEditiqueCache(db);
   }
+}
+
+/// v71 — `generated_documents.emitted_on`, le jour d'émission du reçu scellé.
+///
+/// Le ticket définitif imprime ce jour en date principale, comme le PDF scellé :
+/// le numéro croît avec lui, donc la pile du jour reste continue quel que soit
+/// le nombre de postes. Il arrive par l'accusé (`documents[].emittedAt`) ou par
+/// la récupération du reçu (`X-Document-Emitted-At`). Additif, nullable :
+/// **aucune reprise** — sans lui, le ticket garde la date de saisie, comme
+/// avant.
+///
+/// ⚠️ Garde de table et de colonne, même raison qu'à la v53.
+Future<void> _addReceiptEmissionDay(DatabaseExecutor db) async {
+  final info = await db.rawQuery('PRAGMA table_info(generated_documents)');
+  if (info.isEmpty) return;
+  if (info.any((row) => row['name'] == 'emitted_on')) return;
+  await db.execute(
+    'ALTER TABLE generated_documents ADD COLUMN emitted_on TEXT',
+  );
 }
 
 /// v51 — `enrollments.annual_matriculation_number`.

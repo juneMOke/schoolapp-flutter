@@ -11,6 +11,7 @@ const _labels = TicketLabels(
   provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
+  enteredAtLabel: 'Saisi le',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -46,6 +47,7 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   provisionalMention: _labels.provisionalMention,
   referenceLabel: _labels.referenceLabel,
   dateLabel: _labels.dateLabel,
+  enteredAtLabel: _labels.enteredAtLabel,
   payerLabel: _labels.payerLabel,
   phoneLabel: _labels.phoneLabel,
   cashierLabel: _labels.cashierLabel,
@@ -81,6 +83,9 @@ TicketReceiptModel _model({
   /// Une pièce SCELLÉE tait la phrase de conservation — le seul cas où rien ne
   /// sépare le solde du bloc de signature.
   bool isProvisional = true,
+
+  /// Le jour d'émission du reçu scellé — date principale d'un ticket définitif.
+  DateTime? receiptIssuedOn,
   String? schoolPhone = '+243 000 000 000',
   String? schoolTillPhone = '+243 811 111 111',
   int? remainingBalanceInCents = 250000,
@@ -124,6 +129,7 @@ TicketReceiptModel _model({
   reference: 'PROV-A1B2C3-9F8E7D6C',
   isProvisional: isProvisional,
   paidAt: DateTime(2026, 8, 4, 14, 7),
+  receiptIssuedOn: receiptIssuedOn,
   cashierFullName: cashierFullName,
   tenders:
       tenders ??
@@ -1053,6 +1059,7 @@ void main() {
         provisionalMention: _labels.provisionalMention,
         referenceLabel: _labels.referenceLabel,
         dateLabel: _labels.dateLabel,
+        enteredAtLabel: _labels.enteredAtLabel,
         payerLabel: _labels.payerLabel,
         phoneLabel: _labels.phoneLabel,
         cashierLabel: _labels.cashierLabel,
@@ -1107,6 +1114,7 @@ void main() {
       provisionalMention: _labels.provisionalMention,
       referenceLabel: _labels.referenceLabel,
       dateLabel: _labels.dateLabel,
+      enteredAtLabel: _labels.enteredAtLabel,
       payerLabel: _labels.payerLabel,
       phoneLabel: _labels.phoneLabel,
       cashierLabel: _labels.cashierLabel,
@@ -1441,6 +1449,51 @@ void main() {
           expect(line.length, lessThanOrEqualTo(width), reason: line);
         }
       }
+    });
+  });
+
+  // Réponse back du 2026-10-30 : un ticket définitif prend la date d'émission
+  // du reçu, comme le PDF scellé — le numéro croît avec elle, et la pile du
+  // jour reste continue quel que soit le nombre de postes.
+  group('date d émission du reçu', () {
+    final issuedOn = DateTime(2026, 8, 5);
+
+    for (final columns in const [32, 48]) {
+      test(
+        'définitif : date d émission sans heure, saisie dessous ($columns)',
+        () {
+          final lines = TicketTextLayout.render(
+            _model(isProvisional: false, receiptIssuedOn: issuedOn),
+            columns: columns,
+          );
+          final date = lines.indexWhere((l) => l.startsWith('Date : '));
+
+          expect(lines[date].trimRight(), 'Date : 05/08/2026');
+          expect(lines[date + 1], startsWith('Saisi le 04/08/2026'));
+          expect(lines[date + 1], endsWith('14:07'));
+          expect(lines[date + 1].length, columns);
+          for (final line in lines) {
+            expect(line.length, lessThanOrEqualTo(columns));
+          }
+        },
+      );
+    }
+
+    test('définitif sans jour connu : la date de saisie, comme avant', () {
+      final out = _flat(TicketTextLayout.render(_model(isProvisional: false)));
+
+      expect(out, contains('Date : 04/08/2026'));
+      expect(out, isNot(contains('Saisi le')));
+    });
+
+    test('provisoire : le jour d émission ne s imprime jamais', () {
+      final out = _flat(
+        TicketTextLayout.render(_model(receiptIssuedOn: issuedOn)),
+      );
+
+      expect(out, contains('Date : 04/08/2026'));
+      expect(out, isNot(contains('05/08/2026')));
+      expect(out, isNot(contains('Saisi le')));
     });
   });
 }

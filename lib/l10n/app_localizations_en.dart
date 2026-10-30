@@ -8476,6 +8476,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketDateLabel => 'Date:';
 
   @override
+  String get ticketEnteredAtLabel => 'Entered on';
+
+  @override
   String get ticketPayerLabel => 'PAYER:';
 
   @override

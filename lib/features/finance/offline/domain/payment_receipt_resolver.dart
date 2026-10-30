@@ -35,12 +35,18 @@ class PaymentReceiptReference extends Equatable {
   /// `payments.cancelled_at` : le serveur a annulé le VERSEMENT lui-même.
   final int? paymentCancelledAt;
 
+  /// Jour d'émission `AAAA-MM-JJ` du reçu définitif, `null` s'il n'est pas
+  /// connu ou si le reçu n'est pas scellé. C'est la date principale du ticket
+  /// définitif (`ReceiptEmissionDay` dit comment le lire).
+  final String? emittedOn;
+
   const PaymentReceiptReference({
     this.number,
     this.status = PaymentReceiptStatus.unknown,
     this.documentId,
     this.cacheEntry,
     this.paymentCancelledAt,
+    this.emittedOn,
   });
 
   bool get isDefinitive => status == PaymentReceiptStatus.definitive;
@@ -69,6 +75,7 @@ class PaymentReceiptReference extends Equatable {
     documentId,
     cacheEntry,
     paymentCancelledAt,
+    emittedOn,
   ];
 }
 

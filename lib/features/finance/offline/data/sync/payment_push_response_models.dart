@@ -7,6 +7,7 @@
 // a été physiquement reçu au guichet. Un trop-perçu est ACCEPTÉ puis signalé via
 // [OverpaymentSignal] pour arbitrage admin.
 
+import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_pull_models.dart'
     show StudentChargeDto;
 
@@ -78,11 +79,16 @@ class GeneratedDocumentDto {
   final String status; // DEFINITIVE
   final String? url;
 
+  /// Jour d'émission `AAAA-MM-JJ`, lu de `emittedAt` (date à minuit UTC,
+  /// ajout back du 2026-10-30) ; `null` tant que le serveur ne le sert pas.
+  final String? emittedOn;
+
   const GeneratedDocumentDto({
     required this.type,
     required this.documentNumber,
     required this.status,
     this.url,
+    this.emittedOn,
   });
 
   factory GeneratedDocumentDto.fromJson(Map<String, dynamic> j) =>
@@ -91,6 +97,7 @@ class GeneratedDocumentDto {
         documentNumber: j['documentNumber'] as String,
         status: (j['status'] as String?) ?? 'DEFINITIVE',
         url: j['url'] as String?,
+        emittedOn: ReceiptEmissionDay.fromIso(j['emittedAt']),
       );
 
   /// `doc_type` local de la table `generated_documents` (domaine `PAYMENT`).

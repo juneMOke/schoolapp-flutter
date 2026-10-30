@@ -34,6 +34,10 @@ class TicketLabels extends Equatable {
   /// 27 caractères de battement, et 11 à 32 colonnes.
   final String dateLabel;
 
+  /// « Saisi le » — sur un ticket définitif daté de l'émission du reçu, coiffe
+  /// la date et l'heure de saisie du versement, en mention secondaire.
+  final String enteredAtLabel;
+
   final String cashierLabel;
 
   /// « Tél. Promoteur : » — le téléphone de l'ÉTABLISSEMENT, en en-tête.
@@ -166,6 +170,7 @@ class TicketLabels extends Equatable {
     required this.provisionalMention,
     required this.referenceLabel,
     required this.dateLabel,
+    required this.enteredAtLabel,
     required this.cashierLabel,
     required this.schoolPhoneLabel,
     required this.tillPhoneLabel,
@@ -197,6 +202,7 @@ class TicketLabels extends Equatable {
     provisionalMention,
     referenceLabel,
     dateLabel,
+    enteredAtLabel,
     cashierLabel,
     schoolPhoneLabel,
     tillPhoneLabel,

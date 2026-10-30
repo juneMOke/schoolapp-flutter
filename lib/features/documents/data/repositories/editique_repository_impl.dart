@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
@@ -250,12 +251,22 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
         academicYearId: academicYearId,
         schoolId: schoolId,
         ownerUid: currentUser.uid ?? '',
+        emittedAt: _emittedAtMs(document.emittedOn),
         bytes: document.bytes,
       );
     } catch (_) {
       // Disque plein, index refusé, magasin en panne : la pièce vient d'être
       // servie à l'appelant, c'est tout ce qui compte.
     }
+  }
+
+  /// Le jour d'émission annoncé, dans la forme du cache : minuit UTC, comme le
+  /// delta éditique l'écrit.
+  static int? _emittedAtMs(String? emittedOn) {
+    final day = ReceiptEmissionDay.toDate(emittedOn);
+    return day == null
+        ? null
+        : DateTime.utc(day.year, day.month, day.day).millisecondsSinceEpoch;
   }
 
   /// Copie locale de la pièce, ou `null` si elle n'est pas en cache — ou si le

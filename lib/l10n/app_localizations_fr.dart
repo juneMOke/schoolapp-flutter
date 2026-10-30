@@ -8551,6 +8551,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketDateLabel => 'Date :';
 
   @override
+  String get ticketEnteredAtLabel => 'Saisi le';
+
+  @override
   String get ticketPayerLabel => 'PAYEUR :';
 
   @override

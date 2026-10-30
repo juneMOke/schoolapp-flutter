@@ -74,6 +74,7 @@ class PaymentReceiptRecoveryOutboxHandler implements OutboxSyncHandler {
       paymentId: paymentId,
       documentId: document.documentId,
       documentNumber: document.documentNumber,
+      emittedOn: document.emittedOn,
     );
     // Le numéro ne vit que dans `Content-Disposition` : sans lui, rien ne
     // rendrait le ticket imprimable, et la marque levée le laisserait

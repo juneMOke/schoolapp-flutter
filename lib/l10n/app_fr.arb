@@ -5734,6 +5734,10 @@
   "ticketProvisionalMention": "provisoire",
   "ticketReferenceLabel": "Réf.",
   "ticketDateLabel": "Date :",
+  "ticketEnteredAtLabel": "Saisi le",
+  "@ticketEnteredAtLabel": {
+    "description": "Ticket définitif : coiffe la date et l'heure de saisie du versement, sous la date d'émission du reçu."
+  },
   "ticketPayerLabel": "PAYEUR :",
   "ticketPhoneLabel": "Tél.",
   "ticketCashierLabel": "Caissier :",

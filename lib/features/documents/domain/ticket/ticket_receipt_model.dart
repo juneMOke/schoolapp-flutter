@@ -104,6 +104,15 @@ class TicketReceiptModel extends Equatable {
   final bool isProvisional;
 
   final DateTime paidAt;
+
+  /// Jour d'émission du reçu scellé (sans heure), `null` s'il n'est pas connu.
+  ///
+  /// Présent sur un ticket définitif, il en devient la date principale, comme
+  /// sur le PDF scellé : le numéro croît avec lui, donc la pile du jour reste
+  /// continue même quand un versement saisi la veille se synchronise le matin
+  /// sur un autre poste. [paidAt] passe alors en mention « Saisi le ».
+  final DateTime? receiptIssuedOn;
+
   final String? cashierFullName;
 
   /// Le payeur, **quand il y en a un**.
@@ -203,6 +212,7 @@ class TicketReceiptModel extends Equatable {
     required this.reference,
     required this.isProvisional,
     required this.paidAt,
+    this.receiptIssuedOn,
     this.cashierFullName,
     this.payerFullName,
     this.payerPhoneNumber,
@@ -391,6 +401,7 @@ class TicketReceiptModel extends Equatable {
     reference,
     isProvisional,
     paidAt,
+    receiptIssuedOn,
     cashierFullName,
     tenders,
     allocations,
