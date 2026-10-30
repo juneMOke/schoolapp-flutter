@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/receipt_number_watch_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/correct_payment_use_case.dart';
@@ -13,10 +16,25 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockCorrect extends Mock implements CorrectPaymentUseCase {}
 
+/// Le reçu du versement annulé : numéroté, annulation acquittée ou non.
+class _Receipts implements PaymentReceiptResolver {
+  PaymentReceiptReference reference = const PaymentReceiptReference(
+    number: 'CF-RC-2627-000821',
+    status: PaymentReceiptStatus.definitive,
+  );
+
+  @override
+  Future<PaymentReceiptReference> resolve(String paymentId) async => reference;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 /// Le geste « Annuler » : motif obligatoire, précision pour « Autre », et un
 /// résultat toujours local.
 void main() {
   late _MockCorrect correct;
+  late _Receipts receipts;
 
   setUpAll(() {
     registerFallbackValue(
@@ -28,11 +46,21 @@ void main() {
   });
 
   setUp(() {
+    receipts = _Receipts();
+    getIt.registerFactory<ReceiptNumberWatchCubit>(
+      () => ReceiptNumberWatchCubit(
+        receipts,
+        every: const Duration(milliseconds: 10),
+        giveUpAfter: const Duration(milliseconds: 30),
+      ),
+    );
     correct = _MockCorrect();
     when(() => correct(any())).thenAnswer(
       (_) async => const Right(PaymentCorrectionOutcome(correctionId: 'pc-1')),
     );
   });
+
+  tearDown(() => getIt.reset());
 
   Future<void> open(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1024, 900));
@@ -131,6 +159,70 @@ void main() {
     expect(draft.replacement, isNull);
     expect(draft.cashMoved, isFalse);
     expect(find.text('Versement annulé'), findsOneWidget);
+  });
+
+  // Continuité des tickets RC, lot B : chaque numéro garde un papier.
+  group('le ticket d annulation', () {
+    Future<void> cancel(WidgetTester tester) async {
+      await open(tester);
+      await choose(tester, PaymentCorrectionReason.duplicate);
+      await tester.tap(
+        find.widgetWithText(EteeloButton, 'Annuler le versement'),
+      );
+      await tester.pump();
+      await tester.pump();
+    }
+
+    bool printEnabled(WidgetTester tester) => tester
+        .widget<ButtonStyleButton>(
+          find.ancestor(
+            of: find.text('Imprimer le ticket d\'annulation'),
+            matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+          ),
+        )
+        .enabled;
+
+    testWidgets('attend l accusé, puis renvoie vers la file', (tester) async {
+      await cancel(tester);
+
+      expect(printEnabled(tester), isFalse);
+      expect(find.textContaining('dès que le serveur'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump();
+
+      expect(printEnabled(tester), isFalse);
+      expect(
+        find.textContaining('depuis « Tickets à imprimer »'),
+        findsOneWidget,
+      );
+    });
+
+    // R2 : une origine jamais acceptée par le serveur n'a pas de numéro.
+    testWidgets('annulation locale : aucun ticket promis', (tester) async {
+      when(() => correct(any())).thenAnswer(
+        (_) async => const Right(
+          PaymentCorrectionOutcome(correctionId: 'pc-1', localOnly: true),
+        ),
+      );
+      await cancel(tester);
+
+      expect(find.text('Versement annulé'), findsOneWidget);
+      expect(find.text('Imprimer le ticket d\'annulation'), findsNothing);
+      expect(find.textContaining('Tickets à imprimer'), findsNothing);
+    });
+
+    testWidgets('annulation acquittée : le ticket peut sortir', (tester) async {
+      receipts.reference = const PaymentReceiptReference(
+        number: 'CF-RC-2627-000821',
+        status: PaymentReceiptStatus.definitive,
+        paymentCancelledAt: 3000,
+      );
+      await cancel(tester);
+      await tester.pump();
+
+      expect(printEnabled(tester), isTrue);
+    });
   });
 
   // D8 : « Argent rendu » dit déjà que de l'argent a changé de main.

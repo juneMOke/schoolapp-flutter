@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fi
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_stats_dashboard_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/finance_till_tab.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/tickets_to_print_banner.dart';
 
 /// Le tableau de bord Finances : **la caisse**, et elle seule.
 ///
@@ -57,6 +58,11 @@ class _FinanceStatsDashboardPageState extends State<FinanceStatsDashboardPage> {
               schoolYear: state.till?.context.schoolYear,
               l10n: l10n,
             ),
+          ),
+          // Lu sur la file LOCALE de ce poste, à part des chiffres serveur du
+          // tableau de bord (continuité des tickets RC, lot D).
+          const TicketsToPrintBanner(
+            padding: EdgeInsets.only(top: AppDimensions.spacingM),
           ),
           const SizedBox(height: AppDimensions.spacingL),
           const FinanceTillTab(),

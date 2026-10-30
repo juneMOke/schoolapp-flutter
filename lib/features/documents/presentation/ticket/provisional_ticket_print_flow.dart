@@ -68,10 +68,23 @@ Future<void> printProvisionalTicketWithFallback(
   // encaissé — il n'existe aucun chemin de réimpression.
   final cutNotice = l10n.ticketCutNotice;
 
-  final model = await buildProvisionalTicket(context, paymentId: paymentId);
+  final built = await buildProvisionalTicket(context, paymentId: paymentId);
+  final model = built.fold((_) => null, (model) => model);
 
   if (model == null) {
-    messenger?.showSnackBar(SnackBar(content: Text(l10n.ticketPrintFailed)));
+    // Sans numéro définitif, ce n'est pas une panne : le ticket attend la
+    // synchronisation, et c'est ce qu'il faut dire (continuité RC, lot D).
+    final awaiting = built.fold(
+      (failure) => failure is ReceiptAwaitingNumberFailure,
+      (_) => false,
+    );
+    messenger?.showSnackBar(
+      SnackBar(
+        content: Text(
+          awaiting ? l10n.ticketAwaitingNumber : l10n.ticketPrintFailed,
+        ),
+      ),
+    );
     return;
   }
 
@@ -234,7 +247,7 @@ Future<void> _sendTicketToPrinter(
     case ThermalTicketFailed(problem: final problem, copies: final copies):
       messenger?.showSnackBar(
         SnackBar(
-          content: Text(_problemMessage(l10n, problem)),
+          content: Text(thermalPrinterProblemMessage(l10n, problem)),
           // Une permission refusée définitivement ne se redemande plus : Android
           // ne réaffiche jamais la boîte de dialogue, et sans ce raccourci le
           // caissier n'a plus aucun chemin vers les réglages depuis
@@ -274,7 +287,8 @@ Future<void> _sendTicketToPrinter(
   }
 }
 
-String _problemMessage(
+/// La cause d'une panne d'imprimante, dans la langue de l'écran.
+String thermalPrinterProblemMessage(
   AppLocalizations l10n,
   ThermalPrinterProblem problem,
 ) => switch (problem) {

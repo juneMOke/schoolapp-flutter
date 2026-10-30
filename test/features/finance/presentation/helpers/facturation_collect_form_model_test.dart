@@ -46,13 +46,16 @@ void main() {
   late int appelsAuReglement;
   late List<ExchangeRate> serie;
 
-  FacturationCollectFormModel modele({int tranches = 3}) {
+  FacturationCollectFormModel modele({
+    int tranches = 3,
+    DateTime Function()? nowOf,
+  }) {
     rates = FacturationRateBoard(onChanged: () {});
     appelsAuReglement = 0;
     return FacturationCollectFormModel.fromCharges(
       charges: [for (var i = 1; i <= tranches; i++) _charge(id: 'T$i')],
       rates: rates,
-      nowOf: () => _maintenant,
+      nowOf: nowOf ?? () => _maintenant,
       settlementOf: () {
         appelsAuReglement++;
         return TenderSettlement(rates: serie, at: _maintenant);
@@ -109,23 +112,15 @@ void main() {
       expect(modele().paidDay, DateTime(2026, 9, 16));
     });
 
-    test('re-confirmer le même jour ne change RIEN', () {
-      final m = modele();
+    // Une tablette laissée allumée toute la nuit : le jour se relit à chaque
+    // fois, il n'est jamais figé à l'ouverture de la page.
+    test('suit l\'horloge de l\'école, minuit compris', () {
+      var now = DateTime.utc(2026, 9, 16, 22, 50); // 23 h 50 à Kinshasa
+      final m = modele(nowOf: () => now);
+      expect(m.paidDay, DateTime(2026, 9, 16));
 
-      expect(m.paidDayChanged(DateTime(2026, 9, 16)), isFalse);
-    });
-
-    test('choisir un autre jour le retient', () {
-      final m = modele();
-
-      expect(m.paidDayChanged(DateTime(2026, 9, 12)), isTrue);
-      expect(m.paidDay, DateTime(2026, 9, 12));
-    });
-
-    test('ne retient que le jour, jamais l\'heure', () {
-      final m = modele()..paidDayChanged(DateTime(2026, 9, 12, 7, 45));
-
-      expect(m.paidDay, DateTime(2026, 9, 12));
+      now = DateTime.utc(2026, 9, 16, 23, 10); // 00 h 10 le 17
+      expect(m.paidDay, DateTime(2026, 9, 17));
     });
   });
 
@@ -254,10 +249,10 @@ void main() {
       expect(modele().buildDraft(), isNull);
     });
 
-    test('porte le jour désigné, pas un instant', () {
+    test('porte le jour de l\'origine d\'une correction, pas un instant', () {
       final m = modele();
+      m.prefill(centsByCharge: const {}, day: DateTime(2026, 9, 12, 7, 45));
       m.toggle(m.entries.first, true);
-      m.paidDayChanged(DateTime(2026, 9, 12));
 
       expect(m.buildDraft()!.paidAt, DateTime(2026, 9, 12));
     });
@@ -294,27 +289,6 @@ void main() {
       expect(draft.amounts.entries.single.currency, 'USD');
       expect(draft.tenders.single.currency, 'CDF');
       expect(draft.tenders.single.amountInCents, 10000000);
-    });
-  });
-
-  group('changer la date re-dérive', () {
-    test('sans détruire une ventilation saisie à la main', () {
-      // Le parcours qui a coûté de l'argent avant R2, rejoué au niveau du
-      // modèle : il doit rester sans effet sur la ventilation.
-      final m = modele();
-      final group = m.groups.single;
-      m.groupToggle(group, true);
-      m.groupTenderCurrencyChanged(group, 'CDF');
-      group.tenderController.text = '200000';
-      m.groupTenderEdited(group);
-
-      m.entries.first.controller.text = '10';
-      m.allocationEdited(m.entries.first);
-      final ventilation = m.entries.first.controller.text;
-
-      m.paidDayChanged(DateTime(2026, 9, 12));
-
-      expect(m.entries.first.controller.text, ventilation);
     });
   });
 }

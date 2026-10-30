@@ -9,7 +9,6 @@ import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
@@ -106,7 +105,7 @@ void main() {
     status: StudentChargeStatus.due,
   );
 
-  Future<void> ouvrir(WidgetTester tester, {DateTime? now}) async {
+  Future<void> ouvrir(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1280, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -120,7 +119,7 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: FacturationCreatePaymentView(
-              now: now ?? _maintenant,
+              now: _maintenant,
               intent: FacturationCreatePaymentIntent(
                 studentId: 'stu-1',
                 academicYearId: 'ay-1',
@@ -138,9 +137,6 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
-
-  EteeloDateInput champDate(WidgetTester tester) =>
-      tester.widget<EteeloDateInput>(find.byType(EteeloDateInput));
 
   Finder champParLibelle(String label) => find.descendant(
     of: find.byWidgetPredicate(
@@ -173,11 +169,6 @@ void main() {
     await tester.ensureVisible(coche);
     await tester.pumpAndSettle();
     await tester.tap(coche);
-    await tester.pumpAndSettle();
-  }
-
-  Future<void> choisirDate(WidgetTester tester, DateTime jour) async {
-    champDate(tester).onChanged!(jour);
     await tester.pumpAndSettle();
   }
 
@@ -215,28 +206,13 @@ void main() {
     return drafts.single;
   }
 
-  testWidgets('la date désignée est CELLE QUI PART en base', (tester) async {
+  testWidgets('aucun champ de date à l\'encaissement', (tester) async {
+    // Lot C de la continuité des tickets : un versement est daté du jour de sa
+    // saisie. Un champ de date, même en lecture seule, laisserait croire qu'on
+    // peut encaisser pour un autre jour.
     await ouvrir(tester);
-    await cocher(tester);
-    await remplirPayeur(tester);
-    await choisirDate(tester, DateTime(2026, 9, 12));
 
-    await encaisser(tester);
-
-    // L'instant COMPLET, et plus seulement le jour : l'horloge de la page
-    // traverse désormais jusqu'au mapper, donc la recomposition est entièrement
-    // déterminée. `_maintenant` = 08 h UTC = 09 h murale à Kinshasa, reposée sur
-    // le 12 puis ramenée en UTC — d'où 08 h.
-    //
-    // ⚠️ C'est cette injection qui rend le fait vérifiable. Tant que la popin
-    // lisait `DateTime.now()`, ce test ne pouvait asserter qu'un préfixe de jour,
-    // et il rougissait une heure par jour : entre 23 h et minuit UTC, l'heure
-    // murale passait 00 h, la recomposition retirait l'heure de décalage, et le
-    // jour reculait d'un cran.
-    expect(
-      captureDraft().draft.paidAt,
-      DateTime.utc(2026, 9, 12, 8).toIso8601String(),
-    );
+    expect(find.byType(EteeloDateInput), findsNothing);
   });
 
   testWidgets('sans rien changer, c\'est aujourd\'hui qui part', (
@@ -261,57 +237,10 @@ void main() {
     await ouvrir(tester);
     await cocher(tester);
     await remplirPayeur(tester);
-    await choisirDate(tester, DateTime(2026, 9, 12));
+    await tester.pumpAndSettle();
 
     await ouvrirConfirmation(tester);
 
-    expect(find.textContaining('12/09/2026'), findsOneWidget);
-  });
-
-  testWidgets('la date est GELÉE pendant un encaissement en vol', (
-    tester,
-  ) async {
-    await ouvrir(tester);
-    await cocher(tester);
-    await remplirPayeur(tester);
-
-    await ouvrirConfirmation(tester);
-
-    // ⚠️ On assère `readOnly`, jamais en appelant `onChanged` : le rappel
-    // court-circuiterait `_pickDate`, où vit RÉELLEMENT le gel
-    // (`if (!_interactive) return;`). Un test écrit avec `onChanged` serait vert
-    // sur un gel cassé.
-    //
-    // Et surtout pas `onChanged == null` : la section enveloppe toujours le
-    // rappel dans une closure, donc ce champ n'est jamais nul — l'assertion
-    // passerait pour une raison fausse.
-    expect(champDate(tester).readOnly, isTrue);
-  });
-
-  testWidgets('re-confirmer le même jour ne change rien', (tester) async {
-    await ouvrir(tester);
-    await cocher(tester);
-    await remplirPayeur(tester);
-
-    // Le sélecteur rappelle `onChanged` dès qu'on valide, même sans avoir
-    // bougé : sans garde d'égalité, tout le recalcul serait rejoué.
-    await choisirDate(tester, DateTime(2026, 9, 16));
-    await encaisser(tester);
-
-    // Re-désigner le jour courant doit rendre EXACTEMENT ce que rendait le
-    // chemin par défaut : même instant, pas seulement même jour.
-    expect(captureDraft().draft.paidAt, _maintenant.toIso8601String());
-  });
-
-  testWidgets('le jour par défaut SUIT l\'horloge, il n\'est pas figé', (
-    tester,
-  ) async {
-    // Une tablette laissée allumée toute la nuit : la page ne doit pas dater de
-    // la veille ce qu'elle encaisse le lendemain.
-    await ouvrir(tester, now: DateTime.utc(2026, 9, 16, 23, 30));
-
-    // 23 h 30 UTC = 00 h 30 le 17 à Kinshasa.
-    expect(champDate(tester).value, DateTime(2026, 9, 17));
-    expect(SchoolTime.today(DateTime.utc(2026, 9, 16, 23, 30)).day, 17);
+    expect(find.textContaining('16 sept. 2026'), findsOneWidget);
   });
 }

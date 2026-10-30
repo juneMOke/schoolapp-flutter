@@ -8,16 +8,20 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_bloc.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_event.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/finance_offline_state.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payments_bloc.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/receipt_number_watch_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_collect_flow_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
@@ -191,8 +195,24 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     );
   }
 
-  /// Encaissement écrit en local — clé du reçu provisoire à imprimer.
+  /// Encaissement écrit en local — clé du ticket à imprimer.
   String? _paymentId;
+
+  /// Le numéro définitif du reçu, attendu après l'écriture locale : un ticket
+  /// ne sort plus qu'avec lui (continuité des tickets RC, lot D). Créé au
+  /// succès seulement — les phases précédentes n'en ont pas l'usage.
+  ReceiptNumberWatchCubit? _receiptWatch;
+
+  /// L'invite d'impression suit le droit de la file (`editique.read`) : c'est
+  /// le pull des pièces qui apporte le numéro sans lequel rien ne sort.
+  bool get _canPrintTicket =>
+      PermissionGate.allowsAccess(context, kTicketPrintAccess);
+
+  @override
+  void dispose() {
+    _receiptWatch?.close();
+    super.dispose();
+  }
 
   void _onBlocState(FinanceOfflineState state) {
     if (!mounted || !_awaitingBloc) return;
@@ -201,6 +221,11 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
       // Retenu pour le ticket : c'est la seule clé disponible à cet instant, et
       // l'écran de succès était jusqu'ici un cul-de-sac (ADR-012 D-3).
       _paymentId = state.paymentId;
+      // Sans `editique.read`, aucun ticket à offrir : rien à attendre non plus.
+      if (_canPrintTicket) {
+        _receiptWatch = getIt<ReceiptNumberWatchCubit>()
+          ..watch(state.paymentId);
+      }
       // Encaissement écrit localement (en attente de synchro) : on allume la
       // pastille globale et le rafraîchissement du détail est déclenché APRÈS
       // fermeture de la popin (cf. _onCollect).
@@ -296,23 +321,26 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                         totalLabel: widget.totalLabel,
                         rateLabel: widget.rateLabel,
                         // ⚠️ Lu sur la REQUÊTE, jamais sur un paramètre jumeau :
-                        // le récapitulatif existe pour rattraper une erreur de
-                        // date, il doit donc montrer la valeur qui part
-                        // réellement en base — pas une seconde copie qui
-                        // pourrait diverger sans que rien ne le dise.
+                        // le récapitulatif montre le jour qui part — celui de
+                        // la saisie, ou l'origine d'une correction —, pas une
+                        // seconde copie qui pourrait diverger sans que rien ne
+                        // le dise.
                         paidAt: widget.request.paidAt,
                         studentName: widget.studentName,
                         payerName: widget.payerName,
                         payerPhone: widget.payerPhone,
                         allocations: widget.allocations,
                       )
-                    : _ResultBody(
-                        phase: _phase,
-                        totalLabel: widget.totalLabel,
-                        incidentCode: _incidentCode,
+                    : _withReceiptWatch(
+                        (watch) => _ResultBody(
+                          phase: _phase,
+                          totalLabel: widget.totalLabel,
+                          incidentCode: _incidentCode,
+                          receiptNumber: watch.number,
+                        ),
                       ),
               ),
-              footer: [_buildFooter(l10n)],
+              footer: [_withReceiptWatch((watch) => _buildFooter(l10n, watch))],
             ),
           ),
         ),
@@ -334,7 +362,20 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     _Phase.processing => null,
   };
 
-  Widget _buildFooter(AppLocalizations l10n) {
+  /// Reconstruit [builder] quand le numéro du reçu change d'état — sans
+  /// attente en cours, avec l'état vide.
+  Widget _withReceiptWatch(
+    Widget Function(ReceiptNumberWatchState watch) builder,
+  ) {
+    final watch = _receiptWatch;
+    if (watch == null) return builder(const ReceiptNumberWatchState());
+    return BlocBuilder<ReceiptNumberWatchCubit, ReceiptNumberWatchState>(
+      bloc: watch,
+      builder: (_, state) => builder(state),
+    );
+  }
+
+  Widget _buildFooter(AppLocalizations l10n, ReceiptNumberWatchState watch) {
     switch (_phase) {
       case _Phase.processing:
         return const SizedBox.shrink();
@@ -366,27 +407,35 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
           children: [
             const Divider(height: 1, color: AppColors.border),
             FinanceModalFooter(
-              // Le reçu DÉFINITIF est inatteignable ici : on vient d'atteindre
-              // `FinanceOfflinePaymentPendingSync`, l'uuid du paiement est
-              // encore inconnu du serveur et la demande répondrait 404. Ce que
-              // le guichet peut remettre tout de suite, c'est le ticket
-              // PROVISOIRE — une projection des lignes qui viennent d'être
-              // écrites, sans le moindre appel réseau (ADR-012 D-3).
+              // Un ticket ne sort qu'avec le numéro DÉFINITIF de son reçu
+              // (continuité des tickets RC, lot D) : on vient d'écrire en
+              // local, l'accusé du serveur le donnera. En ligne il arrive en
+              // quelques secondes ; sinon le ticket attend dans « Tickets à
+              // imprimer ».
               secondaryLabel: l10n.ticketPrintLabel,
               secondaryIcon: Icons.print_outlined,
               // Éteint tant qu'une impression est en vol : un `VoidCallback`
               // n'a aucun anti-rebond, et rien ne bouge à l'écran entre l'appui
               // et l'apparition de l'interface système.
-              onSecondary: _paymentId == null || _printing
+              onSecondary:
+                  _paymentId == null ||
+                      _printing ||
+                      watch.phase != ReceiptNumberPhase.numbered
                   ? null
                   : _printTicket,
-              secondaryHint: l10n.facturationPaymentReceiptPendingSyncHint,
+              secondaryHint: switch (watch.phase) {
+                ReceiptNumberPhase.numbered => null,
+                ReceiptNumberPhase.deferred =>
+                  l10n.facturationCollectTicketDeferred,
+                _ => l10n.facturationCollectReceiptWaiting,
+              },
               primaryLabel: l10n.facturationPaymentCloseLabel,
               primaryIcon: Icons.check_rounded,
               onPrimary: () => Navigator.of(
                 context,
               ).pop(FacturationCollectOutcome.succeeded),
               stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
+              showSecondary: _receiptWatch != null,
             ),
           ],
         );
@@ -558,10 +607,14 @@ class _ResultBody extends StatelessWidget {
   final String totalLabel;
   final String? incidentCode;
 
+  /// Le numéro définitif du reçu, `null` tant qu'il n'est pas attribué.
+  final String? receiptNumber;
+
   const _ResultBody({
     required this.phase,
     required this.totalLabel,
     required this.incidentCode,
+    this.receiptNumber,
   });
 
   @override
@@ -618,8 +671,9 @@ class _ResultBody extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingM),
             _ResultChip(
               icon: Icons.receipt_long_outlined,
-              // Numéro de reçu absent côté backend → laissé vide pour le moment.
-              label: l10n.facturationCollectReceiptChip('—'),
+              // Le numéro définitif dès que l'accusé l'apporte ; un tiret
+              // tant qu'il n'est pas attribué.
+              label: l10n.facturationCollectReceiptChip(receiptNumber ?? '—'),
               color: AppColors.feeStatusPaid,
             ),
           ],

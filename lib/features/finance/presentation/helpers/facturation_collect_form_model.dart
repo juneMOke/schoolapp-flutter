@@ -124,8 +124,8 @@ class FacturationCollectFormModel {
   /// de Kinshasa qui découpe les journées de caisse.
   DateTime get today => SchoolTime.today(nowOf());
 
-  /// Le **jour** porté par le versement : aujourd'hui tant que le caissier n'a
-  /// rien changé.
+  /// Le **jour** porté par le versement : aujourd'hui, ou le jour d'origine
+  /// d'une correction (`prefill`). Aucun autre jour ne se choisit (lot C).
   ///
   /// ⚠️ C'est un aujourd'hui **vivant** — il se recalcule à chaque lecture.
   /// Figer la valeur à l'ouverture daterait de la veille un versement encaissé
@@ -406,52 +406,5 @@ class FacturationCollectFormModel {
       if (currency == null) continue;
       tenderCurrencyChanged(entry, currency);
     }
-  }
-
-  // ── Le changement de date (A4) ─────────────────────────────────────────────
-
-  /// Désigne un nouveau jour, et re-dérive ce qui en découle.
-  ///
-  /// Rend `false` quand rien ne change — le sélecteur rappelle `onChanged` dès
-  /// qu'on valide, même sans avoir rien bougé, et un aller-retour
-  /// imputation→comptoir→imputation ne rend pas toujours le même centime.
-  ///
-  /// ⚠️ **Il ne suffit pas de mémoriser le jour.** Les montants convertis déjà
-  /// affichés ont été dérivés au taux de l'ancienne date ; la soumission, elle,
-  /// recompose les `tenders` sur le règlement COURANT. Sans re-dérivation,
-  /// l'écran annoncerait un chiffre et le versement en porterait un autre.
-  ///
-  /// ⚠️ **Les natures d'abord, les tranches ensuite.** Une nature convertie
-  /// propage sa devise à ses tranches, donc les deux boucles passent sur les
-  /// mêmes créances : re-dériver les tranches avant la cascade de leur nature
-  /// laisserait des comptoirs calculés sur des imputations périmées.
-  bool paidDayChanged(DateTime day) {
-    final chosen = DateTime(day.year, day.month, day.day);
-    if (chosen == paidDay) return false;
-
-    _paidDayOverride = chosen;
-    rates.closeUntouched();
-
-    for (final group in groups) {
-      if (!group.isConverted) continue;
-      // `groupIsSource` AUTANT que `tenderIsSource` : une nature qui a rendu la
-      // main à ses tranches n'est plus l'unité de règlement, et rejouer sa
-      // cascade écraserait la ventilation saisie à la main.
-      if (group.groupIsSource && group.tenderIsSource) {
-        groupTenderEdited(group);
-      } else {
-        reflectGroupTender(group);
-      }
-    }
-
-    for (final entry in entries) {
-      if (!entry.isConverted) continue;
-      if (entry.tenderIsSource) {
-        tenderEdited(entry);
-      } else {
-        reflectTender(entry);
-      }
-    }
-    return true;
   }
 }

@@ -12,7 +12,10 @@ class FacturationCreatePaymentLayout extends StatelessWidget {
   /// Origine et élève d'une correction, au-dessus de tout le reste.
   final List<Widget> header;
   final Widget payer;
-  final Widget date;
+
+  /// Le jour d'origine d'une correction ; `null` pour un encaissement, daté
+  /// du jour de sa saisie.
+  final Widget? date;
   final Widget charges;
 
   /// Motif d'une correction, sous les créances.
@@ -22,7 +25,7 @@ class FacturationCreatePaymentLayout extends StatelessWidget {
     super.key,
     this.header = const [],
     required this.payer,
-    required this.date,
+    this.date,
     required this.charges,
     this.footer,
   });
@@ -51,6 +54,7 @@ class FacturationCreatePaymentLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final footer = this.footer;
+    final date = this.date;
     if (!twoColumnsFor(context)) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,8 +62,7 @@ class FacturationCreatePaymentLayout extends StatelessWidget {
           for (final card in header) ...[card, _gap],
           payer,
           _gap,
-          date,
-          _gap,
+          if (date != null) ...[date, _gap],
           charges,
           if (footer != null) ...[_gap, footer],
         ],
@@ -96,7 +99,10 @@ class FacturationCreatePaymentLayout extends StatelessWidget {
                   1,
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [payer, _gap, date],
+                    children: [
+                      payer,
+                      if (date != null) ...[_gap, date],
+                    ],
                   ),
                 ),
               ),

@@ -247,6 +247,17 @@ class AppConstants {
   /// de fluidité, ce qui la ferait diverger du serveur en silence.
   static const Duration financeTillReportRetryFallback = Duration(seconds: 60);
 
+  // ── Continuité des tickets RC — l'attente du numéro définitif ──────────────
+
+  /// Intervalle de relecture du reçu après un encaissement ou une annulation :
+  /// un ticket ne sort qu'avec le numéro définitif, que l'accusé du serveur
+  /// apporte en quelques secondes quand le poste est en ligne. Pas une
+  /// animation : un rythme d'interrogation de la base locale.
+  static const Duration receiptNumberPollInterval = Duration(seconds: 2);
+
+  /// Au-delà, on renonce : le ticket attendra dans « Tickets à imprimer ».
+  static const Duration receiptNumberWaitLimit = Duration(seconds: 30);
+
   // ── Recouvrement — la liste de relance ────────────────────────────────────
 
   /// `POST` de la **liste de relance** : la tablette envoie les lignes, le
@@ -834,7 +845,10 @@ class AppConstants {
   // v69 (2026-10-25) : le barème élargi du back (Q8) — charges patronales,
   // plafonds d'avance, PC/E activable, intitulés du bulletin
   // (`ref_payroll_settings`). Additif, nullable. Palier d'école.
-  static const int offlineDbSchemaVersion = 69;
+  // v70 (2026-10-28) : `ticket_print_jobs`, les tickets que le poste doit
+  // encore imprimer — un ticket ne sort qu'avec le numéro définitif de son
+  // reçu (continuité des tickets RC, lot D). Table neuve. Palier d'école.
+  static const int offlineDbSchemaVersion = 70;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

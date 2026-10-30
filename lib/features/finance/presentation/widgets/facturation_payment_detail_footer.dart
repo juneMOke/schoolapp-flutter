@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/cancellation_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_modal_parts.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_ticket_print_row.dart';
@@ -19,6 +20,10 @@ class FacturationPaymentDetailFooter extends StatefulWidget {
   /// offert.
   final String? ticketPaymentId;
 
+  /// Le versement annulé dont le ticket d'annulation s'imprime depuis le pied
+  /// (continuité des tickets RC, lot B). Ne sert que sans [ticketPaymentId].
+  final String? cancellationPaymentId;
+
   final VoidCallback? onDownloadReceipt;
   final String? downloadHint;
   final VoidCallback onClose;
@@ -26,6 +31,7 @@ class FacturationPaymentDetailFooter extends StatefulWidget {
   const FacturationPaymentDetailFooter({
     super.key,
     required this.ticketPaymentId,
+    this.cancellationPaymentId,
     required this.onDownloadReceipt,
     required this.onClose,
     this.downloadHint,
@@ -39,10 +45,37 @@ class FacturationPaymentDetailFooter extends StatefulWidget {
 class _FacturationPaymentDetailFooterState
     extends State<FacturationPaymentDetailFooter>
     with TicketPrintGesture {
+  Future<void> _printCancellation(String paymentId) async {
+    if (printing) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    setState(() => printing = true);
+    try {
+      await printCancellationTicket(
+        context,
+        paymentId: paymentId,
+        messenger: messenger,
+      );
+    } finally {
+      if (mounted) setState(() => printing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final paymentId = widget.ticketPaymentId;
+    final cancellation = widget.cancellationPaymentId;
+    if (paymentId == null && cancellation != null) {
+      return FinanceModalFooter(
+        secondaryLabel: l10n.facturationPaymentDownloadReceiptLabel,
+        secondaryIcon: Icons.download_outlined,
+        onSecondary: widget.onDownloadReceipt,
+        secondaryHint: widget.downloadHint,
+        primaryLabel: l10n.paymentCancelTicketPrint,
+        primaryIcon: Icons.print_outlined,
+        onPrimary: printing ? null : () => _printCancellation(cancellation),
+      );
+    }
     // `watch` seulement quand un ticket est offert : c'est alors, et alors
     // seulement, que le libellé dépend du dernier tirage.
     final printed =

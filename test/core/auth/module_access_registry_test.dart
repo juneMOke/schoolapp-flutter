@@ -369,6 +369,20 @@ void main() {
       expect(allows('/finances/facturations', _comptabilite), isTrue);
     });
 
+    // Retour du back du 2026-10-28 : sans `editique.read`, la file des
+    // tickets ne se remplit jamais de rien d'imprimable.
+    test('« Tickets à imprimer » exige editique.read EN PLUS du sous-menu', () {
+      const page = '/finances/facturations/tickets-a-imprimer';
+      final sansLecture = [
+        for (final p in _comptabilite)
+          if (p != 'editique.read') p,
+      ];
+      expect(allows('/finances/facturations', sansLecture), isTrue);
+      expect(allows(page, sansLecture), isFalse);
+      expect(allows(page, const ['editique.read']), isFalse);
+      expect(allows(page, [...sansLecture, 'editique.read']), isTrue);
+    });
+
     // C'est le cas que le filtrage du registre ne couvrait pas : la route porte
     // des paramètres, donc elle ne figure dans aucun menu.
     test('route à paramètres : le second segment décide', () {
