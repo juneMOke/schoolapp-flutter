@@ -33,6 +33,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payer_search_dialog.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payer_suggestions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_cubit.dart';
@@ -63,6 +64,15 @@ class FacturationCreatePaymentPage extends StatelessWidget {
   final FacturationCreatePaymentIntent intent;
 
   const FacturationCreatePaymentPage({super.key, required this.intent});
+
+  /// Une lecture ratée laisse la recherche seule : l'encaissement n'en dépend
+  /// pas.
+  static Future<List<LocalPayerIdentity>> _loadKnownPayers(
+    String studentId,
+  ) async {
+    final result = await getIt<GetPayerSuggestionsUseCase>()(studentId);
+    return result.fold((_) => const [], (payers) => payers);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +116,7 @@ class FacturationCreatePaymentPage extends StatelessWidget {
                 intent: intent,
                 rates: rates.rates,
                 sectionTitles: titles,
+                loadKnownPayers: _loadKnownPayers,
               ),
             ),
       ),
@@ -129,9 +140,14 @@ class FacturationCreatePaymentView extends StatefulWidget {
   /// l'horloge du poste.
   final DateTime? now;
 
+  /// Les payeurs connus de l'élève. `null` : aucune liste à dérouler.
+  final Future<List<LocalPayerIdentity>> Function(String studentId)?
+  loadKnownPayers;
+
   const FacturationCreatePaymentView({
     super.key,
     required this.intent,
+    this.loadKnownPayers,
     this.rates = const [],
     this.sectionTitles = const FeeSectionTitlesState(),
     this.now,
@@ -188,6 +204,7 @@ class _FacturationCreatePaymentViewState
     _model = _modelOf(widget.intent.unpaidCharges);
     _payer.addListener(_onChanged);
     _correctionDetail.addListener(_onChanged);
+    _loadKnownPayers();
     final correction = widget.intent.correction;
     if (correction != null) {
       _prefillOrigin(correction);
@@ -464,6 +481,29 @@ class _FacturationCreatePaymentViewState
       group.effectiveTenderCurrency,
       l10n,
     );
+  }
+
+  List<LocalPayerIdentity> _knownPayers = const [];
+
+  Future<void> _loadKnownPayers() async {
+    final payers = await widget.loadKnownPayers?.call(widget.intent.studentId);
+    if (!mounted || payers == null) return;
+    setState(() => _knownPayers = payers);
+  }
+
+  /// Le payeur connu que les champs désignent : dérivé d'eux, il disparaît de
+  /// la liste dès que le caissier les retape.
+  LocalPayerIdentity? get _selectedKnownPayer {
+    final typed = LocalPayerIdentity(
+      lastName: _payer.lastName.text,
+      firstName: _payer.firstName.text,
+      middleName: _payer.middleName.text,
+      origin: PayerOrigin.previousPayment,
+    );
+    for (final payer in _knownPayers) {
+      if (payer.matchKey == typed.matchKey) return payer;
+    }
+    return null;
   }
 
   /// Ouvre l'annuaire local des payeurs et reprend celui qui en revient.
@@ -884,6 +924,9 @@ class _FacturationCreatePaymentViewState
           middleNameController: _payer.middleName,
           phoneController: _payer.phone,
           onPickPayer: _pickPayer,
+          knownPayers: _knownPayers,
+          selectedPayer: _selectedKnownPayer,
+          onPayerSelected: _payer.applyPayer,
           phoneErrorText: _payer.phoneErrorText(l10n),
           readOnly: _collectInFlight,
         ),
