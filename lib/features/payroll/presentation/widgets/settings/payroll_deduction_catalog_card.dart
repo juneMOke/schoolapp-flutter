@@ -1,34 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
-import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_online_only.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_type_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les gestes du catalogue, confiés à la page.
-class PayrollDeductionCatalogActions {
-  final VoidCallback onAdd;
-  final ValueChanged<PayrollDeductionType> onRename;
-  final ValueChanged<PayrollDeductionType> onArchive;
-  final ValueChanged<PayrollDeductionType> onRestore;
-  final ValueChanged<PayrollDeductionType> onDelete;
-  final void Function(PayrollDeductionType type, {required bool up}) onMove;
-
-  const PayrollDeductionCatalogActions({
-    required this.onAdd,
-    required this.onRename,
-    required this.onArchive,
-    required this.onRestore,
-    required this.onDelete,
-    required this.onMove,
-  });
-}
+export 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_type_row.dart'
+    show PayrollDeductionCatalogActions;
 
 /// RH · Paie ▸ Configuration — la carte des rubriques de l'école. Hors de la
 /// barre d'enregistrement : chaque geste s'écrit seul. [actions] nul : l'économe
@@ -37,11 +18,22 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
   final List<PayrollDeductionType> catalog;
   final PayrollDeductionCatalogActions? actions;
 
+  /// Les devises réglées par l'école : le plafond se juge devise par devise.
+  final List<String> currencies;
+
   const PayrollDeductionCatalogCard({
     super.key,
     required this.catalog,
     required this.actions,
+    required this.currencies,
   });
+
+  /// Chaque devise a atteint son plafond : plus rien à créer.
+  bool _full(List<PayrollDeductionType> active) => currencies.every(
+    (currency) =>
+        active.where((type) => type.appliesTo(currency)).length >=
+        PayrollDeductionType.maxActive,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +41,7 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
     final active = catalog.where((type) => !type.archived).toList();
     final archived = catalog.where((type) => type.archived).toList();
     final actions = this.actions;
+    final full = _full(active);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: BiToneSectionCard(
@@ -66,7 +59,7 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
                 ),
               ),
             for (final (index, type) in active.indexed)
-              _TypeRow(
+              PayrollDeductionTypeRow(
                 type: type,
                 actions: actions,
                 canMoveUp: index > 0,
@@ -79,13 +72,11 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
                 child: EteeloButton.secondary(
                   label: l10n.payrollDeductionsAdd,
                   icon: Icons.add,
-                  onPressed: active.length < PayrollDeductionType.maxActive
-                      ? actions.onAdd
-                      : null,
+                  onPressed: full ? null : actions.onAdd,
                   fullWidth: false,
                 ),
               ),
-              if (active.length >= PayrollDeductionType.maxActive) ...[
+              if (full) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   l10n.payrollRuleDeductionTypeLimit,
@@ -104,148 +95,11 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
                 ),
               ),
               for (final type in archived)
-                _TypeRow(type: type, actions: actions),
+                PayrollDeductionTypeRow(type: type, actions: actions),
             ],
           ],
         ),
       ),
-    );
-  }
-}
-
-enum _Gesture { rename, archive, restore, delete }
-
-class _TypeRow extends StatelessWidget {
-  final PayrollDeductionType type;
-  final PayrollDeductionCatalogActions? actions;
-  final bool canMoveUp;
-  final bool canMoveDown;
-
-  const _TypeRow({
-    required this.type,
-    required this.actions,
-    this.canMoveUp = false,
-    this.canMoveDown = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final actions = this.actions;
-    final note = switch (type.syncState) {
-      RecordSyncState.failed => PayrollLabels.serverRefusal(
-        l10n,
-        type.syncErrorCode,
-      ),
-      RecordSyncState.pending => l10n.payrollDeductionsPending,
-      RecordSyncState.synced => null,
-    };
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: AppDimensions.minTouchTarget,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  type.label,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: type.archived
-                        ? AppColors.textSecondary
-                        : AppColors.textPrimary,
-                  ),
-                ),
-                if (note != null)
-                  Text(
-                    note,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: type.syncState == RecordSyncState.failed
-                          ? AppColors.error
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          if (actions != null && !type.archived) ...[
-            IconButton(
-              tooltip: l10n.payrollDeductionsMoveUp,
-              icon: const Icon(Icons.arrow_upward),
-              onPressed: canMoveUp
-                  ? () => actions.onMove(type, up: true)
-                  : null,
-            ),
-            IconButton(
-              tooltip: l10n.payrollDeductionsMoveDown,
-              icon: const Icon(Icons.arrow_downward),
-              onPressed: canMoveDown
-                  ? () => actions.onMove(type, up: false)
-                  : null,
-            ),
-          ],
-          if (actions != null)
-            PayrollOnlineOnly(
-              builder: (context, online) =>
-                  _GestureMenu(type: type, online: online, actions: actions),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GestureMenu extends StatelessWidget {
-  final PayrollDeductionType type;
-  final bool online;
-  final PayrollDeductionCatalogActions actions;
-
-  const _GestureMenu({
-    required this.type,
-    required this.online,
-    required this.actions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final canDelete = online || !type.serverKnown;
-    return PopupMenuButton<_Gesture>(
-      tooltip: l10n.payrollDeductionsActions,
-      onSelected: (gesture) => switch (gesture) {
-        _Gesture.rename => actions.onRename(type),
-        _Gesture.archive => actions.onArchive(type),
-        _Gesture.restore => actions.onRestore(type),
-        _Gesture.delete => actions.onDelete(type),
-      },
-      itemBuilder: (_) => [
-        PopupMenuItem(
-          value: _Gesture.rename,
-          child: Text(l10n.payrollDeductionsRename),
-        ),
-        if (type.archived)
-          PopupMenuItem(
-            value: _Gesture.restore,
-            child: Text(l10n.payrollDeductionsRestore),
-          )
-        else
-          PopupMenuItem(
-            value: _Gesture.archive,
-            child: Text(l10n.payrollDeductionsArchive),
-          ),
-        PopupMenuItem(
-          value: _Gesture.delete,
-          enabled: canDelete,
-          child: Text(
-            canDelete
-                ? l10n.payrollDeductionsDelete
-                : l10n.payrollDeductionsDeleteOffline,
-          ),
-        ),
-      ],
     );
   }
 }

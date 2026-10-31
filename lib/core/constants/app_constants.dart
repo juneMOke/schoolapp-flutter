@@ -861,7 +861,10 @@ class AppConstants {
   // v74 (2026-10-31) : les retenues de l'école — `payroll_deduction_types`, le
   // catalogue, et `payroll_deductions`, les saisies par agent et par mois.
   // Tables neuves. Palier d'école.
-  static const int offlineDbSchemaVersion = 74;
+  // v75 (2026-10-31) : une rubrique porte son code, sa description, sa devise
+  // et son montant par défaut. Colonnes ajoutées ; le socle les remplit à la
+  // descente suivante. Palier d'école.
+  static const int offlineDbSchemaVersion = 75;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

@@ -41,7 +41,11 @@ class PayrollDeductionTypeDao {
       for (final row in rows)
         PayrollDeductionType(
           id: row['id']! as String,
+          code: row['code']! as String,
           label: row['label']! as String,
+          description: row['description'] as String?,
+          currency: row['currency']! as String,
+          defaultAmountInCents: row['default_amount_in_cents']! as int,
           sortOrder: row['sort_order']! as int,
           archived: row['archived'] == 1,
           serverKnown: row['server_known'] == 1,
@@ -94,7 +98,11 @@ class PayrollDeductionTypeDao {
       if (recent.contains(seed.id)) continue;
       if (await _isQueued(txn, schoolId, seed.id)) continue;
       await PayrollStore.upsert(txn, table, _key(schoolId, seed.id), {
+        'code': seed.code,
         'label': seed.label,
+        'description': seed.description,
+        'currency': seed.currency,
+        'default_amount_in_cents': seed.defaultAmountInCents,
         'sort_order': seed.sortOrder,
         'archived': seed.archived ? 1 : 0,
         'client_updated_at': seed.clientUpdatedAt,
@@ -131,7 +139,11 @@ class PayrollDeductionTypeDao {
         table,
         _key(schoolId, request.id),
         {
+          'code': request.code,
           'label': request.label,
+          'description': request.description,
+          'currency': request.currency,
+          'default_amount_in_cents': request.defaultAmountInCents,
           'sort_order': request.sortOrder,
           'archived': request.archived ? 1 : 0,
           'client_updated_at': request.clientUpdatedAt,

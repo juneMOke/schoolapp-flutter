@@ -11,6 +11,9 @@ abstract final class PayrollDeductionCodes {
   static const String invalidType = 'INVALID_DEDUCTION_TYPE';
   static const String labelTaken = 'DEDUCTION_TYPE_LABEL_TAKEN';
   static const String limitReached = 'DEDUCTION_TYPE_LIMIT_REACHED';
+  static const String codeTaken = 'DEDUCTION_TYPE_CODE_TAKEN';
+  static const String fieldLocked = 'DEDUCTION_TYPE_FIELD_LOCKED';
+  static const String currencyUnknown = 'DEDUCTION_TYPE_CURRENCY_UNKNOWN';
   static const String inUse = 'DEDUCTION_TYPE_IN_USE';
   static const String archived = 'DEDUCTION_TYPE_ARCHIVED';
   static const String currencyMismatch = 'DEDUCTION_CURRENCY_MISMATCH';

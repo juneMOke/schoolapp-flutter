@@ -119,6 +119,29 @@ class PayrollSnapshot {
     return null;
   }
 
+  /// Une saisie supérieure à 0 ou une ligne figée cite-t-elle la rubrique ?
+  /// Son code et sa devise ne bougent alors plus.
+  bool deductionTypeInUse(String id) {
+    final key = id.toLowerCase();
+    bool cites(String other) => other.toLowerCase() == key;
+    return deductions.values.any(
+          (month) => month.values.any(
+            (entries) => entries.any(
+              (entry) =>
+                  cites(entry.deductionTypeId) &&
+                  (entry.counted?.amountInCents ?? 0) > 0,
+            ),
+          ),
+        ) ||
+        frozenLines.values.any(
+          (lines) => lines.any(
+            (line) => line.deductions.custom.any(
+              (custom) => cites(custom.deductionTypeId),
+            ),
+          ),
+        );
+  }
+
   /// Le premier mois payable : celui du plus ancien contrat de l'école.
   String? get firstMonth {
     String? first;

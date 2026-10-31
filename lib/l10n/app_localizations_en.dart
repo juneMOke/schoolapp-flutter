@@ -21021,11 +21021,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollRuleDeductionTypeLabelTaken =>
-      'An active deduction already has this label.';
+      'An active deduction in this currency already has this label.';
 
   @override
   String get payrollRuleDeductionTypeLimit =>
-      'Six active deductions at most: archive one to continue.';
+      'Six active deductions at most per currency: archive one to continue.';
+
+  @override
+  String get payrollRuleDeductionTypeCodeTaken =>
+      'This code is already used by another deduction, even an archived one.';
+
+  @override
+  String get payrollRuleDeductionTypeFieldLocked =>
+      'This deduction has been used: its code and currency can no longer change.';
+
+  @override
+  String get payrollRuleDeductionTypeCurrencyUnknown =>
+      'This currency is not set up for the school.';
 
   @override
   String get payrollRuleDeductionTypeArchived =>
@@ -21044,7 +21056,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollDeductionsSubtitle =>
-      'Your own deductions, next to the five standard ones. Amounts are entered agent by agent, every month.';
+      'Your own deductions, next to the five standard ones. The default amount applies to every agent paid in its currency; the ledger\'s pencil replaces it for one agent.';
 
   @override
   String get payrollDeductionsEmpty => 'No deduction yet.';
@@ -21062,10 +21074,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollDeductionsNewTitle => 'New deduction';
 
   @override
-  String get payrollDeductionsRenameTitle => 'Rename the deduction';
+  String get payrollDeductionsEditTitle => 'Edit the deduction';
 
   @override
-  String get payrollDeductionsRename => 'Rename';
+  String get payrollDeductionsEdit => 'Edit';
+
+  @override
+  String get payrollDeductionsCode => 'Code';
+
+  @override
+  String get payrollDeductionsCodeInvalid =>
+      '2 to 12 characters: letters, digits, - or _.';
+
+  @override
+  String get payrollDeductionsDescription => 'Description';
+
+  @override
+  String get payrollDeductionsDescriptionTooLong => '200 characters at most.';
+
+  @override
+  String get payrollDeductionsCurrency => 'Currency';
+
+  @override
+  String get payrollDeductionsDefaultAmount => 'Default amount';
+
+  @override
+  String get payrollDeductionsDefaultHint =>
+      'Withheld every month from every agent paid in this currency, unless an amount is entered for that agent. At 0, nothing is withheld.';
+
+  @override
+  String get payrollDeductionsLockedHint =>
+      'This deduction has been used: its code and currency can no longer change.';
+
+  @override
+  String payrollDeductionsDefaultOf(String amount) {
+    return '$amount by default';
+  }
+
+  @override
+  String payrollDeductionsNoDefault(String currency) {
+    return '$currency, no default amount';
+  }
+
+  @override
+  String payrollVarsCustomDefault(String amount) {
+    return 'Default: $amount';
+  }
+
+  @override
+  String get payrollVarsCustomFromDefault => 'Default amount';
+
+  @override
+  String payrollVarsCustomOtherCurrency(String label, String currency) {
+    return '$label ($currency)';
+  }
+
+  @override
+  String get payrollRuleDeductionTypeRefused =>
+      'An edited deduction was refused: fix it in the configuration, then sync.';
 
   @override
   String get payrollDeductionsArchive => 'Archive';

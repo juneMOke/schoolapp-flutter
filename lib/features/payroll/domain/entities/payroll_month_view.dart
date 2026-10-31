@@ -47,6 +47,10 @@ enum PayrollBlocker {
   /// Une saisie de rubrique est dans une autre devise que sa ligne.
   deductionCurrency,
 
+  /// Une rubrique connue du serveur a été refusée : son défaut peut différer
+  /// du sien, l'empreinte serait fausse.
+  deductionTypeRefused,
+
   /// Une saisie vise une rubrique absente du catalogue de la tablette.
   deductionTypeUnknown,
 }

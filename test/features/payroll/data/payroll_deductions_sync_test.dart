@@ -43,9 +43,14 @@ PayrollDeductionTypeRequestDto _type({
   String label = 'Cartes',
   String at = '2026-10-20T09:00:00Z',
   bool archived = false,
+  int defaultAmount = 0,
 }) => PayrollDeductionTypeRequestDto(
   id: id,
+  code: 'CARTE',
   label: label,
+  description: null,
+  currency: 'USD',
+  defaultAmountInCents: defaultAmount,
   sortOrder: 10,
   archived: archived,
   clientUpdatedAt: at,
@@ -68,7 +73,11 @@ PayrollDeductionRequestDto _saisie({
 
 PayrollDeductionTypeSeed _seed(String id, {String label = 'Cartes'}) => (
   id: id,
+  code: 'CARTE',
   label: label,
+  description: 'Carte du personnel',
+  currency: 'USD',
+  defaultAmountInCents: 500,
   sortOrder: 10,
   archived: false,
   clientUpdatedAt: '2026-10-20T09:00:00Z',
@@ -162,6 +171,43 @@ void main() {
       final all = await types.forSchool(_school);
       expect(all.map((t) => t.id), ['t-1']);
       expect(all.single.label, 'Badges');
+    });
+
+    test('le socle range toute la fiche', () async {
+      await types.applySeed([_seed('t-1')], schoolId: _school, nowMs: 1);
+
+      final type = (await types.forSchool(_school)).single;
+      expect(type.code, 'CARTE');
+      expect(type.description, 'Carte du personnel');
+      expect(type.currency, 'USD');
+      expect(type.defaultAmountInCents, 500);
+    });
+
+    test('une écriture de la tablette garde toute la fiche', () async {
+      await saveType(_type(defaultAmount: 750));
+
+      final type = (await types.forSchool(_school)).single;
+      expect(type.code, 'CARTE');
+      expect(type.currency, 'USD');
+      expect(type.defaultAmountInCents, 750);
+      final sent = PayrollDeductionTypeRequestDto.tryParse(
+        _type(defaultAmount: 750).toJson(),
+      )!;
+      expect(sent.code, 'CARTE');
+      expect(sent.description, isNull);
+      expect(sent.defaultAmountInCents, 750);
+    });
+
+    test('une rubrique sans code ni devise repart quand même', () async {
+      final raw = _type().toJson();
+      (raw['deductionType'] as Map)
+        ..['code'] = ''
+        ..['currency'] = '';
+
+      final sent = PayrollDeductionTypeRequestDto.tryParse(raw);
+
+      expect(sent, isNotNull);
+      expect(sent!.code, isEmpty);
     });
 
     test('une création jamais reçue n\'est pas purgée', () async {

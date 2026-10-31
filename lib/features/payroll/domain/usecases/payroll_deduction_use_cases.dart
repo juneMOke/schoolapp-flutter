@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
@@ -12,18 +13,49 @@ import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circ
 abstract final class PayrollDeductionCatalogRules {
   static String _normal(String label) => label.trim().toLowerCase();
 
-  /// `null` si [type] peut s'écrire dans [catalog]. Une rubrique archivée ne
-  /// compte ni pour le libellé, ni pour le plafond.
+  static bool _sameCurrency(PayrollDeductionType a, PayrollDeductionType b) =>
+      CurrencyCode.normalize(a.currency) == CurrencyCode.normalize(b.currency);
+
+  /// `null` si [type] peut s'écrire dans [catalog]. [used] : une saisie ou une
+  /// ligne figée la cite, son code et sa devise ne bougent plus.
+  ///
+  /// Le code se juge sur tout le catalogue, archivées comprises ; le libellé et
+  /// le plafond, par devise, parmi les rubriques actives seulement.
   static PayrollRule? check(
     List<PayrollDeductionType> catalog,
-    PayrollDeductionType type,
-  ) {
+    PayrollDeductionType type, {
+    bool used = false,
+  }) {
     final label = type.label.trim();
-    if (label.isEmpty || label.length > PayrollDeductionType.maxLabelLength) {
+    final previous = catalog.where((t) => t.id == type.id).firstOrNull;
+    // Venue d'un serveur antérieur au contrat, une rubrique garde un code et
+    // une devise vides : elle s'archive et se renomme quand même.
+    final codeKept = type.code.isEmpty && previous?.code.isEmpty == true;
+    final currencyKept =
+        type.currency.isEmpty && previous?.currency.isEmpty == true;
+    if (label.isEmpty ||
+        label.length > PayrollDeductionType.maxLabelLength ||
+        (!codeKept && !PayrollDeductionType.codeFormat.hasMatch(type.code)) ||
+        (!currencyKept && CurrencyCode.normalize(type.currency).isEmpty) ||
+        (type.description?.length ?? 0) >
+            PayrollDeductionType.maxDescriptionLength) {
       return PayrollRule.invalidData;
     }
+    if (type.defaultAmountInCents < 0) return PayrollRule.invalidAmount;
+    if (type.code.isNotEmpty &&
+        catalog.any((t) => t.id != type.id && t.code == type.code)) {
+      return PayrollRule.deductionTypeCodeTaken;
+    }
+    if (used &&
+        previous != null &&
+        ((previous.code.isNotEmpty && previous.code != type.code) ||
+            (previous.currency.isNotEmpty && !_sameCurrency(previous, type)))) {
+      return PayrollRule.deductionTypeFieldLocked;
+    }
     if (type.archived) return null;
-    final others = catalog.where((t) => t.id != type.id && !t.archived);
+    final others = catalog.where(
+      (t) => t.id != type.id && !t.archived && _sameCurrency(t, type),
+    );
     if (others.any((t) => _normal(t.label) == _normal(label))) {
       return PayrollRule.deductionTypeLabelTaken;
     }
@@ -44,7 +76,7 @@ class CreatePayrollDeductionTypeUseCase {
 
   Future<Either<Failure, Unit>> call(
     List<PayrollDeductionType> catalog,
-    String label,
+    PayrollDeductionTypeDraft draft,
   ) async {
     final last = catalog.fold(
       0,
@@ -52,16 +84,16 @@ class CreatePayrollDeductionTypeUseCase {
     );
     final type = PayrollDeductionType(
       id: _repository.newTypeId(),
-      label: label,
+      label: draft.label,
       sortOrder: last + orderStep,
-    );
+    ).rewritten(draft: draft);
     final rule = PayrollDeductionCatalogRules.check(catalog, type);
     if (rule != null) return Left(PayrollRuleFailure(rule));
     return _repository.saveTypes([type]);
   }
 }
 
-/// Renomme, archive ou restaure une rubrique. Restaurer repasse par le libellé
+/// Modifie, archive ou restaure une rubrique. Restaurer repasse par le libellé
 /// et le plafond, comme une création.
 class UpdatePayrollDeductionTypeUseCase {
   final PayrollDeductionRepository _repository;
@@ -70,9 +102,10 @@ class UpdatePayrollDeductionTypeUseCase {
 
   Future<Either<Failure, Unit>> call(
     List<PayrollDeductionType> catalog,
-    PayrollDeductionType type,
-  ) async {
-    final rule = PayrollDeductionCatalogRules.check(catalog, type);
+    PayrollDeductionType type, {
+    bool used = false,
+  }) async {
+    final rule = PayrollDeductionCatalogRules.check(catalog, type, used: used);
     if (rule != null) return Left(PayrollRuleFailure(rule));
     return _repository.saveTypes([type]);
   }
@@ -99,12 +132,9 @@ class MovePayrollDeductionTypeUseCase {
       for (final (index, type) in active.indexed)
         if (type.sortOrder !=
             (index + 1) * CreatePayrollDeductionTypeUseCase.orderStep)
-          PayrollDeductionType(
-            id: type.id,
-            label: type.label,
+          type.rewritten(
             sortOrder:
                 (index + 1) * CreatePayrollDeductionTypeUseCase.orderStep,
-            archived: type.archived,
           ),
     ]);
   }
@@ -112,7 +142,7 @@ class MovePayrollDeductionTypeUseCase {
 
 /// Enregistre les éléments variables d'un agent et ses saisies de rubriques,
 /// dans une même transaction : mêmes règles que les éléments seuls, et une
-/// rubrique archivée n'accepte que la mise à 0.
+/// rubrique archivée ou d'une autre devise n'accepte que la mise à 0.
 class SavePayrollDeductionsUseCase {
   final PayrollDeductionRepository _repository;
 
@@ -126,16 +156,18 @@ class SavePayrollDeductionsUseCase {
   }) async {
     final rule = SavePayrollVariablesUseCase.check(view, variables);
     if (rule != null) return Left(PayrollRuleFailure(rule));
-    final archived = {
-      for (final type in catalog)
-        if (type.archived) type.id,
-    };
+    final byId = {for (final type in catalog) type.id: type};
     for (final entry in entries) {
       if (entry.amountInCents < 0) {
         return Left(PayrollRuleFailure(PayrollRule.invalidAmount));
       }
-      if (entry.amountInCents > 0 && archived.contains(entry.deductionTypeId)) {
+      final type = byId[entry.deductionTypeId];
+      if (entry.amountInCents == 0 || type == null) continue;
+      if (type.archived) {
         return Left(PayrollRuleFailure(PayrollRule.deductionTypeArchived));
+      }
+      if (type.currency.isNotEmpty && !type.appliesTo(entry.currency)) {
+        return Left(PayrollRuleFailure(PayrollRule.deductionCurrencyMismatch));
       }
     }
     return _repository.saveEntries(

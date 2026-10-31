@@ -145,6 +145,13 @@ abstract final class PayrollLabels {
     PayrollRule.deductionTypeLabelTaken =>
       l10n.payrollRuleDeductionTypeLabelTaken,
     PayrollRule.deductionTypeLimitReached => l10n.payrollRuleDeductionTypeLimit,
+    PayrollRule.deductionTypeRefused => l10n.payrollRuleDeductionTypeRefused,
+    PayrollRule.deductionTypeCodeTaken =>
+      l10n.payrollRuleDeductionTypeCodeTaken,
+    PayrollRule.deductionTypeFieldLocked =>
+      l10n.payrollRuleDeductionTypeFieldLocked,
+    PayrollRule.deductionTypeCurrencyUnknown =>
+      l10n.payrollRuleDeductionTypeCurrencyUnknown,
     PayrollRule.deductionTypeArchived => l10n.payrollRuleDeductionTypeArchived,
     PayrollRule.deductionCurrencyMismatch => l10n.payrollRuleDeductionCurrency,
     PayrollRule.deductionTypeGone => l10n.payrollRuleDeductionTypeGone,

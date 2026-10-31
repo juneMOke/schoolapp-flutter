@@ -76,7 +76,7 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
   late final List<PayrollCustomField> _custom = [
     for (final type in widget.deductionTypes)
       if (_entryOf(type) case final entry
-          when !type.archived || (entry?.counted?.amountInCents ?? 0) > 0)
+          when PayrollCustomField.shown(type, entry, widget.line.currency))
         PayrollCustomField.of(type, entry, widget.line.currency),
   ];
 
@@ -145,7 +145,7 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
     return [
       for (final entry in widget.entries)
         if (!shown.contains(entry.deductionTypeId)) ?entry.counted,
-      for (final field in _custom) ?field.preview(_memberId),
+      for (final field in _custom) field.preview(_memberId),
     ];
   }
 

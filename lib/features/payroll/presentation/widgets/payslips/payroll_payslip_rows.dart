@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
@@ -22,12 +23,15 @@ abstract final class PayrollPayslipRows {
   /// Les cinq retenues du modèle des écoles, **toujours** listées dans
   /// l'ordre du papier — « — » quand elles sont nulles —, les rubriques de
   /// l'école à leur suite, puis le total :
-  /// chaque montant rangé par le calcul dans sa ligne.
+  /// chaque montant rangé par le calcul dans sa ligne. [idle] : les rubriques
+  /// sans montant à lister quand même, pour le détail du calcul — le bulletin
+  /// ne les imprime pas.
   static List<PayslipRow> deductions(
     BuildContext context,
     PayrollLine line,
-    Map<String, SalaryAdvance> advances,
-  ) {
+    Map<String, SalaryAdvance> advances, {
+    List<PayrollDeductionType> idle = const [],
+  }) {
     final l10n = AppLocalizations.of(context)!;
     String money(int cents) =>
         cents == 0 ? none : '− ${PayrollLabels.money(cents, line.currency)}';
@@ -87,8 +91,11 @@ abstract final class PayrollPayslipRows {
                   PayrollLabels.money(custom.requestedInCents, line.currency),
                   PayrollLabels.money(custom.takenInCents, line.currency),
                 )
+              : custom.fromDefault
+              ? l10n.payrollVarsCustomFromDefault
               : null,
         ),
+      for (final type in idle) (label: type.label, value: none, note: null),
       (
         label: l10n.payrollPayslipDeductionsTotal,
         value: total == 0

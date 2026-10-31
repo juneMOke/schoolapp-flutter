@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_local_write.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_catalog_card.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_delete_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_type_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_draft.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_form.dart';
@@ -126,48 +127,49 @@ class _SettingsEditorState extends State<_SettingsEditor> {
 
   PayrollCubit get _cubit => context.read<PayrollCubit>();
 
+  List<String> get _currencies {
+    final settings = widget.state.snapshot.settings;
+    return settings.byCurrency.isEmpty
+        ? [settings.firstCurrency]
+        : settings.byCurrency.keys.toList();
+  }
+
   Future<void> _add() async {
     final l10n = AppLocalizations.of(context)!;
-    final label = await PayrollDeductionTypeDialog.show(
+    final draft = await PayrollDeductionTypeDialog.show(
       context,
-      PayrollDeductionTypeDialog(title: l10n.payrollDeductionsNewTitle),
+      PayrollDeductionTypeDialog(
+        title: l10n.payrollDeductionsNewTitle,
+        currencies: _currencies,
+      ),
     );
-    if (label == null || !mounted) return;
+    if (draft == null || !mounted) return;
     await _cubit.perform(
-      (commands) async => commands.deductions?.create(_catalog, label),
+      (commands) async => commands.deductions?.create(_catalog, draft),
     );
     if (mounted) notifyPayrollLocalWrite(context);
   }
 
-  Future<void> _rename(PayrollDeductionType type) async {
+  Future<void> _edit(PayrollDeductionType type) async {
     final l10n = AppLocalizations.of(context)!;
-    final label = await PayrollDeductionTypeDialog.show(
+    final draft = await PayrollDeductionTypeDialog.show(
       context,
       PayrollDeductionTypeDialog(
-        title: l10n.payrollDeductionsRenameTitle,
-        initial: type.label,
+        title: l10n.payrollDeductionsEditTitle,
+        currencies: _currencies,
+        initial: type,
+        locked: widget.state.snapshot.deductionTypeInUse(type.id),
       ),
     );
-    if (label == null || !mounted) return;
-    await _update(type, label: label);
+    if (draft == null || !mounted) return;
+    await _update(type.rewritten(draft: draft));
   }
 
-  Future<void> _update(
-    PayrollDeductionType type, {
-    String? label,
-    bool? archived,
-  }) async {
+  Future<void> _update(PayrollDeductionType type) async {
+    final used = widget.state.snapshot.deductionTypeInUse(type.id);
     await _cubit.perform(
-      (commands) async => commands.deductions?.update(
-        _catalog,
-        PayrollDeductionType(
-          id: type.id,
-          label: label ?? type.label,
-          sortOrder: type.sortOrder,
-          archived: archived ?? type.archived,
-          serverKnown: type.serverKnown,
-        ),
-      ),
+      (commands) async =>
+          commands.deductions?.update(_catalog, type, used: used),
     );
     if (mounted) notifyPayrollLocalWrite(context);
   }
@@ -218,12 +220,15 @@ class _SettingsEditorState extends State<_SettingsEditor> {
               PayrollWideSettingsCards(draft: _draft, readOnly: !canManage),
             PayrollDeductionCatalogCard(
               catalog: _catalog,
+              currencies: _currencies,
               actions: canManage
                   ? PayrollDeductionCatalogActions(
                       onAdd: _add,
-                      onRename: _rename,
-                      onArchive: (type) => _update(type, archived: true),
-                      onRestore: (type) => _update(type, archived: false),
+                      onEdit: _edit,
+                      onArchive: (type) =>
+                          _update(type.rewritten(archived: true)),
+                      onRestore: (type) =>
+                          _update(type.rewritten(archived: false)),
                       onDelete: _delete,
                       onMove: _move,
                     )

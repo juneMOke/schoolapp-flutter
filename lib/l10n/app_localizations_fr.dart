@@ -21160,11 +21160,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollRuleDeductionTypeLabelTaken =>
-      'Une rubrique active porte déjà ce libellé.';
+      'Une rubrique active de cette devise porte déjà ce libellé.';
 
   @override
   String get payrollRuleDeductionTypeLimit =>
-      'Six rubriques actives au plus : archivez-en une pour continuer.';
+      'Six rubriques actives au plus par devise : archivez-en une pour continuer.';
+
+  @override
+  String get payrollRuleDeductionTypeCodeTaken =>
+      'Ce code est déjà pris par une autre rubrique, même archivée.';
+
+  @override
+  String get payrollRuleDeductionTypeFieldLocked =>
+      'Cette rubrique a servi : son code et sa devise ne changent plus.';
+
+  @override
+  String get payrollRuleDeductionTypeCurrencyUnknown =>
+      'Cette devise n\'est pas réglée pour l\'école.';
 
   @override
   String get payrollRuleDeductionTypeArchived =>
@@ -21183,7 +21195,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollDeductionsSubtitle =>
-      'Vos rubriques, à côté des cinq retenues du modèle. Les montants se saisissent agent par agent, chaque mois.';
+      'Vos rubriques, à côté des cinq retenues du modèle. Le montant par défaut vaut pour tous les agents de la devise ; le crayon du livre le remplace pour un agent.';
 
   @override
   String get payrollDeductionsEmpty => 'Aucune rubrique pour l\'instant.';
@@ -21201,10 +21213,64 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollDeductionsNewTitle => 'Nouvelle rubrique';
 
   @override
-  String get payrollDeductionsRenameTitle => 'Renommer la rubrique';
+  String get payrollDeductionsEditTitle => 'Modifier la rubrique';
 
   @override
-  String get payrollDeductionsRename => 'Renommer';
+  String get payrollDeductionsEdit => 'Modifier';
+
+  @override
+  String get payrollDeductionsCode => 'Code';
+
+  @override
+  String get payrollDeductionsCodeInvalid =>
+      '2 à 12 caractères : lettres, chiffres, - ou _.';
+
+  @override
+  String get payrollDeductionsDescription => 'Description';
+
+  @override
+  String get payrollDeductionsDescriptionTooLong => '200 caractères au plus.';
+
+  @override
+  String get payrollDeductionsCurrency => 'Devise';
+
+  @override
+  String get payrollDeductionsDefaultAmount => 'Montant par défaut';
+
+  @override
+  String get payrollDeductionsDefaultHint =>
+      'Retenu chaque mois à tous les agents payés dans cette devise, sauf montant saisi pour un agent. À 0, rien n\'est retenu.';
+
+  @override
+  String get payrollDeductionsLockedHint =>
+      'Cette rubrique a servi : son code et sa devise ne changent plus.';
+
+  @override
+  String payrollDeductionsDefaultOf(String amount) {
+    return '$amount par défaut';
+  }
+
+  @override
+  String payrollDeductionsNoDefault(String currency) {
+    return '$currency, sans montant par défaut';
+  }
+
+  @override
+  String payrollVarsCustomDefault(String amount) {
+    return 'Par défaut : $amount';
+  }
+
+  @override
+  String get payrollVarsCustomFromDefault => 'Montant par défaut';
+
+  @override
+  String payrollVarsCustomOtherCurrency(String label, String currency) {
+    return '$label ($currency)';
+  }
+
+  @override
+  String get payrollRuleDeductionTypeRefused =>
+      'Une rubrique modifiée a été refusée : corrigez-la dans la configuration, puis synchronisez.';
 
   @override
   String get payrollDeductionsArchive => 'Archiver';

@@ -203,7 +203,7 @@ void main() {
 
       expect(refused.controller.text, isEmpty);
       expect(refused.changed('m-1'), isNull);
-      expect(refused.preview('m-1'), isNull);
+      expect(refused.preview('m-1').amountInCents, 0);
 
       refused.controller.text = '5';
       expect(refused.changed('m-1')!.amountInCents, 500);

@@ -133,6 +133,9 @@ Future<void> migrateTenantDatabase(
   if (upTo(74)) {
     await _createTables(db, payrollDeductionTables);
   }
+  if (upTo(75)) {
+    await _addDeductionTypeFields(db);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -193,6 +196,26 @@ Future<void> _addColumnIfTable(
   if (info.isEmpty) return;
   if (info.any((row) => row['name'] == column)) return;
   await db.execute('ALTER TABLE $table ADD COLUMN $column $type');
+}
+
+/// v75 — la fiche complète d'une rubrique. Sans devise ni montant, une rubrique
+/// déjà rangée ne retient rien tant que le socle ne l'a pas redescendue.
+Future<void> _addDeductionTypeFields(DatabaseExecutor db) async {
+  const table = 'payroll_deduction_types';
+  await _addColumnIfTable(db, table, 'code', type: "TEXT NOT NULL DEFAULT ''");
+  await _addColumnIfTable(db, table, 'description');
+  await _addColumnIfTable(
+    db,
+    table,
+    'currency',
+    type: "TEXT NOT NULL DEFAULT ''",
+  );
+  await _addColumnIfTable(
+    db,
+    table,
+    'default_amount_in_cents',
+    type: 'INTEGER NOT NULL DEFAULT 0',
+  );
 }
 
 /// v71 — `generated_documents.emitted_on`, le jour d'émission du reçu scellé.

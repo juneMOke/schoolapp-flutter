@@ -18,10 +18,15 @@ class PayrollDeductionIssues {
   /// l'économe.
   final List<PayrollDeductionEntry> refused;
 
+  /// Une écriture de rubrique refusée sur une rubrique que le serveur connaît :
+  /// son défaut, sur la tablette, n'est peut-être plus le sien.
+  final bool typeRefused;
+
   const PayrollDeductionIssues({
     this.foreign = const [],
     this.unknown = const [],
     this.refused = const [],
+    this.typeRefused = false,
   });
 
   static const PayrollDeductionIssues none = PayrollDeductionIssues();
@@ -31,6 +36,8 @@ class PayrollDeductionIssues {
       ? PayrollBlocker.deductionCurrency
       : unknown.isNotEmpty
       ? PayrollBlocker.deductionTypeUnknown
+      : typeRefused
+      ? PayrollBlocker.deductionTypeRefused
       : null;
 
   static PayrollDeductionIssues of({
@@ -63,6 +70,7 @@ class PayrollDeductionIssues {
       foreign: foreign,
       unknown: unknown,
       refused: refused,
+      typeRefused: types.any((type) => type.refusedOnServer),
     );
   }
 }

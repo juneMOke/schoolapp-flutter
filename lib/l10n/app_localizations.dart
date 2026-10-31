@@ -32320,14 +32320,32 @@ abstract class AppLocalizations {
   /// No description provided for @payrollRuleDeductionTypeLabelTaken.
   ///
   /// In en, this message translates to:
-  /// **'An active deduction already has this label.'**
+  /// **'An active deduction in this currency already has this label.'**
   String get payrollRuleDeductionTypeLabelTaken;
 
   /// No description provided for @payrollRuleDeductionTypeLimit.
   ///
   /// In en, this message translates to:
-  /// **'Six active deductions at most: archive one to continue.'**
+  /// **'Six active deductions at most per currency: archive one to continue.'**
   String get payrollRuleDeductionTypeLimit;
+
+  /// No description provided for @payrollRuleDeductionTypeCodeTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'This code is already used by another deduction, even an archived one.'**
+  String get payrollRuleDeductionTypeCodeTaken;
+
+  /// No description provided for @payrollRuleDeductionTypeFieldLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction has been used: its code and currency can no longer change.'**
+  String get payrollRuleDeductionTypeFieldLocked;
+
+  /// No description provided for @payrollRuleDeductionTypeCurrencyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'This currency is not set up for the school.'**
+  String get payrollRuleDeductionTypeCurrencyUnknown;
 
   /// No description provided for @payrollRuleDeductionTypeArchived.
   ///
@@ -32356,7 +32374,7 @@ abstract class AppLocalizations {
   /// No description provided for @payrollDeductionsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Your own deductions, next to the five standard ones. Amounts are entered agent by agent, every month.'**
+  /// **'Your own deductions, next to the five standard ones. The default amount applies to every agent paid in its currency; the ledger\'s pencil replaces it for one agent.'**
   String get payrollDeductionsSubtitle;
 
   /// No description provided for @payrollDeductionsEmpty.
@@ -32389,17 +32407,101 @@ abstract class AppLocalizations {
   /// **'New deduction'**
   String get payrollDeductionsNewTitle;
 
-  /// No description provided for @payrollDeductionsRenameTitle.
+  /// No description provided for @payrollDeductionsEditTitle.
   ///
   /// In en, this message translates to:
-  /// **'Rename the deduction'**
-  String get payrollDeductionsRenameTitle;
+  /// **'Edit the deduction'**
+  String get payrollDeductionsEditTitle;
 
-  /// No description provided for @payrollDeductionsRename.
+  /// No description provided for @payrollDeductionsEdit.
   ///
   /// In en, this message translates to:
-  /// **'Rename'**
-  String get payrollDeductionsRename;
+  /// **'Edit'**
+  String get payrollDeductionsEdit;
+
+  /// No description provided for @payrollDeductionsCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get payrollDeductionsCode;
+
+  /// No description provided for @payrollDeductionsCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'2 to 12 characters: letters, digits, - or _.'**
+  String get payrollDeductionsCodeInvalid;
+
+  /// No description provided for @payrollDeductionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get payrollDeductionsDescription;
+
+  /// No description provided for @payrollDeductionsDescriptionTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'200 characters at most.'**
+  String get payrollDeductionsDescriptionTooLong;
+
+  /// No description provided for @payrollDeductionsCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get payrollDeductionsCurrency;
+
+  /// No description provided for @payrollDeductionsDefaultAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Default amount'**
+  String get payrollDeductionsDefaultAmount;
+
+  /// No description provided for @payrollDeductionsDefaultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Withheld every month from every agent paid in this currency, unless an amount is entered for that agent. At 0, nothing is withheld.'**
+  String get payrollDeductionsDefaultHint;
+
+  /// No description provided for @payrollDeductionsLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction has been used: its code and currency can no longer change.'**
+  String get payrollDeductionsLockedHint;
+
+  /// No description provided for @payrollDeductionsDefaultOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} by default'**
+  String payrollDeductionsDefaultOf(String amount);
+
+  /// No description provided for @payrollDeductionsNoDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency}, no default amount'**
+  String payrollDeductionsNoDefault(String currency);
+
+  /// No description provided for @payrollVarsCustomDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: {amount}'**
+  String payrollVarsCustomDefault(String amount);
+
+  /// No description provided for @payrollVarsCustomFromDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default amount'**
+  String get payrollVarsCustomFromDefault;
+
+  /// No description provided for @payrollVarsCustomOtherCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({currency})'**
+  String payrollVarsCustomOtherCurrency(String label, String currency);
+
+  /// No description provided for @payrollRuleDeductionTypeRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'An edited deduction was refused: fix it in the configuration, then sync.'**
+  String get payrollRuleDeductionTypeRefused;
 
   /// No description provided for @payrollDeductionsArchive.
   ///

@@ -9,11 +9,16 @@ class PayrollLineCustomDeduction extends Equatable {
   final int requestedInCents;
   final int takenInCents;
 
+  /// Le montant vient du défaut de la rubrique, sans saisie. Affichage
+  /// seulement : l'empreinte l'ignore, et une ligne figée ne le sait plus.
+  final bool fromDefault;
+
   const PayrollLineCustomDeduction({
     required this.deductionTypeId,
     required this.label,
     required this.requestedInCents,
     required this.takenInCents,
+    this.fromDefault = false,
   });
 
   /// La capacité n'a pas suffi : « saisi X, retenu Y ».
@@ -25,6 +30,7 @@ class PayrollLineCustomDeduction extends Equatable {
     label,
     requestedInCents,
     takenInCents,
+    fromDefault,
   ];
 }
 

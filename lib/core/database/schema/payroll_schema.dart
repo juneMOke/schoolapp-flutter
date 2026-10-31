@@ -361,18 +361,22 @@ const TableSchema payrollArrearsPrioritiesTable = TableSchema(
   ''',
 );
 
-/// `payroll_deduction_types` — les rubriques de retenue de l'école. Aucun
-/// montant ici. Descendent avec le socle ; `server_known` dit que le serveur
-/// a déjà eu la rubrique, et sépare une rubrique supprimée d'une création
-/// encore jamais reçue. `acked_at` protège un accusé tout frais d'un socle lu
-/// avant lui.
+/// `payroll_deduction_types` — les rubriques de retenue de l'école, avec leur
+/// devise et leur montant par défaut. Descendent avec le socle ; `server_known`
+/// dit que le serveur a déjà eu la rubrique, et sépare une rubrique supprimée
+/// d'une création encore jamais reçue. `acked_at` protège un accusé tout frais
+/// d'un socle lu avant lui.
 const TableSchema payrollDeductionTypesTable = TableSchema(
   name: 'payroll_deduction_types',
   createTableSql: '''
     CREATE TABLE payroll_deduction_types (
       school_id TEXT NOT NULL,
       id TEXT NOT NULL,
+      code TEXT NOT NULL DEFAULT '',
       label TEXT NOT NULL,
+      description TEXT,
+      currency TEXT NOT NULL DEFAULT '',
+      default_amount_in_cents INTEGER NOT NULL DEFAULT 0,
       sort_order INTEGER NOT NULL DEFAULT 0,
       archived INTEGER NOT NULL DEFAULT 0,
       server_known INTEGER NOT NULL DEFAULT 0,

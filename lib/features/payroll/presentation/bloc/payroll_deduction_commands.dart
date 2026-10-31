@@ -36,13 +36,14 @@ class PayrollDeductionCommands {
 
   Future<PayrollNotice> create(
     List<PayrollDeductionType> catalog,
-    String label,
-  ) async => _notice(await _create(catalog, label), _saved);
+    PayrollDeductionTypeDraft draft,
+  ) async => _notice(await _create(catalog, draft), _saved);
 
   Future<PayrollNotice> update(
     List<PayrollDeductionType> catalog,
-    PayrollDeductionType type,
-  ) async => _notice(await _update(catalog, type), _saved);
+    PayrollDeductionType type, {
+    bool used = false,
+  }) async => _notice(await _update(catalog, type, used: used), _saved);
 
   Future<PayrollNotice> move(
     List<PayrollDeductionType> catalog,

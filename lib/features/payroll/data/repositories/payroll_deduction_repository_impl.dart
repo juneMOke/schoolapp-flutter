@@ -147,12 +147,20 @@ class PayrollDeductionRepositoryImpl implements PayrollDeductionRepository {
   }
 }
 
-/// Le contrat tient le libellé sans espaces de bordure.
+/// Le contrat tient le libellé sans espaces de bordure, et une description vide
+/// pour absente.
 extension PayrollDeductionRequests on PayrollRequestFactory {
   PayrollDeductionTypeRequestDto deductionType(PayrollDeductionType type) =>
       PayrollDeductionTypeRequestDto(
         id: type.id,
+        code: type.code,
         label: type.label.trim(),
+        description: switch (type.description?.trim()) {
+          final text? when text.isNotEmpty => text,
+          _ => null,
+        },
+        currency: type.currency,
+        defaultAmountInCents: type.defaultAmountInCents,
         sortOrder: type.sortOrder,
         archived: type.archived,
         clientUpdatedAt: stamp,

@@ -12,7 +12,11 @@ typedef PayrollCurrencySeed = ({
 /// (`deductionTypes[]`, archivées comprises).
 typedef PayrollDeductionTypeSeed = ({
   String id,
+  String code,
   String label,
+  String? description,
+  String currency,
+  int defaultAmountInCents,
   int sortOrder,
   bool archived,
   String? clientUpdatedAt,
@@ -148,9 +152,17 @@ class PayrollSettingsSeed {
         return null;
       }
       final at = item['clientUpdatedAt'];
+      final code = item['code'];
+      final description = item['description'];
+      final currency = item['currency'];
+      final defaultAmount = item['defaultAmountInCents'];
       types.add((
         id: id.trim().toLowerCase(),
+        code: code is String ? code : '',
         label: label,
+        description: description is String ? description : null,
+        currency: currency is String ? currency : '',
+        defaultAmountInCents: defaultAmount is num ? defaultAmount.toInt() : 0,
         sortOrder: order.toInt(),
         archived: item['archived'] == true,
         clientUpdatedAt: at is String ? at : null,

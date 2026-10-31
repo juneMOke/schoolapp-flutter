@@ -59,7 +59,11 @@ class PayrollDeductionDto {
 /// écrit gagne par rubrique.
 class PayrollDeductionTypeRequestDto {
   final String id;
+  final String code;
   final String label;
+  final String? description;
+  final String currency;
+  final int defaultAmountInCents;
   final int sortOrder;
   final bool archived;
   final String clientUpdatedAt;
@@ -67,7 +71,11 @@ class PayrollDeductionTypeRequestDto {
 
   const PayrollDeductionTypeRequestDto({
     required this.id,
+    required this.code,
     required this.label,
+    required this.description,
+    required this.currency,
+    required this.defaultAmountInCents,
     required this.sortOrder,
     required this.archived,
     required this.clientUpdatedAt,
@@ -77,7 +85,11 @@ class PayrollDeductionTypeRequestDto {
   Map<String, dynamic> toJson() => {
     'deductionType': {
       'id': id,
+      'code': code,
       'label': label,
+      'description': description,
+      'currency': currency,
+      'defaultAmountInCents': defaultAmountInCents,
       'sortOrder': sortOrder,
       'archived': archived,
       'clientUpdatedAt': clientUpdatedAt,
@@ -103,7 +115,13 @@ class PayrollDeductionTypeRequestDto {
     }
     return PayrollDeductionTypeRequestDto(
       id: id,
+      // Vides sur une rubrique d'un serveur antérieur au contrat : le texte ne
+      // les distingue pas d'un champ absent, et l'envoi ne doit pas s'y perdre.
+      code: inner.text('code') ?? '',
       label: label,
+      description: inner.text('description'),
+      currency: inner.text('currency') ?? '',
+      defaultAmountInCents: inner.integer('defaultAmountInCents') ?? 0,
       sortOrder: order,
       archived: inner['archived'] == true,
       clientUpdatedAt: at,

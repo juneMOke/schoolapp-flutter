@@ -73,6 +73,15 @@ enum PayrollRule {
   deductionTypeLabelTaken,
   deductionTypeLimitReached,
 
+  /// Ce code est déjà pris dans l'école, archivées comprises.
+  deductionTypeCodeTaken,
+
+  /// Le code et la devise d'une rubrique utilisée ne changent plus.
+  deductionTypeFieldLocked,
+
+  /// La devise n'est pas réglée par l'école.
+  deductionTypeCurrencyUnknown,
+
   /// La rubrique est archivée : seule la mise à 0 passe.
   deductionTypeArchived,
 
@@ -84,6 +93,9 @@ enum PayrollRule {
 
   /// Une saisie vise une rubrique que la tablette ne connaît pas encore.
   deductionTypeUnknown,
+
+  /// Une modification de rubrique a été refusée : à corriger avant de soumettre.
+  deductionTypeRefused,
 }
 
 class PayrollRuleFailure extends ValidationFailure {
@@ -103,6 +115,7 @@ extension PayrollBlockerRule on PayrollBlocker {
     PayrollBlocker.hasDisbursements => PayrollRule.hasDisbursements,
     PayrollBlocker.deductionCurrency => PayrollRule.deductionCurrencyMismatch,
     PayrollBlocker.deductionTypeUnknown => PayrollRule.deductionTypeUnknown,
+    PayrollBlocker.deductionTypeRefused => PayrollRule.deductionTypeRefused,
   };
 }
 
@@ -145,6 +158,10 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   PayrollDeductionCodes.inUse => PayrollRule.deductionTypeInUse,
   PayrollDeductionCodes.labelTaken => PayrollRule.deductionTypeLabelTaken,
   PayrollDeductionCodes.limitReached => PayrollRule.deductionTypeLimitReached,
+  PayrollDeductionCodes.codeTaken => PayrollRule.deductionTypeCodeTaken,
+  PayrollDeductionCodes.fieldLocked => PayrollRule.deductionTypeFieldLocked,
+  PayrollDeductionCodes.currencyUnknown =>
+    PayrollRule.deductionTypeCurrencyUnknown,
   PayrollDeductionCodes.archived => PayrollRule.deductionTypeArchived,
   PayrollDeductionCodes.currencyMismatch =>
     PayrollRule.deductionCurrencyMismatch,
