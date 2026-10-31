@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
@@ -23,6 +24,12 @@ class PayrollEngineInput {
   final Map<String, PayrollVariables> variables;
   final Map<String, StaffPayProfile> profiles;
 
+  /// Tout le catalogue de l'école, archivées comprises.
+  final List<PayrollDeductionType> deductionTypes;
+
+  /// Par agent : ses saisies de rubriques pour [month].
+  final Map<String, List<PayrollDeductionEntry>> deductions;
+
   /// Le résumé du Pointage de M, clos ; `null` = mois encore ouvert ou hors
   /// année : vide, aucune absence ni heure (R1).
   final AttendanceSummary? attendance;
@@ -43,6 +50,8 @@ class PayrollEngineInput {
     required this.contractsByMember,
     this.variables = const {},
     this.profiles = const {},
+    this.deductionTypes = const [],
+    this.deductions = const {},
     this.attendance,
     this.advances = const {},
     this.payoutRatePercent = 100,
@@ -73,7 +82,7 @@ class PayrollComputation {
 ///         × pas : défaut[devise])
 /// hs      roundDiv(minutes_sup × tauxHS, 60)          (0 pour un vacataire)
 /// alloc   enfants × allocation[devise]                (statuts éligibles)
-/// fixes   absence, IPR/CNSS, PC/E                     (PayrollDeductions)
+/// fixes   absence, IPR/CNSS, PC/E, rubriques          (PayrollDeductions)
 /// avances prises sur brut − fixes
 /// net     brut − fixes − retenues d'avance            (jamais négatif)
 /// verser  montant fixe ?? net × taux du mois          (le reste : arriéré)
@@ -145,6 +154,7 @@ abstract final class PayrollEngine {
     final gross = base + overtime + allowance;
     final deductions = PayrollDeductions.compute(
       month: input.month,
+      currency: currency,
       hourly: hourly,
       baseInCents: base,
       grossInCents: gross,
@@ -152,6 +162,8 @@ abstract final class PayrollEngine {
       perCurrency: perCurrency,
       variables: variables,
       attendance: summary,
+      types: input.deductionTypes,
+      entries: input.deductions[memberId] ?? const [],
     );
     final advances = PayrollAdvanceSchedule.deduct(
       month: input.month,
@@ -196,15 +208,16 @@ abstract final class PayrollEngine {
   }
 
   /// La devise de la ligne : celle de la prime pour un conventionné (son
-  /// salaire est versé par l'État), celle du montant sinon. Une devise vide
-  /// compte comme absente ; sans rien, [fallback] — la première devise que
-  /// l'école a réglée.
+  /// salaire est versé par l'État, sa devise ne dit rien de la paie), celle du
+  /// montant sinon. Une devise vide compte comme absente ; sans rien,
+  /// [fallback] — la première devise que l'école a réglée. Même règle que
+  /// `PayrollEngine.currencyOf` au serveur.
   static String currencyOf(
     StaffContract contract, {
     String fallback = CurrencyCode.usd,
   }) {
     final candidates = contract.kind == StaffContractKind.conventionne
-        ? [contract.bonus?.currency, contract.amount?.currency]
+        ? [contract.bonus?.currency]
         : [contract.amount?.currency, contract.bonus?.currency];
     for (final candidate in candidates) {
       final code = CurrencyCode.normalize(candidate ?? '');

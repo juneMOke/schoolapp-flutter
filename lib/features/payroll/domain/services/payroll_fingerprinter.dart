@@ -44,6 +44,13 @@ abstract final class PayrollFingerprinter {
         iprInCents: line.deductions.iprInCents,
         cnssInCents: line.deductions.cnssInCents,
         childcareInCents: line.deductions.childcareInCents,
+        customDeductions: [
+          for (final custom in line.deductions.custom)
+            PayrollDigestDeduction(
+              deductionTypeId: custom.deductionTypeId.toLowerCase(),
+              takenInCents: custom.takenInCents,
+            ),
+        ],
         toPayInCents: line.toPayInCents,
       ),
   ]..sort((a, b) => a.staffMemberId.compareTo(b.staffMemberId));

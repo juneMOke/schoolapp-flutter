@@ -34,6 +34,14 @@ abstract final class PayrollFingerprintJson {
               'cnssInCents': line.cnssInCents,
               'childcareInCents': line.childcareInCents,
               'toPayInCents': line.toPayInCents,
+              if (line.customDeductions.isNotEmpty)
+                'customDeductions': [
+                  for (final custom in line.customDeductions)
+                    {
+                      'deductionTypeId': custom.deductionTypeId,
+                      'takenInCents': custom.takenInCents,
+                    },
+                ],
             },
           },
       ],
@@ -92,7 +100,19 @@ abstract final class PayrollFingerprintJson {
       iprInCents: raw.integer('iprInCents') ?? 0,
       cnssInCents: raw.integer('cnssInCents') ?? 0,
       childcareInCents: raw.integer('childcareInCents') ?? 0,
+      customDeductions: _customDeductions(raw['customDeductions']),
       toPayInCents: raw.integer('toPayInCents'),
     );
   }
+
+  static List<PayrollDigestDeduction> _customDeductions(Object? raw) => [
+    if (raw is List)
+      for (final item in raw)
+        if (item is Map)
+          if (item.text('deductionTypeId') case final String id)
+            PayrollDigestDeduction(
+              deductionTypeId: id.toLowerCase(),
+              takenInCents: item.integer('takenInCents') ?? 0,
+            ),
+  ];
 }

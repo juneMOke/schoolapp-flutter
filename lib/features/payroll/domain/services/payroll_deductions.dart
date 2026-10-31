@@ -1,4 +1,6 @@
+import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line_parts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
@@ -17,11 +19,14 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_work
 /// IPR      brut > 0 ? forfait[devise] : 0
 /// CNSS     roundDiv(base × ‰[devise], 1000)        (base avant absence, T4)
 /// PC/E     variable ?? 0
+/// rubriques montant saisi > 0 et dans la devise de la ligne, par `sortOrder`
+///          puis identifiant en texte
 /// ```
 /// Pris sur le brut dans cet ordre, chacun borné à ce qui reste (T3).
 abstract final class PayrollDeductions {
   static PayrollLineDeductions compute({
     required String month,
+    required String currency,
     required bool hourly,
     required int baseInCents,
     required int grossInCents,
@@ -29,6 +34,8 @@ abstract final class PayrollDeductions {
     required PayrollCurrencySettings perCurrency,
     required PayrollVariables? variables,
     required AttendanceAgentSummary attendance,
+    List<PayrollDeductionType> types = const [],
+    List<PayrollDeductionEntry> entries = const [],
   }) {
     final workingDays = hourly ? null : PayrollWorkingDays.of(month);
     final absences = workingDays == null
@@ -58,6 +65,15 @@ abstract final class PayrollDeductions {
     final childcare = take(
       settings.childcareEnabled ? _positive(variables?.childcareInCents) : 0,
     );
+    final custom = [
+      for (final (type, entry) in counted(types, entries, currency))
+        PayrollLineCustomDeduction(
+          deductionTypeId: type.id,
+          label: type.label,
+          requestedInCents: entry.amountInCents,
+          takenInCents: take(entry.amountInCents),
+        ),
+    ];
     return PayrollLineDeductions(
       workDaysDivisor: workingDays,
       unjustifiedAbsences: absences,
@@ -65,7 +81,36 @@ abstract final class PayrollDeductions {
       iprInCents: ipr,
       cnssInCents: cnss,
       childcareInCents: childcare,
+      custom: custom,
     );
+  }
+
+  /// Les saisies que le moteur retient, dans son ordre : montant supérieur à
+  /// 0, dans la devise de la ligne, sur une rubrique du catalogue — archivée
+  /// ou non. Les autres sortent du calcul, de `custom[]` et de l'empreinte.
+  static List<(PayrollDeductionType, PayrollDeductionEntry)> counted(
+    List<PayrollDeductionType> types,
+    List<PayrollDeductionEntry> entries,
+    String currency,
+  ) {
+    final line = CurrencyCode.normalize(currency);
+    final byType = {for (final type in types) type.id.toLowerCase(): type};
+    final retained = <(PayrollDeductionType, PayrollDeductionEntry)>[];
+    for (final entry in entries) {
+      final type = byType[entry.deductionTypeId.toLowerCase()];
+      if (type == null ||
+          entry.amountInCents <= 0 ||
+          CurrencyCode.normalize(entry.currency) != line) {
+        continue;
+      }
+      retained.add((type, entry));
+    }
+    return retained..sort((a, b) {
+      final byOrder = a.$1.sortOrder.compareTo(b.$1.sortOrder);
+      return byOrder != 0
+          ? byOrder
+          : a.$1.id.toLowerCase().compareTo(b.$1.id.toLowerCase());
+    });
   }
 
   /// NJ : les absences non justifiées du mois, bornées à [0, J].
