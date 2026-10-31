@@ -963,6 +963,7 @@ class AppDimensions {
   static const photoPanelRadius = 22.0;
   static const photoPanelFullscreenBelow = 600.0;
   static const photoViewfinderRadius = 14.0;
+  static const photoViewfinderReference = 1000.0;
   static const photoShutter = 68.0;
   static const photoShutterRing = 4.0;
   static const photoDarkButton = 44.0;

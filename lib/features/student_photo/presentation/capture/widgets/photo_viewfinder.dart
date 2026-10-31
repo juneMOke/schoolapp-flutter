@@ -27,6 +27,7 @@ class PhotoViewfinder extends StatelessWidget {
     // de lui-même quand l'appareil est tenu en portrait.
     final portrait = MediaQuery.orientationOf(context) == Orientation.portrait;
     final ratio = session?.previewAspectRatio ?? 4 / 3;
+    const reference = AppDimensions.photoViewfinderReference;
     return AspectRatio(
       aspectRatio: 4 / 3,
       child: ClipRRect(
@@ -45,10 +46,12 @@ class PhotoViewfinder extends StatelessWidget {
                       fit: BoxFit.cover,
                       clipBehavior: Clip.hardEdge,
                       // Une taille de référence au rapport du flux : `FittedBox`
-                      // la met à l'échelle du viseur sans la déformer.
+                      // la met à l'échelle du viseur sans la déformer. Jamais
+                      // de l'ordre du pixel : sur le web, l'aperçu est un
+                      // élément HTML, et le moteur l'envoie alors hors écran.
                       child: SizedBox(
-                        width: portrait ? 1 : ratio,
-                        height: portrait ? ratio : 1,
+                        width: reference * (portrait ? 1 : ratio),
+                        height: reference * (portrait ? ratio : 1),
                         child: session.buildPreview(),
                       ),
                     ),

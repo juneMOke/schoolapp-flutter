@@ -361,8 +361,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutesNames.photoSessionPath,
       name: AppRoutesNames.photoSession,
-      // Sans prise de vue possible (navigateur), l'adresse tapée ou un favori
-      // ne mènent pas à une séance qui échouerait à chaque photo.
+      // Sans prise de vue possible, l'adresse tapée ou un favori ne mènent pas
+      // à une séance qui échouerait à chaque photo.
       redirect: (context, state) =>
           photoCaptureSupported ? null : AppRoutesNames.homePath,
       builder: (context, state) => const PhotoSessionPage(),

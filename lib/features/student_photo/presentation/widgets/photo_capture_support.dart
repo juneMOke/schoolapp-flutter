@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
-
-/// Le poste sait-il poser une photo ? Pas le web : le magasin chiffré repose
-/// sur `dart:io` et rend chaque prise en échec. Les entrées s'y masquent, la
-/// photo descendue reste affichée.
-bool get photoCaptureSupported => !kIsWeb;
+/// Le poste sait-il poser une photo ? Oui partout : sur le web, le magasin
+/// scelle dans IndexedDB (`platformBlobFiles`) et le viseur passe par
+/// `camera_web` ; sur Windows et Linux, par `camera_desktop`.
+bool get photoCaptureSupported => true;
