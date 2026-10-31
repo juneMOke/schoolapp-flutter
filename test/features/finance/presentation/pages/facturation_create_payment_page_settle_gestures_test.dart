@@ -188,13 +188,13 @@ void main() {
         .first,
   );
 
-  /// ⚠️ `TextButton` : la nature porte le MÊME libellé sur un `OutlinedButton`.
+  /// La nature porte le MÊME bouton : d'où la recherche dans la ligne.
   /// Viser le texte seul frapperait l'un en croyant frapper l'autre.
   Future<void> toutSolderLaTranche(WidgetTester tester, int index) => tapoter(
     tester,
     find.descendant(
       of: ligneDeTranche(index),
-      matching: find.widgetWithText(TextButton, 'Tout solder'),
+      matching: find.widgetWithText(OutlinedButton, 'Tout solder'),
     ),
   );
 
@@ -223,10 +223,7 @@ void main() {
   /// d'une tranche.
   Future<void> reglerLaNatureEnFrancs(WidgetTester tester) => tapoter(
     tester,
-    find.descendant(
-      of: ligneDeNature(),
-      matching: find.widgetWithText(ChoiceChip, 'FC'),
-    ),
+    find.descendant(of: ligneDeNature(), matching: find.text('FC')),
   );
 
   Finder comptoirDeNature() =>

@@ -587,9 +587,9 @@ class _FacturationCreatePaymentViewState
     return !reason.requiresDetail || _correctionDetail.text.trim().isNotEmpty;
   }
 
-  /// « Annuler et remplacer » — un seul geste, sans popin de confirmation :
-  /// l'origine barrée et l'écart jouent ce rôle (spec §05).
-  void _onCorrect() {
+  /// « Annuler et remplacer » : le même récapitulatif qu'un encaissement, puis
+  /// l'écriture. Le geste annule un versement : il se relit avant de partir.
+  Future<void> _onCorrect(AppLocalizations l10n) async {
     final correction = widget.intent.correction;
     final reason = _correctionReason;
     if (correction == null || reason == null) return;
@@ -597,40 +597,67 @@ class _FacturationCreatePaymentViewState
     final draft = _model.buildDraft();
     if (draft == null) return;
 
-    final replacement = withOriginInstant(
-      recordPaymentDraftFromRequest(
-        PaymentsCreateRequested(
-          // L'élève retenu (D1), sinon celui de l'origine.
-          studentId:
-              context
-                  .read<PaymentCorrectionTargetCubit>()
-                  .state
-                  .target
-                  ?.studentId ??
-              widget.intent.studentId,
-          academicYearId: widget.intent.academicYearId,
-          paidAt: draft.paidAt,
-          amounts: draft.amounts,
-          tenders: draft.tenders,
-          payerFirstName: _payer.valueOf(_payer.firstName),
-          payerLastName: _payer.valueOf(_payer.lastName),
-          payerMiddleName: _payer.valueOf(_payer.middleName),
-          payerPhoneNumber: _payer.valueOf(_payer.phone),
-          allocations: draft.allocations,
-        ),
-        now: widget.now,
-      ),
-      correction,
-      _model.paidDay,
+    final target = context.read<PaymentCorrectionTargetCubit>().state.target;
+    final request = PaymentsCreateRequested(
+      // L'élève retenu (D1), sinon celui de l'origine.
+      studentId: target?.studentId ?? widget.intent.studentId,
+      academicYearId: widget.intent.academicYearId,
+      paidAt: draft.paidAt,
+      amounts: draft.amounts,
+      tenders: draft.tenders,
+      payerFirstName: _payer.valueOf(_payer.firstName),
+      payerLastName: _payer.valueOf(_payer.lastName),
+      payerMiddleName: _payer.valueOf(_payer.middleName),
+      payerPhoneNumber: _payer.valueOf(_payer.phone),
+      allocations: draft.allocations,
     );
+    final settlement = _settlement();
+    final totalLabel = hasConversion(settlement, _model.entries)
+        ? bagLabel(tenderBagOf(settlement, _model.entries))
+        : bagLabel(draft.amounts);
+
     setState(() => _collectInFlight = true);
+    final outcome = await showFacturationCreatePaymentConfirmDialog(
+      context,
+      financeOfflineBloc: context.read<FinanceOfflineBloc>(),
+      totalLabel: totalLabel,
+      rateLabel: singleRateLabel(linesOf(settlement, _model.entries)),
+      // L'élève qui recevra le versement : celui retenu, s'il a changé.
+      studentName: target == null
+          ? studentFullName(widget.intent, l10n)
+          : [
+              target.lastName,
+              target.surname,
+              target.firstName,
+            ].whereType<String>().where((n) => n.isNotEmpty).join(' '),
+      payerName: _payer.composedName,
+      payerPhone: _payer.phone.text.trim(),
+      allocations: _confirmGroups(settlement, l10n),
+      request: request,
+      now: widget.now,
+      confirmation: FacturationConfirmOnlyLabels(
+        title: l10n.paymentCorrectionConfirmTitle(totalLabel),
+        notice: l10n.paymentCorrectionConfirmNotice,
+        action: l10n.paymentCorrectionSubmit,
+      ),
+    );
+    if (!mounted) return;
+    if (outcome != FacturationCollectOutcome.confirmed) {
+      setState(() => _collectInFlight = false);
+      return;
+    }
+
     context.read<PaymentCorrectionCubit>().submit(
       PaymentCorrectionDraft(
         paymentId: correction.origin.paymentId,
         reason: reason,
         reasonDetail: _correctionDetail.text,
         cashMoved: _cashMoved,
-        replacement: replacement,
+        replacement: withOriginInstant(
+          recordPaymentDraftFromRequest(request, now: widget.now),
+          correction,
+          _model.paidDay,
+        ),
       ),
     );
   }
@@ -692,7 +719,7 @@ class _FacturationCreatePaymentViewState
         ? null
         : correction == null
         ? () => _onCollect(l10n)
-        : _onCorrect;
+        : () => _onCorrect(l10n);
 
     return PopScope(
       // Bloque le retour système / `maybePop` : toute sortie passe par
