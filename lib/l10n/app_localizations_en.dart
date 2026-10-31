@@ -21171,4 +21171,7 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0: the gross was not enough.';
   }
+
+  @override
+  String get payrollDashCustom => 'School deductions';
 }

@@ -12155,5 +12155,6 @@
   "payrollDeductionRefusedNotice": "Deductions taken out of the calculation: {list}.",
   "@payrollDeductionRefusedNotice": {"placeholders": {"list": {"type": "String"}}},
   "payrollConfirmTrimmed": "{count, plural, =1{One deduction will be cut short} other{{count} deductions will be cut short}}: the gross was not enough.",
-  "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}}
+  "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}},
+  "payrollDashCustom": "School deductions"
 }

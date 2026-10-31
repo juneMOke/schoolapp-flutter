@@ -21310,4 +21310,7 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0 : le brut n\'a pas suffi.';
   }
+
+  @override
+  String get payrollDashCustom => 'Retenues de l\'école';
 }

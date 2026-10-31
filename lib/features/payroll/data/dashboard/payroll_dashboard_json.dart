@@ -54,6 +54,9 @@ abstract final class PayrollDashboardJson {
         advancesInCents: _cents(json, 'advancesInCents'),
         legalInCents: _cents(json, 'legalInCents'),
         childcareInCents: _cents(json, 'childcareInCents'),
+        // Facultatif : un serveur d'avant les rubriques ne le sert pas.
+        customDeductionsInCents:
+            (json['customDeductionsInCents'] as num?)?.toInt() ?? 0,
         netInCents: _cents(json, 'netInCents'),
         employerChargesInCents: _cents(json, 'employerChargesInCents'),
       );

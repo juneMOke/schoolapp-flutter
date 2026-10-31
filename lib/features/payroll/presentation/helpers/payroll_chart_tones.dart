@@ -14,6 +14,7 @@ abstract final class PayrollChartTones {
   static const Color advances = DashboardSense.attente;
   static const Color legal = DashboardSense.attendu;
   static const Color childcare = DashboardSense.marque;
+  static const Color custom = DashboardSense.prestige;
 
   // ── Où en est le net ──
   static const Color paid = DashboardSense.encaisse;

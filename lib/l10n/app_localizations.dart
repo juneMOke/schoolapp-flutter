@@ -32562,6 +32562,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{One deduction will be cut short} other{{count} deductions will be cut short}}: the gross was not enough.'**
   String payrollConfirmTrimmed(int count);
+
+  /// No description provided for @payrollDashCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollDashCustom;
 }
 
 class _AppLocalizationsDelegate

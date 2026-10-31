@@ -12335,5 +12335,6 @@
   "payrollDeductionRefusedNotice": "Retenues retirées du calcul : {list}.",
   "@payrollDeductionRefusedNotice": {"placeholders": {"list": {"type": "String"}}},
   "payrollConfirmTrimmed": "{count, plural, =1{Une retenue sera rognée} other{{count} retenues seront rognées}} : le brut n'a pas suffi.",
-  "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}}
+  "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}},
+  "payrollDashCustom": "Retenues de l'école"
 }

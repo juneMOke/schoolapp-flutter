@@ -48,6 +48,12 @@ class PayrollDashboardSplitCard extends StatelessWidget {
         forecast.childcareInCents,
         PayrollChartTones.childcare,
       ),
+      if (forecast.customDeductionsInCents > 0)
+        (
+          l10n.payrollDashCustom,
+          forecast.customDeductionsInCents,
+          PayrollChartTones.custom,
+        ),
     ];
     final net = progress == null
         ? const <(String, int, Color)>[]
