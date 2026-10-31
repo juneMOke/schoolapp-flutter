@@ -44,10 +44,12 @@ import 'package:school_app_flutter/features/expense/domain/usecases/find_expense
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_deduction_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_settings_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_commands.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_deduction_commands.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_expense_advance_bridge.dart';
 import 'package:school_app_flutter/features/expense/presentation/bridge/expense_staff_advance_bridge.dart';
@@ -92,6 +94,12 @@ void _registerPresentation(GetIt getIt) {
       settings: getIt<SavePayrollSettingsUseCase>(),
       share: getIt<RecordPayslipShareUseCase>(),
       payslip: getIt<FetchPayslipUseCase>(),
+      deductions: PayrollDeductionCommands(
+        create: getIt<CreatePayrollDeductionTypeUseCase>(),
+        update: getIt<UpdatePayrollDeductionTypeUseCase>(),
+        move: getIt<MovePayrollDeductionTypeUseCase>(),
+        remove: getIt<RemovePayrollDeductionTypeUseCase>(),
+      ),
     ),
   );
   // Dépenses ▸ Nouvelle demande → formulaire d'avance de la Paie.
@@ -222,6 +230,13 @@ void _registerDomain(GetIt getIt) {
     ..registerFactory(() => CancelPayrollDisbursementUseCase(repository()))
     ..registerFactory(() => SaveStaffPayProfileUseCase(repository()))
     ..registerFactory(() => SavePayrollSettingsUseCase(repository()));
+  PayrollDeductionRepository deductions() =>
+      getIt<PayrollDeductionRepository>();
+  getIt
+    ..registerFactory(() => CreatePayrollDeductionTypeUseCase(deductions()))
+    ..registerFactory(() => UpdatePayrollDeductionTypeUseCase(deductions()))
+    ..registerFactory(() => MovePayrollDeductionTypeUseCase(deductions()))
+    ..registerFactory(() => RemovePayrollDeductionTypeUseCase(deductions()));
 }
 
 void _registerStorage(GetIt getIt) {

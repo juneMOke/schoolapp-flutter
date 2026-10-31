@@ -12,16 +12,19 @@ import 'package:school_app_flutter/features/expense/domain/repositories/expense_
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/find_expense_use_case.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
+import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_deduction_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_advance_request_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_arrears_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circuit_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_deduction_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_settings_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_commands.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_deduction_commands.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -56,6 +59,9 @@ pumpPayrollScreen(
 
   /// Les PDF du serveur (bulletins, état de paie, tableau de bord).
   PayslipRepository? payslips,
+
+  /// Les rubriques de l'école et leurs saisies.
+  PayrollDeductionRepository? deductions,
 
   /// Un geste posé avant que la tablette ne soit lue (un mois d'adresse).
   void Function(PayrollCubit cubit)? beforeLoad,
@@ -92,6 +98,14 @@ pumpPayrollScreen(
       settings: SavePayrollSettingsUseCase(repository),
       share: RecordPayslipShareUseCase(repository),
       payslip: FetchPayslipUseCase(payslips ?? _MockPayslips()),
+      deductions: deductions == null
+          ? null
+          : PayrollDeductionCommands(
+              create: CreatePayrollDeductionTypeUseCase(deductions),
+              update: UpdatePayrollDeductionTypeUseCase(deductions),
+              move: MovePayrollDeductionTypeUseCase(deductions),
+              remove: RemovePayrollDeductionTypeUseCase(deductions),
+            ),
     ),
     now: () => DateTime(2026, 10, 26, 10),
   );
