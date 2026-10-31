@@ -148,6 +148,7 @@ abstract final class PayrollLabels {
     PayrollRule.deductionTypeArchived => l10n.payrollRuleDeductionTypeArchived,
     PayrollRule.deductionCurrencyMismatch => l10n.payrollRuleDeductionCurrency,
     PayrollRule.deductionTypeGone => l10n.payrollRuleDeductionTypeGone,
+    PayrollRule.deductionTypeUnknown => l10n.payrollRuleDeductionTypeUnknown,
   };
 
   /// Un refus du serveur en mots : la règle qu'il dit quand on la connaît,

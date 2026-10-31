@@ -21124,4 +21124,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payrollVarsCustomClear => 'Set to 0';
+
+  @override
+  String get payrollRuleDeductionTypeUnknown =>
+      'A deduction refers to a type this tablet does not know yet: synchronise.';
+
+  @override
+  String get payrollDeductionRefusedDismiss => 'Got it';
+
+  @override
+  String get payrollDeductionTrimmedShort => 'Deduction cut short';
+
+  @override
+  String get payrollAgentTotalsCustom => 'School deductions';
+
+  @override
+  String get payrollKpiSchoolDeductionsDetailCustom =>
+      'Absences · IPR/CNSS · childcare · school';
+
+  @override
+  String get payrollConfirmFixedDeductionsCustom =>
+      'Deductions (absences, IPR/CNSS, PC/E, school)';
+
+  @override
+  String payrollDeductionForeignNotice(String list) {
+    return 'Deductions entered in another currency than the payroll: $list. Enter the amount again or set it to 0.';
+  }
+
+  @override
+  String payrollDeductionForeignNoticeSubmitted(String list) {
+    return 'Deductions entered in another currency than the payroll: $list. Management returns the payroll first, then the bursar corrects them.';
+  }
+
+  @override
+  String payrollDeductionRefusedNotice(String list) {
+    return 'Deductions taken out of the calculation: $list.';
+  }
+
+  @override
+  String payrollConfirmTrimmed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deductions will be cut short',
+      one: 'One deduction will be cut short',
+    );
+    return '$_temp0: the gross was not enough.';
+  }
 }

@@ -169,6 +169,13 @@ class PayrollLedgerTable extends StatelessWidget {
                   color: PayrollTone.submitted.ink,
                 ),
               ),
+            if (line.deductions.hasTrimmedCustom)
+              Text(
+                l10n.payrollDeductionTrimmedShort,
+                style: AppTypography.bodySmall.copyWith(
+                  color: PayrollTone.submitted.ink,
+                ),
+              ),
           ],
         ),
         Column(

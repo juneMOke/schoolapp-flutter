@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_deduction_issues.dart';
 
 /// Où en est une paie **à l'écran** : le statut serveur, plus le geste de
 /// cette tablette qui n'est pas encore accusé. « Validée » ne s'affiche jamais
@@ -42,6 +43,12 @@ enum PayrollBlocker {
 
   /// Un versement vivant existe : la paie ne se rouvre plus (A4).
   hasDisbursements,
+
+  /// Une saisie de rubrique est dans une autre devise que sa ligne.
+  deductionCurrency,
+
+  /// Une saisie vise une rubrique absente du catalogue de la tablette.
+  deductionTypeUnknown,
 }
 
 /// Le livre d'un mois, prêt pour l'écran.
@@ -83,6 +90,9 @@ class PayrollMonthView {
   final PayrollBlocker? validateBlocker;
   final PayrollBlocker? reopenBlocker;
 
+  /// Ce que les saisies de rubriques du mois disent au circuit.
+  final PayrollDeductionIssues deductionIssues;
+
   const PayrollMonthView({
     required this.month,
     required this.header,
@@ -100,6 +110,7 @@ class PayrollMonthView {
     this.submitBlocker,
     this.validateBlocker,
     this.reopenBlocker,
+    this.deductionIssues = PayrollDeductionIssues.none,
   });
 
   bool get isEditable => phase == PayrollPhase.draft;
@@ -112,6 +123,10 @@ class PayrollMonthView {
     }
     return month;
   }
+
+  /// Les lignes dont une rubrique n'a pas pu être retenue en entier.
+  int get trimmedCount =>
+      lines.where((line) => line.deductions.hasTrimmedCustom).length;
 
   /// Un versement réduit ce mois-ci : un taux sous 100 % ou un montant fixe.
   bool get hasReducedPayout => lines.any((line) => line.deferredInCents > 0);

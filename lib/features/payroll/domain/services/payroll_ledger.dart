@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_deduction_issues.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
@@ -49,6 +50,13 @@ abstract final class PayrollLedger {
       hasSummary: snapshot.summaries.containsKey(month),
       years: snapshot.schoolYears,
     );
+    // Une paie figée ne se calcule plus : seuls les refus restent à lire.
+    final issues = PayrollDeductionIssues.of(
+      entries: snapshot.deductions[month] ?? const {},
+      types: snapshot.deductionTypes,
+      lines: frozen == null ? lines : const [],
+    );
+    final deductionBlocker = frozen == null ? issues.blocker : null;
     return PayrollMonthView(
       month: month,
       header: header,
@@ -72,10 +80,11 @@ abstract final class PayrollLedger {
       attendance: attendance,
       awaitingFrozenLines: server == PayrollStatus.validated && frozen == null,
       lastRefusal: _lastRefusal(gestures),
-      submitBlocker: _submitBlocker(snapshot, month),
+      submitBlocker: _submitBlocker(snapshot, month) ?? deductionBlocker,
       validateBlocker: attendance == PayrollAttendanceState.open
           ? PayrollBlocker.attendanceOpen
-          : null,
+          : deductionBlocker,
+      deductionIssues: issues,
       reopenBlocker: _hasAnyDisbursement(snapshot, month)
           ? PayrollBlocker.hasDisbursements
           : null,

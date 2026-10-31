@@ -32502,6 +32502,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set to 0'**
   String get payrollVarsCustomClear;
+
+  /// No description provided for @payrollRuleDeductionTypeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'A deduction refers to a type this tablet does not know yet: synchronise.'**
+  String get payrollRuleDeductionTypeUnknown;
+
+  /// No description provided for @payrollDeductionRefusedDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get payrollDeductionRefusedDismiss;
+
+  /// No description provided for @payrollDeductionTrimmedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction cut short'**
+  String get payrollDeductionTrimmedShort;
+
+  /// No description provided for @payrollAgentTotalsCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollAgentTotalsCustom;
+
+  /// No description provided for @payrollKpiSchoolDeductionsDetailCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences · IPR/CNSS · childcare · school'**
+  String get payrollKpiSchoolDeductionsDetailCustom;
+
+  /// No description provided for @payrollConfirmFixedDeductionsCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions (absences, IPR/CNSS, PC/E, school)'**
+  String get payrollConfirmFixedDeductionsCustom;
+
+  /// No description provided for @payrollDeductionForeignNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions entered in another currency than the payroll: {list}. Enter the amount again or set it to 0.'**
+  String payrollDeductionForeignNotice(String list);
+
+  /// No description provided for @payrollDeductionForeignNoticeSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions entered in another currency than the payroll: {list}. Management returns the payroll first, then the bursar corrects them.'**
+  String payrollDeductionForeignNoticeSubmitted(String list);
+
+  /// No description provided for @payrollDeductionRefusedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions taken out of the calculation: {list}.'**
+  String payrollDeductionRefusedNotice(String list);
+
+  /// No description provided for @payrollConfirmTrimmed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One deduction will be cut short} other{{count} deductions will be cut short}}: the gross was not enough.'**
+  String payrollConfirmTrimmed(int count);
 }
 
 class _AppLocalizationsDelegate

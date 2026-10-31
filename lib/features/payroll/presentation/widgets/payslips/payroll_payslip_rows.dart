@@ -20,7 +20,8 @@ abstract final class PayrollPayslipRows {
   static const absenceIndex = 1;
 
   /// Les cinq retenues du modèle des écoles, **toujours** listées dans
-  /// l'ordre du papier — « — » quand elles sont nulles —, puis leur total :
+  /// l'ordre du papier — « — » quand elles sont nulles —, les rubriques de
+  /// l'école à leur suite, puis le total :
   /// chaque montant rangé par le calcul dans sa ligne.
   static List<PayslipRow> deductions(
     BuildContext context,
@@ -77,6 +78,17 @@ abstract final class PayrollPayslipRows {
         value: money(d.childcareInCents),
         note: null,
       ),
+      for (final custom in d.custom)
+        (
+          label: custom.label,
+          value: money(custom.takenInCents),
+          note: custom.trimmed
+              ? l10n.payrollVarsCustomTrimmed(
+                  PayrollLabels.money(custom.requestedInCents, line.currency),
+                  PayrollLabels.money(custom.takenInCents, line.currency),
+                )
+              : null,
+        ),
       (
         label: l10n.payrollPayslipDeductionsTotal,
         value: total == 0

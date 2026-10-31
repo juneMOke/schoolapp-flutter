@@ -83,6 +83,18 @@ class PayrollLedgerActions {
     });
   }
 
+  /// L'économe a lu les retenues refusées : elles disparaissent.
+  Future<void> dismissRefusedDeductions(PayrollMonthView view) =>
+      _cubit.perform((commands) async {
+        final deductions = commands.deductions;
+        if (deductions == null) return null;
+        for (final entry in view.deductionIssues.refused) {
+          final notice = await deductions.dismiss(view.month, entry);
+          if (notice != null) return notice;
+        }
+        return null;
+      });
+
   /// Le taux de versement du mois (v2).
   Future<void> editPayoutPolicy() async {
     final view = _state.view;

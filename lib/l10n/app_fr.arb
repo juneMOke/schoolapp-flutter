@@ -12321,5 +12321,19 @@
   "@payrollVarsCustomArchived": {"placeholders": {"label": {"type": "String"}}},
   "payrollVarsCustomTrimmed": "Saisi {requested}, retenu {taken}",
   "@payrollVarsCustomTrimmed": {"placeholders": {"requested": {"type": "String"}, "taken": {"type": "String"}}},
-  "payrollVarsCustomClear": "Mettre à 0"
+  "payrollVarsCustomClear": "Mettre à 0",
+  "payrollRuleDeductionTypeUnknown": "Une retenue vise une rubrique que cette tablette ne connaît pas encore : synchronisez.",
+  "payrollDeductionRefusedDismiss": "J'ai lu",
+  "payrollDeductionTrimmedShort": "Retenue rognée",
+  "payrollAgentTotalsCustom": "Retenues de l'école",
+  "payrollKpiSchoolDeductionsDetailCustom": "Absences · IPR/CNSS · PC/E · rubriques",
+  "payrollConfirmFixedDeductionsCustom": "Retenues (absences, IPR/CNSS, PC/E, rubriques)",
+  "payrollDeductionForeignNotice": "Retenues saisies dans une autre devise que la paie : {list}. Ressaisissez le montant ou mettez-le à 0.",
+  "@payrollDeductionForeignNotice": {"placeholders": {"list": {"type": "String"}}},
+  "payrollDeductionForeignNoticeSubmitted": "Retenues saisies dans une autre devise que la paie : {list}. La direction renvoie d'abord la paie, puis l'économe corrige.",
+  "@payrollDeductionForeignNoticeSubmitted": {"placeholders": {"list": {"type": "String"}}},
+  "payrollDeductionRefusedNotice": "Retenues retirées du calcul : {list}.",
+  "@payrollDeductionRefusedNotice": {"placeholders": {"list": {"type": "String"}}},
+  "payrollConfirmTrimmed": "{count, plural, =1{Une retenue sera rognée} other{{count} retenues seront rognées}} : le brut n'a pas suffi.",
+  "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}}
 }

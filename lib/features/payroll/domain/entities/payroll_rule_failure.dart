@@ -81,6 +81,9 @@ enum PayrollRule {
 
   /// La rubrique visée a été supprimée, ou refusée.
   deductionTypeGone,
+
+  /// Une saisie vise une rubrique que la tablette ne connaît pas encore.
+  deductionTypeUnknown,
 }
 
 class PayrollRuleFailure extends ValidationFailure {
@@ -98,6 +101,8 @@ extension PayrollBlockerRule on PayrollBlocker {
     PayrollBlocker.previousNotValidated => PayrollRule.previousNotValidated,
     PayrollBlocker.attendanceOpen => PayrollRule.attendanceOpen,
     PayrollBlocker.hasDisbursements => PayrollRule.hasDisbursements,
+    PayrollBlocker.deductionCurrency => PayrollRule.deductionCurrencyMismatch,
+    PayrollBlocker.deductionTypeUnknown => PayrollRule.deductionTypeUnknown,
   };
 }
 

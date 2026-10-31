@@ -12141,5 +12141,19 @@
   "@payrollDeductionsDeleteTitle": {"placeholders": {"label": {"type": "String"}}},
   "@payrollVarsCustomArchived": {"placeholders": {"label": {"type": "String"}}},
   "@payrollVarsCustomTrimmed": {"placeholders": {"requested": {"type": "String"}, "taken": {"type": "String"}}},
-  "payrollVarsCustomClear": "Set to 0"
+  "payrollVarsCustomClear": "Set to 0",
+  "payrollRuleDeductionTypeUnknown": "A deduction refers to a type this tablet does not know yet: synchronise.",
+  "payrollDeductionRefusedDismiss": "Got it",
+  "payrollDeductionTrimmedShort": "Deduction cut short",
+  "payrollAgentTotalsCustom": "School deductions",
+  "payrollKpiSchoolDeductionsDetailCustom": "Absences · IPR/CNSS · childcare · school",
+  "payrollConfirmFixedDeductionsCustom": "Deductions (absences, IPR/CNSS, PC/E, school)",
+  "payrollDeductionForeignNotice": "Deductions entered in another currency than the payroll: {list}. Enter the amount again or set it to 0.",
+  "@payrollDeductionForeignNotice": {"placeholders": {"list": {"type": "String"}}},
+  "payrollDeductionForeignNoticeSubmitted": "Deductions entered in another currency than the payroll: {list}. Management returns the payroll first, then the bursar corrects them.",
+  "@payrollDeductionForeignNoticeSubmitted": {"placeholders": {"list": {"type": "String"}}},
+  "payrollDeductionRefusedNotice": "Deductions taken out of the calculation: {list}.",
+  "@payrollDeductionRefusedNotice": {"placeholders": {"list": {"type": "String"}}},
+  "payrollConfirmTrimmed": "{count, plural, =1{One deduction will be cut short} other{{count} deductions will be cut short}}: the gross was not enough.",
+  "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}}
 }

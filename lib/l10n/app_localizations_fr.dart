@@ -21263,4 +21263,51 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollVarsCustomClear => 'Mettre à 0';
+
+  @override
+  String get payrollRuleDeductionTypeUnknown =>
+      'Une retenue vise une rubrique que cette tablette ne connaît pas encore : synchronisez.';
+
+  @override
+  String get payrollDeductionRefusedDismiss => 'J\'ai lu';
+
+  @override
+  String get payrollDeductionTrimmedShort => 'Retenue rognée';
+
+  @override
+  String get payrollAgentTotalsCustom => 'Retenues de l\'école';
+
+  @override
+  String get payrollKpiSchoolDeductionsDetailCustom =>
+      'Absences · IPR/CNSS · PC/E · rubriques';
+
+  @override
+  String get payrollConfirmFixedDeductionsCustom =>
+      'Retenues (absences, IPR/CNSS, PC/E, rubriques)';
+
+  @override
+  String payrollDeductionForeignNotice(String list) {
+    return 'Retenues saisies dans une autre devise que la paie : $list. Ressaisissez le montant ou mettez-le à 0.';
+  }
+
+  @override
+  String payrollDeductionForeignNoticeSubmitted(String list) {
+    return 'Retenues saisies dans une autre devise que la paie : $list. La direction renvoie d\'abord la paie, puis l\'économe corrige.';
+  }
+
+  @override
+  String payrollDeductionRefusedNotice(String list) {
+    return 'Retenues retirées du calcul : $list.';
+  }
+
+  @override
+  String payrollConfirmTrimmed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count retenues seront rognées',
+      one: 'Une retenue sera rognée',
+    );
+    return '$_temp0 : le brut n\'a pas suffi.';
+  }
 }
