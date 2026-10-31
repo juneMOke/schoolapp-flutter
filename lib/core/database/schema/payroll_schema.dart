@@ -364,7 +364,8 @@ const TableSchema payrollArrearsPrioritiesTable = TableSchema(
 /// `payroll_deduction_types` — les rubriques de retenue de l'école. Aucun
 /// montant ici. Descendent avec le socle ; `server_known` dit que le serveur
 /// a déjà eu la rubrique, et sépare une rubrique supprimée d'une création
-/// encore jamais reçue.
+/// encore jamais reçue. `acked_at` protège un accusé tout frais d'un socle lu
+/// avant lui.
 const TableSchema payrollDeductionTypesTable = TableSchema(
   name: 'payroll_deduction_types',
   createTableSql: '''
@@ -375,6 +376,7 @@ const TableSchema payrollDeductionTypesTable = TableSchema(
       sort_order INTEGER NOT NULL DEFAULT 0,
       archived INTEGER NOT NULL DEFAULT 0,
       server_known INTEGER NOT NULL DEFAULT 0,
+      acked_at INTEGER,
       client_updated_at TEXT,
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,
@@ -388,6 +390,10 @@ const TableSchema payrollDeductionTypesTable = TableSchema(
 /// `payroll_deductions` — le montant d'un agent sur une rubrique et un mois,
 /// en centimes de [currency]. `0` retire la retenue, la ligne reste avec son
 /// horloge. Dernier écrit gagne ; écrit seulement sur une paie en brouillon.
+///
+/// `server_amount_in_cents` et `server_currency` gardent ce que le serveur
+/// tient : c'est ce qui compte quand la saisie locale a été refusée. `acked_at`
+/// protège un accusé tout frais d'une descente lue avant lui.
 const TableSchema payrollDeductionsTable = TableSchema(
   name: 'payroll_deductions',
   createTableSql: '''
@@ -398,6 +404,9 @@ const TableSchema payrollDeductionsTable = TableSchema(
       deduction_type_id TEXT NOT NULL,
       amount_in_cents INTEGER NOT NULL,
       currency TEXT NOT NULL,
+      server_amount_in_cents INTEGER,
+      server_currency TEXT,
+      acked_at INTEGER,
       client_updated_at TEXT NOT NULL,
       sync_status TEXT NOT NULL DEFAULT 'SYNCED',
       sync_error TEXT,

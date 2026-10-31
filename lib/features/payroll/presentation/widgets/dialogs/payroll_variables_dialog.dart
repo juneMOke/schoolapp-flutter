@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/money/amount_input.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
@@ -77,7 +76,7 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
   late final List<PayrollCustomField> _custom = [
     for (final type in widget.deductionTypes)
       if (_entryOf(type) case final entry
-          when !type.archived || (entry?.amountInCents ?? 0) > 0)
+          when !type.archived || (entry?.counted?.amountInCents ?? 0) > 0)
         PayrollCustomField.of(type, entry, widget.line.currency),
   ];
 
@@ -145,9 +144,7 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
     final shown = {for (final field in _custom) field.type.id};
     return [
       for (final entry in widget.entries)
-        if (!shown.contains(entry.deductionTypeId) &&
-            entry.syncState != RecordSyncState.failed)
-          entry,
+        if (!shown.contains(entry.deductionTypeId)) ?entry.counted,
       for (final field in _custom) ?field.preview(_memberId),
     ];
   }

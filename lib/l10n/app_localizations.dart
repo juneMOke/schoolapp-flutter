@@ -32568,6 +32568,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'School deductions'**
   String get payrollDashCustom;
+
+  /// No description provided for @payrollVarsCustomRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused amount: {amount}. {reason}'**
+  String payrollVarsCustomRefused(String amount, String reason);
+
+  /// No description provided for @payrollVarsCustomForeign.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} entered in another currency than the month\'s payroll.'**
+  String payrollVarsCustomForeign(String amount);
+
+  /// No description provided for @payrollDeductionNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({label})'**
+  String payrollDeductionNamed(String name, String label);
+
+  /// No description provided for @payrollDeductionRefusedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {reason}'**
+  String payrollDeductionRefusedItem(String name, String reason);
 }
 
 class _AppLocalizationsDelegate

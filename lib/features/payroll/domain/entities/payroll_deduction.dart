@@ -56,6 +56,10 @@ class PayrollDeductionEntry extends Equatable {
   final String deductionTypeId;
   final int amountInCents;
   final String currency;
+
+  /// Ce que le serveur tient pour cette clé ; `null` : rien.
+  final int? serverAmountInCents;
+  final String? serverCurrency;
   final RecordSyncState syncState;
   final String? syncError;
   final String? syncErrorCode;
@@ -65,10 +69,28 @@ class PayrollDeductionEntry extends Equatable {
     required this.deductionTypeId,
     required this.amountInCents,
     required this.currency,
+    this.serverAmountInCents,
+    this.serverCurrency,
     this.syncState = RecordSyncState.synced,
     this.syncError,
     this.syncErrorCode,
   });
+
+  /// Ce qui compte vraiment. Un refus n'a rien écrit au serveur : la valeur
+  /// qu'il tenait reste en vigueur, sinon la tablette signerait un autre livre.
+  /// `null` : rien à compter.
+  PayrollDeductionEntry? get counted {
+    if (syncState != RecordSyncState.failed) return this;
+    final amount = serverAmountInCents;
+    final currency = serverCurrency;
+    if (amount == null || currency == null) return null;
+    return PayrollDeductionEntry(
+      staffMemberId: staffMemberId,
+      deductionTypeId: deductionTypeId,
+      amountInCents: amount,
+      currency: currency,
+    );
+  }
 
   @override
   List<Object?> get props => [
@@ -76,6 +98,8 @@ class PayrollDeductionEntry extends Equatable {
     deductionTypeId,
     amountInCents,
     currency,
+    serverAmountInCents,
+    serverCurrency,
     syncState,
     syncError,
     syncErrorCode,

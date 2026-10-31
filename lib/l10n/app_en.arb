@@ -12156,5 +12156,13 @@
   "@payrollDeductionRefusedNotice": {"placeholders": {"list": {"type": "String"}}},
   "payrollConfirmTrimmed": "{count, plural, =1{One deduction will be cut short} other{{count} deductions will be cut short}}: the gross was not enough.",
   "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}},
-  "payrollDashCustom": "School deductions"
+  "payrollDashCustom": "School deductions",
+  "payrollVarsCustomRefused": "Refused amount: {amount}. {reason}",
+  "@payrollVarsCustomRefused": {"placeholders": {"amount": {"type": "String"}, "reason": {"type": "String"}}},
+  "payrollVarsCustomForeign": "{amount} entered in another currency than the month's payroll.",
+  "@payrollVarsCustomForeign": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollDeductionNamed": "{name} ({label})",
+  "@payrollDeductionNamed": {"placeholders": {"name": {"type": "String"}, "label": {"type": "String"}}},
+  "payrollDeductionRefusedItem": "{name}: {reason}",
+  "@payrollDeductionRefusedItem": {"placeholders": {"name": {"type": "String"}, "reason": {"type": "String"}}}
 }

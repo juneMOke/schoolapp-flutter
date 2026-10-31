@@ -47,7 +47,7 @@ abstract final class PayrollLedgerNotices {
       final type = snapshot.deductionTypes
           .where((type) => type.id == entry.deductionTypeId)
           .firstOrNull;
-      return type == null ? name : '$name (${type.label})';
+      return type == null ? name : l10n.payrollDeductionNamed(name, type.label);
     }
 
     // Le blocage de devise a sa propre annonce, qui nomme les agents.
@@ -111,7 +111,7 @@ abstract final class PayrollLedgerNotices {
           ),
           icon: Icons.currency_exchange,
         ),
-      if (issues.refused.isNotEmpty && canWrite)
+      if (issues.refused.isNotEmpty && (canWrite || canManage))
         Row(
           children: [
             Expanded(
@@ -119,20 +119,27 @@ abstract final class PayrollLedgerNotices {
                 l10n.payrollDeductionRefusedNotice(
                   issues.refused
                       .map(
-                        (entry) =>
-                            '${named(entry)} : ${PayrollLabels.serverRefusal(l10n, entry.syncErrorCode)}',
+                        (entry) => l10n.payrollDeductionRefusedItem(
+                          named(entry),
+                          PayrollLabels.serverRefusal(
+                            l10n,
+                            entry.syncErrorCode,
+                          ),
+                        ),
                       )
                       .join(', '),
                 ),
                 icon: Icons.remove_circle_outline,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            EteeloButton.ghost(
-              label: l10n.payrollDeductionRefusedDismiss,
-              onPressed: () => actions.dismissRefusedDeductions(view),
-              fullWidth: false,
-            ),
+            if (canWrite) ...[
+              const SizedBox(width: AppSpacing.sm),
+              EteeloButton.ghost(
+                label: l10n.payrollDeductionRefusedDismiss,
+                onPressed: () => actions.dismissRefusedDeductions(view),
+                fullWidth: false,
+              ),
+            ],
           ],
         ),
     ];

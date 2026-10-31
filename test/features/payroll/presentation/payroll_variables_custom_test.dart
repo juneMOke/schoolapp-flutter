@@ -198,10 +198,46 @@ void main() {
       expect(foreign.changed('m-1')!.currency, 'USD');
     });
 
-    test('refusée : ressaisir le même montant repart', () {
+    test('refusée : ne repart pas sans geste, ressaisie elle repart', () {
       final refused = field(_entry('a', 500, state: RecordSyncState.failed));
 
+      expect(refused.controller.text, isEmpty);
+      expect(refused.changed('m-1'), isNull);
+      expect(refused.preview('m-1'), isNull);
+
+      refused.controller.text = '5';
       expect(refused.changed('m-1')!.amountInCents, 500);
+    });
+
+    test('refusée avec valeur serveur : s\'ouvre dessus, 0 la retire', () {
+      final refused = field(
+        const PayrollDeductionEntry(
+          staffMemberId: 'm-1',
+          deductionTypeId: 'a',
+          amountInCents: 800,
+          currency: 'USD',
+          serverAmountInCents: 500,
+          serverCurrency: 'USD',
+          syncState: RecordSyncState.failed,
+        ),
+      );
+
+      expect(refused.changed('m-1'), isNull);
+      refused.controller.clear();
+      expect(refused.changed('m-1')!.amountInCents, 0);
+    });
+
+    test('verrouillée en autre devise : la mise à 0 part', () {
+      final locked = PayrollCustomField.of(
+        _old,
+        _entry('z', 500, currency: 'CDF'),
+        'USD',
+      );
+
+      expect(locked.clearable, isTrue);
+      locked.clear();
+      expect(locked.clearable, isFalse);
+      expect(locked.changed('m-1')!.amountInCents, 0);
     });
   });
 
@@ -405,12 +441,7 @@ void main() {
         ],
       )();
 
-      expect(
-        find.text(
-          'Cette rubrique est archivée : seule la mise à 0 est possible.',
-        ),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Montant refusé'), findsOneWidget);
     });
 
     testWidgets('une autre devise le dit sur son champ', (tester) async {
@@ -422,12 +453,7 @@ void main() {
         entries: [_entry('a', 500, currency: 'CDF')],
       )();
 
-      expect(
-        find.text(
-          'Cette retenue est saisie dans une autre devise que la paie du mois.',
-        ),
-        findsOneWidget,
-      );
+      expect(find.textContaining('dans une autre devise'), findsOneWidget);
     });
   });
 }

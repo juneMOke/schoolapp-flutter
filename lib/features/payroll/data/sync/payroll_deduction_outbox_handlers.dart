@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/offline/lww_outcome.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_type_dao.dart';
@@ -15,6 +16,7 @@ class PayrollDeductionTypeOutboxHandler
     extends PayrollOutboxHandler<PayrollDeductionTypeRequestDto> {
   final PayrollSyncApi _api;
   final PayrollDeductionTypeDao _dao;
+  final int Function() _now;
 
   PayrollDeductionTypeOutboxHandler({
     required PayrollSyncApi api,
@@ -22,8 +24,10 @@ class PayrollDeductionTypeOutboxHandler
     required super.outbox,
     required super.currentUser,
     required super.extras,
+    int Function()? now,
   }) : _api = api,
-       _dao = dao;
+       _dao = dao,
+       _now = now ?? (() => DateTime.now().millisecondsSinceEpoch);
 
   @override
   String get aggregateType => PayrollOutbox.deductionType;
@@ -32,13 +36,23 @@ class PayrollDeductionTypeOutboxHandler
   PayrollDeductionTypeRequestDto? parse(Object? raw) =>
       PayrollDeductionTypeRequestDto.tryParse(raw);
 
+  /// Une écriture remplacée n'a plus rien à dire : la rejouer sur un refus
+  /// retiendrait pendant des jours tout ce qui attend le catalogue.
+  @override
+  Future<OutboxDispatchResult?> hold(
+    PayrollDeductionTypeRequestDto request,
+    String schoolId,
+  ) async => await _dao.isCurrent(request, schoolId: schoolId)
+      ? null
+      : const OutboxDispatchResult.acked();
+
   @override
   Future<void> send(
     PayrollDeductionTypeRequestDto request,
     String schoolId,
   ) async {
     await _api.submitDeductionType(extras, request.toJson());
-    await _dao.acknowledge(request, schoolId: schoolId);
+    await _dao.acknowledge(request, schoolId: schoolId, nowMs: _now());
   }
 
   @override
@@ -74,6 +88,7 @@ class PayrollDeductionOutboxHandler
   final PayrollSyncApi _api;
   final PayrollDeductionDao _dao;
   final PayrollDeductionTypeDao _types;
+  final int Function() _now;
 
   PayrollDeductionOutboxHandler({
     required PayrollSyncApi api,
@@ -83,9 +98,11 @@ class PayrollDeductionOutboxHandler
     required super.currentUser,
     required super.extras,
     super.members,
+    int Function()? now,
   }) : _api = api,
        _dao = dao,
-       _types = types;
+       _types = types,
+       _now = now ?? (() => DateTime.now().millisecondsSinceEpoch);
 
   @override
   String get aggregateType => PayrollOutbox.deduction;
@@ -111,6 +128,11 @@ class PayrollDeductionOutboxHandler
     PayrollDeductionRequestDto request,
     String schoolId,
   ) async {
+    // Remplacée ou retirée, elle n'a plus rien à dire ; la rejouer sur un refus
+    // retiendrait pendant des jours les gestes du mois.
+    if (!await _dao.isCurrent(request, schoolId: schoolId)) {
+      return const OutboxDispatchResult.acked();
+    }
     final type = await _types.of(schoolId, request.deductionTypeId);
     if (type.state == StaffParentState.unsent) {
       return const OutboxDispatchResult.blocked('Rubrique pas encore accusée');
@@ -129,8 +151,22 @@ class PayrollDeductionOutboxHandler
 
   @override
   Future<void> send(PayrollDeductionRequestDto request, String schoolId) async {
-    await _api.submitDeduction(extras, request.toJson());
-    await _dao.settle(request, schoolId: schoolId, failed: false);
+    final response = await _api.submitDeduction(extras, request.toJson());
+    await _dao.acknowledge(
+      request,
+      schoolId: schoolId,
+      nowMs: _now(),
+      retained: _retained(response),
+    );
+  }
+
+  /// Ce que le serveur a gardé quand une écriture plus récente a primé.
+  static PayrollDeductionDto? _retained(Object? response) {
+    if (response is! Map) return null;
+    if (LwwOutcome.fromWire(response['lwwOutcome']) != LwwOutcome.superseded) {
+      return null;
+    }
+    return PayrollDeductionDto.tryParse(response['deduction']);
   }
 
   @override
@@ -138,10 +174,9 @@ class PayrollDeductionOutboxHandler
     PayrollDeductionRequestDto request,
     StaffPushFailure failure,
     String schoolId,
-  ) => _dao.settle(
+  ) => _dao.refuse(
     request,
     schoolId: schoolId,
-    failed: true,
     code: failure.storedCode,
     reason: failure.reason,
   );
@@ -155,10 +190,9 @@ class PayrollDeductionOutboxHandler
   Future<void> tombstoned(
     PayrollDeductionRequestDto request,
     String schoolId,
-  ) => _dao.settle(
+  ) => _dao.refuse(
     request,
     schoolId: schoolId,
-    failed: true,
     code: PayrollDeductionCodes.tombstoned,
     reason: 'Rubrique supprimée',
   );

@@ -16,11 +16,18 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/common/
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une rubrique dans la modale : son champ, et ce qu'elle portait à l'ouverture.
+///
+/// Le champ s'ouvre sur **ce qui compte** — la valeur du serveur quand la saisie
+/// a été refusée, vide pour une autre devise. Un montant refusé ne se remplit
+/// jamais : il repartirait sans geste de l'économe.
 class PayrollCustomField {
   final PayrollDeductionType type;
   final PayrollDeductionEntry? entry;
   final String currency;
   final TextEditingController controller;
+
+  /// L'économe a demandé la mise à 0 d'une rubrique verrouillée.
+  bool _cleared = false;
 
   PayrollCustomField._(this.type, this.entry, this.currency, this.controller);
 
@@ -29,16 +36,16 @@ class PayrollCustomField {
     PayrollDeductionEntry? entry,
     String currency,
   ) {
-    final counted = entry != null && _sameCurrency(entry, currency);
-    final amount = entry?.amountInCents ?? 0;
+    final counted = entry?.counted;
+    final amount = counted != null && _sameCurrency(counted, currency)
+        ? counted.amountInCents
+        : 0;
     return PayrollCustomField._(
       type,
       entry,
       currency,
       TextEditingController(
-        text: counted && amount > 0
-            ? MoneyFormat.amountOnly(Money(amount, currency))
-            : '',
+        text: amount > 0 ? MoneyFormat.amountOnly(Money(amount, currency)) : '',
       ),
     );
   }
@@ -47,16 +54,33 @@ class PayrollCustomField {
       CurrencyCode.normalize(entry.currency) ==
       CurrencyCode.normalize(currency);
 
-  /// La saisie porte un montant dans une autre devise que la ligne.
-  bool get foreign =>
-      entry != null &&
-      entry!.amountInCents > 0 &&
-      !_sameCurrency(entry!, currency);
+  /// Ce qui compte aujourd'hui pour cette rubrique, s'il y a quelque chose.
+  PayrollDeductionEntry? get _counted {
+    final counted = entry?.counted;
+    return counted != null && counted.amountInCents > 0 ? counted : null;
+  }
+
+  /// La valeur qui compte est dans une autre devise que la ligne.
+  bool get foreign {
+    final counted = _counted;
+    return counted != null && !_sameCurrency(counted, currency);
+  }
+
+  /// Le montant en autre devise, dans sa propre devise.
+  PayrollDeductionEntry? get foreignEntry => foreign ? _counted : null;
 
   bool get refused => entry?.syncState == RecordSyncState.failed;
 
-  /// Archivée avec un montant : seule la mise à 0 est permise.
+  /// Archivée : seule la mise à 0 est permise.
   bool get locked => type.archived;
+
+  /// La mise à 0 d'une rubrique verrouillée a encore quelque chose à faire.
+  bool get clearable => !_cleared && (foreign || amountInCents > 0);
+
+  void clear() {
+    _cleared = true;
+    controller.clear();
+  }
 
   /// `AmountInput` ne connaît que les montants positifs ; ici, 0 retire la
   /// retenue.
@@ -69,17 +93,16 @@ class PayrollCustomField {
 
   int get amountInCents => AmountInput.toCents(controller.text) ?? 0;
 
-  /// Ce qui compte tel quel à l'ouverture ; une saisie refusée n'y est plus,
-  /// une autre devise non plus.
-  int get _openedInCents =>
-      entry == null || refused || foreign ? 0 : entry!.amountInCents;
+  /// Le montant de la ligne à l'ouverture, dans sa devise.
+  int get _openedInCents => foreign ? 0 : _counted?.amountInCents ?? 0;
+
+  bool get _touched => _cleared || controller.text.trim().isNotEmpty;
 
   /// La saisie à écrire, ou `null` si rien n'a changé. Dans une autre devise,
   /// un champ laissé vide ne dit rien ; un 0 tapé efface.
   PayrollDeductionEntry? changed(String staffMemberId) {
     if (invalid) return null;
-    final touched = controller.text.trim().isNotEmpty;
-    if (amountInCents == _openedInCents && !(foreign && touched)) return null;
+    if (amountInCents == _openedInCents && !(foreign && _touched)) return null;
     return PayrollDeductionEntry(
       staffMemberId: staffMemberId,
       deductionTypeId: type.id,
@@ -160,10 +183,17 @@ class _Field extends StatelessWidget {
     final retained = preview.deductions.custom
         .where((c) => c.deductionTypeId == field.type.id)
         .firstOrNull;
-    final note = field.foreign
-        ? l10n.payrollRuleDeductionCurrency
-        : field.refused
-        ? PayrollLabels.serverRefusal(l10n, field.entry?.syncErrorCode)
+    final foreign = field.foreignEntry;
+    final refused = field.refused ? field.entry : null;
+    final note = foreign != null
+        ? l10n.payrollVarsCustomForeign(
+            PayrollLabels.money(foreign.amountInCents, foreign.currency),
+          )
+        : refused != null
+        ? l10n.payrollVarsCustomRefused(
+            PayrollLabels.money(refused.amountInCents, refused.currency),
+            PayrollLabels.serverRefusal(l10n, refused.syncErrorCode),
+          )
         : retained != null && retained.trimmed
         ? l10n.payrollVarsCustomTrimmed(
             money(retained.requestedInCents),
@@ -182,6 +212,7 @@ class _Field extends StatelessWidget {
             label: field.type.label,
             keyboardType: EteeloTextInputType.number,
             capitalization: EteeloTextCapitalization.none,
+            errorText: field.invalid ? l10n.payrollRuleInvalidAmount : null,
             onChanged: (_) => onChanged(),
           ),
         if (note != null)
@@ -216,15 +247,21 @@ class _ArchivedRow extends StatelessWidget {
         Expanded(
           child: PayrollAmountRow(
             l10n.payrollVarsCustomArchived(field.type.label),
-            money(field.amountInCents),
+            switch (field.foreignEntry) {
+              final foreign? => PayrollLabels.money(
+                foreign.amountInCents,
+                foreign.currency,
+              ),
+              null => money(field.amountInCents),
+            },
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
         EteeloButton.ghost(
           label: l10n.payrollVarsCustomClear,
-          onPressed: field.amountInCents > 0
+          onPressed: field.clearable
               ? () {
-                  field.controller.clear();
+                  field.clear();
                   onChanged();
                 }
               : null,

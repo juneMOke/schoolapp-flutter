@@ -14,7 +14,8 @@ class PayrollDeductionIssues {
   /// calculer l'ordre du moteur, son empreinte serait fausse.
   final List<PayrollDeductionEntry> unknown;
 
-  /// Refusées ou supprimées : hors calcul, à lire par l'économe.
+  /// Refusées ou supprimées : le montant refusé ne compte pas, à lire par
+  /// l'économe.
   final List<PayrollDeductionEntry> refused;
 
   const PayrollDeductionIssues({
@@ -47,15 +48,14 @@ class PayrollDeductionIssues {
     final refused = <PayrollDeductionEntry>[];
     for (final list in entries.values) {
       for (final entry in list) {
-        if (entry.syncState == RecordSyncState.failed) {
-          refused.add(entry);
-        } else if (entry.amountInCents <= 0) {
-          continue;
-        } else if (!known.contains(entry.deductionTypeId.toLowerCase())) {
-          unknown.add(entry);
-        } else if (currencies[entry.staffMemberId] case final currency?
-            when currency != CurrencyCode.normalize(entry.currency)) {
-          foreign.add(entry);
+        if (entry.syncState == RecordSyncState.failed) refused.add(entry);
+        final counted = entry.counted;
+        if (counted == null || counted.amountInCents <= 0) continue;
+        if (!known.contains(counted.deductionTypeId.toLowerCase())) {
+          unknown.add(counted);
+        } else if (currencies[counted.staffMemberId] case final currency?
+            when currency != CurrencyCode.normalize(counted.currency)) {
+          foreign.add(counted);
         }
       }
     }

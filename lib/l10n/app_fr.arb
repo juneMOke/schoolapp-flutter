@@ -12336,5 +12336,13 @@
   "@payrollDeductionRefusedNotice": {"placeholders": {"list": {"type": "String"}}},
   "payrollConfirmTrimmed": "{count, plural, =1{Une retenue sera rognée} other{{count} retenues seront rognées}} : le brut n'a pas suffi.",
   "@payrollConfirmTrimmed": {"placeholders": {"count": {"type": "int"}}},
-  "payrollDashCustom": "Retenues de l'école"
+  "payrollDashCustom": "Retenues de l'école",
+  "payrollVarsCustomRefused": "Montant refusé : {amount}. {reason}",
+  "@payrollVarsCustomRefused": {"placeholders": {"amount": {"type": "String"}, "reason": {"type": "String"}}},
+  "payrollVarsCustomForeign": "{amount} saisis dans une autre devise que la paie du mois.",
+  "@payrollVarsCustomForeign": {"placeholders": {"amount": {"type": "String"}}},
+  "payrollDeductionNamed": "{name} ({label})",
+  "@payrollDeductionNamed": {"placeholders": {"name": {"type": "String"}, "label": {"type": "String"}}},
+  "payrollDeductionRefusedItem": "{name} : {reason}",
+  "@payrollDeductionRefusedItem": {"placeholders": {"name": {"type": "String"}, "reason": {"type": "String"}}}
 }

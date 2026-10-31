@@ -21313,4 +21313,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get payrollDashCustom => 'Retenues de l\'école';
+
+  @override
+  String payrollVarsCustomRefused(String amount, String reason) {
+    return 'Montant refusé : $amount. $reason';
+  }
+
+  @override
+  String payrollVarsCustomForeign(String amount) {
+    return '$amount saisis dans une autre devise que la paie du mois.';
+  }
+
+  @override
+  String payrollDeductionNamed(String name, String label) {
+    return '$name ($label)';
+  }
+
+  @override
+  String payrollDeductionRefusedItem(String name, String reason) {
+    return '$name : $reason';
+  }
 }

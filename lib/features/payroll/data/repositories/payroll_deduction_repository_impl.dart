@@ -111,11 +111,16 @@ class PayrollDeductionRepositoryImpl implements PayrollDeductionRepository {
         await _local.deductionTypes.cancelUnsent(schoolId, id);
         return const Right(unit);
       }
+      // Le serveur ne la voit pas : il accepterait, et la saisie reviendrait
+      // en pierre tombale.
+      if (await _local.deductions.hasQueuedOn(id)) {
+        return Left(PayrollRuleFailure(PayrollRule.deductionTypeInUse));
+      }
       await _api.deleteDeductionType(_extras, id);
       await _local.deductionTypes.remove(schoolId, id);
       return const Right(unit);
     } on DioException catch (e) {
-      return _removeFailure(e, schoolId, id);
+      return await _removeFailure(e, schoolId, id);
     } catch (e) {
       return Left(StorageFailure('Suppression de la rubrique : $e'));
     }

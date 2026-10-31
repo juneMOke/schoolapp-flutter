@@ -1,4 +1,3 @@
-import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
@@ -106,17 +105,14 @@ abstract final class PayrollLedger {
   }
 
   /// Ce que le moteur lit pour [month].
-  /// Une saisie refusée n'est plus au serveur : elle sort du calcul, sinon la
-  /// tablette signerait un livre que le serveur ne retrouve pas.
+  /// Une saisie refusée compte pour ce que le serveur tient, pas pour le
+  /// montant refusé : la tablette signe le livre que le serveur retrouvera.
   static Map<String, List<PayrollDeductionEntry>> _countedDeductions(
     PayrollSnapshot snapshot,
     String month,
   ) => {
     for (final entry in (snapshot.deductions[month] ?? const {}).entries)
-      entry.key: [
-        for (final deduction in entry.value)
-          if (deduction.syncState != RecordSyncState.failed) deduction,
-      ],
+      entry.key: [for (final deduction in entry.value) ?deduction.counted],
   };
 
   static PayrollEngineInput inputOf(PayrollSnapshot snapshot, String month) =>

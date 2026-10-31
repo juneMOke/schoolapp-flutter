@@ -38,6 +38,10 @@ class PayrollStore {
 
   const PayrollStore(this._db);
 
+  /// Pendant ce délai après un accusé, une descente est présumée lue avant
+  /// lui : elle n'efface ni ne recule la ligne accusée.
+  static const int freshAckWindowMs = 10 * 60 * 1000;
+
   DatabaseExecutor get db => _db;
 
   /// Exécute [body] dans une transaction — ou dans celle qui est déjà ouverte.

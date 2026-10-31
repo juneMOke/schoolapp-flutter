@@ -124,9 +124,11 @@ class PayrollMonthView {
     return month;
   }
 
-  /// Les lignes dont une rubrique n'a pas pu être retenue en entier.
-  int get trimmedCount =>
-      lines.where((line) => line.deductions.hasTrimmedCustom).length;
+  /// Les rubriques qui n'ont pas pu être retenues en entier.
+  int get trimmedCount => lines.fold(
+    0,
+    (sum, line) => sum + line.deductions.custom.where((c) => c.trimmed).length,
+  );
 
   /// Un versement réduit ce mois-ci : un taux sous 100 % ou un montant fixe.
   bool get hasReducedPayout => lines.any((line) => line.deferredInCents > 0);

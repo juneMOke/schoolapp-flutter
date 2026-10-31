@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_outbox.da
 import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_deduction_dto.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
+import 'package:school_app_flutter/features/staff/data/local/staff_lww.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_gate.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -32,7 +33,7 @@ class PayrollDeductionTypeDao {
   Future<List<PayrollDeductionType>> forSchool(String schoolId) async {
     final rows = await _store.db.rawQuery(
       'SELECT *, '
-      '${PayrollStore.lwwEffectiveStatusColumn(PayrollOutbox.deductionType, 'id')} '
+      '${PayrollStore.lwwEffectiveStatusColumn(PayrollOutbox.deductionType, '$table.id')} '
       'FROM $table WHERE school_id = ? ORDER BY sort_order, id',
       [schoolId],
     );
@@ -62,13 +63,26 @@ class PayrollDeductionTypeDao {
     final served = {for (final seed in seeds) seed.id};
     final rows = await txn.query(
       table,
-      columns: ['id', 'server_known'],
+      columns: ['id', 'server_known', 'acked_at'],
       where: 'school_id = ?',
       whereArgs: [schoolId],
     );
+    bool fresh(Map<String, Object?> row) {
+      final acked = row['acked_at'] as int?;
+      return acked != null && nowMs - acked < PayrollStore.freshAckWindowMs;
+    }
+
+    final recent = {
+      for (final row in rows)
+        if (fresh(row)) row['id']! as String,
+    };
     for (final row in rows) {
       final id = row['id']! as String;
-      if (served.contains(id) || row['server_known'] != 1) continue;
+      if (served.contains(id) ||
+          row['server_known'] != 1 ||
+          recent.contains(id)) {
+        continue;
+      }
       if (await _isQueued(txn, schoolId, id)) continue;
       await txn.delete(
         table,
@@ -77,6 +91,7 @@ class PayrollDeductionTypeDao {
       );
     }
     for (final seed in seeds) {
+      if (recent.contains(seed.id)) continue;
       if (await _isQueued(txn, schoolId, seed.id)) continue;
       await PayrollStore.upsert(txn, table, _key(schoolId, seed.id), {
         'label': seed.label,
@@ -138,15 +153,35 @@ class PayrollDeductionTypeDao {
     }
   });
 
+  /// La rubrique envoyée est-elle encore celle de la ligne ? Sinon elle n'a
+  /// plus rien à dire : sa remplaçante part avec sa propre entrée.
+  Future<bool> isCurrent(
+    PayrollDeductionTypeRequestDto sent, {
+    required String schoolId,
+  }) async {
+    final rows = await _store.db.query(
+      table,
+      columns: ['client_updated_at'],
+      where: PayrollStore.where(_key(schoolId, sent.id)),
+      whereArgs: PayrollStore.args(_key(schoolId, sent.id)),
+    );
+    return rows.isNotEmpty &&
+        StaffLww.sameInstant(
+          rows.single['client_updated_at'] as String?,
+          sent.clientUpdatedAt,
+        );
+  }
+
   /// L'accusé : le serveur connaît la rubrique, même si elle a été retouchée
   /// pendant le vol.
   Future<void> acknowledge(
     PayrollDeductionTypeRequestDto sent, {
     required String schoolId,
+    required int nowMs,
   }) async {
     await _store.db.update(
       table,
-      {'server_known': 1},
+      {'server_known': 1, 'acked_at': nowMs},
       where: PayrollStore.where(_key(schoolId, sent.id)),
       whereArgs: PayrollStore.args(_key(schoolId, sent.id)),
     );
@@ -249,9 +284,9 @@ class PayrollDeductionTypeDao {
         );
         await txn.delete(
           OutboxDao.table,
-          where: 'status = ? AND (id LIKE ? OR id LIKE ?)',
+          where: 'status != ? AND (id LIKE ? OR id LIKE ?)',
           whereArgs: [
-            OutboxStatus.pending.dbValue,
+            OutboxStatus.acked.dbValue,
             '${PayrollOutbox.deductionType}:$id@%',
             '${PayrollOutbox.deduction}:%:$id@%',
           ],

@@ -100,6 +100,44 @@ void main() {
     expect(view.lines.single.deductions.custom, isEmpty);
   });
 
+  test('une modification refusée compte pour la valeur du serveur', () {
+    final without = _view(_snapshot(const [])).lines.single;
+    final view = _view(
+      _snapshot([
+        const PayrollDeductionEntry(
+          staffMemberId: 'm-1',
+          deductionTypeId: 't',
+          amountInCents: 800,
+          currency: 'USD',
+          serverAmountInCents: 300,
+          serverCurrency: 'USD',
+          syncState: RecordSyncState.failed,
+        ),
+      ]),
+    );
+
+    expect(view.lines.single.netInCents, without.netInCents - 300);
+    expect(view.deductionIssues.refused, hasLength(1));
+  });
+
+  test('une valeur serveur en autre devise bloque, même sous un refus', () {
+    final view = _view(
+      _snapshot([
+        const PayrollDeductionEntry(
+          staffMemberId: 'm-1',
+          deductionTypeId: 't',
+          amountInCents: 800,
+          currency: 'USD',
+          serverAmountInCents: 300,
+          serverCurrency: 'CDF',
+          syncState: RecordSyncState.failed,
+        ),
+      ]),
+    );
+
+    expect(view.submitBlocker, PayrollBlocker.deductionCurrency);
+  });
+
   test('une paie figée ne se bloque plus', () {
     final view = _view(
       _snapshot(

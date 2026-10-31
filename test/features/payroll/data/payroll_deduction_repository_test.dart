@@ -165,6 +165,29 @@ void main() {
       expect(await local.deductionTypes.forSchool(_school), hasLength(1));
     });
 
+    test('une saisie encore en file la retient, sans appel', () async {
+      await knownType();
+      await repository.saveEntries(
+        '2026-10',
+        entries: const [
+          PayrollDeductionEntry(
+            staffMemberId: 'm-1',
+            deductionTypeId: 't-1',
+            amountInCents: 500,
+            currency: 'USD',
+          ),
+        ],
+      );
+
+      final result = await repository.removeType('t-1');
+
+      expect(
+        result.fold((f) => (f as PayrollRuleFailure).rule, (_) => null),
+        PayrollRule.deductionTypeInUse,
+      );
+      verifyNever(() => api.deleteDeductionType(any(), any()));
+    });
+
     test('déjà supprimée au serveur : retirée ici aussi', () async {
       when(
         () => api.deleteDeductionType(any(), any()),

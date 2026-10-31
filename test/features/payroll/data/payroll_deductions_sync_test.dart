@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_dao.dart';
@@ -139,7 +140,8 @@ void main() {
   Future<PayrollDeductionTypeRequestDto> known() async {
     final request = _type();
     await saveType(request);
-    await types.acknowledge(request, schoolId: _school);
+    await types.acknowledge(request, schoolId: _school, nowMs: 0);
+    await db.update(PayrollDeductionTypeDao.table, {'acked_at': null});
     await db.delete(OutboxDao.table);
     return request;
   }
@@ -274,10 +276,9 @@ void main() {
 
     test('refusée sans valeur au serveur, elle reste hors calcul', () async {
       await saveSaisie(_saisie());
-      await deductions.settle(
+      await deductions.refuse(
         _saisie(),
         schoolId: _school,
-        failed: true,
         code: PayrollDeductionCodes.archived,
       );
       await db.delete(OutboxDao.table);
@@ -289,11 +290,50 @@ void main() {
       ))[_month]!['m-1']!.single;
       expect(entry.syncState, RecordSyncState.failed);
       expect(entry.syncErrorCode, PayrollDeductionCodes.archived);
+      expect(entry.counted, isNull);
     });
 
-    test('refusée avec une valeur au serveur, celle-ci revient', () async {
+    test(
+      'une modification refusée laisse compter la valeur du serveur',
+      () async {
+        await pull([_server(300)]);
+        await saveSaisie(_saisie(amount: 800));
+        await deductions.refuse(_saisie(amount: 800), schoolId: _school);
+        await db.delete(OutboxDao.table);
+
+        final entry = (await deductions.forSchool(
+          _school,
+        ))[_month]!['m-1']!.single;
+        expect(entry.syncState, RecordSyncState.failed);
+        expect(entry.amountInCents, 800);
+        expect(entry.counted!.amountInCents, 300);
+      },
+    );
+
+    test('la lecture du refus revient à la valeur du serveur', () async {
+      await pull([_server(300)]);
+      await saveSaisie(_saisie(amount: 800));
+      await deductions.refuse(_saisie(amount: 800), schoolId: _school);
+      await db.update(OutboxDao.table, {
+        'status': OutboxStatus.syncError.dbValue,
+      });
+      final refused = (await deductions.forSchool(
+        _school,
+      ))[_month]!['m-1']!.single;
+
+      await deductions.dismiss(_month, refused, schoolId: _school);
+
+      final entry = (await deductions.forSchool(
+        _school,
+      ))[_month]!['m-1']!.single;
+      expect(entry.amountInCents, 300);
+      expect(entry.syncState, RecordSyncState.synced);
+      expect(await db.query(OutboxDao.table), isEmpty);
+    });
+
+    test('un refus se garde même si la descente repasse', () async {
       await saveSaisie(_saisie());
-      await deductions.settle(_saisie(), schoolId: _school, failed: true);
+      await deductions.refuse(_saisie(), schoolId: _school, code: 'X');
       await db.delete(OutboxDao.table);
 
       await pull([_server(300)]);
@@ -301,8 +341,37 @@ void main() {
       final entry = (await deductions.forSchool(
         _school,
       ))[_month]!['m-1']!.single;
-      expect(entry.amountInCents, 300);
-      expect(entry.syncState, RecordSyncState.synced);
+      expect(entry.syncState, RecordSyncState.failed);
+      expect(entry.counted!.amountInCents, 300);
+    });
+
+    test('une saisie en file garde la valeur du serveur en réserve', () async {
+      await saveSaisie(_saisie(amount: 900));
+
+      await pull([_server(500)]);
+
+      final entry = (await deductions.forSchool(
+        _school,
+      ))[_month]!['m-1']!.single;
+      expect(entry.amountInCents, 900);
+      expect(entry.serverAmountInCents, 500);
+    });
+
+    test('un accusé tout frais résiste à une descente lue avant lui', () async {
+      await saveSaisie(_saisie(amount: 900));
+      await deductions.acknowledge(
+        _saisie(amount: 900),
+        schoolId: _school,
+        nowMs: 5,
+      );
+
+      await pull(const []);
+      await pull([_server(100)]);
+
+      final entry = (await deductions.forSchool(
+        _school,
+      ))[_month]!['m-1']!.single;
+      expect(entry.amountInCents, 900);
     });
 
     test('une saisie illisible : la paie ne remplace rien', () {
@@ -349,6 +418,29 @@ void main() {
   });
 
   group('envoi d\'une rubrique', () {
+    test('remplacée : acquittée sans envoi', () async {
+      await saveType(_type());
+      final older = await entryOf(PayrollOutbox.deductionType);
+      await saveType(
+        _type(label: 'Badges', at: '2026-10-25T09:00:00Z'),
+        at: 20,
+      );
+
+      final result = await typeHandler().dispatch(older);
+
+      expect(result.outcome, OutboxDispatchOutcome.acked);
+      verifyNever(() => api.submitDeductionType(any(), any()));
+    });
+
+    test('en file, elle se lit en attente, pas refusée', () async {
+      await saveType(_type());
+
+      expect(
+        (await types.forSchool(_school)).single.syncState,
+        RecordSyncState.pending,
+      );
+    });
+
     test('accusée, le serveur la connaît', () async {
       when(
         () => api.submitDeductionType(any(), any()),
@@ -476,6 +568,47 @@ void main() {
       expect(entry.syncState, RecordSyncState.failed);
       expect(entry.syncErrorCode, PayrollDeductionCodes.tombstoned);
     });
+
+    test('un accusé SUPERSEDED range la valeur retenue', () async {
+      when(() => api.submitDeduction(any(), any())).thenAnswer(
+        (_) async => {
+          'lwwOutcome': 'SUPERSEDED',
+          'deduction': {
+            'staffMemberId': 'm-1',
+            'deductionTypeId': 't-1',
+            'amountInCents': 777,
+            'currency': 'USD',
+            'clientUpdatedAt': '2026-10-22T09:00:00Z',
+          },
+        },
+      );
+      await saveSaisie(_saisie());
+
+      await saisieHandler().dispatch(await entryOf(PayrollOutbox.deduction));
+
+      final entry = (await deductions.forSchool(
+        _school,
+      ))[_month]!['m-1']!.single;
+      expect(entry.amountInCents, 777);
+      expect(entry.serverAmountInCents, 777);
+    });
+
+    test(
+      'remplacée : acquittée sans envoi, sans boucler sur un refus',
+      () async {
+        await saveSaisie(_saisie(amount: 700));
+        final older = await entryOf(PayrollOutbox.deduction);
+        await saveSaisie(
+          _saisie(amount: 800, at: '2026-10-22T09:00:00Z'),
+          at: 30,
+        );
+
+        final result = await saisieHandler().dispatch(older);
+
+        expect(result.outcome, OutboxDispatchOutcome.acked);
+        verifyNever(() => api.submitDeduction(any(), any()));
+      },
+    );
 
     test('devise refusée : le code est rangé sur la saisie', () async {
       when(
