@@ -32467,17 +32467,53 @@ abstract class AppLocalizations {
   /// **'This deduction has been used: its code and currency can no longer change.'**
   String get payrollDeductionsLockedHint;
 
-  /// No description provided for @payrollDeductionsDefaultOf.
+  /// No description provided for @payrollDeductionsColDefault.
   ///
   /// In en, this message translates to:
-  /// **'{amount} by default'**
-  String payrollDeductionsDefaultOf(String amount);
+  /// **'Default'**
+  String get payrollDeductionsColDefault;
 
-  /// No description provided for @payrollDeductionsNoDefault.
+  /// No description provided for @payrollSettingsModelTitle.
   ///
   /// In en, this message translates to:
-  /// **'{currency}, no default amount'**
-  String payrollDeductionsNoDefault(String currency);
+  /// **'Standard deductions'**
+  String get payrollSettingsModelTitle;
+
+  /// No description provided for @payrollSettingsModelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off what your school doesn\'t apply: these deductions disappear from data entry and from the payslip.'**
+  String get payrollSettingsModelSubtitle;
+
+  /// No description provided for @payrollSettingsLegalToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withhold IPR and CNSS'**
+  String get payrollSettingsLegalToggle;
+
+  /// No description provided for @payrollSettingsAdvancesToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant salary advances'**
+  String get payrollSettingsAdvancesToggle;
+
+  /// No description provided for @payrollSettingsLoansToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant staff loans'**
+  String get payrollSettingsLoansToggle;
+
+  /// No description provided for @payrollVarsSectionEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings'**
+  String get payrollVarsSectionEarnings;
+
+  /// No description provided for @payrollVarsSectionDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard deductions'**
+  String get payrollVarsSectionDeductions;
 
   /// No description provided for @payrollVarsCustomDefault.
   ///

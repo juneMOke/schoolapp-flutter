@@ -31,7 +31,7 @@ abstract final class PayrollAdvanceRules {
   /// Les échéances d'un prêt au plus : le réglage de l'école (Q8), que le
   /// serveur juge au dépôt — 4 tant qu'il ne l'a pas servi.
   static int maxInstallmentsOf(PayrollSnapshot snapshot) =>
-      snapshot.settings.loanMaxMonths;
+      snapshot.settings.staffLoansEnabled ? snapshot.settings.loanMaxMonths : 1;
 
   /// Le mois où tombe la première échéance par défaut : le mois en cours si sa
   /// paie est encore en brouillon, sinon le suivant.
@@ -58,7 +58,8 @@ abstract final class PayrollAdvanceRules {
   ) {
     if (draft.amount.amountInCents <= 0) return PayrollRule.invalidAmount;
     if (draft.installments < 1 ||
-        draft.installments > maxInstallmentsOf(snapshot)) {
+        draft.installments > maxInstallmentsOf(snapshot) ||
+        !snapshot.settings.allowsInstallments(draft.installments)) {
       return PayrollRule.invalidInstallments;
     }
     final contract = contractFor(

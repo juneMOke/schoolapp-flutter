@@ -170,6 +170,7 @@ class PayrollPayslipContent {
         context,
         line,
         advances,
+        settings: snapshot.settings,
         idle: listIdleRubrics && !line.frozen
             ? [
                 for (final type in snapshot.deductionTypes)

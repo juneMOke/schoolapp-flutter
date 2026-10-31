@@ -21107,14 +21107,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'This deduction has been used: its code and currency can no longer change.';
 
   @override
-  String payrollDeductionsDefaultOf(String amount) {
-    return '$amount by default';
-  }
+  String get payrollDeductionsColDefault => 'Default';
 
   @override
-  String payrollDeductionsNoDefault(String currency) {
-    return '$currency, no default amount';
-  }
+  String get payrollSettingsModelTitle => 'Standard deductions';
+
+  @override
+  String get payrollSettingsModelSubtitle =>
+      'Turn off what your school doesn\'t apply: these deductions disappear from data entry and from the payslip.';
+
+  @override
+  String get payrollSettingsLegalToggle => 'Withhold IPR and CNSS';
+
+  @override
+  String get payrollSettingsAdvancesToggle => 'Grant salary advances';
+
+  @override
+  String get payrollSettingsLoansToggle => 'Grant staff loans';
+
+  @override
+  String get payrollVarsSectionEarnings => 'Earnings';
+
+  @override
+  String get payrollVarsSectionDeductions => 'Standard deductions';
 
   @override
   String payrollVarsCustomDefault(String amount) {

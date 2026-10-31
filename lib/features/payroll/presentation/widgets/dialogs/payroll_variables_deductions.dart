@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_amount_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les retenues fixes dans les éléments variables : la prise en charge des
-/// enfants (PC/E), et ce que les retenues prennent sur le brut. L'absence ne
-/// se saisit pas (formule 3) : elle vient du Pointage clos du mois, qu'on
-/// rouvre pour la corriger.
+/// Les retenues du modèle dans les éléments variables : ce qui est calculé, à
+/// lire, puis la prise en charge des enfants (PC/E), à saisir. Une retenue à 0
+/// ne se montre pas. L'absence ne se saisit pas (formule 3) : elle vient du
+/// Pointage clos du mois, qu'on rouvre pour la corriger.
 class PayrollVariablesDeductions extends StatelessWidget {
   /// La ligne qu'auraient les éléments saisis.
   final PayrollLine preview;
@@ -36,14 +37,6 @@ class PayrollVariablesDeductions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (childcareEnabled)
-          EteeloTextInput(
-            controller: childcare,
-            label: l10n.payrollVarsChildcare,
-            keyboardType: EteeloTextInputType.number,
-            capitalization: EteeloTextCapitalization.none,
-            onChanged: (_) => onChanged(),
-          ),
         if (deductions.absenceInCents > 0)
           PayrollAmountRow(
             l10n.payrollVarsAbsence(deductions.absentDays ?? 0),
@@ -56,11 +49,22 @@ class PayrollVariablesDeductions extends StatelessWidget {
             '− ${money(deductions.iprInCents + deductions.cnssInCents)}',
             ink: AppColors.error,
           ),
-        if (deductions.childcareInCents > 0)
+        if (preview.advances.isNotEmpty)
           PayrollAmountRow(
-            l10n.payrollVarsChildcareShort,
-            '− ${money(deductions.childcareInCents)}',
+            l10n.payrollVarsAdvances,
+            '− ${money(preview.advanceInCents)}',
             ink: AppColors.error,
+          ),
+        if (childcareEnabled)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: EteeloTextInput(
+              controller: childcare,
+              label: l10n.payrollVarsChildcare,
+              keyboardType: EteeloTextInputType.number,
+              capitalization: EteeloTextCapitalization.none,
+              onChanged: (_) => onChanged(),
+            ),
           ),
       ],
     );

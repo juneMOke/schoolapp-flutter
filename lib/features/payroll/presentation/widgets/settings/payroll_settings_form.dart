@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_model_deductions_card.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_draft.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_inputs.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
@@ -9,9 +10,9 @@ import 'package:school_app_flutter/features/staff/presentation/helpers/staff_con
 import 'package:school_app_flutter/features/staff/presentation/helpers/staff_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le barème en quatre cartes : le mois de salaire, les retenues légales, les
-/// heures supplémentaires, les allocations familiales. [readOnly] : l'économe
-/// consulte, champs grisés.
+/// Le barème en cartes : le mois de salaire, les retenues du modèle, les
+/// retenues légales si l'école les applique, les heures supplémentaires, les
+/// allocations familiales. [readOnly] : l'économe consulte, champs grisés.
 class PayrollSettingsForm extends StatelessWidget {
   final PayrollSettingsDraft draft;
   final bool readOnly;
@@ -56,34 +57,31 @@ class PayrollSettingsForm extends StatelessWidget {
               draft.errorOfHours(),
             ),
           ],
-          footer: PayrollSettingsToggle(
-            label: l10n.payrollSettingsAbsenceDeduction,
-            selected: draft.absence,
-            onTap: readOnly ? null : draft.toggleAbsence,
-          ),
         ),
-        PayrollSettingsCard(
-          title: l10n.payrollSettingsLegalTitle,
-          subtitle: l10n.payrollSettingsLegalSubtitle,
-          icon: Icons.account_balance_outlined,
-          fields: [
-            for (final currency in currencies) ...[
-              amount(
-                currency,
-                PayrollCurrencyField.ipr,
-                l10n.payrollSettingsIpr,
-              ),
-              field(
-                draft.cnss[currency]!,
-                l10n.payrollSettingsInCurrency(
-                  l10n.payrollSettingsCnss,
+        PayrollModelDeductionsCard(draft: draft, readOnly: readOnly),
+        if (draft.legal)
+          PayrollSettingsCard(
+            title: l10n.payrollSettingsLegalTitle,
+            subtitle: l10n.payrollSettingsLegalSubtitle,
+            icon: Icons.account_balance_outlined,
+            fields: [
+              for (final currency in currencies) ...[
+                amount(
                   currency,
+                  PayrollCurrencyField.ipr,
+                  l10n.payrollSettingsIpr,
                 ),
-                draft.errorOfCnss(currency),
-              ),
+                field(
+                  draft.cnss[currency]!,
+                  l10n.payrollSettingsInCurrency(
+                    l10n.payrollSettingsCnss,
+                    currency,
+                  ),
+                  draft.errorOfCnss(currency),
+                ),
+              ],
             ],
-          ],
-        ),
+          ),
         PayrollSettingsCard(
           title: l10n.payrollSettingsOvertimeTitle,
           subtitle: l10n.payrollSettingsOvertimeSubtitle,

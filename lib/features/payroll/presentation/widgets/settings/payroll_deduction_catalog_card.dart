@@ -5,10 +5,10 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/bi_tone_section_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_type_row.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_table.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-export 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_type_row.dart'
+export 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_table.dart'
     show PayrollDeductionCatalogActions;
 
 /// RH · Paie ▸ Configuration — la carte des rubriques de l'école. Hors de la
@@ -58,15 +58,10 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-            for (final (index, type) in active.indexed)
-              PayrollDeductionTypeRow(
-                type: type,
-                actions: actions,
-                canMoveUp: index > 0,
-                canMoveDown: index < active.length - 1,
-              ),
+            if (active.isNotEmpty)
+              PayrollDeductionTable(types: active, actions: actions),
             if (actions != null) ...[
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.md),
               Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: EteeloButton.secondary(
@@ -94,8 +89,8 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-              for (final type in archived)
-                PayrollDeductionTypeRow(type: type, actions: actions),
+              const SizedBox(height: AppSpacing.sm),
+              PayrollDeductionTable(types: archived, actions: actions),
             ],
           ],
         ),

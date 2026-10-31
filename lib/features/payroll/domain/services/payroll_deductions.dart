@@ -56,9 +56,15 @@ abstract final class PayrollDeductions {
           ? _absence(baseInCents, absences, workingDays)
           : 0,
     );
-    final ipr = take(grossInCents > 0 ? perCurrency.iprFlatInCents : 0);
+    // Coupés par l'école, ils comptent 0 ; les taux réglés restent rangés.
+    final legal = settings.legalDeductionsEnabled;
+    final ipr = take(
+      legal && grossInCents > 0 ? perCurrency.iprFlatInCents : 0,
+    );
     final cnss = take(
-      PayrollMath.roundDiv(baseInCents * perCurrency.cnssPermille, 1000),
+      legal
+          ? PayrollMath.roundDiv(baseInCents * perCurrency.cnssPermille, 1000)
+          : 0,
     );
     // Coupée par l'école (Q8), la PC/E compte 0 — le montant saisi reste
     // rangé, et revient si on la rallume. Même règle au serveur.

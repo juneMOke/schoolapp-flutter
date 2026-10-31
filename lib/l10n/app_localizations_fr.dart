@@ -21246,14 +21246,30 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette rubrique a servi : son code et sa devise ne changent plus.';
 
   @override
-  String payrollDeductionsDefaultOf(String amount) {
-    return '$amount par défaut';
-  }
+  String get payrollDeductionsColDefault => 'Par défaut';
 
   @override
-  String payrollDeductionsNoDefault(String currency) {
-    return '$currency, sans montant par défaut';
-  }
+  String get payrollSettingsModelTitle => 'Retenues du modèle';
+
+  @override
+  String get payrollSettingsModelSubtitle =>
+      'Coupez ce que votre école n\'applique pas : ces retenues disparaissent de la saisie et du bulletin.';
+
+  @override
+  String get payrollSettingsLegalToggle => 'Retenir l\'IPR et la CNSS';
+
+  @override
+  String get payrollSettingsAdvancesToggle =>
+      'Accorder des avances sur salaire';
+
+  @override
+  String get payrollSettingsLoansToggle => 'Accorder des prêts au personnel';
+
+  @override
+  String get payrollVarsSectionEarnings => 'Gains';
+
+  @override
+  String get payrollVarsSectionDeductions => 'Retenues du modèle';
 
   @override
   String payrollVarsCustomDefault(String amount) {

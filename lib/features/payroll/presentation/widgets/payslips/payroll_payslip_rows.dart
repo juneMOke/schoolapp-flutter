@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_dedu
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settlement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/salary_advance.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
@@ -16,20 +17,18 @@ abstract final class PayrollPayslipRows {
   /// Le montant d'une retenue nulle : la ligne reste listée (modèle papier).
   static const none = '—';
 
-  /// Le rang de l'absence parmi [deductions] — le détail du calcul y ajoute
-  /// sa formule.
-  static const absenceIndex = 1;
-
-  /// Les cinq retenues du modèle des écoles, **toujours** listées dans
-  /// l'ordre du papier — « — » quand elles sont nulles —, les rubriques de
-  /// l'école à leur suite, puis le total :
-  /// chaque montant rangé par le calcul dans sa ligne. [idle] : les rubriques
+  /// Les retenues du modèle que l'école applique, dans l'ordre du papier — « — »
+  /// quand elles sont nulles —, les rubriques de l'école à leur suite, puis le
+  /// total : chaque montant rangé par le calcul dans sa ligne. Une retenue
+  /// coupée ne se liste plus, sauf si elle retient encore quelque chose (une
+  /// avance qui court, une ligne figée avant la coupure). [idle] : les rubriques
   /// sans montant à lister quand même, pour le détail du calcul — le bulletin
   /// ne les imprime pas.
   static List<PayslipRow> deductions(
     BuildContext context,
     PayrollLine line,
     Map<String, SalaryAdvance> advances, {
+    required PayrollSettings settings,
     List<PayrollDeductionType> idle = const [],
   }) {
     final l10n = AppLocalizations.of(context)!;
@@ -55,33 +54,38 @@ abstract final class PayrollPayslipRows {
 
     final total = d.totalInCents + line.advanceInCents;
     return [
-      (
-        label: l10n.payrollPayslipIprCnss,
-        value: money(d.iprInCents + d.cnssInCents),
-        note: null,
-      ),
-      (
-        label: l10n.payrollPayslipAbsence,
-        value: money(d.absenceInCents),
-        note: d.absenceInCents > 0 && d.absentDays != null
-            ? l10n.payrollPayslipAbsenceDays(d.absentDays!)
-            : null,
-      ),
-      (
-        label: l10n.payrollPayslipSalaryAdvance,
-        value: money(taken(false)),
-        note: notes(false),
-      ),
-      (
-        label: l10n.payrollPayslipLoan,
-        value: money(taken(true)),
-        note: notes(true),
-      ),
-      (
-        label: l10n.payrollPayslipChildcare,
-        value: money(d.childcareInCents),
-        note: null,
-      ),
+      if (settings.legalDeductionsEnabled || d.iprInCents + d.cnssInCents > 0)
+        (
+          label: l10n.payrollPayslipIprCnss,
+          value: money(d.iprInCents + d.cnssInCents),
+          note: null,
+        ),
+      if (settings.absenceDeductionEnabled || d.absenceInCents > 0)
+        (
+          label: l10n.payrollPayslipAbsence,
+          value: money(d.absenceInCents),
+          note: d.absenceInCents > 0 && d.absentDays != null
+              ? l10n.payrollPayslipAbsenceDays(d.absentDays!)
+              : null,
+        ),
+      if (settings.salaryAdvancesEnabled || notes(false) != null)
+        (
+          label: l10n.payrollPayslipSalaryAdvance,
+          value: money(taken(false)),
+          note: notes(false),
+        ),
+      if (settings.staffLoansEnabled || notes(true) != null)
+        (
+          label: l10n.payrollPayslipLoan,
+          value: money(taken(true)),
+          note: notes(true),
+        ),
+      if (settings.childcareEnabled || d.childcareInCents > 0)
+        (
+          label: l10n.payrollPayslipChildcare,
+          value: money(d.childcareInCents),
+          note: null,
+        ),
       for (final custom in d.custom)
         (
           label: custom.label,

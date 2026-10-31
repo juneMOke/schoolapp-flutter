@@ -46,28 +46,26 @@ class PayrollWideSettingsCards extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PayrollSettingsCard(
-          title: l10n.payrollSettingsAdvancesTitle,
-          subtitle: l10n.payrollSettingsAdvancesSubtitle,
-          icon: Icons.volunteer_activism_outlined,
-          fields: [
-            number(
-              wide.advanceMax,
-              l10n.payrollSettingsAdvanceMax,
-              wide.errorOfAdvanceMax(),
-            ),
-            number(
-              wide.loanMax,
-              l10n.payrollSettingsLoanMax,
-              wide.errorOfLoanMax(),
-            ),
-          ],
-          footer: PayrollSettingsToggle(
-            label: l10n.payrollSettingsChildcare,
-            selected: wide.childcare,
-            onTap: readOnly ? null : draft.toggleChildcare,
+        if (draft.advances || draft.loans)
+          PayrollSettingsCard(
+            title: l10n.payrollSettingsAdvancesTitle,
+            subtitle: l10n.payrollSettingsAdvancesSubtitle,
+            icon: Icons.volunteer_activism_outlined,
+            fields: [
+              if (draft.advances)
+                number(
+                  wide.advanceMax,
+                  l10n.payrollSettingsAdvanceMax,
+                  wide.errorOfAdvanceMax(),
+                ),
+              if (draft.loans)
+                number(
+                  wide.loanMax,
+                  l10n.payrollSettingsLoanMax,
+                  wide.errorOfLoanMax(),
+                ),
+            ],
           ),
-        ),
         PayrollSettingsCard(
           title: l10n.payrollSettingsEmployerTitle,
           subtitle: l10n.payrollSettingsEmployerSubtitle,

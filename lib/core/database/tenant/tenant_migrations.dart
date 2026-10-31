@@ -136,6 +136,20 @@ Future<void> migrateTenantDatabase(
   if (upTo(75)) {
     await _addDeductionTypeFields(db);
   }
+  if (upTo(76)) {
+    for (final column in const [
+      'legal_deductions_enabled',
+      'salary_advances_enabled',
+      'staff_loans_enabled',
+    ]) {
+      await _addColumnIfTable(
+        db,
+        'ref_payroll_settings',
+        column,
+        type: 'INTEGER',
+      );
+    }
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les

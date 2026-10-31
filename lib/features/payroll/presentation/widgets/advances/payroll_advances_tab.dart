@@ -63,7 +63,9 @@ class PayrollAdvancesTab extends StatelessWidget {
     // Une demande est une dépense : le serveur exige `hr.pay.read` et le
     // droit d'écrire une dépense — la même règle que Dépenses ▸ Nouvelle
     // demande. L'octroi direct d'avant le type (T11) reste sous `hr.pay.write`.
-    final canRequest = state.snapshot.staffAdvanceTypeId != null
+    final canRequest =
+        state.snapshot.settings.grantsAdvances &&
+            state.snapshot.staffAdvanceTypeId != null
         ? PermissionGate.allows(context, [Perm.hrPayRead, Perm.expenseWrite])
         : canWrite;
     final advances = state.snapshot.advances;

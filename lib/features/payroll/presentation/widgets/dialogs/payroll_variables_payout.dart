@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
@@ -41,8 +40,6 @@ class PayrollVariablesPayout extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(l10n.payrollVarsPayout, style: AppTypography.labelLarge),
-        const SizedBox(height: AppSpacing.xs),
         SegmentedTabFilter<bool>(
           expand: true,
           selected: fixed,

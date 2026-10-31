@@ -299,6 +299,7 @@ void main() {
         home: Builder(
           builder: (context) {
             rows = PayrollPayslipRows.deductions(
+              settings: PayrollSettings.defaults,
               context,
               const PayrollLine(
                 month: _month,

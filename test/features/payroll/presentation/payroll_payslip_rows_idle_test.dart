@@ -40,6 +40,7 @@ void main() {
   Future<List<PayslipRow>> rows(
     WidgetTester tester, {
     List<PayrollDeductionType> idle = const [],
+    PayrollSettings settings = PayrollSettings.defaults,
   }) async {
     late List<PayslipRow> result;
     await tester.pumpWidget(
@@ -58,6 +59,7 @@ void main() {
               context,
               _line(),
               const {},
+              settings: settings,
               idle: idle,
             );
             return const SizedBox.shrink();
@@ -76,6 +78,26 @@ void main() {
     final tenue = all.firstWhere((row) => row.label == 'Tenue');
     expect(tenue.value, PayrollPayslipRows.none);
     expect(all.indexOf(tenue), all.length - 2);
+  });
+
+  testWidgets('une retenue coupée sans montant ne se liste plus', (
+    tester,
+  ) async {
+    final all = await rows(
+      tester,
+      settings: PayrollSettings.defaults.copyWith(
+        legalDeductionsEnabled: false,
+        salaryAdvancesEnabled: false,
+        staffLoansEnabled: false,
+        childcareEnabled: false,
+      ),
+    );
+
+    final labels = all.map((row) => row.label);
+    expect(labels, isNot(contains('Remboursement prêt')));
+    expect(labels, isNot(contains('Avance sur salaire')));
+    expect(labels, isNot(contains('Prise en charge enfant du personnel')));
+    expect(labels, isNot(contains('Absence non justifiée')));
   });
 
   testWidgets('un montant venu du défaut le dit', (tester) async {

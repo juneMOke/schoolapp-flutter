@@ -46,6 +46,15 @@ class PayrollSettings extends Equatable {
   /// deux côtés ; les montants saisis restent rangés.
   final bool childcareEnabled;
 
+  /// L'IPR et la CNSS sont-ils retenus ? Coupés, le moteur les compte à 0, des
+  /// deux côtés ; les taux réglés restent rangés.
+  final bool legalDeductionsEnabled;
+
+  /// Coupées, une avance sur salaire ou un prêt ne s'accordent plus. Ce qui
+  /// court continue de se retenir jusqu'au bout : rien ne s'efface en silence.
+  final bool salaryAdvancesEnabled;
+  final bool staffLoansEnabled;
+
   /// Q8 — les intitulés de signature du bulletin ; `null` = ceux du modèle
   /// papier (Bénéficiaire · DG · Caissier(e)).
   final String? signatureBeneficiaryLabel;
@@ -71,6 +80,9 @@ class PayrollSettings extends Equatable {
     this.advanceMaxPercent = defaultAdvanceMaxPercent,
     this.loanMaxMonths = defaultLoanMaxMonths,
     this.childcareEnabled = true,
+    this.legalDeductionsEnabled = true,
+    this.salaryAdvancesEnabled = true,
+    this.staffLoansEnabled = true,
     this.signatureBeneficiaryLabel,
     this.signatureDirectorLabel,
     this.signatureCashierLabel,
@@ -83,6 +95,16 @@ class PayrollSettings extends Equatable {
   static const int defaultOnemPermille = 2;
   static const int defaultAdvanceMaxPercent = 50;
   static const int defaultLoanMaxMonths = 4;
+
+  /// Une avance à une seule échéance, ou un prêt à plusieurs, s'accorde-t-il ?
+  bool allowsInstallments(int installments) =>
+      installments == 1 ? salaryAdvancesEnabled : staffLoansEnabled;
+
+  /// Le plus petit nombre d'échéances qui s'accorde.
+  int get minInstallments => salaryAdvancesEnabled ? 1 : 2;
+
+  /// L'école accorde-t-elle encore quelque chose ?
+  bool get grantsAdvances => salaryAdvancesEnabled || staffLoansEnabled;
 
   /// Les charges patronales, en ‰ du brut.
   int get employerChargesPermille =>
@@ -139,6 +161,9 @@ class PayrollSettings extends Equatable {
     int? advanceMaxPercent,
     int? loanMaxMonths,
     bool? childcareEnabled,
+    bool? legalDeductionsEnabled,
+    bool? salaryAdvancesEnabled,
+    bool? staffLoansEnabled,
     ({String? beneficiary, String? director, String? cashier})? signatures,
     RecordSyncState? syncState,
   }) => PayrollSettings(
@@ -157,6 +182,10 @@ class PayrollSettings extends Equatable {
     advanceMaxPercent: advanceMaxPercent ?? this.advanceMaxPercent,
     loanMaxMonths: loanMaxMonths ?? this.loanMaxMonths,
     childcareEnabled: childcareEnabled ?? this.childcareEnabled,
+    legalDeductionsEnabled:
+        legalDeductionsEnabled ?? this.legalDeductionsEnabled,
+    salaryAdvancesEnabled: salaryAdvancesEnabled ?? this.salaryAdvancesEnabled,
+    staffLoansEnabled: staffLoansEnabled ?? this.staffLoansEnabled,
     // Les intitulés se posent ensemble : `null` dans le triplet = celui du
     // modèle papier.
     signatureBeneficiaryLabel: signatures == null
@@ -191,6 +220,9 @@ class PayrollSettings extends Equatable {
     advanceMaxPercent,
     loanMaxMonths,
     childcareEnabled,
+    legalDeductionsEnabled,
+    salaryAdvancesEnabled,
+    staffLoansEnabled,
     signatureBeneficiaryLabel,
     signatureDirectorLabel,
     signatureCashierLabel,

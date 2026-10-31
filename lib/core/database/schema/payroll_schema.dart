@@ -42,6 +42,9 @@ const TableSchema refPayrollSettingsTable = TableSchema(
       advance_max_percent INTEGER,
       loan_max_months INTEGER,
       childcare_enabled INTEGER,
+      legal_deductions_enabled INTEGER,
+      salary_advances_enabled INTEGER,
+      staff_loans_enabled INTEGER,
       signature_beneficiary_label TEXT,
       signature_director_label TEXT,
       signature_cashier_label TEXT

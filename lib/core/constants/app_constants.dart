@@ -864,7 +864,9 @@ class AppConstants {
   // v75 (2026-10-31) : une rubrique porte son code, sa description, sa devise
   // et son montant par défaut. Colonnes ajoutées ; le socle les remplit à la
   // descente suivante. Palier d'école.
-  static const int offlineDbSchemaVersion = 75;
+  // v76 (2026-11-01) : l'école coupe l'IPR et la CNSS, les avances, les prêts.
+  // Trois colonnes de réglages, `NULL` : retenue active. Palier d'école.
+  static const int offlineDbSchemaVersion = 76;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

@@ -897,6 +897,12 @@ class AppDimensions {
   // 136 de versement au moins, l'œil et le crayon, 16 de marges ; les
   // colonnes de montant sont alignées à droite, en chiffres tabulaires.
   static const payrollLedgerMinWidth = 1124.0;
+  static const payrollDeductionTableMinWidth = 560.0;
+  static const payrollDeductionColCode = 104.0;
+  static const payrollDeductionColCurrency = 72.0;
+  static const payrollDeductionColDefault = 120.0;
+  static const payrollVarsAmountField = 140.0;
+  static const payrollVarsAmountRowMinWidth = 300.0;
   static const payrollColAgent = 220.0;
   static const payrollColAmount = 100.0;
 

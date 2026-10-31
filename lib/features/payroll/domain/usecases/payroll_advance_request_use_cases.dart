@@ -77,7 +77,8 @@ class RequestSalaryAdvanceUseCase {
   ) {
     if (draft.amount.amountInCents <= 0) return PayrollRule.invalidAmount;
     if (draft.installments < 1 ||
-        draft.installments > PayrollAdvanceRules.maxInstallmentsOf(snapshot)) {
+        draft.installments > PayrollAdvanceRules.maxInstallmentsOf(snapshot) ||
+        !snapshot.settings.allowsInstallments(draft.installments)) {
       return PayrollRule.invalidInstallments;
     }
     final contract = PayrollAdvanceRules.contractFor(

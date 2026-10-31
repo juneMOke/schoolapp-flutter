@@ -104,6 +104,59 @@ void main() {
     });
   });
 
+  group('retenues du modèle coupées', () {
+    PayrollLine compute(PayrollSettings settings) => PayrollEngine.compute(
+      PayrollEngineInput(
+        month: _month,
+        settings: settings,
+        contractsByMember: {
+          'm-1': [contract('m-1')],
+        },
+      ),
+    ).lines.single;
+
+    final legal = PayrollSettings.defaults.copyWith(
+      byCurrency: {
+        'USD': const PayrollCurrencySettings(
+          childAllowanceInCents: 500,
+          defaultOvertimeRateInCents: 300,
+          overtimeRateStepInCents: 50,
+          iprFlatInCents: 700,
+          cnssPermille: 50,
+        ),
+      },
+    );
+
+    test('IPR et CNSS coupés comptent 0, et le net remonte', () {
+      final on = compute(legal);
+      final off = compute(legal.copyWith(legalDeductionsEnabled: false));
+
+      expect(on.deductions.iprInCents, 700);
+      expect(on.deductions.cnssInCents, greaterThan(0));
+      expect(off.deductions.iprInCents, 0);
+      expect(off.deductions.cnssInCents, 0);
+      expect(
+        off.netInCents,
+        on.netInCents + on.deductions.iprInCents + on.deductions.cnssInCents,
+      );
+    });
+
+    test('avance et prêt se coupent chacun', () {
+      final noAdvance = legal.copyWith(salaryAdvancesEnabled: false);
+      final noLoan = legal.copyWith(staffLoansEnabled: false);
+
+      expect(noAdvance.allowsInstallments(1), isFalse);
+      expect(noAdvance.allowsInstallments(3), isTrue);
+      expect(noAdvance.minInstallments, 2);
+      expect(noLoan.allowsInstallments(1), isTrue);
+      expect(noLoan.allowsInstallments(3), isFalse);
+      expect(
+        noLoan.copyWith(salaryAdvancesEnabled: false).grantsAdvances,
+        isFalse,
+      );
+    });
+  });
+
   test('un défaut ne bloque jamais le circuit', () {
     final line = _line(const []);
 

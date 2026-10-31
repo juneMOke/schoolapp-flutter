@@ -307,7 +307,8 @@ void main() {
       child: const PayrollSettingsScreen(),
     );
 
-    expect(find.textContaining('CARTE ·'), findsOneWidget);
+    expect(find.text('CARTE'), findsOneWidget);
+    expect(find.text('USD'), findsWidgets);
     expect(find.text('Badge du personnel'), findsOneWidget);
   });
 

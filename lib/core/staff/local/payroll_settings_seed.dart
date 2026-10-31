@@ -56,6 +56,12 @@ class PayrollSettingsSeed {
   final int? advanceMaxPercent;
   final int? loanMaxMonths;
   final bool? childcareEnabled;
+
+  /// `null` tant que le serveur ne les sert pas : retenue active, et le champ
+  /// reste tu à la remontée.
+  final bool? legalDeductionsEnabled;
+  final bool? salaryAdvancesEnabled;
+  final bool? staffLoansEnabled;
   final String? signatureBeneficiaryLabel;
   final String? signatureDirectorLabel;
   final String? signatureCashierLabel;
@@ -77,6 +83,9 @@ class PayrollSettingsSeed {
     this.advanceMaxPercent,
     this.loanMaxMonths,
     this.childcareEnabled,
+    this.legalDeductionsEnabled,
+    this.salaryAdvancesEnabled,
+    this.staffLoansEnabled,
     this.signatureBeneficiaryLabel,
     this.signatureDirectorLabel,
     this.signatureCashierLabel,
@@ -128,6 +137,9 @@ class PayrollSettingsSeed {
           : null,
       loanMaxMonths: wide ? _within(raw['loanMaxMonths'], 2, 12, 4) : null,
       childcareEnabled: wide ? raw['childcareEnabled'] != false : null,
+      legalDeductionsEnabled: _switch(raw['legalDeductionsEnabled']),
+      salaryAdvancesEnabled: _switch(raw['salaryAdvancesEnabled']),
+      staffLoansEnabled: _switch(raw['staffLoansEnabled']),
       signatureBeneficiaryLabel: _label(raw['signatureBeneficiaryLabel']),
       signatureDirectorLabel: _label(raw['signatureDirectorLabel']),
       signatureCashierLabel: _label(raw['signatureCashierLabel']),
@@ -170,6 +182,8 @@ class PayrollSettingsSeed {
     }
     return types;
   }
+
+  static bool? _switch(Object? raw) => raw is bool ? raw : null;
 
   /// Le serveur sert-il les réglages Q8 ? Il les sert toujours ensemble.
   bool get servesWideSettings => childcareEnabled != null;
@@ -218,6 +232,9 @@ class PayrollSettingsSeed {
     'allowanceEligibleKinds': allowanceEligibleKinds,
     'workDaysDivisor': workDaysDivisor,
     'absenceDeductionEnabled': absenceDeductionEnabled,
+    'legalDeductionsEnabled': ?legalDeductionsEnabled,
+    'salaryAdvancesEnabled': ?salaryAdvancesEnabled,
+    'staffLoansEnabled': ?staffLoansEnabled,
     if (servesWideSettings) ...{
       'cnssEmployerPermille': cnssEmployerPermille,
       'inppPermille': inppPermille,

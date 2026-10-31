@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -31,21 +32,13 @@ class PayrollVariablesCustom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          l10n.payrollVarsCustomTitle,
-          style: AppTypography.labelLarge.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        for (final field in fields)
+        for (final (index, field) in fields.indexed)
           Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            padding: EdgeInsets.only(top: index == 0 ? 0 : AppSpacing.sm),
             child: _Field(field: field, preview: preview, onChanged: onChanged),
           ),
       ],
@@ -96,23 +89,13 @@ class _Field extends StatelessWidget {
         if (field.locked)
           _LockedRow(field: field, money: money, onChanged: onChanged)
         else
-          EteeloTextInput(
-            controller: field.controller,
-            label: field.type.label,
-            keyboardType: EteeloTextInputType.number,
-            capitalization: EteeloTextCapitalization.none,
-            errorText: field.invalid ? l10n.payrollRuleInvalidAmount : null,
-            onChanged: (_) => onChanged(),
-          ),
-        if (field.defaultInCents case final amount?)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Text(
-              l10n.payrollVarsCustomDefault(money(amount)),
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
+          _AmountRow(
+            field: field,
+            hint: switch (field.defaultInCents) {
+              final amount? => l10n.payrollVarsCustomDefault(money(amount)),
+              null => null,
+            },
+            onChanged: onChanged,
           ),
         if (note != null)
           Padding(
@@ -123,6 +106,74 @@ class _Field extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Une rubrique ouverte : le libellé et son rappel à gauche, le montant à
+/// droite. À l'étroit, le champ prend toute la largeur et porte le libellé.
+class _AmountRow extends StatelessWidget {
+  final PayrollCustomField field;
+  final String? hint;
+  final VoidCallback onChanged;
+
+  const _AmountRow({
+    required this.field,
+    required this.hint,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final hint = this.hint;
+    final muted = AppTypography.bodySmall.copyWith(
+      color: AppColors.textSecondary,
+    );
+    EteeloTextInput input({required bool hideLabel}) => EteeloTextInput(
+      controller: field.controller,
+      label: field.type.label,
+      hideLabel: hideLabel,
+      keyboardType: EteeloTextInputType.number,
+      capitalization: EteeloTextCapitalization.none,
+      errorText: field.invalid ? l10n.payrollRuleInvalidAmount : null,
+      onChanged: (_) => onChanged(),
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        if (box.maxWidth < AppDimensions.payrollVarsAmountRowMinWidth) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              input(hideLabel: false),
+              if (hint != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(hint, style: muted),
+              ],
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(field.type.label, style: AppTypography.bodyMedium),
+                  if (hint != null) Text(hint, style: muted),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            SizedBox(
+              width: AppDimensions.payrollVarsAmountField,
+              child: input(hideLabel: true),
+            ),
+          ],
+        );
+      },
     );
   }
 }

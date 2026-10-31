@@ -5,12 +5,13 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_amount_row.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_stepper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les gains variables d'un agent : heures supplémentaires et leur taux,
-/// enfants à charge et leurs allocations.
+/// Les gains d'un agent : sa base, ses heures supplémentaires et leur taux, ses
+/// enfants à charge. Rien pour ce qui ne le concerne pas : ni heures pour un
+/// vacataire, ni enfants sans allocation réglée, ni taux sans heures.
 class PayrollVariablesEarnings extends StatelessWidget {
   final PayrollLine line;
   final PayrollLine preview;
@@ -42,56 +43,52 @@ class PayrollVariablesEarnings extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     String money(int cents) => PayrollLabels.money(cents, line.currency);
+    final showsChildren = childUnitInCents > 0 || children > 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(l10n.payrollVarsOvertime, style: AppTypography.labelLarge),
-        const SizedBox(height: AppSpacing.xs),
-        if (!line.overtimeAllowed)
-          PayrollTone.draft.notice(l10n.payrollVarsNoOvertime)
-        else ...[
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.sm,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              PayrollStepper(
-                value: overtime,
-                step: _halfHour,
-                format: (minutes) => PayrollLabels.hours(l10n, minutes),
-                decreaseLabel: l10n.payrollDecrease,
-                increaseLabel: l10n.payrollIncrease,
-                onChanged: (value) => onOvertime(value),
-              ),
-              Text(
-                money(preview.overtimeInCents),
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
+        PayrollAmountRow(l10n.payrollVarsBase, money(preview.baseInCents)),
+        if (line.overtimeAllowed) ...[
           const SizedBox(height: AppSpacing.sm),
-          EteeloTextInput(
-            controller: rate,
-            label: l10n.payrollVarsRate,
-            placeholder: l10n.payrollVarsRateHint(
-              money(preview.overtimeRateInCents),
+          _StepperRow(
+            label: l10n.payrollVarsOvertime,
+            note: overtime > 0 ? money(preview.overtimeInCents) : null,
+            stepper: PayrollStepper(
+              value: overtime,
+              step: _halfHour,
+              format: (minutes) => PayrollLabels.hours(l10n, minutes),
+              decreaseLabel: l10n.payrollDecrease,
+              increaseLabel: l10n.payrollIncrease,
+              onChanged: (value) => onOvertime(value),
             ),
-            keyboardType: EteeloTextInputType.number,
-            capitalization: EteeloTextCapitalization.none,
-            onChanged: (_) => onChanged(),
           ),
+          if (overtime > 0 || rate.text.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            EteeloTextInput(
+              controller: rate,
+              label: l10n.payrollVarsRate,
+              placeholder: l10n.payrollVarsRateHint(
+                money(preview.overtimeRateInCents),
+              ),
+              keyboardType: EteeloTextInputType.number,
+              capitalization: EteeloTextCapitalization.none,
+              onChanged: (_) => onChanged(),
+            ),
+          ],
         ],
-        const Divider(),
-        Text(l10n.payrollVarsChildren, style: AppTypography.labelLarge),
-        const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.md,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            PayrollStepper(
+        if (showsChildren) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _StepperRow(
+            label: l10n.payrollVarsChildren,
+            note: children > 0
+                ? l10n.payrollVarsAllowance(
+                    children,
+                    money(childUnitInCents),
+                    money(preview.allowanceInCents),
+                  )
+                : null,
+            stepper: PayrollStepper(
               value: children,
               max: _maxChildren,
               format: (value) => '$value',
@@ -99,18 +96,50 @@ class PayrollVariablesEarnings extends StatelessWidget {
               increaseLabel: l10n.payrollIncrease,
               onChanged: (value) => onChildren(value),
             ),
-            Text(
-              l10n.payrollVarsAllowance(
-                children,
-                money(childUnitInCents),
-                money(preview.allowanceInCents),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Un libellé et sa note à gauche, le compteur à droite ; à l'étroit, le
+/// compteur passe dessous.
+class _StepperRow extends StatelessWidget {
+  final String label;
+  final String? note;
+  final Widget stepper;
+
+  const _StepperRow({
+    required this.label,
+    required this.note,
+    required this.stepper,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final note = this.note;
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.xs,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label, style: AppTypography.bodyMedium),
+            if (note != null)
+              Text(
+                note,
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
           ],
         ),
+        stepper,
       ],
     );
   }

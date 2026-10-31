@@ -384,6 +384,8 @@ void main() {
       await open(tester, types: const [_old], entries: [_entry('z', 500)])();
 
       expect(find.byType(TextField).evaluate().length, greaterThan(0));
+      await tester.ensureVisible(find.text('Mettre à 0'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Mettre à 0'));
       await tester.pump();
 

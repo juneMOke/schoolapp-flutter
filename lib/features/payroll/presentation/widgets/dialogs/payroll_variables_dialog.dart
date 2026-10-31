@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/money/amount_input.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
@@ -13,8 +12,8 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_variables_deductions.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_variables_earnings.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_variables_payout.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_vars_section.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
-import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_amount_row.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_net_banner.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -161,6 +160,15 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
               _fixedReason.text.trim().length >= minPayoutReasonLength)) &&
       !_custom.any((field) => field.invalid);
 
+  /// Le bloc des retenues du modèle : rien à lire ni à saisir, il ne se montre
+  /// pas.
+  bool _hasFixedDeductions(PayrollLine preview) {
+    final d = preview.deductions;
+    return widget.settings.childcareEnabled ||
+        preview.advances.isNotEmpty ||
+        d.absenceInCents + d.iprInCents + d.cnssInCents > 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -181,55 +189,58 @@ class _PayrollVariablesDialogState extends State<PayrollVariablesDialog> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          PayrollAmountRow(l10n.payrollVarsBase, money(preview.baseInCents)),
-          const Divider(),
-          PayrollVariablesEarnings(
-            line: line,
-            preview: preview,
-            overtime: _overtime,
-            children: _children,
-            rate: _rate,
-            childUnitInCents: unit,
-            onOvertime: (value) => setState(() => _overtime = value),
-            onChildren: (value) => setState(() => _children = value),
-            onChanged: () => setState(() {}),
-          ),
-          const Divider(),
-          PayrollVariablesDeductions(
-            preview: preview,
-            childcare: _childcare,
-            childcareEnabled: widget.settings.childcareEnabled,
-            onChanged: () => setState(() {}),
-          ),
-          if (_custom.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            PayrollVariablesCustom(
-              fields: _custom,
-              preview: preview,
-              onChanged: () => setState(() {}),
-            ),
-          ],
-          if (preview.advances.isNotEmpty) ...[
-            const Divider(),
-            PayrollAmountRow(
-              l10n.payrollVarsAdvances,
-              '− ${money(preview.advanceInCents)}',
-            ),
-          ],
-          const SizedBox(height: AppSpacing.md),
           PayrollNetBanner(
             label: l10n.payrollColNet,
             amount: money(preview.netInCents),
           ),
-          const SizedBox(height: AppSpacing.md),
-          PayrollVariablesPayout(
-            preview: preview,
-            monthRate: widget.monthRate,
-            fixed: _fixed,
-            amount: _fixedAmount,
-            reason: _fixedReason,
-            onFixed: (fixed) => setState(() => _fixed = fixed),
-            onChanged: () => setState(() {}),
+          PayrollVarsSection(
+            title: l10n.payrollVarsSectionEarnings,
+            icon: Icons.add_circle_outline,
+            child: PayrollVariablesEarnings(
+              line: line,
+              preview: preview,
+              overtime: _overtime,
+              children: _children,
+              rate: _rate,
+              childUnitInCents: unit,
+              onOvertime: (value) => setState(() => _overtime = value),
+              onChildren: (value) => setState(() => _children = value),
+              onChanged: () => setState(() {}),
+            ),
+          ),
+          if (_hasFixedDeductions(preview))
+            PayrollVarsSection(
+              title: l10n.payrollVarsSectionDeductions,
+              icon: Icons.remove_circle_outline,
+              child: PayrollVariablesDeductions(
+                preview: preview,
+                childcare: _childcare,
+                childcareEnabled: widget.settings.childcareEnabled,
+                onChanged: () => setState(() {}),
+              ),
+            ),
+          if (_custom.isNotEmpty)
+            PayrollVarsSection(
+              title: l10n.payrollVarsCustomTitle,
+              icon: Icons.playlist_remove_outlined,
+              child: PayrollVariablesCustom(
+                fields: _custom,
+                preview: preview,
+                onChanged: () => setState(() {}),
+              ),
+            ),
+          PayrollVarsSection(
+            title: l10n.payrollVarsPayout,
+            icon: Icons.payments_outlined,
+            child: PayrollVariablesPayout(
+              preview: preview,
+              monthRate: widget.monthRate,
+              fixed: _fixed,
+              amount: _fixedAmount,
+              reason: _fixedReason,
+              onFixed: (fixed) => setState(() => _fixed = fixed),
+              onChanged: () => setState(() {}),
+            ),
           ),
         ],
       ),
