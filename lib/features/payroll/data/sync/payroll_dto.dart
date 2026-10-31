@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/core/helpers/json_fields.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/payroll_deduction_dto.dart';
 
 /// Les éléments variables d'un agent, tels qu'ils descendent avec la paie.
 class PayrollVariablesDto {
@@ -118,6 +119,10 @@ class PayrollDto {
   final String? returnReason;
   final String? validationGestureId;
   final List<PayrollVariablesDto> variables;
+
+  /// Les saisies de rubriques du mois ; `null` si le champ manque ou s'il est
+  /// illisible : rien n'est alors remplacé.
+  final List<PayrollDeductionDto>? deductions;
   final List<PayrollGestureDto> gestures;
 
   /// `null` : 100 % jamais réglé, ou une paie v1.
@@ -139,6 +144,7 @@ class PayrollDto {
     this.returnReason,
     this.validationGestureId,
     this.variables = const [],
+    this.deductions,
     this.gestures = const [],
     this.payoutPolicy,
     this.lines,
@@ -170,6 +176,7 @@ class PayrollDto {
         if (variables is List)
           for (final item in variables) ?PayrollVariablesDto.tryParse(item),
       ],
+      deductions: PayrollDeductionDto.listOrNull(raw['deductions']),
       gestures: [
         if (gestures is List)
           for (final item in gestures) ?PayrollGestureDto.tryParse(item),

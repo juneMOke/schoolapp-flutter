@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
@@ -26,6 +27,12 @@ class PayrollSnapshot {
   /// Par mois `YYYY-MM`.
   final Map<String, PayrollHeader> headers;
   final Map<String, Map<String, PayrollVariables>> variables;
+
+  /// Tout le catalogue des rubriques, archivées comprises, dans l'ordre.
+  final List<PayrollDeductionType> deductionTypes;
+
+  /// Par mois puis par agent : les saisies de rubriques, refusées comprises.
+  final Map<String, Map<String, List<PayrollDeductionEntry>>> deductions;
 
   /// Par mois : le taux de versement ; absent = 100 %.
   final Map<String, PayrollPayoutPolicy> payoutPolicies;
@@ -73,6 +80,8 @@ class PayrollSnapshot {
     required this.schoolYears,
     required this.shareTraces,
     required this.hasEverSynced,
+    this.deductionTypes = const [],
+    this.deductions = const {},
     this.payoutPolicies = const {},
     this.arrearsPriorities = const {},
     this.advanceRequests = const [],

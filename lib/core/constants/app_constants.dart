@@ -858,7 +858,10 @@ class AppConstants {
   // remplaçant reprend le numéro de celui qu'il remplace. L'index unique du
   // cache sur le numéro ne vaut plus que pour les pièces sans identifiant, et
   // l'édition s'ajoute à `generated_documents` et `editique_cache_entries`.
-  static const int offlineDbSchemaVersion = 73;
+  // v74 (2026-10-31) : les retenues de l'école — `payroll_deduction_types`, le
+  // catalogue, et `payroll_deductions`, les saisies par agent et par mois.
+  // Tables neuves. Palier d'école.
+  static const int offlineDbSchemaVersion = 74;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1299,6 +1302,20 @@ class AppConstants {
   /// Éléments variables d'un agent pour un mois (POST, brouillon seulement).
   static const String syncPayrollVariablesEndpoint =
       '/api/v1/sync/payroll-variables';
+
+  /// Une rubrique de retenue de l'école (POST, `hr.pay.manage`, dernier écrit
+  /// gagne par rubrique) ; le catalogue descend avec le socle.
+  static const String syncPayrollDeductionTypesEndpoint =
+      '/api/v1/sync/payroll-deduction-types';
+
+  /// Suppression d'une rubrique jamais saisie (DELETE, `hr.pay.manage`).
+  static const String syncPayrollDeductionTypeEndpoint =
+      '/api/v1/sync/payroll-deduction-types/{id}';
+
+  /// Montant d'un agent sur une rubrique et un mois (POST, brouillon
+  /// seulement, dernier écrit gagne par ligne).
+  static const String syncPayrollDeductionsEndpoint =
+      '/api/v1/sync/payroll-deductions';
 
   /// Taux de versement d'un mois (POST, brouillon seulement, dernier écrit
   /// gagne) — Paie v2.

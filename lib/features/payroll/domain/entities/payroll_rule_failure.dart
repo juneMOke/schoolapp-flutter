@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction_codes.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 
 /// Une règle de la paie que le geste ne respecte pas — refusée **avant** la
@@ -66,6 +67,20 @@ enum PayrollRule {
 
   /// Les chiffres du serveur diffèrent de ceux vus (`PAYROLL_STALE`).
   stale,
+
+  /// La rubrique a déjà été saisie ou figée : elle s'archive.
+  deductionTypeInUse,
+  deductionTypeLabelTaken,
+  deductionTypeLimitReached,
+
+  /// La rubrique est archivée : seule la mise à 0 passe.
+  deductionTypeArchived,
+
+  /// La saisie est dans une autre devise que la ligne du mois.
+  deductionCurrencyMismatch,
+
+  /// La rubrique visée a été supprimée, ou refusée.
+  deductionTypeGone,
 }
 
 class PayrollRuleFailure extends ValidationFailure {
@@ -120,7 +135,16 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'INVALID_DISBURSEMENT' ||
   'INVALID_PAY_PROFILE' ||
   'INVALID_PAYROLL_SETTINGS' ||
-  'INVALID_PAYOUT' => PayrollRule.invalidData,
+  'INVALID_PAYOUT' ||
+  PayrollDeductionCodes.invalidType => PayrollRule.invalidData,
+  PayrollDeductionCodes.inUse => PayrollRule.deductionTypeInUse,
+  PayrollDeductionCodes.labelTaken => PayrollRule.deductionTypeLabelTaken,
+  PayrollDeductionCodes.limitReached => PayrollRule.deductionTypeLimitReached,
+  PayrollDeductionCodes.archived => PayrollRule.deductionTypeArchived,
+  PayrollDeductionCodes.currencyMismatch =>
+    PayrollRule.deductionCurrencyMismatch,
+  PayrollDeductionCodes.tombstoned ||
+  PayrollDeductionCodes.typeRefused => PayrollRule.deductionTypeGone,
   final code? when code.endsWith('_ID_CONFLICT') => PayrollRule.invalidData,
   _ => null,
 };

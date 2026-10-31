@@ -141,6 +141,13 @@ abstract final class PayrollLabels {
     PayrollRule.forbidden => l10n.payrollRuleForbidden,
     PayrollRule.parentRefused => l10n.payrollRuleParentRefused,
     PayrollRule.stale => l10n.payrollStaleBanner,
+    PayrollRule.deductionTypeInUse => l10n.payrollRuleDeductionTypeInUse,
+    PayrollRule.deductionTypeLabelTaken =>
+      l10n.payrollRuleDeductionTypeLabelTaken,
+    PayrollRule.deductionTypeLimitReached => l10n.payrollRuleDeductionTypeLimit,
+    PayrollRule.deductionTypeArchived => l10n.payrollRuleDeductionTypeArchived,
+    PayrollRule.deductionCurrencyMismatch => l10n.payrollRuleDeductionCurrency,
+    PayrollRule.deductionTypeGone => l10n.payrollRuleDeductionTypeGone,
   };
 
   /// Un refus du serveur en mots : la règle qu'il dit quand on la connaît,

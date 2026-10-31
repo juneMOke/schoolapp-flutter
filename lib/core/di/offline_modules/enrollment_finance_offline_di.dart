@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_type_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_settings_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_document_type_dao.dart';
@@ -500,12 +501,22 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
             nowMs: DateTime.now().millisecondsSinceEpoch,
           ),
       // Huitième seam, scopé ÉCOLE : les réglages de la Paie RH.
-      applyPayrollSettings: (settings, schoolId) =>
-          getIt<PayrollSettingsDao>().applySeed(
-            settings,
-            schoolId: schoolId,
-            nowMs: DateTime.now().millisecondsSinceEpoch,
-          ),
+      applyPayrollSettings: (settings, schoolId) async {
+        final nowMs = DateTime.now().millisecondsSinceEpoch;
+        await getIt<PayrollSettingsDao>().applySeed(
+          settings,
+          schoolId: schoolId,
+          nowMs: nowMs,
+        );
+        // À part : les réglages en file ne doivent pas retenir le catalogue.
+        final types = settings.deductionTypes;
+        if (types == null) return;
+        await getIt<PayrollDeductionTypeDao>().applySeed(
+          types,
+          schoolId: schoolId,
+          nowMs: nowMs,
+        );
+      },
       syncMetaDao: getIt<SyncMetaDao>(),
       requiredAuth: getIt<Map<String, dynamic>>(),
       currentUser: getIt<CurrentUserContext>(),

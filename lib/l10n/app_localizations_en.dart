@@ -21011,4 +21011,114 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapStatusFrozen => 'Frozen';
+
+  @override
+  String get payrollRuleDeductionTypeInUse =>
+      'This deduction has already been used: archive it instead.';
+
+  @override
+  String get payrollRuleDeductionTypeLabelTaken =>
+      'An active deduction already has this label.';
+
+  @override
+  String get payrollRuleDeductionTypeLimit =>
+      'Six active deductions at most: archive one to continue.';
+
+  @override
+  String get payrollRuleDeductionTypeArchived =>
+      'This deduction is archived: it can only be set to 0.';
+
+  @override
+  String get payrollRuleDeductionCurrency =>
+      'This deduction was entered in another currency than the month\'s payroll.';
+
+  @override
+  String get payrollRuleDeductionTypeGone =>
+      'This deduction was deleted or refused.';
+
+  @override
+  String get payrollDeductionsTitle => 'School deductions';
+
+  @override
+  String get payrollDeductionsSubtitle =>
+      'Your own deductions, next to the five standard ones. Amounts are entered agent by agent, every month.';
+
+  @override
+  String get payrollDeductionsEmpty => 'No deduction yet.';
+
+  @override
+  String get payrollDeductionsAdd => 'Add a deduction';
+
+  @override
+  String get payrollDeductionsArchivedTitle => 'Archived';
+
+  @override
+  String get payrollDeductionsLabel => 'Label';
+
+  @override
+  String get payrollDeductionsNewTitle => 'New deduction';
+
+  @override
+  String get payrollDeductionsRenameTitle => 'Rename the deduction';
+
+  @override
+  String get payrollDeductionsRename => 'Rename';
+
+  @override
+  String get payrollDeductionsArchive => 'Archive';
+
+  @override
+  String get payrollDeductionsRestore => 'Restore';
+
+  @override
+  String get payrollDeductionsDelete => 'Delete';
+
+  @override
+  String get payrollDeductionsDeleteOffline => 'Delete (online only)';
+
+  @override
+  String get payrollDeductionsMoveUp => 'Move up';
+
+  @override
+  String get payrollDeductionsMoveDown => 'Move down';
+
+  @override
+  String get payrollDeductionsActions => 'Deduction actions';
+
+  @override
+  String get payrollDeductionsLabelRequired => 'The label is required.';
+
+  @override
+  String get payrollDeductionsLabelTooLong => '40 characters at most.';
+
+  @override
+  String get payrollDeductionsPending => 'Waiting to be sent';
+
+  @override
+  String get payrollDeductionsDeleteBody =>
+      'This deduction will be permanently removed.';
+
+  @override
+  String get payrollToastDeductionTypeSaved => 'Deduction saved.';
+
+  @override
+  String get payrollToastDeductionTypeRemoved => 'Deduction deleted.';
+
+  @override
+  String get payrollVarsCustomTitle => 'School deductions';
+
+  @override
+  String payrollDeductionsDeleteTitle(String label) {
+    return 'Delete “$label”?';
+  }
+
+  @override
+  String payrollVarsCustomArchived(String label) {
+    return '$label (archived)';
+  }
+
+  @override
+  String payrollVarsCustomTrimmed(String requested, String taken) {
+    return 'Entered $requested, withheld $taken';
+  }
 }

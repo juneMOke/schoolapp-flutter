@@ -17,6 +17,8 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/payroll/data/local/attendance_summary_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_calendar_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_type_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_advance_request_dao.dart';
@@ -28,10 +30,12 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_variables
 import 'package:school_app_flutter/features/payroll/data/local/salary_advance_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/staff_pay_profile_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_local.dart';
+import 'package:school_app_flutter/features/payroll/data/repositories/payroll_deduction_repository_impl.dart';
 import 'package:school_app_flutter/features/payroll/data/repositories/payroll_repository_impl.dart';
 import 'package:school_app_flutter/features/payroll/data/repositories/payroll_snapshot_reader.dart';
 import 'package:school_app_flutter/features/payroll/data/repositories/payslip_repository_impl.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payslip_api.dart';
+import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_deduction_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_pull_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_repository.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payslip_repository.dart';
@@ -139,6 +143,8 @@ void _registerDomain(GetIt getIt) {
       profiles: getIt<StaffPayProfileDao>(),
       payrolls: getIt<PayrollDao>(),
       variables: getIt<PayrollVariablesDao>(),
+      deductionTypes: getIt<PayrollDeductionTypeDao>(),
+      deductions: getIt<PayrollDeductionDao>(),
       payoutPolicies: getIt<PayrollPayoutPolicyDao>(),
       arrearsPriorities: getIt<PayrollArrearsPriorityDao>(),
       advanceRequests: PayrollAdvanceRequestDao(getIt<Database>()),
@@ -148,6 +154,18 @@ void _registerDomain(GetIt getIt) {
       disbursements: getIt<PayrollDisbursementDao>(),
       shares: getIt<PayrollShareTraceDao>(),
       calendar: getIt<PayrollCalendarDao>(),
+    ),
+  );
+  getIt.registerLazySingleton<PayrollDeductionRepository>(
+    () => PayrollDeductionRepositoryImpl(
+      local: getIt<PayrollLocal>(),
+      writer: StaffLocalWriter(
+        currentUser: getIt<CurrentUserContext>(),
+        syncEngine: getIt<SyncEngine>(),
+      ),
+      api: getIt<PayrollSyncApi>(),
+      extras: getIt<Map<String, dynamic>>(),
+      ids: getIt<IdGenerator>(),
     ),
   );
   getIt.registerLazySingleton<PayrollRepository>(
@@ -224,6 +242,12 @@ void _registerStorage(GetIt getIt) {
   getIt.registerLazySingleton<PayrollDao>(() => PayrollDao(getIt<Database>()));
   getIt.registerLazySingleton<PayrollVariablesDao>(
     () => PayrollVariablesDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<PayrollDeductionTypeDao>(
+    () => PayrollDeductionTypeDao(getIt<Database>()),
+  );
+  getIt.registerLazySingleton<PayrollDeductionDao>(
+    () => PayrollDeductionDao(getIt<Database>()),
   );
   getIt.registerLazySingleton<PayrollArrearsPriorityDao>(
     () => PayrollArrearsPriorityDao(getIt<Database>()),

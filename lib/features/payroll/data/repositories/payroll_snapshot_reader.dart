@@ -63,6 +63,8 @@ class PayrollSnapshotReader {
                 profiles: await _local.profiles.forSchool(schoolId),
                 headers: await _local.payrolls.headers(schoolId),
                 variables: await _local.variables.forSchool(schoolId),
+                deductionTypes: await _local.deductionTypes.forSchool(schoolId),
+                deductions: await _local.deductions.forSchool(schoolId),
                 payoutPolicies: await _local.payoutPolicies.forSchool(schoolId),
                 arrearsPriorities: await _local.arrearsPriorities.prioritized(
                   schoolId,

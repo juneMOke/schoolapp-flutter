@@ -21150,4 +21150,114 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrPresenceRecapStatusFrozen => 'Figé';
+
+  @override
+  String get payrollRuleDeductionTypeInUse =>
+      'Cette rubrique a déjà servi : archivez-la plutôt.';
+
+  @override
+  String get payrollRuleDeductionTypeLabelTaken =>
+      'Une rubrique active porte déjà ce libellé.';
+
+  @override
+  String get payrollRuleDeductionTypeLimit =>
+      'Six rubriques actives au plus : archivez-en une pour continuer.';
+
+  @override
+  String get payrollRuleDeductionTypeArchived =>
+      'Cette rubrique est archivée : seule la mise à 0 est possible.';
+
+  @override
+  String get payrollRuleDeductionCurrency =>
+      'Cette retenue est saisie dans une autre devise que la paie du mois.';
+
+  @override
+  String get payrollRuleDeductionTypeGone =>
+      'Cette rubrique a été supprimée ou refusée.';
+
+  @override
+  String get payrollDeductionsTitle => 'Retenues de l\'école';
+
+  @override
+  String get payrollDeductionsSubtitle =>
+      'Vos rubriques, à côté des cinq retenues du modèle. Les montants se saisissent agent par agent, chaque mois.';
+
+  @override
+  String get payrollDeductionsEmpty => 'Aucune rubrique pour l\'instant.';
+
+  @override
+  String get payrollDeductionsAdd => 'Ajouter une rubrique';
+
+  @override
+  String get payrollDeductionsArchivedTitle => 'Archivées';
+
+  @override
+  String get payrollDeductionsLabel => 'Libellé';
+
+  @override
+  String get payrollDeductionsNewTitle => 'Nouvelle rubrique';
+
+  @override
+  String get payrollDeductionsRenameTitle => 'Renommer la rubrique';
+
+  @override
+  String get payrollDeductionsRename => 'Renommer';
+
+  @override
+  String get payrollDeductionsArchive => 'Archiver';
+
+  @override
+  String get payrollDeductionsRestore => 'Restaurer';
+
+  @override
+  String get payrollDeductionsDelete => 'Supprimer';
+
+  @override
+  String get payrollDeductionsDeleteOffline => 'Supprimer (en ligne seulement)';
+
+  @override
+  String get payrollDeductionsMoveUp => 'Monter';
+
+  @override
+  String get payrollDeductionsMoveDown => 'Descendre';
+
+  @override
+  String get payrollDeductionsActions => 'Actions de la rubrique';
+
+  @override
+  String get payrollDeductionsLabelRequired => 'Le libellé est obligatoire.';
+
+  @override
+  String get payrollDeductionsLabelTooLong => '40 caractères au plus.';
+
+  @override
+  String get payrollDeductionsPending => 'En attente d\'envoi';
+
+  @override
+  String get payrollDeductionsDeleteBody =>
+      'Cette rubrique disparaîtra définitivement.';
+
+  @override
+  String get payrollToastDeductionTypeSaved => 'Rubrique enregistrée.';
+
+  @override
+  String get payrollToastDeductionTypeRemoved => 'Rubrique supprimée.';
+
+  @override
+  String get payrollVarsCustomTitle => 'Retenues de l\'école';
+
+  @override
+  String payrollDeductionsDeleteTitle(String label) {
+    return 'Supprimer « $label » ?';
+  }
+
+  @override
+  String payrollVarsCustomArchived(String label) {
+    return '$label (archivée)';
+  }
+
+  @override
+  String payrollVarsCustomTrimmed(String requested, String taken) {
+    return 'Saisi $requested, retenu $taken';
+  }
 }

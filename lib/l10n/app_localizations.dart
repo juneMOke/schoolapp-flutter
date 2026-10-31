@@ -32304,6 +32304,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Frozen'**
   String get hrPresenceRecapStatusFrozen;
+
+  /// No description provided for @payrollRuleDeductionTypeInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction has already been used: archive it instead.'**
+  String get payrollRuleDeductionTypeInUse;
+
+  /// No description provided for @payrollRuleDeductionTypeLabelTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'An active deduction already has this label.'**
+  String get payrollRuleDeductionTypeLabelTaken;
+
+  /// No description provided for @payrollRuleDeductionTypeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Six active deductions at most: archive one to continue.'**
+  String get payrollRuleDeductionTypeLimit;
+
+  /// No description provided for @payrollRuleDeductionTypeArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction is archived: it can only be set to 0.'**
+  String get payrollRuleDeductionTypeArchived;
+
+  /// No description provided for @payrollRuleDeductionCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction was entered in another currency than the month\'s payroll.'**
+  String get payrollRuleDeductionCurrency;
+
+  /// No description provided for @payrollRuleDeductionTypeGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction was deleted or refused.'**
+  String get payrollRuleDeductionTypeGone;
+
+  /// No description provided for @payrollDeductionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollDeductionsTitle;
+
+  /// No description provided for @payrollDeductionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own deductions, next to the five standard ones. Amounts are entered agent by agent, every month.'**
+  String get payrollDeductionsSubtitle;
+
+  /// No description provided for @payrollDeductionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No deduction yet.'**
+  String get payrollDeductionsEmpty;
+
+  /// No description provided for @payrollDeductionsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a deduction'**
+  String get payrollDeductionsAdd;
+
+  /// No description provided for @payrollDeductionsArchivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get payrollDeductionsArchivedTitle;
+
+  /// No description provided for @payrollDeductionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get payrollDeductionsLabel;
+
+  /// No description provided for @payrollDeductionsNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New deduction'**
+  String get payrollDeductionsNewTitle;
+
+  /// No description provided for @payrollDeductionsRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename the deduction'**
+  String get payrollDeductionsRenameTitle;
+
+  /// No description provided for @payrollDeductionsRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get payrollDeductionsRename;
+
+  /// No description provided for @payrollDeductionsArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get payrollDeductionsArchive;
+
+  /// No description provided for @payrollDeductionsRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get payrollDeductionsRestore;
+
+  /// No description provided for @payrollDeductionsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get payrollDeductionsDelete;
+
+  /// No description provided for @payrollDeductionsDeleteOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete (online only)'**
+  String get payrollDeductionsDeleteOffline;
+
+  /// No description provided for @payrollDeductionsMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get payrollDeductionsMoveUp;
+
+  /// No description provided for @payrollDeductionsMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get payrollDeductionsMoveDown;
+
+  /// No description provided for @payrollDeductionsActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction actions'**
+  String get payrollDeductionsActions;
+
+  /// No description provided for @payrollDeductionsLabelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The label is required.'**
+  String get payrollDeductionsLabelRequired;
+
+  /// No description provided for @payrollDeductionsLabelTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'40 characters at most.'**
+  String get payrollDeductionsLabelTooLong;
+
+  /// No description provided for @payrollDeductionsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get payrollDeductionsPending;
+
+  /// No description provided for @payrollDeductionsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction will be permanently removed.'**
+  String get payrollDeductionsDeleteBody;
+
+  /// No description provided for @payrollToastDeductionTypeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction saved.'**
+  String get payrollToastDeductionTypeSaved;
+
+  /// No description provided for @payrollToastDeductionTypeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction deleted.'**
+  String get payrollToastDeductionTypeRemoved;
+
+  /// No description provided for @payrollVarsCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollVarsCustomTitle;
+
+  /// No description provided for @payrollDeductionsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{label}”?'**
+  String payrollDeductionsDeleteTitle(String label);
+
+  /// No description provided for @payrollVarsCustomArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} (archived)'**
+  String payrollVarsCustomArchived(String label);
+
+  /// No description provided for @payrollVarsCustomTrimmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered {requested}, withheld {taken}'**
+  String payrollVarsCustomTrimmed(String requested, String taken);
 }
 
 class _AppLocalizationsDelegate

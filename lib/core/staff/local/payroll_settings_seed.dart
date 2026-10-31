@@ -8,6 +8,16 @@ typedef PayrollCurrencySeed = ({
   int cnssPermille,
 });
 
+/// Une rubrique de retenue de l'école, telle que le socle la sert
+/// (`deductionTypes[]`, archivées comprises).
+typedef PayrollDeductionTypeSeed = ({
+  String id,
+  String label,
+  int sortOrder,
+  bool archived,
+  String? clientUpdatedAt,
+});
+
 /// Les réglages de paie d'une école tels que le socle les sert (section
 /// `payrollSettings`, `PayrollSettingsDto` du serveur — la liste des devises
 /// s'y nomme `currencyRules`, comme dans le PUT et les vecteurs) : diviseur mensuel, majoration en ‰, statuts ouvrant les
@@ -46,6 +56,10 @@ class PayrollSettingsSeed {
   final String? signatureDirectorLabel;
   final String? signatureCashierLabel;
 
+  /// Le catalogue des rubriques. `null` : le champ n'est pas servi, le cache
+  /// reste ; une liste vide, elle, dit que l'école n'a aucune rubrique.
+  final List<PayrollDeductionTypeSeed>? deductionTypes;
+
   const PayrollSettingsSeed({
     required this.monthlyHoursDivisor,
     required this.overtimeMultiplierPermille,
@@ -62,6 +76,7 @@ class PayrollSettingsSeed {
     this.signatureBeneficiaryLabel,
     this.signatureDirectorLabel,
     this.signatureCashierLabel,
+    this.deductionTypes,
   });
 
   /// La section du socle, ou `null` quand elle n'est pas communiquée ou
@@ -112,7 +127,36 @@ class PayrollSettingsSeed {
       signatureBeneficiaryLabel: _label(raw['signatureBeneficiaryLabel']),
       signatureDirectorLabel: _label(raw['signatureDirectorLabel']),
       signatureCashierLabel: _label(raw['signatureCashierLabel']),
+      deductionTypes: _deductionTypes(raw['deductionTypes']),
     );
+  }
+
+  /// `null` si le champ manque ou si une rubrique est illisible : la liste
+  /// fait foi, et une liste tronquée retirerait des rubriques.
+  static List<PayrollDeductionTypeSeed>? _deductionTypes(Object? raw) {
+    if (raw is! List) return null;
+    final types = <PayrollDeductionTypeSeed>[];
+    for (final item in raw) {
+      if (item is! Map) return null;
+      final id = item['id'];
+      final label = item['label'];
+      final order = item['sortOrder'];
+      if (id is! String ||
+          id.trim().isEmpty ||
+          label is! String ||
+          order is! num) {
+        return null;
+      }
+      final at = item['clientUpdatedAt'];
+      types.add((
+        id: id.trim().toLowerCase(),
+        label: label,
+        sortOrder: order.toInt(),
+        archived: item['archived'] == true,
+        clientUpdatedAt: at is String ? at : null,
+      ));
+    }
+    return types;
   }
 
   /// Le serveur sert-il les réglages Q8 ? Il les sert toujours ensemble.

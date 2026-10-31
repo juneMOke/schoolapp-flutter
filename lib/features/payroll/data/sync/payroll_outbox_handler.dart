@@ -50,6 +50,13 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
 
   Future<void> send(R request, String schoolId);
 
+  /// Le handler sait effacer son geste sur une pierre tombale (410) ; sinon
+  /// le 410 se range comme un refus.
+  bool get handlesTombstone => false;
+
+  /// Efface le geste de la tablette : l'envoi s'acquitte, sans rejeu.
+  Future<void> tombstoned(R request, String schoolId) async {}
+
   /// Range le refus ; rend `false` quand une saisie plus récente l'a remplacé
   /// (l'entrée repart alors avec elle).
   Future<bool> reject(R request, StaffPushFailure failure, String schoolId);
@@ -115,6 +122,9 @@ abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
     return StaffOutboxDispatch.push(
       send: () => send(request, schoolId),
       reject: (failure) => reject(request, failure, schoolId),
+      onTombstone: handlesTombstone
+          ? () => tombstoned(request, schoolId)
+          : null,
     );
   }
 }

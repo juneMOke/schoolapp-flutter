@@ -12,6 +12,9 @@ class PayrollDeductionType extends Equatable {
   /// Archivée, elle n'accepte plus de montant, mais ceux déjà saisis sur un
   /// brouillon comptent toujours : archiver ne change aucun net en silence.
   final bool archived;
+
+  /// Le serveur l'a déjà eue : sa suppression passe par lui, en ligne.
+  final bool serverKnown;
   final RecordSyncState syncState;
   final String? syncError;
   final String? syncErrorCode;
@@ -21,6 +24,7 @@ class PayrollDeductionType extends Equatable {
     required this.label,
     required this.sortOrder,
     this.archived = false,
+    this.serverKnown = false,
     this.syncState = RecordSyncState.synced,
     this.syncError,
     this.syncErrorCode,
@@ -37,6 +41,7 @@ class PayrollDeductionType extends Equatable {
     label,
     sortOrder,
     archived,
+    serverKnown,
     syncState,
     syncError,
     syncErrorCode,

@@ -130,6 +130,9 @@ Future<void> migrateTenantDatabase(
       type: 'INTEGER',
     );
   }
+  if (upTo(74)) {
+    await _createTables(db, payrollDeductionTables);
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les

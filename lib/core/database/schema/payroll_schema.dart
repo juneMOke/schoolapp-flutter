@@ -5,9 +5,10 @@
 /// à la lecture à partir des faits ci-dessous. Après validation, elle descend
 /// figée (`payroll_lines`) et le calcul local ne tourne plus sur ce mois.
 ///
-/// Tout descend sous `hr.pay.read`. Huit écritures remontent par la file :
-/// réglages, profil de paie, éléments variables, geste du circuit, avance et
-/// son annulation, versement et son annulation.
+/// Tout descend sous `hr.pay.read`. Dix écritures remontent par la file :
+/// réglages, profil de paie, éléments variables, rubrique de l'école et saisie
+/// d'une rubrique, geste du circuit, avance et son annulation, versement et
+/// son annulation.
 library;
 
 import 'package:school_app_flutter/core/database/table_schema.dart';
@@ -360,6 +361,58 @@ const TableSchema payrollArrearsPrioritiesTable = TableSchema(
   ''',
 );
 
+/// `payroll_deduction_types` — les rubriques de retenue de l'école. Aucun
+/// montant ici. Descendent avec le socle ; `server_known` dit que le serveur
+/// a déjà eu la rubrique, et sépare une rubrique supprimée d'une création
+/// encore jamais reçue.
+const TableSchema payrollDeductionTypesTable = TableSchema(
+  name: 'payroll_deduction_types',
+  createTableSql: '''
+    CREATE TABLE payroll_deduction_types (
+      school_id TEXT NOT NULL,
+      id TEXT NOT NULL,
+      label TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      archived INTEGER NOT NULL DEFAULT 0,
+      server_known INTEGER NOT NULL DEFAULT 0,
+      client_updated_at TEXT,
+      sync_status TEXT NOT NULL DEFAULT 'SYNCED',
+      sync_error TEXT,
+      sync_error_code TEXT,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, id)
+    )
+  ''',
+);
+
+/// `payroll_deductions` — le montant d'un agent sur une rubrique et un mois,
+/// en centimes de [currency]. `0` retire la retenue, la ligne reste avec son
+/// horloge. Dernier écrit gagne ; écrit seulement sur une paie en brouillon.
+const TableSchema payrollDeductionsTable = TableSchema(
+  name: 'payroll_deductions',
+  createTableSql: '''
+    CREATE TABLE payroll_deductions (
+      school_id TEXT NOT NULL,
+      month TEXT NOT NULL,
+      staff_member_id TEXT NOT NULL,
+      deduction_type_id TEXT NOT NULL,
+      amount_in_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL,
+      client_updated_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'SYNCED',
+      sync_error TEXT,
+      sync_error_code TEXT,
+      updated_at INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (school_id, month, staff_member_id, deduction_type_id)
+    )
+  ''',
+);
+
+const List<TableSchema> payrollDeductionTables = [
+  payrollDeductionTypesTable,
+  payrollDeductionsTable,
+];
+
 const List<TableSchema> payrollTables = [
   refPayrollSettingsTable,
   staffPayProfilesTable,
@@ -373,4 +426,5 @@ const List<TableSchema> payrollTables = [
   payrollShareTracesTable,
   payrollPayoutPoliciesTable,
   payrollArrearsPrioritiesTable,
+  ...payrollDeductionTables,
 ];

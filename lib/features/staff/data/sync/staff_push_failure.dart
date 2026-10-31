@@ -16,6 +16,8 @@ import 'package:school_app_flutter/core/network/api_error_parser.dart';
 ///   pas encore arrivée au serveur — même attente ;
 /// - `ADVANCE_NOT_YET_SYNCED` / `DISBURSEMENT_NOT_YET_SYNCED` : une
 ///   annulation arrive avant le fait qu'elle annule — même attente ;
+/// - `DEDUCTION_TYPE_NOT_YET_SYNCED` : une saisie vise une rubrique que le
+///   serveur n'a pas reçue — même attente ;
 /// - sans code : le même identifiant est encore en vol — un rejeu ordinaire.
 class StaffPushFailure {
   final int? status;
@@ -40,6 +42,8 @@ class StaffPushFailure {
   static const String payrollNotYetValidated = 'PAYROLL_NOT_YET_VALIDATED';
   static const String advanceNotYetSynced = 'ADVANCE_NOT_YET_SYNCED';
   static const String disbursementNotYetSynced = 'DISBURSEMENT_NOT_YET_SYNCED';
+  static const String deductionTypeNotYetSynced =
+      'DEDUCTION_TYPE_NOT_YET_SYNCED';
 
   /// Les 409 d'attente du module RH : rejoués sans consommer de tentative.
   static const Set<String> dependencyWaitCodes = {
@@ -48,6 +52,7 @@ class StaffPushFailure {
     payrollNotYetValidated,
     advanceNotYetSynced,
     disbursementNotYetSynced,
+    deductionTypeNotYetSynced,
   };
 
   /// Un refus décidé sur la tablette, sans réponse du serveur (une fiche

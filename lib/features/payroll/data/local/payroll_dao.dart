@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_store.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
@@ -129,6 +130,13 @@ class PayrollDao {
       txn,
       payroll.month,
       payroll.variables,
+      schoolId: schoolId,
+      nowMs: nowMs,
+    );
+    await PayrollDeductionDao.applyServer(
+      txn,
+      payroll.month,
+      payroll.deductions,
       schoolId: schoolId,
       nowMs: nowMs,
     );
