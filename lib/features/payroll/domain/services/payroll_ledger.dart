@@ -135,12 +135,14 @@ abstract final class PayrollLedger {
       );
 
   /// La ligne qu'aurait [variables] — l'aperçu en direct des éléments
-  /// variables, par le même moteur.
+  /// variables, par le même moteur. [entries] remplace les saisies de
+  /// rubriques de l'agent ; `null` : celles de la tablette.
   static PayrollLine? previewLine(
     PayrollSnapshot snapshot,
     String month,
-    PayrollVariables variables,
-  ) {
+    PayrollVariables variables, {
+    List<PayrollDeductionEntry>? entries,
+  }) {
     final input = inputOf(snapshot, month);
     final lines = PayrollEngine.compute(
       PayrollEngineInput(
@@ -152,6 +154,11 @@ abstract final class PayrollLedger {
         },
         variables: {variables.staffMemberId: variables},
         profiles: input.profiles,
+        deductionTypes: input.deductionTypes,
+        deductions: {
+          variables.staffMemberId:
+              entries ?? input.deductions[variables.staffMemberId] ?? const [],
+        },
         attendance: input.attendance,
         advances: input.advances,
         payoutRatePercent: input.payoutRatePercent,

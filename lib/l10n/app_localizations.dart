@@ -32496,6 +32496,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Entered {requested}, withheld {taken}'**
   String payrollVarsCustomTrimmed(String requested, String taken);
+
+  /// No description provided for @payrollVarsCustomClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Set to 0'**
+  String get payrollVarsCustomClear;
 }
 
 class _AppLocalizationsDelegate

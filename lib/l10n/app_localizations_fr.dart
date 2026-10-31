@@ -21260,4 +21260,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String payrollVarsCustomTrimmed(String requested, String taken) {
     return 'Saisi $requested, retenu $taken';
   }
+
+  @override
+  String get payrollVarsCustomClear => 'Mettre à 0';
 }

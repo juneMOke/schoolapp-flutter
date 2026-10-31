@@ -105,6 +105,8 @@ pumpPayrollScreen(
               update: UpdatePayrollDeductionTypeUseCase(deductions),
               move: MovePayrollDeductionTypeUseCase(deductions),
               remove: RemovePayrollDeductionTypeUseCase(deductions),
+              entries: SavePayrollDeductionsUseCase(deductions),
+              dismiss: DismissPayrollDeductionUseCase(deductions),
             ),
     ),
     now: () => DateTime(2026, 10, 26, 10),

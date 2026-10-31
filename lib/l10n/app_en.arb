@@ -12140,5 +12140,6 @@
   "payrollVarsCustomTrimmed": "Entered {requested}, withheld {taken}",
   "@payrollDeductionsDeleteTitle": {"placeholders": {"label": {"type": "String"}}},
   "@payrollVarsCustomArchived": {"placeholders": {"label": {"type": "String"}}},
-  "@payrollVarsCustomTrimmed": {"placeholders": {"requested": {"type": "String"}, "taken": {"type": "String"}}}
+  "@payrollVarsCustomTrimmed": {"placeholders": {"requested": {"type": "String"}, "taken": {"type": "String"}}},
+  "payrollVarsCustomClear": "Set to 0"
 }

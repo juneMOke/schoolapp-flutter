@@ -21121,4 +21121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String payrollVarsCustomTrimmed(String requested, String taken) {
     return 'Entered $requested, withheld $taken';
   }
+
+  @override
+  String get payrollVarsCustomClear => 'Set to 0';
 }

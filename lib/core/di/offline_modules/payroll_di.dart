@@ -99,6 +99,8 @@ void _registerPresentation(GetIt getIt) {
         update: getIt<UpdatePayrollDeductionTypeUseCase>(),
         move: getIt<MovePayrollDeductionTypeUseCase>(),
         remove: getIt<RemovePayrollDeductionTypeUseCase>(),
+        entries: getIt<SavePayrollDeductionsUseCase>(),
+        dismiss: getIt<DismissPayrollDeductionUseCase>(),
       ),
     ),
   );
@@ -236,7 +238,9 @@ void _registerDomain(GetIt getIt) {
     ..registerFactory(() => CreatePayrollDeductionTypeUseCase(deductions()))
     ..registerFactory(() => UpdatePayrollDeductionTypeUseCase(deductions()))
     ..registerFactory(() => MovePayrollDeductionTypeUseCase(deductions()))
-    ..registerFactory(() => RemovePayrollDeductionTypeUseCase(deductions()));
+    ..registerFactory(() => RemovePayrollDeductionTypeUseCase(deductions()))
+    ..registerFactory(() => SavePayrollDeductionsUseCase(deductions()))
+    ..registerFactory(() => DismissPayrollDeductionUseCase(deductions()));
 }
 
 void _registerStorage(GetIt getIt) {

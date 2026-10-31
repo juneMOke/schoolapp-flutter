@@ -12320,5 +12320,6 @@
   "payrollVarsCustomArchived": "{label} (archivée)",
   "@payrollVarsCustomArchived": {"placeholders": {"label": {"type": "String"}}},
   "payrollVarsCustomTrimmed": "Saisi {requested}, retenu {taken}",
-  "@payrollVarsCustomTrimmed": {"placeholders": {"requested": {"type": "String"}, "taken": {"type": "String"}}}
+  "@payrollVarsCustomTrimmed": {"placeholders": {"requested": {"type": "String"}, "taken": {"type": "String"}}},
+  "payrollVarsCustomClear": "Mettre à 0"
 }
