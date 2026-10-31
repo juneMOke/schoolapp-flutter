@@ -7,8 +7,10 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/build_provisional_ticket_use_case.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -68,14 +70,30 @@ Future<bool> printProvisionalTicket({
   required String cutNotice,
   TicketLogoBand? logoBand,
   int copies = TicketCopies.fallback,
+}) => printTicketLines(
+  lines: TicketTextLayout.renderRich(model, columns: PdfTicketRenderer.columns),
+  name: model.reference,
+  cutNotice: cutNotice,
+  logoBand: logoBand,
+  copies: copies,
+);
+
+/// Le spouleur, pour tout ticket déjà composé en lignes : le ticket de caisse
+/// comme le ticket d'annulation sortent par le même chemin.
+Future<bool> printTicketLines({
+  required List<TicketLine> lines,
+  required String name,
+  required String cutNotice,
+  TicketLogoBand? logoBand,
+  int copies = TicketCopies.fallback,
 }) async {
   {
     try {
       // Rendu de référence produit AVANT de solliciter le spouleur : une
       // composition impossible se dit tout de suite, plutôt qu'après avoir
       // ouvert une boîte de dialogue d'impression qui se refermera seule.
-      final fallback = await PdfTicketRenderer.render(
-        model,
+      final fallback = await PdfTicketRenderer.renderRichLines(
+        lines,
         format: _initialFormat,
         cutNotice: cutNotice,
         logoBand: logoBand,
@@ -85,8 +103,8 @@ Future<bool> printProvisionalTicket({
       await Printing.layoutPdf(
         onLayout: (format) async {
           try {
-            return await PdfTicketRenderer.render(
-              model,
+            return await PdfTicketRenderer.renderRichLines(
+              lines,
               format: format,
               cutNotice: cutNotice,
               logoBand: logoBand,
@@ -101,7 +119,7 @@ Future<bool> printProvisionalTicket({
             return fallback;
           }
         },
-        name: model.reference,
+        name: name,
         format: _initialFormat,
       );
       return true;
