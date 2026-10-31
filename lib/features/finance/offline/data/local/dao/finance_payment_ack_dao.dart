@@ -179,6 +179,7 @@ class FinancePaymentAckDao {
         status: doc.status,
         emittedOn: doc.emittedOn,
         verificationUrl: doc.verificationUrl,
+        edition: doc.edition,
       );
     }
   }

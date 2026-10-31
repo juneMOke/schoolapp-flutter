@@ -854,7 +854,11 @@ class AppConstants {
   // v72 (2026-10-30) : l'URL de vérification du reçu scellé, imprimée en QR
   // sur le ticket — `generated_documents.verification_url` (école) et
   // `editique_cache_entries.verification_url` (appareil). Additif, nullable.
-  static const int offlineDbSchemaVersion = 72;
+  // v73 (2026-10-31) : la numérotation par édition (V200 du back) — un reçu
+  // remplaçant reprend le numéro de celui qu'il remplace. L'index unique du
+  // cache sur le numéro ne vaut plus que pour les pièces sans identifiant, et
+  // l'édition s'ajoute à `generated_documents` et `editique_cache_entries`.
+  static const int offlineDbSchemaVersion = 73;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

@@ -42,6 +42,10 @@ class TicketLabels extends Equatable {
   /// au-dessus de lui, sur un ticket scellé seulement.
   final String verificationNotice;
 
+  /// « Édition : » — sous la référence d'un reçu remplaçant qui a repris le
+  /// numéro de celui qu'il remplace. Absent en première édition.
+  final String editionLabel;
+
   final String cashierLabel;
 
   /// « Tél. Promoteur : » — le téléphone de l'ÉTABLISSEMENT, en en-tête.
@@ -176,6 +180,7 @@ class TicketLabels extends Equatable {
     required this.dateLabel,
     required this.enteredAtLabel,
     required this.verificationNotice,
+    required this.editionLabel,
     required this.cashierLabel,
     required this.schoolPhoneLabel,
     required this.tillPhoneLabel,
@@ -209,6 +214,7 @@ class TicketLabels extends Equatable {
     dateLabel,
     enteredAtLabel,
     verificationNotice,
+    editionLabel,
     cashierLabel,
     schoolPhoneLabel,
     tillPhoneLabel,

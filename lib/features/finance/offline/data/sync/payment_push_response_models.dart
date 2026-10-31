@@ -88,6 +88,10 @@ class GeneratedDocumentDto {
   /// absente ou douteuse (`ReceiptVerificationUrl`).
   final String? verificationUrl;
 
+  /// Édition du reçu sous son numéro (V200 du back) ; `null` tant que le
+  /// serveur ne la sert pas.
+  final int? edition;
+
   const GeneratedDocumentDto({
     required this.type,
     required this.documentNumber,
@@ -95,6 +99,7 @@ class GeneratedDocumentDto {
     this.url,
     this.emittedOn,
     this.verificationUrl,
+    this.edition,
   });
 
   factory GeneratedDocumentDto.fromJson(Map<String, dynamic> j) =>
@@ -105,6 +110,7 @@ class GeneratedDocumentDto {
         url: j['url'] as String?,
         emittedOn: ReceiptEmissionDay.fromIso(j['emittedAt']),
         verificationUrl: ReceiptVerificationUrl.normalize(j['verificationUrl']),
+        edition: (j['edition'] as num?)?.toInt(),
       );
 
   /// `doc_type` local de la table `generated_documents` (domaine `PAYMENT`).

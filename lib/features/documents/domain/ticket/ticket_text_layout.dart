@@ -185,6 +185,13 @@ abstract final class TicketTextLayout {
         ? '${model.labels.referenceLabel} ${model.labels.provisionalMention}'
         : model.labels.referenceLabel;
     lines.addAll(_wrapped('$referenceLabel ${model.reference}', width));
+    // Sous un numéro repris, seule l'édition distingue ce papier de celui du
+    // reçu annulé. La première édition ne se dit pas, comme sur le PDF.
+    if (!model.isProvisional && model.edition > 1) {
+      lines.addAll(
+        _wrapped('${model.labels.editionLabel} ${model.edition}', width),
+      );
+    }
     // La date prend enfin un libellé — elle occupait jusqu'ici le créneau de
     // gauche sans être nommée. L'heure reste calée à DROITE sur la même ligne :
     // « Date : » + `JJ/MM/AAAA` fait 16 caractères, l'heure 5, il reste 27

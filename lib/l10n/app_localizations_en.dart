@@ -8479,6 +8479,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketEnteredAtLabel => 'Entered on';
 
   @override
+  String get ticketEditionLabel => 'Edition:';
+
+  @override
   String get ticketVerifyNotice => 'Scan to verify this receipt';
 
   @override
@@ -12321,6 +12324,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentCorrectionSubmit => 'Cancel and replace';
+
+  @override
+  String paymentCorrectionConfirmTitle(String amount) {
+    return 'Replace with $amount?';
+  }
+
+  @override
+  String get paymentCorrectionConfirmNotice =>
+      'The original payment will be cancelled, and this one will replace it.';
 
   @override
   String paymentCorrectionGap(String amount) {

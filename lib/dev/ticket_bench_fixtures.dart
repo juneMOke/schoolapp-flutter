@@ -25,6 +25,7 @@ abstract final class TicketBenchFixtures {
     dateLabel: 'Date :',
     enteredAtLabel: 'Saisi le',
     verificationNotice: 'Scannez pour vérifier ce reçu',
+    editionLabel: 'Édition :',
     payerLabel: 'PAYEUR :',
     phoneLabel: 'Tél.',
     cashierLabel: 'Caissier :',

@@ -104,6 +104,10 @@ class EditiqueCacheEntry extends Equatable {
   /// `null` tant que le serveur ne la sert pas.
   final String? verificationUrl;
 
+  /// Édition de la pièce sous son numéro (v73) ; `null` vaut première édition.
+  /// Deux pièces peuvent partager un numéro : seul [documentId] les distingue.
+  final int? edition;
+
   /// Époch ms de la mise en cache.
   final int createdAt;
 
@@ -125,6 +129,7 @@ class EditiqueCacheEntry extends Equatable {
     this.cancelledAt,
     this.cancellationReason,
     this.verificationUrl,
+    this.edition,
     required this.createdAt,
     required this.lastAccessedAt,
   });
@@ -173,6 +178,7 @@ class EditiqueCacheEntry extends Equatable {
     'cancelled_at': cancelledAt,
     'cancellation_reason': cancellationReason,
     'verification_url': verificationUrl,
+    'edition': edition,
     'created_at': createdAt,
     'last_accessed_at': lastAccessedAt,
   };
@@ -193,6 +199,7 @@ class EditiqueCacheEntry extends Equatable {
         cancelledAt: map['cancelled_at'] as int?,
         cancellationReason: map['cancellation_reason'] as String?,
         verificationUrl: map['verification_url'] as String?,
+        edition: map['edition'] as int?,
         createdAt: (map['created_at'] as int?) ?? 0,
         lastAccessedAt: (map['last_accessed_at'] as int?) ?? 0,
       );
@@ -216,6 +223,7 @@ class EditiqueCacheEntry extends Equatable {
     cancelledAt,
     cancellationReason,
     verificationUrl,
+    edition,
     createdAt,
     lastAccessedAt,
   ];

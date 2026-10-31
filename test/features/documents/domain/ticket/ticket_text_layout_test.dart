@@ -13,6 +13,7 @@ const _labels = TicketLabels(
   dateLabel: 'Date :',
   enteredAtLabel: 'Saisi le',
   verificationNotice: 'Scannez pour vérifier ce reçu',
+  editionLabel: 'Édition :',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -50,6 +51,7 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   dateLabel: _labels.dateLabel,
   enteredAtLabel: _labels.enteredAtLabel,
   verificationNotice: _labels.verificationNotice,
+  editionLabel: _labels.editionLabel,
   payerLabel: _labels.payerLabel,
   phoneLabel: _labels.phoneLabel,
   cashierLabel: _labels.cashierLabel,
@@ -91,6 +93,7 @@ TicketReceiptModel _model({
 
   /// L'URL de vérification du reçu scellé — le QR du ticket.
   String? verificationUrl,
+  int edition = 1,
   String? schoolPhone = '+243 000 000 000',
   String? schoolTillPhone = '+243 811 111 111',
   int? remainingBalanceInCents = 250000,
@@ -136,6 +139,7 @@ TicketReceiptModel _model({
   paidAt: DateTime(2026, 8, 4, 14, 7),
   receiptIssuedOn: receiptIssuedOn,
   verificationUrl: verificationUrl,
+  edition: edition,
   cashierFullName: cashierFullName,
   tenders:
       tenders ??
@@ -1067,6 +1071,7 @@ void main() {
         dateLabel: _labels.dateLabel,
         enteredAtLabel: _labels.enteredAtLabel,
         verificationNotice: _labels.verificationNotice,
+        editionLabel: _labels.editionLabel,
         payerLabel: _labels.payerLabel,
         phoneLabel: _labels.phoneLabel,
         cashierLabel: _labels.cashierLabel,
@@ -1123,6 +1128,7 @@ void main() {
       dateLabel: _labels.dateLabel,
       enteredAtLabel: _labels.enteredAtLabel,
       verificationNotice: _labels.verificationNotice,
+      editionLabel: _labels.editionLabel,
       payerLabel: _labels.payerLabel,
       phoneLabel: _labels.phoneLabel,
       cashierLabel: _labels.cashierLabel,
@@ -1507,6 +1513,34 @@ void main() {
 
   // Révision de D-4 (2026-10-30) : le ticket scellé porte le QR de son reçu,
   // le ticket provisoire jamais.
+  group('édition du reçu', () {
+    List<String> out(TicketReceiptModel model) => [
+      for (final line in TicketTextLayout.render(model)) line.trim(),
+    ];
+
+    test('une deuxième édition se dit sous la référence', () {
+      final lines = out(_model(isProvisional: false, edition: 2));
+
+      final edition = lines.indexOf('Édition : 2');
+      expect(edition, greaterThan(0));
+      expect(lines[edition - 1], startsWith(_labels.referenceLabel));
+    });
+
+    test('la première édition ne se dit pas, comme sur le PDF', () {
+      expect(
+        out(_model(isProvisional: false)).join('\n'),
+        isNot(contains('Édition')),
+      );
+    });
+
+    test('un provisoire n a jamais d édition', () {
+      expect(
+        out(_model(isProvisional: true, edition: 2)).join('\n'),
+        isNot(contains('Édition')),
+      );
+    });
+  });
+
   group('QR de vérification', () {
     const url = 'https://api.eteelo.com/verify/RC/9f8e7d6c';
 

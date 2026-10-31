@@ -1895,6 +1895,42 @@ void main() {
       },
     );
 
+    test('ACK d une autre édition du même numéro : ses faits remplacent ceux '
+        'de la précédente', () async {
+      await db.insert('generated_documents', {
+        'id': 'gd1',
+        'doc_domain': 'PAYMENT',
+        'payment_id': 'pay1',
+        'student_id': 's1',
+        'doc_type': 'RC',
+        'number': 'ETL-RP-0042',
+        'status': 'DEFINITIVE',
+        'edition': 1,
+        'emitted_on': '2026-10-30',
+        'verification_url': 'https://verify.eteeloconnect.com/d/edition-1',
+        'created_at': 1000,
+      });
+
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: [
+            GeneratedDocumentDto.fromJson(const {
+              'type': 'PAYMENT_RECEIPT',
+              'documentNumber': 'ETL-RP-0042',
+              'status': 'DEFINITIVE',
+              'edition': 2,
+            }),
+          ],
+        ),
+        nowMs: 5000,
+      );
+
+      final row = (await db.query('generated_documents')).single;
+      expect(row['edition'], 2);
+      expect(row['emitted_on'], isNull);
+      expect(row['verification_url'], isNull);
+    });
+
     test('ACK avec verificationUrl : le QR du reçu est gardé ; un AUTRE numéro '
         'sans URL ne garde pas celle de l ancien', () async {
       await db.insert('generated_documents', {

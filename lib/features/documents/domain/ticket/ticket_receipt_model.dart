@@ -121,6 +121,11 @@ class TicketReceiptModel extends Equatable {
   /// doit pas paraître (D-4). Le gabarit l'ignore donc sous [isProvisional].
   final String? verificationUrl;
 
+  /// Édition du reçu sous son numéro. À partir de 2, le numéro est partagé
+  /// avec le reçu annulé qu'il remplace (V200 du back) : le papier doit le
+  /// dire, comme le PDF scellé.
+  final int edition;
+
   final String? cashierFullName;
 
   /// Le payeur, **quand il y en a un**.
@@ -222,6 +227,7 @@ class TicketReceiptModel extends Equatable {
     required this.paidAt,
     this.receiptIssuedOn,
     this.verificationUrl,
+    this.edition = 1,
     this.cashierFullName,
     this.payerFullName,
     this.payerPhoneNumber,
@@ -412,6 +418,7 @@ class TicketReceiptModel extends Equatable {
     paidAt,
     receiptIssuedOn,
     verificationUrl,
+    edition,
     cashierFullName,
     tenders,
     allocations,

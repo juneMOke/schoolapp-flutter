@@ -288,6 +288,7 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
           bytes = await cache.readByDocumentNumber(
             schoolId: schoolId,
             documentNumber: number,
+            unidentifiedOnly: id != null,
           );
         }
       }

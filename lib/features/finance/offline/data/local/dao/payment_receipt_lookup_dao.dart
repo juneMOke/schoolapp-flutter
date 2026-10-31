@@ -29,6 +29,9 @@ class PaymentReceiptLocalRow {
   /// URL de vérification de la ligne scellée (v72), imprimée en QR.
   final String? verificationUrl;
 
+  /// Édition de la ligne scellée (v73) ; `null` vaut première édition.
+  final int? edition;
+
   const PaymentReceiptLocalRow({
     this.paymentFound = false,
     this.receiptId,
@@ -38,6 +41,7 @@ class PaymentReceiptLocalRow {
     this.documentStatus,
     this.emittedOn,
     this.verificationUrl,
+    this.edition,
   });
 }
 
@@ -70,6 +74,7 @@ class PaymentReceiptLookupDao {
         'status',
         'emitted_on',
         'verification_url',
+        'edition',
       ],
       where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
       whereArgs: [paymentId, 'PAYMENT', 'RC'],
@@ -87,6 +92,7 @@ class PaymentReceiptLookupDao {
       documentStatus: document?['status'] as String?,
       emittedOn: _text(document?['emitted_on']),
       verificationUrl: _text(document?['verification_url']),
+      edition: document?['edition'] as int?,
     );
   }
 

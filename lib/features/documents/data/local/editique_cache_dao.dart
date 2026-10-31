@@ -45,6 +45,11 @@ class EditiqueCacheDao {
 
   /// Entrée portant ce numéro de pièce dans cette école. Repli du régime AM-5,
   /// tant que l'émission ne rend pas d'identifiant.
+  ///
+  /// ⚠️ Un numéro peut désigner plusieurs éditions (V200 du back). Celle qui
+  /// répond est la pièce en vigueur, puis la plus récente. Qui connaît
+  /// l'identifiant de sa pièce passe par [findUnidentifiedByDocumentNumber] :
+  /// une autre édition n'est pas sa pièce.
   Future<EditiqueCacheEntry?> findByDocumentNumber({
     required String schoolId,
     required String documentNumber,
@@ -53,6 +58,25 @@ class EditiqueCacheDao {
     final rows = await _db.query(
       kEditiqueCacheTable,
       where: 'school_id = ? AND document_number = ?',
+      whereArgs: [schoolId, documentNumber],
+      orderBy:
+          'cancelled_at IS NOT NULL, COALESCE(edition, 1) DESC, '
+          'created_at DESC',
+      limit: 1,
+    );
+    return rows.isEmpty ? null : EditiqueCacheEntry.fromMap(rows.first);
+  }
+
+  /// La pièce de ce numéro encore SANS identifiant serveur (régime AM-5) : la
+  /// seule qu'une pièce identifiée puisse reconnaître pour sienne.
+  Future<EditiqueCacheEntry?> findUnidentifiedByDocumentNumber({
+    required String schoolId,
+    required String documentNumber,
+  }) async {
+    if (documentNumber.isEmpty) return null;
+    final rows = await _db.query(
+      kEditiqueCacheTable,
+      where: 'school_id = ? AND document_number = ? AND document_id IS NULL',
       whereArgs: [schoolId, documentNumber],
       limit: 1,
     );
@@ -236,6 +260,7 @@ class EditiqueCacheDao {
       // Une émission ou un re-téléchargement qui ne l'annonce pas ne doit pas
       // retirer le QR qu'un delta avait appris.
       'verification_url',
+      'edition',
     ]) {
       values[field] ??= known[field];
     }
@@ -277,6 +302,11 @@ class EditiqueCacheDao {
   /// Ligne existante correspondant à l'identité de [entry] : d'abord
   /// l'identifiant serveur, puis le numéro dans l'école.
   ///
+  /// ⚠️ **Une pièce identifiée ne reconnaît par son numéro qu'une ligne sans
+  /// identifiant.** Le numéro ne désigne plus une pièce unique (V200 du back) :
+  /// rattachée à l'édition précédente, une nouvelle édition hériterait de son
+  /// annulation et de ses octets, et l'écraserait.
+  ///
   /// Publique parce que le magasin d'octets doit poser **exactement** la même
   /// question avant d'écrire un fichier : c'est la clé locale de la ligne
   /// existante qui nomme ce fichier, et [upsert] la conserve. Écrire sous une
@@ -289,12 +319,16 @@ class EditiqueCacheDao {
       if (byId != null) return byId;
     }
     final number = entry.documentNumber;
-    if (number != null && number.isNotEmpty) {
-      return findByDocumentNumber(
+    if (number == null || number.isEmpty) return null;
+    if (documentId != null && documentId.isNotEmpty) {
+      return findUnidentifiedByDocumentNumber(
         schoolId: entry.schoolId,
         documentNumber: number,
       );
     }
-    return null;
+    return findByDocumentNumber(
+      schoolId: entry.schoolId,
+      documentNumber: number,
+    );
   }
 }

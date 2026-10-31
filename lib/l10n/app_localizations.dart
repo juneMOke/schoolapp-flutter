@@ -13566,6 +13566,12 @@ abstract class AppLocalizations {
   /// **'Entered on'**
   String get ticketEnteredAtLabel;
 
+  /// No description provided for @ticketEditionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edition:'**
+  String get ticketEditionLabel;
+
   /// No description provided for @ticketVerifyNotice.
   ///
   /// In en, this message translates to:
@@ -19249,6 +19255,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel and replace'**
   String get paymentCorrectionSubmit;
+
+  /// No description provided for @paymentCorrectionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace with {amount}?'**
+  String paymentCorrectionConfirmTitle(String amount);
+
+  /// No description provided for @paymentCorrectionConfirmNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The original payment will be cancelled, and this one will replace it.'**
+  String get paymentCorrectionConfirmNotice;
 
   /// No description provided for @paymentCorrectionGap.
   ///

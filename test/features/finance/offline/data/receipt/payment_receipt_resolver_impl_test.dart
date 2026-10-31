@@ -88,6 +88,7 @@ void main() {
     String? provisionalNumber,
     String? emittedOn,
     String? verificationUrl,
+    int? edition,
   }) => school.insert('generated_documents', {
     'id': 'gd-1',
     'doc_domain': 'PAYMENT',
@@ -98,6 +99,87 @@ void main() {
     'status': status,
     'emitted_on': emittedOn,
     'verification_url': verificationUrl,
+    'edition': edition,
+  });
+
+  // Numérotation par édition (V200 du back) : le remplaçant reprend le numéro
+  // du reçu annulé. C'est lui, et non l'annulé, que la fiche doit montrer.
+  group('deux éditions d un même numéro', () {
+    const number = 'CF-RC-2627-000263';
+    const urlV1 = 'https://verify.eteeloconnect.com/d/edition-1';
+    const urlV2 = 'https://verify.eteeloconnect.com/d/edition-2';
+
+    Future<void> cacheCancelledFirstEdition() => cache.upsert(
+      cacheEntry(
+        id: 'c-1',
+        documentId: 'doc-1',
+        documentNumber: number,
+        cancelledAt: 5000,
+        cancellationReason: 'Mauvais montant',
+      ),
+    );
+
+    test(
+      'le remplaçant n est pas dit annulé par la pièce qu il remplace',
+      () async {
+        await seedPayment(receiptId: 'doc-2');
+        await seedLocalDocument(
+          number: number,
+          status: 'DEFINITIVE',
+          verificationUrl: urlV2,
+          edition: 2,
+        );
+        await cacheCancelledFirstEdition();
+
+        final receipt = await resolver.resolve('p-1');
+
+        expect(receipt.number, number);
+        expect(receipt.isCancelled, isFalse);
+        expect(receipt.cacheEntry, isNull);
+        expect(receipt.verificationUrl, urlV2);
+        expect(receipt.edition, 2);
+      },
+    );
+
+    test(
+      'une réédition apprise par le pull prime sur la ligne locale',
+      () async {
+        await seedPayment(receiptId: 'doc-2');
+        await seedLocalDocument(
+          number: number,
+          status: 'DEFINITIVE',
+          verificationUrl: urlV1,
+          edition: 1,
+        );
+        await cache.upsert(
+          cacheEntry(
+            id: 'c-2',
+            documentId: 'doc-2',
+            documentNumber: number,
+            verificationUrl: urlV2,
+            edition: 2,
+          ),
+        );
+
+        final receipt = await resolver.resolve('p-1');
+
+        expect(receipt.verificationUrl, urlV2);
+        expect(receipt.edition, 2);
+      },
+    );
+
+    test('le versement d origine garde son reçu annulé', () async {
+      await seedPayment(receiptId: 'doc-1', cancelledAt: 5000);
+      await cacheCancelledFirstEdition();
+      await cache.upsert(
+        cacheEntry(id: 'c-2', documentId: 'doc-2', documentNumber: number),
+      );
+
+      final receipt = await resolver.resolve('p-1');
+
+      expect(receipt.cacheEntry?.documentId, 'doc-1');
+      expect(receipt.isReceiptCancelled, isTrue);
+    });
   });
 
   test('le numéro scellé local passe en premier', () async {

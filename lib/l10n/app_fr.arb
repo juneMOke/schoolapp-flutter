@@ -5735,6 +5735,10 @@
   "ticketReferenceLabel": "Réf.",
   "ticketDateLabel": "Date :",
   "ticketEnteredAtLabel": "Saisi le",
+  "ticketEditionLabel": "Édition :",
+  "@ticketEditionLabel": {
+    "description": "Libellé de l'édition d'un reçu remplaçant qui a repris le numéro du reçu annulé, imprimé sous la référence du ticket."
+  },
   "ticketVerifyNotice": "Scannez pour vérifier ce reçu",
   "@ticketVerifyNotice": {
     "description": "Légende du QR de vérification imprimé sur un ticket dont le reçu est scellé (perception ou annulation)."
@@ -8390,6 +8394,16 @@
   "paymentCorrectionCorrectEyebrow": "Corriger un versement",
   "paymentCorrectionOriginLabel": "Versement d'origine · sera annulé",
   "paymentCorrectionSubmit": "Annuler et remplacer",
+  "paymentCorrectionConfirmTitle": "Remplacer par {amount} ?",
+  "@paymentCorrectionConfirmTitle": {
+    "description": "Titre du récapitulatif avant une correction de versement.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionConfirmNotice": "Le versement d'origine sera annulé, et celui-ci le remplacera.",
   "paymentCorrectionGap": "Écart avec l'origine : {amount}",
   "@paymentCorrectionGap": {
     "placeholders": {

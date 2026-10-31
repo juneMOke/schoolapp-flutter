@@ -8554,6 +8554,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketEnteredAtLabel => 'Saisi le';
 
   @override
+  String get ticketEditionLabel => 'Édition :';
+
+  @override
   String get ticketVerifyNotice => 'Scannez pour vérifier ce reçu';
 
   @override
@@ -12417,6 +12420,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paymentCorrectionSubmit => 'Annuler et remplacer';
+
+  @override
+  String paymentCorrectionConfirmTitle(String amount) {
+    return 'Remplacer par $amount ?';
+  }
+
+  @override
+  String get paymentCorrectionConfirmNotice =>
+      'Le versement d\'origine sera annulé, et celui-ci le remplacera.';
 
   @override
   String paymentCorrectionGap(String amount) {

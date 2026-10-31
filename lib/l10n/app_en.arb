@@ -5660,6 +5660,7 @@
   "ticketReferenceLabel": "Ref.",
   "ticketDateLabel": "Date:",
   "ticketEnteredAtLabel": "Entered on",
+  "ticketEditionLabel": "Edition:",
   "ticketVerifyNotice": "Scan to verify this receipt",
   "ticketPayerLabel": "PAYER:",
   "ticketPhoneLabel": "Tel.",
@@ -8168,6 +8169,15 @@
   "paymentCorrectionCorrectEyebrow": "Correct a payment",
   "paymentCorrectionOriginLabel": "Original payment · will be cancelled",
   "paymentCorrectionSubmit": "Cancel and replace",
+  "paymentCorrectionConfirmTitle": "Replace with {amount}?",
+  "@paymentCorrectionConfirmTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionConfirmNotice": "The original payment will be cancelled, and this one will replace it.",
   "paymentCorrectionGap": "Difference with the original: {amount}",
   "@paymentCorrectionGap": {
     "placeholders": {

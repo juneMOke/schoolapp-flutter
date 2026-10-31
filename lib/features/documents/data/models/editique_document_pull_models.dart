@@ -43,6 +43,10 @@ class PulledEditiqueDocument {
   /// URL de vérification du reçu scellé, `null` si absente ou douteuse.
   final String? verificationUrl;
 
+  /// Édition de la pièce sous son numéro (V200 du back) ; `null` tant que le
+  /// serveur ne la sert pas.
+  final int? edition;
+
   const PulledEditiqueDocument({
     required this.id,
     required this.docType,
@@ -56,6 +60,7 @@ class PulledEditiqueDocument {
     this.cancelledAtMs,
     this.cancellationReason,
     this.verificationUrl,
+    this.edition,
   });
 
   factory PulledEditiqueDocument.fromJson(Map<String, dynamic> j) =>
@@ -72,6 +77,7 @@ class PulledEditiqueDocument {
         cancelledAtMs: _isoToMs(j['cancelledAt'] as String?),
         cancellationReason: j['cancellationReason'] as String?,
         verificationUrl: ReceiptVerificationUrl.normalize(j['verificationUrl']),
+        edition: (j['edition'] as num?)?.toInt(),
       );
 
   /// Entrée d'index **sans octets** : `contentSha256` reste nul, c'est ce qui
@@ -99,6 +105,7 @@ class PulledEditiqueDocument {
     cancelledAt: cancelledAtMs,
     cancellationReason: cancellationReason,
     verificationUrl: verificationUrl,
+    edition: edition,
     createdAt: nowMs,
     lastAccessedAt: nowMs,
   );

@@ -122,6 +122,14 @@ Future<void> migrateTenantDatabase(
   if (upTo(72)) {
     await _addColumnIfTable(db, 'generated_documents', 'verification_url');
   }
+  if (upTo(73)) {
+    await _addColumnIfTable(
+      db,
+      'generated_documents',
+      'edition',
+      type: 'INTEGER',
+    );
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -139,6 +147,30 @@ Future<void> migrateDeviceDatabase(
   if (upTo(72)) {
     await _addColumnIfTable(db, 'editique_cache_entries', 'verification_url');
   }
+  if (upTo(73)) {
+    await _admitReceiptEditionsInEditiqueCache(db);
+  }
+}
+
+/// v73 — la numérotation par édition (V200 du back) : un reçu remplaçant
+/// reprend le numéro de celui qu'il remplace. L'index unique sur le numéro
+/// faisait confondre les deux pièces, et la nouvelle héritait de l'annulation
+/// et des octets de l'ancienne. Il ne vaut plus que pour les pièces sans
+/// identifiant. Aucune reprise : le numéro y était encore unique.
+Future<void> _admitReceiptEditionsInEditiqueCache(DatabaseExecutor db) async {
+  const table = 'editique_cache_entries';
+  final info = await db.rawQuery('PRAGMA table_info($table)');
+  if (info.isEmpty) return;
+  await _addColumnIfTable(db, table, 'edition', type: 'INTEGER');
+  await db.execute('DROP INDEX IF EXISTS idx_editique_cache_number');
+  await db.execute(
+    'CREATE UNIQUE INDEX idx_editique_cache_number '
+    'ON $table(school_id, document_number) WHERE document_id IS NULL',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_editique_cache_number_lookup '
+    'ON $table(school_id, document_number)',
+  );
 }
 
 /// v72 — l'URL de vérification du reçu scellé, que le ticket imprime en QR
@@ -151,12 +183,13 @@ Future<void> migrateDeviceDatabase(
 Future<void> _addColumnIfTable(
   DatabaseExecutor db,
   String table,
-  String column,
-) async {
+  String column, {
+  String type = 'TEXT',
+}) async {
   final info = await db.rawQuery('PRAGMA table_info($table)');
   if (info.isEmpty) return;
   if (info.any((row) => row['name'] == column)) return;
-  await db.execute('ALTER TABLE $table ADD COLUMN $column TEXT');
+  await db.execute('ALTER TABLE $table ADD COLUMN $column $type');
 }
 
 /// v71 — `generated_documents.emitted_on`, le jour d'émission du reçu scellé.

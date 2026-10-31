@@ -71,9 +71,14 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
     // numéro : ses faits ne valent que si son numéro est celui imprimé, sans
     // quoi le ticket serait daté d'un autre jour et vérifié contre une autre
     // pièce.
+    //
+    // Même numéro, édition plus récente au cache : le pull a appris une
+    // réédition que la ligne locale ignore, et ses faits priment.
     final definitive = status == PaymentReceiptStatus.definitive;
-    final fromLocal = definitive && number == localDefinitive;
     final fromCache = definitive && number == cachedNumber;
+    final cacheIsNewer =
+        fromCache && (cached?.edition ?? 1) > (row.edition ?? 1);
+    final fromLocal = definitive && number == localDefinitive && !cacheIsNewer;
 
     return PaymentReceiptReference(
       number: number,
@@ -89,6 +94,11 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
       verificationUrl:
           (fromLocal ? row.verificationUrl : null) ??
           (fromCache ? _text(cached?.verificationUrl) : null),
+      edition: definitive
+          ? (fromLocal ? row.edition : null) ??
+                (fromCache ? cached?.edition : null) ??
+                1
+          : 1,
     );
   }
 
@@ -103,8 +113,11 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
         : (number, PaymentReceiptStatus.provisional);
   }
 
-  /// Par identifiant d'abord ; par numéro, scopé à l'école, seulement quand
-  /// aucun identifiant n'est connu (régime AM-5).
+  /// Par identifiant d'abord ; par numéro, scopé à l'école, seulement pour une
+  /// pièce sans identifiant (régime AM-5).
+  ///
+  /// ⚠️ Avec un identifiant connu, le numéro ne doit jamais rendre une autre
+  /// édition : le reçu remplaçant se dirait annulé par celui qu'il remplace.
   ///
   /// La garde de profil (RG-012-4) s'applique ici comme à tout lecteur du
   /// cache : sans droit, la tablette ne sait rien de la pièce.
@@ -121,6 +134,12 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
       final schoolId = _currentUser.schoolId;
       if (documentNumber == null || schoolId == null || schoolId.isEmpty) {
         return null;
+      }
+      if (documentId != null) {
+        return await _cache.findUnidentifiedByDocumentNumber(
+          schoolId: schoolId,
+          documentNumber: documentNumber,
+        );
       }
       return await _cache.findByDocumentNumber(
         schoolId: schoolId,
