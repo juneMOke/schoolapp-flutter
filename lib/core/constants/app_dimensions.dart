@@ -896,7 +896,7 @@ class AppDimensions {
   // Le livre défile horizontalement sous 1024 dp — 220 d'agent, les montants,
   // 136 de versement au moins, l'œil et le crayon, 16 de marges ; les
   // colonnes de montant sont alignées à droite, en chiffres tabulaires.
-  static const payrollLedgerMinWidth = 1024.0;
+  static const payrollLedgerMinWidth = 1124.0;
   static const payrollColAgent = 220.0;
   static const payrollColAmount = 100.0;
 

@@ -14410,7 +14410,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get payrollColAdvance => 'Retenues';
+  String get payrollColDeductions => 'Retenues';
+
+  @override
+  String get payrollColAdvance => 'Avance';
 
   @override
   String get payrollColNet => 'Net';

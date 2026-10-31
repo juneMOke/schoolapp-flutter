@@ -9955,7 +9955,8 @@
       }
     }
   },
-  "payrollColAdvance": "Retenues",
+  "payrollColDeductions": "Retenues",
+  "payrollColAdvance": "Avance",
   "payrollColNet": "Net",
   "payrollColAttendance": "Pointage",
   "payrollColPayout": "Versement",

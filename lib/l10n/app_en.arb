@@ -9465,7 +9465,8 @@
       }
     }
   },
-  "payrollColAdvance": "Deductions",
+  "payrollColDeductions": "Deductions",
+  "payrollColAdvance": "Advance",
   "payrollColNet": "Net",
   "payrollColAttendance": "Attendance",
   "payrollColPayout": "Payment",

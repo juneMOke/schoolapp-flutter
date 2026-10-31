@@ -22400,10 +22400,16 @@ abstract class AppLocalizations {
   /// **'pay {amount} · fixed'**
   String payrollLineToPayFixed(String amount);
 
-  /// No description provided for @payrollColAdvance.
+  /// No description provided for @payrollColDeductions.
   ///
   /// In en, this message translates to:
   /// **'Deductions'**
+  String get payrollColDeductions;
+
+  /// No description provided for @payrollColAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance'**
   String get payrollColAdvance;
 
   /// No description provided for @payrollColNet.
