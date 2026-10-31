@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/finance/presentation/extensions/stud
 import 'package:school_app_flutter/features/finance/presentation/helpers/facturation_charge_group_entry.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/fee_status_badge.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_amount_parts.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La ligne d'une **nature de frais** à l'encaissement (GE-2).
@@ -148,34 +149,41 @@ class FacturationCreatePaymentChargeGroupLine extends StatelessWidget {
                       // et son comptoir disparaissent, et son montant n'est
                       // plus qu'un total. Les laisser afficherait deux devises
                       // concurrentes pour un même versement.
-                      if (group.groupIsSource &&
+                      if (group.amountIsEditable &&
                           currencyOptions.length > 1) ...[
-                        _CurrencyPicker(
+                        FacturationTenderCurrencyPicker(
                           options: currencyOptions,
                           selected: group.effectiveTenderCurrency,
                           onSelected: onTenderCurrencyChanged,
                         ),
-                        const SizedBox(height: AppDimensions.spacingS),
+                        const SizedBox(height: AppDimensions.spacingM),
                       ],
-                      _AmountRow(
-                        controller: group.controller,
-                        currency: group.currency,
-                        // Les tranches commandent : le champ du groupe n'est
-                        // plus une saisie mais leur total. Le laisser
-                        // modifiable ferait deux vérités pour un montant.
-                        readOnly: !group.groupIsSource,
-                        onEdited: onAmountEdited,
+                      FacturationSettleableAmountRow(
                         onSettleAll: onSettleAll,
+                        field: FacturationAmountField(
+                          controller: group.controller,
+                          currency: group.currency,
+                          label: l10n.facturationCreatePaymentGroupAmountLabel,
+                          hint: l10n.facturationCreatePaymentGroupAmountHint,
+                          // Les tranches commandent : le champ du groupe n'est
+                          // plus une saisie mais leur total. Le laisser
+                          // modifiable ferait deux vérités pour un montant.
+                          readOnly: !group.amountIsEditable,
+                          onEdited: onAmountEdited,
+                        ),
                       ),
                       // Le comptoir : un seul champ pour toute la nature, là où
                       // l'écran en affichait un par tranche. Les tranches d'un
                       // groupe partagent la devise de créance, donc une seule
                       // conversion et un seul taux à lire pour le parent.
-                      if (group.groupIsSource && group.isConverted) ...[
+                      if (group.amountIsEditable && group.isConverted) ...[
                         const SizedBox(height: AppDimensions.spacingS),
-                        _TenderRow(
+                        FacturationAmountField(
                           controller: group.tenderController,
                           currency: group.effectiveTenderCurrency,
+                          label: l10n.facturationCreatePaymentTenderAmountLabel,
+                          hint: l10n.facturationCreatePaymentAmountHint,
+                          accent: AppColors.terreCuiteDark,
                           onEdited: onTenderEdited,
                         ),
                         if (rateLabel != null)
@@ -329,115 +337,6 @@ class _HeaderRow extends StatelessWidget {
           FeeStatusBadge(label: statusLabel, visuals: statusVisuals),
         ],
       ),
-    );
-  }
-}
-
-class _AmountRow extends StatelessWidget {
-  final TextEditingController controller;
-  final String currency;
-  final bool readOnly;
-  final VoidCallback onEdited;
-  final VoidCallback onSettleAll;
-
-  const _AmountRow({
-    required this.controller,
-    required this.currency,
-    required this.readOnly,
-    required this.onEdited,
-    required this.onSettleAll,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            readOnly: readOnly,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: TextInputAction.next,
-            onChanged: (_) => onEdited(),
-            decoration: InputDecoration(
-              labelText: l10n.facturationCreatePaymentGroupAmountLabel,
-              hintText: l10n.facturationCreatePaymentGroupAmountHint,
-              suffixText: MoneyFormat.symbolOf(currency),
-              isDense: true,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        // `minimumSize` explicite : le thème pose les boutons en pleine
-        // largeur, et un bouton inline sans cette borne réclame une largeur
-        // infinie dans une `Row`.
-        OutlinedButton(
-          onPressed: onSettleAll,
-          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
-          child: Text(l10n.facturationCreatePaymentSettleAllAction),
-        ),
-      ],
-    );
-  }
-}
-
-class _TenderRow extends StatelessWidget {
-  final TextEditingController controller;
-  final String currency;
-  final VoidCallback onEdited;
-
-  const _TenderRow({
-    required this.controller,
-    required this.currency,
-    required this.onEdited,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return TextField(
-      controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      textInputAction: TextInputAction.next,
-      onChanged: (_) => onEdited(),
-      decoration: InputDecoration(
-        labelText: l10n.facturationCreatePaymentTenderAmountLabel,
-        suffixText: MoneyFormat.symbolOf(currency),
-        isDense: true,
-      ),
-    );
-  }
-}
-
-/// Le choix de la devise de règlement, pour toute la nature.
-class _CurrencyPicker extends StatelessWidget {
-  final List<String> options;
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  const _CurrencyPicker({
-    required this.options,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppDimensions.spacingXS,
-      children: [
-        for (final option in options)
-          ChoiceChip(
-            label: Text(MoneyFormat.symbolOf(option)),
-            selected: option == selected,
-            onSelected: (_) => onSelected(option),
-            visualDensity: VisualDensity.compact,
-          ),
-      ],
     );
   }
 }

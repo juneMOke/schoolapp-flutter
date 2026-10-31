@@ -20,6 +20,7 @@ const _labels = TicketCancellationLabels(
   classroomLabel: 'Classe :',
   schoolPhoneLabel: 'Tél. Promoteur :',
   tillPhoneLabel: 'Tél. caisse :',
+  verificationNotice: 'Scannez pour vérifier ce reçu',
   reasons: {'REFUNDED': 'Argent rendu au payeur'},
 );
 
@@ -28,6 +29,7 @@ TicketCancellationModel _model({
   bool cashMoved = true,
   String? by = 'Jean Kabeya',
   MoneyBag? amount,
+  String? verificationUrl,
 }) => TicketCancellationModel(
   schoolName: 'Collège La Fontaine',
   schoolTillPhone: '+243 810 000 000',
@@ -41,6 +43,7 @@ TicketCancellationModel _model({
   reasonDetail: detail,
   cashMoved: cashMoved,
   cancelledByName: by,
+  verificationUrl: verificationUrl,
   labels: _labels,
 );
 
@@ -112,5 +115,28 @@ void main() {
         expect(line.length, lessThanOrEqualTo(columns), reason: line);
       }
     }
+  });
+
+  // Révision de D-4 (2026-10-30) : scanné, le QR du reçu annulé dit
+  // « annulé ».
+  test('porte le QR du reçu annulé, sous sa légende, en dernier', () {
+    const url = 'https://api.eteelo.com/verify/RC/9f8e7d6c';
+    final lines = TicketCancellationLayout.renderRich(
+      _model(verificationUrl: url),
+    );
+
+    expect(lines.last.isQr, isTrue);
+    expect(lines.last.qrPayload, url);
+    expect(
+      lines[lines.length - 2].text.trim(),
+      'Scannez pour vérifier ce reçu',
+    );
+  });
+
+  test('sans URL, ni légende ni QR', () {
+    final lines = TicketCancellationLayout.renderRich(_model());
+
+    expect(lines.where((l) => l.isQr), isEmpty);
+    expect(text(_model()), isNot(contains('Scannez')));
   });
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -17,6 +19,7 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/provis
 import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_batch_print_flow.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_queue_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/tickets_to_print_list.dart';
+import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « Tickets à imprimer » — les tickets que ce poste doit encore sortir
@@ -24,8 +27,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// Un ticket ne sort qu'avec le numéro définitif de son reçu. Hors ligne, il
 /// attend ici ; une fois le versement acquitté, le caissier le coche — seul ou
-/// avec les autres — et lance l'impression. Rien ne s'imprime de soi-même :
-/// l'imprimante est choisie à chaque lancement.
+/// avec les autres —, relit l'aperçu et lance l'impression. Rien ne s'imprime
+/// de soi-même : l'imprimante est choisie à chaque lancement.
 class TicketsToPrintPage extends StatelessWidget {
   const TicketsToPrintPage({super.key});
 
@@ -49,7 +52,7 @@ class TicketsToPrintView extends StatelessWidget {
     cubit.printingChanged(true);
     final TicketBatchOutcome outcome;
     try {
-      outcome = await printTicketBatch(context, jobs: jobs);
+      outcome = await reviewAndPrintTicketBatch(context, jobs: jobs);
     } finally {
       // Quoi qu'il arrive, le bouton se rallume : un lot qui lève ne doit pas
       // geler la page.
@@ -61,6 +64,7 @@ class TicketsToPrintView extends StatelessWidget {
     final problem = outcome.problem;
     final lines = [
       if (outcome.printed > 0) l10n.ticketsToPrintDone(outcome.printed),
+      if (outcome.spoolerFailed) l10n.ticketPrintFailed,
       if (problem != null)
         l10n.ticketsToPrintStopped(thermalPrinterProblemMessage(l10n, problem)),
       if (outcome.skipped > 0) l10n.ticketsToPrintSkipped(outcome.skipped),
@@ -104,11 +108,13 @@ class TicketsToPrintView extends StatelessWidget {
           action: PageAction.refresh,
           onInvoke: cubit.load,
           child: AppPageBackground(
-            appBar: ModuleTopBar(
+            // La page vit sous un `ShellRoute` : son navigateur imbriqué ne
+            // porte qu'elle, et seul le routeur sait la dépiler.
+            appBar: OffShellTopBar(
               eyebrow: l10n.ticketsToPrintEyebrow,
               title: l10n.ticketsToPrintTitle,
-              onBack: () => Navigator.of(context).maybePop(),
               backTooltip: l10n.ticketsToPrintBack,
+              shellSubMenuId: MenuConstants.facturationsId,
             ),
             bottomNavigationBar: _PrintBar(onPrint: () => _print(context)),
             child: BlocBuilder<TicketPrintQueueCubit, TicketPrintQueueState>(
@@ -118,44 +124,76 @@ class TicketsToPrintView extends StatelessWidget {
                   previous.selected != current.selected ||
                   previous.printing != current.printing ||
                   previous.retrying != current.retrying,
-              builder: (context, state) => switch (state.phase) {
-                TicketPrintQueuePhase.loading => EteeloListSkeleton(
-                  semanticsLabel: l10n.ticketsToPrintTitle,
-                ),
-                TicketPrintQueuePhase.failure => EteeloErrorResult(
-                  type: EteeloErrorType.server,
-                  title: l10n.ticketsToPrintLoadErrorTitle,
-                  message: l10n.ticketsToPrintLoadErrorMessage,
-                  primaryAction: EteeloButton.primary(
-                    label: l10n.ticketsToPrintRetry,
-                    icon: Icons.refresh_rounded,
-                    fullWidth: false,
-                    onPressed: cubit.load,
-                  ),
-                ),
-                TicketPrintQueuePhase.loaded when state.jobs.isEmpty =>
-                  EteeloEmptyResult(
-                    label: l10n.ticketsToPrintEmptyTitle,
-                    description: l10n.ticketsToPrintEmptyDescription,
-                    medallionIcon: Icons.print_outlined,
-                    primaryAction: EteeloButton.secondary(
-                      label: l10n.ticketsToPrintRefresh,
-                      icon: Icons.refresh_rounded,
-                      fullWidth: false,
-                      onPressed: cubit.load,
+              builder: (context, state) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const _QueueIntro(),
+                  const SizedBox(height: AppDimensions.spacingL),
+                  switch (state.phase) {
+                    TicketPrintQueuePhase.loading => EteeloListSkeleton(
+                      semanticsLabel: l10n.ticketsToPrintTitle,
                     ),
-                  ),
-                TicketPrintQueuePhase.loaded => TicketsToPrintList(
-                  state: state,
-                  onToggle: cubit.toggle,
-                  onToggleAll: cubit.toggleAll,
-                  onRetry: (job) => _retry(context, job),
-                ),
-              },
+                    TicketPrintQueuePhase.failure => EteeloErrorResult(
+                      type: EteeloErrorType.server,
+                      title: l10n.ticketsToPrintLoadErrorTitle,
+                      message: l10n.ticketsToPrintLoadErrorMessage,
+                      primaryAction: EteeloButton.primary(
+                        label: l10n.ticketsToPrintRetry,
+                        icon: Icons.refresh_rounded,
+                        fullWidth: false,
+                        onPressed: cubit.load,
+                      ),
+                    ),
+                    TicketPrintQueuePhase.loaded when state.jobs.isEmpty =>
+                      EteeloEmptyResult(
+                        label: l10n.ticketsToPrintEmptyTitle,
+                        description: l10n.ticketsToPrintEmptyDescription,
+                        medallionIcon: Icons.print_outlined,
+                        primaryAction: EteeloButton.secondary(
+                          label: l10n.ticketsToPrintRefresh,
+                          icon: Icons.refresh_rounded,
+                          fullWidth: false,
+                          onPressed: cubit.load,
+                        ),
+                      ),
+                    TicketPrintQueuePhase.loaded => TicketsToPrintList(
+                      state: state,
+                      onToggle: cubit.toggle,
+                      onToggleAll: cubit.toggleAll,
+                      onRetry: (job) => _retry(context, job),
+                    ),
+                  },
+                ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Ce que la page montre, avant la liste : le lecteur y apprend que la file
+/// est celle de CE poste, et pourquoi un ticket peut y attendre.
+class _QueueIntro extends StatelessWidget {
+  const _QueueIntro();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.ticketsToPrintIntroTitle,
+          style: AppTextStyles.pageTitle.copyWith(color: AppColors.textPrimary),
+        ),
+        const SizedBox(height: AppDimensions.spacingXS),
+        Text(
+          l10n.ticketsToPrintIntroMessage,
+          style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+        ),
+      ],
     );
   }
 }

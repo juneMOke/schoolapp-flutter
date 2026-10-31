@@ -32,7 +32,11 @@ class _EntitledAccess implements EditiqueCacheAccess {
 }
 
 /// Un reçu appris par le pull des pièces : métadonnées seules, sans PDF.
-EditiqueCacheEntry _knownReceipt({int? cancelledAt}) => EditiqueCacheEntry(
+EditiqueCacheEntry _knownReceipt({
+  int? cancelledAt,
+  int? emittedAt,
+  String? verificationUrl,
+}) => EditiqueCacheEntry(
   id: 'c-77',
   documentId: 'rcpt-77',
   documentNumber: 'CF-RC-2627-000279',
@@ -42,6 +46,8 @@ EditiqueCacheEntry _knownReceipt({int? cancelledAt}) => EditiqueCacheEntry(
   ownerUid: 'u-1',
   sizeBytes: 0,
   cancelledAt: cancelledAt,
+  emittedAt: emittedAt,
+  verificationUrl: verificationUrl,
   createdAt: 2000,
   lastAccessedAt: 3000,
 );
@@ -51,6 +57,9 @@ const _labels = TicketLabels(
   provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
+  enteredAtLabel: 'Saisi le',
+  verificationNotice: 'Scannez pour vérifier ce reçu',
+  editionLabel: 'Édition :',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -332,6 +341,51 @@ void main() {
       )).getOrElse(() => throw StateError('échec'));
 
       expect(model.reference, 'CF-RC-2627-000279');
+    });
+
+    // Réponse back du 2026-10-30 : le ticket définitif prend le jour
+    // d'émission du reçu, lu tel quel (date à minuit UTC).
+    test('le jour d émission du reçu passe au ticket', () async {
+      await seedForeign(known: false);
+      await cache.upsert(
+        _knownReceipt(
+          emittedAt: DateTime.utc(2026, 10, 27).millisecondsSinceEpoch,
+        ),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.receiptIssuedOn, DateTime(2026, 10, 27));
+    });
+
+    test('l URL de vérification du reçu passe au ticket', () async {
+      await seedForeign(known: false);
+      await cache.upsert(
+        _knownReceipt(
+          verificationUrl: 'https://api.eteelo.com/verify/RC/doc-1',
+        ),
+      );
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.verificationUrl, 'https://api.eteelo.com/verify/RC/doc-1');
+    });
+
+    test('sans jour connu, le ticket n en invente pas', () async {
+      await seedForeign();
+
+      final model = (await repository.buildForPayment(
+        paymentId: 'p-1',
+        labels: _labels,
+      )).getOrElse(() => throw StateError('échec'));
+
+      expect(model.receiptIssuedOn, isNull);
     });
 
     // Le repli court (« P1 ») s'imprimait faute de numéro connu : un papier

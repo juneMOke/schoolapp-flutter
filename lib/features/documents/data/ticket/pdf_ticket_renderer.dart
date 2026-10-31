@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_qr_band.dart';
 
 /// Rend le reçu provisoire en PDF **80 mm** — sortie de repli de RG-012-10,
 /// quand aucune imprimante thermique n'est appairée.
@@ -145,6 +146,22 @@ abstract final class PdfTicketRenderer {
     String? cutNotice,
     TicketLogoBand? logoBand,
     int copies = 1,
+  }) => renderTickets(
+    [lines],
+    format: format,
+    cutNotice: cutNotice,
+    logoBand: logoBand,
+    copies: copies,
+  );
+
+  /// Plusieurs tickets dans un seul document, chacun sur sa page : le lot de
+  /// « Tickets à imprimer » se relit d'un bloc, puis part d'un seul geste.
+  static Future<Uint8List> renderTickets(
+    List<List<TicketLine>> tickets, {
+    PdfPageFormat format = pageFormat,
+    String? cutNotice,
+    TicketLogoBand? logoBand,
+    int copies = 1,
   }) async {
     final document = pw.Document();
     final band = (logoBand != null && logoBand.isUsable) ? logoBand : null;
@@ -152,11 +169,13 @@ abstract final class PdfTicketRenderer {
     // Un `addPage` par exemplaire : chacun ouvre une page neuve, si bien que
     // deux exemplaires ne partagent jamais une feuille — on ne découpe pas un
     // ticket dans le bas d'un autre.
-    for (var i = 0; i < (copies < 1 ? 1 : copies); i++) {
-      if (format.height.isInfinite) {
-        _addRollPage(document, lines, format, band);
-      } else {
-        _addSheetPages(document, lines, format, cutNotice, band);
+    for (final lines in tickets) {
+      for (var i = 0; i < (copies < 1 ? 1 : copies); i++) {
+        if (format.height.isInfinite) {
+          _addRollPage(document, lines, format, band);
+        } else {
+          _addSheetPages(document, lines, format, cutNotice, band);
+        }
       }
     }
 
@@ -222,7 +241,13 @@ abstract final class PdfTicketRenderer {
           children: [
             if (band != null)
               _bandWidget(band, TicketBlockGeometry.textWidthFor(format)),
-            for (final line in lines) _line(line, style, boldStyle),
+            for (final line in lines)
+              _line(
+                line,
+                style,
+                boldStyle,
+                TicketBlockGeometry.textWidthFor(format),
+              ),
           ],
         ),
       ),
@@ -277,7 +302,7 @@ abstract final class PdfTicketRenderer {
                 padding: pw.EdgeInsets.symmetric(horizontal: padding),
                 child: pw.SizedBox(
                   width: textWidth,
-                  child: _line(line, style, boldStyle),
+                  child: _line(line, style, boldStyle, textWidth),
                 ),
               ),
             ),
@@ -392,7 +417,20 @@ abstract final class PdfTicketRenderer {
     TicketLine line,
     pw.TextStyle style,
     pw.TextStyle boldStyle,
+    double width,
   ) {
+    // Le QR, dessiné depuis la même matrice que sur la thermique (48 colonnes,
+    // la laize que le bloc de texte représente).
+    if (line.qrPayload case final payload?) {
+      final band = TicketQrBand.of(
+        payload,
+        paperDots: TicketQrBand.paperDotsFor(TicketTextLayout.defaultColumns),
+      );
+      if (band == null || !band.isUsable) {
+        return pw.SizedBox(height: style.fontSize);
+      }
+      return _bandWidget(band, width);
+    }
     // Une ligne vide doit être un blanc de hauteur NON NULLE. La matérialiser
     // par une espace ne suffisait pas : le moteur de texte découpe sur les
     // espaces, ne trouve aucun mot, n'ajoute aucune ligne et rend une boîte de

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/sealed_receipt_write.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_anomaly_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/provisional_charge_dissolver.dart';
@@ -170,11 +171,15 @@ class FinancePaymentAckDao {
     PaymentAggregateResponse ack,
   ) async {
     for (final doc in ack.documents) {
-      await txn.update(
-        'generated_documents',
-        {'number': doc.documentNumber, 'status': doc.status},
-        where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
-        whereArgs: [ack.paymentId, 'PAYMENT', doc.localDocType],
+      await SealedReceiptWrite.seal(
+        txn,
+        paymentId: ack.paymentId,
+        docType: doc.localDocType,
+        number: doc.documentNumber,
+        status: doc.status,
+        emittedOn: doc.emittedOn,
+        verificationUrl: doc.verificationUrl,
+        edition: doc.edition,
       );
     }
   }

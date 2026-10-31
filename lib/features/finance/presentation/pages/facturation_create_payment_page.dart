@@ -33,6 +33,7 @@ import 'package:school_app_flutter/features/finance/presentation/widgets/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_payer_search_dialog.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payer_suggestions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_reason.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/repositories/payment_correction_repository.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/payment_correction_cubit.dart';
@@ -63,6 +64,15 @@ class FacturationCreatePaymentPage extends StatelessWidget {
   final FacturationCreatePaymentIntent intent;
 
   const FacturationCreatePaymentPage({super.key, required this.intent});
+
+  /// Une lecture ratée laisse la recherche seule : l'encaissement n'en dépend
+  /// pas.
+  static Future<List<LocalPayerIdentity>> _loadKnownPayers(
+    String studentId,
+  ) async {
+    final result = await getIt<GetPayerSuggestionsUseCase>()(studentId);
+    return result.fold((_) => const [], (payers) => payers);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +116,7 @@ class FacturationCreatePaymentPage extends StatelessWidget {
                 intent: intent,
                 rates: rates.rates,
                 sectionTitles: titles,
+                loadKnownPayers: _loadKnownPayers,
               ),
             ),
       ),
@@ -129,9 +140,14 @@ class FacturationCreatePaymentView extends StatefulWidget {
   /// l'horloge du poste.
   final DateTime? now;
 
+  /// Les payeurs connus de l'élève. `null` : aucune liste à dérouler.
+  final Future<List<LocalPayerIdentity>> Function(String studentId)?
+  loadKnownPayers;
+
   const FacturationCreatePaymentView({
     super.key,
     required this.intent,
+    this.loadKnownPayers,
     this.rates = const [],
     this.sectionTitles = const FeeSectionTitlesState(),
     this.now,
@@ -188,6 +204,7 @@ class _FacturationCreatePaymentViewState
     _model = _modelOf(widget.intent.unpaidCharges);
     _payer.addListener(_onChanged);
     _correctionDetail.addListener(_onChanged);
+    _loadKnownPayers();
     final correction = widget.intent.correction;
     if (correction != null) {
       _prefillOrigin(correction);
@@ -466,6 +483,29 @@ class _FacturationCreatePaymentViewState
     );
   }
 
+  List<LocalPayerIdentity> _knownPayers = const [];
+
+  Future<void> _loadKnownPayers() async {
+    final payers = await widget.loadKnownPayers?.call(widget.intent.studentId);
+    if (!mounted || payers == null) return;
+    setState(() => _knownPayers = payers);
+  }
+
+  /// Le payeur connu que les champs désignent : dérivé d'eux, il disparaît de
+  /// la liste dès que le caissier les retape.
+  LocalPayerIdentity? get _selectedKnownPayer {
+    final typed = LocalPayerIdentity(
+      lastName: _payer.lastName.text,
+      firstName: _payer.firstName.text,
+      middleName: _payer.middleName.text,
+      origin: PayerOrigin.previousPayment,
+    );
+    for (final payer in _knownPayers) {
+      if (payer.matchKey == typed.matchKey) return payer;
+    }
+    return null;
+  }
+
   /// Ouvre l'annuaire local des payeurs et reprend celui qui en revient.
   Future<void> _pickPayer() async {
     final payer = await showFacturationPayerSearchDialog(
@@ -587,9 +627,9 @@ class _FacturationCreatePaymentViewState
     return !reason.requiresDetail || _correctionDetail.text.trim().isNotEmpty;
   }
 
-  /// « Annuler et remplacer » — un seul geste, sans popin de confirmation :
-  /// l'origine barrée et l'écart jouent ce rôle (spec §05).
-  void _onCorrect() {
+  /// « Annuler et remplacer » : le même récapitulatif qu'un encaissement, puis
+  /// l'écriture. Le geste annule un versement : il se relit avant de partir.
+  Future<void> _onCorrect(AppLocalizations l10n) async {
     final correction = widget.intent.correction;
     final reason = _correctionReason;
     if (correction == null || reason == null) return;
@@ -597,40 +637,67 @@ class _FacturationCreatePaymentViewState
     final draft = _model.buildDraft();
     if (draft == null) return;
 
-    final replacement = withOriginInstant(
-      recordPaymentDraftFromRequest(
-        PaymentsCreateRequested(
-          // L'élève retenu (D1), sinon celui de l'origine.
-          studentId:
-              context
-                  .read<PaymentCorrectionTargetCubit>()
-                  .state
-                  .target
-                  ?.studentId ??
-              widget.intent.studentId,
-          academicYearId: widget.intent.academicYearId,
-          paidAt: draft.paidAt,
-          amounts: draft.amounts,
-          tenders: draft.tenders,
-          payerFirstName: _payer.valueOf(_payer.firstName),
-          payerLastName: _payer.valueOf(_payer.lastName),
-          payerMiddleName: _payer.valueOf(_payer.middleName),
-          payerPhoneNumber: _payer.valueOf(_payer.phone),
-          allocations: draft.allocations,
-        ),
-        now: widget.now,
-      ),
-      correction,
-      _model.paidDay,
+    final target = context.read<PaymentCorrectionTargetCubit>().state.target;
+    final request = PaymentsCreateRequested(
+      // L'élève retenu (D1), sinon celui de l'origine.
+      studentId: target?.studentId ?? widget.intent.studentId,
+      academicYearId: widget.intent.academicYearId,
+      paidAt: draft.paidAt,
+      amounts: draft.amounts,
+      tenders: draft.tenders,
+      payerFirstName: _payer.valueOf(_payer.firstName),
+      payerLastName: _payer.valueOf(_payer.lastName),
+      payerMiddleName: _payer.valueOf(_payer.middleName),
+      payerPhoneNumber: _payer.valueOf(_payer.phone),
+      allocations: draft.allocations,
     );
+    final settlement = _settlement();
+    final totalLabel = hasConversion(settlement, _model.entries)
+        ? bagLabel(tenderBagOf(settlement, _model.entries))
+        : bagLabel(draft.amounts);
+
     setState(() => _collectInFlight = true);
+    final outcome = await showFacturationCreatePaymentConfirmDialog(
+      context,
+      financeOfflineBloc: context.read<FinanceOfflineBloc>(),
+      totalLabel: totalLabel,
+      rateLabel: singleRateLabel(linesOf(settlement, _model.entries)),
+      // L'élève qui recevra le versement : celui retenu, s'il a changé.
+      studentName: target == null
+          ? studentFullName(widget.intent, l10n)
+          : [
+              target.lastName,
+              target.surname,
+              target.firstName,
+            ].whereType<String>().where((n) => n.isNotEmpty).join(' '),
+      payerName: _payer.composedName,
+      payerPhone: _payer.phone.text.trim(),
+      allocations: _confirmGroups(settlement, l10n),
+      request: request,
+      now: widget.now,
+      confirmation: FacturationConfirmOnlyLabels(
+        title: l10n.paymentCorrectionConfirmTitle(totalLabel),
+        notice: l10n.paymentCorrectionConfirmNotice,
+        action: l10n.paymentCorrectionSubmit,
+      ),
+    );
+    if (!mounted) return;
+    if (outcome != FacturationCollectOutcome.confirmed) {
+      setState(() => _collectInFlight = false);
+      return;
+    }
+
     context.read<PaymentCorrectionCubit>().submit(
       PaymentCorrectionDraft(
         paymentId: correction.origin.paymentId,
         reason: reason,
         reasonDetail: _correctionDetail.text,
         cashMoved: _cashMoved,
-        replacement: replacement,
+        replacement: withOriginInstant(
+          recordPaymentDraftFromRequest(request, now: widget.now),
+          correction,
+          _model.paidDay,
+        ),
       ),
     );
   }
@@ -692,7 +759,7 @@ class _FacturationCreatePaymentViewState
         ? null
         : correction == null
         ? () => _onCollect(l10n)
-        : _onCorrect;
+        : () => _onCorrect(l10n);
 
     return PopScope(
       // Bloque le retour système / `maybePop` : toute sortie passe par
@@ -857,6 +924,9 @@ class _FacturationCreatePaymentViewState
           middleNameController: _payer.middleName,
           phoneController: _payer.phone,
           onPickPayer: _pickPayer,
+          knownPayers: _knownPayers,
+          selectedPayer: _selectedKnownPayer,
+          onPayerSelected: _payer.applyPayer,
           phoneErrorText: _payer.phoneErrorText(l10n),
           readOnly: _collectInFlight,
         ),

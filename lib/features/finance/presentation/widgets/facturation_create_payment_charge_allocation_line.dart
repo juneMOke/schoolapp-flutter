@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/selection/checkable_row.dart';
-import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/currency_field.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/student_charge_designation.dart';
 import 'package:school_app_flutter/features/finance/presentation/extensions/student_charge_status_ui_extension.dart';
 import 'package:school_app_flutter/features/finance/presentation/utils/facturation_collect_payment_utils.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_form_fields.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_amount_parts.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ligne de frais à régler de la page d'encaissement (spec MODALE-12).
@@ -189,24 +187,27 @@ class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
                       // après le frais et avant le montant, dans l'ordre où
                       // elle se pose au comptoir.
                       if (currencyOptions.length > 1) ...[
-                        _TenderCurrencyPicker(
+                        FacturationTenderCurrencyPicker(
                           options: currencyOptions,
                           selected: tenderCurrency,
                           onSelected: onTenderCurrencyChanged,
-                          label: l10n.facturationCreatePaymentTenderCurrency,
                         ),
                         const SizedBox(height: AppDimensions.spacingM),
                       ],
-                      _MoneyField(
-                        controller: amountController,
-                        currency: charge.currency,
-                        label: l10n.facturationCreatePaymentAmountToSettleLabel,
-                        hint: l10n.facturationCreatePaymentAmountHint,
-                        onEdited: onAllocationEdited,
+                      FacturationSettleableAmountRow(
+                        onSettleAll: onSettleAll,
+                        field: FacturationAmountField(
+                          controller: amountController,
+                          currency: charge.currency,
+                          label:
+                              l10n.facturationCreatePaymentAmountToSettleLabel,
+                          hint: l10n.facturationCreatePaymentAmountHint,
+                          onEdited: onAllocationEdited,
+                        ),
                       ),
                       if (_converted) ...[
                         const SizedBox(height: AppDimensions.spacingS),
-                        _MoneyField(
+                        FacturationAmountField(
                           controller: tenderController,
                           currency: tenderCurrency,
                           label: l10n.facturationCreatePaymentTenderAmountLabel,
@@ -222,23 +223,6 @@ class FacturationCreatePaymentChargeAllocationLine extends StatelessWidget {
                           ),
                         ],
                       ],
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: onSettleAll,
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: AppDimensions.spacingXS,
-                            ),
-                            // Cible padded (48 dp) : « Tout régler » se
-                            // touche au doigt, au guichet.
-                            minimumSize: const Size(0, 0),
-                          ),
-                          child: Text(
-                            l10n.facturationCreatePaymentSettleAllAction,
-                          ),
-                        ),
-                      ),
                       if (overflowing) ...[
                         const SizedBox(height: AppDimensions.spacingS),
                         _OverflowWarning(
@@ -305,98 +289,6 @@ class _AllocationCheckbox extends StatelessWidget {
 }
 
 /// Pastille de statut compacte du frais (Soldé / Partiel / Impayé).
-/// « Le parent règle en… » — une bascule exclusive, jamais deux champs reliés
-/// par un « ou ».
-///
-/// La devise de règlement est un **mode** : on en choisit un, et seuls ses
-/// montants partent. Même règle que la recherche bi-mode, pour la même raison —
-/// deux blocs concurrents laisseraient croire qu'on peut panacher sur une même
-/// ligne, ce que le modèle ne sait pas représenter.
-class _TenderCurrencyPicker extends StatelessWidget {
-  final List<String> options;
-  final String selected;
-  final ValueChanged<String> onSelected;
-  final String label;
-
-  const _TenderCurrencyPicker({
-    required this.options,
-    required this.selected,
-    required this.onSelected,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: AppTextStyles.badge.copyWith(
-            color: AppColors.terreCuite,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spacingXS),
-        SegmentedTabFilter<String>(
-          expand: true,
-          selected: selected,
-          onSelected: onSelected,
-          semanticsLabel: label,
-          options: [
-            for (final currency in options)
-              SegmentedTabOption<String>(
-                label: MoneyFormat.symbolOf(currency),
-                value: currency,
-                semanticLabel: currency,
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Un montant, dans une devise nommée.
-///
-/// `onEdited` ne part qu'à la frappe de l'utilisateur : c'est ce qui permet à
-/// la page de recalculer l'AUTRE champ sans jamais réécrire celui qui a le
-/// curseur.
-class _MoneyField extends StatelessWidget {
-  final TextEditingController controller;
-  final String currency;
-  final String label;
-  final String hint;
-  final Color accent;
-  final VoidCallback onEdited;
-
-  const _MoneyField({
-    required this.controller,
-    required this.currency,
-    required this.label,
-    required this.hint,
-    required this.onEdited,
-    this.accent = AppColors.bleuArdoise,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      textInputAction: TextInputAction.next,
-      style: AppTextStyles.moneyTabular.copyWith(color: AppColors.textPrimary),
-      onChanged: (_) => onEdited(),
-      decoration: financeInputDecoration(
-        label: label,
-        hint: hint,
-        accentColor: accent,
-        readOnly: false,
-      ).copyWith(suffixText: currency),
-    );
-  }
-}
-
 /// Le taux appliqué, et ce qui repart avec le parent.
 ///
 /// Les deux se lisent sur la ligne qu'ils concernent : deux frais réglés

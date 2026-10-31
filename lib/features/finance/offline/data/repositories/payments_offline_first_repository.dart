@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/finance/domain/entities/payment.dart
 import 'package:school_app_flutter/features/finance/domain/entities/payment_allocations.dart';
 import 'package:school_app_flutter/features/finance/domain/repositories/payments_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/finance_local_dao.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 import 'package:school_app_flutter/features/finance/offline/data/mappers/local_finance_online_mappers.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_ledger_refresher.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -26,14 +27,17 @@ class PaymentsOfflineFirstRepository implements PaymentsRepository {
   final FinanceLocalDao _dao;
   final LedgerRefresh _refresh;
   final PaymentsRepository _online;
+  final PaymentReceiptResolver? _receipts;
 
   const PaymentsOfflineFirstRepository({
     required FinanceLocalDao dao,
     required LedgerRefresh refresh,
     required PaymentsRepository online,
+    PaymentReceiptResolver? receipts,
   }) : _dao = dao,
        _refresh = refresh,
-       _online = online;
+       _online = online,
+       _receipts = receipts;
 
   @override
   Future<Either<Failure, List<Payment>>> getPaymentsByStudentAndAcademicYear({
@@ -49,14 +53,25 @@ class PaymentsOfflineFirstRepository implements PaymentsRepository {
             (p) =>
                 p.academicYearId == null || p.academicYearId == academicYearId,
           )
-          .map((p) => p.toOnlineEntity())
           .toList();
-      return Right(scoped);
+      return Right([
+        for (final payment in scoped)
+          payment.toOnlineEntity(
+            receiptNumber: await _definitiveNumberOf(payment.id),
+          ),
+      ]);
     } catch (e) {
       return Left(
         StorageFailure('Lecture locale des paiements impossible : $e'),
       );
     }
+  }
+
+  /// Le numéro définitif du reçu, par le résolveur de la fiche : un versement
+  /// encaissé sur une autre caisse n'a son numéro que dans le cache des pièces.
+  Future<String?> _definitiveNumberOf(String paymentId) async {
+    final receipt = await _receipts?.resolve(paymentId);
+    return (receipt?.isDefinitive ?? false) ? receipt?.number : null;
   }
 
   @override

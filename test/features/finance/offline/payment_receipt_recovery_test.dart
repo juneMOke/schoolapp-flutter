@@ -162,6 +162,46 @@ void main() {
       final receipt = (await db.query('generated_documents')).single;
       expect(receipt['number'], 'CF-RC-2627-000802');
       expect(receipt['status'], 'DEFINITIVE');
+      expect(receipt['emitted_on'], isNull);
+    });
+
+    test('reçu rendu avec son jour d émission : il est gardé', () async {
+      editique.result = Right(
+        EditiqueDocument(
+          type: EditiqueDocumentType.paymentReceipt,
+          bytes: Uint8List(0),
+          fileName: 'CF-RC-2627-000802.pdf',
+          documentNumber: 'CF-RC-2627-000802',
+          documentId: 'doc-1',
+          emittedOn: '2026-10-28',
+        ),
+      );
+
+      await handler.dispatch(entryOf((await recoveries()).single));
+
+      final receipt = (await db.query('generated_documents')).single;
+      expect(receipt['emitted_on'], '2026-10-28');
+    });
+
+    test('reçu rendu avec son URL de vérification : elle est gardée', () async {
+      editique.result = Right(
+        EditiqueDocument(
+          type: EditiqueDocumentType.paymentReceipt,
+          bytes: Uint8List(0),
+          fileName: 'CF-RC-2627-000802.pdf',
+          documentNumber: 'CF-RC-2627-000802',
+          documentId: 'doc-1',
+          verificationUrl: 'https://api.eteelo.com/verify/RC/doc-1',
+        ),
+      );
+
+      await handler.dispatch(entryOf((await recoveries()).single));
+
+      final receipt = (await db.query('generated_documents')).single;
+      expect(
+        receipt['verification_url'],
+        'https://api.eteelo.com/verify/RC/doc-1',
+      );
     });
 
     test('versement annulé entre-temps : la marque tombe', () async {

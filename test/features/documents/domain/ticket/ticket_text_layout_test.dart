@@ -11,6 +11,9 @@ const _labels = TicketLabels(
   provisionalMention: 'provisoire',
   referenceLabel: 'Réf.',
   dateLabel: 'Date :',
+  enteredAtLabel: 'Saisi le',
+  verificationNotice: 'Scannez pour vérifier ce reçu',
+  editionLabel: 'Édition :',
   payerLabel: 'PAYEUR :',
   phoneLabel: 'Tél.',
   cashierLabel: 'Caissier :',
@@ -46,6 +49,9 @@ final TicketLabels _labelsWithoutBalanceTitle = TicketLabels(
   provisionalMention: _labels.provisionalMention,
   referenceLabel: _labels.referenceLabel,
   dateLabel: _labels.dateLabel,
+  enteredAtLabel: _labels.enteredAtLabel,
+  verificationNotice: _labels.verificationNotice,
+  editionLabel: _labels.editionLabel,
   payerLabel: _labels.payerLabel,
   phoneLabel: _labels.phoneLabel,
   cashierLabel: _labels.cashierLabel,
@@ -81,6 +87,13 @@ TicketReceiptModel _model({
   /// Une pièce SCELLÉE tait la phrase de conservation — le seul cas où rien ne
   /// sépare le solde du bloc de signature.
   bool isProvisional = true,
+
+  /// Le jour d'émission du reçu scellé — date principale d'un ticket définitif.
+  DateTime? receiptIssuedOn,
+
+  /// L'URL de vérification du reçu scellé — le QR du ticket.
+  String? verificationUrl,
+  int edition = 1,
   String? schoolPhone = '+243 000 000 000',
   String? schoolTillPhone = '+243 811 111 111',
   int? remainingBalanceInCents = 250000,
@@ -124,6 +137,9 @@ TicketReceiptModel _model({
   reference: 'PROV-A1B2C3-9F8E7D6C',
   isProvisional: isProvisional,
   paidAt: DateTime(2026, 8, 4, 14, 7),
+  receiptIssuedOn: receiptIssuedOn,
+  verificationUrl: verificationUrl,
+  edition: edition,
   cashierFullName: cashierFullName,
   tenders:
       tenders ??
@@ -1053,6 +1069,9 @@ void main() {
         provisionalMention: _labels.provisionalMention,
         referenceLabel: _labels.referenceLabel,
         dateLabel: _labels.dateLabel,
+        enteredAtLabel: _labels.enteredAtLabel,
+        verificationNotice: _labels.verificationNotice,
+        editionLabel: _labels.editionLabel,
         payerLabel: _labels.payerLabel,
         phoneLabel: _labels.phoneLabel,
         cashierLabel: _labels.cashierLabel,
@@ -1107,6 +1126,9 @@ void main() {
       provisionalMention: _labels.provisionalMention,
       referenceLabel: _labels.referenceLabel,
       dateLabel: _labels.dateLabel,
+      enteredAtLabel: _labels.enteredAtLabel,
+      verificationNotice: _labels.verificationNotice,
+      editionLabel: _labels.editionLabel,
       payerLabel: _labels.payerLabel,
       phoneLabel: _labels.phoneLabel,
       cashierLabel: _labels.cashierLabel,
@@ -1441,6 +1463,164 @@ void main() {
           expect(line.length, lessThanOrEqualTo(width), reason: line);
         }
       }
+    });
+  });
+
+  // Réponse back du 2026-10-30 : un ticket définitif prend la date d'émission
+  // du reçu, comme le PDF scellé — le numéro croît avec elle, et la pile du
+  // jour reste continue quel que soit le nombre de postes.
+  group('date d émission du reçu', () {
+    final issuedOn = DateTime(2026, 8, 5);
+
+    for (final columns in const [32, 48]) {
+      test(
+        'définitif : date d émission sans heure, saisie dessous ($columns)',
+        () {
+          final lines = TicketTextLayout.render(
+            _model(isProvisional: false, receiptIssuedOn: issuedOn),
+            columns: columns,
+          );
+          final date = lines.indexWhere((l) => l.startsWith('Date : '));
+
+          expect(lines[date].trimRight(), 'Date : 05/08/2026');
+          expect(lines[date + 1], startsWith('Saisi le 04/08/2026'));
+          expect(lines[date + 1], endsWith('14:07'));
+          expect(lines[date + 1].length, columns);
+          for (final line in lines) {
+            expect(line.length, lessThanOrEqualTo(columns));
+          }
+        },
+      );
+    }
+
+    test('définitif sans jour connu : la date de saisie, comme avant', () {
+      final out = _flat(TicketTextLayout.render(_model(isProvisional: false)));
+
+      expect(out, contains('Date : 04/08/2026'));
+      expect(out, isNot(contains('Saisi le')));
+    });
+
+    test('provisoire : le jour d émission ne s imprime jamais', () {
+      final out = _flat(
+        TicketTextLayout.render(_model(receiptIssuedOn: issuedOn)),
+      );
+
+      expect(out, contains('Date : 04/08/2026'));
+      expect(out, isNot(contains('05/08/2026')));
+      expect(out, isNot(contains('Saisi le')));
+    });
+  });
+
+  // Révision de D-4 (2026-10-30) : le ticket scellé porte le QR de son reçu,
+  // le ticket provisoire jamais.
+  group('édition du reçu', () {
+    List<String> out(TicketReceiptModel model) => [
+      for (final line in TicketTextLayout.render(model)) line.trim(),
+    ];
+
+    test('une deuxième édition se dit sous la référence', () {
+      final lines = out(_model(isProvisional: false, edition: 2));
+
+      final edition = lines.indexOf('Édition : 2');
+      expect(edition, greaterThan(0));
+      expect(lines[edition - 1], startsWith(_labels.referenceLabel));
+    });
+
+    test('la première édition ne se dit pas, comme sur le PDF', () {
+      expect(
+        out(_model(isProvisional: false)).join('\n'),
+        isNot(contains('Édition')),
+      );
+    });
+
+    test('un provisoire n a jamais d édition', () {
+      expect(
+        out(_model(isProvisional: true, edition: 2)).join('\n'),
+        isNot(contains('Édition')),
+      );
+    });
+  });
+
+  group('QR de vérification', () {
+    const url = 'https://api.eteelo.com/verify/RC/9f8e7d6c';
+
+    test('scellé : légende puis QR, juste avant le pied', () {
+      final lines = TicketTextLayout.renderRich(
+        _model(isProvisional: false, verificationUrl: url),
+      );
+      final qr = lines.indexWhere((l) => l.isQr);
+
+      expect(lines.where((l) => l.isQr), hasLength(1));
+      expect(lines[qr].qrPayload, url);
+      expect(lines[qr - 1].text.trim(), 'Scannez pour vérifier ce reçu');
+      expect(
+        lines.skip(qr).map((l) => l.text.trim()),
+        contains(_labels.thanksNotice),
+      );
+      expect(
+        lines.take(qr).map((l) => l.text.trim()),
+        isNot(contains(_labels.thanksNotice)),
+      );
+    });
+
+    test('le pivot textuel garde une ligne vide à sa place', () {
+      final rich = TicketTextLayout.renderRich(
+        _model(isProvisional: false, verificationUrl: url),
+      );
+      final text = TicketTextLayout.render(
+        _model(isProvisional: false, verificationUrl: url),
+      );
+
+      expect(text, hasLength(rich.length));
+      expect(text[rich.indexWhere((l) => l.isQr)], '');
+      expect(text.join('\n'), isNot(contains(url)));
+    });
+
+    test('provisoire : jamais de QR, même l URL connue', () {
+      final lines = TicketTextLayout.renderRich(_model(verificationUrl: url));
+
+      expect(lines.where((l) => l.isQr), isEmpty);
+      expect(
+        lines.map((l) => l.text),
+        isNot(contains(contains('Scannez pour vérifier'))),
+      );
+    });
+
+    test(
+      'une URL vide, ou trop longue pour 32 colonnes : ni légende ni QR',
+      () {
+        final long = 'https://api.eteelo.com/verify/${'a' * 300}';
+
+        for (final (verificationUrl, columns) in [('  ', 48), (long, 32)]) {
+          final lines = TicketTextLayout.renderRich(
+            _model(isProvisional: false, verificationUrl: verificationUrl),
+            columns: columns,
+          );
+
+          expect(lines.where((l) => l.isQr), isEmpty);
+          expect(
+            lines.map((l) => l.text),
+            isNot(contains(contains('Scannez pour vérifier'))),
+          );
+        }
+        // La même, à 48 colonnes, tient.
+        expect(
+          TicketTextLayout.renderRich(
+            _model(isProvisional: false, verificationUrl: long),
+          ).where((l) => l.isQr),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('sans URL : ni légende ni QR', () {
+      final lines = TicketTextLayout.renderRich(_model(isProvisional: false));
+
+      expect(lines.where((l) => l.isQr), isEmpty);
+      expect(
+        lines.map((l) => l.text),
+        isNot(contains(contains('Scannez pour vérifier'))),
+      );
     });
   });
 }

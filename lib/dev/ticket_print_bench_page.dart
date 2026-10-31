@@ -59,11 +59,16 @@ class _TicketPrintBenchPageState extends State<TicketPrintBenchPage> {
   static const List<int> _feeds = [2, 4, 6, 8, 10];
 
   int _columns = 48;
-  bool _minimal = false;
+
+  /// `torture`, `minimal` ou `sealed` — cf. `TicketBenchFixtures`.
+  String _fixture = 'torture';
   int _feedLines = EscPosTicketRenderer.defaultFeedLines;
 
-  TicketReceiptModel get _model =>
-      _minimal ? TicketBenchFixtures.minimal : TicketBenchFixtures.torture;
+  TicketReceiptModel get _model => switch (_fixture) {
+    'minimal' => TicketBenchFixtures.minimal,
+    'sealed' => TicketBenchFixtures.sealed,
+    _ => TicketBenchFixtures.torture,
+  };
 
   Uint8List _buildTicket() => EscPosTicketRenderer.render(
     _model,
@@ -112,13 +117,14 @@ class _TicketPrintBenchPageState extends State<TicketPrintBenchPage> {
           const SizedBox(height: AppSpacing.lg),
 
           const _Header('Modèle'),
-          SegmentedButton<bool>(
+          SegmentedButton<String>(
             segments: const [
-              ButtonSegment(value: false, label: Text('Torture')),
-              ButtonSegment(value: true, label: Text('Tout absent')),
+              ButtonSegment(value: 'torture', label: Text('Torture')),
+              ButtonSegment(value: 'minimal', label: Text('Tout absent')),
+              ButtonSegment(value: 'sealed', label: Text('Scellé + QR')),
             ],
-            selected: {_minimal},
-            onSelectionChanged: (s) => setState(() => _minimal = s.first),
+            selected: {_fixture},
+            onSelectionChanged: (s) => setState(() => _fixture = s.first),
           ),
           const SizedBox(height: AppSpacing.lg),
 

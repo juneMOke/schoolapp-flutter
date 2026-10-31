@@ -65,7 +65,8 @@ class CancellationTicketRepositoryImpl implements CancellationTicketRepository {
           schoolPhone: school?.phone,
           schoolTillPhone: school?.tillPhone,
           receiptNumber: number,
-          // Même lecture que le ticket de caisse : l'heure du guichet.
+          // L'heure du guichet, comme la mention « Saisi le » du ticket de
+          // caisse (sa date principale est, elle, le jour d'émission du reçu).
           originalPaidAt: (DateTime.tryParse(payment.paidAt) ?? DateTime.now())
               .toLocal(),
           studentFullName: student?.fullName ?? '',
@@ -80,6 +81,7 @@ class CancellationTicketRepositoryImpl implements CancellationTicketRepository {
           reasonDetail: cancellation.reason,
           cashMoved: cancellation.cashMoved,
           cancelledByName: cancellation.cancelledByName,
+          verificationUrl: receipt.verificationUrl,
           labels: labels,
         ),
       );

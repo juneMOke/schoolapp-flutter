@@ -7,22 +7,23 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 
-Payment _payment({String? payerPhoneNumber = '+243816939060'}) => Payment(
+Payment _payment({String? receiptNumber}) => Payment(
   id: 'pay-1',
+  receiptNumber: receiptNumber,
   studentId: 'stu-1',
   academicYearId: 'ay-1',
   amounts: MoneyBag.of(const [Money(15000, 'USD')]),
   payerFirstName: 'Joseph',
   payerLastName: 'Kabongo',
   payerMiddleName: 'Mwamba',
-  payerPhoneNumber: payerPhoneNumber,
+  payerPhoneNumber: '+243816939060',
   paidAt: DateTime(2025, 11, 8),
 );
 
 Future<void> _pump(
   WidgetTester tester, {
   required VoidCallback onTap,
-  String? payerPhoneNumber = '+243816939060',
+  String? receiptNumber = 'CF-RC-2627-000802',
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -31,7 +32,7 @@ Future<void> _pump(
       supportedLocales: AppLocalizations.supportedLocales,
       home: AppPageBackground(
         child: FacturationPaymentLine(
-          payment: _payment(payerPhoneNumber: payerPhoneNumber),
+          payment: _payment(receiptNumber: receiptNumber),
           onTap: onTap,
         ),
       ),
@@ -43,15 +44,14 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
-    'ligne de versement : payeur, médaillon, montant « + », méta Espèces',
+    'ligne de versement : reçu, médaillon, montant « + », méta Espèces',
     (tester) async {
       await _pump(tester, onTap: () {});
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
 
-      // Payeur « Nom Post-nom Prénom » (personne, pas l'élève).
-      expect(find.text('Kabongo Mwamba Joseph'), findsOneWidget);
+      expect(find.text('CF-RC-2627-000802'), findsOneWidget);
       // Médaillon billet + chevron.
       expect(find.byIcon(Icons.payments_outlined), findsOneWidget);
       expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
@@ -79,25 +79,21 @@ void main() {
     expect(tapped, isTrue);
   });
 
-  testWidgets('le numéro du payeur s\'affiche sous son nom', (tester) async {
+  // Le numéro du reçu, pas le payeur : c'est lui que la famille a sur son
+  // papier. Le payeur et son téléphone se lisent dans le détail.
+  testWidgets('sans numéro définitif, la ligne le dit', (tester) async {
+    await _pump(tester, onTap: () {}, receiptNumber: null);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reçu en attente de numéro'), findsOneWidget);
+    expect(find.text('Kabongo Mwamba Joseph'), findsNothing);
+  });
+
+  testWidgets('ni le payeur ni son téléphone sur la ligne', (tester) async {
     await _pump(tester, onTap: () {});
     await tester.pumpAndSettle();
 
-    expect(find.text('+243816939060'), findsOneWidget);
-    expect(find.byIcon(Icons.phone_outlined), findsOneWidget);
-  });
-
-  /// Tout versement antérieur au palier v28 — et tout versement encaissé sur
-  /// un autre poste — n'a pas de numéro. Dans une LISTE, répéter « numéro
-  /// inconnu » à chaque ligne ne renseigne personne et noie ce qui compte : la
-  /// ligne disparaît, et le détail du versement, lui, le dit explicitement.
-  testWidgets('sans numéro, la ligne disparaît au lieu de dire « inconnu »', (
-    tester,
-  ) async {
-    await _pump(tester, onTap: () {}, payerPhoneNumber: null);
-    await tester.pumpAndSettle();
-
+    expect(find.text('+243816939060'), findsNothing);
     expect(find.byIcon(Icons.phone_outlined), findsNothing);
-    expect(find.textContaining('inconnu'), findsNothing);
   });
 }

@@ -100,6 +100,14 @@ class EditiqueCacheEntry extends Equatable {
   /// renseigné : le front reçoit ici une donnée qu'il ne contrôle pas.
   final String? cancellationReason;
 
+  /// URL de vérification du reçu scellé, que le ticket imprime en QR (v72) ;
+  /// `null` tant que le serveur ne la sert pas.
+  final String? verificationUrl;
+
+  /// Édition de la pièce sous son numéro (v73) ; `null` vaut première édition.
+  /// Deux pièces peuvent partager un numéro : seul [documentId] les distingue.
+  final int? edition;
+
   /// Époch ms de la mise en cache.
   final int createdAt;
 
@@ -120,6 +128,8 @@ class EditiqueCacheEntry extends Equatable {
     this.emittedAt,
     this.cancelledAt,
     this.cancellationReason,
+    this.verificationUrl,
+    this.edition,
     required this.createdAt,
     required this.lastAccessedAt,
   });
@@ -167,6 +177,8 @@ class EditiqueCacheEntry extends Equatable {
     'emitted_at': emittedAt,
     'cancelled_at': cancelledAt,
     'cancellation_reason': cancellationReason,
+    'verification_url': verificationUrl,
+    'edition': edition,
     'created_at': createdAt,
     'last_accessed_at': lastAccessedAt,
   };
@@ -186,6 +198,8 @@ class EditiqueCacheEntry extends Equatable {
         emittedAt: map['emitted_at'] as int?,
         cancelledAt: map['cancelled_at'] as int?,
         cancellationReason: map['cancellation_reason'] as String?,
+        verificationUrl: map['verification_url'] as String?,
+        edition: map['edition'] as int?,
         createdAt: (map['created_at'] as int?) ?? 0,
         lastAccessedAt: (map['last_accessed_at'] as int?) ?? 0,
       );
@@ -208,6 +222,8 @@ class EditiqueCacheEntry extends Equatable {
     // devient annulée : l'égalité de valeur les déclarerait identiques.
     cancelledAt,
     cancellationReason,
+    verificationUrl,
+    edition,
     createdAt,
     lastAccessedAt,
   ];

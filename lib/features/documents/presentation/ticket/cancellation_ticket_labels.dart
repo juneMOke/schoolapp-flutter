@@ -22,6 +22,7 @@ TicketCancellationLabels cancellationTicketLabels(AppLocalizations l10n) =>
       classroomLabel: l10n.ticketClassroomLabel,
       schoolPhoneLabel: l10n.ticketSchoolPhoneLabel,
       tillPhoneLabel: l10n.ticketTillPhoneLabel,
+      verificationNotice: l10n.ticketVerifyNotice,
       reasons: {
         for (final reason in PaymentCorrectionReason.values)
           reason.code: paymentCorrectionReasonLabel(reason, l10n),

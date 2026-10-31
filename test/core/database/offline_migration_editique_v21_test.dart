@@ -214,16 +214,18 @@ void main() {
       },
     );
 
+    // Sans identifiant seulement : depuis la v73, deux éditions identifiées
+    // partagent un numéro.
     test('le numéro est unique PAR école, pas globalement', () async {
       await db.insert(
         'editique_cache_entries',
-        _entry(id: 'c-1', documentId: 'doc-1'),
+        _entry(id: 'c-1', documentId: null),
       );
       // Même numéro, autre école : légitime, les séquences sont par
       // établissement.
       await db.insert(
         'editique_cache_entries',
-        _entry(id: 'c-2', documentId: 'doc-2', schoolId: 'school-2'),
+        _entry(id: 'c-2', documentId: null, schoolId: 'school-2'),
       );
 
       expect(await db.query('editique_cache_entries'), hasLength(2));
@@ -231,7 +233,7 @@ void main() {
       await expectLater(
         db.insert(
           'editique_cache_entries',
-          _entry(id: 'c-3', documentId: 'doc-3'),
+          _entry(id: 'c-3', documentId: null),
         ),
         throwsA(isA<DatabaseException>()),
       );

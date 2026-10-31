@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_qr_band.dart';
 
 /// Met le reçu provisoire en **lignes de caractères**.
 ///
@@ -184,16 +185,40 @@ abstract final class TicketTextLayout {
         ? '${model.labels.referenceLabel} ${model.labels.provisionalMention}'
         : model.labels.referenceLabel;
     lines.addAll(_wrapped('$referenceLabel ${model.reference}', width));
+    // Sous un numéro repris, seule l'édition distingue ce papier de celui du
+    // reçu annulé. La première édition ne se dit pas, comme sur le PDF.
+    if (!model.isProvisional && model.edition > 1) {
+      lines.addAll(
+        _wrapped('${model.labels.editionLabel} ${model.edition}', width),
+      );
+    }
     // La date prend enfin un libellé — elle occupait jusqu'ici le créneau de
     // gauche sans être nommée. L'heure reste calée à DROITE sur la même ligne :
     // « Date : » + `JJ/MM/AAAA` fait 16 caractères, l'heure 5, il reste 27
     // colonnes de battement à 48 et 11 à 32. Aucune ligne de papier ajoutée.
-    _addPair(
-      lines,
-      '${model.labels.dateLabel} ${_formatDate(model.paidAt)}',
-      _formatTime(model.paidAt),
-      width,
-    );
+    //
+    // Un ticket définitif dont on connaît le jour d'émission prend CE jour en
+    // date principale, sans heure — c'est une date, pas l'instant du
+    // scellement. La saisie passe dessous, date et heure : « Saisi le ».
+    final issuedOn = model.isProvisional ? null : model.receiptIssuedOn;
+    if (issuedOn == null) {
+      _addPair(
+        lines,
+        '${model.labels.dateLabel} ${_formatDate(model.paidAt)}',
+        _formatTime(model.paidAt),
+        width,
+      );
+    } else {
+      lines.addAll(
+        _wrapped('${model.labels.dateLabel} ${_formatDate(issuedOn)}', width),
+      );
+      _addPair(
+        lines,
+        '${model.labels.enteredAtLabel} ${_formatDate(model.paidAt)}',
+        _formatTime(model.paidAt),
+        width,
+      );
+    }
     _addOptional(
       lines,
       model.labels.cashierLabel,
@@ -514,6 +539,19 @@ abstract final class TicketTextLayout {
       lines.add(_rule(width));
     }
 
+    // ── Le QR de vérification, juste avant le pied : scanné, il dit si le
+    // reçu est en vigueur, annulé ou remplacé (révision de D-4). Jamais sur un
+    // ticket provisoire — le QR le ferait passer pour officiel. Sa ligne vaut
+    // `''` dans le pivot textuel ; les renderers le dessinent à cette place.
+    final verificationUrl = model.isProvisional ? null : model.verificationUrl;
+    int? qrAt;
+    if (verificationUrl != null &&
+        TicketQrBand.fits(verificationUrl, columns: width)) {
+      lines.addAll(_centeredWrapped(model.labels.verificationNotice, width));
+      qrAt = lines.length;
+      lines.add('');
+    }
+
     // Le pied, sur les deux sorties et dans tous les cas.
     //
     // L'adresse est sur sa PROPRE ligne, et sans schéma : deux lignes courtes
@@ -526,7 +564,10 @@ abstract final class TicketTextLayout {
 
     return [
       for (var i = 0; i < lines.length; i++)
-        TicketLine(lines[i], bold: bold.contains(i)),
+        if (i == qrAt)
+          TicketLine.qr(verificationUrl!)
+        else
+          TicketLine(lines[i], bold: bold.contains(i)),
     ];
   }
 

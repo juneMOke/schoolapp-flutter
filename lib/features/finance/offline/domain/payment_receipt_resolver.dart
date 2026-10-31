@@ -35,12 +35,28 @@ class PaymentReceiptReference extends Equatable {
   /// `payments.cancelled_at` : le serveur a annulé le VERSEMENT lui-même.
   final int? paymentCancelledAt;
 
+  /// Jour d'émission `AAAA-MM-JJ` du reçu définitif, `null` s'il n'est pas
+  /// connu ou si le reçu n'est pas scellé. C'est la date principale du ticket
+  /// définitif (`ReceiptEmissionDay` dit comment le lire).
+  final String? emittedOn;
+
+  /// URL de vérification du reçu définitif dont [number] s'imprime — le QR du
+  /// ticket ; `null` si inconnue ou si le reçu n'est pas scellé.
+  final String? verificationUrl;
+
+  /// Édition du reçu sous son numéro : 1, ou n + 1 pour un reçu remplaçant qui
+  /// a repris le numéro de celui qu'il remplace (V200 du back).
+  final int edition;
+
   const PaymentReceiptReference({
     this.number,
     this.status = PaymentReceiptStatus.unknown,
     this.documentId,
     this.cacheEntry,
     this.paymentCancelledAt,
+    this.emittedOn,
+    this.verificationUrl,
+    this.edition = 1,
   });
 
   bool get isDefinitive => status == PaymentReceiptStatus.definitive;
@@ -69,6 +85,9 @@ class PaymentReceiptReference extends Equatable {
     documentId,
     cacheEntry,
     paymentCancelledAt,
+    emittedOn,
+    verificationUrl,
+    edition,
   ];
 }
 

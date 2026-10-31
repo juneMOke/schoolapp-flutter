@@ -3246,6 +3246,7 @@
   "facturationPaymentInfoSectionTitle": "Informations du paiement",
   "facturationPaymentPayerLabel": "Payeur",
   "facturationPaymentPayerUnnamed": "Sans payeur nommé",
+  "facturationPaymentLineReceiptPending": "Reçu en attente de numéro",
   "facturationPaymentAmountLabel": "Montant global payé",
   "facturationPaymentPaidAtLabel": "Date de paiement",
   "facturationPaymentAmountPaidLabel": "Montant versé",
@@ -3365,6 +3366,9 @@
   "facturationCreatePaymentPayerPhoneLabel": "Téléphone du payeur",
   "facturationCreatePaymentPayerOptionalNotice": "Ces informations sont facultatives : un versement peut être encaissé sans nommer le payeur. Le reçu, lui, porte toujours l'élève et les frais réglés.",
   "facturationCreatePaymentPayerPickAction": "Choisir un payeur",
+  "facturationCreatePaymentKnownPayerLabel": "Payeur déjà connu",
+  "facturationCreatePaymentKnownPayerPlaceholder": "Choisir dans la liste",
+  "facturationCreatePaymentOtherPayerAction": "Chercher un autre payeur",
   "facturationCreatePaymentPayerPickHelp": "Reprenez un payeur déjà venu à la caisse, ou saisissez-le ci-dessous.",
   "facturationPayerSearchDialogEyebrow": "Encaissement",
   "facturationPayerSearchDialogTitle": "Choisir un payeur",
@@ -5734,6 +5738,18 @@
   "ticketProvisionalMention": "provisoire",
   "ticketReferenceLabel": "Réf.",
   "ticketDateLabel": "Date :",
+  "ticketEnteredAtLabel": "Saisi le",
+  "ticketEditionLabel": "Édition :",
+  "@ticketEditionLabel": {
+    "description": "Libellé de l'édition d'un reçu remplaçant qui a repris le numéro du reçu annulé, imprimé sous la référence du ticket."
+  },
+  "ticketVerifyNotice": "Scannez pour vérifier ce reçu",
+  "@ticketVerifyNotice": {
+    "description": "Légende du QR de vérification imprimé sur un ticket dont le reçu est scellé (perception ou annulation)."
+  },
+  "@ticketEnteredAtLabel": {
+    "description": "Ticket définitif : coiffe la date et l'heure de saisie du versement, sous la date d'émission du reçu."
+  },
   "ticketPayerLabel": "PAYEUR :",
   "ticketPhoneLabel": "Tél.",
   "ticketCashierLabel": "Caissier :",
@@ -5775,6 +5791,13 @@
   "ticketsToPrintEyebrow": "Finances",
   "ticketsToPrintTitle": "Tickets à imprimer",
   "ticketsToPrintBack": "Retour",
+  "ticketsToPrintIntroTitle": "Les tickets de ce poste",
+  "ticketsToPrintIntroMessage": "Les versements saisis sur ce poste dont le ticket n'est pas encore imprimé.",
+  "ticketsToPrintReadyHint": "Cochez les tickets, vérifiez l'aperçu, puis imprimez.",
+  "ticketsToPrintPaperOutTitle": "Les tickets sont-ils bien sortis ?",
+  "ticketsToPrintPaperOutMessage": "L'application ne sait pas si l'imprimante a vraiment sorti le papier. Confirmez pour les retirer de la liste.",
+  "ticketsToPrintPaperOutYes": "Oui, retirer de la liste",
+  "ticketsToPrintPaperOutNo": "Non, les garder",
   "ticketsToPrintReadySection": "Prêts à imprimer ({count})",
   "@ticketsToPrintReadySection": {
     "placeholders": {
@@ -8382,6 +8405,16 @@
   "paymentCorrectionCorrectEyebrow": "Corriger un versement",
   "paymentCorrectionOriginLabel": "Versement d'origine · sera annulé",
   "paymentCorrectionSubmit": "Annuler et remplacer",
+  "paymentCorrectionConfirmTitle": "Remplacer par {amount} ?",
+  "@paymentCorrectionConfirmTitle": {
+    "description": "Titre du récapitulatif avant une correction de versement.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentCorrectionConfirmNotice": "Le versement d'origine sera annulé, et celui-ci le remplacera.",
   "paymentCorrectionGap": "Écart avec l'origine : {amount}",
   "@paymentCorrectionGap": {
     "placeholders": {

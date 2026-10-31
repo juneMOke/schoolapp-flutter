@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/documents/data/local/ticket_print_job_writer.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/sealed_receipt_write.dart';
 
 /// Le reçu qu'un accusé n'a pas rapporté (continuité des tickets RC).
 ///
@@ -101,11 +102,14 @@ class ReceiptRecoveryDao {
 
   /// Le reçu est revenu : le versement le porte comme si l'accusé l'avait
   /// rapporté — son identifiant d'archive, et le numéro définitif à la place
-  /// du `PROV-…` (même écriture que le scellement à l'accusé).
+  /// du `PROV-…` avec son jour d'émission et son URL de vérification (même
+  /// écriture que le scellement à l'accusé, `SealedReceiptWrite`).
   Future<void> recordRecovered({
     required String paymentId,
     String? documentId,
     String? documentNumber,
+    String? emittedOn,
+    String? verificationUrl,
   }) async {
     if (documentId != null && documentId.isNotEmpty) {
       await _db.update(
@@ -116,11 +120,14 @@ class ReceiptRecoveryDao {
       );
     }
     if (documentNumber != null && documentNumber.isNotEmpty) {
-      await _db.update(
-        'generated_documents',
-        {'number': documentNumber, 'status': 'DEFINITIVE'},
-        where: 'payment_id = ? AND doc_domain = ? AND doc_type = ?',
-        whereArgs: [paymentId, 'PAYMENT', 'RC'],
+      await SealedReceiptWrite.seal(
+        _db,
+        paymentId: paymentId,
+        docType: 'RC',
+        number: documentNumber,
+        status: 'DEFINITIVE',
+        emittedOn: emittedOn,
+        verificationUrl: verificationUrl,
       );
     }
   }

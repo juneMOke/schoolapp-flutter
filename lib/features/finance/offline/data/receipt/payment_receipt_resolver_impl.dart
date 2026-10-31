@@ -2,6 +2,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/documents/data/local/editique_cache_dao.dart';
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_entitlement.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
+import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_receipt_lookup_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 
@@ -60,12 +61,44 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
       _ => _provisional(row),
     };
 
+    // Les faits du reçu scellé — son jour d'émission, son URL de vérification
+    // — ne valent que pour le numéro IMPRIMÉ. La ligne scellée d'abord
+    // (accusé, récupération), puis le delta éditique : un versement encaissé
+    // ailleurs n'a que le second.
+    //
+    // ⚠️ Le cache se lit par `payments.receipt_id`, que le pull peut faire
+    // pointer sur une pièce rééditée alors que la ligne locale garde l'ancien
+    // numéro : ses faits ne valent que si son numéro est celui imprimé, sans
+    // quoi le ticket serait daté d'un autre jour et vérifié contre une autre
+    // pièce.
+    //
+    // Même numéro, édition plus récente au cache : le pull a appris une
+    // réédition que la ligne locale ignore, et ses faits priment.
+    final definitive = status == PaymentReceiptStatus.definitive;
+    final fromCache = definitive && number == cachedNumber;
+    final cacheIsNewer =
+        fromCache && (cached?.edition ?? 1) > (row.edition ?? 1);
+    final fromLocal = definitive && number == localDefinitive && !cacheIsNewer;
+
     return PaymentReceiptReference(
       number: number,
       status: status,
       documentId: row.receiptId ?? _text(cached?.documentId),
       cacheEntry: cached,
       paymentCancelledAt: row.paymentCancelledAt,
+      emittedOn:
+          (fromLocal ? row.emittedOn : null) ??
+          (fromCache
+              ? ReceiptEmissionDay.fromEpochMs(cached?.emittedAt)
+              : null),
+      verificationUrl:
+          (fromLocal ? row.verificationUrl : null) ??
+          (fromCache ? _text(cached?.verificationUrl) : null),
+      edition: definitive
+          ? (fromLocal ? row.edition : null) ??
+                (fromCache ? cached?.edition : null) ??
+                1
+          : 1,
     );
   }
 
@@ -80,8 +113,11 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
         : (number, PaymentReceiptStatus.provisional);
   }
 
-  /// Par identifiant d'abord ; par numéro, scopé à l'école, seulement quand
-  /// aucun identifiant n'est connu (régime AM-5).
+  /// Par identifiant d'abord ; par numéro, scopé à l'école, seulement pour une
+  /// pièce sans identifiant (régime AM-5).
+  ///
+  /// ⚠️ Avec un identifiant connu, le numéro ne doit jamais rendre une autre
+  /// édition : le reçu remplaçant se dirait annulé par celui qu'il remplace.
   ///
   /// La garde de profil (RG-012-4) s'applique ici comme à tout lecteur du
   /// cache : sans droit, la tablette ne sait rien de la pièce.
@@ -98,6 +134,12 @@ class PaymentReceiptResolverImpl implements PaymentReceiptResolver {
       final schoolId = _currentUser.schoolId;
       if (documentNumber == null || schoolId == null || schoolId.isEmpty) {
         return null;
+      }
+      if (documentId != null) {
+        return await _cache.findUnidentifiedByDocumentNumber(
+          schoolId: schoolId,
+          documentNumber: documentNumber,
+        );
       }
       return await _cache.findByDocumentNumber(
         schoolId: schoolId,
