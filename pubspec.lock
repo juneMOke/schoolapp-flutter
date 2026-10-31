@@ -161,6 +161,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.3+1"
+  camera_desktop:
+    dependency: "direct main"
+    description:
+      name: camera_desktop
+      sha256: "280ce2b335f3a6d2bd4345c9906697d86de40065d52cd6090df28a8b52b32304"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   camera_platform_interface:
     dependency: transitive
     description:
@@ -177,14 +185,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.5+6"
-  camera_windows:
-    dependency: "direct main"
-    description:
-      name: camera_windows
-      sha256: da05937f6dff64fbbd2d64f74e4240b6da50d377031034704b0a12a9dfb4ea15
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.0"
   characters:
     dependency: transitive
     description:

@@ -165,15 +165,17 @@ dependencies:
   # ── Photo de l'élève (features/student_photo) ────────────────────────────
   # `camera` pour le viseur intégré (guide ovale, bascule, séance en rafale) :
   # l'intent système ne sait ni cadrer ni enchaîner. Android, iOS et web par
-  # la fédération du paquet ; Windows par `camera_windows`, qu'elle n'endosse
-  # pas ; Linux n'a aucun greffon — import de fichier seul.
+  # la fédération du paquet ; Windows et Linux par `camera_desktop`, qu'elle
+  # n'endosse pas, et qui exclut `camera_windows` (deux implémentations de
+  # `camera:windows` sont refusées). Sous Linux, il lie GStreamer : voir
+  # ENVIRONMENT.md pour les prérequis.
   # `image` pour recadrer et ré-encoder le carré JPEG 512 envoyé au serveur,
   # hors du fil d'interface.
   #
   # ⚠️ Ne JAMAIS importer `camera` hors de `CameraViewfinderGateway` : le reste
   # de la capture se teste sans appareil.
   camera: ^0.12.0+2
-  camera_windows: ^0.3.0
+  camera_desktop: ^2.0.0
   image: ^4.10.1
 
   # ── Version web ──────────────────────────────────────────────────────────

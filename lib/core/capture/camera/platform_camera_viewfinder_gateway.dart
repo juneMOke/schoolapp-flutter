@@ -7,9 +7,9 @@ import 'package:school_app_flutter/core/capture/camera/camera_viewfinder_gateway
 
 /// [CameraViewfinderGateway] sur le greffon `camera`.
 ///
-/// Android, iOS et web par la fédération du paquet, Windows par
-/// `camera_windows`. Linux n'a pas de greffon : la liste des caméras y lève,
-/// et se lit comme « aucune caméra » — l'import reste l'issue.
+/// Android, iOS et web par la fédération du paquet, Windows et Linux par
+/// `camera_desktop`. Une liste qui lève se lit comme « aucune caméra » :
+/// l'import reste l'issue.
 ///
 /// Sans son : l'application ne filme pas, et demander le micro ferait échouer
 /// l'ouverture sur un appareil qui le refuse.
@@ -35,7 +35,7 @@ class PlatformCameraViewfinderGateway extends CameraViewfinderGateway {
       }
       return const [];
     } catch (_) {
-      // Pas de greffon (Linux), pas d'implémentation : aucune caméra.
+      // Pas d'implémentation sur cette plateforme : aucune caméra.
       return const [];
     }
     return [for (final camera in cameras) _PlatformLens.of(camera)];
