@@ -5787,6 +5787,13 @@
   "ticketsToPrintEyebrow": "Finances",
   "ticketsToPrintTitle": "Tickets à imprimer",
   "ticketsToPrintBack": "Retour",
+  "ticketsToPrintIntroTitle": "Les tickets de ce poste",
+  "ticketsToPrintIntroMessage": "Les versements saisis sur ce poste dont le ticket n'est pas encore imprimé.",
+  "ticketsToPrintReadyHint": "Cochez les tickets, vérifiez l'aperçu, puis imprimez.",
+  "ticketsToPrintPaperOutTitle": "Les tickets sont-ils bien sortis ?",
+  "ticketsToPrintPaperOutMessage": "L'application ne sait pas si l'imprimante a vraiment sorti le papier. Confirmez pour les retirer de la liste.",
+  "ticketsToPrintPaperOutYes": "Oui, retirer de la liste",
+  "ticketsToPrintPaperOutNo": "Non, les garder",
   "ticketsToPrintReadySection": "Prêts à imprimer ({count})",
   "@ticketsToPrintReadySection": {
     "placeholders": {

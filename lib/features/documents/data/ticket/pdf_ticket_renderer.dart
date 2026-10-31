@@ -146,6 +146,22 @@ abstract final class PdfTicketRenderer {
     String? cutNotice,
     TicketLogoBand? logoBand,
     int copies = 1,
+  }) => renderTickets(
+    [lines],
+    format: format,
+    cutNotice: cutNotice,
+    logoBand: logoBand,
+    copies: copies,
+  );
+
+  /// Plusieurs tickets dans un seul document, chacun sur sa page : le lot de
+  /// « Tickets à imprimer » se relit d'un bloc, puis part d'un seul geste.
+  static Future<Uint8List> renderTickets(
+    List<List<TicketLine>> tickets, {
+    PdfPageFormat format = pageFormat,
+    String? cutNotice,
+    TicketLogoBand? logoBand,
+    int copies = 1,
   }) async {
     final document = pw.Document();
     final band = (logoBand != null && logoBand.isUsable) ? logoBand : null;
@@ -153,11 +169,13 @@ abstract final class PdfTicketRenderer {
     // Un `addPage` par exemplaire : chacun ouvre une page neuve, si bien que
     // deux exemplaires ne partagent jamais une feuille — on ne découpe pas un
     // ticket dans le bas d'un autre.
-    for (var i = 0; i < (copies < 1 ? 1 : copies); i++) {
-      if (format.height.isInfinite) {
-        _addRollPage(document, lines, format, band);
-      } else {
-        _addSheetPages(document, lines, format, cutNotice, band);
+    for (final lines in tickets) {
+      for (var i = 0; i < (copies < 1 ? 1 : copies); i++) {
+        if (format.height.isInfinite) {
+          _addRollPage(document, lines, format, band);
+        } else {
+          _addSheetPages(document, lines, format, cutNotice, band);
+        }
       }
     }
 

@@ -86,14 +86,29 @@ Future<bool> printTicketLines({
   required String cutNotice,
   TicketLogoBand? logoBand,
   int copies = TicketCopies.fallback,
+}) => printTickets(
+  tickets: [lines],
+  name: name,
+  cutNotice: cutNotice,
+  logoBand: logoBand,
+  copies: copies,
+);
+
+/// Le spouleur pour un lot : un seul document, un ticket par page.
+Future<bool> printTickets({
+  required List<List<TicketLine>> tickets,
+  required String name,
+  required String cutNotice,
+  TicketLogoBand? logoBand,
+  int copies = TicketCopies.fallback,
 }) async {
   {
     try {
       // Rendu de référence produit AVANT de solliciter le spouleur : une
       // composition impossible se dit tout de suite, plutôt qu'après avoir
       // ouvert une boîte de dialogue d'impression qui se refermera seule.
-      final fallback = await PdfTicketRenderer.renderRichLines(
-        lines,
+      final fallback = await PdfTicketRenderer.renderTickets(
+        tickets,
         format: _initialFormat,
         cutNotice: cutNotice,
         logoBand: logoBand,
@@ -103,8 +118,8 @@ Future<bool> printTicketLines({
       await Printing.layoutPdf(
         onLayout: (format) async {
           try {
-            return await PdfTicketRenderer.renderRichLines(
-              lines,
+            return await PdfTicketRenderer.renderTickets(
+              tickets,
               format: format,
               cutNotice: cutNotice,
               logoBand: logoBand,

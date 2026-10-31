@@ -8686,6 +8686,31 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketsToPrintBack => 'Retour';
 
   @override
+  String get ticketsToPrintIntroTitle => 'Les tickets de ce poste';
+
+  @override
+  String get ticketsToPrintIntroMessage =>
+      'Les versements saisis sur ce poste dont le ticket n\'est pas encore imprimé.';
+
+  @override
+  String get ticketsToPrintReadyHint =>
+      'Cochez les tickets, vérifiez l\'aperçu, puis imprimez.';
+
+  @override
+  String get ticketsToPrintPaperOutTitle =>
+      'Les tickets sont-ils bien sortis ?';
+
+  @override
+  String get ticketsToPrintPaperOutMessage =>
+      'L\'application ne sait pas si l\'imprimante a vraiment sorti le papier. Confirmez pour les retirer de la liste.';
+
+  @override
+  String get ticketsToPrintPaperOutYes => 'Oui, retirer de la liste';
+
+  @override
+  String get ticketsToPrintPaperOutNo => 'Non, les garder';
+
+  @override
   String ticketsToPrintReadySection(int count) {
     return 'Prêts à imprimer ($count)';
   }

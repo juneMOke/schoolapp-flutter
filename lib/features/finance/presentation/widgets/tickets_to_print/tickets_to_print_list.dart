@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_queue_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_card.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/ticket_print_job_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -35,71 +37,85 @@ class TicketsToPrintList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (ready.isNotEmpty) ...[
-          _SectionHeader(
+        if (ready.isNotEmpty)
+          _SectionCard(
+            icon: Icons.print_outlined,
             title: l10n.ticketsToPrintReadySection(ready.length),
+            subtitle: l10n.ticketsToPrintReadyHint,
             trailing: _SelectAll(
               value: state.allReadySelected,
               onChanged: frozen ? null : onToggleAll,
             ),
+            children: [
+              for (final job in ready)
+                TicketPrintJobTile(
+                  key: ValueKey(job.id),
+                  job: job,
+                  selected: state.selected.contains(job.id),
+                  onChanged: frozen ? null : (value) => onToggle(job.id, value),
+                ),
+            ],
           ),
-          for (final job in ready)
-            TicketPrintJobTile(
-              key: ValueKey(job.id),
-              job: job,
-              selected: state.selected.contains(job.id),
-              onChanged: frozen ? null : (value) => onToggle(job.id, value),
-            ),
-          const SizedBox(height: AppDimensions.spacingL),
-        ],
-        if (awaiting.isNotEmpty) ...[
-          _SectionHeader(
+        if (ready.isNotEmpty && awaiting.isNotEmpty)
+          const SizedBox(height: AppDimensions.spacingM),
+        if (awaiting.isNotEmpty)
+          _SectionCard(
+            icon: Icons.hourglass_empty_rounded,
             title: l10n.ticketsToPrintAwaitingSection(awaiting.length),
+            subtitle: l10n.ticketsToPrintAwaitingHint,
+            children: [
+              for (final job in awaiting)
+                TicketPrintJobTile(
+                  key: ValueKey(job.id),
+                  job: job,
+                  onRetry: job.state == TicketPrintJobState.receiptMissing
+                      ? () => onRetry(job)
+                      : null,
+                  retrying: state.retrying.contains(job.id),
+                ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppDimensions.spacingS),
-            child: Text(
-              l10n.ticketsToPrintAwaitingHint,
-              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
-            ),
-          ),
-          for (final job in awaiting)
-            TicketPrintJobTile(
-              key: ValueKey(job.id),
-              job: job,
-              onRetry: job.state == TicketPrintJobState.receiptMissing
-                  ? () => onRetry(job)
-                  : null,
-              retrying: state.retrying.contains(job.id),
-            ),
-        ],
       ],
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
+/// Un groupe de tickets : sa carte, son en-tête, ses lignes.
+class _SectionCard extends StatelessWidget {
+  final IconData icon;
   final String title;
+  final String subtitle;
   final Widget? trailing;
+  final List<Widget> children;
 
-  const _SectionHeader({required this.title, this.trailing});
+  const _SectionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.children,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
     final trailing = this.trailing;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppDimensions.spacingS),
-      child: Row(
+    return FinanceSectionCard(
+      backgroundColor: AppColors.surfaceRaised,
+      borderColor: AppColors.border,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Text(
-              title,
-              style: AppTextStyles.sectionTitle.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
+          FinanceSectionHeader(
+            icon: icon,
+            title: title,
+            subtitle: subtitle,
+            accent: AppColors.bleuArdoise,
+            accentSoft: AppColors.surfaceAlt,
           ),
-          ?trailing,
+          if (trailing != null)
+            Align(alignment: Alignment.centerRight, child: trailing),
+          const SizedBox(height: AppDimensions.spacingS),
+          ...children,
         ],
       ),
     );

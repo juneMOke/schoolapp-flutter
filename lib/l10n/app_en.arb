@@ -5703,6 +5703,13 @@
   "ticketsToPrintEyebrow": "Finance",
   "ticketsToPrintTitle": "Tickets to print",
   "ticketsToPrintBack": "Back",
+  "ticketsToPrintIntroTitle": "This station's tickets",
+  "ticketsToPrintIntroMessage": "Payments entered on this station whose ticket has not been printed yet.",
+  "ticketsToPrintReadyHint": "Tick the tickets, check the preview, then print.",
+  "ticketsToPrintPaperOutTitle": "Did the tickets come out?",
+  "ticketsToPrintPaperOutMessage": "The app cannot tell whether the printer really produced the paper. Confirm to remove them from the list.",
+  "ticketsToPrintPaperOutYes": "Yes, remove from the list",
+  "ticketsToPrintPaperOutNo": "No, keep them",
   "ticketsToPrintReadySection": "Ready to print ({count})",
   "@ticketsToPrintReadySection": {
     "placeholders": {

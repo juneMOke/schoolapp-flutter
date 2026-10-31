@@ -13824,6 +13824,48 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get ticketsToPrintBack;
 
+  /// No description provided for @ticketsToPrintIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This station\'s tickets'**
+  String get ticketsToPrintIntroTitle;
+
+  /// No description provided for @ticketsToPrintIntroMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments entered on this station whose ticket has not been printed yet.'**
+  String get ticketsToPrintIntroMessage;
+
+  /// No description provided for @ticketsToPrintReadyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the tickets, check the preview, then print.'**
+  String get ticketsToPrintReadyHint;
+
+  /// No description provided for @ticketsToPrintPaperOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Did the tickets come out?'**
+  String get ticketsToPrintPaperOutTitle;
+
+  /// No description provided for @ticketsToPrintPaperOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The app cannot tell whether the printer really produced the paper. Confirm to remove them from the list.'**
+  String get ticketsToPrintPaperOutMessage;
+
+  /// No description provided for @ticketsToPrintPaperOutYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, remove from the list'**
+  String get ticketsToPrintPaperOutYes;
+
+  /// No description provided for @ticketsToPrintPaperOutNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, keep them'**
+  String get ticketsToPrintPaperOutNo;
+
   /// No description provided for @ticketsToPrintReadySection.
   ///
   /// In en, this message translates to:
