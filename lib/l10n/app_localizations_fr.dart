@@ -4672,6 +4672,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentPayerUnnamed => 'Sans payeur nommé';
 
   @override
+  String get facturationPaymentLineReceiptPending =>
+      'Reçu en attente de numéro';
+
+  @override
   String get facturationPaymentAmountLabel => 'Montant global payé';
 
   @override
@@ -5039,6 +5043,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerPickAction => 'Choisir un payeur';
+
+  @override
+  String get facturationCreatePaymentKnownPayerLabel => 'Payeur déjà connu';
+
+  @override
+  String get facturationCreatePaymentKnownPayerPlaceholder =>
+      'Choisir dans la liste';
+
+  @override
+  String get facturationCreatePaymentOtherPayerAction =>
+      'Chercher un autre payeur';
 
   @override
   String get facturationCreatePaymentPayerPickHelp =>

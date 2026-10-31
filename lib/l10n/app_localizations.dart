@@ -7497,6 +7497,12 @@ abstract class AppLocalizations {
   /// **'No payer named'**
   String get facturationPaymentPayerUnnamed;
 
+  /// No description provided for @facturationPaymentLineReceiptPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt awaiting its number'**
+  String get facturationPaymentLineReceiptPending;
+
   /// No description provided for @facturationPaymentAmountLabel.
   ///
   /// In en, this message translates to:
@@ -8070,6 +8076,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a payer'**
   String get facturationCreatePaymentPayerPickAction;
+
+  /// No description provided for @facturationCreatePaymentKnownPayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Known payer'**
+  String get facturationCreatePaymentKnownPayerLabel;
+
+  /// No description provided for @facturationCreatePaymentKnownPayerPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from the list'**
+  String get facturationCreatePaymentKnownPayerPlaceholder;
+
+  /// No description provided for @facturationCreatePaymentOtherPayerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Find another payer'**
+  String get facturationCreatePaymentOtherPayerAction;
 
   /// No description provided for @facturationCreatePaymentPayerPickHelp.
   ///

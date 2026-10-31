@@ -4646,6 +4646,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentPayerUnnamed => 'No payer named';
 
   @override
+  String get facturationPaymentLineReceiptPending =>
+      'Receipt awaiting its number';
+
+  @override
   String get facturationPaymentAmountLabel => 'Total paid amount';
 
   @override
@@ -5007,6 +5011,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerPickAction => 'Choose a payer';
+
+  @override
+  String get facturationCreatePaymentKnownPayerLabel => 'Known payer';
+
+  @override
+  String get facturationCreatePaymentKnownPayerPlaceholder =>
+      'Choose from the list';
+
+  @override
+  String get facturationCreatePaymentOtherPayerAction => 'Find another payer';
 
   @override
   String get facturationCreatePaymentPayerPickHelp =>

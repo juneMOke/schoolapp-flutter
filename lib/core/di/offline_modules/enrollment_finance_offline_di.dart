@@ -408,6 +408,7 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   getIt.registerLazySingleton<PaymentsRepository>(
     () => PaymentsOfflineFirstRepository(
       dao: getIt<FinanceLocalDao>(),
+      receipts: getIt<PaymentReceiptResolver>(),
       refresh: getIt<FinanceLedgerRefresher>().refresh,
       online: PaymentsRepositoryImpl(
         remoteDataSource: getIt<PaymentsRemoteDataSource>(),
