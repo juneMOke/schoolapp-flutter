@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_focus_registry.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_cell_look.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une cellule modifiable. Son texte vit dans son contrôleur : il ne suit l'état
@@ -143,7 +144,7 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
   }
 
   Widget _frame(AppLocalizations l10n, CoteCell? cell, bool changed) {
-    final look = _CellLook.of(
+    final look = CoteCellLook.of(
       cell: cell,
       column: widget.column,
       focused: _focusNode.hasFocus,
@@ -234,79 +235,5 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
     return calculee == null
         ? null
         : l10n.coteCellReplaces(formatCote(calculee));
-  }
-}
-
-/// Six apparences, la légende les reprend.
-class _CellLook {
-  final Color surface;
-  final Color border;
-  final Color ink;
-  final double borderWidth;
-  final bool dashed;
-
-  const _CellLook({
-    required this.surface,
-    required this.border,
-    required this.ink,
-    this.borderWidth = 1,
-    this.dashed = false,
-  });
-
-  factory _CellLook.of({
-    required CoteCell? cell,
-    required CoteColumn column,
-    required bool focused,
-    required bool changed,
-    required bool empty,
-  }) {
-    final exam = column.isExamen;
-    if (cell?.isInvalid ?? false) {
-      return const _CellLook(
-        surface: AppColors.coteInvalidSurface,
-        border: AppColors.error,
-        ink: AppColors.error,
-        borderWidth: 1.5,
-      );
-    }
-    if (focused) {
-      return const _CellLook(
-        surface: AppColors.surfaceRaised,
-        border: AppColors.bleuArdoise,
-        ink: AppColors.bleuProfond,
-        borderWidth: 1.5,
-      );
-    }
-    if (changed) {
-      return const _CellLook(
-        surface: AppColors.coteChangedSurface,
-        border: AppColors.warning,
-        ink: AppColors.bleuProfond,
-        borderWidth: 1.5,
-      );
-    }
-    if (empty) {
-      return const _CellLook(
-        surface: AppColors.coteEmptySurface,
-        border: AppColors.coteEmptyBorder,
-        ink: AppColors.textMuted,
-        dashed: true,
-      );
-    }
-    final surface = exam ? AppColors.coteExamSurface : AppColors.surfaceRaised;
-    final border = exam ? AppColors.coteExamBorder : AppColors.coteCellBorder;
-    if (cell?.isCalculated ?? false) {
-      return _CellLook(
-        surface: surface,
-        border: border,
-        ink: AppColors.textSecondary,
-        dashed: true,
-      );
-    }
-    return _CellLook(
-      surface: surface,
-      border: border,
-      ink: exam ? AppColors.coteExamInk : AppColors.bleuProfond,
-    );
   }
 }

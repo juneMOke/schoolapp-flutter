@@ -31,13 +31,11 @@ class CoteBulletinFooter extends StatelessWidget {
       builder: (context, state) {
         if (state is! CoteSaisieReady) return const SizedBox.shrink();
         final calc = state.current;
-        final group = state.columns.isEmpty
-            ? ''
-            : CoteLabels.groupShort(
-                l10n,
-                state.classe.decoupage,
-                state.columns.last.numero,
-              );
+        final group = CoteLabels.firstGroupShort(
+          l10n,
+          state.classe,
+          state.columns,
+        );
         final rejected = _rejected(state);
         return Container(
           padding: const EdgeInsets.all(AppSpacing.md),

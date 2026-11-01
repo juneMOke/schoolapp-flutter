@@ -22,6 +22,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_event.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/cote_state_listener.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_scope_bar.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_selection_card.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/states/cote_saisie_states.dart';
@@ -260,7 +261,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
                     ),
             ),
             const SizedBox(height: AppSpacing.md),
-            _StateListener(
+            CoteStateListener(
               onChanged: _onStateChanged,
               child: _zone(context, state, classrooms),
             ),
@@ -297,33 +298,5 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
         onStudentChanged: _flush,
       ),
     };
-  }
-}
-
-/// Écoute les états avec le précédent en main, ce que `BlocListener` ne donne
-/// qu'à son `listenWhen`.
-class _StateListener extends StatefulWidget {
-  final void Function(BuildContext, CoteSaisieState, CoteSaisieState) onChanged;
-  final Widget child;
-
-  const _StateListener({required this.onChanged, required this.child});
-
-  @override
-  State<_StateListener> createState() => _StateListenerState();
-}
-
-class _StateListenerState extends State<_StateListener> {
-  late CoteSaisieState _previous = context.read<CoteSaisieBloc>().state;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<CoteSaisieBloc, CoteSaisieState>(
-      listener: (context, state) {
-        final previous = _previous;
-        _previous = state;
-        widget.onChanged(context, previous, state);
-      },
-      child: widget.child,
-    );
   }
 }

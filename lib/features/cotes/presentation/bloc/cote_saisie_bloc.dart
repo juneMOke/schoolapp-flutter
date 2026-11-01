@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -11,6 +10,7 @@ import 'package:school_app_flutter/features/cotes/domain/repositories/cotes_repo
 import 'package:school_app_flutter/features/cotes/domain/services/cote_calculator.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_columns.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_input.dart';
+import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_edit_step.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_event.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/resultats/presentation/bloc/resultats_error_type.dart';
@@ -48,8 +48,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     Emitter<CoteSaisieState> emit,
   ) => switch (event) {
     final CoteSaisieOpened e => _onOpened(e, emit),
-    CoteSaisieRetried() =>
-      _lastOpened == null ? Future.value() : _onOpened(_lastOpened!, emit),
+    CoteSaisieRetried() => _onRetried(emit),
     CoteSaisieClosed() => _onClosed(emit),
     final CoteScopeChanged e => _onScope(e, emit),
     final CoteStudentSelected e => _onSelect(e.studentId, emit),
@@ -71,6 +70,23 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     result.fold((failure) => emit(_failureState(failure)), (snapshot) {
       emit(_readyOrEmpty(snapshot, event));
     });
+  }
+
+  /// Recharger garde l'élève et la portée à l'écran.
+  Future<void> _onRetried(Emitter<CoteSaisieState> emit) {
+    final last = _lastOpened;
+    if (last == null) return Future.value();
+    final s = state;
+    return _onOpened(
+      s is CoteSaisieReady
+          ? CoteSaisieOpened(
+              last.classroomId,
+              scope: s.scope,
+              eleveId: s.currentId,
+            )
+          : last,
+      emit,
+    );
   }
 
   CoteSaisieState _failureState(Failure failure) {
@@ -227,7 +243,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
         s.cells.cell(key.studentId, key.coursId, key.colonneId) ??
         CoteCell(key: key);
     final input = parseCoteInput(event.raw, column.first.maxFor(course.first));
-    final step = _nextStep(cell, input, event.raw);
+    final step = nextCoteEdit(_repository, cell, input, event.raw);
     if (step == null) return;
 
     emit(_withCell(s, step.cell, key.studentId));
@@ -266,53 +282,6 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
       ranking: _calculator.rank(calcs),
       progress: _calculator.progress(calcs.values),
     );
-  }
-
-  /// Ce qu'une frappe change, `null` si rien : traverser une case, ou y remettre
-  /// ce qu'elle montre déjà, ne crée pas de cote.
-  _CellStep? _nextStep(CoteCell cell, CoteInput input, String raw) {
-    final key = cell.key;
-    _CellStep clearOnly() => _CellStep(
-      cell: cell.withInvalidRaw(null),
-      sends: false,
-      write: (_) => _repository.clearInvalid(key),
-    );
-    _CellStep draft(double? value) => _CellStep(
-      cell: cell.withDraft(value),
-      sends: true,
-      write: (classroomId) => _repository.saveValue(
-        classroomId: classroomId,
-        key: key,
-        value: value,
-      ),
-    );
-
-    switch (input) {
-      case CoteInputInvalid():
-        if (cell.invalidRaw == raw) return null;
-        return _CellStep(
-          cell: cell.withInvalidRaw(raw),
-          sends: false,
-          write: (classroomId) => _repository.saveInvalid(
-            classroomId: classroomId,
-            key: key,
-            raw: raw,
-          ),
-        );
-      case CoteInputEmpty():
-        final hasOwnValue = cell.hasDraft
-            ? cell.draftValue != null || cell.isRejected
-            : cell.serverCote != null;
-        if (hasOwnValue) return draft(null);
-        return cell.invalidRaw == null ? null : clearOnly();
-      case CoteInputValue(:final value):
-        final shown = cell.displayedValue;
-        final same = shown != null && toCentis(shown) == toCentis(value);
-        if (same && !cell.isRejected) {
-          return cell.invalidRaw == null ? null : clearOnly();
-        }
-        return draft(value);
-    }
   }
 
   Future<void> _onDiscarded(
@@ -364,16 +333,4 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     _highlight?.cancel();
     return super.close();
   }
-}
-
-class _CellStep {
-  final CoteCell cell;
-  final bool sends;
-  final Future<Either<Failure, Unit>> Function(String classroomId) write;
-
-  const _CellStep({
-    required this.cell,
-    required this.sends,
-    required this.write,
-  });
 }

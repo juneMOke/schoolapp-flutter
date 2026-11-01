@@ -14,6 +14,18 @@ abstract final class CoteLabels {
       ? l10n.coteGroupShortTrimester(ordre)
       : l10n.coteGroupShortSemester(ordre);
 
+  /// Le groupe de la première colonne : « S1 », jamais son numéro de période.
+  static String firstGroupShort(
+    AppLocalizations l10n,
+    CoteClasse classe,
+    List<CoteColumn> columns,
+  ) {
+    if (columns.isEmpty) return '';
+    final periodeId = columns.first.periodeId;
+    final group = classe.periodes.where((p) => p.id == periodeId).firstOrNull;
+    return group == null ? '' : groupShort(l10n, classe.decoupage, group.ordre);
+  }
+
   static String _periodeLibelle(CoteClasse classe, String periodeId) => classe
       .periodes
       .firstWhere((p) => p.id == periodeId, orElse: () => classe.periodes.first)

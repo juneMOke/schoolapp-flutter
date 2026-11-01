@@ -186,16 +186,8 @@ class _HeaderLabel extends StatelessWidget {
 
   String _label(AppLocalizations l10n) {
     if (grid.hasGroupTotals) return l10n.coteColumnAnnual;
-    final columns = grid.columns;
-    final group = columns.isEmpty
-        ? null
-        : grid.classe.periodes
-              .where((p) => p.id == columns.first.periodeId)
-              .firstOrNull;
     return l10n.coteColumnTotalScope(
-      group == null
-          ? ''
-          : CoteLabels.groupShort(l10n, grid.classe.decoupage, group.ordre),
+      CoteLabels.firstGroupShort(l10n, grid.classe, grid.columns),
     );
   }
 }
