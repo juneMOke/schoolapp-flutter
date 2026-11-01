@@ -1,5 +1,5 @@
 {
-  "description": "Vecteurs de référence du moteur de paie v3 (formule 3) (hr). Même fichier côté tablette : un moteur qui diverge fait échouer la CI des deux dépôts. Montants en centimes ; le pointage lu est celui du mois même ; absence = min(base × NJ ÷ J arrondi demi vers le haut, base), J = jours du lundi au vendredi du mois civil, NJ borné à [0, J], si absenceDeductionEnabled ; mois yyyy-MM ; settings absent = défauts ; childcareEnabled faux = PC/E à 0 ; payout absent = 100 %. net = brut − absence − IPR − CNSS − PC/E − rubriques − échéances ; à verser = min(net, montant fixe), sinon net × taux ÷ 100 arrondi demi vers le haut. Rubriques : deductionTypes est le catalogue du cas, staff[].deductions les saisies du mois ; pour chaque rubrique, la saisie (même à 0), sinon le défaut d'une rubrique non archivée (MonthDeductions). Le moteur garde celles dont le montant est supérieur à 0 et la devise celle de la ligne, par sortOrder puis forme texte de deductionTypeId, chacune min(saisi, capacité), le reste perdu ; une saisie supérieure à 0 d'une autre devise est un écart (currencyMismatches), pas un défaut. Empreinte : staffMemberId|currency|gross|absence|ipr|cnss|childcare|advance|net|toPay, plus |typeId:taken,typeId:taken pour une ligne qui porte une rubrique, triées, jointes par \\n, SHA-256.",
+  "description": "Vecteurs de référence du moteur de paie v3 (formule 3) (hr). Même fichier côté tablette : un moteur qui diverge fait échouer la CI des deux dépôts. Montants en centimes ; le pointage lu est celui du mois même ; absence = min(base × NJ ÷ J arrondi demi vers le haut, base), J = jours du lundi au vendredi du mois civil, NJ borné à [0, J], si absenceDeductionEnabled ; mois yyyy-MM ; settings absent = défauts ; childcareEnabled faux = PC/E à 0 ; legalDeductionsEnabled faux = IPR et CNSS à 0, absent = vrai ; payout absent = 100 %. net = brut − absence − IPR − CNSS − PC/E − rubriques − échéances ; à verser = min(net, montant fixe), sinon net × taux ÷ 100 arrondi demi vers le haut. Rubriques : deductionTypes est le catalogue du cas, staff[].deductions les saisies du mois ; pour chaque rubrique, la saisie (même à 0), sinon le défaut d'une rubrique non archivée (MonthDeductions). Le moteur garde celles dont le montant est supérieur à 0 et la devise celle de la ligne, par sortOrder puis forme texte de deductionTypeId, chacune min(saisi, capacité), le reste perdu ; une saisie supérieure à 0 d'une autre devise est un écart (currencyMismatches), pas un défaut. Empreinte : staffMemberId|currency|gross|absence|ipr|cnss|childcare|advance|net|toPay, plus |typeId:taken,typeId:taken pour une ligne qui porte une rubrique, triées, jointes par \\n, SHA-256.",
   "defaultSettings": {
     "monthlyHoursDivisor": 173,
     "overtimeMultiplierPermille": 1300,
@@ -27,7 +27,8 @@
       }
     ],
     "absenceDeductionEnabled": false,
-    "childcareEnabled": true
+    "childcareEnabled": true,
+    "legalDeductionsEnabled": true
   },
   "cases": [
     {
@@ -4953,6 +4954,332 @@
           }
         ],
         "linesDigest": "60ff698abcd9b6f5dac9d05cf5b3b71feca684b22a5cd9eea93bc07897b07907"
+      }
+    },
+    {
+      "name": "retenues légales allumées : le contraste, l'IPR et la CNSS sont retenus aux taux de l'école",
+      "month": "2026-10",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT",
+          "VACATAIRE",
+          "CONVENTIONNE"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50,
+            "iprFlatInCents": 1000,
+            "cnssPermille": 50
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          }
+        ],
+        "absenceDeductionEnabled": false,
+        "childcareEnabled": true,
+        "legalDeductionsEnabled": true
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000a01",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000a01",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000a01",
+            "contractId": "00000000-0000-4000-9000-000000000a01",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 1000,
+            "cnssInCents": 1500,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 27500,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 27500,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 2500,
+            "advanceInCents": 0,
+            "netInCents": 27500,
+            "toPayInCents": 27500
+          }
+        ],
+        "linesDigest": "e208ab1279790a54682d31ff006e203a24a701865f9ef48889d780aefc981ec8"
+      }
+    },
+    {
+      "name": "retenues légales coupées : IPR et CNSS à 0, les taux restent rangés",
+      "month": "2026-10",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT",
+          "VACATAIRE",
+          "CONVENTIONNE"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50,
+            "iprFlatInCents": 1000,
+            "cnssPermille": 50
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          }
+        ],
+        "absenceDeductionEnabled": false,
+        "childcareEnabled": true,
+        "legalDeductionsEnabled": false
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000a02",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000a02",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000a02",
+            "contractId": "00000000-0000-4000-9000-000000000a02",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 30000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 0,
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "toPayInCents": 30000
+          }
+        ],
+        "linesDigest": "03a7e3e6b0af3da4244a689e42a0db2a687133407786af3d630d38dbc4a65192"
+      }
+    },
+    {
+      "name": "retenues légales coupées : la capacité qu'elles laissent va à la rubrique, à l'avance et au net",
+      "month": "2026-10",
+      "settings": {
+        "monthlyHoursDivisor": 173,
+        "overtimeMultiplierPermille": 1300,
+        "allowanceEligibleKinds": [
+          "PERMANENT",
+          "VACATAIRE",
+          "CONVENTIONNE"
+        ],
+        "currencyRules": [
+          {
+            "currency": "USD",
+            "childAllowanceInCents": 500,
+            "defaultOvertimeRateInCents": 300,
+            "overtimeRateStepInCents": 50,
+            "iprFlatInCents": 1000,
+            "cnssPermille": 50
+          },
+          {
+            "currency": "CDF",
+            "childAllowanceInCents": 1400000,
+            "defaultOvertimeRateInCents": 850000,
+            "overtimeRateStepInCents": 50000,
+            "iprFlatInCents": 0,
+            "cnssPermille": 0
+          }
+        ],
+        "absenceDeductionEnabled": false,
+        "childcareEnabled": true,
+        "legalDeductionsEnabled": false
+      },
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000a03",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000a03",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 600,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000c001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 500,
+          "archived": false
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000a03",
+            "contractId": "00000000-0000-4000-9000-000000000a03",
+            "currency": "USD",
+            "baseInCents": 600,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 600,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 100,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 100,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000c001",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 600,
+            "deductionInCents": 500,
+            "advanceInCents": 0,
+            "netInCents": 100,
+            "toPayInCents": 100
+          }
+        ],
+        "linesDigest": "99fe5ed9c3f15d5c4595a5f7e1413c43d9a88c3c1ff54bc917774f73fb5bfcc3"
       }
     }
   ]
