@@ -4,7 +4,9 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_phone_input.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_section_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -34,9 +36,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// mot pour une identité, règle non négociable #11). C'est l'exception qui se
 /// déclare.
 ///
-/// Le bouton « Choisir un payeur » ouvre l'annuaire local : le même parent
-/// revient chaque trimestre, et le retrouver doit coûter un tap plutôt que
-/// quatre champs.
+/// Les payeurs déjà connus pour cet élève se choisissent dans une liste
+/// déroulante : le même parent revient chaque trimestre, et le retrouver doit
+/// coûter un tap plutôt que quatre champs. La recherche dans tout l'annuaire
+/// local reste à côté, pour le payeur venu pour un autre élève.
 class FacturationCreatePaymentPayerSection extends StatelessWidget {
   final TextEditingController lastNameController;
   final TextEditingController firstNameController;
@@ -49,6 +52,15 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
   /// formulaire.
   final VoidCallback? onPickPayer;
 
+  /// Les payeurs connus pour cet élève. Vide : aucune liste à dérouler, la
+  /// recherche reste seule.
+  final List<LocalPayerIdentity> knownPayers;
+
+  /// Celui que les champs désignent, `null` dès qu'ils s'en écartent.
+  final LocalPayerIdentity? selectedPayer;
+
+  final ValueChanged<LocalPayerIdentity>? onPayerSelected;
+
   /// Message d'erreur du téléphone (numéro incomplet), ou `null`.
   final String? phoneErrorText;
 
@@ -59,6 +71,9 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
     required this.middleNameController,
     required this.phoneController,
     this.onPickPayer,
+    this.knownPayers = const [],
+    this.selectedPayer,
+    this.onPayerSelected,
     this.phoneErrorText,
     this.readOnly = false,
   });
@@ -103,11 +118,43 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
         const SizedBox(height: AppDimensions.spacingM),
         const Divider(height: 1, color: AppColors.border),
         const SizedBox(height: AppDimensions.spacingM),
-        _PickPayerBar(
-          help: l10n.facturationCreatePaymentPayerPickHelp,
-          actionLabel: l10n.facturationCreatePaymentPayerPickAction,
-          onPressed: readOnly ? null : onPickPayer,
-        ),
+        if (knownPayers.isEmpty)
+          _PickPayerBar(
+            help: l10n.facturationCreatePaymentPayerPickHelp,
+            actionLabel: l10n.facturationCreatePaymentPayerPickAction,
+            onPressed: readOnly ? null : onPickPayer,
+          )
+        else ...[
+          EteeloSelectInput<LocalPayerIdentity>(
+            label: l10n.facturationCreatePaymentKnownPayerLabel,
+            placeholder: l10n.facturationCreatePaymentKnownPayerPlaceholder,
+            helperText: l10n.facturationCreatePaymentPayerPickHelp,
+            value: selectedPayer,
+            readOnly: readOnly,
+            items: [
+              for (final payer in knownPayers)
+                EteeloSelectItem<LocalPayerIdentity>(
+                  value: payer,
+                  label: payer.fullName,
+                  subtitle:
+                      payer.phoneNumber ??
+                      l10n.facturationPayerSearchUnknownPhone,
+                ),
+            ],
+            onChanged: (payer) {
+              if (payer != null) onPayerSelected?.call(payer);
+            },
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: readOnly ? null : onPickPayer,
+              icon: const Icon(Icons.person_search_outlined),
+              label: Text(l10n.facturationCreatePaymentOtherPayerAction),
+              style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+            ),
+          ),
+        ],
         const SizedBox(height: AppDimensions.spacingM),
         LayoutBuilder(
           builder: (context, constraints) {

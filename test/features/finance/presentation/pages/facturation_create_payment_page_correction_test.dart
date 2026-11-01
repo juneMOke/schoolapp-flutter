@@ -219,6 +219,19 @@ void main() {
       )
       .first;
 
+  /// « Annuler et remplacer » ouvre le récapitulatif, qui seul écrit.
+  Future<void> submitAndConfirm(WidgetTester tester) async {
+    await tester.tap(find.byWidget(cta(tester)));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(Dialog),
+        matching: find.text('Annuler et remplacer'),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
   Future<void> choose(WidgetTester tester, PaymentCorrectionReason r) async {
     final chip = find.byKey(ValueKey('payment-correction-reason-${r.code}'));
     await tester.ensureVisible(chip);
@@ -292,8 +305,7 @@ void main() {
     await tester.enterText(amountField(), '50');
     await tester.pump();
     expect(cta(tester).onPressed, isNotNull);
-    await tester.tap(find.byWidget(cta(tester)));
-    await tester.pump();
+    await submitAndConfirm(tester);
 
     final draft =
         verify(() => correct(captureAny())).captured.single
@@ -353,8 +365,7 @@ void main() {
     );
     expect(cta(tester).onPressed, isNotNull);
 
-    await tester.tap(find.byWidget(cta(tester)));
-    await tester.pump();
+    await submitAndConfirm(tester);
 
     final draft =
         verify(() => correct(captureAny())).captured.single
@@ -373,6 +384,33 @@ void main() {
     expect(find.text('Versement corrigé'), findsOneWidget);
   });
 
+  testWidgets('le récapitulatif s ouvre, et rien ne part sans confirmation', (
+    tester,
+  ) async {
+    await open(tester);
+    await tester.enterText(amountField(), '50');
+    await tester.pump();
+    await choose(tester, PaymentCorrectionReason.wrongAmount);
+
+    await tester.tap(find.byWidget(cta(tester)));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Remplacer par'), findsOneWidget);
+    expect(
+      find.text(
+        'Le versement d\'origine sera annulé, et celui-ci le remplacera.',
+      ),
+      findsOneWidget,
+    );
+    verifyNever(() => correct(any()));
+
+    await tester.tap(find.text('Modifier'));
+    await tester.pumpAndSettle();
+
+    verifyNever(() => correct(any()));
+    expect(cta(tester).onPressed, isNotNull);
+  });
+
   testWidgets('écrite, la correction prévient la fiche avant de se fermer', (
     tester,
   ) async {
@@ -381,8 +419,7 @@ void main() {
     await tester.enterText(amountField(), '50');
     await tester.pump();
     await choose(tester, PaymentCorrectionReason.wrongAmount);
-    await tester.tap(find.byWidget(cta(tester)));
-    await tester.pump();
+    await submitAndConfirm(tester);
     await tester.pump();
     expect(written, 0);
 

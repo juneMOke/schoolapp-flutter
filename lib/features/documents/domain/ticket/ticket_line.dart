@@ -31,14 +31,32 @@ class TicketLine extends Equatable {
   final String text;
   final bool bold;
 
-  const TicketLine(this.text, {this.bold = false});
+  /// Le contenu d'un **QR** à poser à cette place, `null` pour une ligne de
+  /// texte.
+  ///
+  /// Le QR de vérification d'un reçu scellé (révision de D-4, 2026-10-30)
+  /// prend place DANS le gabarit, contrairement au logo : il se place avant le
+  /// pied, sous sa légende, et seul le gabarit sait où. Il n'entre pas pour
+  /// autant dans le pivot textuel : sa ligne y vaut `''`, et chaque renderer
+  /// le dessine depuis la même matrice (`TicketQrBand`).
+  final String? qrPayload;
+
+  const TicketLine(this.text, {this.bold = false}) : qrPayload = null;
 
   /// Une ligne sans attribut — ce que rend un gabarit qui n'en pose aucun.
-  const TicketLine.plain(this.text) : bold = false;
+  const TicketLine.plain(this.text) : bold = false, qrPayload = null;
+
+  /// Le QR de [payload], à cette place du ticket.
+  const TicketLine.qr(String payload)
+    : text = '',
+      bold = false,
+      qrPayload = payload;
+
+  bool get isQr => qrPayload != null;
 
   @override
-  List<Object?> get props => [text, bold];
+  List<Object?> get props => [text, bold, qrPayload];
 
   @override
-  String toString() => bold ? '**$text**' : text;
+  String toString() => isQr ? '[QR $qrPayload]' : (bold ? '**$text**' : text);
 }

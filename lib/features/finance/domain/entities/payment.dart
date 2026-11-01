@@ -70,6 +70,10 @@ class Payment extends Equatable {
   final String? cancellationReasonCode;
   final String? cancellationReason;
 
+  /// Le numéro DÉFINITIF de son reçu, `null` tant que le serveur ne l'a pas
+  /// scellé. Le titre de sa ligne dans l'historique de l'élève.
+  final String? receiptNumber;
+
   const Payment({
     required this.id,
     required this.studentId,
@@ -88,6 +92,7 @@ class Payment extends Equatable {
     this.cancelledByName,
     this.cancellationReasonCode,
     this.cancellationReason,
+    this.receiptNumber,
     this.cashierFirstName,
     this.cashierLastName,
     this.collectedByName,
@@ -136,6 +141,7 @@ class Payment extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    receiptNumber,
     studentId,
     academicYearId,
     amounts,

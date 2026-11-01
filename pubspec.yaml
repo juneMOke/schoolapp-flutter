@@ -97,6 +97,11 @@ dependencies:
   # désormais (`depend_on_referenced_packages`), et PINÉ sur la version résolue
   # par `printing` pour que les deux ne divergent jamais.
   pdf: 3.12.0
+  # Matrice du QR de vérification imprimé sur le ticket scellé (révision de
+  # D-4, 2026-10-30). Déjà tiré en transitif par `pdf` → `barcode` — déclaré en
+  # direct parce que l'application l'importe, et PINÉ sur la version résolue
+  # pour ne jamais diverger du QR que dessine `pdf`.
+  qr: 3.0.2
 
   # ── Impression thermique ESC/POS (ADR-012 L2.4) ──────────────────────────
   # Envoi d'octets bruts à une imprimante Bluetooth Classic (RFCOMM/SPP), pour

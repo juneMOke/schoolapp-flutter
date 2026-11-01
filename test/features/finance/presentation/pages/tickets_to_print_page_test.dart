@@ -12,6 +12,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
@@ -248,6 +249,55 @@ void main() {
 
     expect(find.textContaining('Ticket d\'annulation'), findsOneWidget);
     expect(find.textContaining('Dernier échec'), findsOneWidget);
+  });
+
+  // La page vit sous un `ShellRoute` : son navigateur imbriqué ne porte qu'elle,
+  // et un `Navigator.maybePop` n'y dépile rien.
+  testWidgets('la flèche ramène à l écran d où l on vient', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final router = GoRouter(
+      initialLocation: '/home',
+      routes: [
+        GoRoute(
+          path: '/home',
+          builder: (context, _) => TextButton(
+            onPressed: () => context.push('/finances/tickets'),
+            child: const Text('accueil'),
+          ),
+        ),
+        ShellRoute(
+          builder: (_, _, child) => child,
+          routes: [
+            GoRoute(
+              path: '/finances/tickets',
+              builder: (_, _) => BlocProvider<SyncStatusCubit>.value(
+                value: sync,
+                child: const TicketsToPrintPage(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      MaterialApp.router(
+        routerConfig: router,
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('accueil'));
+    await tester.pumpAndSettle();
+    expect(find.text('accueil'), findsNothing);
+
+    await tester.tap(find.byTooltip('Retour'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('accueil'), findsOneWidget);
   });
 
   testWidgets('file vide : l état vide partagé', (tester) async {

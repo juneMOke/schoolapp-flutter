@@ -131,7 +131,7 @@ void main() {
           'idx_editique_cache_lru',
         ]),
       );
-      expect(editiqueCacheEntriesTable.createIndexSql, hasLength(4));
+      expect(editiqueCacheEntriesTable.createIndexSql, hasLength(5));
     });
   });
 }

@@ -70,6 +70,14 @@ class FacturationChargeGroupEntry {
   bool get groupIsSource => _groupIsSource;
   bool _groupIsSource = true;
 
+  /// Le montant de la nature se tape-t-il ? Oui quand elle commande, et quand
+  /// ses tranches portent la ventilation d'un versement à corriger.
+  ///
+  /// ⚠️ Pas [groupIsSource] pour autant : rejouer une cascade écraserait cette
+  /// ventilation. Elle ne cède qu'à une frappe du caissier sur la nature.
+  bool get amountIsEditable => _groupIsSource || _holdsOriginVentilation;
+  bool _holdsOriginVentilation = false;
+
   /// La devise dans laquelle CETTE nature est réglée. `null` = celle de la
   /// créance, c'est-à-dire le cas courant, qui ne coûte rien.
   ///
@@ -114,12 +122,14 @@ class FacturationChargeGroupEntry {
 
   /// Le caissier a tapé le MONTANT de la nature : le comptoir en découle.
   void amountBecomesSource() {
+    _takesOverOriginVentilation();
     _groupIsSource = true;
     _tenderIsSource = false;
   }
 
   /// Le caissier a tapé le COMPTOIR de la nature : l'imputation en découle.
   void tenderBecomesSource() {
+    _takesOverOriginVentilation();
     _groupIsSource = true;
     _tenderIsSource = true;
   }
@@ -135,6 +145,24 @@ class FacturationChargeGroupEntry {
   void handsOverToTranches() {
     _groupIsSource = false;
     _tenderIsSource = false;
+    _holdsOriginVentilation = false;
+  }
+
+  /// Ses tranches viennent d'être pré-remplies avec un versement à corriger.
+  void holdsOriginVentilation() => _holdsOriginVentilation = !_groupIsSource;
+
+  /// La devise que portent les tranches de l'origine, que le sélecteur de la
+  /// nature doit dire. Sans propagation : une tranche non reprise garde la
+  /// sienne tant que la nature ne commande pas.
+  void adoptOriginTenderCurrency(String value) =>
+      _tenderCurrency = value == currency ? null : value;
+
+  /// Le caissier tape sur la nature : la cascade va écrire ses tranches, toutes
+  /// doivent alors régler dans sa devise.
+  void _takesOverOriginVentilation() {
+    if (!_holdsOriginVentilation) return;
+    _holdsOriginVentilation = false;
+    setTenderCurrency(_tenderCurrency);
   }
 
   /// La devise de règlement effective — celle des créances par défaut.

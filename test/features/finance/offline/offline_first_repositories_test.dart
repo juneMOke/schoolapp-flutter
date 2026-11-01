@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/finance/offline/data/repositories/st
 import '../../offline_full_db.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/payment_receipt_resolver.dart';
 
 /// Délégué online factice : n'est appelé que pour les méthodes admin/create.
 class _FakeStudentChargesOnline implements StudentChargesRepository {
@@ -253,6 +254,53 @@ void main() {
       },
     );
 
+    test('la ligne porte le numéro définitif, jamais un PROV-', () async {
+      await dao.recordPayment(
+        payment: const PaymentLocalModel(
+          id: 'p-sealed',
+          clientUuid: 'p-sealed',
+          studentId: 's1',
+          academicYearId: 'ay-1',
+          paidAt: '2026-07-06T10:00:00Z',
+        ),
+        allocations: const [],
+        outboxEntryId: 'ob-sealed',
+        nowMs: 1000,
+      );
+      Future<String?> numberWhen(PaymentReceiptReference receipt) async {
+        final repo = PaymentsOfflineFirstRepository(
+          dao: dao,
+          refresh: noRefresh,
+          online: _FakePaymentsOnline(),
+          receipts: _FixedReceipt(receipt),
+        );
+        final result = await repo.getPaymentsByStudentAndAcademicYear(
+          studentId: 's1',
+          academicYearId: 'ay-1',
+        );
+        return result.getOrElse(() => []).last.receiptNumber;
+      }
+
+      expect(
+        await numberWhen(
+          const PaymentReceiptReference(
+            number: 'CF-RC-2627-000802',
+            status: PaymentReceiptStatus.definitive,
+          ),
+        ),
+        'CF-RC-2627-000802',
+      );
+      expect(
+        await numberWhen(
+          const PaymentReceiptReference(
+            number: 'PROV-0CB02AF9',
+            status: PaymentReceiptStatus.provisional,
+          ),
+        ),
+        isNull,
+      );
+    });
+
     test(
       'createPayment délégué à l\'online (chemin non emprunté par l\'UI)',
       () async {
@@ -358,4 +406,13 @@ void main() {
       },
     );
   });
+}
+
+class _FixedReceipt implements PaymentReceiptResolver {
+  final PaymentReceiptReference receipt;
+
+  const _FixedReceipt(this.receipt);
+
+  @override
+  Future<PaymentReceiptReference> resolve(String paymentId) async => receipt;
 }

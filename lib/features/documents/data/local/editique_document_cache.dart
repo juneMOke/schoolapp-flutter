@@ -111,6 +111,7 @@ class EditiqueDocumentCache {
     required String schoolId,
     String ownerUid = '',
     int? emittedAt,
+    String? verificationUrl,
     required Uint8List bytes,
   }) {
     return _exclusive(() async {
@@ -166,6 +167,7 @@ class EditiqueDocumentCache {
           sizeBytes: stored.clearSizeBytes,
           contentSha256: stored.sha256Hex,
           emittedAt: emittedAt,
+          verificationUrl: verificationUrl,
           // Une pièce déjà connue garde sa date de mise en cache : la remettre
           // à maintenant effacerait son ancienneté réelle.
           createdAt: existing?.createdAt ?? now,
@@ -268,6 +270,9 @@ class EditiqueDocumentCache {
               cancelledAt: document.cancelledAt ?? existing?.cancelledAt,
               cancellationReason:
                   document.cancellationReason ?? existing?.cancellationReason,
+              verificationUrl:
+                  document.verificationUrl ?? existing?.verificationUrl,
+              edition: document.edition ?? existing?.edition,
               createdAt: existing?.createdAt ?? now,
               lastAccessedAt: existing?.lastAccessedAt ?? now,
             ),
@@ -291,14 +296,23 @@ class EditiqueDocumentCache {
   /// Octets de la pièce portant ce numéro dans cette école. Repli du régime
   /// AM-5, pour les pièces mises en cache avant que le serveur n'annonce leur
   /// identifiant d'archive.
+  ///
+  /// [unidentifiedOnly] : l'appelant connaît l'identifiant de sa pièce, et une
+  /// autre édition du même numéro n'est pas elle.
   Future<Uint8List?> readByDocumentNumber({
     required String schoolId,
     required String documentNumber,
+    bool unidentifiedOnly = false,
   }) => _read(
-    () => _index.findByDocumentNumber(
-      schoolId: schoolId,
-      documentNumber: documentNumber,
-    ),
+    () => unidentifiedOnly
+        ? _index.findUnidentifiedByDocumentNumber(
+            schoolId: schoolId,
+            documentNumber: documentNumber,
+          )
+        : _index.findByDocumentNumber(
+            schoolId: schoolId,
+            documentNumber: documentNumber,
+          ),
   );
 
   Future<Uint8List?> _read(

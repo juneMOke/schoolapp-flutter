@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_create_payment_payer_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/entities/local_payer_identity.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,8 @@ void main() {
     TextEditingController? phoneController,
     VoidCallback? onPickPayer,
     bool readOnly = false,
+    List<LocalPayerIdentity> knownPayers = const [],
+    ValueChanged<LocalPayerIdentity>? onPayerSelected,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -29,6 +32,8 @@ void main() {
             phoneController: phoneController ?? TextEditingController(),
             onPickPayer: onPickPayer,
             readOnly: readOnly,
+            knownPayers: knownPayers,
+            onPayerSelected: onPayerSelected,
           ),
         ),
       ),
@@ -164,6 +169,42 @@ void main() {
     await tester.pump();
 
     expect(ouvertures, 1);
+  });
+
+  group('payeurs connus de l élève', () {
+    const payer = LocalPayerIdentity(
+      lastName: 'Kabongo',
+      firstName: 'Joseph',
+      phoneNumber: '+243816939060',
+      origin: PayerOrigin.previousPayment,
+    );
+
+    testWidgets('la liste déroulante remplace le bouton', (tester) async {
+      final selected = <LocalPayerIdentity>[];
+      var searches = 0;
+      await pumpPayerSection(
+        tester,
+        lastNameController: TextEditingController(),
+        firstNameController: TextEditingController(),
+        middleNameController: TextEditingController(),
+        knownPayers: const [payer],
+        onPayerSelected: selected.add,
+        onPickPayer: () => searches++,
+      );
+
+      expect(find.text('Choisir un payeur'), findsNothing);
+      expect(find.text('Payeur déjà connu'), findsOneWidget);
+
+      await tester.tap(find.text('Choisir dans la liste'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(payer.fullName));
+      await tester.pumpAndSettle();
+      expect(selected, [payer]);
+
+      await tester.tap(find.text('Chercher un autre payeur'));
+      await tester.pump();
+      expect(searches, 1);
+    });
   });
 
   /// Pendant un encaissement en vol, plus rien ne doit changer sous le

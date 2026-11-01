@@ -1810,6 +1810,196 @@ void main() {
     );
 
     test(
+      'ACK avec emittedAt : le jour d émission est gardé tel quel, sans '
+      'conversion de fuseau ; un ACK qui ne le porte pas ne l efface pas',
+      () async {
+        await db.insert('generated_documents', {
+          'id': 'gd1',
+          'doc_domain': 'PAYMENT',
+          'payment_id': 'pay1',
+          'student_id': 's1',
+          'doc_type': 'RC',
+          'number': 'PROV-ABCD1234',
+          'status': 'PROVISIONAL',
+          'created_at': 1000,
+        });
+
+        await dao.applyPaymentAck(
+          ackOf(
+            documents: [
+              GeneratedDocumentDto.fromJson(const {
+                'type': 'PAYMENT_RECEIPT',
+                'documentNumber': 'ETL-RP-0042',
+                'status': 'DEFINITIVE',
+                'emittedAt': '2026-10-27T00:00:00Z',
+              }),
+            ],
+          ),
+          nowMs: 5000,
+        );
+        expect(
+          (await db.query('generated_documents')).single['emitted_on'],
+          '2026-10-27',
+        );
+
+        await dao.applyPaymentAck(
+          ackOf(
+            documents: const [
+              GeneratedDocumentDto(
+                type: 'PAYMENT_RECEIPT',
+                documentNumber: 'ETL-RP-0042',
+                status: 'DEFINITIVE',
+              ),
+            ],
+          ),
+          nowMs: 6000,
+        );
+        expect(
+          (await db.query('generated_documents')).single['emitted_on'],
+          '2026-10-27',
+        );
+      },
+    );
+
+    test(
+      'ACK d un AUTRE numéro sans emittedAt : l ancien jour ne lui reste pas',
+      () async {
+        await db.insert('generated_documents', {
+          'id': 'gd1',
+          'doc_domain': 'PAYMENT',
+          'payment_id': 'pay1',
+          'student_id': 's1',
+          'doc_type': 'RC',
+          'number': 'ETL-RP-0042',
+          'status': 'DEFINITIVE',
+          'emitted_on': '2026-10-27',
+          'created_at': 1000,
+        });
+
+        await dao.applyPaymentAck(
+          ackOf(
+            documents: const [
+              GeneratedDocumentDto(
+                type: 'PAYMENT_RECEIPT',
+                documentNumber: 'ETL-RP-0043',
+                status: 'DEFINITIVE',
+              ),
+            ],
+          ),
+          nowMs: 5000,
+        );
+
+        final doc = (await db.query('generated_documents')).single;
+        expect(doc['number'], 'ETL-RP-0043');
+        expect(doc['emitted_on'], isNull);
+      },
+    );
+
+    test('ACK d une autre édition du même numéro : ses faits remplacent ceux '
+        'de la précédente', () async {
+      await db.insert('generated_documents', {
+        'id': 'gd1',
+        'doc_domain': 'PAYMENT',
+        'payment_id': 'pay1',
+        'student_id': 's1',
+        'doc_type': 'RC',
+        'number': 'ETL-RP-0042',
+        'status': 'DEFINITIVE',
+        'edition': 1,
+        'emitted_on': '2026-10-30',
+        'verification_url': 'https://verify.eteeloconnect.com/d/edition-1',
+        'created_at': 1000,
+      });
+
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: [
+            GeneratedDocumentDto.fromJson(const {
+              'type': 'PAYMENT_RECEIPT',
+              'documentNumber': 'ETL-RP-0042',
+              'status': 'DEFINITIVE',
+              'edition': 2,
+            }),
+          ],
+        ),
+        nowMs: 5000,
+      );
+
+      final row = (await db.query('generated_documents')).single;
+      expect(row['edition'], 2);
+      expect(row['emitted_on'], isNull);
+      expect(row['verification_url'], isNull);
+    });
+
+    test('ACK avec verificationUrl : le QR du reçu est gardé ; un AUTRE numéro '
+        'sans URL ne garde pas celle de l ancien', () async {
+      await db.insert('generated_documents', {
+        'id': 'gd1',
+        'doc_domain': 'PAYMENT',
+        'payment_id': 'pay1',
+        'student_id': 's1',
+        'doc_type': 'RC',
+        'number': 'PROV-ABCD1234',
+        'status': 'PROVISIONAL',
+        'created_at': 1000,
+      });
+
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: [
+            GeneratedDocumentDto.fromJson(const {
+              'type': 'PAYMENT_RECEIPT',
+              'documentNumber': 'ETL-RP-0042',
+              'status': 'DEFINITIVE',
+              'verificationUrl': 'https://api.eteelo.com/verify/RC/doc-1',
+            }),
+          ],
+        ),
+        nowMs: 5000,
+      );
+      expect(
+        (await db.query('generated_documents')).single['verification_url'],
+        'https://api.eteelo.com/verify/RC/doc-1',
+      );
+
+      // Même numéro, rejeu sans URL : elle reste.
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: const [
+            GeneratedDocumentDto(
+              type: 'PAYMENT_RECEIPT',
+              documentNumber: 'ETL-RP-0042',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+        nowMs: 6000,
+      );
+      expect(
+        (await db.query('generated_documents')).single['verification_url'],
+        'https://api.eteelo.com/verify/RC/doc-1',
+      );
+
+      // Autre numéro, sans URL : celle de l'ancien ne le vérifierait pas.
+      await dao.applyPaymentAck(
+        ackOf(
+          documents: const [
+            GeneratedDocumentDto(
+              type: 'PAYMENT_RECEIPT',
+              documentNumber: 'ETL-RP-0043',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+        nowMs: 7000,
+      );
+      expect(
+        (await db.query('generated_documents')).single['verification_url'],
+        isNull,
+      );
+    });
+
+    test(
       'ACK sans document (scellement best-effort en échec, décision G) : le reçu '
       'provisoire est CONSERVÉ, le paiement reste acquis (SYNCED)',
       () async {

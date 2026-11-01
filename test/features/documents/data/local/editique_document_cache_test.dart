@@ -403,12 +403,15 @@ void main() {
         await putReceipt(cache, documentId: 'doc-2', documentNumber: 'N-2');
         expect(filesOnDisk(), ['gen-1.enc', 'gen-2.enc']);
 
-        // Renuméroter doc-1 sur le numéro déjà pris par doc-2 : l'index unique
-        // par école refuse.
+        // L'index refuse la mise à jour de doc-1, quelle qu'en soit la raison.
+        await db.execute(
+          'CREATE TRIGGER refuse_update BEFORE UPDATE ON '
+          "editique_cache_entries BEGIN SELECT RAISE(ABORT, 'refus'); END",
+        );
         final entry = await cache.put(
           docType: 'RC',
           documentId: 'doc-1',
-          documentNumber: 'N-2',
+          documentNumber: 'N-1',
           schoolId: 'school-1',
           bytes: pdf('collision'),
         );

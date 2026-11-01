@@ -116,6 +116,20 @@ Future<void> migrateTenantDatabase(
   if (upTo(70)) {
     await _createTables(db, ticketPrintJobsTables);
   }
+  if (upTo(71)) {
+    await _addReceiptEmissionDay(db);
+  }
+  if (upTo(72)) {
+    await _addColumnIfTable(db, 'generated_documents', 'verification_url');
+  }
+  if (upTo(73)) {
+    await _addColumnIfTable(
+      db,
+      'generated_documents',
+      'edition',
+      type: 'INTEGER',
+    );
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les
@@ -130,6 +144,71 @@ Future<void> migrateDeviceDatabase(
   if (upTo(63)) {
     await _admitEnrollmentSheetInEditiqueCache(db);
   }
+  if (upTo(72)) {
+    await _addColumnIfTable(db, 'editique_cache_entries', 'verification_url');
+  }
+  if (upTo(73)) {
+    await _admitReceiptEditionsInEditiqueCache(db);
+  }
+}
+
+/// v73 — la numérotation par édition (V200 du back) : un reçu remplaçant
+/// reprend le numéro de celui qu'il remplace. L'index unique sur le numéro
+/// faisait confondre les deux pièces, et la nouvelle héritait de l'annulation
+/// et des octets de l'ancienne. Il ne vaut plus que pour les pièces sans
+/// identifiant. Aucune reprise : le numéro y était encore unique.
+Future<void> _admitReceiptEditionsInEditiqueCache(DatabaseExecutor db) async {
+  const table = 'editique_cache_entries';
+  final info = await db.rawQuery('PRAGMA table_info($table)');
+  if (info.isEmpty) return;
+  await _addColumnIfTable(db, table, 'edition', type: 'INTEGER');
+  await db.execute('DROP INDEX IF EXISTS idx_editique_cache_number');
+  await db.execute(
+    'CREATE UNIQUE INDEX idx_editique_cache_number '
+    'ON $table(school_id, document_number) WHERE document_id IS NULL',
+  );
+  await db.execute(
+    'CREATE INDEX IF NOT EXISTS idx_editique_cache_number_lookup '
+    'ON $table(school_id, document_number)',
+  );
+}
+
+/// v72 — l'URL de vérification du reçu scellé, que le ticket imprime en QR
+/// (révision de D-4, 2026-10-30) : `generated_documents.verification_url` côté
+/// école (accusé, récupération), `editique_cache_entries.verification_url`
+/// côté appareil (delta éditique, pour un versement encaissé ailleurs).
+///
+/// Additif, nullable, **aucune reprise** : sans URL, le ticket sort sans QR,
+/// comme avant. Garde de table et de colonne, même raison qu'à la v53.
+Future<void> _addColumnIfTable(
+  DatabaseExecutor db,
+  String table,
+  String column, {
+  String type = 'TEXT',
+}) async {
+  final info = await db.rawQuery('PRAGMA table_info($table)');
+  if (info.isEmpty) return;
+  if (info.any((row) => row['name'] == column)) return;
+  await db.execute('ALTER TABLE $table ADD COLUMN $column $type');
+}
+
+/// v71 — `generated_documents.emitted_on`, le jour d'émission du reçu scellé.
+///
+/// Le ticket définitif imprime ce jour en date principale, comme le PDF scellé :
+/// le numéro croît avec lui, donc la pile du jour reste continue quel que soit
+/// le nombre de postes. Il arrive par l'accusé (`documents[].emittedAt`) ou par
+/// la récupération du reçu (`X-Document-Emitted-At`). Additif, nullable :
+/// **aucune reprise** — sans lui, le ticket garde la date de saisie, comme
+/// avant.
+///
+/// ⚠️ Garde de table et de colonne, même raison qu'à la v53.
+Future<void> _addReceiptEmissionDay(DatabaseExecutor db) async {
+  final info = await db.rawQuery('PRAGMA table_info(generated_documents)');
+  if (info.isEmpty) return;
+  if (info.any((row) => row['name'] == 'emitted_on')) return;
+  await db.execute(
+    'ALTER TABLE generated_documents ADD COLUMN emitted_on TEXT',
+  );
 }
 
 /// v51 — `enrollments.annual_matriculation_number`.

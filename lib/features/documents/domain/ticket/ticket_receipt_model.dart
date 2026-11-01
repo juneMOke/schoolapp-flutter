@@ -104,6 +104,28 @@ class TicketReceiptModel extends Equatable {
   final bool isProvisional;
 
   final DateTime paidAt;
+
+  /// Jour d'émission du reçu scellé (sans heure), `null` s'il n'est pas connu.
+  ///
+  /// Présent sur un ticket définitif, il en devient la date principale, comme
+  /// sur le PDF scellé : le numéro croît avec lui, donc la pile du jour reste
+  /// continue même quand un versement saisi la veille se synchronise le matin
+  /// sur un autre poste. [paidAt] passe alors en mention « Saisi le ».
+  final DateTime? receiptIssuedOn;
+
+  /// URL de vérification du reçu scellé, imprimée en QR (révision de D-4,
+  /// 2026-10-30) ; `null` quand elle n'est pas connue.
+  ///
+  /// ⚠️ **Jamais sur un ticket provisoire**, même si elle était connue : le QR
+  /// fait passer le papier pour officiel, et c'est tout ce qu'un `PROV-` ne
+  /// doit pas paraître (D-4). Le gabarit l'ignore donc sous [isProvisional].
+  final String? verificationUrl;
+
+  /// Édition du reçu sous son numéro. À partir de 2, le numéro est partagé
+  /// avec le reçu annulé qu'il remplace (V200 du back) : le papier doit le
+  /// dire, comme le PDF scellé.
+  final int edition;
+
   final String? cashierFullName;
 
   /// Le payeur, **quand il y en a un**.
@@ -203,6 +225,9 @@ class TicketReceiptModel extends Equatable {
     required this.reference,
     required this.isProvisional,
     required this.paidAt,
+    this.receiptIssuedOn,
+    this.verificationUrl,
+    this.edition = 1,
     this.cashierFullName,
     this.payerFullName,
     this.payerPhoneNumber,
@@ -391,6 +416,9 @@ class TicketReceiptModel extends Equatable {
     reference,
     isProvisional,
     paidAt,
+    receiptIssuedOn,
+    verificationUrl,
+    edition,
     cashierFullName,
     tenders,
     allocations,

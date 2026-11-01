@@ -394,17 +394,31 @@ class FacturationCollectFormModel {
       entry.writeDerived(entry.controller, formatPlainAmount(bounded));
       allocationEdited(entry);
     }
+    for (final group in groups) {
+      group.holdsOriginVentilation();
+    }
   }
 
   /// Reprend la devise que le tiroir de l'origine a reçue, par devise de
   /// créance (D7). À appeler quand la série de taux est connue : sans elle, le
   /// comptoir ne se calcule pas.
   void prefillTenderCurrencies(Map<String, String> byChargeCurrency) {
+    // La nature d'abord : son sélecteur reste visible en correction, et il doit
+    // dire la devise que ses tranches portent.
+    for (final group in groups) {
+      final currency = byChargeCurrency[group.currency];
+      if (currency != null && group.selected) {
+        group.adoptOriginTenderCurrency(currency);
+      }
+    }
     for (final entry in entries) {
       if (!entry.selected) continue;
       final currency = byChargeCurrency[entry.charge.currency];
       if (currency == null) continue;
       tenderCurrencyChanged(entry, currency);
+    }
+    for (final group in groups) {
+      group.holdsOriginVentilation();
     }
   }
 }

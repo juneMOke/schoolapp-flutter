@@ -969,6 +969,9 @@ const TableSchema generatedDocumentsTable = TableSchema(
       number TEXT NOT NULL,
       provisional_number TEXT,
       status TEXT NOT NULL DEFAULT 'PROVISIONAL',
+      emitted_on TEXT,
+      verification_url TEXT,
+      edition INTEGER,
       verification_token TEXT,
       pdf_blob BLOB,
       created_at INTEGER NOT NULL DEFAULT 0

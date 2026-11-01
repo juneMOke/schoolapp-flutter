@@ -4672,6 +4672,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get facturationPaymentPayerUnnamed => 'Sans payeur nommé';
 
   @override
+  String get facturationPaymentLineReceiptPending =>
+      'Reçu en attente de numéro';
+
+  @override
   String get facturationPaymentAmountLabel => 'Montant global payé';
 
   @override
@@ -5039,6 +5043,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerPickAction => 'Choisir un payeur';
+
+  @override
+  String get facturationCreatePaymentKnownPayerLabel => 'Payeur déjà connu';
+
+  @override
+  String get facturationCreatePaymentKnownPayerPlaceholder =>
+      'Choisir dans la liste';
+
+  @override
+  String get facturationCreatePaymentOtherPayerAction =>
+      'Chercher un autre payeur';
 
   @override
   String get facturationCreatePaymentPayerPickHelp =>
@@ -8551,6 +8566,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketDateLabel => 'Date :';
 
   @override
+  String get ticketEnteredAtLabel => 'Saisi le';
+
+  @override
+  String get ticketEditionLabel => 'Édition :';
+
+  @override
+  String get ticketVerifyNotice => 'Scannez pour vérifier ce reçu';
+
+  @override
   String get ticketPayerLabel => 'PAYEUR :';
 
   @override
@@ -8675,6 +8699,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ticketsToPrintBack => 'Retour';
+
+  @override
+  String get ticketsToPrintIntroTitle => 'Les tickets de ce poste';
+
+  @override
+  String get ticketsToPrintIntroMessage =>
+      'Les versements saisis sur ce poste dont le ticket n\'est pas encore imprimé.';
+
+  @override
+  String get ticketsToPrintReadyHint =>
+      'Cochez les tickets, vérifiez l\'aperçu, puis imprimez.';
+
+  @override
+  String get ticketsToPrintPaperOutTitle =>
+      'Les tickets sont-ils bien sortis ?';
+
+  @override
+  String get ticketsToPrintPaperOutMessage =>
+      'L\'application ne sait pas si l\'imprimante a vraiment sorti le papier. Confirmez pour les retirer de la liste.';
+
+  @override
+  String get ticketsToPrintPaperOutYes => 'Oui, retirer de la liste';
+
+  @override
+  String get ticketsToPrintPaperOutNo => 'Non, les garder';
 
   @override
   String ticketsToPrintReadySection(int count) {
@@ -12411,6 +12460,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get paymentCorrectionSubmit => 'Annuler et remplacer';
+
+  @override
+  String paymentCorrectionConfirmTitle(String amount) {
+    return 'Remplacer par $amount ?';
+  }
+
+  @override
+  String get paymentCorrectionConfirmNotice =>
+      'Le versement d\'origine sera annulé, et celui-ci le remplacera.';
 
   @override
   String paymentCorrectionGap(String amount) {

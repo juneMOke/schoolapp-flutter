@@ -198,6 +198,63 @@ void main() {
       expect(m.entries.first.effectiveCents, 4800);
     });
 
+    group('le montant de la nature, en correction', () {
+      test('reste modifiable, sans que la nature commande', () {
+        final m = modele()..prefill(centsByCharge: {'T1': 4800, 'T2': 200});
+        final nature = m.groups.single;
+
+        expect(nature.amountIsEditable, isTrue);
+        // La cascade ne doit pas pouvoir se rejouer sur l'origine.
+        expect(nature.groupIsSource, isFalse);
+        expect([for (final e in m.entries) e.effectiveCents], [4800, 200, 0]);
+      });
+
+      test('une ventilation hors ordre survit tant qu on ne la retape pas', () {
+        final m = modele()..prefill(centsByCharge: {'T2': 1000});
+
+        expect([for (final e in m.entries) e.effectiveCents], [0, 1000, 0]);
+        expect(m.groups.single.amountIsEditable, isTrue);
+      });
+
+      test('une frappe sur la nature reprend la main par la cascade', () {
+        final m = modele()..prefill(centsByCharge: {'T2': 1000});
+        final nature = m.groups.single;
+
+        nature.controller.text = '60';
+        m.groupAmountEdited(nature);
+
+        expect(nature.groupIsSource, isTrue);
+        expect([for (final e in m.entries) e.effectiveCents], [4800, 1200, 0]);
+      });
+
+      test('une frappe sur une tranche la referme, comme à l encaissement', () {
+        final m = modele()..prefill(centsByCharge: {'T1': 4800});
+        final nature = m.groups.single;
+
+        m.allocationEdited(m.entries.first);
+
+        expect(nature.amountIsEditable, isFalse);
+      });
+
+      test('reprise en devise d origine, toutes les tranches la suivent', () {
+        final m = modele()
+          ..prefill(centsByCharge: {'T1': 4800})
+          ..prefillTenderCurrencies({'USD': 'CDF'});
+        final nature = m.groups.single;
+
+        expect(nature.effectiveTenderCurrency, 'CDF');
+        expect(nature.amountIsEditable, isTrue);
+
+        nature.controller.text = '60';
+        m.groupAmountEdited(nature);
+
+        expect(
+          [for (final e in m.entries) e.effectiveTenderCurrency],
+          ['CDF', 'CDF', 'CDF'],
+        );
+      });
+    });
+
     test('la devise du tiroir d origine est reprise (D7)', () {
       final m = modele()
         ..prefill(centsByCharge: {'T1': 4800})

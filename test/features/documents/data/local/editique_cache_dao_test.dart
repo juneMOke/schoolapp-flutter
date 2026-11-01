@@ -205,6 +205,25 @@ void main() {
       expect(stored?.emittedAt, 77);
     });
 
+    // Une émission qui n'annonce pas l'URL ne retire pas le QR qu'un delta
+    // avait appris.
+    test(
+      'une URL de vérification connue n est pas effacée par un null',
+      () async {
+        await dao.upsert(
+          cacheEntry(verificationUrl: 'https://api.eteelo.com/verify/RC/doc-1'),
+        );
+
+        await dao.upsert(cacheEntry());
+
+        final stored = await dao.findByDocumentId('doc-1');
+        expect(
+          stored?.verificationUrl,
+          'https://api.eteelo.com/verify/RC/doc-1',
+        );
+      },
+    );
+
     // Un relevé ou un quitus n'est pas archivé par le serveur : la copie locale
     // en serait l'unique exemplaire, et l'éviction LRU la détruirait.
     test('un type non archivé est refusé', () async {
@@ -443,6 +462,85 @@ void main() {
           cacheEntry(documentId: 'doc-9', documentNumber: 'ETL-RC-9'),
         ),
         isNull,
+      );
+    });
+  });
+
+  /// Numérotation par édition (V200, back) : un reçu remplaçant reprend le
+  /// numéro de celui qu'il remplace. Deux pièces partagent alors un numéro.
+  group('deux éditions d un même numéro', () {
+    Future<void> seedCancelledFirstEdition() => dao.upsert(
+      cacheEntry(
+        id: 'c-1',
+        documentId: 'doc-1',
+        documentNumber: 'ETL-RC-1',
+        contentSha256: 'empreinte-edition-1',
+        cancelledAt: 5,
+        cancellationReason: 'Mauvais montant',
+      ),
+    );
+
+    test(
+      'la nouvelle édition n hérite ni de l annulation ni des octets',
+      () async {
+        await seedCancelledFirstEdition();
+
+        await dao.upsert(
+          cacheEntry(
+            id: 'c-2',
+            documentId: 'doc-2',
+            documentNumber: 'ETL-RC-1',
+            contentSha256: null,
+          ),
+        );
+
+        final first = await dao.findByDocumentId('doc-1');
+        final second = await dao.findByDocumentId('doc-2');
+        expect(first?.cancelledAt, 5);
+        expect(first?.contentSha256, 'empreinte-edition-1');
+        expect(second?.id, 'c-2');
+        expect(second?.isCancelled, isFalse);
+        expect(second?.contentSha256, isNull);
+      },
+    );
+
+    test('par numéro seul, c est la pièce en vigueur qui répond', () async {
+      await seedCancelledFirstEdition();
+      await dao.upsert(
+        cacheEntry(id: 'c-2', documentId: 'doc-2', documentNumber: 'ETL-RC-1'),
+      );
+
+      final found = await dao.findByDocumentNumber(
+        schoolId: 'school-1',
+        documentNumber: 'ETL-RC-1',
+      );
+
+      expect(found?.documentId, 'doc-2');
+    });
+
+    test('une pièce sans identifiant reste adoptée par son numéro', () async {
+      await dao.upsert(
+        cacheEntry(id: 'c-1', documentId: null, documentNumber: 'ETL-RC-1'),
+      );
+
+      await dao.upsert(
+        cacheEntry(id: 'c-2', documentId: 'doc-1', documentNumber: 'ETL-RC-1'),
+      );
+
+      final found = await dao.findByDocumentId('doc-1');
+      expect(found?.id, 'c-1');
+    });
+
+    test('deux pièces sans identifiant ne partagent pas un numéro', () async {
+      await db.insert('editique_cache_entries', {
+        ...cacheEntry(id: 'c-1', documentId: null).toMap(),
+      });
+
+      await expectLater(
+        db.insert('editique_cache_entries', {
+          ...cacheEntry(id: 'c-2', documentId: null).toMap(),
+        }),
+        throwsA(isA<DatabaseException>()),
       );
     });
   });

@@ -4646,6 +4646,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get facturationPaymentPayerUnnamed => 'No payer named';
 
   @override
+  String get facturationPaymentLineReceiptPending =>
+      'Receipt awaiting its number';
+
+  @override
   String get facturationPaymentAmountLabel => 'Total paid amount';
 
   @override
@@ -5007,6 +5011,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCreatePaymentPayerPickAction => 'Choose a payer';
+
+  @override
+  String get facturationCreatePaymentKnownPayerLabel => 'Known payer';
+
+  @override
+  String get facturationCreatePaymentKnownPayerPlaceholder =>
+      'Choose from the list';
+
+  @override
+  String get facturationCreatePaymentOtherPayerAction => 'Find another payer';
 
   @override
   String get facturationCreatePaymentPayerPickHelp =>
@@ -8476,6 +8490,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketDateLabel => 'Date:';
 
   @override
+  String get ticketEnteredAtLabel => 'Entered on';
+
+  @override
+  String get ticketEditionLabel => 'Edition:';
+
+  @override
+  String get ticketVerifyNotice => 'Scan to verify this receipt';
+
+  @override
   String get ticketPayerLabel => 'PAYER:';
 
   @override
@@ -8600,6 +8623,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketsToPrintBack => 'Back';
+
+  @override
+  String get ticketsToPrintIntroTitle => 'This station\'s tickets';
+
+  @override
+  String get ticketsToPrintIntroMessage =>
+      'Payments entered on this station whose ticket has not been printed yet.';
+
+  @override
+  String get ticketsToPrintReadyHint =>
+      'Tick the tickets, check the preview, then print.';
+
+  @override
+  String get ticketsToPrintPaperOutTitle => 'Did the tickets come out?';
+
+  @override
+  String get ticketsToPrintPaperOutMessage =>
+      'The app cannot tell whether the printer really produced the paper. Confirm to remove them from the list.';
+
+  @override
+  String get ticketsToPrintPaperOutYes => 'Yes, remove from the list';
+
+  @override
+  String get ticketsToPrintPaperOutNo => 'No, keep them';
 
   @override
   String ticketsToPrintReadySection(int count) {
@@ -12315,6 +12362,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentCorrectionSubmit => 'Cancel and replace';
+
+  @override
+  String paymentCorrectionConfirmTitle(String amount) {
+    return 'Replace with $amount?';
+  }
+
+  @override
+  String get paymentCorrectionConfirmNotice =>
+      'The original payment will be cancelled, and this one will replace it.';
 
   @override
   String paymentCorrectionGap(String amount) {

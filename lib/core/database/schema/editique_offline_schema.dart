@@ -147,6 +147,12 @@ const TableSchema editiqueCacheEntriesTable = TableSchema(
       cancelled_at INTEGER,
       -- Texte libre saisi par un agent de l'école. Ne se traduit pas.
       cancellation_reason TEXT,
+      -- URL de vérification du reçu scellé (v72), imprimée en QR sur le
+      -- ticket ; NULL tant que le delta ne la sert pas.
+      verification_url TEXT,
+      -- Édition de la pièce sous son numéro (v73) ; NULL = première, ou
+      -- inconnue. Deux lignes peuvent partager un numéro, jamais un document_id.
+      edition INTEGER,
       created_at INTEGER NOT NULL,
       last_accessed_at INTEGER NOT NULL,
       CHECK (
@@ -162,7 +168,13 @@ const TableSchema editiqueCacheEntriesTable = TableSchema(
     // entrées portant le MÊME identifiant restent impossibles.
     'CREATE UNIQUE INDEX idx_editique_cache_document '
         'ON editique_cache_entries(document_id)',
+    // Depuis la v73, l'unicité du numéro ne tient plus que pour les pièces SANS
+    // identifiant (régime AM-5) : un reçu remplaçant reprend le numéro de celui
+    // qu'il remplace, en édition suivante, et seul `document_id` les distingue.
     'CREATE UNIQUE INDEX idx_editique_cache_number '
+        'ON editique_cache_entries(school_id, document_number) '
+        'WHERE document_id IS NULL',
+    'CREATE INDEX idx_editique_cache_number_lookup '
         'ON editique_cache_entries(school_id, document_number)',
     // Miroir de l'index serveur `idx_editique_documents_subject` : la question
     // posée est la même des deux côtés (les pièces d'un élève, éventuellement

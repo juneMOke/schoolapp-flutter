@@ -7497,6 +7497,12 @@ abstract class AppLocalizations {
   /// **'No payer named'**
   String get facturationPaymentPayerUnnamed;
 
+  /// No description provided for @facturationPaymentLineReceiptPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt awaiting its number'**
+  String get facturationPaymentLineReceiptPending;
+
   /// No description provided for @facturationPaymentAmountLabel.
   ///
   /// In en, this message translates to:
@@ -8070,6 +8076,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a payer'**
   String get facturationCreatePaymentPayerPickAction;
+
+  /// No description provided for @facturationCreatePaymentKnownPayerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Known payer'**
+  String get facturationCreatePaymentKnownPayerLabel;
+
+  /// No description provided for @facturationCreatePaymentKnownPayerPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from the list'**
+  String get facturationCreatePaymentKnownPayerPlaceholder;
+
+  /// No description provided for @facturationCreatePaymentOtherPayerAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Find another payer'**
+  String get facturationCreatePaymentOtherPayerAction;
 
   /// No description provided for @facturationCreatePaymentPayerPickHelp.
   ///
@@ -13560,6 +13584,24 @@ abstract class AppLocalizations {
   /// **'Date:'**
   String get ticketDateLabel;
 
+  /// No description provided for @ticketEnteredAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered on'**
+  String get ticketEnteredAtLabel;
+
+  /// No description provided for @ticketEditionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Edition:'**
+  String get ticketEditionLabel;
+
+  /// No description provided for @ticketVerifyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to verify this receipt'**
+  String get ticketVerifyNotice;
+
   /// No description provided for @ticketPayerLabel.
   ///
   /// In en, this message translates to:
@@ -13805,6 +13847,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back'**
   String get ticketsToPrintBack;
+
+  /// No description provided for @ticketsToPrintIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This station\'s tickets'**
+  String get ticketsToPrintIntroTitle;
+
+  /// No description provided for @ticketsToPrintIntroMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments entered on this station whose ticket has not been printed yet.'**
+  String get ticketsToPrintIntroMessage;
+
+  /// No description provided for @ticketsToPrintReadyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the tickets, check the preview, then print.'**
+  String get ticketsToPrintReadyHint;
+
+  /// No description provided for @ticketsToPrintPaperOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Did the tickets come out?'**
+  String get ticketsToPrintPaperOutTitle;
+
+  /// No description provided for @ticketsToPrintPaperOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The app cannot tell whether the printer really produced the paper. Confirm to remove them from the list.'**
+  String get ticketsToPrintPaperOutMessage;
+
+  /// No description provided for @ticketsToPrintPaperOutYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, remove from the list'**
+  String get ticketsToPrintPaperOutYes;
+
+  /// No description provided for @ticketsToPrintPaperOutNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, keep them'**
+  String get ticketsToPrintPaperOutNo;
 
   /// No description provided for @ticketsToPrintReadySection.
   ///
@@ -19237,6 +19321,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel and replace'**
   String get paymentCorrectionSubmit;
+
+  /// No description provided for @paymentCorrectionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace with {amount}?'**
+  String paymentCorrectionConfirmTitle(String amount);
+
+  /// No description provided for @paymentCorrectionConfirmNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The original payment will be cancelled, and this one will replace it.'**
+  String get paymentCorrectionConfirmNotice;
 
   /// No description provided for @paymentCorrectionGap.
   ///

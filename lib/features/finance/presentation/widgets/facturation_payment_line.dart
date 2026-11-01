@@ -7,15 +7,15 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_payer_phone_line.dart';
 import 'package:school_app_flutter/core/components/status/pending_sync_badge.dart';
 import 'package:school_app_flutter/features/finance/presentation/helpers/payment_correction_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ligne d'un versement (spec §09).
 ///
-/// Médaillon « billet » vert, identité du payeur (Nom Post-nom Prénom — une
-/// personne, pas l'élève), méta (date · moyen), montant en vert préfixé « + ».
+/// Médaillon « billet » vert, numéro du reçu — ce que la famille a sur son
+/// papier et ce que le caissier retrouve dans sa pile ; le payeur se lit dans le
+/// détail —, méta (date · moyen), montant en vert préfixé « + ».
 /// Tout l'élément est cliquable et mène au détail du paiement ; survol = bord
 /// or-bleu, fond state-hover, légère élévation et chevron bleu-ardoise.
 class FacturationPaymentLine extends StatefulWidget {
@@ -36,21 +36,6 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
   static const double _medallionSize = 40;
   bool _hovered = false;
   bool _focused = false;
-
-  /// Le nom du payeur, ou la mention d'un versement encaissé sans le nommer.
-  ///
-  /// **Pas un tiret** : depuis la V114 serveur, l'absence de payeur est un CHOIX
-  /// du guichet et non une donnée manquante. Un tiret, ici en titre de ligne,
-  /// se lirait comme une valeur perdue et enverrait chercher ce qu'on n'a
-  /// jamais eu.
-  String _payerFullName(AppLocalizations l10n) {
-    final fullName = [
-      widget.payment.payerLastName ?? '',
-      widget.payment.payerMiddleName ?? '',
-      widget.payment.payerFirstName ?? '',
-    ].map((value) => value.trim()).where((value) => value.isNotEmpty).join(' ');
-    return fullName.isEmpty ? l10n.facturationPaymentPayerUnnamed : fullName;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +97,8 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      _payerFullName(l10n),
+                      widget.payment.receiptNumber ??
+                          l10n.facturationPaymentLineReceiptPending,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.titleSmall.copyWith(
@@ -128,9 +114,6 @@ class _FacturationPaymentLineState extends State<FacturationPaymentLine> {
                     _PaymentMeta(
                       date: date,
                       method: l10n.facturationPaymentMethodCash,
-                    ),
-                    FinancePayerPhoneLine(
-                      phoneNumber: widget.payment.payerPhoneNumber,
                     ),
                     // Versement de ce poste pas encore remonté (FRONT §3).
                     if (widget.payment.isPendingSync) ...[

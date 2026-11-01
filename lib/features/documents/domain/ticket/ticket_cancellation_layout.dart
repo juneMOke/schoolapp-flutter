@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_chars
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_qr_band.dart';
 
 /// Met le ticket d'annulation en **lignes de caractères** (continuité des
 /// tickets RC, lot B).
@@ -154,9 +155,26 @@ abstract final class TicketCancellationLayout {
     );
     lines.add(rule);
 
+    // ── Le QR du reçu annulé : scanné, il dit « annulé ». Le ticket d'une
+    // annulation n'existe que pour un reçu scellé, donc aucune garde de
+    // provisoire ici.
+    final verificationUrl = model.verificationUrl;
+    int? qrAt;
+    if (verificationUrl != null &&
+        TicketQrBand.fits(verificationUrl, columns: width)) {
+      lines.addAll(
+        TicketTextPrimitives.centeredWrapped(labels.verificationNotice, width),
+      );
+      qrAt = lines.length;
+      lines.add('');
+    }
+
     return [
       for (var i = 0; i < lines.length; i++)
-        TicketLine(lines[i], bold: bold.contains(i)),
+        if (i == qrAt)
+          TicketLine.qr(verificationUrl!)
+        else
+          TicketLine(lines[i], bold: bold.contains(i)),
     ];
   }
 }

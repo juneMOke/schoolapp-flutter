@@ -40,12 +40,24 @@ class EditiqueDocument extends Equatable {
   /// type quand le serveur n'en propose pas).
   final String fileName;
 
+  /// Jour d'émission `AAAA-MM-JJ`, lu dans l'en-tête `X-Document-Emitted-At`
+  /// (une date à minuit UTC, cf. `ReceiptEmissionDay`). `null` quand le
+  /// serveur ne le pose pas — pièce non archivée ou serveur antérieur.
+  final String? emittedOn;
+
+  /// URL de vérification de la pièce, lue dans `X-Document-Verification-Url`
+  /// — celle que le ticket imprime en QR. `null` quand le serveur ne la pose
+  /// pas.
+  final String? verificationUrl;
+
   const EditiqueDocument({
     required this.type,
     required this.bytes,
     required this.fileName,
     this.documentNumber,
     this.documentId,
+    this.emittedOn,
+    this.verificationUrl,
   });
 
   /// Relais de [EditiqueDocumentType.isReplayable] — voir sa documentation
@@ -59,5 +71,7 @@ class EditiqueDocument extends Equatable {
     documentNumber,
     documentId,
     fileName,
+    emittedOn,
+    verificationUrl,
   ];
 }

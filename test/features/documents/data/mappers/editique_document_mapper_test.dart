@@ -16,6 +16,8 @@ HttpResponse<Uint8List> _response({
   String? contentType = 'application/pdf',
   String? contentDisposition,
   String? documentId,
+  String? emittedAt,
+  String? verificationUrl,
 }) {
   final headerMap = <String, List<String>>{};
   if (contentType != null) {
@@ -26,6 +28,12 @@ HttpResponse<Uint8List> _response({
   }
   if (documentId != null) {
     headerMap['x-document-id'] = <String>[documentId];
+  }
+  if (emittedAt != null) {
+    headerMap['x-document-emitted-at'] = <String>[emittedAt];
+  }
+  if (verificationUrl != null) {
+    headerMap['x-document-verification-url'] = <String>[verificationUrl];
   }
 
   return HttpResponse<Uint8List>(
@@ -98,6 +106,40 @@ void main() {
         () => throw StateError('attendu Right'),
       );
       expect(document.documentId, isNull);
+    });
+
+    test('lit le jour d émission tel quel, sans conversion de fuseau', () {
+      final result = EditiqueDocumentMapper.map(
+        _response(emittedAt: '2026-10-27T00:00:00Z'),
+        EditiqueDocumentType.paymentReceipt,
+      );
+
+      expect(result.fold((_) => null, (d) => d.emittedOn), '2026-10-27');
+    });
+
+    test(
+      'lit l URL de vérification ; une valeur douteuse vaut une absence',
+      () {
+        String? read(String value) => EditiqueDocumentMapper.map(
+          _response(verificationUrl: value),
+          EditiqueDocumentType.paymentReceipt,
+        ).fold((_) => 'échec', (d) => d.verificationUrl);
+
+        expect(
+          read('https://api.eteelo.com/verify/RC/doc-1'),
+          'https://api.eteelo.com/verify/RC/doc-1',
+        );
+        expect(read('javascript:alert(1)'), isNull);
+      },
+    );
+
+    test('sans l en-tête, aucun jour d émission', () {
+      final result = EditiqueDocumentMapper.map(
+        _response(),
+        EditiqueDocumentType.paymentReceipt,
+      );
+
+      expect(result.fold((_) => 'échec', (d) => d.emittedOn), isNull);
     });
 
     test('tolère un content-type paramétré', () {

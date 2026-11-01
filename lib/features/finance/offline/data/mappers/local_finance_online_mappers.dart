@@ -34,8 +34,9 @@ extension LocalStudentChargeToOnline on LocalStudentCharge {
 }
 
 extension LocalPaymentToOnline on LocalPayment {
-  Payment toOnlineEntity() => Payment(
+  Payment toOnlineEntity({String? receiptNumber}) => Payment(
     id: id,
+    receiptNumber: receiptNumber,
     studentId: studentId,
     academicYearId: academicYearId ?? '',
     amounts: amounts,

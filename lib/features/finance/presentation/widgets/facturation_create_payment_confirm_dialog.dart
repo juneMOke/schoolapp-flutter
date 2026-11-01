@@ -26,7 +26,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 
 /// Issue de la sur-couche d'encaissement (confirmation → résultat).
-enum FacturationCollectOutcome { edited, cancelled, succeeded }
+enum FacturationCollectOutcome { edited, cancelled, succeeded, confirmed }
 
 /// Ligne de répartition affichée dans la confirmation : libellé + montant.
 class FacturationConfirmAllocationItem {
@@ -83,6 +83,10 @@ class FacturationConfirmAllocationGroup {
 /// Retourne [FacturationCollectOutcome.succeeded] si le paiement a été
 /// enregistré, [edited] si l'utilisateur revient à la saisie, [cancelled]
 /// sinon.
+///
+/// [confirmation] : le récapitulatif seul, pour un geste que l'appelant écrit
+/// lui-même — la correction d'un versement. La popin rend alors
+/// [FacturationCollectOutcome.confirmed], sans rien écrire.
 Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   BuildContext context, {
   required FinanceOfflineBloc financeOfflineBloc,
@@ -95,6 +99,7 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
   required PaymentsCreateRequested request,
   VoidCallback? onDownloadReceipt,
   DateTime? now,
+  FacturationConfirmOnlyLabels? confirmation,
 }) async {
   final outcome = await showDialog<FacturationCollectOutcome>(
     context: context,
@@ -114,16 +119,31 @@ Future<FacturationCollectOutcome> showFacturationCreatePaymentConfirmDialog(
         request: request,
         onDownloadReceipt: onDownloadReceipt,
         now: now,
+        confirmation: confirmation,
       ),
     ),
   );
   return outcome ?? FacturationCollectOutcome.cancelled;
 }
 
+/// Les mots du récapitulatif quand il ne fait que confirmer.
+class FacturationConfirmOnlyLabels {
+  final String title;
+  final String notice;
+  final String action;
+
+  const FacturationConfirmOnlyLabels({
+    required this.title,
+    required this.notice,
+    required this.action,
+  });
+}
+
 enum _Phase { confirm, processing, success, error }
 
 class _CollectFlowDialog extends StatefulWidget {
   final String totalLabel;
+  final FacturationConfirmOnlyLabels? confirmation;
 
   /// Le taux appliqué, déjà rendu (« 1 666,67 FC / \$ »). `null` quand perçu et
   /// imputé sont dans la même unité — un « 1,00 » ferait chercher au caissier
@@ -162,6 +182,7 @@ class _CollectFlowDialog extends StatefulWidget {
     required this.payerPhone,
     required this.allocations,
     required this.request,
+    this.confirmation,
     this.onDownloadReceipt,
     this.now,
   });
@@ -177,6 +198,10 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   String? _incidentCode;
 
   void _confirm() {
+    if (widget.confirmation != null) {
+      Navigator.of(context).pop(FacturationCollectOutcome.confirmed);
+      return;
+    }
     // Invariant « un seul traitement en vol » : ignore toute ré-entrance.
     if (_phase == _Phase.processing || _awaitingBloc) {
       return;
@@ -319,6 +344,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                 child: _phase == _Phase.confirm
                     ? _ConfirmBody(
                         totalLabel: widget.totalLabel,
+                        confirmation: widget.confirmation,
                         rateLabel: widget.rateLabel,
                         // ⚠️ Lu sur la REQUÊTE, jamais sur un paramètre jumeau :
                         // le récapitulatif montre le jour qui part — celui de
@@ -394,7 +420,9 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                 secondaryIcon: Icons.edit_outlined,
                 onSecondary: () =>
                     Navigator.of(context).pop(FacturationCollectOutcome.edited),
-                primaryLabel: l10n.facturationCreatePaymentConfirmValidate,
+                primaryLabel:
+                    widget.confirmation?.action ??
+                    l10n.facturationCreatePaymentConfirmValidate,
                 primaryIcon: Icons.check_circle_outline_rounded,
                 onPrimary: blocksWrites ? null : _confirm,
                 stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
@@ -467,6 +495,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
 /// Corps de l'étape 1 : récapitulatif + répartition.
 class _ConfirmBody extends StatelessWidget {
   final String totalLabel;
+  final FacturationConfirmOnlyLabels? confirmation;
   final String? rateLabel;
   final DateTime paidAt;
   final String studentName;
@@ -476,6 +505,7 @@ class _ConfirmBody extends StatelessWidget {
 
   const _ConfirmBody({
     required this.totalLabel,
+    this.confirmation,
     this.rateLabel,
     required this.paidAt,
     required this.studentName,
@@ -501,13 +531,21 @@ class _ConfirmBody extends StatelessWidget {
         ),
         const SizedBox(height: AppDimensions.spacingXS),
         Text(
-          l10n.facturationCreatePaymentConfirmCollectTitle(totalLabel),
+          confirmation?.title ??
+              l10n.facturationCreatePaymentConfirmCollectTitle(totalLabel),
           style: AppTextStyles.totalAmountLora.copyWith(
             fontSize: 22,
             color: AppColors.bleuProfond,
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (confirmation != null) ...[
+          const SizedBox(height: AppDimensions.spacingXS),
+          Text(
+            confirmation!.notice,
+            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
         if (rateLabel != null) ...[
           const SizedBox(height: AppDimensions.spacingXS),
           Text(

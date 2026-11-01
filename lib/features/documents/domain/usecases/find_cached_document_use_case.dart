@@ -45,10 +45,17 @@ class FindCachedDocumentUseCase {
       final schoolId = _currentUser.schoolId;
       if (schoolId == null || schoolId.isEmpty) return null;
 
-      final byNumber = await _dao.findByDocumentNumber(
-        schoolId: schoolId,
-        documentNumber: documentNumber,
-      );
+      // Qui connaît l'identifiant de sa pièce ne se voit jamais rendre une
+      // autre édition du même numéro.
+      final byNumber = documentId != null && documentId.isNotEmpty
+          ? await _dao.findUnidentifiedByDocumentNumber(
+              schoolId: schoolId,
+              documentNumber: documentNumber,
+            )
+          : await _dao.findByDocumentNumber(
+              schoolId: schoolId,
+              documentNumber: documentNumber,
+            );
       return byNumber == null ? null : _decisiveOnly(byNumber);
     } catch (_) {
       return null;
