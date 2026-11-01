@@ -43,6 +43,53 @@ void main() {
           as int?) ??
       0;
 
+  group('Cotes saisies', () {
+    Future<void> givenCote(String id, String studentId) =>
+        db.insert('ref_cote_cours', {
+          'id': id,
+          'student_id': studentId,
+          'cours_id': 'cours-1',
+          'colonne_id': 'p1',
+          'valeur': 14.5,
+        });
+
+    test('un retrait efface la seule cote qu\'il nomme', () async {
+      await givenCote('cote-1', 'eleve-1');
+      await givenCote('cote-2', 'eleve-2');
+
+      final result = await dao.apply(const [
+        TombstoneDto(
+          resource: 'academics_cotes',
+          entityId: 'cote-1',
+          reason: TombstoneReason.deleted,
+        ),
+      ]);
+
+      expect(result.removed, 1);
+      expect(await countIn('ref_cote_cours'), 1);
+    });
+
+    test('une écriture en attente de la saisie n\'est pas touchée', () async {
+      await db.insert('cote_saisie', {
+        'student_id': 'eleve-1',
+        'cours_id': 'cours-1',
+        'colonne_id': 'p1',
+        'classroom_id': 'c1',
+        'has_draft': 1,
+      });
+
+      await dao.apply(const [
+        TombstoneDto(
+          resource: 'academics_cotes',
+          entityId: 'cote-1',
+          reason: TombstoneReason.deleted,
+        ),
+      ]);
+
+      expect(await countIn('cote_saisie'), 1);
+    });
+  });
+
   group('Suppression', () {
     test('efface la ligne et ses filles', () async {
       await givenPayment('pay-1');

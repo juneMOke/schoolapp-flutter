@@ -29,6 +29,18 @@ void main() {
     expect(await hasTable('ref_cote_cours'), isTrue);
   });
 
+  test('v78 : `ref_cote_cours` gagne son identifiant serveur', () async {
+    await migrateTenantDatabase(db, 76, newVersion: 77);
+    await db.execute('DROP INDEX IF EXISTS idx_ref_cote_cours_id');
+    await db.execute('ALTER TABLE ref_cote_cours DROP COLUMN id');
+
+    await migrateTenantDatabase(db, 77, newVersion: 78);
+    await migrateTenantDatabase(db, 77, newVersion: 78);
+
+    final columns = await db.rawQuery('PRAGMA table_info(ref_cote_cours)');
+    expect(columns.map((c) => c['name']), contains('id'));
+  });
+
   test('rejouer le palier ne lève pas', () async {
     await migrateTenantDatabase(db, 76, newVersion: 77);
     await migrateTenantDatabase(db, 76, newVersion: 77);

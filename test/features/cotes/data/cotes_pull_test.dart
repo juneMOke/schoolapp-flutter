@@ -28,6 +28,7 @@ void main() {
     final page = CotePageDto.fromJson({
       'items': [
         {
+          'id': 'cote-1',
           'studentId': 'e1',
           'coursId': 'fr',
           'sousPeriodeId': 'P1',
@@ -58,6 +59,20 @@ void main() {
     expect(page.items.last.colonneId, 'S1');
     expect(page.items.last.examen, isTrue);
     expect(page.items.last.valeur, isNull);
+  });
+
+  test('l\'identifiant de la ligne se garde pour son retrait', () async {
+    final item = CoteDeltaDto.tryParse({
+      'id': 'cote-1',
+      'studentId': 'e1',
+      'coursId': 'fr',
+      'sousPeriodeId': 'P1',
+      'valeur': 14.5,
+    })!;
+    await local.applyPulled([item]);
+
+    final rows = await db.query('ref_cote_cours');
+    expect(rows.single['id'], 'cote-1');
   });
 
   test('la lecture rend les cotes, la dernière page gagne', () async {

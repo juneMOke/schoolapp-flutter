@@ -49,7 +49,7 @@ class _FakeApi implements CotesApi {
         requestOptions: RequestOptions(),
         statusCode: 200,
         headers: Headers.fromMap({
-          'etag': ['"v1"'],
+          'etag': ['W/"v1"'],
         }),
       ),
     );
@@ -115,7 +115,8 @@ void main() {
 
     final snapshot = right(await repository.load('c1'));
 
-    expect(api.seenEtag, '"v1"');
+    // L'étiquette faible du back repart telle quelle, préfixe compris.
+    expect(api.seenEtag, 'W/"v1"');
     expect(snapshot.fromCache, isFalse);
     expect(snapshot.cells, hasLength(3));
   });

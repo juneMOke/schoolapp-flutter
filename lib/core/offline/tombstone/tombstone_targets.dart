@@ -228,6 +228,12 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
       'academics_journal',
     ],
   ),
+  // Les cotes saisies, en lecture seule ici. `cote_saisie`, la file de l'écran
+  // de saisie, n'y figure pas : une écriture en attente ne se perd jamais.
+  'academics_cotes': TombstoneTarget(
+    table: 'ref_cote_cours',
+    scopeColumn: 'cours_id',
+  ),
   'academics_evaluations': TombstoneTarget(
     table: 'evaluation',
     scopeColumn: 'cours_id',

@@ -59,11 +59,12 @@ const TableSchema coteSaisieTable = TableSchema(
 /// `ref_cote_cours` — les cotes des cours d'un enseignant, en lecture seule
 /// (flux `academics.cotes`). `valeur` nulle : la cote a été vidée, la tablette
 /// revient à sa moyenne. `colonne_id` : une sous-période, ou la période d'un
-/// examen.
+/// examen. `id` : l'identifiant serveur, celui que nomme une pierre tombale.
 const TableSchema refCoteCoursTable = TableSchema(
   name: 'ref_cote_cours',
   createTableSql: '''
     CREATE TABLE ref_cote_cours (
+      id TEXT,
       student_id TEXT NOT NULL,
       cours_id TEXT NOT NULL,
       colonne_id TEXT NOT NULL,
@@ -75,6 +76,8 @@ const TableSchema refCoteCoursTable = TableSchema(
   ''',
   createIndexSql: [
     'CREATE INDEX idx_ref_cote_cours ON ref_cote_cours(cours_id)',
+    // Un retrait serveur nomme la ligne par son identifiant.
+    'CREATE INDEX idx_ref_cote_cours_id ON ref_cote_cours(id)',
   ],
 );
 

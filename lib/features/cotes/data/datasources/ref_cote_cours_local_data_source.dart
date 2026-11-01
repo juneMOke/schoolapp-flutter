@@ -16,6 +16,7 @@ class RefCoteCoursLocalDataSource {
       final batch = txn.batch();
       for (final item in items) {
         batch.insert(table, {
+          'id': item.id,
           'student_id': item.studentId,
           'cours_id': item.coursId,
           'colonne_id': item.colonneId,

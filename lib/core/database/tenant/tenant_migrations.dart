@@ -154,6 +154,12 @@ Future<void> migrateTenantDatabase(
   if (upTo(77)) {
     await _createTables(db, coteSaisieTables);
   }
+  if (upTo(78)) {
+    await _addColumnIfTable(db, 'ref_cote_cours', 'id');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ref_cote_cours_id ON ref_cote_cours(id)',
+    );
+  }
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les

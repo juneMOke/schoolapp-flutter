@@ -868,7 +868,9 @@ class AppConstants {
   // Trois colonnes de réglages, `NULL` : retenue active. Palier d'école.
   // v77 (2026-11-01) : la saisie des notes par classe — `cote_classe_cache`,
   // `cote_saisie` et `ref_cote_cours`. Trois tables neuves, aucun backfill.
-  static const int offlineDbSchemaVersion = 77;
+  // v78 (2026-11-01) : `ref_cote_cours.id`, l'identifiant serveur que nomme une
+  // pierre tombale. Colonne ajoutée, remplie par le flux.
+  static const int offlineDbSchemaVersion = 78;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

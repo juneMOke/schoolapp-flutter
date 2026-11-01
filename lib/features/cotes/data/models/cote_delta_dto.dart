@@ -3,6 +3,8 @@ import 'package:school_app_flutter/core/offline/keyset_page.dart';
 
 /// Une cote du flux de la tablette. `valeur` nulle : la cote a été vidée.
 class CoteDeltaDto {
+  /// L'identifiant serveur de la ligne : celui que nomme sa pierre tombale.
+  final String? id;
   final String studentId;
   final String coursId;
   final String colonneId;
@@ -11,6 +13,7 @@ class CoteDeltaDto {
   final int? updatedAtMs;
 
   const CoteDeltaDto({
+    this.id,
     required this.studentId,
     required this.coursId,
     required this.colonneId,
@@ -31,6 +34,7 @@ class CoteDeltaDto {
     }
     final valeur = raw['valeur'];
     return CoteDeltaDto(
+      id: raw['id'] as String?,
       studentId: studentId,
       coursId: coursId,
       colonneId: colonneId,
