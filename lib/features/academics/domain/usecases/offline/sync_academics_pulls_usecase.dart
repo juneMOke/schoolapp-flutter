@@ -2,6 +2,7 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_metier_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/grades_referential_pull_repository_impl.dart';
+import 'package:school_app_flutter/features/cotes/data/repositories/cotes_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_pull_repository_impl.dart';
 
 /// Hydrate les caches Notes/Cours au montage des FeatureScopes `academics` et
@@ -38,7 +39,7 @@ class SyncAcademicsPullsUseCase {
 
   const SyncAcademicsPullsUseCase(this._coordinator);
 
-  /// Les sept ressources que ces écrans lisent — **un ensemble, jamais une
+  /// Les huit ressources que ces écrans lisent — **un ensemble, jamais une
   /// séquence** : l'ordre d'exécution est celui du registre, pas celui de ces
   /// accolades (cf. `PullCoordinator.pullSubset`).
   ///
@@ -54,6 +55,8 @@ class SyncAcademicsPullsUseCase {
     kAcademicsCoursResourcePrefix,
     kAcademicsEvaluationsResourcePrefix,
     kAcademicsNotesResourcePrefix,
+    // Les cotes saisies : elles remplacent la moyenne du détail d'un cours.
+    kAcademicsCotesResourcePrefix,
     // Le programme (Cours ▸ Mes cours) et la modale de création d'évaluation,
     // qui coche ses chapitres.
     kAcademicsChapitresResourcePrefix,

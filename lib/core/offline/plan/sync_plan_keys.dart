@@ -131,6 +131,11 @@ abstract final class SyncPlanKeys {
   static const String academicsEvaluations = 'academics.evaluations';
   static const String academicsNotes = 'academics.notes';
 
+  /// Les cotes saisies pour les cours de l'enseignant : un curseur par cours.
+  /// ⚠️ À déclarer au plan serveur sous cette clé (lot back 4) : sans elle, le
+  /// plan ne désigne jamais le flux.
+  static const String academicsCotes = 'academics.cotes';
+
   /// Le programme de cours : chapitres entiers, un curseur par cours.
   /// ⚠️ À déclarer au plan serveur sous cette clé : sans elle, le plan ne
   /// désigne jamais le flux.
@@ -228,6 +233,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.academicsCours: ['academics_cours'],
   SyncPlanKeys.academicsEvaluations: ['academics_evaluations'],
   SyncPlanKeys.academicsNotes: ['academics_notes'],
+  SyncPlanKeys.academicsCotes: ['academics_cotes'],
   SyncPlanKeys.academicsChapitres: ['academics_chapitres'],
   SyncPlanKeys.academicsJournal: ['academics_journal'],
   SyncPlanKeys.editiqueDocuments: ['editique_documents'],
@@ -317,6 +323,7 @@ Set<String> pullCompletionSubjectsOf(String resource) {
 /// | `academics_cours` | `academics_cours@<uid>` |
 /// | `academics_evaluations` | `academics_evaluations:<coursId>` |
 /// | `academics_notes` | `academics_notes:<coursId>` |
+/// | `academics_cotes` | `academics_cotes:<coursId>` |
 /// | `academics_chapitres` | `academics_chapitres:<coursId>` |
 /// | `academics_journal` | `academics_journal:<coursId>` |
 /// | `academics_grades_referential` | `academics_grades_referential@<uid>` |
@@ -334,6 +341,7 @@ const Set<String> _kCursorKeyPrefixes = {
   'academics_cours',
   'academics_evaluations',
   'academics_notes',
+  'academics_cotes',
   'academics_chapitres',
   'academics_journal',
   'academics_grades_referential',

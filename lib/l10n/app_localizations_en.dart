@@ -1690,6 +1690,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courseDetailProvisional => 'provisional';
 
   @override
+  String get courseDetailCoteSaisie => 'Entered grade';
+
+  @override
   String get courseDetailClassAverageLabel => 'Class average';
 
   @override

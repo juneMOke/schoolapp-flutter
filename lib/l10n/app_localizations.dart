@@ -2648,6 +2648,12 @@ abstract class AppLocalizations {
   /// **'provisional'**
   String get courseDetailProvisional;
 
+  /// No description provided for @courseDetailCoteSaisie.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered grade'**
+  String get courseDetailCoteSaisie;
+
   /// No description provided for @courseDetailClassAverageLabel.
   ///
   /// In en, this message translates to:

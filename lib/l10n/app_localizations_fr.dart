@@ -1699,6 +1699,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get courseDetailProvisional => 'provisoire';
 
   @override
+  String get courseDetailCoteSaisie => 'Cote saisie';
+
+  @override
   String get courseDetailClassAverageLabel => 'Moyenne de classe';
 
   @override

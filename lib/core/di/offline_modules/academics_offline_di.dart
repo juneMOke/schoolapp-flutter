@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/academics/domain/usecases/offline/sync_academics_pulls_usecase.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/cotes/data/datasources/ref_cote_cours_local_data_source.dart';
 // ── Schedule (offline) ──
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_api.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_pull_handler.dart';
@@ -178,6 +179,7 @@ void registerAcademicsOffline(GetIt getIt) {
       syncMetaDao: getIt<SyncMetaDao>(),
       referentialDao: getIt<EnrollmentReferentialDao>(),
       currentUser: getIt<CurrentUserContext>(),
+      coteLocalDataSource: getIt<RefCoteCoursLocalDataSource>(),
     ),
   );
   // Impl offline-first de NotationRepository (lecture composée notes+roster,

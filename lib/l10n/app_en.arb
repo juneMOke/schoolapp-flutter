@@ -1510,6 +1510,7 @@
     }
   },
   "courseDetailProvisional": "provisional",
+  "courseDetailCoteSaisie": "Entered grade",
   "courseDetailClassAverageLabel": "Class average",
   "courseDetailAbove50": "{count}/{total} students ≥ 50%",
   "@courseDetailAbove50": {

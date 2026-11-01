@@ -1460,6 +1460,7 @@
     }
   },
   "courseDetailProvisional": "provisoire",
+  "courseDetailCoteSaisie": "Cote saisie",
   "courseDetailClassAverageLabel": "Moyenne de classe",
   "courseDetailAbove50": "{count}/{total} élèves ≥ 50 %",
   "@courseDetailAbove50": {

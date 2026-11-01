@@ -26,6 +26,7 @@ import 'package:school_app_flutter/features/attendances/data/repository/offline/
 import 'package:school_app_flutter/features/attendances/data/repository/offline/disciplinary_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/auth/data/services/auth_session_manager.dart';
+import 'package:school_app_flutter/features/cotes/data/repositories/cotes_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_member_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_transfer_pull_repository_impl.dart';
@@ -276,11 +277,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('quarante handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(40));
+    test('quarante et un handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(41));
       expect(
         order().toSet(),
-        hasLength(40),
+        hasLength(41),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -310,11 +311,11 @@ void main() {
       ]);
     });
 
-    // Les trente-huit autres restent gouvernés par leur permission : sans cette
+    // Les trente-neuf autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
     test(
-      'les trente-huit autres flux déclarent tous une exigence de lecture',
+      'les trente-neuf autres flux déclarent tous une exigence de lecture',
       () {
         final sansExigence = coordinator.registered
             .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
@@ -326,7 +327,7 @@ void main() {
         expect(sansExigence, isEmpty);
         expect(
           coordinator.registered.where((h) => !h.isBaseline),
-          hasLength(38),
+          hasLength(39),
         );
       },
     );
@@ -355,7 +356,7 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les quarante ressources attendues sont toutes enregistrées', () {
+  test('les quarante et une ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       kTombstonesResource,
       EnrollmentPullRepositoryImpl.referentialResource,
@@ -397,6 +398,7 @@ void main() {
       kPayrollArrearsPrioritiesResource,
       kStudentPhotosResource,
       kEnrollmentSuspensionsResource,
+      kAcademicsCotesResourcePrefix,
     });
   });
 
