@@ -77,11 +77,15 @@ class EvalCreationRules {
 
   /// Plafond EXAMEN de la période (`maxExamenParPeriodeScolaire`, bundle) —
   /// un seul créneau examen par période, donc « atteint » dès qu'un examen
-  /// existe. Plafond `null` (bundle pas encore pullé) → pas de blocage local,
-  /// le backstop serveur reste le dernier rempart.
+  /// existe. Plafond absent (bundle pas encore pullé) ou branche sans examen
+  /// (déjà grisée par [disabledTypes]) → pas de blocage local, le backstop
+  /// serveur reste le dernier rempart.
   bool get _examenPlafondReached {
-    final maxExamen = detail.plafonds?.maxExamenParPeriodeScolaire;
-    if (maxExamen == null) return false;
+    final plafonds = detail.plafonds;
+    final maxExamen = plafonds?.maxExamenParPeriodeScolaire;
+    if (plafonds == null || maxExamen == null || plafonds.sansExamen) {
+      return false;
+    }
     final existing = periode?.examen != null ? 1 : 0;
     return existing >= maxExamen;
   }
@@ -109,11 +113,11 @@ class EvalCreationRules {
       isExamen ? _examenPlafondReached : _journalierPlafondReached;
 
   /// Type EXAMEN grisé si la branche n'a pas d'examen
-  /// (`maxExamenParPeriodeScolaire` `null`, bundle) — jamais traité comme 0 ;
+  /// (`maxExamenParPeriodeScolaire` à 0, ou `null` avant la bascule du barème) ;
   /// plafonds pas encore en cache → pas de grisage.
   Set<TypeEvaluation> get disabledTypes {
     final plafonds = detail.plafonds;
-    if (plafonds == null || plafonds.maxExamenParPeriodeScolaire != null) {
+    if (plafonds == null || !plafonds.sansExamen) {
       return const {};
     }
     return const {TypeEvaluation.examen};
