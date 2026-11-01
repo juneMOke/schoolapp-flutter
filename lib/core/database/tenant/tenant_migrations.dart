@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/database/schema/attendance_justification
 import 'package:school_app_flutter/core/database/schema/evaluation_depot_schema.dart';
 import 'package:school_app_flutter/core/database/schema/boutique_dashboard_cache_schema.dart';
 import 'package:school_app_flutter/core/database/schema/class_journal_schema.dart';
+import 'package:school_app_flutter/core/database/schema/cote_saisie_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_suspension_schema.dart';
@@ -149,6 +150,9 @@ Future<void> migrateTenantDatabase(
         type: 'INTEGER',
       );
     }
+  }
+  if (upTo(77)) {
+    await _createTables(db, coteSaisieTables);
   }
 }
 

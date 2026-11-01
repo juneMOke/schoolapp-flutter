@@ -137,6 +137,9 @@ import 'package:school_app_flutter/features/auth/domain/usecases/reset_password_
 import 'package:school_app_flutter/features/auth/domain/usecases/validate_otp_use_case.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/forgot_password_bloc.dart';
+import 'package:school_app_flutter/features/cotes/domain/repositories/cotes_repository.dart';
+import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
+import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/classroom_remote_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/classroom_repository_impl.dart';
 import 'package:school_app_flutter/features/classes/domain/repositories/classroom_repository.dart';
@@ -1447,6 +1450,12 @@ Future<void> configureDependencies({
     () => GetPeriodesScolairesUseCase(getIt<ResultatsRepository>()),
   );
 
+  getIt.registerFactory<CoteSaisieBloc>(
+    () => CoteSaisieBloc(getIt<CotesRepository>()),
+  );
+  getIt.registerFactory<CoteSaveCubit>(
+    () => CoteSaveCubit(getIt<CotesRepository>()),
+  );
   getIt.registerFactory<ResultatsClasseBloc>(
     () => ResultatsClasseBloc(
       getResultatsClasse: getIt<GetResultatsClasseUseCase>(),

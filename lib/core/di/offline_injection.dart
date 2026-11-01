@@ -17,6 +17,7 @@ import 'package:school_app_flutter/core/database/tenant/offline_database_files.d
 import 'package:school_app_flutter/core/database/tenant/tenant_database.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
+import 'package:school_app_flutter/core/di/offline_modules/cotes_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/communication_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/enrollment_finance_offline_di.dart';
 import 'package:school_app_flutter/core/database/database_key_service.dart';
@@ -362,6 +363,7 @@ void registerOfflineModules(GetIt getIt) {
   registerStudentPhoto(getIt); // Photo de l'élève — après l'inscription
   registerEnrollmentSuspension(getIt); // Désactivation — après les classes
   registerCommunication(getIt); // Communiqués aux parents — en ligne
+  registerCotes(getIt); // Saisie des notes — cache de classe et file d'envoi
 }
 
 /// Plan de synchronisation par profil (ADR-015 F2).

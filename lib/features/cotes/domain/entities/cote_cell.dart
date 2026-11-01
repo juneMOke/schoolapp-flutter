@@ -56,6 +56,32 @@ class CoteCell extends Equatable {
 
   bool get isRejected => syncState == SyncState.syncError;
 
+  /// La saisie valide [value] posée : toute frappe invalide et tout refus
+  /// s'effacent.
+  CoteCell withDraft(double? value) => CoteCell(
+    key: key,
+    serverCote: serverCote,
+    calculee: calculee,
+    serverUpdatedAtMs: serverUpdatedAtMs,
+    hasDraft: true,
+    draftValue: value,
+    draftUpdatedAtMs: draftUpdatedAtMs,
+    syncState: SyncState.pendingSync,
+  );
+
+  CoteCell withInvalidRaw(String? raw) => CoteCell(
+    key: key,
+    serverCote: serverCote,
+    calculee: calculee,
+    serverUpdatedAtMs: serverUpdatedAtMs,
+    hasDraft: hasDraft,
+    draftValue: draftValue,
+    draftUpdatedAtMs: draftUpdatedAtMs,
+    syncState: syncState,
+    rejectionReason: rejectionReason,
+    invalidRaw: raw,
+  );
+
   /// À corriger : hors barème, ou refusée par le serveur.
   bool get isInvalid => invalidRaw != null || isRejected;
 

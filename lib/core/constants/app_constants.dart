@@ -866,7 +866,9 @@ class AppConstants {
   // descente suivante. Palier d'école.
   // v76 (2026-11-01) : l'école coupe l'IPR et la CNSS, les avances, les prêts.
   // Trois colonnes de réglages, `NULL` : retenue active. Palier d'école.
-  static const int offlineDbSchemaVersion = 76;
+  // v77 (2026-11-01) : la saisie des notes par classe — `cote_classe_cache`,
+  // `cote_saisie` et `ref_cote_cours`. Trois tables neuves, aucun backfill.
+  static const int offlineDbSchemaVersion = 77;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1609,6 +1611,17 @@ class AppConstants {
   /// (remplacement d'ensemble à chaque `200`).
   static const String syncAcademicsGradesReferentialEndpoint =
       '/api/v1/sync/academics/grades-referential';
+
+  /// Toute l'année d'une classe pour la saisie des notes, sous
+  /// `academics.grade.enter`. `ETag` et `304` comme `grades-referential`.
+  static const String cotesClasseEndpoint = '/api/v1/academics/cotes';
+
+  /// **POST** : l'envoi d'un lot de cotes, 200 lignes au plus, un résultat par
+  /// ligne (LWW sur `updatedAt`), sous `academics.grade.enter`.
+  /// **GET** : les cotes d'un cours en keyset pour la tablette de l'enseignant,
+  /// sous `academics.grade.read` (403 `COURS_NOT_OWNED` hors de ses cours).
+  static const String syncAcademicsCotesEndpoint =
+      '/api/v1/sync/academics/cotes';
 
   /// Pull KEYSET de la trame horaire de l'école (réf, lecture seule). Scope
   /// école résolu par le JWT. Query : `cursor`, `limit`. → `ref_time_slots`.
