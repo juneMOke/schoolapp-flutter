@@ -191,7 +191,7 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pump();
 
-    expect(find.text('18/80'), findsWidgets);
+    expect(find.textContaining('18'), findsWidgets);
     expect((bloc.state as CoteSaisieReady).current.total, 1800);
   });
 

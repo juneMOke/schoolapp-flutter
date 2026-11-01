@@ -76,12 +76,9 @@ class CoteClasseDto {
 
 /// La structure d'une classe, du fil ou du cache.
 CoteClasse coteClasseFromStructure(Map<String, dynamic> json) {
-  final classroomId = json['classroomId'];
-  if (classroomId is! String || classroomId.isEmpty) {
-    throw const FormatException('classroomId absent');
-  }
   return CoteClasse(
-    classroomId: classroomId,
+    // L'écran se fie à la classe qu'il a demandée, pas à cet écho.
+    classroomId: json['classroomId'] as String? ?? '',
     decoupage: DecoupageX.fromApiValue(json['periodType'] as String?),
     periodes: _list(json['periodes'], _periode),
     rubriques: _list(json['rubriques'], _rubrique),

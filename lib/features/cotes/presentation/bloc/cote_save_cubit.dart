@@ -66,6 +66,9 @@ class CoteSaveCubit extends Cubit<CoteSaveStatus> {
 
   String? _classroomId;
   Timer? _debounce;
+
+  /// Un vidage tiers occupait le moteur : notre envoi est à relancer.
+  bool _rerun = false;
   late final void Function() _unsubscribe;
 
   CoteSaveCubit(this._repository, {this.onFlushed, Clock now = systemClock})
@@ -90,7 +93,7 @@ class CoteSaveCubit extends Cubit<CoteSaveStatus> {
 
   /// Une cellule vient d'être posée.
   void noteChanged() {
-    if (_classroomId == null) return;
+    if (isClosed || _classroomId == null) return;
     emit(const CoteSaving());
     _debounce?.cancel();
     _debounce = Timer(AppMotion.autosaveDebounce, flushNow);
@@ -120,7 +123,7 @@ class CoteSaveCubit extends Cubit<CoteSaveStatus> {
       case CoteFlushOutcome.stuck:
         emit(const CoteSaveFailed());
       case CoteFlushOutcome.busy:
-        break;
+        _rerun = true;
     }
   }
 
@@ -138,6 +141,11 @@ class CoteSaveCubit extends Cubit<CoteSaveStatus> {
     onFlushed?.call();
     final classroomId = _classroomId;
     if (classroomId == null || (_debounce?.isActive ?? false)) return;
+    if (_rerun) {
+      _rerun = false;
+      await flushNow();
+      return;
+    }
     if (state is CoteSaveIdle || state is CoteSaved) return;
     final pending = await _repository.pendingCount(classroomId);
     if (isClosed || _classroomId != classroomId) return;

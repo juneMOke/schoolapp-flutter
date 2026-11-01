@@ -33,6 +33,10 @@ class CoteWorkspace extends StatefulWidget {
 class _CoteWorkspaceState extends State<CoteWorkspace> {
   bool _listVisible = true;
 
+  /// Le bulletin change de parent quand la liste paraît ou disparaît : sa clé
+  /// garde son focus, son défilement et le réglage d'Entrée.
+  final _bulletinKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -50,10 +54,14 @@ class _CoteWorkspaceState extends State<CoteWorkspace> {
               width: constraints.maxWidth,
               columns: state.columns,
               wasVisible: _listVisible,
+              textScale: MediaQuery.textScalerOf(context).scale(1),
             );
-            final bulletin = CoteBulletinCard(
-              classroomName: widget.classroomName,
-              onStudentChanged: widget.onStudentChanged,
+            final bulletin = KeyedSubtree(
+              key: _bulletinKey,
+              child: CoteBulletinCard(
+                classroomName: widget.classroomName,
+                onStudentChanged: widget.onStudentChanged,
+              ),
             );
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -65,11 +65,21 @@ List<CoteColumn> columnsFor(CoteClasse classe, CoteScope scope) {
   };
 }
 
-/// La portée d'ouverture : le groupe en cours, sinon le premier.
-CoteScope defaultScope(CoteClasse classe) {
+/// La portée d'ouverture : le groupe en cours, sinon le premier. Avec
+/// [singleColumn], sa première colonne ouverte : un téléphone n'en montre
+/// qu'une à la fois.
+CoteScope defaultScope(CoteClasse classe, {bool singleColumn = false}) {
   final periodes = classe.periodes;
   if (periodes.isEmpty) return const CoteScope(portee: CotePortee.annee);
   final courant = periodes.where((p) => p.courant);
   final periode = courant.isEmpty ? periodes.first : courant.first;
-  return CoteScope(portee: CotePortee.groupe, cibleId: periode.id);
+  if (!singleColumn) {
+    return CoteScope(portee: CotePortee.groupe, cibleId: periode.id);
+  }
+  final columns = yearColumns(
+    classe,
+  ).where((c) => c.isInput && c.periodeId == periode.id);
+  final open = columns.where((c) => !c.locked);
+  final column = open.isEmpty ? columns.first : open.first;
+  return CoteScope(portee: CotePortee.colonne, cibleId: column.id);
 }

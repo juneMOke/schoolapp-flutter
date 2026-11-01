@@ -136,7 +136,9 @@ class _Swatch extends StatelessWidget {
       height: AppDimensions.coteLegendSwatch,
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(AppDimensions.coteSwatchRadius),
+        ),
         border: Border.all(color: border),
       ),
     );

@@ -495,6 +495,11 @@ class AcademicsLocalDataSource {
   /// un bug de synchro, mais une conséquence légitime de la perte d'accès.
   Future<void> evictCoursData(String coursId) async {
     await _db.transaction((txn) async {
+      await txn.delete(
+        'ref_cote_cours',
+        where: 'cours_id = ?',
+        whereArgs: [coursId],
+      );
       final evalRows = await txn.query(
         evaluationTable,
         columns: ['id'],

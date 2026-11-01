@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
@@ -109,6 +110,112 @@ void main() {
     await tester.pump();
   }
 
+  /// La frappe du clavier réel : `tester.enterText` rouvrirait le clavier de
+  /// lui-même et masquerait un champ qui n'est plus relié.
+  Future<void> typeOnKeyboard(WidgetTester tester, String text) async {
+    tester.testTextInput.enterText(text);
+    await tester.pump();
+    await settle(tester);
+  }
+
+  testWidgets('une case vide reçoit le clavier dès le premier tap', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    await tester.tap(field(0));
+    await tester.pump();
+    await typeOnKeyboard(tester, '14');
+
+    expect(tester.widget<TextField>(field(0)).controller!.text, '14');
+    final ready = bloc.state as CoteSaisieReady;
+    expect(ready.cells.cell('e1', 'fr', 'P1')!.displayedValue, 14);
+  });
+
+  testWidgets('Entrée mène à une case vide qui reçoit le clavier', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(field(0));
+    await tester.pump();
+    await typeOnKeyboard(tester, '14');
+
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await settle(tester);
+    await typeOnKeyboard(tester, '8');
+
+    expect(repository.saved.single.$2, 14);
+    expect(tester.widget<TextField>(field(3)).controller!.text, '8');
+  });
+
+  testWidgets('une frappe hors barème ne coupe pas le clavier', (tester) async {
+    await pump(tester);
+    await tester.tap(field(3));
+    await tester.pump();
+
+    await typeOnKeyboard(tester, '55');
+    await typeOnKeyboard(tester, '5');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await settle(tester);
+
+    expect(repository.invalids, isEmpty);
+    expect(repository.saved.single.$2, 5);
+  });
+
+  testWidgets('quitter la case écrit, taper non', (tester) async {
+    await pump(tester);
+    await tester.tap(field(0));
+    await tester.pump();
+
+    await typeOnKeyboard(tester, '14');
+    expect(repository.saved, isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await settle(tester);
+
+    expect(repository.saved.single.$2, 14);
+  });
+
+  testWidgets('changer d\'élève sans quitter la case écrit quand même', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(field(0));
+    await tester.pump();
+    await typeOnKeyboard(tester, '14');
+
+    bloc.add(const CoteStudentSelected('e2'));
+    await settle(tester);
+    await settle(tester);
+
+    expect(repository.saved.single.$1.studentId, 'e1');
+    expect(repository.saved.single.$2, 14);
+  });
+
+  testWidgets('Échap sur une cote refusée ne la renvoie pas', (tester) async {
+    await pump(
+      tester,
+      cells: [
+        CoteCell(
+          key: demoKey('P1'),
+          hasDraft: true,
+          draftValue: 14,
+          syncState: SyncState.syncError,
+          rejectionReason: 'OUT_OF_RANGE',
+        ),
+      ],
+    );
+    await tester.tap(field(0));
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await settle(tester);
+
+    expect(repository.saved, isEmpty);
+  });
+
   testWidgets('Entrée descend au cours suivant', (tester) async {
     await pump(tester);
     await tester.tap(field(0));
@@ -172,6 +279,8 @@ void main() {
     final cell = (bloc.state as CoteSaisieReady).cells.cell('e1', 'fr', 'P1')!;
     expect(cell.isCalculated, isTrue);
     expect(cell.displayedValue, 13.25);
+    expect(tester.widget<TextField>(field(0)).controller!.text, '13,25');
+    expect(repository.saved, isEmpty);
   });
 
   testWidgets('traverser une valeur calculée n\'écrit rien', (tester) async {
@@ -202,6 +311,18 @@ void main() {
     await settle(tester);
 
     expect(tester.widget<TextField>(field(0)).controller!.text, '13,25');
+  });
+
+  testWidgets('la limite de frappe suit le maximum du cours', (tester) async {
+    await pump(tester);
+    final limiter = tester
+        .widget<TextField>(field(0))
+        .inputFormatters!
+        .whereType<LengthLimitingTextInputFormatter>()
+        .single;
+
+    // Français sur 20 : deux chiffres, la virgule, deux décimales.
+    expect(limiter.maxLength, 5);
   });
 
   testWidgets('Alt+→ change d\'élève et place le focus sur une case vide', (

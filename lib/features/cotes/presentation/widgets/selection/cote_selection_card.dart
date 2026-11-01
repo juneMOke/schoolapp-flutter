@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -40,7 +41,7 @@ class CoteSelectionCard extends StatefulWidget {
 
 class _CoteSelectionCardState extends State<CoteSelectionCard> {
   static const double _gap = AppSpacing.sm;
-  static const double _minFieldWidth = 170;
+  static const double _minFieldWidth = AppDimensions.coteSelectFieldMinWidth;
 
   String? _cycleId;
   String? _levelKey;

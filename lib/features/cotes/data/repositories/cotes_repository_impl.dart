@@ -124,6 +124,13 @@ class CotesRepositoryImpl implements CotesRepository {
         cached,
         const ServerFailure('Invalid cotes payload'),
       );
+    } on TypeError {
+      // Un champ du mauvais type lève ici, pas en `FormatException`.
+      return _fromCacheOr(
+        classroomId,
+        cached,
+        const ServerFailure('Invalid cotes payload'),
+      );
     }
   }
 
@@ -203,14 +210,19 @@ class CotesRepositoryImpl implements CotesRepository {
   Future<int> pendingCount(String classroomId) =>
       _write.pendingCount(classroomId: classroomId, authorId: _authorId);
 
+  /// Vide la file tant que ça avance : au-delà de 200 lignes, la tranche
+  /// suivante, ré-enfilée pendant le vidage, n'en fait pas partie.
   @override
   Future<CoteFlushOutcome> flush(String classroomId) async {
-    final report = await _syncEngine.flush();
-    if (await pendingCount(classroomId) == 0) return CoteFlushOutcome.done;
-    if (report.offline) return CoteFlushOutcome.offline;
-    if (report.authBlocked) return CoteFlushOutcome.sessionExpired;
-    if (report.skipped) return CoteFlushOutcome.busy;
-    return CoteFlushOutcome.stuck;
+    while (true) {
+      final report = await _syncEngine.flush();
+      if (await pendingCount(classroomId) == 0) return CoteFlushOutcome.done;
+      if (report.offline) return CoteFlushOutcome.offline;
+      if (report.authBlocked) return CoteFlushOutcome.sessionExpired;
+      if (report.skipped) return CoteFlushOutcome.busy;
+      final refused = report.retried + report.failed + report.poisoned > 0;
+      if (refused || report.acked == 0) return CoteFlushOutcome.stuck;
+    }
   }
 
   @override

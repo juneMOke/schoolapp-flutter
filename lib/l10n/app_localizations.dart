@@ -33377,6 +33377,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change class'**
   String get coteEmptyChangeClass;
+
+  /// No description provided for @cotePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String cotePercent(int percent);
+
+  /// No description provided for @coteColumnTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get coteColumnTotal;
+
+  /// No description provided for @syncAggregateCotesBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get syncAggregateCotesBatch;
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_skeleton.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -56,21 +58,50 @@ class CoteSaisieEmptyState extends StatelessWidget {
   }
 }
 
-/// Le squelette garde la mise en page : jamais de spinner centré.
+/// Le squelette garde la mise en page : la liste si elle tient, le bandeau de
+/// l'élève, puis les lignes de la grille. Jamais de spinner centré.
 class CoteSaisieSkeleton extends StatelessWidget {
   const CoteSaisieSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final grid = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const EteeloSkeletonBox(height: 72),
-        for (var i = 0; i < 9; i++) ...[
+        const EteeloSkeletonBox(height: AppDimensions.coteSkeletonHeader),
+        for (var i = 0; i < AppDimensions.coteSkeletonGridRows; i++) ...[
           const SizedBox(height: AppSpacing.sm),
-          const EteeloSkeletonBox(height: 48),
+          const EteeloSkeletonBox(height: AppDimensions.minTouchTarget),
         ],
       ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < AppBreakpoints.coteGridCompactMax) {
+          return grid;
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: AppDimensions.coteListPanelWidth,
+              child: Column(
+                children: [
+                  for (var i = 0; i < AppDimensions.coteSkeletonListRows; i++)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: EteeloSkeletonBox(
+                        height: AppDimensions.coteListRowHeight,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppDimensions.coteListGap),
+            Expanded(child: grid),
+          ],
+        );
+      },
     );
   }
 }

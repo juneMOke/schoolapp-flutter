@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/route_key_shortcut.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -42,68 +43,80 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
   }
 
   void _step(int delta) {
+    final state = context.read<CoteSaisieBloc>().state;
+    if (state is! CoteSaisieReady) return;
+    if (delta < 0 ? !state.hasPrevious : !state.hasNext) return;
     context.read<CoteSaisieBloc>().add(CoteStudentStepped(delta));
     _stepped();
   }
 
   @override
   Widget build(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): () =>
-            _step(-1),
-        const SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): () =>
-            _step(1),
-      },
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
-          borderRadius: AppRadius.brLg,
-          border: Border.all(color: AppColors.border),
-        ),
-        child: BlocConsumer<CoteSaisieBloc, CoteSaisieState>(
-          listenWhen: (previous, current) => _gridChanged(previous, current),
-          listener: (context, state) {
-            _gridKey = GlobalKey<CoteGridState>();
-            if (!_focusAfterStep) return;
-            _focusAfterStep = false;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _gridKey.currentState?.focusFirstEmpty();
-            });
-          },
-          buildWhen: _gridChanged,
-          builder: (context, state) {
-            if (state is! CoteSaisieReady) return const SizedBox.shrink();
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CoteBulletinHeader(
-                      classroomName: widget.classroomName,
-                      onStepped: _stepped,
+    // Au niveau de l'écran : ils valent aussi sans focus dans la carte, juste
+    // après un clic dans la liste par exemple.
+    return RouteKeyShortcut(
+      activators: const [
+        SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true),
+      ],
+      onPressed: () => _step(-1),
+      child: RouteKeyShortcut(
+        activators: const [
+          SingleActivator(LogicalKeyboardKey.arrowRight, alt: true),
+        ],
+        onPressed: () => _step(1),
+        child: _card(),
+      ),
+    );
+  }
+
+  Widget _card() {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.brLg,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: BlocConsumer<CoteSaisieBloc, CoteSaisieState>(
+        listenWhen: (previous, current) => _gridChanged(previous, current),
+        listener: (context, state) {
+          _gridKey = GlobalKey<CoteGridState>();
+          if (!_focusAfterStep) return;
+          _focusAfterStep = false;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _gridKey.currentState?.focusFirstEmpty();
+          });
+        },
+        buildWhen: _gridChanged,
+        builder: (context, state) {
+          if (state is! CoteSaisieReady) return const SizedBox.shrink();
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CoteBulletinHeader(
+                    classroomName: widget.classroomName,
+                    onStepped: _stepped,
+                  ),
+                  CoteBulletinLegend(
+                    columns: state.columns,
+                    enterMove: _enterMove,
+                    showKeyboardHelp:
+                        constraints.maxWidth >= AppBreakpoints.coteGridPhoneMax,
+                    onToggleEnter: () => setState(
+                      () => _enterMove = _enterMove == CoteMove.down
+                          ? CoteMove.right
+                          : CoteMove.down,
                     ),
-                    CoteBulletinLegend(
-                      columns: state.columns,
-                      enterMove: _enterMove,
-                      showKeyboardHelp:
-                          constraints.maxWidth >=
-                          AppBreakpoints.coteGridPhoneMax,
-                      onToggleEnter: () => setState(
-                        () => _enterMove = _enterMove == CoteMove.down
-                            ? CoteMove.right
-                            : CoteMove.down,
-                      ),
-                    ),
-                    CoteGrid(key: _gridKey, enterMove: _enterMove),
-                    CoteBulletinFooter(onStepped: _stepped),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+                  ),
+                  CoteGrid(key: _gridKey, enterMove: _enterMove),
+                  CoteBulletinFooter(onStepped: _stepped),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }

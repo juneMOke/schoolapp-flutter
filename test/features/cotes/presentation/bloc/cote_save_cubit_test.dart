@@ -122,6 +122,34 @@ void main() {
     await cubit.close();
   });
 
+  test('moteur occupé : l\'envoi est relancé à la fin du vidage', () async {
+    final cubit = build();
+    await cubit.attach('c1');
+    repository.flushOutcome = CoteFlushOutcome.busy;
+    cubit.noteChanged();
+    await cubit.flushNow();
+    expect(cubit.state, isA<CoteSaving>());
+    expect(repository.flushes, 1);
+
+    repository
+      ..flushOutcome = CoteFlushOutcome.done
+      ..pending = 0;
+    repository.endFlush();
+    await pumpEventQueue();
+
+    expect(repository.flushes, 2);
+    expect(cubit.state, const CoteSaved(42));
+    await cubit.close();
+  });
+
+  test('une frappe après fermeture ne lève pas', () async {
+    final cubit = build();
+    await cubit.attach('c1');
+    await cubit.close();
+
+    expect(cubit.noteChanged, returnsNormally);
+  });
+
   test('fermer vide ce qui attendait le silence', () async {
     final cubit = build();
     await cubit.attach('c1');

@@ -119,7 +119,7 @@ class CoteStudentTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    percent == null ? '—' : '$percent %',
+                    percent == null ? '—' : l10n.cotePercent(percent),
                     style: AppTypography.bodySmall.copyWith(
                       color: cotePercentColor(percent),
                       fontWeight: FontWeight.w600,
@@ -153,11 +153,11 @@ class CoteStudentTile extends StatelessWidget {
         ),
         if (invalid || complete)
           Positioned(
-            right: -3,
-            bottom: -3,
+            right: -AppDimensions.coteStatusBadgeOffset,
+            bottom: -AppDimensions.coteStatusBadgeOffset,
             child: Container(
-              width: 16,
-              height: 16,
+              width: AppDimensions.coteStatusBadge,
+              height: AppDimensions.coteStatusBadge,
               decoration: BoxDecoration(
                 color: invalid ? AppColors.error : AppColors.vertSavane,
                 shape: BoxShape.circle,
@@ -165,7 +165,7 @@ class CoteStudentTile extends StatelessWidget {
               ),
               child: Icon(
                 invalid ? Icons.priority_high_rounded : Icons.check_rounded,
-                size: 10,
+                size: AppDimensions.coteStatusBadgeIcon,
                 color: AppColors.textOnDark,
               ),
             ),

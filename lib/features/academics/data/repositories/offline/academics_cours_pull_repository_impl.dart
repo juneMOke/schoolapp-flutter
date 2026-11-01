@@ -227,6 +227,7 @@ class AcademicsCoursPullRepositoryImpl {
           for (final prefix in const [
             kAcademicsEvaluationsResourcePrefix,
             kAcademicsNotesResourcePrefix,
+            'academics_cotes',
           ]) {
             await _syncMetaDao.deleteCursor('$prefix:$coursId');
             await _syncMetaDao.deleteCursor('${prefix}_bootstrap:$coursId');

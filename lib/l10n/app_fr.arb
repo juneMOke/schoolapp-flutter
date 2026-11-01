@@ -12511,5 +12511,9 @@
   "coteEmptyStudentsDescription": "Vérifiez la classe choisie ou la composition des classes.",
   "coteEmptyCoursesTitle": "Aucun cours configuré pour ce niveau",
   "coteEmptyCoursesDescription": "Le barème de cette classe n'est pas encore attribué.",
-  "coteEmptyChangeClass": "Changer de classe"
+  "coteEmptyChangeClass": "Changer de classe",
+  "cotePercent": "{percent} %",
+  "@cotePercent": {"placeholders": {"percent": {"type": "int"}}},
+  "coteColumnTotal": "Total",
+  "syncAggregateCotesBatch": "Saisie des notes"
 }

@@ -68,8 +68,8 @@ final class CoteSaisieReady extends CoteSaisieState {
   final int changedNotice;
   final int changedCount;
 
-  /// Une écriture sur l'appareil a échoué.
-  final bool storageFailed;
+  /// Croît à chaque écriture ratée sur l'appareil : chacune se signale.
+  final int storageFailures;
 
   const CoteSaisieReady({
     required this.classe,
@@ -87,7 +87,7 @@ final class CoteSaisieReady extends CoteSaisieState {
     this.changedKeys = const {},
     this.changedNotice = 0,
     this.changedCount = 0,
-    this.storageFailed = false,
+    this.storageFailures = 0,
   });
 
   CoteEleveCalc get current => calcs[currentId]!;
@@ -111,7 +111,7 @@ final class CoteSaisieReady extends CoteSaisieState {
     Set<CoteCellKey>? changedKeys,
     int? changedNotice,
     int? changedCount,
-    bool? storageFailed,
+    int? storageFailures,
   }) => CoteSaisieReady(
     classe: classe,
     cours: cours,
@@ -128,7 +128,7 @@ final class CoteSaisieReady extends CoteSaisieState {
     changedKeys: changedKeys ?? this.changedKeys,
     changedNotice: changedNotice ?? this.changedNotice,
     changedCount: changedCount ?? this.changedCount,
-    storageFailed: storageFailed ?? this.storageFailed,
+    storageFailures: storageFailures ?? this.storageFailures,
   );
 
   @override
@@ -146,6 +146,6 @@ final class CoteSaisieReady extends CoteSaisieState {
     changedKeys,
     changedNotice,
     changedCount,
-    storageFailed,
+    storageFailures,
   ];
 }

@@ -45,9 +45,15 @@ class CotesLocalDataSource {
 
   /// Remplace ce que le serveur a dit d'une classe, en une transaction.
   ///
-  /// Tout ce que la tablette retient survit : un brouillon en attente, une cote
-  /// refusée (le serveur n'en garde aucune trace) et une frappe à corriger. Seule
-  /// leur partie serveur est rafraîchie.
+  /// [syncedAt] est l'heure du départ de la requête : la réponse décrit le
+  /// serveur à cet instant. Un envoi accepté pendant son trajet est plus récent
+  /// qu'elle, et elle ne l'efface pas — l'horloge de la cellule tranche. Tout ce
+  /// que la tablette retient survit : brouillon en attente, cote refusée (le
+  /// serveur n'en garde aucune trace), frappe à corriger, cellule dépassée pas
+  /// encore signalée.
+  ///
+  /// Une ligne ne se supprime jamais : une cote vidée ne redescend pas, son
+  /// horloge resterait perdue et la saisie suivante pourrait la perdre.
   Future<void> replaceClasse({
     required String classroomId,
     required CoteClasseDto dto,
@@ -59,16 +65,13 @@ class CotesLocalDataSource {
         'structure_json': jsonEncode(dto.structure),
         'synced_at': syncedAt,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
-      await txn.delete(
-        table,
-        where: 'classroom_id = ? AND has_draft = 0 AND invalid_raw IS NULL',
-        whereArgs: [classroomId],
-      );
       await txn.update(
         table,
-        {'server_cote': null, 'calculee': null, 'server_updated_at': null},
-        where: 'classroom_id = ?',
-        whereArgs: [classroomId],
+        {'server_cote': null, 'calculee': null},
+        where:
+            'classroom_id = ? AND superseded_at IS NULL '
+            'AND (server_updated_at IS NULL OR server_updated_at < ?)',
+        whereArgs: [classroomId, syncedAt],
       );
       final batch = txn.batch();
       for (final cell in dto.cellules) {
@@ -77,9 +80,12 @@ class CotesLocalDataSource {
           'examen, server_cote, calculee, server_updated_at) '
           'VALUES (?, ?, ?, ?, ?, ?, ?, ?) '
           'ON CONFLICT (student_id, cours_id, colonne_id) DO UPDATE SET '
-          'server_cote = excluded.server_cote, '
           'calculee = excluded.calculee, '
-          'server_updated_at = excluded.server_updated_at',
+          'server_cote = CASE WHEN $_localIsNewer '
+          'THEN $table.server_cote ELSE excluded.server_cote END, '
+          'server_updated_at = CASE WHEN $_localIsNewer '
+          'THEN $table.server_updated_at '
+          'ELSE excluded.server_updated_at END',
           [
             cell.studentId,
             cell.coursId,
@@ -95,4 +101,8 @@ class CotesLocalDataSource {
       await batch.commit(noResult: true);
     });
   }
+
+  static const String _localIsNewer =
+      'COALESCE($table.server_updated_at, 0) > '
+      'COALESCE(excluded.server_updated_at, 0)';
 }

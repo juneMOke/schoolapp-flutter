@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_cells.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_zone_rows.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La zone des notes : une ligne par cours, dans l'ordre de Tab.
 class CoteGridCenter extends StatelessWidget {
@@ -54,7 +55,8 @@ class CoteGridCenter extends StatelessWidget {
             builder: (context, state) => _cells(
               height: heights.percent,
               background: AppColors.bleuArdoise,
-              text: (column) => _groupPercent(state, column),
+              text: (column) =>
+                  _groupPercent(AppLocalizations.of(context)!, state, column),
               style: coteDarkRowStyle().copyWith(color: AppColors.orDoux),
             ),
           ),
@@ -74,7 +76,11 @@ class CoteGridCenter extends StatelessWidget {
     cells: state.cells,
   );
 
-  String _groupPercent(CoteSaisieReady state, CoteColumn column) {
+  String _groupPercent(
+    AppLocalizations l10n,
+    CoteSaisieReady state,
+    CoteColumn column,
+  ) {
     if (column.isInput) return '';
     final sources = grid.year.where(
       (c) => c.isInput && c.periodeId == column.periodeId,
@@ -86,7 +92,7 @@ class CoteGridCenter extends StatelessWidget {
       cells: state.cells,
     );
     final percent = calc.pct;
-    return percent == null ? '—' : '$percent %';
+    return percent == null ? '—' : l10n.cotePercent(percent);
   }
 
   Widget _cells({
@@ -103,11 +109,14 @@ class CoteGridCenter extends StatelessWidget {
           for (final column in grid.columns)
             SizedBox(
               width: grid.metrics.widthOf(column),
-              child: Text(
-                text(column),
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                style: style,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  text(column),
+                  maxLines: 1,
+                  softWrap: false,
+                  style: style,
+                ),
               ),
             ),
         ],
@@ -138,22 +147,25 @@ class _DomainRow extends StatelessWidget {
                   for (final column in grid.columns)
                     SizedBox(
                       width: grid.metrics.widthOf(column),
-                      child: Text(
-                        formatCentis(
-                          _calculator.columnSum(
-                            studentId: grid.studentId,
-                            cours: row.rubrique.allCours,
-                            column: column,
-                            year: grid.year,
-                            cells: state.cells,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          formatCentis(
+                            _calculator.columnSum(
+                              studentId: grid.studentId,
+                              cours: row.rubrique.allCours,
+                              column: column,
+                              year: grid.year,
+                              cells: state.cells,
+                            ),
                           ),
-                        ),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: row.tone.ink,
-                          fontWeight: FontWeight.w700,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                          maxLines: 1,
+                          softWrap: false,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: row.tone.ink,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
                       ),
                     ),

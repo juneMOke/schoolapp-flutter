@@ -192,6 +192,15 @@ void main() {
       expect(saved.syncState, SyncState.synced);
     });
 
+    test('APPLIED sans valeur : la ligne envoyée fait foi', () async {
+      await save(_key('P1'), 14.5);
+      api.byColumn['P1'] = {'valeur': null};
+
+      await handler.dispatch(entry());
+
+      expect((await cell('P1')).serverCote, 14.5);
+    });
+
     test('une cellule vidée revient au calcul', () async {
       await db.insert('cote_saisie', {
         'student_id': 'e1',

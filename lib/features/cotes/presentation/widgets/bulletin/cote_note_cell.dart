@@ -28,6 +28,9 @@ class CoteNoteCell extends StatefulWidget {
   final double height;
   final String columnLabel;
 
+  /// Beaucoup de colonnes : le texte se resserre pour tenir.
+  final bool dense;
+
   /// Ce que fait Entrée : cours suivant, ou colonne suivante.
   final CoteMove enterMove;
 
@@ -39,6 +42,7 @@ class CoteNoteCell extends StatefulWidget {
     required this.height,
     required this.columnLabel,
     required this.enterMove,
+    this.dense = false,
   });
 
   @override
@@ -49,22 +53,27 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
   final _controller = TextEditingController();
   late final FocusNode _focusNode;
   late final CoteCellKey _key;
+  late final CoteSaisieBloc _bloc;
 
-  /// Ce que la cellule portait en propre à l'arrivée du focus : Échap y revient.
-  String _rawAtFocus = '';
+  /// La cellule à l'arrivée du focus : toute frappe se juge contre elle, et Échap
+  /// y revient. Rien ne s'écrit avant de quitter la case.
+  CoteCell? _base;
+  bool _dirty = false;
 
   @override
   void initState() {
     super.initState();
+    _bloc = context.read<CoteSaisieBloc>();
     _key = widget.registry.keyOf(widget.cours, widget.column);
     _focusNode = widget.registry.nodeFor(widget.cours, widget.column)
       ..onKeyEvent = _onKey
       ..addListener(_onFocusChanged);
-    _controller.text = _textOf(_cell(context.read<CoteSaisieBloc>().state));
+    _controller.text = _textOf(_cell(_bloc.state));
   }
 
   @override
   void dispose() {
+    _commit();
     _focusNode
       ..removeListener(_onFocusChanged)
       ..onKeyEvent = null;
@@ -76,6 +85,8 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       ? state.cells.cell(_key.studentId, _key.coursId, _key.colonneId)
       : null;
 
+  CoteCell get _currentCell => _cell(_bloc.state) ?? CoteCell(key: _key);
+
   String _textOf(CoteCell? cell) {
     if (cell == null) return '';
     final raw = cell.invalidRaw;
@@ -85,17 +96,25 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
   }
 
   void _onFocusChanged() {
-    final cell = _cell(context.read<CoteSaisieBloc>().state);
     if (_focusNode.hasFocus) {
-      _rawAtFocus = cell == null || cell.isCalculated ? '' : _textOf(cell);
+      _base = _currentCell;
       _controller.selection = TextSelection(
         baseOffset: 0,
         extentOffset: _controller.text.length,
       );
     } else {
-      _controller.text = _textOf(cell);
+      _commit();
+      _controller.text = _textOf(_cell(_bloc.state));
     }
     setState(() {});
+  }
+
+  void _commit() {
+    final base = _base;
+    if (!_dirty || base == null || _bloc.isClosed) return;
+    _dirty = false;
+    _base = null;
+    _bloc.add(CoteCellCommitted(_key, _controller.text, base));
   }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
@@ -110,15 +129,29 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.escape) {
-      _controller.text = _rawAtFocus;
-      _edited(_rawAtFocus);
+      _revert();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
 
-  void _edited(String raw) =>
-      context.read<CoteSaisieBloc>().add(CoteCellEdited(_key, raw));
+  void _revert() {
+    final base = _base;
+    if (!_dirty || base == null) return;
+    _dirty = false;
+    _bloc.add(CoteCellReverted(base));
+    _controller.text = _textOf(base);
+    _controller.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: _controller.text.length,
+    );
+  }
+
+  void _typed(String raw) {
+    _base ??= _currentCell;
+    _dirty = true;
+    _bloc.add(CoteCellTyped(_key, raw, _base!));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,22 +193,25 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-        LengthLimitingTextInputFormatter(5),
+        // « 139,25 » : les chiffres du maximum, la virgule, deux décimales.
+        LengthLimitingTextInputFormatter('$max'.length + 3),
       ],
-      style: AppTypography.bodyLarge.copyWith(
-        color: look.ink,
-        fontWeight: look.dashed ? FontWeight.w500 : FontWeight.w600,
-        fontFeatures: const [FontFeature.tabularFigures()],
-      ),
+      style: (widget.dense ? AppTypography.bodyMedium : AppTypography.bodyLarge)
+          .copyWith(
+            color: look.ink,
+            fontWeight: look.dashed ? FontWeight.w500 : FontWeight.w600,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
       decoration: const InputDecoration(
         isCollapsed: true,
         border: InputBorder.none,
         hintText: '—',
         hintStyle: TextStyle(color: AppColors.textMuted),
       ),
-      onChanged: _edited,
+      onChanged: _typed,
       onEditingComplete: () {},
       onSubmitted: (_) {
+        _commit();
         widget.registry.move(_key, widget.enterMove);
       },
     );
@@ -198,18 +234,20 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
               ]
             : null,
       ),
-      child: look.dashed
-          ? CustomPaint(
-              painter: DashedRRectPainter(
+      // Une seule forme d'arbre : remonter le champ au gain de focus lui ferait
+      // perdre sa connexion au clavier.
+      child: CustomPaint(
+        painter: look.dashed
+            ? DashedRRectPainter(
                 color: look.border,
                 borderRadius: AppRadius.brSm,
                 strokeWidth: 1,
                 dash: 4,
                 gap: 3,
-              ),
-              child: Center(child: field),
-            )
-          : field,
+              )
+            : null,
+        child: Center(child: field),
+      ),
     );
     final hint = _hint(l10n, cell, max);
     return Semantics(
@@ -220,7 +258,9 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       ),
       value: _controller.text,
       hint: hint,
-      child: hint == null ? body : Tooltip(message: hint, child: body),
+      // Toujours visible et jamais vide : autrement, `Tooltip` rend son enfant
+      // nu, et son apparition remonterait le champ en pleine frappe.
+      child: Tooltip(message: hint ?? widget.columnLabel, child: body),
     );
   }
 

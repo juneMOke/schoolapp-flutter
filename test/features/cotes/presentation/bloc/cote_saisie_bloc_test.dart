@@ -42,6 +42,17 @@ void main() {
     return bloc.state as CoteSaisieReady;
   }
 
+  /// La frappe complète : tape, puis quitte la case.
+  void enter(CoteSaisieBloc bloc, CoteCellKey key, String raw) {
+    final ready = bloc.state as CoteSaisieReady;
+    final base =
+        ready.cells.cell(key.studentId, key.coursId, key.colonneId) ??
+        CoteCell(key: key);
+    bloc
+      ..add(CoteCellTyped(key, raw, base))
+      ..add(CoteCellCommitted(key, raw, base));
+  }
+
   group('ouverture', () {
     blocTest<CoteSaisieBloc, CoteSaisieState>(
       'chargement → prêt',
@@ -155,6 +166,50 @@ void main() {
       ],
     );
 
+    test('recharger garde l\'élève et la portée', () async {
+      final bloc = build();
+      await opened(bloc);
+      bloc
+        ..add(const CoteStudentSelected('e2'))
+        ..add(
+          const CoteScopeChanged(
+            CoteScope(portee: CotePortee.colonne, cibleId: 'P2'),
+          ),
+        );
+      await settle(bloc);
+
+      bloc.add(const CoteSaisieRetried());
+      final ready = await settle(bloc);
+
+      expect(ready.currentId, 'e2');
+      expect(ready.columns.single.id, 'P2');
+      await bloc.close();
+    });
+
+    test('sur téléphone, on ouvre sur une colonne ouverte', () async {
+      final bloc = build();
+      bloc.add(const CoteSaisieOpened('c1', singleColumn: true));
+      final ready =
+          await bloc.stream.firstWhere((s) => s is CoteSaisieReady)
+              as CoteSaisieReady;
+
+      expect(ready.scope.portee, CotePortee.colonne);
+      expect(ready.columns.single.id, 'P1');
+      await bloc.close();
+    });
+
+    test('une frappe à corriger sur une colonne close est oubliée', () async {
+      repository = FakeCotesRepository(
+        cells: [CoteCell(key: demoKey('P3'), invalidRaw: '99')],
+      );
+      final bloc = build();
+      final ready = await opened(bloc);
+
+      expect(ready.cells.cell('e1', 'fr', 'P3')!.invalidRaw, isNull);
+      expect(repository.clearedInvalid, [demoKey('P3')]);
+      await bloc.close();
+    });
+
     test('réessayer relance la dernière ouverture', () async {
       repository.loadResult = const Left(NetworkFailure());
       final bloc = build();
@@ -179,7 +234,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), '18'));
+      enter(bloc, demoKey('P1'), '18');
       final ready = await settle(bloc);
 
       expect(ready.current.total, 1800);
@@ -194,7 +249,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), '12,5'));
+      enter(bloc, demoKey('P1'), '12,5');
       await settle(bloc);
 
       expect(repository.saved.single.$2, 12.5);
@@ -205,7 +260,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), '24'));
+      enter(bloc, demoKey('P1'), '24');
       final ready = await settle(bloc);
 
       expect(ready.current.invalid, 1);
@@ -219,12 +274,92 @@ void main() {
     test('corriger une frappe hors barème l\'efface', () async {
       final bloc = build();
       await opened(bloc);
-      bloc.add(CoteCellEdited(demoKey('P1'), '24'));
-      bloc.add(CoteCellEdited(demoKey('P1'), '14'));
+      enter(bloc, demoKey('P1'), '24');
+      await settle(bloc);
+
+      enter(bloc, demoKey('P1'), '14');
       final ready = await settle(bloc);
 
       expect(ready.current.invalid, 0);
       expect(ready.current.total, 1400);
+      await bloc.close();
+    });
+
+    test('taper 25 sur 20 n\'envoie jamais le préfixe 2', () async {
+      final bloc = build();
+      await opened(bloc);
+      final base = CoteCell(key: demoKey('P1'));
+
+      bloc
+        ..add(CoteCellTyped(demoKey('P1'), '2', base))
+        ..add(CoteCellTyped(demoKey('P1'), '25', base))
+        ..add(CoteCellCommitted(demoKey('P1'), '25', base));
+      await settle(bloc);
+
+      expect(repository.saved, isEmpty);
+      expect(repository.invalids.single.$2, '25');
+      expect(written, 0);
+      await bloc.close();
+    });
+
+    test('taper recalcule sans rien écrire', () async {
+      final bloc = build();
+      await opened(bloc);
+
+      bloc.add(
+        CoteCellTyped(demoKey('P1'), '18', CoteCell(key: demoKey('P1'))),
+      );
+      final ready = await settle(bloc);
+
+      expect(ready.current.total, 1800);
+      expect(repository.saved, isEmpty);
+      await bloc.close();
+    });
+
+    test('retaper la valeur calculée ne crée pas de cote', () async {
+      repository = FakeCotesRepository(cells: [_server('P1', calculee: 12)]);
+      final bloc = build();
+      await opened(bloc);
+      final base = _server('P1', calculee: 12);
+
+      bloc
+        ..add(CoteCellTyped(demoKey('P1'), '', base))
+        ..add(CoteCellTyped(demoKey('P1'), '1', base))
+        ..add(CoteCellTyped(demoKey('P1'), '12', base))
+        ..add(CoteCellCommitted(demoKey('P1'), '12', base));
+      await settle(bloc);
+
+      expect(repository.saved, isEmpty);
+      await bloc.close();
+    });
+
+    test('annuler revient à la cellule d\'arrivée, sans écrire', () async {
+      final base = _server('P1', cote: 14);
+      repository = FakeCotesRepository(cells: [base]);
+      final bloc = build();
+      await opened(bloc);
+
+      bloc
+        ..add(CoteCellTyped(demoKey('P1'), '18', base))
+        ..add(CoteCellReverted(base));
+      final ready = await settle(bloc);
+
+      expect(ready.current.total, 1400);
+      expect(repository.saved, isEmpty);
+      await bloc.close();
+    });
+
+    test('une relecture n\'efface pas la case en cours de frappe', () async {
+      final bloc = build();
+      await opened(bloc);
+      bloc.add(
+        CoteCellTyped(demoKey('P1'), '18', CoteCell(key: demoKey('P1'))),
+      );
+
+      bloc.add(const CoteCellsRefreshed());
+      final ready = await settle(bloc);
+
+      expect(ready.current.total, 1800);
       await bloc.close();
     });
 
@@ -233,7 +368,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), '13,25'));
+      enter(bloc, demoKey('P1'), '13,25');
       await settle(bloc);
 
       expect(repository.saved, isEmpty);
@@ -246,7 +381,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), '15'));
+      enter(bloc, demoKey('P1'), '15');
       await settle(bloc);
 
       expect(repository.saved.single.$2, 15);
@@ -260,7 +395,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), ''));
+      enter(bloc, demoKey('P1'), '');
       final ready = await settle(bloc);
 
       expect(repository.saved.single.$2, isNull);
@@ -276,7 +411,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), ''));
+      enter(bloc, demoKey('P1'), '');
       await settle(bloc);
 
       expect(repository.saved, isEmpty);
@@ -287,7 +422,7 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P3'), '10'));
+      enter(bloc, demoKey('P3'), '10');
       await settle(bloc);
 
       expect(repository.saved, isEmpty);
@@ -298,23 +433,10 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('S1', cours: 'eps'), '10'));
+      enter(bloc, demoKey('S1', cours: 'eps'), '10');
       await settle(bloc);
 
       expect(repository.saved, isEmpty);
-      await bloc.close();
-    });
-
-    test('les frappes s\'écrivent dans l\'ordre', () async {
-      final bloc = build();
-      await opened(bloc);
-
-      for (final raw in ['1', '14', '14,', '14,5']) {
-        bloc.add(CoteCellEdited(demoKey('P1'), raw));
-      }
-      await settle(bloc);
-
-      expect(repository.saved.map((s) => s.$2), [1, 14, 14.5]);
       await bloc.close();
     });
 
@@ -323,10 +445,12 @@ void main() {
       final bloc = build();
       await opened(bloc);
 
-      bloc.add(CoteCellEdited(demoKey('P1'), '14'));
+      enter(bloc, demoKey('P1'), '14');
       final ready = await settle(bloc);
 
-      expect(ready.storageFailed, isTrue);
+      expect(ready.storageFailures, 1);
+      // La case revient à ce que la base contient vraiment.
+      expect(ready.current.total, 0);
       expect(written, 0);
       await bloc.close();
     });

@@ -47,7 +47,7 @@ class CoteGridTotalZone extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: Text(maxima, maxLines: 1, style: coteMaximaStyle()),
             ),
-            _grandTotal(calc),
+            _grandTotal(AppLocalizations.of(context)!, calc),
             if (grid.hasGroupTotals)
               Container(height: heights.percent, color: AppColors.bleuArdoise),
           ],
@@ -103,7 +103,7 @@ class CoteGridTotalZone extends StatelessWidget {
     );
   }
 
-  Widget _grandTotal(CoteEleveCalc calc) {
+  Widget _grandTotal(AppLocalizations l10n, CoteEleveCalc calc) {
     final percent = calc.pct;
     final low = percent != null && percent < 50;
     return Container(
@@ -138,7 +138,7 @@ class CoteGridTotalZone extends StatelessWidget {
                 borderRadius: AppRadius.brPill,
               ),
               child: Text(
-                percent == null ? '—' : '$percent %',
+                percent == null ? '—' : l10n.cotePercent(percent),
                 maxLines: 1,
                 style: AppTypography.labelMedium.copyWith(
                   color: percent == null || low
@@ -186,6 +186,9 @@ class _HeaderLabel extends StatelessWidget {
 
   String _label(AppLocalizations l10n) {
     if (grid.hasGroupTotals) return l10n.coteColumnAnnual;
+    if (grid.columns.length == 1 || grid.metrics.phone) {
+      return l10n.coteColumnTotal;
+    }
     return l10n.coteColumnTotalScope(
       CoteLabels.firstGroupShort(l10n, grid.classe, grid.columns),
     );

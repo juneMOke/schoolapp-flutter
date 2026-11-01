@@ -24,7 +24,13 @@ class CoteGridMetrics {
     required this.dense,
   });
 
-  factory CoteGridMetrics.of(double width, List<CoteColumn> columns) {
+  /// [textScale] : les colonnes de chiffres grandissent avec le texte, sinon un
+  /// « 119,75 » n'y tient plus à ×1,3. Celle des cours s'ellipse, elle.
+  factory CoteGridMetrics.of(
+    double width,
+    List<CoteColumn> columns, {
+    double textScale = 1,
+  }) {
     final count = columns.length;
     final dense = count > 6;
     final phone = width < AppBreakpoints.coteGridPhoneMax;
@@ -35,19 +41,25 @@ class CoteGridMetrics {
           : dense || compact
           ? AppDimensions.coteCourseColumnDense
           : AppDimensions.coteCourseColumn,
-      noteWidth: count <= 4
-          ? AppDimensions.coteNoteColumn
-          : dense
-          ? AppDimensions.coteNoteColumnDense
-          : AppDimensions.coteNoteColumnMedium,
-      groupWidth: dense
-          ? AppDimensions.coteGroupColumnDense
-          : AppDimensions.coteGroupColumn,
-      totalWidth: phone
-          ? AppDimensions.coteTotalColumnPhone
-          : dense
-          ? AppDimensions.coteTotalColumnDense
-          : AppDimensions.coteTotalColumn,
+      noteWidth:
+          textScale *
+          (count <= 4
+              ? AppDimensions.coteNoteColumn
+              : dense
+              ? AppDimensions.coteNoteColumnDense
+              : AppDimensions.coteNoteColumnMedium),
+      groupWidth:
+          textScale *
+          (dense
+              ? AppDimensions.coteGroupColumnDense
+              : AppDimensions.coteGroupColumn),
+      totalWidth:
+          textScale *
+          (phone
+              ? AppDimensions.coteTotalColumnPhone
+              : dense
+              ? AppDimensions.coteTotalColumnDense
+              : AppDimensions.coteTotalColumn),
       phone: phone,
       dense: dense,
     );
@@ -70,11 +82,16 @@ bool coteListVisible({
   required double width,
   required List<CoteColumn> columns,
   required bool wasVisible,
+  double textScale = 1,
 }) {
   if (width < AppBreakpoints.coteGridCompactMax) return false;
   final gridWidth =
       width - AppDimensions.coteListPanelWidth - AppDimensions.coteListGap;
-  final needed = CoteGridMetrics.of(gridWidth, columns).minGridWidth(columns);
+  final needed = CoteGridMetrics.of(
+    gridWidth,
+    columns,
+    textScale: textScale,
+  ).minGridWidth(columns);
   return gridWidth >=
       needed + (wasVisible ? 0 : AppDimensions.coteListHysteresis);
 }

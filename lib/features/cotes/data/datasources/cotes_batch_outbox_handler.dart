@@ -169,7 +169,10 @@ class CotesBatchOutboxHandler implements OutboxSyncHandler {
         await _local.applyServerValue(
           key: key,
           pushedAt: line.updatedAtMs,
-          valeur: result.valeur,
+          // Accepté : la ligne envoyée fait foi, le serveur n'a rien à ajouter.
+          valeur: result.outcome == CoteOutcome.superseded
+              ? result.valeur
+              : line.valeur,
           serverUpdatedAtMs: result.updatedAtMs,
           superseded: result.outcome == CoteOutcome.superseded,
           nowMs: nowMs,

@@ -65,6 +65,9 @@ DioException _status(int code, {Object? error}) {
   );
 }
 
+/// Après les `updatedAt` de la classe : la réponse est bien plus récente.
+final int _now = DateTime.utc(2026, 11, 2).millisecondsSinceEpoch;
+
 void main() {
   late Database db;
   late _FakeApi api;
@@ -87,7 +90,7 @@ void main() {
       outbox: outbox,
       syncEngine: SyncEngine(outbox: outbox, connectivity: connectivity),
       requiredAuth: const {},
-      now: () => 1000,
+      now: () => _now,
     );
   });
   tearDown(() => db.close());
@@ -169,11 +172,51 @@ void main() {
     expect(result.fold((f) => f, (_) => null), isA<ServerFailure>());
   });
 
-  test('recharger retire ce que le serveur ne dit plus', () async {
+  test('recharger efface ce que le serveur ne dit plus', () async {
     await repository.load('c1');
     api.json = coteClasseJson()..['cellules'] = <Object?>[];
 
-    expect(right(await repository.load('c1')).cells, isEmpty);
+    final cells = right(await repository.load('c1')).cells;
+
+    expect(cells.every((c) => c.displayedValue == null), isTrue);
+  });
+
+  test('un champ mal typé avec un cache : la copie, pas une erreur', () async {
+    await repository.load('c1');
+    api.failure = TypeError();
+
+    expect(right(await repository.load('c1')).fromCache, isTrue);
+  });
+
+  test('une réponse partie avant un envoi accepté ne l\'efface pas', () async {
+    await repository.load('c1');
+    await db.update(
+      'cote_saisie',
+      {'server_cote': 19.0, 'server_updated_at': _now + 1},
+      where: 'colonne_id = ?',
+      whereArgs: ['P1'],
+    );
+
+    final cells = right(await repository.load('c1')).cells;
+
+    final cell = cells.firstWhere((c) => c.key.colonneId == 'P1');
+    expect(cell.serverCote, 19);
+    expect(cell.calculee, 13.25);
+  });
+
+  test('une cellule dépassée attend son signalement', () async {
+    await repository.load('c1');
+    await db.update(
+      'cote_saisie',
+      {'superseded_at': 1},
+      where: 'colonne_id = ?',
+      whereArgs: ['S1'],
+    );
+    api.json = coteClasseJson()..['cellules'] = <Object?>[];
+
+    final cells = right(await repository.load('c1')).cells;
+
+    expect(cells.firstWhere((c) => c.key.colonneId == 'S1').serverCote, 31);
   });
 
   test(
@@ -200,8 +243,6 @@ void main() {
       api.json = coteClasseJson()..['cellules'] = <Object?>[];
 
       final cells = right(await repository.load('c1')).cells;
-
-      expect(cells, hasLength(2));
       final refused = cells.firstWhere((c) => c.key.colonneId == 'P1');
       expect(refused.isRejected, isTrue);
       expect(refused.draftValue, 18);

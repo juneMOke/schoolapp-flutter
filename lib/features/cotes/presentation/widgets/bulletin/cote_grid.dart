@@ -120,7 +120,11 @@ class CoteGridState extends State<CoteGrid> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final metrics = CoteGridMetrics.of(width, _opened.columns);
+        final metrics = CoteGridMetrics.of(
+          width,
+          _opened.columns,
+          textScale: scale,
+        );
         final grid = CoteGridContext(
           classe: _opened.classe,
           columns: _opened.columns,

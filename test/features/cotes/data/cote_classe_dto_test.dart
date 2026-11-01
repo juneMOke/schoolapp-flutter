@@ -47,10 +47,20 @@ void main() {
   });
 
   test('une structure illisible lève : rien ne se placerait', () {
-    final json = coteClasseJson()..remove('classroomId');
+    final json = coteClasseJson();
+    ((json['periodes'] as List).first as Map<String, dynamic>).remove('id');
 
     expect(() => CoteClasseDto.fromJson(json), throwsFormatException);
   });
+
+  test(
+    'la réponse peut taire la classe : l\'écran sait ce qu\'il a demandé',
+    () {
+      final json = coteClasseJson()..remove('classroomId');
+
+      expect(() => CoteClasseDto.fromJson(json).toEntity(), returnsNormally);
+    },
+  );
 
   test('un cours sans maxExamen au fil vaut sans examen', () {
     final json = coteClasseJson();

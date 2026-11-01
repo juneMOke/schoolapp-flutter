@@ -21877,4 +21877,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get coteEmptyChangeClass => 'Changer de classe';
+
+  @override
+  String cotePercent(int percent) {
+    return '$percent %';
+  }
+
+  @override
+  String get coteColumnTotal => 'Total';
+
+  @override
+  String get syncAggregateCotesBatch => 'Saisie des notes';
 }

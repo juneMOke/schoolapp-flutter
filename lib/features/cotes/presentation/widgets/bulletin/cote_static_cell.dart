@@ -34,13 +34,17 @@ class CoteStaticCell extends StatelessWidget {
         color: background,
         borderRadius: AppRadius.brSm,
       ),
-      child: Text(
-        text,
-        maxLines: 1,
-        style: AppTypography.bodyMedium.copyWith(
-          color: ink,
-          fontWeight: weight,
-          fontFeatures: const [FontFeature.tabularFigures()],
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          text,
+          maxLines: 1,
+          softWrap: false,
+          style: AppTypography.bodyMedium.copyWith(
+            color: ink,
+            fontWeight: weight,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
         ),
       ),
     );

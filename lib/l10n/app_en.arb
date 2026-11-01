@@ -12331,5 +12331,9 @@
   "coteEmptyStudentsDescription": "Check the chosen class or the class lists.",
   "coteEmptyCoursesTitle": "No course set up for this level",
   "coteEmptyCoursesDescription": "This class has no grading scale yet.",
-  "coteEmptyChangeClass": "Change class"
+  "coteEmptyChangeClass": "Change class",
+  "cotePercent": "{percent}%",
+  "@cotePercent": {"placeholders": {"percent": {"type": "int"}}},
+  "coteColumnTotal": "Total",
+  "syncAggregateCotesBatch": "Grade entry"
 }

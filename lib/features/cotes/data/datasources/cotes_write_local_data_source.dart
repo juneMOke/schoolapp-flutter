@@ -110,6 +110,7 @@ class CotesWriteLocalDataSource {
       'has_draft': 0,
       'draft_valeur': null,
       'draft_updated_at': null,
+      'invalid_raw': null,
       'sync_status': SyncState.synced.dbValue,
       'rejection_reason': null,
     },

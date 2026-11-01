@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « 61/80 », sa jauge et son pourcentage. Sur téléphone, le total seul.
 class CoteTotalValue extends StatelessWidget {
@@ -24,6 +26,7 @@ class CoteTotalValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final color = cotePercentColor(percent);
     final meterWidth = dense
         ? AppDimensions.coteMeterWidthDense
@@ -45,16 +48,16 @@ class CoteTotalValue extends StatelessWidget {
         ],
       ),
       maxLines: 1,
-      overflow: TextOverflow.fade,
       softWrap: false,
       style: AppTypography.bodySmall,
     );
-    if (!showMeter) return total;
+    final shrinking = FittedBox(fit: BoxFit.scaleDown, child: total);
+    if (!showMeter) return shrinking;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Flexible(child: total),
-        const SizedBox(width: 8),
+        Flexible(child: shrinking),
+        const SizedBox(width: AppSpacing.sm),
         SizedBox(
           width: meterWidth,
           height: AppDimensions.coteMeterHeight,
@@ -67,9 +70,9 @@ class CoteTotalValue extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Text(
-          percent == null ? '—' : '$percent %',
+          percent == null ? '—' : l10n.cotePercent(percent!),
           maxLines: 1,
           style: AppTypography.labelSmall.copyWith(
             color: color,

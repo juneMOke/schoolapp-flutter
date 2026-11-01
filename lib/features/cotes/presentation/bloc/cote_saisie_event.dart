@@ -10,16 +10,23 @@ sealed class CoteSaisieEvent extends Equatable {
 }
 
 /// Ouvre une classe. [scope] et [eleveId] viennent de l'adresse : une portée ou
-/// un élève devenus inconnus retombent sur ceux d'ouverture.
+/// un élève devenus inconnus retombent sur ceux d'ouverture. [singleColumn] :
+/// sur téléphone, on ouvre sur une colonne plutôt que sur un groupe.
 final class CoteSaisieOpened extends CoteSaisieEvent {
   final String classroomId;
   final CoteScope? scope;
   final String? eleveId;
+  final bool singleColumn;
 
-  const CoteSaisieOpened(this.classroomId, {this.scope, this.eleveId});
+  const CoteSaisieOpened(
+    this.classroomId, {
+    this.scope,
+    this.eleveId,
+    this.singleColumn = false,
+  });
 
   @override
-  List<Object?> get props => [classroomId, scope, eleveId];
+  List<Object?> get props => [classroomId, scope, eleveId, singleColumn];
 }
 
 final class CoteSaisieRetried extends CoteSaisieEvent {
@@ -58,15 +65,40 @@ final class CoteStudentStepped extends CoteSaisieEvent {
   List<Object?> get props => [delta];
 }
 
-/// Une frappe, brute : `''`, `'14,5'`, ou un texte hors barème.
-final class CoteCellEdited extends CoteSaisieEvent {
+/// Une frappe : l'écran recalcule, rien n'est écrit. [base] est la cellule à
+/// l'arrivée du focus, sans quoi « 2 » en route vers « 25 » compterait comme une
+/// saisie.
+final class CoteCellTyped extends CoteSaisieEvent {
   final CoteCellKey key;
   final String raw;
+  final CoteCell base;
 
-  const CoteCellEdited(this.key, this.raw);
+  const CoteCellTyped(this.key, this.raw, this.base);
 
   @override
-  List<Object?> get props => [key, raw];
+  List<Object?> get props => [key, raw, base];
+}
+
+/// La case est quittée : ce qui y reste s'écrit, comparé à [base].
+final class CoteCellCommitted extends CoteSaisieEvent {
+  final CoteCellKey key;
+  final String raw;
+  final CoteCell base;
+
+  const CoteCellCommitted(this.key, this.raw, this.base);
+
+  @override
+  List<Object?> get props => [key, raw, base];
+}
+
+/// Échap : la cellule revient à [base], rien n'a été écrit.
+final class CoteCellReverted extends CoteSaisieEvent {
+  final CoteCell base;
+
+  const CoteCellReverted(this.base);
+
+  @override
+  List<Object?> get props => [base];
 }
 
 /// Renonce à une cote que le serveur a refusée.

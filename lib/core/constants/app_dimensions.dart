@@ -1212,7 +1212,7 @@ class AppDimensions {
   static const coteListRowHeight = 64.0;
   static const coteCourseColumn = 176.0;
   static const coteCourseColumnDense = 140.0;
-  static const coteCourseColumnPhone = 112.0;
+  static const coteCourseColumnPhone = 136.0;
   static const coteNoteColumn = 84.0;
   static const coteNoteColumnMedium = 72.0;
   static const coteNoteColumnDense = 64.0;
@@ -1220,7 +1220,7 @@ class AppDimensions {
   static const coteGroupColumnDense = 70.0;
   static const coteTotalColumn = 158.0;
   static const coteTotalColumnDense = 150.0;
-  static const coteTotalColumnPhone = 84.0;
+  static const coteTotalColumnPhone = 96.0;
   static const coteCellHorizontalPadding = 5.0;
   static const coteRowHeader = 40.0;
   static const coteRowGroup = 30.0;
@@ -1243,4 +1243,13 @@ class AppDimensions {
   static const coteProgressMaxWidth = 220.0;
   static const coteProgressHeight = 6.0;
   static const coteFocusHalo = 3.0;
+  static const coteSelectFieldMinWidth = 170.0;
+  static const coteStatusBadge = 16.0;
+  static const coteStatusBadgeIcon = 10.0;
+  static const coteStatusBadgeOffset = 3.0;
+  static const coteSwatchRadius = 4.0;
+  static const coteHeaderLockIcon = 10.0;
+  static const coteSkeletonHeader = 72.0;
+  static const coteSkeletonListRows = 8;
+  static const coteSkeletonGridRows = 9;
 }

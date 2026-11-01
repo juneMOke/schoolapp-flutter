@@ -29,6 +29,9 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
   CoteSaisieOpened? _lastOpened;
   Timer? _highlight;
 
+  /// Les cases en cours de frappe : une relecture de la base ne les efface pas.
+  final Map<CoteCellKey, CoteCell> _previews = {};
+
   CoteSaisieBloc(
     this._repository, {
     CoteCalculator calculator = const CoteCalculator(),
@@ -53,7 +56,9 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     final CoteScopeChanged e => _onScope(e, emit),
     final CoteStudentSelected e => _onSelect(e.studentId, emit),
     final CoteStudentStepped e => _onStep(e, emit),
-    final CoteCellEdited e => _onEdited(e, emit),
+    final CoteCellTyped e => _onTyped(e, emit),
+    final CoteCellCommitted e => _onCommitted(e, emit),
+    final CoteCellReverted e => _onReverted(e, emit),
     final CoteRejectedDiscarded e => _onDiscarded(e, emit),
     CoteCellsRefreshed() => _onRefreshed(emit),
     CoteHighlightCleared() => _onHighlightCleared(emit),
@@ -65,6 +70,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
   ) async {
     _lastOpened = event;
     _classroomId = event.classroomId;
+    _previews.clear();
     emit(const CoteSaisieLoading());
     final result = await _repository.load(event.classroomId);
     result.fold((failure) => emit(_failureState(failure)), (snapshot) {
@@ -118,17 +124,20 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     if (classe.eleves.isEmpty) {
       return const CoteSaisieEmpty(CoteEmptyReason.noStudents);
     }
-    if (cours.isEmpty) return const CoteSaisieEmpty(CoteEmptyReason.noCourses);
+    if (cours.isEmpty || classe.periodes.isEmpty) {
+      return const CoteSaisieEmpty(CoteEmptyReason.noCourses);
+    }
     final eleves = [...classe.eleves]..sort(_compareNames);
     final year = yearColumns(classe);
-    var scope = event.scope ?? defaultScope(classe);
+    final opening = defaultScope(classe, singleColumn: event.singleColumn);
+    var scope = event.scope ?? opening;
     var columns = columnsFor(classe, scope);
     if (columns.isEmpty) {
-      scope = defaultScope(classe);
+      scope = opening;
       columns = columnsFor(classe, scope);
     }
     final known = eleves.any((e) => e.studentId == event.eleveId);
-    final cells = CoteCellTable.of(snapshot.cells);
+    final cells = CoteCellTable.of(_withoutStaleInvalid(snapshot.cells, year));
     final calcs = _calcAll(eleves, cours, columns, cells);
     return CoteSaisieReady(
       classe: classe,
@@ -144,6 +153,30 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
       progress: _calculator.progress(calcs.values),
       fromCache: snapshot.fromCache,
     );
+  }
+
+  /// Une frappe à corriger sur une colonne close ne se corrigera plus : elle ne
+  /// doit pas laisser l'élève incomplet pour toujours.
+  List<CoteCell> _withoutStaleInvalid(
+    List<CoteCell> cells,
+    List<CoteColumn> year,
+  ) {
+    final locked = {
+      for (final column in year)
+        if (column.isInput && column.locked) column.id,
+    };
+    return [
+      for (final cell in cells)
+        if (cell.invalidRaw != null && locked.contains(cell.key.colonneId))
+          _clearedInvalid(cell)
+        else
+          cell,
+    ];
+  }
+
+  CoteCell _clearedInvalid(CoteCell cell) {
+    unawaited(_repository.clearInvalid(cell.key));
+    return cell.withInvalidRaw(null);
   }
 
   static int _compareNames(CoteEleve a, CoteEleve b) =>
@@ -226,39 +259,85 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     emit(s.copyWith(currentId: s.eleves[next].studentId));
   }
 
-  Future<void> _onEdited(
-    CoteCellEdited event,
+  /// Le maximum de la cellule, `null` si elle ne se saisit pas.
+  int? _maxOf(CoteSaisieReady s, CoteCellKey key) {
+    final column = s.year.where((c) => c.isInput && c.id == key.colonneId);
+    final course = s.cours.where((c) => c.coursId == key.coursId);
+    if (column.isEmpty || course.isEmpty) return null;
+    if (column.first.locked || !column.first.appliesTo(course.first)) {
+      return null;
+    }
+    return column.first.maxFor(course.first);
+  }
+
+  Future<void> _onTyped(
+    CoteCellTyped event,
     Emitter<CoteSaisieState> emit,
   ) async {
     final s = state;
+    if (s is! CoteSaisieReady) return;
+    final max = _maxOf(s, event.key);
+    if (max == null) return;
+    final step = nextCoteEdit(
+      _repository,
+      event.base,
+      parseCoteInput(event.raw, max),
+      event.raw,
+    );
+    final preview = step?.cell ?? event.base;
+    _previews[event.key] = preview;
+    emit(_withCell(s, preview, event.key.studentId));
+  }
+
+  Future<void> _onCommitted(
+    CoteCellCommitted event,
+    Emitter<CoteSaisieState> emit,
+  ) async {
+    _previews.remove(event.key);
+    final s = state;
     final classroomId = _classroomId;
     if (s is! CoteSaisieReady || classroomId == null) return;
-    final key = event.key;
-    final column = s.year.where((c) => c.isInput && c.id == key.colonneId);
-    final course = s.cours.where((c) => c.coursId == key.coursId);
-    if (column.isEmpty || course.isEmpty) return;
-    if (column.first.locked || !column.first.appliesTo(course.first)) return;
-
-    final cell =
-        s.cells.cell(key.studentId, key.coursId, key.colonneId) ??
-        CoteCell(key: key);
-    final input = parseCoteInput(event.raw, column.first.maxFor(course.first));
-    final step = nextCoteEdit(_repository, cell, input, event.raw);
-    if (step == null) return;
-
-    emit(_withCell(s, step.cell, key.studentId));
+    final max = _maxOf(s, event.key);
+    if (max == null) return;
+    final step = nextCoteEdit(
+      _repository,
+      event.base,
+      parseCoteInput(event.raw, max),
+      event.raw,
+    );
+    if (step == null) {
+      emit(_withCell(s, event.base, event.key.studentId));
+      return;
+    }
+    emit(_withCell(s, step.cell, event.key.studentId));
     final result = await step.write(classroomId);
     result.fold(
       (_) {
         final current = state;
-        if (current is CoteSaisieReady) {
-          emit(current.copyWith(storageFailed: true));
-        }
+        if (current is! CoteSaisieReady) return;
+        emit(
+          _withCell(
+            current,
+            event.base,
+            event.key.studentId,
+          ).copyWith(storageFailures: current.storageFailures + 1),
+        );
       },
       (_) {
         if (step.sends) onCellWritten?.call();
       },
     );
+  }
+
+  Future<void> _onReverted(
+    CoteCellReverted event,
+    Emitter<CoteSaisieState> emit,
+  ) async {
+    _previews.remove(event.base.key);
+    final s = state;
+    if (s is CoteSaisieReady) {
+      emit(_withCell(s, event.base, event.base.key.studentId));
+    }
   }
 
   CoteSaisieReady _withCell(
@@ -299,6 +378,8 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     final s = state;
     if (s is! CoteSaisieReady || classroomId == null) return;
     final cells = await _repository.readCells(classroomId);
+    // Pas `Ready` ici (un chargement) : les signalements attendent le prochain
+    // passage, ils ne se consomment pas dans le vide.
     final superseded = await _repository.takeSuperseded(classroomId);
     final changed = superseded.getOrElse(() => const <CoteCellKey>[]);
     cells.fold((_) {}, (list) {
@@ -307,19 +388,21 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
       emit(
         _recomputed(
           current,
-          cells: CoteCellTable.of(list),
+          cells: _previews.values.fold<CoteCellTable>(
+            CoteCellTable.of(list),
+            (table, preview) => table.withCell(preview),
+          ),
           changedKeys: changed.isEmpty ? null : changed.toSet(),
           changedNotice: changed.isEmpty ? null : current.changedNotice + 1,
           changedCount: changed.isEmpty ? null : changed.length,
         ),
       );
     });
-    if (changed.isNotEmpty) {
+    if (changed.isNotEmpty && !isClosed) {
       _highlight?.cancel();
-      _highlight = Timer(
-        AppMotion.changedCellHighlight,
-        () => add(const CoteHighlightCleared()),
-      );
+      _highlight = Timer(AppMotion.changedCellHighlight, () {
+        if (!isClosed) add(const CoteHighlightCleared());
+      });
     }
   }
 

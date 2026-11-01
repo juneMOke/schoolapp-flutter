@@ -81,7 +81,7 @@ class CoteBulletinHeader extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             _Kpi(
-              value: percent == null ? '—' : '$percent %',
+              value: percent == null ? '—' : l10n.cotePercent(percent),
               label: calc.provisoire && percent != null
                   ? l10n.coteKpiProvisional
                   : l10n.coteKpiPercent,

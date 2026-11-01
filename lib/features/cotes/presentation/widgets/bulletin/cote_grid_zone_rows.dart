@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
 
 /// Se reconstruit quand les chiffres de cet élève bougent, jamais pour un autre.
 class CoteStudentBuilder extends StatelessWidget {
@@ -28,6 +30,23 @@ class CoteStudentBuilder extends StatelessWidget {
           : const SizedBox.shrink(),
     );
   }
+}
+
+/// Le filet gauche d'une colonne : plus marqué au début de chaque groupe.
+Border coteColumnEdge(CoteColumn column, CoteGridContext grid) {
+  final first = grid.columns.first == column;
+  final startsGroup =
+      !first &&
+      grid.columns[grid.columns.indexOf(column) - 1].periodeId !=
+          column.periodeId;
+  return Border(
+    left: first
+        ? BorderSide.none
+        : BorderSide(
+            color: startsGroup ? AppColors.borderStrong : AppColors.border,
+            width: startsGroup ? 2 : 1,
+          ),
+  );
 }
 
 /// Le style des lignes de pied sombres.

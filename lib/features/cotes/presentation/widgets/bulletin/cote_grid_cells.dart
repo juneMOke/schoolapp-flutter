@@ -31,14 +31,13 @@ class CoteCourseCells extends StatelessWidget {
       child: Row(
         children: [
           for (final column in grid.columns)
-            SizedBox(
+            Container(
               width: grid.metrics.widthOf(column),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.coteCellHorizontalPadding,
-                ),
-                child: _Cell(cours: row.cours, column: column, grid: grid),
+              decoration: BoxDecoration(border: coteColumnEdge(column, grid)),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.coteCellHorizontalPadding,
               ),
+              child: _Cell(cours: row.cours, column: column, grid: grid),
             ),
         ],
       ),
@@ -103,6 +102,7 @@ class _Cell extends StatelessWidget {
       height: height,
       columnLabel: CoteLabels.columnLong(l10n, grid.classe, column),
       enterMove: grid.enterMove,
+      dense: grid.metrics.dense,
     );
   }
 }

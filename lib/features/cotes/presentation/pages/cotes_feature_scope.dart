@@ -41,8 +41,9 @@ class _CotesFeatureScopeState extends State<CotesFeatureScope> {
 
   @override
   void dispose() {
-    _saveCubit.close();
-    _saisieBloc.close();
+    // Le bloc d'abord : la dernière case quittée s'y écrit encore, et le cubit
+    // ne se ferme qu'après l'avoir envoyée.
+    _saisieBloc.close().whenComplete(_saveCubit.close);
     _academicYearContextBloc.close();
     _classroomOfflineBloc.close();
     super.dispose();
