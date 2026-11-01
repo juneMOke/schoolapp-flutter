@@ -1,5 +1,5 @@
 {
-  "description": "Vecteurs de référence du moteur de paie v3 (formule 3) (hr). Même fichier côté tablette : un moteur qui diverge fait échouer la CI des deux dépôts. Montants en centimes ; le pointage lu est celui du mois même ; absence = min(base × NJ ÷ J arrondi demi vers le haut, base), J = jours du lundi au vendredi du mois civil, NJ borné à [0, J], si absenceDeductionEnabled ; mois yyyy-MM ; settings absent = défauts ; childcareEnabled faux = PC/E à 0 ; payout absent = 100 %. net = brut − absence − IPR − CNSS − PC/E − échéances ; à verser = min(net, montant fixe), sinon net × taux ÷ 100 arrondi demi vers le haut. Empreinte : staffMemberId|currency|gross|absence|ipr|cnss|childcare|advance|net|toPay, triées, jointes par \\n, SHA-256.",
+  "description": "Vecteurs de référence du moteur de paie v3 (formule 3) (hr). Même fichier côté tablette : un moteur qui diverge fait échouer la CI des deux dépôts. Montants en centimes ; le pointage lu est celui du mois même ; absence = min(base × NJ ÷ J arrondi demi vers le haut, base), J = jours du lundi au vendredi du mois civil, NJ borné à [0, J], si absenceDeductionEnabled ; mois yyyy-MM ; settings absent = défauts ; childcareEnabled faux = PC/E à 0 ; payout absent = 100 %. net = brut − absence − IPR − CNSS − PC/E − rubriques − échéances ; à verser = min(net, montant fixe), sinon net × taux ÷ 100 arrondi demi vers le haut. Rubriques : deductionTypes est le catalogue du cas, staff[].deductions les saisies du mois ; pour chaque rubrique, la saisie (même à 0), sinon le défaut d'une rubrique non archivée (MonthDeductions). Le moteur garde celles dont le montant est supérieur à 0 et la devise celle de la ligne, par sortOrder puis forme texte de deductionTypeId, chacune min(saisi, capacité), le reste perdu ; une saisie supérieure à 0 d'une autre devise est un écart (currencyMismatches), pas un défaut. Empreinte : staffMemberId|currency|gross|absence|ipr|cnss|childcare|advance|net|toPay, plus |typeId:taken,typeId:taken pour une ligne qui porte une rubrique, triées, jointes par \\n, SHA-256.",
   "defaultSettings": {
     "monthlyHoursDivisor": 173,
     "overtimeMultiplierPermille": 1300,
@@ -2895,6 +2895,2064 @@
           }
         ],
         "linesDigest": "c1964b69097f15d511780aa4b47c4c852d92f0d8c99c34f3c68c0fb421d6bdc2"
+      }
+    },
+    {
+      "name": "retenues de l'école : deux rubriques, ordre croissant puis forme texte de l'identifiant (l'ordre signé de UUID.compareTo mettrait 8… avant 0…)",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0001",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0001",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": [
+            {
+              "deductionTypeId": "f0000000-0000-4000-8000-00000000a003",
+              "amountInCents": 700,
+              "currency": "USD"
+            },
+            {
+              "deductionTypeId": "80000000-0000-4000-8000-00000000a002",
+              "amountInCents": 500,
+              "currency": "USD"
+            },
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+              "amountInCents": 300,
+              "currency": "USD"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0001",
+            "contractId": "00000000-0000-4000-8000-0000000d0001",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 28500,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 28500,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "f0000000-0000-4000-8000-00000000a003",
+                "label": "Tenue",
+                "requestedInCents": 700,
+                "takenInCents": 700
+              },
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+                "label": "Cotisation",
+                "requestedInCents": 300,
+                "takenInCents": 300
+              },
+              {
+                "deductionTypeId": "80000000-0000-4000-8000-00000000a002",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 1500,
+            "advanceInCents": 0,
+            "netInCents": 28500,
+            "toPayInCents": 28500
+          }
+        ],
+        "linesDigest": "e27bedc9c381fe87e69cd940f06a7f544b67c4b7f78aafa3609904eb05074e53",
+        "currencyMismatches": []
+      },
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000a001",
+          "label": "Cotisation",
+          "sortOrder": 10,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        },
+        {
+          "id": "80000000-0000-4000-8000-00000000a002",
+          "label": "Frais des cartes",
+          "sortOrder": 10,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        },
+        {
+          "id": "f0000000-0000-4000-8000-00000000a003",
+          "label": "Tenue",
+          "sortOrder": 5,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        }
+      ]
+    },
+    {
+      "name": "retenues de l'école : rognées dans la limite du brut, la dernière retenue à 0 reste listée et entre dans l'empreinte avec :0",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0002",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0002",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 1000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+              "amountInCents": 600,
+              "currency": "USD"
+            },
+            {
+              "deductionTypeId": "80000000-0000-4000-8000-00000000a002",
+              "amountInCents": 600,
+              "currency": "USD"
+            },
+            {
+              "deductionTypeId": "f0000000-0000-4000-8000-00000000a003",
+              "amountInCents": 100,
+              "currency": "USD"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0002",
+            "contractId": "00000000-0000-4000-8000-0000000d0002",
+            "currency": "USD",
+            "baseInCents": 1000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 1000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 0,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 0,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+                "label": "Cotisation",
+                "requestedInCents": 600,
+                "takenInCents": 600
+              },
+              {
+                "deductionTypeId": "80000000-0000-4000-8000-00000000a002",
+                "label": "Frais des cartes",
+                "requestedInCents": 600,
+                "takenInCents": 400
+              },
+              {
+                "deductionTypeId": "f0000000-0000-4000-8000-00000000a003",
+                "label": "Tenue",
+                "requestedInCents": 100,
+                "takenInCents": 0
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 1000,
+            "deductionInCents": 1000,
+            "advanceInCents": 0,
+            "netInCents": 0,
+            "toPayInCents": 0
+          }
+        ],
+        "linesDigest": "bf1630a748f051b88db50812a9e16d3faf8795153b11383b1cc74078dc910ab8",
+        "currencyMismatches": []
+      },
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000a001",
+          "label": "Cotisation",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        },
+        {
+          "id": "80000000-0000-4000-8000-00000000a002",
+          "label": "Frais des cartes",
+          "sortOrder": 2,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        },
+        {
+          "id": "f0000000-0000-4000-8000-00000000a003",
+          "label": "Tenue",
+          "sortOrder": 3,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        }
+      ]
+    },
+    {
+      "name": "retenues de l'école : prises après la PC/E et avant les avances, l'échéance rognée glisse au mois suivant",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0003",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0003",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 10000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+              "amountInCents": 4000,
+              "currency": "USD"
+            }
+          ],
+          "variables": {
+            "childcareInCents": 2000
+          },
+          "advances": [
+            {
+              "advanceId": "00000000-0000-4000-8000-00000000ad01",
+              "amountInCents": 6000,
+              "currency": "USD",
+              "installments": 1,
+              "firstMonth": "2026-10",
+              "maturedMonths": 0,
+              "alreadyTaken": 0
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0003",
+            "contractId": "00000000-0000-4000-8000-0000000d0003",
+            "currency": "USD",
+            "baseInCents": 10000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 100,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 10000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 2000,
+            "advances": [
+              {
+                "advanceId": "00000000-0000-4000-8000-00000000ad01",
+                "rank": 1,
+                "due": 6000,
+                "taken": 4000,
+                "carried": 2000
+              }
+            ],
+            "advanceInCents": 4000,
+            "netInCents": 0,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 0,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+                "label": "Frais des cartes",
+                "requestedInCents": 4000,
+                "takenInCents": 4000
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 10000,
+            "deductionInCents": 6000,
+            "advanceInCents": 4000,
+            "netInCents": 0,
+            "toPayInCents": 0
+          }
+        ],
+        "linesDigest": "3bc1b1073a3e80568a332ba8f3196c92fe822cff73e6593de98c2f5b02296c67",
+        "currencyMismatches": []
+      },
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000a001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        }
+      ]
+    },
+    {
+      "name": "retenues de l'école : une rubrique archivée dont le montant reste saisi compte encore",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0004",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0004",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+              "amountInCents": 500,
+              "currency": "USD"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0004",
+            "contractId": "00000000-0000-4000-8000-0000000d0004",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29500,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 500,
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "toPayInCents": 29500
+          }
+        ],
+        "linesDigest": "cb188074de4b33f1ad1a6adedbb3757d325efba8a3a67c176d01323498c023a6",
+        "currencyMismatches": []
+      },
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000a001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": true
+        }
+      ]
+    },
+    {
+      "name": "retenues de l'école : une saisie dans une autre devise n'est pas comptée et laisse la forme canonique de la ligne ; à 0, elle n'est pas un écart",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0005",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0005",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+              "amountInCents": 1500000,
+              "currency": "CDF"
+            },
+            {
+              "deductionTypeId": "80000000-0000-4000-8000-00000000a002",
+              "amountInCents": 0,
+              "currency": "CDF"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0005",
+            "contractId": "00000000-0000-4000-8000-0000000d0005",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 30000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 0,
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "toPayInCents": 30000
+          }
+        ],
+        "linesDigest": "81000af53072b567f483a64d6e5361ae127466b71d7ab073bd53e2d9cd6b20af",
+        "currencyMismatches": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0005",
+            "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+            "currency": "CDF",
+            "lineCurrency": "USD"
+          }
+        ]
+      },
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000a001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "CDF",
+          "defaultAmountInCents": 0,
+          "archived": false
+        },
+        {
+          "id": "80000000-0000-4000-8000-00000000a002",
+          "label": "Tenue",
+          "sortOrder": 2,
+          "currency": "CDF",
+          "defaultAmountInCents": 0,
+          "archived": false
+        }
+      ]
+    },
+    {
+      "name": "retenues de l'école : les saisies à 0 ne comptent pas et laissent la forme canonique de la ligne",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0006",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0006",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+              "amountInCents": 0,
+              "currency": "USD"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0006",
+            "contractId": "00000000-0000-4000-8000-0000000d0006",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 30000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 0,
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "toPayInCents": 30000
+          }
+        ],
+        "linesDigest": "a9f1fc4f4cc3b58b01a6a05ad0ae5a16f4f8728c70ef2cbc4fa4238e50e7e25f",
+        "currencyMismatches": []
+      },
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000a001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        }
+      ]
+    },
+    {
+      "name": "retenues de l'école : un livre mêlant une ligne avec rubrique et une ligne sans, taux du mois à 50 %",
+      "month": "2026-10",
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0007",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0007",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 30001,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+              "amountInCents": 500,
+              "currency": "USD"
+            }
+          ]
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-0000000c0008",
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-8000-0000000d0008",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2025-09-01",
+              "endsOn": null,
+              "amountInCents": 20000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "attendance": {
+            "workedMinutes": 0,
+            "unjustifiedAbsences": 0,
+            "justifiedAbsences": 0,
+            "lates": 0,
+            "lateMinutes": 0
+          },
+          "deductions": []
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0007",
+            "contractId": "00000000-0000-4000-8000-0000000d0007",
+            "currency": "USD",
+            "baseInCents": 30001,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30001,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29501,
+            "payoutPercent": 50,
+            "fixedPayoutInCents": null,
+            "payoutReason": "Trésorerie du mois",
+            "toPayInCents": 14751,
+            "deferredInCents": 14750,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000a001",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-0000000c0008",
+            "contractId": "00000000-0000-4000-8000-0000000d0008",
+            "currency": "USD",
+            "baseInCents": 20000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 150,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 20000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 20000,
+            "payoutPercent": 50,
+            "fixedPayoutInCents": null,
+            "payoutReason": "Trésorerie du mois",
+            "toPayInCents": 10000,
+            "deferredInCents": 10000,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          }
+        ],
+        "withoutContract": [],
+        "formulaVersion": 3,
+        "lineCount": 2,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 50001,
+            "deductionInCents": 500,
+            "advanceInCents": 0,
+            "netInCents": 49501,
+            "toPayInCents": 24751
+          }
+        ],
+        "linesDigest": "431ae21d5518802369cee1e0c100a8028ef10478f831cc56cb8c9573c846454b",
+        "currencyMismatches": []
+      },
+      "payout": {
+        "percent": 50,
+        "reason": "Trésorerie du mois"
+      },
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000a001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 0,
+          "archived": false
+        }
+      ]
+    },
+    {
+      "name": "montant par défaut : sans saisie, le défaut est retenu",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 500,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000101",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000101",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000101",
+            "contractId": "00000000-0000-4000-9000-000000000101",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29500,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 500,
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "toPayInCents": 29500
+          }
+        ],
+        "linesDigest": "c3bd26fbba52414d8e1ca0f17f4bbdbae51c1fcd2bb7ec48577f72e1ef96b96c"
+      }
+    },
+    {
+      "name": "montant par défaut : une saisie le remplace, plus haute puis plus basse",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 500,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000201",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000201",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+              "amountInCents": 900,
+              "currency": "USD"
+            }
+          ]
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000202",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000202",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+              "amountInCents": 200,
+              "currency": "USD"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000201",
+            "contractId": "00000000-0000-4000-9000-000000000201",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29100,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29100,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Frais des cartes",
+                "requestedInCents": 900,
+                "takenInCents": 900
+              }
+            ]
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000202",
+            "contractId": "00000000-0000-4000-9000-000000000202",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29800,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29800,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Frais des cartes",
+                "requestedInCents": 200,
+                "takenInCents": 200
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 2,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 60000,
+            "deductionInCents": 1100,
+            "advanceInCents": 0,
+            "netInCents": 58900,
+            "toPayInCents": 58900
+          }
+        ],
+        "linesDigest": "5df1a93aca668609500b6e32a77853efbf568ad96271d0037afa8d4d7840121f"
+      }
+    },
+    {
+      "name": "montant par défaut : une saisie à 0 l'écarte et laisse la forme canonique de la ligne",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 500,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000301",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000301",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+              "amountInCents": 0,
+              "currency": "USD"
+            }
+          ]
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000302",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000302",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000301",
+            "contractId": "00000000-0000-4000-9000-000000000301",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 30000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000302",
+            "contractId": "00000000-0000-4000-9000-000000000302",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29500,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 2,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 60000,
+            "deductionInCents": 500,
+            "advanceInCents": 0,
+            "netInCents": 59500,
+            "toPayInCents": 59500
+          }
+        ],
+        "linesDigest": "e91cd1088b7a996128885d276d14c49fa1a64faa3d4de918ab5e10182f7a8dd9"
+      }
+    },
+    {
+      "name": "montant par défaut : un agent d'une autre devise n'a pas la rubrique, et ce n'est pas un écart",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 500,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000401",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000401",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000402",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000402",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 90000000,
+              "currency": "CDF",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000401",
+            "contractId": "00000000-0000-4000-9000-000000000401",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29500,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000402",
+            "contractId": "00000000-0000-4000-9000-000000000402",
+            "currency": "CDF",
+            "baseInCents": 90000000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 700000,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 90000000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 90000000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 90000000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 2,
+        "totals": [
+          {
+            "currency": "CDF",
+            "grossInCents": 90000000,
+            "deductionInCents": 0,
+            "advanceInCents": 0,
+            "netInCents": 90000000,
+            "toPayInCents": 90000000
+          },
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 500,
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "toPayInCents": 29500
+          }
+        ],
+        "linesDigest": "b8470b17de6f073a86f9c9bc2258855ce067aee5c3de11f16cf4827af53c6f66"
+      }
+    },
+    {
+      "name": "montant par défaut : une rubrique archivée ne l'applique plus, un montant saisi compte encore",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 500,
+          "archived": true
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000501",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000501",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000502",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000502",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+              "amountInCents": 700,
+              "currency": "USD"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000501",
+            "contractId": "00000000-0000-4000-9000-000000000501",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 30000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 30000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": []
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000502",
+            "contractId": "00000000-0000-4000-9000-000000000502",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29300,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29300,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Frais des cartes",
+                "requestedInCents": 700,
+                "takenInCents": 700
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 2,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 60000,
+            "deductionInCents": 700,
+            "advanceInCents": 0,
+            "netInCents": 59300,
+            "toPayInCents": 59300
+          }
+        ],
+        "linesDigest": "5bfdb36e6534ae2c21006345cea7806f98e72359a279cc05ae8cec41c541af02"
+      }
+    },
+    {
+      "name": "montant par défaut : deux défauts rognés au brut restant, dans l'ordre de sortOrder",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Tenue",
+          "sortOrder": 2,
+          "currency": "USD",
+          "defaultAmountInCents": 2000,
+          "archived": false
+        },
+        {
+          "id": "80000000-0000-4000-8000-00000000b002",
+          "label": "Cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 2000,
+          "archived": false
+        },
+        {
+          "id": "f0000000-0000-4000-8000-00000000b003",
+          "label": "Mutuelle",
+          "sortOrder": 3,
+          "currency": "USD",
+          "defaultAmountInCents": 700,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000601",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000601",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 3000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000601",
+            "contractId": "00000000-0000-4000-9000-000000000601",
+            "currency": "USD",
+            "baseInCents": 3000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 0,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 3000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 0,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 0,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "80000000-0000-4000-8000-00000000b002",
+                "label": "Cartes",
+                "requestedInCents": 2000,
+                "takenInCents": 2000
+              },
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Tenue",
+                "requestedInCents": 2000,
+                "takenInCents": 1000
+              },
+              {
+                "deductionTypeId": "f0000000-0000-4000-8000-00000000b003",
+                "label": "Mutuelle",
+                "requestedInCents": 700,
+                "takenInCents": 0
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 3000,
+            "deductionInCents": 3000,
+            "advanceInCents": 0,
+            "netInCents": 0,
+            "toPayInCents": 0
+          }
+        ],
+        "linesDigest": "07bd52f8ef46f97212b57f9a39ee8a1442357f1e37371d245b85d1cb9b802873"
+      }
+    },
+    {
+      "name": "montant par défaut : un mois sans aucune saisie, la même rubrique en USD et en CDF sur deux agents",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 500,
+          "archived": false
+        },
+        {
+          "id": "80000000-0000-4000-8000-00000000b002",
+          "label": "Frais des cartes",
+          "sortOrder": 1,
+          "currency": "CDF",
+          "defaultAmountInCents": 1400000,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000701",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000701",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        },
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000702",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000702",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 90000000,
+              "currency": "CDF",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000701",
+            "contractId": "00000000-0000-4000-9000-000000000701",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29500,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Frais des cartes",
+                "requestedInCents": 500,
+                "takenInCents": 500
+              }
+            ]
+          },
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000702",
+            "contractId": "00000000-0000-4000-9000-000000000702",
+            "currency": "CDF",
+            "baseInCents": 90000000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 700000,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 90000000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 88600000,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 88600000,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "80000000-0000-4000-8000-00000000b002",
+                "label": "Frais des cartes",
+                "requestedInCents": 1400000,
+                "takenInCents": 1400000
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 2,
+        "totals": [
+          {
+            "currency": "CDF",
+            "grossInCents": 90000000,
+            "deductionInCents": 1400000,
+            "advanceInCents": 0,
+            "netInCents": 88600000,
+            "toPayInCents": 88600000
+          },
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 500,
+            "advanceInCents": 0,
+            "netInCents": 29500,
+            "toPayInCents": 29500
+          }
+        ],
+        "linesDigest": "f15a3252c4c70723047be9185c0fe2b59b759491a22662161a336aba7e4d475a"
+      }
+    },
+    {
+      "name": "montant par défaut : un conventionné sans devise de prime est payé dans la première devise réglée, pas celle du montant",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Cartes",
+          "sortOrder": 1,
+          "currency": "USD",
+          "defaultAmountInCents": 300,
+          "archived": false
+        },
+        {
+          "id": "80000000-0000-4000-8000-00000000b002",
+          "label": "Tenue",
+          "sortOrder": 2,
+          "currency": "CDF",
+          "defaultAmountInCents": 800000,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000801",
+          "profileChildren": 2,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000801",
+              "kind": "CONVENTIONNE",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 90000000,
+              "currency": "CDF",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000801",
+            "contractId": "00000000-0000-4000-9000-000000000801",
+            "currency": "USD",
+            "baseInCents": 0,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 300,
+            "overtimeInCents": 0,
+            "dependentChildren": 2,
+            "allowanceInCents": 1000,
+            "grossInCents": 1000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 700,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 700,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+                "label": "Cartes",
+                "requestedInCents": 300,
+                "takenInCents": 300
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 1000,
+            "deductionInCents": 300,
+            "advanceInCents": 0,
+            "netInCents": 700,
+            "toPayInCents": 700
+          }
+        ],
+        "linesDigest": "9966ffe787c009a48218bcd798d496b21b5462b801e06072a893b562ffe9de99"
+      }
+    },
+    {
+      "name": "montant par défaut : une saisie d'une autre devise reste un écart, le défaut d'à côté s'applique",
+      "month": "2026-10",
+      "deductionTypes": [
+        {
+          "id": "00000000-0000-4000-8000-00000000b001",
+          "label": "Cartes",
+          "sortOrder": 1,
+          "currency": "CDF",
+          "defaultAmountInCents": 800000,
+          "archived": false
+        },
+        {
+          "id": "80000000-0000-4000-8000-00000000b002",
+          "label": "Tenue",
+          "sortOrder": 2,
+          "currency": "USD",
+          "defaultAmountInCents": 400,
+          "archived": false
+        }
+      ],
+      "staff": [
+        {
+          "staffMemberId": "00000000-0000-4000-8000-000000000901",
+          "profileChildren": null,
+          "contracts": [
+            {
+              "id": "00000000-0000-4000-9000-000000000901",
+              "kind": "PERMANENT",
+              "payMode": null,
+              "effectiveFrom": "2026-01-01",
+              "endsOn": null,
+              "amountInCents": 30000,
+              "currency": "USD",
+              "bonusInCents": null,
+              "bonusCurrency": null
+            }
+          ],
+          "deductions": [
+            {
+              "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+              "amountInCents": 900000,
+              "currency": "CDF"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "lines": [
+          {
+            "formulaVersion": 3,
+            "staffMemberId": "00000000-0000-4000-8000-000000000901",
+            "contractId": "00000000-0000-4000-9000-000000000901",
+            "currency": "USD",
+            "baseInCents": 30000,
+            "baseMinutes": null,
+            "hoursMonth": null,
+            "overtimeMinutes": 0,
+            "overtimeRateInCents": 250,
+            "overtimeInCents": 0,
+            "dependentChildren": 0,
+            "allowanceInCents": 0,
+            "grossInCents": 30000,
+            "unjustifiedAbsences": 0,
+            "workDaysDivisor": 22,
+            "absenceInCents": 0,
+            "iprInCents": 0,
+            "cnssInCents": 0,
+            "childcareInCents": 0,
+            "advances": [],
+            "advanceInCents": 0,
+            "netInCents": 29600,
+            "payoutPercent": 100,
+            "fixedPayoutInCents": null,
+            "payoutReason": null,
+            "toPayInCents": 29600,
+            "deferredInCents": 0,
+            "attendanceMonth": "2026-10",
+            "customDeductions": [
+              {
+                "deductionTypeId": "80000000-0000-4000-8000-00000000b002",
+                "label": "Tenue",
+                "requestedInCents": 400,
+                "takenInCents": 400
+              }
+            ]
+          }
+        ],
+        "withoutContract": [],
+        "currencyMismatches": [
+          {
+            "staffMemberId": "00000000-0000-4000-8000-000000000901",
+            "deductionTypeId": "00000000-0000-4000-8000-00000000b001",
+            "currency": "CDF",
+            "lineCurrency": "USD"
+          }
+        ],
+        "formulaVersion": 3,
+        "lineCount": 1,
+        "totals": [
+          {
+            "currency": "USD",
+            "grossInCents": 30000,
+            "deductionInCents": 400,
+            "advanceInCents": 0,
+            "netInCents": 29600,
+            "toPayInCents": 29600
+          }
+        ],
+        "linesDigest": "60ff698abcd9b6f5dac9d05cf5b3b71feca684b22a5cd9eea93bc07897b07907"
       }
     }
   ]
