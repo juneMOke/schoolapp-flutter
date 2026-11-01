@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction_codes.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 
 /// Une règle de la paie que le geste ne respecte pas — refusée **avant** la
@@ -22,6 +23,10 @@ enum PayrollRule {
   workedDaysOutOfRange,
   invalidAmount,
   invalidInstallments,
+
+  /// L'école a coupé les avances ou les prêts : plus de nouvelle demande. Ce
+  /// qui court, ou ce qui est déjà approuvé, va jusqu'au bout.
+  advanceKindDisabled,
 
   /// Le mois de départ d'une avance est déjà soumis ou validé.
   monthLocked,
@@ -66,6 +71,35 @@ enum PayrollRule {
 
   /// Les chiffres du serveur diffèrent de ceux vus (`PAYROLL_STALE`).
   stale,
+
+  /// La rubrique a déjà été saisie ou figée : elle s'archive.
+  deductionTypeInUse,
+  deductionTypeLabelTaken,
+  deductionTypeLimitReached,
+
+  /// Ce code est déjà pris dans l'école, archivées comprises.
+  deductionTypeCodeTaken,
+
+  /// Le code et la devise d'une rubrique utilisée ne changent plus.
+  deductionTypeFieldLocked,
+
+  /// La devise n'est pas réglée par l'école.
+  deductionTypeCurrencyUnknown,
+
+  /// La rubrique est archivée : seule la mise à 0 passe.
+  deductionTypeArchived,
+
+  /// La saisie est dans une autre devise que la ligne du mois.
+  deductionCurrencyMismatch,
+
+  /// La rubrique visée a été supprimée, ou refusée.
+  deductionTypeGone,
+
+  /// Une saisie vise une rubrique que la tablette ne connaît pas encore.
+  deductionTypeUnknown,
+
+  /// Une modification de rubrique a été refusée : à corriger avant de soumettre.
+  deductionTypeRefused,
 }
 
 class PayrollRuleFailure extends ValidationFailure {
@@ -83,6 +117,9 @@ extension PayrollBlockerRule on PayrollBlocker {
     PayrollBlocker.previousNotValidated => PayrollRule.previousNotValidated,
     PayrollBlocker.attendanceOpen => PayrollRule.attendanceOpen,
     PayrollBlocker.hasDisbursements => PayrollRule.hasDisbursements,
+    PayrollBlocker.deductionCurrency => PayrollRule.deductionCurrencyMismatch,
+    PayrollBlocker.deductionTypeUnknown => PayrollRule.deductionTypeUnknown,
+    PayrollBlocker.deductionTypeRefused => PayrollRule.deductionTypeRefused,
   };
 }
 
@@ -99,6 +136,7 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'INVALID_DAYS_WORKED' => PayrollRule.workedDaysOutOfRange,
   'STAFF_NOT_ON_PAYROLL' => PayrollRule.noContract,
   'ADVANCE_MONTH_LOCKED' => PayrollRule.monthLocked,
+  'ADVANCE_KIND_DISABLED' => PayrollRule.advanceKindDisabled,
   'ADVANCE_CURRENCY_MISMATCH' ||
   'DISBURSEMENT_CURRENCY_MISMATCH' ||
   'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,
@@ -120,7 +158,20 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'INVALID_DISBURSEMENT' ||
   'INVALID_PAY_PROFILE' ||
   'INVALID_PAYROLL_SETTINGS' ||
-  'INVALID_PAYOUT' => PayrollRule.invalidData,
+  'INVALID_PAYOUT' ||
+  PayrollDeductionCodes.invalidType => PayrollRule.invalidData,
+  PayrollDeductionCodes.inUse => PayrollRule.deductionTypeInUse,
+  PayrollDeductionCodes.labelTaken => PayrollRule.deductionTypeLabelTaken,
+  PayrollDeductionCodes.limitReached => PayrollRule.deductionTypeLimitReached,
+  PayrollDeductionCodes.codeTaken => PayrollRule.deductionTypeCodeTaken,
+  PayrollDeductionCodes.fieldLocked => PayrollRule.deductionTypeFieldLocked,
+  PayrollDeductionCodes.currencyUnknown =>
+    PayrollRule.deductionTypeCurrencyUnknown,
+  PayrollDeductionCodes.archived => PayrollRule.deductionTypeArchived,
+  PayrollDeductionCodes.currencyMismatch =>
+    PayrollRule.deductionCurrencyMismatch,
+  PayrollDeductionCodes.tombstoned ||
+  PayrollDeductionCodes.typeRefused => PayrollRule.deductionTypeGone,
   final code? when code.endsWith('_ID_CONFLICT') => PayrollRule.invalidData,
   _ => null,
 };

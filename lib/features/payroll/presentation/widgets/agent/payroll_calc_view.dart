@@ -49,12 +49,11 @@ class PayrollCalcView extends StatelessWidget {
           value: content.gross.value,
         ),
         _Section(number: 2, title: l10n.payrollCalcDeductions),
-        for (final (index, row)
-            in deductions.take(deductions.length - 1).indexed)
+        for (final row in deductions.take(deductions.length - 1))
           _CalcRow(
             sign: '−',
             label: row.label,
-            note: index == PayrollPayslipRows.absenceIndex
+            note: row.label == l10n.payrollPayslipAbsence
                 ? _absenceNote(context) ?? row.note
                 : row.note,
             value: row.value,

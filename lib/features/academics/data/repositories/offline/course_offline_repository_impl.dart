@@ -32,6 +32,7 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/s
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/cotes/data/datasources/ref_cote_cours_local_data_source.dart';
 import 'package:school_app_flutter/features/classes/data/models/offline/classroom_member_dto.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 
@@ -69,6 +70,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
   final SyncMetaDao _syncMetaDao;
   final EnrollmentReferentialDao _referentialDao;
   final CurrentUserContext? _currentUser;
+  final RefCoteCoursLocalDataSource? _coteLocal;
 
   const CourseOfflineRepositoryImpl({
     required CourseRepository online,
@@ -79,6 +81,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     required SyncMetaDao syncMetaDao,
     required EnrollmentReferentialDao referentialDao,
     CurrentUserContext? currentUser,
+    RefCoteCoursLocalDataSource? coteLocalDataSource,
   }) : _online = online,
        _academicsLocal = academicsLocalDataSource,
        _academicsRefLocal = academicsRefLocalDataSource,
@@ -86,7 +89,8 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
        _evaluationRepo = evaluationRepository,
        _syncMetaDao = syncMetaDao,
        _referentialDao = referentialDao,
-       _currentUser = currentUser;
+       _currentUser = currentUser,
+       _coteLocal = coteLocalDataSource;
 
   /// Compte dont on lit le cache (partition tablette partagée, cf.
   /// `core/offline/owner_scope.dart`).
@@ -260,6 +264,9 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
       final effectif = roster.length;
 
       final evals = await _academicsLocal.getEvaluationsForCours(coursId);
+      final cotes =
+          await _coteLocal?.readForCours(coursId) ??
+          const <String, Map<String, double>>{};
       final noted = await _academicsLocal.notedCountByEvaluation(
         evals.map((e) => e.id).toList(growable: false),
       );
@@ -301,10 +308,10 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
                           _evalSummary(ev, effectif, noted, chapitreTitles),
                         );
                       }
-                      final moyennesEleves = _moyennesEleves(
-                        spEvals,
-                        notesByEvaluation,
-                        roster,
+                      final moyennesEleves = _withCotes(
+                        _moyennesEleves(spEvals, notesByEvaluation, roster),
+                        cotes[sp.id],
+                        ligneBareme.maxJournalierParSousPeriode,
                       );
                       final classAverage = _classAverage(moyennesEleves);
                       return SousPeriodeNotation(
@@ -341,6 +348,8 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
                       noted,
                       notesByEvaluation,
                       roster,
+                      cotes[p.id],
+                      ligneBareme.maxExamenParPeriodeScolaire ?? 0,
                     ),
             );
           })
@@ -444,10 +453,16 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
     Map<String, int> noted,
     Map<String, List<NoteEvaluationRow>> notesByEvaluation,
     List<ClassroomMemberDto> roster,
+    Map<String, double>? cotes,
+    int maxExamen,
   ) {
     final n = noted[row.id] ?? 0;
     final classAverage = _classAverage(
-      _moyennesEleves([row], notesByEvaluation, roster),
+      _withCotes(
+        _moyennesEleves([row], notesByEvaluation, roster),
+        cotes,
+        maxExamen,
+      ),
     );
     return ExamenNotation(
       evaluationId: row.id,
@@ -521,6 +536,30 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
           );
         })
         .toList(growable: false);
+  }
+
+  /// La cote saisie prime sur la moyenne, comme au bulletin. Sans maximum, rien
+  /// à rapporter : la moyenne reste.
+  List<MoyenneEleve> _withCotes(
+    List<MoyenneEleve> moyennes,
+    Map<String, double>? cotes,
+    int max,
+  ) {
+    if (cotes == null || cotes.isEmpty || max <= 0) return moyennes;
+    return [
+      for (final m in moyennes)
+        if (cotes[m.studentId] case final cote?)
+          MoyenneEleve(
+            studentId: m.studentId,
+            firstName: m.firstName,
+            lastName: m.lastName,
+            middleName: m.middleName,
+            moyenne: cote / max * 100,
+            coteSaisie: true,
+          )
+        else
+          m,
+    ];
   }
 
   _ClassAverage _classAverage(List<MoyenneEleve> moyennesEleves) {

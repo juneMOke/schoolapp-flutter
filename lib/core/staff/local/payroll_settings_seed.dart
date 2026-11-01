@@ -8,6 +8,20 @@ typedef PayrollCurrencySeed = ({
   int cnssPermille,
 });
 
+/// Une rubrique de retenue de l'école, telle que le socle la sert
+/// (`deductionTypes[]`, archivées comprises).
+typedef PayrollDeductionTypeSeed = ({
+  String id,
+  String code,
+  String label,
+  String? description,
+  String currency,
+  int defaultAmountInCents,
+  int sortOrder,
+  bool archived,
+  String? clientUpdatedAt,
+});
+
 /// Les réglages de paie d'une école tels que le socle les sert (section
 /// `payrollSettings`, `PayrollSettingsDto` du serveur — la liste des devises
 /// s'y nomme `currencyRules`, comme dans le PUT et les vecteurs) : diviseur mensuel, majoration en ‰, statuts ouvrant les
@@ -42,9 +56,19 @@ class PayrollSettingsSeed {
   final int? advanceMaxPercent;
   final int? loanMaxMonths;
   final bool? childcareEnabled;
+
+  /// `null` tant que le serveur ne les sert pas : retenue active, et le champ
+  /// reste tu à la remontée.
+  final bool? legalDeductionsEnabled;
+  final bool? salaryAdvancesEnabled;
+  final bool? staffLoansEnabled;
   final String? signatureBeneficiaryLabel;
   final String? signatureDirectorLabel;
   final String? signatureCashierLabel;
+
+  /// Le catalogue des rubriques. `null` : le champ n'est pas servi, le cache
+  /// reste ; une liste vide, elle, dit que l'école n'a aucune rubrique.
+  final List<PayrollDeductionTypeSeed>? deductionTypes;
 
   const PayrollSettingsSeed({
     required this.monthlyHoursDivisor,
@@ -59,9 +83,13 @@ class PayrollSettingsSeed {
     this.advanceMaxPercent,
     this.loanMaxMonths,
     this.childcareEnabled,
+    this.legalDeductionsEnabled,
+    this.salaryAdvancesEnabled,
+    this.staffLoansEnabled,
     this.signatureBeneficiaryLabel,
     this.signatureDirectorLabel,
     this.signatureCashierLabel,
+    this.deductionTypes,
   });
 
   /// La section du socle, ou `null` quand elle n'est pas communiquée ou
@@ -109,11 +137,53 @@ class PayrollSettingsSeed {
           : null,
       loanMaxMonths: wide ? _within(raw['loanMaxMonths'], 2, 12, 4) : null,
       childcareEnabled: wide ? raw['childcareEnabled'] != false : null,
+      legalDeductionsEnabled: _switch(raw['legalDeductionsEnabled']),
+      salaryAdvancesEnabled: _switch(raw['salaryAdvancesEnabled']),
+      staffLoansEnabled: _switch(raw['staffLoansEnabled']),
       signatureBeneficiaryLabel: _label(raw['signatureBeneficiaryLabel']),
       signatureDirectorLabel: _label(raw['signatureDirectorLabel']),
       signatureCashierLabel: _label(raw['signatureCashierLabel']),
+      deductionTypes: _deductionTypes(raw['deductionTypes']),
     );
   }
+
+  /// `null` si le champ manque ou si une rubrique est illisible : la liste
+  /// fait foi, et une liste tronquée retirerait des rubriques.
+  static List<PayrollDeductionTypeSeed>? _deductionTypes(Object? raw) {
+    if (raw is! List) return null;
+    final types = <PayrollDeductionTypeSeed>[];
+    for (final item in raw) {
+      if (item is! Map) return null;
+      final id = item['id'];
+      final label = item['label'];
+      final order = item['sortOrder'];
+      if (id is! String ||
+          id.trim().isEmpty ||
+          label is! String ||
+          order is! num) {
+        return null;
+      }
+      final at = item['clientUpdatedAt'];
+      final code = item['code'];
+      final description = item['description'];
+      final currency = item['currency'];
+      final defaultAmount = item['defaultAmountInCents'];
+      types.add((
+        id: id.trim().toLowerCase(),
+        code: code is String ? code : '',
+        label: label,
+        description: description is String ? description : null,
+        currency: currency is String ? currency : '',
+        defaultAmountInCents: defaultAmount is num ? defaultAmount.toInt() : 0,
+        sortOrder: order.toInt(),
+        archived: item['archived'] == true,
+        clientUpdatedAt: at is String ? at : null,
+      ));
+    }
+    return types;
+  }
+
+  static bool? _switch(Object? raw) => raw is bool ? raw : null;
 
   /// Le serveur sert-il les réglages Q8 ? Il les sert toujours ensemble.
   bool get servesWideSettings => childcareEnabled != null;
@@ -162,6 +232,9 @@ class PayrollSettingsSeed {
     'allowanceEligibleKinds': allowanceEligibleKinds,
     'workDaysDivisor': workDaysDivisor,
     'absenceDeductionEnabled': absenceDeductionEnabled,
+    'legalDeductionsEnabled': ?legalDeductionsEnabled,
+    'salaryAdvancesEnabled': ?salaryAdvancesEnabled,
+    'staffLoansEnabled': ?staffLoansEnabled,
     if (servesWideSettings) ...{
       'cnssEmployerPermille': cnssEmployerPermille,
       'inppPermille': inppPermille,

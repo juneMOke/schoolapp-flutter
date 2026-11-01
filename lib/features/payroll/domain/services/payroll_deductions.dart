@@ -1,7 +1,9 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line_parts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_deduction_resolver.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_math.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_working_days.dart';
 
@@ -17,11 +19,14 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_work
 /// IPR      brut > 0 ? forfait[devise] : 0
 /// CNSS     roundDiv(base × ‰[devise], 1000)        (base avant absence, T4)
 /// PC/E     variable ?? 0
+/// rubriques saisie, sinon défaut de la rubrique (PayrollDeductionResolver),
+///          par `sortOrder` puis identifiant en texte
 /// ```
 /// Pris sur le brut dans cet ordre, chacun borné à ce qui reste (T3).
 abstract final class PayrollDeductions {
   static PayrollLineDeductions compute({
     required String month,
+    required String currency,
     required bool hourly,
     required int baseInCents,
     required int grossInCents,
@@ -29,6 +34,8 @@ abstract final class PayrollDeductions {
     required PayrollCurrencySettings perCurrency,
     required PayrollVariables? variables,
     required AttendanceAgentSummary attendance,
+    List<PayrollDeductionType> types = const [],
+    List<PayrollDeductionEntry> entries = const [],
   }) {
     final workingDays = hourly ? null : PayrollWorkingDays.of(month);
     final absences = workingDays == null
@@ -49,15 +56,35 @@ abstract final class PayrollDeductions {
           ? _absence(baseInCents, absences, workingDays)
           : 0,
     );
-    final ipr = take(grossInCents > 0 ? perCurrency.iprFlatInCents : 0);
+    // Coupés par l'école, ils comptent 0 ; les taux réglés restent rangés.
+    final legal = settings.legalDeductionsEnabled;
+    final ipr = take(
+      legal && grossInCents > 0 ? perCurrency.iprFlatInCents : 0,
+    );
     final cnss = take(
-      PayrollMath.roundDiv(baseInCents * perCurrency.cnssPermille, 1000),
+      legal
+          ? PayrollMath.roundDiv(baseInCents * perCurrency.cnssPermille, 1000)
+          : 0,
     );
     // Coupée par l'école (Q8), la PC/E compte 0 — le montant saisi reste
     // rangé, et revient si on la rallume. Même règle au serveur.
     final childcare = take(
       settings.childcareEnabled ? _positive(variables?.childcareInCents) : 0,
     );
+    final custom = [
+      for (final deduction in PayrollDeductionResolver.resolve(
+        types,
+        entries,
+        currency,
+      ))
+        PayrollLineCustomDeduction(
+          deductionTypeId: deduction.type.id,
+          label: deduction.type.label,
+          requestedInCents: deduction.amountInCents,
+          takenInCents: take(deduction.amountInCents),
+          fromDefault: deduction.fromDefault,
+        ),
+    ];
     return PayrollLineDeductions(
       workDaysDivisor: workingDays,
       unjustifiedAbsences: absences,
@@ -65,6 +92,7 @@ abstract final class PayrollDeductions {
       iprInCents: ipr,
       cnssInCents: cnss,
       childcareInCents: childcare,
+      custom: custom,
     );
   }
 

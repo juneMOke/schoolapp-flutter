@@ -1,9 +1,44 @@
 import 'package:equatable/equatable.dart';
 
+/// Une rubrique de l'école sur une ligne : ce qui a été saisi, et ce qui a pu
+/// être retenu. L'écart est perdu, jamais reporté. [label] est une copie : une
+/// ligne figée garde le libellé de son mois. Centimes.
+class PayrollLineCustomDeduction extends Equatable {
+  final String deductionTypeId;
+  final String label;
+  final int requestedInCents;
+  final int takenInCents;
+
+  /// Le montant vient du défaut de la rubrique, sans saisie. Affichage
+  /// seulement : l'empreinte l'ignore, et une ligne figée ne le sait plus.
+  final bool fromDefault;
+
+  const PayrollLineCustomDeduction({
+    required this.deductionTypeId,
+    required this.label,
+    required this.requestedInCents,
+    required this.takenInCents,
+    this.fromDefault = false,
+  });
+
+  /// La capacité n'a pas suffi : « saisi X, retenu Y ».
+  bool get trimmed => takenInCents < requestedInCents;
+
+  @override
+  List<Object?> get props => [
+    deductionTypeId,
+    label,
+    requestedInCents,
+    takenInCents,
+    fromDefault,
+  ];
+}
+
 /// Les retenues fixes v2 d'une ligne, dans l'ordre où elles se prennent sur
 /// le brut (T3) : l'absence non justifiée, puis l'IPR et la CNSS, puis la
-/// prise en charge des enfants. Chaque montant est **ce qui a été retenu** —
-/// ce qui ne tenait plus dans le brut est perdu, jamais reporté. Centimes.
+/// prise en charge des enfants, puis les rubriques de l'école. Chaque montant
+/// est **ce qui a été retenu** — ce qui ne tenait plus dans le brut est perdu,
+/// jamais reporté. Centimes.
 class PayrollLineDeductions extends Equatable {
   /// Le diviseur de la retenue : J, les jours ouvrés du mois, depuis la
   /// formule 3 (le réglage de l'école avant) ; `null` pour un vacataire à
@@ -20,6 +55,10 @@ class PayrollLineDeductions extends Equatable {
   final int cnssInCents;
   final int childcareInCents;
 
+  /// Les rubriques de l'école, dans l'ordre du moteur, même celles retenues à
+  /// 0 ; vide sur toute ligne antérieure.
+  final List<PayrollLineCustomDeduction> custom;
+
   const PayrollLineDeductions({
     this.workDaysDivisor,
     this.workedDays,
@@ -28,13 +67,26 @@ class PayrollLineDeductions extends Equatable {
     this.iprInCents = 0,
     this.cnssInCents = 0,
     this.childcareInCents = 0,
+    this.custom = const [],
   });
 
   /// Une ligne v1, ou une école qui ne règle rien.
   static const PayrollLineDeductions none = PayrollLineDeductions();
 
+  /// Ce que les rubriques de l'école ont retenu.
+  int get customInCents =>
+      custom.fold(0, (sum, deduction) => sum + deduction.takenInCents);
+
+  /// Tout ce que l'école retient : `net = brut − total − avances`.
   int get totalInCents =>
-      absenceInCents + iprInCents + cnssInCents + childcareInCents;
+      absenceInCents +
+      iprInCents +
+      cnssInCents +
+      childcareInCents +
+      customInCents;
+
+  /// Au moins une rubrique n'a pas pu être retenue en entier.
+  bool get hasTrimmedCustom => custom.any((deduction) => deduction.trimmed);
 
   /// Les jours d'absence retenus : NJ en formule 3, `diviseur − NJP` avant.
   int? get absentDays {
@@ -54,6 +106,7 @@ class PayrollLineDeductions extends Equatable {
     iprInCents,
     cnssInCents,
     childcareInCents,
+    custom,
   ];
 }
 

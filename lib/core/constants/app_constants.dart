@@ -858,7 +858,19 @@ class AppConstants {
   // remplaçant reprend le numéro de celui qu'il remplace. L'index unique du
   // cache sur le numéro ne vaut plus que pour les pièces sans identifiant, et
   // l'édition s'ajoute à `generated_documents` et `editique_cache_entries`.
-  static const int offlineDbSchemaVersion = 73;
+  // v74 (2026-10-31) : les retenues de l'école — `payroll_deduction_types`, le
+  // catalogue, et `payroll_deductions`, les saisies par agent et par mois.
+  // Tables neuves. Palier d'école.
+  // v75 (2026-10-31) : une rubrique porte son code, sa description, sa devise
+  // et son montant par défaut. Colonnes ajoutées ; le socle les remplit à la
+  // descente suivante. Palier d'école.
+  // v76 (2026-11-01) : l'école coupe l'IPR et la CNSS, les avances, les prêts.
+  // Trois colonnes de réglages, `NULL` : retenue active. Palier d'école.
+  // v77 (2026-11-01) : la saisie des notes par classe — `cote_classe_cache`,
+  // `cote_saisie` et `ref_cote_cours`. Trois tables neuves, aucun backfill.
+  // v78 (2026-11-01) : `ref_cote_cours.id`, l'identifiant serveur que nomme une
+  // pierre tombale. Colonne ajoutée, remplie par le flux.
+  static const int offlineDbSchemaVersion = 78;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1300,6 +1312,20 @@ class AppConstants {
   static const String syncPayrollVariablesEndpoint =
       '/api/v1/sync/payroll-variables';
 
+  /// Une rubrique de retenue de l'école (POST, `hr.pay.manage`, dernier écrit
+  /// gagne par rubrique) ; le catalogue descend avec le socle.
+  static const String syncPayrollDeductionTypesEndpoint =
+      '/api/v1/sync/payroll-deduction-types';
+
+  /// Suppression d'une rubrique jamais saisie (DELETE, `hr.pay.manage`).
+  static const String syncPayrollDeductionTypeEndpoint =
+      '/api/v1/sync/payroll-deduction-types/{id}';
+
+  /// Montant d'un agent sur une rubrique et un mois (POST, brouillon
+  /// seulement, dernier écrit gagne par ligne).
+  static const String syncPayrollDeductionsEndpoint =
+      '/api/v1/sync/payroll-deductions';
+
   /// Taux de versement d'un mois (POST, brouillon seulement, dernier écrit
   /// gagne) — Paie v2.
   static const String syncPayrollPayoutPoliciesEndpoint =
@@ -1587,6 +1613,17 @@ class AppConstants {
   /// (remplacement d'ensemble à chaque `200`).
   static const String syncAcademicsGradesReferentialEndpoint =
       '/api/v1/sync/academics/grades-referential';
+
+  /// Toute l'année d'une classe pour la saisie des notes, sous
+  /// `academics.grade.enter`. `ETag` et `304` comme `grades-referential`.
+  static const String cotesClasseEndpoint = '/api/v1/academics/cotes';
+
+  /// **POST** : l'envoi d'un lot de cotes, 200 lignes au plus, un résultat par
+  /// ligne (LWW sur `updatedAt`), sous `academics.grade.enter`.
+  /// **GET** : les cotes d'un cours en keyset pour la tablette de l'enseignant,
+  /// sous `academics.grade.read` (403 `COURS_NOT_OWNED` hors de ses cours).
+  static const String syncAcademicsCotesEndpoint =
+      '/api/v1/sync/academics/cotes';
 
   /// Pull KEYSET de la trame horaire de l'école (réf, lecture seule). Scope
   /// école résolu par le JWT. Query : `cursor`, `limit`. → `ref_time_slots`.

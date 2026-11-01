@@ -207,6 +207,14 @@ class AppBreakpoints {
   // (Jour/Top classes) passe en colonne sous ce seuil.
   static const double attendanceOverviewTwoColMin = 880.0;
 
+  /// Saisie des notes par classe (largeur reçue) : en deçà, la colonne des
+  /// cours se resserre et la liste des élèves laisse place à un sélecteur.
+  static const double coteGridCompactMax = formMediumMin;
+
+  /// En deçà, un téléphone : une colonne à la fois, le total sans jauge, et
+  /// plus d'aide clavier.
+  static const double coteGridPhoneMax = dataTableCardsMax;
+
   /// Saisie de notes, mode Focus, en paysage : le pavé passe à côté de la
   /// note au lieu d'en dessous — sans quoi une tablette de 600 dp de haut
   /// défilait à chaque élève.

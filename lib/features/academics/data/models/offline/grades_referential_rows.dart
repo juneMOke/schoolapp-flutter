@@ -36,7 +36,8 @@ class RefBrancheRow extends Equatable {
 }
 
 /// `ref_ligne_bareme` — plafonds de saisie + pont vers la branche.
-/// `maxExamenParPeriodeScolaire` **nullable** = branche sans examen (≠ 0).
+/// `maxExamenParPeriodeScolaire` à 0 = branche sans examen ; `null` = l'ancienne
+/// forme, encore possible dans un bundle d'avant la bascule du barème.
 class RefLigneBaremeRow extends Equatable {
   final String id;
   final String grilleId;

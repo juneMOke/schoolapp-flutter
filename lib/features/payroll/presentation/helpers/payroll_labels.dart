@@ -123,6 +123,7 @@ abstract final class PayrollLabels {
     PayrollRule.invalidInstallments => l10n.payrollRuleInvalidInstallments,
     PayrollRule.monthLocked => l10n.payrollRuleMonthLocked,
     PayrollRule.noContract => l10n.payrollRuleNoContract,
+    PayrollRule.advanceKindDisabled => l10n.payrollRuleAdvanceKindDisabled,
     PayrollRule.alreadyDeducted => l10n.payrollRuleAlreadyDeducted,
     PayrollRule.followsExpense => l10n.payrollRuleFollowsExpense,
     PayrollRule.advanceTypeMissing => l10n.payrollRuleAdvanceTypeMissing,
@@ -141,6 +142,21 @@ abstract final class PayrollLabels {
     PayrollRule.forbidden => l10n.payrollRuleForbidden,
     PayrollRule.parentRefused => l10n.payrollRuleParentRefused,
     PayrollRule.stale => l10n.payrollStaleBanner,
+    PayrollRule.deductionTypeInUse => l10n.payrollRuleDeductionTypeInUse,
+    PayrollRule.deductionTypeLabelTaken =>
+      l10n.payrollRuleDeductionTypeLabelTaken,
+    PayrollRule.deductionTypeLimitReached => l10n.payrollRuleDeductionTypeLimit,
+    PayrollRule.deductionTypeRefused => l10n.payrollRuleDeductionTypeRefused,
+    PayrollRule.deductionTypeCodeTaken =>
+      l10n.payrollRuleDeductionTypeCodeTaken,
+    PayrollRule.deductionTypeFieldLocked =>
+      l10n.payrollRuleDeductionTypeFieldLocked,
+    PayrollRule.deductionTypeCurrencyUnknown =>
+      l10n.payrollRuleDeductionTypeCurrencyUnknown,
+    PayrollRule.deductionTypeArchived => l10n.payrollRuleDeductionTypeArchived,
+    PayrollRule.deductionCurrencyMismatch => l10n.payrollRuleDeductionCurrency,
+    PayrollRule.deductionTypeGone => l10n.payrollRuleDeductionTypeGone,
+    PayrollRule.deductionTypeUnknown => l10n.payrollRuleDeductionTypeUnknown,
   };
 
   /// Un refus du serveur en mots : la règle qu'il dit quand on la connaît,

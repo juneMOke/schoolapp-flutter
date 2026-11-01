@@ -49,6 +49,9 @@ class PayrollAgentTotals extends Equatable {
   final int iprCnssInCents;
   final int absenceInCents;
   final int childcareInCents;
+
+  /// Ce que les rubriques de l'école ont retenu.
+  final int customInCents;
   final int advancesInCents;
   final int netInCents;
   final int paidInCents;
@@ -60,6 +63,7 @@ class PayrollAgentTotals extends Equatable {
     this.iprCnssInCents = 0,
     this.absenceInCents = 0,
     this.childcareInCents = 0,
+    this.customInCents = 0,
     this.advancesInCents = 0,
     this.netInCents = 0,
     this.paidInCents = 0,
@@ -75,6 +79,7 @@ class PayrollAgentTotals extends Equatable {
       iprCnssInCents: iprCnssInCents + d.iprInCents + d.cnssInCents,
       absenceInCents: absenceInCents + d.absenceInCents,
       childcareInCents: childcareInCents + d.childcareInCents,
+      customInCents: customInCents + d.customInCents,
       advancesInCents: advancesInCents + line.advanceInCents,
       netInCents: netInCents + line.netInCents,
       paidInCents: paidInCents + month.paidInCents,
@@ -89,6 +94,7 @@ class PayrollAgentTotals extends Equatable {
     iprCnssInCents,
     absenceInCents,
     childcareInCents,
+    customInCents,
     advancesInCents,
     netInCents,
     paidInCents,

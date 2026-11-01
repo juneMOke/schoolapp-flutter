@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_circ
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_money_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_read_use_cases.dart';
 import 'package:school_app_flutter/features/payroll/domain/usecases/payroll_settings_use_cases.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_deduction_commands.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_notice.dart';
 
 /// Les gestes de la paie : chacun passe par son cas d'usage et rend l'annonce
@@ -45,6 +46,9 @@ class PayrollCommands {
   final RecordPayslipShareUseCase _share;
   final FetchPayslipUseCase _payslip;
 
+  /// Les gestes du catalogue des rubriques ; absents, ils n'ont pas lieu.
+  final PayrollDeductionCommands? deductions;
+
   const PayrollCommands({
     required SavePayrollVariablesUseCase variables,
     required SavePayrollPayoutPolicyUseCase payoutPolicy,
@@ -61,6 +65,7 @@ class PayrollCommands {
     required SavePayrollSettingsUseCase settings,
     required RecordPayslipShareUseCase share,
     required FetchPayslipUseCase payslip,
+    this.deductions,
   }) : _variables = variables,
        _payoutPolicy = payoutPolicy,
        _payArrears = payArrears,

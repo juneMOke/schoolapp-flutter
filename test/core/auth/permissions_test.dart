@@ -74,6 +74,7 @@ void main() {
     Perm.academicsGradeRead: 'academics.grade.read',
     Perm.academicsGradeWrite: 'academics.grade.write',
     Perm.academicsGradeSeal: 'academics.grade.seal',
+    Perm.academicsGradeEnter: 'academics.grade.enter',
     Perm.academicsResultRead: 'academics.result.read',
     Perm.academicsReferentialRead: 'academics.referential.read',
     Perm.academicsReferentialWrite: 'academics.referential.write',
@@ -170,7 +171,10 @@ void main() {
       // 80 → 81 : `hr.attendance.reopen`, rouvrir un mois clos du Pointage
       // (DIRECTOR, SUPER_ADMIN — migration back V199, contrat « Paie au
       // mois M » du 2026-10-28).
-      expect(Perm.values, hasLength(81));
+      // 81 → 82 : `academics.grade.enter`, saisir les cotes d'une classe
+      // (`GRADE_CLERK`, DIRECTOR — contrat « Saisie des notes » du 2026-11-01).
+      // ⚠️ Déclarée avant que le serveur ne la sème (lot back 2).
+      expect(Perm.values, hasLength(82));
     },
   );
 

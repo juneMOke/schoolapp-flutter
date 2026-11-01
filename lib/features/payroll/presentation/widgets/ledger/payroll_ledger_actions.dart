@@ -55,19 +55,45 @@ class PayrollLedgerActions {
         current:
             state.snapshot.variables[month]?[line.staffMemberId] ??
             PayrollVariables(staffMemberId: line.staffMemberId),
-        preview: (variables) =>
-            PayrollLedger.previewLine(state.snapshot, month, variables),
+        deductionTypes: state.snapshot.deductionTypes,
+        entries:
+            state.snapshot.deductions[month]?[line.staffMemberId] ?? const [],
+        preview: (variables, entries) => PayrollLedger.previewLine(
+          state.snapshot,
+          month,
+          variables,
+          entries: entries,
+        ),
       ),
     );
     if (result == null || !context.mounted) return;
-    await _cubit.perform(
-      (commands) => commands.saveVariables(
+    final name = nameOf(line.staffMemberId);
+    await _cubit.perform((commands) async {
+      final deductions = commands.deductions;
+      if (result.entries.isEmpty || deductions == null) {
+        return commands.saveVariables(view, result.variables, name: name);
+      }
+      return deductions.saveEntries(
         view,
-        result,
-        name: nameOf(line.staffMemberId),
-      ),
-    );
+        result.variables,
+        result.entries,
+        catalog: state.snapshot.deductionTypes,
+        name: name,
+      );
+    });
   }
+
+  /// L'économe a lu les retenues refusées : elles disparaissent.
+  Future<void> dismissRefusedDeductions(PayrollMonthView view) =>
+      _cubit.perform((commands) async {
+        final deductions = commands.deductions;
+        if (deductions == null) return null;
+        for (final entry in view.deductionIssues.refused) {
+          final notice = await deductions.dismiss(view.month, entry);
+          if (notice != null) return notice;
+        }
+        return null;
+      });
 
   /// Le taux de versement du mois (v2).
   Future<void> editPayoutPolicy() async {

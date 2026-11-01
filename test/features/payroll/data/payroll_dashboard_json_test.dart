@@ -29,6 +29,7 @@ void main() {
           forecast.absenceInCents +
           forecast.legalInCents +
           forecast.childcareInCents +
+          forecast.customDeductionsInCents +
           forecast.advancesInCents,
       forecast.grossInCents,
     );
@@ -81,6 +82,27 @@ void main() {
     );
 
     expect(() => PayrollDashboardJson.fromJson(json), throwsA(anything));
+  });
+
+  test('les rubriques se lisent, et leur absence vaut 0', () {
+    final json = payrollDashboardFixture();
+    final forecast =
+        ((json['currencies'] as List).first as Map)['forecast'] as Map;
+
+    expect(
+      PayrollDashboardJson.fromJson(
+        json,
+      ).section('USD')!.forecast.customDeductionsInCents,
+      0,
+    );
+
+    forecast['customDeductionsInCents'] = 500;
+    expect(
+      PayrollDashboardJson.fromJson(
+        json,
+      ).section('USD')!.forecast.customDeductionsInCents,
+      500,
+    );
   });
 
   test('des lignes filtrées à zéro ne vident pas le mois', () {

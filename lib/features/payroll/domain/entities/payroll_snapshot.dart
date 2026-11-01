@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
@@ -26,6 +27,12 @@ class PayrollSnapshot {
   /// Par mois `YYYY-MM`.
   final Map<String, PayrollHeader> headers;
   final Map<String, Map<String, PayrollVariables>> variables;
+
+  /// Tout le catalogue des rubriques, archivées comprises, dans l'ordre.
+  final List<PayrollDeductionType> deductionTypes;
+
+  /// Par mois puis par agent : les saisies de rubriques, refusées comprises.
+  final Map<String, Map<String, List<PayrollDeductionEntry>>> deductions;
 
   /// Par mois : le taux de versement ; absent = 100 %.
   final Map<String, PayrollPayoutPolicy> payoutPolicies;
@@ -73,6 +80,8 @@ class PayrollSnapshot {
     required this.schoolYears,
     required this.shareTraces,
     required this.hasEverSynced,
+    this.deductionTypes = const [],
+    this.deductions = const {},
     this.payoutPolicies = const {},
     this.arrearsPriorities = const {},
     this.advanceRequests = const [],
@@ -108,6 +117,29 @@ class PayrollSnapshot {
       if (member.id.toLowerCase() == wanted) return member;
     }
     return null;
+  }
+
+  /// Une saisie supérieure à 0 ou une ligne figée cite-t-elle la rubrique ?
+  /// Son code et sa devise ne bougent alors plus.
+  bool deductionTypeInUse(String id) {
+    final key = id.toLowerCase();
+    bool cites(String other) => other.toLowerCase() == key;
+    return deductions.values.any(
+          (month) => month.values.any(
+            (entries) => entries.any(
+              (entry) =>
+                  cites(entry.deductionTypeId) &&
+                  (entry.counted?.amountInCents ?? 0) > 0,
+            ),
+          ),
+        ) ||
+        frozenLines.values.any(
+          (lines) => lines.any(
+            (line) => line.deductions.custom.any(
+              (custom) => cites(custom.deductionTypeId),
+            ),
+          ),
+        );
   }
 
   /// Le premier mois payable : celui du plus ancien contrat de l'école.

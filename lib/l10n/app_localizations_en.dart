@@ -1690,6 +1690,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get courseDetailProvisional => 'provisional';
 
   @override
+  String get courseDetailCoteSaisie => 'Entered grade';
+
+  @override
   String get courseDetailClassAverageLabel => 'Class average';
 
   @override
@@ -14309,7 +14312,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get payrollColAdvance => 'Deductions';
+  String get payrollColDeductions => 'Deductions';
+
+  @override
+  String get payrollColAdvance => 'Advance';
 
   @override
   String get payrollColNet => 'Net';
@@ -21011,4 +21017,757 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hrPresenceRecapStatusFrozen => 'Frozen';
+
+  @override
+  String get payrollRuleDeductionTypeInUse =>
+      'This deduction has already been used: archive it instead.';
+
+  @override
+  String get payrollRuleDeductionTypeLabelTaken =>
+      'An active deduction in this currency already has this label.';
+
+  @override
+  String get payrollRuleDeductionTypeLimit =>
+      'Six active deductions at most per currency: archive one to continue.';
+
+  @override
+  String get payrollRuleDeductionTypeCodeTaken =>
+      'This code is already used by another deduction, even an archived one.';
+
+  @override
+  String get payrollRuleDeductionTypeFieldLocked =>
+      'This deduction has been used: its code and currency can no longer change.';
+
+  @override
+  String get payrollRuleDeductionTypeCurrencyUnknown =>
+      'This currency is not set up for the school.';
+
+  @override
+  String get payrollRuleDeductionTypeArchived =>
+      'This deduction is archived: it can only be set to 0.';
+
+  @override
+  String get payrollRuleDeductionCurrency =>
+      'This deduction was entered in another currency than the month\'s payroll.';
+
+  @override
+  String get payrollRuleDeductionTypeGone =>
+      'This deduction was deleted or refused.';
+
+  @override
+  String get payrollDeductionsTitle => 'School deductions';
+
+  @override
+  String get payrollDeductionsSubtitle =>
+      'Your own deductions, next to the five standard ones. The default amount applies to every agent paid in its currency; the ledger\'s pencil replaces it for one agent.';
+
+  @override
+  String get payrollDeductionsEmpty => 'No deduction yet.';
+
+  @override
+  String get payrollDeductionsAdd => 'Add a deduction';
+
+  @override
+  String get payrollDeductionsArchivedTitle => 'Archived';
+
+  @override
+  String get payrollDeductionsLabel => 'Label';
+
+  @override
+  String get payrollDeductionsNewTitle => 'New deduction';
+
+  @override
+  String get payrollDeductionsEditTitle => 'Edit the deduction';
+
+  @override
+  String get payrollDeductionsEdit => 'Edit';
+
+  @override
+  String get payrollDeductionsCode => 'Code';
+
+  @override
+  String get payrollDeductionsCodeInvalid =>
+      '2 to 12 characters: letters, digits, - or _.';
+
+  @override
+  String get payrollDeductionsDescription => 'Description';
+
+  @override
+  String get payrollDeductionsDescriptionTooLong => '200 characters at most.';
+
+  @override
+  String get payrollDeductionsCurrency => 'Currency';
+
+  @override
+  String get payrollDeductionsDefaultAmount => 'Default amount';
+
+  @override
+  String get payrollDeductionsDefaultHint =>
+      'Withheld every month from every agent paid in this currency, unless an amount is entered for that agent. At 0, nothing is withheld.';
+
+  @override
+  String get payrollDeductionsLockedHint =>
+      'This deduction has been used: its code and currency can no longer change.';
+
+  @override
+  String get payrollDeductionsColDefault => 'Default';
+
+  @override
+  String get payrollRuleAdvanceKindDisabled =>
+      'The school no longer grants this type of advance: see the payroll configuration.';
+
+  @override
+  String get payrollSettingsModelTitle => 'Standard deductions';
+
+  @override
+  String get payrollSettingsModelSubtitle =>
+      'Turn off what your school doesn\'t apply: these deductions disappear from data entry and from the payslip.';
+
+  @override
+  String get payrollSettingsLegalToggle => 'Withhold IPR and CNSS';
+
+  @override
+  String get payrollSettingsAdvancesToggle => 'Grant salary advances';
+
+  @override
+  String get payrollSettingsLoansToggle => 'Grant staff loans';
+
+  @override
+  String get payrollVarsSectionEarnings => 'Earnings';
+
+  @override
+  String get payrollVarsSectionDeductions => 'Standard deductions';
+
+  @override
+  String payrollVarsCustomDefault(String amount) {
+    return 'Default: $amount';
+  }
+
+  @override
+  String get payrollVarsCustomFromDefault => 'Default amount';
+
+  @override
+  String payrollVarsCustomOtherCurrency(String label, String currency) {
+    return '$label ($currency)';
+  }
+
+  @override
+  String get payrollRuleDeductionTypeRefused =>
+      'An edited deduction was refused: fix it in the configuration, then sync.';
+
+  @override
+  String get payrollDeductionsArchive => 'Archive';
+
+  @override
+  String get payrollDeductionsRestore => 'Restore';
+
+  @override
+  String get payrollDeductionsDelete => 'Delete';
+
+  @override
+  String get payrollDeductionsDeleteOffline => 'Delete (online only)';
+
+  @override
+  String get payrollDeductionsMoveUp => 'Move up';
+
+  @override
+  String get payrollDeductionsMoveDown => 'Move down';
+
+  @override
+  String get payrollDeductionsActions => 'Deduction actions';
+
+  @override
+  String get payrollDeductionsLabelRequired => 'The label is required.';
+
+  @override
+  String get payrollDeductionsLabelTooLong => '40 characters at most.';
+
+  @override
+  String get payrollDeductionsPending => 'Waiting to be sent';
+
+  @override
+  String get payrollDeductionsDeleteBody =>
+      'This deduction will be permanently removed.';
+
+  @override
+  String get payrollToastDeductionTypeSaved => 'Deduction saved.';
+
+  @override
+  String get payrollToastDeductionTypeRemoved => 'Deduction deleted.';
+
+  @override
+  String get payrollVarsCustomTitle => 'School deductions';
+
+  @override
+  String payrollDeductionsDeleteTitle(String label) {
+    return 'Delete “$label”?';
+  }
+
+  @override
+  String payrollVarsCustomArchived(String label) {
+    return '$label (archived)';
+  }
+
+  @override
+  String payrollVarsCustomTrimmed(String requested, String taken) {
+    return 'Entered $requested, withheld $taken';
+  }
+
+  @override
+  String get payrollVarsCustomClear => 'Set to 0';
+
+  @override
+  String get payrollRuleDeductionTypeUnknown =>
+      'A deduction refers to a type this tablet does not know yet: synchronise.';
+
+  @override
+  String get payrollDeductionRefusedDismiss => 'Got it';
+
+  @override
+  String get payrollDeductionTrimmedShort => 'Deduction cut short';
+
+  @override
+  String get payrollAgentTotalsCustom => 'School deductions';
+
+  @override
+  String get payrollKpiSchoolDeductionsDetailCustom =>
+      'Absences · IPR/CNSS · childcare · school';
+
+  @override
+  String get payrollConfirmFixedDeductionsCustom =>
+      'Deductions (absences, IPR/CNSS, PC/E, school)';
+
+  @override
+  String payrollDeductionForeignNotice(String list) {
+    return 'Deductions entered in another currency than the payroll: $list. Enter the amount again or set it to 0.';
+  }
+
+  @override
+  String payrollDeductionForeignNoticeSubmitted(String list) {
+    return 'Deductions entered in another currency than the payroll: $list. Management returns the payroll first, then the bursar corrects them.';
+  }
+
+  @override
+  String payrollDeductionRefusedNotice(String list) {
+    return 'Deductions taken out of the calculation: $list.';
+  }
+
+  @override
+  String payrollConfirmTrimmed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deductions will be cut short',
+      one: 'One deduction will be cut short',
+    );
+    return '$_temp0: the gross was not enough.';
+  }
+
+  @override
+  String get payrollDashCustom => 'School deductions';
+
+  @override
+  String payrollVarsCustomRefused(String amount, String reason) {
+    return 'Refused amount: $amount. $reason';
+  }
+
+  @override
+  String payrollVarsCustomForeign(String amount) {
+    return '$amount entered in another currency than the month\'s payroll.';
+  }
+
+  @override
+  String payrollDeductionNamed(String name, String label) {
+    return '$name ($label)';
+  }
+
+  @override
+  String payrollDeductionRefusedItem(String name, String reason) {
+    return '$name: $reason';
+  }
+
+  @override
+  String get subMenuResultatsSaisie => 'Grade entry';
+
+  @override
+  String get coteSaisieEyebrow => 'Results · Grade entry';
+
+  @override
+  String get coteSaisieTitle => 'Enter a class\'s grades';
+
+  @override
+  String get coteSaisieOpen => 'Open grade entry';
+
+  @override
+  String get coteDecoupageTrimestres => 'Terms';
+
+  @override
+  String get coteDecoupageSemestres => 'Semesters';
+
+  @override
+  String get cotePorteeColonne => 'Period / exam';
+
+  @override
+  String get cotePorteeUnSemestre => 'One semester';
+
+  @override
+  String get cotePorteeUnTrimestre => 'One term';
+
+  @override
+  String get cotePorteeLesSemestres => 'All semesters';
+
+  @override
+  String get cotePorteeLesTrimestres => 'All terms';
+
+  @override
+  String get cotePorteeSemantics => 'Entry scope';
+
+  @override
+  String get coteGroupChipSemantics => 'Choose a column or a group';
+
+  @override
+  String coteColumnPeriod(int numero) {
+    return 'P$numero';
+  }
+
+  @override
+  String coteColumnPeriodLong(int numero) {
+    return 'Period $numero';
+  }
+
+  @override
+  String get coteColumnExam => 'Exam';
+
+  @override
+  String coteColumnExamOf(String group) {
+    return 'Exam $group';
+  }
+
+  @override
+  String coteColumnExamLong(String group) {
+    return 'Exam · $group';
+  }
+
+  @override
+  String coteColumnTotalOf(String group) {
+    return 'Tot. $group';
+  }
+
+  @override
+  String coteColumnTotalLong(String group) {
+    return 'Total · $group';
+  }
+
+  @override
+  String coteGroupShortSemester(int ordre) {
+    return 'S$ordre';
+  }
+
+  @override
+  String coteGroupShortTrimester(int ordre) {
+    return 'T$ordre';
+  }
+
+  @override
+  String get coteColumnMaxPeriod => 'Max per.';
+
+  @override
+  String get coteColumnMaxPeriodLong => 'Maximum per period';
+
+  @override
+  String get coteColumnMaxExam => 'Max ex.';
+
+  @override
+  String get coteColumnMaxExamLong => 'Exam maximum';
+
+  @override
+  String coteColumnMaxOf(String group) {
+    return 'Max $group';
+  }
+
+  @override
+  String coteColumnMaxGroupLong(String group) {
+    return 'Maximum · $group';
+  }
+
+  @override
+  String get coteSubtotal => 'Subtotal';
+
+  @override
+  String coteMaxCellSemantics(String label, String course) {
+    return '$label, $course';
+  }
+
+  @override
+  String get coteColumnCours => 'Course';
+
+  @override
+  String coteColumnTotalScope(String group) {
+    return 'Total $group · %';
+  }
+
+  @override
+  String get coteColumnAnnual => 'Year · %';
+
+  @override
+  String coteClassBarEyebrow(String classe) {
+    return 'Class $classe';
+  }
+
+  @override
+  String coteClassBarSummary(String scope, int students, int complete) {
+    String _temp0 = intl.Intl.pluralLogic(
+      students,
+      locale: localeName,
+      other: '$students students',
+      one: '1 student',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      complete,
+      locale: localeName,
+      other: '$complete complete',
+      one: '1 complete',
+      zero: 'none complete',
+    );
+    return '$scope · $_temp0 · $_temp1';
+  }
+
+  @override
+  String get coteSaveIdle => 'Draft · saved automatically';
+
+  @override
+  String get coteSaving => 'Saving…';
+
+  @override
+  String coteSavedAt(String time) {
+    return 'Saved at $time';
+  }
+
+  @override
+  String coteSaveOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades waiting',
+      one: '1 grade waiting',
+    );
+    return 'Offline · $_temp0';
+  }
+
+  @override
+  String get coteSaveFailed => 'Could not save';
+
+  @override
+  String get coteSaveRetry => 'Retry';
+
+  @override
+  String get coteSaveSessionExpired =>
+      'Session expired · sign in to send the grades';
+
+  @override
+  String get coteFromCacheBanner =>
+      'Device copy: the server did not answer. Your entries stay saved here.';
+
+  @override
+  String get coteStorageFailed =>
+      'This grade could not be saved on the device.';
+
+  @override
+  String coteChangedNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades updated',
+      one: '1 grade updated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get coteListSearchHint => 'Search for a student';
+
+  @override
+  String get coteListFilterAll => 'All';
+
+  @override
+  String get coteListFilterTodo => 'To complete';
+
+  @override
+  String get coteListFilterDone => 'Complete';
+
+  @override
+  String get coteListFilterSemantics => 'Filter students';
+
+  @override
+  String get coteListComplete => 'Entry complete';
+
+  @override
+  String coteListMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades missing',
+      one: '1 grade missing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String coteListToFix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades to fix',
+      one: '1 grade to fix',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String coteListEmptySearch(String query) {
+    return 'No student matches “$query”.';
+  }
+
+  @override
+  String get coteListEmptyDone => 'No student is complete yet.';
+
+  @override
+  String get coteListEmptyTodo => 'All students are complete.';
+
+  @override
+  String get coteListShowAll => 'Show all students';
+
+  @override
+  String coteRank(int rank) {
+    return '#$rank';
+  }
+
+  @override
+  String get coteRankNone => 'NR';
+
+  @override
+  String get coteRankNoneLong => 'Not ranked';
+
+  @override
+  String get cotePickerSemantics => 'Choose a student';
+
+  @override
+  String cotePickerItem(String number, String name, int filled, int cells) {
+    return '$number · $name — $filled/$cells';
+  }
+
+  @override
+  String coteHeaderSubtitle(String classe, String scope, int index, int total) {
+    return 'Class $classe · $scope · student $index/$total';
+  }
+
+  @override
+  String get coteKpiPercent => 'Percentage';
+
+  @override
+  String get coteKpiProvisional => 'Provisional';
+
+  @override
+  String coteKpiRankOf(int count) {
+    return 'of $count';
+  }
+
+  @override
+  String get coteKpiFilled => 'Grades entered';
+
+  @override
+  String get coteStudentPrevious => 'Previous student';
+
+  @override
+  String get coteStudentNext => 'Next student';
+
+  @override
+  String get coteLegendEmpty => 'To enter';
+
+  @override
+  String get coteLegendPeriod => 'Period grade';
+
+  @override
+  String get coteLegendExam => 'Exam';
+
+  @override
+  String get coteLegendCalculated => 'Calculated average';
+
+  @override
+  String get coteLegendTotal => 'Calculated total';
+
+  @override
+  String get coteLegendBelowHalf => 'Below half';
+
+  @override
+  String get coteLegendHalfOrMore => 'Half or more';
+
+  @override
+  String get coteRubriqueExpand => 'Expand';
+
+  @override
+  String get coteRubriqueCollapse => 'Collapse';
+
+  @override
+  String get coteRubriqueAlert => 'Grades to fix are folded here';
+
+  @override
+  String get coteLegendEnterKey => 'Enter';
+
+  @override
+  String get coteLegendEnterDown => 'next course';
+
+  @override
+  String get coteLegendEnterRight => 'next column';
+
+  @override
+  String get coteLegendEnterToggle => 'Change what the Enter key does';
+
+  @override
+  String get coteMaxima => 'Maximum';
+
+  @override
+  String get coteTotalObtained => 'Total obtained';
+
+  @override
+  String get cotePercentRow => 'Percentage';
+
+  @override
+  String coteFooterRule(String group) {
+    return 'Total $group = periods + exam. Percentage = total obtained ÷ maximum × 100.';
+  }
+
+  @override
+  String coteFooterProvisional(int filled, int cells) {
+    return 'Provisional: based on $filled grades entered out of $cells.';
+  }
+
+  @override
+  String coteFooterInvalid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades out of range, not counted until corrected.',
+      one: '1 grade out of range, not counted until corrected.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String coteCellInvalid(String max) {
+    return 'Invalid grade: 0 to $max';
+  }
+
+  @override
+  String get coteCellCalculated => 'Average of the assessments';
+
+  @override
+  String coteCellReplaces(String value) {
+    return 'Average of the assessments: $value';
+  }
+
+  @override
+  String get coteCellLocked => 'Column closed';
+
+  @override
+  String get coteCellNoExam => 'This course has no exam';
+
+  @override
+  String get coteRejectedClosed =>
+      'Refused: the column was closed in the meantime. The server did not keep it.';
+
+  @override
+  String get coteRejectedRange => 'Refused: value out of range.';
+
+  @override
+  String get coteRejectedNoExam => 'Refused: this course has no exam.';
+
+  @override
+  String get coteRejectedStudent =>
+      'Refused: this student is no longer in the class.';
+
+  @override
+  String get coteRejectedColumn =>
+      'Refused: this column no longer exists for the class.';
+
+  @override
+  String get coteRejectedOther => 'Refused by the server.';
+
+  @override
+  String get coteRejectedDiscard => 'Discard';
+
+  @override
+  String coteRejectedOfficial(String value) {
+    return 'Report card value: $value';
+  }
+
+  @override
+  String coteCellSemantics(String course, String column, String max) {
+    return '$course · $column, out of $max';
+  }
+
+  @override
+  String coteTotalSemantics(String column, String course) {
+    return 'Total $column, $course';
+  }
+
+  @override
+  String coteValueOutOf(String value, String max) {
+    return '$value out of $max';
+  }
+
+  @override
+  String coteStudentAnnounce(String name, int index, int total, int percent) {
+    return '$name, student $index of $total, $percent percent';
+  }
+
+  @override
+  String coteStudentAnnounceProvisional(
+    String name,
+    int index,
+    int total,
+    int percent,
+  ) {
+    return '$name, student $index of $total, $percent percent provisional';
+  }
+
+  @override
+  String coteStudentAnnounceNoGrade(String name, int index, int total) {
+    return '$name, student $index of $total, no grade';
+  }
+
+  @override
+  String get coteIdleTitle => 'Choose a class';
+
+  @override
+  String get coteIdleDescription =>
+      'Period and exam grades open as a report card, one student at a time.';
+
+  @override
+  String get coteEmptyStudentsTitle => 'No student enrolled in this class';
+
+  @override
+  String get coteEmptyStudentsDescription =>
+      'Check the chosen class or the class lists.';
+
+  @override
+  String get coteEmptyCoursesTitle => 'No course set up for this level';
+
+  @override
+  String get coteEmptyCoursesDescription =>
+      'This class has no grading scale yet.';
+
+  @override
+  String get coteEmptyChangeClass => 'Change class';
+
+  @override
+  String cotePercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get coteColumnTotal => 'Total';
+
+  @override
+  String get syncAggregateCotesBatch => 'Grade entry';
 }

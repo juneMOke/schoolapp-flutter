@@ -24,6 +24,9 @@ class PayrollSettingsDraft extends ChangeNotifier {
   /// Le barème élargi (Q8), saisi seulement quand le serveur l'a servi.
   final PayrollWideSettingsDraft wide = PayrollWideSettingsDraft();
   bool _absence = false;
+  bool _legal = true;
+  bool _advances = true;
+  bool _loans = true;
   final Set<StaffContractKind> _eligible = {};
 
   PayrollSettingsDraft(PayrollSettings saved)
@@ -49,7 +52,25 @@ class PayrollSettingsDraft extends ChangeNotifier {
   ];
 
   bool get absence => _absence;
+  bool get legal => _legal;
+  bool get advances => _advances;
+  bool get loans => _loans;
   Set<StaffContractKind> get eligible => Set.unmodifiable(_eligible);
+
+  void toggleLegal() {
+    _legal = !_legal;
+    notifyListeners();
+  }
+
+  void toggleAdvances() {
+    _advances = !_advances;
+    notifyListeners();
+  }
+
+  void toggleLoans() {
+    _loans = !_loans;
+    notifyListeners();
+  }
 
   void toggleChildcare() {
     wide.childcare = !wide.childcare;
@@ -83,6 +104,15 @@ class PayrollSettingsDraft extends ChangeNotifier {
     if (wide.childcare == _base.childcareEnabled) {
       wide.childcare = saved.childcareEnabled;
     }
+    if (_legal == _base.legalDeductionsEnabled) {
+      _legal = saved.legalDeductionsEnabled;
+    }
+    if (_advances == _base.salaryAdvancesEnabled) {
+      _advances = saved.salaryAdvancesEnabled;
+    }
+    if (_loans == _base.staffLoansEnabled) {
+      _loans = saved.staffLoansEnabled;
+    }
     if (_eligible.length == _base.allowanceEligibleKinds.length &&
         _eligible.containsAll(_base.allowanceEligibleKinds)) {
       _eligible
@@ -110,6 +140,9 @@ class PayrollSettingsDraft extends ChangeNotifier {
     }
     _absence = settings.absenceDeductionEnabled;
     wide.childcare = settings.childcareEnabled;
+    _legal = settings.legalDeductionsEnabled;
+    _advances = settings.salaryAdvancesEnabled;
+    _loans = settings.staffLoansEnabled;
     _eligible
       ..clear()
       ..addAll(settings.allowanceEligibleKinds);
@@ -160,6 +193,9 @@ class PayrollSettingsDraft extends ChangeNotifier {
       // sont les jours ouvrés du mois. L'ancien, servi déprécié, repart tel
       // quel et le serveur l'ignore.
       absenceDeductionEnabled: _absence,
+      legalDeductionsEnabled: _legal,
+      salaryAdvancesEnabled: _advances,
+      staffLoansEnabled: _loans,
       allowanceEligibleKinds: {..._eligible},
       byCurrency: money.byCurrency(_base),
     );

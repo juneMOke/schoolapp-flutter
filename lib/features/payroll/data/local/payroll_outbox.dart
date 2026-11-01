@@ -2,8 +2,8 @@
 ///
 /// Le moteur n'ordonne rien par agrégat ; les handlers de la paie le font par
 /// `OutboxDao.hasOlderPending`, sur l'`aggregateId` posé ici :
-/// - le **mois** (`payroll:YYYY-MM`) : éléments variables, taux du mois,
-///   gestes, et l'avance
+/// - le **mois** (`payroll:YYYY-MM`) : éléments variables, saisies de
+///   rubriques, taux du mois, gestes, et l'avance
 ///   qui commence ce mois-là — un geste attend ce qui a été écrit avant lui ;
 /// - la **ligne** (`payroll-line:YYYY-MM:<agent>`) : versements et
 ///   annulations d'un même salaire, dans l'ordre de pose ;
@@ -12,6 +12,8 @@ abstract final class PayrollOutbox {
   static const String settings = 'PAYROLL_SETTINGS';
   static const String profile = 'STAFF_PAY_PROFILE';
   static const String variables = 'PAYROLL_VARIABLES';
+  static const String deductionType = 'PAYROLL_DEDUCTION_TYPE';
+  static const String deduction = 'PAYROLL_DEDUCTION';
   static const String payoutPolicy = 'PAYROLL_PAYOUT_POLICY';
   static const String arrearsPriority = 'PAYROLL_ARREARS_PRIORITY';
   static const String gesture = 'PAYROLL_GESTURE';
@@ -37,4 +39,6 @@ abstract final class PayrollOutbox {
       'payroll-line:$month:$staffMemberId';
 
   static String advanceKey(String advanceId) => 'advance:$advanceId';
+
+  static String deductionTypeKey(String id) => 'deduction-type:$id';
 }

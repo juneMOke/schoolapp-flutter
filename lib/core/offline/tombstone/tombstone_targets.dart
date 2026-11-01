@@ -215,6 +215,7 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
       'DELETE FROM chapitre_ressource WHERE cours_id = ?',
       'DELETE FROM chapitre WHERE cours_id = ?',
       'DELETE FROM journal_seance WHERE cours_id = ?',
+      'DELETE FROM ref_cote_cours WHERE cours_id = ?',
     ],
     // Sans cette purge, un cours réaffecté PUIS rendu reprendrait un curseur
     // périmé au lieu de rebootstraper, et perdrait en silence tout ce qui
@@ -222,9 +223,16 @@ const Map<String, TombstoneTarget> kTombstoneTargets = {
     scopedCursorPrefixes: [
       'academics_evaluations',
       'academics_notes',
+      'academics_cotes',
       'academics_chapitres',
       'academics_journal',
     ],
+  ),
+  // Les cotes saisies, en lecture seule ici. `cote_saisie`, la file de l'écran
+  // de saisie, n'y figure pas : une écriture en attente ne se perd jamais.
+  'academics_cotes': TombstoneTarget(
+    table: 'ref_cote_cours',
+    scopeColumn: 'cours_id',
   ),
   'academics_evaluations': TombstoneTarget(
     table: 'evaluation',

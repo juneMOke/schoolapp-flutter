@@ -33,6 +33,13 @@ class AppMotion {
   // l'app ; le message qui l'annonce reste affiché le même temps.
   static const Duration exitConfirmWindow = Duration(seconds: 2);
 
+  // Saisie des notes : l'envoi part après ce silence, pour regrouper les
+  // cellules d'une même rafale de frappes.
+  static const Duration autosaveDebounce = Duration(milliseconds: 700);
+  // Saisie des notes : le temps qu'une cellule remplacée par une écriture plus
+  // récente reste surlignée.
+  static const Duration changedCellHighlight = Duration(seconds: 2);
+
   static const Curve inCurve = Curves.easeInCubic;
   static const Curve outCurve = Curves.easeOutCubic;
   static const Curve gentleOut = Curves.easeOut;

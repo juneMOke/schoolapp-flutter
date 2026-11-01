@@ -51,6 +51,8 @@ import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_p
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
+import 'package:school_app_flutter/features/cotes/presentation/pages/cote_saisie_page.dart';
+import 'package:school_app_flutter/features/cotes/presentation/pages/cotes_feature_scope.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_coordinator_page.dart';
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_feature_scope.dart';
 import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_coordinator_page.dart';
@@ -259,6 +261,8 @@ class ShellScreen extends StatelessWidget {
         return const JournalFeatureScope(child: JournalCoordinatorPage());
       case MenuConstants.resultatsClasseId:
         return const ResultatsFeatureScope(child: ResultatsCoordinatorPage());
+      case MenuConstants.resultatsSaisieId:
+        return const CotesFeatureScope(child: CoteSaisiePage());
       // Même page que la route hors coquille `/configuration/settings`, qui
       // reste servie pour le lien profond. Elle ne monte ni Scaffold ni AppBar
       // — elle peint son propre `AppPageBackground` — donc elle s'insère ici

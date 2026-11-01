@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_gesture.dart';
@@ -8,6 +9,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snap
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_advance_schedule.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
+import 'package:school_app_flutter/features/payroll/domain/services/payroll_deduction_issues.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_fingerprinter.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_month.dart';
@@ -47,6 +49,13 @@ abstract final class PayrollLedger {
       hasSummary: snapshot.summaries.containsKey(month),
       years: snapshot.schoolYears,
     );
+    // Une paie figée ne se calcule plus : seuls les refus restent à lire.
+    final issues = PayrollDeductionIssues.of(
+      entries: snapshot.deductions[month] ?? const {},
+      types: snapshot.deductionTypes,
+      lines: frozen == null ? lines : const [],
+    );
+    final deductionBlocker = frozen == null ? issues.blocker : null;
     return PayrollMonthView(
       month: month,
       header: header,
@@ -70,10 +79,11 @@ abstract final class PayrollLedger {
       attendance: attendance,
       awaitingFrozenLines: server == PayrollStatus.validated && frozen == null,
       lastRefusal: _lastRefusal(gestures),
-      submitBlocker: _submitBlocker(snapshot, month),
+      submitBlocker: _submitBlocker(snapshot, month) ?? deductionBlocker,
       validateBlocker: attendance == PayrollAttendanceState.open
           ? PayrollBlocker.attendanceOpen
-          : null,
+          : deductionBlocker,
+      deductionIssues: issues,
       reopenBlocker: _hasAnyDisbursement(snapshot, month)
           ? PayrollBlocker.hasDisbursements
           : null,
@@ -95,6 +105,16 @@ abstract final class PayrollLedger {
   }
 
   /// Ce que le moteur lit pour [month].
+  /// Une saisie refusée compte pour ce que le serveur tient, pas pour le
+  /// montant refusé : la tablette signe le livre que le serveur retrouvera.
+  static Map<String, List<PayrollDeductionEntry>> _countedDeductions(
+    PayrollSnapshot snapshot,
+    String month,
+  ) => {
+    for (final entry in (snapshot.deductions[month] ?? const {}).entries)
+      entry.key: [for (final deduction in entry.value) ?deduction.counted],
+  };
+
   static PayrollEngineInput inputOf(PayrollSnapshot snapshot, String month) =>
       PayrollEngineInput(
         month: month,
@@ -105,6 +125,8 @@ abstract final class PayrollLedger {
         },
         variables: snapshot.variables[month] ?? const {},
         profiles: snapshot.profiles,
+        deductionTypes: snapshot.deductionTypes,
+        deductions: _countedDeductions(snapshot, month),
         attendance: snapshot.summaries[month],
         payoutRatePercent:
             snapshot.payoutPolicies[month]?.ratePercent ??
@@ -118,12 +140,14 @@ abstract final class PayrollLedger {
       );
 
   /// La ligne qu'aurait [variables] — l'aperçu en direct des éléments
-  /// variables, par le même moteur.
+  /// variables, par le même moteur. [entries] remplace les saisies de
+  /// rubriques de l'agent ; `null` : celles de la tablette.
   static PayrollLine? previewLine(
     PayrollSnapshot snapshot,
     String month,
-    PayrollVariables variables,
-  ) {
+    PayrollVariables variables, {
+    List<PayrollDeductionEntry>? entries,
+  }) {
     final input = inputOf(snapshot, month);
     final lines = PayrollEngine.compute(
       PayrollEngineInput(
@@ -135,6 +159,11 @@ abstract final class PayrollLedger {
         },
         variables: {variables.staffMemberId: variables},
         profiles: input.profiles,
+        deductionTypes: input.deductionTypes,
+        deductions: {
+          variables.staffMemberId:
+              entries ?? input.deductions[variables.staffMemberId] ?? const [],
+        },
         attendance: input.attendance,
         advances: input.advances,
         payoutRatePercent: input.payoutRatePercent,

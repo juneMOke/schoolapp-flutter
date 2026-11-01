@@ -20,27 +20,32 @@ class SavePayrollVariablesUseCase {
     PayrollMonthView view,
     PayrollVariables variables,
   ) async {
-    if (!view.isEditable) {
-      return Left(PayrollRuleFailure(PayrollRule.notEditable));
-    }
+    final rule = check(view, variables);
+    if (rule != null) return Left(PayrollRuleFailure(rule));
+    return _repository.saveVariables(view.month, variables);
+  }
+
+  /// La règle que ces éléments ne respectent pas, ou `null`.
+  static PayrollRule? check(PayrollMonthView view, PayrollVariables variables) {
+    if (!view.isEditable) return PayrollRule.notEditable;
     final line = view.line(variables.staffMemberId);
-    if (line == null) return Left(PayrollRuleFailure(PayrollRule.noContract));
+    if (line == null) return PayrollRule.noContract;
     if (!line.overtimeAllowed && (variables.overtimeMinutes ?? 0) > 0) {
-      return Left(PayrollRuleFailure(PayrollRule.overtimeNotAllowed));
+      return PayrollRule.overtimeNotAllowed;
     }
     if ((variables.overtimeMinutes ?? 0) < 0 ||
         (variables.overtimeRateInCents ?? 0) < 0 ||
         (variables.dependentChildren ?? 0) < 0 ||
         (variables.childcareInCents ?? 0) < 0 ||
         (variables.fixedPayoutInCents ?? 0) < 0) {
-      return Left(PayrollRuleFailure(PayrollRule.invalidAmount));
+      return PayrollRule.invalidAmount;
     }
     if (variables.fixedPayoutInCents != null &&
         (variables.fixedPayoutReason?.trim().length ?? 0) <
             minPayoutReasonLength) {
-      return Left(PayrollRuleFailure(PayrollRule.reasonRequired));
+      return PayrollRule.reasonRequired;
     }
-    return _repository.saveVariables(view.month, variables);
+    return null;
   }
 }
 

@@ -442,6 +442,15 @@ class _ReleveRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
+          if (eleve.coteSaisie) ...[
+            Text(
+              AppLocalizations.of(context)!.courseDetailCoteSaisie,
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
           _ScorePill(moyenne: eleve.moyenne),
         ],
       ),

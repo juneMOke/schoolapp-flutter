@@ -33,6 +33,7 @@ const Set<String> shellFullBleedSubMenuIds = {
   MenuConstants.timetableId,
   MenuConstants.classJournalId,
   MenuConstants.resultatsClasseId,
+  MenuConstants.resultatsSaisieId,
   MenuConstants.documentsStudentId,
   MenuConstants.configurationSchoolId,
   MenuConstants.hrStaffFileId,

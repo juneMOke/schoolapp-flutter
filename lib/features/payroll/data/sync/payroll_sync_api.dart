@@ -38,6 +38,24 @@ abstract class PayrollSyncApi {
     @Body() Map<String, dynamic> body,
   );
 
+  @POST(AppConstants.syncPayrollDeductionTypesEndpoint)
+  Future<dynamic> submitDeductionType(
+    @Extras() Map<String, dynamic> extras,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @DELETE(AppConstants.syncPayrollDeductionTypeEndpoint)
+  Future<void> deleteDeductionType(
+    @Extras() Map<String, dynamic> extras,
+    @Path('id') String id,
+  );
+
+  @POST(AppConstants.syncPayrollDeductionsEndpoint)
+  Future<dynamic> submitDeduction(
+    @Extras() Map<String, dynamic> extras,
+    @Body() Map<String, dynamic> body,
+  );
+
   @POST(AppConstants.syncPayrollArrearsPrioritiesEndpoint)
   Future<dynamic> submitArrearsPriority(
     @Extras() Map<String, dynamic> extras,

@@ -26,6 +26,8 @@ enum PayrollNoticeKind {
   advanceCancelled,
   profileSaved,
   settingsSaved,
+  deductionTypeSaved,
+  deductionTypeRemoved,
   shared,
   downloaded,
 

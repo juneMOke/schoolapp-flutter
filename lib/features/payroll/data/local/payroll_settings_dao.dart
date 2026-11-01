@@ -37,6 +37,9 @@ class PayrollSettingsDao {
       'currencyRules': _decode(row['by_currency']),
       'workDaysDivisor': row['work_days_divisor'],
       'absenceDeductionEnabled': row['absence_deduction_enabled'] == 1,
+      'legalDeductionsEnabled': _switch(row['legal_deductions_enabled']),
+      'salaryAdvancesEnabled': _switch(row['salary_advances_enabled']),
+      'staffLoansEnabled': _switch(row['staff_loans_enabled']),
       // Q8 : rangés seulement une fois servis ; `NULL` les tait.
       if (row['childcare_enabled'] != null) ...{
         'cnssEmployerPermille': row['cnss_employer_permille'],
@@ -135,6 +138,13 @@ class PayrollSettingsDao {
       'by_currency': jsonEncode(json['currencyRules']),
       'work_days_divisor': seed.workDaysDivisor,
       'absence_deduction_enabled': seed.absenceDeductionEnabled ? 1 : 0,
+      // Tus par le serveur : la colonne garde ce que l'école a choisi ici.
+      if (seed.legalDeductionsEnabled case final enabled?)
+        'legal_deductions_enabled': enabled ? 1 : 0,
+      if (seed.salaryAdvancesEnabled case final enabled?)
+        'salary_advances_enabled': enabled ? 1 : 0,
+      if (seed.staffLoansEnabled case final enabled?)
+        'staff_loans_enabled': enabled ? 1 : 0,
       // Q8 tus (pas servis, ou saisis sur un écran qui ne les avait pas
       // encore) : les colonnes gardent ce qu'elles ont. Écrire `NULL` par-
       // dessus des valeurs servies rallumerait la PC/E d'ici l'accusé.
@@ -151,6 +161,8 @@ class PayrollSettingsDao {
       },
     };
   }
+
+  static bool? _switch(Object? raw) => raw is int ? raw == 1 : null;
 
   static Object? _decode(Object? raw) {
     if (raw is! String) return null;
@@ -192,6 +204,9 @@ class PayrollSettingsDao {
         seed.advanceMaxPercent ?? PayrollSettings.defaultAdvanceMaxPercent,
     loanMaxMonths: seed.loanMaxMonths ?? PayrollSettings.defaultLoanMaxMonths,
     childcareEnabled: seed.childcareEnabled ?? true,
+    legalDeductionsEnabled: seed.legalDeductionsEnabled ?? true,
+    salaryAdvancesEnabled: seed.salaryAdvancesEnabled ?? true,
+    staffLoansEnabled: seed.staffLoansEnabled ?? true,
     signatureBeneficiaryLabel: seed.signatureBeneficiaryLabel,
     signatureDirectorLabel: seed.signatureDirectorLabel,
     signatureCashierLabel: seed.signatureCashierLabel,
@@ -237,6 +252,9 @@ class PayrollSettingsDao {
     childcareEnabled: settings.wideSettingsServed
         ? settings.childcareEnabled
         : null,
+    legalDeductionsEnabled: settings.legalDeductionsEnabled,
+    salaryAdvancesEnabled: settings.salaryAdvancesEnabled,
+    staffLoansEnabled: settings.staffLoansEnabled,
     signatureBeneficiaryLabel: settings.signatureBeneficiaryLabel,
     signatureDirectorLabel: settings.signatureDirectorLabel,
     signatureCashierLabel: settings.signatureCashierLabel,

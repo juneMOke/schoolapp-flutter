@@ -71,6 +71,12 @@ class PayrollAgentTotalsCard extends StatelessWidget {
         minus(t.childcareInCents),
         ink: ink(t.childcareInCents),
       ),
+      if (t.customInCents > 0)
+        PayrollAmountRow(
+          l10n.payrollAgentTotalsCustom,
+          minus(t.customInCents),
+          ink: ink(t.customInCents),
+        ),
       PayrollAmountRow(
         l10n.payrollAgentTotalsAdvances,
         minus(t.advancesInCents),

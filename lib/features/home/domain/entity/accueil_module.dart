@@ -69,7 +69,7 @@ class AccueilModule {
 
   /// Page d'entrée du module (spec §03) : le tableau de bord s'il existe,
   /// sinon le premier sous-module. Ainsi Cours ouvre « Emploi du temps » et
-  /// Résultats « Résultats par classe ».
+  /// Résultats « Saisie des notes ».
   AccueilSubModule get entry => subModules.firstWhere(
     (sub) => sub.isDashboard,
     orElse: () => subModules.first,

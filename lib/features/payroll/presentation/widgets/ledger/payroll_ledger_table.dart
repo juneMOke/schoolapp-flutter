@@ -45,13 +45,14 @@ class PayrollLedgerTable extends StatelessWidget {
     required this.canWrite,
   });
 
-  static const int _netColumn = 5;
+  static const int _netColumn = 6;
 
   static const List<double?> _widths = [
     AppDimensions.payrollColAgent,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColSmallAmount,
     AppDimensions.payrollColSmallAmount,
+    AppDimensions.payrollColAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAmount,
     AppDimensions.payrollColAttendance,
@@ -74,12 +75,13 @@ class PayrollLedgerTable extends StatelessWidget {
       raised: true,
       ruleAfter: _netColumn,
       widths: _widths,
-      endAligned: const {1, 2, 3, 4, 5},
+      endAligned: const {1, 2, 3, 4, 5, 6},
       headers: [
         l10n.payrollColAgent,
         l10n.payrollColBase,
         l10n.payrollColOvertime,
         l10n.payrollColAllowance,
+        l10n.payrollColDeductions,
         l10n.payrollColAdvance,
         l10n.payrollColNet,
         l10n.payrollColAttendance,
@@ -101,8 +103,11 @@ class PayrollLedgerTable extends StatelessWidget {
       textAlign: TextAlign.end,
       style: EteeloColumnTableRow.figures(color: color, strong: strong),
     );
+    Widget withheld(int cents) => amount(
+      cents == 0 ? '—' : '− ${money(cents)}',
+      color: cents == 0 ? null : PayrollTone.alert.ink,
+    );
     final carried = line.carriedInCents;
-    final withheld = line.deductions.totalInCents + line.advanceInCents;
     return EteeloColumnTableRow(
       widths: _widths,
       onTap: () => onOpen(line),
@@ -158,10 +163,20 @@ class PayrollLedgerTable extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            amount(
-              withheld == 0 ? '—' : '− ${money(withheld)}',
-              color: withheld == 0 ? null : PayrollTone.alert.ink,
-            ),
+            withheld(line.deductions.totalInCents),
+            if (line.deductions.hasTrimmedCustom)
+              Text(
+                l10n.payrollDeductionTrimmedShort,
+                style: AppTypography.bodySmall.copyWith(
+                  color: PayrollTone.submitted.ink,
+                ),
+              ),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            withheld(line.advanceInCents),
             if (carried > 0)
               Text(
                 l10n.payrollCarried(money(carried)),
@@ -230,9 +245,8 @@ class PayrollLedgerTable extends StatelessWidget {
                 (l) => l.baseInCents,
                 (l) => l.overtimeInCents,
                 (l) => l.allowanceInCents,
-                // La colonne affiche retenues + avance par ligne : le total
-                // somme les mêmes montants.
-                (l) => l.deductions.totalInCents + l.advanceInCents,
+                (l) => l.deductions.totalInCents,
+                (l) => l.advanceInCents,
                 (l) => l.netInCents,
               ])
                 Text(

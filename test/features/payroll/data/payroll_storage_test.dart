@@ -252,7 +252,14 @@ void main() {
         expect(read.absenceDeductionEnabled, isTrue);
         expect(read.of('USD').iprFlatInCents, 200);
         expect(read.of('USD').cnssPermille, 35);
-        expect(PayrollSettingsDao.toSeed(read).toJson(), v2.toJson());
+        // La remontée dit toujours les trois interrupteurs : rallumer une
+        // retenue doit pouvoir partir.
+        expect(PayrollSettingsDao.toSeed(read).toJson(), {
+          ...v2.toJson(),
+          'legalDeductionsEnabled': true,
+          'salaryAdvancesEnabled': true,
+          'staffLoansEnabled': true,
+        });
       },
     );
 

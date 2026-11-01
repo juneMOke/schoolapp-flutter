@@ -7,9 +7,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_month_view.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_rule_failure.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_attendance_rule.dart';
+import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
@@ -38,6 +40,19 @@ abstract final class PayrollLedgerNotices {
     final attendanceMonth = PayrollLabels.month(context, view.month);
     final refusal = view.lastRefusal;
     final returned = view.header?.returnReason;
+    final issues = view.deductionIssues;
+    final snapshot = context.read<PayrollCubit>().state.snapshot;
+    String named(PayrollDeductionEntry entry) {
+      final name = actions.nameOf(entry.staffMemberId);
+      final type = snapshot.deductionTypes
+          .where((type) => type.id == entry.deductionTypeId)
+          .firstOrNull;
+      return type == null ? name : l10n.payrollDeductionNamed(name, type.label);
+    }
+
+    // Le blocage de devise a sa propre annonce, qui nomme les agents.
+    bool generic(PayrollBlocker blocker) =>
+        blocker != PayrollBlocker.deductionCurrency;
     final alerts = <Widget>[
       if (refusal != null && refusal.isStale)
         Row(
@@ -73,15 +88,60 @@ abstract final class PayrollLedgerNotices {
           icon: Icons.reply,
         ),
       if (view.phase == PayrollPhase.draft && canWrite)
-        if (view.submitBlocker case final blocker?)
+        if (view.submitBlocker case final blocker? when generic(blocker))
           PayrollTone.submitted.notice(
             PayrollLabels.rule(l10n, blocker.rule, month: attendanceMonth),
           ),
       if (view.phase == PayrollPhase.submitted && canManage)
-        if (view.validateBlocker case final blocker?)
+        if (view.validateBlocker case final blocker? when generic(blocker))
           PayrollTone.submitted.notice(
             PayrollLabels.rule(l10n, blocker.rule, month: attendanceMonth),
           ),
+      if (issues.foreign.isNotEmpty && view.phase == PayrollPhase.draft)
+        PayrollTone.alert.notice(
+          l10n.payrollDeductionForeignNotice(
+            issues.foreign.map(named).join(', '),
+          ),
+          icon: Icons.currency_exchange,
+        ),
+      if (issues.foreign.isNotEmpty && view.phase == PayrollPhase.submitted)
+        PayrollTone.alert.notice(
+          l10n.payrollDeductionForeignNoticeSubmitted(
+            issues.foreign.map(named).join(', '),
+          ),
+          icon: Icons.currency_exchange,
+        ),
+      if (issues.refused.isNotEmpty && (canWrite || canManage))
+        Row(
+          children: [
+            Expanded(
+              child: PayrollTone.alert.notice(
+                l10n.payrollDeductionRefusedNotice(
+                  issues.refused
+                      .map(
+                        (entry) => l10n.payrollDeductionRefusedItem(
+                          named(entry),
+                          PayrollLabels.serverRefusal(
+                            l10n,
+                            entry.syncErrorCode,
+                          ),
+                        ),
+                      )
+                      .join(', '),
+                ),
+                icon: Icons.remove_circle_outline,
+              ),
+            ),
+            if (canWrite) ...[
+              const SizedBox(width: AppSpacing.sm),
+              EteeloButton.ghost(
+                label: l10n.payrollDeductionRefusedDismiss,
+                onPressed: () => actions.dismissRefusedDeductions(view),
+                fullWidth: false,
+              ),
+            ],
+          ],
+        ),
     ];
     final infos = <Widget>[
       if (view.awaitingFrozenLines)

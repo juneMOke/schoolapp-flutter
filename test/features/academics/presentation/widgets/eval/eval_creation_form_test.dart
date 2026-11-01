@@ -336,6 +336,31 @@ void main() {
     );
 
     testWidgets(
+      'EXAMEN grisé si maxExamenParPeriodeScolaire vaut 0 (branche sans '
+      'examen, forme du barème après bascule)',
+      (tester) async {
+        final detailNoExamen = CoursNotationDetail(
+          coursId: 'c1',
+          classroomId: 'cl1',
+          effectif: 28,
+          periodes: detail.periodes,
+          plafonds: const LigneBaremePlafonds(
+            maxJournalierParSousPeriode: 5,
+            maxExamenParPeriodeScolaire: 0,
+          ),
+        );
+        await tester.pumpWidget(host(detailNoExamen));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Examen'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Examen semestriel'), findsNothing);
+        expect(find.text('10'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'plafond journalier atteint : blocage + message, indépendant de la '
       'clôture',
       (tester) async {

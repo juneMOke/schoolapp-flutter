@@ -3,6 +3,8 @@ import 'package:school_app_flutter/features/payroll/data/local/payroll_advance_r
 import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_calendar_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_type_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
@@ -20,6 +22,8 @@ class PayrollLocal {
   final StaffPayProfileDao profiles;
   final PayrollDao payrolls;
   final PayrollVariablesDao variables;
+  final PayrollDeductionTypeDao deductionTypes;
+  final PayrollDeductionDao deductions;
   final PayrollPayoutPolicyDao payoutPolicies;
   final PayrollArrearsPriorityDao arrearsPriorities;
   final PayrollAdvanceRequestDao advanceRequests;
@@ -35,6 +39,8 @@ class PayrollLocal {
     required this.profiles,
     required this.payrolls,
     required this.variables,
+    required this.deductionTypes,
+    required this.deductions,
     required this.payoutPolicies,
     required this.arrearsPriorities,
     required this.advanceRequests,
@@ -52,6 +58,8 @@ class PayrollLocal {
     profiles: StaffPayProfileDao(db),
     payrolls: PayrollDao(db),
     variables: PayrollVariablesDao(db),
+    deductionTypes: PayrollDeductionTypeDao(db),
+    deductions: PayrollDeductionDao(db),
     payoutPolicies: PayrollPayoutPolicyDao(db),
     arrearsPriorities: PayrollArrearsPriorityDao(db),
     advanceRequests: PayrollAdvanceRequestDao(db),

@@ -2648,6 +2648,12 @@ abstract class AppLocalizations {
   /// **'provisional'**
   String get courseDetailProvisional;
 
+  /// No description provided for @courseDetailCoteSaisie.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered grade'**
+  String get courseDetailCoteSaisie;
+
   /// No description provided for @courseDetailClassAverageLabel.
   ///
   /// In en, this message translates to:
@@ -22400,10 +22406,16 @@ abstract class AppLocalizations {
   /// **'pay {amount} · fixed'**
   String payrollLineToPayFixed(String amount);
 
-  /// No description provided for @payrollColAdvance.
+  /// No description provided for @payrollColDeductions.
   ///
   /// In en, this message translates to:
   /// **'Deductions'**
+  String get payrollColDeductions;
+
+  /// No description provided for @payrollColAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance'**
   String get payrollColAdvance;
 
   /// No description provided for @payrollColNet.
@@ -32304,6 +32316,1151 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Frozen'**
   String get hrPresenceRecapStatusFrozen;
+
+  /// No description provided for @payrollRuleDeductionTypeInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction has already been used: archive it instead.'**
+  String get payrollRuleDeductionTypeInUse;
+
+  /// No description provided for @payrollRuleDeductionTypeLabelTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'An active deduction in this currency already has this label.'**
+  String get payrollRuleDeductionTypeLabelTaken;
+
+  /// No description provided for @payrollRuleDeductionTypeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Six active deductions at most per currency: archive one to continue.'**
+  String get payrollRuleDeductionTypeLimit;
+
+  /// No description provided for @payrollRuleDeductionTypeCodeTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'This code is already used by another deduction, even an archived one.'**
+  String get payrollRuleDeductionTypeCodeTaken;
+
+  /// No description provided for @payrollRuleDeductionTypeFieldLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction has been used: its code and currency can no longer change.'**
+  String get payrollRuleDeductionTypeFieldLocked;
+
+  /// No description provided for @payrollRuleDeductionTypeCurrencyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'This currency is not set up for the school.'**
+  String get payrollRuleDeductionTypeCurrencyUnknown;
+
+  /// No description provided for @payrollRuleDeductionTypeArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction is archived: it can only be set to 0.'**
+  String get payrollRuleDeductionTypeArchived;
+
+  /// No description provided for @payrollRuleDeductionCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction was entered in another currency than the month\'s payroll.'**
+  String get payrollRuleDeductionCurrency;
+
+  /// No description provided for @payrollRuleDeductionTypeGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction was deleted or refused.'**
+  String get payrollRuleDeductionTypeGone;
+
+  /// No description provided for @payrollDeductionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollDeductionsTitle;
+
+  /// No description provided for @payrollDeductionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own deductions, next to the five standard ones. The default amount applies to every agent paid in its currency; the ledger\'s pencil replaces it for one agent.'**
+  String get payrollDeductionsSubtitle;
+
+  /// No description provided for @payrollDeductionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No deduction yet.'**
+  String get payrollDeductionsEmpty;
+
+  /// No description provided for @payrollDeductionsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a deduction'**
+  String get payrollDeductionsAdd;
+
+  /// No description provided for @payrollDeductionsArchivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get payrollDeductionsArchivedTitle;
+
+  /// No description provided for @payrollDeductionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get payrollDeductionsLabel;
+
+  /// No description provided for @payrollDeductionsNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New deduction'**
+  String get payrollDeductionsNewTitle;
+
+  /// No description provided for @payrollDeductionsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the deduction'**
+  String get payrollDeductionsEditTitle;
+
+  /// No description provided for @payrollDeductionsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get payrollDeductionsEdit;
+
+  /// No description provided for @payrollDeductionsCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get payrollDeductionsCode;
+
+  /// No description provided for @payrollDeductionsCodeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'2 to 12 characters: letters, digits, - or _.'**
+  String get payrollDeductionsCodeInvalid;
+
+  /// No description provided for @payrollDeductionsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get payrollDeductionsDescription;
+
+  /// No description provided for @payrollDeductionsDescriptionTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'200 characters at most.'**
+  String get payrollDeductionsDescriptionTooLong;
+
+  /// No description provided for @payrollDeductionsCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get payrollDeductionsCurrency;
+
+  /// No description provided for @payrollDeductionsDefaultAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Default amount'**
+  String get payrollDeductionsDefaultAmount;
+
+  /// No description provided for @payrollDeductionsDefaultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Withheld every month from every agent paid in this currency, unless an amount is entered for that agent. At 0, nothing is withheld.'**
+  String get payrollDeductionsDefaultHint;
+
+  /// No description provided for @payrollDeductionsLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction has been used: its code and currency can no longer change.'**
+  String get payrollDeductionsLockedHint;
+
+  /// No description provided for @payrollDeductionsColDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get payrollDeductionsColDefault;
+
+  /// No description provided for @payrollRuleAdvanceKindDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The school no longer grants this type of advance: see the payroll configuration.'**
+  String get payrollRuleAdvanceKindDisabled;
+
+  /// No description provided for @payrollSettingsModelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard deductions'**
+  String get payrollSettingsModelTitle;
+
+  /// No description provided for @payrollSettingsModelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off what your school doesn\'t apply: these deductions disappear from data entry and from the payslip.'**
+  String get payrollSettingsModelSubtitle;
+
+  /// No description provided for @payrollSettingsLegalToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withhold IPR and CNSS'**
+  String get payrollSettingsLegalToggle;
+
+  /// No description provided for @payrollSettingsAdvancesToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant salary advances'**
+  String get payrollSettingsAdvancesToggle;
+
+  /// No description provided for @payrollSettingsLoansToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant staff loans'**
+  String get payrollSettingsLoansToggle;
+
+  /// No description provided for @payrollVarsSectionEarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Earnings'**
+  String get payrollVarsSectionEarnings;
+
+  /// No description provided for @payrollVarsSectionDeductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard deductions'**
+  String get payrollVarsSectionDeductions;
+
+  /// No description provided for @payrollVarsCustomDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: {amount}'**
+  String payrollVarsCustomDefault(String amount);
+
+  /// No description provided for @payrollVarsCustomFromDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default amount'**
+  String get payrollVarsCustomFromDefault;
+
+  /// No description provided for @payrollVarsCustomOtherCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({currency})'**
+  String payrollVarsCustomOtherCurrency(String label, String currency);
+
+  /// No description provided for @payrollRuleDeductionTypeRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'An edited deduction was refused: fix it in the configuration, then sync.'**
+  String get payrollRuleDeductionTypeRefused;
+
+  /// No description provided for @payrollDeductionsArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get payrollDeductionsArchive;
+
+  /// No description provided for @payrollDeductionsRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get payrollDeductionsRestore;
+
+  /// No description provided for @payrollDeductionsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get payrollDeductionsDelete;
+
+  /// No description provided for @payrollDeductionsDeleteOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete (online only)'**
+  String get payrollDeductionsDeleteOffline;
+
+  /// No description provided for @payrollDeductionsMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get payrollDeductionsMoveUp;
+
+  /// No description provided for @payrollDeductionsMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get payrollDeductionsMoveDown;
+
+  /// No description provided for @payrollDeductionsActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction actions'**
+  String get payrollDeductionsActions;
+
+  /// No description provided for @payrollDeductionsLabelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The label is required.'**
+  String get payrollDeductionsLabelRequired;
+
+  /// No description provided for @payrollDeductionsLabelTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'40 characters at most.'**
+  String get payrollDeductionsLabelTooLong;
+
+  /// No description provided for @payrollDeductionsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get payrollDeductionsPending;
+
+  /// No description provided for @payrollDeductionsDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This deduction will be permanently removed.'**
+  String get payrollDeductionsDeleteBody;
+
+  /// No description provided for @payrollToastDeductionTypeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction saved.'**
+  String get payrollToastDeductionTypeSaved;
+
+  /// No description provided for @payrollToastDeductionTypeRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction deleted.'**
+  String get payrollToastDeductionTypeRemoved;
+
+  /// No description provided for @payrollVarsCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollVarsCustomTitle;
+
+  /// No description provided for @payrollDeductionsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{label}”?'**
+  String payrollDeductionsDeleteTitle(String label);
+
+  /// No description provided for @payrollVarsCustomArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} (archived)'**
+  String payrollVarsCustomArchived(String label);
+
+  /// No description provided for @payrollVarsCustomTrimmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered {requested}, withheld {taken}'**
+  String payrollVarsCustomTrimmed(String requested, String taken);
+
+  /// No description provided for @payrollVarsCustomClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Set to 0'**
+  String get payrollVarsCustomClear;
+
+  /// No description provided for @payrollRuleDeductionTypeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'A deduction refers to a type this tablet does not know yet: synchronise.'**
+  String get payrollRuleDeductionTypeUnknown;
+
+  /// No description provided for @payrollDeductionRefusedDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get payrollDeductionRefusedDismiss;
+
+  /// No description provided for @payrollDeductionTrimmedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduction cut short'**
+  String get payrollDeductionTrimmedShort;
+
+  /// No description provided for @payrollAgentTotalsCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollAgentTotalsCustom;
+
+  /// No description provided for @payrollKpiSchoolDeductionsDetailCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences · IPR/CNSS · childcare · school'**
+  String get payrollKpiSchoolDeductionsDetailCustom;
+
+  /// No description provided for @payrollConfirmFixedDeductionsCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions (absences, IPR/CNSS, PC/E, school)'**
+  String get payrollConfirmFixedDeductionsCustom;
+
+  /// No description provided for @payrollDeductionForeignNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions entered in another currency than the payroll: {list}. Enter the amount again or set it to 0.'**
+  String payrollDeductionForeignNotice(String list);
+
+  /// No description provided for @payrollDeductionForeignNoticeSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions entered in another currency than the payroll: {list}. Management returns the payroll first, then the bursar corrects them.'**
+  String payrollDeductionForeignNoticeSubmitted(String list);
+
+  /// No description provided for @payrollDeductionRefusedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductions taken out of the calculation: {list}.'**
+  String payrollDeductionRefusedNotice(String list);
+
+  /// No description provided for @payrollConfirmTrimmed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One deduction will be cut short} other{{count} deductions will be cut short}}: the gross was not enough.'**
+  String payrollConfirmTrimmed(int count);
+
+  /// No description provided for @payrollDashCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'School deductions'**
+  String get payrollDashCustom;
+
+  /// No description provided for @payrollVarsCustomRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused amount: {amount}. {reason}'**
+  String payrollVarsCustomRefused(String amount, String reason);
+
+  /// No description provided for @payrollVarsCustomForeign.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} entered in another currency than the month\'s payroll.'**
+  String payrollVarsCustomForeign(String amount);
+
+  /// No description provided for @payrollDeductionNamed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({label})'**
+  String payrollDeductionNamed(String name, String label);
+
+  /// No description provided for @payrollDeductionRefusedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {reason}'**
+  String payrollDeductionRefusedItem(String name, String reason);
+
+  /// No description provided for @subMenuResultatsSaisie.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get subMenuResultatsSaisie;
+
+  /// No description provided for @coteSaisieEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Results · Grade entry'**
+  String get coteSaisieEyebrow;
+
+  /// No description provided for @coteSaisieTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a class\'s grades'**
+  String get coteSaisieTitle;
+
+  /// No description provided for @coteSaisieOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open grade entry'**
+  String get coteSaisieOpen;
+
+  /// No description provided for @coteDecoupageTrimestres.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get coteDecoupageTrimestres;
+
+  /// No description provided for @coteDecoupageSemestres.
+  ///
+  /// In en, this message translates to:
+  /// **'Semesters'**
+  String get coteDecoupageSemestres;
+
+  /// No description provided for @cotePorteeColonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Period / exam'**
+  String get cotePorteeColonne;
+
+  /// No description provided for @cotePorteeUnSemestre.
+  ///
+  /// In en, this message translates to:
+  /// **'One semester'**
+  String get cotePorteeUnSemestre;
+
+  /// No description provided for @cotePorteeUnTrimestre.
+  ///
+  /// In en, this message translates to:
+  /// **'One term'**
+  String get cotePorteeUnTrimestre;
+
+  /// No description provided for @cotePorteeLesSemestres.
+  ///
+  /// In en, this message translates to:
+  /// **'All semesters'**
+  String get cotePorteeLesSemestres;
+
+  /// No description provided for @cotePorteeLesTrimestres.
+  ///
+  /// In en, this message translates to:
+  /// **'All terms'**
+  String get cotePorteeLesTrimestres;
+
+  /// No description provided for @cotePorteeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry scope'**
+  String get cotePorteeSemantics;
+
+  /// No description provided for @coteGroupChipSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a column or a group'**
+  String get coteGroupChipSemantics;
+
+  /// No description provided for @coteColumnPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'P{numero}'**
+  String coteColumnPeriod(int numero);
+
+  /// No description provided for @coteColumnPeriodLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Period {numero}'**
+  String coteColumnPeriodLong(int numero);
+
+  /// No description provided for @coteColumnExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get coteColumnExam;
+
+  /// No description provided for @coteColumnExamOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam {group}'**
+  String coteColumnExamOf(String group);
+
+  /// No description provided for @coteColumnExamLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam · {group}'**
+  String coteColumnExamLong(String group);
+
+  /// No description provided for @coteColumnTotalOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Tot. {group}'**
+  String coteColumnTotalOf(String group);
+
+  /// No description provided for @coteColumnTotalLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · {group}'**
+  String coteColumnTotalLong(String group);
+
+  /// No description provided for @coteGroupShortSemester.
+  ///
+  /// In en, this message translates to:
+  /// **'S{ordre}'**
+  String coteGroupShortSemester(int ordre);
+
+  /// No description provided for @coteGroupShortTrimester.
+  ///
+  /// In en, this message translates to:
+  /// **'T{ordre}'**
+  String coteGroupShortTrimester(int ordre);
+
+  /// No description provided for @coteColumnMaxPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Max per.'**
+  String get coteColumnMaxPeriod;
+
+  /// No description provided for @coteColumnMaxPeriodLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum per period'**
+  String get coteColumnMaxPeriodLong;
+
+  /// No description provided for @coteColumnMaxExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Max ex.'**
+  String get coteColumnMaxExam;
+
+  /// No description provided for @coteColumnMaxExamLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam maximum'**
+  String get coteColumnMaxExamLong;
+
+  /// No description provided for @coteColumnMaxOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {group}'**
+  String coteColumnMaxOf(String group);
+
+  /// No description provided for @coteColumnMaxGroupLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum · {group}'**
+  String coteColumnMaxGroupLong(String group);
+
+  /// No description provided for @coteSubtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get coteSubtotal;
+
+  /// No description provided for @coteMaxCellSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}, {course}'**
+  String coteMaxCellSemantics(String label, String course);
+
+  /// No description provided for @coteColumnCours.
+  ///
+  /// In en, this message translates to:
+  /// **'Course'**
+  String get coteColumnCours;
+
+  /// No description provided for @coteColumnTotalScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {group} · %'**
+  String coteColumnTotalScope(String group);
+
+  /// No description provided for @coteColumnAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'Year · %'**
+  String get coteColumnAnnual;
+
+  /// No description provided for @coteClassBarEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {classe}'**
+  String coteClassBarEyebrow(String classe);
+
+  /// No description provided for @coteClassBarSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} · {students, plural, =1{1 student} other{{students} students}} · {complete, plural, =0{none complete} =1{1 complete} other{{complete} complete}}'**
+  String coteClassBarSummary(String scope, int students, int complete);
+
+  /// No description provided for @coteSaveIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft · saved automatically'**
+  String get coteSaveIdle;
+
+  /// No description provided for @coteSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get coteSaving;
+
+  /// No description provided for @coteSavedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved at {time}'**
+  String coteSavedAt(String time);
+
+  /// No description provided for @coteSaveOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · {count, plural, =1{1 grade waiting} other{{count} grades waiting}}'**
+  String coteSaveOffline(int count);
+
+  /// No description provided for @coteSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save'**
+  String get coteSaveFailed;
+
+  /// No description provided for @coteSaveRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get coteSaveRetry;
+
+  /// No description provided for @coteSaveSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired · sign in to send the grades'**
+  String get coteSaveSessionExpired;
+
+  /// No description provided for @coteFromCacheBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Device copy: the server did not answer. Your entries stay saved here.'**
+  String get coteFromCacheBanner;
+
+  /// No description provided for @coteStorageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This grade could not be saved on the device.'**
+  String get coteStorageFailed;
+
+  /// No description provided for @coteChangedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade updated} other{{count} grades updated}}'**
+  String coteChangedNotice(int count);
+
+  /// No description provided for @coteListSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a student'**
+  String get coteListSearchHint;
+
+  /// No description provided for @coteListFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get coteListFilterAll;
+
+  /// No description provided for @coteListFilterTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete'**
+  String get coteListFilterTodo;
+
+  /// No description provided for @coteListFilterDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get coteListFilterDone;
+
+  /// No description provided for @coteListFilterSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter students'**
+  String get coteListFilterSemantics;
+
+  /// No description provided for @coteListComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry complete'**
+  String get coteListComplete;
+
+  /// No description provided for @coteListMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade missing} other{{count} grades missing}}'**
+  String coteListMissing(int count);
+
+  /// No description provided for @coteListToFix.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade to fix} other{{count} grades to fix}}'**
+  String coteListToFix(int count);
+
+  /// No description provided for @coteListEmptySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches “{query}”.'**
+  String coteListEmptySearch(String query);
+
+  /// No description provided for @coteListEmptyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'No student is complete yet.'**
+  String get coteListEmptyDone;
+
+  /// No description provided for @coteListEmptyTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'All students are complete.'**
+  String get coteListEmptyTodo;
+
+  /// No description provided for @coteListShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all students'**
+  String get coteListShowAll;
+
+  /// No description provided for @coteRank.
+  ///
+  /// In en, this message translates to:
+  /// **'#{rank}'**
+  String coteRank(int rank);
+
+  /// No description provided for @coteRankNone.
+  ///
+  /// In en, this message translates to:
+  /// **'NR'**
+  String get coteRankNone;
+
+  /// No description provided for @coteRankNoneLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Not ranked'**
+  String get coteRankNoneLong;
+
+  /// No description provided for @cotePickerSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a student'**
+  String get cotePickerSemantics;
+
+  /// No description provided for @cotePickerItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{number} · {name} — {filled}/{cells}'**
+  String cotePickerItem(String number, String name, int filled, int cells);
+
+  /// No description provided for @coteHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {classe} · {scope} · student {index}/{total}'**
+  String coteHeaderSubtitle(String classe, String scope, int index, int total);
+
+  /// No description provided for @coteKpiPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get coteKpiPercent;
+
+  /// No description provided for @coteKpiProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional'**
+  String get coteKpiProvisional;
+
+  /// No description provided for @coteKpiRankOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {count}'**
+  String coteKpiRankOf(int count);
+
+  /// No description provided for @coteKpiFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades entered'**
+  String get coteKpiFilled;
+
+  /// No description provided for @coteStudentPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous student'**
+  String get coteStudentPrevious;
+
+  /// No description provided for @coteStudentNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next student'**
+  String get coteStudentNext;
+
+  /// No description provided for @coteLegendEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'To enter'**
+  String get coteLegendEmpty;
+
+  /// No description provided for @coteLegendPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period grade'**
+  String get coteLegendPeriod;
+
+  /// No description provided for @coteLegendExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get coteLegendExam;
+
+  /// No description provided for @coteLegendCalculated.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated average'**
+  String get coteLegendCalculated;
+
+  /// No description provided for @coteLegendTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated total'**
+  String get coteLegendTotal;
+
+  /// No description provided for @coteLegendBelowHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Below half'**
+  String get coteLegendBelowHalf;
+
+  /// No description provided for @coteLegendHalfOrMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Half or more'**
+  String get coteLegendHalfOrMore;
+
+  /// No description provided for @coteRubriqueExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get coteRubriqueExpand;
+
+  /// No description provided for @coteRubriqueCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get coteRubriqueCollapse;
+
+  /// No description provided for @coteRubriqueAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades to fix are folded here'**
+  String get coteRubriqueAlert;
+
+  /// No description provided for @coteLegendEnterKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get coteLegendEnterKey;
+
+  /// No description provided for @coteLegendEnterDown.
+  ///
+  /// In en, this message translates to:
+  /// **'next course'**
+  String get coteLegendEnterDown;
+
+  /// No description provided for @coteLegendEnterRight.
+  ///
+  /// In en, this message translates to:
+  /// **'next column'**
+  String get coteLegendEnterRight;
+
+  /// No description provided for @coteLegendEnterToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change what the Enter key does'**
+  String get coteLegendEnterToggle;
+
+  /// No description provided for @coteMaxima.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get coteMaxima;
+
+  /// No description provided for @coteTotalObtained.
+  ///
+  /// In en, this message translates to:
+  /// **'Total obtained'**
+  String get coteTotalObtained;
+
+  /// No description provided for @cotePercentRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get cotePercentRow;
+
+  /// No description provided for @coteFooterRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {group} = periods + exam. Percentage = total obtained ÷ maximum × 100.'**
+  String coteFooterRule(String group);
+
+  /// No description provided for @coteFooterProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional: based on {filled} grades entered out of {cells}.'**
+  String coteFooterProvisional(int filled, int cells);
+
+  /// No description provided for @coteFooterInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade out of range, not counted until corrected.} other{{count} grades out of range, not counted until corrected.}}'**
+  String coteFooterInvalid(int count);
+
+  /// No description provided for @coteCellInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid grade: 0 to {max}'**
+  String coteCellInvalid(String max);
+
+  /// No description provided for @coteCellCalculated.
+  ///
+  /// In en, this message translates to:
+  /// **'Average of the assessments'**
+  String get coteCellCalculated;
+
+  /// No description provided for @coteCellReplaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Average of the assessments: {value}'**
+  String coteCellReplaces(String value);
+
+  /// No description provided for @coteCellLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Column closed'**
+  String get coteCellLocked;
+
+  /// No description provided for @coteCellNoExam.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no exam'**
+  String get coteCellNoExam;
+
+  /// No description provided for @coteRejectedClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: the column was closed in the meantime. The server did not keep it.'**
+  String get coteRejectedClosed;
+
+  /// No description provided for @coteRejectedRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: value out of range.'**
+  String get coteRejectedRange;
+
+  /// No description provided for @coteRejectedNoExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: this course has no exam.'**
+  String get coteRejectedNoExam;
+
+  /// No description provided for @coteRejectedStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: this student is no longer in the class.'**
+  String get coteRejectedStudent;
+
+  /// No description provided for @coteRejectedColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: this column no longer exists for the class.'**
+  String get coteRejectedColumn;
+
+  /// No description provided for @coteRejectedOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused by the server.'**
+  String get coteRejectedOther;
+
+  /// No description provided for @coteRejectedDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get coteRejectedDiscard;
+
+  /// No description provided for @coteRejectedOfficial.
+  ///
+  /// In en, this message translates to:
+  /// **'Report card value: {value}'**
+  String coteRejectedOfficial(String value);
+
+  /// No description provided for @coteCellSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{course} · {column}, out of {max}'**
+  String coteCellSemantics(String course, String column, String max);
+
+  /// No description provided for @coteTotalSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {column}, {course}'**
+  String coteTotalSemantics(String column, String course);
+
+  /// No description provided for @coteValueOutOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} out of {max}'**
+  String coteValueOutOf(String value, String max);
+
+  /// No description provided for @coteStudentAnnounce.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, student {index} of {total}, {percent} percent'**
+  String coteStudentAnnounce(String name, int index, int total, int percent);
+
+  /// No description provided for @coteStudentAnnounceProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, student {index} of {total}, {percent} percent provisional'**
+  String coteStudentAnnounceProvisional(
+    String name,
+    int index,
+    int total,
+    int percent,
+  );
+
+  /// No description provided for @coteStudentAnnounceNoGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, student {index} of {total}, no grade'**
+  String coteStudentAnnounceNoGrade(String name, int index, int total);
+
+  /// No description provided for @coteIdleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class'**
+  String get coteIdleTitle;
+
+  /// No description provided for @coteIdleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Period and exam grades open as a report card, one student at a time.'**
+  String get coteIdleDescription;
+
+  /// No description provided for @coteEmptyStudentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled in this class'**
+  String get coteEmptyStudentsTitle;
+
+  /// No description provided for @coteEmptyStudentsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the chosen class or the class lists.'**
+  String get coteEmptyStudentsDescription;
+
+  /// No description provided for @coteEmptyCoursesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No course set up for this level'**
+  String get coteEmptyCoursesTitle;
+
+  /// No description provided for @coteEmptyCoursesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This class has no grading scale yet.'**
+  String get coteEmptyCoursesDescription;
+
+  /// No description provided for @coteEmptyChangeClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Change class'**
+  String get coteEmptyChangeClass;
+
+  /// No description provided for @cotePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String cotePercent(int percent);
+
+  /// No description provided for @coteColumnTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get coteColumnTotal;
+
+  /// No description provided for @syncAggregateCotesBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get syncAggregateCotesBatch;
 }
 
 class _AppLocalizationsDelegate

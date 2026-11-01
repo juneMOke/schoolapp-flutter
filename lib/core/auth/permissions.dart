@@ -183,6 +183,11 @@ enum Perm {
   academicsGradeRead('academics.grade.read'),
   academicsGradeWrite('academics.grade.write'),
   academicsGradeSeal('academics.grade.seal'),
+  // Saisir les cotes finales d'une classe (Résultats ▸ Saisie des notes) : le
+  // rôle dédié `GRADE_CLERK` et le directeur. Rien à voir avec
+  // `academicsGradeWrite`, qui porte les notes d'une évaluation : l'enseignant
+  // n'écrit pas ici.
+  academicsGradeEnter('academics.grade.enter'),
   academicsResultRead('academics.result.read'),
   academicsReferentialRead('academics.referential.read'),
   academicsReferentialWrite('academics.referential.write'),

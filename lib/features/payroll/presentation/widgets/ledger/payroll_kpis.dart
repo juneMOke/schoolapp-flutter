@@ -66,7 +66,9 @@ class PayrollKpis extends StatelessWidget {
               valueLines: _perCurrency(lines, (l) => l.deductions.totalInCents),
               accent: DashboardSense.manquant,
               icon: Icons.remove_circle_outline,
-              subline: l10n.payrollKpiSchoolDeductionsDetail,
+              subline: lines.any((l) => l.deductions.custom.isNotEmpty)
+                  ? l10n.payrollKpiSchoolDeductionsDetailCustom
+                  : l10n.payrollKpiSchoolDeductionsDetail,
             ),
             PayrollKpiCard.of(
               label: l10n.payrollKpiLoans,

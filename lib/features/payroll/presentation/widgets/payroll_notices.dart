@@ -60,6 +60,10 @@ void showPayrollNotice(
       AppSnackBar.showSuccess(context, l10n.payrollToastProfile);
     case PayrollNoticeKind.settingsSaved:
       AppSnackBar.showSuccess(context, l10n.payrollToastSettings);
+    case PayrollNoticeKind.deductionTypeSaved:
+      AppSnackBar.showSuccess(context, l10n.payrollToastDeductionTypeSaved);
+    case PayrollNoticeKind.deductionTypeRemoved:
+      AppSnackBar.showSuccess(context, l10n.payrollToastDeductionTypeRemoved);
     case PayrollNoticeKind.shared:
       AppSnackBar.showInfo(context, l10n.payrollToastShared);
     case PayrollNoticeKind.downloaded:

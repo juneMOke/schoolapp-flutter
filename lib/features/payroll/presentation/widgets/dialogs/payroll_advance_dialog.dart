@@ -57,7 +57,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
   String? _memberId;
   PayoutMode _mode = PayoutMode.cash;
   SalaryAdvanceReason? _reason;
-  int _installments = 1;
+  late int _installments = widget.snapshot.settings.minInstallments;
   bool _tried = false;
 
   late final String _firstMonth = PayrollAdvanceRules.defaultFirstMonth(
@@ -204,7 +204,7 @@ class _PayrollAdvanceDialogState extends State<PayrollAdvanceDialog> {
           PayrollChoiceChips<int>(
             values: [
               for (
-                var n = 1;
+                var n = widget.snapshot.settings.minInstallments;
                 n <= PayrollAdvanceRules.maxInstallmentsOf(widget.snapshot);
                 n++
               )

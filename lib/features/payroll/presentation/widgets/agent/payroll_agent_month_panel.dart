@@ -47,6 +47,7 @@ class _PayrollAgentMonthPanelState extends State<PayrollAgentMonthPanel> {
       snapshot: widget.snapshot,
       view: month.view,
       line: month.line,
+      listIdleRubrics: _view == _View.calc,
     );
     final heading = Column(
       crossAxisAlignment: CrossAxisAlignment.start,

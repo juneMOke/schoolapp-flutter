@@ -896,7 +896,13 @@ class AppDimensions {
   // Le livre défile horizontalement sous 1024 dp — 220 d'agent, les montants,
   // 136 de versement au moins, l'œil et le crayon, 16 de marges ; les
   // colonnes de montant sont alignées à droite, en chiffres tabulaires.
-  static const payrollLedgerMinWidth = 1024.0;
+  static const payrollLedgerMinWidth = 1124.0;
+  static const payrollDeductionTableMinWidth = 560.0;
+  static const payrollDeductionColCode = 104.0;
+  static const payrollDeductionColCurrency = 72.0;
+  static const payrollDeductionColDefault = 120.0;
+  static const payrollVarsAmountField = 140.0;
+  static const payrollVarsAmountRowMinWidth = 300.0;
   static const payrollColAgent = 220.0;
   static const payrollColAmount = 100.0;
 
@@ -1190,4 +1196,71 @@ class AppDimensions {
   /// RH · Présences : le texte d'une alerte de tableau de bord ne s'étire pas
   /// sur tout un poste — l'action se range à sa droite.
   static const hrPresenceInsightTextMaxWidth = 560.0;
+
+  // ── Saisie des notes — grille bulletin ─────────────────────────────────────
+  // Les lignes sont des hauteurs de base : la grille les multiplie par
+  // l'échelle du texte, ses trois zones restent ainsi alignées à ×1,3.
+  static const coteListPanelWidth = 280.0;
+  static const coteListPanelMaxHeight = 640.0;
+
+  /// Écart entre la liste et le bulletin ; la liste n'est montrée que si la
+  /// grille tient à côté de ce couple.
+  static const coteListGap = 14.0;
+
+  /// Évite que la liste clignote autour du seuil, barre de défilement comprise.
+  static const coteListHysteresis = 32.0;
+  static const coteListRowHeight = 64.0;
+  static const coteCourseColumn = 240.0;
+  static const coteCourseColumnDense = 200.0;
+  static const coteCourseColumnPhone = 110.0;
+
+  /// Le surplus de largeur va aux noms de cours, jusqu'ici.
+  static const coteCourseColumnMax = 360.0;
+  static const coteMaxColumn = 56.0;
+  static const coteMaxColumnDense = 46.0;
+  static const coteNoteColumn = 84.0;
+  static const coteNoteColumnMedium = 72.0;
+  static const coteNoteColumnDense = 64.0;
+  static const coteGroupColumn = 78.0;
+  static const coteGroupColumnDense = 70.0;
+  static const coteTotalColumn = 158.0;
+  static const coteTotalColumnDense = 150.0;
+  static const coteTotalColumnPhone = 96.0;
+  static const coteCellHorizontalPadding = 5.0;
+  static const coteRowHeader = 40.0;
+  static const coteRowGroup = 30.0;
+  // Titres repliables : une cible d'appui entière, sur toute la largeur.
+  static const coteRowDomain = minTouchTarget;
+  static const coteRowDomainPhone = 56.0;
+  static const coteRowBranch = minTouchTarget;
+  static const coteRowSubtotal = 38.0;
+
+  /// Une cellule de [minTouchTarget] et ses 4 dp de part et d'autre.
+  static const coteRowCourse = minTouchTarget + 8;
+  static const coteRowMaxima = 34.0;
+  static const coteRowTotal = 44.0;
+  static const coteRowPercent = 38.0;
+  static const coteMeterWidth = 30.0;
+  static const coteMeterWidthDense = 22.0;
+  static const coteMeterHeight = 5.0;
+  static const coteBranchRule = 2.0;
+  static const coteChevron = 20.0;
+  static const coteSubtotalRule = 1.5;
+  static const coteCourseMarkWidth = 3.0;
+  static const coteCourseMarkHeight = 30.0;
+  static const coteLegendSwatch = 14.0;
+  static const coteHeaderKpiMinWidth = 86.0;
+  static const coteHeaderAvatar = 44.0;
+  static const coteProgressMaxWidth = 220.0;
+  static const coteProgressHeight = 6.0;
+  static const coteFocusHalo = 3.0;
+  static const coteSelectFieldMinWidth = 170.0;
+  static const coteStatusBadge = 16.0;
+  static const coteStatusBadgeIcon = 10.0;
+  static const coteStatusBadgeOffset = 3.0;
+  static const coteSwatchRadius = 4.0;
+  static const coteHeaderLockIcon = 10.0;
+  static const coteSkeletonHeader = 72.0;
+  static const coteSkeletonListRows = 8;
+  static const coteSkeletonGridRows = 9;
 }

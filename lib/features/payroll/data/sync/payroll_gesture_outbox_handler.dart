@@ -15,7 +15,7 @@ import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 /// `PAYROLL_GESTURE` — soumettre, renvoyer, valider, rouvrir.
 ///
 /// **Attend** ce qui a été posé avant lui sur le même mois — éléments
-/// variables, avances qui commencent ce mois-là, gestes aînés : l'empreinte
+/// variables, saisies de rubriques, avances qui commencent ce mois-là, gestes aînés : l'empreinte
 /// envoyée a été calculée avec eux, le serveur doit les avoir.
 ///
 /// Un refus `PAYROLL_STALE` garde les chiffres du serveur pour l'écran de
@@ -46,6 +46,7 @@ class PayrollGestureOutboxHandler
   @override
   Set<String> get waitsFor => const {
     PayrollOutbox.variables,
+    PayrollOutbox.deduction,
     // Le taux du mois entre dans l'empreinte (« à verser ») : un geste qui
     // le doublerait serait recalculé à 100 % et refusé.
     PayrollOutbox.payoutPolicy,
@@ -54,7 +55,8 @@ class PayrollGestureOutboxHandler
   };
 
   /// Soumettre et valider portent l'empreinte d'un calcul qui lit aussi les
-  /// contrats, les profils, les réglages et **toutes** les avances (une avance
+  /// contrats, les profils, les réglages, le catalogue des rubriques et
+  /// **toutes** les avances (une avance
   /// commencée plus tôt a encore des échéances ce mois-ci) : ce qui en a été écrit avant sur
   /// la tablette part d'abord, sinon le serveur trouverait d'autres chiffres.
   @override
@@ -69,6 +71,7 @@ class PayrollGestureOutboxHandler
     StaffContractWriteDao.contractAggregateType,
     StaffContractWriteDao.correctionAggregateType,
     PayrollOutbox.settings,
+    PayrollOutbox.deductionType,
     PayrollOutbox.profile,
     // Le paiement d'une dépense d'avance fait naître l'avance au serveur (B5).
     ExpenseWriteDao.gestureAggregateType,

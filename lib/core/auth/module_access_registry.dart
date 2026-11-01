@@ -424,6 +424,7 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   },
   MenuConstants.resultatsMenuId: {
     MenuConstants.resultatsClasseId: ModuleAccess([Perm.academicsResultRead]),
+    MenuConstants.resultatsSaisieId: ModuleAccess([Perm.academicsGradeEnter]),
   },
   MenuConstants.documentsMenuId: {
     MenuConstants.documentsStudentId: ModuleAccess([Perm.editiqueRead]),

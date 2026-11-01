@@ -1,4 +1,4 @@
-/// La synchronisation de la Paie : ses cinq descentes et ses huit remontées.
+/// La synchronisation de la Paie : ses cinq descentes et ses dix remontées.
 library;
 
 import 'package:get_it/get_it.dart';
@@ -12,6 +12,8 @@ import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/attendance_summary_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_arrears_priority_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_dao.dart';
+import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_type_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_disbursement_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
@@ -23,6 +25,7 @@ import 'package:school_app_flutter/features/payroll/data/repositories/payroll_di
 import 'package:school_app_flutter/features/payroll/data/repositories/payroll_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_arrears_priority_outbox_handler.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_cancellation_outbox_handler.dart';
+import 'package:school_app_flutter/features/payroll/data/sync/payroll_deduction_outbox_handlers.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_fact_outbox_handlers.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_gesture_outbox_handler.dart';
 import 'package:school_app_flutter/features/payroll/data/sync/payroll_lww_outbox_handlers.dart';
@@ -95,7 +98,7 @@ void _registerPulls(GetIt getIt) {
     );
 }
 
-/// Huit remontées. L'ordre par mois, par ligne et par avance est tenu par les
+/// Dix remontées. L'ordre par mois, par ligne et par avance est tenu par les
 /// handlers eux-mêmes (`OutboxDao.hasOlderPending`).
 void _registerPushes(GetIt getIt) {
   final engine = getIt<SyncEngine>();
@@ -128,6 +131,26 @@ void _registerPushes(GetIt getIt) {
       PayrollVariablesOutboxHandler(
         api: api,
         dao: getIt<PayrollVariablesDao>(),
+        outbox: outbox,
+        currentUser: currentUser,
+        extras: extras,
+        members: members,
+      ),
+    )
+    ..registerHandler(
+      PayrollDeductionTypeOutboxHandler(
+        api: api,
+        dao: getIt<PayrollDeductionTypeDao>(),
+        outbox: outbox,
+        currentUser: currentUser,
+        extras: extras,
+      ),
+    )
+    ..registerHandler(
+      PayrollDeductionOutboxHandler(
+        api: api,
+        dao: getIt<PayrollDeductionDao>(),
+        types: getIt<PayrollDeductionTypeDao>(),
         outbox: outbox,
         currentUser: currentUser,
         extras: extras,

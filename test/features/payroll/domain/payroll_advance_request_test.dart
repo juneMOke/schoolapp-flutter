@@ -281,5 +281,28 @@ void main() {
         PayrollRule.invalidInstallments,
       );
     });
+
+    test('un type coupé par l école se refuse par son propre motif', () {
+      PayrollRule? refusal(PayrollSettings settings, int installments) =>
+          RequestSalaryAdvanceUseCase.refusalOf(
+            snapshot(settings: settings),
+            draft(installments: installments),
+          );
+      final noAdvance = PayrollSettings.defaults.copyWith(
+        salaryAdvancesEnabled: false,
+      );
+      final noLoan = PayrollSettings.defaults.copyWith(
+        staffLoansEnabled: false,
+      );
+
+      expect(refusal(noAdvance, 1), PayrollRule.advanceKindDisabled);
+      expect(refusal(noLoan, 3), PayrollRule.advanceKindDisabled);
+      expect(refusal(noAdvance, 3), isNot(PayrollRule.advanceKindDisabled));
+      expect(refusal(noLoan, 1), isNot(PayrollRule.advanceKindDisabled));
+      expect(
+        payrollRuleOfServerCode('ADVANCE_KIND_DISABLED'),
+        PayrollRule.advanceKindDisabled,
+      );
+    });
   });
 }

@@ -279,6 +279,9 @@ class PayrollPayslipActions {
         '${l10n.payrollPayslipSalaryAdvance} ${money(line.advanceInCents)}',
       if (d.childcareInCents > 0)
         '${l10n.payrollPayslipChildcare} ${money(d.childcareInCents)}',
+      for (final custom in d.custom)
+        if (custom.takenInCents > 0)
+          '${custom.label} ${money(custom.takenInCents)}',
     ];
     final settlement = view.settlementOf(line);
     final days = PayrollLabels.attendanceDays(l10n, d);

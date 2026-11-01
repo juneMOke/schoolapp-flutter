@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 /// Le prévu et le réel d'un mois dans une devise, sur toutes ses lignes. Les
-/// cinq retenues sont celles réellement prises :
-/// `net + absence + legal + childcare + advances = gross`, à l'unité.
+/// retenues sont celles réellement prises :
+/// `net + absence + legal + childcare + custom + advances = gross`, à l'unité.
 class PayrollDashboardForecast extends Equatable {
   final int grossInCents;
   final int absenceInCents;
@@ -11,6 +11,9 @@ class PayrollDashboardForecast extends Equatable {
   /// IPR + CNSS.
   final int legalInCents;
   final int childcareInCents;
+
+  /// Les rubriques de l'école ; 0 tant que le serveur ne les sert pas.
+  final int customDeductionsInCents;
   final int netInCents;
 
   /// Brut × (CNSS employeur + INPP + ONEM) ‰, aux taux du jour du calcul.
@@ -22,6 +25,7 @@ class PayrollDashboardForecast extends Equatable {
     this.advancesInCents = 0,
     this.legalInCents = 0,
     this.childcareInCents = 0,
+    this.customDeductionsInCents = 0,
     this.netInCents = 0,
     this.employerChargesInCents = 0,
   });
@@ -36,6 +40,7 @@ class PayrollDashboardForecast extends Equatable {
     advancesInCents,
     legalInCents,
     childcareInCents,
+    customDeductionsInCents,
     netInCents,
     employerChargesInCents,
   ];

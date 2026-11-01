@@ -89,6 +89,22 @@ class AppTypography {
     fontWeight: FontWeight.w500,
   );
 
+  /// Le titre d'un domaine dans un bulletin.
+  static const bulletinDomain = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.8,
+  );
+
+  /// Le titre d'une branche dans un bulletin.
+  static const bulletinBranch = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.3,
+  );
+
   static const money = TextStyle(
     fontFamily: 'Inter',
     fontSize: 16,

@@ -444,7 +444,7 @@ class AccueilModulesFactory {
     );
   }
 
-  /// Résultats — page unique : l'en-tête et l'unique ligne mènent au même écran.
+  /// Résultats — la saisie des notes, puis les résultats par classe.
   static AccueilModule _resultats(AppLocalizations l10n) {
     const menuId = MenuConstants.resultatsMenuId;
     return AccueilModule(
@@ -454,6 +454,11 @@ class AccueilModulesFactory {
       icon: Icons.percent,
       tone: AccueilModuleTones.of(menuId),
       subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.resultatsSaisieId,
+          title: l10n.subMenuResultatsSaisie,
+        ),
         _page(
           menuId: menuId,
           subMenuId: MenuConstants.resultatsClasseId,

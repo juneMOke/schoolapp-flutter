@@ -27,6 +27,8 @@ abstract final class PayrollLineJson {
     final allowance = _map(raw['allowance']);
     final attendance = _map(raw['attendance']);
     final advances = raw['advances'];
+    final deductions = _deductions(raw['deductions']);
+    if (deductions == null) return null;
     return PayrollLine(
       month: month,
       staffMemberId: staffMemberId,
@@ -47,7 +49,7 @@ abstract final class PayrollLineJson {
       grossInCents: gross,
       netInCents: net,
       formulaVersion: raw.integer('formulaVersion') ?? 1,
-      deductions: _deductions(raw['deductions']),
+      deductions: deductions,
       payout: _payout(raw['payout'], net),
       advances: [
         if (advances is List)
@@ -66,8 +68,12 @@ abstract final class PayrollLineJson {
     );
   }
 
-  static PayrollLineDeductions _deductions(Object? raw) {
+  /// `null` si une rubrique est illisible : un total faux ne se devine pas, la
+  /// ligne entière est écartée.
+  static PayrollLineDeductions? _deductions(Object? raw) {
     if (raw is! Map) return PayrollLineDeductions.none;
+    final custom = _custom(raw['custom']);
+    if (custom == null) return null;
     return PayrollLineDeductions(
       workDaysDivisor: raw.integer('workDaysDivisor'),
       workedDays: raw.integer('daysWorked'),
@@ -76,7 +82,29 @@ abstract final class PayrollLineJson {
       iprInCents: raw.integer('iprInCents') ?? 0,
       cnssInCents: raw.integer('cnssInCents') ?? 0,
       childcareInCents: raw.integer('childcareInCents') ?? 0,
+      custom: custom,
     );
+  }
+
+  static List<PayrollLineCustomDeduction>? _custom(Object? raw) {
+    if (raw == null) return const [];
+    if (raw is! List) return null;
+    final custom = <PayrollLineCustomDeduction>[];
+    for (final item in raw) {
+      if (item is! Map) return null;
+      final id = item.text('deductionTypeId');
+      final taken = item.integer('takenInCents');
+      if (id == null || taken == null) return null;
+      custom.add(
+        PayrollLineCustomDeduction(
+          deductionTypeId: id,
+          label: item.text('label') ?? '',
+          requestedInCents: item.integer('requestedInCents') ?? taken,
+          takenInCents: taken,
+        ),
+      );
+    }
+    return custom;
   }
 
   /// Sans bloc, tout le net est à verser — un « à verser » au-delà du net ne

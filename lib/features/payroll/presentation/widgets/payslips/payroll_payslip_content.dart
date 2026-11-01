@@ -73,6 +73,7 @@ class PayrollPayslipContent {
     required PayrollSnapshot snapshot,
     required PayrollMonthView view,
     required PayrollLine line,
+    bool listIdleRubrics = false,
   }) {
     final l10n = AppLocalizations.of(context)!;
     final member = snapshot.member(line.staffMemberId);
@@ -165,7 +166,23 @@ class PayrollPayslipContent {
         value: money(line.grossInCents),
         note: null,
       ),
-      deductions: PayrollPayslipRows.deductions(context, line, advances),
+      deductions: PayrollPayslipRows.deductions(
+        context,
+        line,
+        advances,
+        settings: snapshot.settings,
+        idle: listIdleRubrics && !line.frozen
+            ? [
+                for (final type in snapshot.deductionTypes)
+                  if (!type.archived &&
+                      type.appliesTo(line.currency) &&
+                      !line.deductions.custom.any(
+                        (c) => c.deductionTypeId == type.id,
+                      ))
+                    type,
+              ]
+            : const [],
+      ),
       net: (
         label: l10n.payrollPayslipNetDue,
         value: money(line.netInCents),

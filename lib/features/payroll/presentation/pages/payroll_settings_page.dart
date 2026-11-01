@@ -10,12 +10,16 @@ import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_local_write.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_catalog_card.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_delete_dialog.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_deduction_type_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_draft.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_form.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_save_bar.dart';
@@ -53,6 +57,7 @@ class PayrollSettingsScreen extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.load != current.load ||
           previous.snapshot.settings != current.snapshot.settings ||
+          previous.snapshot.deductionTypes != current.snapshot.deductionTypes ||
           previous.snapshot.hasEverSynced != current.snapshot.hasEverSynced ||
           previous.snapshot.headers != current.snapshot.headers,
       builder: (context, state) => switch (state.load) {
@@ -117,6 +122,77 @@ class _SettingsEditorState extends State<_SettingsEditor> {
     setState(() => _saving = false);
   }
 
+  List<PayrollDeductionType> get _catalog =>
+      widget.state.snapshot.deductionTypes;
+
+  PayrollCubit get _cubit => context.read<PayrollCubit>();
+
+  List<String> get _currencies {
+    final settings = widget.state.snapshot.settings;
+    return settings.byCurrency.isEmpty
+        ? [settings.firstCurrency]
+        : settings.byCurrency.keys.toList();
+  }
+
+  Future<void> _add() async {
+    final l10n = AppLocalizations.of(context)!;
+    final draft = await PayrollDeductionTypeDialog.show(
+      context,
+      PayrollDeductionTypeDialog(
+        title: l10n.payrollDeductionsNewTitle,
+        currencies: _currencies,
+      ),
+    );
+    if (draft == null || !mounted) return;
+    await _cubit.perform(
+      (commands) async => commands.deductions?.create(_catalog, draft),
+    );
+    if (mounted) notifyPayrollLocalWrite(context);
+  }
+
+  Future<void> _edit(PayrollDeductionType type) async {
+    final l10n = AppLocalizations.of(context)!;
+    final draft = await PayrollDeductionTypeDialog.show(
+      context,
+      PayrollDeductionTypeDialog(
+        title: l10n.payrollDeductionsEditTitle,
+        currencies: _currencies,
+        initial: type,
+        locked: widget.state.snapshot.deductionTypeInUse(type.id),
+      ),
+    );
+    if (draft == null || !mounted) return;
+    await _update(type.rewritten(draft: draft));
+  }
+
+  Future<void> _update(PayrollDeductionType type) async {
+    final used = widget.state.snapshot.deductionTypeInUse(type.id);
+    await _cubit.perform(
+      (commands) async =>
+          commands.deductions?.update(_catalog, type, used: used),
+    );
+    if (mounted) notifyPayrollLocalWrite(context);
+  }
+
+  Future<void> _move(PayrollDeductionType type, {required bool up}) async {
+    await _cubit.perform(
+      (commands) async => commands.deductions?.move(_catalog, type.id, up: up),
+    );
+    if (mounted) notifyPayrollLocalWrite(context);
+  }
+
+  Future<void> _delete(PayrollDeductionType type) async {
+    final confirmed = await PayrollDeductionDeleteDialog.show(
+      context,
+      type.label,
+    );
+    if (!confirmed || !mounted) return;
+    await _cubit.perform(
+      (commands) async => commands.deductions?.remove(type.id),
+    );
+    if (mounted) notifyPayrollLocalWrite(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -142,6 +218,22 @@ class _SettingsEditorState extends State<_SettingsEditor> {
             PayrollSettingsForm(draft: _draft, readOnly: !canManage),
             if (_draft.showsWide)
               PayrollWideSettingsCards(draft: _draft, readOnly: !canManage),
+            PayrollDeductionCatalogCard(
+              catalog: _catalog,
+              currencies: _currencies,
+              actions: canManage
+                  ? PayrollDeductionCatalogActions(
+                      onAdd: _add,
+                      onEdit: _edit,
+                      onArchive: (type) =>
+                          _update(type.rewritten(archived: true)),
+                      onRestore: (type) =>
+                          _update(type.rewritten(archived: false)),
+                      onDelete: _delete,
+                      onMove: _move,
+                    )
+                  : null,
+            ),
             if (canManage) ...[
               PayrollSettingsSaveBar(
                 dirty: _draft.isDirty,

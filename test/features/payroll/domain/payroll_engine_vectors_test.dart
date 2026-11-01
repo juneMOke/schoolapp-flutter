@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/attendance_summary.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_state.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_deduction.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_variables.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_engine.dart';
@@ -102,6 +103,16 @@ void main() {
             'toPayInCents': line.toPayInCents,
             'deferredInCents': line.deferredInCents,
             'attendanceMonth': line.attendanceMonth,
+            if (want.containsKey('customDeductions'))
+              'customDeductions': [
+                for (final c in line.deductions.custom)
+                  {
+                    'deductionTypeId': c.deductionTypeId,
+                    'label': c.label,
+                    'requestedInCents': c.requestedInCents,
+                    'takenInCents': c.takenInCents,
+                  },
+              ],
           },
           want,
           reason: 'ligne $index',
@@ -128,6 +139,29 @@ PayrollEngineInput _input(
     settings: PayrollSettingsDao.toEntity(
       _settings(vector['settings'] ?? defaultSettings),
     ),
+    deductionTypes: [
+      for (final raw in vector['deductionTypes'] as List? ?? const [])
+        PayrollDeductionType(
+          id: (raw as Map)['id'] as String,
+          label: raw['label'] as String,
+          sortOrder: raw['sortOrder'] as int,
+          currency: raw['currency'] as String? ?? '',
+          defaultAmountInCents: raw['defaultAmountInCents'] as int? ?? 0,
+          archived: raw['archived'] == true,
+        ),
+    ],
+    deductions: {
+      for (final agent in staff)
+        agent['staffMemberId'] as String: [
+          for (final raw in agent['deductions'] as List? ?? const [])
+            PayrollDeductionEntry(
+              staffMemberId: agent['staffMemberId'] as String,
+              deductionTypeId: (raw as Map)['deductionTypeId'] as String,
+              amountInCents: raw['amountInCents'] as int,
+              currency: raw['currency'] as String,
+            ),
+        ],
+    },
     contractsByMember: {
       for (final agent in staff)
         agent['staffMemberId'] as String: [

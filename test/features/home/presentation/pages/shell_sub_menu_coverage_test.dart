@@ -120,6 +120,7 @@ const Map<String, String> _constants = {
   'classJournalId': 'class-journal',
   'timetableId': 'timetable',
   'resultatsClasseId': 'resultats-classe',
+  'resultatsSaisieId': 'resultats-saisie',
   'documentsStudentId': 'documents-eleve',
   'configurationSchoolId': 'settings',
 };

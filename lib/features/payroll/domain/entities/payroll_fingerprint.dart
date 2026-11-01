@@ -2,7 +2,8 @@ import 'package:equatable/equatable.dart';
 
 /// Les totaux d'une devise : brut, retenues d'avance, net. Centimes.
 ///
-/// v2 : les retenues fixes (absence, IPR, CNSS, PC/E) et ce qui sera versé ;
+/// v2 : les retenues fixes (absence, IPR, CNSS, PC/E, rubriques) et ce qui
+/// sera versé ;
 /// `null` dans une empreinte v1, qui les omet.
 class PayrollTotal extends Equatable {
   final String currency;
@@ -32,6 +33,20 @@ class PayrollTotal extends Equatable {
   ];
 }
 
+/// Une rubrique dans l'empreinte : son identifiant et ce qui a été retenu.
+class PayrollDigestDeduction extends Equatable {
+  final String deductionTypeId;
+  final int takenInCents;
+
+  const PayrollDigestDeduction({
+    required this.deductionTypeId,
+    required this.takenInCents,
+  });
+
+  @override
+  List<Object?> get props => [deductionTypeId, takenInCents];
+}
+
 /// Une ligne réduite à ce que l'empreinte compare.
 class PayrollDigestLine extends Equatable {
   final String staffMemberId;
@@ -50,6 +65,9 @@ class PayrollDigestLine extends Equatable {
   final int childcareInCents;
   final int toPayInCents;
 
+  /// Les rubriques comptées, dans l'ordre du moteur, même retenues à 0.
+  final List<PayrollDigestDeduction> customDeductions;
+
   const PayrollDigestLine({
     required this.staffMemberId,
     required this.currency,
@@ -61,23 +79,33 @@ class PayrollDigestLine extends Equatable {
     this.iprInCents = 0,
     this.cnssInCents = 0,
     this.childcareInCents = 0,
+    this.customDeductions = const [],
     int? toPayInCents,
   }) : toPayInCents = toPayInCents ?? netInCents;
 
-  /// Absence, IPR, CNSS et PC/E.
+  /// Absence, IPR, CNSS, PC/E et rubriques.
   int get fixedDeductionsInCents =>
-      absenceInCents + iprInCents + cnssInCents + childcareInCents;
+      absenceInCents +
+      iprInCents +
+      cnssInCents +
+      childcareInCents +
+      customDeductions.fold(0, (sum, d) => sum + d.takenInCents);
 
   /// La forme exacte du contrat, entiers en base 10 sans séparateur :
   /// - v1 `{staffMemberId}|{currency}|{gross}|{advance}|{net}` ;
   /// - v2 `{staffMemberId}|{currency}|{gross}|{absence}|{ipr}|{cnss}|{pce}|`
-  ///   `{advance}|{net}|{verser}` (`PayrollFingerprint` du serveur).
+  ///   `{advance}|{net}|{verser}` (`PayrollFingerprint` du serveur), et
+  ///   `|{rubrique}:{retenu},…` si la ligne compte au moins une rubrique.
   String get canonical => formulaVersion < 2
       ? '${staffMemberId.toLowerCase()}|$currency|$grossInCents|'
             '$advanceInCents|$netInCents'
       : '${staffMemberId.toLowerCase()}|$currency|$grossInCents|'
             '$absenceInCents|$iprInCents|$cnssInCents|$childcareInCents|'
-            '$advanceInCents|$netInCents|$toPayInCents';
+            '$advanceInCents|$netInCents|$toPayInCents$_customSuffix';
+
+  String get _customSuffix => customDeductions.isEmpty
+      ? ''
+      : '|${customDeductions.map((d) => '${d.deductionTypeId.toLowerCase()}:${d.takenInCents}').join(',')}';
 
   @override
   List<Object?> get props => [
@@ -92,6 +120,7 @@ class PayrollDigestLine extends Equatable {
     cnssInCents,
     childcareInCents,
     toPayInCents,
+    customDeductions,
   ];
 }
 

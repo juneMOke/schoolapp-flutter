@@ -75,7 +75,9 @@ class PayrollConfirmDialog extends StatelessWidget {
           ),
           if (fixed)
             _Line(
-              l10n.payrollConfirmFixedDeductions,
+              lines.any((line) => line.deductions.custom.isNotEmpty)
+                  ? l10n.payrollConfirmFixedDeductionsCustom
+                  : l10n.payrollConfirmFixedDeductions,
               sum((line) => line.deductions.totalInCents),
             ),
           _Line(
@@ -103,6 +105,13 @@ class PayrollConfirmDialog extends StatelessWidget {
                 reduced,
               ),
               icon: Icons.hourglass_bottom,
+            ),
+          ],
+          if (view.trimmedCount > 0) ...[
+            const SizedBox(height: AppSpacing.sm),
+            PayrollTone.submitted.notice(
+              l10n.payrollConfirmTrimmed(view.trimmedCount),
+              icon: Icons.content_cut,
             ),
           ],
           if (warning != null) ...[

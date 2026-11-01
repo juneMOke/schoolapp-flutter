@@ -21,6 +21,8 @@ import 'package:school_app_flutter/features/academics/domain/entities/notation/s
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/repositories/course_repository.dart';
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_local_data_source.dart';
+import 'package:school_app_flutter/features/cotes/data/datasources/ref_cote_cours_local_data_source.dart';
+import 'package:school_app_flutter/features/cotes/data/models/cote_delta_dto.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 
 import '../../../../../core/offline/offline_full_test_db.dart';
@@ -62,6 +64,7 @@ void main() {
       syncMetaDao: syncMetaDao,
       referentialDao: EnrollmentReferentialDao(db),
       currentUser: CurrentUserContext()..set(null, schoolId: 'school-1'),
+      coteLocalDataSource: RefCoteCoursLocalDataSource(db),
     );
   });
 
@@ -494,6 +497,53 @@ void main() {
       // s2 : NOTEE remplacée par ABSENT_JUSTIFIE (exclu) + EN_ATTENTE
       // (exclu) → aucune note comptée.
       expect(byStudent['s2']!.moyenne, isNull);
+    });
+
+    test(
+      'une cote saisie remplace la moyenne de cet élève, mention comprise',
+      () async {
+        await RefCoteCoursLocalDataSource(db).applyPulled(const [
+          CoteDeltaDto(
+            studentId: 's1',
+            coursId: 'co1',
+            colonneId: 'sp1',
+            examen: false,
+            valeur: 1,
+          ),
+        ]);
+
+        final detail = (await repo.getCoursNotationDetail(
+          'co1',
+        )).getOrElse(() => fail('Left'));
+
+        final sp = detail.periodes.single.sousPeriodes.single;
+        final byStudent = {for (final m in sp.moyennesEleves) m.studentId: m};
+        // max journalier 2 : 1/2 = 50 %, à la place de ses 60 %.
+        expect(byStudent['s1']!.moyenne, 50);
+        expect(byStudent['s1']!.coteSaisie, isTrue);
+        expect(byStudent['s2']!.moyenne, 60);
+        expect(byStudent['s2']!.coteSaisie, isFalse);
+        expect(sp.moyenneClasse, 55);
+      },
+    );
+
+    test('une cote vidée : la tablette revient à sa moyenne', () async {
+      await RefCoteCoursLocalDataSource(db).applyPulled(const [
+        CoteDeltaDto(
+          studentId: 's1',
+          coursId: 'co1',
+          colonneId: 'sp1',
+          examen: false,
+        ),
+      ]);
+
+      final detail = (await repo.getCoursNotationDetail(
+        'co1',
+      )).getOrElse(() => fail('Left'));
+
+      final sp = detail.periodes.single.sousPeriodes.single;
+      expect(sp.moyennesEleves.first.moyenne, 60);
+      expect(sp.moyennesEleves.first.coteSaisie, isFalse);
     });
 
     test('plusieurs examens sur UNE période (maxExamen > 1) : le PREMIER par '
