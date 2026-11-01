@@ -24,6 +24,10 @@ enum PayrollRule {
   invalidAmount,
   invalidInstallments,
 
+  /// L'école a coupé les avances ou les prêts : plus de nouvelle demande. Ce
+  /// qui court, ou ce qui est déjà approuvé, va jusqu'au bout.
+  advanceKindDisabled,
+
   /// Le mois de départ d'une avance est déjà soumis ou validé.
   monthLocked,
 
@@ -132,6 +136,7 @@ PayrollRule? payrollRuleOfServerCode(String? code) => switch (code) {
   'INVALID_DAYS_WORKED' => PayrollRule.workedDaysOutOfRange,
   'STAFF_NOT_ON_PAYROLL' => PayrollRule.noContract,
   'ADVANCE_MONTH_LOCKED' => PayrollRule.monthLocked,
+  'ADVANCE_KIND_DISABLED' => PayrollRule.advanceKindDisabled,
   'ADVANCE_CURRENCY_MISMATCH' ||
   'DISBURSEMENT_CURRENCY_MISMATCH' ||
   'AMOUNT_MISMATCH' => PayrollRule.invalidAmount,

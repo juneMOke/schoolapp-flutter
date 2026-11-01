@@ -21249,6 +21249,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollDeductionsColDefault => 'Par défaut';
 
   @override
+  String get payrollRuleAdvanceKindDisabled =>
+      'L\'école n\'accorde plus ce type d\'avance : voyez la configuration de la paie.';
+
+  @override
   String get payrollSettingsModelTitle => 'Retenues du modèle';
 
   @override

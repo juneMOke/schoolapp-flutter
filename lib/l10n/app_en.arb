@@ -12134,6 +12134,7 @@
   "payrollDeductionsDefaultHint": "Withheld every month from every agent paid in this currency, unless an amount is entered for that agent. At 0, nothing is withheld.",
   "payrollDeductionsLockedHint": "This deduction has been used: its code and currency can no longer change.",
   "payrollDeductionsColDefault": "Default",
+  "payrollRuleAdvanceKindDisabled": "The school no longer grants this type of advance: see the payroll configuration.",
   "payrollSettingsModelTitle": "Standard deductions",
   "payrollSettingsModelSubtitle": "Turn off what your school doesn't apply: these deductions disappear from data entry and from the payslip.",
   "payrollSettingsLegalToggle": "Withhold IPR and CNSS",

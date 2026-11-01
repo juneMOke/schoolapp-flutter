@@ -32473,6 +32473,12 @@ abstract class AppLocalizations {
   /// **'Default'**
   String get payrollDeductionsColDefault;
 
+  /// No description provided for @payrollRuleAdvanceKindDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The school no longer grants this type of advance: see the payroll configuration.'**
+  String get payrollRuleAdvanceKindDisabled;
+
   /// No description provided for @payrollSettingsModelTitle.
   ///
   /// In en, this message translates to:

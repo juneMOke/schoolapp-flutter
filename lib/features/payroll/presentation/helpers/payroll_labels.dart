@@ -123,6 +123,7 @@ abstract final class PayrollLabels {
     PayrollRule.invalidInstallments => l10n.payrollRuleInvalidInstallments,
     PayrollRule.monthLocked => l10n.payrollRuleMonthLocked,
     PayrollRule.noContract => l10n.payrollRuleNoContract,
+    PayrollRule.advanceKindDisabled => l10n.payrollRuleAdvanceKindDisabled,
     PayrollRule.alreadyDeducted => l10n.payrollRuleAlreadyDeducted,
     PayrollRule.followsExpense => l10n.payrollRuleFollowsExpense,
     PayrollRule.advanceTypeMissing => l10n.payrollRuleAdvanceTypeMissing,

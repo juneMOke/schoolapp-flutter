@@ -21110,6 +21110,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollDeductionsColDefault => 'Default';
 
   @override
+  String get payrollRuleAdvanceKindDisabled =>
+      'The school no longer grants this type of advance: see the payroll configuration.';
+
+  @override
   String get payrollSettingsModelTitle => 'Standard deductions';
 
   @override

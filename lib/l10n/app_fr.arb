@@ -12314,6 +12314,7 @@
   "payrollDeductionsDefaultHint": "Retenu chaque mois à tous les agents payés dans cette devise, sauf montant saisi pour un agent. À 0, rien n'est retenu.",
   "payrollDeductionsLockedHint": "Cette rubrique a servi : son code et sa devise ne changent plus.",
   "payrollDeductionsColDefault": "Par défaut",
+  "payrollRuleAdvanceKindDisabled": "L'école n'accorde plus ce type d'avance : voyez la configuration de la paie.",
   "payrollSettingsModelTitle": "Retenues du modèle",
   "payrollSettingsModelSubtitle": "Coupez ce que votre école n'applique pas : ces retenues disparaissent de la saisie et du bulletin.",
   "payrollSettingsLegalToggle": "Retenir l'IPR et la CNSS",
