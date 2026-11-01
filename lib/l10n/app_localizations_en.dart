@@ -21282,4 +21282,443 @@ class AppLocalizationsEn extends AppLocalizations {
   String payrollDeductionRefusedItem(String name, String reason) {
     return '$name: $reason';
   }
+
+  @override
+  String get subMenuResultatsSaisie => 'Grade entry';
+
+  @override
+  String get coteSaisieEyebrow => 'Results · Grade entry';
+
+  @override
+  String get coteSaisieTitle => 'Enter a class\'s grades';
+
+  @override
+  String get coteSaisieOpen => 'Open grade entry';
+
+  @override
+  String get coteDecoupageTrimestres => 'Terms';
+
+  @override
+  String get coteDecoupageSemestres => 'Semesters';
+
+  @override
+  String get cotePorteeColonne => 'Period / exam';
+
+  @override
+  String get cotePorteeUnSemestre => 'One semester';
+
+  @override
+  String get cotePorteeUnTrimestre => 'One term';
+
+  @override
+  String get cotePorteeLesSemestres => 'All semesters';
+
+  @override
+  String get cotePorteeLesTrimestres => 'All terms';
+
+  @override
+  String get cotePorteeSemantics => 'Entry scope';
+
+  @override
+  String get coteGroupChipSemantics => 'Choose a column or a group';
+
+  @override
+  String coteColumnPeriod(int numero) {
+    return 'P$numero';
+  }
+
+  @override
+  String coteColumnPeriodLong(int numero) {
+    return 'Period $numero';
+  }
+
+  @override
+  String get coteColumnExam => 'Exam';
+
+  @override
+  String coteColumnExamOf(String group) {
+    return 'Exam $group';
+  }
+
+  @override
+  String coteColumnExamLong(String group) {
+    return 'Exam · $group';
+  }
+
+  @override
+  String coteColumnTotalOf(String group) {
+    return 'Tot. $group';
+  }
+
+  @override
+  String coteColumnTotalLong(String group) {
+    return 'Total · $group';
+  }
+
+  @override
+  String coteGroupShortSemester(int ordre) {
+    return 'S$ordre';
+  }
+
+  @override
+  String coteGroupShortTrimester(int ordre) {
+    return 'T$ordre';
+  }
+
+  @override
+  String get coteColumnCours => 'Course';
+
+  @override
+  String coteColumnTotalScope(String group) {
+    return 'Total $group · %';
+  }
+
+  @override
+  String get coteColumnAnnual => 'Year · %';
+
+  @override
+  String coteClassBarEyebrow(String classe) {
+    return 'Class $classe';
+  }
+
+  @override
+  String coteClassBarSummary(String scope, int students, int complete) {
+    String _temp0 = intl.Intl.pluralLogic(
+      students,
+      locale: localeName,
+      other: '$students students',
+      one: '1 student',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      complete,
+      locale: localeName,
+      other: '$complete complete',
+      one: '1 complete',
+      zero: 'none complete',
+    );
+    return '$scope · $_temp0 · $_temp1';
+  }
+
+  @override
+  String get coteSaveIdle => 'Draft · saved automatically';
+
+  @override
+  String get coteSaving => 'Saving…';
+
+  @override
+  String coteSavedAt(String time) {
+    return 'Saved at $time';
+  }
+
+  @override
+  String coteSaveOffline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades waiting',
+      one: '1 grade waiting',
+    );
+    return 'Offline · $_temp0';
+  }
+
+  @override
+  String get coteSaveFailed => 'Could not save';
+
+  @override
+  String get coteSaveRetry => 'Retry';
+
+  @override
+  String get coteSaveSessionExpired =>
+      'Session expired · sign in to send the grades';
+
+  @override
+  String get coteFromCacheBanner =>
+      'Device copy: the server did not answer. Your entries stay saved here.';
+
+  @override
+  String get coteStorageFailed =>
+      'This grade could not be saved on the device.';
+
+  @override
+  String coteChangedNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades updated',
+      one: '1 grade updated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get coteListSearchHint => 'Search for a student';
+
+  @override
+  String get coteListFilterAll => 'All';
+
+  @override
+  String get coteListFilterTodo => 'To complete';
+
+  @override
+  String get coteListFilterDone => 'Complete';
+
+  @override
+  String get coteListFilterSemantics => 'Filter students';
+
+  @override
+  String get coteListComplete => 'Entry complete';
+
+  @override
+  String coteListMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades missing',
+      one: '1 grade missing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String coteListToFix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades to fix',
+      one: '1 grade to fix',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String coteListEmptySearch(String query) {
+    return 'No student matches “$query”.';
+  }
+
+  @override
+  String get coteListEmptyDone => 'No student is complete yet.';
+
+  @override
+  String get coteListEmptyTodo => 'All students are complete.';
+
+  @override
+  String get coteListShowAll => 'Show all students';
+
+  @override
+  String coteRank(int rank) {
+    return '#$rank';
+  }
+
+  @override
+  String get coteRankNone => 'NR';
+
+  @override
+  String get coteRankNoneLong => 'Not ranked';
+
+  @override
+  String get cotePickerSemantics => 'Choose a student';
+
+  @override
+  String cotePickerItem(String number, String name, int filled, int cells) {
+    return '$number · $name — $filled/$cells';
+  }
+
+  @override
+  String coteHeaderSubtitle(String classe, String scope, int index, int total) {
+    return 'Class $classe · $scope · student $index/$total';
+  }
+
+  @override
+  String get coteKpiPercent => 'Percentage';
+
+  @override
+  String get coteKpiProvisional => 'Provisional';
+
+  @override
+  String coteKpiRankOf(int count) {
+    return 'of $count';
+  }
+
+  @override
+  String get coteKpiFilled => 'Grades entered';
+
+  @override
+  String get coteStudentPrevious => 'Previous student';
+
+  @override
+  String get coteStudentNext => 'Next student';
+
+  @override
+  String get coteLegendEmpty => 'To enter';
+
+  @override
+  String get coteLegendPeriod => 'Period grade';
+
+  @override
+  String get coteLegendExam => 'Exam';
+
+  @override
+  String get coteLegendCalculated => 'Calculated average';
+
+  @override
+  String get coteLegendTotal => 'Calculated total';
+
+  @override
+  String get coteLegendEnterKey => 'Enter';
+
+  @override
+  String get coteLegendEnterDown => 'next course';
+
+  @override
+  String get coteLegendEnterRight => 'next column';
+
+  @override
+  String get coteLegendEnterToggle => 'Change what the Enter key does';
+
+  @override
+  String coteCourseScale(String max, String exam) {
+    return 'out of $max · ex. $exam';
+  }
+
+  @override
+  String coteCourseScaleNoExam(String max) {
+    return 'out of $max';
+  }
+
+  @override
+  String get coteMaxima => 'Maximum';
+
+  @override
+  String get coteTotalObtained => 'Total obtained';
+
+  @override
+  String get cotePercentRow => 'Percentage';
+
+  @override
+  String coteFooterRule(String group) {
+    return 'Total $group = periods + exam. Percentage = total obtained ÷ maximum × 100.';
+  }
+
+  @override
+  String coteFooterProvisional(int filled, int cells) {
+    return 'Provisional: based on $filled grades entered out of $cells.';
+  }
+
+  @override
+  String coteFooterInvalid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grades out of range, not counted until corrected.',
+      one: '1 grade out of range, not counted until corrected.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String coteCellInvalid(String max) {
+    return 'Invalid grade: 0 to $max';
+  }
+
+  @override
+  String get coteCellCalculated => 'Average of the assessments';
+
+  @override
+  String coteCellReplaces(String value) {
+    return 'Average of the assessments: $value';
+  }
+
+  @override
+  String get coteCellLocked => 'Column closed';
+
+  @override
+  String get coteCellNoExam => 'This course has no exam';
+
+  @override
+  String get coteRejectedClosed =>
+      'Refused: the column was closed in the meantime. The server did not keep it.';
+
+  @override
+  String get coteRejectedRange => 'Refused: value out of range.';
+
+  @override
+  String get coteRejectedNoExam => 'Refused: this course has no exam.';
+
+  @override
+  String get coteRejectedStudent =>
+      'Refused: this student is no longer in the class.';
+
+  @override
+  String get coteRejectedColumn =>
+      'Refused: this column no longer exists for the class.';
+
+  @override
+  String get coteRejectedOther => 'Refused by the server.';
+
+  @override
+  String get coteRejectedDiscard => 'Discard';
+
+  @override
+  String coteRejectedOfficial(String value) {
+    return 'Report card value: $value';
+  }
+
+  @override
+  String coteCellSemantics(String course, String column, String max) {
+    return '$course · $column, out of $max';
+  }
+
+  @override
+  String coteTotalSemantics(String column, String course) {
+    return 'Total $column, $course';
+  }
+
+  @override
+  String coteValueOutOf(String value, String max) {
+    return '$value out of $max';
+  }
+
+  @override
+  String coteStudentAnnounce(String name, int index, int total, int percent) {
+    return '$name, student $index of $total, $percent percent';
+  }
+
+  @override
+  String coteStudentAnnounceProvisional(
+    String name,
+    int index,
+    int total,
+    int percent,
+  ) {
+    return '$name, student $index of $total, $percent percent provisional';
+  }
+
+  @override
+  String coteStudentAnnounceNoGrade(String name, int index, int total) {
+    return '$name, student $index of $total, no grade';
+  }
+
+  @override
+  String get coteIdleTitle => 'Choose a class';
+
+  @override
+  String get coteIdleDescription =>
+      'Period and exam grades open as a report card, one student at a time.';
+
+  @override
+  String get coteEmptyStudentsTitle => 'No student enrolled in this class';
+
+  @override
+  String get coteEmptyStudentsDescription =>
+      'Check the chosen class or the class lists.';
+
+  @override
+  String get coteEmptyCoursesTitle => 'No course set up for this level';
+
+  @override
+  String get coteEmptyCoursesDescription =>
+      'This class has no grading scale yet.';
+
+  @override
+  String get coteEmptyChangeClass => 'Change class';
 }

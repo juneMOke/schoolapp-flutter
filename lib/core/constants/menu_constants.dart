@@ -201,6 +201,7 @@ class MenuConstants {
   static const String timetableId = 'timetable';
 
   static const String resultatsClasseId = 'resultats-classe';
+  static const String resultatsSaisieId = 'resultats-saisie';
 
   static const String documentsStudentId = 'documents-eleve';
 

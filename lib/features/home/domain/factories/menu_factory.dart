@@ -473,13 +473,18 @@ class MenuFactory {
     );
   }
 
-  /// Menu Résultats avec son sous-menu « Résultats par classe ».
+  /// Menu Résultats : la saisie des notes, puis les résultats par classe.
   static MenuItem _createResultatsMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.resultatsMenuId,
       title: l10n.menuResultats,
       icon: Icons.leaderboard_outlined,
       subMenus: [
+        SubMenuItem(
+          id: MenuConstants.resultatsSaisieId,
+          title: l10n.subMenuResultatsSaisie,
+          route: AppRoutesNames.resultatsSaisie,
+        ),
         SubMenuItem(
           id: MenuConstants.resultatsClasseId,
           title: l10n.subMenuResultatsClasse,

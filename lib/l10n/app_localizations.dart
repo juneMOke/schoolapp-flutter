@@ -32742,6 +32742,635 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name}: {reason}'**
   String payrollDeductionRefusedItem(String name, String reason);
+
+  /// No description provided for @subMenuResultatsSaisie.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade entry'**
+  String get subMenuResultatsSaisie;
+
+  /// No description provided for @coteSaisieEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Results · Grade entry'**
+  String get coteSaisieEyebrow;
+
+  /// No description provided for @coteSaisieTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a class\'s grades'**
+  String get coteSaisieTitle;
+
+  /// No description provided for @coteSaisieOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open grade entry'**
+  String get coteSaisieOpen;
+
+  /// No description provided for @coteDecoupageTrimestres.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get coteDecoupageTrimestres;
+
+  /// No description provided for @coteDecoupageSemestres.
+  ///
+  /// In en, this message translates to:
+  /// **'Semesters'**
+  String get coteDecoupageSemestres;
+
+  /// No description provided for @cotePorteeColonne.
+  ///
+  /// In en, this message translates to:
+  /// **'Period / exam'**
+  String get cotePorteeColonne;
+
+  /// No description provided for @cotePorteeUnSemestre.
+  ///
+  /// In en, this message translates to:
+  /// **'One semester'**
+  String get cotePorteeUnSemestre;
+
+  /// No description provided for @cotePorteeUnTrimestre.
+  ///
+  /// In en, this message translates to:
+  /// **'One term'**
+  String get cotePorteeUnTrimestre;
+
+  /// No description provided for @cotePorteeLesSemestres.
+  ///
+  /// In en, this message translates to:
+  /// **'All semesters'**
+  String get cotePorteeLesSemestres;
+
+  /// No description provided for @cotePorteeLesTrimestres.
+  ///
+  /// In en, this message translates to:
+  /// **'All terms'**
+  String get cotePorteeLesTrimestres;
+
+  /// No description provided for @cotePorteeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry scope'**
+  String get cotePorteeSemantics;
+
+  /// No description provided for @coteGroupChipSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a column or a group'**
+  String get coteGroupChipSemantics;
+
+  /// No description provided for @coteColumnPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'P{numero}'**
+  String coteColumnPeriod(int numero);
+
+  /// No description provided for @coteColumnPeriodLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Period {numero}'**
+  String coteColumnPeriodLong(int numero);
+
+  /// No description provided for @coteColumnExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get coteColumnExam;
+
+  /// No description provided for @coteColumnExamOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam {group}'**
+  String coteColumnExamOf(String group);
+
+  /// No description provided for @coteColumnExamLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam · {group}'**
+  String coteColumnExamLong(String group);
+
+  /// No description provided for @coteColumnTotalOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Tot. {group}'**
+  String coteColumnTotalOf(String group);
+
+  /// No description provided for @coteColumnTotalLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · {group}'**
+  String coteColumnTotalLong(String group);
+
+  /// No description provided for @coteGroupShortSemester.
+  ///
+  /// In en, this message translates to:
+  /// **'S{ordre}'**
+  String coteGroupShortSemester(int ordre);
+
+  /// No description provided for @coteGroupShortTrimester.
+  ///
+  /// In en, this message translates to:
+  /// **'T{ordre}'**
+  String coteGroupShortTrimester(int ordre);
+
+  /// No description provided for @coteColumnCours.
+  ///
+  /// In en, this message translates to:
+  /// **'Course'**
+  String get coteColumnCours;
+
+  /// No description provided for @coteColumnTotalScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {group} · %'**
+  String coteColumnTotalScope(String group);
+
+  /// No description provided for @coteColumnAnnual.
+  ///
+  /// In en, this message translates to:
+  /// **'Year · %'**
+  String get coteColumnAnnual;
+
+  /// No description provided for @coteClassBarEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {classe}'**
+  String coteClassBarEyebrow(String classe);
+
+  /// No description provided for @coteClassBarSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{scope} · {students, plural, =1{1 student} other{{students} students}} · {complete, plural, =0{none complete} =1{1 complete} other{{complete} complete}}'**
+  String coteClassBarSummary(String scope, int students, int complete);
+
+  /// No description provided for @coteSaveIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft · saved automatically'**
+  String get coteSaveIdle;
+
+  /// No description provided for @coteSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get coteSaving;
+
+  /// No description provided for @coteSavedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved at {time}'**
+  String coteSavedAt(String time);
+
+  /// No description provided for @coteSaveOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · {count, plural, =1{1 grade waiting} other{{count} grades waiting}}'**
+  String coteSaveOffline(int count);
+
+  /// No description provided for @coteSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save'**
+  String get coteSaveFailed;
+
+  /// No description provided for @coteSaveRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get coteSaveRetry;
+
+  /// No description provided for @coteSaveSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired · sign in to send the grades'**
+  String get coteSaveSessionExpired;
+
+  /// No description provided for @coteFromCacheBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Device copy: the server did not answer. Your entries stay saved here.'**
+  String get coteFromCacheBanner;
+
+  /// No description provided for @coteStorageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This grade could not be saved on the device.'**
+  String get coteStorageFailed;
+
+  /// No description provided for @coteChangedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade updated} other{{count} grades updated}}'**
+  String coteChangedNotice(int count);
+
+  /// No description provided for @coteListSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a student'**
+  String get coteListSearchHint;
+
+  /// No description provided for @coteListFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get coteListFilterAll;
+
+  /// No description provided for @coteListFilterTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete'**
+  String get coteListFilterTodo;
+
+  /// No description provided for @coteListFilterDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get coteListFilterDone;
+
+  /// No description provided for @coteListFilterSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter students'**
+  String get coteListFilterSemantics;
+
+  /// No description provided for @coteListComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry complete'**
+  String get coteListComplete;
+
+  /// No description provided for @coteListMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade missing} other{{count} grades missing}}'**
+  String coteListMissing(int count);
+
+  /// No description provided for @coteListToFix.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade to fix} other{{count} grades to fix}}'**
+  String coteListToFix(int count);
+
+  /// No description provided for @coteListEmptySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches “{query}”.'**
+  String coteListEmptySearch(String query);
+
+  /// No description provided for @coteListEmptyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'No student is complete yet.'**
+  String get coteListEmptyDone;
+
+  /// No description provided for @coteListEmptyTodo.
+  ///
+  /// In en, this message translates to:
+  /// **'All students are complete.'**
+  String get coteListEmptyTodo;
+
+  /// No description provided for @coteListShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all students'**
+  String get coteListShowAll;
+
+  /// No description provided for @coteRank.
+  ///
+  /// In en, this message translates to:
+  /// **'#{rank}'**
+  String coteRank(int rank);
+
+  /// No description provided for @coteRankNone.
+  ///
+  /// In en, this message translates to:
+  /// **'NR'**
+  String get coteRankNone;
+
+  /// No description provided for @coteRankNoneLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Not ranked'**
+  String get coteRankNoneLong;
+
+  /// No description provided for @cotePickerSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a student'**
+  String get cotePickerSemantics;
+
+  /// No description provided for @cotePickerItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{number} · {name} — {filled}/{cells}'**
+  String cotePickerItem(String number, String name, int filled, int cells);
+
+  /// No description provided for @coteHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Class {classe} · {scope} · student {index}/{total}'**
+  String coteHeaderSubtitle(String classe, String scope, int index, int total);
+
+  /// No description provided for @coteKpiPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get coteKpiPercent;
+
+  /// No description provided for @coteKpiProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional'**
+  String get coteKpiProvisional;
+
+  /// No description provided for @coteKpiRankOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {count}'**
+  String coteKpiRankOf(int count);
+
+  /// No description provided for @coteKpiFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades entered'**
+  String get coteKpiFilled;
+
+  /// No description provided for @coteStudentPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous student'**
+  String get coteStudentPrevious;
+
+  /// No description provided for @coteStudentNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next student'**
+  String get coteStudentNext;
+
+  /// No description provided for @coteLegendEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'To enter'**
+  String get coteLegendEmpty;
+
+  /// No description provided for @coteLegendPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period grade'**
+  String get coteLegendPeriod;
+
+  /// No description provided for @coteLegendExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam'**
+  String get coteLegendExam;
+
+  /// No description provided for @coteLegendCalculated.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated average'**
+  String get coteLegendCalculated;
+
+  /// No description provided for @coteLegendTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated total'**
+  String get coteLegendTotal;
+
+  /// No description provided for @coteLegendEnterKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get coteLegendEnterKey;
+
+  /// No description provided for @coteLegendEnterDown.
+  ///
+  /// In en, this message translates to:
+  /// **'next course'**
+  String get coteLegendEnterDown;
+
+  /// No description provided for @coteLegendEnterRight.
+  ///
+  /// In en, this message translates to:
+  /// **'next column'**
+  String get coteLegendEnterRight;
+
+  /// No description provided for @coteLegendEnterToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change what the Enter key does'**
+  String get coteLegendEnterToggle;
+
+  /// No description provided for @coteCourseScale.
+  ///
+  /// In en, this message translates to:
+  /// **'out of {max} · ex. {exam}'**
+  String coteCourseScale(String max, String exam);
+
+  /// No description provided for @coteCourseScaleNoExam.
+  ///
+  /// In en, this message translates to:
+  /// **'out of {max}'**
+  String coteCourseScaleNoExam(String max);
+
+  /// No description provided for @coteMaxima.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get coteMaxima;
+
+  /// No description provided for @coteTotalObtained.
+  ///
+  /// In en, this message translates to:
+  /// **'Total obtained'**
+  String get coteTotalObtained;
+
+  /// No description provided for @cotePercentRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentage'**
+  String get cotePercentRow;
+
+  /// No description provided for @coteFooterRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {group} = periods + exam. Percentage = total obtained ÷ maximum × 100.'**
+  String coteFooterRule(String group);
+
+  /// No description provided for @coteFooterProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional: based on {filled} grades entered out of {cells}.'**
+  String coteFooterProvisional(int filled, int cells);
+
+  /// No description provided for @coteFooterInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 grade out of range, not counted until corrected.} other{{count} grades out of range, not counted until corrected.}}'**
+  String coteFooterInvalid(int count);
+
+  /// No description provided for @coteCellInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid grade: 0 to {max}'**
+  String coteCellInvalid(String max);
+
+  /// No description provided for @coteCellCalculated.
+  ///
+  /// In en, this message translates to:
+  /// **'Average of the assessments'**
+  String get coteCellCalculated;
+
+  /// No description provided for @coteCellReplaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Average of the assessments: {value}'**
+  String coteCellReplaces(String value);
+
+  /// No description provided for @coteCellLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Column closed'**
+  String get coteCellLocked;
+
+  /// No description provided for @coteCellNoExam.
+  ///
+  /// In en, this message translates to:
+  /// **'This course has no exam'**
+  String get coteCellNoExam;
+
+  /// No description provided for @coteRejectedClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: the column was closed in the meantime. The server did not keep it.'**
+  String get coteRejectedClosed;
+
+  /// No description provided for @coteRejectedRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: value out of range.'**
+  String get coteRejectedRange;
+
+  /// No description provided for @coteRejectedNoExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: this course has no exam.'**
+  String get coteRejectedNoExam;
+
+  /// No description provided for @coteRejectedStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: this student is no longer in the class.'**
+  String get coteRejectedStudent;
+
+  /// No description provided for @coteRejectedColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: this column no longer exists for the class.'**
+  String get coteRejectedColumn;
+
+  /// No description provided for @coteRejectedOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused by the server.'**
+  String get coteRejectedOther;
+
+  /// No description provided for @coteRejectedDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get coteRejectedDiscard;
+
+  /// No description provided for @coteRejectedOfficial.
+  ///
+  /// In en, this message translates to:
+  /// **'Report card value: {value}'**
+  String coteRejectedOfficial(String value);
+
+  /// No description provided for @coteCellSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{course} · {column}, out of {max}'**
+  String coteCellSemantics(String course, String column, String max);
+
+  /// No description provided for @coteTotalSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {column}, {course}'**
+  String coteTotalSemantics(String column, String course);
+
+  /// No description provided for @coteValueOutOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} out of {max}'**
+  String coteValueOutOf(String value, String max);
+
+  /// No description provided for @coteStudentAnnounce.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, student {index} of {total}, {percent} percent'**
+  String coteStudentAnnounce(String name, int index, int total, int percent);
+
+  /// No description provided for @coteStudentAnnounceProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, student {index} of {total}, {percent} percent provisional'**
+  String coteStudentAnnounceProvisional(
+    String name,
+    int index,
+    int total,
+    int percent,
+  );
+
+  /// No description provided for @coteStudentAnnounceNoGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, student {index} of {total}, no grade'**
+  String coteStudentAnnounceNoGrade(String name, int index, int total);
+
+  /// No description provided for @coteIdleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class'**
+  String get coteIdleTitle;
+
+  /// No description provided for @coteIdleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Period and exam grades open as a report card, one student at a time.'**
+  String get coteIdleDescription;
+
+  /// No description provided for @coteEmptyStudentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No student enrolled in this class'**
+  String get coteEmptyStudentsTitle;
+
+  /// No description provided for @coteEmptyStudentsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the chosen class or the class lists.'**
+  String get coteEmptyStudentsDescription;
+
+  /// No description provided for @coteEmptyCoursesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No course set up for this level'**
+  String get coteEmptyCoursesTitle;
+
+  /// No description provided for @coteEmptyCoursesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This class has no grading scale yet.'**
+  String get coteEmptyCoursesDescription;
+
+  /// No description provided for @coteEmptyChangeClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Change class'**
+  String get coteEmptyChangeClass;
 }
 
 class _AppLocalizationsDelegate

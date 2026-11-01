@@ -701,4 +701,24 @@ class AppColors {
   static const journalChapterSurface = Color(0xFFFBF6EF);
   static const journalChapterBorder = Color(0xFFEAD9C6);
   static const journalChapterInk = Color(0xFF6B5836);
+
+  // Saisie des notes — cellules de la grille bulletin.
+  static const coteCellBorder = Color(0xFFCBD8E2);
+  static const coteEmptySurface = Color(0xFFF4F6F8);
+  static const coteEmptyBorder = Color(0xFFC3CDD5);
+  static const coteExamSurface = Color(0xFFFFFBF2);
+  static const coteExamBorder = Color(0xFFE8D9B0);
+
+  /// L'encre de l'examen, 5,0:1 sur [coteExamSurface].
+  static const coteExamInk = Color(0xFF8A6A1F);
+  static const coteInvalidSurface = Color(0xFFFAECEA);
+
+  /// Une cellule remplacée par une écriture plus récente, le temps de le voir.
+  static const coteChangedSurface = Color(0xFFFFF4D6);
+
+  // Saisie des notes — teintes des domaines du bulletin, par rotation.
+  static const coteDomainTerreSoft = Color(0xFFF8EEE6);
+  static const coteDomainVertSoft = Color(0xFFEDF5EF);
+  static const coteDomainPrune = Color(0xFF7A4E68);
+  static const coteDomainPruneSoft = Color(0xFFF5EDF2);
 }

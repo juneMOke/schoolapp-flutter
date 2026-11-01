@@ -158,6 +158,8 @@ class AppRoutesNames {
 
   static const String resultatsClasse =
       '/resultats/${MenuConstants.resultatsClasseId}';
+  static const String resultatsSaisie =
+      '/resultats/${MenuConstants.resultatsSaisieId}';
 
   static const String documentsStudents =
       '/documents/${MenuConstants.documentsStudentId}';

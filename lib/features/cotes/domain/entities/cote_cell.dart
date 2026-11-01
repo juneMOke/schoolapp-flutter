@@ -56,6 +56,8 @@ class CoteCell extends Equatable {
 
   bool get isRejected => syncState == SyncState.syncError;
 
+  CoteCell? get rejectedOrNull => isRejected ? this : null;
+
   /// La saisie valide [value] posée : toute frappe invalide et tout refus
   /// s'effacent.
   CoteCell withDraft(double? value) => CoteCell(
