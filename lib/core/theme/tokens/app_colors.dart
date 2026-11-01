@@ -717,6 +717,8 @@ class AppColors {
   static const coteChangedSurface = Color(0xFFFFF4D6);
 
   // Saisie des notes — teintes des domaines du bulletin, par rotation.
+  /// Les colonnes de maxima : ni une note, ni un total.
+  static const coteMaxSurface = Color(0xFFE4ECF3);
   static const coteDomainTerreSoft = Color(0xFFF8EEE6);
   static const coteDomainVertSoft = Color(0xFFEDF5EF);
   static const coteDomainPrune = Color(0xFF7A4E68);

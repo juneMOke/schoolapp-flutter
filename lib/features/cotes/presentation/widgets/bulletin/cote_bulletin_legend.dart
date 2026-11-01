@@ -79,6 +79,14 @@ class CoteBulletinLegend extends StatelessWidget {
               ),
               label: l10n.coteLegendTotal,
             ),
+          _Item(
+            swatch: const _Dot(AppColors.error),
+            label: l10n.coteLegendBelowHalf,
+          ),
+          _Item(
+            swatch: const _Dot(AppColors.vertSavane),
+            label: l10n.coteLegendHalfOrMore,
+          ),
           if (showKeyboardHelp)
             Tooltip(
               message: l10n.coteLegendEnterToggle,
@@ -119,6 +127,21 @@ class _Item extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  final Color color;
+
+  const _Dot(this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: AppDimensions.coteLegendSwatch,
+      height: AppDimensions.coteLegendSwatch,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

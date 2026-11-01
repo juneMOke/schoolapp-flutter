@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// « 61/80 », sa jauge et son pourcentage. Sur téléphone, le total seul.
@@ -12,6 +12,9 @@ class CoteTotalValue extends StatelessWidget {
   final String obtained;
   final String max;
   final int? percent;
+
+  /// L'encre du score ; `null` si rien n'est rempli.
+  final Color? ink;
   final bool showMeter;
   final bool dense;
 
@@ -20,6 +23,7 @@ class CoteTotalValue extends StatelessWidget {
     required this.obtained,
     required this.max,
     required this.percent,
+    required this.ink,
     this.showMeter = true,
     this.dense = false,
   });
@@ -27,7 +31,7 @@ class CoteTotalValue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final color = cotePercentColor(percent);
+    final color = ink ?? AppColors.textMuted;
     final meterWidth = dense
         ? AppDimensions.coteMeterWidthDense
         : AppDimensions.coteMeterWidth;
@@ -36,9 +40,9 @@ class CoteTotalValue extends StatelessWidget {
         children: [
           TextSpan(
             text: obtained,
-            style: const TextStyle(
-              color: AppColors.noirChaud,
-              fontWeight: FontWeight.w600,
+            style: TextStyle(
+              color: ink ?? AppColors.noirChaud,
+              fontWeight: FontWeight.w700,
             ),
           ),
           TextSpan(
@@ -63,10 +67,15 @@ class CoteTotalValue extends StatelessWidget {
           height: AppDimensions.coteMeterHeight,
           child: ClipRRect(
             borderRadius: AppRadius.brPill,
-            child: LinearProgressIndicator(
-              value: (percent ?? 0).clamp(0, 100) / 100,
-              backgroundColor: AppColors.border,
-              valueColor: AlwaysStoppedAnimation(color),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(end: (percent ?? 0).clamp(0, 100) / 100),
+              duration: AppMotion.standard,
+              curve: AppMotion.outCurve,
+              builder: (context, value, _) => LinearProgressIndicator(
+                value: value,
+                backgroundColor: AppColors.border,
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
             ),
           ),
         ),

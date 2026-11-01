@@ -156,21 +156,39 @@ class CoteCalculator {
     required CoteColumn column,
     required List<CoteColumn> year,
     required CoteCellTable cells,
+  }) => columnScore(
+    studentId: studentId,
+    cours: cours,
+    column: column,
+    year: year,
+    cells: cells,
+  ).total;
+
+  /// Cette somme et le maximum des seules cases remplies, en centièmes : une
+  /// colonne à moitié saisie se juge sur ce qui est saisi, comme le pourcentage.
+  ({int total, int maxFilled}) columnScore({
+    required String studentId,
+    required Iterable<CoteCours> cours,
+    required CoteColumn column,
+    required List<CoteColumn> year,
+    required CoteCellTable cells,
   }) {
     final sources = column.isInput
         ? [column]
         : year.where((c) => c.isInput && c.periodeId == column.periodeId);
-    var sum = 0;
+    var total = 0, maxFilled = 0;
     for (final course in cours) {
       for (final source in sources) {
         if (!source.appliesTo(course)) continue;
         final value = cells
             .cell(studentId, course.coursId, source.id)
             ?.countedValue;
-        if (value != null) sum += toCentis(value);
+        if (value == null) continue;
+        total += toCentis(value);
+        maxFilled += source.maxFor(course) * 100;
       }
     }
-    return sum;
+    return (total: total, maxFilled: maxFilled);
   }
 
   /// Le maximum d'une colonne sur des cours, en points.

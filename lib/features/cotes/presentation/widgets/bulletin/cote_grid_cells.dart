@@ -6,9 +6,11 @@ import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dar
 import 'package:school_app_flutter/features/cotes/domain/services/cote_calculator.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_input.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_focus_registry.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_columns.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_row_frame.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_zone_rows.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_note_cell.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_static_cell.dart';
@@ -22,24 +24,61 @@ class CoteCourseCells extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: grid.heights.course,
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceRaised,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
+    return CoteCourseRowFrame(
+      row: row,
+      grid: grid,
       child: Row(
         children: [
-          for (final column in grid.columns)
+          for (final column in grid.gridColumns)
             Container(
               width: grid.metrics.widthOf(column),
-              decoration: BoxDecoration(border: coteColumnEdge(column, grid)),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.coteCellHorizontalPadding,
+              decoration: BoxDecoration(
+                color: column.isMax ? AppColors.coteMaxSurface : null,
+                border: coteColumnEdge(column, grid),
               ),
-              child: _Cell(cours: row.cours, column: column, grid: grid),
+              padding: column.isMax
+                  ? null
+                  : const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.coteCellHorizontalPadding,
+                    ),
+              child: column.isMax
+                  ? _MaxCell(cours: row.cours, column: column, grid: grid)
+                  : _Cell(cours: row.cours, column: column.source, grid: grid),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Le maximum du cours pour cette colonne : le rappel du bulletin, jamais une
+/// saisie. Il n'entre donc pas dans l'ordre de Tab.
+class _MaxCell extends StatelessWidget {
+  final CoteCours cours;
+  final CoteGridColumn column;
+  final CoteGridContext grid;
+
+  const _MaxCell({
+    required this.cours,
+    required this.column,
+    required this.grid,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final source = column.source;
+    final applies = source.appliesTo(cours);
+    return CoteStaticCell(
+      text: applies ? '${source.maxFor(cours)}' : '—',
+      height: grid.heights.cell,
+      background: Colors.transparent,
+      ink: AppColors.bleuArdoise,
+      weight: FontWeight.w800,
+      tooltip: applies ? null : l10n.coteCellNoExam,
+      semanticLabel: l10n.coteMaxCellSemantics(
+        CoteLabels.maxLong(l10n, grid.classe, source),
+        cours.branche,
       ),
     );
   }
@@ -61,25 +100,28 @@ class _Cell extends StatelessWidget {
     if (!column.isInput) {
       return CoteStudentBuilder(
         studentId: grid.studentId,
-        builder: (context, state) => CoteStaticCell(
-          text: formatCentis(
-            _calculator.columnSum(
-              studentId: grid.studentId,
-              cours: [cours],
-              column: column,
-              year: grid.year,
-              cells: state.cells,
+        builder: (context, state) {
+          final score = _calculator.columnScore(
+            studentId: grid.studentId,
+            cours: [cours],
+            column: column,
+            year: grid.year,
+            cells: state.cells,
+          );
+          return CoteStaticCell(
+            text: score.maxFilled == 0 ? '—' : formatCentis(score.total),
+            height: height,
+            background: AppColors.bleuArdoiseSoft,
+            ink:
+                coteScoreInk(score.total, score.maxFilled) ??
+                AppColors.textMuted,
+            weight: FontWeight.w700,
+            semanticLabel: l10n.coteTotalSemantics(
+              CoteLabels.columnLong(l10n, grid.classe, column),
+              cours.branche,
             ),
-          ),
-          height: height,
-          background: AppColors.bleuArdoiseSoft,
-          ink: AppColors.bleuProfond,
-          weight: FontWeight.w700,
-          semanticLabel: l10n.coteTotalSemantics(
-            CoteLabels.columnLong(l10n, grid.classe, column),
-            cours.branche,
-          ),
-        ),
+          );
+        },
       );
     }
     if (!column.appliesTo(cours)) {
@@ -129,13 +171,16 @@ class _LockedCell extends StatelessWidget {
         final cell = state.cells.cell(grid.studentId, cours.coursId, column.id);
         final value = cell?.displayedValue;
         final rejected = cell?.isRejected ?? false;
+        final score = value == null
+            ? null
+            : coteScoreInk(toCentis(value), column.maxFor(cours) * 100);
         return CoteStaticCell(
           text: value == null ? '—' : formatCote(value),
           height: grid.heights.cell,
           background: rejected
               ? AppColors.coteInvalidSurface
               : AppColors.papier,
-          ink: rejected ? AppColors.error : AppColors.textSecondary,
+          ink: rejected ? AppColors.error : score ?? AppColors.textSecondary,
           tooltip: rejected
               ? CoteLabels.rejection(l10n, cell?.rejectionReason)
               : l10n.coteCellLocked,

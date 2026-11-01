@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/motion/eteelo_entrance.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -58,15 +59,21 @@ class _CoteWorkspaceState extends State<CoteWorkspace> {
             );
             final bulletin = KeyedSubtree(
               key: _bulletinKey,
-              child: CoteBulletinCard(
-                classroomName: widget.classroomName,
-                onStudentChanged: widget.onStudentChanged,
+              child: EteeloEntrance(
+                index: 2,
+                child: CoteBulletinCard(
+                  classroomName: widget.classroomName,
+                  onStudentChanged: widget.onStudentChanged,
+                ),
               ),
             );
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                CoteClassBar(classroomName: widget.classroomName),
+                EteeloEntrance(
+                  index: 0,
+                  child: CoteClassBar(classroomName: widget.classroomName),
+                ),
                 if (state.fromCache) ...[
                   const SizedBox(height: AppSpacing.sm),
                   Text(
@@ -81,15 +88,23 @@ class _CoteWorkspaceState extends State<CoteWorkspace> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CoteStudentPanel(
-                        onStudentChanged: widget.onStudentChanged,
+                      EteeloEntrance(
+                        index: 1,
+                        child: CoteStudentPanel(
+                          onStudentChanged: widget.onStudentChanged,
+                        ),
                       ),
                       const SizedBox(width: AppDimensions.coteListGap),
                       Expanded(child: bulletin),
                     ],
                   )
                 else ...[
-                  CoteStudentPicker(onStudentChanged: widget.onStudentChanged),
+                  EteeloEntrance(
+                    index: 1,
+                    child: CoteStudentPicker(
+                      onStudentChanged: widget.onStudentChanged,
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   bulletin,
                 ],

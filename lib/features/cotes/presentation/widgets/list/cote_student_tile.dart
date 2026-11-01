@@ -121,7 +121,10 @@ class CoteStudentTile extends StatelessWidget {
                   Text(
                     percent == null ? '—' : l10n.cotePercent(percent),
                     style: AppTypography.bodySmall.copyWith(
-                      color: cotePercentColor(percent),
+                      color: calc == null
+                          ? AppColors.textMuted
+                          : coteScoreInk(calc.total, calc.maxFilled) ??
+                                AppColors.textMuted,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

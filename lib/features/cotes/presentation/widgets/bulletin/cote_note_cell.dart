@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_event.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_focus_registry.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_cell_look.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -59,6 +60,7 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
   /// y revient. Rien ne s'écrit avant de quitter la case.
   CoteCell? _base;
   bool _dirty = false;
+  bool _hovered = false;
 
   @override
   void initState() {
@@ -177,14 +179,20 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
   }
 
   Widget _frame(AppLocalizations l10n, CoteCell? cell, bool changed) {
+    final max = widget.column.maxFor(widget.cours);
+    final value = cell?.displayedValue;
     final look = CoteCellLook.of(
       cell: cell,
       column: widget.column,
       focused: _focusNode.hasFocus,
       changed: changed,
       empty: _controller.text.isEmpty,
+      scoreInk: value == null ? null : coteScoreInk(toCentis(value), max * 100),
     );
-    final max = widget.column.maxFor(widget.cours);
+    // Le survol ne touche ni l'erreur ni le focus, qui parlent déjà.
+    final edge = _hovered && !(cell?.isInvalid ?? false)
+        ? AppColors.bleuArdoise
+        : look.border;
     final field = TextField(
       controller: _controller,
       focusNode: _focusNode,
@@ -224,7 +232,7 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
         borderRadius: AppRadius.brSm,
         border: look.dashed
             ? null
-            : Border.all(color: look.border, width: look.borderWidth),
+            : Border.all(color: edge, width: look.borderWidth),
         boxShadow: _focusNode.hasFocus
             ? const [
                 BoxShadow(
@@ -239,7 +247,7 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       child: CustomPaint(
         painter: look.dashed
             ? DashedRRectPainter(
-                color: look.border,
+                color: edge,
                 borderRadius: AppRadius.brSm,
                 strokeWidth: 1,
                 dash: 4,
@@ -260,7 +268,11 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       hint: hint,
       // Toujours visible et jamais vide : autrement, `Tooltip` rend son enfant
       // nu, et son apparition remonterait le champ en pleine frappe.
-      child: Tooltip(message: hint ?? widget.columnLabel, child: body),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: Tooltip(message: hint ?? widget.columnLabel, child: body),
+      ),
     );
   }
 

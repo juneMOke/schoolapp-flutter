@@ -21369,6 +21369,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get coteColumnMaxPeriod => 'Max per.';
+
+  @override
+  String get coteColumnMaxPeriodLong => 'Maximum per period';
+
+  @override
+  String get coteColumnMaxExam => 'Max ex.';
+
+  @override
+  String get coteColumnMaxExamLong => 'Exam maximum';
+
+  @override
+  String coteColumnMaxOf(String group) {
+    return 'Max $group';
+  }
+
+  @override
+  String coteColumnMaxGroupLong(String group) {
+    return 'Maximum · $group';
+  }
+
+  @override
+  String get coteSubtotal => 'Subtotal';
+
+  @override
+  String coteMaxCellSemantics(String label, String course) {
+    return '$label, $course';
+  }
+
+  @override
   String get coteColumnCours => 'Course';
 
   @override
@@ -21567,6 +21597,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coteLegendTotal => 'Calculated total';
 
   @override
+  String get coteLegendBelowHalf => 'Below half';
+
+  @override
+  String get coteLegendHalfOrMore => 'Half or more';
+
+  @override
+  String get coteRubriqueExpand => 'Expand';
+
+  @override
+  String get coteRubriqueCollapse => 'Collapse';
+
+  @override
+  String get coteRubriqueAlert => 'Grades to fix are folded here';
+
+  @override
   String get coteLegendEnterKey => 'Enter';
 
   @override
@@ -21577,16 +21622,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coteLegendEnterToggle => 'Change what the Enter key does';
-
-  @override
-  String coteCourseScale(String max, String exam) {
-    return 'out of $max · ex. $exam';
-  }
-
-  @override
-  String coteCourseScaleNoExam(String max) {
-    return 'out of $max';
-  }
 
   @override
   String get coteMaxima => 'Maximum';

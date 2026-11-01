@@ -9,7 +9,10 @@ enum CoteMove { down, up, right }
 /// focus. Détenu par l'état de la grille, libéré avec elle.
 class CoteFocusRegistry {
   final String studentId;
-  final List<CoteCours> cours;
+
+  /// Les cours visibles, dans l'ordre de l'écran : une rubrique repliée n'a plus
+  /// de cellule où aller.
+  List<CoteCours> cours;
   final List<CoteColumn> columns;
   final Map<String, FocusNode> _nodes = {};
 

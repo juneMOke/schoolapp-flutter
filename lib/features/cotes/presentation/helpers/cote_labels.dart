@@ -44,6 +44,32 @@ abstract final class CoteLabels {
     ),
   };
 
+  /// L'en-tête d'une colonne de maxima : « Max pér. », « Max ex. », « Max T1 ».
+  static String maxShort(
+    AppLocalizations l10n,
+    Decoupage decoupage,
+    CoteColumn column,
+  ) => switch (column.kind) {
+    CoteColumnKind.periode => l10n.coteColumnMaxPeriod,
+    CoteColumnKind.examen => l10n.coteColumnMaxExam,
+    CoteColumnKind.totalGroupe => l10n.coteColumnMaxOf(
+      groupShort(l10n, decoupage, column.numero),
+    ),
+  };
+
+  /// L'info-bulle et le lecteur d'écran d'une colonne de maxima.
+  static String maxLong(
+    AppLocalizations l10n,
+    CoteClasse classe,
+    CoteColumn column,
+  ) => switch (column.kind) {
+    CoteColumnKind.periode => l10n.coteColumnMaxPeriodLong,
+    CoteColumnKind.examen => l10n.coteColumnMaxExamLong,
+    CoteColumnKind.totalGroupe => l10n.coteColumnMaxGroupLong(
+      _periodeLibelle(classe, column.periodeId),
+    ),
+  };
+
   /// La puce d'une cible : « P3 », « Examen S1 ».
   static String columnChip(
     AppLocalizations l10n,

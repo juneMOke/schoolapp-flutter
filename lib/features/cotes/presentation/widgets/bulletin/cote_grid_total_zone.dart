@@ -5,10 +5,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_calculator.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_input.dart';
-import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_row_frame.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_rubrique.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_zone_rows.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_percent_meter.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -33,16 +34,20 @@ class CoteGridTotalZone extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (grid.hasGroupTotals)
-              Container(height: heights.group, color: AppColors.blancCasse),
+              Container(height: heights.group, color: AppColors.bleuProfond),
             _HeaderLabel(grid: grid, height: heights.header),
             for (final row in grid.rows)
-              switch (row) {
-                final CoteRubriqueRow r => _domainTotal(state, r),
+              coteRowReveal(row, switch (row) {
+                final CoteRubriqueRow r => CoteRubriqueStrip(
+                  row: r,
+                  grid: grid,
+                ),
                 final CoteCourseRow r => _courseTotal(calc, r),
-              },
+                final CoteSubtotalRow r => _subtotal(calc, r),
+              }),
             Container(
               height: heights.maxima,
-              color: AppColors.blancCasse,
+              color: AppColors.coteMaxSurface,
               padding: _padding,
               alignment: Alignment.centerRight,
               child: Text(maxima, maxLines: 1, style: coteMaximaStyle()),
@@ -56,8 +61,7 @@ class CoteGridTotalZone extends StatelessWidget {
     );
   }
 
-  Widget _domainTotal(CoteSaisieReady state, CoteRubriqueRow row) {
-    final calc = state.calcs[grid.studentId]!;
+  Widget _subtotal(CoteEleveCalc calc, CoteSubtotalRow row) {
     var total = 0, filled = 0, scope = 0;
     for (final cours in row.rubrique.allCours) {
       final part = calc.cours[cours.coursId];
@@ -66,37 +70,36 @@ class CoteGridTotalZone extends StatelessWidget {
       filled += part.maxFilled;
       scope += part.maxScope;
     }
-    return Container(
-      height: grid.heights.domain,
-      color: row.tone.soft,
-      padding: _padding,
-      alignment: Alignment.centerRight,
-      child: row.rubrique.produitSousTotal
-          ? CoteTotalValue(
-              obtained: formatCentis(total),
-              max: formatCentis(scope),
-              percent: roundedPercent(total, filled),
-              showMeter: !grid.metrics.phone,
-              dense: grid.metrics.dense,
-            )
-          : null,
+    return CoteSubtotalStrip(
+      row: row,
+      grid: grid,
+      child: Container(
+        padding: _padding,
+        alignment: Alignment.centerRight,
+        child: CoteTotalValue(
+          obtained: formatCentis(total),
+          max: formatCentis(scope),
+          percent: roundedPercent(total, filled),
+          ink: coteScoreInk(total, filled),
+          showMeter: !grid.metrics.phone,
+          dense: grid.metrics.dense,
+        ),
+      ),
     );
   }
 
   Widget _courseTotal(CoteEleveCalc calc, CoteCourseRow row) {
     final part = calc.cours[row.cours.coursId];
-    return Container(
-      height: grid.heights.course,
+    return CoteCourseRowFrame(
+      row: row,
+      grid: grid,
       padding: _padding,
       alignment: Alignment.centerRight,
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceRaised,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
       child: CoteTotalValue(
         obtained: formatCentis(part?.total ?? 0),
         max: formatCentis(part?.maxScope ?? 0),
         percent: part?.pct,
+        ink: part == null ? null : coteScoreInk(part.total, part.maxFilled),
         showMeter: !grid.metrics.phone,
         dense: grid.metrics.dense,
       ),
@@ -105,7 +108,7 @@ class CoteGridTotalZone extends StatelessWidget {
 
   Widget _grandTotal(AppLocalizations l10n, CoteEleveCalc calc) {
     final percent = calc.pct;
-    final low = percent != null && percent < 50;
+    final ink = coteScoreInk(calc.total, calc.maxFilled);
     return Container(
       height: grid.heights.total,
       color: AppColors.bleuProfond,
@@ -130,20 +133,14 @@ class CoteGridTotalZone extends StatelessWidget {
                 vertical: AppSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: percent == null
-                    ? AppColors.stateFocusOnDark
-                    : low
-                    ? AppColors.error
-                    : AppColors.orDoux,
+                color: ink ?? AppColors.stateFocusOnDark,
                 borderRadius: AppRadius.brPill,
               ),
               child: Text(
                 percent == null ? '—' : l10n.cotePercent(percent),
                 maxLines: 1,
                 style: AppTypography.labelMedium.copyWith(
-                  color: percent == null || low
-                      ? AppColors.textOnDark
-                      : AppColors.bleuProfond,
+                  color: AppColors.textOnDark,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -168,16 +165,13 @@ class _HeaderLabel extends StatelessWidget {
       height: height,
       padding: _padding,
       alignment: Alignment.centerRight,
-      decoration: const BoxDecoration(
-        color: AppColors.blancCasse,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+      color: AppColors.bleuProfond,
       child: Text(
         _label(l10n).toUpperCase(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTypography.labelSmall.copyWith(
-          color: AppColors.bleuProfond,
+          color: AppColors.textOnDark,
           fontWeight: FontWeight.w600,
         ),
       ),

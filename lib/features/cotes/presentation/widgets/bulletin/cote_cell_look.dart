@@ -3,7 +3,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 
-/// Six apparences, la légende les reprend.
+/// Six apparences, la légende les reprend. [CoteCellLook.of] colore le chiffre
+/// selon `scoreInk` ; une frappe hors barème garde son rouge d'erreur.
 class CoteCellLook {
   final Color surface;
   final Color border;
@@ -25,6 +26,7 @@ class CoteCellLook {
     required bool focused,
     required bool changed,
     required bool empty,
+    Color? scoreInk,
   }) {
     final exam = column.isExamen;
     if (cell?.isInvalid ?? false) {
@@ -36,18 +38,18 @@ class CoteCellLook {
       );
     }
     if (focused) {
-      return const CoteCellLook(
+      return CoteCellLook(
         surface: AppColors.surfaceRaised,
         border: AppColors.bleuArdoise,
-        ink: AppColors.bleuProfond,
+        ink: scoreInk ?? AppColors.bleuProfond,
         borderWidth: 1.5,
       );
     }
     if (changed) {
-      return const CoteCellLook(
+      return CoteCellLook(
         surface: AppColors.coteChangedSurface,
         border: AppColors.warning,
-        ink: AppColors.bleuProfond,
+        ink: scoreInk ?? AppColors.bleuProfond,
         borderWidth: 1.5,
       );
     }
@@ -65,14 +67,14 @@ class CoteCellLook {
       return CoteCellLook(
         surface: surface,
         border: border,
-        ink: AppColors.textSecondary,
+        ink: scoreInk ?? AppColors.textSecondary,
         dashed: true,
       );
     }
     return CoteCellLook(
       surface: surface,
       border: border,
-      ink: exam ? AppColors.coteExamInk : AppColors.bleuProfond,
+      ink: scoreInk ?? (exam ? AppColors.coteExamInk : AppColors.bleuProfond),
     );
   }
 }

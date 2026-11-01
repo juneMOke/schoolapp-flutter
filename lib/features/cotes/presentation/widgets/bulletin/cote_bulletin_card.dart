@@ -37,6 +37,17 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
   CoteMove _enterMove = CoteMove.down;
   bool _focusAfterStep = false;
 
+  /// Un élève après l'autre, on garde les mêmes rubriques ouvertes.
+  Set<String> _collapsed = const {};
+
+  void _toggleRubrique(String id) {
+    setState(() {
+      _collapsed = _collapsed.contains(id)
+          ? (_collapsed.toSet()..remove(id))
+          : {..._collapsed, id};
+    });
+  }
+
   void _stepped() {
     _focusAfterStep = true;
     widget.onStudentChanged?.call();
@@ -110,7 +121,12 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
                           : CoteMove.down,
                     ),
                   ),
-                  CoteGrid(key: _gridKey, enterMove: _enterMove),
+                  CoteGrid(
+                    key: _gridKey,
+                    enterMove: _enterMove,
+                    collapsed: _collapsed,
+                    onToggleRubrique: _toggleRubrique,
+                  ),
                   CoteBulletinFooter(onStepped: _stepped),
                 ],
               );

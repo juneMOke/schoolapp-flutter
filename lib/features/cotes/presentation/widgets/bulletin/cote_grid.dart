@@ -1,72 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
-import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_focus_registry.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_columns.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_center.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_course_zone.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_rubrique.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_context.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_total_zone.dart';
 
-/// Les hauteurs communes aux trois zones : leurs lignes s'alignent parce
-/// qu'elles les partagent, y compris avec le texte agrandi.
-class CoteGridHeights {
-  final double scale;
+export 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_context.dart';
 
-  const CoteGridHeights(this.scale);
-
-  double get header => AppDimensions.coteRowHeader * scale;
-  double get group => AppDimensions.coteRowGroup * scale;
-  double get domain => AppDimensions.coteRowDomain * scale;
-  double get course => AppDimensions.coteRowCourse * scale;
-  double get cell => AppDimensions.minTouchTarget * scale;
-  double get maxima => AppDimensions.coteRowMaxima * scale;
-  double get total => AppDimensions.coteRowTotal * scale;
-  double get percent => AppDimensions.coteRowPercent * scale;
-}
-
-/// Tout ce que les trois zones se partagent.
-class CoteGridContext {
-  final CoteClasse classe;
-  final List<CoteColumn> columns;
-  final List<CoteColumn> year;
-  final List<CoteCours> cours;
-  final List<CoteGridRow> rows;
-  final String studentId;
-  final CoteGridMetrics metrics;
-  final CoteGridHeights heights;
-  final CoteFocusRegistry registry;
-  final CoteMove enterMove;
-
-  const CoteGridContext({
-    required this.classe,
-    required this.columns,
-    required this.year,
-    required this.cours,
-    required this.rows,
-    required this.studentId,
-    required this.metrics,
-    required this.heights,
-    required this.registry,
-    required this.enterMove,
-  });
-
-  /// Une colonne de total de groupe ? Alors une ligne « Pourcentage » par
-  /// groupe, et un bandeau de groupes au-dessus de l'en-tête.
-  bool get hasGroupTotals => columns.any((c) => !c.isInput);
-}
-
-/// La grille : cours figés à gauche, notes au centre, total figé à droite.
+/// La grille : cours figés à gauche, notes au centre, total figé à droite. Les
+/// titres de rubrique passent par-dessus les trois zones : un titre centré sur
+/// la ligne ne dépend ni de la colonne figée ni du défilement.
 /// Toutes les hauteurs sont communes, donc aucune synchronisation de défilement
 /// vertical : seule la zone centrale défile, et de côté.
 class CoteGrid extends StatefulWidget {
   final CoteMove enterMove;
 
-  const CoteGrid({super.key, required this.enterMove});
+  /// Les rubriques repliées : le réglage survit au changement d'élève, la
+  /// grille non.
+  final Set<String> collapsed;
+  final ValueChanged<String> onToggleRubrique;
+
+  const CoteGrid({
+    super.key,
+    required this.enterMove,
+    this.collapsed = const {},
+    required this.onToggleRubrique,
+  });
 
   @override
   State<CoteGrid> createState() => CoteGridState();
@@ -75,6 +43,7 @@ class CoteGrid extends StatefulWidget {
 class CoteGridState extends State<CoteGrid> {
   late final CoteFocusRegistry _registry;
   late final CoteSaisieReady _opened;
+  final _hoveredCours = ValueNotifier<String?>(null);
 
   @override
   void initState() {
@@ -82,14 +51,25 @@ class CoteGridState extends State<CoteGrid> {
     _opened = context.read<CoteSaisieBloc>().state as CoteSaisieReady;
     _registry = CoteFocusRegistry(
       studentId: _opened.currentId,
-      cours: _orderedCours(_opened),
+      cours: _orderedCours(),
       columns: _opened.columns,
     );
   }
 
-  /// L'ordre des lignes à l'écran, celui de Tab et des flèches.
-  static List<CoteCours> _orderedCours(CoteSaisieReady state) => [
-    for (final row in coteGridRows(state.classe.rubriques))
+  @override
+  void didUpdateWidget(CoteGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.collapsed != widget.collapsed) {
+      _registry.cours = _orderedCours();
+    }
+  }
+
+  List<CoteGridRow> _rows() =>
+      coteGridRows(_opened.classe.rubriques, collapsed: widget.collapsed);
+
+  /// L'ordre des lignes à l'écran, celui des flèches et d'Entrée.
+  List<CoteCours> _orderedCours() => [
+    for (final row in _rows())
       if (row is CoteCourseRow) row.cours,
   ];
 
@@ -111,6 +91,7 @@ class CoteGridState extends State<CoteGrid> {
   @override
   void dispose() {
     _registry.dispose();
+    _hoveredCours.dispose();
     super.dispose();
   }
 
@@ -128,41 +109,57 @@ class CoteGridState extends State<CoteGrid> {
         final grid = CoteGridContext(
           classe: _opened.classe,
           columns: _opened.columns,
+          gridColumns: coteGridColumns(_opened.columns),
           year: _opened.year,
           cours: _opened.cours,
-          rows: coteGridRows(_opened.classe.rubriques),
+          rows: _rows(),
           studentId: _opened.currentId,
           metrics: metrics,
-          heights: CoteGridHeights(scale),
+          heights: CoteGridHeights(scale, phone: metrics.phone),
           registry: _registry,
           enterMove: widget.enterMove,
+          hoveredCours: _hoveredCours,
+          onToggleRubrique: widget.onToggleRubrique,
         );
-        final center = metrics.centerWidth(_opened.columns);
+        final center = metrics.centerWidth;
         final room = width - metrics.courseWidth - metrics.totalWidth;
         final fits = center <= room;
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: metrics.courseWidth,
-              child: CoteGridCourseZone(grid: grid),
-            ),
-            if (fits) ...[
-              SizedBox(
-                width: center,
-                child: CoteGridCenter(grid: grid),
+        final grow = MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : AppMotion.medium;
+        return AnimatedSize(
+          duration: grow,
+          curve: AppMotion.outCurve,
+          alignment: Alignment.topCenter,
+          child: Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: metrics.courseWidth,
+                    child: CoteGridCourseZone(grid: grid),
+                  ),
+                  if (fits) ...[
+                    SizedBox(
+                      width: center,
+                      child: CoteGridCenter(grid: grid),
+                    ),
+                    Expanded(child: CoteGridTotalZone(grid: grid)),
+                  ] else ...[
+                    Expanded(
+                      child: _ScrollingCenter(grid: grid, width: center),
+                    ),
+                    SizedBox(
+                      width: metrics.totalWidth,
+                      child: CoteGridTotalZone(grid: grid),
+                    ),
+                  ],
+                ],
               ),
-              Expanded(child: CoteGridTotalZone(grid: grid)),
-            ] else ...[
-              Expanded(
-                child: _ScrollingCenter(grid: grid, width: center),
-              ),
-              SizedBox(
-                width: metrics.totalWidth,
-                child: CoteGridTotalZone(grid: grid),
-              ),
+              ...coteRubriqueTitles(grid),
             ],
-          ],
+          ),
         );
       },
     );

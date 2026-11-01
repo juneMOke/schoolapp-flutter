@@ -6,6 +6,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_row_frame.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_rubrique.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_zone_rows.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -23,20 +25,25 @@ class CoteGridCourseZone extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (grid.hasGroupTotals)
-          Container(height: heights.group, color: AppColors.blancCasse),
+          Container(height: heights.group, color: AppColors.bleuProfond),
         _HeaderCell(
           label: l10n.coteColumnCours.toUpperCase(),
           height: heights.header,
         ),
         for (final row in grid.rows)
-          switch (row) {
-            final CoteRubriqueRow r => _DomainLabel(row: r, grid: grid),
+          coteRowReveal(row, switch (row) {
+            final CoteRubriqueRow r => CoteRubriqueStrip(row: r, grid: grid),
             final CoteCourseRow r => _CourseLabel(row: r, grid: grid),
-          },
+            final CoteSubtotalRow r => CoteSubtotalStrip(
+              row: r,
+              grid: grid,
+              child: _SubtotalLabel(row: r),
+            ),
+          }),
         _FootLabel(
           label: l10n.coteMaxima.toUpperCase(),
           height: heights.maxima,
-          background: AppColors.blancCasse,
+          background: AppColors.coteMaxSurface,
           style: coteMaximaStyle(),
         ),
         _FootLabel(
@@ -69,16 +76,13 @@ class _HeaderCell extends StatelessWidget {
       height: height,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       alignment: Alignment.centerLeft,
-      decoration: const BoxDecoration(
-        color: AppColors.blancCasse,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
-      ),
+      color: AppColors.bleuProfond,
       child: Text(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTypography.labelSmall.copyWith(
-          color: AppColors.textMuted,
+          color: AppColors.textOnDark,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -86,47 +90,33 @@ class _HeaderCell extends StatelessWidget {
   }
 }
 
-class _DomainLabel extends StatelessWidget {
-  final CoteRubriqueRow row;
-  final CoteGridContext grid;
+class _SubtotalLabel extends StatelessWidget {
+  final CoteSubtotalRow row;
 
-  const _DomainLabel({required this.row, required this.grid});
+  const _SubtotalLabel({required this.row});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: grid.heights.domain,
-      color: row.tone.soft,
-      padding: EdgeInsets.only(
-        left: AppSpacing.md + row.depth * AppSpacing.sm,
-        right: AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: AppDimensions.coteDomainMark,
-            height: AppDimensions.coteDomainMark,
-            decoration: BoxDecoration(
-              color: row.tone.ink,
-              shape: BoxShape.circle,
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          AppLocalizations.of(context)!.coteSubtotal,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.labelMedium.copyWith(
+            color: row.tone.ink,
+            fontWeight: FontWeight.w700,
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: EteeloOverflowText(
-              (row.rubrique.label ?? '').toUpperCase(),
-              style: AppTypography.labelSmall.copyWith(
-                color: row.tone.ink,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
+/// Le nom entier du cours : il va à la ligne plutôt que de se couper, et ne
+/// s'ellipse qu'au-delà de ce que la ligne peut contenir.
 class _CourseLabel extends StatelessWidget {
   final CoteCourseRow row;
   final CoteGridContext grid;
@@ -135,18 +125,12 @@ class _CourseLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final cours = row.cours;
-    final scale = cours.hasExamen
-        ? l10n.coteCourseScale('${cours.maxJournalier}', '${cours.maxExamen}')
-        : l10n.coteCourseScaleNoExam('${cours.maxJournalier}');
-    return Container(
-      height: grid.heights.course,
+    // Une colonne étroite prend une ligne de plus, en petit : le nom reste entier.
+    final narrow = grid.metrics.courseWidth < AppDimensions.coteCourseColumn;
+    return CoteCourseRowFrame(
+      row: row,
+      grid: grid,
       padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.xs),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceRaised,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
       child: Row(
         children: [
           Container(
@@ -156,24 +140,15 @@ class _CourseLabel extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                EteeloOverflowText(
-                  cours.branche,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.noirChaud,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                EteeloOverflowText(
-                  scale,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
+            child: EteeloOverflowText(
+              row.cours.branche,
+              maxLines: narrow ? 3 : 2,
+              style:
+                  (narrow ? AppTypography.bodySmall : AppTypography.bodyMedium)
+                      .copyWith(
+                        color: AppColors.noirChaud,
+                        fontWeight: FontWeight.w500,
+                      ),
             ),
           ),
         ],

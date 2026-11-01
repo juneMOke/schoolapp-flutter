@@ -21515,6 +21515,36 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get coteColumnMaxPeriod => 'Max pér.';
+
+  @override
+  String get coteColumnMaxPeriodLong => 'Maximum par période';
+
+  @override
+  String get coteColumnMaxExam => 'Max ex.';
+
+  @override
+  String get coteColumnMaxExamLong => 'Maximum à l\'examen';
+
+  @override
+  String coteColumnMaxOf(String group) {
+    return 'Max $group';
+  }
+
+  @override
+  String coteColumnMaxGroupLong(String group) {
+    return 'Maximum · $group';
+  }
+
+  @override
+  String get coteSubtotal => 'Sous-total';
+
+  @override
+  String coteMaxCellSemantics(String label, String course) {
+    return '$label, $course';
+  }
+
+  @override
   String get coteColumnCours => 'Cours';
 
   @override
@@ -21719,6 +21749,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coteLegendTotal => 'Total calculé';
 
   @override
+  String get coteLegendBelowHalf => 'Moins de la moitié';
+
+  @override
+  String get coteLegendHalfOrMore => 'La moitié ou plus';
+
+  @override
+  String get coteRubriqueExpand => 'Déplier';
+
+  @override
+  String get coteRubriqueCollapse => 'Replier';
+
+  @override
+  String get coteRubriqueAlert => 'Des cotes à corriger sont repliées ici';
+
+  @override
   String get coteLegendEnterKey => 'Entrée';
 
   @override
@@ -21729,16 +21774,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get coteLegendEnterToggle => 'Changer l\'effet de la touche Entrée';
-
-  @override
-  String coteCourseScale(String max, String exam) {
-    return 'sur $max · ex. $exam';
-  }
-
-  @override
-  String coteCourseScaleNoExam(String max) {
-    return 'sur $max';
-  }
 
   @override
   String get coteMaxima => 'Maxima';

@@ -1210,9 +1210,14 @@ class AppDimensions {
   /// Évite que la liste clignote autour du seuil, barre de défilement comprise.
   static const coteListHysteresis = 32.0;
   static const coteListRowHeight = 64.0;
-  static const coteCourseColumn = 176.0;
-  static const coteCourseColumnDense = 140.0;
-  static const coteCourseColumnPhone = 136.0;
+  static const coteCourseColumn = 240.0;
+  static const coteCourseColumnDense = 200.0;
+  static const coteCourseColumnPhone = 110.0;
+
+  /// Le surplus de largeur va aux noms de cours, jusqu'ici.
+  static const coteCourseColumnMax = 360.0;
+  static const coteMaxColumn = 56.0;
+  static const coteMaxColumnDense = 46.0;
   static const coteNoteColumn = 84.0;
   static const coteNoteColumnMedium = 72.0;
   static const coteNoteColumnDense = 64.0;
@@ -1224,7 +1229,11 @@ class AppDimensions {
   static const coteCellHorizontalPadding = 5.0;
   static const coteRowHeader = 40.0;
   static const coteRowGroup = 30.0;
-  static const coteRowDomain = 34.0;
+  // Titres repliables : une cible d'appui entière, sur toute la largeur.
+  static const coteRowDomain = minTouchTarget;
+  static const coteRowDomainPhone = 56.0;
+  static const coteRowBranch = minTouchTarget;
+  static const coteRowSubtotal = 38.0;
 
   /// Une cellule de [minTouchTarget] et ses 4 dp de part et d'autre.
   static const coteRowCourse = minTouchTarget + 8;
@@ -1234,7 +1243,9 @@ class AppDimensions {
   static const coteMeterWidth = 30.0;
   static const coteMeterWidthDense = 22.0;
   static const coteMeterHeight = 5.0;
-  static const coteDomainMark = 8.0;
+  static const coteBranchRule = 2.0;
+  static const coteChevron = 20.0;
+  static const coteSubtotalRule = 1.5;
   static const coteCourseMarkWidth = 3.0;
   static const coteCourseMarkHeight = 30.0;
   static const coteLegendSwatch = 14.0;

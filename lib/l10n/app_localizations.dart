@@ -32881,6 +32881,54 @@ abstract class AppLocalizations {
   /// **'T{ordre}'**
   String coteGroupShortTrimester(int ordre);
 
+  /// No description provided for @coteColumnMaxPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Max per.'**
+  String get coteColumnMaxPeriod;
+
+  /// No description provided for @coteColumnMaxPeriodLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum per period'**
+  String get coteColumnMaxPeriodLong;
+
+  /// No description provided for @coteColumnMaxExam.
+  ///
+  /// In en, this message translates to:
+  /// **'Max ex.'**
+  String get coteColumnMaxExam;
+
+  /// No description provided for @coteColumnMaxExamLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam maximum'**
+  String get coteColumnMaxExamLong;
+
+  /// No description provided for @coteColumnMaxOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {group}'**
+  String coteColumnMaxOf(String group);
+
+  /// No description provided for @coteColumnMaxGroupLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum · {group}'**
+  String coteColumnMaxGroupLong(String group);
+
+  /// No description provided for @coteSubtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get coteSubtotal;
+
+  /// No description provided for @coteMaxCellSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}, {course}'**
+  String coteMaxCellSemantics(String label, String course);
+
   /// No description provided for @coteColumnCours.
   ///
   /// In en, this message translates to:
@@ -33145,6 +33193,36 @@ abstract class AppLocalizations {
   /// **'Calculated total'**
   String get coteLegendTotal;
 
+  /// No description provided for @coteLegendBelowHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Below half'**
+  String get coteLegendBelowHalf;
+
+  /// No description provided for @coteLegendHalfOrMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Half or more'**
+  String get coteLegendHalfOrMore;
+
+  /// No description provided for @coteRubriqueExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get coteRubriqueExpand;
+
+  /// No description provided for @coteRubriqueCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get coteRubriqueCollapse;
+
+  /// No description provided for @coteRubriqueAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades to fix are folded here'**
+  String get coteRubriqueAlert;
+
   /// No description provided for @coteLegendEnterKey.
   ///
   /// In en, this message translates to:
@@ -33168,18 +33246,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change what the Enter key does'**
   String get coteLegendEnterToggle;
-
-  /// No description provided for @coteCourseScale.
-  ///
-  /// In en, this message translates to:
-  /// **'out of {max} · ex. {exam}'**
-  String coteCourseScale(String max, String exam);
-
-  /// No description provided for @coteCourseScaleNoExam.
-  ///
-  /// In en, this message translates to:
-  /// **'out of {max}'**
-  String coteCourseScaleNoExam(String max);
 
   /// No description provided for @coteMaxima.
   ///

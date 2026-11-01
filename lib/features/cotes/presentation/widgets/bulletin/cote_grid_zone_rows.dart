@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_columns.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
@@ -33,19 +33,18 @@ class CoteStudentBuilder extends StatelessWidget {
 }
 
 /// Le filet gauche d'une colonne : plus marqué au début de chaque groupe.
-Border coteColumnEdge(CoteColumn column, CoteGridContext grid) {
-  final first = grid.columns.first == column;
+Border coteColumnEdge(CoteGridColumn column, CoteGridContext grid) {
+  final index = grid.gridColumns.indexOf(column);
+  if (index == 0) return const Border();
   final startsGroup =
-      !first &&
-      grid.columns[grid.columns.indexOf(column) - 1].periodeId !=
-          column.periodeId;
+      grid.gridColumns[index - 1].source.periodeId != column.source.periodeId;
   return Border(
-    left: first
-        ? BorderSide.none
-        : BorderSide(
-            color: startsGroup ? AppColors.borderStrong : AppColors.border,
-            width: startsGroup ? 2 : 1,
-          ),
+    left: BorderSide(
+      color: startsGroup || column.isMax
+          ? AppColors.borderStrong
+          : AppColors.border,
+      width: startsGroup ? 2 : 1,
+    ),
   );
 }
 
@@ -59,7 +58,7 @@ TextStyle coteDarkRowStyle({bool strong = false}) =>
 
 /// Le style des maxima.
 TextStyle coteMaximaStyle() => AppTypography.labelSmall.copyWith(
-  color: AppColors.textMuted,
-  fontWeight: FontWeight.w500,
+  color: AppColors.bleuArdoise,
+  fontWeight: FontWeight.w800,
   fontFeatures: const [FontFeature.tabularFigures()],
 );
