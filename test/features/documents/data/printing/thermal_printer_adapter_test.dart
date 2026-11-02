@@ -33,6 +33,10 @@ class _FakeChannel implements ThermalPrinterChannel {
   final List<String> calls = [];
   final List<List<int>> written = [];
 
+  /// Horloge du double : dit QUAND la liaison a été refermée.
+  final Stopwatch clock = Stopwatch()..start();
+  Duration? disconnectedAt;
+
   _FakeChannel({
     this.permission = true,
     this.bluetooth = true,
@@ -77,7 +81,10 @@ class _FakeChannel implements ThermalPrinterChannel {
   }
 
   @override
-  Future<void> disconnect() => _record('disconnect', null);
+  Future<void> disconnect() {
+    disconnectedAt = clock.elapsed;
+    return _record('disconnect', null);
+  }
 }
 
 /// Double de la constatation de permission.
@@ -116,6 +123,7 @@ ThermalPrinterAdapter _adapter(
   probeTimeout: const Duration(milliseconds: 40),
   connectTimeout: const Duration(milliseconds: 40),
   writeTimeout: const Duration(milliseconds: 40),
+  drainTime: (_) => Duration.zero,
 );
 
 ThermalPrinterProblem? _problemOf(Object either) {
@@ -323,6 +331,7 @@ void main() {
                 probeTimeout: const Duration(milliseconds: 40),
                 connectTimeout: const Duration(milliseconds: 40),
                 writeTimeout: const Duration(milliseconds: 100),
+                drainTime: (_) => Duration.zero,
               );
           // Plus long qu'UN budget, bien plus court que trois.
           const slowWrite = Duration(milliseconds: 150);
@@ -341,6 +350,72 @@ void main() {
           expect(triple.isRight(), isTrue);
         },
       );
+    });
+
+    /// Régression du 2026-11-02 : l'écriture native rend la main avant que les
+    /// octets aient quitté la tablette. Fermée aussitôt, la liaison coupait le
+    /// QR de bas de ticket, et le ticket suivant sortait avec un bout de QR en
+    /// tête puis le logo imprimé en charabia.
+    group('vidange avant fermeture', () {
+      test(
+        'attend la vidange du flux ENTIER, exemplaires compris, avant de fermer',
+        () async {
+          final channel = _FakeChannel();
+          final measured = <int>[];
+          const drain = Duration(milliseconds: 120);
+
+          final result = await ThermalPrinterAdapter(
+            channel,
+            _FakePermission(),
+            probeTimeout: const Duration(milliseconds: 40),
+            connectTimeout: const Duration(milliseconds: 40),
+            writeTimeout: const Duration(milliseconds: 40),
+            drainTime: (bytes) {
+              measured.add(bytes);
+              return drain;
+            },
+          ).printBytes(_ticket, macAddress: mac, copies: 2);
+
+          expect(result.isRight(), isTrue);
+          expect(measured, [
+            EscPosTicketRenderer.joinCopies(_ticket, 2).length,
+          ]);
+          expect(channel.calls.last, 'disconnect');
+          expect(channel.disconnectedAt, greaterThanOrEqualTo(drain));
+        },
+      );
+
+      test('n\'attend pas quand l\'écriture a échoué', () async {
+        final channel = _FakeChannel(writes: false);
+        var asked = false;
+
+        await ThermalPrinterAdapter(
+          channel,
+          _FakePermission(),
+          probeTimeout: const Duration(milliseconds: 40),
+          connectTimeout: const Duration(milliseconds: 40),
+          writeTimeout: const Duration(milliseconds: 40),
+          drainTime: (_) {
+            asked = true;
+            return const Duration(seconds: 30);
+          },
+        ).printBytes(_ticket, macAddress: mac);
+
+        expect(asked, isFalse);
+        expect(channel.calls, contains('disconnect'));
+      });
+
+      test('l\'estimation croît avec le volume, bornée des deux côtés', () {
+        final empty = ThermalPrinterAdapter.estimateDrainTime(0);
+        // Un ticket avec logo et QR de vérification : ~30 Ko.
+        final sealed = ThermalPrinterAdapter.estimateDrainTime(30 * 1024);
+        final huge = ThermalPrinterAdapter.estimateDrainTime(10 * 1024 * 1024);
+
+        expect(empty, greaterThan(Duration.zero));
+        expect(sealed, greaterThan(empty));
+        expect(sealed, greaterThanOrEqualTo(const Duration(seconds: 3)));
+        expect(huge, const Duration(seconds: 15));
+      });
     });
 
     test('ferme la liaison même quand l\'écriture échoue', () async {
