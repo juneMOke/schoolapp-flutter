@@ -133,9 +133,13 @@ class _RubriqueTitle extends StatelessWidget {
       ),
     );
     final alert = row.collapsed ? _HiddenAlert(row: row, grid: grid) : null;
+    void toggle() => grid.onToggleRubrique(row.rubrique.id);
     return ExcludeFocusTraversal(
+      // excludeSemantics retire l'action de l'InkWell : le Semantics la
+      // reporte, sinon le lecteur d'écran annonce un bouton inerte.
       child: Semantics(
         button: true,
+        onTap: toggle,
         expanded: !row.collapsed,
         label: row.rubrique.label,
         hint: row.collapsed
@@ -145,9 +149,9 @@ class _RubriqueTitle extends StatelessWidget {
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
-            onTap: () => grid.onToggleRubrique(row.rubrique.id),
+            onTap: toggle,
             hoverColor: domain
-                ? AppColors.stateFocusOnDark
+                ? AppColors.stateHoverOnDark
                 : AppColors.stateHover,
             child: Padding(
               padding: EdgeInsets.only(

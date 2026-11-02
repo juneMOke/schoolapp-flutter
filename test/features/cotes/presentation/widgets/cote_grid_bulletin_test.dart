@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -190,6 +191,34 @@ void main() {
     await tester.tap(find.text('FRANÇAIS'));
     await tester.pump();
     expect(find.text(_longName), findsOneWidget);
+  });
+
+  testWidgets('le lecteur d\'écran replie une rubrique', (tester) async {
+    final handle = tester.ensureSemantics();
+    await _pump(tester);
+    expect(find.text(_longName), findsOneWidget);
+
+    // excludeSemantics retirait l'action de l'InkWell : le bouton annoncé
+    // était inerte.
+    final node = tester.getSemantics(find.bySemanticsLabel('Français'));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    tester.semantics.tap(find.semantics.byLabel('Français'));
+    await tester.pump();
+    expect(find.text(_longName), findsNothing);
+    handle.dispose();
+  });
+
+  testWidgets('le survol d\'un domaine prend le voile de survol', (
+    tester,
+  ) async {
+    await _pump(tester);
+    final ink = tester.widget<InkWell>(
+      find.ancestor(
+        of: find.text('DOMAINE DES LANGUES'),
+        matching: find.byType(InkWell),
+      ),
+    );
+    expect(ink.hoverColor, AppColors.stateHoverOnDark);
   });
 
   testWidgets('un domaine replié cache ses branches', (tester) async {
