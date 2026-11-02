@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/capture/camera/camera_viewfinder_gateway.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -20,12 +21,26 @@ class PhotoViewfinder extends StatelessWidget {
     this.overlay,
   });
 
+  /// Le flux pivote-t-il avec l'appareil ? Sur une tablette ou un téléphone
+  /// seulement : le capteur y livre son rapport en paysage et `CameraPreview`
+  /// le retourne quand l'appareil est tenu en portrait. Une webcam (poste,
+  /// navigateur) reste en paysage quelle que soit la forme de la fenêtre :
+  /// lui inverser le rapport l'écraserait.
+  static bool streamFollowsDevice({
+    bool isWeb = kIsWeb,
+    TargetPlatform? platform,
+  }) {
+    if (isWeb) return false;
+    final target = platform ?? defaultTargetPlatform;
+    return target == TargetPlatform.android || target == TargetPlatform.iOS;
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = this.session;
-    // Le capteur livre son rapport en paysage ; `CameraPreview` le retourne
-    // de lui-même quand l'appareil est tenu en portrait.
-    final portrait = MediaQuery.orientationOf(context) == Orientation.portrait;
+    final portrait =
+        streamFollowsDevice() &&
+        MediaQuery.orientationOf(context) == Orientation.portrait;
     final ratio = session?.previewAspectRatio ?? 4 / 3;
     const reference = AppDimensions.photoViewfinderReference;
     return AspectRatio(
