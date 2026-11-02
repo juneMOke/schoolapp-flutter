@@ -24,12 +24,8 @@ class CoteGridCourseZone extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (grid.hasGroupTotals)
-          Container(height: heights.group, color: AppColors.bleuProfond),
-        _HeaderCell(
-          label: l10n.coteColumnCours.toUpperCase(),
-          height: heights.header,
-        ),
+        // L'en-tête vit dans la pile de la grille, collé au haut de l'écran.
+        SizedBox(height: grid.rowsTop),
         for (final row in grid.rows)
           coteRowReveal(row, switch (row) {
             final CoteRubriqueRow r => CoteRubriqueStrip(row: r, grid: grid),
@@ -60,32 +56,6 @@ class CoteGridCourseZone extends StatelessWidget {
             style: coteDarkRowStyle(),
           ),
       ],
-    );
-  }
-}
-
-class _HeaderCell extends StatelessWidget {
-  final String label;
-  final double height;
-
-  const _HeaderCell({required this.label, required this.height});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      alignment: Alignment.centerLeft,
-      color: AppColors.bleuProfond,
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTypography.labelSmall.copyWith(
-          color: AppColors.textOnDark,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 }

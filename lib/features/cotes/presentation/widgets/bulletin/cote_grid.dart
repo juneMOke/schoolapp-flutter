@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_center.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_course_zone.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header_band.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_rubrique.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_context.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_total_zone.dart';
@@ -49,6 +50,9 @@ class CoteGridState extends State<CoteGrid> {
   /// fenêtre redimensionnée) : sa clé garde ses cases, donc le focus, la
   /// frappe en cours — qui ne s'écrit pas pour autant — et le clavier.
   final _centerKey = GlobalKey(debugLabel: 'CoteGridCenter');
+
+  /// Le défilement de côté des notes, que suit leur en-tête collant.
+  final _horizontal = ScrollController();
 
   @override
   void initState() {
@@ -97,6 +101,7 @@ class CoteGridState extends State<CoteGrid> {
   void dispose() {
     _registry.dispose();
     _hoveredCours.dispose();
+    _horizontal.dispose();
     super.dispose();
   }
 
@@ -154,6 +159,7 @@ class CoteGridState extends State<CoteGrid> {
                   ] else ...[
                     Expanded(
                       child: _ScrollingCenter(
+                        controller: _horizontal,
                         width: center,
                         child: CoteGridCenter(key: _centerKey, grid: grid),
                       ),
@@ -166,6 +172,18 @@ class CoteGridState extends State<CoteGrid> {
                 ],
               ),
               ...coteRubriqueTitles(grid),
+              // En dernier : collé en haut de l'écran, il passe par-dessus les
+              // lignes et leurs titres.
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: CoteGridHeaderBand(
+                  grid: grid,
+                  fits: fits,
+                  horizontal: _horizontal,
+                ),
+              ),
             ],
           ),
         );
@@ -176,24 +194,16 @@ class CoteGridState extends State<CoteGrid> {
 
 /// La zone centrale quand elle ne tient pas : elle défile de côté, barre
 /// visible, entre les filets des colonnes figées.
-class _ScrollingCenter extends StatefulWidget {
+class _ScrollingCenter extends StatelessWidget {
+  final ScrollController controller;
   final double width;
   final Widget child;
 
-  const _ScrollingCenter({required this.width, required this.child});
-
-  @override
-  State<_ScrollingCenter> createState() => _ScrollingCenterState();
-}
-
-class _ScrollingCenterState extends State<_ScrollingCenter> {
-  final _controller = ScrollController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const _ScrollingCenter({
+    required this.controller,
+    required this.width,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -204,12 +214,12 @@ class _ScrollingCenterState extends State<_ScrollingCenter> {
         ),
       ),
       child: Scrollbar(
-        controller: _controller,
+        controller: controller,
         thumbVisibility: true,
         child: SingleChildScrollView(
-          controller: _controller,
+          controller: controller,
           scrollDirection: Axis.horizontal,
-          child: SizedBox(width: widget.width, child: widget.child),
+          child: SizedBox(width: width, child: child),
         ),
       ),
     );

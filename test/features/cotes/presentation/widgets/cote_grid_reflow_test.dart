@@ -7,6 +7,8 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_bulletin_card.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header_band.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../bloc/fake_cotes_repository.dart';
@@ -19,8 +21,8 @@ void main() {
   late FakeCotesRepository repository;
   late CoteSaisieBloc bloc;
 
-  Future<void> pump(WidgetTester tester) async {
-    tester.view.physicalSize = _fits;
+  Future<void> pump(WidgetTester tester, {Size size = _fits}) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     repository = FakeCotesRepository();
@@ -112,5 +114,81 @@ void main() {
     expect(repository.saved, isEmpty);
     final ready = bloc.state as CoteSaisieReady;
     expect(ready.cells.cell('e1', 'fr', 'P2')!.displayedValue, 15);
+  });
+
+  group('l\'en-tête des colonnes', () {
+    Finder header(String text) => find.descendant(
+      of: find.byType(CoteGridHeaderBand),
+      matching: find.text(text),
+    );
+
+    ScrollPosition page(WidgetTester tester) => tester
+        .state<ScrollableState>(
+          find
+              .ancestor(
+                of: find.byType(CoteGrid),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        )
+        .position;
+
+    Future<void> scrollPageTo(WidgetTester tester, double offset) async {
+      page(tester).jumpTo(offset);
+      await tester.pump();
+      await tester.pump();
+    }
+
+    testWidgets('reste en haut de l\'écran quand la page défile', (
+      tester,
+    ) async {
+      await pump(tester, size: const Size(1280, 300));
+      final gridTop = tester.getTopLeft(find.byType(CoteGrid)).dy;
+      expect(tester.getTopLeft(header('COURS')).dy, greaterThan(gridTop - 1));
+
+      await scrollPageTo(tester, gridTop + 60);
+
+      // Le haut de la page visible, et non plus le haut de la grille, parti.
+      expect(tester.getTopLeft(find.byType(CoteGrid)).dy, lessThan(0));
+      final top = tester.getTopLeft(header('COURS')).dy;
+      expect(top, inInclusiveRange(0, 12));
+      expect(tester.getTopLeft(header('P1')).dy, inInclusiveRange(0, 12));
+
+      // Revenu en haut, il reprend sa place.
+      await scrollPageTo(tester, 0);
+      expect(tester.getTopLeft(header('COURS')).dy, greaterThan(gridTop - 1));
+    });
+
+    testWidgets('s\'arrête au pied de la grille, sans le couvrir', (
+      tester,
+    ) async {
+      await pump(tester, size: const Size(1280, 300));
+
+      await scrollPageTo(tester, page(tester).maxScrollExtent);
+
+      final grid = tester.getRect(find.byType(CoteGrid));
+      final band = tester.getRect(find.byType(CoteGridHeaderBand));
+      final maxima = tester.getTopLeft(find.text('MAXIMA')).dy;
+      expect(band.bottom, lessThanOrEqualTo(maxima + 0.5));
+      expect(band.top, greaterThanOrEqualTo(grid.top));
+    });
+
+    testWidgets('suit les notes qui défilent de côté', (tester) async {
+      await pump(tester, size: _scrolls);
+      final controller = tester
+          .widget<SingleChildScrollView>(
+            find.descendant(
+              of: find.byType(CoteGrid),
+              matching: find.byType(SingleChildScrollView),
+            ),
+          )
+          .controller!;
+      final before = tester.getTopLeft(header('P1')).dx;
+
+      controller.jumpTo(40);
+      await tester.pump();
+
+      expect(tester.getTopLeft(header('P1')).dx, closeTo(before - 40, 0.5));
+    });
   });
 }

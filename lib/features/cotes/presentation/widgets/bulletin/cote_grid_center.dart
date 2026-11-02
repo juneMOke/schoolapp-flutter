@@ -10,7 +10,6 @@ import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_cells.dart';
-import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_row_frame.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_rubrique.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_zone_rows.dart';
@@ -30,8 +29,7 @@ class CoteGridCenter extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (grid.hasGroupTotals) CoteGroupBand(grid: grid),
-        CoteHeaderRow(grid: grid),
+        SizedBox(height: grid.rowsTop),
         for (final row in grid.rows)
           coteRowReveal(row, switch (row) {
             final CoteRubriqueRow r => CoteRubriqueStrip(row: r, grid: grid),
