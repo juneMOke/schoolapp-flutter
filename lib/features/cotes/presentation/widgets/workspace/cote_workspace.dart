@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_bulletin_card.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_panel.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_picker.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_query.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/workspace/cote_class_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -21,10 +22,15 @@ class CoteWorkspace extends StatefulWidget {
   final String classroomName;
   final VoidCallback? onStudentChanged;
 
+  /// La recherche et le filtre de la liste ; sans eux, l'espace de travail
+  /// tient les siens — toujours au-dessus de la liste, qui va et vient.
+  final CoteStudentQuery? studentQuery;
+
   const CoteWorkspace({
     super.key,
     required this.classroomName,
     this.onStudentChanged,
+    this.studentQuery,
   });
 
   @override
@@ -37,6 +43,14 @@ class _CoteWorkspaceState extends State<CoteWorkspace> {
   /// Le bulletin change de parent quand la liste paraît ou disparaît : sa clé
   /// garde son focus, son défilement et le réglage d'Entrée.
   final _bulletinKey = GlobalKey();
+
+  final _ownQuery = CoteStudentQuery();
+
+  @override
+  void dispose() {
+    _ownQuery.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +105,7 @@ class _CoteWorkspaceState extends State<CoteWorkspace> {
                       EteeloEntrance(
                         index: 1,
                         child: CoteStudentPanel(
+                          query: widget.studentQuery ?? _ownQuery,
                           onStudentChanged: widget.onStudentChanged,
                         ),
                       ),

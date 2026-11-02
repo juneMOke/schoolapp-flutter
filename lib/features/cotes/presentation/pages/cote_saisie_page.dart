@@ -19,12 +19,13 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/offline/cl
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
-import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_event.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_saisie_address.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_query.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_scope_bar.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_selection_card.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/states/cote_saisie_states.dart';
@@ -33,8 +34,9 @@ import 'package:school_app_flutter/features/resultats/presentation/helpers/resul
 import 'package:school_app_flutter/features/resultats/presentation/widgets/states/resultats_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Résultats ▸ Saisie des notes. La classe, la portée et l'élève vivent dans
-/// l'adresse (`?classe=…&portee=…&cible=…&eleve=…`) : un F5 les retrouve.
+/// Résultats ▸ Saisie des notes. La classe, la portée, l'élève, la recherche
+/// et le filtre de la liste vivent dans l'adresse ([CoteSaisieAddress]) : un
+/// F5 les retrouve.
 class CoteSaisiePage extends StatefulWidget {
   const CoteSaisiePage({super.key});
 
@@ -44,11 +46,6 @@ class CoteSaisiePage extends StatefulWidget {
 
 class _CoteSaisiePageState extends State<CoteSaisiePage>
     with WidgetsBindingObserver {
-  static const _classeParam = 'classe';
-  static const _porteeParam = 'portee';
-  static const _cibleParam = 'cible';
-  static const _eleveParam = 'eleve';
-
   GoRouter? _router;
   bool _openedFromAddress = false;
   String? _addressClassroomId;
@@ -65,6 +62,10 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
   /// Le nombre de classes ouvertes : chacune replie la carte de sélection.
   int _openCount = 0;
 
+  /// La recherche et le filtre de la liste : au-dessus d'elle, qui va et
+  /// vient avec la largeur, et dans l'adresse.
+  late CoteStudentQuery _studentQuery;
+
   @override
   void initState() {
     super.initState();
@@ -78,9 +79,11 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     if (_openedFromAddress) return;
     _openedFromAddress = true;
     final router = _router;
+    _studentQuery = CoteSaisieAddress.queryOf(router)
+      ..addListener(() => _write(CoteSaisieAddress.ofQuery(_studentQuery)));
     final classroomId = router == null
         ? null
-        : LocationQuery.read(router, _classeParam);
+        : LocationQuery.read(router, CoteSaisieAddress.classe);
     if (router == null || classroomId == null) return;
     _addressClassroomId = classroomId;
     _openPending = true;
@@ -95,8 +98,8 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     context.read<CoteSaisieBloc>().add(
       CoteSaisieOpened(
         classroomId,
-        scope: _scopeFromAddress(router),
-        eleveId: LocationQuery.read(router, _eleveParam),
+        scope: CoteSaisieAddress.scopeOf(router),
+        eleveId: LocationQuery.read(router, CoteSaisieAddress.eleve),
         singleColumn: _isPhone,
       ),
     );
@@ -106,20 +109,10 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
       (_width ?? MediaQuery.sizeOf(context).width) <
       AppBreakpoints.coteGridPhoneMax;
 
-  CoteScope? _scopeFromAddress(GoRouter router) {
-    final portee = CotePortee.values
-        .where((p) => p.name == LocationQuery.read(router, _porteeParam))
-        .firstOrNull;
-    if (portee == null) return null;
-    return CoteScope(
-      portee: portee,
-      cibleId: LocationQuery.read(router, _cibleParam),
-    );
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _studentQuery.dispose();
     super.dispose();
   }
 
@@ -150,11 +143,11 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     final bloc = context.read<CoteSaisieBloc>();
     _classroomName = classroom.name;
     _flush();
+    // Une autre classe, une autre liste : la recherche repart de zéro.
+    _studentQuery.reset();
     _write({
-      _classeParam: classroom.id,
-      _porteeParam: null,
-      _cibleParam: null,
-      _eleveParam: null,
+      ...CoteSaisieAddress.cleared,
+      CoteSaisieAddress.classe: classroom.id,
     });
     bloc.add(CoteSaisieOpened(classroom.id, singleColumn: _isPhone));
   }
@@ -168,18 +161,16 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
   }
 
   void _writeAddress(CoteSaisieReady state) => _write({
-    _classeParam: context.read<CoteSaisieBloc>().classroomId,
-    _porteeParam: state.scope.portee.name,
-    _cibleParam: state.scope.cibleId,
-    _eleveParam: state.currentId,
+    CoteSaisieAddress.classe: context.read<CoteSaisieBloc>().classroomId,
+    CoteSaisieAddress.portee: state.scope.portee.name,
+    CoteSaisieAddress.cible: state.scope.cibleId,
+    CoteSaisieAddress.eleve: state.currentId,
   });
 
-  void _clearAddress() => _write({
-    _classeParam: null,
-    _porteeParam: null,
-    _cibleParam: null,
-    _eleveParam: null,
-  });
+  void _clearAddress() {
+    _studentQuery.reset();
+    _write(CoteSaisieAddress.cleared);
+  }
 
   void _announce(BuildContext context, CoteSaisieReady state) {
     final l10n = AppLocalizations.of(context)!;
@@ -401,6 +392,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
       CoteSaisieReady() => CoteWorkspace(
         classroomName: _nameOf(classrooms, bloc.classroomId),
         onStudentChanged: _flush,
+        studentQuery: _studentQuery,
       ),
     };
   }

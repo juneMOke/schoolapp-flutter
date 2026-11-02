@@ -1,9 +1,11 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
@@ -20,6 +22,8 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
 import 'package:school_app_flutter/features/cotes/presentation/pages/cote_saisie_page.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_note_cell.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_panel.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_query.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/workspace/cote_workspace.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -174,6 +178,57 @@ void main() {
 
       expect((bloc.state as CoteSaisieReady).scope.portee, CotePortee.groupe);
       expect(address(), contains('portee=groupe'));
+    });
+  });
+
+  group('la liste des élèves dans l\'adresse', () {
+    Finder search() => find.descendant(
+      of: find.byType(CoteStudentPanel),
+      matching: find.byType(TextField),
+    );
+
+    testWidgets('un F5 retrouve la recherche et le filtre', (tester) async {
+      await pumpRouted(
+        tester,
+        location: '/saisie?classe=c1&recherche=mba&filtre=todo',
+      );
+
+      expect(tester.widget<TextField>(search()).controller!.text, 'mba');
+      final filter = tester.widget<SegmentedTabFilter<CoteStudentFilter>>(
+        find.byType(SegmentedTabFilter<CoteStudentFilter>),
+      );
+      expect(filter.selected, CoteStudentFilter.todo);
+      expect(find.textContaining('Tshala'), findsNothing);
+    });
+
+    testWidgets('la recherche tapée s\'écrit dans l\'adresse, « tous » non', (
+      tester,
+    ) async {
+      await pumpRouted(tester, location: '/saisie?classe=c1');
+
+      await tester.enterText(search(), 'tsh');
+      await tester.pump();
+
+      expect(address(), contains('recherche=tsh'));
+      expect(address(), isNot(contains('filtre=')));
+    });
+
+    testWidgets('Ctrl+F va à la recherche des élèves', (tester) async {
+      await pumpRouted(tester, location: '/saisie?classe=c1');
+      expect(
+        FocusManager.instance.primaryFocus?.context?.widget,
+        isNot(isA<EditableText>()),
+      );
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+
+      final editable = tester.widget<EditableText>(
+        find.descendant(of: search(), matching: find.byType(EditableText)),
+      );
+      expect(editable.focusNode.hasFocus, isTrue);
     });
   });
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/export/csv_writer.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -14,10 +15,9 @@ import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.da
 import 'package:school_app_flutter/features/cotes/domain/services/cote_calculator.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_query.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_tile.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-enum CoteStudentFilter { all, todo, done }
 
 /// Vrai si [eleve] répond à la recherche et au filtre : contient, sans casse ni
 /// accents, sur « nom post-nom prénom ».
@@ -42,25 +42,56 @@ bool coteStudentMatches({
 String _fold(String value) => CsvWriter.removeDiacritics(value).toLowerCase();
 
 /// La liste des élèves : recherche et filtre sont de l'état d'écran, pas du
-/// métier.
+/// métier, tenu par [query] au-dessus d'elle. Ctrl+F (ou « / ») va à la
+/// recherche ; Échap la vide.
 class CoteStudentPanel extends StatefulWidget {
+  final CoteStudentQuery query;
+
   /// Appelé au passage à un autre élève (la frappe en attente part).
   final VoidCallback? onStudentChanged;
 
-  const CoteStudentPanel({super.key, this.onStudentChanged});
+  const CoteStudentPanel({
+    super.key,
+    required this.query,
+    this.onStudentChanged,
+  });
 
   @override
   State<CoteStudentPanel> createState() => _CoteStudentPanelState();
 }
 
 class _CoteStudentPanelState extends State<CoteStudentPanel> {
-  final _search = TextEditingController();
-  CoteStudentFilter _filter = CoteStudentFilter.all;
+  late final _search = TextEditingController(text: widget.query.text);
+
+  CoteStudentQuery get _query => widget.query;
+  CoteStudentFilter get _filter => _query.filter;
+
+  @override
+  void initState() {
+    super.initState();
+    _query.addListener(_onQueryChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant CoteStudentPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.query == widget.query) return;
+    oldWidget.query.removeListener(_onQueryChanged);
+    widget.query.addListener(_onQueryChanged);
+    _onQueryChanged();
+  }
 
   @override
   void dispose() {
+    _query.removeListener(_onQueryChanged);
     _search.dispose();
     super.dispose();
+  }
+
+  /// Une recherche changée d'ailleurs (adresse, autre classe) : le champ suit.
+  void _onQueryChanged() {
+    if (_search.text != _query.text) _search.text = _query.text;
+    setState(() {});
   }
 
   @override
@@ -111,19 +142,25 @@ class _CoteStudentPanelState extends State<CoteStudentPanel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              EteeloTextInput(
-                controller: _search,
-                label: l10n.coteListSearchHint,
-                hideLabel: true,
-                placeholder: l10n.coteListSearchHint,
-                capitalization: EteeloTextCapitalization.none,
-                prefix: const Icon(Icons.search_rounded, size: 18),
-                onChanged: (_) => setState(() {}),
+              SearchFocusShortcut(
+                child: ClearOnEscape(
+                  controller: _search,
+                  onCleared: (value) => _query.text = value,
+                  child: EteeloTextInput(
+                    controller: _search,
+                    label: l10n.coteListSearchHint,
+                    hideLabel: true,
+                    placeholder: l10n.coteListSearchHint,
+                    capitalization: EteeloTextCapitalization.none,
+                    prefix: const Icon(Icons.search_rounded, size: 18),
+                    onChanged: (value) => _query.text = value,
+                  ),
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               SegmentedTabFilter<CoteStudentFilter>(
                 selected: _filter,
-                onSelected: (value) => setState(() => _filter = value),
+                onSelected: (value) => _query.filter = value,
                 semanticsLabel: l10n.coteListFilterSemantics,
                 wrap: true,
                 options: [
@@ -189,10 +226,7 @@ class _CoteStudentPanelState extends State<CoteStudentPanel> {
           EteeloButton.ghost(
             label: l10n.coteListShowAll,
             fullWidth: false,
-            onPressed: () {
-              _search.clear();
-              setState(() => _filter = CoteStudentFilter.all);
-            },
+            onPressed: _query.reset,
           ),
         ],
       ),
