@@ -9951,7 +9951,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueSaleDetailTitle => 'Détail de la vente';
 
   @override
-  String get boutiqueSaleDetailBack => 'Retour à l\'historique';
+  String get boutiqueSaleDetailBack => 'Retour au tableau de bord';
 
   @override
   String get boutiqueSaleDetailPayer => 'Payeur';

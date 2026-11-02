@@ -9867,7 +9867,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueSaleDetailTitle => 'Sale details';
 
   @override
-  String get boutiqueSaleDetailBack => 'Back to history';
+  String get boutiqueSaleDetailBack => 'Back to the dashboard';
 
   @override
   String get boutiqueSaleDetailPayer => 'Payer';

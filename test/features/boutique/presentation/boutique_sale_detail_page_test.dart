@@ -471,7 +471,7 @@ void main() {
       expect(find.text('Polo Lacoste'), findsOneWidget);
 
       // Retour : le tableau de bord, rebâti sous la fiche.
-      await tester.tap(find.byTooltip("Retour à l'historique"));
+      await tester.tap(find.byTooltip('Retour au tableau de bord'));
       await tester.pumpAndSettle();
       expect(
         find.text('écran ${MenuConstants.boutiqueDashboardId}'),

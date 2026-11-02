@@ -366,7 +366,7 @@ void main() {
       // un retour à « Cette semaine ».
       expect(statsWindows.every((w) => w.isSingleDay), isTrue);
 
-      await tester.tap(find.byTooltip("Retour à l'historique"));
+      await tester.tap(find.byTooltip('Retour au tableau de bord'));
       await tester.pumpAndSettle();
       expect(address(), '$base?periode=today');
     });

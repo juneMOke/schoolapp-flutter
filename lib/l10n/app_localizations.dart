@@ -15710,7 +15710,7 @@ abstract class AppLocalizations {
   /// No description provided for @boutiqueSaleDetailBack.
   ///
   /// In en, this message translates to:
-  /// **'Back to history'**
+  /// **'Back to the dashboard'**
   String get boutiqueSaleDetailBack;
 
   /// No description provided for @boutiqueSaleDetailPayer.
