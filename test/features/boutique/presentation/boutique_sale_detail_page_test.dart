@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
@@ -283,6 +284,14 @@ void main() {
       find.textContaining('numéro n\'a pas été communiqué'),
       findsOneWidget,
     );
+    // L'encre ambre : l'ambre de fond ne se lit pas sur son voile (2,5:1).
+    expect(
+      tester
+          .widget<Text>(find.textContaining('numéro n\'a pas été communiqué'))
+          .style
+          ?.color,
+      AppColors.warningInk,
+    );
     // La référence provisoire est bien ce qui s'affiche en attendant.
     expect(find.textContaining('PROV-'), findsWidgets);
   });
@@ -326,6 +335,13 @@ void main() {
     );
 
     expect(find.textContaining('pas encore partie au serveur'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.textContaining('pas encore partie au serveur'))
+          .style
+          ?.color,
+      AppColors.warningInk,
+    );
   });
 
   testWidgets('vente disparue : ce n\'est PAS une panne de lecture', (

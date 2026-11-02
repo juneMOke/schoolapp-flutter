@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/article_family.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_article.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_cart.dart';
@@ -61,6 +62,15 @@ void main() {
 
     expect(find.text('19/10/2026'), findsOneWidget);
     expect(find.text(_backdatedNote), findsOneWidget);
+    // L'encre ambre, texte ET icône : l'ambre de fond tombe à 2,5:1.
+    expect(
+      tester.widget<Text>(find.text(_backdatedNote)).style?.color,
+      AppColors.warningInk,
+    );
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.schedule_rounded)).color,
+      AppColors.warningInk,
+    );
   });
 
   testWidgets('reconfirmer aujourd\'hui rend `null`, jamais la date du jour', (

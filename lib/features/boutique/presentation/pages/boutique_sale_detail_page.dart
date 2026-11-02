@@ -293,7 +293,7 @@ class _Body extends StatelessWidget {
     final pending = sale.syncStatus == 'PENDING_SYNC'
         ? _Notice(
             icon: Icons.cloud_upload_outlined,
-            color: AppColors.warning,
+            color: AppColors.warningInk,
             text: l10n.boutiqueSaleDetailPendingNotice,
           )
         : null;
@@ -616,7 +616,7 @@ class _Actions extends StatelessWidget {
                 ),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: AppColors.textMuted,
+            color: AppColors.textMutedAa,
           ),
         ),
         const SizedBox(height: AppDimensions.spacingM),
@@ -638,7 +638,7 @@ class _Actions extends StatelessWidget {
         else
           _Notice(
             icon: Icons.schedule_outlined,
-            color: AppColors.textMuted,
+            color: AppColors.textMutedAa,
             text: l10n.boutiqueSaleDetailReceiptPending,
           ),
         // **Réclamer, et non émettre.** Le serveur scelle la pièce au push de la
@@ -655,7 +655,7 @@ class _Actions extends StatelessWidget {
             const SizedBox(height: AppDimensions.spacingS),
             _Notice(
               icon: Icons.pin_outlined,
-              color: AppColors.warning,
+              color: AppColors.warningInk,
               text: l10n.boutiqueSaleDetailReceiptNumberMissing,
             ),
           ],
@@ -690,6 +690,9 @@ class _Actions extends StatelessWidget {
   }
 }
 
+/// Un avis dans la teinte de [color] : celle-ci écrit le texte, elle doit
+/// donc être une ENCRE (≥ 4,5:1 sur son propre voile) — `warningInk`, jamais
+/// `warning` (2,5:1).
 class _Notice extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -756,7 +759,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Text(
     label.toUpperCase(),
     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-      color: AppColors.textMuted,
+      color: AppColors.textMutedAa,
       letterSpacing: 1.1,
       fontWeight: FontWeight.w600,
     ),
@@ -790,7 +793,7 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textMuted,
+                color: AppColors.textMutedAa,
               ),
             ),
           ),
@@ -800,7 +803,7 @@ class _InfoRow extends StatelessWidget {
               textAlign: TextAlign.right,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: muted ? FontWeight.w400 : FontWeight.w600,
-                color: muted ? AppColors.textMuted : AppColors.bleuProfond,
+                color: muted ? AppColors.textMutedAa : AppColors.bleuProfond,
                 fontStyle: muted ? FontStyle.italic : FontStyle.normal,
               ),
             ),
