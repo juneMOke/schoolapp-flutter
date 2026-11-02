@@ -51,6 +51,9 @@ class CoteGridState extends State<CoteGrid> {
   /// frappe en cours — qui ne s'écrit pas pour autant — et le clavier.
   final _centerKey = GlobalKey(debugLabel: 'CoteGridCenter');
 
+  /// La grille entière, qu'elle grandisse en s'animant ou non.
+  final _stackKey = GlobalKey(debugLabel: 'CoteGridStack');
+
   /// Le défilement de côté des notes, que suit leur en-tête collant.
   final _horizontal = ScrollController();
 
@@ -193,10 +196,8 @@ class CoteGridState extends State<CoteGrid> {
     required Duration grow,
   }) {
     final center = metrics.centerWidth;
-    return AnimatedSize(
-      duration: grow,
-      curve: AppMotion.outCurve,
-      alignment: Alignment.topCenter,
+    final stack = KeyedSubtree(
+      key: _stackKey,
       child: Stack(
         children: [
           Row(
@@ -245,6 +246,16 @@ class CoteGridState extends State<CoteGrid> {
           ),
         ],
       ),
+    );
+    // Sans animation, pas d'AnimatedSize : à durée nulle, il se remet en page
+    // pendant sa propre mise en page, et une rotation lève une assertion. La
+    // clé garde la grille d'une forme à l'autre.
+    if (grow == Duration.zero) return stack;
+    return AnimatedSize(
+      duration: grow,
+      curve: AppMotion.outCurve,
+      alignment: Alignment.topCenter,
+      child: stack,
     );
   }
 }

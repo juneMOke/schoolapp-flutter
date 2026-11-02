@@ -213,4 +213,17 @@ void main() {
     expect(find.text('Abandonner'), findsOneWidget);
     expect(find.textContaining('colonne clôturée'), findsWidgets);
   });
+
+  testWidgets('animations réduites : tourner l\'écran ne lève rien', (
+    tester,
+  ) async {
+    await _pump(tester, size: const Size(1280, 800));
+
+    tester.view.physicalSize = const Size(800, 1280);
+    await tester.pump();
+    tester.view.physicalSize = const Size(1280, 800);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
 }
