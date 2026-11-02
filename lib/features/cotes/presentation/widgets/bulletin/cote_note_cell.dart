@@ -208,6 +208,9 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
           .copyWith(
             color: look.ink,
             fontWeight: look.dashed ? FontWeight.w500 : FontWeight.w600,
+            decoration: value == null
+                ? TextDecoration.none
+                : coteScoreMark(toCentis(value), max * 100),
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
       decoration: const InputDecoration(

@@ -9742,6 +9742,10 @@
   "@payrollArrearsPriority": {
     "description": "Drapeau priorité."
   },
+  "payrollArrearsLate": "En retard",
+  "@payrollArrearsLate": {
+    "description": "Arriéré ancien de trois mois ou plus : dit en mots, pas par le rouge seul."
+  },
   "payrollArrearsOriginDeferred": "Différé décidé",
   "@payrollArrearsOriginDeferred": {
     "description": "Origine d'un arriéré."

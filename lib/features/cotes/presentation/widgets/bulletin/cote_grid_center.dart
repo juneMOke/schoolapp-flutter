@@ -223,6 +223,9 @@ class _SubtotalCell extends StatelessWidget {
                       AppColors.textMuted,
             fontWeight: FontWeight.w700,
             fontFeatures: const [FontFeature.tabularFigures()],
+            decoration: isMax
+                ? TextDecoration.none
+                : coteScoreMark(score.total, score.maxFilled),
           ),
         ),
       ),

@@ -14040,6 +14040,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollArrearsPriority => 'Priority';
 
   @override
+  String get payrollArrearsLate => 'Overdue';
+
+  @override
   String get payrollArrearsOriginDeferred => 'Decided deferral';
 
   @override

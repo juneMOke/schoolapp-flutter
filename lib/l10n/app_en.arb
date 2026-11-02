@@ -9296,6 +9296,7 @@
     }
   },
   "payrollArrearsPriority": "Priority",
+  "payrollArrearsLate": "Overdue",
   "payrollArrearsOriginDeferred": "Decided deferral",
   "payrollArrearsOriginUnpaid": "Unpaid",
   "payrollArrearsOriginPartial": "Part-paid",

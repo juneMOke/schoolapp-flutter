@@ -176,6 +176,20 @@ void main() {
     expect(ink('15,5'), AppColors.vertSavane); // 15,5/20
   });
 
+  testWidgets('une note sous la moitié se souligne : pas la couleur seule', (
+    tester,
+  ) async {
+    await _pump(tester);
+    TextDecoration? mark(String value) => tester
+        .widget<TextField>(
+          find.ancestor(of: find.text(value), matching: find.byType(TextField)),
+        )
+        .style
+        ?.decoration;
+    expect(mark('4'), TextDecoration.underline); // 4/10
+    expect(mark('15,5'), TextDecoration.none); // 15,5/20
+  });
+
   testWidgets('une branche se replie : il reste son titre et sa somme', (
     tester,
   ) async {

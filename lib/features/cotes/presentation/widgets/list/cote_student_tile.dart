@@ -126,6 +126,9 @@ class CoteStudentTile extends StatelessWidget {
                           : coteScoreInk(calc.total, calc.maxFilled) ??
                                 AppColors.textMutedAa,
                       fontWeight: FontWeight.w600,
+                      decoration: calc == null
+                          ? TextDecoration.none
+                          : coteScoreMark(calc.total, calc.maxFilled),
                     ),
                   ),
                   Text(

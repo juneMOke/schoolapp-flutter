@@ -136,14 +136,29 @@ class PayrollArrearsTable extends StatelessWidget {
               ),
           ],
         ),
-        Text(
-          l10n.payrollArrearsSince(
-            PayrollLabels.month(context, agent.oldestMonth),
-            age,
-          ),
-          style: AppTypography.bodySmall.copyWith(
-            color: late ? PayrollTone.alert.ink : AppColors.textSecondary,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.payrollArrearsSince(
+                PayrollLabels.month(context, agent.oldestMonth),
+                age,
+              ),
+              style: AppTypography.bodySmall.copyWith(
+                color: late ? PayrollTone.alert.ink : AppColors.textSecondary,
+              ),
+            ),
+            // Le retard se dit en mots : le rouge seul ne se lit pas par
+            // tous.
+            if (late)
+              Text(
+                l10n.payrollArrearsLate,
+                style: AppTypography.bodySmall.copyWith(
+                  color: PayrollTone.alert.ink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
         ),
       ],
     );

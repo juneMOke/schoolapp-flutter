@@ -14140,6 +14140,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get payrollArrearsPriority => 'En priorité';
 
   @override
+  String get payrollArrearsLate => 'En retard';
+
+  @override
   String get payrollArrearsOriginDeferred => 'Différé décidé';
 
   @override

@@ -22010,6 +22010,12 @@ abstract class AppLocalizations {
   /// **'Priority'**
   String get payrollArrearsPriority;
 
+  /// No description provided for @payrollArrearsLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get payrollArrearsLate;
+
   /// No description provided for @payrollArrearsOriginDeferred.
   ///
   /// In en, this message translates to:

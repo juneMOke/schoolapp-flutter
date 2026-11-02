@@ -79,9 +79,11 @@ class CoteBulletinLegend extends StatelessWidget {
               ),
               label: l10n.coteLegendTotal,
             ),
+          // Souligné comme la note qu'il décrit : le rouge seul ne suffit pas.
           _Item(
             swatch: const _Dot(AppColors.error),
             label: l10n.coteLegendBelowHalf,
+            decoration: TextDecoration.underline,
           ),
           _Item(
             swatch: const _Dot(AppColors.vertSavane),
@@ -110,8 +112,13 @@ class CoteBulletinLegend extends StatelessWidget {
 class _Item extends StatelessWidget {
   final Widget swatch;
   final String label;
+  final TextDecoration decoration;
 
-  const _Item({required this.swatch, required this.label});
+  const _Item({
+    required this.swatch,
+    required this.label,
+    this.decoration = TextDecoration.none,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +131,7 @@ class _Item extends StatelessWidget {
           label,
           style: AppTypography.labelSmall.copyWith(
             color: AppColors.textSecondary,
+            decoration: decoration,
           ),
         ),
       ],

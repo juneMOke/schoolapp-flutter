@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_drafts.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
@@ -10,6 +11,8 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/arrears/payroll_arrears_screen.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/arrears/payroll_arrears_table.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../../../test_helpers/reference_formats.dart';
 import '../../staff/staff_builders.dart';
@@ -127,4 +130,49 @@ void main() {
       expect(drafts.every((d) => d.signedRegister), isTrue);
     },
   );
+
+  group('l\'ancienneté d\'un arriéré', () {
+    Future<void> pumpTable(WidgetTester tester, String currentMonth) async {
+      applyReferenceFormat(tester, kReferenceFormats.last);
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: PayrollArrearsTable(
+              snapshot: snapshot,
+              currentMonth: currentMonth,
+              onOpen: (_) {},
+              agents: [
+                PayrollArrearsAgent(
+                  staffMemberId: 'm-2',
+                  months: [
+                    PayrollArrear(
+                      line: line('m-2', '2026-08', 15000),
+                      validationGestureId: 'g-2026-08',
+                      paidInCents: 0,
+                      dueInCents: 15000,
+                      origin: PayrollArrearOrigin.unpaid,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('à trois mois, le retard se dit en mots', (tester) async {
+      await pumpTable(tester, '2026-11');
+      expect(find.text('En retard'), findsOneWidget);
+    });
+
+    testWidgets('avant trois mois, rien à dire', (tester) async {
+      await pumpTable(tester, '2026-09');
+      expect(find.text('En retard'), findsNothing);
+    });
+  });
 }

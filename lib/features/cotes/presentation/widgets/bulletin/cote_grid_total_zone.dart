@@ -81,6 +81,7 @@ class CoteGridTotalZone extends StatelessWidget {
           max: formatCentis(scope),
           percent: roundedPercent(total, filled),
           ink: coteScoreInk(total, filled),
+          fails: coteScoreFails(total, filled),
           showMeter: !grid.metrics.phone,
           dense: grid.metrics.dense,
         ),
@@ -100,6 +101,7 @@ class CoteGridTotalZone extends StatelessWidget {
         max: formatCentis(part?.maxScope ?? 0),
         percent: part?.pct,
         ink: part == null ? null : coteScoreInk(part.total, part.maxFilled),
+        fails: part != null && coteScoreFails(part.total, part.maxFilled),
         showMeter: !grid.metrics.phone,
         dense: grid.metrics.dense,
       ),
@@ -122,7 +124,9 @@ class CoteGridTotalZone extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.fade,
               softWrap: false,
-              style: coteDarkRowStyle(strong: true),
+              style: coteDarkRowStyle(
+                strong: true,
+              ).copyWith(decoration: coteScoreMark(calc.total, calc.maxFilled)),
             ),
           ),
           if (!grid.metrics.phone) ...[

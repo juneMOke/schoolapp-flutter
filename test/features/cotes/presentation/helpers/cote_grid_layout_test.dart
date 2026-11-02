@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -173,6 +174,17 @@ void main() {
 
     test('rien de rempli : rien à juger', () {
       expect(coteScoreInk(0, 0), isNull);
+    });
+  });
+
+  group('coteScoreMark', () {
+    test('souligné sous la moitié, au même seuil que l\'encre', () {
+      expect(coteScoreMark(999, 2000), TextDecoration.underline);
+      expect(coteScoreMark(1000, 2000), TextDecoration.none);
+    });
+
+    test('rien de rempli : aucune marque', () {
+      expect(coteScoreMark(0, 0), TextDecoration.none);
     });
   });
 
