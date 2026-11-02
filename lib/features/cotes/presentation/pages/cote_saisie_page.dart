@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_event.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_scope_bar.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_selection_card.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/states/cote_saisie_states.dart';
@@ -54,6 +55,16 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
   String _classroomName = '';
   CoteSaisieState _previous = const CoteSaisieIdle();
 
+  /// La largeur reçue par la page (barre latérale déduite), relue à chaque
+  /// mise en page : c'est elle, et non la fenêtre, qui dit « téléphone ».
+  double? _width;
+
+  /// La classe de l'adresse attend la première mesure pour s'ouvrir.
+  bool _openPending = false;
+
+  /// Le nombre de classes ouvertes : chacune replie la carte de sélection.
+  int _openCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -72,6 +83,15 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
         : LocationQuery.read(router, _classeParam);
     if (router == null || classroomId == null) return;
     _addressClassroomId = classroomId;
+    _openPending = true;
+  }
+
+  /// Appelé à la mise en page : la largeur est enfin connue.
+  void _openFromAddress() {
+    final router = _router;
+    final classroomId = _addressClassroomId;
+    if (!_openPending || router == null || classroomId == null) return;
+    _openPending = false;
     context.read<CoteSaisieBloc>().add(
       CoteSaisieOpened(
         classroomId,
@@ -83,7 +103,8 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
   }
 
   bool get _isPhone =>
-      MediaQuery.sizeOf(context).width < AppBreakpoints.coteGridPhoneMax;
+      (_width ?? MediaQuery.sizeOf(context).width) <
+      AppBreakpoints.coteGridPhoneMax;
 
   CoteScope? _scopeFromAddress(GoRouter router) {
     final portee = CotePortee.values
@@ -188,6 +209,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     if (state is! CoteSaisieReady) return;
     final bloc = context.read<CoteSaisieBloc>();
     if (previous is! CoteSaisieReady) {
+      _openCount++;
       context.read<CoteSaveCubit>().attach(bloc.classroomId!);
       _writeAddress(state);
       return;
@@ -244,7 +266,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     // écrit la case avant de partir. Seule la garde se relit — la page ne
     // se rebâtit pas à chaque frappe.
     final uncommitted = context.read<CoteSaisieBloc>().uncommittedCell;
-    return ValueListenableBuilder<bool>(
+    final guarded = ValueListenableBuilder<bool>(
       valueListenable: uncommitted,
       child: page,
       builder: (context, _, page) => RouteExitGuard(
@@ -252,6 +274,13 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
         confirmExit: _commitBeforeLeaving,
         child: page!,
       ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _width = constraints.maxWidth;
+        _openFromAddress();
+        return guarded;
+      },
     );
   }
 
@@ -306,6 +335,10 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
               initialClassroomId: _addressClassroomId,
               isOpening: state is CoteSaisieLoading,
               onOpen: _open,
+              openCount: _openCount,
+              summary: ready == null
+                  ? null
+                  : _summary(context, ready, classrooms),
               scopeBar: ready == null
                   ? null
                   : CoteScopeBar(
@@ -321,6 +354,26 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
         );
       },
     );
+  }
+
+  /// « 7e A · Semestre 1 » ; la portée seule tant que la classe n'a pas de nom.
+  String _summary(
+    BuildContext context,
+    CoteSaisieReady ready,
+    ClassroomOfflineState classrooms,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final name = _nameOf(
+      classrooms,
+      context.read<CoteSaisieBloc>().classroomId,
+    );
+    final scope = CoteLabels.scope(
+      l10n,
+      ready.classe,
+      ready.scope,
+      ready.columns,
+    );
+    return name.isEmpty ? scope : l10n.coteSelectionSummary(name, scope);
   }
 
   Widget _zone(

@@ -12196,6 +12196,17 @@
   "@payrollDeductionRefusedItem": {"placeholders": {"name": {"type": "String"}, "reason": {"type": "String"}}},
   "subMenuResultatsSaisie": "Grade entry",
   "coteSaisieEyebrow": "Results · Grade entry",
+  "coteSelectionSummary": "{classe} · {portee}",
+  "@coteSelectionSummary": {
+    "description": "Collapsed selection card: the open class and its scope",
+    "placeholders": {
+      "classe": {"type": "String"},
+      "portee": {"type": "String"}
+    }
+  },
+  "coteSelectionChange": "Change",
+  "coteSelectionChangeHint": "Change the class or the scope",
+  "coteSelectionCollapse": "Collapse",
   "coteSaisieTitle": "Enter a class's grades",
   "coteSaisieOpen": "Open grade entry",
   "coteDecoupageTrimestres": "Terms",

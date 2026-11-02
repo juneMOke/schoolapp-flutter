@@ -32767,6 +32767,30 @@ abstract class AppLocalizations {
   /// **'Results · Grade entry'**
   String get coteSaisieEyebrow;
 
+  /// Collapsed selection card: the open class and its scope
+  ///
+  /// In en, this message translates to:
+  /// **'{classe} · {portee}'**
+  String coteSelectionSummary(String classe, String portee);
+
+  /// No description provided for @coteSelectionChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get coteSelectionChange;
+
+  /// No description provided for @coteSelectionChangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the class or the scope'**
+  String get coteSelectionChangeHint;
+
+  /// No description provided for @coteSelectionCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get coteSelectionCollapse;
+
   /// No description provided for @coteSaisieTitle.
   ///
   /// In en, this message translates to:

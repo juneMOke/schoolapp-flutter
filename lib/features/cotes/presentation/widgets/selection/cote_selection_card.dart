@@ -5,18 +5,19 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_search_form_logic.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_selection_summary.dart';
 import 'package:school_app_flutter/features/resultats/presentation/widgets/resultats_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La carte de sélection : la cascade Cycle → Niveau → Classe, et « Ouvrir la
 /// saisie ». Changer de classe exige d'ouvrir à nouveau ; la portée, elle, se
-/// règle sans recharger ([scopeBar]).
+/// règle sans recharger ([scopeBar]). Une fois la classe ouverte ([summary]),
+/// elle se replie en une ligne et « Changer » la rouvre.
 class CoteSelectionCard extends StatefulWidget {
   final List<ClassesListCycleOption> cycleOptions;
 
@@ -26,6 +27,12 @@ class CoteSelectionCard extends StatefulWidget {
   final ValueChanged<OfflineClassroom> onOpen;
   final Widget? scopeBar;
 
+  /// « classe · portée » quand une classe est ouverte, sinon `null`.
+  final String? summary;
+
+  /// Change à chaque classe ouverte : la carte se replie de nouveau.
+  final int openCount;
+
   const CoteSelectionCard({
     super.key,
     required this.cycleOptions,
@@ -33,6 +40,8 @@ class CoteSelectionCard extends StatefulWidget {
     this.initialClassroomId,
     this.isOpening = false,
     this.scopeBar,
+    this.summary,
+    this.openCount = 0,
   });
 
   @override
@@ -48,6 +57,9 @@ class _CoteSelectionCardState extends State<CoteSelectionCard> {
   String? _classroomId;
   bool _placed = false;
 
+  /// Rouverte par « Changer » ; se replie à chaque classe ouverte.
+  bool _expanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +69,7 @@ class _CoteSelectionCardState extends State<CoteSelectionCard> {
   @override
   void didUpdateWidget(covariant CoteSelectionCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.openCount != widget.openCount) _expanded = false;
     if (oldWidget.cycleOptions == widget.cycleOptions) return;
     _placeFromAddress();
     final sync = ClassesListSearchFormLogic.computeSelectionSync(
@@ -107,31 +120,32 @@ class _CoteSelectionCardState extends State<CoteSelectionCard> {
       _classroomId,
     );
     final scopeBar = widget.scopeBar;
+    final summary = widget.summary;
+    if (summary != null && !_expanded) {
+      return ResultatsCard(
+        child: CoteSelectionSummary(
+          summary: summary,
+          onChange: () => setState(() => _expanded = true),
+        ),
+      );
+    }
+    final fields = LayoutBuilder(
+      builder: (context, constraints) =>
+          _fields(l10n, constraints.maxWidth, levels, classrooms),
+    );
     return ResultatsCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            l10n.coteSaisieEyebrow.toUpperCase(),
-            style: AppTypography.labelSmall.copyWith(
-              color: AppColors.terreCuite,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            l10n.coteSaisieTitle,
-            style: AppTypography.titleMedium.copyWith(
-              color: AppColors.bleuProfond,
-            ),
+          CoteSelectionHeading(
+            onCollapse: summary == null
+                ? null
+                : () => setState(() => _expanded = false),
           ),
           const SizedBox(height: AppSpacing.lg),
-          SearchFocusShortcut(
-            child: LayoutBuilder(
-              builder: (context, constraints) =>
-                  _fields(l10n, constraints.maxWidth, levels, classrooms),
-            ),
-          ),
+          // Ctrl+F va aux champs tant qu'aucune classe n'est ouverte ; ensuite,
+          // à la recherche des élèves.
+          if (summary == null) SearchFocusShortcut(child: fields) else fields,
           const SizedBox(height: AppSpacing.md),
           const Divider(height: 1, color: AppColors.border),
           const SizedBox(height: AppSpacing.md),

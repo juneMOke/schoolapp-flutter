@@ -12379,6 +12379,17 @@
   "@payrollDeductionRefusedItem": {"placeholders": {"name": {"type": "String"}, "reason": {"type": "String"}}},
   "subMenuResultatsSaisie": "Saisie des notes",
   "coteSaisieEyebrow": "Résultats · Saisie des notes",
+  "coteSelectionSummary": "{classe} · {portee}",
+  "@coteSelectionSummary": {
+    "description": "Carte de sélection repliée : la classe ouverte et sa portée",
+    "placeholders": {
+      "classe": {"type": "String"},
+      "portee": {"type": "String"}
+    }
+  },
+  "coteSelectionChange": "Changer",
+  "coteSelectionChangeHint": "Changer de classe ou de portée",
+  "coteSelectionCollapse": "Replier",
   "coteSaisieTitle": "Saisir les notes d'une classe",
   "coteSaisieOpen": "Ouvrir la saisie",
   "coteDecoupageTrimestres": "Trimestres",

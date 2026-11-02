@@ -21296,6 +21296,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coteSaisieEyebrow => 'Results · Grade entry';
 
   @override
+  String coteSelectionSummary(String classe, String portee) {
+    return '$classe · $portee';
+  }
+
+  @override
+  String get coteSelectionChange => 'Change';
+
+  @override
+  String get coteSelectionChangeHint => 'Change the class or the scope';
+
+  @override
+  String get coteSelectionCollapse => 'Collapse';
+
+  @override
   String get coteSaisieTitle => 'Enter a class\'s grades';
 
   @override
