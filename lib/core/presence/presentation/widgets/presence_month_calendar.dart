@@ -106,7 +106,9 @@ class _DayCell extends StatelessWidget {
       child: Opacity(
         opacity: day.upcoming ? AppDimensions.presenceMarkUpcomingOpacity : 1,
         child: _tappable(
-          Container(
+          // Ink, pas Container : le fond opaque de la case se peint sur le
+          // Material, et le survol et le focus de l'InkWell PAR-DESSUS.
+          Ink(
             height: AppDimensions.presenceMarkCalendarCellHeight,
             decoration: BoxDecoration(
               color: marked ? tone.soft : AppColors.surfaceRaised,
@@ -170,14 +172,18 @@ class _DayCell extends StatelessWidget {
             ],
           )
         : cell;
-    if (onTap == null || day.upcoming) return marked;
+    // Le Material porte le fond (Ink) de la case, touchable ou non : posé
+    // sur celui de la page, il serait recouvert par la carte qui contient
+    // le calendrier.
     return Material(
       type: MaterialType.transparency,
-      child: InkWell(
-        onTap: () => onTap(day.day),
-        borderRadius: AppRadius.brSm,
-        child: marked,
-      ),
+      child: onTap == null || day.upcoming
+          ? marked
+          : InkWell(
+              onTap: () => onTap(day.day),
+              borderRadius: AppRadius.brSm,
+              child: marked,
+            ),
     );
   }
 }
