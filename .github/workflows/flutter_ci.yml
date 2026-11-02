@@ -15,6 +15,11 @@ jobs:
   # dernier run en était aussi un ancêtre, et ce run, vert, portait sur
   # `HEAD^2`. Sinon (main a bougé depuis, squash, push direct), on teste
   # comme avant.
+  # Propre au front (le back ne teste qu'au push sur `main`) : un push sur
+  # une branche de travail (`fix/**`, `feature/**`) dont une PR est ouverte
+  # déclenche aussi le run `pull_request` de cette PR, qui teste la fusion
+  # avec la base — plus strict que la tête seule, et c'est lui qui garde la
+  # fusion. Le run `push` est alors une redite : on s'en remet à la PR.
   # ─────────────────────────────────────────────────────────────────
   already-verified:
     name: Reuse the PR verification
@@ -23,6 +28,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      pull-requests: read
     outputs:
       reuse: ${{ steps.check.outputs.reuse }}
     steps:
@@ -50,6 +56,19 @@ jobs:
           else
             echo "main a bougé depuis le dernier run de la PR (ou pas de merge) : tests rejoués"
           fi
+          case "${{ github.ref_name }}" in
+            main|master|develop) ;;
+            *)
+              if [ "$reuse" != true ]; then
+                OPEN_PR=$(gh api "repos/${{ github.repository }}/pulls?state=open&head=${{ github.repository_owner }}:${{ github.ref_name }}" \
+                  --jq '.[0].number // empty' || true)
+                if [ -n "$OPEN_PR" ]; then
+                  reuse=true
+                  echo "✓ PR #${OPEN_PR} ouverte : son run pull_request vérifie ce commit, run push non rejoué"
+                fi
+              fi
+              ;;
+          esac
           echo "reuse=${reuse}" >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────
