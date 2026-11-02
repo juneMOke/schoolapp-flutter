@@ -53,6 +53,10 @@ void main() {
   late FakeCotesRepository repository;
   late CoteSaisieBloc bloc;
 
+  /// Les Échap parvenues au-dessus de la carte : celles que la case a laissé
+  /// remonter.
+  var escapesAbove = 0;
+
   Future<void> pump(
     WidgetTester tester, {
     List<CoteCell> cells = const [],
@@ -60,6 +64,7 @@ void main() {
     tester.view.physicalSize = const Size(1280, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    escapesAbove = 0;
     repository = FakeCotesRepository(classe: _classe, cells: cells);
     bloc = CoteSaisieBloc(repository);
     final save = CoteSaveCubit(repository);
@@ -73,18 +78,29 @@ void main() {
           BlocProvider.value(value: bloc),
           BlocProvider.value(value: save),
         ],
-        child: const MaterialApp(
-          localizationsDelegates: [
+        child: MaterialApp(
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: Locale('fr'),
+          locale: const Locale('fr'),
           home: Scaffold(
-            body: SingleChildScrollView(
-              child: CoteBulletinCard(classroomName: '7e A'),
+            body: Focus(
+              canRequestFocus: false,
+              skipTraversal: true,
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.escape) {
+                  escapesAbove++;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: const SingleChildScrollView(
+                child: CoteBulletinCard(classroomName: '7e A'),
+              ),
             ),
           ),
         ),
@@ -340,5 +356,115 @@ void main() {
 
     expect((bloc.state as CoteSaisieReady).currentId, 'e2');
     expect(focused(tester, 0), isTrue);
+  });
+
+  group('Échap', () {
+    testWidgets(
+      'sans frappe en cours, remonte au lieu de mourir dans la case',
+      (tester) async {
+        await pump(
+          tester,
+          cells: [CoteCell(key: demoKey('P1'), serverCote: 14)],
+        );
+        await tester.tap(field(0));
+        await tester.pump();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        expect(escapesAbove, 1);
+        expect(focused(tester, 0), isTrue);
+      },
+    );
+
+    testWidgets('pendant une frappe, l\'annule et s\'arrête là', (
+      tester,
+    ) async {
+      await pump(tester, cells: [CoteCell(key: demoKey('P1'), serverCote: 14)]);
+      await tester.tap(field(0));
+      await tester.pump();
+      await typeOnKeyboard(tester, '18');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await settle(tester);
+      expect(escapesAbove, 0);
+      expect(tester.widget<TextField>(field(0)).controller!.text, '14');
+      // Plus rien à annuler : la suivante remonte.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      expect(escapesAbove, 1);
+    });
+  });
+
+  group('← et →', () {
+    testWidgets('une case vide passe à sa voisine, dans l\'ordre de lecture', (
+      tester,
+    ) async {
+      await pump(tester);
+      await tester.tap(field(1));
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focused(tester, 2), isTrue);
+
+      // Au bout de la ligne, la suivante.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(focused(tester, 3), isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focused(tester, 2), isTrue);
+    });
+
+    testWidgets('dans le texte, déplacent le curseur ; au bord, la case', (
+      tester,
+    ) async {
+      await pump(tester);
+      await tester.tap(field(1));
+      await tester.pump();
+      await typeOnKeyboard(tester, '14');
+      final controller = tester.widget<TextField>(field(1)).controller!;
+      expect(controller.selection, const TextSelection.collapsed(offset: 2));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focused(tester, 1), isTrue);
+      expect(controller.selection.extentOffset, 1);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(focused(tester, 1), isTrue);
+      expect(repository.saved, isEmpty);
+
+      // Curseur en tête : la case de gauche, et la cote quittée s'écrit.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await settle(tester);
+      expect(focused(tester, 0), isTrue);
+      expect(repository.saved.single.$2, 14);
+    });
+
+    testWidgets('tout le texte sélectionné à l\'arrivée : la flèche reste dans '
+        'la case', (tester) async {
+      await pump(tester, cells: [CoteCell(key: demoKey('P2'), serverCote: 12)]);
+      await tester.tap(field(1));
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+
+      expect(focused(tester, 1), isTrue);
+    });
+
+    testWidgets('Maj+flèche sélectionne, sans changer de case', (tester) async {
+      await pump(tester);
+      await tester.tap(field(1));
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+
+      expect(focused(tester, 1), isTrue);
+    });
   });
 }

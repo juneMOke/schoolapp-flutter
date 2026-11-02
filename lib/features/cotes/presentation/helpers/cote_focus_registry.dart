@@ -3,7 +3,9 @@ import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 
-enum CoteMove { down, up, right }
+/// [right] et [left] suivent l'ordre de lecture : au bout d'une ligne, la
+/// suivante (ou la précédente).
+enum CoteMove { down, up, right, left }
 
 /// Les cellules modifiables de la grille de l'élève courant et leurs nœuds de
 /// focus. Détenu par l'état de la grille, libéré avec elle.
@@ -44,10 +46,31 @@ class CoteFocusRegistry {
     final row = cours.indexWhere((c) => c.coursId == from.coursId);
     final col = columns.indexWhere((c) => c.id == from.colonneId);
     if (row < 0 || col < 0) return;
-    final next = direction == CoteMove.right
-        ? _nextInReadingOrder(row, col)
-        : _nextInColumn(row, col, direction == CoteMove.down ? 1 : -1);
+    final next = switch (direction) {
+      CoteMove.right => _nextInReadingOrder(row, col),
+      CoteMove.left => _previousInReadingOrder(row, col),
+      CoteMove.down => _nextInColumn(row, col, 1),
+      CoteMove.up => _nextInColumn(row, col, -1),
+    };
     next?.requestFocus();
+  }
+
+  /// Le cours de la case qui a le focus, s'il y en a une.
+  String? get focusedCoursId {
+    for (final MapEntry(:key, :value) in _nodes.entries) {
+      if (value.hasFocus) return key.split('|').first;
+    }
+    return null;
+  }
+
+  /// La première case modifiable des [candidates], dans leur ordre.
+  FocusNode? firstEditableOf(Iterable<CoteCours> candidates) {
+    for (final course in candidates) {
+      for (final column in columns) {
+        if (isEditable(course, column)) return nodeFor(course, column);
+      }
+    }
+    return null;
   }
 
   FocusNode? _nextInColumn(int row, int col, int step) {
@@ -62,6 +85,17 @@ class CoteFocusRegistry {
   FocusNode? _nextInReadingOrder(int row, int col) {
     for (var r = row; r < cours.length; r++) {
       for (var c = r == row ? col + 1 : 0; c < columns.length; c++) {
+        if (isEditable(cours[r], columns[c])) {
+          return nodeFor(cours[r], columns[c]);
+        }
+      }
+    }
+    return null;
+  }
+
+  FocusNode? _previousInReadingOrder(int row, int col) {
+    for (var r = row; r >= 0; r--) {
+      for (var c = r == row ? col - 1 : columns.length - 1; c >= 0; c--) {
         if (isEditable(cours[r], columns[c])) {
           return nodeFor(cours[r], columns[c]);
         }

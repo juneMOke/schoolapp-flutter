@@ -33277,6 +33277,12 @@ abstract class AppLocalizations {
   /// **'next column'**
   String get coteLegendEnterRight;
 
+  /// No description provided for @coteLegendRubriqueKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt+↑ folds the section · Alt+↓ unfolds all'**
+  String get coteLegendRubriqueKeys;
+
   /// No description provided for @coteLegendEnterToggle.
   ///
   /// In en, this message translates to:

@@ -21641,6 +21641,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coteLegendEnterRight => 'next column';
 
   @override
+  String get coteLegendRubriqueKeys =>
+      'Alt+↑ folds the section · Alt+↓ unfolds all';
+
+  @override
   String get coteLegendEnterToggle => 'Change what the Enter key does';
 
   @override

@@ -12312,6 +12312,7 @@
   "coteLegendEnterKey": "Enter",
   "coteLegendEnterDown": "next course",
   "coteLegendEnterRight": "next column",
+  "coteLegendRubriqueKeys": "Alt+↑ folds the section · Alt+↓ unfolds all",
   "coteLegendEnterToggle": "Change what the Enter key does",
   "coteMaxima": "Maximum",
   "coteTotalObtained": "Total obtained",

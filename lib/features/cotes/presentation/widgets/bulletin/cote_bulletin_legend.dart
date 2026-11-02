@@ -98,6 +98,13 @@ class CoteBulletinLegend extends StatelessWidget {
             label: l10n.coteLegendHalfOrMore,
           ),
           if (showKeyboardHelp)
+            Text(
+              l10n.coteLegendRubriqueKeys,
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          if (showKeyboardHelp)
             Tooltip(
               message: l10n.coteLegendEnterToggle,
               child: TextButton(

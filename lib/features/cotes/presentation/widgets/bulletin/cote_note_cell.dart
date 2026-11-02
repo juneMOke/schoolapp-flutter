@@ -121,20 +121,46 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is KeyUpEvent) return KeyEventResult.ignored;
+    // Alt+flèche appartient à l'écran (élève voisin, rubriques), Maj+flèche à
+    // la sélection du texte : la case n'y touche pas.
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isAltPressed ||
+        keyboard.isControlPressed ||
+        keyboard.isMetaPressed ||
+        keyboard.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
     final key = event.logicalKey;
-    if (key == LogicalKeyboardKey.arrowDown) {
-      widget.registry.move(_key, CoteMove.down);
+    final move = switch (key) {
+      LogicalKeyboardKey.arrowDown => CoteMove.down,
+      LogicalKeyboardKey.arrowUp => CoteMove.up,
+      // De côté, seulement au bord du texte : sinon la flèche déplace le
+      // curseur dans la case, comme partout ailleurs.
+      LogicalKeyboardKey.arrowLeft when _caretAt(start: true) => CoteMove.left,
+      LogicalKeyboardKey.arrowRight when _caretAt(start: false) =>
+        CoteMove.right,
+      _ => null,
+    };
+    if (move != null) {
+      widget.registry.move(_key, move);
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.arrowUp) {
-      widget.registry.move(_key, CoteMove.up);
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.escape) {
+    // Rien à annuler : Échap remonte (fermer, revenir), au lieu de mourir ici.
+    if (key == LogicalKeyboardKey.escape && _dirty) {
       _revert();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
+  }
+
+  /// Le curseur, sans sélection, au début ou à la fin du texte — ou une case
+  /// vide.
+  bool _caretAt({required bool start}) {
+    final text = _controller.text;
+    if (text.isEmpty) return true;
+    final selection = _controller.selection;
+    if (!selection.isValid || !selection.isCollapsed) return false;
+    return selection.extentOffset == (start ? 0 : text.length);
   }
 
   void _revert() {

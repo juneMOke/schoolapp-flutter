@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -189,6 +190,69 @@ void main() {
       await tester.pump();
 
       expect(tester.getTopLeft(header('P1')).dx, closeTo(before - 40, 0.5));
+    });
+  });
+
+  group('replier au clavier', () {
+    Future<void> alt(WidgetTester tester, LogicalKeyboardKey key) async {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(key);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await settle(tester);
+    }
+
+    bool focusedIn(WidgetTester tester, String branche) =>
+        FocusManager.instance.primaryFocus?.debugLabel?.startsWith(
+          'cote $branche',
+        ) ??
+        false;
+
+    testWidgets('Alt+↑ replie la rubrique de la case, Alt+↓ déplie tout', (
+      tester,
+    ) async {
+      await pump(tester);
+      expect(find.byType(TextField), findsNWidgets(5));
+      await tester.tap(field(0));
+      await tester.pump();
+      await typeOnKeyboard(tester, '14');
+
+      await alt(tester, LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      // Les Langues repliées : restent les deux cases d'EPS, dont la première
+      // a pris le focus ; la case quittée s'est écrite, comme à tout départ.
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(focusedIn(tester, 'Éducation physique'), isTrue);
+      expect(repository.saved.single.$2, 14);
+
+      await alt(tester, LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+
+      expect(find.byType(TextField), findsNWidgets(5));
+      expect(focusedIn(tester, 'Éducation physique'), isTrue);
+    });
+
+    testWidgets('la dernière rubrique repliée rend le focus à celle d\'avant', (
+      tester,
+    ) async {
+      await pump(tester);
+      await tester.tap(field(3));
+      await tester.pump();
+
+      await alt(tester, LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      expect(find.byType(TextField), findsNWidgets(3));
+      expect(focusedIn(tester, 'Français'), isTrue);
+    });
+
+    testWidgets('sans case au focus, Alt+↑ ne fait rien', (tester) async {
+      await pump(tester);
+
+      await alt(tester, LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+
+      expect(find.byType(TextField), findsNWidgets(5));
     });
   });
 }

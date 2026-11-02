@@ -12495,6 +12495,7 @@
   "coteLegendEnterKey": "Entrée",
   "coteLegendEnterDown": "cours suivant",
   "coteLegendEnterRight": "colonne suivante",
+  "coteLegendRubriqueKeys": "Alt+↑ replie la rubrique · Alt+↓ déplie tout",
   "coteLegendEnterToggle": "Changer l'effet de la touche Entrée",
   "coteMaxima": "Maxima",
   "coteTotalObtained": "Total obtenu",

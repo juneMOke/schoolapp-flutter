@@ -48,6 +48,11 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
     });
   }
 
+  void _expandAll() {
+    if (_collapsed.isEmpty) return;
+    setState(() => _collapsed = const {});
+  }
+
   void _stepped() {
     _focusAfterStep = true;
     widget.onStudentChanged?.call();
@@ -75,7 +80,24 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
           SingleActivator(LogicalKeyboardKey.arrowRight, alt: true),
         ],
         onPressed: () => _step(1),
-        child: _card(),
+        // Alt+↑ / Alt+↓ : ni la saisie (chiffres, virgule) ni le navigateur
+        // ne s'en servent. Replier part de la case au focus ; tout déplier
+        // vaut sans focus, pour revenir d'une grille toute repliée.
+        child: RouteKeyShortcut(
+          activators: const [
+            SingleActivator(LogicalKeyboardKey.arrowUp, alt: true),
+          ],
+          isEnabled: () => _gridKey.currentState?.hasFocusedCell ?? false,
+          onPressed: () => _gridKey.currentState?.collapseFocusedRubrique(),
+          child: RouteKeyShortcut(
+            activators: const [
+              SingleActivator(LogicalKeyboardKey.arrowDown, alt: true),
+            ],
+            isEnabled: () => _collapsed.isNotEmpty,
+            onPressed: _expandAll,
+            child: _card(),
+          ),
+        ),
       ),
     );
   }

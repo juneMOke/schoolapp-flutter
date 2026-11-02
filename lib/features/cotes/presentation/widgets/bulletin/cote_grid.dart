@@ -97,6 +97,38 @@ class CoteGridState extends State<CoteGrid> {
         ?.requestFocus();
   }
 
+  /// Une case de la grille a le focus.
+  bool get hasFocusedCell => _registry.focusedCoursId != null;
+
+  /// Replie la rubrique la plus proche de la case au focus. Le focus passe
+  /// d'abord à la case qui suit la rubrique (sinon à celle qui la précède) :
+  /// la case quittée s'écrit, comme à tout départ, et le clavier reste dans
+  /// la grille.
+  void collapseFocusedRubrique() {
+    final coursId = _registry.focusedCoursId;
+    if (coursId == null) return;
+    CoteRubriqueRow? target;
+    for (final row in _rows().whereType<CoteRubriqueRow>()) {
+      if (row.collapsed) continue;
+      if (!row.rubrique.allCours.any((c) => c.coursId == coursId)) continue;
+      if (target == null || row.depth > target.depth) target = row;
+    }
+    if (target == null) return;
+    final inside = {for (final c in target.rubrique.allCours) c.coursId};
+    final ordered = _orderedCours();
+    final first = ordered.indexWhere((c) => inside.contains(c.coursId));
+    final last = ordered.lastIndexWhere((c) => inside.contains(c.coursId));
+    final next =
+        _registry.firstEditableOf(ordered.skip(last + 1)) ??
+        _registry.firstEditableOf(ordered.take(first).toList().reversed);
+    if (next != null) {
+      next.requestFocus();
+    } else {
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    widget.onToggleRubrique(target.rubrique.id);
+  }
+
   @override
   void dispose() {
     _registry.dispose();

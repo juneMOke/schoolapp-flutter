@@ -21793,6 +21793,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coteLegendEnterRight => 'colonne suivante';
 
   @override
+  String get coteLegendRubriqueKeys =>
+      'Alt+↑ replie la rubrique · Alt+↓ déplie tout';
+
+  @override
   String get coteLegendEnterToggle => 'Changer l\'effet de la touche Entrée';
 
   @override
