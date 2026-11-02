@@ -31,3 +31,28 @@ void openBoutiqueTill(BuildContext context) {
   }
   GoRouter.maybeOf(context)?.go(AppRoutesNames.boutiqueAchats);
 }
+
+/// Ouvre la fiche de [saleId] par-dessus le tableau de bord, à son adresse
+/// (`…/vente/{saleId}`) ; se termine quand elle se referme. La requête du
+/// tableau de bord suit (période, filtres) : après un F5 sur la fiche, le
+/// retour retrouve le même écran — et, tant que la fiche est ouverte, il
+/// ne lit pas une adresse nue comme un retour à ses valeurs par défaut.
+///
+/// ⚠️ Précédent du navigateur retire la fiche sans `pop` : le `Future` ne se
+/// termine alors pas, et le tableau de bord ne se relit pas.
+Future<void> openBoutiqueSale(BuildContext context, {required String saleId}) {
+  final router = GoRouter.maybeOf(context);
+  if (router == null) return Future.value();
+  final here = GoRouterState.of(context).uri;
+  return context.push<void>(
+    Uri(
+      path: AppRoutesNames.boutiqueSalePath(
+        dashboardPath: here.path,
+        saleId: saleId,
+      ),
+      queryParameters: here.queryParameters.isEmpty
+          ? null
+          : here.queryParameters,
+    ).toString(),
+  );
+}

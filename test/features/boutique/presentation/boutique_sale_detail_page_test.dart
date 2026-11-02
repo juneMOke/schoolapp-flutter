@@ -1,6 +1,14 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:bloc_test/bloc_test.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/router/boutique_sale_routes.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -20,6 +28,10 @@ class _MockGetDetail extends Mock implements GetBoutiqueSaleDetailUseCase {}
 class _MockMarkPrinted extends Mock implements MarkSaleTicketPrintedUseCase {}
 
 class _MockClaimReceipt extends Mock implements ClaimSaleReceiptUseCase {}
+
+class _MockAcademicYearBloc
+    extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
+    implements AcademicYearContextBloc {}
 
 BoutiqueSaleLocalModel _sale({
   String? collectedByName = 'Mbala Céline',
@@ -374,5 +386,89 @@ void main() {
     final payer = tester.getTopLeft(find.text('Ndombo Lelo Willy'));
     final total = tester.getTopLeft(find.text('TOTAL À ENCAISSER'));
     expect(total.dy, lessThan(payer.dy));
+  });
+
+  group('son adresse', () {
+    late _MockAcademicYearBloc academicYear;
+    late GoRouter router;
+
+    setUp(() {
+      academicYear = _MockAcademicYearBloc();
+      when(() => academicYear.state).thenReturn(
+        const AcademicYearContextState(
+          status: AcademicYearContextLoadStatus.success,
+          context: AcademicYearContext(
+            academicYear: AcademicYear(
+              id: 'ay-1',
+              name: '2026-2027',
+              current: true,
+            ),
+            schoolLevelGroups: [],
+          ),
+        ),
+      );
+    });
+
+    Future<void> open(WidgetTester tester, String location) async {
+      await tester.binding.setSurfaceSize(const Size(900, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      when(() => getDetail(any())).thenAnswer((_) async => Right(_detail()));
+      router = GoRouter(
+        initialLocation: location,
+        routes: [
+          GoRoute(
+            path: '/home/:subMenuId',
+            builder: (_, state) =>
+                Text('écran ${state.pathParameters['subMenuId']}'),
+            routes: [BoutiqueSaleRoutes.sale()],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        BlocProvider<AcademicYearContextBloc>.value(
+          value: academicYear,
+          child: MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('un lien la rouvre par son seul identifiant, sans extra', (
+      tester,
+    ) async {
+      await open(
+        tester,
+        '/home/${MenuConstants.boutiqueDashboardId}/vente/aaaabbbb-cccc-dddd',
+      );
+
+      verify(() => getDetail('aaaabbbb-cccc-dddd')).called(1);
+      expect(find.text('Polo Lacoste'), findsOneWidget);
+
+      // Retour : le tableau de bord, rebâti sous la fiche.
+      await tester.tap(find.byTooltip("Retour à l'historique"));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('écran ${MenuConstants.boutiqueDashboardId}'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sous un autre écran, l\'adresse retombe sur l\'écran', (
+      tester,
+    ) async {
+      await open(tester, '/home/${MenuConstants.hrPayrollId}/vente/x');
+
+      verifyNever(() => getDetail(any()));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/home/${MenuConstants.hrPayrollId}',
+      );
+    });
   });
 }

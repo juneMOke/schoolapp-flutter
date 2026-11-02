@@ -39,6 +39,10 @@ void main() {
         'tableau de bord de RH · Présences — gardée, comme l\'écran qui '
         'l\'ouvre, par son second segment ; sous un autre sous-menu, '
         '`HrAgentRoutes.redirectFor` la ramène à l\'écran',
+    '/home/:subMenuId/vente/:saleId':
+        'fiche d\'une vente de la boutique — gardée, comme le tableau de bord '
+        'qui l\'ouvre, par son second segment ; sous un autre sous-menu, '
+        '`BoutiqueSaleRoutes` la ramène à l\'écran',
     '/dev/components': 'galerie de composants, kDebugMode uniquement',
     '/dev/ticket-print': 'banc de calage thermique, kDebugMode uniquement',
     '/boutique/boutique-historique':

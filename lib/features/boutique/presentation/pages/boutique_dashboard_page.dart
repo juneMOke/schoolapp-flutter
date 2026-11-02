@@ -15,13 +15,11 @@ import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_navigation.dart';
-import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_academic_year_gate.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_body.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_header.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_location.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_provisional_notice.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le tableau de bord de la boutique : « combien a-t-elle vendu, quoi, et à
@@ -57,14 +55,6 @@ class _DashboardViewState extends State<_DashboardView> {
   bool _listsStarted = false;
 
   String get _academicYearId => widget.year?.academicYear.id ?? '';
-
-  /// Les libellés de niveaux servent au TICKET d'une vente walk-in, rouvert
-  /// depuis « Ventes de la période ».
-  Map<String, String> get _levelLabels => {
-    for (final bundle
-        in widget.year?.schoolLevelGroups ?? const <SchoolLevelGroupBundle>[])
-      for (final level in bundle.levels) level.id: level.name,
-  };
 
   bool _started = false;
 
@@ -121,11 +111,7 @@ class _DashboardViewState extends State<_DashboardView> {
   Future<void> _openSale(BoutiqueSaleRow sale) async {
     final bloc = context.read<BoutiqueDashboardBloc>();
     final sales = context.read<BoutiqueSalesCubit>();
-    await BoutiqueSaleDetailPage.push(
-      context,
-      saleId: sale.saleId,
-      levelLabels: _levelLabels,
-    );
+    await openBoutiqueSale(context, saleId: sale.saleId);
     if (!mounted) return;
     bloc.add(const BoutiqueDashboardRefreshRequested());
     // La fenêtre n'a pas bougé : la liste se relit d'elle-même, page et

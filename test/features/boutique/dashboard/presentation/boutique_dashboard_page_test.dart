@@ -29,6 +29,11 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/s
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
+import 'package:school_app_flutter/router/boutique_sale_routes.dart';
+import 'package:school_app_flutter/router/reflected_records_parser.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
@@ -57,6 +62,12 @@ class _MockBeneficiaries extends Mock
 class _MockCatalog extends Mock implements GetBoutiqueCatalogUseCase {}
 
 class _MockPreference extends Mock implements DashboardPeriodPreference {}
+
+class _MockSaleDetail extends Mock implements GetBoutiqueSaleDetailUseCase {}
+
+class _MockMarkPrinted extends Mock implements MarkSaleTicketPrintedUseCase {}
+
+class _MockClaimReceipt extends Mock implements ClaimSaleReceiptUseCase {}
 
 class _MockAcademicYearBloc
     extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
@@ -217,6 +228,7 @@ void main() {
           GoRoute(
             path: '/home/:subMenuId',
             builder: (_, _) => const BoutiqueDashboardPage(),
+            routes: [BoutiqueSaleRoutes.sale()],
           ),
         ],
       );
@@ -230,7 +242,7 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('fr'),
-            routerConfig: next,
+            routerConfig: ReflectedRecordsParser.configOf(next),
           ),
         ),
       );
@@ -238,8 +250,8 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  String address() =>
-      router!.routerDelegate.currentConfiguration.uri.toString();
+  /// L'adresse de la barre du navigateur, fiche poussée comprise.
+  String address() => router!.routeInformationProvider.value.uri.toString();
 
   BoutiqueDashboardState dashboardState(WidgetTester tester) => tester
       .element(find.byType(BoutiqueDashboardLocation))
@@ -330,6 +342,33 @@ void main() {
         expect(address(), base);
       },
     );
+
+    testWidgets('une vente s\'ouvre à son adresse, filtres du dessous gardés', (
+      tester,
+    ) async {
+      final getDetail = _MockSaleDetail();
+      when(
+        () => getDetail(any()),
+      ).thenAnswer((_) async => const Left(NotFoundFailure()));
+      GetIt.I
+        ..registerFactory<GetBoutiqueSaleDetailUseCase>(() => getDetail)
+        ..registerFactory<MarkSaleTicketPrintedUseCase>(_MockMarkPrinted.new)
+        ..registerFactory<ClaimSaleReceiptUseCase>(_MockClaimReceipt.new);
+      await pumpPage(tester, location: '$base?periode=today');
+
+      await tester.tap(find.text('RV-000472').first);
+      await tester.pumpAndSettle();
+
+      expect(address(), '$base/vente/s-0-1?periode=today');
+      verify(() => getDetail('s-0-1')).called(1);
+      // Le tableau de bord du dessous n'a pas lu l'adresse de la fiche comme
+      // un retour à « Cette semaine ».
+      expect(statsWindows.every((w) => w.isSingleDay), isTrue);
+
+      await tester.tap(find.byTooltip("Retour à l'historique"));
+      await tester.pumpAndSettle();
+      expect(address(), '$base?periode=today');
+    });
   });
 
   testWidgets('prêt : chiffres, temps, contenu, élèves, reçus', (tester) async {
