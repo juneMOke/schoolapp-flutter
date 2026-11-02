@@ -8,10 +8,57 @@ on:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────
+  # Job 0 — Réutiliser la vérification de la PR (même règle que le back)
+  # Un merge sur `main` ne rejoue pas les tests quand la PR a déjà testé
+  # exactement le même arbre : la PR contenait le `main` dans lequel elle a
+  # été fusionnée (`HEAD^1` ancêtre de `HEAD^2`), donc le `main` qu'a vu son
+  # dernier run en était aussi un ancêtre, et ce run, vert, portait sur
+  # `HEAD^2`. Sinon (main a bougé depuis, squash, push direct), on teste
+  # comme avant.
+  # ─────────────────────────────────────────────────────────────────
+  already-verified:
+    name: Reuse the PR verification
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      reuse: ${{ steps.check.outputs.reuse }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Compare with the last green PR run
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          reuse=false
+          if PR_HEAD=$(git rev-parse -q --verify HEAD^2) \
+             && git merge-base --is-ancestor HEAD^1 "$PR_HEAD" \
+             && [ "$(git rev-parse 'HEAD^{tree}')" = "$(git rev-parse "$PR_HEAD^{tree}")" ]; then
+            GREEN=$(gh api "repos/${{ github.repository }}/actions/workflows/flutter_ci.yml/runs?event=pull_request&status=success&head_sha=${PR_HEAD}" \
+              --jq '.total_count' || echo 0)
+            if [ "${GREEN:-0}" -gt 0 ]; then
+              reuse=true
+              echo "✓ ${PR_HEAD} déjà vert en PR, sur le même arbre : tests non rejoués"
+            else
+              echo "Aucun run de PR vert pour ${PR_HEAD} : tests rejoués"
+            fi
+          else
+            echo "main a bougé depuis le dernier run de la PR (ou pas de merge) : tests rejoués"
+          fi
+          echo "reuse=${reuse}" >> "$GITHUB_OUTPUT"
+
+  # ─────────────────────────────────────────────────────────────────
   # Job 1 — Validation des variables d'environnement (fail fast)
   # ─────────────────────────────────────────────────────────────────
   validate-env:
     name: Validate env config (dev smoke test)
+    needs: already-verified
+    if: ${{ !cancelled() && needs.already-verified.outputs.reuse != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -28,6 +75,7 @@ jobs:
   analyze-and-test:
     name: Analyze & Test
     needs: validate-env
+    if: ${{ !cancelled() && needs.validate-env.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
