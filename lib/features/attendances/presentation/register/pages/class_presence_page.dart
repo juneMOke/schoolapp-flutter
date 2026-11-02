@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/attendances/presentation/register/he
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_picker_button.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_picker_dialog.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_register_actions.dart';
+import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_location.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_no_class.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_notices.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/widgets/class_presence_tabs.dart';
@@ -151,7 +152,11 @@ class _ClassPresenceScreenState extends State<ClassPresenceScreen> {
               (ClassroomOfflineBloc bloc) => bloc.state.classrooms,
             ),
           );
-          return _Body(cycles: cycles, onPick: () => _pickClass(cycles));
+          // La classe, le jour, le mois et les filtres dans l'adresse.
+          return ClassPresenceLocation(
+            cycles: cycles,
+            child: _Body(cycles: cycles, onPick: () => _pickClass(cycles)),
+          );
         },
       ),
     ),

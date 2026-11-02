@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_edited_days.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_day_navigation.dart';
 import 'package:school_app_flutter/core/offline/resource_sync_signals.dart';
+import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_classroom.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/register/class_presence_day.dart';
@@ -90,6 +91,58 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState>
         studentId: () => null,
         dayQuery: ClassDayQuery.none,
         recapQuery: ClassRecapQuery.none,
+        clearFailure: true,
+      ),
+    );
+    await _readDay(loading: true);
+    await _readMonth();
+  }
+
+  /// Rouvre l'écran tel que l'adresse le décrit (F5, lien) : la classe, puis
+  /// le jour, le mois, l'élève et les filtres — chacun ignoré s'il sort de
+  /// ce que l'écran sait montrer (week-end, futur, avant la rentrée).
+  Future<void> openFromAddress(
+    ClassPresenceClassroom classroom, {
+    String? day,
+    String? month,
+    String? studentId,
+    PresenceStatus? status,
+    ClassRecapFilter? recapFilter,
+  }) async {
+    final today = SchoolDayCalendar.dayOf(_now());
+    final start = state.schoolYear?.start;
+    bool inYear(String value) =>
+        value.compareTo(today) <= 0 &&
+        (start == null || value.compareTo(start) >= 0);
+    final shownDay =
+        day != null &&
+            SchoolDayCalendar.isDay(day) &&
+            SchoolDayCalendar.isWeekday(day) &&
+            inYear(day)
+        ? day
+        : state.day;
+    final shownMonth =
+        month != null &&
+            SchoolDayCalendar.isDay(SchoolDayCalendar.firstOf(month)) &&
+            month.compareTo(SchoolDayCalendar.monthOf(today)) <= 0 &&
+            (start == null ||
+                month.compareTo(SchoolDayCalendar.monthOf(start)) >= 0)
+        ? month
+        : state.month;
+    emit(
+      state.copyWith(
+        classroom: classroom,
+        load: ClassPresenceLoad.loading,
+        today: today,
+        day: shownDay,
+        month: shownMonth,
+        presenceDay: () => null,
+        monthData: () => null,
+        studentId: () => studentId,
+        dayQuery: ClassDayQuery(status: status),
+        recapQuery: ClassRecapQuery(
+          filter: recapFilter ?? ClassRecapFilter.all,
+        ),
         clearFailure: true,
       ),
     );

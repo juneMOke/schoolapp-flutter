@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/offline/resource_sync_signals.dart';
@@ -59,7 +60,12 @@ void main() {
 
   /// Monte l'écran d'appel : deux classes de 6e, un appel du jour à moitié
   /// pointé.
-  Future<ClassPresenceCubit> pumpScreen(WidgetTester tester) async {
+  GoRouter? router;
+
+  Future<ClassPresenceCubit> pumpScreen(
+    WidgetTester tester, {
+    String? location,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(1280, 1800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -158,29 +164,51 @@ void main() {
     );
     addTearDown(cubit.close);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.light,
-        locale: const Locale('fr'),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+    final screen = Scaffold(
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider<AcademicYearContextBloc>.value(value: years),
+          BlocProvider<ClassroomOfflineBloc>.value(value: classes),
+          BlocProvider<ClassPresenceCubit>.value(value: cubit),
         ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: MultiBlocProvider(
-            providers: [
-              BlocProvider<AcademicYearContextBloc>.value(value: years),
-              BlocProvider<ClassroomOfflineBloc>.value(value: classes),
-              BlocProvider<ClassPresenceCubit>.value(value: cubit),
-            ],
-            child: const ClassPresenceScreen(),
-          ),
-        ),
+        child: const ClassPresenceScreen(),
       ),
     );
+    const delegates = [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ];
+    if (location == null) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('fr'),
+          localizationsDelegates: delegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: screen,
+        ),
+      );
+    } else {
+      // Un F5 : l'écran est rebâti à neuf depuis la seule adresse.
+      final next = GoRouter(
+        initialLocation: location,
+        routes: [GoRoute(path: '/home/:subMenuId', builder: (_, _) => screen)],
+      );
+      addTearDown(next.dispose);
+      router = next;
+      await tester.pumpWidget(
+        MaterialApp.router(
+          key: UniqueKey(),
+          theme: AppTheme.light,
+          locale: const Locale('fr'),
+          localizationsDelegates: delegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: next,
+        ),
+      );
+    }
     await tester.pumpAndSettle();
     return cubit;
   }
@@ -264,6 +292,61 @@ void main() {
     await tester.tap(find.text('Quitter sans valider'));
     await tester.pumpAndSettle();
     expect(await leaving, isTrue);
+  });
+
+  group('l\'adresse', () {
+    const base = '/home/presences';
+    Map<String, String> query() =>
+        router!.routerDelegate.currentConfiguration.uri.queryParameters;
+
+    testWidgets('classe, jour et statut s\'inscrivent ; F5 les restitue', (
+      tester,
+    ) async {
+      final cubit = await pumpScreen(tester, location: base);
+      expect(query(), isEmpty);
+
+      await chooseClass(tester, '6e B');
+      await cubit.stepDay(-1);
+      cubit.setDayStatus(PresenceStatus.absent);
+      await tester.pumpAndSettle();
+      expect(query(), {
+        'classe': 'c2',
+        'jour': '2026-09-30',
+        'statut': 'absent',
+      });
+
+      final written = router!.routerDelegate.currentConfiguration.uri;
+      final reopened = await pumpScreen(tester, location: written.toString());
+
+      expect(reopened.state.classroom?.id, 'c2');
+      expect(reopened.state.day, '2026-09-30');
+      expect(reopened.state.dayQuery.status, PresenceStatus.absent);
+      expect(verify(() => load(captureAny())).captured.last, (
+        classroomId: 'c2',
+        academicYearId: 'y1',
+        day: '2026-09-30',
+      ));
+      expect(query(), written.queryParameters);
+    });
+
+    testWidgets('contre-épreuve : un jour futur ou un dimanche est ignoré', (
+      tester,
+    ) async {
+      final cubit = await pumpScreen(
+        tester,
+        location: '$base?classe=c1&jour=2026-10-05&mois=2027-01',
+      );
+      expect(cubit.state.classroom?.id, 'c1');
+      expect(cubit.state.day, '2026-10-01');
+      expect(cubit.state.month, '2026-10');
+      expect(query(), {'classe': 'c1'});
+
+      final sunday = await pumpScreen(
+        tester,
+        location: '$base?classe=c1&jour=2026-09-27',
+      );
+      expect(sunday.state.day, '2026-10-01');
+    });
   });
 }
 
