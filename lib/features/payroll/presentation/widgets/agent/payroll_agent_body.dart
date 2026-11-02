@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_agent_situation.dart';
 import 'package:school_app_flutter/features/payroll/domain/services/payroll_agent_situations.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
@@ -32,6 +33,13 @@ class PayrollAgentBody extends StatefulWidget {
   final String agentId;
   final String entryMonth;
 
+  /// Le mois à montrer à l'ouverture, lu dans l'adresse ; le mois d'entrée
+  /// à défaut.
+  final String? shownMonth;
+
+  /// Le bulletin à l'ouverture, lu dans l'adresse.
+  final bool payslip;
+
   /// L'écran sous la fiche (le livre, le tableau de bord).
   final String origin;
   final PayrollAgentStepper stepper;
@@ -41,6 +49,8 @@ class PayrollAgentBody extends StatefulWidget {
     required this.state,
     required this.agentId,
     required this.entryMonth,
+    this.shownMonth,
+    this.payslip = false,
     required this.origin,
     required this.stepper,
   });
@@ -56,13 +66,13 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
   void initState() {
     super.initState();
     // Passer à l'agent voisin garde le cubit de la page : la fiche repart
-    // du mois d'entrée et du haut de page, comme un F5 sur son adresse.
+    // du mois d'entrée (ou du mois vu de l'adresse, après F5) et du haut de
+    // page, comme un F5 sur son adresse.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final cubit = context.read<PayrollCubit>();
-      if (cubit.state.month != widget.entryMonth) {
-        cubit.showMonth(widget.entryMonth);
-      }
+      final opening = widget.shownMonth ?? widget.entryMonth;
+      if (cubit.state.month != opening) cubit.showMonth(opening);
       final scroll = Scrollable.maybeOf(context)?.position;
       if (scroll != null && scroll.hasPixels && scroll.pixels > 0) {
         scroll.jumpTo(scroll.minScrollExtent);
@@ -128,7 +138,17 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
         );
         final panel = KeyedSubtree(
           key: _panelKey,
-          child: PayrollAgentMonthPanel(snapshot: state.snapshot, month: shown),
+          child: PayrollAgentMonthPanel(
+            snapshot: state.snapshot,
+            month: shown,
+            initialPayslip: widget.payslip,
+            onPayslipChanged: (payslip) =>
+                PayrollAgentNavigation.showInAddress(context, {
+                  HrAgentAddress.viewParam: payslip
+                      ? HrAgentAddress.payslipValue
+                      : null,
+                }),
+          ),
         );
         final side = _side(situation, shown, canWrite: canWrite, wide: wide);
         if (!wide) {
@@ -224,6 +244,11 @@ class _PayrollAgentBodyState extends State<PayrollAgentBody> {
 
   void _select(String month, {required bool scroll}) {
     context.read<PayrollCubit>().showMonth(month);
+    // Le mois vu dans l'adresse ; le mois d'entrée, lui, ne bouge pas : il
+    // fixe l'ordre d'Alt+← / Alt+→.
+    PayrollAgentNavigation.showInAddress(context, {
+      HrAgentAddress.shownMonthParam: month == widget.entryMonth ? null : month,
+    });
     if (!scroll) return;
     // Sur un écran étroit, le panneau est sous la liste : on l'amène.
     WidgetsBinding.instance.addPostFrameCallback((_) {

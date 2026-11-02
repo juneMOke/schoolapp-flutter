@@ -73,11 +73,15 @@ class PayrollDashboardCubit extends Cubit<PayrollDashboardState> {
   }
 
   /// L'adresse a changé (F5, Précédent, lien) : un seul rechargement pour le
-  /// mois et le filtre lus.
+  /// mois et le filtre lus. [currency] `null` : la première devise servie.
   Future<void> applyLocation({
     required String? month,
     required PayrollDashboardFilter filter,
+    String? currency,
   }) async {
+    if (currency != state.currency) {
+      emit(state.copyWith(currency: () => currency));
+    }
     var wanted = PayrollMonth.parse(month) ?? state.currentMonth;
     if (wanted.compareTo(state.currentMonth) > 0) wanted = state.currentMonth;
     if (wanted != state.month) {

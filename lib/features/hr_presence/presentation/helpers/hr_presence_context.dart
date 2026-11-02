@@ -31,6 +31,13 @@ abstract final class HrAgentAddress {
   static const viewParam = 'vue-agent';
   static const yearValue = 'an';
 
+  /// Le mois affiché par la fiche de paie, quand ce n'est pas celui
+  /// d'entrée ([monthParam], qui fixe l'ordre de parcours).
+  static const shownMonthParam = 'mois-vu';
+
+  /// `vue-agent=bulletin` : la fiche de paie montre le bulletin.
+  static const payslipValue = 'bulletin';
+
   /// La flèche d'une page d'agent : dépiler, ou rejoindre [subMenuId] dans
   /// la coquille — puis retirer de l'adresse les clés de l'agent, que
   /// go_router garde sur l'écran du dessous après un F5.
@@ -45,7 +52,11 @@ abstract final class HrAgentAddress {
       );
     }
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => LocationQuery.write(router, {monthParam: null, viewParam: null}),
+      (_) => LocationQuery.write(router, {
+        monthParam: null,
+        viewParam: null,
+        shownMonthParam: null,
+      }),
     );
   }
 }

@@ -62,10 +62,14 @@ abstract final class HrAgentRoutes {
         );
       }
       if (PayrollAgentNavigation.origins.contains(subMenuId)) {
+        final query = state.uri.queryParameters;
         return PayrollAgentPage(
           args: (
             agentId: state.pathParameters['agentId'] ?? '',
-            month: state.uri.queryParameters[HrAgentAddress.monthParam],
+            month: query[HrAgentAddress.monthParam],
+            shownMonth: query[HrAgentAddress.shownMonthParam],
+            payslip:
+                query[HrAgentAddress.viewParam] == HrAgentAddress.payslipValue,
           ),
           onClosed: onClosed,
           shellSubMenuId: subMenuId!,

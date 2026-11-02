@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cu
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_refresh_shortcut.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advances_location.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advances_tab.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_notices.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
@@ -23,7 +24,9 @@ class PayrollAdvancesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<PayrollCubit>(
     create: (_) => getIt<PayrollCubit>()..load(),
-    child: const PayrollRefreshShortcut(child: PayrollAdvancesScreen()),
+    child: const PayrollAdvancesLocation(
+      child: PayrollRefreshShortcut(child: PayrollAdvancesScreen()),
+    ),
   );
 }
 

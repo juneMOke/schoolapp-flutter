@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -242,5 +244,87 @@ void main() {
     await pumpAgent(tester, snapshot: snapshotOf(paid: [paid(10000)]));
 
     expect(find.text('Reste dû par l\'école'), findsOneWidget);
+  });
+
+  group('l\'adresse de la fiche', () {
+    const entry = '/home/paie/m-1?mois-agent=2026-10';
+
+    Widget fromRoute(GoRouterState state) {
+      final query = state.uri.queryParameters;
+      return PayrollAgentScreen(
+        agentId: state.pathParameters['agentId']!,
+        entryMonth: query[HrAgentAddress.monthParam],
+        shownMonth: query[HrAgentAddress.shownMonthParam],
+        payslip: query[HrAgentAddress.viewParam] == HrAgentAddress.payslipValue,
+      );
+    }
+
+    testWidgets('le mois vu et le bulletin s\'inscrivent, sans toucher au '
+        'mois d\'entrée ; F5 les restitue', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1400, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      late GoRouter router;
+      String address() => router.routeInformationProvider.value.uri.toString();
+      await pumpPayrollScreen(
+        tester,
+        snapshot: snapshotOf(),
+        location: entry,
+        routeChild: fromRoute,
+        onRouter: (r) => router = r,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Septembre 2026').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bulletin'));
+      await tester.pumpAndSettle();
+
+      final written = Uri.parse(address());
+      expect(written.path, '/home/paie/m-1');
+      expect(written.queryParameters, {
+        'mois-agent': '2026-10',
+        'mois-vu': '2026-09',
+        'vue-agent': 'bulletin',
+      });
+
+      // F5 : une fiche neuve, sur la seule adresse.
+      final reopened = await pumpPayrollScreen(
+        tester,
+        snapshot: snapshotOf(),
+        location: written.toString(),
+        routeChild: fromRoute,
+        onRouter: (r) => router = r,
+      );
+      await tester.pumpAndSettle();
+
+      expect(reopened.cubit.state.month, '2026-09');
+      expect(find.byType(PayrollPayslipSheet), findsOneWidget);
+      expect(Uri.parse(address()).queryParameters, written.queryParameters);
+    });
+
+    testWidgets('contre-épreuve : revenir au mois d\'entrée et au calcul '
+        'rend l\'adresse d\'entrée', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1400, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      late GoRouter router;
+      await pumpPayrollScreen(
+        tester,
+        snapshot: snapshotOf(),
+        location:
+            '/home/paie/m-1?mois-agent=2026-10&mois-vu=2026-09'
+            '&vue-agent=bulletin',
+        routeChild: fromRoute,
+        onRouter: (r) => router = r,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(PayrollPayslipSheet), findsOneWidget);
+
+      await tester.tap(find.text('Octobre 2026').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Détail du calcul'));
+      await tester.pumpAndSettle();
+
+      expect(router.routeInformationProvider.value.uri.toString(), entry);
+    });
   });
 }

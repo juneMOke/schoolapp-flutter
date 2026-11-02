@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
@@ -28,6 +29,8 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_de
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
+import 'package:school_app_flutter/router/reflected_records_parser.dart';
 
 class MockPayrollRepository extends Mock implements PayrollRepository {}
 
@@ -65,6 +68,14 @@ pumpPayrollScreen(
 
   /// Un geste posé avant que la tablette ne soit lue (un mois d'adresse).
   void Function(PayrollCubit cubit)? beforeLoad,
+
+  /// Une adresse d'ouverture (un F5), sous un vrai routeur : `/home/:subMenuId`
+  /// bâtit [child] ; `/home/:subMenuId/:agentId` bâtit [routeChild] depuis
+  /// l'état de sa route (l'écran du dessous reste alors vide). [onRouter]
+  /// reçoit ce routeur.
+  String? location,
+  Widget Function(GoRouterState state)? routeChild,
+  void Function(GoRouter router)? onRouter,
 }) async {
   final repository = MockPayrollRepository();
   when(() => repository.load()).thenAnswer((_) async => Right(snapshot));
@@ -120,19 +131,56 @@ pumpPayrollScreen(
   whenListen(auth, const Stream<AuthState>.empty(), initialState: state);
   addTearDown(cubit.close);
   beforeLoad?.call(cubit);
-  await tester.pumpWidget(
-    MaterialApp(
-      locale: const Locale('fr'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: BlocProvider<AuthBloc>.value(
-          value: auth,
-          child: BlocProvider.value(value: cubit..load(), child: child),
+  if (location == null) {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: BlocProvider<AuthBloc>.value(
+            value: auth,
+            child: BlocProvider.value(value: cubit..load(), child: child),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  } else {
+    final router = GoRouter(
+      initialLocation: location,
+      routes: [
+        GoRoute(
+          path: AppRoutesNames.homeSubMenuRoute,
+          builder: (_, _) =>
+              Scaffold(body: routeChild == null ? child : const SizedBox()),
+          routes: [
+            GoRoute(
+              path: ':agentId',
+              builder: (_, state) =>
+                  Scaffold(body: routeChild?.call(state) ?? child),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    onRouter?.call(router);
+    await tester.pumpWidget(
+      BlocProvider<AuthBloc>.value(
+        key: UniqueKey(),
+        value: auth,
+        child: BlocProvider.value(
+          value: cubit..load(),
+          child: MaterialApp.router(
+            locale: const Locale('fr'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: ReflectedRecordsParser.configOf(router),
+          ),
+        ),
+      ),
+    );
+  }
   await tester.pump();
   await tester.pump();
   return (cubit: cubit, repository: repository, signals: signals);

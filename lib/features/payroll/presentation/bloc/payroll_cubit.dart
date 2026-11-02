@@ -126,6 +126,17 @@ class PayrollCubit extends Cubit<PayrollState> {
     _openMonth(wanted);
   }
 
+  /// Le mois et les filtres du livre lus dans l'adresse (F5, Précédent) :
+  /// le mois d'abord — il remet le filtre de versement à « tous ».
+  void applyLocation({
+    String? month,
+    StaffContractKind? contract,
+    PayrollPayFilter payFilter = PayrollPayFilter.all,
+  }) {
+    showMonth(month);
+    emit(state.copyWith(contractFilter: () => contract, payFilter: payFilter));
+  }
+
   void _openMonth(String month) {
     if (month == state.month) return;
     final view = PayrollLedger.monthView(state.snapshot, month);
