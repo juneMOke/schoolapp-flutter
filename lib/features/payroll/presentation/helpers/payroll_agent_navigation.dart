@@ -38,6 +38,17 @@ abstract final class PayrollAgentNavigation {
     query: {...screenQuery, HrAgentAddress.monthParam: month},
   );
 
+  /// L'adresse de la fiche de [agentId] sur le livre de [month], sous le
+  /// livre : pour un `go` depuis un autre module (la présence d'un agent).
+  static String addressOf({required String agentId, required String month}) =>
+      Uri(
+        path: AppRoutesNames.hrPersonnelAgentPath(
+          subMenuId: subMenuId,
+          agentId: agentId,
+        ),
+        queryParameters: {HrAgentAddress.monthParam: month},
+      ).toString();
+
   /// Passe à l'agent [agentId] sans empiler : un seul retour ramène au
   /// livre, et F5 rouvre l'agent affiché. [month] est le livre d'entrée, qui
   /// fixe l'ordre de parcours. Sur le web, l'entrée d'historique est

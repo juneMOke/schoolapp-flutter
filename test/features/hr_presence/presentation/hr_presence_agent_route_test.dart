@@ -204,4 +204,57 @@ void main() {
     expect(find.byType(HrPresenceFicheAgentScreen), findsOneWidget);
     expect(find.byTooltip('Récapitulatif'), findsOneWidget);
   });
+
+  testWidgets('« Ouvrir la paie » mène à la fiche de paie de l\'agent, sur '
+      'le livre du même mois (go)', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 1400);
+    addTearDown(tester.view.reset);
+    final router = GoRouter(
+      initialLocation: '/home/$dashboard/a-1?mois-agent=2026-09',
+      routes: [
+        GoRoute(
+          path: AppRoutesNames.homeSubMenuRoute,
+          builder: (_, state) =>
+              Text('écran ${state.pathParameters['subMenuId']}'),
+          routes: [
+            GoRoute(
+              path: ':agentId',
+              builder: (_, state) =>
+                  state.pathParameters['subMenuId'] == MenuConstants.hrPayrollId
+                  ? Text('fiche de paie ${state.pathParameters['agentId']}')
+                  : HrPresenceAgentPage(
+                      args: (
+                        agentId: state.pathParameters['agentId']!,
+                        month: '2026-09',
+                        yearStart: null,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      MaterialApp.router(
+        locale: const Locale('fr'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.text('Ouvrir la paie'));
+    await settle(tester);
+
+    expect(
+      router.routerDelegate.currentConfiguration.uri.toString(),
+      '/home/${MenuConstants.hrPayrollId}/a-1?mois-agent=2026-09',
+    );
+    expect(find.text('fiche de paie a-1'), findsOneWidget);
+    // `go` : la page de présence ne reste pas sous la fiche.
+    expect(find.byType(HrPresenceAgentPage), findsNothing);
+  });
 }
