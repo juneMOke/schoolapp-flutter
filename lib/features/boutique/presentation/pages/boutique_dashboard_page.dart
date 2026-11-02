@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -15,6 +14,7 @@ import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_navigation.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_academic_year_gate.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_body.dart';
@@ -22,7 +22,6 @@ import 'package:school_app_flutter/features/boutique/presentation/widgets/dashbo
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_provisional_notice.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Le tableau de bord de la boutique : « combien a-t-elle vendu, quoi, et à
 /// quels élèves ? » — un flux, jamais un stock ni une dette.
@@ -94,7 +93,7 @@ class _DashboardViewState extends State<_DashboardView> {
     }
   }
 
-  void _openTill() => context.go(AppRoutesNames.boutiqueAchats);
+  void _openTill() => openBoutiqueTill(context);
 
   /// Un article du palmarès devient le filtre de la liste, et l'écran y
   /// descend : trois gestes, aucune saisie, pour « qui a déjà son polo ? ».

@@ -34,6 +34,8 @@ import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_dashboard_page.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_view.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../dashboard_fixtures.dart';
@@ -61,6 +63,9 @@ class _MockAcademicYearBloc
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
 
+class _MockNavigationBloc extends MockBloc<NavigationEvent, NavigationState>
+    implements NavigationBloc {}
+
 void main() {
   late _MockStats getStats;
   late _MockProvisional getProvisional;
@@ -77,6 +82,9 @@ void main() {
       BeneficiariesQuery(academicYearId: '', window: sevenDays),
     );
     registerFallbackValue(SalesQuery(academicYearId: '', window: sevenDays));
+    registerFallbackValue(
+      const SubMenuItemSelected(menuId: '', subMenuId: '', title: ''),
+    );
   });
 
   void answerStats(
@@ -165,6 +173,7 @@ void main() {
   Future<void> pumpPage(
     WidgetTester tester, {
     Size size = const Size(1280, 2600),
+    NavigationBloc? navigation,
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -173,6 +182,8 @@ void main() {
         providers: [
           BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
           BlocProvider<AuthBloc>.value(value: authBloc),
+          if (navigation != null)
+            BlocProvider<NavigationBloc>.value(value: navigation),
         ],
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -390,5 +401,30 @@ void main() {
     await pumpPage(tester, size: const Size(360, 4200));
     expect(tester.takeException(), isNull);
     expect(find.text('Élèves concernés'), findsOneWidget);
+  });
+
+  testWidgets('« Ouvrir la caisse » passe au sous-menu, dans la coquille', (
+    tester,
+  ) async {
+    final navigation = _MockNavigationBloc();
+    when(() => navigation.state).thenReturn(
+      const NavigationState(
+        menuItems: [],
+        isSidebarExpanded: true,
+        currentTitle: '',
+      ),
+    );
+    await pumpPage(tester, navigation: navigation);
+
+    await tester.tap(find.text('Ouvrir la caisse'));
+    await tester.pump();
+
+    // Une route nue (`context.go`) perdrait la barre latérale et le retour.
+    final event =
+        verify(() => navigation.add(captureAny())).captured.single
+            as SubMenuItemSelected;
+    expect(event.menuId, MenuConstants.boutiqueMenuId);
+    expect(event.subMenuId, MenuConstants.boutiqueAchatsId);
+    expect(event.title, 'Caisse');
   });
 }
