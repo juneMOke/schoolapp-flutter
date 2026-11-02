@@ -31,7 +31,7 @@ class CoteTotalValue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final color = ink ?? AppColors.textMuted;
+    final color = ink ?? AppColors.textMutedAa;
     final meterWidth = dense
         ? AppDimensions.coteMeterWidthDense
         : AppDimensions.coteMeterWidth;
@@ -47,7 +47,7 @@ class CoteTotalValue extends StatelessWidget {
           ),
           TextSpan(
             text: '/$max',
-            style: const TextStyle(color: AppColors.textMuted),
+            style: const TextStyle(color: AppColors.textMutedAa),
           ),
         ],
       ),

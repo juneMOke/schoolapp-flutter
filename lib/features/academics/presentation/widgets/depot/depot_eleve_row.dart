@@ -50,7 +50,7 @@ class DepotEleveRow extends StatelessWidget {
                     ).formatMediumDate(depositedAt.toLocal()),
                   ),
                   style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textMuted,
+                    color: AppColors.textMutedAa,
                   ),
                 ),
             ],

@@ -45,7 +45,7 @@ class TicketPrintJobTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final onChanged = this.onChanged;
     final ready = job.isReady;
-    final muted = ready ? AppColors.textSecondary : AppColors.textMuted;
+    final muted = ready ? AppColors.textSecondary : AppColors.textMutedAa;
     final student = job.studentFullName.trim();
     final problem = _problemLabel(l10n);
 
@@ -99,7 +99,7 @@ class TicketPrintJobTile extends StatelessWidget {
                           style: AppTextStyles.bodyStrong.copyWith(
                             color: ready
                                 ? AppColors.textPrimary
-                                : AppColors.textMuted,
+                                : AppColors.textMutedAa,
                           ),
                         ),
                         Text(

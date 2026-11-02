@@ -96,7 +96,7 @@ class JustificationCard extends StatelessWidget {
                 if (decided != null) l10n.justificationDecidedOn(decided),
               ].join(' · '),
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textMuted,
+                color: AppColors.textMutedAa,
               ),
             ),
           ],
@@ -138,7 +138,7 @@ class _Quote extends StatelessWidget {
     children: [
       Text(
         label,
-        style: AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
+        style: AppTypography.labelSmall.copyWith(color: AppColors.textMutedAa),
       ),
       const SizedBox(height: AppSpacing.xs),
       Text(text, style: AppTypography.bodyMedium),

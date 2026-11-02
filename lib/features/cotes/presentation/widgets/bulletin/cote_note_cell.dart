@@ -214,7 +214,7 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
         isCollapsed: true,
         border: InputBorder.none,
         hintText: '—',
-        hintStyle: TextStyle(color: AppColors.textMuted),
+        hintStyle: TextStyle(color: AppColors.textMutedAa),
       ),
       onChanged: _typed,
       onEditingComplete: () {},

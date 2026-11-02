@@ -63,7 +63,7 @@ class _BeneficiaryRow extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: name == null ? FontWeight.w400 : FontWeight.w600,
                 color: name == null
-                    ? AppColors.textMuted
+                    ? AppColors.textMutedAa
                     : AppColors.bleuProfond,
                 fontStyle: name == null ? FontStyle.italic : FontStyle.normal,
               ),
@@ -73,7 +73,7 @@ class _BeneficiaryRow extends StatelessWidget {
           Text(
             classLabel ?? l10n.boutiqueSaleDetailStudentNoClass,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.textMuted,
+              color: AppColors.textMutedAa,
               fontStyle: classLabel == null
                   ? FontStyle.italic
                   : FontStyle.normal,
