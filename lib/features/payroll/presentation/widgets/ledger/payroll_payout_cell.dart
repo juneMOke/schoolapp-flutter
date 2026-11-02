@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/tap_target_height.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -57,33 +59,45 @@ class PayrollPayoutCell extends StatelessWidget {
     };
     if (pill != null && view.canPay) {
       final (tone, label) = pill;
-      return InkWell(
+      // La pastille ouvre le versement : une cible de 48 dp au doigt (40 à
+      // la souris), lue comme un bouton, son libellé entier en info-bulle
+      // quand la colonne le coupe.
+      return Semantics(
+        button: true,
+        label: label,
+        excludeSemantics: true,
         onTap: onPayout,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs / 2,
+        child: InkWell(
+          onTap: onPayout,
+          borderRadius: BorderRadius.circular(AppSpacing.md),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: TapTargetHeight.of(context)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs / 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: tone.soft,
+                      borderRadius: BorderRadius.circular(AppSpacing.md),
+                    ),
+                    child: EteeloOverflowText(
+                      label,
+                      style: AppTypography.labelSmall.copyWith(color: tone.ink),
+                    ),
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: tone.soft,
-                  borderRadius: BorderRadius.circular(AppSpacing.md),
-                ),
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelSmall.copyWith(color: tone.ink),
-                ),
-              ),
+                if (last != null) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  RecordSyncDot(state: last.syncState),
+                ],
+              ],
             ),
-            if (last != null) ...[
-              const SizedBox(width: AppSpacing.xs),
-              RecordSyncDot(state: last.syncState),
-            ],
-          ],
+          ),
         ),
       );
     }

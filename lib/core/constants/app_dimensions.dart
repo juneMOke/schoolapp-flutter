@@ -225,6 +225,10 @@ class AppDimensions {
   /// lignes clé/valeur au-dessus desquelles elle s'aligne.
   static const financeRowIconSize = 18.0;
 
+  /// La flèche de retour de la fiche d'un élève (Résultats, vue focus) : le
+  /// glyphe garde sa chasse, la cible fait [minTouchTarget].
+  static const resultatsFocusBackIconSize = 18.0;
+
   // Popin "Rechercher un parent" (étape Tuteurs de l'inscription).
   static const guardianSearchModalMaxWidth = 560.0;
 
