@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import camera_desktop
 import connectivity_plus
 import file_picker
 import file_selector_macos
@@ -16,6 +17,7 @@ import sqflite_sqlcipher
 import url_launcher_macos
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  CameraDesktopPlugin.register(with: registry.registrar(forPlugin: "CameraDesktopPlugin"))
   ConnectivityPlusPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlusPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))

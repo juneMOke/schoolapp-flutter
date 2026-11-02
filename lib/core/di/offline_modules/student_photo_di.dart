@@ -25,6 +25,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
+import 'package:school_app_flutter/core/storage/encrypted_blob/platform_blob_files.dart';
 import 'package:school_app_flutter/features/student_photo/data/local/student_photo_blobs.dart';
 import 'package:school_app_flutter/features/student_photo/data/local/student_photo_dao.dart';
 import 'package:school_app_flutter/features/student_photo/data/local/student_photo_sync_dao.dart';
@@ -67,6 +68,7 @@ void registerStudentPhoto(GetIt getIt) {
     () => StudentPhotoBlobs(
       EncryptedBlobStore(
         directoryName: AppConstants.studentPhotosDirectoryName,
+        files: platformBlobFiles(AppConstants.studentPhotosDirectoryName),
         keyService: BlobKeyService(
           getIt<FlutterSecureStorage>(),
           storageKey: AppConstants.studentPhotosKeyStorageKey,

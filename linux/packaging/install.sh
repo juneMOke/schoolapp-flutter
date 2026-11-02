@@ -22,6 +22,10 @@ SHARED_LIBS="$(/sbin/ldconfig -p 2>/dev/null || true)"
 if [[ "$SHARED_LIBS" != *libsecret-1.so.0* ]]; then
   echo "⚠ libsecret absente : installez-la (Debian/Ubuntu : sudo apt install libsecret-1-0 gnome-keyring)." >&2
 fi
+# La caméra lie GStreamer au chargement : sans lui, l'application ne démarre pas.
+if [[ "$SHARED_LIBS" != *libgstapp-1.0.so.0* ]]; then
+  echo "⚠ GStreamer absent : installez-le (Debian/Ubuntu : sudo apt install gstreamer1.0-plugins-base gstreamer1.0-plugins-good)." >&2
+fi
 
 rm -rf "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR" "$APPLICATIONS_DIR"

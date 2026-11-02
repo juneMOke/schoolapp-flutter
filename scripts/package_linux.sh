@@ -10,8 +10,9 @@
 # `--dart-define` distinguent les environnements.
 #
 # Prérequis de build : clang cmake ninja-build pkg-config libgtk-3-dev
-# libsecret-1-dev. Prérequis d'exécution : libgtk-3-0 libsecret-1-0 et un
-# trousseau (gnome-keyring), voir install.sh.
+# libsecret-1-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev.
+# Prérequis d'exécution : libgtk-3-0 libsecret-1-0, un trousseau
+# (gnome-keyring) et GStreamer (gstreamer1.0-plugins-good), voir install.sh.
 set -euo pipefail
 
 APP_ENV=""

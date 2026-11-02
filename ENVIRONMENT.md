@@ -191,7 +191,7 @@ de staging relirait la base de la production.
 | Livrable | `eteelo-connect-<version>-<env>-windows-x64-setup.exe` (Inno Setup) | `eteelo-connect-<version>-<env>-linux-x64.tar.gz` + `install.sh` |
 | Où se construit | **sur Windows uniquement** (CI `windows-latest`) | ici ou en CI |
 | Bases locales | `%APPDATA%\com.junethink\ETEELO CONNECT\databases\<env>` | `~/.local/share/com.junethink.school_app_flutter/databases/<env>` |
-| Prérequis poste | aucun (runtime VC++ embarqué) | `libgtk-3-0`, `libsecret-1-0`, un trousseau (`gnome-keyring`) |
+| Prérequis poste | aucun (runtime VC++ embarqué) | `libgtk-3-0`, `libsecret-1-0`, un trousseau (`gnome-keyring`), GStreamer (`gstreamer1.0-plugins-base`, `gstreamer1.0-plugins-good`) |
 
 ```bash
 # Linux, en local
