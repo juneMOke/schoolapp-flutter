@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/navigation/location_query.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -103,13 +104,26 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.paused) return;
+    // `hidden` : l'onglet passe derrière (web), avant même `paused` — sur le
+    // web, une fermeture n'arrive jamais jusqu'à `paused`.
+    if (state != AppLifecycleState.paused &&
+        state != AppLifecycleState.hidden) {
+      return;
+    }
     // La case en cours s'écrit en perdant le focus, puis la file part.
     FocusManager.instance.primaryFocus?.unfocus();
     _flush();
   }
 
   void _flush() => context.read<CoteSaveCubit>().flushNow();
+
+  /// Une sortie (Précédent, un autre écran) pendant une frappe : la case
+  /// s'écrit, puis la file part — aucune question, rien ne se perd.
+  Future<bool> _commitBeforeLeaving() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (mounted) _flush();
+    return true;
+  }
 
   void _open(OfflineClassroom classroom) {
     final bloc = context.read<CoteSaisieBloc>();
@@ -207,7 +221,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     // Posé ici, au-dessus de l'attente de l'année : un lien profond ouvre sa
     // classe avant que la page n'ait fini d'arriver, et l'enregistrement doit
     // tout de même s'y attacher.
-    return BlocListener<CoteSaisieBloc, CoteSaisieState>(
+    final page = BlocListener<CoteSaisieBloc, CoteSaisieState>(
       listenWhen: (previous, current) {
         _previous = previous;
         return true;
@@ -223,6 +237,20 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
           ),
         ),
         child: Builder(builder: _content),
+      ),
+    );
+    // Une frappe en cours, que rien n'a écrite : sur le web, fermer ou
+    // recharger l'onglet demande confirmation ; une sortie dans l'appli
+    // écrit la case avant de partir. Seule la garde se relit — la page ne
+    // se rebâtit pas à chaque frappe.
+    final uncommitted = context.read<CoteSaisieBloc>().uncommittedCell;
+    return ValueListenableBuilder<bool>(
+      valueListenable: uncommitted,
+      child: page,
+      builder: (context, _, page) => RouteExitGuard(
+        hasUnsavedWork: () => uncommitted.value,
+        confirmExit: _commitBeforeLeaving,
+        child: page!,
       ),
     );
   }

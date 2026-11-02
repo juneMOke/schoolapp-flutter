@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
@@ -16,6 +17,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
 import 'package:school_app_flutter/features/cotes/presentation/pages/cote_saisie_page.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_note_cell.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/workspace/cote_workspace.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -142,5 +144,55 @@ void main() {
     await tester.pump();
 
     expect(find.text('Choisissez une classe'), findsOneWidget);
+  });
+
+  group('la frappe en cours', () {
+    Future<void> openClass(WidgetTester tester) async {
+      await pumpPage(tester);
+      bloc.add(const CoteSaisieOpened('c1'));
+      await tester.runAsync(
+        () => bloc.stream.firstWhere((s) => s is CoteSaisieReady),
+      );
+      await tester.pump();
+      await tester.pump();
+    }
+
+    RouteExitGuard guard(WidgetTester tester) =>
+        tester.widget<RouteExitGuard>(find.byType(RouteExitGuard));
+
+    testWidgets('une case tapée et non quittée retient la sortie ; partir '
+        'l\'écrit, sans question', (tester) async {
+      await openClass(tester);
+      // Contre-épreuve : rien de tapé, rien à retenir.
+      expect(guard(tester).hasUnsavedWork(), isFalse);
+
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(CoteNoteCell),
+              matching: find.byType(TextField),
+            )
+            .first,
+      );
+      await tester.pump();
+      tester.testTextInput.enterText('14');
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+
+      expect(repository.saved, isEmpty);
+      expect(guard(tester).hasUnsavedWork(), isTrue);
+
+      final leaving = RouteExitGuard.mayLeave(
+        tester.element(find.byType(CoteWorkspace)),
+      );
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+
+      expect(await leaving, isTrue);
+      expect(find.byType(Dialog), findsNothing);
+      expect(repository.saved.single.$2, 14);
+      expect(guard(tester).hasUnsavedWork(), isFalse);
+    });
   });
 }

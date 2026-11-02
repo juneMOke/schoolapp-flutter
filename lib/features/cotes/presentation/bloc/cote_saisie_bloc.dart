@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -46,6 +47,13 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
 
   String? get classroomId => _classroomId;
 
+  /// Une case reçoit une frappe que rien n'a encore écrite : la cote ne
+  /// s'écrit qu'en quittant la case. Écoutable : la garde de sortie de la
+  /// page se relit sans rebâtir la grille à chaque frappe.
+  final ValueNotifier<bool> uncommittedCell = ValueNotifier(false);
+
+  void _syncUncommitted() => uncommittedCell.value = _previews.isNotEmpty;
+
   Future<void> _dispatch(
     CoteSaisieEvent event,
     Emitter<CoteSaisieState> emit,
@@ -71,6 +79,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     _lastOpened = event;
     _classroomId = event.classroomId;
     _previews.clear();
+    _syncUncommitted();
     emit(const CoteSaisieLoading());
     final result = await _repository.load(event.classroomId);
     result.fold((failure) => emit(_failureState(failure)), (snapshot) {
@@ -286,6 +295,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     );
     final preview = step?.cell ?? event.base;
     _previews[event.key] = preview;
+    _syncUncommitted();
     emit(_withCell(s, preview, event.key.studentId));
   }
 
@@ -294,6 +304,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     Emitter<CoteSaisieState> emit,
   ) async {
     _previews.remove(event.key);
+    _syncUncommitted();
     final s = state;
     final classroomId = _classroomId;
     if (s is! CoteSaisieReady || classroomId == null) return;
@@ -334,6 +345,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     Emitter<CoteSaisieState> emit,
   ) async {
     _previews.remove(event.base.key);
+    _syncUncommitted();
     final s = state;
     if (s is CoteSaisieReady) {
       emit(_withCell(s, event.base, event.base.key.studentId));
@@ -414,6 +426,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
   @override
   Future<void> close() {
     _highlight?.cancel();
+    uncommittedCell.dispose();
     return super.close();
   }
 }
