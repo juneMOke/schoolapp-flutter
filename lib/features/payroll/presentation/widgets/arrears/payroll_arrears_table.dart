@@ -103,19 +103,28 @@ class PayrollArrearsTable extends StatelessWidget {
             ),
           ],
         ),
-        Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
+        // Le motif d'un mois s'écrit sous sa pastille : en info-bulle, il ne
+        // se trouvait ni au doigt ni en mode cartes (et un mois sans motif
+        // ouvrait une bulle vide).
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (final arrear in agent.months)
-              Tooltip(
-                message: arrear.reason ?? '',
-                child: _Chip(
-                  label:
-                      '${PayrollLabels.month(context, arrear.month)} · '
-                      '${PayrollLabels.money(arrear.dueInCents, arrear.currency)}',
-                ),
+            for (final (index, arrear) in agent.months.indexed) ...[
+              if (index > 0) const SizedBox(height: AppSpacing.xs),
+              _Chip(
+                label:
+                    '${PayrollLabels.month(context, arrear.month)} · '
+                    '${PayrollLabels.money(arrear.dueInCents, arrear.currency)}',
               ),
+              if (arrear.reason case final reason?
+                  when reason.trim().isNotEmpty)
+                Text(
+                  reason,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textMutedAa,
+                  ),
+                ),
+            ],
           ],
         ),
         Column(

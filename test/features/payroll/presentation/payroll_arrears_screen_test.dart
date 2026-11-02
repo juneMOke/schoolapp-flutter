@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_draf
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_line.dart';
+import 'package:school_app_flutter/features/payroll/domain/entities/payroll_payout_policy.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_settings.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/arrears/payroll_arrears_screen.dart';
@@ -32,7 +33,9 @@ void main() {
     frozen: true,
   );
 
-  final snapshot = PayrollSnapshot(
+  PayrollSnapshot snapshotWith({
+    Map<String, PayrollPayoutPolicy> policies = const {},
+  }) => PayrollSnapshot(
     members: [
       member(
         'm-1',
@@ -86,7 +89,9 @@ void main() {
     schoolYears: const [(start: '2025-09-01', end: '2027-07-02')],
     shareTraces: const {},
     hasEverSynced: true,
+    payoutPolicies: policies,
   );
+  final snapshot = snapshotWith();
 
   testAtReferenceFormats('Registre des arriérés', (tester, format) async {
     await pumpPayrollScreen(
@@ -97,6 +102,37 @@ void main() {
 
     expect(find.text('DETTE SALARIALE'), findsOneWidget);
     expect(find.text('KABASELE-TSHIMANGA Mutombo Marie-Béatrice'), findsOne);
+  });
+
+  testAtReferenceFormats('le motif d un mois se lit sous sa pastille', (
+    tester,
+    format,
+  ) async {
+    // Septembre versé à 50 % par décision de la direction ; août sans motif.
+    await pumpPayrollScreen(
+      tester,
+      snapshot: snapshotWith(
+        policies: const {
+          '2026-09': PayrollPayoutPolicy(
+            month: '2026-09',
+            ratePercent: 50,
+            reason: 'Trésorerie insuffisante',
+          ),
+        },
+      ),
+      child: const PayrollArrearsScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    // Écrit à l'écran, en colonnes comme en cartes — plus en info-bulle.
+    final reason = find.text('Trésorerie insuffisante');
+    expect(reason, findsWidgets);
+    await tester.ensureVisible(reason.first);
+    expect(find.byTooltip('Trésorerie insuffisante'), findsNothing);
+    // Aucune info-bulle vide sur un mois sans motif.
+    for (final tooltip in tester.widgetList<Tooltip>(find.byType(Tooltip))) {
+      expect(tooltip.message, isNot(isEmpty));
+    }
   });
 
   testWidgets(
