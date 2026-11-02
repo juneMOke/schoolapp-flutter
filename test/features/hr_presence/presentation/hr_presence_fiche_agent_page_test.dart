@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table_cards.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_year.dart';
@@ -252,6 +253,19 @@ void main() {
   testAtReferenceFormats('la fiche mensuelle tient', (tester, format) async {
     await pump(tester, size: null);
     expect(find.byType(PresenceMonthCalendar), findsOneWidget);
+    // Un jour passé s'ouvre au doigt : sa case garde 48 dp de large, même
+    // sur le téléphone (48,4 dp à 360).
+    final days = find.descendant(
+      of: find.byType(PresenceMonthCalendar),
+      matching: find.byType(InkWell),
+    );
+    expect(days, findsWidgets);
+    for (final day in days.evaluate()) {
+      expect(
+        (day.renderObject! as RenderBox).size.width,
+        greaterThanOrEqualTo(AppDimensions.minTouchTarget),
+      );
+    }
   });
 
   testAtReferenceFormats('la fiche annuelle tient', (tester, format) async {
