@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -8,6 +9,29 @@ import 'package:school_app_flutter/features/student_photo/presentation/capture/w
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/photo_viewfinder.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+/// Le titre et la phrase d'une caméra empêchée. Sur le web, un refus se
+/// lève dans le navigateur, pour ce site : la phrase le dit.
+({String title, String message}) cameraBlockTexts(
+  AppLocalizations l10n,
+  CameraBlockReason reason, {
+  bool web = kIsWeb,
+}) => switch (reason) {
+  CameraBlockReason.denied => (
+    title: l10n.photoCameraBlockedTitle,
+    message: web
+        ? l10n.photoCameraBlockedWebMessage
+        : l10n.photoCameraBlockedMessage,
+  ),
+  CameraBlockReason.none => (
+    title: l10n.photoNoCameraTitle,
+    message: l10n.photoNoCameraMessage,
+  ),
+  CameraBlockReason.insecureContext => (
+    title: l10n.photoCameraInsecureTitle,
+    message: l10n.photoCameraInsecureMessage,
+  ),
+};
+
 /// Le viseur et sa barre (Importer · déclencheur · bascule) — pour une
 /// caméra en route, en direct, absente ou refusée. L'import reste toujours
 /// possible.
@@ -16,6 +40,9 @@ class CaptureCameraBody extends StatelessWidget {
   final VoidCallback onImport;
   final VoidCallback onShoot;
   final VoidCallback onSwitch;
+
+  /// Redemande la caméra après un refus ou une absence.
+  final VoidCallback onRetry;
 
   /// Cf. [PhotoViewfinder.maxHeight].
   final double? viewfinderMaxHeight;
@@ -26,6 +53,7 @@ class CaptureCameraBody extends StatelessWidget {
     required this.onImport,
     required this.onShoot,
     required this.onSwitch,
+    required this.onRetry,
     this.viewfinderMaxHeight,
   });
 
@@ -45,14 +73,11 @@ class CaptureCameraBody extends StatelessWidget {
             CaptureStarting() => const _CameraStarting(),
             CaptureBlocked(:final reason) => CaptureProblemCard(
               icon: Icons.videocam_off_rounded,
-              title: reason == CameraBlockReason.denied
-                  ? l10n.photoCameraBlockedTitle
-                  : l10n.photoNoCameraTitle,
-              message: reason == CameraBlockReason.denied
-                  ? l10n.photoCameraBlockedMessage
-                  : l10n.photoNoCameraMessage,
+              title: cameraBlockTexts(l10n, reason).title,
+              message: cameraBlockTexts(l10n, reason).message,
               actionLabel: l10n.photoImportAction,
               onAction: onImport,
+              onRetry: reason.canRetry ? onRetry : null,
             ),
             _ => null,
           },
@@ -143,6 +168,9 @@ class CaptureProblemCard extends StatelessWidget {
   final String actionLabel;
   final VoidCallback onAction;
 
+  /// « Réessayer » : redemande la caméra. Nul, pas de second bouton.
+  final VoidCallback? onRetry;
+
   const CaptureProblemCard({
     super.key,
     required this.icon,
@@ -150,10 +178,12 @@ class CaptureProblemCard extends StatelessWidget {
     required this.message,
     required this.actionLabel,
     required this.onAction,
+    this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
+    final onRetry = this.onRetry;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -171,6 +201,13 @@ class CaptureProblemCard extends StatelessWidget {
             onPressed: onAction,
             primary: true,
           ),
+          secondaryAction: onRetry == null
+              ? null
+              : PhotoDarkPillButton(
+                  label: AppLocalizations.of(context)!.photoRetry,
+                  icon: Icons.refresh_rounded,
+                  onPressed: onRetry,
+                ),
         ),
       ),
     );

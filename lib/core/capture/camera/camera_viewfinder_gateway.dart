@@ -23,6 +23,13 @@ class CameraAccessDeniedException implements Exception {
   const CameraAccessDeniedException();
 }
 
+/// La page n'est pas servie en https : le navigateur refuse la caméra sans
+/// même la demander. Rien à autoriser côté utilisateur ; c'est l'adresse de
+/// l'application qu'il faut changer.
+class CameraInsecureContextException implements Exception {
+  const CameraInsecureContextException();
+}
+
 /// L'appareil n'a aucune caméra utilisable (poste fixe sans webcam, Linux).
 class NoCameraException implements Exception {
   const NoCameraException();
@@ -50,7 +57,9 @@ abstract class CameraSession {
 /// Seul endroit qui touche au greffon `camera` : tout le reste de la prise de
 /// vue se teste sans appareil.
 abstract class CameraViewfinderGateway {
-  /// Les caméras de l'appareil ; vide s'il n'y en a pas.
+  /// Les caméras de l'appareil ; vide s'il n'y en a pas. Lève
+  /// [CameraAccessDeniedException] si l'accès est refusé,
+  /// [CameraInsecureContextException] sur une page web servie en http.
   Future<List<CameraLens>> lenses();
 
   /// Ouvre [lens]. Lève [CameraAccessDeniedException] si l'accès est refusé,

@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/core/capture/camera/camera_viewfinder_gateway.dart';
+import 'package:school_app_flutter/core/web/secure_context.dart';
 
 /// [CameraViewfinderGateway] sur le greffon `camera`.
 ///
@@ -14,6 +15,15 @@ import 'package:school_app_flutter/core/capture/camera/camera_viewfinder_gateway
 /// Sans son : l'application ne filme pas, et demander le micro ferait échouer
 /// l'ouverture sur un appareil qui le refuse.
 class PlatformCameraViewfinderGateway extends CameraViewfinderGateway {
+  /// Vrai sur une page web servie en http : le greffon y lève une erreur
+  /// JavaScript (pas de `navigator.mediaDevices`) qu'on lirait sinon comme
+  /// « aucune caméra ».
+  final bool Function() _insecureContext;
+
+  PlatformCameraViewfinderGateway({bool Function()? insecureContext})
+    : _insecureContext =
+          insecureContext ?? (() => kIsWeb && !isSecureContext());
+
   /// Codes par lesquels le greffon signale une caméra refusée ou bloquée par
   /// la gestion de flotte.
   static const Set<String> _deniedCodes = {
@@ -26,6 +36,7 @@ class PlatformCameraViewfinderGateway extends CameraViewfinderGateway {
 
   @override
   Future<List<CameraLens>> lenses() async {
+    if (_insecureContext()) throw const CameraInsecureContextException();
     final List<CameraDescription> cameras;
     try {
       cameras = await availableCameras();

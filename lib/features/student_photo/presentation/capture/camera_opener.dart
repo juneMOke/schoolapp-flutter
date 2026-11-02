@@ -66,6 +66,8 @@ class CameraOpener {
       return CameraOpened(session, canSwitch: _lenses.length > 1);
     } on CameraAccessDeniedException {
       return const CameraUnavailable(CameraBlockReason.denied);
+    } on CameraInsecureContextException {
+      return const CameraUnavailable(CameraBlockReason.insecureContext);
     } catch (_) {
       return const CameraUnavailable(CameraBlockReason.none);
     }

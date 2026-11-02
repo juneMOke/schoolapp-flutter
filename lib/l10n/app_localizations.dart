@@ -24828,6 +24828,24 @@ abstract class AppLocalizations {
   /// **'Allow it in the settings, or import a photo.'**
   String get photoCameraBlockedMessage;
 
+  /// No description provided for @photoCameraBlockedWebMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the camera for this site (icon left of the address), then try again; or import a photo.'**
+  String get photoCameraBlockedWebMessage;
+
+  /// No description provided for @photoCameraInsecureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Insecure connection'**
+  String get photoCameraInsecureTitle;
+
+  /// No description provided for @photoCameraInsecureMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser only opens the camera on an https address. Open the app over https, or import a photo.'**
+  String get photoCameraInsecureMessage;
+
   /// No description provided for @photoNoCameraTitle.
   ///
   /// In en, this message translates to:

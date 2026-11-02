@@ -34,6 +34,7 @@ class CaptureBody extends StatelessWidget {
         onImport: cubit.importFile,
         onShoot: cubit.shoot,
         onSwitch: cubit.switchCamera,
+        onRetry: cubit.retryCamera,
         viewfinderMaxHeight: viewfinderMaxHeight,
       ),
       CaptureReview() => CaptureReviewBody(

@@ -53,6 +53,7 @@ class SessionShootingView extends StatelessWidget {
       onSwitch: cubit.switchCamera,
       onAdvance: cubit.advance,
       onRetake: cubit.retakeCurrent,
+      onRetryCamera: cubit.retryCamera,
     );
     final queue = Column(
       mainAxisSize: MainAxisSize.min,

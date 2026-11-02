@@ -41,12 +41,19 @@ class FakeSession implements CameraSession {
 class FakeCameras extends CameraViewfinderGateway {
   List<CameraLens> available;
   Object? openError;
+
+  /// Levée par [lenses] (refus du navigateur, page en http).
+  Object? lensesError;
   final List<FakeSession> opened = [];
 
   FakeCameras(this.available);
 
   @override
-  Future<List<CameraLens>> lenses() async => available;
+  Future<List<CameraLens>> lenses() async {
+    final error = lensesError;
+    if (error != null) throw error;
+    return available;
+  }
 
   @override
   Future<CameraSession> open(CameraLens lens) async {

@@ -29,6 +29,9 @@ class SessionShootPanel extends StatelessWidget {
   final VoidCallback onAdvance;
   final VoidCallback onRetake;
 
+  /// Redemande la caméra après un refus ou une absence.
+  final VoidCallback onRetryCamera;
+
   /// Le viseur (et son flash) se borne à cette hauteur, centré : sa largeur
   /// en découle. Nul : toute la largeur du panneau.
   final double? viewfinderMaxHeight;
@@ -45,6 +48,7 @@ class SessionShootPanel extends StatelessWidget {
     required this.onSwitch,
     required this.onAdvance,
     required this.onRetake,
+    required this.onRetryCamera,
   });
 
   @override
@@ -125,12 +129,16 @@ class SessionShootPanel extends StatelessWidget {
                   overlay: switch (camera) {
                     CameraUnavailable(:final reason) => CaptureProblemCard(
                       icon: Icons.videocam_off_rounded,
-                      title: reason == CameraBlockReason.denied
-                          ? l10n.photoCameraBlockedTitle
-                          : l10n.photoNoCameraTitle,
-                      message: l10n.photoSessionImportInstead,
+                      title: cameraBlockTexts(l10n, reason).title,
+                      // Sans caméra, la séance continue à l'import ;
+                      // refusée ou en http, on dit d'abord comment la
+                      // retrouver.
+                      message: reason == CameraBlockReason.none
+                          ? l10n.photoSessionImportInstead
+                          : cameraBlockTexts(l10n, reason).message,
                       actionLabel: l10n.photoImportAction,
                       onAction: onImport,
+                      onRetry: reason.canRetry ? onRetryCamera : null,
                     ),
                     null => const Center(
                       child: CircularProgressIndicator(color: AppColors.orDoux),

@@ -69,7 +69,8 @@ const referenceFormats = <Size>[
 ];
 
 class PhotoLayoutHarness {
-  final FakeCameras cameras = FakeCameras([backLens]);
+  /// Neuves à chaque test : un refus simulé ne fuit pas dans le suivant.
+  FakeCameras cameras = FakeCameras([backLens]);
   final _MockRepository _repository = _MockRepository();
   final DocumentCaptureGateway files = _MockFiles();
   late Future<void> Function() _unregister;
@@ -81,6 +82,7 @@ class PhotoLayoutHarness {
   }
 
   Future<void> setUp() async {
+    cameras = FakeCameras([backLens]);
     await getIt.reset();
     when(
       () => _repository.loadIndex(),

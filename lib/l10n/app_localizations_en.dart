@@ -15892,6 +15892,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Allow it in the settings, or import a photo.';
 
   @override
+  String get photoCameraBlockedWebMessage =>
+      'Allow the camera for this site (icon left of the address), then try again; or import a photo.';
+
+  @override
+  String get photoCameraInsecureTitle => 'Insecure connection';
+
+  @override
+  String get photoCameraInsecureMessage =>
+      'The browser only opens the camera on an https address. Open the app over https, or import a photo.';
+
+  @override
   String get photoNoCameraTitle => 'No camera found';
 
   @override
