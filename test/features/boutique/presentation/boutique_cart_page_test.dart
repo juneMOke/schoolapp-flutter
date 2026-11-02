@@ -307,4 +307,30 @@ void main() {
     expect(find.byType(BoutiqueCartPage), findsOneWidget);
     expect(bloc.state.cart.isEmpty, isFalse);
   });
+
+  group('passé en paysage', () {
+    testWidgets('la caisse montrerait le panier en colonne : la page se '
+        'referme, le panier reste', (tester) async {
+      final bloc = await pumpCartPage(tester, seed: ready());
+      expect(find.byType(BoutiqueCartPage), findsOneWidget);
+
+      await tester.binding.setSurfaceSize(const Size(1400, 900));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BoutiqueCartPage), findsNothing);
+      expect(find.text('CATALOGUE'), findsOneWidget);
+      expect(bloc.state.cart.isEmpty, isFalse);
+    });
+
+    testWidgets('contre-épreuve : sous le seuil, la page reste', (
+      tester,
+    ) async {
+      await pumpCartPage(tester, seed: ready());
+
+      await tester.binding.setSurfaceSize(const Size(960, 600));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BoutiqueCartPage), findsOneWidget);
+    });
+  });
 }
