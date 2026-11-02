@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/on_dark_ink_well.dart';
 import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -127,7 +128,7 @@ class _MonthButton extends StatelessWidget {
     button: true,
     child: Tooltip(
       message: AppLocalizations.of(context)!.presenceMarkPickMonth,
-      child: InkWell(
+      child: OnDarkInkWell(
         onTap: onPick,
         borderRadius: AppRadius.brSm,
         child: TouchTarget(

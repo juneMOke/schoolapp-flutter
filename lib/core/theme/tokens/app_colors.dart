@@ -57,6 +57,13 @@ class AppColors {
   // `stateFocus`, bleu ardoise à 20 %, y disparaît. Blanc cassé à 24 %, nettement
   // au-dessus du survol (6 %) et de l'appui (10 %) des mêmes surfaces.
   static const stateFocusOnDark = Color(0x3DFAFAF7);
+
+  /// Survol sur une surface sombre : blanc cassé à 6 %. [stateHover], bleu
+  /// ardoise, y est invisible.
+  static const stateHoverOnDark = Color(0x0FFAFAF7);
+
+  /// Appui sur une surface sombre : blanc cassé à 10 %.
+  static const statePressedOnDark = Color(0x1AFAFAF7);
   static const stateDisabled = border;
 
   /// Anneau de focus clavier d'un bouton : opaque, séparé du bouton par un
