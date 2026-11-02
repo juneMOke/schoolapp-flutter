@@ -25,6 +25,22 @@ class HrAgentIntent {
   /// ⚠️ Le `Future` de `push` ne se termine pas quand Précédent du navigateur
   /// retire la fiche (nouvelle configuration, pas un `pop`) : c'est la page
   /// qui prévient, à sa disparition ([onClosed]).
+  /// Ouvre une fiche neuve par-dessus l'écran [subMenuId], à son adresse
+  /// (`…/nouveau`), préremplie des mots de [prefill] ; se termine quand elle
+  /// se referme.
+  static Future<void> openNew(
+    BuildContext context, {
+    required String subMenuId,
+    String prefill = '',
+  }) => open(
+    context,
+    subMenuId: subMenuId,
+    agentId: AppRoutesNames.hrNewAgentSegment,
+    query: prefill.trim().isEmpty
+        ? const {}
+        : {AppRoutesNames.hrNewAgentPrefillParam: prefill},
+  );
+
   static Future<void> open(
     BuildContext context, {
     required String subMenuId,

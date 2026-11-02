@@ -397,7 +397,12 @@ class AppRouter {
       onExit: RouteExitGuard.onExitOfPage(_shellPageKey),
       pageBuilder: (context, state) =>
           _shellPage(state.pathParameters['subMenuId']),
-      routes: [BoutiqueSaleRoutes.sale(), HrAgentRoutes.agent()],
+      // `nouveau` avant `:agentId`, qui le prendrait pour un identifiant.
+      routes: [
+        BoutiqueSaleRoutes.sale(),
+        HrAgentRoutes.newAgent(),
+        HrAgentRoutes.agent(),
+      ],
     ),
     ShellRoute(
       builder: (context, state, child) {

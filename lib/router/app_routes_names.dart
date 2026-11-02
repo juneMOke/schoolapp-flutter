@@ -134,6 +134,14 @@ class AppRoutesNames {
   /// partagé rouvrent l'écran dans la coquille, et la fiche par-dessus.
   static const String hrPersonnelAgent = '$homeSubMenuRoute/:agentId';
 
+  /// Une fiche neuve, par-dessus l'écran de RH · Personnel qui l'ouvre :
+  /// `/home/rh-personnel-fichier/nouveau?nom=…` (les mots d'une recherche
+  /// restée vide). Déclarée AVANT `:agentId`, qui la prendrait sinon pour un
+  /// identifiant.
+  static const String hrNewAgentSegment = 'nouveau';
+  static const String hrNewAgent = '$homeSubMenuRoute/$hrNewAgentSegment';
+  static const String hrNewAgentPrefillParam = 'nom';
+
   static String hrPersonnelAgentPath({
     required String subMenuId,
     required String agentId,

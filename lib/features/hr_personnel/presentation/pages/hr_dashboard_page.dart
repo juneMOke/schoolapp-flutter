@@ -21,7 +21,6 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/bloc/hr_pe
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/common/hr_query_location.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/dashboard/hr_dashboard_body.dart';
-import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// RH · Personnel ▸ Tableau de bord — combien d'agents, comment ils se
@@ -105,13 +104,12 @@ class _HrDashboardScreenState extends State<HrDashboardScreen> {
     await context.read<HrPersonnelCubit>().refresh();
   }
 
-  /// Une fiche neuve n'a pas d'adresse : elle s'ouvre par-dessus l'écran.
+  /// Une fiche neuve s'ouvre par-dessus l'écran, à son adresse
+  /// (`…/nouveau`).
   Future<void> _createAgent() async {
-    final local = context.read<HrPersonnelCubit>().state;
-    await StaffAgentPage.open(
+    await HrAgentIntent.openNew(
       context,
-      others: local.snapshot.members,
-      today: local.today,
+      subMenuId: MenuConstants.hrPersonnelDashboardId,
     );
     if (!mounted) return;
     await context.read<HrPersonnelCubit>().refresh();

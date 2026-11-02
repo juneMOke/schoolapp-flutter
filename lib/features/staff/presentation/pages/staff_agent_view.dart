@@ -31,7 +31,15 @@ class StaffAgentView extends StatefulWidget {
   final StaffContractKind? kind;
   final String today;
 
-  const StaffAgentView({super.key, required this.kind, required this.today});
+  /// Une création vient d'être écrite : l'agent a désormais son adresse.
+  final ValueChanged<String>? onCreated;
+
+  const StaffAgentView({
+    super.key,
+    required this.kind,
+    required this.today,
+    this.onCreated,
+  });
 
   @override
   State<StaffAgentView> createState() => _StaffAgentViewState();
@@ -95,6 +103,7 @@ class _StaffAgentViewState extends State<StaffAgentView> {
     if (state.justSaved && previous.member == null && created != null) {
       unawaited(context.read<StaffDossierCubit>().load(created.id));
       unawaited(_afterCreation(context, created.id, previous.contractToPose));
+      widget.onCreated?.call(created.id);
     }
     if (state.justSaved) {
       AppSnackBar.showSuccess(
