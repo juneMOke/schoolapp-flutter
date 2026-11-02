@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
@@ -10,7 +11,14 @@ class FakeSession implements CameraSession {
   @override
   final CameraLens lens;
   bool closed = false;
-  Uint8List shot = Uint8List.fromList([9, 9, 9]);
+
+  /// Une vraie image (PNG 1 × 1) : le recadrage qui suit la prise la décode.
+  Uint8List shot = base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  );
+
+  /// Le nombre de prises demandées.
+  int captures = 0;
 
   FakeSession(this.lens);
 
@@ -21,7 +29,10 @@ class FakeSession implements CameraSession {
   Widget buildPreview() => const SizedBox();
 
   @override
-  Future<Uint8List> capture() async => shot;
+  Future<Uint8List> capture() async {
+    captures++;
+    return shot;
+  }
 
   @override
   Future<void> close() async => closed = true;

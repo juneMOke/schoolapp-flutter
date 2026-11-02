@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/idle_focus_shortcut.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -149,31 +150,35 @@ class _StudentPhotoCaptureDialogState extends State<StudentPhotoCaptureDialog> {
             const SingleActivator(LogicalKeyboardKey.escape): () {
               if (!_busy) _close();
             },
-            const SingleActivator(LogicalKeyboardKey.space): _cubit.shoot,
           },
-          child: FocusScope(
-            autofocus: true,
-            child: Stack(
-              children: [
-                // Le voile : un clic dehors ferme, sauf pendant l'enregistrement.
-                Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      if (!_busy) _close();
-                    },
+          // Espace déclenche, sauf quand un bouton a le focus : il le garde.
+          child: IdleFocusShortcut(
+            activator: const SingleActivator(LogicalKeyboardKey.space),
+            onInvoke: _cubit.shoot,
+            child: FocusScope(
+              autofocus: true,
+              child: Stack(
+                children: [
+                  // Le voile : un clic dehors ferme, sauf pendant l'enregistrement.
+                  Positioned.fill(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        if (!_busy) _close();
+                      },
+                    ),
                   ),
-                ),
-                Center(
-                  child: Semantics(
-                    scopesRoute: true,
-                    namesRoute: true,
-                    explicitChildNodes: true,
-                    label: l10n.photoDialogSemantics(widget.studentName),
-                    child: _panel(context, fullscreen),
+                  Center(
+                    child: Semantics(
+                      scopesRoute: true,
+                      namesRoute: true,
+                      explicitChildNodes: true,
+                      label: l10n.photoDialogSemantics(widget.studentName),
+                      child: _panel(context, fullscreen),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

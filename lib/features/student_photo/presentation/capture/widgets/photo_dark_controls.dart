@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -7,6 +8,10 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
 /// Le déclencheur : disque blanc de 68 dp cerclé de blanc translucide. Inactif
 /// (estompé) tant que le flux n'est pas en direct.
+///
+/// Un vrai bouton sur le poste et le web : une étape de tabulation, Entrée
+/// et Espace, curseur main ; le survol éclaire l'anneau, le focus clavier
+/// l'entoure d'or.
 class PhotoShutterButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final String semanticLabel;
@@ -26,19 +31,21 @@ class PhotoShutterButton extends StatefulWidget {
 class _PhotoShutterButtonState extends State<PhotoShutterButton> {
   bool _pressed = false;
 
+  void _setPressed(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
+
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onPressed != null;
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: widget.semanticLabel,
-      child: GestureDetector(
-        onTapDown: enabled ? (_) => setState(() => _pressed = true) : null,
-        onTapCancel: () => setState(() => _pressed = false),
-        onTapUp: (_) => setState(() => _pressed = false),
-        onTap: widget.onPressed,
+    return EteeloActivatable(
+      onActivate: widget.onPressed,
+      semanticLabel: widget.semanticLabel,
+      builder: (context, highlight) => Listener(
+        onPointerDown: enabled ? (_) => _setPressed(true) : null,
+        onPointerUp: (_) => _setPressed(false),
+        onPointerCancel: (_) => _setPressed(false),
         child: AnimatedOpacity(
           opacity: enabled ? 1 : 0.35,
           duration: AppMotion.micro,
@@ -52,7 +59,11 @@ class _PhotoShutterButtonState extends State<PhotoShutterButton> {
                 color: AppColors.onPhotoCapture,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.onPhotoCaptureRing,
+                  color: highlight.focused
+                      ? AppColors.orDoux
+                      : highlight.hovered
+                      ? AppColors.onPhotoCapture
+                      : AppColors.onPhotoCaptureRing,
                   width: AppDimensions.photoShutterRing,
                 ),
               ),
