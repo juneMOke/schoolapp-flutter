@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/navigation/bloc_location_tab.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -32,8 +33,29 @@ class JustificationQueuePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<JustificationQueueCubit>(
     create: (_) => getIt<JustificationQueueCubit>(),
-    child: const JustificationQueueScreen(),
+    child: const JustificationQueueLocation(child: JustificationQueueScreen()),
   );
+}
+
+/// « À traiter » / « Traitées » dans l'adresse (`?onglet=decided`) : F5
+/// retrouve l'onglet, Précédent y revient.
+class JustificationQueueLocation extends StatelessWidget {
+  final Widget child;
+
+  const JustificationQueueLocation({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) =>
+      BlocLocationTab<
+        JustificationQueueCubit,
+        JustificationQueueState,
+        JustificationQueueFilter
+      >(
+        values: JustificationQueueFilter.values,
+        tabOf: (state) => state.filter,
+        select: (cubit, filter) => cubit.setFilter(filter),
+        child: child,
+      );
 }
 
 class JustificationQueueScreen extends StatefulWidget {
