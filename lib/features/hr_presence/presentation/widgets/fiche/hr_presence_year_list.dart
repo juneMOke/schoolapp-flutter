@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/tables/data_table_models.dart
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_data_table_theme.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_profile_badge.dart';
@@ -21,7 +22,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// du mois — et l'année en pied. Les colonnes alignées comparent les mois de
 /// haut en bas. Vacances et mois à venir se disent, et ne s'ouvrent pas ; un
 /// mois de classe ouvre sa vue mensuelle. Sous sa largeur plancher, elle
-/// défile de côté et le mois reste à l'écran.
+/// défile de côté et le mois reste à l'écran ; sur un téléphone, une carte
+/// par mois.
 class HrPresenceYearList extends StatelessWidget {
   final List<HrAttendanceMonthSummary> months;
 
@@ -37,17 +39,6 @@ class HrPresenceYearList extends StatelessWidget {
     this.total,
     this.totalProfile,
   });
-
-  static const List<double?> _widths = [
-    AppDimensions.hrPresenceYearMonthWidth,
-    AppDimensions.hrPresenceYearColShare,
-    AppDimensions.hrPresenceYearColRate,
-    AppDimensions.hrPresenceYearColRate,
-    AppDimensions.hrPresenceYearColRate,
-    AppDimensions.hrPresenceYearColScored,
-    null,
-    EteeloDataTableTheme.trailingSlotWidth,
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +56,12 @@ class HrPresenceYearList extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         EteeloColumnTable(
           tone: ListingTones.table,
+          // Sur un téléphone, une carte par mois : à 360 dp la table de
+          // 880 dp défilait de côté sur les deux tiers de sa largeur.
+          cardsBelow: AppBreakpoints.dataTableCardsMax,
           minWidth: AppDimensions.hrPresenceYearMinWidth,
           frozenFirstColumn: true,
-          widths: _widths,
+          widths: _yearWidths,
           endAligned: const {2, 3, 4, 5},
           headers: [
             l10n.hrPresenceYearColMonth,
@@ -80,11 +74,15 @@ class HrPresenceYearList extends StatelessWidget {
             '',
           ],
           rowCount: months.length,
+          // Des fonctions, pas des widgets : le mode cartes lit les cellules
+          // de la ligne qu'on lui rend ; un widget qui la bâtit plus tard
+          // serait posé tel quel, en colonnes comprimées.
           row: (context, index) =>
-              _MonthRow(month: months[index], onOpen: onOpenMonth),
+              _monthRow(context, months[index], onOpenMonth),
           footer: total == null
               ? null
-              : _TotalRow(
+              : _totalRow(
+                  context,
                   total: total,
                   classDays: months.fold(
                     0,
@@ -97,6 +95,18 @@ class HrPresenceYearList extends StatelessWidget {
     );
   }
 }
+
+/// Mois, barre, trois taux, jours pointés, profil, œil.
+const List<double?> _yearWidths = [
+  AppDimensions.hrPresenceYearMonthWidth,
+  AppDimensions.hrPresenceYearColShare,
+  AppDimensions.hrPresenceYearColRate,
+  AppDimensions.hrPresenceYearColRate,
+  AppDimensions.hrPresenceYearColRate,
+  AppDimensions.hrPresenceYearColScored,
+  null,
+  EteeloDataTableTheme.trailingSlotWidth,
+];
 
 String _rate(AppLocalizations l10n, int? pct) =>
     pct == null ? l10n.hrPresenceNoValue : l10n.presenceRateValue(pct);
@@ -124,141 +134,127 @@ Widget _share({required int? presence, required int? late, int? absent}) =>
       ),
     );
 
-class _MonthRow extends StatelessWidget {
-  final HrAttendanceMonthSummary month;
-  final ValueChanged<String> onOpen;
-
-  const _MonthRow({required this.month, required this.onOpen});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final dates = MaterialLocalizations.of(context);
-    final date = DateTime.tryParse('${month.month}-01');
-    final name = date == null ? month.month : dates.formatMonthYear(date);
-    final openable = month.isOpenable;
-    final muted = AppTypography.bodySmall.copyWith(
-      color: AppColors.textMutedAa,
-    );
-    final nameCell = Text(
+/// Un mois de l'année : sa ligne, et sa phrase pour le lecteur d'écran.
+Widget _monthRow(
+  BuildContext context,
+  HrAttendanceMonthSummary month,
+  ValueChanged<String> onOpen,
+) {
+  final l10n = AppLocalizations.of(context)!;
+  final dates = MaterialLocalizations.of(context);
+  final date = DateTime.tryParse('${month.month}-01');
+  final name = date == null ? month.month : dates.formatMonthYear(date);
+  final openable = month.isOpenable;
+  final muted = AppTypography.bodySmall.copyWith(color: AppColors.textMutedAa);
+  final nameCell = Text(
+    name,
+    style: AppTypography.labelLarge.copyWith(
+      color: openable ? AppColors.textPrimary : AppColors.textMutedAa,
+    ),
+  );
+  final List<Widget> cells = switch (month.state) {
+    HrAttendanceMonthState.classMonth => [
+      nameCell,
+      _share(
+        presence: month.presenceRatePct,
+        late: month.lateRatePct,
+        absent: month.absenceRatePct,
+      ),
+      _figure(_rate(l10n, month.presenceRatePct)),
+      _figure(_rate(l10n, month.lateRatePct)),
+      _figure(_rate(l10n, month.absenceRatePct)),
+      _figure(l10n.presenceMarkKpiRatio(month.scored, month.classDays)),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: PresenceProfileBadge(profile: month.profile),
+      ),
+      // L'œil des tables de l'app : toute la ligne ouvre aussi.
+      DataTableTrailingRegistry.build(
+        context,
+        DataTableTrailingSpec(
+          type: DataTableTrailingType.eye,
+          tooltip: l10n.hrPresenceYearOpen,
+          onTap: () => onOpen(month.month),
+        ),
+      ),
+    ],
+    // Vacances ou à venir : le mois se dit dans la colonne de la barre, le
+    // reste se tait.
+    HrAttendanceMonthState.holiday || HrAttendanceMonthState.future => [
+      nameCell,
+      Text(
+        month.state == HrAttendanceMonthState.holiday
+            ? l10n.hrPresenceMonthHoliday
+            : l10n.hrPresenceMonthFuture,
+        style: muted,
+      ),
+      for (var i = 0; i < 4; i++)
+        _figure(l10n.hrPresenceNoValue, color: AppColors.textMutedAa),
+      const SizedBox.shrink(),
+      const SizedBox.shrink(),
+    ],
+  };
+  final row = EteeloColumnTableRow(
+    widths: _yearWidths,
+    onTap: openable ? () => onOpen(month.month) : null,
+    cells: cells,
+  );
+  if (!openable) return row;
+  // Une seule phrase pour le lecteur d'écran : le mois et ses taux.
+  return Semantics(
+    button: true,
+    label: l10n.hrPresenceYearRowA11y(
       name,
-      style: AppTypography.labelLarge.copyWith(
-        color: openable ? AppColors.textPrimary : AppColors.textMutedAa,
-      ),
-    );
-    final List<Widget> cells = switch (month.state) {
-      HrAttendanceMonthState.classMonth => [
-        nameCell,
-        _share(
-          presence: month.presenceRatePct,
-          late: month.lateRatePct,
-          absent: month.absenceRatePct,
-        ),
-        _figure(_rate(l10n, month.presenceRatePct)),
-        _figure(_rate(l10n, month.lateRatePct)),
-        _figure(_rate(l10n, month.absenceRatePct)),
-        _figure(l10n.presenceMarkKpiRatio(month.scored, month.classDays)),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: PresenceProfileBadge(profile: month.profile),
-        ),
-        // L'œil des tables de l'app : toute la ligne ouvre aussi.
-        DataTableTrailingRegistry.build(
-          context,
-          DataTableTrailingSpec(
-            type: DataTableTrailingType.eye,
-            tooltip: l10n.hrPresenceYearOpen,
-            onTap: () => onOpen(month.month),
-          ),
-        ),
-      ],
-      // Vacances ou à venir : le mois se dit dans la colonne de la barre, le
-      // reste se tait.
-      HrAttendanceMonthState.holiday || HrAttendanceMonthState.future => [
-        nameCell,
-        Text(
-          month.state == HrAttendanceMonthState.holiday
-              ? l10n.hrPresenceMonthHoliday
-              : l10n.hrPresenceMonthFuture,
-          style: muted,
-        ),
-        for (var i = 0; i < 4; i++)
-          _figure(l10n.hrPresenceNoValue, color: AppColors.textMutedAa),
-        const SizedBox.shrink(),
-        const SizedBox.shrink(),
-      ],
-    };
-    final row = EteeloColumnTableRow(
-      widths: HrPresenceYearList._widths,
-      onTap: openable ? () => onOpen(month.month) : null,
-      cells: cells,
-    );
-    if (!openable) return row;
-    // Une seule phrase pour le lecteur d'écran : le mois et ses taux.
-    return Semantics(
-      button: true,
-      label: l10n.hrPresenceYearRowA11y(
-        name,
-        _rate(l10n, month.presenceRatePct),
-        _rate(l10n, month.lateRatePct),
-        _rate(l10n, month.absenceRatePct),
-      ),
-      excludeSemantics: true,
-      onTap: () => onOpen(month.month),
-      child: row,
-    );
-  }
+      _rate(l10n, month.presenceRatePct),
+      _rate(l10n, month.lateRatePct),
+      _rate(l10n, month.absenceRatePct),
+    ),
+    excludeSemantics: true,
+    onTap: () => onOpen(month.month),
+    child: row,
+  );
 }
 
 /// Le pied : l'année entière, ses taux et son profil.
-class _TotalRow extends StatelessWidget {
-  final HrAttendanceKpis total;
-  final int classDays;
-  final PresenceProfile? profile;
-
-  const _TotalRow({
-    required this.total,
-    required this.classDays,
-    required this.profile,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final profile = this.profile;
-    final ink = ListingTones.table.headerInk;
-    return EteeloColumnTableRow(
-      widths: HrPresenceYearList._widths,
-      // Le bandeau de l'en-tête, comme les totaux de la Paie.
-      background: ListingTones.table.header,
-      labelInk: ink,
-      cells: [
-        Text(
-          l10n.hrPresenceYearTotal,
-          style: AppTypography.labelLarge.copyWith(color: ink),
+Widget _totalRow(
+  BuildContext context, {
+  required HrAttendanceKpis total,
+  required int classDays,
+  required PresenceProfile? profile,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  final ink = ListingTones.table.headerInk;
+  return EteeloColumnTableRow(
+    widths: _yearWidths,
+    // Le bandeau de l'en-tête, comme les totaux de la Paie.
+    background: ListingTones.table.header,
+    labelInk: ink,
+    cells: [
+      Text(
+        l10n.hrPresenceYearTotal,
+        style: AppTypography.labelLarge.copyWith(color: ink),
+      ),
+      _share(
+        presence: total.presenceRatePct,
+        late: total.lateRatePct,
+        absent: total.absenceRatePct,
+      ),
+      _figure(_rate(l10n, total.presenceRatePct), strong: true, color: ink),
+      _figure(_rate(l10n, total.lateRatePct), strong: true, color: ink),
+      _figure(_rate(l10n, total.absenceRatePct), strong: true, color: ink),
+      _figure(
+        l10n.presenceMarkKpiRatio(total.scored, classDays),
+        strong: true,
+        color: ink,
+      ),
+      if (profile == null)
+        const SizedBox.shrink()
+      else
+        Align(
+          alignment: Alignment.centerLeft,
+          child: PresenceProfileBadge(profile: profile),
         ),
-        _share(
-          presence: total.presenceRatePct,
-          late: total.lateRatePct,
-          absent: total.absenceRatePct,
-        ),
-        _figure(_rate(l10n, total.presenceRatePct), strong: true, color: ink),
-        _figure(_rate(l10n, total.lateRatePct), strong: true, color: ink),
-        _figure(_rate(l10n, total.absenceRatePct), strong: true, color: ink),
-        _figure(
-          l10n.presenceMarkKpiRatio(total.scored, classDays),
-          strong: true,
-          color: ink,
-        ),
-        if (profile == null)
-          const SizedBox.shrink()
-        else
-          Align(
-            alignment: Alignment.centerLeft,
-            child: PresenceProfileBadge(profile: profile),
-          ),
-        const SizedBox.shrink(),
-      ],
-    );
-  }
+      const SizedBox.shrink(),
+    ],
+  );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/listing_tones.dart';
@@ -12,11 +13,14 @@ import 'package:school_app_flutter/features/staff/presentation/widgets/common/st
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_contract_badge.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_dossier_meter.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/common/staff_identity_lines.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/grid/staff_agent_grid.dart';
+import 'package:school_app_flutter/features/staff/presentation/widgets/list/staff_table_sort_header.dart';
 import 'package:school_app_flutter/core/components/status/record_sync_pill.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les agents en tableau : Agent · Fonction · Contrat · Dossier · Synchro.
-/// Une ligne entière ouvre l'agent. En-tête et zébrure suivent la grammaire
+/// Une ligne entière ouvre l'agent ; sous `dataTableCardsMax`, les cartes de
+/// la grille. En-tête et zébrure suivent la grammaire
 /// des listes (`ListingTones`) : la terre cuite appartient aux résultats.
 class StaffAgentTable extends StatelessWidget {
   final List<StaffFileRow> rows;
@@ -49,8 +53,36 @@ class StaffAgentTable extends StatelessWidget {
   static const double _minTableWidth = 760;
 
   @override
-  Widget build(BuildContext context) =>
-      EteeloMinWidthScroll(minWidth: _minTableWidth, child: _table(context));
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) =>
+        constraints.maxWidth < AppBreakpoints.dataTableCardsMax
+        ? _cards(context)
+        : EteeloMinWidthScroll(
+            minWidth: _minTableWidth,
+            child: _table(context),
+          ),
+  );
+
+  /// Sur un téléphone ou une 7″ en portrait, les cartes de la grille : le
+  /// tableau de 760 dp y défilait de côté, l'agent écrasé au premier tiers.
+  /// Le tri de l'en-tête « Agent » passe au-dessus des cartes.
+  Widget _cards(BuildContext context) {
+    final grid = StaffAgentGrid(rows: rows, onOpen: onOpen);
+    final onAgentSort = this.onAgentSort;
+    if (onAgentSort == null) return grid;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        StaffTableSortHeader(
+          label: _header(AppLocalizations.of(context)!.staffTableAgent),
+          descending: agentDescending,
+          onTap: onAgentSort,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        grid,
+      ],
+    );
+  }
 
   Widget _table(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -69,7 +101,7 @@ class StaffAgentTable extends StatelessWidget {
               showDossier: showDossier,
               agent: onAgentSort == null
                   ? _header(l10n.staffTableAgent)
-                  : _SortableHeader(
+                  : StaffTableSortHeader(
                       label: _header(l10n.staffTableAgent),
                       descending: agentDescending,
                       onTap: onAgentSort!,
@@ -122,52 +154,6 @@ class StaffAgentTable extends StatelessWidget {
       letterSpacing: 0.6,
     ),
   );
-}
-
-/// Un en-tête qui trie : son libellé et la flèche du sens courant.
-class _SortableHeader extends StatelessWidget {
-  final Widget label;
-  final bool descending;
-  final VoidCallback onTap;
-
-  const _SortableHeader({
-    required this.label,
-    required this.descending,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Semantics(
-      button: true,
-      // La flèche ne se lit pas : le sens du tri se dit.
-      hint: descending
-          ? l10n.staffTableSortDescending
-          : l10n.staffTableSortAscending,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.brSm,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: AppDimensions.minTouchTarget,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(child: label),
-              const SizedBox(width: AppSpacing.xs),
-              Icon(
-                descending ? Icons.arrow_downward : Icons.arrow_upward,
-                size: AppDimensions.detailMiniIconSize,
-                color: ListingTones.inkEnteteTable,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Une rangée de colonnes : deux souples (agent, fonction), trois fixes.

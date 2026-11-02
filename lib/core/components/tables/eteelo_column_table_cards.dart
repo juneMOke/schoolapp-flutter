@@ -14,7 +14,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 ///
 /// Les cartes sont tirées des lignes elles-mêmes : un tableau n'écrit pas deux
 /// fois ses cellules. Un widget qui n'est ni une [EteeloColumnTableRow] ni
-/// une colonne de lignes (un intertitre) se pose tel quel.
+/// une colonne de lignes (un intertitre) se pose tel quel ; une ligne sous un
+/// [Semantics] devient une carte sous le même [Semantics].
 class EteeloColumnTableCards extends StatelessWidget {
   final List<String> headers;
   final List<Widget> rows;
@@ -45,6 +46,19 @@ class EteeloColumnTableCards extends StatelessWidget {
     EteeloColumnTableRow() => [_card(widget)],
     Column(:final children) => [
       for (final child in children) ..._cardsOf(child),
+    ],
+    // Une ligne qui se dit en une phrase au lecteur d'écran (le mois et ses
+    // taux) : la carte garde cette phrase. Sans ce cas, la ligne se posait
+    // telle quelle, en colonnes comprimées dans la largeur du téléphone.
+    Semantics(:final child?) when child is EteeloColumnTableRow => [
+      Semantics.fromProperties(
+        properties: widget.properties,
+        container: widget.container,
+        explicitChildNodes: widget.explicitChildNodes,
+        excludeSemantics: widget.excludeSemantics,
+        blockUserActions: widget.blockUserActions,
+        child: _card(child),
+      ),
     ],
     _ => [widget],
   };
