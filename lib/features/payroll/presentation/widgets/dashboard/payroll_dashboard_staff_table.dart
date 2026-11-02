@@ -52,6 +52,10 @@ class PayrollDashboardStaffTable extends StatelessWidget {
       tone: ListingTones.table,
       cardsBelow: AppBreakpoints.dataTableCardsMax,
       minWidth: AppDimensions.payrollDashStaffMinWidth,
+      // Barre dépliée sur une 10″ paysage, il reste ~900 dp au tableau : il
+      // défile de côté, et l'agent reste à l'écran pendant que ses montants
+      // passent.
+      frozenFirstColumn: true,
       widths: _widths,
       // Un filet entre les montants et le statut, comme au livre : il les
       // écarte aussi, et « Reste » ne se colle plus à « Statut ».
