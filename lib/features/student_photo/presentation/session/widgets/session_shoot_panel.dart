@@ -29,9 +29,14 @@ class SessionShootPanel extends StatelessWidget {
   final VoidCallback onAdvance;
   final VoidCallback onRetake;
 
+  /// Le viseur (et son flash) se borne à cette hauteur, centré : sa largeur
+  /// en découle. Nul : toute la largeur du panneau.
+  final double? viewfinderMaxHeight;
+
   const SessionShootPanel({
     super.key,
     required this.state,
+    this.viewfinderMaxHeight,
     required this.online,
     required this.onShoot,
     required this.onSkip,
@@ -111,43 +116,45 @@ class SessionShootPanel extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           SessionProgressBar(value: progress),
           const SizedBox(height: AppSpacing.md),
-          Stack(
-            children: [
-              PhotoViewfinder(
-                session: opened?.session,
-                tip: l10n.photoSessionTip,
-                overlay: switch (camera) {
-                  CameraUnavailable(:final reason) => CaptureProblemCard(
-                    icon: Icons.videocam_off_rounded,
-                    title: reason == CameraBlockReason.denied
-                        ? l10n.photoCameraBlockedTitle
-                        : l10n.photoNoCameraTitle,
-                    message: l10n.photoSessionImportInstead,
-                    actionLabel: l10n.photoImportAction,
-                    onAction: onImport,
-                  ),
-                  null => const Center(
-                    child: CircularProgressIndicator(color: AppColors.orDoux),
-                  ),
-                  _ => null,
-                },
-              ),
-              if (flash != null)
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      AppDimensions.photoViewfinderRadius,
+          _bounded(
+            Stack(
+              children: [
+                PhotoViewfinder(
+                  session: opened?.session,
+                  tip: l10n.photoSessionTip,
+                  overlay: switch (camera) {
+                    CameraUnavailable(:final reason) => CaptureProblemCard(
+                      icon: Icons.videocam_off_rounded,
+                      title: reason == CameraBlockReason.denied
+                          ? l10n.photoCameraBlockedTitle
+                          : l10n.photoNoCameraTitle,
+                      message: l10n.photoSessionImportInstead,
+                      actionLabel: l10n.photoImportAction,
+                      onAction: onImport,
                     ),
-                    child: SessionFlashOverlay(
-                      key: ValueKey(flash),
-                      flash: flash,
-                      queued: !online,
-                      onAdvance: onAdvance,
-                      onRetake: onRetake,
+                    null => const Center(
+                      child: CircularProgressIndicator(color: AppColors.orDoux),
                     ),
-                  ),
+                    _ => null,
+                  },
                 ),
-            ],
+                if (flash != null)
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.photoViewfinderRadius,
+                      ),
+                      child: SessionFlashOverlay(
+                        key: ValueKey(flash),
+                        flash: flash,
+                        queued: !online,
+                        onAdvance: onAdvance,
+                        onRetake: onRetake,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
@@ -211,6 +218,18 @@ class SessionShootPanel extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  /// Le flash couvre le viseur, pas le panneau : on borne les deux ensemble.
+  Widget _bounded(Widget viewfinder) {
+    final maxHeight = viewfinderMaxHeight;
+    if (maxHeight == null) return viewfinder;
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxHeight * 4 / 3),
+        child: viewfinder,
       ),
     );
   }

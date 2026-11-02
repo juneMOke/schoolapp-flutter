@@ -102,7 +102,14 @@ class SessionStatusChip extends StatelessWidget {
         children: [
           Icon(icon, size: AppDimensions.photoIconXs, color: ink),
           const SizedBox(width: AppSpacing.xs),
-          Text(label, style: AppTypography.labelSmall.copyWith(color: ink)),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.labelSmall.copyWith(color: ink),
+            ),
+          ),
         ],
       ),
     );

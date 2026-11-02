@@ -963,13 +963,27 @@ class AppDimensions {
   static const payrollAgentMonthTileMin = 56.0;
 
   // ── Photo de l'élève (spec « Photo de l'élève », 1 px = 1 dp) ────────────
-  /// Le panneau de capture : largeur maximale, rayon, et en dessous de quelle
-  /// largeur d'écran il passe en plein écran.
+  /// Le panneau de capture : largeur maximale et rayon. Le plein écran se
+  /// règle dans `AppBreakpoints.photoCaptureFullscreenMax`.
   static const photoPanelMaxWidth = 580.0;
   static const photoPanelRadius = 22.0;
-  static const photoPanelFullscreenBelow = 600.0;
   static const photoViewfinderRadius = 14.0;
   static const photoViewfinderReference = 1000.0;
+
+  /// Le viseur ne descend pas sous cette hauteur : en deçà, le panneau défile
+  /// plutôt que de montrer un timbre-poste.
+  static const photoViewfinderMinHeight = 150.0;
+
+  /// Ce que le panneau de capture prend autour du viseur, en hauteur : marges
+  /// (12 + 20), en-tête (48, la croix ; ~60 au texte ×1,3), deux écarts de 12
+  /// et le déclencheur (68) — arrondi au-dessus pour le texte agrandi.
+  static const photoCaptureChromeReserve = 190.0;
+
+  /// Ce que la séance prend autour du viseur, en hauteur : marges de page
+  /// (2 × 24) et du panneau (2 × 16), l'élève (52 ; ~64 au texte ×1,3), la
+  /// barre de progression et ses écarts (4 + 3 × 12), le déclencheur (68),
+  /// et la ligne « Importer » (8 + 48) — pour qu'elle reste visible aussi.
+  static const photoSessionShootChromeReserve = 320.0;
   static const photoShutter = 68.0;
   static const photoShutterRing = 4.0;
   static const photoDarkButton = 44.0;

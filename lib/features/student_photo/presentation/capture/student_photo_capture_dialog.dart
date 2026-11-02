@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -14,6 +15,7 @@ import 'package:school_app_flutter/features/student_photo/presentation/capture/s
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/camera_lifecycle_guard.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/capture_body.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/capture_header.dart';
+import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/photo_viewfinder.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/photo_capture_outcome.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/student_photo/presentation/capture/widgets/photo_capture_decor.dart';
@@ -133,9 +135,10 @@ class _StudentPhotoCaptureDialogState extends State<StudentPhotoCaptureDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final window = MediaQuery.sizeOf(context);
     final fullscreen =
-        MediaQuery.sizeOf(context).width <
-        AppDimensions.photoPanelFullscreenBelow;
+        window.width < AppBreakpoints.photoCaptureFullscreenMax ||
+        window.height < AppBreakpoints.photoCaptureFullscreenMaxHeight;
     return BlocProvider.value(
       value: _cubit,
       child: CameraLifecycleGuard(
@@ -182,15 +185,15 @@ class _StudentPhotoCaptureDialogState extends State<StudentPhotoCaptureDialog> {
     final radius = BorderRadius.circular(
       fullscreen ? 0 : AppDimensions.photoPanelRadius,
     );
+    final window = MediaQuery.sizeOf(context);
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: fullscreen
-            ? double.infinity
-            : AppDimensions.photoPanelMaxWidth,
-        maxHeight: fullscreen
-            ? double.infinity
-            : MediaQuery.sizeOf(context).height,
-      ),
+      // Plein écran : toute la fenêtre, pas la seule hauteur du contenu.
+      constraints: fullscreen
+          ? BoxConstraints.tight(window)
+          : BoxConstraints(
+              maxWidth: AppDimensions.photoPanelMaxWidth,
+              maxHeight: window.height,
+            ),
       child: Material(
         type: MaterialType.transparency,
         child: DecoratedBox(
@@ -200,39 +203,50 @@ class _StudentPhotoCaptureDialogState extends State<StudentPhotoCaptureDialog> {
             boxShadow: fullscreen ? null : PhotoCaptureDecor.panelShadow,
           ),
           child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.sectionGap,
-                AppSpacing.md,
-                AppSpacing.sectionGap,
-                AppSpacing.sectionGap,
-              ),
-              child:
-                  BlocConsumer<
-                    StudentPhotoCaptureCubit,
-                    StudentPhotoCaptureState
-                  >(
-                    listenWhen: (previous, current) =>
-                        current is CaptureSaved || current is CaptureDraftReady,
-                    listener: _onState,
-                    builder: (context, state) => Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        CaptureHeader(
-                          studentName: widget.studentName,
-                          reviewing:
-                              state is CaptureReview ||
-                              state is CaptureSaveFailed,
-                          onClose: state is CaptureSaving ? null : _close,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        CaptureBody(state: state, cubit: _cubit),
-                      ],
-                    ),
-                  ),
+            child: LayoutBuilder(
+              builder: (context, constraints) =>
+                  _scrollingBody(constraints.maxHeight),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Le viseur se borne à la hauteur offerte : le déclencheur reste à
+  /// l'écran sur un téléphone en paysage comme sur une fenêtre basse.
+  Widget _scrollingBody(double available) {
+    final viewfinderMaxHeight = PhotoViewfinder.heightWithin(
+      available,
+      reserve: AppDimensions.photoCaptureChromeReserve,
+    );
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sectionGap,
+        AppSpacing.md,
+        AppSpacing.sectionGap,
+        AppSpacing.sectionGap,
+      ),
+      child: BlocConsumer<StudentPhotoCaptureCubit, StudentPhotoCaptureState>(
+        listenWhen: (previous, current) =>
+            current is CaptureSaved || current is CaptureDraftReady,
+        listener: _onState,
+        builder: (context, state) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CaptureHeader(
+              studentName: widget.studentName,
+              reviewing: state is CaptureReview || state is CaptureSaveFailed,
+              onClose: state is CaptureSaving ? null : _close,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            CaptureBody(
+              state: state,
+              cubit: _cubit,
+              viewfinderMaxHeight: viewfinderMaxHeight,
+            ),
+          ],
         ),
       ),
     );

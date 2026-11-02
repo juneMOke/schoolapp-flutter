@@ -17,12 +17,16 @@ class CaptureCameraBody extends StatelessWidget {
   final VoidCallback onShoot;
   final VoidCallback onSwitch;
 
+  /// Cf. [PhotoViewfinder.maxHeight].
+  final double? viewfinderMaxHeight;
+
   const CaptureCameraBody({
     super.key,
     required this.state,
     required this.onImport,
     required this.onShoot,
     required this.onSwitch,
+    this.viewfinderMaxHeight,
   });
 
   @override
@@ -36,6 +40,7 @@ class CaptureCameraBody extends StatelessWidget {
         PhotoViewfinder(
           session: live?.session,
           tip: l10n.photoCaptureTip,
+          maxHeight: viewfinderMaxHeight,
           overlay: switch (state) {
             CaptureStarting() => const _CameraStarting(),
             CaptureBlocked(:final reason) => CaptureProblemCard(

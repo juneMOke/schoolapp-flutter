@@ -9,17 +9,32 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 /// Le viseur 4:3 : le flux en direct, recouvert d'un guide ovale qui laisse
 /// voir le visage et assombrit le reste. [overlay] remplace le flux (demande
 /// d'accès, caméra absente).
+///
+/// [maxHeight] borne la hauteur : le viseur se rétrécit alors en largeur,
+/// centré, pour laisser le déclencheur à l'écran sur une fenêtre basse.
 class PhotoViewfinder extends StatelessWidget {
   final CameraSession? session;
   final String tip;
   final Widget? overlay;
+  final double? maxHeight;
 
   const PhotoViewfinder({
     super.key,
     required this.session,
     required this.tip,
     this.overlay,
+    this.maxHeight,
   });
+
+  /// La hauteur laissée au viseur quand [available] dp sont offerts et que
+  /// [reserve] dp vont au reste du panneau — jamais moins de
+  /// [AppDimensions.photoViewfinderMinHeight] : en deçà, le panneau défile.
+  static double heightWithin(double available, {required double reserve}) {
+    final left = available - reserve;
+    return left < AppDimensions.photoViewfinderMinHeight
+        ? AppDimensions.photoViewfinderMinHeight
+        : left;
+  }
 
   /// Le flux pivote-t-il avec l'appareil ? Sur une tablette ou un téléphone
   /// seulement : le capteur y livre son rapport en paysage et `CameraPreview`
@@ -43,7 +58,7 @@ class PhotoViewfinder extends StatelessWidget {
         MediaQuery.orientationOf(context) == Orientation.portrait;
     final ratio = session?.previewAspectRatio ?? 4 / 3;
     const reference = AppDimensions.photoViewfinderReference;
-    return AspectRatio(
+    final viewfinder = AspectRatio(
       aspectRatio: 4 / 3,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(
@@ -86,6 +101,14 @@ class PhotoViewfinder extends StatelessWidget {
                 ],
               ),
         ),
+      ),
+    );
+    final maxHeight = this.maxHeight;
+    if (maxHeight == null) return viewfinder;
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxHeight * 4 / 3),
+        child: viewfinder,
       ),
     );
   }

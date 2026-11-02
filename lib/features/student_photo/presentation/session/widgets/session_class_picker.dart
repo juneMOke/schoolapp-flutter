@@ -59,10 +59,12 @@ class SessionClassPicker extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              Text(
-                l10n.photoSessionChooseClass,
-                style: AppTypography.titleLarge.copyWith(
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  l10n.photoSessionChooseClass,
+                  style: AppTypography.titleLarge.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ],

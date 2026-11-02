@@ -154,10 +154,12 @@ class _QueueRow extends StatelessWidget {
                   ],
                 ),
               ),
-              SessionStatusChip(
-                studentId: student.id,
-                status: item.status,
-                online: online,
+              Flexible(
+                child: SessionStatusChip(
+                  studentId: student.id,
+                  status: item.status,
+                  online: online,
+                ),
               ),
             ],
           ),

@@ -36,6 +36,11 @@ class AppBreakpoints {
   /// ~230 dp de champ sur un téléphone.
   static const double formDialogFullscreenMax = detailCompactMax;
 
+  /// Fenêtre sous laquelle la prise de photo d'un élève prend tout l'écran :
+  /// la même règle que les modales de saisie. Voir aussi
+  /// [photoCaptureFullscreenMaxHeight].
+  static const double photoCaptureFullscreenMax = formDialogFullscreenMax;
+
   /// Hauteur restée visible au-dessus du clavier sous laquelle une barre
   /// basse (`AppPageBackground`) ne le suit plus : sur un téléphone en
   /// paysage, barre d'en-tête et barre basse ne laisseraient rien à la
@@ -246,4 +251,10 @@ class AppBreakpoints {
   // En deçà, même la barre réduite à sa progression prend la place du champ en
   // cours de saisie : elle disparaît et seul le pied d'actions subsiste.
   static const double wizardStepperBreadcrumbMinHeight = 150.0;
+
+  /// Prise de photo : sous cette hauteur, le panneau passe en plein écran
+  /// même sur une fenêtre large. Le panneau complet pèse ~570 dp (viseur
+  /// 4:3 de 532 de large, en-tête, déclencheur) ; centré, il lui faut ses
+  /// marges en plus.
+  static const double photoCaptureFullscreenMaxHeight = 640.0;
 }
