@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/navigation/bloc_location_tab.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
@@ -119,45 +120,52 @@ class _ClassPresenceScreenState extends State<ClassPresenceScreen> {
     ).leaveGuard.leaveThen(() => cubit.selectClassroom(picked));
   }
 
+  /// F5 / Ctrl+R : tirer les flux puis relire, sans recharger la page web.
   @override
-  Widget build(BuildContext context) => AppPageBackground(
-    width: PageContentWidth.wide,
-    child: BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
-      // Transition de statut : un contexte qui se résout à l'identique doit
-      // quand même relire les classes.
-      listenWhen: (previous, current) =>
-          previous.status != current.status ||
-          previous.context?.academicYear.id != current.context?.academicYear.id,
-      listener: (context, state) => _onAcademicYear(state),
-      child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
-        buildWhen: (previous, current) =>
+  Widget build(BuildContext context) => PageActionShortcut(
+    action: PageAction.refresh,
+    onInvoke: () =>
+        unawaited(context.read<ClassPresenceCubit>().syncAndRefresh()),
+    child: AppPageBackground(
+      width: PageContentWidth.wide,
+      child: BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
+        // Transition de statut : un contexte qui se résout à l'identique doit
+        // quand même relire les classes.
+        listenWhen: (previous, current) =>
             previous.status != current.status ||
-            previous.context != current.context,
-        builder: (context, years) {
-          if (years.status == AcademicYearContextLoadStatus.initial ||
-              years.status == AcademicYearContextLoadStatus.loading) {
-            return const EteeloListSkeleton(rowCount: 8);
-          }
-          final yearContext = years.context;
-          if (years.status != AcademicYearContextLoadStatus.success ||
-              yearContext == null) {
-            return BootstrapContextError(
-              onLogout: () =>
-                  context.read<AuthBloc>().add(const AuthLogoutRequested()),
+            previous.context?.academicYear.id !=
+                current.context?.academicYear.id,
+        listener: (context, state) => _onAcademicYear(state),
+        child: BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
+          buildWhen: (previous, current) =>
+              previous.status != current.status ||
+              previous.context != current.context,
+          builder: (context, years) {
+            if (years.status == AcademicYearContextLoadStatus.initial ||
+                years.status == AcademicYearContextLoadStatus.loading) {
+              return const EteeloListSkeleton(rowCount: 8);
+            }
+            final yearContext = years.context;
+            if (years.status != AcademicYearContextLoadStatus.success ||
+                yearContext == null) {
+              return BootstrapContextError(
+                onLogout: () =>
+                    context.read<AuthBloc>().add(const AuthLogoutRequested()),
+              );
+            }
+            final cycles = buildClassPickerCycles(
+              yearContext.schoolLevelGroups,
+              context.select(
+                (ClassroomOfflineBloc bloc) => bloc.state.classrooms,
+              ),
             );
-          }
-          final cycles = buildClassPickerCycles(
-            yearContext.schoolLevelGroups,
-            context.select(
-              (ClassroomOfflineBloc bloc) => bloc.state.classrooms,
-            ),
-          );
-          // La classe, le jour, le mois et les filtres dans l'adresse.
-          return ClassPresenceLocation(
-            cycles: cycles,
-            child: _Body(cycles: cycles, onPick: () => _pickClass(cycles)),
-          );
-        },
+            // La classe, le jour, le mois et les filtres dans l'adresse.
+            return ClassPresenceLocation(
+              cycles: cycles,
+              child: _Body(cycles: cycles, onPick: () => _pickClass(cycles)),
+            );
+          },
+        ),
       ),
     ),
   );

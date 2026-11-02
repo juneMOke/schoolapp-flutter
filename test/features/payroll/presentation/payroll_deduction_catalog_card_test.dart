@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
@@ -119,6 +120,27 @@ void main() {
 
     expect(find.text('Montant par défaut'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Ctrl+N ouvre le formulaire d une rubrique, comme son bouton', (
+    tester,
+  ) async {
+    await tall(tester);
+    await pumpPayrollScreen(
+      tester,
+      snapshot: _snapshot(const [cards]),
+      permissions: direction,
+      deductions: deductions,
+      child: const PayrollSettingsScreen(),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Montant par défaut'), findsOneWidget);
   });
 
   testWidgets('la direction crée une rubrique', (tester) async {

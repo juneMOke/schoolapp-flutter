@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -292,6 +293,20 @@ void main() {
     await tester.tap(find.text('Quitter sans valider'));
     await tester.pumpAndSettle();
     expect(await leaving, isTrue);
+  });
+
+  testWidgets('F5 tire les flux puis relit l\'appel, sans recharger', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await chooseClass(tester, '6e A');
+    clearInteractions(load);
+
+    final handled = await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+
+    expect(handled, isTrue);
+    verify(() => load(any())).called(1);
   });
 
   group('l\'adresse', () {

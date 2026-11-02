@@ -68,6 +68,14 @@ class JustificationQueueCubit extends Cubit<JustificationQueueState> {
     await refresh();
   }
 
+  /// F5 / Ctrl+R : tirer les flux, puis relire la tablette — sans
+  /// recharger la page web.
+  Future<void> syncAndRefresh() async {
+    await _signals.pull();
+    if (isClosed) return;
+    await refresh();
+  }
+
   Future<void> refresh() async {
     final year = state.academicYearId;
     if (year == null) return;

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bloc_test/bloc_test.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
@@ -386,6 +387,25 @@ void main() {
     final payer = tester.getTopLeft(find.text('Ndombo Lelo Willy'));
     final total = tester.getTopLeft(find.text('TOTAL À ENCAISSER'));
     expect(total.dy, lessThan(payer.dy));
+  });
+
+  testWidgets('Ctrl+P imprime le ticket d\'une vente lue, et seulement', (
+    tester,
+  ) async {
+    PageActionShortcut printing() => tester.widget<PageActionShortcut>(
+      find.byWidgetPredicate(
+        (w) => w is PageActionShortcut && w.action == PageAction.print,
+      ),
+    );
+
+    await pumpDetail(tester, detail: _detail());
+    expect(printing().onInvoke, isNotNull);
+
+    // Contre-épreuve : une vente disparue n'a rien à imprimer — Ctrl+P
+    // passe alors au navigateur.
+    await tester.pumpWidget(const SizedBox());
+    await pumpDetail(tester);
+    expect(printing().onInvoke, isNull);
   });
 
   group('son adresse', () {

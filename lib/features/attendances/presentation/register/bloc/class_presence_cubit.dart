@@ -151,6 +151,14 @@ class ClassPresenceCubit extends Cubit<ClassPresenceState>
   }
 
   /// Relecture **silencieuse** : jamais de squelette, un échec garde l'écran.
+  /// F5 / Ctrl+R : tirer les flux, puis relire la tablette — sans
+  /// recharger la page web.
+  Future<void> syncAndRefresh() async {
+    await _signals.pull();
+    if (isClosed) return;
+    await refresh();
+  }
+
   Future<void> refresh() async {
     await _readDay(loading: false);
     await _readMonth();

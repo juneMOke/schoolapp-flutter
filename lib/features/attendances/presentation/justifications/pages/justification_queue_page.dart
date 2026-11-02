@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/navigation/bloc_location_tab.dart';
@@ -87,33 +88,39 @@ class _JustificationQueueScreenState extends State<JustificationQueueScreen> {
     unawaited(context.read<JustificationQueueCubit>().setAcademicYear(year.id));
   }
 
+  /// F5 / Ctrl+R : tirer les flux puis relire, sans recharger la page web.
   @override
-  Widget build(BuildContext context) => AppPageBackground(
-    width: PageContentWidth.wide,
-    child: MultiBlocListener(
-      listeners: [
-        BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
-          listenWhen: (previous, current) =>
-              previous.status != current.status ||
-              previous.context?.academicYear.id !=
-                  current.context?.academicYear.id,
-          listener: (context, state) => _onAcademicYear(state),
+  Widget build(BuildContext context) => PageActionShortcut(
+    action: PageAction.refresh,
+    onInvoke: () =>
+        unawaited(context.read<JustificationQueueCubit>().syncAndRefresh()),
+    child: AppPageBackground(
+      width: PageContentWidth.wide,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<AcademicYearContextBloc, AcademicYearContextState>(
+            listenWhen: (previous, current) =>
+                previous.status != current.status ||
+                previous.context?.academicYear.id !=
+                    current.context?.academicYear.id,
+            listener: (context, state) => _onAcademicYear(state),
+          ),
+          BlocListener<JustificationQueueCubit, JustificationQueueState>(
+            listenWhen: (previous, current) =>
+                current.decidedElsewhere.isNotEmpty &&
+                previous.decidedElsewhere != current.decidedElsewhere,
+            listener: _announceDecidedElsewhere,
+          ),
+        ],
+        child: BlocBuilder<JustificationQueueCubit, JustificationQueueState>(
+          buildWhen: (previous, current) =>
+              previous.load != current.load ||
+              previous.all != current.all ||
+              previous.filter != current.filter ||
+              previous.attachments != current.attachments ||
+              previous.failure != current.failure,
+          builder: _body,
         ),
-        BlocListener<JustificationQueueCubit, JustificationQueueState>(
-          listenWhen: (previous, current) =>
-              current.decidedElsewhere.isNotEmpty &&
-              previous.decidedElsewhere != current.decidedElsewhere,
-          listener: _announceDecidedElsewhere,
-        ),
-      ],
-      child: BlocBuilder<JustificationQueueCubit, JustificationQueueState>(
-        buildWhen: (previous, current) =>
-            previous.load != current.load ||
-            previous.all != current.all ||
-            previous.filter != current.filter ||
-            previous.attachments != current.attachments ||
-            previous.failure != current.failure,
-        builder: _body,
       ),
     ),
   );

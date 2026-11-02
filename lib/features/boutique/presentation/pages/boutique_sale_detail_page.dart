@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -202,16 +203,27 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
           ),
         };
 
-        return AppPageBackground(
-          // Référence de vente, montants : se copient à la souris.
-          selectableText: true,
-          appBar: ModuleTopBar(
-            eyebrow: l10n.boutiqueSaleDetailEyebrow,
-            title: title,
-            onBack: () => Navigator.of(context).maybePop(),
-            backTooltip: l10n.boutiqueSaleDetailBack,
+        // Ctrl+P : le ticket, comme son bouton — pas l'impression du
+        // navigateur, qui ne verrait qu'une image de l'écran.
+        return PageActionShortcut(
+          action: PageAction.print,
+          onInvoke:
+              state.status == SaleDetailStatus.ready &&
+                  detail != null &&
+                  !_isPrinting
+              ? () => _printTicket(detail)
+              : null,
+          child: AppPageBackground(
+            // Référence de vente, montants : se copient à la souris.
+            selectableText: true,
+            appBar: ModuleTopBar(
+              eyebrow: l10n.boutiqueSaleDetailEyebrow,
+              title: title,
+              onBack: () => Navigator.of(context).maybePop(),
+              backTooltip: l10n.boutiqueSaleDetailBack,
+            ),
+            child: content,
           ),
-          child: content,
         );
       },
     );

@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -571,6 +572,23 @@ void main() {
       expect(find.text('Réessayer'), findsNothing);
     },
   );
+
+  testWidgets('F5 relit les chiffres et les deux listes, sans recharger', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    final stats = statsWindows.length;
+    final sales = salesQueries.length;
+    final pupils = queries.length;
+
+    final handled = await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+
+    expect(handled, isTrue);
+    expect(statsWindows.length, stats + 1);
+    expect(salesQueries.length, sales + 1);
+    expect(queries.length, pupils + 1);
+  });
 
   testWidgets('largeur téléphone : aucun débordement', (tester) async {
     await pumpPage(tester, size: const Size(360, 4200));

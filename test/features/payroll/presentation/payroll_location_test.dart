@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +26,9 @@ import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_st
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_advances_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_dashboard_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_settings_page.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_advance_dialog.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_refresh_shortcut.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/advances/payroll_advances_location.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_location.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_month_location.dart';
@@ -163,6 +167,44 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(reopened.cubit.state.advanceFilter, PayrollAdvanceFilter.settled);
+    });
+  });
+
+  group('les raccourcis', () {
+    testWidgets('Ctrl+N ouvre « Nouvelle avance »', (tester) async {
+      await wide(tester);
+      await pumpPayrollScreen(
+        tester,
+        snapshot: snapshot(),
+        child: const PayrollAdvancesScreen(),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PayrollAdvanceDialog), findsOneWidget);
+    });
+
+    testWidgets('F5 sur la configuration tire les flux, sans recharger', (
+      tester,
+    ) async {
+      await wide(tester);
+      final pumped = await pumpPayrollScreen(
+        tester,
+        snapshot: snapshot(),
+        child: const PayrollRefreshShortcut(child: PayrollSettingsScreen()),
+      );
+      await tester.pumpAndSettle();
+      clearInteractions(pumped.signals);
+
+      final handled = await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+      await tester.pumpAndSettle();
+
+      expect(handled, isTrue);
+      verify(() => pumped.signals.pull()).called(1);
     });
   });
 
