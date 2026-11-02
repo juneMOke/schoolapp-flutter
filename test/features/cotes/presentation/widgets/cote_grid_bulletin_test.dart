@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_focus_registry.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header_band.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -158,7 +159,9 @@ void main() {
     expect(find.text('19,5'), findsWidgets);
 
     final title = tester.getCenter(find.text('DOMAINE DES LANGUES'));
-    final grid = tester.getCenter(find.byType(CoteGrid));
+    // Le centre de la grille dessinée — son en-tête —, et non de la place
+    // qu'elle reçoit : sur un poste large, elle s'arrête avant le bord.
+    final grid = tester.getCenter(find.byType(CoteGridHeaderBand));
     expect((title.dx - grid.dx).abs(), lessThan(40));
   });
 

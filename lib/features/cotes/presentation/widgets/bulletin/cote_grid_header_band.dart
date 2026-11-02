@@ -18,8 +18,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class CoteGridHeaderBand extends StatefulWidget {
   final CoteGridContext grid;
 
-  /// Vrai si les notes tiennent : elles ont alors leur largeur, et le total
-  /// prend le reste. Sinon elles défilent dans ce qui reste entre les deux.
+  /// Vrai si les notes tiennent : elles ont alors leur largeur. Sinon elles
+  /// défilent dans ce qui reste entre les cours et le total.
   final bool fits;
   final ScrollController horizontal;
 
@@ -98,7 +98,10 @@ class _CoteGridHeaderBandState extends State<CoteGridHeaderBand> {
               width: metrics.centerWidth,
               child: _Notes(grid: grid),
             ),
-            Expanded(child: _TotalHeader(grid: grid)),
+            SizedBox(
+              width: metrics.totalWidth,
+              child: _TotalHeader(grid: grid),
+            ),
           ] else ...[
             Expanded(
               child: _ScrolledNotes(grid: grid, horizontal: widget.horizontal),

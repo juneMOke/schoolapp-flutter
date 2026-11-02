@@ -169,57 +169,82 @@ class CoteGridState extends State<CoteGrid> {
         final grow = MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
             : AppMotion.medium;
-        return AnimatedSize(
-          duration: grow,
-          curve: AppMotion.outCurve,
-          alignment: Alignment.topCenter,
-          child: Stack(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: metrics.courseWidth,
-                    child: CoteGridCourseZone(grid: grid),
-                  ),
-                  if (fits) ...[
-                    SizedBox(
-                      width: center,
-                      child: CoteGridCenter(key: _centerKey, grid: grid),
-                    ),
-                    Expanded(child: CoteGridTotalZone(grid: grid)),
-                  ] else ...[
-                    Expanded(
-                      child: _ScrollingCenter(
-                        controller: _horizontal,
-                        width: center,
-                        child: CoteGridCenter(key: _centerKey, grid: grid),
-                      ),
-                    ),
-                    SizedBox(
-                      width: metrics.totalWidth,
-                      child: CoteGridTotalZone(grid: grid),
-                    ),
-                  ],
-                ],
-              ),
-              ...coteRubriqueTitles(grid),
-              // En dernier : collé en haut de l'écran, il passe par-dessus les
-              // lignes et leurs titres.
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: CoteGridHeaderBand(
-                  grid: grid,
-                  fits: fits,
-                  horizontal: _horizontal,
-                ),
-              ),
-            ],
+        // Le total garde sa largeur : étiré sur la place libre d'un poste
+        // large, il éloignait le chiffre de sa ligne. La grille s'arrête là,
+        // calée à gauche sous l'en-tête du bulletin.
+        final used = fits
+            ? metrics.courseWidth + center + metrics.totalWidth
+            : width;
+        return Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: used,
+            child: _grid(grid, metrics, fits: fits, grow: grow),
           ),
         );
       },
+    );
+  }
+
+  Widget _grid(
+    CoteGridContext grid,
+    CoteGridMetrics metrics, {
+    required bool fits,
+    required Duration grow,
+  }) {
+    final center = metrics.centerWidth;
+    return AnimatedSize(
+      duration: grow,
+      curve: AppMotion.outCurve,
+      alignment: Alignment.topCenter,
+      child: Stack(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: metrics.courseWidth,
+                child: CoteGridCourseZone(grid: grid),
+              ),
+              if (fits) ...[
+                SizedBox(
+                  width: center,
+                  child: CoteGridCenter(key: _centerKey, grid: grid),
+                ),
+                SizedBox(
+                  width: metrics.totalWidth,
+                  child: CoteGridTotalZone(grid: grid),
+                ),
+              ] else ...[
+                Expanded(
+                  child: _ScrollingCenter(
+                    controller: _horizontal,
+                    width: center,
+                    child: CoteGridCenter(key: _centerKey, grid: grid),
+                  ),
+                ),
+                SizedBox(
+                  width: metrics.totalWidth,
+                  child: CoteGridTotalZone(grid: grid),
+                ),
+              ],
+            ],
+          ),
+          ...coteRubriqueTitles(grid),
+          // En dernier : collé en haut de l'écran, il passe par-dessus les
+          // lignes et leurs titres.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: CoteGridHeaderBand(
+              grid: grid,
+              fits: fits,
+              horizontal: _horizontal,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

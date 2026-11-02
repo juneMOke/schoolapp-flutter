@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_event.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
@@ -10,6 +11,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cu
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_bulletin_card.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header_band.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_total_zone.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../bloc/fake_cotes_repository.dart';
@@ -255,4 +257,18 @@ void main() {
       expect(find.byType(TextField), findsNWidgets(5));
     });
   });
+
+  for (final width in [1280.0, 1920.0]) {
+    testWidgets('à ${width.toInt()} dp, le total garde sa largeur', (
+      tester,
+    ) async {
+      await pump(tester, size: Size(width, 900));
+
+      final total = tester.getRect(find.byType(CoteGridTotalZone));
+      expect(total.width, AppDimensions.coteTotalColumn);
+      // L'en-tête s'arrête avec lui.
+      final band = tester.getRect(find.byType(CoteGridHeaderBand));
+      expect(band.right, closeTo(total.right, 0.5));
+    });
+  }
 }
