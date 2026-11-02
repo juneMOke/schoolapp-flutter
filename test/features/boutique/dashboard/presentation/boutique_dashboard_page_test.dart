@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
@@ -33,6 +34,7 @@ import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_dashboard_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_location.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_view.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
@@ -74,6 +76,9 @@ void main() {
   late _MockAcademicYearBloc academicYearBloc;
   late _MockAuthBloc authBloc;
   final queries = <BeneficiariesQuery>[];
+  final salesQueries = <SalesQuery>[];
+  final statsWindows = <DashboardWindow>[];
+  GoRouter? router;
 
   setUpAll(() {
     registerFallbackValue(sevenDays);
@@ -95,12 +100,17 @@ void main() {
           academicYearId: any(named: 'academicYearId'),
           window: any(named: 'window'),
         ),
-      ).thenAnswer(
-        (i) async => answer(i.namedArguments[#window] as DashboardWindow),
-      );
+      ).thenAnswer((i) async {
+        final window = i.namedArguments[#window] as DashboardWindow;
+        statsWindows.add(window);
+        return answer(window);
+      });
 
   setUp(() {
     queries.clear();
+    salesQueries.clear();
+    statsWindows.clear();
+    router = null;
     getStats = _MockStats();
     getProvisional = _MockProvisional();
     getBeneficiaries = _MockBeneficiaries();
@@ -135,7 +145,10 @@ void main() {
         window: any(named: 'window'),
       ),
     ).thenAnswer((_) async => const Right(ProvisionalSales.none));
-    when(() => getSales(any())).thenAnswer((_) async => Right(salesPageOf()));
+    when(() => getSales(any())).thenAnswer((i) async {
+      salesQueries.add(i.positionalArguments.first as SalesQuery);
+      return Right(salesPageOf(total: 30));
+    });
     when(() => getBeneficiaries(any())).thenAnswer((i) async {
       queries.add(i.positionalArguments.first as BeneficiariesQuery);
       return Right(beneficiariesOf());
@@ -174,27 +187,150 @@ void main() {
     WidgetTester tester, {
     Size size = const Size(1280, 2600),
     NavigationBloc? navigation,
+    String? location,
   }) async {
     await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      MultiBlocProvider(
-        providers: [
-          BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
-          BlocProvider<AuthBloc>.value(value: authBloc),
-          if (navigation != null)
-            BlocProvider<NavigationBloc>.value(value: navigation),
-        ],
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: Locale('fr'),
-          home: BoutiqueDashboardPage(),
+    final providers = [
+      BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
+      BlocProvider<AuthBloc>.value(value: authBloc),
+      if (navigation != null)
+        BlocProvider<NavigationBloc>.value(value: navigation),
+    ];
+    if (location == null) {
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: providers,
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('fr'),
+            home: BoutiqueDashboardPage(),
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Un F5 : l'arbre est rebâti à neuf depuis la seule adresse.
+      final next = GoRouter(
+        initialLocation: location,
+        routes: [
+          GoRoute(
+            path: '/home/:subMenuId',
+            builder: (_, _) => const BoutiqueDashboardPage(),
+          ),
+        ],
+      );
+      addTearDown(next.dispose);
+      router = next;
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          key: UniqueKey(),
+          providers: providers,
+          child: MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
+            routerConfig: next,
+          ),
+        ),
+      );
+    }
     await tester.pumpAndSettle();
   }
+
+  String address() =>
+      router!.routerDelegate.currentConfiguration.uri.toString();
+
+  BoutiqueDashboardState dashboardState(WidgetTester tester) => tester
+      .element(find.byType(BoutiqueDashboardLocation))
+      .read<BoutiqueDashboardBloc>()
+      .state;
+
+  group('l\'adresse', () {
+    const base = '/home/${MenuConstants.boutiqueDashboardId}';
+
+    testWidgets('période, filtres et page s\'inscrivent ; F5 les restitue', (
+      tester,
+    ) async {
+      await pumpPage(tester, location: base);
+      expect(address(), base);
+
+      await tester.tap(find.text('Aujourd\'hui'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1. Polo Lacoste'));
+      await tester.pumpAndSettle();
+      final sales = tester
+          .element(find.byType(BoutiqueDashboardLocation))
+          .read<BoutiqueSalesCubit>();
+      await sales.classSelected('c-5b');
+      await tester.pumpAndSettle();
+      await sales.pageChanged(1);
+      await tester.pumpAndSettle();
+
+      final written = Uri.parse(address());
+      expect(written.queryParameters, {
+        'periode': 'today',
+        'ventes-par': 'classe',
+        'ventes-classe': 'c-5b',
+        'ventes-page': '2',
+        'eleves-article': 'a-polo',
+      });
+
+      // F5 : tout est relu depuis la seule adresse.
+      statsWindows.clear();
+      salesQueries.clear();
+      queries.clear();
+      await pumpPage(tester, location: written.toString());
+
+      expect(statsWindows.single.isSingleDay, isTrue);
+      expect(dashboardState(tester).period, DashboardPeriod.today);
+      expect(salesQueries.single.classId, 'c-5b');
+      expect(salesQueries.single.page, 1);
+      expect(queries.last.articleId, 'a-polo');
+      expect(Uri.parse(address()).queryParameters, written.queryParameters);
+    });
+
+    testWidgets('une période précise et sa devise se rouvrent par lien', (
+      tester,
+    ) async {
+      answerStats(
+        (w) => Right(
+          BoutiqueStatsSnapshot(
+            stats: statsOf(window: w, currencies: const ['USD', 'CDF']),
+          ),
+        ),
+      );
+      await pumpPage(
+        tester,
+        location: '$base?periode=custom&du=2026-10-12&au=2026-10-05&devise=CDF',
+      );
+
+      expect(
+        statsWindows.single,
+        DashboardWindow(
+          from: DateTime(2026, 10, 5),
+          to: DateTime(2026, 10, 12),
+        ),
+      );
+      expect(dashboardState(tester).selectedCurrency, 'CDF');
+      expect(Uri.parse(address()).queryParameters, {
+        'periode': 'custom',
+        'du': '2026-10-05',
+        'au': '2026-10-12',
+        'devise': 'CDF',
+      });
+    });
+
+    testWidgets(
+      'contre-épreuve : une adresse nue garde la période par défaut',
+      (tester) async {
+        await pumpPage(tester, location: base);
+        expect(statsWindows.single, thisWeek);
+        expect(salesQueries.single.page, 0);
+        expect(address(), base);
+      },
+    );
+  });
 
   testWidgets('prêt : chiffres, temps, contenu, élèves, reçus', (tester) async {
     await pumpPage(tester);

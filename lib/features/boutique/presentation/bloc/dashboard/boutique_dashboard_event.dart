@@ -15,13 +15,38 @@ class BoutiqueDashboardStarted extends BoutiqueDashboardEvent {
   /// précède ne se compare pas (cf. [BoutiqueDashboardState.isDeltaComparable]).
   final DateTime? yearStart;
 
+  /// La période, les bornes et la devise lues dans l'adresse à l'ouverture
+  /// (F5, lien) : elles priment sur la période mémorisée. `null` pour une
+  /// adresse nue.
+  final BoutiqueDashboardLocationApplied? location;
+
   const BoutiqueDashboardStarted({
     required this.academicYearId,
     this.yearStart,
+    this.location,
   });
 
   @override
-  List<Object?> get props => [academicYearId, yearStart];
+  List<Object?> get props => [academicYearId, yearStart, location];
+}
+
+/// L'adresse a changé (Précédent, Suivant, lien) : l'écran la rejoint.
+///
+/// [range] n'est lu que par la période précise — absent, elle s'ouvre sur la
+/// journée. [currency] `null` : la première devise de la réponse.
+class BoutiqueDashboardLocationApplied extends BoutiqueDashboardEvent {
+  final DashboardPeriod period;
+  final DashboardWindow? range;
+  final String? currency;
+
+  const BoutiqueDashboardLocationApplied({
+    required this.period,
+    this.range,
+    this.currency,
+  });
+
+  @override
+  List<Object?> get props => [period, range, currency];
 }
 
 class BoutiqueDashboardPeriodChanged extends BoutiqueDashboardEvent {

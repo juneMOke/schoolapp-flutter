@@ -32,7 +32,37 @@ class BoutiqueSalesCubit extends Cubit<BoutiqueSalesState> {
   }) {
     _academicYearId = academicYearId;
     _window = window;
-    return _load(page: 0);
+    // Une page lue dans l'adresse (F5) avant la première fenêtre.
+    return _load(page: state.pageIndex);
+  }
+
+  /// Le mode, le critère et la page lus dans l'adresse (F5, Précédent).
+  /// Avant [start], ils attendent la première fenêtre ; ensuite, la liste se
+  /// relit — sauf si rien n'a changé.
+  Future<void> applyLocation({
+    required SalesFilterMode mode,
+    ArticleFamily? family,
+    String? classId,
+    int page = 0,
+  }) async {
+    final next = state.copyWith(
+      mode: mode,
+      family: mode == SalesFilterMode.family ? family : null,
+      classId: mode == SalesFilterMode.classroom ? classId : null,
+      pageIndex: page < 0 ? 0 : page,
+    );
+    if (next.mode == state.mode &&
+        next.family == state.family &&
+        next.classId == state.classId &&
+        next.pageIndex == state.pageIndex) {
+      return;
+    }
+    emit(
+      next.classId == state.classId
+          ? next
+          : next.copyWith(selectedClassLabel: null),
+    );
+    await _load(page: next.pageIndex);
   }
 
   /// La période a changé : le filtre reste, la liste repart de la page 1.
@@ -116,6 +146,7 @@ class BoutiqueSalesCubit extends Cubit<BoutiqueSalesState> {
         status: SalesStatus.loading,
         failure: null,
         page: keepPage ? state.page : null,
+        pageIndex: page,
       ),
     );
     final result = await _getSales(query);

@@ -28,6 +28,10 @@ class BoutiqueSalesState extends Equatable {
   /// La question qui a produit [page] — celle que le PDF reprend.
   final SalesQuery? query;
 
+  /// La page demandée en dernier (0-based), avant même sa réponse : celle
+  /// que l'adresse retient.
+  final int pageIndex;
+
   const BoutiqueSalesState({
     this.status = SalesStatus.initial,
     this.page,
@@ -37,6 +41,7 @@ class BoutiqueSalesState extends Equatable {
     this.classId,
     this.selectedClassLabel,
     this.query,
+    this.pageIndex = 0,
   });
 
   /// Le critère du mode actif est-il posé ?
@@ -62,6 +67,7 @@ class BoutiqueSalesState extends Equatable {
     Object? classId = _undefined,
     Object? selectedClassLabel = _undefined,
     Object? query = _undefined,
+    int? pageIndex,
   }) => BoutiqueSalesState(
     status: status ?? this.status,
     page: identical(page, _undefined) ? this.page : page as BoutiqueSalesPage?,
@@ -77,6 +83,7 @@ class BoutiqueSalesState extends Equatable {
         ? this.selectedClassLabel
         : selectedClassLabel as String?,
     query: identical(query, _undefined) ? this.query : query as SalesQuery?,
+    pageIndex: pageIndex ?? this.pageIndex,
   );
 
   @override
@@ -89,5 +96,6 @@ class BoutiqueSalesState extends Equatable {
     classId,
     selectedClassLabel,
     query,
+    pageIndex,
   ];
 }

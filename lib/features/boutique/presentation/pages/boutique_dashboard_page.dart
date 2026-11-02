@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/boutique/presentation/pages/boutique
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_academic_year_gate.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_body.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_header.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_location.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_provisional_notice.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -65,13 +66,20 @@ class _DashboardViewState extends State<_DashboardView> {
       for (final level in bundle.levels) level.id: level.name,
   };
 
+  bool _started = false;
+
+  /// Au premier montage, après l'arrivée du routeur : l'adresse d'ouverture
+  /// (F5, lien) prime sur la période mémorisée.
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
     context.read<BoutiqueDashboardBloc>().add(
       BoutiqueDashboardStarted(
         academicYearId: _academicYearId,
         yearStart: widget.year?.academicYear.startDate,
+        location: BoutiqueDashboardLocation.readOpening(context),
       ),
     );
   }
@@ -131,75 +139,77 @@ class _DashboardViewState extends State<_DashboardView> {
     return BlocListener<BoutiqueDashboardBloc, BoutiqueDashboardState>(
       listenWhen: (prev, curr) => prev.window != curr.window,
       listener: _onWindowChanged,
-      child: AppPageBackground(
-        width: PageContentWidth.wide,
-        // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
-        appBar: ShellChrome.wraps(context)
-            ? null
-            : ModuleTopBar(
-                eyebrow: l10n.boutiqueDashboardEyebrow,
-                title: l10n.boutiqueDashboardTitle,
-              ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-              buildWhen: (prev, curr) =>
-                  prev.period != curr.period ||
-                  prev.window != curr.window ||
-                  prev.cachedAt != curr.cachedAt ||
-                  prev.yearStart != curr.yearStart,
-              builder: (context, state) => BoutiqueDashboardHeader(
-                period: state.period,
-                window: state.window,
-                cachedAt: state.cachedAt,
-                yearStart: state.yearStart,
-                onPeriodChanged: (period) => context
-                    .read<BoutiqueDashboardBloc>()
-                    .add(BoutiqueDashboardPeriodChanged(period)),
-                onRangeChanged: (window) => context
-                    .read<BoutiqueDashboardBloc>()
-                    .add(BoutiqueDashboardCustomRangeChanged(window)),
-                onRefresh: () => context.read<BoutiqueDashboardBloc>().add(
-                  const BoutiqueDashboardRefreshRequested(),
+      child: BoutiqueDashboardLocation(
+        child: AppPageBackground(
+          width: PageContentWidth.wide,
+          // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
+          appBar: ShellChrome.wraps(context)
+              ? null
+              : ModuleTopBar(
+                  eyebrow: l10n.boutiqueDashboardEyebrow,
+                  title: l10n.boutiqueDashboardTitle,
                 ),
-                onOpenTill: _openTill,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+                buildWhen: (prev, curr) =>
+                    prev.period != curr.period ||
+                    prev.window != curr.window ||
+                    prev.cachedAt != curr.cachedAt ||
+                    prev.yearStart != curr.yearStart,
+                builder: (context, state) => BoutiqueDashboardHeader(
+                  period: state.period,
+                  window: state.window,
+                  cachedAt: state.cachedAt,
+                  yearStart: state.yearStart,
+                  onPeriodChanged: (period) => context
+                      .read<BoutiqueDashboardBloc>()
+                      .add(BoutiqueDashboardPeriodChanged(period)),
+                  onRangeChanged: (window) => context
+                      .read<BoutiqueDashboardBloc>()
+                      .add(BoutiqueDashboardCustomRangeChanged(window)),
+                  onRefresh: () => context.read<BoutiqueDashboardBloc>().add(
+                    const BoutiqueDashboardRefreshRequested(),
+                  ),
+                  onOpenTill: _openTill,
+                ),
               ),
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            // Visible même sous une erreur réseau : ces ventes-là, le poste
-            // les connaît sans le serveur.
-            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-              buildWhen: (prev, curr) => prev.provisional != curr.provisional,
-              builder: (context, state) => state.provisional.isEmpty
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: AppDimensions.spacingM,
+              const SizedBox(height: AppDimensions.spacingM),
+              // Visible même sous une erreur réseau : ces ventes-là, le poste
+              // les connaît sans le serveur.
+              BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+                buildWhen: (prev, curr) => prev.provisional != curr.provisional,
+                builder: (context, state) => state.provisional.isEmpty
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: AppDimensions.spacingM,
+                        ),
+                        child: BoutiqueProvisionalNotice(
+                          provisional: state.provisional,
+                        ),
                       ),
-                      child: BoutiqueProvisionalNotice(
-                        provisional: state.provisional,
-                      ),
-                    ),
-            ),
-            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-              buildWhen: (prev, curr) =>
-                  prev.status != curr.status ||
-                  prev.stats != curr.stats ||
-                  prev.failure != curr.failure ||
-                  prev.refreshing != curr.refreshing ||
-                  prev.selectedCurrency != curr.selectedCurrency ||
-                  prev.window != curr.window,
-              builder: (context, state) => BoutiqueDashboardBody(
-                state: state,
-                now: DateTime.now(),
-                beneficiariesKey: _beneficiariesKey,
-                onArticleTap: _onArticleTap,
-                onOpenSale: _openSale,
-                onOpenTill: _openTill,
               ),
-            ),
-          ],
+              BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+                buildWhen: (prev, curr) =>
+                    prev.status != curr.status ||
+                    prev.stats != curr.stats ||
+                    prev.failure != curr.failure ||
+                    prev.refreshing != curr.refreshing ||
+                    prev.selectedCurrency != curr.selectedCurrency ||
+                    prev.window != curr.window,
+                builder: (context, state) => BoutiqueDashboardBody(
+                  state: state,
+                  now: DateTime.now(),
+                  beneficiariesKey: _beneficiariesKey,
+                  onArticleTap: _onArticleTap,
+                  onOpenSale: _openSale,
+                  onOpenTill: _openTill,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
