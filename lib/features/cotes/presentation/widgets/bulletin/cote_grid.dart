@@ -45,6 +45,11 @@ class CoteGridState extends State<CoteGrid> {
   late final CoteSaisieReady _opened;
   final _hoveredCours = ValueNotifier<String?>(null);
 
+  /// La zone des notes change de parent quand elle cesse de tenir (rotation,
+  /// fenêtre redimensionnée) : sa clé garde ses cases, donc le focus, la
+  /// frappe en cours — qui ne s'écrit pas pour autant — et le clavier.
+  final _centerKey = GlobalKey(debugLabel: 'CoteGridCenter');
+
   @override
   void initState() {
     super.initState();
@@ -143,12 +148,15 @@ class CoteGridState extends State<CoteGrid> {
                   if (fits) ...[
                     SizedBox(
                       width: center,
-                      child: CoteGridCenter(grid: grid),
+                      child: CoteGridCenter(key: _centerKey, grid: grid),
                     ),
                     Expanded(child: CoteGridTotalZone(grid: grid)),
                   ] else ...[
                     Expanded(
-                      child: _ScrollingCenter(grid: grid, width: center),
+                      child: _ScrollingCenter(
+                        width: center,
+                        child: CoteGridCenter(key: _centerKey, grid: grid),
+                      ),
                     ),
                     SizedBox(
                       width: metrics.totalWidth,
@@ -169,10 +177,10 @@ class CoteGridState extends State<CoteGrid> {
 /// La zone centrale quand elle ne tient pas : elle défile de côté, barre
 /// visible, entre les filets des colonnes figées.
 class _ScrollingCenter extends StatefulWidget {
-  final CoteGridContext grid;
   final double width;
+  final Widget child;
 
-  const _ScrollingCenter({required this.grid, required this.width});
+  const _ScrollingCenter({required this.width, required this.child});
 
   @override
   State<_ScrollingCenter> createState() => _ScrollingCenterState();
@@ -201,10 +209,7 @@ class _ScrollingCenterState extends State<_ScrollingCenter> {
         child: SingleChildScrollView(
           controller: _controller,
           scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: widget.width,
-            child: CoteGridCenter(grid: widget.grid),
-          ),
+          child: SizedBox(width: widget.width, child: widget.child),
         ),
       ),
     );
