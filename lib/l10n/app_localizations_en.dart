@@ -21603,6 +21603,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coteLegendBelowHalf => 'Below half';
 
   @override
+  String get coteLegendChanged => 'Changed elsewhere';
+
+  @override
   String get coteLegendHalfOrMore => 'Half or more';
 
   @override

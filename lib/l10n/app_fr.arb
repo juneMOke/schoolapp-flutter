@@ -12476,6 +12476,7 @@
   "coteLegendCalculated": "Moyenne calculée",
   "coteLegendTotal": "Total calculé",
   "coteLegendBelowHalf": "Moins de la moitié",
+  "coteLegendChanged": "Modifiée ailleurs",
   "coteLegendHalfOrMore": "La moitié ou plus",
   "coteRubriqueExpand": "Déplier",
   "coteRubriqueCollapse": "Replier",

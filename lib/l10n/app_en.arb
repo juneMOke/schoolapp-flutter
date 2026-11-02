@@ -12293,6 +12293,7 @@
   "coteLegendCalculated": "Calculated average",
   "coteLegendTotal": "Calculated total",
   "coteLegendBelowHalf": "Below half",
+  "coteLegendChanged": "Changed elsewhere",
   "coteLegendHalfOrMore": "Half or more",
   "coteRubriqueExpand": "Expand",
   "coteRubriqueCollapse": "Collapse",

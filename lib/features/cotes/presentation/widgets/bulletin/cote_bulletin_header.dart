@@ -177,9 +177,9 @@ class _Kpi extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.textOnDark.withValues(alpha: 0.09),
+        color: AppColors.coteHeaderKpiSurface,
         borderRadius: AppRadius.brMd,
-        border: Border.all(color: AppColors.textOnDark.withValues(alpha: 0.14)),
+        border: Border.all(color: AppColors.coteHeaderKpiBorder),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

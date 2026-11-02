@@ -136,7 +136,7 @@ class _CourseLabel extends StatelessWidget {
           Container(
             width: AppDimensions.coteCourseMarkWidth,
             height: AppDimensions.coteCourseMarkHeight,
-            color: row.tone.ink.withValues(alpha: 0.55),
+            color: row.tone.mark,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

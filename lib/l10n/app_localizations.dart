@@ -33205,6 +33205,12 @@ abstract class AppLocalizations {
   /// **'Below half'**
   String get coteLegendBelowHalf;
 
+  /// No description provided for @coteLegendChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed elsewhere'**
+  String get coteLegendChanged;
+
   /// No description provided for @coteLegendHalfOrMore.
   ///
   /// In en, this message translates to:

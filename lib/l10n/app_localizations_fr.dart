@@ -21755,6 +21755,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coteLegendBelowHalf => 'Moins de la moitié';
 
   @override
+  String get coteLegendChanged => 'Modifiée ailleurs';
+
+  @override
   String get coteLegendHalfOrMore => 'La moitié ou plus';
 
   @override

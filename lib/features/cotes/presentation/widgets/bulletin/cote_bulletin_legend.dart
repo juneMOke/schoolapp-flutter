@@ -79,6 +79,14 @@ class CoteBulletinLegend extends StatelessWidget {
               ),
               label: l10n.coteLegendTotal,
             ),
+          // Une cote remplacée par une écriture plus récente, ailleurs.
+          _Item(
+            swatch: const _Swatch(
+              surface: AppColors.coteChangedSurface,
+              border: AppColors.coteChangedBorder,
+            ),
+            label: l10n.coteLegendChanged,
+          ),
           // Souligné comme la note qu'il décrit : le rouge seul ne suffit pas.
           _Item(
             swatch: const _Dot(AppColors.error),

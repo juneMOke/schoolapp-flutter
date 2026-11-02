@@ -723,6 +723,16 @@ class AppColors {
   /// Une cellule remplacée par une écriture plus récente, le temps de le voir.
   static const coteChangedSurface = Color(0xFFFFF4D6);
 
+  /// Son liseré : [warning] n'y tenait que 2,6:1, sous les 3:1 d'un contour
+  /// qui porte un sens. [warningInk] : 5,2:1.
+  static const coteChangedBorder = warningInk;
+
+  /// Le pavé d'un chiffre clé sur l'en-tête sombre du bulletin : un voile
+  /// blanc cassé (9 %) et son liseré (14 %) — des fonds, pas l'encre
+  /// [textOnDark] dosée sur place.
+  static const coteHeaderKpiSurface = Color(0x17FAFAF7);
+  static const coteHeaderKpiBorder = Color(0x24FAFAF7);
+
   // Saisie des notes — teintes des domaines du bulletin, par rotation.
   /// Les colonnes de maxima : ni une note, ni un total.
   static const coteMaxSurface = Color(0xFFE4ECF3);

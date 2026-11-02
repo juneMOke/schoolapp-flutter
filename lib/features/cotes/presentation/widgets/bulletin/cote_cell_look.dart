@@ -48,7 +48,7 @@ class CoteCellLook {
     if (changed) {
       return CoteCellLook(
         surface: AppColors.coteChangedSurface,
-        border: AppColors.warning,
+        border: AppColors.coteChangedBorder,
         ink: scoreInk ?? AppColors.bleuProfond,
         borderWidth: 1.5,
       );

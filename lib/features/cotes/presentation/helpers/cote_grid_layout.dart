@@ -135,6 +135,10 @@ class CoteTone {
 
   /// Une ligne sur deux : à peine teintée, les cases blanches s'en détachent.
   Color get wash => soft.withValues(alpha: 0.5);
+
+  /// Le trait qui ouvre la ligne d'un cours : un FOND, nommé comme tel, et
+  /// non l'encre du domaine dosée dans le widget.
+  Color get mark => ink.withValues(alpha: 0.55);
 }
 
 const List<CoteTone> _tones = [
