@@ -53,6 +53,15 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
     setState(() => _collapsed = const {});
   }
 
+  /// Tout déplier vaut depuis la grille, ou sans focus. Un champ ou une liste
+  /// d'ailleurs (recherche d'élève, choix de la classe) garde Alt+↓, qui y
+  /// ouvre la liste : le clavier matériel passe avant leur focus.
+  bool _mayExpandAll() {
+    final focus = FocusManager.instance.primaryFocus;
+    if (focus == null || focus is FocusScopeNode) return true;
+    return _gridKey.currentState?.holdsFocus ?? false;
+  }
+
   void _stepped() {
     _focusAfterStep = true;
     widget.onStudentChanged?.call();
@@ -82,7 +91,7 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
         onPressed: () => _step(1),
         // Alt+↑ / Alt+↓ : ni la saisie (chiffres, virgule) ni le navigateur
         // ne s'en servent. Replier part de la case au focus ; tout déplier
-        // vaut sans focus, pour revenir d'une grille toute repliée.
+        // vaut aussi sans focus, pour revenir d'une grille toute repliée.
         child: RouteKeyShortcut(
           activators: const [
             SingleActivator(LogicalKeyboardKey.arrowUp, alt: true),
@@ -93,7 +102,7 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
             activators: const [
               SingleActivator(LogicalKeyboardKey.arrowDown, alt: true),
             ],
-            isEnabled: () => _collapsed.isNotEmpty,
+            isEnabled: () => _collapsed.isNotEmpty && _mayExpandAll(),
             onPressed: _expandAll,
             child: _card(),
           ),

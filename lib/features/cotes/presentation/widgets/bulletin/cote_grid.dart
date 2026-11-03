@@ -103,6 +103,12 @@ class CoteGridState extends State<CoteGrid> {
   /// Une case de la grille a le focus.
   bool get hasFocusedCell => _registry.focusedCoursId != null;
 
+  /// Le focus est dans la grille : une case, un titre de rubrique.
+  bool get holdsFocus =>
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorStateOfType<CoteGridState>() ==
+      this;
+
   /// Replie la rubrique la plus proche de la case au focus. Le focus passe
   /// d'abord à la case qui suit la rubrique (sinon à celle qui la précède) :
   /// la case quittée s'écrit, comme à tout départ, et le clavier reste dans
