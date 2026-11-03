@@ -14,8 +14,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../bloc/fake_cotes_repository.dart';
 
-/// Alt+↓ déplie toute la grille — sauf quand le focus est dans un champ ou
-/// une liste hors de la grille, qui ont l'usage de la touche.
+/// Alt+↓ déplie toute la grille, Alt+←/→ changent d'élève — sauf quand le
+/// focus est dans un champ ou une liste hors de la grille, qui ont l'usage de
+/// ces touches (Option+← : mot précédent sur macOS).
 void main() {
   late FakeCotesRepository repository;
   late CoteSaisieBloc bloc;
@@ -130,6 +131,48 @@ void main() {
     await alt(tester, LogicalKeyboardKey.arrowDown);
 
     expect(cells(), findsNWidgets(2));
+  });
+
+  group('Alt+← / Alt+→ : l\'élève voisin', () {
+    String? selected() => (bloc.state as CoteSaisieReady).currentId;
+
+    testWidgets('dans un champ hors de la grille, la touche lui reste', (
+      tester,
+    ) async {
+      await pump(tester);
+      final before = selected();
+
+      search.requestFocus();
+      await tester.pump();
+      await alt(tester, LogicalKeyboardKey.arrowRight);
+
+      expect(selected(), before);
+    });
+
+    testWidgets('depuis une case de la grille, Alt+→ passe à l\'élève '
+        'suivant', (tester) async {
+      await pump(tester);
+      final before = selected();
+
+      await tester.tap(cells().first);
+      await tester.pump();
+      await alt(tester, LogicalKeyboardKey.arrowRight);
+
+      expect(selected(), isNot(before));
+    });
+
+    testWidgets('sans focus, Alt+→ passe encore à l\'élève suivant', (
+      tester,
+    ) async {
+      await pump(tester);
+      final before = selected();
+
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+      await alt(tester, LogicalKeyboardKey.arrowRight);
+
+      expect(selected(), isNot(before));
+    });
   });
 
   testWidgets('sans focus, Alt+↓ déplie encore tout', (tester) async {

@@ -53,10 +53,12 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
     setState(() => _collapsed = const {});
   }
 
-  /// Tout déplier vaut depuis la grille, ou sans focus. Un champ ou une liste
-  /// d'ailleurs (recherche d'élève, choix de la classe) garde Alt+↓, qui y
-  /// ouvre la liste : le clavier matériel passe avant leur focus.
-  bool _mayExpandAll() {
+  /// Tout déplier (Alt+↓) et l'élève voisin (Alt+←/→) valent depuis la
+  /// grille, ou sans focus. Un champ ou une liste d'ailleurs (recherche
+  /// d'élève, choix de la classe) garde ces touches — Alt+↓ y ouvre la liste,
+  /// Option+← y saute au mot précédent sur macOS : le clavier matériel passe
+  /// avant leur focus.
+  bool _gridOwnsKeys() {
     final focus = FocusManager.instance.primaryFocus;
     if (focus == null || focus is FocusScopeNode) return true;
     return _gridKey.currentState?.holdsFocus ?? false;
@@ -78,16 +80,19 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
   @override
   Widget build(BuildContext context) {
     // Au niveau de l'écran : ils valent aussi sans focus dans la carte, juste
-    // après un clic dans la liste par exemple.
+    // après un clic dans la liste par exemple — mais pas dans un champ
+    // d'ailleurs ([_gridOwnsKeys]).
     return RouteKeyShortcut(
       activators: const [
         SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true),
       ],
+      isEnabled: _gridOwnsKeys,
       onPressed: () => _step(-1),
       child: RouteKeyShortcut(
         activators: const [
           SingleActivator(LogicalKeyboardKey.arrowRight, alt: true),
         ],
+        isEnabled: _gridOwnsKeys,
         onPressed: () => _step(1),
         // Alt+↑ / Alt+↓ : ni la saisie (chiffres, virgule) ni le navigateur
         // ne s'en servent. Replier part de la case au focus ; tout déplier
@@ -102,7 +107,7 @@ class _CoteBulletinCardState extends State<CoteBulletinCard> {
             activators: const [
               SingleActivator(LogicalKeyboardKey.arrowDown, alt: true),
             ],
-            isEnabled: () => _collapsed.isNotEmpty && _mayExpandAll(),
+            isEnabled: () => _collapsed.isNotEmpty && _gridOwnsKeys(),
             onPressed: _expandAll,
             child: _card(),
           ),
