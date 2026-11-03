@@ -117,15 +117,18 @@ class RouteExitGuard extends StatefulWidget {
   /// Sortie accordée : les gardes se lèvent, et les pages sans route se
   /// referment — sans quoi elles resteraient affichées au-dessus d'une
   /// coquille dont l'adresse a changé.
+  ///
+  /// Une garde dont la page reste affichée se réarme à l'image suivante :
+  /// `replace` vers une adresse qui garde la même page (la fiche neuve qui
+  /// prend l'adresse de l'agent créé, `…/nouveau` → `…/{id}`) consulte
+  /// `onExit` sans rien quitter. Levée pour de bon, la garde laisserait
+  /// partir sans question la saisie faite ensuite.
   static bool _leave(List<_RouteExitGuardState> guards, bool closePageless) {
     // La réponse arrive après la question : l'écran a pu partir entre-temps.
     for (final guard in guards.where((guard) => guard.mounted)) {
       guard._release();
-      if (closePageless) {
-        guard._closeIfPageless();
-      } else {
-        guard._rearmIfStillShown();
-      }
+      if (closePageless) guard._closeIfPageless();
+      guard._rearmIfStillShown();
     }
     return true;
   }
@@ -216,12 +219,14 @@ class _RouteExitGuardState extends State<RouteExitGuard> {
     if (route.settings is! Page && route.isActive) navigator.removeRoute(route);
   }
 
-  /// Levée par une sortie décidée dans la page : si l'écran est encore là à
-  /// l'image suivante, la sortie n'a pas eu lieu — la garde reprend.
+  /// Levée par une sortie accordée : si l'écran est encore là à l'image
+  /// suivante — sa route toujours dans la pile, pas en train de partir — la
+  /// sortie ne l'a pas emporté, et la garde reprend.
   void _rearmIfStillShown() {
     SchedulerBinding.instance
       ..addPostFrameCallback((_) {
         if (!mounted || !_released) return;
+        if (!(ModalRoute.of(context)?.isActive ?? false)) return;
         setState(() => _released = false);
       })
       ..ensureVisualUpdate();
