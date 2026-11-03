@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
@@ -156,24 +157,17 @@ Future<TicketBatchOutcome> _sendToSpooler(
     return TicketBatchOutcome(skipped: batch.skipped, spoolerFailed: true);
   }
   if (!context.mounted) return TicketBatchOutcome(skipped: batch.skipped);
-  final paperOut = await showDialog<bool>(
+  // Fermer la question sans répondre garde les tickets : seul « Oui » les
+  // retire de la file.
+  final paperOut = await showAppConfirmationDialog(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Text(l10n.ticketsToPrintPaperOutTitle),
-      content: Text(l10n.ticketsToPrintPaperOutMessage),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(false),
-          child: Text(l10n.ticketsToPrintPaperOutNo),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(true),
-          child: Text(l10n.ticketsToPrintPaperOutYes),
-        ),
-      ],
-    ),
+    title: l10n.ticketsToPrintPaperOutTitle,
+    message: l10n.ticketsToPrintPaperOutMessage,
+    confirmLabel: l10n.ticketsToPrintPaperOutYes,
+    cancelLabel: l10n.ticketsToPrintPaperOutNo,
+    headerIcon: Icons.print_outlined,
   );
-  if (paperOut != true) return TicketBatchOutcome(skipped: batch.skipped);
+  if (!paperOut) return TicketBatchOutcome(skipped: batch.skipped);
 
   final markPrinted = getIt<MarkTicketJobPrintedUseCase>();
   for (final (job, _) in batch.tickets) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
@@ -34,7 +34,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
   Future<ExpenseCommentResult> Function(String body)? onComment,
   bool startRefusing = false,
   bool allowShortcuts = true,
-}) => showDialog<ExpenseDetailOutcome>(
+}) => showEteeloAdaptiveDialog<ExpenseDetailOutcome>(
   context: context,
   builder: (_) => ExpenseDetailDialog(
     expense: expense,
@@ -122,71 +122,64 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
                 2 * AppDimensions.spacingL
         ? AppDimensions.expenseDetailDialogWideMaxWidth
         : AppDimensions.expenseDetailDialogMaxWidth;
-    return Dialog(
+    return EteeloAdaptiveDialog(
       insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      constraints: BoxConstraints(
-        minWidth: AppDimensions.dialogMinWidth,
-        maxWidth: maxWidth,
-      ),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: EteeloDialogBody(
-          header: ExpenseDialogHeader(
-            eyebrow: number == null
-                ? l10n.expenseDetailEyebrowPending
-                : l10n.expenseDetailEyebrow(number),
-            title: _expense.title,
-            subtitle: l10n.expenseJoin(
-              widget.type?.label ?? l10n.expenseTypeUnknown,
-              MaterialLocalizations.of(
-                context,
-              ).formatFullDate(_expense.expenseDate),
-            ),
-            onClose: _close,
+      maxWidth: maxWidth,
+      child: EteeloDialogBody(
+        header: ExpenseDialogHeader(
+          eyebrow: number == null
+              ? l10n.expenseDetailEyebrowPending
+              : l10n.expenseDetailEyebrow(number),
+          title: _expense.title,
+          subtitle: l10n.expenseJoin(
+            widget.type?.label ?? l10n.expenseTypeUnknown,
+            MaterialLocalizations.of(
+              context,
+            ).formatFullDate(_expense.expenseDate),
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.spacingL,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ExpenseDetailBody(
-                  expense: _expense,
-                  type: widget.type,
-                  reader: widget.reader,
-                  thread: _thread,
-                  accountId: widget.accountId,
-                  onSend: widget.onComment == null ? null : _send,
-                ),
-                // Le panneau s'ouvre DANS la fiche, sous le fil : le décideur
-                // garde sous les yeux le montant, la chaîne et l'historique —
-                // c'est ce qu'il refuse.
-                if (_refusing)
-                  ExpenseRefusalPanel(
-                    onCancel: () => setState(() => _refusing = false),
-                    onConfirm: (reason) => _close(
-                      ExpenseDetailGesture(ExpenseGesture.refuse, note: reason),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          footer: [
-            ExpenseDetailActions(
-              expense: _expense,
-              isStaffAdvance:
-                  _expense.staffAdvance != null ||
-                  widget.type?.code == ExpenseStaffAdvance.typeCode,
-              accountId: widget.accountId,
-              onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
-              onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),
-              onRefuse: () => setState(() => _refusing = true),
-              allowShortcuts: widget.allowShortcuts,
-            ),
-          ],
+          onClose: _close,
         ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spacingL,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ExpenseDetailBody(
+                expense: _expense,
+                type: widget.type,
+                reader: widget.reader,
+                thread: _thread,
+                accountId: widget.accountId,
+                onSend: widget.onComment == null ? null : _send,
+              ),
+              // Le panneau s'ouvre DANS la fiche, sous le fil : le décideur
+              // garde sous les yeux le montant, la chaîne et l'historique —
+              // c'est ce qu'il refuse.
+              if (_refusing)
+                ExpenseRefusalPanel(
+                  onCancel: () => setState(() => _refusing = false),
+                  onConfirm: (reason) => _close(
+                    ExpenseDetailGesture(ExpenseGesture.refuse, note: reason),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        footer: [
+          ExpenseDetailActions(
+            expense: _expense,
+            isStaffAdvance:
+                _expense.staffAdvance != null ||
+                widget.type?.code == ExpenseStaffAdvance.typeCode,
+            accountId: widget.accountId,
+            onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
+            onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),
+            onRefuse: () => setState(() => _refusing = true),
+            allowShortcuts: widget.allowShortcuts,
+          ),
+        ],
       ),
     );
   }

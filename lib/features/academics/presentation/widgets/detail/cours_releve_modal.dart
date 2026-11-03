@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
@@ -26,30 +27,25 @@ Future<void> showCoursReleveModal(
   required BucketVm bucket,
 }) {
   final size = MediaQuery.sizeOf(context);
-  return showDialog<void>(
+  return showEteeloAdaptiveDialog<void>(
     context: context,
     barrierColor: AppColors.bleuProfond.withValues(alpha: 0.5),
-    builder: (_) => Dialog(
-      backgroundColor: AppColors.surfaceRaised,
+    builder: (_) => EteeloAdaptiveDialog(
       insetPadding: EdgeInsets.symmetric(
         horizontal: size.width <= AppBreakpoints.dataTablePhoneMax
             ? AppSpacing.md
             : AppSpacing.lg,
         vertical: AppSpacing.lg,
       ),
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brLg),
+      borderRadius: AppRadius.brLg,
       clipBehavior: Clip.antiAlias,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: AppDimensions.coursReleveModalMaxWidth,
-          maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
-        ),
-        child: _ReleveContent(
-          brancheNom: brancheNom,
-          classroomName: classroomName,
-          label: label,
-          bucket: bucket,
-        ),
+      maxWidth: AppDimensions.coursReleveModalMaxWidth,
+      maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
+      child: _ReleveContent(
+        brancheNom: brancheNom,
+        classroomName: classroomName,
+        label: label,
+        bucket: bucket,
       ),
     ),
   );

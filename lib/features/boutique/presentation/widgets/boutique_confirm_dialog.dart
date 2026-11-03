@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/boutique_cart.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
@@ -43,7 +43,7 @@ class BoutiqueConfirmDialog extends StatelessWidget {
     required bool payerIsNew,
     required bool isOffline,
   }) async =>
-      await showDialog<bool>(
+      await showEteeloAdaptiveDialog<bool>(
         context: context,
         builder: (_) => BoutiqueConfirmDialog(
           cart: cart,
@@ -63,162 +63,155 @@ class BoutiqueConfirmDialog extends StatelessWidget {
     final total = cart.totals.entries.map(MoneyFormat.format).join(' · ');
     final payer = cart.payer;
 
-    return Dialog(
-      backgroundColor: AppColors.surfaceRaised,
-      surfaceTintColor: Colors.transparent,
+    return EteeloAdaptiveDialog(
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.boutiqueDialogMaxWidth,
+      maxWidth: AppDimensions.boutiqueDialogMaxWidth,
+      child: EteeloDialogBody(
+        header: EteeloDialogDarkHeader(
+          eyebrow: l10n.boutiqueConfirmEyebrow,
+          title: l10n.boutiqueConfirmTitle,
+          onClose: () => Navigator.of(context).pop(false),
         ),
-        child: EteeloDialogBody(
-          header: EteeloDialogDarkHeader(
-            eyebrow: l10n.boutiqueConfirmEyebrow,
-            title: l10n.boutiqueConfirmTitle,
-            onClose: () => Navigator.of(context).pop(false),
-          ),
-          bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
-          body: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Le montant EN PREMIER, et en grand : c'est le seul chiffre que
-              // le guichet doit vérifier avant de prendre l'argent. Enfoui en
-              // bas d'un tableau, il se confirmait sans se lire.
-              _AmountBanner(
-                label: l10n.boutiqueConfirmAmountReceived,
-                amount: total,
-                methodLabel: l10n.boutiqueConfirmMethodCash,
+        bodyPadding: const EdgeInsets.all(AppDimensions.spacingL),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Le montant EN PREMIER, et en grand : c'est le seul chiffre que
+            // le guichet doit vérifier avant de prendre l'argent. Enfoui en
+            // bas d'un tableau, il se confirmait sans se lire.
+            _AmountBanner(
+              label: l10n.boutiqueConfirmAmountReceived,
+              amount: total,
+              methodLabel: l10n.boutiqueConfirmMethodCash,
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.spacingM,
+                vertical: AppDimensions.spacingS,
               ),
-              const SizedBox(height: AppDimensions.spacingM),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.spacingM,
-                  vertical: AppDimensions.spacingS,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceAlt,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  children: [
-                    // La ligne RESTE, même anonyme, et le dit en toutes
-                    // lettres : c'est le dernier écran avant d'engager
-                    // l'argent, et la seule occasion de remarquer qu'on
-                    // voulait nommer quelqu'un. Une ligne escamotée, ou pire
-                    // une valeur vide, laisserait le doute intact. Le ticket,
-                    // lui, escamote — il est lu APRÈS, par le client.
-                    // La date, toujours : c'est le dernier écran où une vente
-                    // antidatée par erreur peut encore être rattrapée.
-                    _Row(
-                      icon: Icons.event_outlined,
-                      label: l10n.boutiqueConfirmDate,
-                      value: formatLocalDay(
-                        cart.saleDate ?? SchoolTime.today(DateTime.now()),
-                      ),
-                    ),
-                    _Row(
-                      icon: Icons.person_outline_rounded,
-                      label: l10n.boutiqueConfirmPayer,
-                      value: _payerNameOf(cart).isEmpty
-                          ? l10n.boutiqueHistoryPayerUnknown
-                          : _payerNameOf(cart),
-                    ),
-                    if (payer.phoneNumber.trim().isNotEmpty)
-                      _Row(
-                        icon: Icons.phone_outlined,
-                        label: l10n.boutiqueConfirmPhone,
-                        value: payer.phoneNumber,
-                      ),
-                    _Row(
-                      icon: Icons.shopping_bag_outlined,
-                      label: l10n.boutiqueConfirmArticles,
-                      value: '${cart.articleCount}',
-                    ),
-                    // « Espèces », en dur : c'est le seul moyen, et proposer un
-                    // choix laisserait croire qu'il y en a d'autres. Il figure
-                    // aussi sur le bandeau, sous le montant.
-                    _Row(
-                      icon: Icons.payments_outlined,
-                      label: l10n.boutiqueConfirmMethod,
-                      value: l10n.boutiqueConfirmMethodCash,
-                    ),
-                  ],
-                ),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
               ),
-              const SizedBox(height: AppDimensions.spacingM),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 16,
-                    color: AppColors.textMuted.withValues(alpha: 0.8),
-                  ),
-                  const SizedBox(width: AppDimensions.spacingXS),
-                  Expanded(
-                    child: Text(
-                      _noticeOf(l10n),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textMuted,
-                        height: 1.4,
-                      ),
+                  // La ligne RESTE, même anonyme, et le dit en toutes
+                  // lettres : c'est le dernier écran avant d'engager
+                  // l'argent, et la seule occasion de remarquer qu'on
+                  // voulait nommer quelqu'un. Une ligne escamotée, ou pire
+                  // une valeur vide, laisserait le doute intact. Le ticket,
+                  // lui, escamote — il est lu APRÈS, par le client.
+                  // La date, toujours : c'est le dernier écran où une vente
+                  // antidatée par erreur peut encore être rattrapée.
+                  _Row(
+                    icon: Icons.event_outlined,
+                    label: l10n.boutiqueConfirmDate,
+                    value: formatLocalDay(
+                      cart.saleDate ?? SchoolTime.today(DateTime.now()),
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
-          footer: [
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(AppDimensions.spacingL),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      style: OutlinedButton.styleFrom(
-                        // ⚠️ Sans `minimumSize`, un bouton inline hérite du
-                        // thème plein-largeur et lève en contrainte infinie.
-                        minimumSize: const Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(l10n.boutiqueConfirmCancel),
-                    ),
+                  _Row(
+                    icon: Icons.person_outline_rounded,
+                    label: l10n.boutiqueConfirmPayer,
+                    value: _payerNameOf(cart).isEmpty
+                        ? l10n.boutiqueHistoryPayerUnknown
+                        : _payerNameOf(cart),
                   ),
-                  const SizedBox(width: AppDimensions.spacingS),
-                  Expanded(
-                    flex: 2,
-                    child: FilledButton.icon(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      icon: const Icon(Icons.check_rounded, size: 18),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.terreCuite,
-                        minimumSize: const Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      // Le montant EST dans le libellé : on confirme un chiffre.
-                      label: Text(
-                        l10n.boutiqueConfirmAction(total),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
+                  if (payer.phoneNumber.trim().isNotEmpty)
+                    _Row(
+                      icon: Icons.phone_outlined,
+                      label: l10n.boutiqueConfirmPhone,
+                      value: payer.phoneNumber,
                     ),
+                  _Row(
+                    icon: Icons.shopping_bag_outlined,
+                    label: l10n.boutiqueConfirmArticles,
+                    value: '${cart.articleCount}',
+                  ),
+                  // « Espèces », en dur : c'est le seul moyen, et proposer un
+                  // choix laisserait croire qu'il y en a d'autres. Il figure
+                  // aussi sur le bandeau, sous le montant.
+                  _Row(
+                    icon: Icons.payments_outlined,
+                    label: l10n.boutiqueConfirmMethod,
+                    value: l10n.boutiqueConfirmMethodCash,
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: AppDimensions.spacingM),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: AppColors.textMuted.withValues(alpha: 0.8),
+                ),
+                const SizedBox(width: AppDimensions.spacingXS),
+                Expanded(
+                  child: Text(
+                    _noticeOf(l10n),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+        footer: [
+          const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.all(AppDimensions.spacingL),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(
+                      // ⚠️ Sans `minimumSize`, un bouton inline hérite du
+                      // thème plein-largeur et lève en contrainte infinie.
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(l10n.boutiqueConfirmCancel),
+                  ),
+                ),
+                const SizedBox(width: AppDimensions.spacingS),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    icon: const Icon(Icons.check_rounded, size: 18),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.terreCuite,
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    // Le montant EST dans le libellé : on confirme un chiffre.
+                    label: Text(
+                      l10n.boutiqueConfirmAction(total),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
