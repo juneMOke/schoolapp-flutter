@@ -199,4 +199,49 @@ void main() {
       expect(page(tester).pixels, 50);
     });
   });
+
+  group('la case qui prend le focus se montre sous l\'en-tête collé', () {
+    Rect band(WidgetTester tester) {
+      final box = tester.renderObject<RenderBox>(
+        find
+            .descendant(
+              of: find.byType(CoteGridHeaderBand),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      return box.localToGlobal(Offset.zero) & box.size;
+    }
+
+    final moves = <String, Future<void> Function(WidgetTester)>{
+      '↑': (tester) => tester.sendKeyEvent(LogicalKeyboardKey.arrowUp),
+      'Maj+Tab': (tester) async {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      },
+    };
+    for (final MapEntry(key: name, value: move) in moves.entries) {
+      testWidgets('après $name', (tester) async {
+        await pump(tester, size: const Size(1280, 300));
+        final cells = find.byType(TextField);
+        // Le Français à moitié sous l'en-tête collé ; on part de l'EPS.
+        final french = tester.getRect(cells.at(2)).top;
+        await scrollPageTo(tester, french - band(tester).height / 2);
+        await tester.tap(cells.at(3));
+        await tester.pump();
+
+        await move(tester);
+        for (var i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+
+        final focused = FocusManager.instance.primaryFocus!;
+        expect(focused.debugLabel, startsWith('cote Français'));
+        // L'en-tête est bien collé en haut, et la case en dessous.
+        expect(band(tester).top, closeTo(0, 0.5));
+        expect(focused.rect.top, greaterThanOrEqualTo(band(tester).bottom));
+      });
+    }
+  });
 }

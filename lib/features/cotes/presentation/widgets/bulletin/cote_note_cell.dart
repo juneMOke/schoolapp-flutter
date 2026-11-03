@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
@@ -35,6 +36,10 @@ class CoteNoteCell extends StatefulWidget {
   /// Ce que fait Entrée : cours suivant, ou colonne suivante.
   final CoteMove enterMove;
 
+  /// La hauteur de l'en-tête des colonnes, collé en haut de la page quand
+  /// elle défile : la case qui prend le focus se montre sous lui, pas dessous.
+  final double headerHeight;
+
   const CoteNoteCell({
     super.key,
     required this.cours,
@@ -43,6 +48,7 @@ class CoteNoteCell extends StatefulWidget {
     required this.height,
     required this.columnLabel,
     required this.enterMove,
+    this.headerHeight = 0,
     this.dense = false,
   });
 
@@ -224,6 +230,12 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       focusNode: _focusNode,
       textAlign: TextAlign.center,
       textInputAction: TextInputAction.next,
+      scrollPadding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg + widget.headerHeight,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
