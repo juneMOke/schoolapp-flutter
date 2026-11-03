@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
@@ -89,15 +90,10 @@ class PayrollDashboardStaffTable extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              row.fullName,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.labelLarge,
-            ),
+            EteeloOverflowText(row.fullName, style: AppTypography.labelLarge),
             if (row.jobTitle case final job? when job.isNotEmpty)
-              Text(
+              EteeloOverflowText(
                 job,
-                overflow: TextOverflow.ellipsis,
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textMutedAa,
                 ),

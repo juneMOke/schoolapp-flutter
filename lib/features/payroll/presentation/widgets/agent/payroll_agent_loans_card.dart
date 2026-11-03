@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart'
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_agent_situation.dart';
@@ -198,10 +199,8 @@ class _Entry extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: AppTypography.labelLarge),
-                  Text(
+                  EteeloOverflowText(
                     detail,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.bodySmall.copyWith(
                       color: AppColors.textMutedAa,
                     ),

@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/presence/presentation/widgets/presence_d
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_agent_situation.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/staff_pay_profile.dart';
@@ -99,11 +100,10 @@ class PayrollAgentHero extends StatelessWidget {
                   letterSpacing: 1.2,
                 ),
               ),
-              Text(
+              EteeloOverflowText(
                 member?.fullName ?? staffMemberId,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
                 style: AppTypography.titleLarge.copyWith(color: onBanner),
+                maxLines: 2,
               ),
               if (meta.isNotEmpty) Text(meta, style: muted),
               _UsualPayout(profile: profile, onEdit: onEditProfile),

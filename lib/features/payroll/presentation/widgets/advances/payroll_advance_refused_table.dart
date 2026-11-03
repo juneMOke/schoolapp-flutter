@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_advance_request.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
@@ -53,10 +54,9 @@ class PayrollAdvanceRefusedTable extends StatelessWidget {
         return EteeloColumnTableRow(
           widths: _widths,
           cells: [
-            Text(
+            EteeloOverflowText(
               snapshot.member(request.staffMemberId)?.fullName ??
                   request.staffMemberId,
-              overflow: TextOverflow.ellipsis,
               style: AppTypography.labelLarge,
             ),
             Text(
@@ -71,13 +71,12 @@ class PayrollAdvanceRefusedTable extends StatelessWidget {
                 color: AppColors.textMutedAa,
               ),
             ),
-            Text(
+            EteeloOverflowText(
               request.status == ExpenseStatus.retracted
                   ? l10n.payrollAdvanceRetractedNote
                   : request.decisionReason ?? '—',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
               style: AppTypography.bodySmall,
+              maxLines: 2,
             ),
           ],
         );

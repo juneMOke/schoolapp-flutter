@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
@@ -222,22 +223,18 @@ class _Identity extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              EteeloOverflowText(
                 primary.isEmpty ? student.firstName : primary,
                 style: AppTypography.bodyMedium.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-              Text(
+              EteeloOverflowText(
                 student.firstName,
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.textMuted,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
