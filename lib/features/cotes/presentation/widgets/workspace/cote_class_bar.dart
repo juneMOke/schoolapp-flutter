@@ -57,10 +57,7 @@ class CoteClassBar extends StatelessWidget {
       children: [
         Text(
           l10n.coteClassBarEyebrow(classroomName).toUpperCase(),
-          style: AppTypography.labelSmall.copyWith(
-            color: AppColors.terreCuite,
-            letterSpacing: 1.2,
-          ),
+          style: AppTypography.eyebrow.copyWith(color: AppColors.terreCuite),
         ),
         Text(
           l10n.coteClassBarSummary(

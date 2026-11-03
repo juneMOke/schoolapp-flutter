@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
@@ -20,9 +22,9 @@ class BoutiqueSaleAmountBanner extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        borderRadius: AppRadius.brLg,
+        gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [AppColors.bleuProfond, AppColors.bleuArdoise],
@@ -43,11 +45,11 @@ class BoutiqueSaleAmountBanner extends StatelessWidget {
                         l10n.boutiqueTotalLabel.toUpperCase(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: AppColors.orDoux,
-                          letterSpacing: 1.1,
+                          letterSpacing: AppTypography.eyebrowLetterSpacing,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppDimensions.spacingXS),
                       Text(
                         // Un total par devise, joints par « · » : le bandeau
                         // est une ligne, et deux unités ne s'y additionnent pas.
@@ -60,7 +62,7 @@ class BoutiqueSaleAmountBanner extends StatelessWidget {
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppDimensions.spacingXS / 2),
                       Text(
                         l10n.boutiqueHistoryArticleCount(
                           detail.sale.articleCount,
@@ -74,7 +76,7 @@ class BoutiqueSaleAmountBanner extends StatelessWidget {
                 ),
                 Icon(
                   Icons.storefront_outlined,
-                  size: 40,
+                  size: AppDimensions.boutiqueSaleBannerIconSize,
                   color: AppColors.textOnDark.withValues(alpha: 0.18),
                 ),
               ],

@@ -97,9 +97,6 @@ class _Eyebrow extends StatelessWidget {
     text.toUpperCase(),
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
-    style: AppTypography.labelSmall.copyWith(
-      color: AppColors.terreCuite,
-      letterSpacing: 1.2,
-    ),
+    style: AppTypography.eyebrow.copyWith(color: AppColors.terreCuite),
   );
 }

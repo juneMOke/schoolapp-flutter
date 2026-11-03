@@ -102,7 +102,7 @@ class PayrollPayslipProvisional extends StatelessWidget {
         style: AppTypography.labelMedium.copyWith(
           color: PayrollTone.submitted.ink,
           fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
+          letterSpacing: AppTypography.capsLetterSpacing,
         ),
       ),
     ),
@@ -138,9 +138,8 @@ class PayrollPayslipIdentity extends StatelessWidget {
                 children: [
                   EteeloOverflowText(
                     row.label.toUpperCase(),
-                    style: AppTypography.labelSmall.copyWith(
+                    style: AppTypography.labelCaps.copyWith(
                       color: AppColors.textMutedAa,
-                      letterSpacing: 0.6,
                     ),
                   ),
                   // Deux lignes : un nom composé tient en entier sur un
@@ -241,9 +240,8 @@ class PayrollPayslipColumns extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = AppTypography.labelSmall.copyWith(
+    final style = AppTypography.labelCaps.copyWith(
       color: AppColors.textMutedAa,
-      letterSpacing: 0.6,
     );
     return Container(
       padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: AppSpacing.sm),

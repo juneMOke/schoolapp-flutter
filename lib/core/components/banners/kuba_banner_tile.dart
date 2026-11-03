@@ -19,20 +19,20 @@ class KubaBannerTile extends StatelessWidget {
     required this.label,
     required this.values,
     this.detail,
-    this.valueColor = AppColors.presenceMarkOnBanner,
+    this.valueColor = AppColors.kubaBannerOn,
   });
 
   @override
   Widget build(BuildContext context) {
     final muted = AppTypography.bodySmall.copyWith(
-      color: AppColors.presenceMarkOnBannerMuted,
+      color: AppColors.kubaBannerOnMuted,
     );
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.payrollAgentBannerTile,
+        color: AppColors.kubaBannerTile,
         borderRadius: AppRadius.brMd,
-        border: Border.all(color: AppColors.presenceMarkOnBannerFaint),
+        border: Border.all(color: AppColors.kubaBannerOnFaint),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/layout/tap_target_height.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -69,7 +70,7 @@ class PayrollPayoutCell extends StatelessWidget {
         onTap: onPayout,
         child: InkWell(
           onTap: onPayout,
-          borderRadius: BorderRadius.circular(AppSpacing.md),
+          borderRadius: AppRadius.brMd,
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: TapTargetHeight.of(context)),
             child: Row(
@@ -83,7 +84,7 @@ class PayrollPayoutCell extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: tone.soft,
-                      borderRadius: BorderRadius.circular(AppSpacing.md),
+                      borderRadius: AppRadius.brMd,
                     ),
                     child: EteeloOverflowText(
                       label,

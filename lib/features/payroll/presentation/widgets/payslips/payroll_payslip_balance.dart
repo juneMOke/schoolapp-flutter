@@ -126,9 +126,8 @@ class _Cell extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: AppTypography.labelSmall.copyWith(
+          style: AppTypography.labelCaps.copyWith(
             color: AppColors.payrollAgentOnBannerMuted,
-            letterSpacing: 0.6,
           ),
         ),
         const SizedBox(height: AppSpacing.xs),

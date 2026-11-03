@@ -152,7 +152,10 @@ class _CoteStudentPanelState extends State<CoteStudentPanel> {
                     hideLabel: true,
                     placeholder: l10n.coteListSearchHint,
                     capitalization: EteeloTextCapitalization.none,
-                    prefix: const Icon(Icons.search_rounded, size: 18),
+                    prefix: const Icon(
+                      Icons.search_rounded,
+                      size: AppDimensions.coteSearchIconSize,
+                    ),
                     onChanged: (value) => _query.text = value,
                   ),
                 ),

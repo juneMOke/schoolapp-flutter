@@ -101,6 +101,15 @@ class AppDimensions {
   static const coursReleveModalMaxWidth = 520.0;
   static const enrollmentDuplicateDialogMaxWidth = 480.0;
   static const boutiqueDialogMaxWidth = 420.0;
+
+  // Fiche d'une vente (boutique) : cartes, gestes, bandeau du montant.
+  static const boutiqueSaleCardRadius = 14.0;
+  static const boutiqueSaleActionHeight = 52.0;
+  static const boutiqueSaleActionIconSize = 20.0;
+  static const boutiqueSaleSpinnerSize = 18.0;
+  static const boutiqueSaleNoticeIconSize = 17.0;
+  static const boutiqueSaleBannerIconSize = 40.0;
+  static const boutiqueSaleInfoRowPaddingV = 6.0;
   static const boutiqueBeneficiaryDialogMaxWidth = 520.0;
   // Part de la hauteur d'écran qu'une modale de détail peut occuper.
   static const dialogMaxHeightRatio = 0.88;
@@ -926,8 +935,11 @@ class AppDimensions {
   static const payrollDashStaffMinWidth = 960.0 + minTouchTarget;
   static const payrollCircuitLink = 14.0;
 
-  /// Le liseré tricolore sous le bandeau de paie.
-  static const payrollBannerStripe = 3.0;
+  /// Le liseré tricolore sous le bandeau kuba (`KubaBanner`).
+  static const kubaBannerStripe = 3.0;
+
+  /// Le liseré tricolore sous le bandeau de paie : celui du bandeau kuba.
+  static const payrollBannerStripe = kubaBannerStripe;
 
   /// Le carreau d'icône d'un bandeau du livre (arriérés, geste, versement).
   static const payrollCalloutIcon = 40.0;
@@ -1253,6 +1265,30 @@ class AppDimensions {
   static const coteCourseMarkHeight = 30.0;
   static const coteLegendSwatch = 14.0;
   static const coteHeaderKpiMinWidth = 86.0;
+
+  /// Le trait d'une case en erreur, en focus ou modifiée : plus appuyé que le
+  /// filet d'une case au repos.
+  static const coteCellStrongBorder = 1.5;
+
+  /// Le pointillé d'une case vide : tiret et blanc.
+  static const coteCellDash = 4.0;
+  static const coteCellDashGap = 3.0;
+
+  /// Le pointillé, plus serré, de la pastille de légende.
+  static const coteLegendDash = 3.0;
+  static const coteLegendDashGap = 2.0;
+
+  /// Le trait vertical de l'élève en cours, dans la liste : celui de la
+  /// marque d'un cours.
+  static const coteStudentCurrentMark = coteCourseMarkWidth;
+
+  /// Le glissement d'une ligne qu'un dépliage révèle.
+  static const coteRowRevealOffset = 6.0;
+
+  /// Les icônes en ligne de la saisie (état d'enregistrement, pied du
+  /// bulletin) et celle du champ de recherche.
+  static const coteInlineIconSize = 16.0;
+  static const coteSearchIconSize = 18.0;
   static const coteHeaderAvatar = 44.0;
   static const coteProgressMaxWidth = 220.0;
   static const coteProgressHeight = 6.0;

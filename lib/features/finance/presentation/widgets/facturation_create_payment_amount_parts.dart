@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_form_fields.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -42,7 +43,7 @@ class FacturationTenderCurrencyPicker extends StatelessWidget {
           label.toUpperCase(),
           style: AppTextStyles.badge.copyWith(
             color: AppColors.terreCuite,
-            letterSpacing: 1.2,
+            letterSpacing: AppTypography.eyebrowLetterSpacing,
           ),
         ),
         const SizedBox(height: AppDimensions.spacingXS),
@@ -132,7 +133,9 @@ class FacturationSettleableAmountRow extends StatelessWidget {
         // infinie dans une `Row`. 48 dp : il se touche au doigt, au guichet.
         OutlinedButton(
           onPressed: onSettleAll,
-          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, AppDimensions.minTouchTarget),
+          ),
           child: Text(l10n.facturationCreatePaymentSettleAllAction),
         ),
       ],

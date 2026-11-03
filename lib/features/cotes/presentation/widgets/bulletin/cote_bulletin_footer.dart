@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -72,7 +73,7 @@ class CoteBulletinFooter extends StatelessWidget {
                           children: [
                             const Icon(
                               Icons.error_outline_rounded,
-                              size: 16,
+                              size: AppDimensions.coteInlineIconSize,
                               color: AppColors.error,
                             ),
                             const SizedBox(width: AppSpacing.xs),

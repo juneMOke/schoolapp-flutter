@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/motion/eteelo_entrance.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_context.dart';
-
-const double _revealOffset = 6;
 
 /// L'entrée d'une ligne : celles qu'un dépliage révèle se posent au lieu
 /// d'apparaître. La clé suit le contenu : replier une branche ne remonte pas
@@ -13,7 +12,7 @@ const double _revealOffset = 6;
 Widget coteRowReveal(CoteGridRow row, Widget child) => EteeloEntrance(
   key: ValueKey(row.id),
   index: 0,
-  offsetY: _revealOffset,
+  offsetY: AppDimensions.coteRowRevealOffset,
   duration: AppMotion.standard,
   child: child,
 );

@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/formatters/local_date_time_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -37,12 +38,14 @@ class BoutiqueSaleDetailActions extends StatelessWidget {
         FilledButton.icon(
           onPressed: isPrinting ? null : onPrintTicket,
           icon: isPrinting
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
+              ? const SizedBox.square(
+                  dimension: AppDimensions.boutiqueSaleSpinnerSize,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.print_outlined, size: 20),
+              : const Icon(
+                  Icons.print_outlined,
+                  size: AppDimensions.boutiqueSaleActionIconSize,
+                ),
           // Le libellé dit LEQUEL des deux gestes on fait : sortir un ticket
           // qui n'existe pas encore, ou en refaire un.
           label: Text(
@@ -54,9 +57,13 @@ class BoutiqueSaleDetailActions extends StatelessWidget {
             backgroundColor: AppColors.terreCuite,
             // ⚠️ Sans `minimumSize`, un bouton inline hérite du thème
             // plein-largeur et lève en contrainte infinie.
-            minimumSize: const Size.fromHeight(52),
+            minimumSize: const Size.fromHeight(
+              AppDimensions.boutiqueSaleActionHeight,
+            ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(
+                AppDimensions.boutiqueSaleCardRadius,
+              ),
             ),
           ),
         ),
@@ -79,12 +86,19 @@ class BoutiqueSaleDetailActions extends StatelessWidget {
         if (detail.hasSealedReceipt)
           OutlinedButton.icon(
             onPressed: onOpenReceipt,
-            icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
+            icon: const Icon(
+              Icons.picture_as_pdf_outlined,
+              size: AppDimensions.boutiqueSaleActionIconSize,
+            ),
             label: Text(l10n.boutiqueSaleDetailOpenReceipt),
             style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
+              minimumSize: const Size.fromHeight(
+                AppDimensions.boutiqueSaleActionHeight,
+              ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.boutiqueSaleCardRadius,
+                ),
               ),
             ),
           )
@@ -122,17 +136,23 @@ class BoutiqueSaleDetailActions extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: isClaiming ? null : onClaimReceipt,
               icon: isClaiming
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
+                  ? const SizedBox.square(
+                      dimension: AppDimensions.boutiqueSaleSpinnerSize,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.cloud_download_outlined, size: 20),
+                  : const Icon(
+                      Icons.cloud_download_outlined,
+                      size: AppDimensions.boutiqueSaleActionIconSize,
+                    ),
               label: Text(l10n.boutiqueSaleDetailClaimReceipt),
               style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
+                minimumSize: const Size.fromHeight(
+                  AppDimensions.boutiqueSaleActionHeight,
+                ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.boutiqueSaleCardRadius,
+                  ),
                 ),
               ),
             ),
@@ -163,13 +183,17 @@ class BoutiqueSaleNotice extends StatelessWidget {
     padding: const EdgeInsets.all(AppDimensions.spacingM),
     decoration: BoxDecoration(
       color: color.withValues(alpha: 0.07),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: AppRadius.brMd,
       border: Border.all(color: color.withValues(alpha: 0.24)),
     ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 17, color: color),
+        Icon(
+          icon,
+          size: AppDimensions.boutiqueSaleNoticeIconSize,
+          color: color,
+        ),
         const SizedBox(width: AppDimensions.spacingS),
         Expanded(
           child: Text(

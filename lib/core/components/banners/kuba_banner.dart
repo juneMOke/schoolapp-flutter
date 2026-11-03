@@ -20,9 +20,9 @@ class KubaBanner extends StatelessWidget {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.payrollAgentBannerStart,
-            AppColors.payrollAgentBannerMid,
-            AppColors.payrollAgentBannerEnd,
+            AppColors.kubaBannerStart,
+            AppColors.kubaBannerMid,
+            AppColors.kubaBannerEnd,
           ],
         ),
       ),
@@ -37,7 +37,7 @@ class KubaBanner extends StatelessWidget {
               AppSpacing.lg,
               AppSpacing.lg,
               AppSpacing.lg,
-              AppSpacing.lg + AppDimensions.payrollBannerStripe,
+              AppSpacing.lg + AppDimensions.kubaBannerStripe,
             ),
             child: child,
           ),
@@ -45,14 +45,14 @@ class KubaBanner extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            height: AppDimensions.payrollBannerStripe,
+            height: AppDimensions.kubaBannerStripe,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.payrollBannerStripeStart,
-                    AppColors.payrollBannerStripeMid,
-                    AppColors.payrollBannerStripeEnd,
+                    AppColors.kubaBannerStripeStart,
+                    AppColors.kubaBannerStripeMid,
+                    AppColors.kubaBannerStripeEnd,
                   ],
                 ),
               ),

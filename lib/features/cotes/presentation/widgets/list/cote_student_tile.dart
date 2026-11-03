@@ -83,7 +83,7 @@ class CoteStudentTile extends StatelessWidget {
             border: Border(
               left: BorderSide(
                 color: current ? AppColors.bleuArdoise : Colors.transparent,
-                width: 3,
+                width: AppDimensions.coteStudentCurrentMark,
               ),
               top: const BorderSide(color: AppColors.border),
             ),

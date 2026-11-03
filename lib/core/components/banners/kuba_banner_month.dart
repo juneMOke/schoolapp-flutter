@@ -64,10 +64,7 @@ class KubaBannerMonth extends StatelessWidget {
             children: [
               Text(
                 eyebrow.toUpperCase(),
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.orDoux,
-                  letterSpacing: 1.2,
-                ),
+                style: AppTypography.eyebrow.copyWith(color: AppColors.orDoux),
               ),
               Wrap(
                 spacing: AppSpacing.sm,
@@ -105,9 +102,7 @@ class KubaBannerMonth extends StatelessWidget {
         months,
         TextButton(
           onPressed: onCurrent,
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.presenceMarkOnBanner,
-          ),
+          style: TextButton.styleFrom(foregroundColor: AppColors.kubaBannerOn),
           child: Text(l10n.presenceMarkCurrentMonth),
         ),
       ],
@@ -139,7 +134,7 @@ class _MonthButton extends StatelessWidget {
                 child: Text(
                   label,
                   style: AppTypography.titleLarge.copyWith(
-                    color: AppColors.presenceMarkOnBanner,
+                    color: AppColors.kubaBannerOn,
                   ),
                 ),
               ),
@@ -147,7 +142,7 @@ class _MonthButton extends StatelessWidget {
               const Icon(
                 Icons.calendar_month_outlined,
                 size: AppSpacing.xl,
-                color: AppColors.presenceMarkOnBannerMuted,
+                color: AppColors.kubaBannerOnMuted,
               ),
             ],
           ),

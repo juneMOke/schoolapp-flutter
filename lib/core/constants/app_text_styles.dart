@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
 class AppTextStyles {
   static final sidebarTitle = const TextStyle(
@@ -101,6 +102,22 @@ class AppTextStyles {
     fontFamily: 'Lora',
     fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
     decoration: TextDecoration.none,
+  );
+
+  /// La phrase sous le chiffre d'un pavé KPI plein (`EteeloKpiCard`).
+  static final kpiPaveSubline = const TextStyle(
+    fontFamily: 'Inter',
+    fontSize: AppDimensions.insPaveSublineFontSize,
+    fontWeight: FontWeight.w400,
+    height: 1.45,
+    decoration: TextDecoration.none,
+  );
+
+  /// La tendance d'un pavé KPI plein : la sous-ligne, un cran plus appuyée,
+  /// en chiffres tabulaires. La couleur dépend du fond du pavé.
+  static final kpiPaveTrend = kpiPaveSubline.copyWith(
+    fontWeight: FontWeight.w500,
+    fontFeatures: tabularFigures,
   );
 
   /// Chiffres tabulaires (largeur de glyphe fixe) à appliquer via `copyWith`

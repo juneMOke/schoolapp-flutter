@@ -279,8 +279,8 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
                 color: edge,
                 borderRadius: AppRadius.brSm,
                 strokeWidth: 1,
-                dash: 4,
-                gap: 3,
+                dash: AppDimensions.coteCellDash,
+                gap: AppDimensions.coteCellDashGap,
               )
             : null,
         child: Center(child: field),

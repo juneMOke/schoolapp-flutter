@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
@@ -34,7 +35,7 @@ class CoteCellLook {
         surface: AppColors.coteInvalidSurface,
         border: AppColors.error,
         ink: AppColors.error,
-        borderWidth: 1.5,
+        borderWidth: AppDimensions.coteCellStrongBorder,
       );
     }
     if (focused) {
@@ -42,7 +43,7 @@ class CoteCellLook {
         surface: AppColors.surfaceRaised,
         border: AppColors.bleuArdoise,
         ink: scoreInk ?? AppColors.bleuProfond,
-        borderWidth: 1.5,
+        borderWidth: AppDimensions.coteCellStrongBorder,
       );
     }
     if (changed) {
@@ -50,7 +51,7 @@ class CoteCellLook {
         surface: AppColors.coteChangedSurface,
         border: AppColors.coteChangedBorder,
         ink: scoreInk ?? AppColors.bleuProfond,
-        borderWidth: 1.5,
+        borderWidth: AppDimensions.coteCellStrongBorder,
       );
     }
     if (empty) {

@@ -95,10 +95,7 @@ class PayrollAgentHero extends StatelessWidget {
             children: [
               Text(
                 l10n.payrollAgentEyebrow.toUpperCase(),
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.orDoux,
-                  letterSpacing: 1.2,
-                ),
+                style: AppTypography.eyebrow.copyWith(color: AppColors.orDoux),
               ),
               EteeloOverflowText(
                 member?.fullName ?? staffMemberId,

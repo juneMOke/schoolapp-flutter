@@ -587,24 +587,38 @@ class AppColors {
   static const payrollValidatedBorder = Color(0xFFD7C9DF);
   static const payrollValidatedInk = boutiqueActesAccent;
 
-  // Le bandeau du livre de paie et de la fiche d'un agent : le même dégradé
-  // que le bandeau des registres de présence, pour que les écrans RH se
-  // ressemblent.
-  static const payrollAgentBannerStart = presenceMarkBannerStart;
-  static const payrollAgentBannerMid = presenceMarkBannerMid;
-  static const payrollAgentBannerEnd = presenceMarkBannerEnd;
-  static const payrollAgentOnBanner = presenceMarkOnBanner;
-  static const payrollAgentOnBannerMuted = presenceMarkOnBannerMuted;
-  static const payrollAgentOnBannerFaint = presenceMarkOnBannerFaint;
+  // Le bandeau kuba du socle (`KubaBanner` : livre de paie, fiche d'un
+  // agent, récapitulatif des présences) : le dégradé des registres de
+  // présence, pour que les écrans RH se ressemblent. Le composant lit ces
+  // noms-ci, jamais ceux d'un module.
+  static const kubaBannerStart = presenceMarkBannerStart;
+  static const kubaBannerMid = presenceMarkBannerMid;
+  static const kubaBannerEnd = presenceMarkBannerEnd;
+  static const kubaBannerOn = presenceMarkOnBanner;
+  static const kubaBannerOnMuted = presenceMarkOnBannerMuted;
+  static const kubaBannerOnFaint = presenceMarkOnBannerFaint;
+  // Le fond d'une tuile chiffrée du bandeau.
+  static const kubaBannerTile = Color(0x1AFFFFFF);
+  // Le liseré sous le bandeau : terre cuite, or, savane.
+  static const kubaBannerStripeStart = terreCuite;
+  static const kubaBannerStripeMid = orDoux;
+  static const kubaBannerStripeEnd = vertSavane;
+
+  // Le bandeau du livre de paie et de la fiche d'un agent : le bandeau kuba.
+  static const payrollAgentBannerStart = kubaBannerStart;
+  static const payrollAgentBannerMid = kubaBannerMid;
+  static const payrollAgentBannerEnd = kubaBannerEnd;
+  static const payrollAgentOnBanner = kubaBannerOn;
+  static const payrollAgentOnBannerMuted = kubaBannerOnMuted;
+  static const payrollAgentOnBannerFaint = kubaBannerOnFaint;
   // Le fond d'une tuile chiffrée du bandeau, et le vert d'un compte à zéro
   // (« aucun arriéré ») : 8,4:1 sur le bleu profond, 5,3:1 sur le bleu
   // ardoise du milieu.
-  static const payrollAgentBannerTile = Color(0x1AFFFFFF);
+  static const payrollAgentBannerTile = kubaBannerTile;
   static const payrollAgentBannerGood = Color(0xFF9FD3AE);
-  // Le liseré sous le bandeau de paie : terre cuite, or, savane.
-  static const payrollBannerStripeStart = terreCuite;
-  static const payrollBannerStripeMid = orDoux;
-  static const payrollBannerStripeEnd = vertSavane;
+  static const payrollBannerStripeStart = kubaBannerStripeStart;
+  static const payrollBannerStripeMid = kubaBannerStripeMid;
+  static const payrollBannerStripeEnd = kubaBannerStripeEnd;
 
   /// Le bouton d'envoi WhatsApp, et lui seul. Le vert de la spec (#25A162)
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.

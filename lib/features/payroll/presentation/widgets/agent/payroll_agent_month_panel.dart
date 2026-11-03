@@ -62,10 +62,7 @@ class _PayrollAgentMonthPanelState extends State<PayrollAgentMonthPanel> {
       children: [
         Text(
           l10n.payrollAgentPanelEyebrow.toUpperCase(),
-          style: AppTypography.labelSmall.copyWith(
-            color: AppColors.textMutedAa,
-            letterSpacing: 1.2,
-          ),
+          style: AppTypography.eyebrow.copyWith(color: AppColors.textMutedAa),
         ),
         Text(
           label[0].toUpperCase() + label.substring(1),
