@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/navigation/location_query.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_month_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -40,13 +41,18 @@ abstract final class PayrollAgentNavigation {
 
   /// L'adresse de la fiche de [agentId] sur le livre de [month], sous le
   /// livre : pour un `go` depuis un autre module (la présence d'un agent).
+  /// Le livre du dessous porte le même mois (`mois`) : le retour de la
+  /// fiche le retrouve, au lieu du mois en cours.
   static String addressOf({required String agentId, required String month}) =>
       Uri(
         path: AppRoutesNames.hrPersonnelAgentPath(
           subMenuId: subMenuId,
           agentId: agentId,
         ),
-        queryParameters: {HrAgentAddress.monthParam: month},
+        queryParameters: {
+          PayrollMonthLocation.monthParam: month,
+          HrAgentAddress.monthParam: month,
+        },
       ).toString();
 
   /// Passe à l'agent [agentId] sans empiler : un seul retour ramène au

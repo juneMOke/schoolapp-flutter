@@ -18,6 +18,20 @@ class PayrollDashboardLocation extends StatelessWidget {
 
   const PayrollDashboardLocation({super.key, required this.child});
 
+  static (String?, String?, String?) _values(PayrollDashboardState state) => (
+    state.isCurrentMonth ? null : state.month,
+    state.filter.address,
+    _currencyOf(state),
+  );
+
+  /// Les clés de [state] hors valeurs par défaut — ce que l'adresse du
+  /// tableau de bord porte, devise comprise. Une fiche ouverte par-dessus
+  /// les garde : après un F5 sur la fiche, le retour retrouve le même écran.
+  static Map<String, String> queryOf(PayrollDashboardState state) {
+    final (month, filter, currency) = _values(state);
+    return {monthParam: ?month, filterParam: ?filter, currencyParam: ?currency};
+  }
+
   @override
   Widget build(BuildContext context) =>
       BlocSelector<
@@ -25,11 +39,7 @@ class PayrollDashboardLocation extends StatelessWidget {
         PayrollDashboardState,
         (String?, String?, String?)
       >(
-        selector: (state) => (
-          state.isCurrentMonth ? null : state.month,
-          state.filter.address,
-          _currencyOf(state),
-        ),
+        selector: _values,
         builder: (context, values) => LocationParamsSync(
           current: {
             monthParam: values.$1,

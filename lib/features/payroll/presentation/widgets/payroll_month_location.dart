@@ -19,14 +19,24 @@ class PayrollMonthLocation extends StatelessWidget {
 
   const PayrollMonthLocation({super.key, required this.child});
 
+  static (String?, String?, String?) _values(PayrollState state) => (
+    state.isCurrentMonth ? null : state.month,
+    state.contractFilter?.name,
+    state.payFilter == PayrollPayFilter.all ? null : state.payFilter.name,
+  );
+
+  /// Les clés de [state] hors valeurs par défaut — ce que l'adresse du livre
+  /// porte. Une fiche ouverte par-dessus les garde : après un F5 sur la
+  /// fiche, le retour retrouve le livre tel qu'il était.
+  static Map<String, String> queryOf(PayrollState state) {
+    final (month, contract, pay) = _values(state);
+    return {monthParam: ?month, contractParam: ?contract, payParam: ?pay};
+  }
+
   @override
   Widget build(BuildContext context) =>
       BlocSelector<PayrollCubit, PayrollState, (String?, String?, String?)>(
-        selector: (state) => (
-          state.isCurrentMonth ? null : state.month,
-          state.contractFilter?.name,
-          state.payFilter == PayrollPayFilter.all ? null : state.payFilter.name,
-        ),
+        selector: _values,
         builder: (context, values) => LocationParamsSync(
           current: {
             monthParam: values.$1,

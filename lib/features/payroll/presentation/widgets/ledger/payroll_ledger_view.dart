@@ -106,10 +106,7 @@ class PayrollLedgerView extends StatelessWidget {
                   context,
                   agentId: line.staffMemberId,
                   month: view.month,
-                  screenQuery: {
-                    if (!state.isCurrentMonth)
-                      PayrollMonthLocation.monthParam: view.month,
-                  },
+                  screenQuery: PayrollMonthLocation.queryOf(state),
                 ),
               ),
               onEdit: view.isEditable && canWrite

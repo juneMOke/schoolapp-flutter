@@ -251,7 +251,8 @@ void main() {
 
     expect(
       router.routerDelegate.currentConfiguration.uri.toString(),
-      '/home/${MenuConstants.hrPayrollId}/a-1?mois-agent=2026-09',
+      // Le livre du dessous sur le même mois : le retour le retrouve.
+      '/home/${MenuConstants.hrPayrollId}/a-1?mois=2026-09&mois-agent=2026-09',
     );
     expect(find.text('fiche de paie a-1'), findsOneWidget);
     // `go` : la page de présence ne reste pas sous la fiche.

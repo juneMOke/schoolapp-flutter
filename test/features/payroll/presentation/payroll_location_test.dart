@@ -35,6 +35,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/reflected_records_parser.dart';
 
 import '../../staff/staff_builders.dart';
 import '../data/payroll_dashboard_json_test.dart' show payrollDashboardFixture;
@@ -134,6 +135,35 @@ void main() {
       expect(reopened.cubit.state.contractFilter, StaffContractKind.permanent);
       expect(reopened.cubit.state.payFilter, PayrollPayFilter.unpaid);
       expect(address().queryParameters, written.queryParameters);
+    });
+  });
+
+  group('la fiche ouverte depuis le livre', () {
+    testWidgets('son adresse garde les filtres du livre : le retour après F5 '
+        'retrouve le même livre', (tester) async {
+      await wide(tester);
+      late GoRouter router;
+      Uri address() => router.routeInformationProvider.value.uri;
+      await pumpPayrollScreen(
+        tester,
+        snapshot: snapshot(),
+        location: '/home/paie?mois=2026-09&versement=unpaid',
+        child: const PayrollMonthLocation(child: PayrollScreen()),
+        onRouter: (r) => router = r,
+      );
+      await tester.pumpAndSettle();
+
+      final eye = find.byTooltip("Ouvrir la fiche de l'agent").first;
+      await tester.ensureVisible(eye);
+      await tester.tap(eye);
+      await tester.pumpAndSettle();
+
+      expect(address().path, startsWith('/home/paie/m-'));
+      expect(address().queryParameters, {
+        'mois': '2026-09',
+        'versement': 'unpaid',
+        'mois-agent': '2026-09',
+      });
     });
   });
 
@@ -257,6 +287,13 @@ void main() {
             builder: (_, _) => const Scaffold(
               body: PayrollDashboardLocation(child: PayrollDashboardScreen()),
             ),
+            routes: [
+              GoRoute(
+                path: ':agentId',
+                builder: (_, state) =>
+                    Text('fiche ${state.pathParameters['agentId']}'),
+              ),
+            ],
           ),
         ],
       );
@@ -272,7 +309,9 @@ void main() {
             locale: const Locale('fr'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            routerConfig: router,
+            // L'adresse d'une fiche poussée (`extra` compris) parvient au
+            // navigateur.
+            routerConfig: ReflectedRecordsParser.configOf(router),
           ),
         ),
       );
@@ -300,6 +339,22 @@ void main() {
       await tester.tap(find.text('USD').first);
       await tester.pumpAndSettle();
       expect(address().queryParameters.containsKey('devise'), isFalse);
+    });
+
+    testWidgets('la fiche d\'un agent garde la devise du dessous dans son '
+        'adresse', (tester) async {
+      await wide(tester);
+      await pump(tester, '/home/paie-tableau-de-bord?devise=CDF');
+
+      final eye = find.byTooltip("Ouvrir la fiche de l'agent").first;
+      await tester.ensureVisible(eye);
+      await tester.tap(eye);
+      await tester.pumpAndSettle();
+
+      final pushed = router.routeInformationProvider.value.uri;
+      expect(pushed.path, startsWith('/home/paie-tableau-de-bord/'));
+      expect(pushed.queryParameters['devise'], 'CDF');
+      expect(pushed.queryParameters['mois-agent'], isNotNull);
     });
   });
 }
