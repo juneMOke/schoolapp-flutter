@@ -280,7 +280,10 @@ void main() {
       // Découper l'envoi ferait insérer par le canal natif un `LF` au milieu du
       // flux, entre une commande ESC/POS et son argument.
       expect(channel.written, hasLength(1));
-      expect(channel.written.single, equals(_ticket));
+      expect(
+        channel.written.single,
+        equals(EscPosTicketRenderer.withResync(_ticket)),
+      );
     });
 
     group('exemplaires', () {
@@ -297,7 +300,11 @@ void main() {
         expect(channel.written, hasLength(1));
         expect(
           channel.written.single,
-          equals(EscPosTicketRenderer.joinCopies(_ticket, 3)),
+          equals(
+            EscPosTicketRenderer.withResync(
+              EscPosTicketRenderer.joinCopies(_ticket, 3),
+            ),
+          ),
         );
       });
 
@@ -312,7 +319,11 @@ void main() {
 
           expect(
             channel.written.single,
-            equals(EscPosTicketRenderer.joinCopies(_ticket, TicketCopies.max)),
+            equals(
+              EscPosTicketRenderer.withResync(
+                EscPosTicketRenderer.joinCopies(_ticket, TicketCopies.max),
+              ),
+            ),
           );
         },
       );
@@ -378,7 +389,9 @@ void main() {
 
           expect(result.isRight(), isTrue);
           expect(measured, [
-            EscPosTicketRenderer.joinCopies(_ticket, 2).length,
+            EscPosTicketRenderer.withResync(
+              EscPosTicketRenderer.joinCopies(_ticket, 2),
+            ).length,
           ]);
           expect(channel.calls.last, 'disconnect');
           expect(channel.disconnectedAt, greaterThanOrEqualTo(drain));

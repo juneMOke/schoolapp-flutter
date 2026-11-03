@@ -240,6 +240,41 @@ abstract final class EscPosTicketRenderer {
     return out.takeBytes();
   }
 
+  /// Octets nuls posés en tête de chaque **envoi**, avant le premier ticket :
+  /// assez pour combler la plus grosse bande raster qu'un envoi précédent ait
+  /// pu laisser inachevée.
+  ///
+  /// ## Pourquoi : l'imprimante garde une image entamée d'un jour à l'autre
+  ///
+  /// Une liaison qui se ferme trop tôt (application tuée, Bluetooth coupé,
+  /// ancienne version sans vidange) coupe le flux au milieu d'un `GS v 0`.
+  /// L'imprimante, restée allumée, attend alors le reste de la bande — et le
+  /// prélève sur l'envoi suivant, même le lendemain : `ESC @` et le début du
+  /// logo y deviennent des lignes de points, puis le reste du logo sort en
+  /// texte (constaté le 2026-11-03 sur la NT-8003DD, à la première impression
+  /// du jour). `ESC @` n'y peut rien : en plein raster, ce n'est qu'une donnée.
+  ///
+  /// Des zéros comblent une bande en attente par du **blanc** ; hors raster,
+  /// une imprimante ESC/POS ignore `NUL`. Le ticket qui suit commence par son
+  /// propre `ESC @` et repart donc d'un état connu, quoi qu'ait laissé l'envoi
+  /// d'avant. Taille : une bande complète de [_rasterStripRows] lignes à la
+  /// laize maximale — aucune commande de ce renderer n'en attend davantage.
+  ///
+  /// Un accesseur, pas un champ : une liste partagée se modifie en place.
+  static Uint8List get resyncPreamble => Uint8List(resyncPreambleLength);
+
+  /// Longueur de [resyncPreamble] : 128 × 72 = 9 216 octets, ~1 s de liaison.
+  static const int resyncPreambleLength =
+      _rasterStripRows * (TicketLogoBand.maxWidthDots ~/ 8);
+
+  /// [stream] précédé de [resyncPreamble] : ce qui part réellement sur une
+  /// liaison qui vient de s'ouvrir.
+  static Uint8List withResync(Uint8List stream) =>
+      (BytesBuilder(copy: false)
+            ..add(resyncPreamble)
+            ..add(stream))
+          .takeBytes();
+
   /// `- - - …` sur toute la largeur, puis `LF`.
   static final Uint8List _tearLine = Uint8List.fromList([
     ...('- ' * (columns ~/ 2)).codeUnits,
