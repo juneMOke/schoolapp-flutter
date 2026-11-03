@@ -32,6 +32,11 @@ class BoutiqueSalesState extends Equatable {
   /// que l'adresse retient.
   final int pageIndex;
 
+  /// [pageIndex] vient d'être reborné sur la dernière page de la réponse
+  /// (une adresse `ventes-page=999`) : une correction, pas un geste —
+  /// l'adresse la reprend sans entrée d'historique.
+  final bool pageCorrected;
+
   const BoutiqueSalesState({
     this.status = SalesStatus.initial,
     this.page,
@@ -42,6 +47,7 @@ class BoutiqueSalesState extends Equatable {
     this.selectedClassLabel,
     this.query,
     this.pageIndex = 0,
+    this.pageCorrected = false,
   });
 
   /// Le critère du mode actif est-il posé ?
@@ -68,6 +74,7 @@ class BoutiqueSalesState extends Equatable {
     Object? selectedClassLabel = _undefined,
     Object? query = _undefined,
     int? pageIndex,
+    bool? pageCorrected,
   }) => BoutiqueSalesState(
     status: status ?? this.status,
     page: identical(page, _undefined) ? this.page : page as BoutiqueSalesPage?,
@@ -84,6 +91,7 @@ class BoutiqueSalesState extends Equatable {
         : selectedClassLabel as String?,
     query: identical(query, _undefined) ? this.query : query as SalesQuery?,
     pageIndex: pageIndex ?? this.pageIndex,
+    pageCorrected: pageCorrected ?? this.pageCorrected,
   );
 
   @override
@@ -97,5 +105,6 @@ class BoutiqueSalesState extends Equatable {
     selectedClassLabel,
     query,
     pageIndex,
+    pageCorrected,
   ];
 }

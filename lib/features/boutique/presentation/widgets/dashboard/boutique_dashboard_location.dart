@@ -117,7 +117,20 @@ class BoutiqueDashboardLocation extends StatelessWidget {
     return window.dayCount > DashboardWindow.maxDayCount ? null : window;
   }
 
-  static (String?, String?, String?, String?) _dashboardValues(
+  /// L'adresse porte-t-elle déjà la période de [state] ? Vrai quand la
+  /// fenêtre vient de l'adresse (Précédent, Suivant, lien) : la page de la
+  /// liste, lue dans la même adresse, reste. Faux après un geste — l'adresse
+  /// ne le suit qu'à l'image suivante — et la liste repart de la page 1.
+  static bool addressHolds(BuildContext context, BoutiqueDashboardState state) {
+    final router = LocationQuery.ownedBy(context);
+    if (router == null) return false;
+    final (period, from, to, _, _) = _dashboardValues(state);
+    return LocationQuery.read(router, periodParam) == period &&
+        LocationQuery.read(router, fromParam) == from &&
+        LocationQuery.read(router, toParam) == to;
+  }
+
+  static (String?, String?, String?, String?, bool) _dashboardValues(
     BoutiqueDashboardState state,
   ) {
     final custom = state.period == DashboardPeriod.custom;
@@ -133,10 +146,11 @@ class BoutiqueDashboardLocation extends StatelessWidget {
               currencies.first.currency == selected
           ? null
           : selected,
+      state.periodFromPreference,
     );
   }
 
-  static (String?, String?, String?, String?) _salesValues(
+  static (String?, String?, String?, String?, bool) _salesValues(
     BoutiqueSalesState state,
   ) {
     final classroom = state.mode == SalesFilterMode.classroom;
@@ -145,6 +159,7 @@ class BoutiqueDashboardLocation extends StatelessWidget {
       classroom ? null : state.family?.name,
       classroom ? state.classId : null,
       state.pageIndex == 0 ? null : '${state.pageIndex + 1}',
+      state.pageCorrected,
     );
   }
 
@@ -153,14 +168,14 @@ class BoutiqueDashboardLocation extends StatelessWidget {
       BlocSelector<
         BoutiqueDashboardBloc,
         BoutiqueDashboardState,
-        (String?, String?, String?, String?)
+        (String?, String?, String?, String?, bool)
       >(
         selector: _dashboardValues,
         builder: (context, dashboard) =>
             BlocSelector<
               BoutiqueSalesCubit,
               BoutiqueSalesState,
-              (String?, String?, String?, String?)
+              (String?, String?, String?, String?, bool)
             >(
               selector: _salesValues,
               builder: (context, sales) =>
@@ -182,6 +197,10 @@ class BoutiqueDashboardLocation extends StatelessWidget {
                         salesPageParam: sales.$4,
                         beneficiaryArticleParam: beneficiaries.$1,
                         beneficiaryClassParam: beneficiaries.$2,
+                      },
+                      quietKeys: {
+                        if (dashboard.$5) periodParam,
+                        if (sales.$5) salesPageParam,
                       },
                       onLocation: (values) {
                         context.read<BoutiqueDashboardBloc>().add(

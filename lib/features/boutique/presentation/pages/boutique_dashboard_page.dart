@@ -86,7 +86,10 @@ class _DashboardViewState extends State<_DashboardView> {
     final sales = context.read<BoutiqueSalesCubit>();
     if (_listsStarted) {
       beneficiaries.windowChanged(window);
-      sales.windowChanged(window);
+      sales.windowChanged(
+        window,
+        keepPage: BoutiqueDashboardLocation.addressHolds(context, state),
+      );
     } else {
       _listsStarted = true;
       beneficiaries.start(academicYearId: _academicYearId, window: window);

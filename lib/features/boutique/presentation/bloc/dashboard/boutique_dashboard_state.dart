@@ -34,6 +34,12 @@ class BoutiqueDashboardState extends Equatable {
   /// La devise détaillée par la série et les familles.
   final String? selectedCurrency;
 
+  /// La période affichée est la période mémorisée, posée à l'ouverture d'une
+  /// adresse nue — pas un geste : l'inscrire dans l'adresse ne fait pas
+  /// d'entrée d'historique (Précédent ramènerait l'adresse nue, lue comme
+  /// « Cette semaine »). Tombe au premier changement de période.
+  final bool periodFromPreference;
+
   const BoutiqueDashboardState({
     this.status = BoutiqueDashboardStatus.initial,
     this.academicYearId = '',
@@ -46,6 +52,7 @@ class BoutiqueDashboardState extends Equatable {
     this.failure,
     this.refreshing = false,
     this.selectedCurrency,
+    this.periodFromPreference = false,
   });
 
   BoutiqueCurrencyStats? get selectedBlock => stats?.blockOf(selectedCurrency);
@@ -77,6 +84,7 @@ class BoutiqueDashboardState extends Equatable {
     Object? failure = _undefined,
     bool? refreshing,
     Object? selectedCurrency = _undefined,
+    bool? periodFromPreference,
   }) => BoutiqueDashboardState(
     status: status ?? this.status,
     academicYearId: academicYearId ?? this.academicYearId,
@@ -97,6 +105,7 @@ class BoutiqueDashboardState extends Equatable {
     selectedCurrency: identical(selectedCurrency, _undefined)
         ? this.selectedCurrency
         : selectedCurrency as String?,
+    periodFromPreference: periodFromPreference ?? this.periodFromPreference,
   );
 
   @override
@@ -112,5 +121,6 @@ class BoutiqueDashboardState extends Equatable {
     failure,
     refreshing,
     selectedCurrency,
+    periodFromPreference,
   ];
 }

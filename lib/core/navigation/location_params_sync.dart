@@ -25,12 +25,20 @@ import 'package:school_app_flutter/core/navigation/location_query.dart';
 class LocationParamsSync extends StatefulWidget {
   final Map<String, String?> current;
   final ValueChanged<Map<String, String?>> onLocation;
+
+  /// Les clés que l'écran vient de corriger de lui-même, sans geste : une
+  /// période mémorisée posée à l'ouverture, une page rebornée. Une écriture
+  /// qui ne change qu'elles **remplace** l'entrée d'historique au lieu d'en
+  /// ajouter une : Précédent ne ramène pas l'adresse corrigée, que l'écran
+  /// lirait autrement (l'adresse nue comme la période par défaut).
+  final Set<String> quietKeys;
   final Widget child;
 
   const LocationParamsSync({
     super.key,
     required this.current,
     required this.onLocation,
+    this.quietKeys = const {},
     required this.child,
   });
 
@@ -48,6 +56,9 @@ class _LocationParamsSyncState extends State<LocationParamsSync> {
   /// widget sur l'ancienne valeur, et il défairait le geste qu'on vient de
   /// faire.
   bool _writePending = false;
+
+  /// L'écriture en attente ne porte que des corrections ([quietKeys]).
+  bool _quiet = false;
 
   @override
   void didChangeDependencies() {
@@ -68,6 +79,15 @@ class _LocationParamsSyncState extends State<LocationParamsSync> {
     super.didUpdateWidget(oldWidget);
     // Après la reconstruction : changer d'adresse la relance.
     if (!mapEquals(oldWidget.current, widget.current)) {
+      final changed = {
+        ...oldWidget.current.keys,
+        ...widget.current.keys,
+      }.where((key) => oldWidget.current[key] != widget.current[key]);
+      // Un geste joint à une correction dans la même image garde son
+      // entrée d'historique.
+      _quiet =
+          (!_writePending || _quiet) &&
+          changed.every(widget.quietKeys.contains);
       _writePending = true;
       WidgetsBinding.instance.addPostFrameCallback((_) => _writeLocation());
     }
@@ -97,11 +117,20 @@ class _LocationParamsSyncState extends State<LocationParamsSync> {
   }
 
   void _writeLocation() {
+    final quiet = _quiet;
     _writePending = false;
+    _quiet = false;
     final router = _router;
     if (!mounted || router == null) return;
     if (mapEquals(_read(router), widget.current)) return;
-    LocationQuery.write(router, widget.current);
+    if (quiet) {
+      Router.neglect(
+        context,
+        () => LocationQuery.write(router, widget.current),
+      );
+    } else {
+      LocationQuery.write(router, widget.current);
+    }
   }
 
   @override

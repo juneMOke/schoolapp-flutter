@@ -83,6 +83,7 @@ class _MockNavigationBloc extends MockBloc<NavigationEvent, NavigationState>
     implements NavigationBloc {}
 
 void main() {
+  late _MockPreference preference;
   late _MockStats getStats;
   late _MockProvisional getProvisional;
   late _MockBeneficiaries getBeneficiaries;
@@ -130,7 +131,7 @@ void main() {
     getBeneficiaries = _MockBeneficiaries();
     getSales = _MockSales();
     final getCatalog = _MockCatalog();
-    final preference = _MockPreference();
+    preference = _MockPreference();
     academicYearBloc = _MockAcademicYearBloc();
     authBloc = _MockAuthBloc();
 
@@ -268,6 +269,94 @@ void main() {
 
   group('l\'adresse', () {
     const base = '/home/${MenuConstants.boutiqueDashboardId}';
+
+    /// Les adresses annoncées au navigateur, et si chacune REMPLACE l'entrée
+    /// d'historique courante (`replace`) ou en ajoute une.
+    final reported = <({String uri, bool replace})>[];
+    setUp(reported.clear);
+
+    void recordHistory(WidgetTester tester) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.navigation,
+        (call) async {
+          if (call.method == 'routeInformationUpdated') {
+            final args = call.arguments as Map;
+            reported.add((
+              uri: (args['uri'] ?? args['location']).toString(),
+              replace: args['replace'] == true,
+            ));
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.navigation,
+          null,
+        ),
+      );
+    }
+
+    testWidgets('période mémorisée sur une adresse nue : écrite sans entrée '
+        'd\'historique, Précédent quitte l\'écran', (tester) async {
+      recordHistory(tester);
+      when(
+        () => preference.read(),
+      ).thenAnswer((_) async => DashboardPeriod.month);
+      await pumpPage(tester, location: base);
+
+      expect(dashboardState(tester).period, DashboardPeriod.month);
+      expect(address(), '$base?periode=month');
+      final write = reported.where((r) => r.uri.contains('periode=month'));
+      expect(write, isNotEmpty);
+      expect(write.every((r) => r.replace), isTrue);
+    });
+
+    testWidgets('contre-épreuve : la période choisie au geste garde son '
+        'entrée d\'historique', (tester) async {
+      recordHistory(tester);
+      await pumpPage(tester, location: base);
+      reported.clear();
+
+      await tester.tap(find.text('Ce mois'));
+      await tester.pumpAndSettle();
+
+      expect(address(), '$base?periode=month');
+      expect(reported.last.replace, isFalse);
+    });
+
+    testWidgets('une adresse qui change période ET page garde la page', (
+      tester,
+    ) async {
+      recordHistory(tester);
+      await pumpPage(tester, location: '$base?periode=month&ventes-page=3');
+      expect(salesQueries.last.page, 2);
+      salesQueries.clear();
+      reported.clear();
+
+      // Précédent / Suivant : le navigateur pose l'adresse entière.
+      router!.go('$base?periode=today&ventes-page=2');
+      await tester.pumpAndSettle();
+
+      expect(salesQueries.last.page, 1);
+      expect(salesQueries.last.window, statsWindows.last);
+      expect(Uri.parse(address()).queryParameters['ventes-page'], '2');
+      // Aucune réécriture : l'historique « Suivant » reste.
+      expect(reported.where((r) => !r.uri.contains('ventes-page=2')), isEmpty);
+    });
+
+    testWidgets('une page au-delà de la dernière se reborne, sans entrée '
+        'd\'historique', (tester) async {
+      recordHistory(tester);
+      // 30 ventes, 10 par page : trois pages.
+      await pumpPage(tester, location: '$base?ventes-page=999');
+
+      expect(salesQueries.map((q) => q.page), [998, 2]);
+      expect(address(), '$base?ventes-page=3');
+      final write = reported.where((r) => r.uri.contains('ventes-page=3'));
+      expect(write, isNotEmpty);
+      expect(write.every((r) => r.replace), isTrue);
+    });
 
     testWidgets('période, filtres et page s\'inscrivent ; F5 les restitue', (
       tester,

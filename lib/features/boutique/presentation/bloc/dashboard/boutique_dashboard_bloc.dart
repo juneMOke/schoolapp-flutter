@@ -78,11 +78,16 @@ class BoutiqueDashboardBloc
     );
     // L'adresse (F5, lien) prime sur la période mémorisée : elle dit ce que
     // l'écran montrait.
+    final remembered = location == null ? await _preference.read() : null;
     final period =
-        location?.period ??
-        await _preference.read() ??
-        DashboardPeriod.defaultPeriod;
-    emit(state.copyWith(period: period));
+        location?.period ?? remembered ?? DashboardPeriod.defaultPeriod;
+    emit(
+      state.copyWith(
+        period: period,
+        periodFromPreference:
+            remembered != null && remembered != DashboardPeriod.defaultPeriod,
+      ),
+    );
     await _load(
       emit,
       window: _windowOf(period, location?.range),
@@ -108,7 +113,7 @@ class BoutiqueDashboardBloc
     }
     final window = _windowOf(event.period, event.range);
     if (event.period == state.period && window == state.window) return;
-    emit(state.copyWith(period: event.period));
+    emit(state.copyWith(period: event.period, periodFromPreference: false));
     await _load(emit, window: window, keepData: true);
   }
 
@@ -129,7 +134,7 @@ class BoutiqueDashboardBloc
     // un geste arrivé là serait écrasé par elle.
     if (state.window == null || event.period == state.period) return;
     // La période est posée AVANT la lecture : le sélecteur suit le doigt.
-    emit(state.copyWith(period: event.period));
+    emit(state.copyWith(period: event.period, periodFromPreference: false));
     if (event.period == DashboardPeriod.custom) {
       // Par défaut, la journée d'aujourd'hui — comme aux inscriptions : une
       // fenêtre valide et lisible, que l'utilisateur élargit ensuite. Ouvrir
@@ -156,7 +161,12 @@ class BoutiqueDashboardBloc
         event.window == state.window) {
       return;
     }
-    emit(state.copyWith(period: DashboardPeriod.custom));
+    emit(
+      state.copyWith(
+        period: DashboardPeriod.custom,
+        periodFromPreference: false,
+      ),
+    );
     await _load(emit, window: event.window, keepData: true);
   }
 

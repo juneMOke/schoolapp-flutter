@@ -65,11 +65,18 @@ class BoutiqueSalesCubit extends Cubit<BoutiqueSalesState> {
     await _load(page: next.pageIndex);
   }
 
-  /// La période a changé : le filtre reste, la liste repart de la page 1.
-  Future<void> windowChanged(DashboardWindow window) async {
+  /// La période a changé : le filtre reste, la liste repart de la page 1 —
+  /// sauf [keepPage] : la période vient d'une adresse (Précédent, Suivant,
+  /// lien) qui porte aussi la page, déjà posée par [applyLocation]. La
+  /// remettre à 1 réécrirait l'adresse, et l'historique « Suivant » serait
+  /// perdu.
+  Future<void> windowChanged(
+    DashboardWindow window, {
+    bool keepPage = false,
+  }) async {
     if (window == _window) return;
     _window = window;
-    await _load(page: 0);
+    await _load(page: keepPage ? state.pageIndex : 0);
   }
 
   /// Bascule de mode : le critère de l'autre mode tombe, puisqu'il ne
@@ -130,7 +137,13 @@ class BoutiqueSalesCubit extends Cubit<BoutiqueSalesState> {
   /// [keepPage] : un changement de page garde la page affichée, la barre dit
   /// l'attente. Une autre question (période, filtre) la retire : l'ancienne
   /// liste se lirait comme la réponse à la nouvelle.
-  Future<void> _load({required int page, bool keepPage = false}) async {
+  ///
+  /// [corrected] : la page est rebornée par la réponse précédente.
+  Future<void> _load({
+    required int page,
+    bool keepPage = false,
+    bool corrected = false,
+  }) async {
     final window = _window;
     if (window == null) return;
     final ticket = ++_ticket;
@@ -147,10 +160,20 @@ class BoutiqueSalesCubit extends Cubit<BoutiqueSalesState> {
         failure: null,
         page: keepPage ? state.page : null,
         pageIndex: page,
+        pageCorrected: corrected,
       ),
     );
     final result = await _getSales(query);
     if (isClosed || ticket != _ticket) return;
+    // Une page au-delà de la dernière (adresse tapée, liste raccourcie
+    // depuis) : la dernière page, plutôt qu'une table vide.
+    final last = result.fold(
+      (_) => null,
+      (salesPage) => salesPage.totalPages - 1,
+    );
+    if (last != null && page > last) {
+      return _load(page: last, corrected: true);
+    }
     result.fold(
       (failure) => emit(
         state.copyWith(
