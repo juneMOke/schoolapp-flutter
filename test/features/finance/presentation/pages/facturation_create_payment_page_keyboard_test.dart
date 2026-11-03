@@ -50,9 +50,14 @@ void main() {
     status: StudentChargeStatus.due,
   );
 
+  // La fenêtre est posée par `tester.view` et non par `setSurfaceSize`, qui
+  // ne change pas `MediaQuery` : la page se croyait sur 800×600 (ou sur le
+  // format de la sonde) quelle que soit la surface, et choisissait sa
+  // disposition pour une autre fenêtre que celle où elle se dessinait.
   Future<void> ouvrir(WidgetTester tester, Size surface) async {
-    await tester.binding.setSurfaceSize(surface);
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = surface;
+    addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
       MultiBlocProvider(
@@ -81,10 +86,12 @@ void main() {
 
   /// Le clavier tel que le framework le voit : des `viewInsets`, en pixels
   /// **physiques** (`MediaQuery` les divise par le `devicePixelRatio`).
+  ///
+  /// La fenêtre est posée à un pixel par dp ([ouvrir]) : on le fixe ici aussi,
+  /// pour que la hauteur du clavier ne dépende pas de l'ordre des appels.
   void ouvrirLeClavier(WidgetTester tester, {double dp = 300}) {
-    tester.view.viewInsets = FakeViewPadding(
-      bottom: dp * tester.view.devicePixelRatio,
-    );
+    tester.view.devicePixelRatio = 1;
+    tester.view.viewInsets = FakeViewPadding(bottom: dp);
     addTearDown(tester.view.resetViewInsets);
   }
 
@@ -92,7 +99,9 @@ void main() {
   // étroits couvrent le débordement horizontal du titre payeur.
   const surfaces = <Size>[
     Size(360, 640), // petit téléphone portrait
+    Size(360, 740), // téléphone de référence (AGENTS.md)
     Size(411, 731), // téléphone portrait
+    Size(740, 360), // téléphone de référence en paysage
     Size(640, 360), // petit téléphone paysage — 218 dp de débordement
     Size(731, 411), // téléphone paysage — 167 dp de débordement
     Size(800, 600), // petite tablette
