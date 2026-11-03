@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -140,5 +142,61 @@ void main() {
       tester.getCenter(header('P1')).dx,
       closeTo(tester.getCenter(cell).dx, 1),
     );
+  });
+
+  group('l\'en-tête des notes défile les notes', () {
+    testWidgets('au glissé', (tester) async {
+      await pump(tester, size: _scrolls);
+      final controller = notes(tester);
+
+      await tester.drag(
+        header('P2'),
+        const Offset(-60, 0),
+        kind: PointerDeviceKind.touch,
+      );
+      await tester.pump();
+
+      expect(controller.offset, greaterThan(30));
+      final cell = find.byType(TextField).first;
+      expect(
+        tester.getCenter(header('P1')).dx,
+        closeTo(tester.getCenter(cell).dx, 1),
+      );
+    });
+
+    testWidgets('à la molette avec Maj', (tester) async {
+      await pump(tester, size: _scrolls);
+      final controller = notes(tester);
+      final pageBefore = page(tester).pixels;
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      final pointer = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(
+        pointer.hover(tester.getCenter(header('P2'))),
+      );
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 50)));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+
+      expect(controller.offset, 50);
+      expect(page(tester).pixels, pageBefore);
+    });
+
+    testWidgets('la molette seule défile la page, pas les notes', (
+      tester,
+    ) async {
+      await pump(tester, size: const Size(620, 300));
+      final controller = notes(tester);
+
+      final pointer = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(
+        pointer.hover(tester.getCenter(header('P2'))),
+      );
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 50)));
+      await tester.pump();
+
+      expect(controller.offset, 0);
+      expect(page(tester).pixels, 50);
+    });
   });
 }
