@@ -160,4 +160,29 @@ void main() {
     expect(find.text('Payé'), findsOneWidget);
     expect(find.text('Non payé'), findsOneWidget);
   });
+
+  testWidgets('un nom de part plus long que la légende passe à la ligne', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 160,
+            child: ChartLegend(
+              entries: [
+                BarChartSegment(
+                  label: 'Avances sur salaire remboursées ce mois',
+                  value: 0,
+                  color: AppColors.success,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }

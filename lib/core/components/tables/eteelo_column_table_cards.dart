@@ -16,6 +16,14 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 /// fois ses cellules. Un widget qui n'est ni une [EteeloColumnTableRow] ni
 /// une colonne de lignes (un intertitre) se pose tel quel ; une ligne sous un
 /// [Semantics] devient une carte sous le même [Semantics].
+///
+/// ⚠️ **La ligne est reconnue par son TYPE, avant d'être bâtie.** Le
+/// `row:` du tableau doit rendre l'[EteeloColumnTableRow] elle-même (une
+/// fonction `_row(context, …)`, pas un widget `_MonthRow` dont le `build`
+/// la construirait plus tard) : un widget maison n'est ni une ligne ni une
+/// colonne, il se pose tel quel — en colonnes comprimées dans la largeur du
+/// téléphone, sans erreur ni avertissement. Seuls [Column] et [Semantics]
+/// sont traversés.
 class EteeloColumnTableCards extends StatelessWidget {
   final List<String> headers;
   final List<Widget> rows;

@@ -129,6 +129,10 @@ class EteeloColumnTable extends StatefulWidget {
   /// Sous cette largeur reçue, une carte par ligne
   /// ([EteeloColumnTableCards]) ; `null` — le défaut — : toujours en colonnes,
   /// défilement de côté sous [minWidth].
+  ///
+  /// ⚠️ Avec un seuil, [row] rend l'[EteeloColumnTableRow] elle-même (au
+  /// besoin sous un [Column] ou un [Semantics]) : un widget qui la bâtit dans
+  /// son propre `build` n'est pas reconnu et reste en colonnes.
   final double? cardsBelow;
 
   /// Un filet vertical après cette colonne, sur toute la hauteur du tableau :

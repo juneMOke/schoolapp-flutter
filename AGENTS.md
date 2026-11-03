@@ -616,6 +616,11 @@ l'app) : aucune hauteur fixe sur un bloc qui contient du texte, une hauteur
   `AppBreakpoints.dataTableCardsMax` — tout ce que porte l'en-tête (tri,
   case « tout ») doit avoir un équivalent en mode cartes. Un tableau large qui
   défile de côté porte une `Scrollbar` visible.
+  `EteeloColumnTable(cardsBelow:)` tire ses cartes des lignes **par leur
+  type** : son `row:` rend l'`EteeloColumnTableRow` elle-même (une fonction
+  `_row(context, …)`, au besoin sous `Column`/`Semantics`), jamais un widget
+  `_XxxRow` qui la bâtirait dans son `build` — celui-là resterait en colonnes
+  comprimées sur le téléphone, sans erreur.
 - **Graphiques** : `ChartHeight` ; `SideTitles` avec `interval` explicite.
   Bandes KPI : `EteeloKpiBand` (largeur de carte calculée, pas fixée).
 
