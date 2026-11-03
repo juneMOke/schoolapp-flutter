@@ -52,15 +52,52 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
   /// machine en train d'imprimer.
   final Duration _writeTimeout;
 
+  /// Attente entre une écriture réussie et la fermeture de la liaison, selon
+  /// le nombre d'octets envoyés — cf. [estimateDrainTime].
+  final Duration Function(int byteCount) _drainTime;
+
   const ThermalPrinterAdapter(
     this._channel,
     this._permission, {
     Duration probeTimeout = const Duration(seconds: 5),
     Duration connectTimeout = const Duration(seconds: 15),
     Duration writeTimeout = const Duration(seconds: 20),
+    Duration Function(int byteCount) drainTime = estimateDrainTime,
   }) : _probeTimeout = probeTimeout,
        _connectTimeout = connectTimeout,
-       _writeTimeout = writeTimeout;
+       _writeTimeout = writeTimeout,
+       _drainTime = drainTime;
+
+  /// Débit retenu pour vider la liaison : prudent, une thermique Bluetooth
+  /// bon marché freine l'envoi au rythme de sa tête quand elle imprime une
+  /// image.
+  static const int _drainBytesPerSecond = 8 * 1024;
+
+  /// Plancher : même un ticket court a besoin d'un instant pour traverser.
+  static const Duration _drainFloor = Duration(milliseconds: 800);
+
+  /// Plafond : au-delà, le caissier croirait l'application figée.
+  static const Duration _drainCeiling = Duration(seconds: 15);
+
+  /// Le temps qu'il faut laisser à [byteCount] octets pour quitter la tablette.
+  ///
+  /// ## Pourquoi attendre avant de fermer
+  ///
+  /// L'écriture native rend la main dès que les octets sont dans le tampon de
+  /// la socket Android, pas quand ils ont atteint l'imprimante. Fermer aussitôt
+  /// jette ce qui n'est pas encore parti. Tant que le ticket finissait par du
+  /// texte, la perte passait inaperçue ; depuis le QR de vérification (~19 Ko
+  /// d'image raster `GS v 0` en bas du ticket), la fin du flux était coupée au
+  /// milieu de l'image. L'imprimante attendait alors le reste du QR, et le
+  /// ticket SUIVANT le comblait : un morceau de QR en tête, puis les octets du
+  /// logo imprimés comme du texte (constaté le 2026-11-02 sur la NT-8003DD).
+  static Duration estimateDrainTime(int byteCount) {
+    final transfer = Duration(
+      milliseconds: byteCount * 1000 ~/ _drainBytesPerSecond,
+    );
+    final total = _drainFloor + transfer;
+    return total > _drainCeiling ? _drainCeiling : total;
+  }
 
   @override
   Future<Either<Failure, Unit>> ensureReady() async {
@@ -173,9 +210,9 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
       // UN SEUL envoi, exemplaires compris : le canal natif préfixe chaque
       // appel d'un `LF`, qui tomberait au milieu d'une séquence ESC/POS si le
       // ticket était découpé.
+      final payload = EscPosTicketRenderer.joinCopies(bytes, count);
       final written = await _guard(
-        () =>
-            _channel.writeBytes(EscPosTicketRenderer.joinCopies(bytes, count)),
+        () => _channel.writeBytes(payload),
         _writeTimeout * count,
       );
       if (written != true) {
@@ -183,6 +220,10 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
           ThermalPrinterFailure(ThermalPrinterProblem.unreachable),
         );
       }
+      // ⚠️ Laisser le flux se vider AVANT le `disconnect` du `finally` : une
+      // fermeture immédiate tronque la fin du ticket et empoisonne le suivant
+      // — cf. [estimateDrainTime].
+      await Future<void>.delayed(_drainTime(payload.length));
       return const Right(unit);
     } finally {
       // La liaison se ferme quoi qu'il arrive : la laisser ouverte empêcherait
