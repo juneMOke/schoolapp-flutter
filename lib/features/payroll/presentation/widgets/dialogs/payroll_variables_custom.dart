@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -141,7 +142,7 @@ class _AmountRow extends StatelessWidget {
     );
     return LayoutBuilder(
       builder: (context, box) {
-        if (box.maxWidth < AppDimensions.payrollVarsAmountRowMinWidth) {
+        if (box.maxWidth < AppBreakpoints.payrollVarsAmountRowMin) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,

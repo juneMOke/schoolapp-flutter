@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card_parts.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/color_mix.dart';
@@ -71,7 +72,7 @@ class EteeloStatsCard extends StatelessWidget {
 
   /// Vrai : les actions restent à droite du titre, le sous-titre s'enroule
   /// dessous ; elles ne passent sous le titre que sur une carte plus étroite
-  /// que [AppDimensions.statsCardActionsBesideMinWidth]. Faux — le défaut — :
+  /// que [AppBreakpoints.statsCardActionsBesideMin]. Faux — le défaut — :
   /// elles s'enroulent dès que titre et actions ne tiennent plus côte à côte.
   final bool actionsBeside;
 

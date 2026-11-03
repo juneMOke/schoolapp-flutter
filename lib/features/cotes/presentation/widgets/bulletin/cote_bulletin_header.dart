@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -125,7 +126,7 @@ class CoteBulletinHeader extends StatelessWidget {
               // d'une colonne d'identité lisible, ils passent dessous.
               final stacked =
                   constraints.maxWidth <
-                  AppDimensions.coteHeaderKpiMinWidth * 8;
+                  AppBreakpoints.coteBulletinHeaderRowMin;
               return stacked
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,

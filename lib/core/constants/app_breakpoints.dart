@@ -173,9 +173,6 @@ class AppBreakpoints {
   // Fiche d'une dépense : le fil passe en colonne quand le corps de la
   // modale dépasse ~820 dp — 340 de fil, 480 de faits au moins.
   static const double expenseDetailTwoColMin = 820.0;
-  // Bulletin de paie : feuille (720 max) et panneau d'actions (270) côte à
-  // côte au-delà de ~1000 dp de contenu — une 10″ paysage, barre repliée.
-  static const double payrollPayslipSideBySideMin = 1000.0;
   // Feuille du bulletin : l'identité sur trois colonnes au-delà, deux en
   // deçà ; le solde (net, perçu, reste) en ligne au-delà, empilé en deçà.
   static const double payrollPayslipIdentityThreeColMin = 400.0;
@@ -241,6 +238,53 @@ class AppBreakpoints {
   // en mode Jour : la grille hebdomadaire (5 jours) y est trop serrée. Au-delà,
   // mode Semaine. L'utilisateur peut toujours basculer via la barre.
   static const double scheduleWeekDefaultMin = dataTableCardsMax; // 600
+
+  // ---------------------------------------------------------------------------
+  // Seuils de composants, mesurés sur la largeur REÇUE (`LayoutBuilder`) —
+  // rangés ici et non dans `AppDimensions` : ce sont des bascules de
+  // disposition, pas des tailles.
+  // ---------------------------------------------------------------------------
+
+  /// Carte de section (`EteeloStatsCard.actionsBeside`) : au-delà, les
+  /// actions restent à droite du titre ; en deçà, elles passent dessous. La
+  /// largeur d'un téléphone : une carte pleine page y garde ses exports à
+  /// côté du titre, une carte en demi-colonne non.
+  static const double statsCardActionsBesideMin = 360.0;
+
+  /// En-tête d'une personne du registre de présence : en deçà, le badge
+  /// (« VAC · H ») passe sous le nom — avatar, nom lisible et badge ne
+  /// tiennent plus sur une ligne.
+  static const double presencePersonHeadingInlineBadgeMin = 220.0;
+
+  /// Ligne de profil (fiche de présence d'un agent) : en deçà, la barre et
+  /// les taux passent sous le nom.
+  static const double presenceProfileRowInlineMin = 640.0;
+
+  /// Montant d'une rubrique de paie (variables du mois) : en deçà, le champ
+  /// passe sous son libellé.
+  static const double payrollVarsAmountRowMin = 300.0;
+
+  /// RH · Personnel, tableau de bord : au-delà, « Par catégorie » et
+  /// « Parité » se tiennent côte à côte — le palier où une fiche cesse
+  /// d'être compacte laisse ~370 dp à chaque carte, assez pour ses barres.
+  static const double hrDashboardTwoColumnsMin = detailCompactMax;
+
+  /// RH · Personnel, « Par catégorie » : en deçà, une ligne passe sur deux
+  /// niveaux (libellé et compte, puis la barre) — à côté d'un libellé de
+  /// 132 dp et d'un compte au texte ×1,3, la barre n'avait plus de place.
+  /// Le palier où un tableau se lit déjà en téléphone.
+  static const double hrCategoryRowStackedMax = dataTablePhoneMax;
+
+  /// En-tête de la saisie des notes (bulletin d'un élève) : en deçà, les
+  /// chiffres et les flèches passent sous l'identité. Huit tuiles de
+  /// `AppDimensions.coteHeaderKpiMinWidth` (86) : les chiffres et les
+  /// flèches en prennent ~440, l'identité garde le reste.
+  static const double coteBulletinHeaderRowMin = 688.0;
+
+  /// Ligne d'élève de la saisie d'une évaluation : en deçà, la note, le
+  /// statut et le commentaire passent sous l'identité. Le même palier que
+  /// la grille de champs à deux colonnes.
+  static const double saisieTableRowInlineMin = formGridTwoColMin;
 
   // ---------------------------------------------------------------------------
   // Seuils de HAUTEUR (les seuls du fichier — tous les autres portent sur la

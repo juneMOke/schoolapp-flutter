@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_trailing_registry.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_models.dart';
 
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_profile_tone.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_profile_badge.dart';
@@ -138,7 +139,7 @@ class HrPresenceProfileRow extends StatelessWidget {
               builder: (context, constraints) {
                 final inline =
                     constraints.maxWidth >=
-                    AppDimensions.presenceProfileRowInlineMinWidth;
+                    AppBreakpoints.presenceProfileRowInlineMin;
                 // L'œil des tables de l'app : toute la ligne ouvre aussi.
                 final eye = DataTableTrailingRegistry.build(
                   context,

@@ -321,10 +321,6 @@ class AppDimensions {
   static const statsCardIconBadgeRadius = 8.0;
   static const statsCardIconSize = 16.0;
 
-  /// Largeur de carte à partir de laquelle des actions posées « à côté »
-  /// restent à droite du titre ([EteeloStatsCard.actionsBeside]) ; en deçà,
-  /// elles passent dessous.
-  static const statsCardActionsBesideMinWidth = 360.0;
   static const enrollmentStatsChartBottomTitleHeight = 28.0;
   static const enrollmentStatsChartVerticalLabelMaxExtent = 84.0;
   static const enrollmentStatsPeriodFilterHeight = 38.0;
@@ -713,10 +709,6 @@ class AppDimensions {
   static const saisieFocusSideBySideMaxWidth = 880.0;
   static const presenceMarkAvatarSize = 44.0;
 
-  /// Largeur sous laquelle l'en-tête d'une personne du registre range son
-  /// badge (« VAC · H ») sous le nom : avatar, nom lisible et badge ne
-  /// tiennent plus sur une ligne.
-  static const presencePersonHeadingInlineBadgeMinWidth = 220.0;
   static const presenceMarkMedallionSize = 46.0;
   static const presenceMarkMedallionIconSize = 24.0;
 
@@ -769,10 +761,6 @@ class AppDimensions {
   static const presenceProfileHeaderAccentWidth = 5.0;
   static const presenceProfileRingWidth = 2.0;
   static const presenceProfileHeaderRingWidth = 3.0;
-
-  /// Sous cette largeur, une ligne de profil range sa barre et ses taux sous
-  /// le nom.
-  static const presenceProfileRowInlineMinWidth = 640.0;
 
   /// La règle du profil, à droite de l'en-tête de fiche : lisible sans
   /// s'étirer.
@@ -908,7 +896,6 @@ class AppDimensions {
   static const payrollDeductionColCurrency = 72.0;
   static const payrollDeductionColDefault = 120.0;
   static const payrollVarsAmountField = 140.0;
-  static const payrollVarsAmountRowMinWidth = 300.0;
   static const payrollColAgent = 208.0;
   static const payrollColAmount = 100.0;
 
@@ -1198,10 +1185,6 @@ class AppDimensions {
   static const communicationStudentRowMinHeight = 48.0;
 
   // ── RH · Personnel — tableau de bord et fichier ──
-  /// Au-delà, « Par catégorie » et « Parité » se tiennent côte à côte —
-  /// mesuré sur la largeur reçue : le palier où une fiche cesse d'être
-  /// compacte laisse ~370 dp à chaque carte, assez pour ses barres.
-  static const hrDashboardTwoColumnsMinWidth = AppBreakpoints.detailCompactMax;
 
   static const hrRosterSortWidth = 220.0;
   static const hrCategoryBarHeight = 10.0;
@@ -1211,11 +1194,6 @@ class AppDimensions {
   static const hrLegendSwatchRadius = 3.0;
   static const hrBarLabelWidth = 132.0;
 
-  /// Sous cette largeur reçue, une ligne de « Par catégorie » passe sur deux
-  /// niveaux (libellé et compte, puis la barre) : à côté d'un libellé de
-  /// [hrBarLabelWidth] et d'un compte au texte ×1,3, la barre n'avait plus
-  /// de place — le palier où un tableau se lit déjà en téléphone.
-  static const hrCategoryRowStackedMaxWidth = AppBreakpoints.dataTablePhoneMax;
   static const hrInsightIconSize = 20.0;
 
   /// RH · Présences : le texte d'une alerte de tableau de bord ne s'étire pas

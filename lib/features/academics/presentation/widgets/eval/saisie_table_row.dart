@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
@@ -152,7 +153,7 @@ class _SaisieTableRowState extends State<SaisieTableRow> {
                   onPressed: () => onComment(widget.student),
                 );
 
-          if (constraints.maxWidth < 560) {
+          if (constraints.maxWidth < AppBreakpoints.saisieTableRowInlineMin) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
