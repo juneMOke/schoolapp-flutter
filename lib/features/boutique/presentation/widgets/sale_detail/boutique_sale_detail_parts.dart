@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 
 /// Les briques de la fiche d'une vente : la carte, le titre de section, la
@@ -69,22 +70,27 @@ class BoutiqueSaleInfoRow extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: AppColors.textMuted),
           const SizedBox(width: AppDimensions.spacingS),
+          // La valeur garde sa largeur, bornée à la moitié de la ligne ; le
+          // libellé prend le reste. Un `Flexible` à côté de l'`Expanded`
+          // bridait le libellé à la moitié même quand la valeur était courte.
           Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textMutedAa,
+            child: LeadingTrailingRow(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              gap: AppDimensions.spacingS,
+              leading: Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textMutedAa,
+                ),
               ),
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: muted ? FontWeight.w400 : FontWeight.w600,
-                color: muted ? AppColors.textMutedAa : AppColors.bleuProfond,
-                fontStyle: muted ? FontStyle.italic : FontStyle.normal,
+              trailing: Text(
+                value,
+                textAlign: TextAlign.right,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: muted ? FontWeight.w400 : FontWeight.w600,
+                  color: muted ? AppColors.textMutedAa : AppColors.bleuProfond,
+                  fontStyle: muted ? FontStyle.italic : FontStyle.normal,
+                ),
               ),
             ),
           ),
