@@ -38,18 +38,24 @@ class _CoteGridHeaderBandState extends State<CoteGridHeaderBand> {
   final _stuck = ValueNotifier<double>(0);
   ScrollableState? _page;
 
+  /// La position écoutée, gardée pour elle-même : la page en refait une
+  /// (zoom du navigateur, écran d'une autre échelle) sans changer d'état, et
+  /// l'ancienne ne bouge plus.
+  ScrollPosition? _position;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final page = Scrollable.maybeOf(context, axis: Axis.vertical);
-    if (page == _page) return;
-    _page?.position.removeListener(_measure);
-    _page = page?..position.addListener(_measure);
+    _page = Scrollable.maybeOf(context, axis: Axis.vertical);
+    final position = _page?.position;
+    if (position == _position) return;
+    _position?.removeListener(_measure);
+    _position = position?..addListener(_measure);
   }
 
   @override
   void dispose() {
-    _page?.position.removeListener(_measure);
+    _position?.removeListener(_measure);
     _stuck.dispose();
     super.dispose();
   }
