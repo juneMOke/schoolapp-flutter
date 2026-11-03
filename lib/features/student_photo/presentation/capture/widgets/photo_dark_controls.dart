@@ -75,7 +75,7 @@ class _PhotoShutterButtonState extends State<PhotoShutterButton> {
   }
 }
 
-/// Bouton pilule de 44 dp sur fond sombre : secondaire (cerclé, voilé) ou
+/// Bouton pilule de 48 dp sur fond sombre : secondaire (cerclé, voilé) ou
 /// primaire (terre cuite plein).
 class PhotoDarkPillButton extends StatelessWidget {
   final String label;
@@ -128,7 +128,7 @@ class PhotoDarkPillButton extends StatelessWidget {
   }
 }
 
-/// Le petit bouton carré de fermeture (40 × 40, rayon 12) des panneaux sombres.
+/// Le bouton carré de fermeture (48 × 48, rayon 12) des panneaux sombres.
 class PhotoDarkCloseButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final String tooltip;

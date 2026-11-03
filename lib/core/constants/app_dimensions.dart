@@ -986,8 +986,11 @@ class AppDimensions {
   static const photoSessionShootChromeReserve = 320.0;
   static const photoShutter = 68.0;
   static const photoShutterRing = 4.0;
-  static const photoDarkButton = 44.0;
-  static const photoCloseButton = 40.0;
+
+  /// Les boutons des panneaux sombres : 48 dp au doigt, 40 à la souris (la
+  /// densité compacte du poste en retire 8, cf. `TapTargetHeight`).
+  static const photoDarkButton = minTouchTarget;
+  static const photoCloseButton = minTouchTarget;
   static const photoCloseRadius = 12.0;
   static const photoGuideStroke = 2.5;
 
