@@ -46,6 +46,8 @@ import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/reference_formats.dart';
+
 import '../dashboard_fixtures.dart';
 
 class _MockStats extends Mock implements GetBoutiqueStatsUseCase {}
@@ -198,11 +200,16 @@ void main() {
   Future<void> pumpPage(
     WidgetTester tester, {
     Size size = const Size(1280, 2600),
+    ReferenceFormat? format,
     NavigationBloc? navigation,
     String? location,
   }) async {
-    await tester.binding.setSurfaceSize(size);
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // Un format de référence pose la fenêtre (et `MediaQuery`) ; sans lui,
+    // une grande surface où tout le tableau de bord se construit.
+    if (format == null) {
+      await tester.binding.setSurfaceSize(size);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+    }
     final providers = [
       BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
       BlocProvider<AuthBloc>.value(value: authBloc),
@@ -590,9 +597,13 @@ void main() {
     expect(queries.length, pupils + 1);
   });
 
-  testWidgets('largeur téléphone : aucun débordement', (tester) async {
-    await pumpPage(tester, size: const Size(360, 4200));
-    expect(tester.takeException(), isNull);
+  testAtReferenceFormats('le tableau de bord tient', (tester, format) async {
+    await pumpPage(tester, format: format);
+    await tester.scrollUntilVisible(
+      find.text('Élèves concernés'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Élèves concernés'), findsOneWidget);
   });
 
