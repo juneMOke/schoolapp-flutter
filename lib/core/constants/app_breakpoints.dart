@@ -41,6 +41,11 @@ class AppBreakpoints {
   /// [photoCaptureFullscreenMaxHeight].
   static const double photoCaptureFullscreenMax = formDialogFullscreenMax;
 
+  /// Séance photo (largeur reçue) : la prise de vue (520 au moins), 20
+  /// d'écart et la file (300 au moins) côte à côte au-delà ; empilées en
+  /// deçà.
+  static const double photoSessionSideBySideMin = 840.0;
+
   /// Hauteur restée visible au-dessus du clavier sous laquelle une barre
   /// basse (`AppPageBackground`) ne le suit plus : sur un téléphone en
   /// paysage, barre d'en-tête et barre basse ne laisseraient rien à la

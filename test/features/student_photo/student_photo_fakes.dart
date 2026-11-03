@@ -20,13 +20,17 @@ class FakeSession implements CameraSession {
   /// Le nombre de prises demandées.
   int captures = 0;
 
+  /// Combien de fois l'aperçu a été monté : sur le web, un aperçu remonté
+  /// recrée son élément vidéo.
+  int previewMounts = 0;
+
   FakeSession(this.lens);
 
   @override
   double get previewAspectRatio => 4 / 3;
 
   @override
-  Widget buildPreview() => const SizedBox();
+  Widget buildPreview() => _CountedPreview(onMount: () => previewMounts++);
 
   @override
   Future<Uint8List> capture() async {
@@ -36,6 +40,26 @@ class FakeSession implements CameraSession {
 
   @override
   Future<void> close() async => closed = true;
+}
+
+class _CountedPreview extends StatefulWidget {
+  final VoidCallback onMount;
+
+  const _CountedPreview({required this.onMount});
+
+  @override
+  State<_CountedPreview> createState() => _CountedPreviewState();
+}
+
+class _CountedPreviewState extends State<_CountedPreview> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onMount();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
 
 class FakeCameras extends CameraViewfinderGateway {

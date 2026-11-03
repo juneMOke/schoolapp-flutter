@@ -1026,7 +1026,6 @@ class AppDimensions {
   static const photoSessionShootMin = 520.0;
   static const photoSessionQueueMin = 300.0;
   static const photoSessionQueueMax = 400.0;
-  static const photoSessionStackBelow = 840.0;
   static const photoSessionHeaderAvatar = 44.0;
   static const photoSessionQueueRow = 56.0;
   static const photoSessionQueueAvatar = 36.0;
@@ -1039,8 +1038,10 @@ class AppDimensions {
   static const photoSessionCountTile = 140.0;
 
   /// La hauteur que la file laisse à l'en-tête et aux marges : elle défile
-  /// dans « 100 % de l'écran moins 260 ».
+  /// dans « 100 % de l'écran moins 260 », jamais sous
+  /// [photoSessionQueueMinHeight] — son en-tête et quatre élèves et demi.
   static const photoSessionQueueReserve = 260.0;
+  static const photoSessionQueueMinHeight = 320.0;
 
   /// Le badge caméra de l'avatar d'en-tête : au moins 20 dp, sinon 42 % de
   /// l'avatar ; et l'écart du contour pointillé.
