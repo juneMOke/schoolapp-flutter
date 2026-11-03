@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
@@ -118,4 +120,16 @@ final class CoteCellsRefreshed extends CoteSaisieEvent {
 
 final class CoteHighlightCleared extends CoteSaisieEvent {
   const CoteHighlightCleared();
+}
+
+/// Une borne dans la file des événements : [done] se complète quand tout ce
+/// qui la précède est traité — la case quittée, écrite sur l'appareil. Cf.
+/// [CoteSaisieBloc.settled].
+final class CoteSaisieSettled extends CoteSaisieEvent {
+  final Completer<void> done;
+
+  const CoteSaisieSettled(this.done);
+
+  @override
+  List<Object?> get props => [done];
 }

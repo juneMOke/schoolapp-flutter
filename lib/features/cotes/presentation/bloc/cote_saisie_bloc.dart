@@ -70,6 +70,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     final CoteRejectedDiscarded e => _onDiscarded(e, emit),
     CoteCellsRefreshed() => _onRefreshed(emit),
     CoteHighlightCleared() => _onHighlightCleared(emit),
+    final CoteSaisieSettled e => _onSettled(e),
   };
 
   Future<void> _onOpened(
@@ -423,8 +424,31 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     if (s is CoteSaisieReady) emit(s.copyWith(changedKeys: const {}));
   }
 
+  /// Les bornes posées par [settled] et pas encore atteintes.
+  final Set<Completer<void>> _barriers = {};
+
+  /// Se complète quand les événements reçus jusqu'ici sont traités : une
+  /// case quittée juste avant est alors écrite dans la file de l'appareil.
+  /// La fermeture du bloc complète aussi l'attente — une sortie ne reste
+  /// jamais suspendue.
+  Future<void> settled() {
+    if (isClosed) return Future<void>.value();
+    final done = Completer<void>();
+    _barriers.add(done);
+    add(CoteSaisieSettled(done));
+    return done.future;
+  }
+
+  Future<void> _onSettled(CoteSaisieSettled event) async {
+    if (_barriers.remove(event.done)) event.done.complete();
+  }
+
   @override
   Future<void> close() {
+    for (final done in _barriers) {
+      done.complete();
+    }
+    _barriers.clear();
     _highlight?.cancel();
     uncommittedCell.dispose();
     return super.close();

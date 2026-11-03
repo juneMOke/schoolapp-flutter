@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -370,6 +372,43 @@ void main() {
       expect(find.byType(Dialog), findsNothing);
       expect(repository.saved.single.$2, 14);
       expect(guard(tester).hasUnsavedWork(), isFalse);
+    });
+
+    testWidgets('partir envoie la dernière cote, pas seulement la file '
+        'd\'avant', (tester) async {
+      await openClass(tester);
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(CoteNoteCell),
+              matching: find.byType(TextField),
+            )
+            .first,
+      );
+      await tester.pump();
+      tester.testTextInput.enterText('14');
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+      repository.savedAtFlush.clear();
+
+      var left = false;
+      unawaited(
+        Future.value(
+          RouteExitGuard.mayLeave(tester.element(find.byType(CoteWorkspace))),
+        ).then((leave) => left = leave),
+      );
+      for (var i = 0; i < 5 && !left; i++) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pump();
+      }
+
+      expect(left, isTrue);
+      expect(repository.saved.single.$2, 14);
+      // L'envoi de la sortie part APRÈS l'écriture de la case quittée : la
+      // cote ne reste pas dans la file jusqu'à la synchro suivante.
+      expect(repository.savedAtFlush, isNotEmpty);
+      expect(repository.savedAtFlush.first, 1);
     });
   });
 }

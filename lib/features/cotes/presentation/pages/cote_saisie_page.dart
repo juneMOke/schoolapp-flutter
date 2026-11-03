@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -124,18 +126,29 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
         state != AppLifecycleState.hidden) {
       return;
     }
-    // La case en cours s'écrit en perdant le focus, puis la file part.
-    FocusManager.instance.primaryFocus?.unfocus();
-    _flush();
+    unawaited(_commitThenFlush());
   }
 
   void _flush() => context.read<CoteSaveCubit>().flushNow();
 
+  /// La case en cours s'écrit en perdant le focus, puis la file part. Le
+  /// focus ne change qu'au microtask suivant, et l'écriture passe par la
+  /// file du bloc : la file n'est envoyée qu'une fois la case écrite, sans
+  /// quoi la dernière cote attendrait la synchro suivante. Le bloc et le
+  /// cubit sont lus avant d'attendre : la page a pu partir entre-temps.
+  Future<void> _commitThenFlush() async {
+    final bloc = context.read<CoteSaisieBloc>();
+    final save = context.read<CoteSaveCubit>();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Future<void>.microtask(() {});
+    await bloc.settled();
+    if (!save.isClosed) unawaited(save.flushNow());
+  }
+
   /// Une sortie (Précédent, un autre écran) pendant une frappe : la case
   /// s'écrit, puis la file part — aucune question, rien ne se perd.
   Future<bool> _commitBeforeLeaving() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    if (mounted) _flush();
+    if (mounted) await _commitThenFlush();
     return true;
   }
 
