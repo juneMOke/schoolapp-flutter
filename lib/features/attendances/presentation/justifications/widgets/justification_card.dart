@@ -69,14 +69,20 @@ class JustificationCard extends StatelessWidget {
             runSpacing: AppSpacing.xs,
             children: [
               if (j.classroomName case final name?)
-                EteeloChip(icon: Icons.class_outlined, label: name),
+                EteeloChip(
+                  icon: Icons.class_outlined,
+                  label: name,
+                  wrapLabel: true,
+                ),
               EteeloChip(
                 icon: Icons.event_busy_outlined,
                 label: PresenceLabels.longDay(dates, j.attendanceDate),
+                wrapLabel: true,
               ),
               EteeloChip(
                 icon: Icons.help_outline,
                 label: j.reason.getDisplayName(l10n),
+                wrapLabel: true,
               ),
             ],
           ),
