@@ -583,6 +583,7 @@ pas dans une passe suivante. Détail des constats : `MOBILE_RESPONSIVE_PLAN.md`.
 | Format | Taille | Ce qui casse d'habitude |
 |---|---|---|
 | Téléphone | 360×740 | lignes `Row` qui débordent, tableaux comprimés, modales étroites |
+| Téléphone paysage | 740×360 | en-tête figé et barre basse qui mangent la hauteur, bascule passée sous le pli, action trop large à côté d'un résumé |
 | 7″ portrait / paysage | 600×960 · 960×600 | seuil 600 des cartes, faible hauteur, double barre de titre |
 | 10″ portrait / paysage | 800×1280 · 1280×800 | 1280 − 280 de barre latérale ≈ 1000 dp de contenu |
 | Poste | 1440 · 1920 | lignes de lecture trop longues, contenu non plafonné |

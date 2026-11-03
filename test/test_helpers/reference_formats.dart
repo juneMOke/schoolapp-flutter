@@ -18,11 +18,15 @@ class ReferenceFormat {
       : '$name ${size.width.toInt()}×${size.height.toInt()} texte ×$textScale';
 }
 
-/// Téléphone, 7″ et 10″ dans les deux sens, poste, grand écran — et le
-/// téléphone en texte ×1,3, là où les hauteurs fixes cassent d'abord.
+/// Le téléphone dans les deux sens, 7″ et 10″ dans les deux sens, poste,
+/// grand écran — et le téléphone en texte ×1,3, là où les hauteurs fixes
+/// cassent d'abord. En paysage (740×360), un téléphone a la largeur d'une
+/// tablette et la hauteur d'un bandeau : c'est là qu'un en-tête figé ou une
+/// barre basse mangent l'écran.
 const kReferenceFormats = <ReferenceFormat>[
   ReferenceFormat('téléphone', Size(360, 740)),
   ReferenceFormat('téléphone', Size(360, 740), textScale: 1.3),
+  ReferenceFormat('téléphone paysage', Size(740, 360)),
   ReferenceFormat('7″ portrait', Size(600, 960)),
   ReferenceFormat('7″ paysage', Size(960, 600)),
   ReferenceFormat('10″ portrait', Size(800, 1280)),

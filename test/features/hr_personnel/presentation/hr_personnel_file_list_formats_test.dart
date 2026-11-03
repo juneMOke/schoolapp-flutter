@@ -30,6 +30,9 @@ void main() {
       screen: const HrPersonnelFileScreen(),
       size: null,
     );
+    // En paysage, la bascule « Liste » est sous le pli : la ramener d'abord.
+    await tester.ensureVisible(find.text('Liste'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Liste'));
     await tester.pump();
 

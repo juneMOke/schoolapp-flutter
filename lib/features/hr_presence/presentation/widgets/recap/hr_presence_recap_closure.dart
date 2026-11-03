@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
@@ -122,12 +123,13 @@ class HrPresenceRecapClosure extends StatelessWidget {
                   ],
                 );
               }
-              return Row(
-                children: [
-                  Expanded(child: summary),
-                  const SizedBox(width: AppSpacing.lg),
-                  action,
-                ],
+              // L'action garde sa largeur, bornée à la moitié : sa phrase
+              // « Clôture possible à partir du … » passe à la ligne au lieu
+              // de pousser le résumé hors de la carte (téléphone en paysage).
+              return LeadingTrailingRow(
+                gap: AppSpacing.lg,
+                leading: summary,
+                trailing: action,
               );
             },
           ),
