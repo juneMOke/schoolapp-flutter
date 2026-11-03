@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
@@ -355,6 +358,32 @@ void main() {
           ?.color,
       AppColors.warningInk,
     );
+  });
+
+  testWidgets('pendant la lecture : le squelette partagé, pas un spinner', (
+    tester,
+  ) async {
+    final pending = Completer<Either<Failure, SaleDetail>>();
+    when(() => getDetail(any())).thenAnswer((_) => pending.future);
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('fr'),
+        home: BoutiqueSaleDetailPage(
+          saleId: 'aaaabbbb-cccc-dddd',
+          levelLabels: {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(EteeloListSkeleton), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    pending.complete(Right(_detail()));
+    await tester.pumpAndSettle();
+    expect(find.byType(EteeloListSkeleton), findsNothing);
   });
 
   testWidgets('vente disparue : ce n\'est PAS une panne de lecture', (

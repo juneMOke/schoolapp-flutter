@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
@@ -172,9 +172,14 @@ class _SaleDetailViewState extends State<_SaleDetailView> {
             ? l10n.boutiqueSaleDetailTitle
             : _referenceOf(detail, l10n);
         final content = switch (state.status) {
-          SaleDetailStatus.initial || SaleDetailStatus.loading => const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXL),
-            child: Center(child: CircularProgressIndicator()),
+          // Règle 10 : le squelette partagé, pas un spinner — les lignes de
+          // la fiche (qui, quand, quoi) s'annoncent avant d'arriver.
+          SaleDetailStatus.initial ||
+          SaleDetailStatus.loading => EteeloListSkeleton(
+            rowCount: 4,
+            showAvatar: false,
+            pillCount: 1,
+            semanticsLabel: l10n.boutiqueSaleDetailTitle,
           ),
           // Une vente ouverte depuis la liste existe. Si elle a disparu,
           // l'écran le DIT : une fiche vide ferait croire à une vente sans
