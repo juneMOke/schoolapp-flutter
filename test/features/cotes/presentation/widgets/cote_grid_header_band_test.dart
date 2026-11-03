@@ -13,6 +13,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 import '../bloc/fake_cotes_repository.dart';
 
+/// À 620, les notes ne tiennent pas : elles défilent de côté.
+const _scrolls = Size(620, 900);
+
 /// L'en-tête collant et ce qui le suit : la page qui défile, les notes qui
 /// défilent de côté, et ce qui change sous eux.
 void main() {
@@ -88,6 +91,15 @@ void main() {
       )
       .position;
 
+  ScrollController notes(WidgetTester tester) => tester
+      .widget<SingleChildScrollView>(
+        find.descendant(
+          of: find.byType(CoteGrid),
+          matching: find.byType(SingleChildScrollView),
+        ),
+      )
+      .controller!;
+
   Future<void> scrollPageTo(WidgetTester tester, double offset) async {
     page(tester).jumpTo(offset);
     await tester.pump();
@@ -107,5 +119,26 @@ void main() {
     await scrollPageTo(tester, gridTop + 60);
 
     expect(tester.getTopLeft(header('COURS')).dy, inInclusiveRange(0, 12));
+  });
+
+  testWidgets('reste aligné sur les notes quand la grille s\'élargit', (
+    tester,
+  ) async {
+    await pump(tester, size: _scrolls);
+    final controller = notes(tester);
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+
+    // Plus large, la fin des notes revient plus tôt : le défileur ramène son
+    // décalage, sans le dire.
+    tester.view.physicalSize = const Size(700, 900);
+    await tester.pump();
+    await tester.pump();
+
+    final cell = find.byType(TextField).first;
+    expect(
+      tester.getCenter(header('P1')).dx,
+      closeTo(tester.getCenter(cell).dx, 1),
+    );
   });
 }

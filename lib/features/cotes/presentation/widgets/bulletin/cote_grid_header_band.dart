@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_context.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_scrolled_header.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'en-tête des trois zones, posé en haut de la pile de la grille. Quand la
@@ -110,7 +111,11 @@ class _CoteGridHeaderBandState extends State<CoteGridHeaderBand> {
             ),
           ] else ...[
             Expanded(
-              child: _ScrolledNotes(grid: grid, horizontal: widget.horizontal),
+              child: CoteGridScrolledHeader(
+                width: metrics.centerWidth,
+                horizontal: widget.horizontal,
+                child: _Notes(grid: grid),
+              ),
             ),
             SizedBox(
               width: metrics.totalWidth,
@@ -151,41 +156,6 @@ class _Notes extends StatelessWidget {
       CoteHeaderRow(grid: grid),
     ],
   );
-}
-
-/// Les titres des notes quand elles défilent : décalés comme les notes, entre
-/// les mêmes filets.
-class _ScrolledNotes extends StatelessWidget {
-  final CoteGridContext grid;
-  final ScrollController horizontal;
-
-  const _ScrolledNotes({required this.grid, required this.horizontal});
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        border: Border.symmetric(
-          vertical: BorderSide(color: AppColors.borderStrong),
-        ),
-      ),
-      child: ClipRect(
-        child: OverflowBox(
-          alignment: Alignment.centerLeft,
-          minWidth: grid.metrics.centerWidth,
-          maxWidth: grid.metrics.centerWidth,
-          child: AnimatedBuilder(
-            animation: horizontal,
-            child: _Notes(grid: grid),
-            builder: (context, notes) => Transform.translate(
-              offset: Offset(horizontal.hasClients ? -horizontal.offset : 0, 0),
-              child: notes,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _TotalHeader extends StatelessWidget {
