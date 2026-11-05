@@ -83,8 +83,15 @@ class SessionStudentHeader extends StatelessWidget {
 
 /// Les gestes de la prise : Passer · déclencheur · Absent, puis « Importer
 /// un fichier » et, s'il y a deux objectifs, « Changer de caméra ».
+///
+/// [compact] (séance en paysage) : ces deux derniers en icônes de 48 dp,
+/// libellé en info-bulle et pour le lecteur d'écran. Avec leurs libellés,
+/// ils prenaient deux lignes de 48 dp dans une colonne de ~330 : la
+/// hauteur d'un téléphone couché ne les loge pas avec l'élève et le
+/// déclencheur.
 class SessionShootActions extends StatelessWidget {
   final SessionShooting state;
+  final bool compact;
   final VoidCallback onShoot;
   final VoidCallback onSkip;
   final VoidCallback onAbsent;
@@ -94,6 +101,7 @@ class SessionShootActions extends StatelessWidget {
   const SessionShootActions({
     super.key,
     required this.state,
+    this.compact = false,
     required this.onShoot,
     required this.onSkip,
     required this.onAbsent,
@@ -144,33 +152,62 @@ class SessionShootActions extends StatelessWidget {
         Wrap(
           alignment: WrapAlignment.center,
           spacing: AppSpacing.md,
-          children: [
-            TextButton.icon(
-              onPressed: state.busy ? null : onImport,
-              icon: const Icon(
-                Icons.upload_rounded,
-                size: AppDimensions.photoIconSm,
-              ),
-              label: Text(l10n.photoSessionImportForStudent),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.onPhotoCaptureMuted,
-              ),
-            ),
-            if (opened != null && opened.canSwitch)
-              TextButton.icon(
-                onPressed: onSwitch,
-                icon: const Icon(
-                  Icons.cameraswitch_rounded,
-                  size: AppDimensions.photoIconSm,
-                ),
-                label: Text(l10n.photoSwitchCamera),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.onPhotoCaptureMuted,
-                ),
-              ),
-          ],
+          children: compact
+              ? [
+                  _iconAction(
+                    Icons.upload_rounded,
+                    l10n.photoSessionImportForStudent,
+                    state.busy ? null : onImport,
+                  ),
+                  if (opened != null && opened.canSwitch)
+                    _iconAction(
+                      Icons.cameraswitch_rounded,
+                      l10n.photoSwitchCamera,
+                      onSwitch,
+                    ),
+                ]
+              : [
+                  TextButton.icon(
+                    onPressed: state.busy ? null : onImport,
+                    icon: const Icon(
+                      Icons.upload_rounded,
+                      size: AppDimensions.photoIconSm,
+                    ),
+                    label: Text(l10n.photoSessionImportForStudent),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.onPhotoCaptureMuted,
+                    ),
+                  ),
+                  if (opened != null && opened.canSwitch)
+                    TextButton.icon(
+                      onPressed: onSwitch,
+                      icon: const Icon(
+                        Icons.cameraswitch_rounded,
+                        size: AppDimensions.photoIconSm,
+                      ),
+                      label: Text(l10n.photoSwitchCamera),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.onPhotoCaptureMuted,
+                      ),
+                    ),
+                ],
         ),
       ],
     );
   }
+
+  static Widget _iconAction(
+    IconData icon,
+    String label,
+    VoidCallback? onPressed,
+  ) => IconButton(
+    tooltip: label,
+    onPressed: onPressed,
+    color: AppColors.onPhotoCaptureMuted,
+    constraints: const BoxConstraints(
+      minWidth: AppDimensions.minTouchTarget,
+      minHeight: AppDimensions.minTouchTarget,
+    ),
+    icon: Icon(icon, size: AppDimensions.photoIconMd),
+  );
 }

@@ -48,11 +48,8 @@ void main() {
     ) async {
       await openShooting(tester, harness, size: size);
       expectOnScreen(tester, find.byType(PhotoShutterButton), size);
-      expectOnScreen(
-        tester,
-        find.text('Importer un fichier pour cet élève'),
-        size,
-      );
+      // L'icône : en paysage, « Importer » n'a plus que son info-bulle.
+      expectOnScreen(tester, find.byIcon(Icons.upload_rounded), size);
     });
   }
 

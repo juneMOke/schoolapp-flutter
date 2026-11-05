@@ -989,6 +989,10 @@ class AppDimensions {
   /// du viseur, il ne reste que les marges de page, resserrées (2 × 16), et
   /// celles du panneau (2 × 16).
   static const photoSessionLandscapeChromeReserve = 64.0;
+
+  /// La colonne des gestes en paysage, au moins : Passer · déclencheur ·
+  /// Absent sur une ligne, au texte ×1,3. Le viseur prend le reste.
+  static const photoSessionLandscapeControlsMin = 320.0;
   static const photoShutter = 68.0;
   static const photoShutterRing = 4.0;
 
@@ -1036,6 +1040,10 @@ class AppDimensions {
   static const photoSessionQueueAvatar = 36.0;
   static const photoSessionCurrentRule = 4.0;
   static const photoSessionFlashPreview = 160.0;
+
+  /// Le plancher de la photo du flash : c'est sur elle qu'on décide
+  /// « Reprendre ». Dans un viseur bas, le texte cède avant elle.
+  static const photoSessionFlashPreviewMin = 96.0;
   static const photoSessionSummaryMedallion = 72.0;
   static const photoSessionSummaryAvatar = 40.0;
   static const photoSessionClassMedallion = 46.0;

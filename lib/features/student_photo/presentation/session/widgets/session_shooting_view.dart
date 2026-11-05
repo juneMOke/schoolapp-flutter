@@ -32,11 +32,23 @@ class SessionShootingView extends StatefulWidget {
   /// déclencheur reste à l'écran sur un portable (768, 900 dp de haut).
   final double viewportHeight;
 
+  /// La prise de vue en paysage (cf. [landscapeFor]) ; la file passe alors
+  /// dessous, quelle que soit la largeur.
+  final bool landscape;
+
   const SessionShootingView({
     super.key,
     required this.state,
     required this.viewportHeight,
+    this.landscape = false,
   });
+
+  /// Une page de [viewport] (sous l'en-tête) met-elle la prise de vue en
+  /// paysage ? Basse, mais assez large pour un viseur et les gestes côte à
+  /// côte : une fenêtre basse et étroite garde la colonne.
+  static bool landscapeFor(Size viewport) =>
+      viewport.height < AppBreakpoints.photoSessionLandscapeMaxHeight &&
+      viewport.width >= AppBreakpoints.photoSessionLandscapeMinWidth;
 
   @override
   State<SessionShootingView> createState() => _SessionShootingViewState();
@@ -60,8 +72,7 @@ class _SessionShootingViewState extends State<SessionShootingView> {
               (registry.refOf(i.student.id)?.isPending ?? false),
         )
         .length;
-    final landscape =
-        widget.viewportHeight < AppBreakpoints.photoSessionLandscapeMaxHeight;
+    final landscape = widget.landscape;
     final shoot = KeyedSubtree(
       key: _shootKey,
       child: SessionShootPanel(
@@ -115,7 +126,10 @@ class _SessionShootingViewState extends State<SessionShootingView> {
     );
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < AppBreakpoints.photoSessionSideBySideMin) {
+        // En paysage, la prise de vue garde toute la largeur : à côté de la
+        // file, il ne resterait au viseur que quelques dizaines de dp.
+        if (landscape ||
+            constraints.maxWidth < AppBreakpoints.photoSessionSideBySideMin) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

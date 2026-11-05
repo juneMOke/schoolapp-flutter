@@ -67,8 +67,10 @@ class SessionShootPanel extends StatelessWidget {
       onRetake: onRetake,
     );
     final header = SessionStudentHeader(state: state);
+    final sideways = landscape && viewfinderMaxHeight != null;
     final actions = SessionShootActions(
       state: state,
+      compact: sideways,
       onShoot: onShoot,
       onSkip: onSkip,
       onAbsent: onAbsent,
@@ -81,10 +83,10 @@ class SessionShootPanel extends StatelessWidget {
         borderRadius: AppRadius.brLg,
         gradient: PhotoCaptureDecor.gradient,
       ),
-      child: landscape
+      child: sideways
           ? SessionShootLandscape(
               viewfinder: viewfinder,
-              viewfinderMaxHeight: viewfinderMaxHeight,
+              height: viewfinderMaxHeight!,
               header: header,
               actions: actions,
             )

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/keyboard/idle_focus_shortcut.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -81,19 +80,26 @@ class _PhotoSessionView extends StatelessWidget {
             ),
             body: SafeArea(
               child: LayoutBuilder(
-                builder: (context, viewport) => SingleChildScrollView(
-                  // Fenêtre basse : marges resserrées, la hauteur va au viseur
-                  // (cf. `photoSessionLandscapeChromeReserve`).
-                  padding: EdgeInsets.all(
-                    viewport.maxHeight <
-                            AppBreakpoints.photoSessionLandscapeMaxHeight
-                        ? AppSpacing.lg
-                        : AppSpacing.xl,
-                  ),
-                  child: ContentMaxWidth(
-                    child: _body(context, state, viewport.maxHeight),
-                  ),
-                ),
+                builder: (context, viewport) {
+                  final landscape = SessionShootingView.landscapeFor(
+                    viewport.biggest,
+                  );
+                  return SingleChildScrollView(
+                    // En paysage : marges resserrées, la hauteur va au viseur
+                    // (cf. `photoSessionLandscapeChromeReserve`).
+                    padding: EdgeInsets.all(
+                      landscape ? AppSpacing.lg : AppSpacing.xl,
+                    ),
+                    child: ContentMaxWidth(
+                      child: _body(
+                        context,
+                        state,
+                        viewport.maxHeight,
+                        landscape: landscape,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -114,8 +120,9 @@ class _PhotoSessionView extends StatelessWidget {
   Widget _body(
     BuildContext context,
     PhotoSessionState state,
-    double viewportHeight,
-  ) {
+    double viewportHeight, {
+    required bool landscape,
+  }) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<PhotoSessionCubit>();
     return switch (state) {
@@ -149,6 +156,7 @@ class _PhotoSessionView extends StatelessWidget {
       SessionShooting() => SessionShootingView(
         state: state,
         viewportHeight: viewportHeight,
+        landscape: landscape,
       ),
       SessionSummary() => SessionSummaryView(
         state: state,

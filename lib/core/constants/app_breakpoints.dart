@@ -315,4 +315,12 @@ class AppBreakpoints {
   /// Un téléphone couché (360 − 68 d'en-tête = 292) passe en paysage ; une
   /// 7" paysage (600 − 68 = 532) et un portable gardent la colonne.
   static const double photoSessionLandscapeMaxHeight = 480.0;
+
+  /// … et seulement à partir de cette largeur de page : marges de page et
+  /// de panneau (2 × 16 + 2 × 16), la colonne des gestes
+  /// (`AppDimensions.photoSessionLandscapeControlsMin`, 320), 16 d'écart et
+  /// un viseur à sa hauteur plancher (150, soit 200 de large). Une fenêtre
+  /// basse et étroite (écran partagé, 370 × 360) garde la colonne : à côté
+  /// du viseur, « Passer » et « Absent » n'y avaient plus que quelques dp.
+  static const double photoSessionLandscapeMinWidth = 600.0;
 }

@@ -54,6 +54,9 @@ class _Rosters implements ClassRosterSource {
 
 const backLens = CameraLens(name: 'back', facing: CameraFacing.back);
 
+/// Le second objectif d'un vrai téléphone : « Changer de caméra » apparaît.
+const frontLens = CameraLens(name: 'front', facing: CameraFacing.front);
+
 /// Les formats de référence (AGENTS.md § « Écran neuf »), plus les deux
 /// portables et le téléphone en paysage.
 const referenceFormats = <Size>[
@@ -81,8 +84,12 @@ class PhotoLayoutHarness {
     registerFallbackValue(DocumentCaptureMode.importImage);
   }
 
+  /// Le réseau vu par la séance : hors ligne, le flash dit « mise en file ».
+  bool online = true;
+
   Future<void> setUp() async {
     cameras = FakeCameras([backLens]);
+    online = true;
     await getIt.reset();
     when(
       () => _repository.loadIndex(),
@@ -101,10 +108,22 @@ class PhotoLayoutHarness {
       ..registerFactory<PhotoSessionCubit>(sessionCubit)
       ..registerFactory<PhotoNetworkCubit>(() {
         final network = _MockNetwork();
-        when(() => network.state).thenReturn(true);
+        when(() => network.state).thenReturn(online);
         when(() => network.start()).thenAnswer((_) async {});
         return network;
       });
+  }
+
+  /// L'écriture d'une photo réussit : sans elle, Mocktail rend `null`, la
+  /// prise échoue en silence et le flash n'est jamais émis.
+  void acceptSaves() {
+    when(
+      () => _repository.savePhoto(
+        studentId: any(named: 'studentId'),
+        jpeg: any(named: 'jpeg'),
+        takenAt: any(named: 'takenAt'),
+      ),
+    ).thenAnswer((_) async => const Right(unit));
   }
 
   /// Une séance sur la classe simulée et les caméras du banc.
