@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/keyboard/idle_focus_shortcut.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -81,7 +82,14 @@ class _PhotoSessionView extends StatelessWidget {
             body: SafeArea(
               child: LayoutBuilder(
                 builder: (context, viewport) => SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  // Fenêtre basse : marges resserrées, la hauteur va au viseur
+                  // (cf. `photoSessionLandscapeChromeReserve`).
+                  padding: EdgeInsets.all(
+                    viewport.maxHeight <
+                            AppBreakpoints.photoSessionLandscapeMaxHeight
+                        ? AppSpacing.lg
+                        : AppSpacing.xl,
+                  ),
                   child: ContentMaxWidth(
                     child: _body(context, state, viewport.maxHeight),
                   ),

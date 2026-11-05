@@ -983,6 +983,12 @@ class AppDimensions {
   /// barre de progression et ses écarts (4 + 3 × 12), le déclencheur (68),
   /// et la ligne « Importer » (8 + 48) — pour qu'elle reste visible aussi.
   static const photoSessionShootChromeReserve = 320.0;
+
+  /// La même réserve en paysage (`AppBreakpoints
+  /// .photoSessionLandscapeMaxHeight`) : l'élève et les gestes passent à côté
+  /// du viseur, il ne reste que les marges de page, resserrées (2 × 16), et
+  /// celles du panneau (2 × 16).
+  static const photoSessionLandscapeChromeReserve = 64.0;
   static const photoShutter = 68.0;
   static const photoShutterRing = 4.0;
 

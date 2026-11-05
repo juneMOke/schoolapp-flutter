@@ -306,4 +306,13 @@ class AppBreakpoints {
   /// 4:3 de 532 de large, en-tête, déclencheur) ; centré, il lui faut ses
   /// marges en plus.
   static const double photoCaptureFullscreenMaxHeight = 640.0;
+
+  /// Séance photo, hauteur visible de la page (sous son en-tête) : en deçà,
+  /// la prise de vue passe en paysage — le viseur à gauche ; l'élève, la
+  /// progression et le déclencheur à droite. Empilés, ils demandent la
+  /// réserve de la séance (`AppDimensions.photoSessionShootChromeReserve`,
+  /// 320) plus le viseur à sa hauteur plancher (150) : 470, arrondi à 480.
+  /// Un téléphone couché (360 − 68 d'en-tête = 292) passe en paysage ; une
+  /// 7" paysage (600 − 68 = 532) et un portable gardent la colonne.
+  static const double photoSessionLandscapeMaxHeight = 480.0;
 }

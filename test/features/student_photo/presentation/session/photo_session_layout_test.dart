@@ -40,11 +40,9 @@ void main() {
   setUp(harness.setUp);
   tearDown(harness.tearDown);
 
-  // 740×360 n'y est pas : l'élève, la progression et la barre de gestes
-  // prennent à eux seuls la hauteur d'un téléphone en paysage (cf. rapport).
-  final formats = referenceFormats.where((s) => s != const Size(740, 360));
-
-  for (final size in formats) {
+  // 740×360 compris : sur une fenêtre basse, la prise de vue passe en
+  // paysage (cf. `photo_session_landscape_test`).
+  for (final size in referenceFormats) {
     testWidgets('$size : déclencheur et « Importer » à l’écran', (
       tester,
     ) async {

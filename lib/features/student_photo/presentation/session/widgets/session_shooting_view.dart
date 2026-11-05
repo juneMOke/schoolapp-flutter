@@ -17,9 +17,12 @@ import 'package:school_app_flutter/features/student_photo/presentation/session/w
 
 /// La prise de vue et la file : côte à côte à partir de
 /// [AppBreakpoints.photoSessionSideBySideMin], empilées en dessous (la prise
-/// de vue d'abord).
+/// de vue d'abord). Sous [AppBreakpoints.photoSessionLandscapeMaxHeight] de
+/// hauteur visible, la prise de vue elle-même passe en paysage : le viseur à
+/// gauche, l'élève et les gestes à droite.
 ///
-/// Chacune garde son identité à la bascule : sans elle, le viseur serait
+/// Chacune garde son identité à la bascule — et le viseur la sienne, d'une
+/// disposition de la prise de vue à l'autre (rotation) : sans elle, le viseur serait
 /// démonté puis remonté — sur le web, l'élément vidéo ainsi recréé peut
 /// rester noir — et la file perdrait son défilement.
 class SessionShootingView extends StatefulWidget {
@@ -42,6 +45,7 @@ class SessionShootingView extends StatefulWidget {
 class _SessionShootingViewState extends State<SessionShootingView> {
   final GlobalKey _shootKey = GlobalKey(debugLabel: 'session-shoot');
   final GlobalKey _queueKey = GlobalKey(debugLabel: 'session-queue');
+  final GlobalKey _viewfinderKey = GlobalKey(debugLabel: 'session-viewfinder');
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +60,19 @@ class _SessionShootingViewState extends State<SessionShootingView> {
               (registry.refOf(i.student.id)?.isPending ?? false),
         )
         .length;
+    final landscape =
+        widget.viewportHeight < AppBreakpoints.photoSessionLandscapeMaxHeight;
     final shoot = KeyedSubtree(
       key: _shootKey,
       child: SessionShootPanel(
         state: state,
+        landscape: landscape,
+        viewfinderKey: _viewfinderKey,
         viewfinderMaxHeight: PhotoViewfinder.heightWithin(
           widget.viewportHeight,
-          reserve: AppDimensions.photoSessionShootChromeReserve,
+          reserve: landscape
+              ? AppDimensions.photoSessionLandscapeChromeReserve
+              : AppDimensions.photoSessionShootChromeReserve,
         ),
         online: online,
         onShoot: cubit.shoot,

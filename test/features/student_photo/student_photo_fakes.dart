@@ -30,7 +30,7 @@ class FakeSession implements CameraSession {
   double get previewAspectRatio => 4 / 3;
 
   @override
-  Widget buildPreview() => _CountedPreview(onMount: () => previewMounts++);
+  Widget buildPreview() => CountedPreview(onMount: () => previewMounts++);
 
   @override
   Future<Uint8List> capture() async {
@@ -42,16 +42,17 @@ class FakeSession implements CameraSession {
   Future<void> close() async => closed = true;
 }
 
-class _CountedPreview extends StatefulWidget {
+/// L'aperçu simulé : son `State` naît une fois par montage.
+class CountedPreview extends StatefulWidget {
   final VoidCallback onMount;
 
-  const _CountedPreview({required this.onMount});
+  const CountedPreview({super.key, required this.onMount});
 
   @override
-  State<_CountedPreview> createState() => _CountedPreviewState();
+  State<CountedPreview> createState() => CountedPreviewState();
 }
 
-class _CountedPreviewState extends State<_CountedPreview> {
+class CountedPreviewState extends State<CountedPreview> {
   @override
   void initState() {
     super.initState();

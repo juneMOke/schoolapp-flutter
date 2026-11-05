@@ -59,21 +59,34 @@ class _SessionFlashOverlayState extends State<SessionFlashOverlay> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: AppDimensions.photoSessionFlashPreview,
-                height: AppDimensions.photoSessionFlashPreview,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.orDoux,
-                    width: AppDimensions.photoFlashRing,
+              // Au plus 160 dp, moins dans un viseur bas (séance en
+              // paysage) : la photo cède sa place au texte et à « Reprendre ».
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppDimensions.photoSessionFlashPreview,
+                    maxHeight: AppDimensions.photoSessionFlashPreview,
                   ),
-                ),
-                child: ClipOval(
-                  child: Image.memory(
-                    widget.flash.photo,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    // Un `Container` : la bordure y repousse la photo,
+                    // l'anneau reste entier.
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.orDoux,
+                          width: AppDimensions.photoFlashRing,
+                        ),
+                      ),
+                      child: ClipOval(
+                        child: Image.memory(
+                          widget.flash.photo,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
