@@ -18,6 +18,10 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
   final List<StaffMember> _others;
   final String _today;
 
+  /// La fiche telle qu'ouverte : une création n'est entamée que si la saisie
+  /// s'en écarte (le brouillon peut naître pré-rempli par la recherche).
+  final StaffMemberDraft _openingDraft;
+
   StaffAgentCubit({
     required SaveStaffMemberUseCase save,
     required LoadStaffMemberUseCase load,
@@ -29,6 +33,7 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
        _load = load,
        _others = others,
        _today = today,
+       _openingDraft = draft,
        super(
          StaffAgentState(
            mode: member == null ? StaffAgentMode.create : StaffAgentMode.view,
@@ -131,10 +136,14 @@ class StaffAgentCubit extends Cubit<StaffAgentState> {
     );
   }
 
-  /// La fiche modifiée diffère-t-elle de celle enregistrée ?
+  /// La fiche modifiée diffère-t-elle de celle enregistrée ? En création :
+  /// la saisie s'écarte-t-elle de la fiche ouverte, ou un contrat initial
+  /// est-il commencé ?
   bool get hasChanges {
     final member = state.member;
-    if (member == null) return true;
+    if (member == null) {
+      return state.draft != _openingDraft || state.initialContract != null;
+    }
     return state.draft != StaffMemberDraft.of(member);
   }
 

@@ -146,6 +146,31 @@ void main() {
     },
   );
 
+  test('création : entamée seulement quand la saisie s écarte de la fiche '
+      'ouverte, ou qu un contrat initial commence', () {
+    StaffAgentCubit opened() => StaffAgentCubit(
+      save: save,
+      load: load,
+      others: const [],
+      today: '2026-09-29',
+      // Pré-remplie par la recherche : ce n'est pas encore une saisie.
+      draft: const StaffMemberDraft(id: 'new', lastName: 'Kalala'),
+    );
+
+    final typed = opened();
+    addTearDown(typed.close);
+    expect(typed.hasChanges, isFalse);
+    typed.updateDraft((d) => d.copyWith(firstName: 'Paul'));
+    expect(typed.hasChanges, isTrue);
+
+    final contracted = opened();
+    addTearDown(contracted.close);
+    contracted.updateInitialContract(
+      (c) => c.copyWith(effectiveFrom: () => '2026-09-01'),
+    );
+    expect(contracted.hasChanges, isTrue);
+  });
+
   group('contrat initial', () {
     const contract = StaffContractDraft(
       kind: StaffContractKind.permanent,

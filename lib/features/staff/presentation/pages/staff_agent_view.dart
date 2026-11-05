@@ -69,22 +69,31 @@ class _StaffAgentViewState extends State<StaffAgentView> {
     }
   }
 
-  /// Une modification en cours serait perdue : la fiche se ferme ou le
-  /// navigateur la quitte sur ce seul critère.
-  bool _hasUnsavedWork(StaffAgentCubit cubit) =>
-      cubit.state.mode == StaffAgentMode.edit && cubit.hasChanges;
+  /// Une saisie en cours serait perdue — modification, ou création entamée
+  /// (F5, fermeture de l'onglet, Précédent) : la fiche se ferme ou le
+  /// navigateur la quitte sur ce seul critère. Une création en cours
+  /// d'écriture n'est plus à protéger : elle devient l'agent.
+  bool _hasUnsavedWork(StaffAgentCubit cubit) => switch (cubit.state.mode) {
+    StaffAgentMode.edit => cubit.hasChanges,
+    StaffAgentMode.create => !cubit.state.saving && cubit.hasChanges,
+    StaffAgentMode.view => false,
+  };
 
   Future<bool> _confirmDiscard() => confirmStaffDiscard(context);
 
   Future<void> _leave(StaffAgentCubit cubit) async {
-    final state = cubit.state;
+    final editing = cubit.state.mode == StaffAgentMode.edit;
     if (_hasUnsavedWork(cubit)) {
       final discard = await _confirmDiscard();
       if (!mounted || !discard) return;
-      cubit.cancelEdit();
-      return;
+      if (!editing) {
+        // La question est posée : la sortie qui suit ne la repose pas.
+        RouteExitGuard.release(context);
+        Navigator.of(context).pop();
+        return;
+      }
     }
-    if (state.mode == StaffAgentMode.edit) {
+    if (editing) {
       cubit.cancelEdit();
       return;
     }
@@ -198,7 +207,8 @@ class _StaffAgentViewState extends State<StaffAgentView> {
           hasUnsavedWork: () => _hasUnsavedWork(cubit),
           confirmExit: _confirmDiscard,
           child: PopScope(
-            canPop: state.mode != StaffAgentMode.edit,
+            canPop:
+                state.mode != StaffAgentMode.edit && !_hasUnsavedWork(cubit),
             onPopInvokedWithResult: (didPop, _) {
               if (!didPop) unawaited(_leave(cubit));
             },
