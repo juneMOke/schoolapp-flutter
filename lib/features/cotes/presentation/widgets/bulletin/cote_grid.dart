@@ -46,6 +46,7 @@ class CoteGridState extends State<CoteGrid> {
   late final CoteFocusRegistry _registry;
   late final CoteSaisieReady _opened;
   final _hoveredCours = ValueNotifier<String?>(null);
+  final _hintBandHeight = ValueNotifier<double>(0);
 
   /// La zone des notes change de parent quand elle cesse de tenir (rotation,
   /// fenêtre redimensionnée) : sa clé garde ses cases, donc le focus, la
@@ -143,6 +144,7 @@ class CoteGridState extends State<CoteGrid> {
   void dispose() {
     _registry.dispose();
     _hoveredCours.dispose();
+    _hintBandHeight.dispose();
     _horizontal.dispose();
     super.dispose();
   }
@@ -171,6 +173,7 @@ class CoteGridState extends State<CoteGrid> {
           registry: _registry,
           enterMove: widget.enterMove,
           hoveredCours: _hoveredCours,
+          hintBandHeight: _hintBandHeight,
           onToggleRubrique: widget.onToggleRubrique,
         );
         final center = metrics.centerWidth;

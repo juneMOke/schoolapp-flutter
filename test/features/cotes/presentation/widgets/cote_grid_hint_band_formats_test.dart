@@ -27,8 +27,6 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    final empty = tester.getSize(find.byType(CoteGridHintBand)).height;
-
     // Anglais, examen : la dernière case, loin à droite sur téléphone.
     tester.widget<TextField>(gridField(5)).focusNode!.requestFocus();
     await tester.pump();
@@ -39,11 +37,12 @@ void main() {
       'Anglais · Examen · Semestre 1 : Refusée : colonne clôturée '
       'entre-temps. Le serveur ne l\'a pas gardée.',
     );
-    final band = tester.getRect(find.byType(CoteGridHintBand));
+    final band = tester.getRect(hintPanel);
     expect(band.left, greaterThanOrEqualTo(0));
     expect(band.right, lessThanOrEqualTo(format.size.width));
-    // Vide, elle garde une ligne : l'aide ne fait que l'allonger.
-    expect(band.height, greaterThanOrEqualTo(empty));
-    expect(empty, greaterThan(0));
+    expect(band.bottom, lessThanOrEqualTo(format.size.height));
+    expect(band.height, greaterThan(0));
+    // Repliée sans focus : elle ne prend aucune place dans la page.
+    expect(tester.getSize(find.byType(CoteGridHintBand)).height, 0);
   });
 }

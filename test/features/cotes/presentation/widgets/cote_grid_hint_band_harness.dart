@@ -51,8 +51,9 @@ const hintClasse = CoteClasse(
 Future<FakeCotesRepository> pumpHintBulletin(
   WidgetTester tester, {
   List<CoteCell> cells = const [],
+  CoteClasse classe = hintClasse,
 }) async {
-  final repository = FakeCotesRepository(classe: hintClasse, cells: cells);
+  final repository = FakeCotesRepository(classe: classe, cells: cells);
   final bloc = CoteSaisieBloc(repository);
   final save = CoteSaveCubit(repository);
   bloc.add(const CoteSaisieOpened('c1'));
@@ -99,6 +100,29 @@ Future<FakeCotesRepository> pumpHintBulletin(
   return repository;
 }
 
+/// Une classe de [count] cours, une seule rubrique : une grille plus haute
+/// que l'écran.
+CoteClasse longHintClasse(int count) => CoteClasse(
+  classroomId: 'c1',
+  decoupage: Decoupage.semestre,
+  periodes: hintClasse.periodes,
+  rubriques: [
+    CoteRubrique(
+      id: 'r',
+      cours: [
+        for (var i = 0; i < count; i++)
+          CoteCours(
+            coursId: 'c$i',
+            branche: 'Cours $i',
+            maxJournalier: 20,
+            maxExamen: 40,
+          ),
+      ],
+    ),
+  ],
+  eleves: hintClasse.eleves,
+);
+
 const outsideFieldKey = Key('outside');
 
 /// Le [index]-ième champ de la grille (le champ d'au-dessus n'en est pas).
@@ -109,16 +133,24 @@ Finder gridField(int index) => find
     )
     .at(index);
 
-/// Le texte de la bande d'aide, vide quand elle n'a rien à dire.
-String bandText(WidgetTester tester) => tester
-    .widget<Text>(
-      find.descendant(
-        of: find.byType(CoteGridHintBand),
-        matching: find.byType(Text),
-      ),
+/// Le texte de la bande d'aide : vide quand elle n'a rien à dire, ou
+/// qu'elle est repliée (aucune case au focus).
+String bandText(WidgetTester tester) {
+  final text = find.descendant(
+    of: find.byType(CoteGridHintBand),
+    matching: find.byType(Text),
+  );
+  if (text.evaluate().isEmpty) return '';
+  return tester.widget<Text>(text).textSpan!.toPlainText();
+}
+
+/// La surface de la bande, celle que l'œil voit.
+Finder get hintPanel => find
+    .descendant(
+      of: find.byType(CoteGridHintBand),
+      matching: find.byType(ExcludeSemantics),
     )
-    .textSpan!
-    .toPlainText();
+    .first;
 
 Future<void> settleHint(WidgetTester tester) async {
   await tester.runAsync(() => Future<void>.delayed(Duration.zero));

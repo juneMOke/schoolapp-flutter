@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,6 +41,10 @@ class CoteNoteCell extends StatefulWidget {
   /// elle défile : la case qui prend le focus se montre sous lui, pas dessous.
   final double headerHeight;
 
+  /// La hauteur de la bande d'aide qui flotte en bas de la page : la case se
+  /// montre aussi au-dessus d'elle.
+  final ValueListenable<double>? hintBandHeight;
+
   const CoteNoteCell({
     super.key,
     required this.cours,
@@ -49,6 +54,7 @@ class CoteNoteCell extends StatefulWidget {
     required this.columnLabel,
     required this.enterMove,
     this.headerHeight = 0,
+    this.hintBandHeight,
     this.dense = false,
   });
 
@@ -76,12 +82,14 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
     _focusNode = widget.registry.nodeFor(widget.cours, widget.column)
       ..onKeyEvent = _onKey
       ..addListener(_onFocusChanged);
+    widget.hintBandHeight?.addListener(_onBandResized);
     _controller.text = _textOf(_cell(_bloc.state));
   }
 
   @override
   void dispose() {
     _commit();
+    widget.hintBandHeight?.removeListener(_onBandResized);
     _focusNode
       ..removeListener(_onFocusChanged)
       ..onKeyEvent = null;
@@ -115,6 +123,11 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       _controller.text = _textOf(_cell(_bloc.state));
     }
     setState(() {});
+  }
+
+  /// Seule la case au focus se révèle : les autres n'ont rien à reprendre.
+  void _onBandResized() {
+    if (mounted && _focusNode.hasFocus) setState(() {});
   }
 
   void _commit() {
@@ -234,7 +247,7 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
         AppSpacing.lg,
         AppSpacing.lg + widget.headerHeight,
         AppSpacing.lg,
-        AppSpacing.lg,
+        AppSpacing.lg + (widget.hintBandHeight?.value ?? 0),
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [

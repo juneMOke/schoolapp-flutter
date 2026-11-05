@@ -146,6 +146,7 @@ class _Cell extends StatelessWidget {
       columnLabel: CoteLabels.columnLong(l10n, grid.classe, column),
       enterMove: grid.enterMove,
       headerHeight: grid.rowsTop,
+      hintBandHeight: grid.hintBandHeight,
       dense: grid.metrics.dense,
     );
   }
