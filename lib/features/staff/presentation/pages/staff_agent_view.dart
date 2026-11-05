@@ -69,26 +69,33 @@ class _StaffAgentViewState extends State<StaffAgentView> {
     }
   }
 
+  /// Le contexte sous la garde de la page : c'est elle, et nulle autre, que
+  /// lève une sortie accordée.
+  BuildContext? _guardContext;
+
   /// Une saisie en cours serait perdue — modification, ou création entamée
   /// (F5, fermeture de l'onglet, Précédent) : la fiche se ferme ou le
-  /// navigateur la quitte sur ce seul critère. Une création en cours
-  /// d'écriture n'est plus à protéger : elle devient l'agent.
+  /// navigateur la quitte sur ce seul critère.
   bool _hasUnsavedWork(StaffAgentCubit cubit) => switch (cubit.state.mode) {
-    StaffAgentMode.edit => cubit.hasChanges,
-    StaffAgentMode.create => !cubit.state.saving && cubit.hasChanges,
+    StaffAgentMode.edit || StaffAgentMode.create => cubit.hasChanges,
     StaffAgentMode.view => false,
   };
+
+  /// Une écriture en vol retient la page : quittée, elle fermerait le cubit
+  /// avant que le contrat initial ne se pose à la suite de la fiche.
+  bool _isSaving(StaffAgentCubit cubit) => cubit.state.saving;
 
   Future<bool> _confirmDiscard() => confirmStaffDiscard(context);
 
   Future<void> _leave(StaffAgentCubit cubit) async {
+    if (_isSaving(cubit)) return;
     final editing = cubit.state.mode == StaffAgentMode.edit;
     if (_hasUnsavedWork(cubit)) {
       final discard = await _confirmDiscard();
       if (!mounted || !discard) return;
       if (!editing) {
         // La question est posée : la sortie qui suit ne la repose pas.
-        RouteExitGuard.release(context);
+        RouteExitGuard.release(_guardContext ?? context);
         Navigator.of(context).pop();
         return;
       }
@@ -204,64 +211,73 @@ class _StaffAgentViewState extends State<StaffAgentView> {
         // du personnel, dont la route consulte cette garde (`onExit`) — ou,
         // sous RH · Personnel, elle a sa propre route (`HrAgentRoutes`).
         return RouteExitGuard(
+          isBusy: () => _isSaving(cubit),
           hasUnsavedWork: () => _hasUnsavedWork(cubit),
           confirmExit: _confirmDiscard,
-          child: PopScope(
-            canPop:
-                state.mode != StaffAgentMode.edit && !_hasUnsavedWork(cubit),
-            onPopInvokedWithResult: (didPop, _) {
-              if (!didPop) unawaited(_leave(cubit));
-            },
-            child: Scaffold(
-              backgroundColor: AppColors.surface,
-              body: Column(
-                children: [
-                  StaffAgentHeader(
-                    state: state,
-                    kind: widget.kind,
-                    onBack: () => unawaited(_leave(cubit)),
-                    onEdit: state.mode == StaffAgentMode.view && canWrite
-                        ? cubit.startEdit
-                        : null,
-                  ),
-                  if (!wholeFile)
-                    WizardBreadcrumb(
-                      titles: [
-                        l10n.staffStepIdentity,
-                        l10n.staffStepAddress,
-                        l10n.staffStepJob,
-                        l10n.staffStepDocuments,
-                      ],
-                      currentStep: state.step,
-                      progress: (state.step + 1) / StaffAgentState.stepCount,
-                      progression: WizardStepProgression(
-                        stepCount: StaffAgentState.stepCount,
-                        currentStep: state.step,
-                        maxStep: state.reached,
+          child: Builder(
+            builder: (guardContext) {
+              _guardContext = guardContext;
+              return PopScope(
+                canPop:
+                    state.mode != StaffAgentMode.edit &&
+                    !_isSaving(cubit) &&
+                    !_hasUnsavedWork(cubit),
+                onPopInvokedWithResult: (didPop, _) {
+                  if (!didPop) unawaited(_leave(cubit));
+                },
+                child: Scaffold(
+                  backgroundColor: AppColors.surface,
+                  body: Column(
+                    children: [
+                      StaffAgentHeader(
+                        state: state,
+                        kind: widget.kind,
+                        onBack: () => unawaited(_leave(cubit)),
+                        onEdit: state.mode == StaffAgentMode.view && canWrite
+                            ? cubit.startEdit
+                            : null,
                       ),
-                      errorSteps: state.visibleErrorSteps,
-                      onStepTap: cubit.goTo,
-                    ),
-                  Expanded(
-                    child: StaffAgentBody(
-                      wholeFile: wholeFile,
-                      state: state,
-                      catalog: _catalog,
-                      today: widget.today,
-                      onChanged: cubit.updateDraft,
-                      appendices: _appendices(state, cubit),
-                    ),
+                      if (!wholeFile)
+                        WizardBreadcrumb(
+                          titles: [
+                            l10n.staffStepIdentity,
+                            l10n.staffStepAddress,
+                            l10n.staffStepJob,
+                            l10n.staffStepDocuments,
+                          ],
+                          currentStep: state.step,
+                          progress:
+                              (state.step + 1) / StaffAgentState.stepCount,
+                          progression: WizardStepProgression(
+                            stepCount: StaffAgentState.stepCount,
+                            currentStep: state.step,
+                            maxStep: state.reached,
+                          ),
+                          errorSteps: state.visibleErrorSteps,
+                          onStepTap: cubit.goTo,
+                        ),
+                      Expanded(
+                        child: StaffAgentBody(
+                          wholeFile: wholeFile,
+                          state: state,
+                          catalog: _catalog,
+                          today: widget.today,
+                          onChanged: cubit.updateDraft,
+                          appendices: _appendices(state, cubit),
+                        ),
+                      ),
+                      StaffAgentFooter(
+                        state: state,
+                        onPrevious: cubit.previous,
+                        onNext: cubit.next,
+                        onSave: () => unawaited(cubit.save()),
+                        onCancel: () => unawaited(_leave(cubit)),
+                      ),
+                    ],
                   ),
-                  StaffAgentFooter(
-                    state: state,
-                    onPrevious: cubit.previous,
-                    onNext: cubit.next,
-                    onSave: () => unawaited(cubit.save()),
-                    onCancel: () => unawaited(_leave(cubit)),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         );
       },

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
@@ -154,6 +157,38 @@ void main() {
 
       expect(find.text('Abandonner les modifications ?'), findsNothing);
       expect(find.text('Fichier'), findsOneWidget);
+    });
+
+    testWidgets('une écriture en vol retient la page : le contrat initial '
+        'se pose à sa suite', (tester) async {
+      const contract = StaffContractDraft(
+        kind: StaffContractKind.permanent,
+        effectiveFrom: '2026-09-01',
+        amount: '250',
+      );
+      when(
+        () => h.addContract(any(), any()),
+      ).thenAnswer((_) async => const Right(unit));
+      final draft = completeDraft();
+      final agent = creating(draft)..updateInitialContract((_) => contract);
+      // Né dans le test, sous FakeAsync : il s'achève quand on le décide.
+      final written = Completer<Either<Failure, Unit>>();
+      when(() => h.save(any())).thenAnswer((_) => written.future);
+      await pumpPushed(tester, agent);
+
+      unawaited(agent.save());
+      await tester.pump();
+      expect(agent.state.saving, isTrue);
+
+      await tester.tap(find.byTooltip('Retour'));
+      await tester.pump();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(StaffAgentView), findsOneWidget);
+
+      written.complete(const Right(unit));
+      await tester.pumpAndSettle();
+      verify(() => h.addContract(draft.id, contract)).called(1);
     });
 
     testWidgets('une saisie commencée demande avant de partir, et '
