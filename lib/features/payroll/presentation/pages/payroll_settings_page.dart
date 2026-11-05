@@ -46,7 +46,8 @@ class PayrollSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
-    width: PageContentWidth.wide,
+    // Un formulaire : ses champs ne s'étirent pas loin de leur libellé.
+    width: PageContentWidth.reading,
     child: BlocConsumer<PayrollCubit, PayrollState>(
       listenWhen: (previous, current) =>
           current.notice != null && previous.notice != current.notice,
