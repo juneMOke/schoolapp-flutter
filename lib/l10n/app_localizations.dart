@@ -33427,6 +33427,12 @@ abstract class AppLocalizations {
   /// **'{course} · {column}, out of {max}'**
   String coteCellSemantics(String course, String column, String max);
 
+  /// No description provided for @coteHintBandSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'{course} · {column}: '**
+  String coteHintBandSubject(String course, String column);
+
   /// No description provided for @coteTotalSemantics.
   ///
   /// In en, this message translates to:

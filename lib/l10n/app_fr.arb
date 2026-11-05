@@ -12527,6 +12527,8 @@
   "@coteRejectedOfficial": {"placeholders": {"value": {"type": "String"}}},
   "coteCellSemantics": "{course} · {column}, sur {max}",
   "@coteCellSemantics": {"placeholders": {"course": {"type": "String"}, "column": {"type": "String"}, "max": {"type": "String"}}},
+  "coteHintBandSubject": "{course} · {column} : ",
+  "@coteHintBandSubject": {"placeholders": {"course": {"type": "String"}, "column": {"type": "String"}}},
   "coteTotalSemantics": "Total {column}, {course}",
   "@coteTotalSemantics": {"placeholders": {"column": {"type": "String"}, "course": {"type": "String"}}},
   "coteValueOutOf": "{value} sur {max}",

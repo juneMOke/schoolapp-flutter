@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_center.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_course_zone.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header_band.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_hint_band.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_rubrique.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_context.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_total_zone.dart';
@@ -188,7 +189,13 @@ class CoteGridState extends State<CoteGrid> {
           alignment: Alignment.topLeft,
           child: SizedBox(
             width: used,
-            child: _grid(grid, metrics, fits: fits, grow: grow),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _grid(grid, metrics, fits: fits, grow: grow),
+                CoteGridHintBand(grid: grid),
+              ],
+            ),
           ),
         );
       },

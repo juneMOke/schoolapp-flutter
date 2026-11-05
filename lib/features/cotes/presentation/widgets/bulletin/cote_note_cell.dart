@@ -298,7 +298,7 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
         child: Center(child: field),
       ),
     );
-    final hint = _hint(l10n, cell, max);
+    final hint = CoteLabels.cellHint(l10n, cell, max);
     return Semantics(
       label: l10n.coteCellSemantics(
         widget.cours.branche,
@@ -315,18 +315,5 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
         child: Tooltip(message: hint ?? widget.columnLabel, child: body),
       ),
     );
-  }
-
-  String? _hint(AppLocalizations l10n, CoteCell? cell, int max) {
-    if (cell == null) return null;
-    if (cell.invalidRaw != null) return l10n.coteCellInvalid('$max');
-    if (cell.isRejected) {
-      return CoteLabels.rejection(l10n, cell.rejectionReason);
-    }
-    if (cell.isCalculated) return l10n.coteCellCalculated;
-    final calculee = cell.calculee;
-    return calculee == null
-        ? null
-        : l10n.coteCellReplaces(formatCote(calculee));
   }
 }

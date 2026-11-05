@@ -63,6 +63,19 @@ class CoteFocusRegistry {
     return null;
   }
 
+  /// La case qui a le focus — son cours et sa colonne —, s'il y en a une.
+  ({CoteCours cours, CoteColumn column})? get focusedCell {
+    for (final course in cours) {
+      for (final column in columns) {
+        final node = _nodes[_slot(course.coursId, column.id)];
+        if (node != null && node.hasFocus) {
+          return (cours: course, column: column);
+        }
+      }
+    }
+    return null;
+  }
+
   /// La première case modifiable des [candidates], dans leur ordre.
   FocusNode? firstEditableOf(Iterable<CoteCours> candidates) {
     for (final course in candidates) {

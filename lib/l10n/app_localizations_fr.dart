@@ -21895,6 +21895,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String coteHintBandSubject(String course, String column) {
+    return '$course · $column : ';
+  }
+
+  @override
   String coteTotalSemantics(String column, String course) {
     return 'Total $column, $course';
   }

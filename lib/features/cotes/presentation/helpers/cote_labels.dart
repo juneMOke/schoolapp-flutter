@@ -1,5 +1,7 @@
+import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
+import 'package:school_app_flutter/features/cotes/domain/services/cote_input.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -119,4 +121,18 @@ abstract final class CoteLabels {
         'UNKNOWN_COLUMN' => l10n.coteRejectedColumn,
         _ => l10n.coteRejectedOther,
       };
+
+  /// L'aide d'une case modifiable : frappe hors barème, refus, moyenne des
+  /// évaluations. La même pour l'info-bulle, le lecteur d'écran et la bande
+  /// d'aide sous la grille ; `null` quand la case n'a rien à dire.
+  static String? cellHint(AppLocalizations l10n, CoteCell? cell, int max) {
+    if (cell == null) return null;
+    if (cell.invalidRaw != null) return l10n.coteCellInvalid('$max');
+    if (cell.isRejected) return rejection(l10n, cell.rejectionReason);
+    if (cell.isCalculated) return l10n.coteCellCalculated;
+    final calculee = cell.calculee;
+    return calculee == null
+        ? null
+        : l10n.coteCellReplaces(formatCote(calculee));
+  }
 }
