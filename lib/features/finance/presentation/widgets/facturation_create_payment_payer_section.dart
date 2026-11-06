@@ -151,7 +151,9 @@ class FacturationCreatePaymentPayerSection extends StatelessWidget {
               onPressed: readOnly ? null : onPickPayer,
               icon: const Icon(Icons.person_search_outlined),
               label: Text(l10n.facturationCreatePaymentOtherPayerAction),
-              style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+              style: TextButton.styleFrom(
+                minimumSize: const Size(0, AppDimensions.minTouchTarget),
+              ),
             ),
           ),
         ],

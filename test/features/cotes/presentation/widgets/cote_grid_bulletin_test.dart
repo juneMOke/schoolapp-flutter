@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,7 @@ import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_focus_registry.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_header_band.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -157,7 +159,9 @@ void main() {
     expect(find.text('19,5'), findsWidgets);
 
     final title = tester.getCenter(find.text('DOMAINE DES LANGUES'));
-    final grid = tester.getCenter(find.byType(CoteGrid));
+    // Le centre de la grille dessinée — son en-tête —, et non de la place
+    // qu'elle reçoit : sur un poste large, elle s'arrête avant le bord.
+    final grid = tester.getCenter(find.byType(CoteGridHeaderBand));
     expect((title.dx - grid.dx).abs(), lessThan(40));
   });
 
@@ -175,6 +179,20 @@ void main() {
     expect(ink('15,5'), AppColors.vertSavane); // 15,5/20
   });
 
+  testWidgets('une note sous la moitié se souligne : pas la couleur seule', (
+    tester,
+  ) async {
+    await _pump(tester);
+    TextDecoration? mark(String value) => tester
+        .widget<TextField>(
+          find.ancestor(of: find.text(value), matching: find.byType(TextField)),
+        )
+        .style
+        ?.decoration;
+    expect(mark('4'), TextDecoration.underline); // 4/10
+    expect(mark('15,5'), TextDecoration.none); // 15,5/20
+  });
+
   testWidgets('une branche se replie : il reste son titre et sa somme', (
     tester,
   ) async {
@@ -190,6 +208,34 @@ void main() {
     await tester.tap(find.text('FRANÇAIS'));
     await tester.pump();
     expect(find.text(_longName), findsOneWidget);
+  });
+
+  testWidgets('le lecteur d\'écran replie une rubrique', (tester) async {
+    final handle = tester.ensureSemantics();
+    await _pump(tester);
+    expect(find.text(_longName), findsOneWidget);
+
+    // excludeSemantics retirait l'action de l'InkWell : le bouton annoncé
+    // était inerte.
+    final node = tester.getSemantics(find.bySemanticsLabel('Français'));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    tester.semantics.tap(find.semantics.byLabel('Français'));
+    await tester.pump();
+    expect(find.text(_longName), findsNothing);
+    handle.dispose();
+  });
+
+  testWidgets('le survol d\'un domaine prend le voile de survol', (
+    tester,
+  ) async {
+    await _pump(tester);
+    final ink = tester.widget<InkWell>(
+      find.ancestor(
+        of: find.text('DOMAINE DES LANGUES'),
+        matching: find.byType(InkWell),
+      ),
+    );
+    expect(ink.hoverColor, AppColors.stateHoverOnDark);
   });
 
   testWidgets('un domaine replié cache ses branches', (tester) async {

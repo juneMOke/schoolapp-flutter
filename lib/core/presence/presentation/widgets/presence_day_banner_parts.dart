@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/on_dark_ink_well.dart';
 import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -64,7 +65,7 @@ class PresenceBannerDay extends StatelessWidget {
       button: true,
       child: Tooltip(
         message: AppLocalizations.of(context)!.presenceMarkPickDay,
-        child: InkWell(
+        child: OnDarkInkWell(
           onTap: onPick,
           borderRadius: AppRadius.brSm,
           child: TouchTarget(
@@ -132,7 +133,7 @@ class PresenceSchedulePill extends StatelessWidget {
       ),
     );
     if (onTap == null) return pill;
-    return InkWell(
+    return OnDarkInkWell(
       onTap: onTap,
       borderRadius: AppRadius.brPill,
       // La pastille reste fine ; sa zone d'appui fait 48 dp.

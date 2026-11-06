@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -63,25 +64,20 @@ class PayrollDisbursementDialog extends StatelessWidget {
           for (final (label, value) in rows)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Row(
+              child: LeadingTrailingRow(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                gap: AppSpacing.sm,
+                leading: Text(
+                  label,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
                   ),
-                  Flexible(
-                    child: Text(
-                      value,
-                      textAlign: TextAlign.end,
-                      style: AppTypography.labelLarge,
-                    ),
-                  ),
-                ],
+                ),
+                trailing: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: AppTypography.labelLarge,
+                ),
               ),
             ),
           Align(

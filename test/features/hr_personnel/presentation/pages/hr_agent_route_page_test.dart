@@ -84,7 +84,7 @@ void main() {
               ),
             ),
           ),
-          routes: [HrAgentRoutes.agent()],
+          routes: [HrAgentRoutes.newAgent(), HrAgentRoutes.agent()],
         ),
       ],
     );
@@ -270,5 +270,55 @@ void main() {
       router.routerDelegate.currentConfiguration.uri.path,
       '/home/facturations',
     );
+  });
+
+  group('une fiche neuve', () {
+    String reflected(GoRouter router) =>
+        ReflectedRecordsParser(router.routeInformationParser)
+            .restoreRouteInformation(
+              router.routerDelegate.currentConfiguration,
+            )!
+            .uri
+            .toString();
+
+    testWidgets('a son adresse : rechargée, elle se rouvre préremplie', (
+      tester,
+    ) async {
+      await pump(tester, '/home/$file/nouveau?nom=Kabeya');
+      await settle(tester);
+
+      final page = tester.widget<StaffAgentPage>(find.byType(StaffAgentPage));
+      expect(page.member, isNull);
+      expect(page.prefill, 'Kabeya');
+      expect(page.others.map((m) => m.id), ['a']);
+    });
+
+    testWidgets('ouverte depuis la liste, puis écrite : l\'adresse devient '
+        'celle de l\'agent, sans rebâtir la page', (tester) async {
+      final router = await pump(tester, '/home/$file');
+      final context = tester.element(find.text('écran $file'));
+      unawaited(
+        HrAgentIntent.openNew(context, subMenuId: file, prefill: 'Kabeya'),
+      );
+      await settle(tester);
+      expect(reflected(router), '/home/$file/nouveau?nom=Kabeya');
+      final element = tester.element(find.byType(StaffAgentPage));
+
+      tester.widget<StaffAgentPage>(find.byType(StaffAgentPage)).onCreated!(
+        'a',
+      );
+      await settle(tester);
+
+      expect(reflected(router), '/home/$file/a');
+      expect(tester.element(find.byType(StaffAgentPage)), same(element));
+    });
+
+    testWidgets('contre-épreuve : hors de RH · Personnel, l\'adresse retombe '
+        'sur l\'écran', (tester) async {
+      final router = await pump(tester, '/home/paie/nouveau');
+
+      expect(find.byType(StaffAgentPage), findsNothing);
+      expect(router.routerDelegate.currentConfiguration.uri.path, '/home/paie');
+    });
   });
 }

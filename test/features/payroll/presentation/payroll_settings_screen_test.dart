@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/widgets/content_max_width.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_enums.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_header.dart';
@@ -67,6 +69,32 @@ void main() {
 
     expect(find.text('Mois de salaire'), findsOneWidget);
     expect(find.text('Barème à jour'), findsOneWidget);
+  });
+
+  testWidgets('sur un poste 1920, le barème garde sa largeur de lecture', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1920, 1080);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpPayrollScreen(
+      tester,
+      snapshot: snapshot,
+      permissions: direction,
+      child: const PayrollSettingsScreen(),
+    );
+
+    // Le plafond du contenu de la page, et non ses champs un à un : en
+    // `wide`, le barème s'étirait jusqu'à 1760 dp.
+    final cap = tester.widget<ConstrainedBox>(
+      find
+          .descendant(
+            of: find.byType(ContentMaxWidth),
+            matching: find.byType(ConstrainedBox),
+          )
+          .first,
+    );
+    expect(cap.constraints.maxWidth, AppDimensions.detailContentMaxWidth);
   });
 
   testAtReferenceFormats('Avances & prêts', (tester, format) async {

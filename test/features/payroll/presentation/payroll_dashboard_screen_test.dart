@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/theme/app_theme.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/dashboard/payroll_dashboard_staff_table.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -108,6 +110,38 @@ void main() {
     final eyes = find.byTooltip("Ouvrir la fiche de l'agent");
     expect(eyes, findsNWidgets(2));
     expect(tester.getSize(eyes.first).height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('10″ paysage barre dépliée : le tableau défile, l agent reste', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    // 1 280 − 280 de barre latérale : le tableau reçoit ~900 dp pour 1 008.
+    tester.view.physicalSize = const Size(1280 - AppTheme.sidebarWidth, 2400);
+    addTearDown(tester.view.reset);
+    await pump(tester);
+
+    final table = find.byType(PayrollDashboardStaffTable);
+    final position = find
+        .descendant(of: table, matching: find.byType(Scrollable))
+        .evaluate()
+        .map((e) => ((e as StatefulElement).state as ScrollableState).position)
+        .singleWhere((p) => p.axis == Axis.horizontal);
+    expect(position.maxScrollExtent, greaterThan(0));
+    position.jumpTo(position.maxScrollExtent);
+    await tester.pump();
+
+    // Le nom reste au bord gauche du tableau, l'œil entre dans le cadre.
+    final name = find.descendant(of: table, matching: find.text('MAYALA Ruth'));
+    expect(
+      tester.getRect(name.first).left,
+      greaterThanOrEqualTo(tester.getRect(table).left),
+    );
+    final eye = find.byTooltip("Ouvrir la fiche de l'agent").first;
+    expect(
+      tester.getRect(eye).right,
+      lessThanOrEqualTo(tester.getRect(table).right),
+    );
   });
 
   testWidgets('le mois du bandeau ouvre le sélecteur, qui ouvre un mois', (

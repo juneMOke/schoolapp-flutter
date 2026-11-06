@@ -28,6 +28,7 @@ import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart'
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_article_card.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_button.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_cart_panel.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_payer_section.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
@@ -378,6 +379,64 @@ void main() {
       expect(find.byType(BoutiqueCartPage), findsNothing);
       expect(find.text('Prix à résoudre'), findsOneWidget);
       expect(find.textContaining('1 ligne sans niveau'), findsOneWidget);
+    });
+  });
+
+  group('le payeur suit le panier d\'un hôte à l\'autre', () {
+    // Le bloc garde le payeur ; les champs doivent le montrer. Des champs
+    // vides sur un payeur retenu encaisseraient la vente au nom d'une
+    // identité invisible, ou mêlée si l'on en retape une partie.
+    // Dans l'ordre de la section : téléphone, nom, post-nom, prénom.
+    const lastName = 1;
+    const firstName = 3;
+    Finder payerField(int index) => find
+        .descendant(
+          of: find.byType(BoutiquePayerSection),
+          matching: find.byType(TextField),
+        )
+        .at(index);
+
+    String fieldText(WidgetTester tester, int index) =>
+        tester.widget<TextField>(payerField(index)).controller!.text;
+
+    Future<void> typePayerInCartPage(WidgetTester tester) async {
+      await tester.tap(find.text('Ajouter au panier'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(BoutiqueCartButton));
+      await tester.pumpAndSettle();
+      await tester.enterText(payerField(lastName), 'Mbala');
+      await tester.enterText(payerField(firstName), 'Grace');
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('passé en paysage : la colonne montre le payeur saisi', (
+      tester,
+    ) async {
+      await pumpPage(tester);
+      await typePayerInCartPage(tester);
+
+      await tester.binding.setSurfaceSize(const Size(1400, 1200));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BoutiqueCartPage), findsNothing);
+      expect(find.byType(BoutiquePayerSection), findsOneWidget);
+      expect(fieldText(tester, lastName), 'Mbala');
+      expect(fieldText(tester, firstName), 'Grace');
+    });
+
+    testWidgets('rouvert après un retour : la page montre le payeur saisi', (
+      tester,
+    ) async {
+      await pumpPage(tester);
+      await typePayerInCartPage(tester);
+
+      await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(BoutiqueCartButton));
+      await tester.pumpAndSettle();
+
+      expect(fieldText(tester, lastName), 'Mbala');
+      expect(fieldText(tester, firstName), 'Grace');
     });
   });
 

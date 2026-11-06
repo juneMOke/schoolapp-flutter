@@ -24,10 +24,18 @@ class PayrollAgentMonthPanel extends StatefulWidget {
   final PayrollSnapshot snapshot;
   final PayrollAgentMonth month;
 
+  /// Le bulletin plutôt que le calcul à l'ouverture (l'adresse, après F5).
+  final bool initialPayslip;
+
+  /// Le choix Calcul / Bulletin, pour l'adresse.
+  final ValueChanged<bool>? onPayslipChanged;
+
   const PayrollAgentMonthPanel({
     super.key,
     required this.snapshot,
     required this.month,
+    this.initialPayslip = false,
+    this.onPayslipChanged,
   });
 
   @override
@@ -35,7 +43,7 @@ class PayrollAgentMonthPanel extends StatefulWidget {
 }
 
 class _PayrollAgentMonthPanelState extends State<PayrollAgentMonthPanel> {
-  _View _view = _View.calc;
+  late _View _view = widget.initialPayslip ? _View.payslip : _View.calc;
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +62,7 @@ class _PayrollAgentMonthPanelState extends State<PayrollAgentMonthPanel> {
       children: [
         Text(
           l10n.payrollAgentPanelEyebrow.toUpperCase(),
-          style: AppTypography.labelSmall.copyWith(
-            color: AppColors.textMutedAa,
-            letterSpacing: 1.2,
-          ),
+          style: AppTypography.eyebrow.copyWith(color: AppColors.textMutedAa),
         ),
         Text(
           label[0].toUpperCase() + label.substring(1),
@@ -107,7 +112,11 @@ class _PayrollAgentMonthPanelState extends State<PayrollAgentMonthPanel> {
               ),
             ],
             selected: _view,
-            onSelected: (view) => setState(() => _view = view),
+            onSelected: (view) {
+              if (view == _view) return;
+              setState(() => _view = view);
+              widget.onPayslipChanged?.call(view == _View.payslip);
+            },
           ),
           const SizedBox(height: AppSpacing.md),
           switch (_view) {

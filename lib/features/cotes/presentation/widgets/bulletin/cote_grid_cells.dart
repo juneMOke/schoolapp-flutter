@@ -115,6 +115,7 @@ class _Cell extends StatelessWidget {
             ink:
                 coteScoreInk(score.total, score.maxFilled) ??
                 AppColors.textMuted,
+            decoration: coteScoreMark(score.total, score.maxFilled),
             weight: FontWeight.w700,
             semanticLabel: l10n.coteTotalSemantics(
               CoteLabels.columnLong(l10n, grid.classe, column),
@@ -144,6 +145,8 @@ class _Cell extends StatelessWidget {
       height: height,
       columnLabel: CoteLabels.columnLong(l10n, grid.classe, column),
       enterMove: grid.enterMove,
+      headerHeight: grid.rowsTop,
+      hintBandHeight: grid.hintBandHeight,
       dense: grid.metrics.dense,
     );
   }
@@ -181,6 +184,9 @@ class _LockedCell extends StatelessWidget {
               ? AppColors.coteInvalidSurface
               : AppColors.papier,
           ink: rejected ? AppColors.error : score ?? AppColors.textSecondary,
+          decoration: value == null
+              ? TextDecoration.none
+              : coteScoreMark(toCentis(value), column.maxFor(cours) * 100),
           tooltip: rejected
               ? CoteLabels.rejection(l10n, cell?.rejectionReason)
               : l10n.coteCellLocked,

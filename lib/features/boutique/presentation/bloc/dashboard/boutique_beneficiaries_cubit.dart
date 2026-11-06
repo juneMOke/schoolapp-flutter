@@ -84,6 +84,24 @@ class BoutiqueBeneficiariesCubit extends Cubit<BoutiqueBeneficiariesState> {
     return _reload();
   }
 
+  /// L'article et la classe lus dans l'adresse (F5, Précédent). Avant
+  /// [start], ils attendent la première fenêtre ; ensuite, la liste se
+  /// relit — sauf si rien n'a changé. La recherche n'y est pas : chaque
+  /// frappe serait une entrée d'historique.
+  Future<void> applyLocation({String? articleId, String? classId}) async {
+    if (articleId == state.articleId && classId == state.classId) return;
+    emit(
+      state.copyWith(
+        articleId: articleId,
+        classId: classId,
+        selectedClassLabel: classId == state.classId
+            ? state.selectedClassLabel
+            : null,
+      ),
+    );
+    await _reload();
+  }
+
   Future<void> resetFilters() {
     _timer?.cancel();
     emit(

@@ -107,6 +107,14 @@ class StudentPhotoCaptureCubit extends Cubit<StudentPhotoCaptureState> {
     if (!isClosed && state is CaptureStarting) await _openCamera();
   }
 
+  /// Redemande la caméra après un refus ou une absence : l'utilisateur a pu
+  /// l'autoriser dans le navigateur ou brancher une webcam entre-temps.
+  Future<void> retryCamera() async {
+    final current = state;
+    if (current is! CaptureBlocked || !current.reason.canRetry) return;
+    await _openCamera();
+  }
+
   /// Passe à la caméra suivante (avant ↔ arrière).
   Future<void> switchCamera() async {
     final current = state;

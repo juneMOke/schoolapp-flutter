@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/core/navigation/location_query.dart';
 import 'package:school_app_flutter/features/hr_personnel/presentation/context/hr_agent_intent.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_month_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -37,6 +39,22 @@ abstract final class PayrollAgentNavigation {
     query: {...screenQuery, HrAgentAddress.monthParam: month},
   );
 
+  /// L'adresse de la fiche de [agentId] sur le livre de [month], sous le
+  /// livre : pour un `go` depuis un autre module (la présence d'un agent).
+  /// Le livre du dessous porte le même mois (`mois`) : le retour de la
+  /// fiche le retrouve, au lieu du mois en cours.
+  static String addressOf({required String agentId, required String month}) =>
+      Uri(
+        path: AppRoutesNames.hrPersonnelAgentPath(
+          subMenuId: subMenuId,
+          agentId: agentId,
+        ),
+        queryParameters: {
+          PayrollMonthLocation.monthParam: month,
+          HrAgentAddress.monthParam: month,
+        },
+      ).toString();
+
   /// Passe à l'agent [agentId] sans empiler : un seul retour ramène au
   /// livre, et F5 rouvre l'agent affiché. [month] est le livre d'entrée, qui
   /// fixe l'ordre de parcours. Sur le web, l'entrée d'historique est
@@ -55,13 +73,34 @@ abstract final class PayrollAgentNavigation {
             subMenuId: originOf(context),
             agentId: agentId,
           ),
+          // L'agent voisin repart de son mois d'entrée, sur le calcul.
           queryParameters: {
             ...state.uri.queryParameters,
             HrAgentAddress.monthParam: month,
-          },
+          }..removeWhere((key, _) => _viewKeys.contains(key)),
         ).toString(),
         extra: state.extra,
       ),
+    );
+  }
+
+  static const _viewKeys = {
+    HrAgentAddress.shownMonthParam,
+    HrAgentAddress.viewParam,
+  };
+
+  /// Ce que la fiche montre — le mois vu ([HrAgentAddress.shownMonthParam]),
+  /// le bulletin ([HrAgentAddress.viewParam]) — écrit dans son adresse sans
+  /// nouvelle entrée d'historique ni nouvelle page : F5 le retrouve,
+  /// Précédent quitte la fiche. `null` retire la clé.
+  static void showInAddress(BuildContext context, Map<String, String?> values) {
+    if (GoRouter.maybeOf(context) == null) return;
+    final state = GoRouterState.of(context);
+    final next = LocationQuery.withValues(state.uri, values);
+    if (next == state.uri) return;
+    Router.neglect(
+      context,
+      () => context.replace(next.toString(), extra: state.extra),
     );
   }
 

@@ -32,7 +32,12 @@ import 'package:school_app_flutter/router/app_routes_names.dart';
 /// manque, et la page le dit.
 class HrAgentRoutePage extends StatefulWidget {
   final String subMenuId;
-  final String agentId;
+
+  /// `null` : une fiche neuve ([HrAgentRoutePage.create]).
+  final String? agentId;
+
+  /// Mots d'une recherche restée vide, pour préremplir une fiche neuve.
+  final String prefill;
 
   /// Prévient l'écran qui a ouvert la fiche, à sa disparition.
   final VoidCallback? onClosed;
@@ -41,10 +46,21 @@ class HrAgentRoutePage extends StatefulWidget {
   const HrAgentRoutePage({
     super.key,
     required this.subMenuId,
-    required this.agentId,
+    required String this.agentId,
     this.onClosed,
     this.now = DateTime.now,
-  });
+  }) : prefill = '';
+
+  /// Une fiche neuve, à son adresse (`…/nouveau`) : le fichier n'est relu
+  /// que pour les doublons. Une fois l'agent écrit, l'adresse devient la
+  /// sienne — F5 rouvre l'agent, pas un formulaire vide.
+  const HrAgentRoutePage.create({
+    super.key,
+    required this.subMenuId,
+    this.prefill = '',
+    this.onClosed,
+    this.now = DateTime.now,
+  }) : agentId = null;
 
   @override
   State<HrAgentRoutePage> createState() => _HrAgentRoutePageState();
@@ -55,7 +71,7 @@ enum _Lookup { loading, found, missing, failure }
 /// L'agent relu, son contrat du jour, et le reste du fichier pour les
 /// doublons.
 typedef _Agent = ({
-  StaffMember member,
+  StaffMember? member,
   StaffContractKind? kind,
   List<StaffMember> others,
   String today,
@@ -122,16 +138,36 @@ class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
   }
 
   _Agent? _agentFrom(StaffFileSnapshot snapshot) {
+    final today = HrPersonnelCubit.dayOf(widget.now());
+    if (widget.agentId == null) {
+      return (member: null, kind: null, others: snapshot.members, today: today);
+    }
     final member = snapshot.members
         .where((m) => m.id == widget.agentId)
         .firstOrNull;
     if (member == null) return null;
-    final today = HrPersonnelCubit.dayOf(widget.now());
     return (
       member: member,
       kind: StaffContractTimeline.currentAt(member.contracts, today)?.kind,
       others: snapshot.members,
       today: today,
+    );
+  }
+
+  /// L'agent créé prend son adresse, à la place de `…/nouveau`, sans
+  /// nouvelle entrée d'historique ni nouvelle page : la fiche reste montée.
+  void _adoptAddress(String memberId) {
+    if (!mounted || GoRouter.maybeOf(context) == null) return;
+    final extra = GoRouterState.of(context).extra;
+    Router.neglect(
+      context,
+      () => context.replace(
+        AppRoutesNames.hrPersonnelAgentPath(
+          subMenuId: widget.subMenuId,
+          agentId: memberId,
+        ),
+        extra: extra,
+      ),
     );
   }
 
@@ -152,6 +188,8 @@ class _HrAgentRoutePageState extends State<HrAgentRoutePage> {
         kind: agent.kind,
         others: agent.others,
         today: agent.today,
+        prefill: widget.prefill,
+        onCreated: widget.agentId == null ? _adoptAddress : null,
       );
     }
 

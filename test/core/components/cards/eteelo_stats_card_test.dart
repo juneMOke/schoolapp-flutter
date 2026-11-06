@@ -105,4 +105,38 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('EteeloStatsCard — actions à côté du titre', () {
+    testWidgets('un indice long et deux exports s\'enroulent sans déborder', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            // Au-dessus du seuil de la carte (360 dp de contenu, marges
+            // retirées) : les actions restent à côté du titre.
+            body: SizedBox(
+              width: 440,
+              child: EteeloStatsCard(
+                title: 'Ventes',
+                hint: 'Mis à jour il y a cinq minutes, hors ligne',
+                actionsBeside: true,
+                actions: [
+                  IconButton(onPressed: () {}, icon: const Icon(Icons.print)),
+                  IconButton(onPressed: () {}, icon: const Icon(Icons.share)),
+                ],
+                child: const Text('contenu'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      // Les actions restent à droite du titre, bornées à la moitié.
+      final title = tester.getRect(find.text('Ventes'));
+      final print = tester.getRect(find.byIcon(Icons.print));
+      expect(print.left, greaterThan(title.right));
+    });
+  });
 }

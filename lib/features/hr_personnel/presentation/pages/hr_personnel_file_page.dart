@@ -27,7 +27,6 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/widgets/hr
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_row.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_file_view.dart';
-import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/grid/staff_agent_grid.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/list/staff_agent_table.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_empty_state.dart';
@@ -86,13 +85,12 @@ class HrPersonnelFileScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<HrPersonnelCubit>();
 
-    // Un agent existant a son adresse ; une fiche neuve, pas encore.
+    // Un agent existant a son adresse ; une fiche neuve aussi (`…/nouveau`).
     Future<void> open({StaffFileRow? row, String prefill = ''}) async {
       if (row == null) {
-        await StaffAgentPage.open(
+        await HrAgentIntent.openNew(
           context,
-          others: state.snapshot.members,
-          today: state.today,
+          subMenuId: MenuConstants.hrPersonnelFileId,
           prefill: prefill,
         );
       } else {

@@ -6596,7 +6596,7 @@
   "boutiqueSuccessEyebrow": "Boutique ▸ Encaissement",
   "boutiqueSaleDetailEyebrow": "Boutique ▸ Vente",
   "boutiqueSaleDetailTitle": "Détail de la vente",
-  "boutiqueSaleDetailBack": "Retour à l'historique",
+  "boutiqueSaleDetailBack": "Retour au tableau de bord",
   "boutiqueSaleDetailPayer": "Payeur",
   "boutiqueSaleDetailPhone": "Téléphone",
   "boutiqueSaleDetailSoldAt": "Encaissée le",
@@ -9742,6 +9742,10 @@
   "@payrollArrearsPriority": {
     "description": "Drapeau priorité."
   },
+  "payrollArrearsLate": "En retard",
+  "@payrollArrearsLate": {
+    "description": "Arriéré ancien de trois mois ou plus : dit en mots, pas par le rouge seul."
+  },
   "payrollArrearsOriginDeferred": "Différé décidé",
   "@payrollArrearsOriginDeferred": {
     "description": "Origine d'un arriéré."
@@ -10785,6 +10789,9 @@
   "photoSavedMessage": "Elle remplace désormais les initiales, et partira au serveur dès que le réseau le permet.",
   "photoCameraBlockedTitle": "Caméra bloquée",
   "photoCameraBlockedMessage": "Autorisez-la dans les réglages, ou importez une photo.",
+  "photoCameraBlockedWebMessage": "Autorisez la caméra pour ce site (icône à gauche de l'adresse), puis réessayez ; ou importez une photo.",
+  "photoCameraInsecureTitle": "Connexion non sécurisée",
+  "photoCameraInsecureMessage": "Le navigateur n'ouvre la caméra que sur une adresse en https. Ouvrez l'application en https, ou importez une photo.",
   "photoNoCameraTitle": "Aucune caméra détectée",
   "photoNoCameraMessage": "Importez une photo depuis un fichier ou la galerie.",
   "photoBadFileTitle": "Fichier non pris en charge",
@@ -12375,6 +12382,17 @@
   "@payrollDeductionRefusedItem": {"placeholders": {"name": {"type": "String"}, "reason": {"type": "String"}}},
   "subMenuResultatsSaisie": "Saisie des notes",
   "coteSaisieEyebrow": "Résultats · Saisie des notes",
+  "coteSelectionSummary": "{classe} · {portee}",
+  "@coteSelectionSummary": {
+    "description": "Carte de sélection repliée : la classe ouverte et sa portée",
+    "placeholders": {
+      "classe": {"type": "String"},
+      "portee": {"type": "String"}
+    }
+  },
+  "coteSelectionChange": "Changer",
+  "coteSelectionChangeHint": "Changer de classe ou de portée",
+  "coteSelectionCollapse": "Replier",
   "coteSaisieTitle": "Saisir les notes d'une classe",
   "coteSaisieOpen": "Ouvrir la saisie",
   "coteDecoupageTrimestres": "Trimestres",
@@ -12472,6 +12490,7 @@
   "coteLegendCalculated": "Moyenne calculée",
   "coteLegendTotal": "Total calculé",
   "coteLegendBelowHalf": "Moins de la moitié",
+  "coteLegendChanged": "Modifiée ailleurs",
   "coteLegendHalfOrMore": "La moitié ou plus",
   "coteRubriqueExpand": "Déplier",
   "coteRubriqueCollapse": "Replier",
@@ -12479,6 +12498,7 @@
   "coteLegendEnterKey": "Entrée",
   "coteLegendEnterDown": "cours suivant",
   "coteLegendEnterRight": "colonne suivante",
+  "coteLegendRubriqueKeys": "Alt+↑ replie la rubrique · Alt+↓ déplie tout",
   "coteLegendEnterToggle": "Changer l'effet de la touche Entrée",
   "coteMaxima": "Maxima",
   "coteTotalObtained": "Total obtenu",
@@ -12507,6 +12527,8 @@
   "@coteRejectedOfficial": {"placeholders": {"value": {"type": "String"}}},
   "coteCellSemantics": "{course} · {column}, sur {max}",
   "@coteCellSemantics": {"placeholders": {"course": {"type": "String"}, "column": {"type": "String"}, "max": {"type": "String"}}},
+  "coteHintBandSubject": "{course} · {column} : ",
+  "@coteHintBandSubject": {"placeholders": {"course": {"type": "String"}, "column": {"type": "String"}}},
   "coteTotalSemantics": "Total {column}, {course}",
   "@coteTotalSemantics": {"placeholders": {"column": {"type": "String"}, "course": {"type": "String"}}},
   "coteValueOutOf": "{value} sur {max}",

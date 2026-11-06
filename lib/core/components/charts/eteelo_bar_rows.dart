@@ -164,6 +164,30 @@ class _Row extends StatelessWidget {
   /// la rangée, ce qui reste lisible.
   static const double _labelShare = 0.38;
 
+  /// La largeur laissée au libellé : son gabarit, au plus [_labelShare] de
+  /// la rangée — et jamais plus que ce que le montant et les deux gouttières
+  /// laissent. Au texte ×1,3 sur un téléphone, le montant grandit avec le
+  /// texte quand la part du libellé, elle, ne bouge pas : la rangée
+  /// débordait de 7 dp (tableau de bord Boutique, 360 dp).
+  double _labelMax(BuildContext context, double width, TextStyle valueStyle) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: row.valueLabel,
+        style: DefaultTextStyle.of(context).style.merge(valueStyle),
+      ),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final value = painter.width;
+    painter.dispose();
+    final left = width - value - 2 * AppDimensions.spacingM;
+    return math.max(
+      0,
+      math.min(math.min(labelWidth, width * _labelShare), left),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // ⚠️ **Le libellé cède, le montant jamais.**
@@ -177,6 +201,10 @@ class _Row extends StatelessWidget {
     // le **montant** flexible le tronquerait, et un chiffre tronqué est un
     // chiffre faux. C'est le libellé qui se contente d'une part de la rangée et
     // s'élide — un libellé élidé se devine, et il est répété dans la légende.
+    final valueStyle = AppTextStyles.bodyStrong.copyWith(
+      color: AppColors.textPrimary,
+      fontFeatures: AppTextStyles.tabularFigures,
+    );
     final content = LayoutBuilder(
       builder: (context, constraints) => ConstrainedBox(
         constraints: BoxConstraints(maxWidth: constraints.maxWidth),
@@ -189,7 +217,7 @@ class _Row extends StatelessWidget {
               ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: constraints.maxWidth.isFinite
-                      ? math.min(labelWidth, constraints.maxWidth * _labelShare)
+                      ? _labelMax(context, constraints.maxWidth, valueStyle)
                       : labelWidth,
                 ),
                 child: _Label(row: row),
@@ -207,10 +235,7 @@ class _Row extends StatelessWidget {
                 row.valueLabel,
                 maxLines: 1,
                 softWrap: false,
-                style: AppTextStyles.bodyStrong.copyWith(
-                  color: AppColors.textPrimary,
-                  fontFeatures: AppTextStyles.tabularFigures,
-                ),
+                style: valueStyle,
               ),
             ],
           ),

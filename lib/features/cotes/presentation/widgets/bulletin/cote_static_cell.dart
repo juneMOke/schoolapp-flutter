@@ -11,6 +11,9 @@ class CoteStaticCell extends StatelessWidget {
   final Color background;
   final Color ink;
   final FontWeight weight;
+
+  /// Souligné pour un score sous la moitié (cf. `coteScoreMark`).
+  final TextDecoration decoration;
   final String? tooltip;
   final String? semanticLabel;
 
@@ -21,6 +24,7 @@ class CoteStaticCell extends StatelessWidget {
     this.background = AppColors.papier,
     this.ink = AppColors.textSecondary,
     this.weight = FontWeight.w500,
+    this.decoration = TextDecoration.none,
     this.tooltip,
     this.semanticLabel,
   });
@@ -43,6 +47,7 @@ class CoteStaticCell extends StatelessWidget {
           style: AppTypography.bodyMedium.copyWith(
             color: ink,
             fontWeight: weight,
+            decoration: decoration,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),

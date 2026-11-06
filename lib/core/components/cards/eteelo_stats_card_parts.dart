@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/theme/color_mix.dart';
 
 /// En-tête d'une carte de section : titre, sous-titre, indice et actions.
@@ -100,21 +102,23 @@ class EteeloStatsCardHeader extends StatelessWidget {
     if (actionsBeside) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth <
-              AppDimensions.statsCardActionsBesideMinWidth) {
+          if (constraints.maxWidth < AppBreakpoints.statsCardActionsBesideMin) {
             return _wrapped(heading, trailing);
           }
-          return Row(
+          // ⚠️ Un `Wrap` posé tel quel dans une `Row` reçoit une largeur
+          // infinie : il ne passait jamais à la ligne, et un indice long
+          // avec deux exports débordait de la carte. Borné à la moitié de
+          // la rangée, il s'enroule ; le titre prend le reste.
+          return LeadingTrailingRow(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: heading),
-              const SizedBox(width: AppDimensions.spacingM),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppDimensions.spacingS,
-                children: trailing,
-              ),
-            ],
+            gap: AppDimensions.spacingM,
+            leading: heading,
+            trailing: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppDimensions.spacingS,
+              runSpacing: AppDimensions.spacingXS,
+              children: trailing,
+            ),
           );
         },
       );

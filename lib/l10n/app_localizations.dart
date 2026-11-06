@@ -15710,7 +15710,7 @@ abstract class AppLocalizations {
   /// No description provided for @boutiqueSaleDetailBack.
   ///
   /// In en, this message translates to:
-  /// **'Back to history'**
+  /// **'Back to the dashboard'**
   String get boutiqueSaleDetailBack;
 
   /// No description provided for @boutiqueSaleDetailPayer.
@@ -22010,6 +22010,12 @@ abstract class AppLocalizations {
   /// **'Priority'**
   String get payrollArrearsPriority;
 
+  /// No description provided for @payrollArrearsLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get payrollArrearsLate;
+
   /// No description provided for @payrollArrearsOriginDeferred.
   ///
   /// In en, this message translates to:
@@ -24821,6 +24827,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow it in the settings, or import a photo.'**
   String get photoCameraBlockedMessage;
+
+  /// No description provided for @photoCameraBlockedWebMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the camera for this site (icon left of the address), then try again; or import a photo.'**
+  String get photoCameraBlockedWebMessage;
+
+  /// No description provided for @photoCameraInsecureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Insecure connection'**
+  String get photoCameraInsecureTitle;
+
+  /// No description provided for @photoCameraInsecureMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser only opens the camera on an https address. Open the app over https, or import a photo.'**
+  String get photoCameraInsecureMessage;
 
   /// No description provided for @photoNoCameraTitle.
   ///
@@ -32761,6 +32785,30 @@ abstract class AppLocalizations {
   /// **'Results · Grade entry'**
   String get coteSaisieEyebrow;
 
+  /// Collapsed selection card: the open class and its scope
+  ///
+  /// In en, this message translates to:
+  /// **'{classe} · {portee}'**
+  String coteSelectionSummary(String classe, String portee);
+
+  /// No description provided for @coteSelectionChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get coteSelectionChange;
+
+  /// No description provided for @coteSelectionChangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the class or the scope'**
+  String get coteSelectionChangeHint;
+
+  /// No description provided for @coteSelectionCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get coteSelectionCollapse;
+
   /// No description provided for @coteSaisieTitle.
   ///
   /// In en, this message translates to:
@@ -33199,6 +33247,12 @@ abstract class AppLocalizations {
   /// **'Below half'**
   String get coteLegendBelowHalf;
 
+  /// No description provided for @coteLegendChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed elsewhere'**
+  String get coteLegendChanged;
+
   /// No description provided for @coteLegendHalfOrMore.
   ///
   /// In en, this message translates to:
@@ -33240,6 +33294,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'next column'**
   String get coteLegendEnterRight;
+
+  /// No description provided for @coteLegendRubriqueKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt+↑ folds the section · Alt+↓ unfolds all'**
+  String get coteLegendRubriqueKeys;
 
   /// No description provided for @coteLegendEnterToggle.
   ///
@@ -33366,6 +33426,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{course} · {column}, out of {max}'**
   String coteCellSemantics(String course, String column, String max);
+
+  /// No description provided for @coteHintBandSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'{course} · {column}: '**
+  String coteHintBandSubject(String course, String column);
 
   /// No description provided for @coteTotalSemantics.
   ///

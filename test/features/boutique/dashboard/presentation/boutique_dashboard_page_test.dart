@@ -1,9 +1,11 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
@@ -28,13 +30,23 @@ import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/s
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_provisional_sales_use_case.dart';
 import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_stats_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/claim_sale_receipt_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
+import 'package:school_app_flutter/router/boutique_sale_routes.dart';
+import 'package:school_app_flutter/router/reflected_records_parser.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_dashboard_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_location.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_view.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+import '../../../../test_helpers/reference_formats.dart';
 
 import '../dashboard_fixtures.dart';
 
@@ -54,6 +66,12 @@ class _MockCatalog extends Mock implements GetBoutiqueCatalogUseCase {}
 
 class _MockPreference extends Mock implements DashboardPeriodPreference {}
 
+class _MockSaleDetail extends Mock implements GetBoutiqueSaleDetailUseCase {}
+
+class _MockMarkPrinted extends Mock implements MarkSaleTicketPrintedUseCase {}
+
+class _MockClaimReceipt extends Mock implements ClaimSaleReceiptUseCase {}
+
 class _MockAcademicYearBloc
     extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
     implements AcademicYearContextBloc {}
@@ -61,7 +79,11 @@ class _MockAcademicYearBloc
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
 
+class _MockNavigationBloc extends MockBloc<NavigationEvent, NavigationState>
+    implements NavigationBloc {}
+
 void main() {
+  late _MockPreference preference;
   late _MockStats getStats;
   late _MockProvisional getProvisional;
   late _MockBeneficiaries getBeneficiaries;
@@ -69,6 +91,9 @@ void main() {
   late _MockAcademicYearBloc academicYearBloc;
   late _MockAuthBloc authBloc;
   final queries = <BeneficiariesQuery>[];
+  final salesQueries = <SalesQuery>[];
+  final statsWindows = <DashboardWindow>[];
+  GoRouter? router;
 
   setUpAll(() {
     registerFallbackValue(sevenDays);
@@ -77,6 +102,9 @@ void main() {
       BeneficiariesQuery(academicYearId: '', window: sevenDays),
     );
     registerFallbackValue(SalesQuery(academicYearId: '', window: sevenDays));
+    registerFallbackValue(
+      const SubMenuItemSelected(menuId: '', subMenuId: '', title: ''),
+    );
   });
 
   void answerStats(
@@ -87,18 +115,23 @@ void main() {
           academicYearId: any(named: 'academicYearId'),
           window: any(named: 'window'),
         ),
-      ).thenAnswer(
-        (i) async => answer(i.namedArguments[#window] as DashboardWindow),
-      );
+      ).thenAnswer((i) async {
+        final window = i.namedArguments[#window] as DashboardWindow;
+        statsWindows.add(window);
+        return answer(window);
+      });
 
   setUp(() {
     queries.clear();
+    salesQueries.clear();
+    statsWindows.clear();
+    router = null;
     getStats = _MockStats();
     getProvisional = _MockProvisional();
     getBeneficiaries = _MockBeneficiaries();
     getSales = _MockSales();
     final getCatalog = _MockCatalog();
-    final preference = _MockPreference();
+    preference = _MockPreference();
     academicYearBloc = _MockAcademicYearBloc();
     authBloc = _MockAuthBloc();
 
@@ -127,7 +160,10 @@ void main() {
         window: any(named: 'window'),
       ),
     ).thenAnswer((_) async => const Right(ProvisionalSales.none));
-    when(() => getSales(any())).thenAnswer((_) async => Right(salesPageOf()));
+    when(() => getSales(any())).thenAnswer((i) async {
+      salesQueries.add(i.positionalArguments.first as SalesQuery);
+      return Right(salesPageOf(total: 30));
+    });
     when(() => getBeneficiaries(any())).thenAnswer((i) async {
       queries.add(i.positionalArguments.first as BeneficiariesQuery);
       return Right(beneficiariesOf());
@@ -165,25 +201,272 @@ void main() {
   Future<void> pumpPage(
     WidgetTester tester, {
     Size size = const Size(1280, 2600),
+    ReferenceFormat? format,
+    NavigationBloc? navigation,
+    String? location,
   }) async {
-    await tester.binding.setSurfaceSize(size);
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      MultiBlocProvider(
-        providers: [
-          BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
-          BlocProvider<AuthBloc>.value(value: authBloc),
-        ],
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: Locale('fr'),
-          home: BoutiqueDashboardPage(),
+    // Un format de référence pose la fenêtre (et `MediaQuery`) ; sans lui,
+    // une grande surface où tout le tableau de bord se construit.
+    if (format == null) {
+      await tester.binding.setSurfaceSize(size);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+    }
+    final providers = [
+      BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
+      BlocProvider<AuthBloc>.value(value: authBloc),
+      if (navigation != null)
+        BlocProvider<NavigationBloc>.value(value: navigation),
+    ];
+    if (location == null) {
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: providers,
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('fr'),
+            home: BoutiqueDashboardPage(),
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Un F5 : l'arbre est rebâti à neuf depuis la seule adresse.
+      final next = GoRouter(
+        initialLocation: location,
+        routes: [
+          GoRoute(
+            path: '/home/:subMenuId',
+            builder: (_, _) => const BoutiqueDashboardPage(),
+            routes: [BoutiqueSaleRoutes.sale()],
+          ),
+        ],
+      );
+      addTearDown(next.dispose);
+      router = next;
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          key: UniqueKey(),
+          providers: providers,
+          child: MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
+            routerConfig: ReflectedRecordsParser.configOf(next),
+          ),
+        ),
+      );
+    }
     await tester.pumpAndSettle();
   }
+
+  /// L'adresse de la barre du navigateur, fiche poussée comprise.
+  String address() => router!.routeInformationProvider.value.uri.toString();
+
+  BoutiqueDashboardState dashboardState(WidgetTester tester) => tester
+      .element(find.byType(BoutiqueDashboardLocation))
+      .read<BoutiqueDashboardBloc>()
+      .state;
+
+  group('l\'adresse', () {
+    const base = '/home/${MenuConstants.boutiqueDashboardId}';
+
+    /// Les adresses annoncées au navigateur, et si chacune REMPLACE l'entrée
+    /// d'historique courante (`replace`) ou en ajoute une.
+    final reported = <({String uri, bool replace})>[];
+    setUp(reported.clear);
+
+    void recordHistory(WidgetTester tester) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.navigation,
+        (call) async {
+          if (call.method == 'routeInformationUpdated') {
+            final args = call.arguments as Map;
+            reported.add((
+              uri: (args['uri'] ?? args['location']).toString(),
+              replace: args['replace'] == true,
+            ));
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.navigation,
+          null,
+        ),
+      );
+    }
+
+    testWidgets('période mémorisée sur une adresse nue : écrite sans entrée '
+        'd\'historique, Précédent quitte l\'écran', (tester) async {
+      recordHistory(tester);
+      when(
+        () => preference.read(),
+      ).thenAnswer((_) async => DashboardPeriod.month);
+      await pumpPage(tester, location: base);
+
+      expect(dashboardState(tester).period, DashboardPeriod.month);
+      expect(address(), '$base?periode=month');
+      final write = reported.where((r) => r.uri.contains('periode=month'));
+      expect(write, isNotEmpty);
+      expect(write.every((r) => r.replace), isTrue);
+    });
+
+    testWidgets('contre-épreuve : la période choisie au geste garde son '
+        'entrée d\'historique', (tester) async {
+      recordHistory(tester);
+      await pumpPage(tester, location: base);
+      reported.clear();
+
+      await tester.tap(find.text('Ce mois'));
+      await tester.pumpAndSettle();
+
+      expect(address(), '$base?periode=month');
+      expect(reported.last.replace, isFalse);
+    });
+
+    testWidgets('une adresse qui change période ET page garde la page', (
+      tester,
+    ) async {
+      recordHistory(tester);
+      await pumpPage(tester, location: '$base?periode=month&ventes-page=3');
+      expect(salesQueries.last.page, 2);
+      salesQueries.clear();
+      reported.clear();
+
+      // Précédent / Suivant : le navigateur pose l'adresse entière.
+      router!.go('$base?periode=today&ventes-page=2');
+      await tester.pumpAndSettle();
+
+      expect(salesQueries.last.page, 1);
+      expect(salesQueries.last.window, statsWindows.last);
+      expect(Uri.parse(address()).queryParameters['ventes-page'], '2');
+      // Aucune réécriture : l'historique « Suivant » reste.
+      expect(reported.where((r) => !r.uri.contains('ventes-page=2')), isEmpty);
+    });
+
+    testWidgets('une page au-delà de la dernière se reborne, sans entrée '
+        'd\'historique', (tester) async {
+      recordHistory(tester);
+      // 30 ventes, 10 par page : trois pages.
+      await pumpPage(tester, location: '$base?ventes-page=999');
+
+      expect(salesQueries.map((q) => q.page), [998, 2]);
+      expect(address(), '$base?ventes-page=3');
+      final write = reported.where((r) => r.uri.contains('ventes-page=3'));
+      expect(write, isNotEmpty);
+      expect(write.every((r) => r.replace), isTrue);
+    });
+
+    testWidgets('période, filtres et page s\'inscrivent ; F5 les restitue', (
+      tester,
+    ) async {
+      await pumpPage(tester, location: base);
+      expect(address(), base);
+
+      await tester.tap(find.text('Aujourd\'hui'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1. Polo Lacoste'));
+      await tester.pumpAndSettle();
+      final sales = tester
+          .element(find.byType(BoutiqueDashboardLocation))
+          .read<BoutiqueSalesCubit>();
+      await sales.classSelected('c-5b');
+      await tester.pumpAndSettle();
+      await sales.pageChanged(1);
+      await tester.pumpAndSettle();
+
+      final written = Uri.parse(address());
+      expect(written.queryParameters, {
+        'periode': 'today',
+        'ventes-par': 'classe',
+        'ventes-classe': 'c-5b',
+        'ventes-page': '2',
+        'eleves-article': 'a-polo',
+      });
+
+      // F5 : tout est relu depuis la seule adresse.
+      statsWindows.clear();
+      salesQueries.clear();
+      queries.clear();
+      await pumpPage(tester, location: written.toString());
+
+      expect(statsWindows.single.isSingleDay, isTrue);
+      expect(dashboardState(tester).period, DashboardPeriod.today);
+      expect(salesQueries.single.classId, 'c-5b');
+      expect(salesQueries.single.page, 1);
+      expect(queries.last.articleId, 'a-polo');
+      expect(Uri.parse(address()).queryParameters, written.queryParameters);
+    });
+
+    testWidgets('une période précise et sa devise se rouvrent par lien', (
+      tester,
+    ) async {
+      answerStats(
+        (w) => Right(
+          BoutiqueStatsSnapshot(
+            stats: statsOf(window: w, currencies: const ['USD', 'CDF']),
+          ),
+        ),
+      );
+      await pumpPage(
+        tester,
+        location: '$base?periode=custom&du=2026-10-12&au=2026-10-05&devise=CDF',
+      );
+
+      expect(
+        statsWindows.single,
+        DashboardWindow(
+          from: DateTime(2026, 10, 5),
+          to: DateTime(2026, 10, 12),
+        ),
+      );
+      expect(dashboardState(tester).selectedCurrency, 'CDF');
+      expect(Uri.parse(address()).queryParameters, {
+        'periode': 'custom',
+        'du': '2026-10-05',
+        'au': '2026-10-12',
+        'devise': 'CDF',
+      });
+    });
+
+    testWidgets(
+      'contre-épreuve : une adresse nue garde la période par défaut',
+      (tester) async {
+        await pumpPage(tester, location: base);
+        expect(statsWindows.single, thisWeek);
+        expect(salesQueries.single.page, 0);
+        expect(address(), base);
+      },
+    );
+
+    testWidgets('une vente s\'ouvre à son adresse, filtres du dessous gardés', (
+      tester,
+    ) async {
+      final getDetail = _MockSaleDetail();
+      when(
+        () => getDetail(any()),
+      ).thenAnswer((_) async => const Left(NotFoundFailure()));
+      GetIt.I
+        ..registerFactory<GetBoutiqueSaleDetailUseCase>(() => getDetail)
+        ..registerFactory<MarkSaleTicketPrintedUseCase>(_MockMarkPrinted.new)
+        ..registerFactory<ClaimSaleReceiptUseCase>(_MockClaimReceipt.new);
+      await pumpPage(tester, location: '$base?periode=today');
+
+      await tester.tap(find.text('RV-000472').first);
+      await tester.pumpAndSettle();
+
+      expect(address(), '$base/vente/s-0-1?periode=today');
+      verify(() => getDetail('s-0-1')).called(1);
+      // Le tableau de bord du dessous n'a pas lu l'adresse de la fiche comme
+      // un retour à « Cette semaine ».
+      expect(statsWindows.every((w) => w.isSingleDay), isTrue);
+
+      await tester.tap(find.byTooltip('Retour au tableau de bord'));
+      await tester.pumpAndSettle();
+      expect(address(), '$base?periode=today');
+    });
+  });
 
   testWidgets('prêt : chiffres, temps, contenu, élèves, reçus', (tester) async {
     await pumpPage(tester);
@@ -386,9 +669,55 @@ void main() {
     },
   );
 
-  testWidgets('largeur téléphone : aucun débordement', (tester) async {
-    await pumpPage(tester, size: const Size(360, 4200));
-    expect(tester.takeException(), isNull);
+  testWidgets('F5 relit les chiffres et les deux listes, sans recharger', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    final stats = statsWindows.length;
+    final sales = salesQueries.length;
+    final pupils = queries.length;
+
+    final handled = await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+
+    expect(handled, isTrue);
+    expect(statsWindows.length, stats + 1);
+    expect(salesQueries.length, sales + 1);
+    expect(queries.length, pupils + 1);
+  });
+
+  testAtReferenceFormats('le tableau de bord tient', (tester, format) async {
+    await pumpPage(tester, format: format);
+    await tester.scrollUntilVisible(
+      find.text('Élèves concernés'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Élèves concernés'), findsOneWidget);
+  });
+
+  testWidgets('« Ouvrir la caisse » passe au sous-menu, dans la coquille', (
+    tester,
+  ) async {
+    final navigation = _MockNavigationBloc();
+    when(() => navigation.state).thenReturn(
+      const NavigationState(
+        menuItems: [],
+        isSidebarExpanded: true,
+        currentTitle: '',
+      ),
+    );
+    await pumpPage(tester, navigation: navigation);
+
+    await tester.tap(find.text('Ouvrir la caisse'));
+    await tester.pump();
+
+    // Une route nue (`context.go`) perdrait la barre latérale et le retour.
+    final event =
+        verify(() => navigation.add(captureAny())).captured.single
+            as SubMenuItemSelected;
+    expect(event.menuId, MenuConstants.boutiqueMenuId);
+    expect(event.subMenuId, MenuConstants.boutiqueAchatsId);
+    expect(event.title, 'Caisse');
   });
 }

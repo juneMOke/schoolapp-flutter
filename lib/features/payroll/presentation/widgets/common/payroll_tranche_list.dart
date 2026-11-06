@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disbursement.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -45,13 +46,12 @@ class PayrollTrancheList extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(
+                    child: EteeloOverflowText(
                       [
                         PayrollLabels.day(context, d.paidAt),
                         PayrollLabels.mode(l10n, d.mode),
                         ?_filled(d.reference),
                       ].join(' · '),
-                      overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyMedium,
                     ),
                   ),

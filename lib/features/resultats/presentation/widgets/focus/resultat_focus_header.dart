@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/person_avatar.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -119,6 +120,8 @@ class ResultatFocusHeader extends StatelessWidget {
   }
 }
 
+/// Le retour à la liste : 48 dp au doigt comme à la souris (l'ancien carreau
+/// de 38 dp se manquait sur une tablette), et une info-bulle qui le nomme.
 class _BackButton extends StatelessWidget {
   final VoidCallback onTap;
   final String semanticsLabel;
@@ -127,31 +130,19 @@ class _BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: semanticsLabel,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
+    return IconButton(
+      onPressed: onTap,
+      tooltip: semanticsLabel,
+      icon: const Icon(Icons.arrow_back_rounded),
+      iconSize: AppDimensions.resultatsFocusBackIconSize,
+      color: AppColors.textOnDark,
+      style: IconButton.styleFrom(
+        minimumSize: const Size.square(AppDimensions.minTouchTarget),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        backgroundColor: AppColors.textOnDark.withValues(alpha: 0.08),
+        shape: RoundedRectangleBorder(
           borderRadius: AppRadius.brMd,
-          onTap: onTap,
-          child: Container(
-            width: 38,
-            height: 38,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.textOnDark.withValues(alpha: 0.08),
-              borderRadius: AppRadius.brMd,
-              border: Border.all(
-                color: AppColors.textOnDark.withValues(alpha: 0.2),
-              ),
-            ),
-            child: const Icon(
-              Icons.arrow_back_rounded,
-              size: 18,
-              color: AppColors.textOnDark,
-            ),
-          ),
+          side: BorderSide(color: AppColors.textOnDark.withValues(alpha: 0.2)),
         ),
       ),
     );

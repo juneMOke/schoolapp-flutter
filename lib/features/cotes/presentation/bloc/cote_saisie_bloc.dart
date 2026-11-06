@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
@@ -46,6 +47,13 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
 
   String? get classroomId => _classroomId;
 
+  /// Une case reçoit une frappe que rien n'a encore écrite : la cote ne
+  /// s'écrit qu'en quittant la case. Écoutable : la garde de sortie de la
+  /// page se relit sans rebâtir la grille à chaque frappe.
+  final ValueNotifier<bool> uncommittedCell = ValueNotifier(false);
+
+  void _syncUncommitted() => uncommittedCell.value = _previews.isNotEmpty;
+
   Future<void> _dispatch(
     CoteSaisieEvent event,
     Emitter<CoteSaisieState> emit,
@@ -62,6 +70,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     final CoteRejectedDiscarded e => _onDiscarded(e, emit),
     CoteCellsRefreshed() => _onRefreshed(emit),
     CoteHighlightCleared() => _onHighlightCleared(emit),
+    final CoteSaisieSettled e => _onSettled(e),
   };
 
   Future<void> _onOpened(
@@ -71,6 +80,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     _lastOpened = event;
     _classroomId = event.classroomId;
     _previews.clear();
+    _syncUncommitted();
     emit(const CoteSaisieLoading());
     final result = await _repository.load(event.classroomId);
     result.fold((failure) => emit(_failureState(failure)), (snapshot) {
@@ -286,6 +296,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     );
     final preview = step?.cell ?? event.base;
     _previews[event.key] = preview;
+    _syncUncommitted();
     emit(_withCell(s, preview, event.key.studentId));
   }
 
@@ -294,6 +305,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     Emitter<CoteSaisieState> emit,
   ) async {
     _previews.remove(event.key);
+    _syncUncommitted();
     final s = state;
     final classroomId = _classroomId;
     if (s is! CoteSaisieReady || classroomId == null) return;
@@ -334,6 +346,7 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     Emitter<CoteSaisieState> emit,
   ) async {
     _previews.remove(event.base.key);
+    _syncUncommitted();
     final s = state;
     if (s is CoteSaisieReady) {
       emit(_withCell(s, event.base, event.base.key.studentId));
@@ -411,9 +424,33 @@ class CoteSaisieBloc extends Bloc<CoteSaisieEvent, CoteSaisieState> {
     if (s is CoteSaisieReady) emit(s.copyWith(changedKeys: const {}));
   }
 
+  /// Les bornes posées par [settled] et pas encore atteintes.
+  final Set<Completer<void>> _barriers = {};
+
+  /// Se complète quand les événements reçus jusqu'ici sont traités : une
+  /// case quittée juste avant est alors écrite dans la file de l'appareil.
+  /// La fermeture du bloc complète aussi l'attente — une sortie ne reste
+  /// jamais suspendue.
+  Future<void> settled() {
+    if (isClosed) return Future<void>.value();
+    final done = Completer<void>();
+    _barriers.add(done);
+    add(CoteSaisieSettled(done));
+    return done.future;
+  }
+
+  Future<void> _onSettled(CoteSaisieSettled event) async {
+    if (_barriers.remove(event.done)) event.done.complete();
+  }
+
   @override
   Future<void> close() {
+    for (final done in _barriers) {
+      done.complete();
+    }
+    _barriers.clear();
     _highlight?.cancel();
+    uncommittedCell.dispose();
     return super.close();
   }
 }

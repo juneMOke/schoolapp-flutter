@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -64,11 +65,16 @@ class PayrollDeductionCatalogCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: EteeloButton.secondary(
-                  label: l10n.payrollDeductionsAdd,
-                  icon: Icons.add,
-                  onPressed: full ? null : actions.onAdd,
-                  fullWidth: false,
+                // Ctrl+N : la même porte que le bouton, fermée au plafond.
+                child: PageActionShortcut(
+                  action: PageAction.create,
+                  onInvoke: full ? null : actions.onAdd,
+                  child: EteeloButton.secondary(
+                    label: l10n.payrollDeductionsAdd,
+                    icon: Icons.add,
+                    onPressed: full ? null : actions.onAdd,
+                    fullWidth: false,
+                  ),
                 ),
               ),
               if (full) ...[

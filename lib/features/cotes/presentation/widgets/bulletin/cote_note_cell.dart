@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +7,7 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
@@ -35,6 +37,14 @@ class CoteNoteCell extends StatefulWidget {
   /// Ce que fait Entrée : cours suivant, ou colonne suivante.
   final CoteMove enterMove;
 
+  /// La hauteur de l'en-tête des colonnes, collé en haut de la page quand
+  /// elle défile : la case qui prend le focus se montre sous lui, pas dessous.
+  final double headerHeight;
+
+  /// La hauteur de la bande d'aide qui flotte en bas de la page : la case se
+  /// montre aussi au-dessus d'elle.
+  final ValueListenable<double>? hintBandHeight;
+
   const CoteNoteCell({
     super.key,
     required this.cours,
@@ -43,6 +53,8 @@ class CoteNoteCell extends StatefulWidget {
     required this.height,
     required this.columnLabel,
     required this.enterMove,
+    this.headerHeight = 0,
+    this.hintBandHeight,
     this.dense = false,
   });
 
@@ -70,12 +82,14 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
     _focusNode = widget.registry.nodeFor(widget.cours, widget.column)
       ..onKeyEvent = _onKey
       ..addListener(_onFocusChanged);
+    widget.hintBandHeight?.addListener(_onBandResized);
     _controller.text = _textOf(_cell(_bloc.state));
   }
 
   @override
   void dispose() {
     _commit();
+    widget.hintBandHeight?.removeListener(_onBandResized);
     _focusNode
       ..removeListener(_onFocusChanged)
       ..onKeyEvent = null;
@@ -111,6 +125,11 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
     setState(() {});
   }
 
+  /// Seule la case au focus se révèle : les autres n'ont rien à reprendre.
+  void _onBandResized() {
+    if (mounted && _focusNode.hasFocus) setState(() {});
+  }
+
   void _commit() {
     final base = _base;
     if (!_dirty || base == null || _bloc.isClosed) return;
@@ -121,20 +140,46 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is KeyUpEvent) return KeyEventResult.ignored;
+    // Alt+flèche appartient à l'écran (élève voisin, rubriques), Maj+flèche à
+    // la sélection du texte : la case n'y touche pas.
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isAltPressed ||
+        keyboard.isControlPressed ||
+        keyboard.isMetaPressed ||
+        keyboard.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
     final key = event.logicalKey;
-    if (key == LogicalKeyboardKey.arrowDown) {
-      widget.registry.move(_key, CoteMove.down);
+    final move = switch (key) {
+      LogicalKeyboardKey.arrowDown => CoteMove.down,
+      LogicalKeyboardKey.arrowUp => CoteMove.up,
+      // De côté, seulement au bord du texte : sinon la flèche déplace le
+      // curseur dans la case, comme partout ailleurs.
+      LogicalKeyboardKey.arrowLeft when _caretAt(start: true) => CoteMove.left,
+      LogicalKeyboardKey.arrowRight when _caretAt(start: false) =>
+        CoteMove.right,
+      _ => null,
+    };
+    if (move != null) {
+      widget.registry.move(_key, move);
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.arrowUp) {
-      widget.registry.move(_key, CoteMove.up);
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.escape) {
+    // Rien à annuler : Échap remonte (fermer, revenir), au lieu de mourir ici.
+    if (key == LogicalKeyboardKey.escape && _dirty) {
       _revert();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
+  }
+
+  /// Le curseur, sans sélection, au début ou à la fin du texte — ou une case
+  /// vide.
+  bool _caretAt({required bool start}) {
+    final text = _controller.text;
+    if (text.isEmpty) return true;
+    final selection = _controller.selection;
+    if (!selection.isValid || !selection.isCollapsed) return false;
+    return selection.extentOffset == (start ? 0 : text.length);
   }
 
   void _revert() {
@@ -198,6 +243,12 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
       focusNode: _focusNode,
       textAlign: TextAlign.center,
       textInputAction: TextInputAction.next,
+      scrollPadding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg + widget.headerHeight,
+        AppSpacing.lg,
+        AppSpacing.lg + (widget.hintBandHeight?.value ?? 0),
+      ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
@@ -208,13 +259,16 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
           .copyWith(
             color: look.ink,
             fontWeight: look.dashed ? FontWeight.w500 : FontWeight.w600,
+            decoration: value == null
+                ? TextDecoration.none
+                : coteScoreMark(toCentis(value), max * 100),
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
       decoration: const InputDecoration(
         isCollapsed: true,
         border: InputBorder.none,
         hintText: '—',
-        hintStyle: TextStyle(color: AppColors.textMuted),
+        hintStyle: TextStyle(color: AppColors.textMutedAa),
       ),
       onChanged: _typed,
       onEditingComplete: () {},
@@ -250,14 +304,14 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
                 color: edge,
                 borderRadius: AppRadius.brSm,
                 strokeWidth: 1,
-                dash: 4,
-                gap: 3,
+                dash: AppDimensions.coteCellDash,
+                gap: AppDimensions.coteCellDashGap,
               )
             : null,
         child: Center(child: field),
       ),
     );
-    final hint = _hint(l10n, cell, max);
+    final hint = CoteLabels.cellHint(l10n, cell, max);
     return Semantics(
       label: l10n.coteCellSemantics(
         widget.cours.branche,
@@ -274,18 +328,5 @@ class _CoteNoteCellState extends State<CoteNoteCell> {
         child: Tooltip(message: hint ?? widget.columnLabel, child: body),
       ),
     );
-  }
-
-  String? _hint(AppLocalizations l10n, CoteCell? cell, int max) {
-    if (cell == null) return null;
-    if (cell.invalidRaw != null) return l10n.coteCellInvalid('$max');
-    if (cell.isRejected) {
-      return CoteLabels.rejection(l10n, cell.rejectionReason);
-    }
-    if (cell.isCalculated) return l10n.coteCellCalculated;
-    final calculee = cell.calculee;
-    return calculee == null
-        ? null
-        : l10n.coteCellReplaces(formatCote(calculee));
   }
 }

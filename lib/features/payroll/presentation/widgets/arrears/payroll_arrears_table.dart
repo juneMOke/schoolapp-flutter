@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_arrear.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/payroll_snapshot.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
@@ -86,9 +88,8 @@ class PayrollArrearsTable extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  EteeloOverflowText(
                     member?.fullName ?? agent.staffMemberId,
-                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.labelLarge,
                   ),
                   Wrap(
@@ -103,19 +104,28 @@ class PayrollArrearsTable extends StatelessWidget {
             ),
           ],
         ),
-        Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
+        // Le motif d'un mois s'écrit sous sa pastille : en info-bulle, il ne
+        // se trouvait ni au doigt ni en mode cartes (et un mois sans motif
+        // ouvrait une bulle vide).
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (final arrear in agent.months)
-              Tooltip(
-                message: arrear.reason ?? '',
-                child: _Chip(
-                  label:
-                      '${PayrollLabels.month(context, arrear.month)} · '
-                      '${PayrollLabels.money(arrear.dueInCents, arrear.currency)}',
-                ),
+            for (final (index, arrear) in agent.months.indexed) ...[
+              if (index > 0) const SizedBox(height: AppSpacing.xs),
+              _Chip(
+                label:
+                    '${PayrollLabels.month(context, arrear.month)} · '
+                    '${PayrollLabels.money(arrear.dueInCents, arrear.currency)}',
               ),
+              if (arrear.reason case final reason?
+                  when reason.trim().isNotEmpty)
+                Text(
+                  reason,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textMutedAa,
+                  ),
+                ),
+            ],
           ],
         ),
         Column(
@@ -136,14 +146,29 @@ class PayrollArrearsTable extends StatelessWidget {
               ),
           ],
         ),
-        Text(
-          l10n.payrollArrearsSince(
-            PayrollLabels.month(context, agent.oldestMonth),
-            age,
-          ),
-          style: AppTypography.bodySmall.copyWith(
-            color: late ? PayrollTone.alert.ink : AppColors.textSecondary,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.payrollArrearsSince(
+                PayrollLabels.month(context, agent.oldestMonth),
+                age,
+              ),
+              style: AppTypography.bodySmall.copyWith(
+                color: late ? PayrollTone.alert.ink : AppColors.textSecondary,
+              ),
+            ),
+            // Le retard se dit en mots : le rouge seul ne se lit pas par
+            // tous.
+            if (late)
+              Text(
+                l10n.payrollArrearsLate,
+                style: AppTypography.bodySmall.copyWith(
+                  color: PayrollTone.alert.ink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
         ),
       ],
     );
@@ -159,7 +184,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
       color: PayrollTone.submitted.soft,
-      borderRadius: BorderRadius.circular(AppSpacing.md),
+      borderRadius: AppRadius.brMd,
     ),
     child: Padding(
       padding: const EdgeInsets.symmetric(

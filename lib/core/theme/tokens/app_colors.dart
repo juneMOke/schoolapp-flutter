@@ -57,6 +57,13 @@ class AppColors {
   // `stateFocus`, bleu ardoise à 20 %, y disparaît. Blanc cassé à 24 %, nettement
   // au-dessus du survol (6 %) et de l'appui (10 %) des mêmes surfaces.
   static const stateFocusOnDark = Color(0x3DFAFAF7);
+
+  /// Survol sur une surface sombre : blanc cassé à 6 %. [stateHover], bleu
+  /// ardoise, y est invisible.
+  static const stateHoverOnDark = Color(0x0FFAFAF7);
+
+  /// Appui sur une surface sombre : blanc cassé à 10 %.
+  static const statePressedOnDark = Color(0x1AFAFAF7);
   static const stateDisabled = border;
 
   /// Anneau de focus clavier d'un bouton : opaque, séparé du bouton par un
@@ -580,24 +587,38 @@ class AppColors {
   static const payrollValidatedBorder = Color(0xFFD7C9DF);
   static const payrollValidatedInk = boutiqueActesAccent;
 
-  // Le bandeau du livre de paie et de la fiche d'un agent : le même dégradé
-  // que le bandeau des registres de présence, pour que les écrans RH se
-  // ressemblent.
-  static const payrollAgentBannerStart = presenceMarkBannerStart;
-  static const payrollAgentBannerMid = presenceMarkBannerMid;
-  static const payrollAgentBannerEnd = presenceMarkBannerEnd;
-  static const payrollAgentOnBanner = presenceMarkOnBanner;
-  static const payrollAgentOnBannerMuted = presenceMarkOnBannerMuted;
-  static const payrollAgentOnBannerFaint = presenceMarkOnBannerFaint;
+  // Le bandeau kuba du socle (`KubaBanner` : livre de paie, fiche d'un
+  // agent, récapitulatif des présences) : le dégradé des registres de
+  // présence, pour que les écrans RH se ressemblent. Le composant lit ces
+  // noms-ci, jamais ceux d'un module.
+  static const kubaBannerStart = presenceMarkBannerStart;
+  static const kubaBannerMid = presenceMarkBannerMid;
+  static const kubaBannerEnd = presenceMarkBannerEnd;
+  static const kubaBannerOn = presenceMarkOnBanner;
+  static const kubaBannerOnMuted = presenceMarkOnBannerMuted;
+  static const kubaBannerOnFaint = presenceMarkOnBannerFaint;
+  // Le fond d'une tuile chiffrée du bandeau.
+  static const kubaBannerTile = Color(0x1AFFFFFF);
+  // Le liseré sous le bandeau : terre cuite, or, savane.
+  static const kubaBannerStripeStart = terreCuite;
+  static const kubaBannerStripeMid = orDoux;
+  static const kubaBannerStripeEnd = vertSavane;
+
+  // Le bandeau du livre de paie et de la fiche d'un agent : le bandeau kuba.
+  static const payrollAgentBannerStart = kubaBannerStart;
+  static const payrollAgentBannerMid = kubaBannerMid;
+  static const payrollAgentBannerEnd = kubaBannerEnd;
+  static const payrollAgentOnBanner = kubaBannerOn;
+  static const payrollAgentOnBannerMuted = kubaBannerOnMuted;
+  static const payrollAgentOnBannerFaint = kubaBannerOnFaint;
   // Le fond d'une tuile chiffrée du bandeau, et le vert d'un compte à zéro
   // (« aucun arriéré ») : 8,4:1 sur le bleu profond, 5,3:1 sur le bleu
   // ardoise du milieu.
-  static const payrollAgentBannerTile = Color(0x1AFFFFFF);
+  static const payrollAgentBannerTile = kubaBannerTile;
   static const payrollAgentBannerGood = Color(0xFF9FD3AE);
-  // Le liseré sous le bandeau de paie : terre cuite, or, savane.
-  static const payrollBannerStripeStart = terreCuite;
-  static const payrollBannerStripeMid = orDoux;
-  static const payrollBannerStripeEnd = vertSavane;
+  static const payrollBannerStripeStart = kubaBannerStripeStart;
+  static const payrollBannerStripeMid = kubaBannerStripeMid;
+  static const payrollBannerStripeEnd = kubaBannerStripeEnd;
 
   /// Le bouton d'envoi WhatsApp, et lui seul. Le vert de la spec (#25A162)
   /// ne tient que 3,0:1 sous un libellé blanc ; assombri, il tient 5,3:1.
@@ -715,6 +736,16 @@ class AppColors {
 
   /// Une cellule remplacée par une écriture plus récente, le temps de le voir.
   static const coteChangedSurface = Color(0xFFFFF4D6);
+
+  /// Son liseré : [warning] n'y tenait que 2,6:1, sous les 3:1 d'un contour
+  /// qui porte un sens. [warningInk] : 5,2:1.
+  static const coteChangedBorder = warningInk;
+
+  /// Le pavé d'un chiffre clé sur l'en-tête sombre du bulletin : un voile
+  /// blanc cassé (9 %) et son liseré (14 %) — des fonds, pas l'encre
+  /// [textOnDark] dosée sur place.
+  static const coteHeaderKpiSurface = Color(0x17FAFAF7);
+  static const coteHeaderKpiBorder = Color(0x24FAFAF7);
 
   // Saisie des notes — teintes des domaines du bulletin, par rotation.
   /// Les colonnes de maxima : ni une note, ni un total.

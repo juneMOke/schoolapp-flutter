@@ -9867,7 +9867,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueSaleDetailTitle => 'Sale details';
 
   @override
-  String get boutiqueSaleDetailBack => 'Back to history';
+  String get boutiqueSaleDetailBack => 'Back to the dashboard';
 
   @override
   String get boutiqueSaleDetailPayer => 'Payer';
@@ -14040,6 +14040,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payrollArrearsPriority => 'Priority';
 
   @override
+  String get payrollArrearsLate => 'Overdue';
+
+  @override
   String get payrollArrearsOriginDeferred => 'Decided deferral';
 
   @override
@@ -15887,6 +15890,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get photoCameraBlockedMessage =>
       'Allow it in the settings, or import a photo.';
+
+  @override
+  String get photoCameraBlockedWebMessage =>
+      'Allow the camera for this site (icon left of the address), then try again; or import a photo.';
+
+  @override
+  String get photoCameraInsecureTitle => 'Insecure connection';
+
+  @override
+  String get photoCameraInsecureMessage =>
+      'The browser only opens the camera on an https address. Open the app over https, or import a photo.';
 
   @override
   String get photoNoCameraTitle => 'No camera found';
@@ -21293,6 +21307,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coteSaisieEyebrow => 'Results · Grade entry';
 
   @override
+  String coteSelectionSummary(String classe, String portee) {
+    return '$classe · $portee';
+  }
+
+  @override
+  String get coteSelectionChange => 'Change';
+
+  @override
+  String get coteSelectionChangeHint => 'Change the class or the scope';
+
+  @override
+  String get coteSelectionCollapse => 'Collapse';
+
+  @override
   String get coteSaisieTitle => 'Enter a class\'s grades';
 
   @override
@@ -21600,6 +21628,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coteLegendBelowHalf => 'Below half';
 
   @override
+  String get coteLegendChanged => 'Changed elsewhere';
+
+  @override
   String get coteLegendHalfOrMore => 'Half or more';
 
   @override
@@ -21619,6 +21650,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coteLegendEnterRight => 'next column';
+
+  @override
+  String get coteLegendRubriqueKeys =>
+      'Alt+↑ folds the section · Alt+↓ unfolds all';
 
   @override
   String get coteLegendEnterToggle => 'Change what the Enter key does';
@@ -21704,6 +21739,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String coteCellSemantics(String course, String column, String max) {
     return '$course · $column, out of $max';
+  }
+
+  @override
+  String coteHintBandSubject(String course, String column) {
+    return '$course · $column: ';
   }
 
   @override

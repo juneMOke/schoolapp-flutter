@@ -89,6 +89,32 @@ class AppTypography {
     fontWeight: FontWeight.w500,
   );
 
+  /// L'interlettrage d'un surtitre en capitales (« FICHE DE L'AGENT ») : il
+  /// aère un texte court que les capitales serrent.
+  static const double eyebrowLetterSpacing = 1.2;
+
+  /// L'interlettrage, plus discret, des intitulés en capitales d'un tableau
+  /// ou d'une feuille (bulletin de paie) : lus en série, ils ne doivent pas
+  /// s'étaler.
+  static const double capsLetterSpacing = 0.6;
+
+  /// Un surtitre : quelques mots en capitales au-dessus d'un titre. La
+  /// couleur dépend du fond — à poser par `copyWith`.
+  static const eyebrow = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    letterSpacing: eyebrowLetterSpacing,
+  );
+
+  /// Un intitulé en capitales d'un tableau ou d'une feuille.
+  static const labelCaps = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    letterSpacing: capsLetterSpacing,
+  );
+
   /// Le titre d'un domaine dans un bulletin.
   static const bulletinDomain = TextStyle(
     fontFamily: 'Lora',

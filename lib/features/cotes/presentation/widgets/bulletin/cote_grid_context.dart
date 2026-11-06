@@ -52,6 +52,10 @@ class CoteGridContext {
 
   /// Le cours survolé : les trois zones d'une ligne s'éclairent ensemble.
   final ValueNotifier<String?> hoveredCours;
+
+  /// La hauteur de la bande d'aide qui flotte en bas de la page : la case qui
+  /// prend le focus se montre au-dessus d'elle, pas dessous.
+  final ValueNotifier<double> hintBandHeight;
   final ValueChanged<String> onToggleRubrique;
 
   const CoteGridContext({
@@ -67,6 +71,7 @@ class CoteGridContext {
     required this.registry,
     required this.enterMove,
     required this.hoveredCours,
+    required this.hintBandHeight,
     required this.onToggleRubrique,
   });
 

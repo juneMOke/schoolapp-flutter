@@ -24,19 +24,16 @@ Future<bool> confirmPublication(
       l10n.publicationConfirmNotesPortal,
     ],
   };
-  final confirmed = await showDialog<bool>(
+  return showAppConfirmationDialog(
     context: context,
-    builder: (dialogContext) => AppConfirmationDialog(
-      title: l10n.publicationConfirmTitle,
-      message: [
-        l10n.publicationConfirmAudience(effectif, classroomName),
-        for (final item in items) l10n.publicationConfirmItem(item),
-      ].join('\n'),
-      confirmLabel: l10n.publicationPublish,
-      cancelLabel: l10n.sujetCancel,
-      headerIcon: Icons.send_rounded,
-      confirmIcon: Icons.send_rounded,
-    ),
+    title: l10n.publicationConfirmTitle,
+    message: [
+      l10n.publicationConfirmAudience(effectif, classroomName),
+      for (final item in items) l10n.publicationConfirmItem(item),
+    ].join('\n'),
+    confirmLabel: l10n.publicationPublish,
+    cancelLabel: l10n.sujetCancel,
+    headerIcon: Icons.send_rounded,
+    confirmIcon: Icons.send_rounded,
   );
-  return confirmed ?? false;
 }

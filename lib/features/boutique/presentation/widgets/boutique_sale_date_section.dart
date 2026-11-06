@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
@@ -75,53 +76,17 @@ class BoutiqueSaleDateSection extends StatelessWidget {
         ),
         if (isBackdated) ...[
           const SizedBox(height: AppDimensions.spacingS),
-          _BackdatedNote(text: l10n.boutiqueSaleDateBackdated),
+          // Pas une erreur : rien n'est bloqué, c'est le rappel que le
+          // ticket portera ce jour-là. L'encre ambre, pas l'ambre de fond,
+          // qui ne se lit pas sur un fond clair (2,5:1).
+          EteeloNotice.tinted(
+            message: l10n.boutiqueSaleDateBackdated,
+            icon: Icons.schedule_rounded,
+            ink: tokens.AppColors.warningInk,
+            background: AppColors.feeStatusPartialSoft,
+          ),
         ],
       ],
-    );
-  }
-}
-
-/// La note ambre d'une vente antidatée. Pas une erreur : rien n'est bloqué,
-/// c'est le rappel que le ticket portera ce jour-là.
-class _BackdatedNote extends StatelessWidget {
-  final String text;
-
-  const _BackdatedNote({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
-        vertical: AppDimensions.spacingS,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.schedule_rounded,
-            size: 18,
-            color: AppColors.warning,
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          Expanded(
-            child: Text(
-              text,
-              // L'encre ambre et non l'ambre de fond : #D68910 ne s'écrit pas
-              // lisiblement sur un fond clair.
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: tokens.AppColors.warningInk,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -101,14 +102,15 @@ class PayrollPayslipProvisional extends StatelessWidget {
         style: AppTypography.labelMedium.copyWith(
           color: PayrollTone.submitted.ink,
           fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
+          letterSpacing: AppTypography.capsLetterSpacing,
         ),
       ),
     ),
   );
 }
 
-/// L'identité de l'agent : trois champs par rangée, deux sur un téléphone.
+/// L'identité de l'agent : trois champs par rangée, deux sur un téléphone ;
+/// une valeur longue passe sur deux lignes, puis en info-bulle.
 class PayrollPayslipIdentity extends StatelessWidget {
   final List<PayslipRow> rows;
 
@@ -134,19 +136,17 @@ class PayrollPayslipIdentity extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  EteeloOverflowText(
                     row.label.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelSmall.copyWith(
+                    style: AppTypography.labelCaps.copyWith(
                       color: AppColors.textMutedAa,
-                      letterSpacing: 0.6,
                     ),
                   ),
-                  Text(
+                  // Deux lignes : un nom composé tient en entier sur un
+                  // téléphone ; au-delà, il se lit à l'appui long.
+                  EteeloOverflowText(
                     row.value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                     style: AppTypography.labelLarge.copyWith(
                       fontWeight: FontWeight.w700,
                       fontFeatures: const [FontFeature.tabularFigures()],
@@ -240,9 +240,8 @@ class PayrollPayslipColumns extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = AppTypography.labelSmall.copyWith(
+    final style = AppTypography.labelCaps.copyWith(
       color: AppColors.textMutedAa,
-      letterSpacing: 0.6,
     );
     return Container(
       padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: AppSpacing.sm),

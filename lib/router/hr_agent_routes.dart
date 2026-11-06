@@ -27,6 +27,36 @@ abstract final class HrAgentRoutes {
     ...PayrollAgentNavigation.origins,
   };
 
+  /// Les écrans qui créent un agent.
+  static const newAgentSubMenuIds = {
+    MenuConstants.hrPersonnelDashboardId,
+    MenuConstants.hrPersonnelFileId,
+  };
+
+  /// La fiche neuve : `/home/{sousMenu}/nouveau`. F5 la rouvre (vide : la
+  /// saisie ne survit pas au rechargement), Précédent la referme. Une fois
+  /// l'agent écrit, l'adresse devient la sienne.
+  static GoRoute newAgent() => GoRoute(
+    path: AppRoutesNames.hrNewAgentSegment,
+    onExit: RouteExitGuard.onExit,
+    redirect: (context, state) {
+      final subMenuId = state.pathParameters['subMenuId'];
+      return newAgentSubMenuIds.contains(subMenuId)
+          ? null
+          : AppRoutesNames.homeSubMenuPath(subMenuId);
+    },
+    builder: (context, state) {
+      final extra = state.extra;
+      return HrAgentRoutePage.create(
+        subMenuId: state.pathParameters['subMenuId'] ?? '',
+        prefill:
+            state.uri.queryParameters[AppRoutesNames.hrNewAgentPrefillParam] ??
+            '',
+        onClosed: extra is HrAgentIntent ? extra.onClosed : null,
+      );
+    },
+  );
+
   static GoRoute agent() => GoRoute(
     path: ':agentId',
     // Précédent du navigateur : la même question qu'une saisie quittée.
@@ -62,10 +92,14 @@ abstract final class HrAgentRoutes {
         );
       }
       if (PayrollAgentNavigation.origins.contains(subMenuId)) {
+        final query = state.uri.queryParameters;
         return PayrollAgentPage(
           args: (
             agentId: state.pathParameters['agentId'] ?? '',
-            month: state.uri.queryParameters[HrAgentAddress.monthParam],
+            month: query[HrAgentAddress.monthParam],
+            shownMonth: query[HrAgentAddress.shownMonthParam],
+            payslip:
+                query[HrAgentAddress.viewParam] == HrAgentAddress.payslipValue,
           ),
           onClosed: onClosed,
           shellSubMenuId: subMenuId!,

@@ -17,8 +17,10 @@ import 'package:school_app_flutter/features/staff/presentation/pages/staff_agent
 /// La page d'un agent, plein écran par-dessus la liste : créer, consulter,
 /// modifier — une seule structure en quatre étapes.
 ///
-/// Poussée par le `Navigator` et non par le routeur : la liste reste montée
-/// dessous, filtres, recherche et affichage intacts au retour.
+/// Sous RH · Personnel, elle a son adresse (`HrAgentRoutes`, création
+/// comprise) ; l'ancien fichier du personnel la pousse encore par le
+/// `Navigator` ([open]). Dans les deux cas, la liste reste montée dessous,
+/// filtres, recherche et affichage intacts au retour.
 class StaffAgentPage extends StatelessWidget {
   final StaffMember? member;
   final StaffContractKind? kind;
@@ -28,6 +30,9 @@ class StaffAgentPage extends StatelessWidget {
   /// Mots d'une recherche restée vide, pour préremplir une création.
   final String prefill;
 
+  /// Une création vient d'être écrite (cf. [StaffAgentView.onCreated]).
+  final ValueChanged<String>? onCreated;
+
   const StaffAgentPage({
     super.key,
     required this.others,
@@ -35,6 +40,7 @@ class StaffAgentPage extends StatelessWidget {
     this.member,
     this.kind,
     this.prefill = '',
+    this.onCreated,
   });
 
   /// Ouvre la page ; se termine quand elle se referme.
@@ -94,7 +100,7 @@ class StaffAgentPage extends StatelessWidget {
           },
         ),
       ],
-      child: StaffAgentView(kind: kind, today: today),
+      child: StaffAgentView(kind: kind, today: today, onCreated: onCreated),
     );
   }
 }

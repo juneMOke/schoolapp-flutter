@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/on_dark_ink_well.dart';
 import 'package:school_app_flutter/core/widgets/touch_target.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -63,10 +64,7 @@ class KubaBannerMonth extends StatelessWidget {
             children: [
               Text(
                 eyebrow.toUpperCase(),
-                style: AppTypography.labelSmall.copyWith(
-                  color: AppColors.orDoux,
-                  letterSpacing: 1.2,
-                ),
+                style: AppTypography.eyebrow.copyWith(color: AppColors.orDoux),
               ),
               Wrap(
                 spacing: AppSpacing.sm,
@@ -104,9 +102,7 @@ class KubaBannerMonth extends StatelessWidget {
         months,
         TextButton(
           onPressed: onCurrent,
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.presenceMarkOnBanner,
-          ),
+          style: TextButton.styleFrom(foregroundColor: AppColors.kubaBannerOn),
           child: Text(l10n.presenceMarkCurrentMonth),
         ),
       ],
@@ -127,7 +123,7 @@ class _MonthButton extends StatelessWidget {
     button: true,
     child: Tooltip(
       message: AppLocalizations.of(context)!.presenceMarkPickMonth,
-      child: InkWell(
+      child: OnDarkInkWell(
         onTap: onPick,
         borderRadius: AppRadius.brSm,
         child: TouchTarget(
@@ -138,7 +134,7 @@ class _MonthButton extends StatelessWidget {
                 child: Text(
                   label,
                   style: AppTypography.titleLarge.copyWith(
-                    color: AppColors.presenceMarkOnBanner,
+                    color: AppColors.kubaBannerOn,
                   ),
                 ),
               ),
@@ -146,7 +142,7 @@ class _MonthButton extends StatelessWidget {
               const Icon(
                 Icons.calendar_month_outlined,
                 size: AppSpacing.xl,
-                color: AppColors.presenceMarkOnBannerMuted,
+                color: AppColors.kubaBannerOnMuted,
               ),
             ],
           ),

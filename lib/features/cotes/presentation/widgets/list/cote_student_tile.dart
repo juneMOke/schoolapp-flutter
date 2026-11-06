@@ -83,7 +83,7 @@ class CoteStudentTile extends StatelessWidget {
             border: Border(
               left: BorderSide(
                 color: current ? AppColors.bleuArdoise : Colors.transparent,
-                width: 3,
+                width: AppDimensions.coteStudentCurrentMark,
               ),
               top: const BorderSide(color: AppColors.border),
             ),
@@ -107,7 +107,7 @@ class CoteStudentTile extends StatelessWidget {
                     EteeloOverflowText(
                       subtitle,
                       style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.textMuted,
+                        color: AppColors.textMutedAa,
                       ),
                     ),
                   ],
@@ -122,16 +122,19 @@ class CoteStudentTile extends StatelessWidget {
                     percent == null ? '—' : l10n.cotePercent(percent),
                     style: AppTypography.bodySmall.copyWith(
                       color: calc == null
-                          ? AppColors.textMuted
+                          ? AppColors.textMutedAa
                           : coteScoreInk(calc.total, calc.maxFilled) ??
-                                AppColors.textMuted,
+                                AppColors.textMutedAa,
                       fontWeight: FontWeight.w600,
+                      decoration: calc == null
+                          ? TextDecoration.none
+                          : coteScoreMark(calc.total, calc.maxFilled),
                     ),
                   ),
                   Text(
                     rank == null ? l10n.coteRankNone : l10n.coteRank(rank),
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textMuted,
+                      color: AppColors.textMutedAa,
                     ),
                   ),
                 ],

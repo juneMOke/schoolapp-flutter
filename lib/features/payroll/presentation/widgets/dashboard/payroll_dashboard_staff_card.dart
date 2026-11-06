@@ -53,11 +53,7 @@ class _StaffCardState extends State<PayrollDashboardStaffCard> {
       agentId: agentId,
       month: state.month,
       from: MenuConstants.hrPayrollDashboardId,
-      screenQuery: {
-        if (!state.isCurrentMonth)
-          PayrollDashboardLocation.monthParam: state.month,
-        PayrollDashboardLocation.filterParam: ?state.filter.address,
-      },
+      screenQuery: PayrollDashboardLocation.queryOf(state),
     );
     if (!mounted || cubit.isClosed) return;
     await cubit.refresh();

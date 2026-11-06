@@ -88,6 +88,24 @@ class AppRoutesNames {
   static const String boutiqueLegacyHistory =
       '/boutique/${MenuConstants.boutiqueLegacyHistoryId}';
 
+  /// La fiche d'une vente, enfant de l'adresse du tableau de bord qui l'a
+  /// ouverte : `/home/boutique-tableau-de-bord/vente/{saleId}`.
+  static const String boutiqueSaleSegment = 'vente';
+  static const String boutiqueSaleRoute = '$boutiqueSaleSegment/:saleId';
+
+  /// Ses deux motifs complets : dans la coquille, et sous la route du
+  /// tableau de bord hors d'elle.
+  static const String boutiqueSaleInShell =
+      '$homeSubMenuRoute/$boutiqueSaleRoute';
+  static const String boutiqueSaleOffShell =
+      '$boutiqueDashboard/$boutiqueSaleRoute';
+
+  /// La fiche de [saleId] sous le tableau de bord d'adresse [dashboardPath].
+  static String boutiqueSalePath({
+    required String dashboardPath,
+    required String saleId,
+  }) => '$dashboardPath/$boutiqueSaleSegment/${Uri.encodeComponent(saleId)}';
+
   static const String expenseDashboard =
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseDashboardId}';
   static const String expenseRegister =
@@ -115,6 +133,14 @@ class AppRoutesNames {
   /// ouverte (`/home/rh-personnel-fichier/{agentId}`) : F5 et un lien
   /// partagé rouvrent l'écran dans la coquille, et la fiche par-dessus.
   static const String hrPersonnelAgent = '$homeSubMenuRoute/:agentId';
+
+  /// Une fiche neuve, par-dessus l'écran de RH · Personnel qui l'ouvre :
+  /// `/home/rh-personnel-fichier/nouveau?nom=…` (les mots d'une recherche
+  /// restée vide). Déclarée AVANT `:agentId`, qui la prendrait sinon pour un
+  /// identifiant.
+  static const String hrNewAgentSegment = 'nouveau';
+  static const String hrNewAgent = '$homeSubMenuRoute/$hrNewAgentSegment';
+  static const String hrNewAgentPrefillParam = 'nom';
 
   static String hrPersonnelAgentPath({
     required String subMenuId,

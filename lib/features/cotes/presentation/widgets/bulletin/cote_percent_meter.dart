@@ -15,6 +15,9 @@ class CoteTotalValue extends StatelessWidget {
 
   /// L'encre du score ; `null` si rien n'est rempli.
   final Color? ink;
+
+  /// Sous la moitié du maximum : le total se souligne (cf. `coteScoreMark`).
+  final bool fails;
   final bool showMeter;
   final bool dense;
 
@@ -24,6 +27,7 @@ class CoteTotalValue extends StatelessWidget {
     required this.max,
     required this.percent,
     required this.ink,
+    this.fails = false,
     this.showMeter = true,
     this.dense = false,
   });
@@ -31,7 +35,7 @@ class CoteTotalValue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final color = ink ?? AppColors.textMuted;
+    final color = ink ?? AppColors.textMutedAa;
     final meterWidth = dense
         ? AppDimensions.coteMeterWidthDense
         : AppDimensions.coteMeterWidth;
@@ -43,11 +47,14 @@ class CoteTotalValue extends StatelessWidget {
             style: TextStyle(
               color: ink ?? AppColors.noirChaud,
               fontWeight: FontWeight.w700,
+              decoration: fails
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
             ),
           ),
           TextSpan(
             text: '/$max',
-            style: const TextStyle(color: AppColors.textMuted),
+            style: const TextStyle(color: AppColors.textMutedAa),
           ),
         ],
       ),

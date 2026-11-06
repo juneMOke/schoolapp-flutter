@@ -33,6 +33,9 @@ class BoutiqueDashboardBloc
   /// l'écran marquerait une fenêtre et en afficherait une autre.
   int _ticket = 0;
 
+  /// Une adresse arrivée avant la première fenêtre : le démarrage la reprend.
+  BoutiqueDashboardLocationApplied? _pendingLocation;
+
   BoutiqueDashboardBloc({
     required GetBoutiqueStatsUseCase getStats,
     required GetBoutiqueProvisionalSalesUseCase getProvisional,
@@ -48,6 +51,7 @@ class BoutiqueDashboardBloc
     on<BoutiqueDashboardCustomRangeChanged>(_onCustomRangeChanged);
     on<BoutiqueDashboardRefreshRequested>(_onRefreshRequested);
     on<BoutiqueDashboardCurrencySelected>(_onCurrencySelected);
+    on<BoutiqueDashboardLocationApplied>(_onLocationApplied);
   }
 
   Future<void> _onStarted(
@@ -60,6 +64,8 @@ class BoutiqueDashboardBloc
         state.status != BoutiqueDashboardStatus.initial) {
       return;
     }
+    final location = event.location ?? _pendingLocation;
+    _pendingLocation = null;
     // L'année est posée AVANT la lecture de la préférence : un second
     // démarrage arrivé pendant cet `await` se reconnaît et s'arrête.
     emit(
@@ -67,11 +73,57 @@ class BoutiqueDashboardBloc
         academicYearId: event.academicYearId,
         yearStart: event.yearStart,
         status: BoutiqueDashboardStatus.loading,
+        selectedCurrency: location?.currency,
       ),
     );
-    final period = await _preference.read() ?? DashboardPeriod.defaultPeriod;
-    emit(state.copyWith(period: period));
-    await _load(emit, window: _presetWindow(period), keepData: false);
+    // L'adresse (F5, lien) prime sur la période mémorisée : elle dit ce que
+    // l'écran montrait.
+    final remembered = location == null ? await _preference.read() : null;
+    final period =
+        location?.period ?? remembered ?? DashboardPeriod.defaultPeriod;
+    emit(
+      state.copyWith(
+        period: period,
+        periodFromPreference:
+            remembered != null && remembered != DashboardPeriod.defaultPeriod,
+      ),
+    );
+    await _load(
+      emit,
+      window: _windowOf(period, location?.range),
+      keepData: false,
+    );
+  }
+
+  Future<void> _onLocationApplied(
+    BoutiqueDashboardLocationApplied event,
+    Emitter<BoutiqueDashboardState> emit,
+  ) async {
+    // Avant la première fenêtre, le démarrage reprendra l'adresse.
+    if (state.window == null) {
+      _pendingLocation = event;
+      return;
+    }
+    final stats = state.stats;
+    final currency = stats == null
+        ? event.currency
+        : _resolveCurrency(event.currency, stats);
+    if (currency != state.selectedCurrency) {
+      emit(state.copyWith(selectedCurrency: currency));
+    }
+    final window = _windowOf(event.period, event.range);
+    if (event.period == state.period && window == state.window) return;
+    emit(state.copyWith(period: event.period, periodFromPreference: false));
+    await _load(emit, window: window, keepData: true);
+  }
+
+  /// La fenêtre de [period] ; la période précise prend [range], ou la
+  /// journée d'aujourd'hui.
+  DashboardWindow _windowOf(DashboardPeriod period, DashboardWindow? range) {
+    if (period != DashboardPeriod.custom) return _presetWindow(period);
+    if (range != null) return range;
+    final today = SchoolTime.today(_now());
+    return DashboardWindow(from: today, to: today);
   }
 
   Future<void> _onPeriodChanged(
@@ -82,7 +134,7 @@ class BoutiqueDashboardBloc
     // un geste arrivé là serait écrasé par elle.
     if (state.window == null || event.period == state.period) return;
     // La période est posée AVANT la lecture : le sélecteur suit le doigt.
-    emit(state.copyWith(period: event.period));
+    emit(state.copyWith(period: event.period, periodFromPreference: false));
     if (event.period == DashboardPeriod.custom) {
       // Par défaut, la journée d'aujourd'hui — comme aux inscriptions : une
       // fenêtre valide et lisible, que l'utilisateur élargit ensuite. Ouvrir
@@ -109,7 +161,12 @@ class BoutiqueDashboardBloc
         event.window == state.window) {
       return;
     }
-    emit(state.copyWith(period: DashboardPeriod.custom));
+    emit(
+      state.copyWith(
+        period: DashboardPeriod.custom,
+        periodFromPreference: false,
+      ),
+    );
     await _load(emit, window: event.window, keepData: true);
   }
 

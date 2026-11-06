@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/app_bars/module_top_bar.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -15,14 +17,13 @@ import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_sales_report_cubit.dart';
-import 'package:school_app_flutter/features/boutique/presentation/pages/boutique_sale_detail_page.dart';
+import 'package:school_app_flutter/features/boutique/presentation/helpers/boutique_navigation.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_academic_year_gate.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_body.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_header.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_dashboard_location.dart';
 import 'package:school_app_flutter/features/boutique/presentation/widgets/dashboard/boutique_provisional_notice.dart';
-import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// Le tableau de bord de la boutique : « combien a-t-elle vendu, quoi, et à
 /// quels élèves ? » — un flux, jamais un stock ni une dette.
@@ -58,21 +59,20 @@ class _DashboardViewState extends State<_DashboardView> {
 
   String get _academicYearId => widget.year?.academicYear.id ?? '';
 
-  /// Les libellés de niveaux servent au TICKET d'une vente walk-in, rouvert
-  /// depuis « Ventes de la période ».
-  Map<String, String> get _levelLabels => {
-    for (final bundle
-        in widget.year?.schoolLevelGroups ?? const <SchoolLevelGroupBundle>[])
-      for (final level in bundle.levels) level.id: level.name,
-  };
+  bool _started = false;
 
+  /// Au premier montage, après l'arrivée du routeur : l'adresse d'ouverture
+  /// (F5, lien) prime sur la période mémorisée.
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
     context.read<BoutiqueDashboardBloc>().add(
       BoutiqueDashboardStarted(
         academicYearId: _academicYearId,
         yearStart: widget.year?.academicYear.startDate,
+        location: BoutiqueDashboardLocation.readOpening(context),
       ),
     );
   }
@@ -86,7 +86,10 @@ class _DashboardViewState extends State<_DashboardView> {
     final sales = context.read<BoutiqueSalesCubit>();
     if (_listsStarted) {
       beneficiaries.windowChanged(window);
-      sales.windowChanged(window);
+      sales.windowChanged(
+        window,
+        keepPage: BoutiqueDashboardLocation.addressHolds(context, state),
+      );
     } else {
       _listsStarted = true;
       beneficiaries.start(academicYearId: _academicYearId, window: window);
@@ -94,7 +97,15 @@ class _DashboardViewState extends State<_DashboardView> {
     }
   }
 
-  void _openTill() => context.go(AppRoutesNames.boutiqueAchats);
+  void _openTill() => openBoutiqueTill(context);
+
+  void _refresh() {
+    context.read<BoutiqueDashboardBloc>().add(
+      const BoutiqueDashboardRefreshRequested(),
+    );
+    unawaited(context.read<BoutiqueSalesCubit>().retry());
+    unawaited(context.read<BoutiqueBeneficiariesCubit>().retry());
+  }
 
   /// Un article du palmarès devient le filtre de la liste, et l'écran y
   /// descend : trois gestes, aucune saisie, pour « qui a déjà son polo ? ».
@@ -114,11 +125,7 @@ class _DashboardViewState extends State<_DashboardView> {
   Future<void> _openSale(BoutiqueSaleRow sale) async {
     final bloc = context.read<BoutiqueDashboardBloc>();
     final sales = context.read<BoutiqueSalesCubit>();
-    await BoutiqueSaleDetailPage.push(
-      context,
-      saleId: sale.saleId,
-      levelLabels: _levelLabels,
-    );
+    await openBoutiqueSale(context, saleId: sale.saleId);
     if (!mounted) return;
     bloc.add(const BoutiqueDashboardRefreshRequested());
     // La fenêtre n'a pas bougé : la liste se relit d'elle-même, page et
@@ -132,75 +139,84 @@ class _DashboardViewState extends State<_DashboardView> {
     return BlocListener<BoutiqueDashboardBloc, BoutiqueDashboardState>(
       listenWhen: (prev, curr) => prev.window != curr.window,
       listener: _onWindowChanged,
-      child: AppPageBackground(
-        width: PageContentWidth.wide,
-        // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
-        appBar: ShellChrome.wraps(context)
-            ? null
-            : ModuleTopBar(
-                eyebrow: l10n.boutiqueDashboardEyebrow,
-                title: l10n.boutiqueDashboardTitle,
-              ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-              buildWhen: (prev, curr) =>
-                  prev.period != curr.period ||
-                  prev.window != curr.window ||
-                  prev.cachedAt != curr.cachedAt ||
-                  prev.yearStart != curr.yearStart,
-              builder: (context, state) => BoutiqueDashboardHeader(
-                period: state.period,
-                window: state.window,
-                cachedAt: state.cachedAt,
-                yearStart: state.yearStart,
-                onPeriodChanged: (period) => context
-                    .read<BoutiqueDashboardBloc>()
-                    .add(BoutiqueDashboardPeriodChanged(period)),
-                onRangeChanged: (window) => context
-                    .read<BoutiqueDashboardBloc>()
-                    .add(BoutiqueDashboardCustomRangeChanged(window)),
-                onRefresh: () => context.read<BoutiqueDashboardBloc>().add(
-                  const BoutiqueDashboardRefreshRequested(),
-                ),
-                onOpenTill: _openTill,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            // Visible même sous une erreur réseau : ces ventes-là, le poste
-            // les connaît sans le serveur.
-            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-              buildWhen: (prev, curr) => prev.provisional != curr.provisional,
-              builder: (context, state) => state.provisional.isEmpty
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: AppDimensions.spacingM,
-                      ),
-                      child: BoutiqueProvisionalNotice(
-                        provisional: state.provisional,
-                      ),
+      // F5 / Ctrl+R : relire les chiffres et les deux listes, sans recharger
+      // la page web — le geste du bouton « Actualiser » de l'en-tête.
+      child: PageActionShortcut(
+        action: PageAction.refresh,
+        onInvoke: _refresh,
+        child: BoutiqueDashboardLocation(
+          child: AppPageBackground(
+            width: PageContentWidth.wide,
+            // Dans la coquille, sa barre d'en-tête nomme déjà l'écran.
+            appBar: ShellChrome.wraps(context)
+                ? null
+                : ModuleTopBar(
+                    eyebrow: l10n.boutiqueDashboardEyebrow,
+                    title: l10n.boutiqueDashboardTitle,
+                  ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+                  buildWhen: (prev, curr) =>
+                      prev.period != curr.period ||
+                      prev.window != curr.window ||
+                      prev.cachedAt != curr.cachedAt ||
+                      prev.yearStart != curr.yearStart,
+                  builder: (context, state) => BoutiqueDashboardHeader(
+                    period: state.period,
+                    window: state.window,
+                    cachedAt: state.cachedAt,
+                    yearStart: state.yearStart,
+                    onPeriodChanged: (period) => context
+                        .read<BoutiqueDashboardBloc>()
+                        .add(BoutiqueDashboardPeriodChanged(period)),
+                    onRangeChanged: (window) => context
+                        .read<BoutiqueDashboardBloc>()
+                        .add(BoutiqueDashboardCustomRangeChanged(window)),
+                    onRefresh: () => context.read<BoutiqueDashboardBloc>().add(
+                      const BoutiqueDashboardRefreshRequested(),
                     ),
+                    onOpenTill: _openTill,
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.spacingM),
+                // Visible même sous une erreur réseau : ces ventes-là, le poste
+                // les connaît sans le serveur.
+                BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+                  buildWhen: (prev, curr) =>
+                      prev.provisional != curr.provisional,
+                  builder: (context, state) => state.provisional.isEmpty
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppDimensions.spacingM,
+                          ),
+                          child: BoutiqueProvisionalNotice(
+                            provisional: state.provisional,
+                          ),
+                        ),
+                ),
+                BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
+                  buildWhen: (prev, curr) =>
+                      prev.status != curr.status ||
+                      prev.stats != curr.stats ||
+                      prev.failure != curr.failure ||
+                      prev.refreshing != curr.refreshing ||
+                      prev.selectedCurrency != curr.selectedCurrency ||
+                      prev.window != curr.window,
+                  builder: (context, state) => BoutiqueDashboardBody(
+                    state: state,
+                    now: DateTime.now(),
+                    beneficiariesKey: _beneficiariesKey,
+                    onArticleTap: _onArticleTap,
+                    onOpenSale: _openSale,
+                    onOpenTill: _openTill,
+                  ),
+                ),
+              ],
             ),
-            BlocBuilder<BoutiqueDashboardBloc, BoutiqueDashboardState>(
-              buildWhen: (prev, curr) =>
-                  prev.status != curr.status ||
-                  prev.stats != curr.stats ||
-                  prev.failure != curr.failure ||
-                  prev.refreshing != curr.refreshing ||
-                  prev.selectedCurrency != curr.selectedCurrency ||
-                  prev.window != curr.window,
-              builder: (context, state) => BoutiqueDashboardBody(
-                state: state,
-                now: DateTime.now(),
-                beneficiariesKey: _beneficiariesKey,
-                onArticleTap: _onArticleTap,
-                onOpenSale: _openSale,
-                onOpenTill: _openTill,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

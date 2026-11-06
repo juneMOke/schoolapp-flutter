@@ -69,14 +69,20 @@ class JustificationCard extends StatelessWidget {
             runSpacing: AppSpacing.xs,
             children: [
               if (j.classroomName case final name?)
-                EteeloChip(icon: Icons.class_outlined, label: name),
+                EteeloChip(
+                  icon: Icons.class_outlined,
+                  label: name,
+                  wrapLabel: true,
+                ),
               EteeloChip(
                 icon: Icons.event_busy_outlined,
                 label: PresenceLabels.longDay(dates, j.attendanceDate),
+                wrapLabel: true,
               ),
               EteeloChip(
                 icon: Icons.help_outline,
                 label: j.reason.getDisplayName(l10n),
+                wrapLabel: true,
               ),
             ],
           ),
@@ -96,7 +102,7 @@ class JustificationCard extends StatelessWidget {
                 if (decided != null) l10n.justificationDecidedOn(decided),
               ].join(' · '),
               style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textMuted,
+                color: AppColors.textMutedAa,
               ),
             ),
           ],
@@ -138,7 +144,7 @@ class _Quote extends StatelessWidget {
     children: [
       Text(
         label,
-        style: AppTypography.labelSmall.copyWith(color: AppColors.textMuted),
+        style: AppTypography.labelSmall.copyWith(color: AppColors.textMutedAa),
       ),
       const SizedBox(height: AppSpacing.xs),
       Text(text, style: AppTypography.bodyMedium),

@@ -126,13 +126,21 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
   /// sans cela `context.read` n'y trouverait rien. C'est aussi ce qui garantit
   /// qu'il n'existe qu'un seul panier — un second bloc en composerait un second,
   /// et la vente encaissée ne serait pas celle qu'on a vue à l'écran.
-  Future<void> _openCart(BuildContext context) => BoutiqueCartPage.push(
-    context,
-    bloc: context.read<BoutiqueBloc>(),
-    academicYearId: widget.academicYearId,
-    levels: widget.levels,
-    academicYearStart: widget.academicYearStart,
-  );
+  ///
+  /// [catalogWidth] : la largeur que la caisse reçoit — la page du panier
+  /// couvre la fenêtre, et se referme quand la caisse passerait en colonne.
+  Future<void> _openCart(BuildContext context, double catalogWidth) =>
+      BoutiqueCartPage.push(
+        context,
+        bloc: context.read<BoutiqueBloc>(),
+        academicYearId: widget.academicYearId,
+        levels: widget.levels,
+        academicYearStart: widget.academicYearStart,
+        chromeWidth: (MediaQuery.sizeOf(context).width - catalogWidth).clamp(
+          0,
+          double.infinity,
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +208,8 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
                           ? null
                           : BoutiqueCartButton(
                               articleCount: state.cart.articleCount,
-                              onPressed: () => _openCart(context),
+                              onPressed: () =>
+                                  _openCart(context, constraints.maxWidth),
                             ),
                     ),
               floatingActionButton: inShell && !sideCart
@@ -213,7 +222,7 @@ class _CatalogueScopeState extends State<_CatalogueScope> {
                             ),
                       icon: Icons.shopping_bag_outlined,
                       badgeCount: state.cart.articleCount,
-                      onPressed: () => _openCart(context),
+                      onPressed: () => _openCart(context, constraints.maxWidth),
                     )
                   : null,
               floatingActionButtonLocation:

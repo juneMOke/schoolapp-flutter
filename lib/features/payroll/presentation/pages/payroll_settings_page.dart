@@ -25,6 +25,7 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/setting
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_settings_save_bar.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/settings/payroll_wide_settings_cards.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll_refresh_shortcut.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// RH · Paie ▸ Configuration — le barème de l'école, à un seul endroit. La
@@ -36,7 +37,7 @@ class PayrollSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<PayrollCubit>(
     create: (_) => getIt<PayrollCubit>()..load(),
-    child: const PayrollSettingsScreen(),
+    child: const PayrollRefreshShortcut(child: PayrollSettingsScreen()),
   );
 }
 
@@ -45,7 +46,8 @@ class PayrollSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPageBackground(
-    width: PageContentWidth.wide,
+    // Un formulaire : ses champs ne s'étirent pas loin de leur libellé.
+    width: PageContentWidth.reading,
     child: BlocConsumer<PayrollCubit, PayrollState>(
       listenWhen: (previous, current) =>
           current.notice != null && previous.notice != current.notice,

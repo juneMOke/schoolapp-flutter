@@ -5,6 +5,8 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_month_calendar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/ink_visibility.dart';
+
 /// Le calendrier d'un mois : le détail d'un jour dans sa case, la marque
 /// « à envoyer », et un jour passé qui s'ouvre quand la fiche le permet.
 void main() {
@@ -63,6 +65,12 @@ void main() {
 
     expect(find.byIcon(Icons.cloud_upload_outlined), findsOneWidget);
     expect(find.byTooltip(RegExp('à envoyer')), findsOneWidget);
+  });
+
+  testWidgets('le survol et le focus d\'une case se voient', (tester) async {
+    await pump(tester, days: [past, pending]);
+    // Le fond de la case est un Ink : l'encre de l'InkWell passe dessus.
+    expectInkNotCovered(tester, find.byType(InkWell));
   });
 
   testWidgets('sans onTapDay, rien ne s\'ouvre', (tester) async {

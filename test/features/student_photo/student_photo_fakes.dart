@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
@@ -10,7 +11,18 @@ class FakeSession implements CameraSession {
   @override
   final CameraLens lens;
   bool closed = false;
-  Uint8List shot = Uint8List.fromList([9, 9, 9]);
+
+  /// Une vraie image (PNG 1 × 1) : le recadrage qui suit la prise la décode.
+  Uint8List shot = base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  );
+
+  /// Le nombre de prises demandées.
+  int captures = 0;
+
+  /// Combien de fois l'aperçu a été monté : sur le web, un aperçu remonté
+  /// recrée son élément vidéo.
+  int previewMounts = 0;
 
   FakeSession(this.lens);
 
@@ -18,24 +30,55 @@ class FakeSession implements CameraSession {
   double get previewAspectRatio => 4 / 3;
 
   @override
-  Widget buildPreview() => const SizedBox();
+  Widget buildPreview() => CountedPreview(onMount: () => previewMounts++);
 
   @override
-  Future<Uint8List> capture() async => shot;
+  Future<Uint8List> capture() async {
+    captures++;
+    return shot;
+  }
 
   @override
   Future<void> close() async => closed = true;
 }
 
+/// L'aperçu simulé : son `State` naît une fois par montage.
+class CountedPreview extends StatefulWidget {
+  final VoidCallback onMount;
+
+  const CountedPreview({super.key, required this.onMount});
+
+  @override
+  State<CountedPreview> createState() => CountedPreviewState();
+}
+
+class CountedPreviewState extends State<CountedPreview> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onMount();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+
 class FakeCameras extends CameraViewfinderGateway {
   List<CameraLens> available;
   Object? openError;
+
+  /// Levée par [lenses] (refus du navigateur, page en http).
+  Object? lensesError;
   final List<FakeSession> opened = [];
 
   FakeCameras(this.available);
 
   @override
-  Future<List<CameraLens>> lenses() async => available;
+  Future<List<CameraLens>> lenses() async {
+    final error = lensesError;
+    if (error != null) throw error;
+    return available;
+  }
 
   @override
   Future<CameraSession> open(CameraLens lens) async {

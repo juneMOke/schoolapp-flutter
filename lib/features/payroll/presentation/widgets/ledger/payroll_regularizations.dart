@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/payroll/domain/entities/payroll_disb
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_notice_with_action.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/dialogs/payroll_reason_dialog.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -54,26 +55,23 @@ class PayrollRegularizations extends StatelessWidget {
           for (final disbursement in disbursements)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.payrollRegularizeRow(
-                        actions.nameOf(disbursement.staffMemberId),
-                        MoneyFormat.format(disbursement.amount),
-                        PayrollLabels.month(context, disbursement.month),
-                        PayrollLabels.refusal(l10n, disbursement.syncErrorCode),
-                      ),
-                      style: AppTypography.bodyMedium.copyWith(color: tone.ink),
-                    ),
+              child: PayrollNoticeWithAction(
+                notice: Text(
+                  l10n.payrollRegularizeRow(
+                    actions.nameOf(disbursement.staffMemberId),
+                    MoneyFormat.format(disbursement.amount),
+                    PayrollLabels.month(context, disbursement.month),
+                    PayrollLabels.refusal(l10n, disbursement.syncErrorCode),
                   ),
-                  if (canWrite)
-                    EteeloButton.ghost(
-                      label: l10n.payrollPayCancel,
-                      onPressed: () => _close(context, disbursement),
-                      fullWidth: false,
-                    ),
-                ],
+                  style: AppTypography.bodyMedium.copyWith(color: tone.ink),
+                ),
+                action: canWrite
+                    ? EteeloButton.ghost(
+                        label: l10n.payrollPayCancel,
+                        onPressed: () => _close(context, disbursement),
+                        fullWidth: false,
+                      )
+                    : null,
               ),
             ),
         ],

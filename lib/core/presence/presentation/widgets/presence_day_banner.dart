@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_schedule.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_day_banner_parts.dart';
 import 'package:school_app_flutter/core/presence/presentation/widgets/presence_progress_ring.dart';
@@ -88,49 +89,16 @@ class PresenceDayBanner extends StatelessWidget {
         spacing: AppSpacing.lg,
         runSpacing: AppSpacing.md,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PresenceBannerButton(
-                icon: Icons.chevron_left,
-                tooltip: l10n.presenceMarkPreviousDay,
-                onPressed: onPrevious,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              // Flexible : sur téléphone la date longue passe à la ligne
-              // plutôt que de pousser le bouton « jour suivant » hors du
-              // bandeau.
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      eyebrow.toUpperCase(),
-                      style: AppTypography.labelSmall.copyWith(
-                        color: AppColors.presenceMarkOnBannerMuted,
-                      ),
-                    ),
-                    PresenceBannerDay(day: day, onPick: onPickDay),
-                    const SizedBox(height: AppSpacing.xs),
-                    PresenceSchedulePill(schedule: schedule, onTap: onSettings),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              PresenceBannerButton(
-                icon: Icons.chevron_right,
-                tooltip: l10n.presenceMarkNextDay,
-                onPressed: onNext,
-              ),
-              if (!isToday) ...[
-                const SizedBox(width: AppSpacing.sm),
-                TextButton(
-                  onPressed: onToday,
-                  style: TextButton.styleFrom(foregroundColor: onBanner),
-                  child: Text(l10n.presenceMarkGoToday),
-                ),
-              ],
-            ],
+          _DayNavigation(
+            eyebrow: eyebrow,
+            day: day,
+            isToday: isToday,
+            schedule: schedule,
+            onPrevious: onPrevious,
+            onNext: onNext,
+            onToday: onToday,
+            onPickDay: onPickDay,
+            onSettings: onSettings,
           ),
           // La progression et ses actions restent voisines ; sur un écran
           // étroit les actions passent sous la progression au lieu de
@@ -179,6 +147,103 @@ class PresenceDayBanner extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// La date du bandeau et ses flèches. Sur une largeur de téléphone, les
+/// flèches et « Aujourd'hui » passent sur une seconde ligne : à côté de la
+/// date longue, ils débordaient d'un jour passé (360 dp, texte ×1,3 surtout).
+class _DayNavigation extends StatelessWidget {
+  final String eyebrow;
+  final String day;
+  final bool isToday;
+  final PresenceSchedule schedule;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+  final VoidCallback onToday;
+  final VoidCallback? onPickDay;
+  final VoidCallback? onSettings;
+
+  const _DayNavigation({
+    required this.eyebrow,
+    required this.day,
+    required this.isToday,
+    required this.schedule,
+    required this.onPrevious,
+    required this.onNext,
+    required this.onToday,
+    required this.onPickDay,
+    required this.onSettings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final previous = PresenceBannerButton(
+      icon: Icons.chevron_left,
+      tooltip: l10n.presenceMarkPreviousDay,
+      onPressed: onPrevious,
+    );
+    final next = PresenceBannerButton(
+      icon: Icons.chevron_right,
+      tooltip: l10n.presenceMarkNextDay,
+      onPressed: onNext,
+    );
+    final today = isToday
+        ? null
+        : TextButton(
+            onPressed: onToday,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.presenceMarkOnBanner,
+            ),
+            child: Text(l10n.presenceMarkGoToday),
+          );
+    final date = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          eyebrow.toUpperCase(),
+          style: AppTypography.labelSmall.copyWith(
+            color: AppColors.presenceMarkOnBannerMuted,
+          ),
+        ),
+        PresenceBannerDay(day: day, onPick: onPickDay),
+        const SizedBox(height: AppSpacing.xs),
+        PresenceSchedulePill(schedule: schedule, onTap: onSettings),
+      ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < AppBreakpoints.phoneNarrowMax) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              date,
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [previous, next, ?today],
+              ),
+            ],
+          );
+        }
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            previous,
+            const SizedBox(width: AppSpacing.sm),
+            // Flexible : la date longue passe à la ligne plutôt que de
+            // pousser le bouton « jour suivant » hors du bandeau.
+            Flexible(child: date),
+            const SizedBox(width: AppSpacing.sm),
+            next,
+            if (today != null) ...[const SizedBox(width: AppSpacing.sm), today],
+          ],
+        );
+      },
     );
   }
 }

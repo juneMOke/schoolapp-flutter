@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -154,7 +155,7 @@ class _CategoryRow extends StatelessWidget {
                   // Étroit (téléphone) : libellé et compte sur une ligne, la
                   // barre dessous — côte à côte, elle n'aurait plus de place.
                   if (constraints.maxWidth <
-                      AppDimensions.hrCategoryRowStackedMaxWidth) {
+                      AppBreakpoints.hrCategoryRowStackedMax) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.min,

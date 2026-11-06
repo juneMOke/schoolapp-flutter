@@ -135,6 +135,10 @@ class CoteTone {
 
   /// Une ligne sur deux : à peine teintée, les cases blanches s'en détachent.
   Color get wash => soft.withValues(alpha: 0.5);
+
+  /// Le trait qui ouvre la ligne d'un cours : un FOND, nommé comme tel, et
+  /// non l'encre du domaine dosée dans le widget.
+  Color get mark => ink.withValues(alpha: 0.55);
 }
 
 const List<CoteTone> _tones = [
@@ -253,10 +257,20 @@ List<CoteGridRow> coteGridRows(
   return rows;
 }
 
+/// Un score sous la moitié du maximum. Comparé sur les points, pas sur un
+/// pourcentage arrondi : 9,9/20 échoue. Sans maximum, rien à juger.
+bool coteScoreFails(int obtained, int max) => max > 0 && obtained * 2 < max;
+
 /// L'encre d'un score : rouge sous la moitié du maximum, vert dès la moitié.
-/// Comparé sur les points, pas sur un pourcentage arrondi : 9,9/20 reste rouge.
 /// `null` sans maximum : rien à juger.
 Color? coteScoreInk(int obtained, int max) {
   if (max <= 0) return null;
-  return obtained * 2 < max ? AppColors.error : AppColors.vertSavane;
+  return coteScoreFails(obtained, max) ? AppColors.error : AppColors.vertSavane;
 }
+
+/// La marque d'un score sous la moitié : souligné, comme au bulletin papier.
+/// Le rouge seul ne se lit ni par un daltonien ni sur une impression en gris.
+TextDecoration coteScoreMark(int obtained, int max) =>
+    coteScoreFails(obtained, max)
+    ? TextDecoration.underline
+    : TextDecoration.none;

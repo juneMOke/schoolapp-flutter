@@ -28,6 +28,18 @@ mixin SessionCameraControl on Cubit<PhotoSessionState> {
     await openCamera(opener!.switchNext);
   }
 
+  /// Redemande la caméra après un refus ou une absence (autorisation donnée
+  /// dans le navigateur, webcam branchée). Le sablier revient le temps de
+  /// la demande.
+  Future<void> retryCamera() async {
+    final current = state;
+    if (current is! SessionShooting) return;
+    final camera = current.camera;
+    if (camera is! CameraUnavailable || !camera.reason.canRetry) return;
+    emit(current.copyWith(clearCamera: true));
+    await openCamera();
+  }
+
   bool _suspended = false;
 
   /// L'application passe en arrière-plan : la caméra est rendue au système.

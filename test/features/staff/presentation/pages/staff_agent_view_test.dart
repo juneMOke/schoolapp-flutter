@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_contract_draft.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_member_draft.dart';
@@ -100,5 +103,119 @@ void main() {
     verify(() => h.addContract(draft.id, contract)).called(1);
     expect(agent.state.step, StaffAgentState.jobStep);
     expect(find.text('Contrat enregistré sur la tablette.'), findsOneWidget);
+  });
+
+  group('création entamée', () {
+    /// La vue poussée au-dessus d'une page « Fichier », comme depuis le
+    /// fichier du personnel.
+    Future<void> pumpPushed(WidgetTester tester, StaffAgentCubit agent) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: agent),
+                        BlocProvider(
+                          create: (_) => getIt<StaffContractsCubit>(),
+                        ),
+                        BlocProvider(create: (_) => getIt<StaffDossierCubit>()),
+                      ],
+                      child: const StaffAgentView(
+                        kind: null,
+                        today: '2026-09-29',
+                      ),
+                    ),
+                  ),
+                ),
+                child: const Text('Fichier'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Fichier'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('une fiche à peine ouverte se quitte sans question', (
+      tester,
+    ) async {
+      final agent = creating(const StaffMemberDraft(id: 'new'));
+      await pumpPushed(tester, agent);
+
+      await tester.tap(find.byTooltip('Retour'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Abandonner les modifications ?'), findsNothing);
+      expect(find.text('Fichier'), findsOneWidget);
+    });
+
+    testWidgets('une écriture en vol retient la page : le contrat initial '
+        'se pose à sa suite', (tester) async {
+      const contract = StaffContractDraft(
+        kind: StaffContractKind.permanent,
+        effectiveFrom: '2026-09-01',
+        amount: '250',
+      );
+      when(
+        () => h.addContract(any(), any()),
+      ).thenAnswer((_) async => const Right(unit));
+      final draft = completeDraft();
+      final agent = creating(draft)..updateInitialContract((_) => contract);
+      // Né dans le test, sous FakeAsync : il s'achève quand on le décide.
+      final written = Completer<Either<Failure, Unit>>();
+      when(() => h.save(any())).thenAnswer((_) => written.future);
+      await pumpPushed(tester, agent);
+
+      unawaited(agent.save());
+      await tester.pump();
+      expect(agent.state.saving, isTrue);
+
+      await tester.tap(find.byTooltip('Retour'));
+      await tester.pump();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(StaffAgentView), findsOneWidget);
+
+      written.complete(const Right(unit));
+      await tester.pumpAndSettle();
+      verify(() => h.addContract(draft.id, contract)).called(1);
+    });
+
+    testWidgets('une saisie commencée demande avant de partir, et '
+        '« Continuer la saisie » la garde', (tester) async {
+      final agent = creating(const StaffMemberDraft(id: 'new'));
+      await pumpPushed(tester, agent);
+      agent.updateDraft((d) => d.copyWith(firstName: 'Paul'));
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Retour'));
+      await tester.pumpAndSettle();
+      expect(find.text('Abandonner les modifications ?'), findsOneWidget);
+
+      await tester.tap(find.text('Continuer la saisie'));
+      await tester.pumpAndSettle();
+      expect(find.byType(StaffAgentView), findsOneWidget);
+      expect(agent.state.draft.firstName, 'Paul');
+
+      // Précédent du système : la même question, la page ne part pas seule.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('Abandonner les modifications ?'), findsOneWidget);
+
+      await tester.tap(find.text('Abandonner'));
+      await tester.pumpAndSettle();
+      expect(find.byType(StaffAgentView), findsNothing);
+      expect(find.text('Fichier'), findsOneWidget);
+    });
   });
 }

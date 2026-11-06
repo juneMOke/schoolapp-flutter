@@ -17,6 +17,10 @@ class FakeCotesRepository implements CotesRepository {
   CoteFlushOutcome flushOutcome = CoteFlushOutcome.done;
   int pending = 0;
   int flushes = 0;
+
+  /// Le nombre de cotes écrites au moment de chaque envoi : ce que la file
+  /// portait quand elle est partie.
+  final savedAtFlush = <int>[];
   int retries = 0;
   bool failWrites = false;
   final listeners = <void Function()>[];
@@ -84,6 +88,7 @@ class FakeCotesRepository implements CotesRepository {
   @override
   Future<CoteFlushOutcome> flush(String classroomId) async {
     flushes++;
+    savedAtFlush.add(saved.length);
     return flushOutcome;
   }
 

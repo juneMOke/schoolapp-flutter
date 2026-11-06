@@ -124,7 +124,7 @@ class _PaymentCancelDoneViewState extends State<PaymentCancelDoneView> {
                         hint,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textMuted,
+                          color: AppColors.textMutedAa,
                         ),
                       ),
                       const SizedBox(height: AppDimensions.spacingS),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +8,7 @@ import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/navigation/location_query.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
@@ -18,11 +21,13 @@ import 'package:school_app_flutter/features/classes/presentation/bloc/offline/cl
 import 'package:school_app_flutter/features/classes/presentation/bloc/offline/classroom_offline_state.dart';
 import 'package:school_app_flutter/features/classes/presentation/helpers/classes_list_page_helpers.dart';
 import 'package:school_app_flutter/features/classes/presentation/widgets/classes_list_models.dart';
-import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_bloc.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_event.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_saisie_state.dart';
 import 'package:school_app_flutter/features/cotes/presentation/bloc/cote_save_cubit.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_saisie_address.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_query.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_scope_bar.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/selection/cote_selection_card.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/states/cote_saisie_states.dart';
@@ -31,8 +36,9 @@ import 'package:school_app_flutter/features/resultats/presentation/helpers/resul
 import 'package:school_app_flutter/features/resultats/presentation/widgets/states/resultats_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Résultats ▸ Saisie des notes. La classe, la portée et l'élève vivent dans
-/// l'adresse (`?classe=…&portee=…&cible=…&eleve=…`) : un F5 les retrouve.
+/// Résultats ▸ Saisie des notes. La classe, la portée, l'élève, la recherche
+/// et le filtre de la liste vivent dans l'adresse ([CoteSaisieAddress]) : un
+/// F5 les retrouve.
 class CoteSaisiePage extends StatefulWidget {
   const CoteSaisiePage({super.key});
 
@@ -42,16 +48,25 @@ class CoteSaisiePage extends StatefulWidget {
 
 class _CoteSaisiePageState extends State<CoteSaisiePage>
     with WidgetsBindingObserver {
-  static const _classeParam = 'classe';
-  static const _porteeParam = 'portee';
-  static const _cibleParam = 'cible';
-  static const _eleveParam = 'eleve';
-
   GoRouter? _router;
   bool _openedFromAddress = false;
   String? _addressClassroomId;
   String _classroomName = '';
   CoteSaisieState _previous = const CoteSaisieIdle();
+
+  /// La largeur reçue par la page (barre latérale déduite), relue à chaque
+  /// mise en page : c'est elle, et non la fenêtre, qui dit « téléphone ».
+  double? _width;
+
+  /// La classe de l'adresse attend la première mesure pour s'ouvrir.
+  bool _openPending = false;
+
+  /// Le nombre de classes ouvertes : chacune replie la carte de sélection.
+  int _openCount = 0;
+
+  /// La recherche et le filtre de la liste : au-dessus d'elle, qui va et
+  /// vient avec la largeur, et dans l'adresse.
+  late CoteStudentQuery _studentQuery;
 
   @override
   void initState() {
@@ -66,60 +81,86 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     if (_openedFromAddress) return;
     _openedFromAddress = true;
     final router = _router;
+    _studentQuery = CoteSaisieAddress.queryOf(router)
+      ..addListener(() => _write(CoteSaisieAddress.ofQuery(_studentQuery)));
     final classroomId = router == null
         ? null
-        : LocationQuery.read(router, _classeParam);
+        : LocationQuery.read(router, CoteSaisieAddress.classe);
     if (router == null || classroomId == null) return;
     _addressClassroomId = classroomId;
+    _openPending = true;
+  }
+
+  /// Appelé à la mise en page : la largeur est enfin connue.
+  void _openFromAddress() {
+    final router = _router;
+    final classroomId = _addressClassroomId;
+    if (!_openPending || router == null || classroomId == null) return;
+    _openPending = false;
     context.read<CoteSaisieBloc>().add(
       CoteSaisieOpened(
         classroomId,
-        scope: _scopeFromAddress(router),
-        eleveId: LocationQuery.read(router, _eleveParam),
+        scope: CoteSaisieAddress.scopeOf(router),
+        eleveId: LocationQuery.read(router, CoteSaisieAddress.eleve),
         singleColumn: _isPhone,
       ),
     );
   }
 
   bool get _isPhone =>
-      MediaQuery.sizeOf(context).width < AppBreakpoints.coteGridPhoneMax;
-
-  CoteScope? _scopeFromAddress(GoRouter router) {
-    final portee = CotePortee.values
-        .where((p) => p.name == LocationQuery.read(router, _porteeParam))
-        .firstOrNull;
-    if (portee == null) return null;
-    return CoteScope(
-      portee: portee,
-      cibleId: LocationQuery.read(router, _cibleParam),
-    );
-  }
+      (_width ?? MediaQuery.sizeOf(context).width) <
+      AppBreakpoints.coteGridPhoneMax;
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _studentQuery.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.paused) return;
-    // La case en cours s'écrit en perdant le focus, puis la file part.
-    FocusManager.instance.primaryFocus?.unfocus();
-    _flush();
+    // `hidden` : l'onglet passe derrière (web), avant même `paused` — sur le
+    // web, une fermeture n'arrive jamais jusqu'à `paused`.
+    if (state != AppLifecycleState.paused &&
+        state != AppLifecycleState.hidden) {
+      return;
+    }
+    unawaited(_commitThenFlush());
   }
 
   void _flush() => context.read<CoteSaveCubit>().flushNow();
+
+  /// La case en cours s'écrit en perdant le focus, puis la file part. Le
+  /// focus ne change qu'au microtask suivant, et l'écriture passe par la
+  /// file du bloc : la file n'est envoyée qu'une fois la case écrite, sans
+  /// quoi la dernière cote attendrait la synchro suivante. Le bloc et le
+  /// cubit sont lus avant d'attendre : la page a pu partir entre-temps.
+  Future<void> _commitThenFlush() async {
+    final bloc = context.read<CoteSaisieBloc>();
+    final save = context.read<CoteSaveCubit>();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await Future<void>.microtask(() {});
+    await bloc.settled();
+    if (!save.isClosed) unawaited(save.flushNow());
+  }
+
+  /// Une sortie (Précédent, un autre écran) pendant une frappe : la case
+  /// s'écrit, puis la file part — aucune question, rien ne se perd.
+  Future<bool> _commitBeforeLeaving() async {
+    if (mounted) await _commitThenFlush();
+    return true;
+  }
 
   void _open(OfflineClassroom classroom) {
     final bloc = context.read<CoteSaisieBloc>();
     _classroomName = classroom.name;
     _flush();
+    // Une autre classe, une autre liste : la recherche repart de zéro.
+    _studentQuery.reset();
     _write({
-      _classeParam: classroom.id,
-      _porteeParam: null,
-      _cibleParam: null,
-      _eleveParam: null,
+      ...CoteSaisieAddress.cleared,
+      CoteSaisieAddress.classe: classroom.id,
     });
     bloc.add(CoteSaisieOpened(classroom.id, singleColumn: _isPhone));
   }
@@ -133,18 +174,16 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
   }
 
   void _writeAddress(CoteSaisieReady state) => _write({
-    _classeParam: context.read<CoteSaisieBloc>().classroomId,
-    _porteeParam: state.scope.portee.name,
-    _cibleParam: state.scope.cibleId,
-    _eleveParam: state.currentId,
+    CoteSaisieAddress.classe: context.read<CoteSaisieBloc>().classroomId,
+    CoteSaisieAddress.portee: state.scope.portee.name,
+    CoteSaisieAddress.cible: state.scope.cibleId,
+    CoteSaisieAddress.eleve: state.currentId,
   });
 
-  void _clearAddress() => _write({
-    _classeParam: null,
-    _porteeParam: null,
-    _cibleParam: null,
-    _eleveParam: null,
-  });
+  void _clearAddress() {
+    _studentQuery.reset();
+    _write(CoteSaisieAddress.cleared);
+  }
 
   void _announce(BuildContext context, CoteSaisieReady state) {
     final l10n = AppLocalizations.of(context)!;
@@ -174,6 +213,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     if (state is! CoteSaisieReady) return;
     final bloc = context.read<CoteSaisieBloc>();
     if (previous is! CoteSaisieReady) {
+      _openCount++;
       context.read<CoteSaveCubit>().attach(bloc.classroomId!);
       _writeAddress(state);
       return;
@@ -207,7 +247,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
     // Posé ici, au-dessus de l'attente de l'année : un lien profond ouvre sa
     // classe avant que la page n'ait fini d'arriver, et l'enregistrement doit
     // tout de même s'y attacher.
-    return BlocListener<CoteSaisieBloc, CoteSaisieState>(
+    final page = BlocListener<CoteSaisieBloc, CoteSaisieState>(
       listenWhen: (previous, current) {
         _previous = previous;
         return true;
@@ -224,6 +264,27 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
         ),
         child: Builder(builder: _content),
       ),
+    );
+    // Une frappe en cours, que rien n'a écrite : sur le web, fermer ou
+    // recharger l'onglet demande confirmation ; une sortie dans l'appli
+    // écrit la case avant de partir. Seule la garde se relit — la page ne
+    // se rebâtit pas à chaque frappe.
+    final uncommitted = context.read<CoteSaisieBloc>().uncommittedCell;
+    final guarded = ValueListenableBuilder<bool>(
+      valueListenable: uncommitted,
+      child: page,
+      builder: (context, _, page) => RouteExitGuard(
+        hasUnsavedWork: () => uncommitted.value,
+        confirmExit: _commitBeforeLeaving,
+        child: page!,
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _width = constraints.maxWidth;
+        _openFromAddress();
+        return guarded;
+      },
     );
   }
 
@@ -278,6 +339,10 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
               initialClassroomId: _addressClassroomId,
               isOpening: state is CoteSaisieLoading,
               onOpen: _open,
+              openCount: _openCount,
+              summary: ready == null
+                  ? null
+                  : _summary(context, ready, classrooms),
               scopeBar: ready == null
                   ? null
                   : CoteScopeBar(
@@ -293,6 +358,26 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
         );
       },
     );
+  }
+
+  /// « 7e A · Semestre 1 » ; la portée seule tant que la classe n'a pas de nom.
+  String _summary(
+    BuildContext context,
+    CoteSaisieReady ready,
+    ClassroomOfflineState classrooms,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final name = _nameOf(
+      classrooms,
+      context.read<CoteSaisieBloc>().classroomId,
+    );
+    final scope = CoteLabels.scope(
+      l10n,
+      ready.classe,
+      ready.scope,
+      ready.columns,
+    );
+    return name.isEmpty ? scope : l10n.coteSelectionSummary(name, scope);
   }
 
   Widget _zone(
@@ -320,6 +405,7 @@ class _CoteSaisiePageState extends State<CoteSaisiePage>
       CoteSaisieReady() => CoteWorkspace(
         classroomName: _nameOf(classrooms, bloc.classroomId),
         onStudentChanged: _flush,
+        studentQuery: _studentQuery,
       ),
     };
   }

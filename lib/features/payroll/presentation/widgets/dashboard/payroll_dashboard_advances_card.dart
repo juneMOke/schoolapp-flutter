@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/payroll/domain/entities/dashboard/payroll_dashboard.dart';
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_state.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
@@ -172,9 +173,8 @@ class _AdvanceRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    EteeloOverflowText(
                       advance.fullName,
-                      overflow: TextOverflow.ellipsis,
                       style: AppTypography.titleSmall.copyWith(
                         color: AppColors.textPrimary,
                       ),

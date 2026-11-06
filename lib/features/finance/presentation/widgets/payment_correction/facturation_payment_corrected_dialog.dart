@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/keyboard/eteelo_submit_shortcut.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
@@ -6,7 +7,6 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_result_medallion.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_status_cubit.dart';
@@ -18,7 +18,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 Future<void> showFacturationPaymentCorrectedDialog(
   BuildContext context, {
   required String? replacementPaymentId,
-}) => showDialog<void>(
+}) => showEteeloAdaptiveDialog<void>(
   context: context,
   barrierDismissible: false,
   builder: (_) => FacturationPaymentCorrectedDialog(
@@ -41,15 +41,14 @@ class FacturationPaymentCorrectedDialog extends StatelessWidget {
     final replacement = PermissionGate.allowsAccess(context, kTicketPrintAccess)
         ? replacementPaymentId
         : null;
-    return Dialog(
-      backgroundColor: AppColors.surfaceRaised,
-      surfaceTintColor: Colors.transparent,
+    return EteeloAdaptiveDialog(
       insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brCard),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: AppDimensions.facturationModalMaxWidth,
-        ),
+      maxWidth: AppDimensions.facturationModalMaxWidth,
+      // Plein écran (téléphone), le compte rendu reste au centre de l'écran ;
+      // centrée, la modale garde la hauteur de son contenu (facteurs 1).
+      child: Align(
+        widthFactor: 1,
+        heightFactor: 1,
         child: EteeloSubmitShortcut(
           onSubmit: null,
           onCancel: () => Navigator.of(context).pop(),

@@ -6,7 +6,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_calculator.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_input.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_grid_layout.dart';
-import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_row_frame.dart';
 import 'package:school_app_flutter/features/cotes/presentation/widgets/bulletin/cote_grid_rubrique.dart';
@@ -33,9 +32,7 @@ class CoteGridTotalZone extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (grid.hasGroupTotals)
-              Container(height: heights.group, color: AppColors.bleuProfond),
-            _HeaderLabel(grid: grid, height: heights.header),
+            SizedBox(height: grid.rowsTop),
             for (final row in grid.rows)
               coteRowReveal(row, switch (row) {
                 final CoteRubriqueRow r => CoteRubriqueStrip(
@@ -81,6 +78,7 @@ class CoteGridTotalZone extends StatelessWidget {
           max: formatCentis(scope),
           percent: roundedPercent(total, filled),
           ink: coteScoreInk(total, filled),
+          fails: coteScoreFails(total, filled),
           showMeter: !grid.metrics.phone,
           dense: grid.metrics.dense,
         ),
@@ -100,6 +98,7 @@ class CoteGridTotalZone extends StatelessWidget {
         max: formatCentis(part?.maxScope ?? 0),
         percent: part?.pct,
         ink: part == null ? null : coteScoreInk(part.total, part.maxFilled),
+        fails: part != null && coteScoreFails(part.total, part.maxFilled),
         showMeter: !grid.metrics.phone,
         dense: grid.metrics.dense,
       ),
@@ -122,7 +121,9 @@ class CoteGridTotalZone extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.fade,
               softWrap: false,
-              style: coteDarkRowStyle(strong: true),
+              style: coteDarkRowStyle(
+                strong: true,
+              ).copyWith(decoration: coteScoreMark(calc.total, calc.maxFilled)),
             ),
           ),
           if (!grid.metrics.phone) ...[
@@ -148,43 +149,6 @@ class CoteGridTotalZone extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-class _HeaderLabel extends StatelessWidget {
-  final CoteGridContext grid;
-  final double height;
-
-  const _HeaderLabel({required this.grid, required this.height});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      height: height,
-      padding: _padding,
-      alignment: Alignment.centerRight,
-      color: AppColors.bleuProfond,
-      child: Text(
-        _label(l10n).toUpperCase(),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTypography.labelSmall.copyWith(
-          color: AppColors.textOnDark,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  String _label(AppLocalizations l10n) {
-    if (grid.hasGroupTotals) return l10n.coteColumnAnnual;
-    if (grid.columns.length == 1 || grid.metrics.phone) {
-      return l10n.coteColumnTotal;
-    }
-    return l10n.coteColumnTotalScope(
-      CoteLabels.firstGroupShort(l10n, grid.classe, grid.columns),
     );
   }
 }

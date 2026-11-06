@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -15,28 +16,24 @@ class PayrollAmountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
+    // Le montant garde sa largeur ; le libellé prend le reste. Un `Flexible`
+    // à côté d'un `Expanded` bridait l'un et l'autre à la moitié.
+    child: LeadingTrailingRow(
+      gap: AppSpacing.sm,
+      leading: Text(
+        label,
+        style: AppTypography.bodyMedium.copyWith(
+          color: AppColors.textSecondary,
         ),
-        const SizedBox(width: AppSpacing.sm),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: AppTypography.labelLarge.copyWith(
-              color: ink,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
+      ),
+      trailing: Text(
+        value,
+        textAlign: TextAlign.end,
+        style: AppTypography.labelLarge.copyWith(
+          color: ink,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
-      ],
+      ),
     ),
   );
 }

@@ -30,10 +30,15 @@ class ChartLegend extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppDimensions.spacingXS),
-            Text(
-              entry.label,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
+            // Un nom plus long que la légende passe à la ligne au lieu de
+            // déborder : le `Wrap` borne chaque part à sa largeur, la `Row`
+            // ne la transmettait pas à son texte.
+            Flexible(
+              child: Text(
+                entry.label,
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
           ],

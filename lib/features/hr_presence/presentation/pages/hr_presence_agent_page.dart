@@ -27,6 +27,7 @@ import 'package:school_app_flutter/features/hr_presence/presentation/widgets/age
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/agent/hr_presence_month_body.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/widgets/states/hr_presence_results_error_state.dart';
 import 'package:school_app_flutter/features/hr_presence/presentation/helpers/hr_presence_context.dart';
+import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_agent_navigation.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -202,11 +203,11 @@ class _Actions extends StatelessWidget {
           EteeloButton.secondary(
             label: l10n.hrPresenceAgentOpenPayroll,
             icon: Icons.payments_outlined,
-            // La Paie en général, dans la coquille et par son adresse : la
-            // page de l'agent, poussée par-dessus la coquille, n'en voit pas
-            // la navigation. La Paie n'a pas encore d'adresse par agent.
+            // La fiche de paie de l'agent, sur le livre du même mois, par
+            // son adresse : `go` rebâtit la coquille sur le livre et pose la
+            // fiche par-dessus — Retour rend le livre, pas cette page.
             onPressed: () => context.go(
-              AppRoutesNames.homeSubMenuPath(MenuConstants.hrPayrollId),
+              PayrollAgentNavigation.addressOf(agentId: agentId, month: month),
             ),
             fullWidth: false,
           ),

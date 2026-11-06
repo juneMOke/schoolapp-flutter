@@ -20,9 +20,16 @@ import 'package:school_app_flutter/features/payroll/presentation/widgets/payroll
 import 'package:school_app_flutter/features/staff/presentation/widgets/states/staff_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Ce que l'adresse donne à la fiche : l'agent, et le livre d'entrée
-/// (`?mois-agent=`), qui fixe l'ordre de parcours.
-typedef PayrollAgentArgs = ({String agentId, String? month});
+/// Ce que l'adresse donne à la fiche : l'agent, le livre d'entrée
+/// (`?mois-agent=`), qui fixe l'ordre de parcours, le mois affiché s'il
+/// diffère (`?mois-vu=`) et le bulletin plutôt que le calcul
+/// (`?vue-agent=bulletin`).
+typedef PayrollAgentArgs = ({
+  String agentId,
+  String? month,
+  String? shownMonth,
+  bool payslip,
+});
 
 /// RH · Paie ▸ Paie ▸ un agent : toute sa situation de paie sur un écran,
 /// par-dessus le livre (`/home/paie/{agentId}?mois-agent=AAAA-MM`).
@@ -47,7 +54,7 @@ class PayrollAgentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<PayrollCubit>(
     create: (_) => getIt<PayrollCubit>()
-      ..showMonth(args.month)
+      ..showMonth(args.shownMonth ?? args.month)
       ..load(),
     child: HrClosingNotifier(
       onClosed: onClosed,
@@ -55,6 +62,8 @@ class PayrollAgentPage extends StatelessWidget {
         child: PayrollAgentScreen(
           agentId: args.agentId,
           entryMonth: args.month,
+          shownMonth: args.shownMonth,
+          payslip: args.payslip,
           shellSubMenuId: shellSubMenuId,
         ),
       ),
@@ -67,12 +76,20 @@ class PayrollAgentScreen extends StatelessWidget {
 
   /// `null` : le mois en cours.
   final String? entryMonth;
+
+  /// Le mois affiché à l'ouverture, s'il diffère du mois d'entrée (F5).
+  final String? shownMonth;
+
+  /// Le bulletin plutôt que le calcul à l'ouverture (F5).
+  final bool payslip;
   final String shellSubMenuId;
 
   const PayrollAgentScreen({
     super.key,
     required this.agentId,
     required this.entryMonth,
+    this.shownMonth,
+    this.payslip = false,
     this.shellSubMenuId = PayrollAgentNavigation.subMenuId,
   });
 
@@ -144,6 +161,8 @@ class PayrollAgentScreen extends StatelessWidget {
               state: state,
               agentId: agentId,
               entryMonth: entryMonth ?? state.currentMonth,
+              shownMonth: shownMonth,
+              payslip: payslip,
               origin: shellSubMenuId,
               stepper: stepper,
             ),

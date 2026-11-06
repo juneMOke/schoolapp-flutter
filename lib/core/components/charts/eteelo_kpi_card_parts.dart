@@ -241,11 +241,7 @@ class EteeloKpiCardFilledContent extends StatelessWidget {
             data.subline!,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: AppDimensions.insPaveSublineFontSize,
-              fontWeight: FontWeight.w400,
-              height: 1.45,
+            style: AppTextStyles.kpiPaveSubline.copyWith(
               color: AppColors.insInkSub,
             ),
           ),
@@ -295,14 +291,7 @@ class _FilledTrend extends StatelessWidget {
             trend.label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: AppDimensions.insPaveSublineFontSize,
-              fontWeight: FontWeight.w500,
-              height: 1.45,
-              color: color,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
+            style: AppTextStyles.kpiPaveTrend.copyWith(color: color),
           ),
         ),
       ],

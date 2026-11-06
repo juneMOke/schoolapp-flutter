@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/labels/audience_note.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_pickers.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/core/auth/module_access_registry.dart';
-import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
+import 'package:school_app_flutter/core/components/labels/audience_note.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/formatters/text_capitalization_formatters.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
-import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_case_status.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_category.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_sanction.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/disciplinary_severity.dart';
@@ -22,9 +12,11 @@ import 'package:school_app_flutter/features/attendances/domain/entities/student_
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_bloc.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_event.dart';
 import 'package:school_app_flutter/features/attendances/presentation/bloc/offline/disciplinary_case_offline_state.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create/disciplinary_create_date_field.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create/disciplinary_create_fields.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create/disciplinary_create_footer.dart';
+import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_create/disciplinary_create_header.dart';
 import 'package:school_app_flutter/features/attendances/presentation/widgets/disciplinary_case_dialog_shell.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
-import 'package:school_app_flutter/features/auth/presentation/widgets/session_write_gate.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class DisciplinaryCaseCreateDialog extends StatefulWidget {
@@ -95,63 +87,9 @@ class _DisciplinaryCaseCreateDialogState
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final baseTheme = Theme.of(context);
-    final picked = await showEteeloDatePicker(
-      context: context,
+    final picked = await pickDisciplinaryCaseDate(
+      context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        if (child == null) return const SizedBox.shrink();
-
-        final themed = baseTheme.copyWith(
-          colorScheme: baseTheme.colorScheme.copyWith(
-            primary: AppColors.disciplinaryDetailAccent,
-            onPrimary: AppColors.surface,
-            onSurface: AppColors.textPrimary,
-            surface: AppColors.surface,
-          ),
-          datePickerTheme: DatePickerThemeData(
-            backgroundColor: AppColors.surface,
-            surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                AppDimensions.sectionCardRadius,
-              ),
-            ),
-            headerBackgroundColor: AppColors.disciplinaryDetailAccentSoft,
-            headerForegroundColor: AppColors.disciplinaryDetailAccent,
-            dayForegroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return AppColors.surface;
-              }
-              return AppColors.textPrimary;
-            }),
-            dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return AppColors.disciplinaryDetailAccent;
-              }
-              return null;
-            }),
-            todayForegroundColor: const WidgetStatePropertyAll(
-              AppColors.disciplinaryDetailAccent,
-            ),
-            todayBackgroundColor: const WidgetStatePropertyAll(
-              AppColors.disciplinaryDetailAccentSoft,
-            ),
-            dayStyle: AppTextStyles.body,
-            yearStyle: AppTextStyles.body,
-          ),
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.disciplinaryDetailAccent,
-              textStyle: AppTextStyles.action,
-            ),
-          ),
-        );
-
-        return Theme(data: themed, child: child);
-      },
     );
     if (!mounted) return;
     if (picked != null && picked != _selectedDate) {
@@ -230,9 +168,6 @@ class _DisciplinaryCaseCreateDialogState
     DisciplinaryCaseOfflineState state,
   ) {
     final isLoading = state is DisciplinaryOfflineSaving;
-    // reduced-motion : les transitions du formulaire deviennent instantanées.
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return EteeloDialogBody(
       // En-tête + pied à boutons ≈ 210 dp incompressibles. Au-dessus de ce
       // seuil ils tiennent et restent ancrés ; en dessous — téléphone en
@@ -242,7 +177,7 @@ class _DisciplinaryCaseCreateDialogState
       minPinnedHeight: 260,
       // Le formulaire occupait déjà toute la hauteur offerte : on la garde.
       pinnedMainAxisSize: MainAxisSize.max,
-      header: _buildHeader(context, l10n, isLoading),
+      header: DisciplinaryCreateHeader(isLoading: isLoading),
       bodyPadding: const EdgeInsets.all(AppDimensions.spacingM),
       body: Form(
         key: _formKey,
@@ -253,483 +188,58 @@ class _DisciplinaryCaseCreateDialogState
             // ses commentaires ni son statut : l'agent le sait en l'écrivant.
             AudienceNote(l10n.disciplinaryCaseVisibleToParents),
             const SizedBox(height: AppDimensions.spacingM),
-            _buildStatusBlock(l10n),
+            const DisciplinaryCreateStatusBlock(),
             const SizedBox(height: AppDimensions.spacingM),
-            _buildCategoryField(l10n, isLoading),
-            const SizedBox(height: AppDimensions.spacingM),
-            _buildSeverityField(l10n),
-            const SizedBox(height: AppDimensions.spacingM),
-            Text(
-              l10n.disciplinaryCaseCreateDialogTitleField,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
+            DisciplinaryCreateCategoryField(
+              value: _category,
+              enabled: !isLoading,
+              onChanged: (value) => _onCategoryChanged(value, l10n),
             ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            TextFormField(
+            const SizedBox(height: AppDimensions.spacingM),
+            DisciplinaryCreateSeverityField(
+              value: _severity,
+              onChanged: (value) => setState(() => _severity = value),
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            DisciplinaryCreateTextField(
+              label: l10n.disciplinaryCaseCreateDialogTitleField,
+              hint: l10n.disciplinaryCaseCreateDialogTitleHint,
               controller: _titleController,
               enabled: !isLoading,
-              inputFormatters: const [SentenceCapitalizationInputFormatter()],
-              textCapitalization: TextCapitalization.sentences,
-              decoration: _inputDecoration(
-                hintText: l10n.disciplinaryCaseCreateDialogTitleHint,
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n.disciplinaryCaseCreateDialogRequiredFieldError;
-                }
-                return null;
-              },
             ),
             const SizedBox(height: AppDimensions.spacingM),
-            Text(
-              l10n.disciplinaryCaseCreateDialogContentField,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            TextFormField(
+            DisciplinaryCreateTextField(
+              label: l10n.disciplinaryCaseCreateDialogContentField,
+              hint: l10n.disciplinaryCaseCreateDialogContentHint,
               controller: _contentController,
               enabled: !isLoading,
-              inputFormatters: const [SentenceCapitalizationInputFormatter()],
-              textCapitalization: TextCapitalization.sentences,
-              decoration: _inputDecoration(
-                hintText: l10n.disciplinaryCaseCreateDialogContentHint,
-              ),
-              minLines: 3,
-              maxLines: 5,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n.disciplinaryCaseCreateDialogRequiredFieldError;
-                }
-                return null;
-              },
+              multiline: true,
             ),
             const SizedBox(height: AppDimensions.spacingM),
-            Text(
+            DisciplinaryCreateFieldLabel(
               l10n.disciplinaryCaseCreateDialogCaseDateField,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
             ),
             const SizedBox(height: AppDimensions.spacingXS),
-            AnimatedOpacity(
-              duration: reduceMotion ? Duration.zero : AppMotion.fast,
-              curve: AppMotion.outCurve,
-              opacity: isLoading ? 0.65 : 1,
-              child: InkWell(
-                onTap: isLoading ? null : () => _selectDate(context),
-                borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-                child: AnimatedContainer(
-                  duration: reduceMotion ? Duration.zero : AppMotion.medium,
-                  curve: AppMotion.outCurve,
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppDimensions.spacingM),
-                  decoration: BoxDecoration(
-                    color: AppColors.disciplinaryDetailAccentSoft,
-                    borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-                    border: Border.all(
-                      color: AppColors.disciplinaryDetailAccent.withValues(
-                        alpha: isLoading ? 0.12 : 0.2,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_today_outlined,
-                        size: AppDimensions.detailMiniIconSize,
-                        color: AppColors.disciplinaryDetailAccent,
-                      ),
-                      const SizedBox(width: AppDimensions.spacingS),
-                      Expanded(
-                        child: AnimatedSwitcher(
-                          duration: reduceMotion
-                              ? Duration.zero
-                              : AppMotion.fast,
-                          switchInCurve: AppMotion.outCurve,
-                          switchOutCurve: AppMotion.inCurve,
-                          child: Text(
-                            _formatSelectedDate(context),
-                            key: ValueKey(_selectedDate),
-                            style: AppTextStyles.bodyStrong.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.expand_more_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            DisciplinaryCreateDateTile(
+              date: _selectedDate,
+              isLoading: isLoading,
+              onTap: () => _selectDate(context),
             ),
             const SizedBox(height: AppDimensions.spacingM),
-            _buildSanctionField(l10n, isLoading),
+            DisciplinaryCreateSanctionField(
+              value: _sanction,
+              enabled: !isLoading,
+              onChanged: (value) => setState(() => _sanction = value),
+            ),
           ],
         ),
       ),
       footer: [
-        Container(
-          padding: const EdgeInsets.all(AppDimensions.spacingM),
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          // Wrap (pas Row) : sur téléphone étroit, si les deux boutons ne
-          // tiennent pas sur une ligne, le bouton principal passe dessous au
-          // lieu de déborder.
-          child: Wrap(
-            alignment: WrapAlignment.end,
-            spacing: AppDimensions.spacingS,
-            runSpacing: AppDimensions.spacingS,
-            children: [
-              Semantics(
-                label: l10n.cancel,
-                button: true,
-                child: TextButton(
-                  onPressed: isLoading ? null : () => Navigator.pop(context),
-                  child: Text(
-                    l10n.cancel,
-                    style: AppTextStyles.action.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-              // Le dialog peut rester ouvert quand la permission redescend en
-              // cours de session (refresh) : garder la porte ne suffit pas, il
-              // faut garder le geste. Même raison que pour le gel READ_ONLY,
-              // dont le raisonnement est ici étendu aux droits.
-              PermissionGate.access(
-                kDisciplineInstructAccess,
-                child: SessionWriteGate(
-                  child: Semantics(
-                    label: l10n.disciplinaryCaseCreateDialogSubmitAction,
-                    button: true,
-                    enabled: !isLoading,
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.disciplinaryDetailAccent,
-                        foregroundColor: AppColors.surface,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimensions.spacingM,
-                          vertical: AppDimensions.spacingS,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppDimensions.spacingM,
-                          ),
-                        ),
-                      ),
-                      onPressed: isLoading ? null : () => _submit(context),
-                      icon: AnimatedSwitcher(
-                        duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                        switchInCurve: AppMotion.outCurve,
-                        switchOutCurve: AppMotion.inCurve,
-                        child: isLoading
-                            ? const SizedBox(
-                                key: ValueKey('loading-icon'),
-                                width: AppDimensions
-                                    .disciplinaryCreateSubmitSpinnerSize,
-                                height: AppDimensions
-                                    .disciplinaryCreateSubmitSpinnerSize,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.surface,
-                                  ),
-                                ),
-                              )
-                            : const Icon(
-                                Icons.add_task_outlined,
-                                key: ValueKey('submit-icon'),
-                              ),
-                      ),
-                      label: AnimatedSwitcher(
-                        duration: reduceMotion ? Duration.zero : AppMotion.fast,
-                        switchInCurve: AppMotion.outCurve,
-                        switchOutCurve: AppMotion.inCurve,
-                        child: Text(
-                          isLoading
-                              ? l10n.disciplinaryCaseCreateDialogCreatingMessage
-                              : l10n.disciplinaryCaseCreateDialogSubmitAction,
-                          key: ValueKey(isLoading),
-                          style: AppTextStyles.action,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        DisciplinaryCreateFooter(
+          isLoading: isLoading,
+          onSubmit: () => _submit(context),
         ),
       ],
     );
   }
-
-  Widget _fieldLabel(String label) => Text(
-    label,
-    style: AppTextStyles.caption.copyWith(
-      color: AppColors.textSecondary,
-      fontWeight: FontWeight.w600,
-    ),
-  );
-
-  Widget _buildStatusBlock(AppLocalizations l10n) {
-    const open = DisciplinaryCaseStatus.open;
-    final color = open.getColor();
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceAlt,
-        borderRadius: BorderRadius.circular(AppDimensions.sectionCardRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _fieldLabel(l10n.disciplinaryStatusAtCreationLabel),
-          const SizedBox(height: AppDimensions.spacingS),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.disciplinaryStatusPillPaddingH,
-              vertical: AppDimensions.disciplinaryStatusPillPaddingV,
-            ),
-            decoration: BoxDecoration(
-              color: color.withValues(
-                alpha: AppDimensions.disciplinaryTintAlpha,
-              ),
-              borderRadius: AppRadius.brPill,
-              border: Border.all(
-                color: color.withValues(
-                  alpha: AppDimensions.disciplinaryTintBorderAlpha,
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  open.getIcon(),
-                  size: AppDimensions.disciplinaryStatusPillIconSize,
-                  color: color,
-                ),
-                const SizedBox(width: AppDimensions.spacingXS),
-                Text(
-                  open.getDisplayName(l10n),
-                  style: AppTextStyles.badge.copyWith(color: color),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingS),
-          Text(
-            l10n.disciplinaryStatusAtCreationHint,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryField(AppLocalizations l10n, bool isLoading) {
-    const categories = [
-      DisciplinaryCategory.disruptiveBehavior,
-      DisciplinaryCategory.lateness,
-      DisciplinaryCategory.repeatedLateness,
-      DisciplinaryCategory.unjustifiedAbsence,
-      DisciplinaryCategory.insolence,
-      DisciplinaryCategory.cheating,
-      DisciplinaryCategory.fighting,
-      DisciplinaryCategory.dressCodeViolation,
-      DisciplinaryCategory.talkingInClass,
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _fieldLabel(l10n.disciplinaryFieldCategory),
-        const SizedBox(height: AppDimensions.spacingXS),
-        EteeloSelectInput<DisciplinaryCategory>(
-          // Le libellé reste porté par `_fieldLabel`, comme pour les champs
-          // texte voisins : la modale garde UN seul style d'intitulé.
-          label: l10n.disciplinaryFieldCategory,
-          hideLabel: true,
-          value: _category,
-          enabled: !isLoading,
-          minWidth: 0,
-          items: [
-            for (final category in categories)
-              EteeloSelectItem<DisciplinaryCategory>(
-                value: category,
-                label: category.getDisplayName(l10n),
-              ),
-          ],
-          onChanged: (value) {
-            if (value != null) _onCategoryChanged(value, l10n);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSeverityField(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _fieldLabel(l10n.disciplinaryFieldSeverity),
-        const SizedBox(height: AppDimensions.spacingXS),
-        SegmentedTabFilter<DisciplinarySeverity>(
-          options: [
-            SegmentedTabOption(
-              label: DisciplinarySeverity.minor.getDisplayName(l10n),
-              value: DisciplinarySeverity.minor,
-            ),
-            SegmentedTabOption(
-              label: DisciplinarySeverity.major.getDisplayName(l10n),
-              value: DisciplinarySeverity.major,
-            ),
-            SegmentedTabOption(
-              label: DisciplinarySeverity.serious.getDisplayName(l10n),
-              value: DisciplinarySeverity.serious,
-            ),
-          ],
-          selected: _severity,
-          onSelected: (value) => setState(() => _severity = value),
-          // Modale étroite : onglets équilibrés pleine largeur (pas de débordement).
-          expand: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSanctionField(AppLocalizations l10n, bool isLoading) {
-    const sanctions = [
-      DisciplinarySanction.unknown,
-      DisciplinarySanction.oralWarning,
-      DisciplinarySanction.writtenWarning,
-      DisciplinarySanction.detention,
-      DisciplinarySanction.parentsSummoned,
-      DisciplinarySanction.temporaryExclusion,
-      DisciplinarySanction.disciplinaryCouncil,
-      DisciplinarySanction.permanentExclusion,
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _fieldLabel(l10n.disciplinaryFieldSanction),
-        const SizedBox(height: AppDimensions.spacingXS),
-        EteeloSelectInput<DisciplinarySanction>(
-          label: l10n.disciplinaryFieldSanction,
-          hideLabel: true,
-          value: _sanction,
-          enabled: !isLoading,
-          minWidth: 0,
-          items: [
-            for (final sanction in sanctions)
-              EteeloSelectItem<DisciplinarySanction>(
-                value: sanction,
-                label: sanction.getDisplayName(l10n),
-              ),
-          ],
-          onChanged: (value) =>
-              setState(() => _sanction = value ?? DisciplinarySanction.unknown),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHeader(
-    BuildContext context,
-    AppLocalizations l10n,
-    bool isLoading,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.spacingM),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.disciplinaryDetailAccentSoft,
-            AppColors.disciplinaryDetailTealSoft,
-          ],
-        ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(AppDimensions.sectionCardRadius),
-          topRight: Radius.circular(AppDimensions.sectionCardRadius),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: AppDimensions.spacingXL + AppDimensions.spacingXS,
-            height: AppDimensions.spacingXL + AppDimensions.spacingXS,
-            decoration: BoxDecoration(
-              color: AppColors.surface.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-            ),
-            child: const Icon(
-              Icons.gavel_outlined,
-              size: AppDimensions.detailHeaderIconSize,
-              color: AppColors.disciplinaryDetailAccent,
-            ),
-          ),
-          const SizedBox(width: AppDimensions.spacingS),
-          Expanded(
-            child: Text(
-              l10n.disciplinaryCaseCreateDialogTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.sectionTitle.copyWith(
-                color: AppColors.disciplinaryDetailAccent,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          if (!isLoading)
-            IconButton(
-              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.pop(context),
-            ),
-        ],
-      ),
-    );
-  }
-
-  // Pas de `labelText` : chaque champ porte déjà un libellé au-dessus
-  // (`_fieldLabel` / Text), donc le label flottant ferait doublon.
-  InputDecoration _inputDecoration({String? hintText}) {
-    return InputDecoration(
-      hintText: hintText,
-      filled: true,
-      fillColor: AppColors.surface,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        borderSide: const BorderSide(color: AppColors.border),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.spacingM),
-        borderSide: const BorderSide(color: AppColors.disciplinaryDetailAccent),
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingM,
-        vertical: AppDimensions.spacingM,
-      ),
-    );
-  }
-
-  String _formatSelectedDate(BuildContext context) =>
-      MaterialLocalizations.of(context).formatMediumDate(_selectedDate);
 }

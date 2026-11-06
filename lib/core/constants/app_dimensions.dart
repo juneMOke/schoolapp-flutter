@@ -101,6 +101,15 @@ class AppDimensions {
   static const coursReleveModalMaxWidth = 520.0;
   static const enrollmentDuplicateDialogMaxWidth = 480.0;
   static const boutiqueDialogMaxWidth = 420.0;
+
+  // Fiche d'une vente (boutique) : cartes, gestes, bandeau du montant.
+  static const boutiqueSaleCardRadius = 14.0;
+  static const boutiqueSaleActionHeight = 52.0;
+  static const boutiqueSaleActionIconSize = 20.0;
+  static const boutiqueSaleSpinnerSize = 18.0;
+  static const boutiqueSaleNoticeIconSize = 17.0;
+  static const boutiqueSaleBannerIconSize = 40.0;
+  static const boutiqueSaleInfoRowPaddingV = 6.0;
   static const boutiqueBeneficiaryDialogMaxWidth = 520.0;
   // Part de la hauteur d'écran qu'une modale de détail peut occuper.
   static const dialogMaxHeightRatio = 0.88;
@@ -225,6 +234,10 @@ class AppDimensions {
   /// lignes clé/valeur au-dessus desquelles elle s'aligne.
   static const financeRowIconSize = 18.0;
 
+  /// La flèche de retour de la fiche d'un élève (Résultats, vue focus) : le
+  /// glyphe garde sa chasse, la cible fait [minTouchTarget].
+  static const resultatsFocusBackIconSize = 18.0;
+
   // Popin "Rechercher un parent" (étape Tuteurs de l'inscription).
   static const guardianSearchModalMaxWidth = 560.0;
 
@@ -317,10 +330,6 @@ class AppDimensions {
   static const statsCardIconBadgeRadius = 8.0;
   static const statsCardIconSize = 16.0;
 
-  /// Largeur de carte à partir de laquelle des actions posées « à côté »
-  /// restent à droite du titre ([EteeloStatsCard.actionsBeside]) ; en deçà,
-  /// elles passent dessous.
-  static const statsCardActionsBesideMinWidth = 360.0;
   static const enrollmentStatsChartBottomTitleHeight = 28.0;
   static const enrollmentStatsChartVerticalLabelMaxExtent = 84.0;
   static const enrollmentStatsPeriodFilterHeight = 38.0;
@@ -709,10 +718,6 @@ class AppDimensions {
   static const saisieFocusSideBySideMaxWidth = 880.0;
   static const presenceMarkAvatarSize = 44.0;
 
-  /// Largeur sous laquelle l'en-tête d'une personne du registre range son
-  /// badge (« VAC · H ») sous le nom : avatar, nom lisible et badge ne
-  /// tiennent plus sur une ligne.
-  static const presencePersonHeadingInlineBadgeMinWidth = 220.0;
   static const presenceMarkMedallionSize = 46.0;
   static const presenceMarkMedallionIconSize = 24.0;
 
@@ -765,10 +770,6 @@ class AppDimensions {
   static const presenceProfileHeaderAccentWidth = 5.0;
   static const presenceProfileRingWidth = 2.0;
   static const presenceProfileHeaderRingWidth = 3.0;
-
-  /// Sous cette largeur, une ligne de profil range sa barre et ses taux sous
-  /// le nom.
-  static const presenceProfileRowInlineMinWidth = 640.0;
 
   /// La règle du profil, à droite de l'en-tête de fiche : lisible sans
   /// s'étirer.
@@ -893,17 +894,18 @@ class AppDimensions {
   static const classRecapWatchDot = 8.0;
 
   // ── RH ▸ Paie ─────────────────────────────────────────────────────────────
-  // Le livre défile horizontalement sous 1024 dp — 220 d'agent, les montants,
-  // 136 de versement au moins, l'œil et le crayon, 16 de marges ; les
-  // colonnes de montant sont alignées à droite, en chiffres tabulaires.
-  static const payrollLedgerMinWidth = 1124.0;
+  // Le livre défile de côté sous sa largeur plancher — 208 d'agent, les
+  // montants, 120 de versement au moins, l'œil et le crayon, 16 de marges ;
+  // les colonnes de montant sont alignées à droite, en chiffres tabulaires.
+  // Sous 1 112 dp : la place qu'un poste de 1 440 laisse au livre, barre
+  // latérale dépliée (à 1 124, l'œil de fin de ligne y passait hors champ).
+  static const payrollLedgerMinWidth = 1096.0;
   static const payrollDeductionTableMinWidth = 560.0;
   static const payrollDeductionColCode = 104.0;
   static const payrollDeductionColCurrency = 72.0;
   static const payrollDeductionColDefault = 120.0;
   static const payrollVarsAmountField = 140.0;
-  static const payrollVarsAmountRowMinWidth = 300.0;
-  static const payrollColAgent = 220.0;
+  static const payrollColAgent = 208.0;
   static const payrollColAmount = 100.0;
 
   /// La dernière colonne du livre : l'œil qui ouvre la fiche, et le crayon
@@ -933,8 +935,11 @@ class AppDimensions {
   static const payrollDashStaffMinWidth = 960.0 + minTouchTarget;
   static const payrollCircuitLink = 14.0;
 
-  /// Le liseré tricolore sous le bandeau de paie.
-  static const payrollBannerStripe = 3.0;
+  /// Le liseré tricolore sous le bandeau kuba (`KubaBanner`).
+  static const kubaBannerStripe = 3.0;
+
+  /// Le liseré tricolore sous le bandeau de paie : celui du bandeau kuba.
+  static const payrollBannerStripe = kubaBannerStripe;
 
   /// Le carreau d'icône d'un bandeau du livre (arriérés, geste, versement).
   static const payrollCalloutIcon = 40.0;
@@ -957,17 +962,44 @@ class AppDimensions {
   static const payrollAgentMonthTileMin = 56.0;
 
   // ── Photo de l'élève (spec « Photo de l'élève », 1 px = 1 dp) ────────────
-  /// Le panneau de capture : largeur maximale, rayon, et en dessous de quelle
-  /// largeur d'écran il passe en plein écran.
+  /// Le panneau de capture : largeur maximale et rayon. Le plein écran se
+  /// règle dans `AppBreakpoints.photoCaptureFullscreenMax`.
   static const photoPanelMaxWidth = 580.0;
   static const photoPanelRadius = 22.0;
-  static const photoPanelFullscreenBelow = 600.0;
   static const photoViewfinderRadius = 14.0;
   static const photoViewfinderReference = 1000.0;
+
+  /// Le viseur ne descend pas sous cette hauteur : en deçà, le panneau défile
+  /// plutôt que de montrer un timbre-poste.
+  static const photoViewfinderMinHeight = 150.0;
+
+  /// Ce que le panneau de capture prend autour du viseur, en hauteur : marges
+  /// (12 + 20), en-tête (48, la croix ; ~60 au texte ×1,3), deux écarts de 12
+  /// et le déclencheur (68) — arrondi au-dessus pour le texte agrandi.
+  static const photoCaptureChromeReserve = 190.0;
+
+  /// Ce que la séance prend autour du viseur, en hauteur : marges de page
+  /// (2 × 24) et du panneau (2 × 16), l'élève (52 ; ~64 au texte ×1,3), la
+  /// barre de progression et ses écarts (4 + 3 × 12), le déclencheur (68),
+  /// et la ligne « Importer » (8 + 48) — pour qu'elle reste visible aussi.
+  static const photoSessionShootChromeReserve = 320.0;
+
+  /// La même réserve en paysage (`AppBreakpoints
+  /// .photoSessionLandscapeMaxHeight`) : l'élève et les gestes passent à côté
+  /// du viseur, il ne reste que les marges de page, resserrées (2 × 16), et
+  /// celles du panneau (2 × 16).
+  static const photoSessionLandscapeChromeReserve = 64.0;
+
+  /// La colonne des gestes en paysage, au moins : Passer · déclencheur ·
+  /// Absent sur une ligne, au texte ×1,3. Le viseur prend le reste.
+  static const photoSessionLandscapeControlsMin = 320.0;
   static const photoShutter = 68.0;
   static const photoShutterRing = 4.0;
-  static const photoDarkButton = 44.0;
-  static const photoCloseButton = 40.0;
+
+  /// Les boutons des panneaux sombres : 48 dp au doigt, 40 à la souris (la
+  /// densité compacte du poste en retire 8, cf. `TapTargetHeight`).
+  static const photoDarkButton = minTouchTarget;
+  static const photoCloseButton = minTouchTarget;
   static const photoCloseRadius = 12.0;
   static const photoGuideStroke = 2.5;
 
@@ -1003,12 +1035,15 @@ class AppDimensions {
   static const photoSessionShootMin = 520.0;
   static const photoSessionQueueMin = 300.0;
   static const photoSessionQueueMax = 400.0;
-  static const photoSessionStackBelow = 840.0;
   static const photoSessionHeaderAvatar = 44.0;
   static const photoSessionQueueRow = 56.0;
   static const photoSessionQueueAvatar = 36.0;
   static const photoSessionCurrentRule = 4.0;
   static const photoSessionFlashPreview = 160.0;
+
+  /// Le plancher de la photo du flash : c'est sur elle qu'on décide
+  /// « Reprendre ». Dans un viseur bas, le texte cède avant elle.
+  static const photoSessionFlashPreviewMin = 96.0;
   static const photoSessionSummaryMedallion = 72.0;
   static const photoSessionSummaryAvatar = 40.0;
   static const photoSessionClassMedallion = 46.0;
@@ -1016,8 +1051,10 @@ class AppDimensions {
   static const photoSessionCountTile = 140.0;
 
   /// La hauteur que la file laisse à l'en-tête et aux marges : elle défile
-  /// dans « 100 % de l'écran moins 260 ».
+  /// dans « 100 % de l'écran moins 260 », jamais sous
+  /// [photoSessionQueueMinHeight] — son en-tête et quatre élèves et demi.
   static const photoSessionQueueReserve = 260.0;
+  static const photoSessionQueueMinHeight = 320.0;
 
   /// Le badge caméra de l'avatar d'en-tête : au moins 20 dp, sinon 42 % de
   /// l'avatar ; et l'écart du contour pointillé.
@@ -1174,10 +1211,6 @@ class AppDimensions {
   static const communicationStudentRowMinHeight = 48.0;
 
   // ── RH · Personnel — tableau de bord et fichier ──
-  /// Au-delà, « Par catégorie » et « Parité » se tiennent côte à côte —
-  /// mesuré sur la largeur reçue : le palier où une fiche cesse d'être
-  /// compacte laisse ~370 dp à chaque carte, assez pour ses barres.
-  static const hrDashboardTwoColumnsMinWidth = AppBreakpoints.detailCompactMax;
 
   static const hrRosterSortWidth = 220.0;
   static const hrCategoryBarHeight = 10.0;
@@ -1187,11 +1220,6 @@ class AppDimensions {
   static const hrLegendSwatchRadius = 3.0;
   static const hrBarLabelWidth = 132.0;
 
-  /// Sous cette largeur reçue, une ligne de « Par catégorie » passe sur deux
-  /// niveaux (libellé et compte, puis la barre) : à côté d'un libellé de
-  /// [hrBarLabelWidth] et d'un compte au texte ×1,3, la barre n'avait plus
-  /// de place — le palier où un tableau se lit déjà en téléphone.
-  static const hrCategoryRowStackedMaxWidth = AppBreakpoints.dataTablePhoneMax;
   static const hrInsightIconSize = 20.0;
 
   /// RH · Présences : le texte d'une alerte de tableau de bord ne s'étire pas
@@ -1251,6 +1279,30 @@ class AppDimensions {
   static const coteCourseMarkHeight = 30.0;
   static const coteLegendSwatch = 14.0;
   static const coteHeaderKpiMinWidth = 86.0;
+
+  /// Le trait d'une case en erreur, en focus ou modifiée : plus appuyé que le
+  /// filet d'une case au repos.
+  static const coteCellStrongBorder = 1.5;
+
+  /// Le pointillé d'une case vide : tiret et blanc.
+  static const coteCellDash = 4.0;
+  static const coteCellDashGap = 3.0;
+
+  /// Le pointillé, plus serré, de la pastille de légende.
+  static const coteLegendDash = 3.0;
+  static const coteLegendDashGap = 2.0;
+
+  /// Le trait vertical de l'élève en cours, dans la liste : celui de la
+  /// marque d'un cours.
+  static const coteStudentCurrentMark = coteCourseMarkWidth;
+
+  /// Le glissement d'une ligne qu'un dépliage révèle.
+  static const coteRowRevealOffset = 6.0;
+
+  /// Les icônes en ligne de la saisie (état d'enregistrement, pied du
+  /// bulletin) et celle du champ de recherche.
+  static const coteInlineIconSize = 16.0;
+  static const coteSearchIconSize = 18.0;
   static const coteHeaderAvatar = 44.0;
   static const coteProgressMaxWidth = 220.0;
   static const coteProgressHeight = 6.0;

@@ -18,6 +18,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table_cards.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_profile.dart';
 import 'package:school_app_flutter/features/hr_presence/domain/entities/hr_attendance_agent_year.dart';
@@ -179,6 +182,22 @@ void main() {
     expect(find.byType(PresenceMonthCalendar), findsOneWidget);
   });
 
+  testWidgets('sur un téléphone, la carte d\'un mois l\'ouvre et se dit en '
+      'une phrase', (tester) async {
+    final mocks = await pump(tester, yearly: true, size: const Size(360, 740));
+
+    final card = find.ancestor(
+      of: find.text('septembre 2026'),
+      matching: find.byType(InkWell),
+    );
+    expect(tester.getSemantics(card.first).label, startsWith('septembre 2026'));
+    await tester.ensureVisible(card.first);
+    await tester.tap(card.first);
+    await tester.pump();
+    await tester.pump();
+    verify(() => mocks.month('a-1', month: '2026-09')).called(1);
+  });
+
   testWidgets('la fiche mensuelle en une feuille : la règle chiffrée, et le '
       'détail de chaque jour dans le calendrier', (tester) async {
     await pump(tester);
@@ -234,11 +253,43 @@ void main() {
   testAtReferenceFormats('la fiche mensuelle tient', (tester, format) async {
     await pump(tester, size: null);
     expect(find.byType(PresenceMonthCalendar), findsOneWidget);
+    // Un jour passé s'ouvre au doigt : sa case garde 48 dp de large, même
+    // sur le téléphone (48,4 dp à 360).
+    final days = find.descendant(
+      of: find.byType(PresenceMonthCalendar),
+      matching: find.byType(InkWell),
+    );
+    expect(days, findsWidgets);
+    for (final day in days.evaluate()) {
+      expect(
+        (day.renderObject! as RenderBox).size.width,
+        greaterThanOrEqualTo(AppDimensions.minTouchTarget),
+      );
+    }
   });
 
   testAtReferenceFormats('la fiche annuelle tient', (tester, format) async {
     await pump(tester, size: null, yearly: true);
-    expect(find.byType(HrPresenceYearList), findsOneWidget);
+    final year = find.byType(HrPresenceYearList);
+    expect(year, findsOneWidget);
+    // Sous `dataTableCardsMax`, une carte par mois : plus rien ne défile de
+    // côté (la table de 880 dp défilait de 584 dp à 360).
+    if (tester.getSize(year).width < AppBreakpoints.dataTableCardsMax) {
+      expect(
+        find.descendant(
+          of: year,
+          matching: find.byType(EteeloColumnTableCards),
+        ),
+        findsOneWidget,
+      );
+      for (final element
+          in find
+              .descendant(of: year, matching: find.byType(Scrollable))
+              .evaluate()) {
+        final state = (element as StatefulElement).state as ScrollableState;
+        expect(state.widget.axisDirection, isNot(AxisDirection.right));
+      }
+    }
   });
 
   StaffAttendanceSnapshot attendanceOf({

@@ -1,9 +1,22 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:bloc_test/bloc_test.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
+import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
+import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
+import 'package:school_app_flutter/router/boutique_sale_routes.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/dashboard/boutique_sale_row.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
@@ -19,6 +32,10 @@ class _MockGetDetail extends Mock implements GetBoutiqueSaleDetailUseCase {}
 class _MockMarkPrinted extends Mock implements MarkSaleTicketPrintedUseCase {}
 
 class _MockClaimReceipt extends Mock implements ClaimSaleReceiptUseCase {}
+
+class _MockAcademicYearBloc
+    extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
+    implements AcademicYearContextBloc {}
 
 BoutiqueSaleLocalModel _sale({
   String? collectedByName = 'Mbala Céline',
@@ -283,6 +300,14 @@ void main() {
       find.textContaining('numéro n\'a pas été communiqué'),
       findsOneWidget,
     );
+    // L'encre ambre : l'ambre de fond ne se lit pas sur son voile (2,5:1).
+    expect(
+      tester
+          .widget<Text>(find.textContaining('numéro n\'a pas été communiqué'))
+          .style
+          ?.color,
+      AppColors.warningInk,
+    );
     // La référence provisoire est bien ce qui s'affiche en attendant.
     expect(find.textContaining('PROV-'), findsWidgets);
   });
@@ -326,6 +351,39 @@ void main() {
     );
 
     expect(find.textContaining('pas encore partie au serveur'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.textContaining('pas encore partie au serveur'))
+          .style
+          ?.color,
+      AppColors.warningInk,
+    );
+  });
+
+  testWidgets('pendant la lecture : le squelette partagé, pas un spinner', (
+    tester,
+  ) async {
+    final pending = Completer<Either<Failure, SaleDetail>>();
+    when(() => getDetail(any())).thenAnswer((_) => pending.future);
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('fr'),
+        home: BoutiqueSaleDetailPage(
+          saleId: 'aaaabbbb-cccc-dddd',
+          levelLabels: {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(EteeloListSkeleton), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    pending.complete(Right(_detail()));
+    await tester.pumpAndSettle();
+    expect(find.byType(EteeloListSkeleton), findsNothing);
   });
 
   testWidgets('vente disparue : ce n\'est PAS une panne de lecture', (
@@ -358,5 +416,108 @@ void main() {
     final payer = tester.getTopLeft(find.text('Ndombo Lelo Willy'));
     final total = tester.getTopLeft(find.text('TOTAL À ENCAISSER'));
     expect(total.dy, lessThan(payer.dy));
+  });
+
+  testWidgets('Ctrl+P imprime le ticket d\'une vente lue, et seulement', (
+    tester,
+  ) async {
+    PageActionShortcut printing() => tester.widget<PageActionShortcut>(
+      find.byWidgetPredicate(
+        (w) => w is PageActionShortcut && w.action == PageAction.print,
+      ),
+    );
+
+    await pumpDetail(tester, detail: _detail());
+    expect(printing().onInvoke, isNotNull);
+
+    // Contre-épreuve : une vente disparue n'a rien à imprimer — Ctrl+P
+    // passe alors au navigateur.
+    await tester.pumpWidget(const SizedBox());
+    await pumpDetail(tester);
+    expect(printing().onInvoke, isNull);
+  });
+
+  group('son adresse', () {
+    late _MockAcademicYearBloc academicYear;
+    late GoRouter router;
+
+    setUp(() {
+      academicYear = _MockAcademicYearBloc();
+      when(() => academicYear.state).thenReturn(
+        const AcademicYearContextState(
+          status: AcademicYearContextLoadStatus.success,
+          context: AcademicYearContext(
+            academicYear: AcademicYear(
+              id: 'ay-1',
+              name: '2026-2027',
+              current: true,
+            ),
+            schoolLevelGroups: [],
+          ),
+        ),
+      );
+    });
+
+    Future<void> open(WidgetTester tester, String location) async {
+      await tester.binding.setSurfaceSize(const Size(900, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      when(() => getDetail(any())).thenAnswer((_) async => Right(_detail()));
+      router = GoRouter(
+        initialLocation: location,
+        routes: [
+          GoRoute(
+            path: '/home/:subMenuId',
+            builder: (_, state) =>
+                Text('écran ${state.pathParameters['subMenuId']}'),
+            routes: [BoutiqueSaleRoutes.sale()],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        BlocProvider<AcademicYearContextBloc>.value(
+          value: academicYear,
+          child: MaterialApp.router(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('fr'),
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('un lien la rouvre par son seul identifiant, sans extra', (
+      tester,
+    ) async {
+      await open(
+        tester,
+        '/home/${MenuConstants.boutiqueDashboardId}/vente/aaaabbbb-cccc-dddd',
+      );
+
+      verify(() => getDetail('aaaabbbb-cccc-dddd')).called(1);
+      expect(find.text('Polo Lacoste'), findsOneWidget);
+
+      // Retour : le tableau de bord, rebâti sous la fiche.
+      await tester.tap(find.byTooltip('Retour au tableau de bord'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('écran ${MenuConstants.boutiqueDashboardId}'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sous un autre écran, l\'adresse retombe sur l\'écran', (
+      tester,
+    ) async {
+      await open(tester, '/home/${MenuConstants.hrPayrollId}/vente/x');
+
+      verifyNever(() => getDetail(any()));
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/home/${MenuConstants.hrPayrollId}',
+      );
+    });
   });
 }

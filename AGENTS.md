@@ -583,6 +583,7 @@ pas dans une passe suivante. Détail des constats : `MOBILE_RESPONSIVE_PLAN.md`.
 | Format | Taille | Ce qui casse d'habitude |
 |---|---|---|
 | Téléphone | 360×740 | lignes `Row` qui débordent, tableaux comprimés, modales étroites |
+| Téléphone paysage | 740×360 | en-tête figé et barre basse qui mangent la hauteur, bascule passée sous le pli, action trop large à côté d'un résumé |
 | 7″ portrait / paysage | 600×960 · 960×600 | seuil 600 des cartes, faible hauteur, double barre de titre |
 | 10″ portrait / paysage | 800×1280 · 1280×800 | 1280 − 280 de barre latérale ≈ 1000 dp de contenu |
 | Poste | 1440 · 1920 | lignes de lecture trop longues, contenu non plafonné |
@@ -616,6 +617,11 @@ l'app) : aucune hauteur fixe sur un bloc qui contient du texte, une hauteur
   `AppBreakpoints.dataTableCardsMax` — tout ce que porte l'en-tête (tri,
   case « tout ») doit avoir un équivalent en mode cartes. Un tableau large qui
   défile de côté porte une `Scrollbar` visible.
+  `EteeloColumnTable(cardsBelow:)` tire ses cartes des lignes **par leur
+  type** : son `row:` rend l'`EteeloColumnTableRow` elle-même (une fonction
+  `_row(context, …)`, au besoin sous `Column`/`Semantics`), jamais un widget
+  `_XxxRow` qui la bâtirait dans son `build` — celui-là resterait en colonnes
+  comprimées sur le téléphone, sans erreur.
 - **Graphiques** : `ChartHeight` ; `SideTitles` avec `interval` explicite.
   Bandes KPI : `EteeloKpiBand` (largeur de carte calculée, pas fixée).
 

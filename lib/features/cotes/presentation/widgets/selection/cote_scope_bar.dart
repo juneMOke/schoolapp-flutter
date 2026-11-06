@@ -176,30 +176,39 @@ class _Chip extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.brPill,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: AppDimensions.minTouchTarget,
-          ),
-          child: Center(
-            widthFactor: 1,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: AppRadius.brPill,
-                border: Border.all(color: border),
-              ),
-              child: Text(
-                label,
-                style: AppTypography.labelMedium.copyWith(
-                  color: ink,
-                  fontWeight: FontWeight.w600,
+      // Le Material porte le fond de la puce (Ink) : survol et focus se
+      // peignent par-dessus, et non sous un Container opaque.
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppRadius.brPill,
+          // Sur la puce choisie, pleine d'accent, le voile bleu ardoise
+          // disparaît : voile blanc cassé.
+          focusColor: selected ? AppColors.stateFocusOnDark : null,
+          hoverColor: selected ? AppColors.stateHoverOnDark : null,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppDimensions.minTouchTarget,
+            ),
+            child: Center(
+              widthFactor: 1,
+              child: Ink(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: surface,
+                  borderRadius: AppRadius.brPill,
+                  border: Border.all(color: border),
+                ),
+                child: Text(
+                  label,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: ink,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

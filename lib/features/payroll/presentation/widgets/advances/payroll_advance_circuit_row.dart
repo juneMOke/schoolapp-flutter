@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/layout/leading_trailing_row.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
@@ -86,47 +88,39 @@ class _CircuitRowState extends State<PayrollAdvanceCircuitRow> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelLarge,
-                    ),
-                    Text(
-                      details.join(' · '),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
+          LeadingTrailingRow(
+            gap: AppSpacing.sm,
+            leading: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EteeloOverflowText(name, style: AppTypography.labelLarge),
+                Text(
+                  details.join(' · '),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      MoneyFormat.format(request.amount),
-                      style: AppTypography.labelLarge.copyWith(
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    Text(
-                      pending
-                          ? l10n.payrollAdvanceCircuitToApprove
-                          : l10n.payrollAdvanceCircuitToPay,
-                      style: AppTypography.labelSmall.copyWith(color: tone.ink),
-                    ),
-                  ],
+              ],
+            ),
+            trailing: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  MoneyFormat.format(request.amount),
+                  textAlign: TextAlign.end,
+                  style: AppTypography.labelLarge.copyWith(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
-              ),
-            ],
+                Text(
+                  pending
+                      ? l10n.payrollAdvanceCircuitToApprove
+                      : l10n.payrollAdvanceCircuitToPay,
+                  textAlign: TextAlign.end,
+                  style: AppTypography.labelSmall.copyWith(color: tone.ink),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Align(

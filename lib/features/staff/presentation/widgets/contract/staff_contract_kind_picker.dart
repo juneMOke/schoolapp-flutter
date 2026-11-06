@@ -118,10 +118,19 @@ class _Tile extends StatelessWidget {
                     color: tone.ink,
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    title,
-                    style: AppTypography.titleSmall.copyWith(color: tone.ink),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppTypography.titleSmall.copyWith(color: tone.ink),
+                    ),
                   ),
+                  // Le choix se voit sans la couleur : une coche.
+                  if (selected)
+                    Icon(
+                      Icons.check_circle_rounded,
+                      size: AppDimensions.staffContractTileIconSize,
+                      color: tone.ink,
+                    ),
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),

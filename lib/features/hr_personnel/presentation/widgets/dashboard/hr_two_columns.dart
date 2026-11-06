@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 
 /// « Par catégorie » et « Parité » côte à côte au-delà de
-/// [AppDimensions.hrDashboardTwoColumnsMinWidth], l'une sous l'autre en deçà.
+/// [AppBreakpoints.hrDashboardTwoColumnsMin], l'une sous l'autre en deçà.
 /// Alignées en haut : leurs hauteurs diffèrent, aucune ne s'étire.
 class HrTwoColumns extends StatelessWidget {
   final Widget first;
@@ -24,7 +24,7 @@ class HrTwoColumns extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      if (constraints.maxWidth < AppDimensions.hrDashboardTwoColumnsMinWidth) {
+      if (constraints.maxWidth < AppBreakpoints.hrDashboardTwoColumnsMin) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -50,13 +50,18 @@ class DepotEleveRow extends StatelessWidget {
                     ).formatMediumDate(depositedAt.toLocal()),
                   ),
                   style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textMuted,
+                    color: AppColors.textMutedAa,
                   ),
                 ),
             ],
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          // Un Wrap, pas une Row : sur un téléphone, le bouton passe sous la
+          // pastille au lieu de déborder (« Rendu en retard » + « Copie
+          // disponible en ligne » ne tiennent pas côte à côte à 360 dp).
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -73,8 +78,7 @@ class DepotEleveRow extends StatelessWidget {
                   style: AppTypography.labelSmall.copyWith(color: tone.ink),
                 ),
               ),
-              if (eleve.depot case final depot?) ...[
-                const SizedBox(width: AppSpacing.sm),
+              if (eleve.depot case final depot?)
                 EteeloButton.ghost(
                   label: !depot.isComplete
                       ? l10n.depotIncomplete
@@ -85,7 +89,6 @@ class DepotEleveRow extends StatelessWidget {
                   onPressed: canOpen ? onOpen : null,
                   fullWidth: false,
                 ),
-              ],
             ],
           ),
         ],

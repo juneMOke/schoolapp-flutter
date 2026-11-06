@@ -28,6 +28,8 @@ class AppColors {
   static const statePressed = tokens.AppColors.statePressed;
   static const stateFocus = tokens.AppColors.stateFocus;
   static const stateFocusOnDark = tokens.AppColors.stateFocusOnDark;
+  static const stateHoverOnDark = tokens.AppColors.stateHoverOnDark;
+  static const statePressedOnDark = tokens.AppColors.statePressedOnDark;
   static const stateDisabled = tokens.AppColors.stateDisabled;
   static const fabBackground = tokens.AppColors.fabBackground;
 

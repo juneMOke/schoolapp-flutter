@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
@@ -14,6 +13,7 @@ import 'package:school_app_flutter/features/payroll/domain/services/payroll_atte
 import 'package:school_app_flutter/features/payroll/presentation/bloc/payroll_cubit.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_labels.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_tone.dart';
+import 'package:school_app_flutter/features/payroll/presentation/widgets/common/payroll_notice_with_action.dart';
 import 'package:school_app_flutter/features/payroll/presentation/widgets/ledger/payroll_ledger_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -55,21 +55,16 @@ abstract final class PayrollLedgerNotices {
         blocker != PayrollBlocker.deductionCurrency;
     final alerts = <Widget>[
       if (refusal != null && refusal.isStale)
-        Row(
-          children: [
-            Expanded(
-              child: PayrollTone.alert.notice(
-                l10n.payrollStaleBanner,
-                icon: Icons.sync_problem,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            EteeloButton.secondary(
-              label: l10n.payrollStaleOpen,
-              onPressed: () => actions.compare(refusal),
-              fullWidth: false,
-            ),
-          ],
+        PayrollNoticeWithAction(
+          notice: PayrollTone.alert.notice(
+            l10n.payrollStaleBanner,
+            icon: Icons.sync_problem,
+          ),
+          action: EteeloButton.secondary(
+            label: l10n.payrollStaleOpen,
+            onPressed: () => actions.compare(refusal),
+            fullWidth: false,
+          ),
         )
       else if (refusal != null)
         PayrollTone.alert.notice(
@@ -112,35 +107,27 @@ abstract final class PayrollLedgerNotices {
           icon: Icons.currency_exchange,
         ),
       if (issues.refused.isNotEmpty && (canWrite || canManage))
-        Row(
-          children: [
-            Expanded(
-              child: PayrollTone.alert.notice(
-                l10n.payrollDeductionRefusedNotice(
-                  issues.refused
-                      .map(
-                        (entry) => l10n.payrollDeductionRefusedItem(
-                          named(entry),
-                          PayrollLabels.serverRefusal(
-                            l10n,
-                            entry.syncErrorCode,
-                          ),
-                        ),
-                      )
-                      .join(', '),
-                ),
-                icon: Icons.remove_circle_outline,
-              ),
+        PayrollNoticeWithAction(
+          notice: PayrollTone.alert.notice(
+            l10n.payrollDeductionRefusedNotice(
+              issues.refused
+                  .map(
+                    (entry) => l10n.payrollDeductionRefusedItem(
+                      named(entry),
+                      PayrollLabels.serverRefusal(l10n, entry.syncErrorCode),
+                    ),
+                  )
+                  .join(', '),
             ),
-            if (canWrite) ...[
-              const SizedBox(width: AppSpacing.sm),
-              EteeloButton.ghost(
-                label: l10n.payrollDeductionRefusedDismiss,
-                onPressed: () => actions.dismissRefusedDeductions(view),
-                fullWidth: false,
-              ),
-            ],
-          ],
+            icon: Icons.remove_circle_outline,
+          ),
+          action: canWrite
+              ? EteeloButton.ghost(
+                  label: l10n.payrollDeductionRefusedDismiss,
+                  onPressed: () => actions.dismissRefusedDeductions(view),
+                  fullWidth: false,
+                )
+              : null,
         ),
     ];
     final infos = <Widget>[
@@ -164,17 +151,14 @@ abstract final class PayrollLedgerNotices {
           icon: Icons.schedule,
         ),
       if (view.withoutContract.isNotEmpty)
-        Row(
-          children: [
-            Expanded(
-              child: PayrollTone.draft.notice(
-                l10n.payrollWithoutContract(view.withoutContract.length),
-                icon: Icons.assignment_late_outlined,
-              ),
-            ),
-            if (_navigation(context) case final navigation?
-                when PermissionGate.allows(context, [Perm.hrStaffRead])) ...[
-              const SizedBox(width: AppSpacing.sm),
+        PayrollNoticeWithAction(
+          notice: PayrollTone.draft.notice(
+            l10n.payrollWithoutContract(view.withoutContract.length),
+            icon: Icons.assignment_late_outlined,
+          ),
+          action: switch (_navigation(context)) {
+            final navigation?
+                when PermissionGate.allows(context, [Perm.hrStaffRead]) =>
               EteeloButton.ghost(
                 label: l10n.payrollOpenStaffFile,
                 onPressed: () => navigation.add(
@@ -186,8 +170,8 @@ abstract final class PayrollLedgerNotices {
                 ),
                 fullWidth: false,
               ),
-            ],
-          ],
+            _ => null,
+          },
         ),
     ];
     return (alerts: alerts, infos: infos);

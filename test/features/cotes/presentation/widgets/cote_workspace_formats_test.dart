@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/cotes/presentation/widgets/list/cote_student_query.dart';
+import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
@@ -212,5 +214,45 @@ void main() {
 
     expect(find.text('Abandonner'), findsOneWidget);
     expect(find.textContaining('colonne clôturée'), findsWidgets);
+  });
+
+  testWidgets('animations réduites : tourner l\'écran ne lève rien', (
+    tester,
+  ) async {
+    await _pump(tester, size: const Size(1280, 800));
+
+    tester.view.physicalSize = const Size(800, 1280);
+    await tester.pump();
+    tester.view.physicalSize = const Size(1280, 800);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('la recherche et le filtre survivent au passage par le '
+      'sélecteur', (tester) async {
+    await _pump(tester, size: const Size(1440, 900));
+    final search = find.descendant(
+      of: find.byType(CoteStudentPanel),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(search, 'mba');
+    await tester.tap(find.textContaining('À compléter'));
+    await tester.pump();
+    expect(find.textContaining('Tshala'), findsNothing);
+
+    // La fenêtre rétrécit : la liste cède la place au sélecteur…
+    tester.view.physicalSize = const Size(800, 1280);
+    await tester.pump();
+    expect(find.byType(CoteStudentPanel), findsNothing);
+
+    // … et revient telle qu'on l'avait laissée.
+    tester.view.physicalSize = const Size(1440, 900);
+    await tester.pump();
+    expect(tester.widget<TextField>(search).controller!.text, 'mba');
+    final filter = tester.widget<SegmentedTabFilter<CoteStudentFilter>>(
+      find.byType(SegmentedTabFilter<CoteStudentFilter>),
+    );
+    expect(filter.selected, CoteStudentFilter.todo);
+    expect(tester.takeException(), isNull);
   });
 }

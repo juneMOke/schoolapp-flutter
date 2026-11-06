@@ -8,8 +8,17 @@ import 'package:school_app_flutter/features/student_photo/domain/entities/crop_w
 /// « Reprendre » pour la caméra, « Autre fichier » pour un import.
 enum PhotoOrigin { camera, file }
 
-/// Pourquoi la caméra n'est pas là.
-enum CameraBlockReason { denied, none }
+/// Pourquoi la caméra n'est pas là : refusée, absente, ou page web servie
+/// en http (le navigateur ne la propose pas).
+enum CameraBlockReason {
+  denied,
+  none,
+  insecureContext;
+
+  /// Une nouvelle demande peut-elle aboutir ? Après une autorisation donnée
+  /// ou une webcam branchée, oui ; en http, rien ne changera sans https.
+  bool get canRetry => this != insecureContext;
+}
 
 /// La modale de capture, de l'accès à la caméra jusqu'à la photo gardée.
 sealed class StudentPhotoCaptureState extends Equatable {

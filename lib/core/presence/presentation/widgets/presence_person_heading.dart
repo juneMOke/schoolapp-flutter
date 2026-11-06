@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/avatars/person_sync_avatar.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_row_view.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -24,7 +25,7 @@ class PresencePersonHeading extends StatelessWidget {
       final stacked =
           trailing != null &&
           constraints.maxWidth <
-              AppDimensions.presencePersonHeadingInlineBadgeMinWidth;
+              AppBreakpoints.presencePersonHeadingInlineBadgeMin;
       return Row(
         children: [
           PersonSyncAvatar(

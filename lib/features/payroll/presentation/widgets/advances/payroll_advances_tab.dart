@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/features/payroll/presentation/helpers/payroll_kpi_card.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:flutter/material.dart';
@@ -140,12 +141,17 @@ class PayrollAdvancesTab extends StatelessWidget {
               count: (filter) => counts[filter],
               onSelected: cubit.setAdvanceFilter,
             ),
+            // Ctrl+N vit sous la même garde que le bouton.
             if (canRequest)
-              EteeloButton.primary(
-                label: l10n.payrollAdvanceNew,
-                icon: Icons.add,
-                onPressed: () => _grant(context),
-                fullWidth: false,
+              PageActionShortcut(
+                action: PageAction.create,
+                onInvoke: () => _grant(context),
+                child: EteeloButton.primary(
+                  label: l10n.payrollAdvanceNew,
+                  icon: Icons.add,
+                  onPressed: () => _grant(context),
+                  fullWidth: false,
+                ),
               ),
           ],
         ),

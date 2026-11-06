@@ -67,6 +67,21 @@ class _BoutiqueCartViewState extends State<BoutiqueCartView> {
   bool _isClosingSale = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Le payeur vit dans le bloc, pas dans cet hôte : le panier passé de la
+    // page à la colonne (rotation), ou rouvert après un retour, doit montrer
+    // l'identité déjà saisie. Des champs vides sur un payeur retenu
+    // encaisseraient la vente au nom d'un payeur invisible. Rien n'est
+    // renvoyé au bloc : il a déjà ces valeurs.
+    final payer = context.read<BoutiqueBloc>().state.cart.payer;
+    _phoneController.text = payer.phoneNumber;
+    _lastNameController.text = payer.lastName;
+    _middleNameController.text = payer.middleName;
+    _firstNameController.text = payer.firstName;
+  }
+
+  @override
   void dispose() {
     _phoneController.dispose();
     _lastNameController.dispose();

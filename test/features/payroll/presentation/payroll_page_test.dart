@@ -29,6 +29,7 @@ import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_p
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_signals.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../test_helpers/reference_formats.dart';
 import '../../staff/staff_builders.dart';
 import '../payroll_builders.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
@@ -109,9 +110,13 @@ void main() {
     required PayrollSnapshot snapshot,
     List<Perm> permissions = _write,
     Size size = const Size(1400, 1600),
+    bool useView = false,
   }) async {
-    await tester.binding.setSurfaceSize(size);
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // `useView` : la fenêtre est déjà posée par un format de référence.
+    if (!useView) {
+      await tester.binding.setSurfaceSize(size);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+    }
     repository = _MockRepository();
     when(() => repository.load()).thenAnswer((_) async => Right(snapshot));
     when(
@@ -409,19 +414,20 @@ void main() {
     expect(find.text('Aucun numéro pour cet agent.'), findsNWidgets(2));
   });
 
-  for (final size in const [Size(800, 1280), Size(420, 1800)]) {
-    testWidgets('aucun débordement en ${size.width.toInt()} dp', (
+  testAtReferenceFormats('la diffusion des bulletins tient', (
+    tester,
+    format,
+  ) async {
+    await pump(
       tester,
-    ) async {
-      await pump(
-        tester,
-        snapshot: snapshotOf(status: PayrollStatus.validated),
-        permissions: [..._write, Perm.hrPayManage],
-        size: size,
-      );
-      await tester.tap(find.text('Diffuser les bulletins'));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-    });
-  }
+      snapshot: snapshotOf(status: PayrollStatus.validated),
+      permissions: [..._write, Perm.hrPayManage],
+      useView: true,
+    );
+    final open = find.text('Diffuser les bulletins');
+    await tester.ensureVisible(open);
+    await tester.pumpAndSettle();
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+  });
 }

@@ -12,7 +12,15 @@ class CaptureBody extends StatelessWidget {
   final StudentPhotoCaptureState state;
   final StudentPhotoCaptureCubit cubit;
 
-  const CaptureBody({super.key, required this.state, required this.cubit});
+  /// Cf. [PhotoViewfinder.maxHeight].
+  final double? viewfinderMaxHeight;
+
+  const CaptureBody({
+    super.key,
+    required this.state,
+    required this.cubit,
+    this.viewfinderMaxHeight,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +34,8 @@ class CaptureBody extends StatelessWidget {
         onImport: cubit.importFile,
         onShoot: cubit.shoot,
         onSwitch: cubit.switchCamera,
+        onRetry: cubit.retryCamera,
+        viewfinderMaxHeight: viewfinderMaxHeight,
       ),
       CaptureReview() => CaptureReviewBody(
         review: state,
@@ -36,6 +46,7 @@ class CaptureBody extends StatelessWidget {
       CaptureBadFile() => PhotoViewfinder(
         session: null,
         tip: '',
+        maxHeight: viewfinderMaxHeight,
         overlay: CaptureProblemCard(
           icon: Icons.broken_image_outlined,
           title: l10n.photoBadFileTitle,
