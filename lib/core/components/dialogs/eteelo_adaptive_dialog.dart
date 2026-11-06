@@ -9,21 +9,68 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 /// couvre les bandes système ; celle de `showDialog` y laissait voir la page
 /// assombrie, et ces bandes restaient une barrière qui fermait la modale —
 /// et perdait la saisie — au premier toucher du bord. Plein écran, la
-/// barrière ne ferme donc jamais ; centrée, elle suit [barrierDismissible].
+/// barrière ne ferme donc jamais au toucher ; centrée, elle suit
+/// [barrierDismissible].
+///
+/// Échap, lui, suit [barrierDismissible] dans les deux formes (#109) :
+/// Flutter le lie à `route.barrierDismissible`, et couper la barrière par ce
+/// drapeau coupait aussi Échap sous 600 dp. La route garde donc le drapeau
+/// de l'appelant et ne retire au plein écran que le toucher.
 Future<T?> showEteeloAdaptiveDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   bool barrierDismissible = true,
   Color? barrierColor,
 }) {
-  return showDialog<T>(
-    context: context,
-    useSafeArea: false,
-    barrierColor: barrierColor,
-    barrierDismissible:
-        barrierDismissible && !EteeloAdaptiveDialog.isFullscreen(context),
-    builder: builder,
+  final navigator = Navigator.of(context, rootNavigator: true);
+  return navigator.push<T>(
+    _AdaptiveDialogRoute<T>(
+      context: context,
+      builder: builder,
+      useSafeArea: false,
+      barrierColor:
+          barrierColor ??
+          DialogTheme.of(context).barrierColor ??
+          Colors.black54,
+      barrierDismissible: barrierDismissible,
+      tapDismissible:
+          barrierDismissible && !EteeloAdaptiveDialog.isFullscreen(context),
+      themes: InheritedTheme.capture(from: context, to: navigator.context),
+      traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+    ),
   );
+}
+
+/// La route de `showDialog`, dont la barrière peut refuser le toucher sans
+/// refuser Échap.
+class _AdaptiveDialogRoute<T> extends DialogRoute<T> {
+  final bool tapDismissible;
+
+  _AdaptiveDialogRoute({
+    required super.context,
+    required super.builder,
+    required super.useSafeArea,
+    required Color super.barrierColor,
+    required super.barrierDismissible,
+    required this.tapDismissible,
+    super.themes,
+    super.traversalEdgeBehavior,
+  });
+
+  @override
+  Widget buildModalBarrier() {
+    if (tapDismissible || !barrierDismissible) return super.buildModalBarrier();
+    final color = barrierColor!;
+    return AnimatedModalBarrier(
+      color: animation!.drive(
+        ColorTween(
+          begin: color.withValues(alpha: 0),
+          end: color,
+        ).chain(CurveTween(curve: barrierCurve)),
+      ),
+      dismissible: false,
+    );
+  }
 }
 
 /// Une modale centrée sur un grand écran, plein écran sur un téléphone
