@@ -12366,5 +12366,14 @@
   "cotePercent": "{percent}%",
   "@cotePercent": {"placeholders": {"percent": {"type": "int"}}},
   "coteColumnTotal": "Total",
-  "syncAggregateCotesBatch": "Grade entry"
+  "syncAggregateCotesBatch": "Grade entry",
+  "levelCorrectionRefusedEnrollmentNotConfirmed": "Correction refused: the enrollment is not confirmed (pre-registration or cancelled enrollment).",
+  "levelCorrectionRefusedStaleLevel": "Correction refused: the student's level was already changed from another tablet. Reopen the record and try again.",
+  "levelCorrectionRefusedInvalidTargetLevel": "Correction refused: the chosen level is not valid for this school or this year.",
+  "levelCorrectionRefusedNoTariff": "Correction refused: the chosen level has no fees in the fee schedule.",
+  "levelCorrectionRefusedHasPayments": "Correction refused: the student already has a payment this year. Contact the administration.",
+  "levelCorrectionRefusedHasGrades": "Correction refused: the student already has grades this year.",
+  "levelCorrectionRefusedTargetClassroomRequired": "Correction refused: choose a class of the new level.",
+  "levelCorrectionRefusedLevelMismatch": "Correction refused: the chosen class is not of the new level.",
+  "levelCorrectionRefusedGeneric": "Level correction refused by the server."
 }

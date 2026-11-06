@@ -21810,4 +21810,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncAggregateCotesBatch => 'Grade entry';
+
+  @override
+  String get levelCorrectionRefusedEnrollmentNotConfirmed =>
+      'Correction refused: the enrollment is not confirmed (pre-registration or cancelled enrollment).';
+
+  @override
+  String get levelCorrectionRefusedStaleLevel =>
+      'Correction refused: the student\'s level was already changed from another tablet. Reopen the record and try again.';
+
+  @override
+  String get levelCorrectionRefusedInvalidTargetLevel =>
+      'Correction refused: the chosen level is not valid for this school or this year.';
+
+  @override
+  String get levelCorrectionRefusedNoTariff =>
+      'Correction refused: the chosen level has no fees in the fee schedule.';
+
+  @override
+  String get levelCorrectionRefusedHasPayments =>
+      'Correction refused: the student already has a payment this year. Contact the administration.';
+
+  @override
+  String get levelCorrectionRefusedHasGrades =>
+      'Correction refused: the student already has grades this year.';
+
+  @override
+  String get levelCorrectionRefusedTargetClassroomRequired =>
+      'Correction refused: choose a class of the new level.';
+
+  @override
+  String get levelCorrectionRefusedLevelMismatch =>
+      'Correction refused: the chosen class is not of the new level.';
+
+  @override
+  String get levelCorrectionRefusedGeneric =>
+      'Level correction refused by the server.';
 }

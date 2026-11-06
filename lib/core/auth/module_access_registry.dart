@@ -155,6 +155,13 @@ const ModuleAccess kEnrollmentSuspendAccess = ModuleAccess([
   Perm.enrollmentSuspend,
 ]);
 
+/// Corriger le niveau d'un élève inscrit
+/// (`POST /sync/enrollment-level-corrections`). Masquée sans elle : le geste
+/// part par l'outbox, où un 403 est terminal.
+const ModuleAccess kEnrollmentLevelCorrectAccess = ModuleAccess([
+  Perm.enrollmentLevelCorrect,
+]);
+
 /// Créer ou modifier la fiche d'un agent (`POST /sync/staff-members`). Poser
 /// un contrat et verser une pièce ont leurs propres droits.
 const ModuleAccess kStaffWriteAccess = ModuleAccess([Perm.hrStaffWrite]);
@@ -276,6 +283,7 @@ const Map<String, ModuleAccess> kGuardedWriteActions = {
   'retirer une dépense': kExpenseWithdrawAccess,
   'photographier un élève': kStudentPhotoWriteAccess,
   'désactiver ou réactiver un élève': kEnrollmentSuspendAccess,
+  'corriger le niveau d\'un élève': kEnrollmentLevelCorrectAccess,
   'envoyer un communiqué aux parents': kAnnouncementSendAccess,
   'tenir les modèles de communiqué': kAnnouncementTemplateWriteAccess,
 };

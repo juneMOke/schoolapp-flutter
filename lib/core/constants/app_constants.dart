@@ -1483,6 +1483,15 @@ class AppConstants {
   static const String syncEnrollmentReactivationsEndpoint =
       '/api/v1/sync/enrollment-suspensions/reactivations';
 
+  /// Correction du niveau d'un élève inscrit (`enrollment.level.correct`) :
+  /// **POST** d'un geste identifié par son uuid, rejouable (201 appliqué, 200
+  /// rejeu, même corps). Le corps rendu est l'état canonique : inscription,
+  /// créances, créances supprimées, membre de classe. Seul 409 :
+  /// `ENROLLMENT_NOT_YET_SYNCED` (attente) ; tout autre refus est un 422
+  /// terminal.
+  static const String syncEnrollmentLevelCorrectionsEndpoint =
+      '/api/v1/sync/enrollment-level-corrections';
+
   /// Volet Discipline offline (contrat openapi_discipline_sync 1.1.0) :
   ///  - **POST** = push de l'agrégat `{case, comments[]}` (upsert 200) : le FAIT
   ///    insert-only (régime A, uuid honoré), le TRAITEMENT `status`/`sanction`

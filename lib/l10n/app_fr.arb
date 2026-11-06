@@ -12549,5 +12549,14 @@
   "cotePercent": "{percent} %",
   "@cotePercent": {"placeholders": {"percent": {"type": "int"}}},
   "coteColumnTotal": "Total",
-  "syncAggregateCotesBatch": "Saisie des notes"
+  "syncAggregateCotesBatch": "Saisie des notes",
+  "levelCorrectionRefusedEnrollmentNotConfirmed": "Correction refusée : l'inscription n'est pas confirmée (préinscription ou inscription annulée).",
+  "levelCorrectionRefusedStaleLevel": "Correction refusée : le niveau de l'élève a déjà été modifié depuis une autre tablette. Rouvrez la fiche et recommencez.",
+  "levelCorrectionRefusedInvalidTargetLevel": "Correction refusée : le niveau choisi ne vaut pas pour cette école ou cette année.",
+  "levelCorrectionRefusedNoTariff": "Correction refusée : le niveau choisi n'a aucun frais dans la grille tarifaire.",
+  "levelCorrectionRefusedHasPayments": "Correction refusée : l'élève a déjà un versement cette année. Adressez-vous à l'administration.",
+  "levelCorrectionRefusedHasGrades": "Correction refusée : l'élève a déjà des notes cette année.",
+  "levelCorrectionRefusedTargetClassroomRequired": "Correction refusée : choisissez une classe du nouveau niveau.",
+  "levelCorrectionRefusedLevelMismatch": "Correction refusée : la classe choisie n'est pas du nouveau niveau.",
+  "levelCorrectionRefusedGeneric": "Correction de niveau refusée par le serveur."
 }

@@ -28,6 +28,10 @@ const _secretariat = <String>[
   'enrollment.delete',
   'enrollment.stats.read',
   'enrollment.suspend',
+  // Corriger le niveau d'un élève (D2 de l'étude « Changer un élève de
+  // niveau », 2026-11-06). ⚠️ Recopié du contrat AVANT que le back ne le sème
+  // (lot B) : à confronter au template serveur à sa livraison.
+  'enrollment.level.correct',
   'finance.charge.read',
   'finance.grid.read',
   'classroom.read',

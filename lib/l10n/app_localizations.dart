@@ -33527,6 +33527,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grade entry'**
   String get syncAggregateCotesBatch;
+
+  /// No description provided for @levelCorrectionRefusedEnrollmentNotConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the enrollment is not confirmed (pre-registration or cancelled enrollment).'**
+  String get levelCorrectionRefusedEnrollmentNotConfirmed;
+
+  /// No description provided for @levelCorrectionRefusedStaleLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the student\'s level was already changed from another tablet. Reopen the record and try again.'**
+  String get levelCorrectionRefusedStaleLevel;
+
+  /// No description provided for @levelCorrectionRefusedInvalidTargetLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the chosen level is not valid for this school or this year.'**
+  String get levelCorrectionRefusedInvalidTargetLevel;
+
+  /// No description provided for @levelCorrectionRefusedNoTariff.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the chosen level has no fees in the fee schedule.'**
+  String get levelCorrectionRefusedNoTariff;
+
+  /// No description provided for @levelCorrectionRefusedHasPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the student already has a payment this year. Contact the administration.'**
+  String get levelCorrectionRefusedHasPayments;
+
+  /// No description provided for @levelCorrectionRefusedHasGrades.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the student already has grades this year.'**
+  String get levelCorrectionRefusedHasGrades;
+
+  /// No description provided for @levelCorrectionRefusedTargetClassroomRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: choose a class of the new level.'**
+  String get levelCorrectionRefusedTargetClassroomRequired;
+
+  /// No description provided for @levelCorrectionRefusedLevelMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the chosen class is not of the new level.'**
+  String get levelCorrectionRefusedLevelMismatch;
+
+  /// No description provided for @levelCorrectionRefusedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction refused by the server.'**
+  String get levelCorrectionRefusedGeneric;
 }
 
 class _AppLocalizationsDelegate

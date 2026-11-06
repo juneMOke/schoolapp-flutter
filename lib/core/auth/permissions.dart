@@ -34,6 +34,15 @@ enum Perm {
   /// et à la direction.
   enrollmentSuspend('enrollment.suspend'),
 
+  /// Corriger le niveau d'un élève inscrit
+  /// (`POST /sync/enrollment-level-corrections`).
+  ///
+  /// Séparée de [enrollmentWrite] et de [enrollmentSuspend] : le geste
+  /// remplace les créances de l'élève par celles de la grille d'un autre
+  /// niveau, il déplace donc de l'argent dû. Semée à la direction et au
+  /// secrétariat (D2). ⚠️ Déclarée avant que le serveur ne la sème (lot back B).
+  enrollmentLevelCorrect('enrollment.level.correct'),
+
   // ── Finances ──────────────────────────────────────────────────────────────
   // `charge` (créances), `payment` (caisse) et `grid` (grille tarifaire) sont
   // trois autorités distinctes : encaisser n'est pas réécrire les montants de

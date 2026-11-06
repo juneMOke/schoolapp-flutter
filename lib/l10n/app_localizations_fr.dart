@@ -21963,4 +21963,40 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncAggregateCotesBatch => 'Saisie des notes';
+
+  @override
+  String get levelCorrectionRefusedEnrollmentNotConfirmed =>
+      'Correction refusée : l\'inscription n\'est pas confirmée (préinscription ou inscription annulée).';
+
+  @override
+  String get levelCorrectionRefusedStaleLevel =>
+      'Correction refusée : le niveau de l\'élève a déjà été modifié depuis une autre tablette. Rouvrez la fiche et recommencez.';
+
+  @override
+  String get levelCorrectionRefusedInvalidTargetLevel =>
+      'Correction refusée : le niveau choisi ne vaut pas pour cette école ou cette année.';
+
+  @override
+  String get levelCorrectionRefusedNoTariff =>
+      'Correction refusée : le niveau choisi n\'a aucun frais dans la grille tarifaire.';
+
+  @override
+  String get levelCorrectionRefusedHasPayments =>
+      'Correction refusée : l\'élève a déjà un versement cette année. Adressez-vous à l\'administration.';
+
+  @override
+  String get levelCorrectionRefusedHasGrades =>
+      'Correction refusée : l\'élève a déjà des notes cette année.';
+
+  @override
+  String get levelCorrectionRefusedTargetClassroomRequired =>
+      'Correction refusée : choisissez une classe du nouveau niveau.';
+
+  @override
+  String get levelCorrectionRefusedLevelMismatch =>
+      'Correction refusée : la classe choisie n\'est pas du nouveau niveau.';
+
+  @override
+  String get levelCorrectionRefusedGeneric =>
+      'Correction de niveau refusée par le serveur.';
 }
