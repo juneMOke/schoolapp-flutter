@@ -12558,5 +12558,6 @@
   "levelCorrectionRefusedHasGrades": "Correction refusée : l'élève a déjà des notes cette année.",
   "levelCorrectionRefusedTargetClassroomRequired": "Correction refusée : choisissez une classe du nouveau niveau.",
   "levelCorrectionRefusedLevelMismatch": "Correction refusée : la classe choisie n'est pas du nouveau niveau.",
-  "levelCorrectionRefusedGeneric": "Correction de niveau refusée par le serveur."
+  "levelCorrectionRefusedGeneric": "Correction de niveau refusée par le serveur.",
+  "syncAggregateEnrollmentLevelCorrection": "Correction de niveau"
 }

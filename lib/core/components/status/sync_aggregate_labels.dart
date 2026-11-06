@@ -24,6 +24,8 @@ String syncAggregateLabel(AppLocalizations l10n, String aggregateType) {
       return l10n.syncAggregateCotesBatch;
     case 'ACADEMICS_EVALUATION':
       return l10n.syncAggregateEvaluation;
+    case 'ENROLLMENT_LEVEL_CORRECTION':
+      return l10n.syncAggregateEnrollmentLevelCorrection;
     case 'CLASSROOM_TRANSFER':
       return l10n.syncAggregateClassroomTransfer;
     case 'CHAPITRE':

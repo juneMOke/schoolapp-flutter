@@ -33581,6 +33581,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Level correction refused by the server.'**
   String get levelCorrectionRefusedGeneric;
+
+  /// No description provided for @syncAggregateEnrollmentLevelCorrection.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction'**
+  String get syncAggregateEnrollmentLevelCorrection;
 }
 
 class _AppLocalizationsDelegate

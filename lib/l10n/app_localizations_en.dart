@@ -21846,4 +21846,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get levelCorrectionRefusedGeneric =>
       'Level correction refused by the server.';
+
+  @override
+  String get syncAggregateEnrollmentLevelCorrection => 'Level correction';
 }

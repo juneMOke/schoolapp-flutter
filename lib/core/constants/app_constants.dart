@@ -870,7 +870,9 @@ class AppConstants {
   // `cote_saisie` et `ref_cote_cours`. Trois tables neuves, aucun backfill.
   // v78 (2026-11-01) : `ref_cote_cours.id`, l'identifiant serveur que nomme une
   // pierre tombale. Colonne ajoutée, remplie par le flux.
-  static const int offlineDbSchemaVersion = 78;
+  // v79 (2026-11-06) : `enrollment_level_corrections`, le geste « corriger le
+  // niveau » en attente ou accusé. Table neuve, aucun backfill. Palier d'école.
+  static const int offlineDbSchemaVersion = 79;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

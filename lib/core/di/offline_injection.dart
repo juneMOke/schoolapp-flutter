@@ -49,6 +49,7 @@ import 'package:school_app_flutter/core/di/offline_modules/classroom_attendance_
 import 'package:school_app_flutter/core/di/offline_modules/academics_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/boutique_offline_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/staff_offline_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/enrollment_level_correction_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/enrollment_suspension_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/student_identity_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/student_photo_di.dart';
@@ -362,6 +363,7 @@ void registerOfflineModules(GetIt getIt) {
   registerDocumentsOffline(getIt); // Éditique — cache de restitution (ADR-012)
   registerStudentPhoto(getIt); // Photo de l'élève — après l'inscription
   registerEnrollmentSuspension(getIt); // Désactivation — après les classes
+  registerEnrollmentLevelCorrection(getIt); // Correction de niveau — idem
   registerCommunication(getIt); // Communiqués aux parents — en ligne
   registerCotes(getIt); // Saisie des notes — cache de classe et file d'envoi
 }

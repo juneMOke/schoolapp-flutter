@@ -21999,4 +21999,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get levelCorrectionRefusedGeneric =>
       'Correction de niveau refusée par le serveur.';
+
+  @override
+  String get syncAggregateEnrollmentLevelCorrection => 'Correction de niveau';
 }
