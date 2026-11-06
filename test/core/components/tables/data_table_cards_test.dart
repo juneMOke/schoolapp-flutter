@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 /// Sur un téléphone, une table qui le demande passe en cartes : comprimées,
 /// ses colonnes coupaient les montants.
 void main() {
@@ -84,6 +86,7 @@ void main() {
   });
 
   testWidgets('au-delà de 600 dp : la table', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await pump(tester, width: 800);
 
     expect(find.byType(DataTableHeader), findsOneWidget);

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 void main() {
   Widget buildHarness({required double width, required Widget child}) {
     return MaterialApp(
@@ -16,6 +18,7 @@ void main() {
   testWidgets('répartit les items sur plusieurs colonnes selon la largeur', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(
       buildHarness(
         width: 760, // ~2 colonnes pour maxExtent 360

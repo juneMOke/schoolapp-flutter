@@ -235,9 +235,14 @@ void main() {
         ),
       );
 
+      // Ordre de lecture : plus à gauche sur la même ligne, ou sur une ligne
+      // au-dessus quand les pastilles s'enroulent (téléphone).
+      final first = tester.getTopLeft(find.text('Frais d\'inscription'));
+      final second = tester.getTopLeft(find.text(_title));
       expect(
-        tester.getTopLeft(find.text('Frais d\'inscription')).dx,
-        lessThan(tester.getTopLeft(find.text(_title)).dx),
+        first.dy < second.dy || (first.dy == second.dy && first.dx < second.dx),
+        isTrue,
+        reason: 'inscription en $first, minerval en $second',
       );
     });
 

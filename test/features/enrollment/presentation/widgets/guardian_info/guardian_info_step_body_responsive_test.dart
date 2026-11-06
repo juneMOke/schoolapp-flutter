@@ -6,6 +6,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/guar
 import 'package:school_app_flutter/features/student/domain/entities/parent_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../../test_helpers/reference_formats.dart';
+
 void main() {
   const title = 'Informations des tuteurs';
   const buttonLabel = 'Ajouter un tuteur/responsable';
@@ -63,6 +65,7 @@ void main() {
   testWidgets(
     'Large (>=520px) : titre et bouton sur la même ligne (bouton à droite)',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(harness(800));
       await tester.pumpAndSettle();
 

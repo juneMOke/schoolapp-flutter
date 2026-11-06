@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/components/buttons/stepper_actions_bar.d
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/enrollment_stepper_controls.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/reference_formats.dart';
+
 void main() {
   Widget buildHarness({
     int currentStep = 0,
@@ -49,6 +51,7 @@ void main() {
   testWidgets('Enrollment stepper controls shows idle save state', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(
       buildHarness(
         currentStep: 0,
@@ -64,6 +67,7 @@ void main() {
   testWidgets('Enrollment stepper controls shows incomplete save state', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(
       buildHarness(
         currentStep: 0,
@@ -79,6 +83,7 @@ void main() {
   testWidgets('Enrollment stepper controls shows pending save state', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(
       buildHarness(
         currentStep: 0,
@@ -94,6 +99,7 @@ void main() {
   testWidgets('Enrollment stepper controls shows saving save state', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(
       buildHarness(
         currentStep: 0,
@@ -110,6 +116,7 @@ void main() {
   testWidgets('Enrollment stepper controls shows saved save state', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(
       buildHarness(
         currentStep: 0,
@@ -126,6 +133,7 @@ void main() {
     'Enrollment stepper controls hides status indicator when no save action '
     '(read-only fees step)',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(
         buildHarness(
           currentStep: 4,
@@ -145,6 +153,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls disables save button when not allowed',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       var savedCount = 0;
 
       await tester.pumpWidget(
@@ -165,6 +174,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls enables and fires save when allowed',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       var savedCount = 0;
 
       await tester.pumpWidget(
@@ -189,6 +199,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls shows next button on non-final step',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(
         buildHarness(currentStep: 2, isLast: false, canContinue: true),
       );
@@ -200,6 +211,7 @@ void main() {
   testWidgets('Enrollment stepper controls shows finish button on final step', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(
       buildHarness(currentStep: 6, isLast: true, canContinue: true),
     );
@@ -210,6 +222,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls shows previous button when not first step',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       var previousCount = 0;
 
       await tester.pumpWidget(
@@ -228,6 +241,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls hides previous button on first step',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(buildHarness(currentStep: 0));
 
       expect(find.text('Précédent'), findsNothing);
@@ -237,6 +251,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls does not show save button when showSaveAction is false',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(
         buildHarness(currentStep: 2, showSaveAction: false),
       );
@@ -249,6 +264,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls on summary step shows action bar only',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(
         buildHarness(
           currentStep: 6,
@@ -268,6 +284,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls : dernier step → Valider en bouton primaire (check)',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(
         buildHarness(
           currentStep: 6,
@@ -290,6 +307,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls integrates abort-save-continue flow',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       var previousCount = 0;
       var saveCount = 0;
       var continueCount = 0;
@@ -320,6 +338,7 @@ void main() {
   testWidgets(
     'Enrollment stepper controls displays saving indicator when savingNow is true',
     (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(
         buildHarness(currentStep: 1, savingNow: true, showSaveAction: true),
       );

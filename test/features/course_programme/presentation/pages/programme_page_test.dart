@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/course_programme/presentation/pages/
 
 import '../programme_test_host.dart';
 
+import '../../../../test_helpers/reference_formats.dart';
+
 class _MockProgrammeCubit extends MockCubit<ProgrammeState>
     implements ProgrammeCubit {}
 
@@ -93,6 +95,7 @@ void main() {
   });
 
   testWidgets('supprimer demande confirmation, puis supprime', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     stub(ProgrammeState(status: ProgrammeStatus.ready, programme: programme));
     when(() => cubit.delete('b')).thenAnswer((_) async {});
     await tester.pumpWidget(page());

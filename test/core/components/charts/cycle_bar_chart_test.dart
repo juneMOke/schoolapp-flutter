@@ -6,6 +6,8 @@ import 'package:school_app_flutter/core/components/charts/cycle_bar_chart.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 void main() {
   const items = [
     BarChartItem(
@@ -204,6 +206,7 @@ void main() {
     testWidgets('une barre occupe ~53 % du pas, pas une largeur en dur', (
       tester,
     ) async {
+      setTestWindow(tester, kDefaultTestWindow);
       // Régression : la largeur était posée en dur (`length > 4 ? 20 : 32`),
       // sans rapport avec l'espace disponible — à cinq barres dans une carte
       // large, 20 dp ne faisaient que ~23 % du pas et le rythme se lisait

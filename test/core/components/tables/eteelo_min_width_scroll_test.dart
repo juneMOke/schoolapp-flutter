@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_min_width_scroll.dart';
 import 'package:school_app_flutter/core/theme/app_scroll_behavior.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 const _table = Key('table');
 
 void main() {
@@ -30,6 +32,7 @@ void main() {
   );
 
   testWidgets('assez large : pleine largeur, sans défilement', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await pump(tester, 800);
     expect(tester.getSize(find.byKey(_table)).width, 800);
     expect(find.byType(SingleChildScrollView), findsNothing);

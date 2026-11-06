@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/components/cards/eteelo_stats_card.dart'
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 void main() {
   Future<void> pump(WidgetTester tester, Widget card) => tester.pumpWidget(
     MaterialApp(
@@ -110,6 +112,7 @@ void main() {
     testWidgets('un indice long et deux exports s\'enroulent sans déborder', (
       tester,
     ) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

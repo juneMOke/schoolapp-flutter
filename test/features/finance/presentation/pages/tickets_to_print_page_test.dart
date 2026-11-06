@@ -166,6 +166,7 @@ void main() {
     );
     // Le reçu est revenu entre-temps.
     queue.result = Right([_job('4', number: 'CF-RC-2627-000804')]);
+    await tester.scrollUntilVisible(find.text('Relancer'), 200);
     await tester.tap(find.text('Relancer'));
     await tester.pumpAndSettle();
 
@@ -178,6 +179,7 @@ void main() {
     queue.result = Right([_job('4', receiptMissing: true)]);
     await open(tester);
 
+    await tester.scrollUntilVisible(find.text('Relancer'), 200);
     await tester.tap(find.text('Relancer'));
     await tester.pumpAndSettle();
 

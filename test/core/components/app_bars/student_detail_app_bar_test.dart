@@ -5,6 +5,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 Future<void> _pump(
   WidgetTester tester, {
   Widget? trailing,
@@ -37,6 +39,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('sur-titre MAJ, titre, initiales et retour', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await _pump(tester);
     await tester.pumpAndSettle();
 
@@ -54,6 +57,7 @@ void main() {
   testWidgets('la croix de fermeture n apparaît que si demandée', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await _pump(tester);
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.close_rounded), findsNothing);
@@ -64,6 +68,7 @@ void main() {
   });
 
   testWidgets('replie sur « ? » quand l identité est inconnue', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await _pump(tester, firstName: '   ', lastName: '');
     await tester.pumpAndSettle();
 

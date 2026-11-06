@@ -28,6 +28,7 @@ void main() {
   testWidgets('Réessayer relance le démarrage', (tester) async {
     await pumpApp(tester);
 
+    await tester.ensureVisible(find.text('Réessayer'));
     await tester.tap(find.text('Réessayer'));
     await tester.pumpAndSettle();
 

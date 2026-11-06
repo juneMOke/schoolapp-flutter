@@ -284,6 +284,7 @@ void main() {
       await pump(tester, location: '/rh-presences/registre');
       await tester.pumpAndSettle();
 
+      await tester.ensureVisible(find.text('Cartes'));
       await tester.tap(find.text('Cartes'));
       await tester.pumpAndSettle();
 

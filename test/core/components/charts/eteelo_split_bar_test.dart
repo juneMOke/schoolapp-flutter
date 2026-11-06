@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_split_bar.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 /// Monte la barre dans une largeur connue, pour que les proportions se mesurent.
 Future<void> _pump(
   WidgetTester tester,
@@ -172,6 +174,7 @@ void main() {
   testWidgets('un total nul rend la piste et des zéros, pas un trou', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     // Le cas d'une école le jour de l'ouverture : c'est un état, pas une
     // absence de rendu.
     await _pump(tester, const [
