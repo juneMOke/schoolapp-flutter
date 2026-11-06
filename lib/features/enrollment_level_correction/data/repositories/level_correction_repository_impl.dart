@@ -10,6 +10,8 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/loc
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_write_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_gesture.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_refusal.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_refused_locally.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_request.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_repository.dart';
 
@@ -69,22 +71,25 @@ class LevelCorrectionRepositoryImpl implements LevelCorrectionRepository {
       correctedAt: wireInstant(nowMs),
       authorId: authorId,
     );
-    final bool recorded;
+    final LevelCorrectionRecordOutcome outcome;
     try {
-      recorded = await _writer.record(
-        gesture,
-        schoolId: schoolId,
-        nowMs: nowMs,
-      );
+      outcome = await _writer.record(gesture, schoolId: schoolId, nowMs: nowMs);
     } catch (e) {
       return Left(StorageFailure('Écriture de la correction : $e'));
     }
-    if (recorded) {
-      _bus.emit({request.enrollmentId});
-      final engine = _syncEngine;
-      if (engine != null) unawaited(engine.flush());
+    switch (outcome) {
+      case LevelCorrectionRecordOutcome.alreadyPending:
+        return const Right(false);
+      case LevelCorrectionRecordOutcome.hasPayments:
+        return const Left(
+          LevelCorrectionRefusedLocally(LevelCorrectionRefusal.hasPayments),
+        );
+      case LevelCorrectionRecordOutcome.recorded:
+        _bus.emit({request.enrollmentId});
+        final engine = _syncEngine;
+        if (engine != null) unawaited(engine.flush());
+        return const Right(true);
     }
-    return Right(recorded);
   }
 
   @override
@@ -93,6 +98,24 @@ class LevelCorrectionRepositoryImpl implements LevelCorrectionRepository {
   ) async {
     try {
       return Right(await _reader.latestFor(enrollmentId));
+    } catch (e) {
+      return Left(StorageFailure('Lecture de la correction : $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> holdsCollection({
+    required String studentId,
+    required String academicYearId,
+  }) async {
+    try {
+      return Right(
+        await _reader.holdsCollection(
+          studentId: studentId,
+          academicYearId: academicYearId,
+          nowMs: _now(),
+        ),
+      );
     } catch (e) {
       return Left(StorageFailure('Lecture de la correction : $e'));
     }

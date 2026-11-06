@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/rep
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_api.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_outbox_handler.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_repository.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/usecases/level_correction_use_cases.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -57,6 +58,17 @@ void registerEnrollmentLevelCorrection(GetIt getIt) {
       currentUser: getIt<CurrentUserContext>(),
       ids: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => CorrectLevelUseCase(getIt<LevelCorrectionRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => LoadLevelCorrectionUseCase(getIt<LevelCorrectionRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => IsCollectionHeldByLevelCorrectionUseCase(
+      getIt<LevelCorrectionRepository>(),
     ),
   );
 

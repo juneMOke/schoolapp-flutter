@@ -11,9 +11,19 @@ abstract class LevelCorrectionRepository {
 
   /// Pose la correction. `Right(false)` : une correction de la même inscription
   /// attend déjà, rien n'est écrit. `Left(ValidationFailure)` sur une demande
-  /// incohérente (motif vide, niveau cible identique).
+  /// incohérente (motif vide, niveau cible identique) ;
+  /// `Left(LevelCorrectionRefusedLocally)` quand la tablette sait déjà que le
+  /// serveur refuserait.
   Future<Either<Failure, bool>> correct(LevelCorrectionRequest request);
 
   /// La dernière correction de l'inscription, `null` s'il n'y en a pas.
   Future<Either<Failure, LevelCorrection?>> latestFor(String enrollmentId);
+
+  /// L'encaissement de l'élève est-il retenu par sa correction de niveau ?
+  /// Vrai tant qu'elle attend, puis tant que la nouvelle grille n'est pas
+  /// descendue (D7).
+  Future<Either<Failure, bool>> holdsCollection({
+    required String studentId,
+    required String academicYearId,
+  });
 }

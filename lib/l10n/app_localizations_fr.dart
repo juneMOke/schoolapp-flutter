@@ -22002,4 +22002,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncAggregateEnrollmentLevelCorrection => 'Correction de niveau';
+
+  @override
+  String get levelCorrectionCollectionHeld =>
+      'Encaissement suspendu : la correction de niveau de cet élève attend sa synchronisation. Il reprendra dès que le nouveau dû sera reçu.';
 }

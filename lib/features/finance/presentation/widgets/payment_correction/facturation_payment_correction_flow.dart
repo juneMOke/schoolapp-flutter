@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/presentation/widgets/level_correction_collection_hold.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/load_payment_correction_origin_use_case.dart';
@@ -36,6 +37,15 @@ Future<bool> runFacturationPaymentCorrection(
 }) async {
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context)!;
+  // D7 : le remplaçant est un versement, retenu comme les autres.
+  if (!await ensureCollectionNotHeldByLevelCorrection(
+    context,
+    studentId: detail.studentId,
+    academicYearId: detail.academicYearId,
+  )) {
+    return false;
+  }
+  if (!context.mounted) return false;
   final loaded = await getIt<LoadPaymentCorrectionOriginUseCase>()(payment.id);
   if (!context.mounted) return false;
 

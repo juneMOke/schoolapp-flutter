@@ -128,7 +128,12 @@ class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
 
     await _sync.markApplied(gesture.id, nowMs: _now());
     _bus.emit({gesture.enrollmentId});
-    unawaited(_refresh().catchError((_) {}));
+    // Un second signal une fois la descente faite : c'est elle qui lève la
+    // garde du guichet, en amenant le nouveau niveau.
+    final enrollmentId = gesture.enrollmentId;
+    unawaited(
+      _refresh().then((_) => _bus.emit({enrollmentId}), onError: (Object _) {}),
+    );
     return const OutboxDispatchResult.acked();
   }
 

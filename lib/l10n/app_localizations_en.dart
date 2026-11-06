@@ -21849,4 +21849,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncAggregateEnrollmentLevelCorrection => 'Level correction';
+
+  @override
+  String get levelCorrectionCollectionHeld =>
+      'Collection on hold: this student\'s level correction is waiting to sync. It will resume as soon as the new amount due is received.';
 }

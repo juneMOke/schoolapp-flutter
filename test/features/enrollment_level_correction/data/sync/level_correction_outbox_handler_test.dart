@@ -78,7 +78,8 @@ void main() {
 
   Future<LevelCorrection?> latest() => reader.latestFor(kEnrollment);
 
-  test('accusé : la correction est appliquée, la descente lancée', () async {
+  test('accusé : la correction est appliquée, la descente lancée, puis '
+      'annoncée une seconde fois une fois faite', () async {
     await record('g-1');
     when(() => api.push(any(), any())).thenAnswer((_) async {});
 
@@ -88,7 +89,10 @@ void main() {
     expect(result.outcome, OutboxDispatchOutcome.acked);
     expect((await latest())?.status, LevelCorrectionStatus.applied);
     expect(refreshes, 1);
+    // Le premier signal à l'accusé, le second après la descente : c'est elle
+    // qui lève la garde du guichet.
     expect(emitted, [
+      {kEnrollment},
       {kEnrollment},
     ]);
     verify(() => api.push(any(), correctionGesture('g-1'))).called(1);

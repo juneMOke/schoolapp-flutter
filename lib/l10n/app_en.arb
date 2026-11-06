@@ -12376,5 +12376,6 @@
   "levelCorrectionRefusedTargetClassroomRequired": "Correction refused: choose a class of the new level.",
   "levelCorrectionRefusedLevelMismatch": "Correction refused: the chosen class is not of the new level.",
   "levelCorrectionRefusedGeneric": "Level correction refused by the server.",
-  "syncAggregateEnrollmentLevelCorrection": "Level correction"
+  "syncAggregateEnrollmentLevelCorrection": "Level correction",
+  "levelCorrectionCollectionHeld": "Collection on hold: this student's level correction is waiting to sync. It will resume as soon as the new amount due is received."
 }

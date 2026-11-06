@@ -12559,5 +12559,6 @@
   "levelCorrectionRefusedTargetClassroomRequired": "Correction refusée : choisissez une classe du nouveau niveau.",
   "levelCorrectionRefusedLevelMismatch": "Correction refusée : la classe choisie n'est pas du nouveau niveau.",
   "levelCorrectionRefusedGeneric": "Correction de niveau refusée par le serveur.",
-  "syncAggregateEnrollmentLevelCorrection": "Correction de niveau"
+  "syncAggregateEnrollmentLevelCorrection": "Correction de niveau",
+  "levelCorrectionCollectionHeld": "Encaissement suspendu : la correction de niveau de cet élève attend sa synchronisation. Il reprendra dès que le nouveau dû sera reçu."
 }

@@ -33587,6 +33587,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Level correction'**
   String get syncAggregateEnrollmentLevelCorrection;
+
+  /// No description provided for @levelCorrectionCollectionHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection on hold: this student\'s level correction is waiting to sync. It will resume as soon as the new amount due is received.'**
+  String get levelCorrectionCollectionHeld;
 }
 
 class _AppLocalizationsDelegate

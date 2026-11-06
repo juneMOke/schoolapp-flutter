@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/database/projections/enrollment_level_correction_sql.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_write_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction.dart';
@@ -11,17 +12,31 @@ class LevelCorrectionReadDao {
 
   static const String table = LevelCorrectionWriteDao.table;
 
-  /// La dernière correction posée sur l'inscription, `null` s'il n'y en a pas.
+  /// La dernière correction posée sur l'inscription (par instant du geste),
+  /// `null` s'il n'y en a pas — la même que lit la garde du guichet.
   Future<LevelCorrection?> latestFor(String enrollmentId) async {
     final rows = await _db.query(
       table,
       where: 'enrollment_id = ?',
       whereArgs: [enrollmentId],
-      orderBy: 'updated_at DESC, corrected_at DESC',
+      orderBy: 'corrected_at DESC, rowid DESC',
       limit: 1,
     );
     return rows.isEmpty ? null : fromRow(rows.single);
   }
+
+  /// Une correction de niveau retient-elle l'encaissement de l'élève (D7) ?
+  /// Cf. [EnrollmentLevelCorrectionSql.holdsCollection].
+  Future<bool> holdsCollection({
+    required String studentId,
+    required String academicYearId,
+    required int nowMs,
+  }) => EnrollmentLevelCorrectionSql.holdsCollection(
+    _db,
+    studentId: studentId,
+    academicYearId: academicYearId,
+    nowMs: nowMs,
+  );
 
   static LevelCorrection fromRow(Map<String, Object?> row) => LevelCorrection(
     id: row['id']! as String,

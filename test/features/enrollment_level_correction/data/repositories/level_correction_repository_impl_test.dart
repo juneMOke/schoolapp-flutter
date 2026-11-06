@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/loc
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_write_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/repositories/level_correction_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_refusal.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_refused_locally.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_request.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -77,6 +79,37 @@ void main() {
     expect(
       await repository.correct(request),
       const Right<Failure, bool>(false),
+    );
+  });
+
+  test("un versement en vigueur : refus local, avec le code qu'aurait rendu "
+      'le serveur', () async {
+    await insertPayment(db, id: 'pay-1');
+    final result = await repository.correct(request);
+    final failure = result.fold((f) => f, (_) => null);
+    expect(failure, isA<LevelCorrectionRefusedLocally>());
+    expect(
+      (failure! as LevelCorrectionRefusedLocally).refusal,
+      LevelCorrectionRefusal.hasPayments,
+    );
+  });
+
+  test('garde du guichet : retenue tant que la correction attend', () async {
+    await insertEnrollment(db);
+    expect(
+      await repository.holdsCollection(
+        studentId: kStudent,
+        academicYearId: kYear,
+      ),
+      const Right<Failure, bool>(false),
+    );
+    await repository.correct(request);
+    expect(
+      await repository.holdsCollection(
+        studentId: kStudent,
+        academicYearId: kYear,
+      ),
+      const Right<Failure, bool>(true),
     );
   });
 

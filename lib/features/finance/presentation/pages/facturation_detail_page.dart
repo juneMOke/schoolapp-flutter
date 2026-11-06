@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/layout/embedded_record_pane.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_eligibility_cubit.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/presentation/widgets/level_correction_collection_hold.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/payment.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/presentation/bloc/ledger_freshness_cubit.dart';
@@ -96,6 +97,18 @@ class FacturationDetailPage extends StatelessWidget {
       studentId: intent.studentId,
       academicYearId: intent.academicYearId,
     );
+    if (!context.mounted) return;
+
+    // D7 : une correction de niveau en cours retient la caisse de l'élève.
+    // Lue APRÈS le préalable, dont la descente a pu apporter la nouvelle
+    // grille et lever la garde.
+    if (!await ensureCollectionNotHeldByLevelCorrection(
+      context,
+      studentId: intent.studentId,
+      academicYearId: intent.academicYearId,
+    )) {
+      return;
+    }
     if (!context.mounted) return;
 
     // Relecture locale en échec : on repart de ce qui est déjà affiché plutôt

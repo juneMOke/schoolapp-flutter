@@ -71,6 +71,8 @@ class FinanceOfflineBloc
 
   String _map(Failure failure) => switch (failure) {
     StorageFailure() => 'Erreur d\'accès à la base locale.',
+    LevelCorrectionHoldFailure() =>
+      'Encaissement retenu : correction de niveau en cours.',
     _ => 'Une erreur est survenue.',
   };
 }
