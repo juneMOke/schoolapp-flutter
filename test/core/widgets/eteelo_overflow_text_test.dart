@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_overflow_text.dart';
 
+import '../../test_helpers/reference_formats.dart';
+
 void main() {
   Future<void> pump(WidgetTester tester, double width) => tester.pumpWidget(
     MaterialApp(
@@ -26,6 +28,7 @@ void main() {
   });
 
   testWidgets('entier : pas d’info-bulle qui le doublerait', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await pump(tester, 800);
     expect(find.byType(Tooltip), findsNothing);
   });

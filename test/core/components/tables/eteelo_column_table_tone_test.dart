@@ -4,6 +4,8 @@ import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table_cards.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 const _tone = DataTableTone(
   header: Color(0xFF203040),
   headerInk: Color(0xFFF8F0E9),
@@ -55,6 +57,7 @@ void main() {
   testWidgets('teinté : bandeau d en-tête plein, encre crème, zébrure', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(_table());
 
     final header = tester.widget<Text>(find.text('AGENT'));
@@ -106,6 +109,7 @@ void main() {
   testWidgets('teinté : le tableau porte le cadre de sa teinte', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(_table());
 
     final framed = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox));

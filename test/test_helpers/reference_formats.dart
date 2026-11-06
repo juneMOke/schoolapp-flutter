@@ -45,6 +45,22 @@ void applyReferenceFormat(WidgetTester tester, ReferenceFormat format) {
   addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 }
 
+/// Les 800×600 dp que `flutter_test` pose par défaut. Un test écrit pour
+/// cette fenêtre la fixe ([setTestWindow]) au lieu de la supposer : sinon il
+/// vérifie un seul format sans le dire, et rougit dès que la fenêtre change
+/// (sonde 360×740, ticket #108).
+const kDefaultTestWindow = Size(800, 600);
+
+/// Pose la fenêtre de test à [size] dp (rapport de pixels 1), remise à zéro
+/// en fin de test. Pour un test qui vérifie UNE disposition : il fixe le
+/// format qu'il vérifie. `setSurfaceSize` ne convient pas — il ne change pas
+/// `MediaQuery`.
+void setTestWindow(WidgetTester tester, Size size) {
+  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = size;
+  addTearDown(tester.view.reset);
+}
+
 /// Un `testWidgets` par format de référence. Un débordement (`RenderFlex
 /// overflowed`) est une exception de rendu : il fait échouer le test du
 /// format où il apparaît, sans assertion de plus.

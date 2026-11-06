@@ -65,6 +65,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Charger la suite'), findsNothing);
+    await tester.ensureVisible(find.text('Réessayer'));
     await tester.tap(find.text('Réessayer'));
     verify(() => cubit.loadMore()).called(1);
   });

@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_actions.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 /// Le pied d'une modale carte : côte à côte en largeur, empilé en étroit,
 /// l'action principale toujours la plus en vue.
 void main() {
@@ -27,6 +29,7 @@ void main() {
   testWidgets('en largeur : côte à côte, la principale à droite', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await pump(tester, 2 * AppDimensions.dialogActionMinWidth + 100);
 
     final cancel = tester.getCenter(find.text('Annuler'));

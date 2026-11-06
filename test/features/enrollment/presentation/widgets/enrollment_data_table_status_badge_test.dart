@@ -8,6 +8,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/enro
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/reference_formats.dart';
+
 void main() {
   Widget buildHarness(Widget child) {
     return MaterialApp(
@@ -296,6 +298,7 @@ void main() {
   testWidgets('Large écran (>=600px) : 3 colonnes dont la colonne Date', (
     tester,
   ) async {
+    setTestWindow(tester, kDefaultTestWindow);
     late AppLocalizations l10n;
     await tester.pumpWidget(
       buildHarness(

@@ -4,6 +4,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/widgets/stud
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../../test_helpers/reference_formats.dart';
+
 void main() {
   late TextEditingController controller;
 
@@ -68,6 +70,7 @@ void main() {
   });
 
   testWidgets('Large (>=480px) : 3 colonnes dont Actions', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await tester.pumpWidget(harness(700));
 
     expect(find.text('Actions'), findsOneWidget);

@@ -11,6 +11,8 @@ import 'package:school_app_flutter/features/enrollment/presentation/bloc/enrollm
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/dashboard/enrollment_entries_section.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../../test_helpers/reference_formats.dart';
+
 class _MockBloc extends MockBloc<EnrollmentEntriesEvent, EnrollmentEntriesState>
     implements EnrollmentEntriesBloc {}
 
@@ -180,6 +182,7 @@ void main() {
     testWidgets('une période libre d\'un seul jour se lit comme un jour', (
       tester,
     ) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await _pump(
         tester,
         _loaded(
@@ -198,6 +201,7 @@ void main() {
 
   group('l\'heure sur un jour, la date au-delà', () {
     testWidgets('sur un jour : la colonne dit l\'heure', (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       await _pump(tester, _loaded([_entry()]));
 
       expect(find.text('HEURE'), findsOneWidget);
@@ -206,6 +210,7 @@ void main() {
     });
 
     testWidgets('sur une semaine : la date administrative', (tester) async {
+      setTestWindow(tester, kDefaultTestWindow);
       // L'heure seule ne situerait plus la ligne sur sept jours.
       await _pump(
         tester,

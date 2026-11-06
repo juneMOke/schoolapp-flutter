@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/components/keyboard/shortcuts_help.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+import '../../../test_helpers/reference_formats.dart';
+
 void main() {
   Future<void> pump(WidgetTester tester) => tester.pumpWidget(
     const MaterialApp(
@@ -15,6 +17,7 @@ void main() {
   );
 
   testWidgets('F1 ouvre l’aide, Échap la ferme', (tester) async {
+    setTestWindow(tester, kDefaultTestWindow);
     await pump(tester);
     await tester.sendKeyEvent(LogicalKeyboardKey.f1);
     await tester.pumpAndSettle();
