@@ -21853,4 +21853,84 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get levelCorrectionCollectionHeld =>
       'Collection on hold: this student\'s level correction is waiting to sync. It will resume as soon as the new amount due is received.';
+
+  @override
+  String get levelCorrectionAction => 'Correct the level';
+
+  @override
+  String get levelCorrectionDialogEyebrow => 'Enrollment';
+
+  @override
+  String get levelCorrectionDialogTitle => 'Correct the student\'s level';
+
+  @override
+  String levelCorrectionCurrentLevel(String level) {
+    return 'Current level: $level';
+  }
+
+  @override
+  String get levelCorrectionNoticeBody =>
+      'The student\'s fees are replaced by those of the new level\'s fee schedule, and the student changes class. Documents already issued remain valid as they are. Collection is on hold until sync.';
+
+  @override
+  String get levelCorrectionTargetLevelLabel => 'New level';
+
+  @override
+  String get levelCorrectionTargetLevelPlaceholder => 'Choose a level';
+
+  @override
+  String levelCorrectionLevelOption(String group, String level) {
+    return '$group · $level';
+  }
+
+  @override
+  String get levelCorrectionTargetClassroomLabel => 'New class';
+
+  @override
+  String get levelCorrectionTargetClassroomPlaceholder => 'Choose a class';
+
+  @override
+  String get levelCorrectionNoClassroomNotice =>
+      'The new level has no class: the student will have no class.';
+
+  @override
+  String get levelCorrectionReasonLabel => 'Reason';
+
+  @override
+  String get levelCorrectionReasonHint => 'E.g. wrong level at enrollment';
+
+  @override
+  String get levelCorrectionCancel => 'Cancel';
+
+  @override
+  String get levelCorrectionConfirm => 'Correct the level';
+
+  @override
+  String get levelCorrectionBusy => 'Saving…';
+
+  @override
+  String get levelCorrectionAlreadyPending =>
+      'A level correction for this student is already waiting to sync.';
+
+  @override
+  String get levelCorrectionWriteFailed =>
+      'The correction could not be saved on the tablet. Try again.';
+
+  @override
+  String get levelCorrectionDone =>
+      'Level correction saved · it will go out at the next sync';
+
+  @override
+  String levelCorrectionBannerPendingLead(String from, String to) {
+    return 'Level correction pending: $from → $to';
+  }
+
+  @override
+  String get levelCorrectionBannerPendingBody =>
+      'Collection for this student is on hold until the new amount due is received.';
+
+  @override
+  String levelCorrectionBannerRefused(String from, String to, String message) {
+    return 'Level correction refused ($from → $to). $message';
+  }
 }

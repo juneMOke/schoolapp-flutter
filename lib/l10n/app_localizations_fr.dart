@@ -22006,4 +22006,85 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get levelCorrectionCollectionHeld =>
       'Encaissement suspendu : la correction de niveau de cet élève attend sa synchronisation. Il reprendra dès que le nouveau dû sera reçu.';
+
+  @override
+  String get levelCorrectionAction => 'Corriger le niveau';
+
+  @override
+  String get levelCorrectionDialogEyebrow => 'Inscription';
+
+  @override
+  String get levelCorrectionDialogTitle => 'Corriger le niveau de l\'élève';
+
+  @override
+  String levelCorrectionCurrentLevel(String level) {
+    return 'Niveau actuel : $level';
+  }
+
+  @override
+  String get levelCorrectionNoticeBody =>
+      'Les frais de l\'élève sont remplacés par ceux de la grille du nouveau niveau, et il change de classe. Les pièces déjà émises restent valables telles quelles. Son encaissement est suspendu jusqu\'à la synchronisation.';
+
+  @override
+  String get levelCorrectionTargetLevelLabel => 'Nouveau niveau';
+
+  @override
+  String get levelCorrectionTargetLevelPlaceholder => 'Choisir un niveau';
+
+  @override
+  String levelCorrectionLevelOption(String group, String level) {
+    return '$group · $level';
+  }
+
+  @override
+  String get levelCorrectionTargetClassroomLabel => 'Nouvelle classe';
+
+  @override
+  String get levelCorrectionTargetClassroomPlaceholder => 'Choisir une classe';
+
+  @override
+  String get levelCorrectionNoClassroomNotice =>
+      'Le nouveau niveau n\'a aucune classe : l\'élève restera sans classe.';
+
+  @override
+  String get levelCorrectionReasonLabel => 'Motif';
+
+  @override
+  String get levelCorrectionReasonHint =>
+      'Ex. : erreur de niveau à l\'inscription';
+
+  @override
+  String get levelCorrectionCancel => 'Annuler';
+
+  @override
+  String get levelCorrectionConfirm => 'Corriger le niveau';
+
+  @override
+  String get levelCorrectionBusy => 'Enregistrement…';
+
+  @override
+  String get levelCorrectionAlreadyPending =>
+      'Une correction de niveau de cet élève attend déjà sa synchronisation.';
+
+  @override
+  String get levelCorrectionWriteFailed =>
+      'La correction n\'a pas pu être enregistrée sur la tablette. Réessayez.';
+
+  @override
+  String get levelCorrectionDone =>
+      'Correction de niveau enregistrée · elle part à la prochaine synchronisation';
+
+  @override
+  String levelCorrectionBannerPendingLead(String from, String to) {
+    return 'Correction de niveau en attente : $from → $to';
+  }
+
+  @override
+  String get levelCorrectionBannerPendingBody =>
+      'L\'encaissement de cet élève est suspendu jusqu\'à la réception du nouveau dû.';
+
+  @override
+  String levelCorrectionBannerRefused(String from, String to, String message) {
+    return 'Correction de niveau refusée ($from → $to). $message';
+  }
 }

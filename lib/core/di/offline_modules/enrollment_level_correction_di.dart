@@ -9,13 +9,18 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/repositories/enrollment_pull_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/level_correction_change_bus.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_options_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_read_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_sync_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_write_dao.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/data/repositories/level_correction_options_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/repositories/level_correction_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_api.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_outbox_handler.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_options_repository.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_repository.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_gesture_cubit.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_status_cubit.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/usecases/level_correction_use_cases.dart';
 import 'package:school_app_flutter/features/finance/offline/data/repositories/finance_pull_repository_impl.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -70,6 +75,26 @@ void registerEnrollmentLevelCorrection(GetIt getIt) {
     () => IsCollectionHeldByLevelCorrectionUseCase(
       getIt<LevelCorrectionRepository>(),
     ),
+  );
+  getIt.registerLazySingleton<LevelCorrectionOptionsRepository>(
+    () => LevelCorrectionOptionsRepositoryImpl(
+      LevelCorrectionOptionsDao(getIt<Database>()),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => LoadLevelCorrectionClassroomsUseCase(
+      getIt<LevelCorrectionOptionsRepository>(),
+    ),
+  );
+  getIt.registerFactoryParam<LevelCorrectionStatusCubit, String, void>(
+    (enrollmentId, _) => LevelCorrectionStatusCubit(
+      getIt<LoadLevelCorrectionUseCase>(),
+      changes: getIt<LevelCorrectionRepository>().changes,
+      enrollmentId: enrollmentId,
+    ),
+  );
+  getIt.registerFactory<LevelCorrectionGestureCubit>(
+    () => LevelCorrectionGestureCubit(getIt<CorrectLevelUseCase>()),
   );
 
   getIt<SyncEngine>().registerHandler(
