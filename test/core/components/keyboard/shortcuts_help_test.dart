@@ -16,8 +16,11 @@ void main() {
     ),
   );
 
-  testWidgets('F1 ouvre l’aide, Échap la ferme', (tester) async {
-    setTestWindow(tester, kDefaultTestWindow);
+  // Plein écran sous 600 dp : Échap ferme aussi (#109).
+  testAtReferenceFormats('F1 ouvre l’aide, Échap la ferme', (
+    tester,
+    format,
+  ) async {
     await pump(tester);
     await tester.sendKeyEvent(LogicalKeyboardKey.f1);
     await tester.pumpAndSettle();
