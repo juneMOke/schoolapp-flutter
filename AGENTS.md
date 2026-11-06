@@ -673,8 +673,15 @@ l'app) : aucune hauteur fixe sur un bloc qui contient du texte, une hauteur
   pas `MediaQuery`.
 - Tout écran neuf a un test qui le pose **à chaque format de référence**, et
   au texte ×1,3 sur le téléphone, et échoue au premier débordement.
-- La sonde de suite complète (`test/flutter_test_config.dart` à 360×740, dans
-  un `git worktree` détaché) reste l'instrument d'une passe transverse.
+- **Un test qui vérifie une disposition fixe sa fenêtre** :
+  `setTestWindow(tester, size)` (`test/test_helpers/reference_formats.dart`),
+  `kDefaultTestWindow` pour un test écrit pour 800×600. Un tap sous le pli
+  défile d'abord (`ensureVisible`, `scrollUntilVisible`).
+- **La sonde téléphone** rejoue toute la suite à 360×740 :
+  `flutter test --dart-define=PROBE_PHONE_SURFACE=true`
+  (`test/flutter_test_config.dart`). Elle tourne chaque nuit sur `main` et à
+  la demande (workflow `Phone surface probe`) ; un rouge y est un test qui
+  suppose 800×600, ou un vrai défaut téléphone (#109).
 
 ## Common Workflows
 

@@ -1,0 +1,92 @@
+name: Phone surface probe
+
+# Rejoue toute la suite à 360×740 dp (test/flutter_test_config.dart).
+# Une nuit où main n'a pas bougé, la sonde ne rejoue pas un commit
+# qu'elle a déjà passé au vert. À la demande : Actions ▸ Run workflow,
+# sur n'importe quelle branche.
+on:
+  schedule:
+    - cron: '30 1 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: phone-surface-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    name: Full suite at 360x740
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Skip a main already probed green
+        id: seen
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          GREEN=$(gh api "repos/${{ github.repository }}/actions/workflows/phone_surface_probe.yml/runs?status=success&head_sha=${{ github.sha }}" \
+            --jq '.total_count' || echo 0)
+          if [ "${GREEN:-0}" -gt 0 ]; then
+            echo "✓ ${{ github.sha }} déjà sondé au vert : sonde non rejouée"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.seen.outputs.skip != 'true'
+
+      - name: Set up Flutter
+        if: steps.seen.outputs.skip != 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+          channel: 'stable'
+
+      - name: Prepare
+        if: steps.seen.outputs.skip != 'true'
+        shell: bash
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+
+      - name: Run the suite at 360x740
+        if: steps.seen.outputs.skip != 'true'
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter test --dart-define=PROBE_PHONE_SURFACE=true \
+            --reporter expanded 2>&1 | tee probe.log
+
+      - name: Summary
+        if: always() && steps.seen.outputs.skip != 'true'
+        shell: bash
+        run: |
+          [ -f probe.log ] || exit 0
+          {
+            echo "## Sonde 360×740"
+            echo
+            echo "- Résultat : \`$(tail -n 1 probe.log)\`"
+            echo "- Débordements : $(grep -c 'overflowed' probe.log || true)"
+            FAILED=$(grep -E '\[E\]$' probe.log | sed -E 's/^.*(test\/[^:]+_test\.dart): /\1 — /; s/ \[E\]$//' | sort -u)
+            if [ -n "$FAILED" ]; then
+              echo
+              echo "### Tests rouges"
+              echo
+              echo "$FAILED" | head -n 100 | sed 's/^/- /'
+              echo
+              echo "Un test « large » fixe sa fenêtre (\`setTestWindow\`), un tap sous le pli défile d'abord. Un vrai défaut d'écran : ticket à part."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the log
+        if: failure() && steps.seen.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: phone-surface-probe-log
+          path: probe.log
+          retention-days: 14
