@@ -72,7 +72,7 @@ jobs:
             echo
             echo "- Résultat : \`$(tail -n 1 probe.log)\`"
             echo "- Débordements : $(grep -c 'overflowed' probe.log || true)"
-            FAILED=$(grep -E '\[E\]$' probe.log | sed -E 's/^.*(test\/[^:]+_test\.dart): /\1 — /; s/ \[E\]$//' | sort -u)
+            FAILED=$(grep -E '\[E\]$' probe.log | sed -E 's/^.*(test\/[^:]+_test\.dart): /\1 — /; s/ \[E\]$//' | sort -u || true)
             if [ -n "$FAILED" ]; then
               echo
               echo "### Tests rouges"
