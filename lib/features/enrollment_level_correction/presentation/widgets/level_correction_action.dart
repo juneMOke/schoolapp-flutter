@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_subject.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
@@ -9,7 +10,6 @@ import 'package:school_app_flutter/features/enrollment_level_correction/domain/e
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_options.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_status_cubit.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/level_correction_flow.dart';
-import 'package:school_app_flutter/features/enrollment_level_correction/presentation/widgets/level_correction_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Fournit l'état de correction d'une inscription à l'action et au bandeau.

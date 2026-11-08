@@ -11,24 +11,8 @@ import 'package:school_app_flutter/features/enrollment_level_correction/domain/e
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_gesture_cubit.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/widgets/level_correction_refusal_l10n.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/presentation/widgets/suspension_notice.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_subject.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-/// Ce que la modale corrige : l'inscription, et le niveau qu'elle porte.
-class LevelCorrectionSubject {
-  final String enrollmentId;
-  final String studentId;
-  final String academicYearId;
-  final String fromSchoolLevelId;
-  final String fromLevelName;
-
-  const LevelCorrectionSubject({
-    required this.enrollmentId,
-    required this.studentId,
-    required this.academicYearId,
-    required this.fromSchoolLevelId,
-    required this.fromLevelName,
-  });
-}
 
 /// Modale « Corriger le niveau ». Se ferme sur `true` une fois le geste posé ;
 /// reste ouverte, saisie conservée, en cas d'échec. Non fermable pendant

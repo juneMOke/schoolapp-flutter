@@ -1,10 +1,11 @@
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/usecases/level_correction_use_cases.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_subject.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_options.dart';
-import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_options_repository.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_gesture_cubit.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/widgets/level_correction_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';

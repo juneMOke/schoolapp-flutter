@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_request.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_options.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_options_repository.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_repository.dart';
 
 /// Pose une correction de niveau. `Right(false)` : une autre attend déjà.
@@ -34,6 +36,21 @@ class IsCollectionHeldByLevelCorrectionUseCase {
     required String studentId,
     required String academicYearId,
   }) => _repository.holdsCollection(
+    studentId: studentId,
+    academicYearId: academicYearId,
+  );
+}
+
+/// Les classes qu'une correction peut viser.
+class LoadLevelCorrectionClassroomsUseCase {
+  final LevelCorrectionOptionsRepository _repository;
+
+  const LoadLevelCorrectionClassroomsUseCase(this._repository);
+
+  Future<Either<Failure, LevelCorrectionClassrooms>> call({
+    required String studentId,
+    required String academicYearId,
+  }) => _repository.classrooms(
     studentId: studentId,
     academicYearId: academicYearId,
   );

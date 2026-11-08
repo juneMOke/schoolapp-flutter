@@ -1,7 +1,7 @@
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_subject.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/entities/local_enrollment_detail.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_options.dart';
-import 'package:school_app_flutter/features/enrollment_level_correction/presentation/widgets/level_correction_dialog.dart';
 
 /// Les niveaux de l'année, chacun avec son cycle, dans l'ordre du référentiel.
 List<LevelOption> levelOptionsFromAcademicYearContext(

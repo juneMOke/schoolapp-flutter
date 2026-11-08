@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/usecases/level_correction_use_cases.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -14,16 +15,17 @@ Future<bool> ensureCollectionNotHeldByLevelCorrection(
   required String studentId,
   required String academicYearId,
 }) async {
-  final messenger = ScaffoldMessenger.of(context);
-  final l10n = AppLocalizations.of(context)!;
   final result = await getIt<IsCollectionHeldByLevelCorrectionUseCase>()(
     studentId: studentId,
     academicYearId: academicYearId,
   );
   final held = result.fold((_) => false, (held) => held);
   if (!held) return true;
-  messenger.showSnackBar(
-    SnackBar(content: Text(l10n.levelCorrectionCollectionHeld)),
-  );
+  if (context.mounted) {
+    AppSnackBar.showWarning(
+      context,
+      AppLocalizations.of(context)!.levelCorrectionCollectionHeld,
+    );
+  }
   return false;
 }
