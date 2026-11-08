@@ -36,7 +36,6 @@ void main() {
   late LevelCorrectionWriteDao writer;
   late LevelCorrectionReadDao reader;
   late OutboxDependencyState dependency;
-  late int refreshes;
   late LevelCorrectionChangeBus bus;
   late List<Set<String>> emitted;
   late LevelCorrectionOutboxHandler handler;
@@ -49,7 +48,6 @@ void main() {
     writer = LevelCorrectionWriteDao(db);
     reader = LevelCorrectionReadDao(db);
     dependency = OutboxDependencyState.ready;
-    refreshes = 0;
     bus = LevelCorrectionChangeBus();
     emitted = [];
     bus.stream.listen(emitted.add);
@@ -61,7 +59,6 @@ void main() {
       bus: bus,
       currentUser: CurrentUserContext()..set(kAuthor, schoolId: kSchool),
       extras: const {},
-      refresh: () async => refreshes++,
       now: () => 99,
     );
   });
@@ -78,8 +75,8 @@ void main() {
 
   Future<LevelCorrection?> latest() => reader.latestFor(kEnrollment);
 
-  test('accusé : la correction est appliquée, la descente lancée, puis '
-      'annoncée une seconde fois une fois faite', () async {
+  test("accusé : la correction est appliquée et annoncée ; la descente n'est "
+      "pas l'affaire du handler", () async {
     await record('g-1');
     when(() => api.push(any(), any())).thenAnswer((_) async {});
 
@@ -88,36 +85,10 @@ void main() {
 
     expect(result.outcome, OutboxDispatchOutcome.acked);
     expect((await latest())?.status, LevelCorrectionStatus.applied);
-    expect(refreshes, 1);
-    // Le premier signal à l'accusé, le second après la descente : c'est elle
-    // qui lève la garde du guichet.
     expect(emitted, [
-      {kEnrollment},
       {kEnrollment},
     ]);
     verify(() => api.push(any(), correctionGesture('g-1'))).called(1);
-  });
-
-  test('une descente qui échoue ne défait pas l\'accusé', () async {
-    await record('g-1');
-    when(() => api.push(any(), any())).thenAnswer((_) async {});
-    handler = LevelCorrectionOutboxHandler(
-      api: api,
-      sync: LevelCorrectionSyncDao(db),
-      outbox: OutboxDao(db),
-      dependency: (_, _) async => dependency,
-      bus: bus,
-      currentUser: CurrentUserContext()..set(kAuthor, schoolId: kSchool),
-      extras: const {},
-      refresh: () async => throw StateError('hors ligne'),
-      now: () => 99,
-    );
-
-    final result = await dispatch('g-1');
-    await pumpEventQueue();
-
-    expect(result.outcome, OutboxDispatchOutcome.acked);
-    expect((await latest())?.status, LevelCorrectionStatus.applied);
   });
 
   test('inscription pas encore accusée localement : le geste attend, sans '
@@ -154,7 +125,6 @@ void main() {
     final row = await latest();
     expect(row?.status, LevelCorrectionStatus.refused);
     expect(row?.refusalCode, 'LEVEL_CORRECTION_HAS_PAYMENTS');
-    expect(refreshes, 0);
   });
 
   test('5xx : rejouable, la ligne reste en attente', () async {

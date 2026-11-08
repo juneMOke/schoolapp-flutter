@@ -94,8 +94,39 @@ void main() {
     );
   });
 
-  testWidgets('appliquée, ou aucune : rien', (tester) async {
-    await pump(tester, _correction(LevelCorrectionStatus.applied));
+  testWidgets('accusée, pas encore descendue : la caisse reste suspendue', (
+    tester,
+  ) async {
+    final l10n = await pump(tester, _correction(LevelCorrectionStatus.applied));
+    expect(
+      find.textContaining(
+        l10n.levelCorrectionBannerAppliedLead('2e maternelle', '2e primaire'),
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining(
+        l10n.levelCorrectionBannerAppliedBody,
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets("envoi abandonné : dit qu'elle n'est pas partie", (tester) async {
+    final l10n = await pump(tester, _correction(LevelCorrectionStatus.stalled));
+    expect(
+      find.textContaining(
+        l10n.levelCorrectionBannerStalled('2e maternelle', '2e primaire'),
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('descendue, ou aucune : rien', (tester) async {
+    await pump(tester, _correction(LevelCorrectionStatus.settled));
     expect(find.byType(RichText), findsNothing);
     await pump(tester, null);
     expect(find.byType(RichText), findsNothing);

@@ -21933,4 +21933,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String levelCorrectionBannerRefused(String from, String to, String message) {
     return 'Level correction refused ($from → $to). $message';
   }
+
+  @override
+  String levelCorrectionBannerAppliedLead(String from, String to) {
+    return 'Level correction accepted: $from → $to';
+  }
+
+  @override
+  String get levelCorrectionBannerAppliedBody =>
+      'The record is updating. Collection will resume once the new amount due has reached this tablet.';
+
+  @override
+  String levelCorrectionBannerStalled(String from, String to) {
+    return 'The level correction ($from → $to) could not be sent. Retry it from the sync status, or make a new correction.';
+  }
 }

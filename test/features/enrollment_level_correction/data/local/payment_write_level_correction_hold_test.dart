@@ -17,7 +17,7 @@ void main() {
 
   setUp(() async {
     db = await openFullOfflineDb();
-    payments = FinancePaymentWriteDao(db, now: () => 1000);
+    payments = FinancePaymentWriteDao(db);
     await insertEnrollment(db);
   });
   tearDown(() => db.close());

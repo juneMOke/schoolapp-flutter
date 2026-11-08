@@ -4,8 +4,6 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/database/projections/enrollment_level_correction_sql.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
-import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/documents/data/local/ticket_print_job_writer.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/models/enrollment_local_models.dart'
@@ -20,10 +18,8 @@ import 'package:school_app_flutter/core/money/money_bag.dart';
 /// sans jamais toucher `student_charges` (le reste se compose à la lecture).
 class FinancePaymentWriteDao {
   final Database _db;
-  final Clock _now;
 
-  const FinancePaymentWriteDao(this._db, {Clock now = systemClock})
-    : _now = now;
+  const FinancePaymentWriteDao(this._db);
 
   /// Insère un paiement + ses allocations (append-only), émet un RC provisoire
   /// et enfile l'outbox(PAYMENT). N'écrit RIEN dans `student_charges` : le reste
@@ -84,7 +80,6 @@ class FinancePaymentWriteDao {
       txn,
       studentId: payment.studentId,
       academicYearId: payment.academicYearId,
-      nowMs: _now(),
     )) {
       throw const LevelCorrectionHoldException();
     }

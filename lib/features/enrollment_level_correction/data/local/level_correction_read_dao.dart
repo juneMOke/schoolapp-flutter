@@ -15,12 +15,15 @@ class LevelCorrectionReadDao {
   /// La dernière correction posée sur l'inscription (par instant du geste),
   /// `null` s'il n'y en a pas — la même que lit la garde du guichet.
   Future<LevelCorrection?> latestFor(String enrollmentId) async {
-    final rows = await _db.query(
-      table,
-      where: 'enrollment_id = ?',
-      whereArgs: [enrollmentId],
-      orderBy: 'corrected_at DESC, rowid DESC',
-      limit: 1,
+    final rows = await _db.rawQuery(
+      '''
+      SELECT c.*, ${EnrollmentLevelCorrectionSql.queued('c')} AS queued
+      FROM $table c
+      WHERE c.enrollment_id = ?
+      ORDER BY c.corrected_at DESC, c.rowid DESC
+      LIMIT 1
+      ''',
+      [enrollmentId],
     );
     return rows.isEmpty ? null : fromRow(rows.single);
   }
@@ -30,12 +33,10 @@ class LevelCorrectionReadDao {
   Future<bool> holdsCollection({
     required String studentId,
     required String academicYearId,
-    required int nowMs,
   }) => EnrollmentLevelCorrectionSql.holdsCollection(
     _db,
     studentId: studentId,
     academicYearId: academicYearId,
-    nowMs: nowMs,
   );
 
   static LevelCorrection fromRow(Map<String, Object?> row) => LevelCorrection(
@@ -49,14 +50,22 @@ class LevelCorrectionReadDao {
     toClassroomId: row['to_classroom_id'] as String?,
     reason: row['reason']! as String,
     correctedAt: row['corrected_at']! as String,
-    status: _status(row['sync_status'] as String?),
+    status: _status(row),
     refusalCode: row['sync_error_code'] as String?,
   );
 
-  static LevelCorrectionStatus _status(String? value) =>
-      switch (RecordSyncState.fromDb(value)) {
-        RecordSyncState.synced => LevelCorrectionStatus.applied,
+  /// `queued` absent (ligne lue sans la jointure) : la ligne en attente est
+  /// tenue pour en file.
+  static LevelCorrectionStatus _status(Map<String, Object?> row) =>
+      switch (RecordSyncState.fromDb(row['sync_status'] as String?)) {
+        RecordSyncState.synced =>
+          row['settled_at'] == null
+              ? LevelCorrectionStatus.applied
+              : LevelCorrectionStatus.settled,
         RecordSyncState.failed => LevelCorrectionStatus.refused,
-        RecordSyncState.pending => LevelCorrectionStatus.pending,
+        RecordSyncState.pending =>
+          row['queued'] == 0
+              ? LevelCorrectionStatus.stalled
+              : LevelCorrectionStatus.pending,
       };
 }

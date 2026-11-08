@@ -6,8 +6,20 @@ enum LevelCorrectionStatus {
   /// encore celles de l'ancien niveau.
   pending,
 
-  /// Accusée par le serveur. Les nouvelles créances arrivent par la descente.
+  /// Posée, mais son envoi est abandonné : la file l'a écartée après trop
+  /// d'échecs (réseau, serveur), sans que le serveur ait jugé le geste. Rien
+  /// n'a changé, l'encaissement n'est plus retenu ; le geste peut être relancé
+  /// depuis la file, ou remplacé par une nouvelle correction.
+  stalled,
+
+  /// Accusée par le serveur, pas encore descendue : le dossier montre encore
+  /// l'ancien niveau, et ses créances peuvent être celles de l'ancienne grille.
+  /// L'encaissement reste retenu, aucune nouvelle correction ne part.
   applied,
+
+  /// Accusée **et** descendue : l'inscription et ses créances sont celles du
+  /// nouveau niveau. Plus rien n'est retenu.
+  settled,
 
   /// Refusée (422, terminal) : rien n'a changé au serveur.
   refused,

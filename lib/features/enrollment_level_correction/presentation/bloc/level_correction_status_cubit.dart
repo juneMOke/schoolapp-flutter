@@ -12,8 +12,12 @@ class LevelCorrectionStatusState extends Equatable {
 
   const LevelCorrectionStatusState([this.correction]);
 
-  /// Une correction attend : le guichet n'en pose pas une seconde.
-  bool get isPending => correction?.status == LevelCorrectionStatus.pending;
+  /// Une correction attend — en file, ou accusée mais pas encore descendue :
+  /// le guichet n'en pose pas une seconde (elle partirait d'un niveau périmé).
+  bool get blocksNewCorrection => switch (correction?.status) {
+    LevelCorrectionStatus.pending || LevelCorrectionStatus.applied => true,
+    _ => false,
+  };
 
   @override
   List<Object?> get props => [correction];

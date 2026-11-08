@@ -7,9 +7,10 @@ import 'package:school_app_flutter/features/enrollment_level_correction/presenta
 import 'package:school_app_flutter/features/enrollment_suspension/presentation/widgets/suspension_notice.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le bandeau d'une correction de niveau, en tête du dossier : en attente
-/// (l'encaissement est suspendu), ou refusée (avec la raison). Rien une fois
-/// appliquée : le dossier montre alors le nouveau niveau.
+/// Le bandeau d'une correction de niveau, en tête du dossier : en attente ou
+/// acceptée sans être descendue (l'encaissement est suspendu), abandonnée par
+/// la file, ou refusée (avec la raison). Rien une fois descendue : le dossier
+/// montre alors le nouveau niveau.
 class LevelCorrectionBanner extends StatelessWidget {
   /// Nom affiché d'un niveau, par identifiant ; l'identifiant brut sinon.
   final String Function(String levelId) levelName;
@@ -26,10 +27,17 @@ class LevelCorrectionBanner extends StatelessWidget {
     if (correction == null) return const SizedBox.shrink();
     final from = levelName(correction.fromSchoolLevelId);
     final to = levelName(correction.toSchoolLevelId);
-    final Widget banner = switch (correction.status) {
+    final Widget? banner = switch (correction.status) {
       LevelCorrectionStatus.pending => SuspensionNotice(
         lead: l10n.levelCorrectionBannerPendingLead(from, to),
         body: l10n.levelCorrectionBannerPendingBody,
+      ),
+      LevelCorrectionStatus.applied => SuspensionNotice(
+        lead: l10n.levelCorrectionBannerAppliedLead(from, to),
+        body: l10n.levelCorrectionBannerAppliedBody,
+      ),
+      LevelCorrectionStatus.stalled => SuspensionGestureError(
+        message: l10n.levelCorrectionBannerStalled(from, to),
       ),
       LevelCorrectionStatus.refused => SuspensionGestureError(
         message: l10n.levelCorrectionBannerRefused(
@@ -38,9 +46,9 @@ class LevelCorrectionBanner extends StatelessWidget {
           l10n.levelCorrectionRefusalMessage(correction.refusalCode),
         ),
       ),
-      LevelCorrectionStatus.applied => const SizedBox.shrink(),
+      LevelCorrectionStatus.settled => null,
     };
-    if (correction.status == LevelCorrectionStatus.applied) return banner;
+    if (banner == null) return const SizedBox.shrink();
     return Semantics(
       liveRegion: true,
       child: Padding(

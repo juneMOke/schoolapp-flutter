@@ -444,6 +444,7 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
           enrollmentId: candidate.target.enrollmentId,
           child: LevelCorrectionScope(
             enrollmentId: candidate.target.enrollmentId,
+            onSettled: _reloadAfterLevelCorrection,
             child: EnrollmentJourneyScaffold(
               modeLabel: _buildJourneyModeLabel(l10n),
               studentDisplayName: _localDraftDisplayName(detail, l10n),
@@ -500,6 +501,19 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   bool get _offersSheet =>
       !_isCompletedReedition &&
       _localReadOnly?.enrollment.status == OfflineEnrollmentStatus.completed;
+
+  /// La correction de niveau vient de descendre : relire le dossier local, qui
+  /// porte le nouveau niveau. La bascule forcée garde la consultation même si
+  /// le dossier avait été ouvert comme écriture non synchronisée — il est
+  /// maintenant synchronisé, et `_onLocalDetail` l'ignorerait.
+  void _reloadAfterLevelCorrection() {
+    final enrollmentId = _localReadOnly?.enrollment.id;
+    if (!mounted || enrollmentId == null) return;
+    _forceLocalReadOnly = true;
+    context.read<EnrollmentOfflineBloc>().add(
+      LoadLocalEnrollmentDetail(enrollmentId),
+    );
+  }
 
   /// « Corriger le niveau » : tout dossier complété consulté, comme la fiche
   /// d'inscription. Le serveur juge le reste (versements, notes).

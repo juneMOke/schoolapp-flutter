@@ -18,12 +18,13 @@ import 'package:sqflite_common/sqlite_api.dart';
 ///     versement saisi maintenant viserait l'ancienne grille, et l'outbox
 ///     n'ordonne rien entre deux types de gestes : parti avant la correction,
 ///     il la ferait refuser ;
-///  2. **elle est accusée, mais pas encore descendue** : l'inscription locale
-///     porte encore un autre niveau que la cible, donc les créances affichées
-///     sont celles de l'ancienne grille. Ce cas est **borné** à
-///     [appliedHoldWindowMs] après l'accusé : si une autre tablette a remis
-///     l'élève à un autre niveau entre-temps, l'écart ne se refermerait jamais,
-///     et une garde sans issue gèlerait la caisse de cet élève pour toujours.
+///  2. **elle est accusée, mais pas encore descendue** (`settled_at` nul) :
+///     tant qu'aucune descente partie **après** l'accusé n'a ramené
+///     l'inscription, les créances et leurs pierres tombales, les créances
+///     affichées peuvent être celles de l'ancienne grille — que le serveur a
+///     supprimées. Ni le niveau local (l'inscription peut descendre sans les
+///     créances, chaque flux échouant pour lui-même) ni une durée (une tablette
+///     restée hors ligne après l'accusé) ne prouvent cette descente.
 ///
 /// Une correction refusée ne retient rien : elle n'a rien changé au serveur.
 /// Une entrée d'outbox tombée en échec terminal non plus : sans elle, le geste
@@ -34,9 +35,16 @@ abstract final class EnrollmentLevelCorrectionSql {
   /// Type d'agrégat des corrections dans l'outbox.
   static const String aggregateType = 'ENROLLMENT_LEVEL_CORRECTION';
 
-  /// Durée pendant laquelle une correction accusée retient encore
-  /// l'encaissement, le temps que la descente apporte la nouvelle grille.
-  static const int appliedHoldWindowMs = 60 * 60 * 1000;
+  /// Prédicat SQL : l'entrée d'outbox de la correction [alias] est encore en
+  /// file (`PENDING`). Faux quand le moteur l'a abandonnée (`SYNC_ERROR`, après
+  /// trop d'échecs transitoires ou un contenu illisible) : la ligne, elle,
+  /// resterait `PENDING_SYNC` pour toujours, faute de quiconque pour la juger.
+  static String queued(String alias) =>
+      '''EXISTS (
+        SELECT 1 FROM ${OutboxDao.table} o
+        WHERE o.id = '$aggregateType:' || $alias.id
+          AND o.status = '${OutboxStatus.pending.dbValue}'
+      )''';
 
   /// L'encaissement de [studentId] est-il retenu par une correction de niveau ?
   /// [academicYearId] `null` : sur n'importe quelle année.
@@ -44,7 +52,6 @@ abstract final class EnrollmentLevelCorrectionSql {
     DatabaseExecutor db, {
     required String studentId,
     String? academicYearId,
-    required int nowMs,
   }) async {
     final rows = await db.rawQuery(
       '''
@@ -58,15 +65,8 @@ abstract final class EnrollmentLevelCorrectionSql {
               OR (n.corrected_at = c.corrected_at AND n.rowid > c.rowid))
         )
         AND (
-          (c.sync_status = ? AND EXISTS (
-            SELECT 1 FROM ${OutboxDao.table} o
-            WHERE o.id = '$aggregateType:' || c.id AND o.status = ?
-          ))
-          OR (c.sync_status = ? AND c.acked_at > ? AND EXISTS (
-            SELECT 1 FROM enrollments e
-            WHERE e.id = c.enrollment_id
-              AND COALESCE(e.school_level_id, '') <> c.to_school_level_id
-          ))
+          (c.sync_status = ? AND ${queued('c')})
+          OR (c.sync_status = ? AND c.settled_at IS NULL)
         )
       LIMIT 1
       ''',
@@ -74,9 +74,7 @@ abstract final class EnrollmentLevelCorrectionSql {
         studentId,
         ?academicYearId,
         RecordSyncState.pending.dbValue,
-        OutboxStatus.pending.dbValue,
         RecordSyncState.synced.dbValue,
-        nowMs - appliedHoldWindowMs,
       ],
     );
     return rows.isNotEmpty;

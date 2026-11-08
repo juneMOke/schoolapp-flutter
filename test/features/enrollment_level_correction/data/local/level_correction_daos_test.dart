@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/database/projections/enrollment_level_correction_sql.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_read_dao.dart';
@@ -102,6 +101,67 @@ void main() {
       expect(await record('g-2'), LevelCorrectionRecordOutcome.recorded);
     });
 
+    test(
+      'accusée mais pas encore descendue : une nouvelle correction attend',
+      () async {
+        await record('g-1');
+        await sync.markApplied('g-1', nowMs: 20);
+        expect(
+          await record('g-2'),
+          LevelCorrectionRecordOutcome.alreadyPending,
+        );
+        await sync.markSettled(pulledFromMs: 30, nowMs: 31);
+        expect(
+          await record('g-2', correctedAt: '2026-11-06T11:00:00.000Z'),
+          LevelCorrectionRecordOutcome.recorded,
+        );
+      },
+    );
+
+    test("envoi abandonné par la file : la correction n'est plus « en "
+        'attente », une nouvelle la remplace', () async {
+      await record('g-1');
+      await OutboxDao(
+        db,
+      ).markSyncError(LevelCorrectionWriteDao.entryId('g-1'), 'poison');
+      expect(
+        (await reader.latestFor(kEnrollment))?.status,
+        LevelCorrectionStatus.stalled,
+      );
+
+      expect(
+        await record('g-2', correctedAt: '2026-11-06T11:00:00.000Z'),
+        LevelCorrectionRecordOutcome.recorded,
+      );
+      expect((await reader.latestFor(kEnrollment))?.id, 'g-2');
+      // La première est close : relancée depuis la file, elle ne partira pas.
+      expect(await sync.holds('g-1'), isFalse);
+      final closed = await db.query(
+        'enrollment_level_corrections',
+        where: 'id = ?',
+        whereArgs: ['g-1'],
+      );
+      expect(
+        closed.single['sync_error_code'],
+        LevelCorrectionWriteDao.supersededCode,
+      );
+    });
+
+    test(
+      'envoi abandonné puis relancé depuis la file : de nouveau en attente',
+      () async {
+        await record('g-1');
+        final outbox = OutboxDao(db);
+        final entryId = LevelCorrectionWriteDao.entryId('g-1');
+        await outbox.markSyncError(entryId, 'poison');
+        await outbox.requeue(entryId);
+        expect(
+          (await reader.latestFor(kEnrollment))?.status,
+          LevelCorrectionStatus.pending,
+        );
+      },
+    );
+
     test('un versement en vigueur sur l\'année : refus local, rien n\'est '
         'écrit', () async {
       await insertPayment(db, id: 'pay-1');
@@ -135,6 +195,31 @@ void main() {
       final latest = await reader.latestFor(kEnrollment);
       expect(latest?.status, LevelCorrectionStatus.applied);
       expect(latest?.refusalCode, isNull);
+      expect(await sync.hasUnsettled(), isTrue);
+    });
+
+    test("descente partie après l'accusé : « descendue », inscriptions "
+        'renvoyées', () async {
+      await record('g-1');
+      await sync.markApplied('g-1', nowMs: 20);
+      expect(await sync.markSettled(pulledFromMs: 20, nowMs: 40), {
+        kEnrollment,
+      });
+      expect(
+        (await reader.latestFor(kEnrollment))?.status,
+        LevelCorrectionStatus.settled,
+      );
+      expect(await sync.hasUnsettled(), isFalse);
+    });
+
+    test("descente partie avant l'accusé : rien n'est descendu", () async {
+      await record('g-1');
+      await sync.markApplied('g-1', nowMs: 20);
+      expect(await sync.markSettled(pulledFromMs: 19, nowMs: 40), isEmpty);
+      expect(
+        (await reader.latestFor(kEnrollment))?.status,
+        LevelCorrectionStatus.applied,
+      );
     });
 
     test('refus : le code reste sur la ligne', () async {
@@ -165,15 +250,8 @@ void main() {
   });
 
   group('garde du guichet (D7)', () {
-    const window = EnrollmentLevelCorrectionSql.appliedHoldWindowMs;
-    const now = 10 * window;
-
-    Future<bool> held({String academicYearId = kYear}) =>
-        reader.holdsCollection(
-          studentId: kStudent,
-          academicYearId: academicYearId,
-          nowMs: now,
-        );
+    Future<bool> held({String academicYearId = kYear}) => reader
+        .holdsCollection(studentId: kStudent, academicYearId: academicYearId);
 
     setUp(() => insertEnrollment(db, schoolLevelId: 'lvl-m2'));
 
@@ -210,36 +288,37 @@ void main() {
 
     test('accusée, nouvelle grille pas encore descendue : retenue', () async {
       await record('g-1');
-      await sync.markApplied('g-1', nowMs: now - 1000);
+      await sync.markApplied('g-1', nowMs: 1000);
       expect(await held(), isTrue);
     });
 
-    test(
-      'accusée et descendue (niveau local = cible) : la caisse rouvre',
-      () async {
-        await record('g-1');
-        await sync.markApplied('g-1', nowMs: now - 1000);
-        await db.update(
-          'enrollments',
-          {'school_level_id': 'lvl-p2'},
-          where: 'id = ?',
-          whereArgs: [kEnrollment],
-        );
-        expect(await held(), isFalse);
-      },
-    );
-
-    test("accusée il y a plus d'une heure : la garde lâche, même sans "
-        'descente', () async {
+    test("accusée, l'inscription locale porte déjà la cible mais les créances "
+        'ne sont pas descendues : toujours retenue', () async {
       await record('g-1');
-      await sync.markApplied('g-1', nowMs: now - window - 1);
+      await sync.markApplied('g-1', nowMs: 1000);
+      await db.update(
+        'enrollments',
+        {'school_level_id': 'lvl-p2'},
+        where: 'id = ?',
+        whereArgs: [kEnrollment],
+      );
+      expect(await held(), isTrue);
+    });
+
+    test('accusée puis descendue : la caisse rouvre', () async {
+      await record('g-1');
+      await sync.markApplied('g-1', nowMs: 1000);
+      await sync.markSettled(pulledFromMs: 1000, nowMs: 2000);
       expect(await held(), isFalse);
     });
 
     test('seule la dernière correction compte', () async {
       await record('g-1');
-      await sync.markApplied('g-1', nowMs: now - 1000);
+      await OutboxDao(
+        db,
+      ).markSyncError(LevelCorrectionWriteDao.entryId('g-1'), 'poison');
       await record('g-2', correctedAt: '2026-11-06T11:00:00.000Z');
+      expect(await held(), isTrue);
       await sync.markRefused('g-2', code: 'STALE_LEVEL', reason: 'x', nowMs: 1);
       expect(await held(), isFalse);
     });

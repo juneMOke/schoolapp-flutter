@@ -59,6 +59,43 @@ class LevelCorrectionSyncDao {
     whereArgs: [gestureId],
   );
 
+  /// Une correction accusée attend-elle encore sa descente ?
+  Future<bool> hasUnsettled() async => (await _db.query(
+    table,
+    columns: ['id'],
+    where: 'sync_status = ? AND settled_at IS NULL',
+    whereArgs: [RecordSyncState.synced.dbValue],
+    limit: 1,
+  )).isNotEmpty;
+
+  /// Une descente partie à [pulledFromMs] (horloge locale) a ramené le nouvel
+  /// état du serveur : les corrections accusées **avant** son départ sont
+  /// descendues. Une correction accusée pendant la descente attend la
+  /// suivante — la réponse a pu être composée avant son accusé.
+  ///
+  /// Renvoie les inscriptions concernées.
+  Future<Set<String>> markSettled({
+    required int pulledFromMs,
+    required int nowMs,
+  }) => _db.transaction((txn) async {
+    const where = 'sync_status = ? AND settled_at IS NULL AND acked_at <= ?';
+    final args = [RecordSyncState.synced.dbValue, pulledFromMs];
+    final rows = await txn.query(
+      table,
+      columns: ['enrollment_id'],
+      where: where,
+      whereArgs: args,
+    );
+    if (rows.isEmpty) return const <String>{};
+    await txn.update(
+      table,
+      {'settled_at': nowMs, 'updated_at': nowMs},
+      where: where,
+      whereArgs: args,
+    );
+    return {for (final r in rows) r['enrollment_id']! as String};
+  });
+
   /// L'inscription a été purgée au serveur (410) : le geste n'a plus d'objet.
   Future<void> drop(String gestureId) =>
       _db.delete(table, where: 'id = ?', whereArgs: [gestureId]);

@@ -14,7 +14,8 @@ enum LevelCorrectionRecordOutcome {
   /// Le geste est posé, et part par l'outbox.
   recorded,
 
-  /// Une correction de la même inscription attend déjà : rien n'est écrit.
+  /// Une correction de la même inscription attend déjà — en file, ou accusée
+  /// mais pas encore descendue : rien n'est écrit.
   alreadyPending,
 
   /// L'élève a un versement en vigueur sur l'année : le serveur refuserait en
@@ -39,9 +40,19 @@ class LevelCorrectionWriteDao {
 
   static String entryId(String gestureId) => '$aggregateType:$gestureId';
 
+  /// Code rangé sur une correction dont l'envoi avait été abandonné par la
+  /// file, et qu'une nouvelle correction remplace. Si l'entrée est relancée
+  /// plus tard, le handler la trouve jugée et ne l'envoie pas.
+  static const String supersededCode = 'SUPERSEDED_AFTER_ABANDON';
+
   /// Pose [gesture], sauf si une correction de la même inscription attend déjà
   /// (la seconde partirait sur un niveau de départ périmé et tomberait en
   /// `STALE_LEVEL`) ou si l'élève a déjà un versement en vigueur sur l'année.
+  ///
+  /// « Attend » : en file, ou accusée sans que la descente ait ramené le
+  /// nouveau niveau. Une correction en attente dont l'envoi a été **abandonné**
+  /// par la file ne bloque pas : elle est close ([supersededCode]) et la
+  /// nouvelle prend sa place — sinon l'élève resterait sans issue.
   ///
   /// Le second contrôle ne remplace pas la garde du serveur : un versement pris
   /// sur une autre tablette n'est pas encore ici. Il épargne seulement au
@@ -51,14 +62,29 @@ class LevelCorrectionWriteDao {
     required String schoolId,
     required int nowMs,
   }) => _db.transaction((txn) async {
-    final pending = await txn.query(
-      table,
-      columns: ['id'],
-      where: 'enrollment_id = ? AND sync_status = ?',
-      whereArgs: [gesture.enrollmentId, RecordSyncState.pending.dbValue],
-      limit: 1,
+    final open = await txn.rawQuery(
+      '''
+      SELECT c.id, c.sync_status,
+             ${EnrollmentLevelCorrectionSql.queued('c')} AS queued
+      FROM $table c
+      WHERE c.enrollment_id = ?
+        AND (c.sync_status = ?
+          OR (c.sync_status = ? AND c.settled_at IS NULL))
+      ''',
+      [
+        gesture.enrollmentId,
+        RecordSyncState.pending.dbValue,
+        RecordSyncState.synced.dbValue,
+      ],
     );
-    if (pending.isNotEmpty) return LevelCorrectionRecordOutcome.alreadyPending;
+    final abandoned = <String>[];
+    for (final row in open) {
+      final stalled =
+          row['sync_status'] == RecordSyncState.pending.dbValue &&
+          row['queued'] == 0;
+      if (!stalled) return LevelCorrectionRecordOutcome.alreadyPending;
+      abandoned.add(row['id']! as String);
+    }
     final payments = await txn.rawQuery(
       'SELECT 1 FROM payments p '
       'WHERE p.student_id = ? AND p.academic_year_id = ? '
@@ -66,6 +92,18 @@ class LevelCorrectionWriteDao {
       [gesture.studentId, gesture.academicYearId],
     );
     if (payments.isNotEmpty) return LevelCorrectionRecordOutcome.hasPayments;
+    for (final id in abandoned) {
+      await txn.update(
+        table,
+        {
+          'sync_status': RecordSyncState.failed.dbValue,
+          'sync_error_code': supersededCode,
+          'updated_at': nowMs,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
     await txn.insert(table, {
       'id': gesture.id,
       'school_id': schoolId,

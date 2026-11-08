@@ -33725,6 +33725,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Level correction refused ({from} → {to}). {message}'**
   String levelCorrectionBannerRefused(String from, String to, String message);
+
+  /// No description provided for @levelCorrectionBannerAppliedLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction accepted: {from} → {to}'**
+  String levelCorrectionBannerAppliedLead(String from, String to);
+
+  /// No description provided for @levelCorrectionBannerAppliedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The record is updating. Collection will resume once the new amount due has reached this tablet.'**
+  String get levelCorrectionBannerAppliedBody;
+
+  /// No description provided for @levelCorrectionBannerStalled.
+  ///
+  /// In en, this message translates to:
+  /// **'The level correction ({from} → {to}) could not be sent. Retry it from the sync status, or make a new correction.'**
+  String levelCorrectionBannerStalled(String from, String to);
 }
 
 class _AppLocalizationsDelegate

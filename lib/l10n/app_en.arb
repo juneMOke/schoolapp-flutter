@@ -12403,5 +12403,10 @@
   "@levelCorrectionBannerPendingLead": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
   "levelCorrectionBannerPendingBody": "Collection for this student is on hold until the new amount due is received.",
   "levelCorrectionBannerRefused": "Level correction refused ({from} → {to}). {message}",
-  "@levelCorrectionBannerRefused": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}, "message": {"type": "String"}}}
+  "@levelCorrectionBannerRefused": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}, "message": {"type": "String"}}},
+  "levelCorrectionBannerAppliedLead": "Level correction accepted: {from} → {to}",
+  "@levelCorrectionBannerAppliedLead": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
+  "levelCorrectionBannerAppliedBody": "The record is updating. Collection will resume once the new amount due has reached this tablet.",
+  "levelCorrectionBannerStalled": "The level correction ({from} → {to}) could not be sent. Retry it from the sync status, or make a new correction.",
+  "@levelCorrectionBannerStalled": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}}
 }

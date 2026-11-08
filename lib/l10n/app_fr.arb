@@ -12586,5 +12586,10 @@
   "@levelCorrectionBannerPendingLead": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
   "levelCorrectionBannerPendingBody": "L'encaissement de cet élève est suspendu jusqu'à la réception du nouveau dû.",
   "levelCorrectionBannerRefused": "Correction de niveau refusée ({from} → {to}). {message}",
-  "@levelCorrectionBannerRefused": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}, "message": {"type": "String"}}}
+  "@levelCorrectionBannerRefused": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}, "message": {"type": "String"}}},
+  "levelCorrectionBannerAppliedLead": "Correction de niveau acceptée : {from} → {to}",
+  "@levelCorrectionBannerAppliedLead": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
+  "levelCorrectionBannerAppliedBody": "Le dossier se met à jour. L'encaissement reprendra dès que le nouveau dû sera arrivé sur cette tablette.",
+  "levelCorrectionBannerStalled": "La correction de niveau ({from} → {to}) n'a pas pu être envoyée. Relancez-la depuis l'état de la synchronisation, ou posez une nouvelle correction.",
+  "@levelCorrectionBannerStalled": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}}
 }

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -17,11 +16,6 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/loc
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_api.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_gesture.dart';
 
-/// Descente des ressources qu'une correction accusée a changées au serveur :
-/// l'inscription, ses créances (et leurs pierres tombales), son membre de
-/// classe.
-typedef LevelCorrectionRefresh = Future<void> Function();
-
 /// Handler d'outbox de l'agrégat `ENROLLMENT_LEVEL_CORRECTION`.
 ///
 /// **Ordre par inscription** : un geste attend (`blocked`) tant qu'un geste
@@ -33,10 +27,9 @@ typedef LevelCorrectionRefresh = Future<void> Function();
 /// ligne garde son code, et rien n'est à défaire, le geste n'ayant rien changé
 /// localement.
 ///
-/// **Après l'accusé**, la tablette n'a pas encore les nouvelles créances : le
-/// handler lance la descente ([LevelCorrectionRefresh]) sans l'attendre. D'ici
-/// là, l'inscription locale porte encore l'ancien niveau, et la garde du guichet
-/// (E3) continue de bloquer l'encaissement.
+/// **Après l'accusé**, la tablette n'a pas encore les nouvelles créances : la
+/// descente revient à `LevelCorrectionSettler`, une fois par fin de flush.
+/// D'ici là, la garde du guichet (E3) continue de bloquer l'encaissement.
 class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
   final LevelCorrectionApi _api;
   final LevelCorrectionSyncDao _sync;
@@ -45,7 +38,6 @@ class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
   final LevelCorrectionChangeBus _bus;
   final CurrentUserContext _currentUser;
   final Map<String, dynamic> _extras;
-  final LevelCorrectionRefresh _refresh;
   final Clock _now;
 
   const LevelCorrectionOutboxHandler({
@@ -56,7 +48,6 @@ class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
     required LevelCorrectionChangeBus bus,
     required CurrentUserContext currentUser,
     required Map<String, dynamic> extras,
-    required LevelCorrectionRefresh refresh,
     Clock now = systemClock,
   }) : _api = api,
        _sync = sync,
@@ -65,7 +56,6 @@ class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
        _bus = bus,
        _currentUser = currentUser,
        _extras = extras,
-       _refresh = refresh,
        _now = now;
 
   static const String enrollmentNotYetSynced = 'ENROLLMENT_NOT_YET_SYNCED';
@@ -128,12 +118,6 @@ class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
 
     await _sync.markApplied(gesture.id, nowMs: _now());
     _bus.emit({gesture.enrollmentId});
-    // Un second signal une fois la descente faite : c'est elle qui lève la
-    // garde du guichet, en amenant le nouveau niveau.
-    final enrollmentId = gesture.enrollmentId;
-    unawaited(
-      _refresh().then((_) => _bus.emit({enrollmentId}), onError: (Object _) {}),
-    );
     return const OutboxDispatchResult.acked();
   }
 

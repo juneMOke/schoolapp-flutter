@@ -13,6 +13,11 @@ import 'package:school_app_flutter/core/database/table_schema.dart';
 /// attend, `SYNCED` une fois accusé, `SYNC_ERROR` sur un refus 422 — dont le
 /// code stable reste dans `sync_error_code` pour que l'écran le traduise.
 ///
+/// `settled_at` : instant (horloge locale) où une descente **partie après
+/// l'accusé** a ramené l'inscription, ses créances et leurs pierres tombales.
+/// Tant qu'il est nul, une correction accusée retient encore l'encaissement :
+/// les créances affichées peuvent être celles de l'ancienne grille.
+///
 /// Index unique partiel : une seule correction en attente par inscription. Une
 /// seconde, posée sur la même copie, partirait avec un niveau de départ périmé
 /// et tomberait en `STALE_LEVEL`.
@@ -36,6 +41,7 @@ const TableSchema enrollmentLevelCorrectionsTable = TableSchema(
       sync_error TEXT,
       sync_error_code TEXT,
       acked_at INTEGER,
+      settled_at INTEGER,
       updated_at INTEGER NOT NULL
     )
   ''',

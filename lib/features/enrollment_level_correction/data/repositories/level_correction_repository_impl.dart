@@ -113,7 +113,6 @@ class LevelCorrectionRepositoryImpl implements LevelCorrectionRepository {
         await _reader.holdsCollection(
           studentId: studentId,
           academicYearId: academicYearId,
-          nowMs: _now(),
         ),
       );
     } catch (e) {

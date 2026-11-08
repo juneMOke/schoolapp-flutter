@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/enrollment_level_correction/domain/e
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/usecases/level_correction_use_cases.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_gesture_cubit.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_status_cubit.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/presentation/widgets/level_correction_action.dart';
 
 class _MockCorrect extends Mock implements CorrectLevelUseCase {}
 
@@ -141,12 +142,12 @@ void main() {
           enrollmentId: 'enr-1',
         );
         await pumpEventQueue();
-        expect(cubit.state.isPending, isTrue);
+        expect(cubit.state.blocksNewCorrection, isTrue);
 
         status = LevelCorrectionStatus.applied;
         changes.add({'enr-2'});
         await pumpEventQueue();
-        expect(cubit.state.isPending, isTrue);
+        expect(cubit.state.blocksNewCorrection, isTrue);
 
         changes.add({'enr-1'});
         await pumpEventQueue();
@@ -171,8 +172,58 @@ void main() {
       fail = true;
       changes.add({'enr-1'});
       await pumpEventQueue();
-      expect(cubit.state.isPending, isTrue);
+      expect(cubit.state.blocksNewCorrection, isTrue);
       await cubit.close();
+    });
+  });
+
+  group('LevelCorrectionStatusState.blocksNewCorrection', () {
+    for (final (status, blocks) in [
+      (LevelCorrectionStatus.pending, true),
+      (LevelCorrectionStatus.applied, true),
+      (LevelCorrectionStatus.stalled, false),
+      (LevelCorrectionStatus.settled, false),
+      (LevelCorrectionStatus.refused, false),
+    ]) {
+      test('${status.name} → $blocks', () {
+        expect(
+          LevelCorrectionStatusState(_correction(status)).blocksNewCorrection,
+          blocks,
+        );
+      });
+    }
+  });
+
+  group('LevelCorrectionScope.justSettled', () {
+    test('passage observé à « descendue » : vrai', () {
+      expect(
+        LevelCorrectionScope.justSettled(
+          _correction(LevelCorrectionStatus.applied),
+          _correction(LevelCorrectionStatus.settled),
+        ),
+        isTrue,
+      );
+    });
+
+    test('première lecture déjà descendue : faux (pas de relecture au '
+        'montage)', () {
+      expect(
+        LevelCorrectionScope.justSettled(
+          null,
+          _correction(LevelCorrectionStatus.settled),
+        ),
+        isFalse,
+      );
+    });
+
+    test('déjà descendue, relue : faux', () {
+      expect(
+        LevelCorrectionScope.justSettled(
+          _correction(LevelCorrectionStatus.settled),
+          _correction(LevelCorrectionStatus.settled),
+        ),
+        isFalse,
+      );
     });
   });
 }

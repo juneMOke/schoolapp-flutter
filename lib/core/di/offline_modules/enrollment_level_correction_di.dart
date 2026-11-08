@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -17,6 +19,9 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/rep
 import 'package:school_app_flutter/features/enrollment_level_correction/data/repositories/level_correction_repository_impl.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_api.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_outbox_handler.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_settler.dart';
+import 'package:school_app_flutter/core/offline/tombstone/tombstone_pull_repository.dart'
+    show kTombstonesResource;
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_options_repository.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_repository.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/presentation/bloc/level_correction_gesture_cubit.dart';
@@ -32,6 +37,15 @@ const Set<String> kLevelCorrectionRefreshResources = {
   EnrollmentPullRepositoryImpl.deltaResource,
   FinancePullRepositoryImpl.chargesResource,
   kClassroomMembersResource,
+};
+
+/// Ce qui doit être descendu pour lever la garde du guichet : le niveau de
+/// l'inscription, les créances de la nouvelle grille, et le retrait de celles
+/// de l'ancienne. Le membre de classe n'en est pas : il ne touche pas l'argent.
+const Set<String> kLevelCorrectionSettlingResources = {
+  EnrollmentPullRepositoryImpl.deltaResource,
+  FinancePullRepositoryImpl.chargesResource,
+  kTombstonesResource,
 };
 
 /// La correction de niveau : sa table, son envoi.
@@ -107,8 +121,19 @@ void registerEnrollmentLevelCorrection(GetIt getIt) {
       bus: getIt<LevelCorrectionChangeBus>(),
       currentUser: getIt<CurrentUserContext>(),
       extras: getIt<Map<String, dynamic>>(),
-      refresh: () =>
-          getIt<PullCoordinator>().pullSubset(kLevelCorrectionRefreshResources),
     ),
+  );
+  getIt.registerLazySingleton<LevelCorrectionSettler>(
+    () => LevelCorrectionSettler(
+      sync: getIt<LevelCorrectionSyncDao>(),
+      bus: getIt<LevelCorrectionChangeBus>(),
+      pull: (resources) => getIt<PullCoordinator>().pullSubset(resources),
+      resources: kLevelCorrectionRefreshResources,
+      required: kLevelCorrectionSettlingResources,
+    ),
+  );
+  // Une descente par fin de flush, pour toutes les corrections accusées.
+  getIt<SyncEngine>().addFlushCompleteListener(
+    () => unawaited(getIt<LevelCorrectionSettler>().settle()),
   );
 }
