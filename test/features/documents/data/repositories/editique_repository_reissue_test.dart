@@ -21,23 +21,27 @@ class _MockCache extends Mock implements EditiqueDocumentCache {}
 Uint8List _pdf() =>
     Uint8List.fromList(<int>[0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x37]);
 
-HttpResponse<Uint8List> _replacement({String? documentId, String? edition}) =>
-    HttpResponse<Uint8List>(
-      _pdf(),
-      Response<Uint8List>(
-        requestOptions: RequestOptions(path: '/reissue'),
-        statusCode: 200,
-        headers: Headers.fromMap(<String, List<String>>{
-          Headers.contentTypeHeader: <String>['application/pdf'],
-          'content-disposition': <String>[
-            'attachment; filename="ETL-AI-2526-000087.pdf"',
-          ],
-          if (documentId != null) 'x-document-id': <String>[documentId],
-          if (edition != null) 'x-document-edition': <String>[edition],
-        }),
-        data: _pdf(),
-      ),
-    );
+HttpResponse<Uint8List> _replacement({
+  String? documentId,
+  String? edition,
+  String? emittedAt,
+}) => HttpResponse<Uint8List>(
+  _pdf(),
+  Response<Uint8List>(
+    requestOptions: RequestOptions(path: '/reissue'),
+    statusCode: 200,
+    headers: Headers.fromMap(<String, List<String>>{
+      Headers.contentTypeHeader: <String>['application/pdf'],
+      'content-disposition': <String>[
+        'attachment; filename="ETL-AI-2526-000087.pdf"',
+      ],
+      if (documentId != null) 'x-document-id': <String>[documentId],
+      if (edition != null) 'x-document-edition': <String>[edition],
+      if (emittedAt != null) 'x-document-emitted-at': <String>[emittedAt],
+    }),
+    data: _pdf(),
+  ),
+);
 
 void main() {
   late _MockRemote remote;
@@ -59,6 +63,7 @@ void main() {
       () => cache.markCancelled(
         documentId: any(named: 'documentId'),
         reason: any(named: 'reason'),
+        cancelledAt: any(named: 'cancelledAt'),
       ),
     ).thenAnswer((_) async {});
     when(
@@ -105,10 +110,7 @@ void main() {
       expect(document.documentId, 'doc-2');
       expect(document.edition, 2);
     });
-    verify(
-      () => cache.markCancelled(documentId: 'doc-1', reason: reason),
-    ).called(1);
-    verify(
+    verifyInOrder([
       () => cache.put(
         docType: 'AI',
         documentId: 'doc-2',
@@ -122,7 +124,47 @@ void main() {
         edition: 2,
         bytes: any(named: 'bytes'),
       ),
+      // La remplaçante d'abord, l'annulation ensuite.
+      () => cache.markCancelled(
+        documentId: 'doc-1',
+        reason: reason,
+        cancelledAt: any(named: 'cancelledAt'),
+      ),
+    ]);
+  });
+
+  test('l\'annulation prend le jour de la remplaçante, pas l\'horloge de la '
+      'tablette', () async {
+    when(() => remote.reissueDocument(any(), any(), any())).thenAnswer(
+      (_) async =>
+          _replacement(documentId: 'doc-2', emittedAt: '2026-11-08T09:14:00Z'),
+    );
+
+    await reissue();
+
+    verify(
+      () => cache.markCancelled(
+        documentId: 'doc-1',
+        reason: reason,
+        cancelledAt: DateTime.utc(2026, 11, 8).millisecondsSinceEpoch,
+      ),
     ).called(1);
+  });
+
+  test('un délai dépassé reste réessayable : la route est rejouable', () async {
+    when(() => remote.reissueDocument(any(), any(), any())).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(path: '/reissue'),
+        type: DioExceptionType.receiveTimeout,
+      ),
+    );
+
+    final result = await reissue();
+
+    result.fold(
+      (f) => expect(f, isA<NetworkFailure>()),
+      (_) => fail('attendu Left'),
+    );
   });
 
   test('une remplaçante sans identifiant ne touche pas au cache : par son '
@@ -138,6 +180,7 @@ void main() {
       () => cache.markCancelled(
         documentId: any(named: 'documentId'),
         reason: any(named: 'reason'),
+        cancelledAt: any(named: 'cancelledAt'),
       ),
     );
   });
@@ -170,6 +213,7 @@ void main() {
       () => cache.markCancelled(
         documentId: any(named: 'documentId'),
         reason: any(named: 'reason'),
+        cancelledAt: any(named: 'cancelledAt'),
       ),
     );
   });
