@@ -200,6 +200,33 @@ Future<void> showEditiqueRestitutionDialog(
   );
 }
 
+/// Réémet une pièce corrigée et montre la remplaçante (même numéro, édition
+/// suivante). En ligne seulement ; la route étant rejouable, « Réessayer »
+/// renvoie le même motif sans risque de seconde pièce.
+Future<void> showEditiqueReissueDialog(
+  BuildContext context, {
+  required EditiqueDocumentType type,
+  required String title,
+  required String documentId,
+  required String reason,
+  String? studentId,
+  String? academicYearId,
+  EditiqueDocumentBloc? bloc,
+}) {
+  return _showEditiqueDocumentDialog(
+    context,
+    title: title,
+    request: EditiqueDocumentReissueRequested(
+      type: type,
+      documentId: documentId,
+      reason: reason,
+      studentId: studentId,
+      academicYearId: academicYearId,
+    ),
+    bloc: bloc,
+  );
+}
+
 /// Socle commun des visionneuses.
 ///
 /// L'émission est déclenchée à l'ouverture. Deux régimes de propriété :

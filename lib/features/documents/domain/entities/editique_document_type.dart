@@ -74,4 +74,12 @@ enum EditiqueDocumentType {
   /// pièce et brûler son numéro avant que la réponse n'arrive), et réessayer
   /// garantit un doublon numéroté.
   bool get isReplayable => isArchived;
+
+  /// Pièce qu'un poste peut faire **réémettre corrigée** sous son numéro
+  /// (`POST /editique/documents/{id}/reissue`) : attestation, note de
+  /// perception, fiche d'inscription. Un reçu se corrige par son versement.
+  bool get isReissuable =>
+      this == enrollmentAttestation ||
+      this == notePerception ||
+      this == enrollmentSheet;
 }

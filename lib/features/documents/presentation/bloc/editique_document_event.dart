@@ -171,3 +171,36 @@ class EditiqueDocumentRestitutionRequested extends EditiqueDocumentEvent {
     academicYearId,
   ];
 }
+
+/// Réémission corrigée d'une pièce en vigueur (AI, NP, FI) : annulée et
+/// remplacée sous le même numéro, en édition suivante. En ligne seulement.
+class EditiqueDocumentReissueRequested extends EditiqueDocumentEvent {
+  final EditiqueDocumentType type;
+
+  /// Référence d'archive de la pièce remplacée.
+  final String documentId;
+
+  /// Motif d'annulation, obligatoire.
+  final String reason;
+
+  /// Attribuent la copie de la remplaçante.
+  final String? studentId;
+  final String? academicYearId;
+
+  const EditiqueDocumentReissueRequested({
+    required this.type,
+    required this.documentId,
+    required this.reason,
+    this.studentId,
+    this.academicYearId,
+  });
+
+  @override
+  List<Object?> get props => [
+    type,
+    documentId,
+    reason,
+    studentId,
+    academicYearId,
+  ];
+}

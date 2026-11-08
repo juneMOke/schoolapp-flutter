@@ -112,6 +112,7 @@ class EditiqueDocumentCache {
     String ownerUid = '',
     int? emittedAt,
     String? verificationUrl,
+    int? edition,
     required Uint8List bytes,
   }) {
     return _exclusive(() async {
@@ -168,6 +169,8 @@ class EditiqueDocumentCache {
           contentSha256: stored.sha256Hex,
           emittedAt: emittedAt,
           verificationUrl: verificationUrl,
+          // `null` laisse l'édition qu'un delta aurait apprise (upsert `??=`).
+          edition: edition,
           // Une pièce déjà connue garde sa date de mise en cache : la remettre
           // à maintenant effacerait son ancienneté réelle.
           createdAt: existing?.createdAt ?? now,
@@ -285,6 +288,27 @@ class EditiqueDocumentCache {
       return retained;
     });
   }
+
+  /// Inscrit le retrait d'une pièce que **ce poste** vient de faire remplacer
+  /// (réémission), sans attendre que le delta le redescende.
+  ///
+  /// Sans cela, la pièce remplacée resterait « en vigueur » ici jusqu'au pull
+  /// suivant, et le catalogue pourrait encore la proposer. Une annulation déjà
+  /// connue n'est jamais réécrite : ni sa date ni son motif. Ne lève jamais.
+  Future<void> markCancelled({
+    required String documentId,
+    required String reason,
+  }) => _exclusive(() async {
+    try {
+      await _index.markCancelled(
+        documentId: documentId,
+        cancelledAt: _now(),
+        reason: reason,
+      );
+    } catch (_) {
+      // Le delta suivant portera l'annulation : ce n'est qu'un raccourci.
+    }
+  });
 
   // ── Lecture ────────────────────────────────────────────────────────────────
 

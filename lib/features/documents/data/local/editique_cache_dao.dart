@@ -282,6 +282,22 @@ class EditiqueCacheDao {
     );
   }
 
+  /// Pose l'annulation d'une pièce, si elle n'en porte pas déjà une : une
+  /// annulation est définitive, sa date et son motif ne se réécrivent pas.
+  Future<void> markCancelled({
+    required String documentId,
+    required int cancelledAt,
+    required String reason,
+  }) async {
+    if (documentId.isEmpty) return;
+    await _db.update(
+      kEditiqueCacheTable,
+      {'cancelled_at': cancelledAt, 'cancellation_reason': reason},
+      where: 'document_id = ? AND cancelled_at IS NULL',
+      whereArgs: [documentId],
+    );
+  }
+
   /// Marque un accès : c'est la SEULE entrée du classement LRU.
   ///
   /// Doit être appelée à chaque **restitution**, pas seulement à l'écriture —

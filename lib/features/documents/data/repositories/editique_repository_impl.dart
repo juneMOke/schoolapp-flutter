@@ -217,6 +217,58 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, EditiqueDocument>> reissue({
+    required EditiqueDocumentType type,
+    required String documentId,
+    required String reason,
+    String? studentId,
+    String? academicYearId,
+  }) async {
+    if (!type.isReissuable) {
+      throw ArgumentError.value(
+        type,
+        'type',
+        'Pièce non réémissible : seules AI, NP et FI se réémettent corrigées',
+      );
+    }
+    if (!await connectivityService.isOnline()) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final reissued = EditiqueDocumentMapper.map(
+        await remoteDataSource.reissueDocument(requiredAuth, documentId, {
+          'reason': reason,
+        }),
+        type,
+      );
+      await reissued.fold((_) async {}, (replacement) async {
+        final replacementId = replacement.documentId;
+        // Sans identifiant, la remplaçante ne se range pas : par son seul
+        // numéro, elle se rattacherait à la pièce qu'elle remplace et en
+        // écraserait la copie. Le delta suivant l'apprendra.
+        if (replacementId == null || replacementId == documentId) return;
+        await cache.markCancelled(documentId: documentId, reason: reason);
+        await _cacheQuietly(
+          reissued,
+          type: type,
+          studentId: studentId,
+          academicYearId: academicYearId,
+        );
+      });
+      return reissued;
+    } on DioException catch (e) {
+      return Left(EditiqueFailureMapper.fromDioException(e));
+    } catch (_) {
+      // Le sort de la requête est inconnu, mais la route est rejouable : un
+      // second appel rend la remplaçante déjà scellée, s'il y en a une. Rien
+      // n'interdit donc de réessayer — d'où un échec ordinaire, pas
+      // `UncertainOutcomeFailure`.
+      return const Left(ServerFailure());
+    }
+  }
+
   /// Dépose une pièce scellée dans le cache, sans jamais peser sur l'issue de
   /// l'appel qui l'a rapportée.
   ///
@@ -253,6 +305,7 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
         ownerUid: currentUser.uid ?? '',
         emittedAt: _emittedAtMs(document.emittedOn),
         verificationUrl: document.verificationUrl,
+        edition: document.edition,
         bytes: document.bytes,
       );
     } catch (_) {

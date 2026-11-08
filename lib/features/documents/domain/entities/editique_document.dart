@@ -50,6 +50,14 @@ class EditiqueDocument extends Equatable {
   /// pas.
   final String? verificationUrl;
 
+  /// Édition de la pièce sous son numéro, lue dans `X-Document-Edition`.
+  ///
+  /// `null` quand le serveur ne l'annonce pas : pièce non archivée, ou pièce
+  /// scellée avant que l'en-tête n'existe. Un affichage retombe alors sur
+  /// l'édition 1 ([displayEdition]) ; le cache, lui, garde `null` pour ne pas
+  /// écraser une édition qu'un delta lui aurait apprise.
+  final int? edition;
+
   const EditiqueDocument({
     required this.type,
     required this.bytes,
@@ -58,7 +66,11 @@ class EditiqueDocument extends Equatable {
     this.documentId,
     this.emittedOn,
     this.verificationUrl,
+    this.edition,
   });
+
+  /// L'édition à montrer : celle annoncée, sinon la première.
+  int get displayEdition => edition ?? 1;
 
   /// Relais de [EditiqueDocumentType.isReplayable] — voir sa documentation
   /// avant d'offrir un « Réessayer » sur un échec d'émission.
@@ -73,5 +85,6 @@ class EditiqueDocument extends Equatable {
     fileName,
     emittedOn,
     verificationUrl,
+    edition,
   ];
 }

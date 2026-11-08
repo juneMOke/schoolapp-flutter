@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -144,16 +146,27 @@ LocalGeneratedDocument _definitiveAttestation() => const LocalGeneratedDocument(
 class MockRestituteDocumentUseCase extends Mock
     implements RestituteDocumentUseCase {}
 
+class MockReissueDocumentUseCase extends Mock
+    implements ReissueDocumentUseCase {}
+
 class _MockListCachedDocumentsUseCase extends Mock
     implements ListCachedDocumentsUseCase {}
 
 void main() {
   late _MockGetLocalEnrollmentDetailUseCase detailUseCase;
   late _MockListCachedDocumentsUseCase cachedUseCase;
+  late MockReissueDocumentUseCase reissueUseCase;
 
   setUpAll(() {
     registerFallbackValue(
       const EmitEnrollmentAttestationParams(enrollmentId: 'x'),
+    );
+    registerFallbackValue(
+      const ReissueDocumentParams(
+        type: EditiqueDocumentType.enrollmentAttestation,
+        documentId: 'x',
+        reason: 'x',
+      ),
     );
   });
 
@@ -162,6 +175,7 @@ void main() {
     // Aucune copie locale par défaut : les lignes se résolvent comme avant le
     // cache de restitution.
     cachedUseCase = _MockListCachedDocumentsUseCase();
+    reissueUseCase = MockReissueDocumentUseCase();
     when(
       () => cachedUseCase(
         studentId: any(named: 'studentId'),
@@ -187,6 +201,7 @@ void main() {
         emitAccountStatementUseCase: _MockEmitAccountStatementUseCase(),
         emitFinancialClearanceUseCase: _MockEmitFinancialClearanceUseCase(),
         restituteDocumentUseCase: MockRestituteDocumentUseCase(),
+        reissueDocumentUseCase: reissueUseCase,
       ),
     );
   });
@@ -405,6 +420,122 @@ void main() {
       await tester.pump();
 
       expect(find.textContaining('Erreur de classe'), findsOneWidget);
+    });
+  });
+
+  // E5 : une pièce en vigueur se fait réémettre corrigée, sous son numéro.
+  group('réémission corrigée', () {
+    EditiqueCacheEntry attestationInForce() => const EditiqueCacheEntry(
+      id: 'c-ai',
+      documentId: 'doc-ai',
+      documentNumber: 'ETL-AI-2526-000431',
+      docType: 'AI',
+      schoolId: 'school-1',
+      sizeBytes: 1024,
+      contentSha256: 'abc',
+      edition: 2,
+      createdAt: 1000,
+      lastAccessedAt: 1000,
+    );
+
+    void seedInForce() {
+      when(() => detailUseCase(any())).thenAnswer(
+        (_) async => Right(
+          LocalEnrollmentDetail(
+            enrollment: _enrollment(),
+            student: _student(),
+            documents: [_definitiveAttestation()],
+          ),
+        ),
+      );
+      when(
+        () => cachedUseCase(
+          studentId: any(named: 'studentId'),
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).thenAnswer((_) async => [attestationInForce()]);
+    }
+
+    testWidgets('propose le geste et annonce l\'édition', (tester) async {
+      seedInForce();
+
+      await _pump(tester);
+      await tester.pump();
+
+      expect(find.text('Réémettre corrigée'), findsOneWidget);
+      expect(find.textContaining('édition 2'), findsOneWidget);
+    });
+
+    testWidgets('tient sur un téléphone, texte agrandi', (tester) async {
+      seedInForce();
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      await _pump(tester, size: const Size(360, 740));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Réémettre corrigée'), findsOneWidget);
+    });
+
+    testWidgets('hors ligne : pas de réémission', (tester) async {
+      seedInForce();
+
+      await _pump(tester, syncStatus: SyncStatus.offline);
+      await tester.pump();
+
+      expect(find.text('Réémettre corrigée'), findsNothing);
+    });
+
+    testWidgets('exige un motif, l\'envoie, puis relit le dossier', (
+      tester,
+    ) async {
+      seedInForce();
+      when(
+        () => reissueUseCase(any()),
+      ).thenAnswer((_) async => const Left(ServerFailure()));
+
+      await _pump(tester);
+      await tester.pump();
+      await tester.tap(find.text('Réémettre corrigée'));
+      await tester.pumpAndSettle();
+
+      // Sans motif, rien ne part.
+      await tester.tap(find.text('Réémettre'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text("Indiquez le motif : il est conservé avec l'annulation."),
+        findsOneWidget,
+      );
+      verifyNever(() => reissueUseCase(any()));
+
+      await tester.enterText(find.byType(TextField), 'Niveau corrigé');
+      await tester.tap(find.text('Réémettre'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      verify(
+        () => reissueUseCase(
+          const ReissueDocumentParams(
+            type: EditiqueDocumentType.enrollmentAttestation,
+            documentId: 'doc-ai',
+            reason: 'Niveau corrigé',
+            studentId: 's-1',
+            academicYearId: 'y-1',
+          ),
+        ),
+      ).called(1);
+
+      clearInteractions(cachedUseCase);
+      tester.state<NavigatorState>(find.byType(Navigator).last).pop();
+      await tester.pumpAndSettle();
+
+      verify(
+        () => cachedUseCase(
+          studentId: 's-1',
+          academicYearId: any(named: 'academicYearId'),
+        ),
+      ).called(1);
     });
   });
 }

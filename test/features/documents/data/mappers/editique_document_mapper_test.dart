@@ -18,6 +18,7 @@ HttpResponse<Uint8List> _response({
   String? documentId,
   String? emittedAt,
   String? verificationUrl,
+  String? edition,
 }) {
   final headerMap = <String, List<String>>{};
   if (contentType != null) {
@@ -34,6 +35,9 @@ HttpResponse<Uint8List> _response({
   }
   if (verificationUrl != null) {
     headerMap['x-document-verification-url'] = <String>[verificationUrl];
+  }
+  if (edition != null) {
+    headerMap['x-document-edition'] = <String>[edition];
   }
 
   return HttpResponse<Uint8List>(
@@ -264,6 +268,30 @@ void main() {
       );
 
       expect(result.isRight(), isTrue);
+    });
+  });
+
+  group('EditiqueDocumentMapper.map — édition', () {
+    int? editionOf(String? header) => EditiqueDocumentMapper.map(
+      _response(edition: header),
+      EditiqueDocumentType.enrollmentAttestation,
+    ).fold((_) => throw StateError('attendu Right'), (d) => d.edition);
+
+    test('lit l\'édition annoncée', () => expect(editionOf('2'), 2));
+
+    test('absente : null, affichée comme la première', () {
+      expect(editionOf(null), isNull);
+      final document = EditiqueDocumentMapper.map(
+        _response(),
+        EditiqueDocumentType.enrollmentAttestation,
+      ).fold((_) => throw StateError('attendu Right'), (d) => d);
+      expect(document.displayEdition, 1);
+    });
+
+    test('illisible ou nulle : ignorée, le PDF reste servi', () {
+      expect(editionOf('abc'), isNull);
+      expect(editionOf('0'), isNull);
+      expect(editionOf(' 3 '), 3);
     });
   });
 }

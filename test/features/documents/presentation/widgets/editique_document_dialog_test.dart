@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'dart:async';
 
@@ -39,6 +40,9 @@ class MockEmitAccountStatementUseCase extends Mock
 class MockRestituteDocumentUseCase extends Mock
     implements RestituteDocumentUseCase {}
 
+class MockReissueDocumentUseCase extends Mock
+    implements ReissueDocumentUseCase {}
+
 /// Tailles réelles de la cible : tablette Android paysage, puis un téléphone
 /// bas de gamme en paysage — les deux hauteurs où la modale est la plus serrée.
 const _tabletLandscape = Size(1280, 800);
@@ -72,6 +76,7 @@ Future<void> _pumpLoading(WidgetTester tester, {required Size size}) async {
             emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
             emitFinancialClearanceUseCase: MockEmitFinancialClearanceUseCase(),
             restituteDocumentUseCase: MockRestituteDocumentUseCase(),
+            reissueDocumentUseCase: MockReissueDocumentUseCase(),
           )..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1')),
           child: const EditiqueDocumentDialogView(
             title: 'Reçu de paiement',
@@ -242,6 +247,7 @@ Future<MockEmitPaymentReceiptUseCase> _pumpFailure(
               emitFinancialClearanceUseCase:
                   MockEmitFinancialClearanceUseCase(),
               restituteDocumentUseCase: MockRestituteDocumentUseCase(),
+              reissueDocumentUseCase: MockReissueDocumentUseCase(),
             );
             return bloc
               ..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1'));

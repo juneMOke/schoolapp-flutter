@@ -21950,4 +21950,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get facturationCollectHeldTitle => 'Collection on hold';
+
+  @override
+  String get documentsReissueAction => 'Reissue corrected';
+
+  @override
+  String documentsReissueTitle(String document) {
+    return 'Reissue corrected: $document?';
+  }
+
+  @override
+  String get documentsReissueHelper =>
+      'The document in force will be cancelled and replaced under the same number, in the next edition, with today\'s state (level, class, fees). The reason is kept with the cancellation.';
+
+  @override
+  String get documentsReissueReasonLabel => 'Reason for reissuing';
+
+  @override
+  String get documentsReissueReasonHint => 'E.g. level corrected (M2 → P2)';
+
+  @override
+  String get documentsReissueReasonRequired =>
+      'Give the reason: it is kept with the cancellation.';
+
+  @override
+  String get documentsReissueConfirm => 'Reissue';
+
+  @override
+  String documentsCurrentEdition(int edition) {
+    return 'edition $edition';
+  }
 }

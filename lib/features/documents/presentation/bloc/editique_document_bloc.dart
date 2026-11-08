@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrol
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_note_perception_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_payment_receipt_use_case.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/student_year_document_params.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
@@ -38,6 +39,7 @@ class EditiqueDocumentBloc
   final EmitAccountStatementUseCase _emitAccountStatementUseCase;
   final EmitFinancialClearanceUseCase _emitFinancialClearanceUseCase;
   final RestituteDocumentUseCase _restituteDocumentUseCase;
+  final ReissueDocumentUseCase _reissueDocumentUseCase;
 
   EditiqueDocumentBloc({
     required EmitEnrollmentAttestationUseCase emitEnrollmentAttestationUseCase,
@@ -47,6 +49,7 @@ class EditiqueDocumentBloc
     required EmitAccountStatementUseCase emitAccountStatementUseCase,
     required EmitFinancialClearanceUseCase emitFinancialClearanceUseCase,
     required RestituteDocumentUseCase restituteDocumentUseCase,
+    required ReissueDocumentUseCase reissueDocumentUseCase,
   }) : _emitEnrollmentAttestationUseCase = emitEnrollmentAttestationUseCase,
        _emitEnrollmentSheetUseCase = emitEnrollmentSheetUseCase,
        _emitNotePerceptionUseCase = emitNotePerceptionUseCase,
@@ -54,6 +57,7 @@ class EditiqueDocumentBloc
        _emitAccountStatementUseCase = emitAccountStatementUseCase,
        _emitFinancialClearanceUseCase = emitFinancialClearanceUseCase,
        _restituteDocumentUseCase = restituteDocumentUseCase,
+       _reissueDocumentUseCase = reissueDocumentUseCase,
        super(const EditiqueDocumentState()) {
     on<EditiqueEnrollmentAttestationRequested>(
       (event, emit) => _run(
@@ -145,6 +149,22 @@ class EditiqueDocumentBloc
             type: event.type,
             documentId: event.documentId,
             documentNumber: event.documentNumber,
+            studentId: event.studentId,
+            academicYearId: event.academicYearId,
+          ),
+        ),
+      ),
+    );
+
+    on<EditiqueDocumentReissueRequested>(
+      (event, emit) => _run(
+        emit,
+        event.type,
+        () => _reissueDocumentUseCase(
+          ReissueDocumentParams(
+            type: event.type,
+            documentId: event.documentId,
+            reason: event.reason,
             studentId: event.studentId,
             academicYearId: event.academicYearId,
           ),

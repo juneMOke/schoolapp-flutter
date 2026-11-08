@@ -90,4 +90,16 @@ abstract class EditiqueRemoteDataSource {
     @Extras() Map<String, dynamic> extras,
     @Path('documentId') String documentId,
   );
+
+  /// Annule la pièce et rend sa remplaçante, même numéro, édition suivante.
+  /// Corps `{"reason": …}`. Rejouable par contrat : un second appel sur la
+  /// pièce déjà annulée rend la remplaçante en vigueur.
+  @POST(AppConstants.reissueEditiqueDocumentEndpoint)
+  @DioResponseType(ResponseType.bytes)
+  @Headers(<String, String>{'Accept': AppConstants.pdfAcceptHeader})
+  Future<HttpResponse<Uint8List>> reissueDocument(
+    @Extras() Map<String, dynamic> extras,
+    @Path('documentId') String documentId,
+    @Body() Map<String, dynamic> body,
+  );
 }

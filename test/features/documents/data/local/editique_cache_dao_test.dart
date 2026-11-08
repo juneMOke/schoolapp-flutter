@@ -544,4 +544,31 @@ void main() {
       );
     });
   });
+
+  group('annulation posée par une réémission', () {
+    test('pose la date et le motif d\'une pièce en vigueur', () async {
+      await dao.upsert(cacheEntry());
+
+      await dao.markCancelled(
+        documentId: 'doc-1',
+        cancelledAt: 42,
+        reason: 'Niveau corrigé',
+      );
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry?.cancelledAt, 42);
+      expect(entry?.cancellationReason, 'Niveau corrigé');
+    });
+
+    test('ne réécrit jamais une annulation déjà connue', () async {
+      await dao.upsert(cacheEntry());
+      await dao.markCancelled(documentId: 'doc-1', cancelledAt: 1, reason: 'A');
+
+      await dao.markCancelled(documentId: 'doc-1', cancelledAt: 2, reason: 'B');
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry?.cancelledAt, 1);
+      expect(entry?.cancellationReason, 'A');
+    });
+  });
 }

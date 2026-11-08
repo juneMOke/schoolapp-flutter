@@ -86,12 +86,27 @@ class DocumentsCatalogAction extends Equatable {
   /// elle est portée, parce qu'alors la ligne n'a rien d'autre à dire.
   final EditiqueCacheEntry? cancelledPiece;
 
+  /// La pièce **en vigueur** de ce type que ce poste peut faire réémettre
+  /// corrigée (AI, NP, FI) : connue par son identifiant d'archive, en ligne,
+  /// gardes de synchro levées. Ses octets ne sont pas exigés — c'est le
+  /// serveur qui recompose. La permission `editique.cancel` se juge à l'écran.
+  ///
+  /// `null` pour une pièce connue par son seul numéro (mise en cache avant
+  /// `X-Document-Id`) : rien ne la désignerait au serveur.
+  final EditiqueCacheEntry? reissuablePiece;
+
+  /// Édition de la pièce en vigueur, quand ce poste la connaît et qu'elle
+  /// n'est pas la première : « 1 » est la règle et ne s'annonce pas.
+  final int? currentEdition;
+
   const DocumentsCatalogAction._({
     required this.kind,
     this.reason,
     this.knownPiece,
     this.cachedPiece,
     this.cancelledPiece,
+    this.reissuablePiece,
+    this.currentEdition,
   });
 
   /// Vrai quand l'action ressort une copie locale au lieu de demander une
@@ -193,6 +208,15 @@ class DocumentsCatalogAction extends Equatable {
 
     final known = _findDefinitive(knownPieces, entry.code);
 
+    // La pièce en vigueur la plus récente, détenue ou seulement connue. Elle
+    // porte l'édition à afficher et, en ligne, ce qu'on peut faire réémettre.
+    final inForce = _findInForce(cachedPieces, entry.code);
+    final edition = (inForce?.edition ?? 1) > 1 ? inForce!.edition : null;
+    final reissuable =
+        !isOffline && entry.type.isReissuable && inForce?.documentId != null
+        ? inForce
+        : null;
+
     // Une pièce dont la tablette détient les OCTETS se consulte, en ligne comme
     // hors ligne : c'est une copie locale qu'on ressort, pas une production
     // qu'on demande au serveur. Cette porte s'ouvre donc AVANT la garde de
@@ -216,6 +240,8 @@ class DocumentsCatalogAction extends Equatable {
         kind: DocumentsCatalogActionKind.consult,
         knownPiece: known,
         cachedPiece: cached,
+        reissuablePiece: reissuable,
+        currentEdition: edition,
       );
     }
 
@@ -245,6 +271,8 @@ class DocumentsCatalogAction extends Equatable {
           : DocumentsCatalogActionKind.consult,
       knownPiece: known,
       cancelledPiece: cancelled,
+      reissuablePiece: reissuable,
+      currentEdition: edition,
     );
   }
 
@@ -262,6 +290,19 @@ class DocumentsCatalogAction extends Equatable {
     for (final entry in cached) {
       if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
       if (entry.hasBytes && !entry.isCancelled) return entry;
+    }
+    return null;
+  }
+
+  /// Pièce de ce type **en vigueur**, détenue ou non, la plus récemment émise
+  /// d'abord.
+  static EditiqueCacheEntry? _findInForce(
+    List<EditiqueCacheEntry> cached,
+    String code,
+  ) {
+    for (final entry in cached) {
+      if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
+      if (!entry.isCancelled) return entry;
     }
     return null;
   }
@@ -313,5 +354,7 @@ class DocumentsCatalogAction extends Equatable {
     knownPiece,
     cachedPiece,
     cancelledPiece,
+    reissuablePiece,
+    currentEdition,
   ];
 }
