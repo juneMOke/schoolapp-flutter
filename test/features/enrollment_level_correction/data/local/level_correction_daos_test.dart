@@ -162,19 +162,25 @@ void main() {
       },
     );
 
-    test('un versement en vigueur sur l\'année : refus local, rien n\'est '
-        'écrit', () async {
-      await insertPayment(db, id: 'pay-1');
+    test(
+      'un versement sur l\'année : refus local, rien n\'est écrit',
+      () async {
+        await insertPayment(db, id: 'pay-1');
+        expect(await record('g-1'), LevelCorrectionRecordOutcome.hasPayments);
+        expect(await reader.latestFor(kEnrollment), isNull);
+        expect(
+          await OutboxDao(db).byId(LevelCorrectionWriteDao.entryId('g-1')),
+          isNull,
+        );
+      },
+    );
+
+    test('un versement annulé retient aussi : le serveur le compte', () async {
+      await insertPayment(db, id: 'pay-1', cancelledAt: 5);
       expect(await record('g-1'), LevelCorrectionRecordOutcome.hasPayments);
-      expect(await reader.latestFor(kEnrollment), isNull);
-      expect(
-        await OutboxDao(db).byId(LevelCorrectionWriteDao.entryId('g-1')),
-        isNull,
-      );
     });
 
-    test('un versement annulé ou d\'une autre année ne retient pas', () async {
-      await insertPayment(db, id: 'pay-1', cancelledAt: 5);
+    test('un versement d\'une autre année ne retient pas', () async {
       await insertPayment(db, id: 'pay-2', academicYearId: 'year-0');
       expect(await record('g-1'), LevelCorrectionRecordOutcome.recorded);
     });

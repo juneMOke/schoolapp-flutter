@@ -6,7 +6,6 @@ import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_gesture.dart';
-import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Issue d'une demande de correction, vue de la tablette.
@@ -18,8 +17,8 @@ enum LevelCorrectionRecordOutcome {
   /// mais pas encore descendue : rien n'est écrit.
   alreadyPending,
 
-  /// L'élève a un versement en vigueur sur l'année : le serveur refuserait en
-  /// `LEVEL_CORRECTION_HAS_PAYMENTS` (premier temps). Rien n'est écrit.
+  /// L'élève a un versement sur l'année, même annulé : le serveur refuserait
+  /// en `LEVEL_CORRECTION_HAS_PAYMENTS` (premier temps). Rien n'est écrit.
   hasPayments,
 }
 
@@ -47,7 +46,11 @@ class LevelCorrectionWriteDao {
 
   /// Pose [gesture], sauf si une correction de la même inscription attend déjà
   /// (la seconde partirait sur un niveau de départ périmé et tomberait en
-  /// `STALE_LEVEL`) ou si l'élève a déjà un versement en vigueur sur l'année.
+  /// `STALE_LEVEL`) ou si l'élève a déjà un versement sur l'année.
+  ///
+  /// Un versement **annulé** compte aussi : le serveur le compte (décision du
+  /// lot C1 du back), car l'annulation laisse sa trace dans les pièces. Ne pas
+  /// le compter laisserait passer un geste que le serveur refuse à coup sûr.
   ///
   /// « Attend » : en file, ou accusée sans que la descente ait ramené le
   /// nouveau niveau. Une correction en attente dont l'envoi a été **abandonné**
@@ -88,7 +91,7 @@ class LevelCorrectionWriteDao {
     final payments = await txn.rawQuery(
       'SELECT 1 FROM payments p '
       'WHERE p.student_id = ? AND p.academic_year_id = ? '
-      'AND ${PaymentInForceSql.inForce('p')} LIMIT 1',
+      'LIMIT 1',
       [gesture.studentId, gesture.academicYearId],
     );
     if (payments.isNotEmpty) return LevelCorrectionRecordOutcome.hasPayments;

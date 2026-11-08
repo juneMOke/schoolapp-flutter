@@ -5,9 +5,9 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/syn
 /// L'envoi d'une correction de niveau : un geste par requête.
 ///
 /// Le corps rendu (inscription, créances, créances supprimées, membre de
-/// classe) n'est pas encore lu : ses noms de champs ne sont pas figés au
-/// contrat. La tablette se recale par la descente que le handler déclenche
-/// après l'accusé.
+/// classe) n'est pas encore lu, bien que ses champs soient figés au contrat
+/// (PR back #218, renvoyés depuis la #220). La tablette se recale par la
+/// descente qui suit l'accusé ; le lire rouvrirait la caisse dès l'accusé.
 class LevelCorrectionApi {
   final Dio _dio;
 
