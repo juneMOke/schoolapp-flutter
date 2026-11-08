@@ -139,7 +139,9 @@ class FacturationConfirmOnlyLabels {
   });
 }
 
-enum _Phase { confirm, processing, success, error }
+/// `held` : la garde d'une correction de niveau a refusé l'écriture (D7) —
+/// rien n'est pris, et réessayer n'y changerait rien tant qu'elle tient.
+enum _Phase { confirm, processing, success, error, held }
 
 class _CollectFlowDialog extends StatefulWidget {
   final String totalLabel;
@@ -256,6 +258,9 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
       // fermeture de la popin (cf. _onCollect).
       context.read<SyncStatusCubit>().notifyLocalWrite();
       setState(() => _phase = _Phase.success);
+    } else if (state is FinanceOfflineError && state.heldByLevelCorrection) {
+      _awaitingBloc = false;
+      setState(() => _phase = _Phase.held);
     } else if (state is FinanceOfflineError) {
       _awaitingBloc = false;
       setState(() {
@@ -382,7 +387,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
     _Phase.success => () => Navigator.of(
       context,
     ).pop(FacturationCollectOutcome.succeeded),
-    _Phase.error => () => Navigator.of(
+    _Phase.error || _Phase.held => () => Navigator.of(
       context,
     ).pop(FacturationCollectOutcome.cancelled),
     _Phase.processing => null,
@@ -464,6 +469,26 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
               ).pop(FacturationCollectOutcome.succeeded),
               stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
               showSecondary: _receiptWatch != null,
+            ),
+          ],
+        );
+      case _Phase.held:
+        return Column(
+          children: [
+            const Divider(height: 1, color: AppColors.border),
+            FinanceModalFooter(
+              secondaryLabel: l10n.facturationCreatePaymentConfirmCancel,
+              secondaryIcon: Icons.close_rounded,
+              onSecondary: () => Navigator.of(
+                context,
+              ).pop(FacturationCollectOutcome.cancelled),
+              showSecondary: false,
+              primaryLabel: l10n.facturationPaymentCloseLabel,
+              primaryIcon: Icons.check_rounded,
+              onPrimary: () => Navigator.of(
+                context,
+              ).pop(FacturationCollectOutcome.cancelled),
+              stackBelowWidth: AppBreakpoints.financeModalFooterRowMin,
             ),
           ],
         );
@@ -669,6 +694,11 @@ class _ResultBody extends StatelessWidget {
         EteeloResultKind.error,
         l10n.facturationCollectErrorTitle,
         l10n.offlineWriteError,
+      ),
+      _Phase.held => (
+        EteeloResultKind.error,
+        l10n.facturationCollectHeldTitle,
+        l10n.levelCorrectionCollectionHeld,
       ),
       _ => (EteeloResultKind.processing, l10n.facturationCollectProcessing, ''),
     };

@@ -21947,4 +21947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String levelCorrectionBannerStalled(String from, String to) {
     return 'The level correction ($from → $to) could not be sent. Retry it from the sync status, or make a new correction.';
   }
+
+  @override
+  String get facturationCollectHeldTitle => 'Collection on hold';
 }

@@ -22101,4 +22101,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String levelCorrectionBannerStalled(String from, String to) {
     return 'La correction de niveau ($from → $to) n\'a pas pu être envoyée. Relancez-la depuis l\'état de la synchronisation, ou posez une nouvelle correction.';
   }
+
+  @override
+  String get facturationCollectHeldTitle => 'Encaissement suspendu';
 }

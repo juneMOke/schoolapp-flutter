@@ -63,7 +63,10 @@ class FinanceOfflineBloc
     final result = await _recordPayment(event.draft);
     emit(
       result.fold(
-        (f) => FinanceOfflineError(_map(f)),
+        (f) => FinanceOfflineError(
+          _map(f),
+          heldByLevelCorrection: f is LevelCorrectionHoldFailure,
+        ),
         (id) => FinanceOfflinePaymentPendingSync(id),
       ),
     );
@@ -71,8 +74,6 @@ class FinanceOfflineBloc
 
   String _map(Failure failure) => switch (failure) {
     StorageFailure() => 'Erreur d\'accès à la base locale.',
-    LevelCorrectionHoldFailure() =>
-      'Encaissement retenu : correction de niveau en cours.',
     _ => 'Une erreur est survenue.',
   };
 }

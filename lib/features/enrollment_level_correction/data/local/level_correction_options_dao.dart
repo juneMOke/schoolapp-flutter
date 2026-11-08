@@ -10,6 +10,11 @@ class LevelCorrectionOptionsDao {
 
   /// Les classes de l'année et la classe actuelle de l'élève — l'appartenance
   /// courante, transferts compris, celle que lit aussi la désactivation.
+  ///
+  /// Mais seulement si l'élève y **est** encore : `ACTIVE`, ou `INACTIVE` du
+  /// seul fait d'une désactivation ouverte (il garde sa classe). Une ligne
+  /// `INACTIVE` sans désactivation dit « a quitté la classe » : l'élève n'est
+  /// plus en classe, et la classe cible ne lui est pas imposée (D3).
   Future<LevelCorrectionClassrooms> classrooms({
     required String studentId,
     required String academicYearId,
@@ -25,8 +30,10 @@ class LevelCorrectionOptionsDao {
       'SELECT cm.classroom_id AS classroom_id '
       'FROM ${EnrollmentSuspensionSql.membersTable} cm '
       'WHERE cm.id = '
-      '${EnrollmentSuspensionSql.currentMemberId('?', '?')}',
-      [studentId, academicYearId],
+      '${EnrollmentSuspensionSql.currentMemberId('?', '?')} '
+      "AND (cm.status = 'ACTIVE' OR "
+      '${EnrollmentSuspensionSql.studentSuspended('?', '?')})',
+      [studentId, academicYearId, studentId, academicYearId],
     );
     return LevelCorrectionClassrooms(
       classrooms: [

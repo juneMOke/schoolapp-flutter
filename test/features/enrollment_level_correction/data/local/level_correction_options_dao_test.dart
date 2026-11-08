@@ -28,12 +28,13 @@ void main() {
   });
   tearDown(() => db.close());
 
-  Future<void> member(String classroomId) =>
+  Future<void> member(String classroomId, {String status = 'ACTIVE'}) =>
       db.insert('ref_classroom_members', {
         'id': 'm-1',
         'student_id': kStudent,
         'classroom_id': classroomId,
         'academic_year_id': kYear,
+        'status': status,
         'student_first_name': 'A',
         'student_last_name': 'B',
       });
@@ -73,4 +74,34 @@ void main() {
       expect(options.requiresClassroom('lvl-p3'), isFalse);
     },
   );
+
+  test("élève sorti de sa classe (INACTIVE, sans désactivation) : il n'est "
+      "plus en classe, rien n'est exigé", () async {
+    await member('cls-m2a', status: 'INACTIVE');
+    final options = await dao.classrooms(
+      studentId: kStudent,
+      academicYearId: kYear,
+    );
+    expect(options.currentClassroomId, isNull);
+    expect(options.requiresClassroom('lvl-p2'), isFalse);
+  });
+
+  test('élève désactivé : il garde sa classe, D3 s\'applique', () async {
+    await member('cls-m2a', status: 'INACTIVE');
+    await db.insert('enrollment_suspensions', {
+      'id': 'sus-1',
+      'school_id': kSchool,
+      'enrollment_id': kEnrollment,
+      'student_id': kStudent,
+      'academic_year_id': kYear,
+      'suspended_at': '2026-11-01T08:00:00Z',
+      'updated_at': 1,
+    });
+    final options = await dao.classrooms(
+      studentId: kStudent,
+      academicYearId: kYear,
+    );
+    expect(options.currentClassroomId, 'cls-m2a');
+    expect(options.requiresClassroom('lvl-p2'), isTrue);
+  });
 }

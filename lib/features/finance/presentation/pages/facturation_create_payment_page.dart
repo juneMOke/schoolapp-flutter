@@ -45,6 +45,7 @@ import 'package:school_app_flutter/features/finance/presentation/helpers/factura
 import 'package:school_app_flutter/features/finance/presentation/widgets/facturation_offline_payment_mapper.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/facturation_payment_corrected_dialog.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/payment_correction/facturation_payment_correction_sections.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -1028,7 +1029,12 @@ class _FacturationCreatePaymentViewState
               ),
               unchanged: unchanged,
               failure: context.select<PaymentCorrectionCubit, String?>(
-                (cubit) => cubit.state.failure?.message,
+                (cubit) => switch (cubit.state.failure) {
+                  LevelCorrectionHoldFailure() => AppLocalizations.of(
+                    context,
+                  )!.levelCorrectionCollectionHeld,
+                  final failure => failure?.message,
+                },
               ),
               enabled: !_collectInFlight,
             ),

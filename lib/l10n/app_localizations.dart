@@ -33743,6 +33743,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The level correction ({from} → {to}) could not be sent. Retry it from the sync status, or make a new correction.'**
   String levelCorrectionBannerStalled(String from, String to);
+
+  /// No description provided for @facturationCollectHeldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection on hold'**
+  String get facturationCollectHeldTitle;
 }
 
 class _AppLocalizationsDelegate

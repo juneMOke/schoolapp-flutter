@@ -271,6 +271,28 @@ void main() {
     expect(find.text('Réessayer'), findsOneWidget);
   });
 
+  testWidgets(
+    'correction de niveau en cours → « suspendu », sans code incident ni '
+    '« Réessayer »',
+    (tester) async {
+      await open(tester);
+
+      await tester.tap(find.text('Confirmer'));
+      await tester.pump();
+      states.add(const FinanceOfflineError('x', heldByLevelCorrection: true));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Encaissement suspendu'), findsOneWidget);
+      expect(
+        find.textContaining('la correction de niveau de cet élève'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Code incident'), findsNothing);
+      expect(find.text('Réessayer'), findsNothing);
+    },
+  );
+
   testWidgets('« Confirmer » → succès pending-sync : reçu + note + pastille', (
     tester,
   ) async {
