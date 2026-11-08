@@ -86,7 +86,8 @@ void main() {
     expect(options.requiresClassroom('lvl-p2'), isFalse);
   });
 
-  test('élève désactivé : il garde sa classe, D3 s\'applique', () async {
+  test('élève désactivé : il ne compte pas comme en classe, rien n\'est '
+      'exigé', () async {
     await member('cls-m2a', status: 'INACTIVE');
     await db.insert('enrollment_suspensions', {
       'id': 'sus-1',
@@ -101,7 +102,7 @@ void main() {
       studentId: kStudent,
       academicYearId: kYear,
     );
-    expect(options.currentClassroomId, 'cls-m2a');
-    expect(options.requiresClassroom('lvl-p2'), isTrue);
+    expect(options.currentClassroomId, isNull);
+    expect(options.requiresClassroom('lvl-p2'), isFalse);
   });
 }
