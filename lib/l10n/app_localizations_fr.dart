@@ -22134,4 +22134,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String documentsCurrentEdition(int edition) {
     return 'édition $edition';
   }
+
+  @override
+  String get documentsReissuePriorTitle => 'Pièce déjà réémise';
+
+  @override
+  String documentsReissuePriorMessage(String date) {
+    return 'Cette pièce avait déjà été réémise le $date, peut-être avant la correction : le serveur l\'a rendue telle quelle, sans la recomposer. La réémettre à nouveau avec l\'état du jour ?';
+  }
+
+  @override
+  String get documentsReissuePriorConfirm => 'Réémettre à nouveau';
+
+  @override
+  String get documentsReissuePriorShow => 'Voir la pièce rendue';
 }

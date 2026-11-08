@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
+import 'dart:typed_data';
 import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
@@ -534,6 +536,51 @@ void main() {
         () => cachedUseCase(
           studentId: 's-1',
           academicYearId: any(named: 'academicYearId'),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('une pièce déjà réémise ailleurs : la tablette le dit et '
+        'propose de réémettre celle-là', (tester) async {
+      seedInForce();
+      when(() => reissueUseCase(any())).thenAnswer((invocation) async {
+        final params =
+            invocation.positionalArguments.first as ReissueDocumentParams;
+        return params.documentId == 'doc-ai'
+            ? Right(
+                EditiqueDocument(
+                  type: EditiqueDocumentType.enrollmentAttestation,
+                  bytes: Uint8List(4),
+                  fileName: 'piece.pdf',
+                  documentId: 'doc-ai-2',
+                  emittedOn: '2020-01-06',
+                ),
+              )
+            : const Left(ServerFailure());
+      });
+
+      await _pump(tester);
+      await tester.pump();
+      await tester.tap(find.text('Réémettre corrigée'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Niveau corrigé');
+      await tester.tap(find.text('Réémettre'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pièce déjà réémise'), findsOneWidget);
+      await tester.tap(find.text('Réémettre à nouveau'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      verify(
+        () => reissueUseCase(
+          const ReissueDocumentParams(
+            type: EditiqueDocumentType.enrollmentAttestation,
+            documentId: 'doc-ai-2',
+            reason: 'Niveau corrigé',
+            studentId: 's-1',
+            academicYearId: 'y-1',
+          ),
         ),
       ).called(1);
     });

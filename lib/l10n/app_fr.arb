@@ -12602,5 +12602,10 @@
   "documentsReissueReasonRequired": "Indiquez le motif : il est conservé avec l'annulation.",
   "documentsReissueConfirm": "Réémettre",
   "documentsCurrentEdition": "édition {edition}",
-  "@documentsCurrentEdition": {"description": "Édition de la pièce en vigueur, ajoutée au sous-titre de sa ligne quand elle n'est pas la première.", "placeholders": {"edition": {"type": "int"}}}
+  "@documentsCurrentEdition": {"description": "Édition de la pièce en vigueur, ajoutée au sous-titre de sa ligne quand elle n'est pas la première.", "placeholders": {"edition": {"type": "int"}}},
+  "documentsReissuePriorTitle": "Pièce déjà réémise",
+  "documentsReissuePriorMessage": "Cette pièce avait déjà été réémise le {date}, peut-être avant la correction : le serveur l'a rendue telle quelle, sans la recomposer. La réémettre à nouveau avec l'état du jour ?",
+  "@documentsReissuePriorMessage": {"placeholders": {"date": {"type": "String"}}},
+  "documentsReissuePriorConfirm": "Réémettre à nouveau",
+  "documentsReissuePriorShow": "Voir la pièce rendue"
 }

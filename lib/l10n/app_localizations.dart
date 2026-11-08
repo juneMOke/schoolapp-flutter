@@ -33797,6 +33797,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'edition {edition}'**
   String documentsCurrentEdition(int edition);
+
+  /// No description provided for @documentsReissuePriorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document already reissued'**
+  String get documentsReissuePriorTitle;
+
+  /// No description provided for @documentsReissuePriorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This document had already been reissued on {date}, possibly before the correction: the server returned it as it was, without recomposing it. Reissue it again with today\'s state?'**
+  String documentsReissuePriorMessage(String date);
+
+  /// No description provided for @documentsReissuePriorConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reissue again'**
+  String get documentsReissuePriorConfirm;
+
+  /// No description provided for @documentsReissuePriorShow.
+  ///
+  /// In en, this message translates to:
+  /// **'View the returned document'**
+  String get documentsReissuePriorShow;
 }
 
 class _AppLocalizationsDelegate

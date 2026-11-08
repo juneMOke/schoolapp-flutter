@@ -294,15 +294,21 @@ class DocumentsCatalogAction extends Equatable {
     return null;
   }
 
-  /// Pièce de ce type **en vigueur**, détenue ou non, la plus récemment émise
-  /// d'abord.
+  /// La **dernière** pièce de ce type, si elle est en vigueur — détenue ou
+  /// non — et rien sinon.
+  ///
+  /// Le pendant exact de [_findCancelled] : s'arrête à la première ligne du
+  /// type. Chercher plus loin ferait proposer de réémettre une pièce plus
+  /// ancienne sur la ligne même qui annonce le retrait de la dernière — deux
+  /// gestes contradictoires, et le second viserait une autre pièce que celle
+  /// dont la ligne parle.
   static EditiqueCacheEntry? _findInForce(
     List<EditiqueCacheEntry> cached,
     String code,
   ) {
     for (final entry in cached) {
       if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
-      if (!entry.isCancelled) return entry;
+      return entry.isCancelled ? null : entry;
     }
     return null;
   }

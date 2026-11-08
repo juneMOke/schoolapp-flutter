@@ -21980,4 +21980,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String documentsCurrentEdition(int edition) {
     return 'edition $edition';
   }
+
+  @override
+  String get documentsReissuePriorTitle => 'Document already reissued';
+
+  @override
+  String documentsReissuePriorMessage(String date) {
+    return 'This document had already been reissued on $date, possibly before the correction: the server returned it as it was, without recomposing it. Reissue it again with today\'s state?';
+  }
+
+  @override
+  String get documentsReissuePriorConfirm => 'Reissue again';
+
+  @override
+  String get documentsReissuePriorShow => 'View the returned document';
 }

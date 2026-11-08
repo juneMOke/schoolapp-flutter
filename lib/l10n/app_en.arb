@@ -12419,5 +12419,10 @@
   "documentsReissueReasonRequired": "Give the reason: it is kept with the cancellation.",
   "documentsReissueConfirm": "Reissue",
   "documentsCurrentEdition": "edition {edition}",
-  "@documentsCurrentEdition": {"placeholders": {"edition": {"type": "int"}}}
+  "@documentsCurrentEdition": {"placeholders": {"edition": {"type": "int"}}},
+  "documentsReissuePriorTitle": "Document already reissued",
+  "documentsReissuePriorMessage": "This document had already been reissued on {date}, possibly before the correction: the server returned it as it was, without recomposing it. Reissue it again with today's state?",
+  "@documentsReissuePriorMessage": {"placeholders": {"date": {"type": "String"}}},
+  "documentsReissuePriorConfirm": "Reissue again",
+  "documentsReissuePriorShow": "View the returned document"
 }

@@ -203,6 +203,9 @@ Future<void> showEditiqueRestitutionDialog(
 /// Réémet une pièce corrigée et montre la remplaçante (même numéro, édition
 /// suivante). En ligne seulement ; la route étant rejouable, « Réessayer »
 /// renvoie le même motif sans risque de seconde pièce.
+///
+/// [dispatchOnOpen] à `false` : la demande a déjà été tranchée par l'appelant,
+/// la visionneuse ne fait que montrer son issue.
 Future<void> showEditiqueReissueDialog(
   BuildContext context, {
   required EditiqueDocumentType type,
@@ -212,10 +215,12 @@ Future<void> showEditiqueReissueDialog(
   String? studentId,
   String? academicYearId,
   EditiqueDocumentBloc? bloc,
+  bool dispatchOnOpen = true,
 }) {
   return _showEditiqueDocumentDialog(
     context,
     title: title,
+    dispatchOnOpen: dispatchOnOpen,
     request: EditiqueDocumentReissueRequested(
       type: type,
       documentId: documentId,

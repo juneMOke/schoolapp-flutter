@@ -119,6 +119,28 @@ void main() {
     });
   });
 
+  test('la dernière pièce est annulée : rien à réémettre, même si une plus '
+      'ancienne tient encore', () {
+    final action = _resolve(
+      EditiqueDocumentType.notePerception,
+      cachedPieces: [
+        _piece('NP', id: 'c-latest', documentId: 'doc-latest', cancelledAt: 9),
+        // Sans octets ici : la ligne propose « Émettre » et annonce le retrait.
+        _piece(
+          'NP',
+          id: 'c-old',
+          documentId: 'doc-old',
+          edition: 2,
+          contentSha256: null,
+        ),
+      ],
+    );
+    expect(action.kind, DocumentsCatalogActionKind.emit);
+    expect(action.cancelledPiece?.documentId, 'doc-latest');
+    expect(action.reissuablePiece, isNull);
+    expect(action.currentEdition, isNull);
+  });
+
   group('édition affichée', () {
     test('édition 2 : annoncée', () {
       expect(
