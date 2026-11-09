@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
 import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -23,40 +24,39 @@ const int kDocumentsReissueReasonMaxLength = 500;
 
 /// « Réémettre corrigée » : le geste second d'une ligne AI, NP ou FI.
 ///
-/// Absent quand rien n'est réémissible (hors ligne, pièce connue par son seul
-/// numéro, autre type) et masqué sans `editique.cancel` — la route annule la
-/// pièce en vigueur. Gelé en session lecture seule, comme toute production.
+/// La ligne ne le pose que si une pièce est réémissible (en ligne, pièce
+/// identifiée, AI, NP ou FI). Masqué sans `editique.cancel` — la route annule
+/// la pièce en vigueur — et alors **sans aucun blanc** : l'écart [gap] au-dessus
+/// du bouton est dans la garde. Gelé en session lecture seule, comme toute
+/// production. [busy] vient de la ligne, qui suit déjà l'état de son bloc.
 class DocumentsCatalogReissueButton extends StatelessWidget {
-  final DocumentsCatalogAction action;
+  final bool busy;
+  final bool gap;
   final VoidCallback onPressed;
 
   const DocumentsCatalogReissueButton({
     super.key,
-    required this.action,
+    required this.busy,
     required this.onPressed,
+    this.gap = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (action.reissuablePiece == null) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
-
-    return BlocBuilder<EditiqueDocumentBloc, EditiqueDocumentState>(
-      buildWhen: (prev, curr) => prev.status != curr.status,
-      builder: (context, state) {
-        final isBusy = state.status == EditiqueDocumentStatus.loading;
-        return PermissionGate(
-          requires: const [Perm.editiqueCancel],
-          child: SessionWriteGate(
-            child: EteeloButton.ghost(
-              label: l10n.documentsReissueAction,
-              icon: Icons.restart_alt_rounded,
-              onPressed: isBusy ? null : onPressed,
-              fullWidth: false,
-            ),
+    return PermissionGate(
+      requires: const [Perm.editiqueCancel],
+      child: Padding(
+        padding: EdgeInsets.only(top: gap ? AppDimensions.spacingS : 0),
+        child: SessionWriteGate(
+          child: EteeloButton.ghost(
+            label: l10n.documentsReissueAction,
+            icon: Icons.restart_alt_rounded,
+            onPressed: busy ? null : onPressed,
+            fullWidth: false,
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

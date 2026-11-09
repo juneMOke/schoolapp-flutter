@@ -1,9 +1,41 @@
 import 'dart:typed_data';
 
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/catalog/documents_catalog_reissue.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
+    implements AuthBloc {}
+
+Widget _harness(Widget child, {required List<String> permissions}) {
+  final auth = _MockAuthBloc();
+  final state = AuthState(
+    status: AuthStatus.authenticated,
+    permissions: permissions,
+  );
+  when(() => auth.state).thenReturn(state);
+  whenListen(auth, Stream<AuthState>.value(state), initialState: state);
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('fr'),
+    home: Scaffold(
+      body: BlocProvider<AuthBloc>.value(
+        value: auth,
+        child: Align(alignment: Alignment.topLeft, child: child),
+      ),
+    ),
+  );
+}
 
 EditiqueDocument _returned({String? documentId = 'doc-2', String? emittedOn}) =>
     EditiqueDocument(
@@ -56,6 +88,42 @@ void main() {
         isPriorReplacement(_returned(), sentDocumentId: 'doc-1', today: today),
         isFalse,
       );
+    });
+  });
+
+  group('DocumentsCatalogReissueButton', () {
+    testWidgets('sans editique.cancel : ni bouton, ni blanc à sa place', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          DocumentsCatalogReissueButton(
+            busy: false,
+            gap: true,
+            onPressed: () {},
+          ),
+          permissions: const ['editique.read'],
+        ),
+      );
+
+      expect(find.byType(OutlinedButton), findsNothing);
+      expect(
+        tester.getSize(find.byType(DocumentsCatalogReissueButton)),
+        Size.zero,
+      );
+    });
+
+    testWidgets('pendant une demande, le bouton est inerte', (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        _harness(
+          DocumentsCatalogReissueButton(busy: true, onPressed: () => taps++),
+          permissions: const ['editique.cancel'],
+        ),
+      );
+
+      await tester.tap(find.text('Réémettre corrigée'), warnIfMissed: false);
+      expect(taps, 0);
     });
   });
 }

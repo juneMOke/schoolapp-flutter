@@ -80,6 +80,10 @@ class AppDimensions {
   // Documents élève : trois colonnes de nom à ~140 dp, plus l'avatar et l'œil.
   // En deçà, la liste défile plutôt que de rogner Nom / Post-nom / Prénom.
   static const documentsTableMinWidth = 560.0;
+  // Ligne du catalogue de pièces : médaillon de code et badge de nature.
+  static const documentsCatalogMedallionSize = 44.0;
+  static const documentsNatureBadgePaddingV = 2.0;
+  static const documentsNatureBadgeIconSize = 12.0;
 
   // Feuille devenue modale sur écran large (`showEteeloAdaptiveSheet`) : la
   // largeur d'une liste de reprise lisible.

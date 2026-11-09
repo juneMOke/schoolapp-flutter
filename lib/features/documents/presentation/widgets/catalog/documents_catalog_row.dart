@@ -187,6 +187,7 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
         buildWhen: (prev, curr) => prev.status != curr.status,
         builder: (context, state) {
           final hasError = state.status == EditiqueDocumentStatus.failure;
+          final busy = state.status == EditiqueDocumentStatus.loading;
 
           return Container(
             padding: const EdgeInsets.all(AppDimensions.spacingM),
@@ -215,7 +216,8 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
                 final reissueButton = widget.action.reissuablePiece == null
                     ? null
                     : DocumentsCatalogReissueButton(
-                        action: widget.action,
+                        busy: busy,
+                        gap: !stacked,
                         onPressed: () => runDocumentsCatalogReissue(
                           context,
                           type: widget.entry.type,
@@ -233,10 +235,15 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
                   subtitle: _subtitle(context, l10n),
                   action: widget.action,
                   footer: stacked
-                      ? Wrap(
-                          spacing: AppDimensions.spacingS,
-                          runSpacing: AppDimensions.spacingS,
-                          children: [mainButton, ?reissueButton],
+                      ? Padding(
+                          padding: const EdgeInsets.only(
+                            top: AppDimensions.spacingS,
+                          ),
+                          child: Wrap(
+                            spacing: AppDimensions.spacingS,
+                            runSpacing: AppDimensions.spacingS,
+                            children: [mainButton, ?reissueButton],
+                          ),
                         )
                       : reissueButton,
                 );

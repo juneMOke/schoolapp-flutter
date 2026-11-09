@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_catalog_entry.dart';
 import 'package:school_app_flutter/features/documents/presentation/models/documents_catalog_action.dart';
@@ -51,11 +52,9 @@ class DocumentsCatalogRowDetails extends StatelessWidget {
           style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
         ),
         DocumentsCatalogRowNotice(action: action),
-        if (footer != null)
-          Padding(
-            padding: const EdgeInsets.only(top: AppDimensions.spacingS),
-            child: footer,
-          ),
+        // Sans marge propre : un geste masqué ne doit laisser aucun blanc, le
+        // pied porte donc son écart lui-même.
+        ?footer,
       ],
     );
   }
@@ -67,8 +66,6 @@ class DocumentsCatalogRowDetails extends StatelessWidget {
 /// donc elle est masquée aux lecteurs d'écran plutôt que de leur faire épeler
 /// deux lettres sans contexte.
 class DocumentsCatalogCodeMedallion extends StatelessWidget {
-  static const double _size = 44;
-
   final String code;
   final Color accent;
 
@@ -82,13 +79,19 @@ class DocumentsCatalogCodeMedallion extends StatelessWidget {
   Widget build(BuildContext context) {
     return ExcludeSemantics(
       child: Container(
-        width: _size,
-        height: _size,
+        width: AppDimensions.documentsCatalogMedallionSize,
+        height: AppDimensions.documentsCatalogMedallionSize,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: accent.withValues(alpha: 0.14),
-          border: Border.all(color: accent.withValues(alpha: 0.18)),
-          borderRadius: BorderRadius.circular(12),
+          color: accent.withValues(
+            alpha: AppColors.documentsMedallionFillAlpha,
+          ),
+          border: Border.all(
+            color: accent.withValues(
+              alpha: AppColors.documentsMedallionBorderAlpha,
+            ),
+          ),
+          borderRadius: AppRadius.brMd,
         ),
         child: Text(
           code,
@@ -129,22 +132,22 @@ class DocumentsCatalogNatureBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingS,
-        vertical: 2,
+        vertical: AppDimensions.documentsNatureBadgePaddingV,
       ),
       decoration: BoxDecoration(
         color: background,
         border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: AppRadius.brPill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             isFige ? Icons.lock_outline_rounded : Icons.schedule_rounded,
-            size: 12,
+            size: AppDimensions.documentsNatureBadgeIconSize,
             color: foreground,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppDimensions.spacingXS),
           Text(
             isFige
                 ? l10n.documentsNatureArchivedLabel
