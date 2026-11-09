@@ -870,7 +870,9 @@ class AppConstants {
   // `cote_saisie` et `ref_cote_cours`. Trois tables neuves, aucun backfill.
   // v78 (2026-11-01) : `ref_cote_cours.id`, l'identifiant serveur que nomme une
   // pierre tombale. Colonne ajoutée, remplie par le flux.
-  static const int offlineDbSchemaVersion = 78;
+  // v79 (2026-11-06) : `enrollment_level_corrections`, le geste « corriger le
+  // niveau » en attente ou accusé. Table neuve, aucun backfill. Palier d'école.
+  static const int offlineDbSchemaVersion = 79;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1482,6 +1484,15 @@ class AppConstants {
   /// quelle que soit la tablette qui l'a posée (`enrollment.suspend`).
   static const String syncEnrollmentReactivationsEndpoint =
       '/api/v1/sync/enrollment-suspensions/reactivations';
+
+  /// Correction du niveau d'un élève inscrit (`enrollment.level.correct`) :
+  /// **POST** d'un geste identifié par son uuid, rejouable (201 appliqué, 200
+  /// rejeu, même corps). Le corps rendu est l'état canonique : inscription,
+  /// créances, créances supprimées, membre de classe. Seul 409 :
+  /// `ENROLLMENT_NOT_YET_SYNCED` (attente) ; tout autre refus est un 422
+  /// terminal.
+  static const String syncEnrollmentLevelCorrectionsEndpoint =
+      '/api/v1/sync/enrollment-level-corrections';
 
   /// Volet Discipline offline (contrat openapi_discipline_sync 1.1.0) :
   ///  - **POST** = push de l'agrégat `{case, comments[]}` (upsert 200) : le FAIT

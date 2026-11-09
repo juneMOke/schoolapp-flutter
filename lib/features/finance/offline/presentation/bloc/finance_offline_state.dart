@@ -52,8 +52,12 @@ class FinanceOfflinePaymentPendingSync extends FinanceOfflineState {
 class FinanceOfflineError extends FinanceOfflineState {
   final String message;
 
-  const FinanceOfflineError(this.message);
+  /// Refus attendu, pas une panne : une correction de niveau retient la caisse
+  /// de l'élève (D7). L'écran le dit tel quel, sans code d'incident.
+  final bool heldByLevelCorrection;
+
+  const FinanceOfflineError(this.message, {this.heldByLevelCorrection = false});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, heldByLevelCorrection];
 }

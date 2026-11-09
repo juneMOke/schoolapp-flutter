@@ -26,6 +26,18 @@ class ValidationFailure extends Failure {
   const ValidationFailure([super.message = 'Invalid request data']);
 }
 
+/// L'encaissement d'un élève est retenu tant que sa correction de niveau n'est
+/// pas accusée et descendue (D7 de l'étude « Changer un élève de niveau ») :
+/// rien n'a été écrit, l'argent n'est pas pris.
+///
+/// Le message est technique : l'écran le reconnaît par son type et affiche
+/// `levelCorrectionCollectionHeld`.
+class LevelCorrectionHoldFailure extends ValidationFailure {
+  const LevelCorrectionHoldFailure([
+    super.message = 'Collection held by a pending level correction',
+  ]);
+}
+
 class ServerFailure extends Failure {
   const ServerFailure([super.message = 'Server error occurred']);
 }

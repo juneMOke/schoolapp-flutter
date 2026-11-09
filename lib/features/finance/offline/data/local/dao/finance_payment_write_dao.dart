@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/database/projections/enrollment_level_correction_sql.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
@@ -70,6 +71,18 @@ class FinancePaymentWriteDao {
     GeneratedDocumentLocalModel? receipt,
     String? authorId,
   }) async {
+    // D7 : une correction de niveau en cours retient la caisse de l'élève. La
+    // fiche refuse déjà d'ouvrir l'encaissement ; ce rempart couvre la page
+    // atteinte autrement (lien profond, rechargement) et le remplaçant d'une
+    // correction de versement, qui passe aussi par ici. Dans la transaction :
+    // la garde et l'écriture voient la même base.
+    if (await EnrollmentLevelCorrectionSql.holdsCollection(
+      txn,
+      studentId: payment.studentId,
+      academicYearId: payment.academicYearId,
+    )) {
+      throw const LevelCorrectionHoldException();
+    }
     await txn.insert(
       'payments',
       payment.toMap(),
@@ -312,4 +325,14 @@ class FinancePaymentWriteDao {
       await txn.delete('payments', where: 'id = ?', whereArgs: [paymentId]);
     });
   }
+}
+
+/// L'encaissement est retenu par une correction de niveau en cours (D7) :
+/// rien n'a été écrit.
+class LevelCorrectionHoldException implements Exception {
+  const LevelCorrectionHoldException();
+
+  @override
+  String toString() =>
+      'Encaissement retenu : correction de niveau en cours pour cet élève';
 }

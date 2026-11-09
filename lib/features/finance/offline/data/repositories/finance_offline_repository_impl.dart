@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart'
+    show LevelCorrectionHoldException;
 import 'package:school_app_flutter/features/finance/offline/data/sync/exchange_rate_remote_data_source.dart';
 import 'dart:async';
 
@@ -104,6 +106,8 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
 
       unawaited(_syncEngine.flush());
       return Right(paymentId);
+    } on LevelCorrectionHoldException {
+      return const Left(LevelCorrectionHoldFailure());
     } catch (e) {
       return Left(StorageFailure('Échec de l\'encaissement local : $e'));
     }

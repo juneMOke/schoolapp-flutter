@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/database/schema/class_journal_schema.dar
 import 'package:school_app_flutter/core/database/schema/cote_saisie_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/enrollment_level_correction_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_suspension_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payment_corrections_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
@@ -159,6 +160,9 @@ Future<void> migrateTenantDatabase(
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_ref_cote_cours_id ON ref_cote_cours(id)',
     );
+  }
+  if (upTo(79)) {
+    await _createTables(db, enrollmentLevelCorrectionTables);
   }
 }
 

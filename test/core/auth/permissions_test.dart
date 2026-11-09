@@ -19,6 +19,7 @@ void main() {
     Perm.enrollmentDelete: 'enrollment.delete',
     Perm.enrollmentStatsRead: 'enrollment.stats.read',
     Perm.enrollmentSuspend: 'enrollment.suspend',
+    Perm.enrollmentLevelCorrect: 'enrollment.level.correct',
     Perm.financeChargeRead: 'finance.charge.read',
     Perm.financeChargeWrite: 'finance.charge.write',
     Perm.financeChargeDelete: 'finance.charge.delete',
@@ -174,7 +175,10 @@ void main() {
       // 81 → 82 : `academics.grade.enter`, saisir les cotes d'une classe
       // (`GRADE_CLERK`, DIRECTOR — contrat « Saisie des notes » du 2026-11-01).
       // ⚠️ Déclarée avant que le serveur ne la sème (lot back 2).
-      expect(Perm.values, hasLength(82));
+      // 82 → 83 : `enrollment.level.correct`, corriger le niveau d'un élève
+      // (DIRECTOR, SECRETARY — étude « Changer un élève de niveau », D2).
+      // ⚠️ Déclarée avant que le serveur ne la sème (lot back B).
+      expect(Perm.values, hasLength(83));
     },
   );
 

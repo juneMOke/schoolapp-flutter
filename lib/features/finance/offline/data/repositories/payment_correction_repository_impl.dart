@@ -5,6 +5,8 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/finance_payment_write_dao.dart'
+    show LevelCorrectionHoldException;
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_composer.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_origin.dart';
@@ -104,6 +106,8 @@ class PaymentCorrectionRepositoryImpl implements PaymentCorrectionRepository {
       );
     } on StateError catch (e) {
       return Left(ValidationFailure(e.message));
+    } on LevelCorrectionHoldException {
+      return const Left(LevelCorrectionHoldFailure());
     } catch (e) {
       return Left(StorageFailure('Échec de la correction locale : $e'));
     }

@@ -4,8 +4,7 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/entities/e
 import 'package:school_app_flutter/router/app_routes_names.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_consultation_actions.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/suspension/consultation_suspension.dart';
+import 'package:school_app_flutter/features/enrollment/presentation/widgets/detail/enrollment_local_consultation_view.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -410,62 +409,30 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   }
 
   // Vue d'un dossier local rendue par le stepper : consultation lecture seule,
-  // ou CORRECTION d'un dossier complété — même agrégat, même écran, seule la
-  // politique change (et avec elle ce qui est éditable).
+  // ou CORRECTION d'un dossier complété (cf. EnrollmentLocalConsultationView).
   Widget _buildLocalReadOnly(BuildContext context, AppLocalizations l10n) {
-    return BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
-      builder: (context, academicYearState) {
-        final detail = mapLocalToEnrollmentDetail(
-          _localReadOnly!,
-          levels: schoolLevelsFromAcademicYearContext(
-            academicYearState.context,
-          ),
-          groups: schoolLevelGroupsFromAcademicYearContext(
-            academicYearState.context,
-          ),
-        );
-        // La correction n'a rien enregistré tant que le dossier n'est pas passé
-        // en brouillon : c'est l'état de la base qui le dit, pas une intention
-        // mémorisée à l'écran.
-        final hasUnvalidatedCorrection =
-            _isCompletedReedition &&
-            _localReadOnly!.enrollment.syncState == SyncState.draft;
-        final candidate = consultationCandidate(_localReadOnly!);
-        return ConsultationSuspensionScope(
-          enrollmentId: candidate.target.enrollmentId,
-          child: EnrollmentJourneyScaffold(
-            modeLabel: _buildJourneyModeLabel(l10n),
-            studentDisplayName: _localDraftDisplayName(detail, l10n),
-            currentStep: _currentStep,
-            avatar: enrollmentPhotoAvatar(detail),
-            onExitRequested: hasUnvalidatedCorrection
-                ? _confirmReeditionExit
-                : null,
-            // Bouton PLEIN (terre cuite) et non un texte sur la barre sombre :
-            // c'est la seule porte de sortie de la lecture seule, et un libellé
-            // posé sur un dégradé bleu se lit comme un titre, pas comme une
-            // action — le guichet ne le voyait pas.
-            action: EnrollmentConsultationActions(
-              candidate: candidate,
-              offersSuspension: _offersSuspension,
-              offersSheet: _offersSheet,
-              onReedit: _canReedit ? _enterReedition : null,
-            ),
-            body: EnrollmentDetailContentShell(
-              child: EnrollmentStepperScope(
-                enrollmentDetail: detail,
-                detailIntent: _effectiveIntent,
-                detailPolicy: _isCompletedReedition
-                    ? _policy
-                    : const LocalConsultationDetailPolicy(),
-                onStepChanged: _onStepChanged,
-                correctionOffered: _canReedit,
-                statusBanner: ConsultationSuspendedBanner(candidate: candidate),
-              ),
-            ),
-          ),
-        );
-      },
+    final local = _localReadOnly!;
+    // La correction n'a rien enregistré tant que le dossier n'est pas passé
+    // en brouillon : c'est l'état de la base qui le dit, pas une intention
+    // mémorisée à l'écran.
+    final hasUnvalidatedCorrection =
+        _isCompletedReedition && local.enrollment.syncState == SyncState.draft;
+    return EnrollmentLocalConsultationView(
+      local: local,
+      intent: _effectiveIntent,
+      detailPolicy: _isCompletedReedition
+          ? _policy
+          : const LocalConsultationDetailPolicy(),
+      modeLabel: _buildJourneyModeLabel(l10n),
+      displayName: (detail) => _localDraftDisplayName(detail, l10n),
+      currentStep: _currentStep,
+      onStepChanged: _onStepChanged,
+      onExitRequested: hasUnvalidatedCorrection ? _confirmReeditionExit : null,
+      onReedit: _canReedit ? _enterReedition : null,
+      offersSuspension: _offersSuspension,
+      offersSheet: _offersSheet,
+      offersLevelCorrection: _offersLevelCorrection,
+      onLevelCorrectionSettled: _reloadAfterLevelCorrection,
     );
   }
 
@@ -477,6 +444,23 @@ class _EnrollmentDetailPageState extends State<EnrollmentDetailPage> {
   bool get _offersSheet =>
       !_isCompletedReedition &&
       _localReadOnly?.enrollment.status == OfflineEnrollmentStatus.completed;
+
+  /// La correction de niveau vient de descendre : relire le dossier local, qui
+  /// porte le nouveau niveau. La bascule forcée garde la consultation même si
+  /// le dossier avait été ouvert comme écriture non synchronisée — il est
+  /// maintenant synchronisé, et `_onLocalDetail` l'ignorerait.
+  void _reloadAfterLevelCorrection() {
+    final enrollmentId = _localReadOnly?.enrollment.id;
+    if (!mounted || enrollmentId == null) return;
+    _forceLocalReadOnly = true;
+    context.read<EnrollmentOfflineBloc>().add(
+      LoadLocalEnrollmentDetail(enrollmentId),
+    );
+  }
+
+  /// « Corriger le niveau » : tout dossier complété consulté, comme la fiche
+  /// d'inscription. Le serveur juge le reste (versements, notes).
+  bool get _offersLevelCorrection => _offersSheet;
 
   bool get _offersSuspension =>
       !_isCompletedReedition &&

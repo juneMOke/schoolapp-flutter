@@ -11,6 +11,7 @@ import 'package:school_app_flutter/core/database/schema/cote_saisie_schema.dart'
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
 import 'package:school_app_flutter/core/database/schema/editique_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_finance_offline_schema.dart';
+import 'package:school_app_flutter/core/database/schema/enrollment_level_correction_schema.dart';
 import 'package:school_app_flutter/core/database/schema/enrollment_suspension_schema.dart';
 import 'package:school_app_flutter/core/database/schema/expense_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/payroll_schema.dart';
@@ -134,4 +135,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...evaluationDepotTables, // Cours — copies déposées par les parents
   ...ticketPrintJobsTables, // Caisse — tickets à imprimer (continuité RC)
   ...coteSaisieTables, // Résultats — saisie des notes (cache et file d'envoi)
+  ...enrollmentLevelCorrectionTables, // Inscriptions — correction de niveau
 ];

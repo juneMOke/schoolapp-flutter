@@ -33527,6 +33527,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grade entry'**
   String get syncAggregateCotesBatch;
+
+  /// No description provided for @levelCorrectionRefusedEnrollmentNotConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the enrollment is not confirmed (pre-registration or cancelled enrollment).'**
+  String get levelCorrectionRefusedEnrollmentNotConfirmed;
+
+  /// No description provided for @levelCorrectionRefusedStaleLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the student\'s level was already changed from another tablet. Reopen the record and try again.'**
+  String get levelCorrectionRefusedStaleLevel;
+
+  /// No description provided for @levelCorrectionRefusedInvalidTargetLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the chosen level is not valid for this school or this year.'**
+  String get levelCorrectionRefusedInvalidTargetLevel;
+
+  /// No description provided for @levelCorrectionRefusedNoTariff.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the chosen level has no fees in the fee schedule.'**
+  String get levelCorrectionRefusedNoTariff;
+
+  /// No description provided for @levelCorrectionRefusedHasPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the student already has a payment this year. Contact the administration.'**
+  String get levelCorrectionRefusedHasPayments;
+
+  /// No description provided for @levelCorrectionRefusedHasGrades.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the student already has grades this year.'**
+  String get levelCorrectionRefusedHasGrades;
+
+  /// No description provided for @levelCorrectionRefusedTargetClassroomRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: choose a class of the new level.'**
+  String get levelCorrectionRefusedTargetClassroomRequired;
+
+  /// No description provided for @levelCorrectionRefusedLevelMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction refused: the chosen class is not of the new level.'**
+  String get levelCorrectionRefusedLevelMismatch;
+
+  /// No description provided for @levelCorrectionRefusedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction refused by the server.'**
+  String get levelCorrectionRefusedGeneric;
+
+  /// No description provided for @syncAggregateEnrollmentLevelCorrection.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction'**
+  String get syncAggregateEnrollmentLevelCorrection;
+
+  /// No description provided for @levelCorrectionCollectionHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection on hold: this student\'s level correction is waiting to sync. It will resume as soon as the new amount due is received.'**
+  String get levelCorrectionCollectionHeld;
+
+  /// No description provided for @levelCorrectionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct the level'**
+  String get levelCorrectionAction;
+
+  /// No description provided for @levelCorrectionDialogEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment'**
+  String get levelCorrectionDialogEyebrow;
+
+  /// No description provided for @levelCorrectionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct the student\'s level'**
+  String get levelCorrectionDialogTitle;
+
+  /// No description provided for @levelCorrectionCurrentLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current level: {level}'**
+  String levelCorrectionCurrentLevel(String level);
+
+  /// No description provided for @levelCorrectionNoticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The student\'s fees are replaced by those of the new level\'s fee schedule, and the student changes class. Documents already issued remain valid as they are. Collection is on hold until sync.'**
+  String get levelCorrectionNoticeBody;
+
+  /// No description provided for @levelCorrectionTargetLevelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New level'**
+  String get levelCorrectionTargetLevelLabel;
+
+  /// No description provided for @levelCorrectionTargetLevelPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a level'**
+  String get levelCorrectionTargetLevelPlaceholder;
+
+  /// No description provided for @levelCorrectionLevelOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{group} · {level}'**
+  String levelCorrectionLevelOption(String group, String level);
+
+  /// No description provided for @levelCorrectionTargetClassroomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New class'**
+  String get levelCorrectionTargetClassroomLabel;
+
+  /// No description provided for @levelCorrectionTargetClassroomPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class'**
+  String get levelCorrectionTargetClassroomPlaceholder;
+
+  /// No description provided for @levelCorrectionNoClassroomNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The new level has no class: the student will have no class.'**
+  String get levelCorrectionNoClassroomNotice;
+
+  /// No description provided for @levelCorrectionReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get levelCorrectionReasonLabel;
+
+  /// No description provided for @levelCorrectionReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. wrong level at enrollment'**
+  String get levelCorrectionReasonHint;
+
+  /// No description provided for @levelCorrectionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get levelCorrectionCancel;
+
+  /// No description provided for @levelCorrectionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct the level'**
+  String get levelCorrectionConfirm;
+
+  /// No description provided for @levelCorrectionBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get levelCorrectionBusy;
+
+  /// No description provided for @levelCorrectionAlreadyPending.
+  ///
+  /// In en, this message translates to:
+  /// **'A level correction for this student is already waiting to sync.'**
+  String get levelCorrectionAlreadyPending;
+
+  /// No description provided for @levelCorrectionWriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The correction could not be saved on the tablet. Try again.'**
+  String get levelCorrectionWriteFailed;
+
+  /// No description provided for @levelCorrectionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction saved · it will go out at the next sync'**
+  String get levelCorrectionDone;
+
+  /// No description provided for @levelCorrectionBannerPendingLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction pending: {from} → {to}'**
+  String levelCorrectionBannerPendingLead(String from, String to);
+
+  /// No description provided for @levelCorrectionBannerPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection for this student is on hold until the new amount due is received.'**
+  String get levelCorrectionBannerPendingBody;
+
+  /// No description provided for @levelCorrectionBannerRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction refused ({from} → {to}). {message}'**
+  String levelCorrectionBannerRefused(String from, String to, String message);
+
+  /// No description provided for @levelCorrectionBannerAppliedLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Level correction accepted: {from} → {to}'**
+  String levelCorrectionBannerAppliedLead(String from, String to);
+
+  /// No description provided for @levelCorrectionBannerAppliedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The record is updating. Collection will resume once the new amount due has reached this tablet.'**
+  String get levelCorrectionBannerAppliedBody;
+
+  /// No description provided for @levelCorrectionBannerStalled.
+  ///
+  /// In en, this message translates to:
+  /// **'The level correction ({from} → {to}) could not be sent. Retry it from the sync status, or make a new correction.'**
+  String levelCorrectionBannerStalled(String from, String to);
+
+  /// No description provided for @facturationCollectHeldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection on hold'**
+  String get facturationCollectHeldTitle;
 }
 
 class _AppLocalizationsDelegate

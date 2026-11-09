@@ -63,7 +63,10 @@ class FinanceOfflineBloc
     final result = await _recordPayment(event.draft);
     emit(
       result.fold(
-        (f) => FinanceOfflineError(_map(f)),
+        (f) => FinanceOfflineError(
+          _map(f),
+          heldByLevelCorrection: f is LevelCorrectionHoldFailure,
+        ),
         (id) => FinanceOfflinePaymentPendingSync(id),
       ),
     );
