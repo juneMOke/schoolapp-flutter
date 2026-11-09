@@ -210,7 +210,12 @@ class ThermalPrinterAdapter implements ThermalPrinterPort {
       // UN SEUL envoi, exemplaires compris : le canal natif préfixe chaque
       // appel d'un `LF`, qui tomberait au milieu d'une séquence ESC/POS si le
       // ticket était découpé.
-      final payload = EscPosTicketRenderer.joinCopies(bytes, count);
+      //
+      // ⚠️ Précédé du bourrage de resynchronisation : la fin d'un envoi
+      // PRÉCÉDENT a pu être perdue — cf. [EscPosTicketRenderer.resyncPreamble].
+      final payload = EscPosTicketRenderer.withResync(
+        EscPosTicketRenderer.joinCopies(bytes, count),
+      );
       final written = await _guard(
         () => _channel.writeBytes(payload),
         _writeTimeout * count,
