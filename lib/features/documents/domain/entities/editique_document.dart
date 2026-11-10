@@ -58,6 +58,17 @@ class EditiqueDocument extends Equatable {
   /// écraser une édition qu'un delta lui aurait apprise.
   final int? edition;
 
+  /// Vrai quand une réémission a rendu une remplaçante qu'elle n'a **pas**
+  /// composée à cet appel (`X-Document-Replayed: true`) : la pièce était déjà
+  /// remplacée, par un autre poste ou par ce même poste dont la réponse s'est
+  /// perdue.
+  ///
+  /// L'en-tête n'est posé que sur un rejeu, jamais à `false` : `false` dit donc
+  /// « pas de signal », ce qui vaut aussi pour un serveur antérieur à
+  /// l'en-tête. Sans rapport avec [isReplayable], qui dit si une émission peut
+  /// se rejouer sans risque.
+  final bool wasReplayed;
+
   const EditiqueDocument({
     required this.type,
     required this.bytes,
@@ -67,6 +78,7 @@ class EditiqueDocument extends Equatable {
     this.emittedOn,
     this.verificationUrl,
     this.edition,
+    this.wasReplayed = false,
   });
 
   /// L'édition à montrer : celle annoncée, sinon la première.
@@ -86,5 +98,6 @@ class EditiqueDocument extends Equatable {
     emittedOn,
     verificationUrl,
     edition,
+    wasReplayed,
   ];
 }

@@ -40,6 +40,10 @@ class EditiqueDocumentMapper {
   /// réémission sous le même numéro.
   static const String _editionHeader = 'x-document-edition';
 
+  /// Posé à `true` sur une réémission qui rend une remplaçante déjà scellée,
+  /// absent sinon — jamais `false`.
+  static const String _replayedHeader = 'x-document-replayed';
+
   static Either<Failure, EditiqueDocument> map(
     HttpResponse<Uint8List> response,
     EditiqueDocumentType type,
@@ -85,6 +89,7 @@ class EditiqueDocumentMapper {
           _firstHeader(headers, _verificationUrlHeader),
         ),
         edition: _edition(headers),
+        wasReplayed: _replayed(headers),
       ),
     );
   }
@@ -98,6 +103,11 @@ class EditiqueDocumentMapper {
     );
     return (value == null || value < 1) ? null : value;
   }
+
+  /// Vrai seulement sur un `true` explicite (casse et blancs tolérés) : toute
+  /// autre valeur se lit comme l'absence du signal.
+  static bool _replayed(Headers headers) =>
+      _firstHeader(headers, _replayedHeader)?.trim().toLowerCase() == 'true';
 
   /// Identifiant d'archive annoncé par le serveur, `null` s'il ne l'annonce pas.
   ///

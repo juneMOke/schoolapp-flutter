@@ -12607,5 +12607,6 @@
   "documentsReissuePriorMessage": "Cette pièce avait déjà été réémise le {date}, peut-être avant la correction : le serveur l'a rendue telle quelle, sans la recomposer. La réémettre à nouveau avec l'état du jour ?",
   "@documentsReissuePriorMessage": {"placeholders": {"date": {"type": "String"}}},
   "documentsReissuePriorConfirm": "Réémettre à nouveau",
-  "documentsReissuePriorShow": "Voir la pièce rendue"
+  "documentsReissuePriorShow": "Voir la pièce rendue",
+  "documentsReissuePriorTodayMessage": "Cette pièce avait déjà été réémise aujourd'hui, depuis ce poste ou un autre : le serveur l'a rendue telle quelle, sans la recomposer. La réémettre à nouveau avec l'état du jour ?"
 }

@@ -64,18 +64,21 @@ class DocumentsCatalogReissueButton extends StatelessWidget {
 /// Vrai quand la pièce rendue par une réémission n'est **pas** neuve : le
 /// serveur a rendu une remplaçante déjà scellée, telle quelle.
 ///
-/// C'est le cas quand la pièce envoyée était déjà remplacée ailleurs — une
-/// autre tablette l'a réémise avant que celle-ci ne l'apprenne. La route est
-/// rejouable : elle n'annule pas deux fois et ressert la pièce en vigueur, avec
-/// le même 200 qu'une vraie réémission. Seul le jour d'émission la trahit — une
-/// pièce composée aujourd'hui porte le jour de l'école, [today]. Une
-/// réémission faite plus tôt le même jour reste indiscernable.
+/// C'est le cas quand la pièce envoyée était déjà remplacée — par une autre
+/// tablette avant que celle-ci ne l'apprenne, ou par celle-ci dont la réponse
+/// s'est perdue. Le serveur le dit (`X-Document-Replayed`,
+/// [EditiqueDocument.wasReplayed]), et c'est lui qui fait foi.
+///
+/// Sans le signal — un serveur antérieur à l'en-tête —, deux indices restent :
+/// la pièce envoyée elle-même, ou un jour d'émission antérieur à celui de
+/// l'école, [today]. Un rejeu du même jour y est alors indiscernable.
 @visibleForTesting
 bool isPriorReplacement(
   EditiqueDocument document, {
   required String sentDocumentId,
   required String today,
 }) {
+  if (document.wasReplayed) return true;
   if (document.documentId == sentDocumentId) return true;
   final emittedOn = document.emittedOn;
   return emittedOn != null && emittedOn.compareTo(today) < 0;
@@ -149,9 +152,7 @@ Future<void> runDocumentsCatalogReissue(
     final again = await showAppConfirmationDialog(
       context: context,
       title: l10n.documentsReissuePriorTitle,
-      message: l10n.documentsReissuePriorMessage(
-        _day(context, returned.emittedOn) ?? returned.emittedOn ?? '',
-      ),
+      message: _priorMessage(context, l10n, returned.emittedOn, today),
       confirmLabel: l10n.documentsReissuePriorConfirm,
       cancelLabel: l10n.documentsReissuePriorShow,
       headerIcon: Icons.history_rounded,
@@ -202,6 +203,23 @@ Future<EditiqueDocumentState?> _reissue(
   } on StateError {
     return null;
   }
+}
+
+/// Le message de l'avertissement : « aujourd'hui » sans prétendre savoir quel
+/// poste — ce peut être celui-ci, dont la réponse s'est perdue —, sinon le
+/// jour de la remplaçante.
+String _priorMessage(
+  BuildContext context,
+  AppLocalizations l10n,
+  String? emittedOn,
+  String today,
+) {
+  if (emittedOn == null || emittedOn == today) {
+    return l10n.documentsReissuePriorTodayMessage;
+  }
+  return l10n.documentsReissuePriorMessage(
+    _day(context, emittedOn) ?? emittedOn,
+  );
 }
 
 String? _day(BuildContext context, String? emittedOn) {

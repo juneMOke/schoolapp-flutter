@@ -21994,4 +21994,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get documentsReissuePriorShow => 'View the returned document';
+
+  @override
+  String get documentsReissuePriorTodayMessage =>
+      'This document had already been reissued today, from this device or another: the server returned it as it was, without recomposing it. Reissue it again with today\'s state?';
 }

@@ -249,6 +249,10 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
         // numéro, elle se rattacherait à la pièce qu'elle remplace et en
         // écraserait la copie. Le delta suivant l'apprendra.
         if (replacementId == null || replacementId == documentId) return;
+        // Un rejeu : la remplaçante est rangée, mais l'annulation n'est pas
+        // la nôtre — elle a été posée par l'appel qui l'a composée, avec SON
+        // motif. L'écrire ici avec le nôtre afficherait un faux motif jusqu'au
+        // delta ; la plus haute édition suffit à montrer la bonne pièce.
         // La remplaçante d'abord : si l'annulation qui suit ne s'écrit pas,
         // la ligne montre quand même la bonne pièce (plus haute édition, en
         // tête du même jour) et le delta posera le retrait. Dans l'ordre
@@ -259,6 +263,7 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
           studentId: studentId,
           academicYearId: academicYearId,
         );
+        if (replacement.wasReplayed) return;
         await cache.markCancelled(
           documentId: documentId,
           reason: reason,

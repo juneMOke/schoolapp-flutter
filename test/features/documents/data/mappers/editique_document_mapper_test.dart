@@ -19,6 +19,7 @@ HttpResponse<Uint8List> _response({
   String? emittedAt,
   String? verificationUrl,
   String? edition,
+  String? replayed,
 }) {
   final headerMap = <String, List<String>>{};
   if (contentType != null) {
@@ -38,6 +39,9 @@ HttpResponse<Uint8List> _response({
   }
   if (edition != null) {
     headerMap['x-document-edition'] = <String>[edition];
+  }
+  if (replayed != null) {
+    headerMap['x-document-replayed'] = <String>[replayed];
   }
 
   return HttpResponse<Uint8List>(
@@ -292,6 +296,28 @@ void main() {
       expect(editionOf('abc'), isNull);
       expect(editionOf('0'), isNull);
       expect(editionOf(' 3 '), 3);
+    });
+  });
+
+  group('EditiqueDocumentMapper.map — rejeu', () {
+    bool replayedOf(String? header) => EditiqueDocumentMapper.map(
+      _response(replayed: header),
+      EditiqueDocumentType.enrollmentAttestation,
+    ).fold((_) => throw StateError('attendu Right'), (d) => d.wasReplayed);
+
+    test('`true` : la remplaçante n\'a pas été composée à cet appel', () {
+      expect(replayedOf('true'), isTrue);
+      expect(replayedOf(' TRUE '), isTrue);
+    });
+
+    test('absent : pas de signal — le serveur ne pose jamais `false`', () {
+      expect(replayedOf(null), isFalse);
+    });
+
+    test('toute autre valeur vaut l\'absence', () {
+      expect(replayedOf('false'), isFalse);
+      expect(replayedOf('1'), isFalse);
+      expect(replayedOf(''), isFalse);
     });
   });
 }

@@ -12424,5 +12424,6 @@
   "documentsReissuePriorMessage": "This document had already been reissued on {date}, possibly before the correction: the server returned it as it was, without recomposing it. Reissue it again with today's state?",
   "@documentsReissuePriorMessage": {"placeholders": {"date": {"type": "String"}}},
   "documentsReissuePriorConfirm": "Reissue again",
-  "documentsReissuePriorShow": "View the returned document"
+  "documentsReissuePriorShow": "View the returned document",
+  "documentsReissuePriorTodayMessage": "This document had already been reissued today, from this device or another: the server returned it as it was, without recomposing it. Reissue it again with today's state?"
 }

@@ -37,14 +37,18 @@ Widget _harness(Widget child, {required List<String> permissions}) {
   );
 }
 
-EditiqueDocument _returned({String? documentId = 'doc-2', String? emittedOn}) =>
-    EditiqueDocument(
-      type: EditiqueDocumentType.enrollmentAttestation,
-      bytes: Uint8List(4),
-      fileName: 'piece.pdf',
-      documentId: documentId,
-      emittedOn: emittedOn,
-    );
+EditiqueDocument _returned({
+  String? documentId = 'doc-2',
+  String? emittedOn,
+  bool wasReplayed = false,
+}) => EditiqueDocument(
+  type: EditiqueDocumentType.enrollmentAttestation,
+  bytes: Uint8List(4),
+  fileName: 'piece.pdf',
+  documentId: documentId,
+  emittedOn: emittedOn,
+  wasReplayed: wasReplayed,
+);
 
 void main() {
   group('isPriorReplacement', () {
@@ -76,6 +80,17 @@ void main() {
       expect(
         isPriorReplacement(
           _returned(documentId: 'doc-1', emittedOn: today),
+          sentDocumentId: 'doc-1',
+          today: today,
+        ),
+        isTrue,
+      );
+    });
+
+    test('rejeu signalé le jour même : le serveur fait foi', () {
+      expect(
+        isPriorReplacement(
+          _returned(emittedOn: today, wasReplayed: true),
           sentDocumentId: 'doc-1',
           today: today,
         ),

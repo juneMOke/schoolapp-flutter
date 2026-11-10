@@ -22148,4 +22148,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get documentsReissuePriorShow => 'Voir la pièce rendue';
+
+  @override
+  String get documentsReissuePriorTodayMessage =>
+      'Cette pièce avait déjà été réémise aujourd\'hui, depuis ce poste ou un autre : le serveur l\'a rendue telle quelle, sans la recomposer. La réémettre à nouveau avec l\'état du jour ?';
 }
