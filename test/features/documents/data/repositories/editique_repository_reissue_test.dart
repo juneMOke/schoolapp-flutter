@@ -25,6 +25,7 @@ HttpResponse<Uint8List> _replacement({
   String? documentId,
   String? edition,
   String? emittedAt,
+  bool replayed = false,
 }) => HttpResponse<Uint8List>(
   _pdf(),
   Response<Uint8List>(
@@ -38,6 +39,7 @@ HttpResponse<Uint8List> _replacement({
       if (documentId != null) 'x-document-id': <String>[documentId],
       if (edition != null) 'x-document-edition': <String>[edition],
       if (emittedAt != null) 'x-document-emitted-at': <String>[emittedAt],
+      if (replayed) 'x-document-replayed': <String>['true'],
     }),
     data: _pdf(),
   ),
@@ -176,6 +178,43 @@ void main() {
     final result = await reissue();
 
     expect(result.isRight(), isTrue);
+    verifyNever(
+      () => cache.markCancelled(
+        documentId: any(named: 'documentId'),
+        reason: any(named: 'reason'),
+        cancelledAt: any(named: 'cancelledAt'),
+      ),
+    );
+  });
+
+  test('un rejeu range la remplaçante sans annuler avec notre motif : '
+      'l\'annulation est celle de l\'appel qui l\'a composée', () async {
+    when(() => remote.reissueDocument(any(), any(), any())).thenAnswer(
+      (_) async =>
+          _replacement(documentId: 'doc-2', edition: '2', replayed: true),
+    );
+
+    final result = await reissue();
+
+    result.fold(
+      (_) => fail('attendu Right'),
+      (document) => expect(document.wasReplayed, isTrue),
+    );
+    verify(
+      () => cache.put(
+        docType: 'AI',
+        documentId: 'doc-2',
+        documentNumber: any(named: 'documentNumber'),
+        studentId: 's-1',
+        academicYearId: 'y-1',
+        schoolId: 'school-1',
+        ownerUid: any(named: 'ownerUid'),
+        emittedAt: any(named: 'emittedAt'),
+        verificationUrl: any(named: 'verificationUrl'),
+        edition: 2,
+        bytes: any(named: 'bytes'),
+      ),
+    ).called(1);
     verifyNever(
       () => cache.markCancelled(
         documentId: any(named: 'documentId'),

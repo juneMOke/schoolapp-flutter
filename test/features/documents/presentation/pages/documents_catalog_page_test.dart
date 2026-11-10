@@ -7,6 +7,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/helpers/date_only_json_helper.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
@@ -583,6 +584,44 @@ void main() {
           ),
         ),
       ).called(1);
+    });
+
+    testWidgets('un rejeu du jour même, signalé par le serveur : la tablette '
+        'le dit sans désigner de poste, et peut montrer la pièce rendue', (
+      tester,
+    ) async {
+      seedInForce();
+      when(() => reissueUseCase(any())).thenAnswer(
+        (_) async => Right(
+          EditiqueDocument(
+            type: EditiqueDocumentType.enrollmentAttestation,
+            bytes: Uint8List(4),
+            fileName: 'piece.pdf',
+            documentId: 'doc-ai-2',
+            emittedOn: DateOnlyJsonHelper.toJson(DateTime.now()),
+            wasReplayed: true,
+          ),
+        ),
+      );
+
+      await _pump(tester);
+      await tester.pump();
+      await tester.tap(find.text('Réémettre corrigée'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Niveau corrigé');
+      await tester.tap(find.text('Réémettre'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pièce déjà réémise'), findsOneWidget);
+      expect(
+        find.textContaining('déjà été réémise aujourd\'hui'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Voir la pièce rendue'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      verify(() => reissueUseCase(any())).called(1);
     });
   });
 }

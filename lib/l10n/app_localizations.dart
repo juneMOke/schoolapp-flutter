@@ -33821,6 +33821,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View the returned document'**
   String get documentsReissuePriorShow;
+
+  /// No description provided for @documentsReissuePriorTodayMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This document had already been reissued today, from this device or another: the server returned it as it was, without recomposing it. Reissue it again with today\'s state?'**
+  String get documentsReissuePriorTodayMessage;
 }
 
 class _AppLocalizationsDelegate
