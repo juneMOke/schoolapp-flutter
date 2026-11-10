@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,9 @@ class _MockEmitFinancialClearanceUseCase extends Mock
 class MockRestituteDocumentUseCase extends Mock
     implements RestituteDocumentUseCase {}
 
+class MockReissueDocumentUseCase extends Mock
+    implements ReissueDocumentUseCase {}
+
 void main() {
   late _MockEmitPaymentReceiptUseCase receiptUseCase;
 
@@ -62,6 +66,7 @@ void main() {
     emitAccountStatementUseCase: _MockEmitAccountStatementUseCase(),
     emitFinancialClearanceUseCase: _MockEmitFinancialClearanceUseCase(),
     restituteDocumentUseCase: MockRestituteDocumentUseCase(),
+    reissueDocumentUseCase: MockReissueDocumentUseCase(),
   );
 
   Future<void> pumpOpener(

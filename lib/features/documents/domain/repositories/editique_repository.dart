@@ -104,4 +104,23 @@ abstract class EditiqueRepository {
     String? studentId,
     String? academicYearId,
   });
+
+  /// **Réémet** une pièce corrigée (AI, NP, FI) : le serveur annule la pièce
+  /// [documentId] et rend sa remplaçante, composée depuis l'état du jour, sous
+  /// le même numéro en édition suivante. [reason] est le motif d'annulation,
+  /// obligatoire (500 caractères au plus).
+  ///
+  /// En ligne seulement, sans outbox, comme toute émission. Mais rejouable :
+  /// un second appel sur la pièce déjà annulée rend la remplaçante en vigueur
+  /// sans en sceller une autre. Un échec indéterminé se réessaie donc sans
+  /// risque, à l'inverse d'un relevé ou d'un quitus.
+  ///
+  /// Lève si [type] n'est pas réémissible : c'est une faute d'appelant.
+  Future<Either<Failure, EditiqueDocument>> reissue({
+    required EditiqueDocumentType type,
+    required String documentId,
+    required String reason,
+    String? studentId,
+    String? academicYearId,
+  });
 }

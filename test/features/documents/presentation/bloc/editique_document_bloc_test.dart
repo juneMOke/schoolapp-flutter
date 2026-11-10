@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'dart:typed_data';
 
@@ -38,6 +39,9 @@ class MockEmitFinancialClearanceUseCase extends Mock
 
 class MockRestituteDocumentUseCase extends Mock
     implements RestituteDocumentUseCase {}
+
+class MockReissueDocumentUseCase extends Mock
+    implements ReissueDocumentUseCase {}
 
 final _receipt = EditiqueDocument(
   type: EditiqueDocumentType.paymentReceipt,
@@ -81,6 +85,8 @@ void main() {
     clearanceUseCase = MockEmitFinancialClearanceUseCase();
   });
 
+  final reissueUseCase = MockReissueDocumentUseCase();
+
   EditiqueDocumentBloc build() => EditiqueDocumentBloc(
     emitEnrollmentSheetUseCase: MockEmitEnrollmentSheetUseCase(),
     emitEnrollmentAttestationUseCase: attestationUseCase,
@@ -89,6 +95,7 @@ void main() {
     emitAccountStatementUseCase: statementUseCase,
     emitFinancialClearanceUseCase: clearanceUseCase,
     restituteDocumentUseCase: MockRestituteDocumentUseCase(),
+    reissueDocumentUseCase: reissueUseCase,
   );
 
   blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
@@ -109,6 +116,35 @@ void main() {
     verify: (_) => verify(
       () => useCase(const EmitPaymentReceiptParams(paymentId: 'p-1')),
     ).called(1),
+  );
+
+  blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(
+    'réémission : même verrou, même état, porte la remplaçante',
+    setUp: () => when(
+      () => reissueUseCase(
+        const ReissueDocumentParams(
+          type: EditiqueDocumentType.notePerception,
+          documentId: 'doc-1',
+          reason: 'Niveau corrigé',
+        ),
+      ),
+    ).thenAnswer((_) async => Right(_receipt)),
+    build: build,
+    act: (bloc) => bloc.add(
+      const EditiqueDocumentReissueRequested(
+        type: EditiqueDocumentType.notePerception,
+        documentId: 'doc-1',
+        reason: 'Niveau corrigé',
+      ),
+    ),
+    expect: () => [
+      isA<EditiqueDocumentState>()
+          .having((s) => s.status, 'status', EditiqueDocumentStatus.loading)
+          .having((s) => s.type, 'type', EditiqueDocumentType.notePerception),
+      isA<EditiqueDocumentState>()
+          .having((s) => s.status, 'status', EditiqueDocumentStatus.success)
+          .having((s) => s.document, 'document', _receipt),
+    ],
   );
 
   blocTest<EditiqueDocumentBloc, EditiqueDocumentState>(

@@ -36,6 +36,10 @@ class EditiqueDocumentMapper {
   /// URL de vérification d'une pièce archivée, imprimée en QR sur le ticket.
   static const String _verificationUrlHeader = 'x-document-verification-url';
 
+  /// Édition de la pièce sous son numéro (1, 2, …), posée depuis la
+  /// réémission sous le même numéro.
+  static const String _editionHeader = 'x-document-edition';
+
   static Either<Failure, EditiqueDocument> map(
     HttpResponse<Uint8List> response,
     EditiqueDocumentType type,
@@ -80,8 +84,19 @@ class EditiqueDocumentMapper {
         verificationUrl: ReceiptVerificationUrl.normalize(
           _firstHeader(headers, _verificationUrlHeader),
         ),
+        edition: _edition(headers),
       ),
     );
+  }
+
+  /// Édition annoncée, `null` si l'en-tête manque ou ne dit pas un entier
+  /// positif. Une pièce scellée avant l'en-tête n'en porte pas : ce n'est pas
+  /// une erreur, et le PDF reste servi.
+  static int? _edition(Headers headers) {
+    final value = int.tryParse(
+      _firstHeader(headers, _editionHeader)?.trim() ?? '',
+    );
+    return (value == null || value < 1) ? null : value;
   }
 
   /// Identifiant d'archive annoncé par le serveur, `null` s'il ne l'annonce pas.

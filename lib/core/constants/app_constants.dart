@@ -374,6 +374,14 @@ class AppConstants {
   static const String downloadEditiqueDocumentEndpoint =
       '/api/v1/editique/documents/{documentId}';
 
+  /// Réémission d'une pièce corrigée (AI, NP, FI) : le serveur annule la pièce
+  /// et la remplace **sous le même numéro**, en édition suivante, composée
+  /// depuis l'état du jour (niveau, classe, créances). Motif obligatoire,
+  /// garde `editique.cancel`. Rejouable : sur une pièce déjà annulée, il rend
+  /// la remplaçante en vigueur au lieu d'en sceller une autre.
+  static const String reissueEditiqueDocumentEndpoint =
+      '/api/v1/editique/documents/{documentId}/reissue';
+
   /// Delta de synchronisation des pièces scellées — **métadonnées seules**.
   ///
   /// Apprend à la tablette ce qui existe ailleurs (une pièce émise depuis un

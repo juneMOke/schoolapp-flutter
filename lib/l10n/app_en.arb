@@ -12409,5 +12409,20 @@
   "levelCorrectionBannerAppliedBody": "The record is updating. Collection will resume once the new amount due has reached this tablet.",
   "levelCorrectionBannerStalled": "The level correction ({from} → {to}) could not be sent. Retry it from the sync status, or make a new correction.",
   "@levelCorrectionBannerStalled": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
-  "facturationCollectHeldTitle": "Collection on hold"
+  "facturationCollectHeldTitle": "Collection on hold",
+  "documentsReissueAction": "Reissue corrected",
+  "documentsReissueTitle": "Reissue corrected: {document}?",
+  "@documentsReissueTitle": {"placeholders": {"document": {"type": "String"}}},
+  "documentsReissueHelper": "The document in force will be cancelled and replaced under the same number, in the next edition, with today's state (level, class, fees). The reason is kept with the cancellation.",
+  "documentsReissueReasonLabel": "Reason for reissuing",
+  "documentsReissueReasonHint": "E.g. level corrected (M2 → P2)",
+  "documentsReissueReasonRequired": "Give the reason: it is kept with the cancellation.",
+  "documentsReissueConfirm": "Reissue",
+  "documentsCurrentEdition": "edition {edition}",
+  "@documentsCurrentEdition": {"placeholders": {"edition": {"type": "int"}}},
+  "documentsReissuePriorTitle": "Document already reissued",
+  "documentsReissuePriorMessage": "This document had already been reissued on {date}, possibly before the correction: the server returned it as it was, without recomposing it. Reissue it again with today's state?",
+  "@documentsReissuePriorMessage": {"placeholders": {"date": {"type": "String"}}},
+  "documentsReissuePriorConfirm": "Reissue again",
+  "documentsReissuePriorShow": "View the returned document"
 }

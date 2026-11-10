@@ -99,8 +99,8 @@ class PulledEditiqueDocument {
     schoolId: schoolId,
     sizeBytes: sizeBytes,
     emittedAt: emittedAtMs,
-    // Le retrait, lui, se propage jusqu'à l'index : c'est la seule voie par
-    // laquelle la tablette peut l'apprendre. Le jeter ici le rendrait invisible
+    // Le retrait, lui, se propage jusqu'à l'index : c'est ainsi que la
+    // tablette apprend ceux qu'elle n'a pas faits elle-même. Le jeter ici le rendrait invisible
     // partout en aval, sans qu'aucun test ne rougisse.
     cancelledAt: cancelledAtMs,
     cancellationReason: cancellationReason,

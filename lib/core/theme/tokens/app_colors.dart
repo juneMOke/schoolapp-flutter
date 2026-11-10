@@ -377,6 +377,9 @@ class AppColors {
   // sans que la page entière bascule en erreur »).
   static const documentsRowErrorSoft = Color(0xFFFCF2F0);
   static const documentsRowErrorBorder = Color(0xFFE4B9B3);
+  // Médaillon de code d'une ligne du catalogue : l'accent de la pièce, dilué.
+  static const documentsMedallionFillAlpha = 0.14;
+  static const documentsMedallionBorderAlpha = 0.18;
 
   // ---- Inscriptions ▸ tableau de bord — encres (spec couleurs) ----
   //

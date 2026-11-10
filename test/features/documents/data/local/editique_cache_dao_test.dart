@@ -544,4 +544,90 @@ void main() {
       );
     });
   });
+
+  group('annulation posée par une réémission', () {
+    test('pose la date et le motif d\'une pièce en vigueur', () async {
+      await dao.upsert(cacheEntry());
+
+      await dao.markCancelled(
+        documentId: 'doc-1',
+        cancelledAt: 42,
+        reason: 'Niveau corrigé',
+      );
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry?.cancelledAt, 42);
+      expect(entry?.cancellationReason, 'Niveau corrigé');
+    });
+
+    test('ne réécrit jamais une annulation déjà connue', () async {
+      await dao.upsert(cacheEntry());
+      await dao.markCancelled(documentId: 'doc-1', cancelledAt: 1, reason: 'A');
+
+      await dao.markCancelled(documentId: 'doc-1', cancelledAt: 2, reason: 'B');
+
+      final entry = await dao.findByDocumentId('doc-1');
+      expect(entry?.cancelledAt, 1);
+      expect(entry?.cancellationReason, 'A');
+    });
+  });
+
+  group('ordre du catalogue, même jour d\'émission', () {
+    test(
+      'la remplaçante passe devant l\'annulée, quel que soit l\'identifiant',
+      () async {
+        // L'identifiant le plus grand sur l'annulée : avant le correctif, il la
+        // faisait sortir en premier.
+        await dao.upsert(
+          cacheEntry(
+            id: 'z-orig',
+            documentId: 'doc-orig',
+            documentNumber: 'ETL-AI-2526-000431',
+            docType: 'AI',
+            cancelledAt: 5,
+            createdAt: 2000,
+          ),
+        );
+        await dao.upsert(
+          cacheEntry(
+            id: 'a-repl',
+            documentId: 'doc-repl',
+            documentNumber: 'ETL-AI-2526-000431',
+            docType: 'AI',
+            edition: 2,
+            createdAt: 2000,
+          ),
+        );
+
+        final rows = await dao.listForStudent(
+          schoolId: 'school-1',
+          studentId: 's-1',
+        );
+
+        expect(rows.map((r) => r.documentId), ['doc-repl', 'doc-orig']);
+      },
+    );
+
+    test('à statut égal, la plus haute édition d\'abord', () async {
+      await dao.upsert(
+        cacheEntry(id: 'z-1', documentId: 'doc-e1', docType: 'NP', edition: 1),
+      );
+      await dao.upsert(
+        cacheEntry(
+          id: 'a-3',
+          documentId: 'doc-e3',
+          documentNumber: 'ETL-NP-3',
+          docType: 'NP',
+          edition: 3,
+        ),
+      );
+
+      final rows = await dao.listForStudent(
+        schoolId: 'school-1',
+        studentId: 's-1',
+      );
+
+      expect(rows.first.documentId, 'doc-e3');
+    });
+  });
 }

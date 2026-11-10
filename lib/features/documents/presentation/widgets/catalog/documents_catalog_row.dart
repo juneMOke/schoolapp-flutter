@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_catalog_entry.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
@@ -13,6 +13,8 @@ import 'package:school_app_flutter/features/documents/presentation/context/docum
 import 'package:school_app_flutter/features/documents/presentation/models/documents_catalog_action.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/catalog/documents_catalog_action_button.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/catalog/documents_catalog_labels.dart';
+import 'package:school_app_flutter/features/documents/presentation/widgets/catalog/documents_catalog_reissue.dart';
+import 'package:school_app_flutter/features/documents/presentation/widgets/catalog/documents_catalog_row_parts.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -185,6 +187,7 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
         buildWhen: (prev, curr) => prev.status != curr.status,
         builder: (context, state) {
           final hasError = state.status == EditiqueDocumentStatus.failure;
+          final busy = state.status == EditiqueDocumentStatus.loading;
 
           return Container(
             padding: const EdgeInsets.all(AppDimensions.spacingM),
@@ -199,50 +202,67 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
               ),
               borderRadius: AppRadius.brCard,
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _CodeMedallion(code: widget.entry.code, accent: accent),
-                const SizedBox(width: AppDimensions.spacingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Wrap(
-                        spacing: AppDimensions.spacingS,
-                        runSpacing: AppDimensions.spacingXS,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            DocumentsCatalogLabels.titleOf(
-                              l10n,
-                              widget.entry.type,
-                            ),
-                            style: AppTypography.titleSmall.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          _NatureBadge(nature: widget.entry.nature),
-                        ],
-                      ),
-                      const SizedBox(height: AppDimensions.spacingXS),
-                      Text(
-                        _subtitle(context, l10n),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                      DocumentsCatalogRowNotice(action: widget.action),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.spacingM),
-                DocumentsCatalogActionButton(
+            // Sur un téléphone étroit, le bouton passe sous le texte : à côté,
+            // il ne laisse plus au titre que quelques lettres, et déborde dès
+            // que le texte est agrandi.
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final stacked =
+                    constraints.maxWidth < AppBreakpoints.phoneNarrowMax;
+                final mainButton = DocumentsCatalogActionButton(
                   action: widget.action,
                   onPressed: _onPressed,
-                ),
-              ],
+                );
+                final reissueButton = widget.action.reissuablePiece == null
+                    ? null
+                    : DocumentsCatalogReissueButton(
+                        busy: busy,
+                        gap: !stacked,
+                        onPressed: () => runDocumentsCatalogReissue(
+                          context,
+                          type: widget.entry.type,
+                          action: widget.action,
+                          intent: widget.intent,
+                          bloc: _bloc,
+                        ),
+                      );
+                final details = DocumentsCatalogRowDetails(
+                  title: DocumentsCatalogLabels.titleOf(
+                    l10n,
+                    widget.entry.type,
+                  ),
+                  nature: widget.entry.nature,
+                  subtitle: _subtitle(context, l10n),
+                  action: widget.action,
+                  footer: stacked
+                      ? Padding(
+                          padding: const EdgeInsets.only(
+                            top: AppDimensions.spacingS,
+                          ),
+                          child: Wrap(
+                            spacing: AppDimensions.spacingS,
+                            runSpacing: AppDimensions.spacingS,
+                            children: [mainButton, ?reissueButton],
+                          ),
+                        )
+                      : reissueButton,
+                );
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DocumentsCatalogCodeMedallion(
+                      code: widget.entry.code,
+                      accent: accent,
+                    ),
+                    const SizedBox(width: AppDimensions.spacingM),
+                    Expanded(child: details),
+                    if (!stacked) ...[
+                      const SizedBox(width: AppDimensions.spacingM),
+                      mainButton,
+                    ],
+                  ],
+                );
+              },
             ),
           );
         },
@@ -256,107 +276,22 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
   /// « Jamais émis pour cet élève » n'est **jamais** affirmé : aucun endpoint ne
   /// liste les pièces d'un élève, donc la tablette ne peut pas le savoir. Elle
   /// ne dit que ce dont elle a la trace.
+  ///
+  /// L'édition s'ajoute quand la pièce en vigueur n'est pas la première : une
+  /// pièce réémise garde son numéro, et seule l'édition dit laquelle circule.
   String _subtitle(BuildContext context, AppLocalizations l10n) {
     final known = widget.action.knownPiece;
-    if (known == null) {
-      return DocumentsCatalogLabels.hintOf(l10n, widget.entry.type);
-    }
-
-    final date = MaterialLocalizations.of(
-      context,
-    ).formatMediumDate(DateTime.fromMillisecondsSinceEpoch(known.createdAt));
-    return l10n.documentsLastIssueSubtitle(date, known.number);
-  }
-}
-
-/// Médaillon 44 dp à l'accent de la pièce, avec sa pastille de code.
-///
-/// La pastille est **décorative** : le titre complet est toujours lu à côté,
-/// donc elle est masquée aux lecteurs d'écran plutôt que de leur faire épeler
-/// deux lettres sans contexte.
-class _CodeMedallion extends StatelessWidget {
-  static const double _size = 44;
-
-  final String code;
-  final Color accent;
-
-  const _CodeMedallion({required this.code, required this.accent});
-
-  @override
-  Widget build(BuildContext context) {
-    return ExcludeSemantics(
-      child: Container(
-        width: _size,
-        height: _size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: accent.withValues(alpha: 0.14),
-          border: Border.all(color: accent.withValues(alpha: 0.18)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          code,
-          style: AppTypography.labelSmall.copyWith(
-            color: accent,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Badge de nature (§08).
-///
-/// Jamais porté par la seule couleur : une icône explicite (cadenas / horloge)
-/// double le libellé, conformément au contrat d'accessibilité du module.
-class _NatureBadge extends StatelessWidget {
-  final EditiqueCatalogNature nature;
-
-  const _NatureBadge({required this.nature});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final isFige = nature == EditiqueCatalogNature.fige;
-
-    final Color foreground = isFige
-        ? AppColors.bleuArdoise
-        : AppColors.documentsHorodateText;
-    final Color background = isFige
-        ? AppColors.bleuArdoiseSoft
-        : AppColors.documentsHorodateSoft;
-    final Color borderColor = isFige
-        ? AppColors.documentsFigeBorder
-        : AppColors.documentsHorodateBorder;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingS,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: background,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isFige ? Icons.lock_outline_rounded : Icons.schedule_rounded,
-            size: 12,
-            color: foreground,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            isFige
-                ? l10n.documentsNatureArchivedLabel
-                : l10n.documentsNatureTimestampedLabel,
-            style: AppTypography.labelSmall.copyWith(color: foreground),
-          ),
-        ],
-      ),
-    );
+    final edition = widget.action.currentEdition;
+    final base = known == null
+        ? DocumentsCatalogLabels.hintOf(l10n, widget.entry.type)
+        : l10n.documentsLastIssueSubtitle(
+            MaterialLocalizations.of(context).formatMediumDate(
+              DateTime.fromMillisecondsSinceEpoch(known.createdAt),
+            ),
+            known.number,
+          );
+    return edition == null
+        ? base
+        : '$base · ${l10n.documentsCurrentEdition(edition)}';
   }
 }

@@ -112,6 +112,7 @@ class EditiqueDocumentCache {
     String ownerUid = '',
     int? emittedAt,
     String? verificationUrl,
+    int? edition,
     required Uint8List bytes,
   }) {
     return _exclusive(() async {
@@ -168,6 +169,8 @@ class EditiqueDocumentCache {
           contentSha256: stored.sha256Hex,
           emittedAt: emittedAt,
           verificationUrl: verificationUrl,
+          // `null` laisse l'édition qu'un delta aurait apprise (upsert `??=`).
+          edition: edition,
           // Une pièce déjà connue garde sa date de mise en cache : la remettre
           // à maintenant effacerait son ancienneté réelle.
           createdAt: existing?.createdAt ?? now,
@@ -216,8 +219,9 @@ class EditiqueDocumentCache {
   /// déjà, sans quoi le premier cycle viderait le cache de ce que la tablette
   /// possède vraiment.
   ///
-  /// C'est aussi la **seule voie** par laquelle une annulation atteint cette
-  /// tablette. Une pièce retirée ne perd pas ses octets pour autant : le
+  /// C'est aussi la voie **ordinaire** par laquelle une annulation atteint
+  /// cette tablette — la seule autre est la réémission faite ici même
+  /// ([markCancelled]), que le delta confirme ensuite. Une pièce retirée ne perd pas ses octets pour autant : le
   /// guichet doit pouvoir ressortir le papier qu'une famille lui présente pour
   /// lui expliquer qu'il n'a plus cours. Elle continue donc de peser au budget
   /// et reste évinçable — avec ceci d'assumé qu'une annulée évincée est
@@ -261,8 +265,9 @@ class EditiqueDocumentCache {
               // conclurait à un fichier corrompu.
               contentSha256: existing?.contentSha256,
               emittedAt: document.emittedAt,
-              // Le delta est la SEULE voie par laquelle une annulation atteint
-              // la tablette. Le repli sur ce qu'on savait déjà n'est pas de la
+              // Le delta est la voie ordinaire par laquelle une annulation
+              // atteint la tablette (l'autre : une réémission faite ici, que
+              // le delta confirme et dont il corrige la date). Le repli sur ce qu'on savait déjà n'est pas de la
               // prudence de façade : une page qui redescendrait la pièce sans
               // son retrait — champ omis, ligne partiellement lue — lèverait
               // une annulation que rien n'a levée côté serveur, où elle est
@@ -285,6 +290,33 @@ class EditiqueDocumentCache {
       return retained;
     });
   }
+
+  /// Inscrit le retrait d'une pièce que **ce poste** vient de faire remplacer
+  /// (réémission), sans attendre que le delta le redescende.
+  ///
+  /// Sans cela, la pièce remplacée resterait « en vigueur » ici jusqu'au pull
+  /// suivant, et le catalogue pourrait encore la proposer. Une annulation déjà
+  /// connue n'est jamais réécrite : ni sa date ni son motif. Ne lève jamais.
+  ///
+  /// [cancelledAt] : la date que le serveur a donnée au retrait, quand
+  /// l'appelant la connaît — celle de la remplaçante, scellée dans le même
+  /// geste. L'horloge de la tablette n'est qu'un repli : elle peut dériver, et
+  /// sa date s'afficherait jusqu'à ce que le delta la corrige.
+  Future<void> markCancelled({
+    required String documentId,
+    required String reason,
+    int? cancelledAt,
+  }) => _exclusive(() async {
+    try {
+      await _index.markCancelled(
+        documentId: documentId,
+        cancelledAt: cancelledAt ?? _now(),
+        reason: reason,
+      );
+    } catch (_) {
+      // Le delta suivant portera l'annulation : ce n'est qu'un raccourci.
+    }
+  });
 
   // ── Lecture ────────────────────────────────────────────────────────────────
 

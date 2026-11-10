@@ -12592,5 +12592,20 @@
   "levelCorrectionBannerAppliedBody": "Le dossier se met à jour. L'encaissement reprendra dès que le nouveau dû sera arrivé sur cette tablette.",
   "levelCorrectionBannerStalled": "La correction de niveau ({from} → {to}) n'a pas pu être envoyée. Relancez-la depuis l'état de la synchronisation, ou posez une nouvelle correction.",
   "@levelCorrectionBannerStalled": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
-  "facturationCollectHeldTitle": "Encaissement suspendu"
+  "facturationCollectHeldTitle": "Encaissement suspendu",
+  "documentsReissueAction": "Réémettre corrigée",
+  "documentsReissueTitle": "Réémettre corrigée : {document} ?",
+  "@documentsReissueTitle": {"placeholders": {"document": {"type": "String"}}},
+  "documentsReissueHelper": "La pièce en vigueur sera annulée et remplacée sous le même numéro, en édition suivante, avec l'état du jour (niveau, classe, frais). Le motif est conservé avec l'annulation.",
+  "documentsReissueReasonLabel": "Motif de la réémission",
+  "documentsReissueReasonHint": "Ex. : niveau corrigé (M2 → P2)",
+  "documentsReissueReasonRequired": "Indiquez le motif : il est conservé avec l'annulation.",
+  "documentsReissueConfirm": "Réémettre",
+  "documentsCurrentEdition": "édition {edition}",
+  "@documentsCurrentEdition": {"description": "Édition de la pièce en vigueur, ajoutée au sous-titre de sa ligne quand elle n'est pas la première.", "placeholders": {"edition": {"type": "int"}}},
+  "documentsReissuePriorTitle": "Pièce déjà réémise",
+  "documentsReissuePriorMessage": "Cette pièce avait déjà été réémise le {date}, peut-être avant la correction : le serveur l'a rendue telle quelle, sans la recomposer. La réémettre à nouveau avec l'état du jour ?",
+  "@documentsReissuePriorMessage": {"placeholders": {"date": {"type": "String"}}},
+  "documentsReissuePriorConfirm": "Réémettre à nouveau",
+  "documentsReissuePriorShow": "Voir la pièce rendue"
 }

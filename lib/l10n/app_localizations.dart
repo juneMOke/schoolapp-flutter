@@ -33749,6 +33749,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collection on hold'**
   String get facturationCollectHeldTitle;
+
+  /// No description provided for @documentsReissueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reissue corrected'**
+  String get documentsReissueAction;
+
+  /// No description provided for @documentsReissueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reissue corrected: {document}?'**
+  String documentsReissueTitle(String document);
+
+  /// No description provided for @documentsReissueHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The document in force will be cancelled and replaced under the same number, in the next edition, with today\'s state (level, class, fees). The reason is kept with the cancellation.'**
+  String get documentsReissueHelper;
+
+  /// No description provided for @documentsReissueReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for reissuing'**
+  String get documentsReissueReasonLabel;
+
+  /// No description provided for @documentsReissueReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g. level corrected (M2 → P2)'**
+  String get documentsReissueReasonHint;
+
+  /// No description provided for @documentsReissueReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the reason: it is kept with the cancellation.'**
+  String get documentsReissueReasonRequired;
+
+  /// No description provided for @documentsReissueConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reissue'**
+  String get documentsReissueConfirm;
+
+  /// No description provided for @documentsCurrentEdition.
+  ///
+  /// In en, this message translates to:
+  /// **'edition {edition}'**
+  String documentsCurrentEdition(int edition);
+
+  /// No description provided for @documentsReissuePriorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document already reissued'**
+  String get documentsReissuePriorTitle;
+
+  /// No description provided for @documentsReissuePriorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This document had already been reissued on {date}, possibly before the correction: the server returned it as it was, without recomposing it. Reissue it again with today\'s state?'**
+  String documentsReissuePriorMessage(String date);
+
+  /// No description provided for @documentsReissuePriorConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reissue again'**
+  String get documentsReissuePriorConfirm;
+
+  /// No description provided for @documentsReissuePriorShow.
+  ///
+  /// In en, this message translates to:
+  /// **'View the returned document'**
+  String get documentsReissuePriorShow;
 }
 
 class _AppLocalizationsDelegate

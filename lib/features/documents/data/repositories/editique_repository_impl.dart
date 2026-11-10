@@ -217,6 +217,77 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, EditiqueDocument>> reissue({
+    required EditiqueDocumentType type,
+    required String documentId,
+    required String reason,
+    String? studentId,
+    String? academicYearId,
+  }) async {
+    if (!type.isReissuable) {
+      throw ArgumentError.value(
+        type,
+        'type',
+        'Pièce non réémissible : seules AI, NP et FI se réémettent corrigées',
+      );
+    }
+    if (!await connectivityService.isOnline()) {
+      return const Left(NetworkFailure());
+    }
+
+    try {
+      final reissued = EditiqueDocumentMapper.map(
+        await remoteDataSource.reissueDocument(requiredAuth, documentId, {
+          'reason': reason,
+        }),
+        type,
+      );
+      await reissued.fold((_) async {}, (replacement) async {
+        final replacementId = replacement.documentId;
+        // Sans identifiant, la remplaçante ne se range pas : par son seul
+        // numéro, elle se rattacherait à la pièce qu'elle remplace et en
+        // écraserait la copie. Le delta suivant l'apprendra.
+        if (replacementId == null || replacementId == documentId) return;
+        // La remplaçante d'abord : si l'annulation qui suit ne s'écrit pas,
+        // la ligne montre quand même la bonne pièce (plus haute édition, en
+        // tête du même jour) et le delta posera le retrait. Dans l'ordre
+        // inverse, une interruption laisserait la ligne sans pièce en vigueur.
+        await _cacheQuietly(
+          reissued,
+          type: type,
+          studentId: studentId,
+          academicYearId: academicYearId,
+        );
+        await cache.markCancelled(
+          documentId: documentId,
+          reason: reason,
+          // Remplacée le jour où la remplaçante est scellée : une date du
+          // serveur, pas de l'horloge de la tablette.
+          cancelledAt: _emittedAtMs(replacement.emittedOn),
+        );
+      });
+      return reissued;
+    } on DioException catch (e) {
+      return Left(_retryable(EditiqueFailureMapper.fromDioException(e)));
+    } catch (_) {
+      // Le sort de la requête est inconnu, mais la route est rejouable : un
+      // second appel rend la remplaçante déjà scellée, s'il y en a une. Rien
+      // n'interdit donc de réessayer — d'où un échec ordinaire, pas
+      // `UncertainOutcomeFailure`.
+      return const Left(ServerFailure());
+    }
+  }
+
+  /// Une issue incertaine (réponse perdue, délai dépassé) n'en est pas une
+  /// pour la réémission : la route est rejouable, un second appel rend la
+  /// remplaçante déjà scellée s'il y en a une. `UncertainOutcomeFailure`
+  /// interdirait de réessayer ; c'est un échec réseau ordinaire.
+  static Failure _retryable(Failure failure) =>
+      failure is UncertainOutcomeFailure
+      ? NetworkFailure(failure.message)
+      : failure;
+
   /// Dépose une pièce scellée dans le cache, sans jamais peser sur l'issue de
   /// l'appel qui l'a rapportée.
   ///
@@ -253,6 +324,7 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
         ownerUid: currentUser.uid ?? '',
         emittedAt: _emittedAtMs(document.emittedOn),
         verificationUrl: document.verificationUrl,
+        edition: document.edition,
         bytes: document.bytes,
       );
     } catch (_) {

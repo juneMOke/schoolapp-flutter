@@ -164,6 +164,7 @@ import 'package:school_app_flutter/features/documents/data/printing/thermal_prin
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_channel.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
+import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/restitute_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
@@ -1084,6 +1085,10 @@ Future<void> configureDependencies({
     () => RestituteDocumentUseCase(getIt<EditiqueRepository>()),
   );
 
+  getIt.registerFactory<ReissueDocumentUseCase>(
+    () => ReissueDocumentUseCase(getIt<EditiqueRepository>()),
+  );
+
   getIt.registerFactory<EditiqueDocumentBloc>(
     () => EditiqueDocumentBloc(
       emitEnrollmentAttestationUseCase:
@@ -1094,6 +1099,7 @@ Future<void> configureDependencies({
       emitAccountStatementUseCase: getIt<EmitAccountStatementUseCase>(),
       emitFinancialClearanceUseCase: getIt<EmitFinancialClearanceUseCase>(),
       restituteDocumentUseCase: getIt<RestituteDocumentUseCase>(),
+      reissueDocumentUseCase: getIt<ReissueDocumentUseCase>(),
     ),
   );
 

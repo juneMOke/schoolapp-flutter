@@ -106,7 +106,15 @@ class EditiqueCacheDao {
       whereArgs: args,
       // Les entrées sans date d'émission connue passent en dernier (SQLite
       // ordonne NULL en premier en ASC, donc en dernier en DESC).
-      orderBy: 'emitted_at DESC, created_at DESC, id DESC',
+      //
+      // À jour d'émission égal — une pièce et sa remplaçante réémise le même
+      // jour —, la pièce en vigueur passe devant l'annulée, puis la plus haute
+      // édition : le catalogue lit la PREMIÈRE ligne d'un type comme la
+      // dernière nouvelle, et un tirage sur l'identifiant lui faisait annoncer
+      // une fois sur deux le retrait d'une pièce déjà remplacée.
+      orderBy:
+          'emitted_at DESC, cancelled_at IS NOT NULL, '
+          'COALESCE(edition, 1) DESC, created_at DESC, id DESC',
     );
     return rows.map(EditiqueCacheEntry.fromMap).toList(growable: false);
   }
@@ -279,6 +287,22 @@ class EditiqueCacheDao {
       values,
       where: 'id = ?',
       whereArgs: [existing.id],
+    );
+  }
+
+  /// Pose l'annulation d'une pièce, si elle n'en porte pas déjà une : une
+  /// annulation est définitive, sa date et son motif ne se réécrivent pas.
+  Future<void> markCancelled({
+    required String documentId,
+    required int cancelledAt,
+    required String reason,
+  }) async {
+    if (documentId.isEmpty) return;
+    await _db.update(
+      kEditiqueCacheTable,
+      {'cancelled_at': cancelledAt, 'cancellation_reason': reason},
+      where: 'document_id = ? AND cancelled_at IS NULL',
+      whereArgs: [documentId],
     );
   }
 
