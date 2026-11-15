@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/treasury/data/wire/treasury_wire.dar
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_closure.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 
 /// La journée de caisse et ses gestes (clôture, réponse aux lignes arrivées
 /// après une clôture, réouverture), sur Dio.
@@ -90,6 +91,18 @@ class TreasuryDayApi {
       options: _options,
     );
     return TreasuryWire.closureOfResponse(response.data);
+  }
+
+  Future<TreasuryPeriod> period(DateTime from, DateTime to) async {
+    final response = await _dio.get<Object?>(
+      AppConstants.treasuryPeriodsEndpoint,
+      queryParameters: {
+        'from': TreasuryWire.dayParam(from),
+        'to': TreasuryWire.dayParam(to),
+      },
+      options: _options,
+    );
+    return TreasuryWire.periodFromJson(response.data);
   }
 
   static String _withDate(String template, DateTime date) =>

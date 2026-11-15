@@ -25,6 +25,10 @@ enum ClosingBlock {
 /// La réponse de la caissière à « Avez-vous bien {reste} dans la caisse ? ».
 enum ClosingAnswer { matches, differs }
 
+/// Ce que l'écran de clôture montre (B1) : la journée, ou les totaux d'une
+/// semaine ou d'un mois (B7).
+enum ClosingScope { day, week, month }
+
 /// Les règles de la clôture (R9, R15, R19), sans Flutter. Le serveur applique
 /// les mêmes et fait foi ; l'écran s'en sert pour activer ses boutons.
 abstract final class CashClosingRules {
@@ -96,6 +100,59 @@ abstract final class CashClosingRules {
     }
     if (next.isBefore(_day(min)) || next.isAfter(_day(today))) return null;
     return next;
+  }
+
+  /// La plage d'une semaine (lundi → samedi, semaine ISO, R4) ou d'un mois
+  /// (1er → dernier jour) qui contient [anchor].
+  static ({DateTime from, DateTime to}) rangeOf(
+    ClosingScope scope,
+    DateTime anchor,
+  ) {
+    final d = _day(anchor);
+    return switch (scope) {
+      ClosingScope.day => (from: d, to: d),
+      ClosingScope.week => (
+        from: DateTime(d.year, d.month, d.day - (d.weekday - DateTime.monday)),
+        to: DateTime(
+          d.year,
+          d.month,
+          d.day - (d.weekday - DateTime.monday) + 5,
+        ),
+      ),
+      ClosingScope.month => (
+        from: DateTime(d.year, d.month),
+        to: DateTime(d.year, d.month + 1, 0),
+      ),
+    };
+  }
+
+  /// La semaine ou le mois voisin (‹ ›), `null` à la borne : rien après la
+  /// période en cours, rien avant celle du début de l'historique (R15).
+  static DateTime? stepPeriod(
+    ClosingScope scope,
+    DateTime anchor, {
+    required int direction,
+    required DateTime min,
+    required DateTime today,
+  }) {
+    final current = rangeOf(scope, anchor).from;
+    final next = switch (scope) {
+      ClosingScope.day => DateTime(
+        current.year,
+        current.month,
+        current.day + direction,
+      ),
+      ClosingScope.week => DateTime(
+        current.year,
+        current.month,
+        current.day + 7 * direction,
+      ),
+      ClosingScope.month => DateTime(current.year, current.month + direction),
+    };
+    final range = rangeOf(scope, next);
+    if (range.from.isAfter(_day(today))) return null;
+    if (range.to.isBefore(_day(min))) return null;
+    return range.from;
   }
 
   static DateTime _day(DateTime value) =>

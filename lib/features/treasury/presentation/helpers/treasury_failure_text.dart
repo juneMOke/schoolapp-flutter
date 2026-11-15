@@ -28,6 +28,7 @@ extension TreasuryFailureText on AppLocalizations {
         TreasuryRefusal.invalidDeclaration => treasuryReasonInvalidDeclaration,
         TreasuryRefusal.closureAlreadyReopened => treasuryReasonAlreadyReopened,
         TreasuryRefusal.invalidDate => treasuryReasonInvalidDate,
+        TreasuryRefusal.invalidRange => treasuryReasonInvalidRange,
       };
     }
     return switch (EteeloErrorType.fromFailure(failure)) {

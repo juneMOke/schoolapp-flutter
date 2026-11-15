@@ -11,6 +11,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/treasury_da
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_day_repository.dart';
 import 'package:school_app_flutter/features/treasury/domain/services/cash_pending_probe.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_screen.dart';
 
 import '../../../../test_helpers/reference_formats.dart';
@@ -54,6 +55,9 @@ Future<void> _pump(
       direction: any(named: 'direction'),
     ),
   ).thenAnswer((_) async => Right(movements));
+  when(
+    () => repo.period(any(), any()),
+  ).thenAnswer((_) async => Right(treasuryWeek()));
   // La carte crée la liste dépliée par GetIt.
   final getIt = GetIt.instance;
   if (getIt.isRegistered<TreasuryDayRepository>()) {
@@ -278,6 +282,44 @@ void main() {
     final opening = tester.getTopLeft(find.text('OUVERTURE'));
     final outflows = tester.getTopLeft(find.text('SORTIES'));
     expect(outflows.dy, opening.dy);
+  });
+
+  testAtReferenceFormats('la semaine : totaux et jour par jour', (
+    tester,
+    _,
+  ) async {
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.textContaining(RegExp('^(Hebdomadaire|Semaine)\$')));
+    await tester.pumpAndSettle();
+    expect(find.text('Jour par jour'), findsOneWidget);
+  });
+
+  testWidgets('la semaine montre l écart en montant exact', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining(
+        'écart ${TreasuryFormat.signedMoney(-500000, TreasuryCurrency.cdf)}',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Non clôturée'), findsOneWidget);
+  });
+
+  testWidgets('toucher une journée de la semaine la rouvre en Journalier', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mer. 21 oct.'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jour par jour'), findsNothing);
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
   });
 }
 

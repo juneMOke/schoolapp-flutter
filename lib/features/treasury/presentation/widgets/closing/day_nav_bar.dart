@@ -10,12 +10,19 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// La journée affichée et sa navigation (B1) : ‹ jeudi 22 octobre 2026 ›, et
 /// « Aujourd'hui » quand on regarde une autre journée. Les flèches se
 /// désactivent aux bornes (début de l'historique, aujourd'hui).
+///
+/// Sert aussi la semaine et le mois (B7) : [label] remplace la date,
+/// [currentHint] la mention « aujourd'hui », [goCurrentLabel] le bouton.
 class DayNavBar extends StatelessWidget {
   final DateTime date;
   final bool isToday;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
   final VoidCallback? onToday;
+  final String? label;
+  final String? currentHint;
+  final String? goCurrentLabel;
+  final bool periodTooltips;
 
   const DayNavBar({
     super.key,
@@ -24,12 +31,16 @@ class DayNavBar extends StatelessWidget {
     this.onPrevious,
     this.onNext,
     this.onToday,
+    this.label,
+    this.currentHint,
+    this.goCurrentLabel,
+    this.periodTooltips = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final label = capitalizeFirst(l10n.treasuryDayLong(date));
+    final label = capitalizeFirst(this.label ?? l10n.treasuryDayLong(date));
     final today = onToday;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -55,7 +66,9 @@ class DayNavBar extends StatelessWidget {
               children: [
                 _Arrow(
                   icon: Icons.chevron_left,
-                  tooltip: l10n.treasuryPrevDay,
+                  tooltip: periodTooltips
+                      ? l10n.treasuryPrevPeriod
+                      : l10n.treasuryPrevDay,
                   onPressed: onPrevious,
                 ),
                 Flexible(
@@ -69,7 +82,7 @@ class DayNavBar extends StatelessWidget {
                       ),
                       if (isToday)
                         Text(
-                          l10n.treasuryTodayLower,
+                          currentHint ?? l10n.treasuryTodayLower,
                           style: AppTypography.labelSmall.copyWith(
                             color: AppColors.textSecondary,
                           ),
@@ -79,7 +92,9 @@ class DayNavBar extends StatelessWidget {
                 ),
                 _Arrow(
                   icon: Icons.chevron_right,
-                  tooltip: l10n.treasuryNextDay,
+                  tooltip: periodTooltips
+                      ? l10n.treasuryNextPeriod
+                      : l10n.treasuryNextDay,
                   onPressed: onNext,
                 ),
               ],
@@ -87,7 +102,7 @@ class DayNavBar extends StatelessWidget {
           ),
           if (!isToday && today != null)
             EteeloButton.ghost(
-              label: l10n.treasuryToday,
+              label: goCurrentLabel ?? l10n.treasuryToday,
               icon: Icons.today_outlined,
               onPressed: today,
               fullWidth: false,

@@ -22761,6 +22761,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryReasonInvalidDate => 'This day is not a cash day.';
 
   @override
+  String get treasuryReasonInvalidRange => 'This period has not started yet.';
+
+  @override
+  String get treasuryScopeLabel => 'Show';
+
+  @override
+  String get treasuryScopeDay => 'Daily';
+
+  @override
+  String get treasuryScopeWeek => 'Weekly';
+
+  @override
+  String get treasuryScopeMonth => 'Monthly';
+
+  @override
+  String get treasuryScopeDayShort => 'Day';
+
+  @override
+  String get treasuryScopeWeekShort => 'Week';
+
+  @override
+  String get treasuryScopeMonthShort => 'Month';
+
+  @override
+  String treasuryWeekOf(DateTime from, DateTime to) {
+    final intl.DateFormat fromDateFormat = intl.DateFormat.MMMd(localeName);
+    final String fromString = fromDateFormat.format(from);
+    final intl.DateFormat toDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String toString = toDateFormat.format(to);
+
+    return 'Week of $fromString to $toString';
+  }
+
+  @override
+  String treasuryMonthOf(DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.yMMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '$monthString';
+  }
+
+  @override
+  String get treasuryInProgress => 'in progress';
+
+  @override
+  String get treasuryCurrentWeek => 'This week';
+
+  @override
+  String get treasuryCurrentMonth => 'This month';
+
+  @override
+  String get treasuryPrevPeriod => 'Previous period';
+
+  @override
+  String get treasuryNextPeriod => 'Next period';
+
+  @override
+  String get treasuryPeriodLoading => 'Loading the period';
+
+  @override
+  String get treasuryPeriodEmpty => 'No elapsed cash day in this period.';
+
+  @override
+  String get treasuryDayByDay => 'Day by day';
+
+  @override
+  String get treasuryDayByDayHint =>
+      'Tap a day to see its detail and its gaps.';
+
+  @override
+  String treasuryDayShort(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMEd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get treasuryStatusClosed => 'Closed';
+
+  @override
+  String get treasuryStatusOpen => 'Open';
+
+  @override
+  String get treasuryGapTag => 'Gap';
+
+  @override
+  String treasuryCellGap(String gap) {
+    return 'gap $gap';
+  }
+
+  @override
+  String get treasuryPeriodClosing => 'Balance at period end';
+
+  @override
   String get treasuryEmptyClosing =>
       'Create a register in Treasury ▸ Settings to get started.';
 

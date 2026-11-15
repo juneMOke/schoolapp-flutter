@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_moveme
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 
 /// Lecture et écriture des corps JSON de la trésorerie (contrat PR back #222).
 ///
@@ -187,6 +188,62 @@ abstract final class TreasuryWire {
       afterClosure: json['afterClosure'] == true,
       alreadyCounted: json['alreadyCounted'] as bool?,
       undoesMovementId: json['undoesMovementId'] as String?,
+    );
+  }
+
+  // ── Semaine et mois (B7) ────────────────────────────────────────────────
+
+  static TreasuryPeriod periodFromJson(Object? body) {
+    final json = _map(body);
+    return TreasuryPeriod(
+      from: _date(json, 'from'),
+      to: _date(json, 'to'),
+      registers: [
+        for (final entry in _list(json['registers']))
+          PeriodRegisterTotals(
+            register: registerFromJson(entry['register']),
+            synthesis: synthesisFromJson(entry['synthesis']),
+          ),
+      ],
+      days: [
+        for (final entry in _list(json['days']))
+          PeriodDayRow(
+            day: _date(entry, 'day'),
+            cells: [
+              for (final cell in _list(entry['cells']))
+                _periodCellFromJson(cell),
+            ],
+          ),
+      ],
+    );
+  }
+
+  static CashSynthesis synthesisFromJson(Object? body) {
+    final json = _map(body);
+    return CashSynthesis(
+      openingInCents: _int(json, 'openingInCents'),
+      inflowsInCents: _int(json, 'inflowsInCents'),
+      outflowsInCents: _int(json, 'outflowsInCents'),
+      gapsInCents: _int(json, 'gapsInCents'),
+      closingInCents: _int(json, 'closingInCents'),
+      variationPercent: (json['variationPercent'] as num?)?.toInt(),
+    );
+  }
+
+  static PeriodDayCell _periodCellFromJson(Map<String, dynamic> json) {
+    final status = ClosureStatus.fromWire(json['status'] as String?);
+    if (status == null) {
+      throw FormatException('Statut de clôture inconnu : ${json['status']}');
+    }
+    final justification = json['justification'];
+    return PeriodDayCell(
+      registerId: _string(json, 'registerId'),
+      inflowsInCents: _int(json, 'inflowsInCents'),
+      outflowsInCents: _int(json, 'outflowsInCents'),
+      gapInCents: _int(json, 'gapInCents'),
+      closingBalanceInCents: _int(json, 'closingBalanceInCents'),
+      status: status,
+      justification: justification is String ? justification : null,
     );
   }
 

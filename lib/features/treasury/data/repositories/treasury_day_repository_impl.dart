@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/treasury/data/repositories/treasury_
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_closure.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_refusal.dart';
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_day_repository.dart';
 
@@ -51,6 +52,10 @@ class TreasuryDayRepositoryImpl implements TreasuryDayRepository {
       // Le flux `treasury.closures` rattrapera au prochain tirage.
     }
   }
+
+  @override
+  Future<Either<Failure, TreasuryPeriod>> period(DateTime from, DateTime to) =>
+      guardTreasury(() => _api.period(from, to));
 
   @override
   Future<Either<Failure, List<CashMovement>>> movements(

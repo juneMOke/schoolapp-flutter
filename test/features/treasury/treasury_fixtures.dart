@@ -5,6 +5,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_moveme
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une caisse USD de 4 820,00 $, en service depuis le 1er octobre 2026.
@@ -140,4 +141,84 @@ Widget treasuryHost(Widget child) => MaterialApp(
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('fr'),
   home: Scaffold(body: SingleChildScrollView(child: child)),
+);
+
+/// La semaine du lundi 19 au samedi 24 octobre 2026, vue le jeudi 22 : trois
+/// journées écoulées, la plus récente en tête. La caisse CDF s'est close avec
+/// un écart de −5 000 FC le mercredi.
+TreasuryPeriod treasuryWeek() => TreasuryPeriod(
+  from: DateTime(2026, 10, 19),
+  to: DateTime(2026, 10, 24),
+  registers: [
+    PeriodRegisterTotals(
+      register: usdRegister,
+      synthesis: const CashSynthesis(
+        openingInCents: 536900,
+        inflowsInCents: 92000,
+        outflowsInCents: 147000,
+        gapsInCents: 0,
+        closingInCents: 481900,
+      ),
+    ),
+    PeriodRegisterTotals(
+      register: cdfRegister,
+      synthesis: const CashSynthesis(
+        openingInCents: 330000000,
+        inflowsInCents: 60000000,
+        outflowsInCents: 44500000,
+        gapsInCents: -500000,
+        closingInCents: 345000000,
+      ),
+    ),
+  ],
+  days: [
+    PeriodDayRow(
+      day: DateTime(2026, 10, 22),
+      cells: const [
+        PeriodDayCell(
+          registerId: 'reg-usd',
+          inflowsInCents: 18100,
+          outflowsInCents: 29500,
+          gapInCents: 0,
+          closingBalanceInCents: 481900,
+          status: ClosureStatus.open,
+        ),
+      ],
+    ),
+    PeriodDayRow(
+      day: DateTime(2026, 10, 21),
+      cells: const [
+        PeriodDayCell(
+          registerId: 'reg-usd',
+          inflowsInCents: 27200,
+          outflowsInCents: 29100,
+          gapInCents: 0,
+          closingBalanceInCents: 493300,
+          status: ClosureStatus.closed,
+        ),
+        PeriodDayCell(
+          registerId: 'reg-cdf',
+          inflowsInCents: 22640000,
+          outflowsInCents: 34510000,
+          gapInCents: -500000,
+          closingBalanceInCents: 332626900,
+          status: ClosureStatus.closed,
+          justification: 'Erreur de rendu de monnaie',
+        ),
+      ],
+    ),
+    PeriodDayRow(
+      day: DateTime(2026, 10, 20),
+      cells: const [
+        PeriodDayCell(
+          registerId: 'reg-usd',
+          inflowsInCents: 46700,
+          outflowsInCents: 88400,
+          gapInCents: 0,
+          closingBalanceInCents: 495200,
+          status: ClosureStatus.notClosed,
+        ),
+      ],
+    ),
+  ],
 );

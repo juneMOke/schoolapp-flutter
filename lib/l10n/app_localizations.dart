@@ -34980,6 +34980,156 @@ abstract class AppLocalizations {
   /// **'This day is not a cash day.'**
   String get treasuryReasonInvalidDate;
 
+  /// No description provided for @treasuryReasonInvalidRange.
+  ///
+  /// In en, this message translates to:
+  /// **'This period has not started yet.'**
+  String get treasuryReasonInvalidRange;
+
+  /// No description provided for @treasuryScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get treasuryScopeLabel;
+
+  /// No description provided for @treasuryScopeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get treasuryScopeDay;
+
+  /// No description provided for @treasuryScopeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get treasuryScopeWeek;
+
+  /// No description provided for @treasuryScopeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get treasuryScopeMonth;
+
+  /// No description provided for @treasuryScopeDayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get treasuryScopeDayShort;
+
+  /// No description provided for @treasuryScopeWeekShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get treasuryScopeWeekShort;
+
+  /// No description provided for @treasuryScopeMonthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get treasuryScopeMonthShort;
+
+  /// No description provided for @treasuryWeekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {from} to {to}'**
+  String treasuryWeekOf(DateTime from, DateTime to);
+
+  /// No description provided for @treasuryMonthOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}'**
+  String treasuryMonthOf(DateTime month);
+
+  /// No description provided for @treasuryInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'in progress'**
+  String get treasuryInProgress;
+
+  /// No description provided for @treasuryCurrentWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get treasuryCurrentWeek;
+
+  /// No description provided for @treasuryCurrentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get treasuryCurrentMonth;
+
+  /// No description provided for @treasuryPrevPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get treasuryPrevPeriod;
+
+  /// No description provided for @treasuryNextPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get treasuryNextPeriod;
+
+  /// No description provided for @treasuryPeriodLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the period'**
+  String get treasuryPeriodLoading;
+
+  /// No description provided for @treasuryPeriodEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No elapsed cash day in this period.'**
+  String get treasuryPeriodEmpty;
+
+  /// No description provided for @treasuryDayByDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day by day'**
+  String get treasuryDayByDay;
+
+  /// No description provided for @treasuryDayByDayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to see its detail and its gaps.'**
+  String get treasuryDayByDayHint;
+
+  /// No description provided for @treasuryDayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryDayShort(DateTime date);
+
+  /// No description provided for @treasuryStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get treasuryStatusClosed;
+
+  /// No description provided for @treasuryStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get treasuryStatusOpen;
+
+  /// No description provided for @treasuryGapTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap'**
+  String get treasuryGapTag;
+
+  /// No description provided for @treasuryCellGap.
+  ///
+  /// In en, this message translates to:
+  /// **'gap {gap}'**
+  String treasuryCellGap(String gap);
+
+  /// No description provided for @treasuryPeriodClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance at period end'**
+  String get treasuryPeriodClosing;
+
   /// No description provided for @treasuryEmptyClosing.
   ///
   /// In en, this message translates to:

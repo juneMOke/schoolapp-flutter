@@ -1721,6 +1721,11 @@ class AppConstants {
   static const String treasuryClosureReopeningEndpoint =
       '/api/v1/treasury/closures/{closureId}/reopening';
 
+  /// **GET** `?from=&to=` (dates de l'école, incluses) = une semaine ou un
+  /// mois de l'écran de clôture (B7) : totaux par caisse, puis une ligne par
+  /// journée écoulée, la plus récente en tête. `400 INVALID_RANGE`.
+  static const String treasuryPeriodsEndpoint = '/api/v1/treasury/periods';
+
   /// **GET** (keyset) = les clôtures de caisse de l'école, réouvertures
   /// comprises (flux `treasury.closures`, `treasury.read`) : la tablette
   /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).

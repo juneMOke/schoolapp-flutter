@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_closure.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 
 /// La journée de caisse et ses gestes — **en ligne seulement** : la clôture est
 /// impossible hors ligne (D2).
@@ -40,4 +41,7 @@ abstract class TreasuryDayRepository {
     required String id,
     required String reason,
   });
+
+  /// Une semaine ou un mois (B7), dates de l'école incluses.
+  Future<Either<Failure, TreasuryPeriod>> period(DateTime from, DateTime to);
 }

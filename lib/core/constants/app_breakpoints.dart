@@ -71,6 +71,10 @@ class AppBreakpoints {
   /// colonnes au-delà de [formGridTwoColMin], trois au-delà de
   /// [formGridThreeColMin].
   static const double formGridTwoColMin = 560.0;
+
+  /// Sous ce seuil, un filtre segmenté de période prend ses libellés courts
+  /// (Trésorerie ▸ Clôture : Jour · Semaine · Mois, spec B1).
+  static const double periodFilterShortLabelsMax = 560.0;
   static const double formGridThreeColMin = 880.0;
 
   /// En-tête de page à chiffres (Classes) : en deçà, le titre passe au-dessus

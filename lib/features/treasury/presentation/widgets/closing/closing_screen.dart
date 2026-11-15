@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_day_repository.dart';
+import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_period_cubit.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_scope_tabs.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/period/period_view.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -36,7 +41,7 @@ class ClosingCallbacks {
 }
 
 /// Trésorerie ▸ Clôture de caisse, vue journalière (B1–B5).
-class ClosingScreen extends StatelessWidget {
+class ClosingScreen extends StatefulWidget {
   final ClosingCallbacks callbacks;
   final bool online;
 
@@ -45,6 +50,23 @@ class ClosingScreen extends StatelessWidget {
     required this.callbacks,
     required this.online,
   });
+
+  @override
+  State<ClosingScreen> createState() => _ClosingScreenState();
+}
+
+class _ClosingScreenState extends State<ClosingScreen> {
+  /// Journalier à l'ouverture ; le filtre n'est pas mémorisé d'une visite à
+  /// l'autre (B1).
+  var _scope = ClosingScope.day;
+
+  ClosingCallbacks get callbacks => widget.callbacks;
+  bool get online => widget.online;
+
+  void _openDay(DateTime day) {
+    setState(() => _scope = ClosingScope.day);
+    context.read<CashClosingCubit>().load(day);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,21 +84,46 @@ class ClosingScreen extends StatelessWidget {
               subtitle: l10n.treasuryClosingSubtitle,
             ),
             const SizedBox(height: AppSpacing.xl),
-            // La barre reste dès que le serveur a dit quel jour on est, même
-            // si la journée affichée échoue : on peut toujours en sortir.
-            if (businessDate != null) ...[
-              DayNavBar(
-                date: state.date,
-                isToday: state.date == businessDate,
-                onPrevious: cubit.nextDay(-1) == null
-                    ? null
-                    : () => cubit.step(-1),
-                onNext: cubit.nextDay(1) == null ? null : () => cubit.step(1),
-                onToday: cubit.goToday,
+            // Semaine et mois ne s'offrent qu'une fois les caisses connues :
+            // leurs bornes viennent du jour du serveur et de la première mise
+            // en service.
+            if (businessDate != null && state.historyStart != null) ...[
+              ClosingScopeTabs(
+                scope: _scope,
+                onChanged: (scope) => setState(() => _scope = scope),
               ),
               const SizedBox(height: AppSpacing.lg),
             ],
-            _body(context, state),
+            if (_scope != ClosingScope.day &&
+                businessDate != null &&
+                state.historyStart != null)
+              BlocProvider(
+                key: ValueKey(_scope),
+                create: (_) => CashPeriodCubit(
+                  GetIt.instance<TreasuryDayRepository>(),
+                  scope: _scope,
+                  today: businessDate,
+                  historyStart: state.historyStart!,
+                )..load(),
+                child: PeriodView(onOpenDay: _openDay, today: businessDate),
+              )
+            // La barre reste dès que le serveur a dit quel jour on est, même
+            // si la journée affichée échoue : on peut toujours en sortir.
+            else ...[
+              if (businessDate != null) ...[
+                DayNavBar(
+                  date: state.date,
+                  isToday: state.date == businessDate,
+                  onPrevious: cubit.nextDay(-1) == null
+                      ? null
+                      : () => cubit.step(-1),
+                  onNext: cubit.nextDay(1) == null ? null : () => cubit.step(1),
+                  onToday: cubit.goToday,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+              _body(context, state),
+            ],
           ],
         );
       },
