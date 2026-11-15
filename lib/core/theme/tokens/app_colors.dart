@@ -757,4 +757,94 @@ class AppColors {
   static const coteDomainVertSoft = Color(0xFFEDF5EF);
   static const coteDomainPrune = Color(0xFF7A4E68);
   static const coteDomainPruneSoft = Color(0xFFF5EDF2);
+
+  // ── Trésorerie (spec Trésorerie V1.5, §05 « Jetons proposés ») ──
+  /// Dégradé de la caisse USD, départ (spec Trésorerie §05).
+  static const treasuryUsdDeep = Color(0xFF0E2D42);
+  static const treasuryUsdMid = Color(0xFF1B4D6B);
+  static const treasuryUsdEnd = Color(0xFF22618A);
+
+  /// Dégradé de la caisse CDF.
+  static const treasuryCdfDeep = Color(0xFF24402C);
+  static const treasuryCdfMid = Color(0xFF3D6B4A);
+  static const treasuryCdfEnd = Color(0xFF4E8560);
+
+  /// Tout ce qui est propre aux dollars : courbe, encadré, pastille « Solde ».
+  static const treasuryUsdInk = Color(0xFF1B4D6B);
+  static const treasuryUsdSoft = Color(0xFFEBF2F7);
+  static const treasuryUsdBorder = Color(0xFFD6E4EE);
+
+  /// Idem pour les francs congolais ; aussi les entrées et « Définitif ».
+  static const treasuryCdfInk = Color(0xFF3D6B4A);
+  static const treasuryCdfSoft = Color(0xFFEDF5EF);
+  static const treasuryCdfBorder = Color(0xFFD2E3D6);
+
+  /// Ouverture : pastille, case, étiquette de la ligne pointillée.
+  static const treasuryOpeningInk = Color(0xFF9A4A20);
+  static const treasuryOpeningSoft = Color(0xFFF6EDE6);
+
+  /// Aussi la bordure des contrôles segmentés terre cuite.
+  static const treasuryOpeningBorder = Color(0xFFE8D3C4);
+  static const treasuryOpeningLine = Color(0xFFB85C2C);
+
+  /// Sorties, écart non nul.
+  static const treasuryOutflowInk = Color(0xFFC0392B);
+  static const treasuryOutflowSoft = Color(0xFFFBEDEB);
+  static const treasuryOutflowBorder = Color(0xFFF0D2CD);
+
+  /// Journée ouverte, « Provisoire ».
+  static const treasuryPendingInk = Color(0xFFA66A00);
+  static const treasuryPendingSoft = Color(0xFFFBF3E3);
+  static const treasuryPendingBorder = Color(0xFFEEDCB4);
+
+  /// Encre des en-têtes de tableau terre cuite.
+  static const treasuryTableHeaderInk = Color(0xFFF8F0E9);
+  static const treasuryTableZebra = Color(0xFFF7F4EF);
+  static const treasuryTableHover = Color(0xFFFAF4F0);
+
+  /// Bandeau de période (A3), note « Bon à savoir ».
+  static const treasuryNoteBg = Color(0xFFFBF6EF);
+  static const treasuryNoteBorder = Color(0xFFECD9BF);
+  static const treasuryNoteText = Color(0xFF6B5836);
+  static const treasuryNoteStrong = Color(0xFF8A4A1F);
+
+  /// Bouton de format PDF.
+  static const treasuryPdfInk = Color(0xFFB03A2E);
+  static const treasuryPdfSoft = Color(0xFFFBEDEB);
+
+  /// Bouton de format Excel.
+  static const treasuryExcelInk = Color(0xFF2F6B43);
+  static const treasuryExcelSoft = Color(0xFFEDF5EF);
+
+  /// Pastille « À clôturer » sur carte de caisse (or 22 %).
+  static const treasuryRunningPill = Color(0x38D9A24E);
+  static const treasuryRunningPillInk = Color(0xFFF3D9A8);
+
+  /// Pastille « Clôturée » sur carte de caisse (vert 22 %).
+  static const treasuryClosedPill = Color(0x388CC8A0);
+  static const treasuryClosedPillInk = Color(0xFFCFEAD7);
+
+  /// Variation positive sur fond sombre.
+  static const treasuryKpiUpInk = Color(0xFF9FD9B0);
+
+  /// Variation négative sur fond sombre.
+  static const treasuryKpiDownInk = Color(0xFFF4B4A8);
+
+  /// Graduations du graphique.
+  static const treasuryChartGrid = Color(0xFFE3DFD2);
+  static const treasuryChartAxisInk = Color(0xFF8C8478);
+
+  /// Tranches à venir, hachurées.
+  static const treasuryChartFutureFill = Color(0xFFFAF8F2);
+  static const treasuryChartFutureHatch = Color(0xFFECE7DA);
+  static const treasuryChartFutureInk = Color(0xFFC9C3B0);
+
+  /// Ombre du filtre sélectionné (terre cuite 70 %).
+  static const treasuryFilterShadow = Color(0xB3B85C2C);
+
+  /// Ombre des cartes de caisse (bleu profond 70 %).
+  static const treasuryRegisterShadow = Color(0xB30E2D42);
+
+  /// Ombre des cartes et panneaux (texte 5 %).
+  static const treasuryCardShadow = Color(0x0D2C2A26);
 }

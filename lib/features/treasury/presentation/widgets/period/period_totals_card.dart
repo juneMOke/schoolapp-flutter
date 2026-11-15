@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/currency_tones.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une caisse sur la semaine ou le mois (B7) : le reste en fin de période,
@@ -30,7 +30,7 @@ class PeriodTotalsCard extends StatelessWidget {
         color: AppColors.surfaceRaised,
         borderRadius: AppRadius.brLg,
         border: Border.all(color: AppColors.border),
-        boxShadow: DashboardTones.paveShadow,
+        boxShadow: TreasuryTones.cardShadow,
       ),
       child: ClipRRect(
         borderRadius: AppRadius.brLg,
@@ -42,7 +42,9 @@ class PeriodTotalsCard extends StatelessWidget {
                 horizontal: AppSpacing.lg,
                 vertical: AppSpacing.md,
               ),
-              color: CurrencyTones.pave(currency.code),
+              decoration: BoxDecoration(
+                gradient: TreasuryTones.gradient(currency),
+              ),
               child: Row(
                 children: [
                   const Icon(
@@ -93,13 +95,13 @@ class PeriodTotalsCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Wrap(
-                spacing: AppSpacing.lg,
+                spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: [
                   _Figure(
                     label: l10n.treasuryOpening,
                     value: TreasuryFormat.money(s.openingInCents, currency),
-                    ink: AppColors.terreCuite,
+                    tone: TreasuryTones.opening,
                   ),
                   _Figure(
                     label: l10n.treasuryInflows,
@@ -107,7 +109,7 @@ class PeriodTotalsCard extends StatelessWidget {
                       s.inflowsInCents,
                       currency,
                     ),
-                    ink: AppColors.success,
+                    tone: TreasuryTones.inflow,
                   ),
                   _Figure(
                     label: l10n.treasuryOutflows,
@@ -115,7 +117,7 @@ class PeriodTotalsCard extends StatelessWidget {
                       -s.outflowsInCents,
                       currency,
                     ),
-                    ink: AppColors.error,
+                    tone: TreasuryTones.outflow,
                   ),
                   // R17 : les écarts sur leur propre ligne, jamais dans les
                   // entrées ni les sorties — sans eux la somme ne tombe pas.
@@ -126,7 +128,7 @@ class PeriodTotalsCard extends StatelessWidget {
                         s.gapsInCents,
                         currency,
                       ),
-                      ink: AppColors.error,
+                      tone: TreasuryTones.outflow,
                     ),
                 ],
               ),
@@ -141,27 +143,38 @@ class PeriodTotalsCard extends StatelessWidget {
 class _Figure extends StatelessWidget {
   final String label;
   final String value;
-  final Color ink;
+  final TreasuryTone tone;
 
-  const _Figure({required this.label, required this.value, required this.ink});
+  const _Figure({required this.label, required this.value, required this.tone});
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(
-        label.toUpperCase(),
-        style: AppTypography.labelCaps.copyWith(color: ink),
-      ),
-      Text(
-        value,
-        softWrap: false,
-        style: AppTextStyles.moneyTabular.copyWith(
-          color: ink,
-          fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppDimensions.treasuryFigurePadH,
+      vertical: AppDimensions.treasuryFigurePadV,
+    ),
+    decoration: BoxDecoration(
+      color: tone.soft,
+      border: Border.all(color: tone.border),
+      borderRadius: BorderRadius.circular(AppDimensions.treasuryFigureRadius),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: AppTypography.labelCaps.copyWith(color: tone.ink),
         ),
-      ),
-    ],
+        Text(
+          value,
+          softWrap: false,
+          style: AppTextStyles.moneyTabular.copyWith(
+            color: tone.ink,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    ),
   );
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -9,130 +10,130 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_regist
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_nav_bar.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// Les colonnes du tableau « Jour par jour » (B7) : JOURNÉE (200) · une
+/// colonne par caisse (280 au moins) · CLÔTURE (130, à droite).
+abstract final class PeriodDayColumns {
+  static const double day = 150;
+  static const double register = 240;
+  static const double closure = 150;
+
+  static List<double?> widths(int registers) => [
+    day,
+    for (var i = 0; i < registers; i++) null,
+    closure,
+  ];
+
+  static double minWidth(int registers) =>
+      day + register * registers + closure + 2 * AppSpacing.sm;
+}
 
 /// Une journée du tableau « Jour par jour » (B7) : par caisse, entrées,
 /// sorties et reste en montants **exacts** (jamais de format court), l'écart
 /// s'il y en a, et l'état de la clôture. Toucher la ligne ouvre la journée.
-class PeriodDayTile extends StatelessWidget {
-  final PeriodDayRow row;
-  final List<CashRegister> registers;
-  final bool isToday;
-  final VoidCallback onOpen;
-
-  const PeriodDayTile({
-    super.key,
-    required this.row,
-    required this.registers,
-    required this.isToday,
-    required this.onOpen,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final cells = [
-      for (final register in registers)
-        if (row.cellOf(register.id) case final cell?) (register, cell),
-    ];
-    final status = _statusOf(cells.map((c) => c.$2));
-    final hasGap = cells.any((c) => c.$2.gapInCents != 0);
-    return Material(
-      color: AppColors.surfaceRaised,
-      child: InkWell(
-        onTap: onOpen,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: AppDimensions.minTouchTarget,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
+EteeloColumnTableRow periodDayRow(
+  BuildContext context, {
+  required PeriodDayRow row,
+  required List<CashRegister> registers,
+  required bool isToday,
+  required VoidCallback onOpen,
+}) {
+  final l10n = AppLocalizations.of(context)!;
+  final cells = [
+    for (final register in registers)
+      if (row.cellOf(register.id) case final cell?) (register, cell),
+  ];
+  final status = _statusOf(cells.map((c) => c.$2));
+  final hasGap = cells.any((c) => c.$2.gapInCents != 0);
+  return EteeloColumnTableRow(
+    widths: PeriodDayColumns.widths(registers.length),
+    onTap: onOpen,
+    cells: [
+      ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: AppDimensions.minTouchTarget - 2 * AppSpacing.sm,
+        ),
+        child: Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              capitalizeFirst(l10n.treasuryDayShort(row.day)),
+              style: AppTypography.titleSmall,
             ),
-            child: Row(
+            if (isToday)
+              _Tag(
+                label: l10n.treasuryToday,
+                ink: AppColors.surfaceRaised,
+                fill: AppColors.terreCuite,
+              ),
+          ],
+        ),
+      ),
+      for (final register in registers)
+        switch (row.cellOf(register.id)) {
+          final cell? => _Cell(register: register, cell: cell),
+          // Caisse pas encore en service ce jour-là.
+          null => const SizedBox.shrink(),
+        },
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Flexible(
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.xs,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            capitalizeFirst(l10n.treasuryDayShort(row.day)),
-                            style: AppTypography.titleSmall,
-                          ),
-                          if (isToday)
-                            _Tag(
-                              label: l10n.treasuryToday,
-                              ink: AppColors.terreCuite,
-                            ),
-                          // L'état et l'écart suivent le titre et passent à
-                          // la ligne avec lui : une colonne à droite privait
-                          // le titre de sa place sur téléphone.
-                          if (hasGap)
-                            _Tag(
-                              label: l10n.treasuryGapTag,
-                              ink: AppColors.error,
-                            ),
-                          if (status != null) _statusTag(l10n, status),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Wrap(
-                        spacing: AppSpacing.lg,
-                        runSpacing: AppSpacing.xs,
-                        children: [
-                          for (final (register, cell) in cells)
-                            _Cell(register: register, cell: cell),
-                        ],
-                      ),
-                    ],
+                if (hasGap)
+                  _Tag(
+                    label: l10n.treasuryGapTag,
+                    ink: TreasuryTones.outflow.ink,
                   ),
-                ),
-                const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                if (status != null) _statusTag(l10n, status),
               ],
             ),
           ),
-        ),
+          const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+        ],
       ),
-    );
-  }
-
-  /// L'état de la journée : clôturée si toutes ses caisses le sont, sinon
-  /// ouverte (aujourd'hui) ou non clôturée (jour passé).
-  static ClosureStatus? _statusOf(Iterable<PeriodDayCell> cells) {
-    if (cells.isEmpty) return null;
-    if (cells.every((c) => c.status == ClosureStatus.closed)) {
-      return ClosureStatus.closed;
-    }
-    return cells.any((c) => c.status == ClosureStatus.open)
-        ? ClosureStatus.open
-        : ClosureStatus.notClosed;
-  }
-
-  static Widget _statusTag(AppLocalizations l10n, ClosureStatus status) =>
-      switch (status) {
-        ClosureStatus.closed => _Tag(
-          label: l10n.treasuryStatusClosed,
-          icon: Icons.lock_outline,
-          ink: AppColors.success,
-        ),
-        ClosureStatus.open => _Tag(
-          label: l10n.treasuryStatusOpen,
-          icon: Icons.schedule,
-          ink: AppColors.financeCrossedAccent,
-        ),
-        ClosureStatus.notClosed => _Tag(
-          label: l10n.treasuryNotClosed,
-          icon: Icons.warning_amber_outlined,
-          ink: AppColors.financeCrossedAccent,
-        ),
-      };
+    ],
+  );
 }
+
+/// L'état de la journée : clôturée si toutes ses caisses le sont, sinon
+/// ouverte (aujourd'hui) ou non clôturée (jour passé).
+ClosureStatus? _statusOf(Iterable<PeriodDayCell> cells) {
+  if (cells.isEmpty) return null;
+  if (cells.every((c) => c.status == ClosureStatus.closed)) {
+    return ClosureStatus.closed;
+  }
+  return cells.any((c) => c.status == ClosureStatus.open)
+      ? ClosureStatus.open
+      : ClosureStatus.notClosed;
+}
+
+Widget _statusTag(AppLocalizations l10n, ClosureStatus status) =>
+    switch (status) {
+      ClosureStatus.closed => _Tag(
+        label: l10n.treasuryStatusClosed,
+        icon: Icons.lock_outline,
+        ink: TreasuryTones.inflow.ink,
+      ),
+      ClosureStatus.open => _Tag(
+        label: l10n.treasuryStatusOpen,
+        icon: Icons.schedule,
+        ink: TreasuryTones.pending.ink,
+      ),
+      ClosureStatus.notClosed => _Tag(
+        label: l10n.treasuryNotClosed,
+        icon: Icons.warning_amber_outlined,
+        ink: TreasuryTones.pending.ink,
+      ),
+    };
 
 class _Cell extends StatelessWidget {
   final CashRegister register;
@@ -151,19 +152,13 @@ class _Cell extends StatelessWidget {
         style: AppTextStyles.moneyTabular,
         children: [
           TextSpan(
-            text: '${register.name} · ',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          TextSpan(
             text: TreasuryFormat.signedMoney(cell.inflowsInCents, currency),
-            style: const TextStyle(color: AppColors.success),
+            style: const TextStyle(color: AppColors.treasuryCdfInk),
           ),
           const TextSpan(text: '  '),
           TextSpan(
             text: TreasuryFormat.signedMoney(-cell.outflowsInCents, currency),
-            style: const TextStyle(color: AppColors.error),
+            style: const TextStyle(color: AppColors.treasuryOutflowInk),
           ),
           TextSpan(
             text:
@@ -191,8 +186,9 @@ class _Tag extends StatelessWidget {
   final String label;
   final IconData? icon;
   final Color ink;
+  final Color? fill;
 
-  const _Tag({required this.label, required this.ink, this.icon});
+  const _Tag({required this.label, required this.ink, this.icon, this.fill});
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +199,7 @@ class _Tag extends StatelessWidget {
         vertical: AppSpacing.xs / 2,
       ),
       decoration: BoxDecoration(
-        color: ink.withValues(alpha: 0.12),
+        color: fill ?? ink.withValues(alpha: 0.12),
         borderRadius: AppRadius.brPill,
       ),
       child: Row(
@@ -213,11 +209,13 @@ class _Tag extends StatelessWidget {
             Icon(glyph, size: AppSpacing.md, color: ink),
             const SizedBox(width: AppSpacing.xs),
           ],
-          Text(
-            label,
-            style: AppTypography.labelSmall.copyWith(
-              color: ink,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              label,
+              style: AppTypography.labelSmall.copyWith(
+                color: ink,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

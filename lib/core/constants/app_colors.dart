@@ -297,4 +297,55 @@ class AppColors {
   static const suspendedInk = tokens.AppColors.suspendedInk;
   static const suspendedSurface = tokens.AppColors.suspendedSurface;
   static const suspendedBorder = tokens.AppColors.suspendedBorder;
+
+  // ── Trésorerie ──
+  static const treasuryUsdDeep = tokens.AppColors.treasuryUsdDeep;
+  static const treasuryUsdMid = tokens.AppColors.treasuryUsdMid;
+  static const treasuryUsdEnd = tokens.AppColors.treasuryUsdEnd;
+  static const treasuryCdfDeep = tokens.AppColors.treasuryCdfDeep;
+  static const treasuryCdfMid = tokens.AppColors.treasuryCdfMid;
+  static const treasuryCdfEnd = tokens.AppColors.treasuryCdfEnd;
+  static const treasuryUsdInk = tokens.AppColors.treasuryUsdInk;
+  static const treasuryUsdSoft = tokens.AppColors.treasuryUsdSoft;
+  static const treasuryUsdBorder = tokens.AppColors.treasuryUsdBorder;
+  static const treasuryCdfInk = tokens.AppColors.treasuryCdfInk;
+  static const treasuryCdfSoft = tokens.AppColors.treasuryCdfSoft;
+  static const treasuryCdfBorder = tokens.AppColors.treasuryCdfBorder;
+  static const treasuryOpeningInk = tokens.AppColors.treasuryOpeningInk;
+  static const treasuryOpeningSoft = tokens.AppColors.treasuryOpeningSoft;
+  static const treasuryOpeningBorder = tokens.AppColors.treasuryOpeningBorder;
+  static const treasuryOpeningLine = tokens.AppColors.treasuryOpeningLine;
+  static const treasuryOutflowInk = tokens.AppColors.treasuryOutflowInk;
+  static const treasuryOutflowSoft = tokens.AppColors.treasuryOutflowSoft;
+  static const treasuryOutflowBorder = tokens.AppColors.treasuryOutflowBorder;
+  static const treasuryPendingInk = tokens.AppColors.treasuryPendingInk;
+  static const treasuryPendingSoft = tokens.AppColors.treasuryPendingSoft;
+  static const treasuryPendingBorder = tokens.AppColors.treasuryPendingBorder;
+  static const treasuryTableHeaderInk = tokens.AppColors.treasuryTableHeaderInk;
+  static const treasuryTableZebra = tokens.AppColors.treasuryTableZebra;
+  static const treasuryTableHover = tokens.AppColors.treasuryTableHover;
+  static const treasuryNoteBg = tokens.AppColors.treasuryNoteBg;
+  static const treasuryNoteBorder = tokens.AppColors.treasuryNoteBorder;
+  static const treasuryNoteText = tokens.AppColors.treasuryNoteText;
+  static const treasuryNoteStrong = tokens.AppColors.treasuryNoteStrong;
+  static const treasuryPdfInk = tokens.AppColors.treasuryPdfInk;
+  static const treasuryPdfSoft = tokens.AppColors.treasuryPdfSoft;
+  static const treasuryExcelInk = tokens.AppColors.treasuryExcelInk;
+  static const treasuryExcelSoft = tokens.AppColors.treasuryExcelSoft;
+  static const treasuryRunningPill = tokens.AppColors.treasuryRunningPill;
+  static const treasuryRunningPillInk = tokens.AppColors.treasuryRunningPillInk;
+  static const treasuryClosedPill = tokens.AppColors.treasuryClosedPill;
+  static const treasuryClosedPillInk = tokens.AppColors.treasuryClosedPillInk;
+  static const treasuryKpiUpInk = tokens.AppColors.treasuryKpiUpInk;
+  static const treasuryKpiDownInk = tokens.AppColors.treasuryKpiDownInk;
+  static const treasuryChartGrid = tokens.AppColors.treasuryChartGrid;
+  static const treasuryChartAxisInk = tokens.AppColors.treasuryChartAxisInk;
+  static const treasuryChartFutureFill =
+      tokens.AppColors.treasuryChartFutureFill;
+  static const treasuryChartFutureHatch =
+      tokens.AppColors.treasuryChartFutureHatch;
+  static const treasuryChartFutureInk = tokens.AppColors.treasuryChartFutureInk;
+  static const treasuryFilterShadow = tokens.AppColors.treasuryFilterShadow;
+  static const treasuryRegisterShadow = tokens.AppColors.treasuryRegisterShadow;
+  static const treasuryCardShadow = tokens.AppColors.treasuryCardShadow;
 }

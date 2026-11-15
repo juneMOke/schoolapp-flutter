@@ -4,7 +4,6 @@ import 'package:school_app_flutter/core/components/controls/segmented_tab_filter
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -12,6 +11,11 @@ import 'package:school_app_flutter/features/treasury/domain/entities/treasury_da
 import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_evolution_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_balance_chart.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/cash_report_opener.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'évolution des caisses (A3) : les filtres de période, le bandeau qui dit
@@ -37,31 +41,13 @@ class EvolutionPanel extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.trending_up, color: AppColors.terreCuite),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.treasuryEvolutionTitle,
-                        style: AppTypography.titleMedium,
-                      ),
-                      Text(
-                        l10n.treasuryEvolutionSubtitle,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            TreasurySectionHeader(
+              icon: Icons.trending_up,
+              title: l10n.treasuryEvolutionTitle,
+              subtitle: l10n.treasuryEvolutionSubtitle,
             ),
-            const SizedBox(height: AppSpacing.md),
             SegmentedTabFilter<EvolutionPeriod>(
+              style: TreasuryTones.filter,
               semanticsLabel: l10n.treasuryEvolutionTitle,
               selected: state.period,
               onSelected: cubit.periodChanged,
@@ -129,13 +115,15 @@ class EvolutionPanel extends StatelessWidget {
       TreasuryEvolutionStatus.ready when evolution != null => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Band(evolution: evolution),
+          _Band(evolution: evolution, onPointHint: l10n.treasuryChartOpenHint),
           for (final series in evolution.series) ...[
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md + 2),
             RegisterBalanceChart(
               series: series,
               granularity: evolution.granularity,
               period: evolution.period,
+              onOpenPoint: (point) =>
+                  openPointReport(context, evolution.granularity, point),
             ),
           ],
         ],
@@ -151,7 +139,10 @@ class EvolutionPanel extends StatelessWidget {
 class _Band extends StatelessWidget {
   final TreasuryEvolution evolution;
 
-  const _Band({required this.evolution});
+  /// « Touchez un point pour ouvrir son rapport », quand un point s'ouvre.
+  final String? onPointHint;
+
+  const _Band({required this.evolution, this.onPointHint});
 
   @override
   Widget build(BuildContext context) {
@@ -170,34 +161,26 @@ class _Band extends StatelessWidget {
     final range = evolution.period == EvolutionPeriod.today
         ? '${l10n.treasuryPeriodToday}, ${l10n.treasuryDayShort(evolution.from)}'
         : l10n.treasuryRangeLabel(evolution.from, to);
-    final parts = [
-      range,
+    final rest = [
       l10n.treasuryCashDays(evolution.cashDays),
       l10n.treasuryDisplayAs(granularity),
       if (evolution.period == EvolutionPeriod.custom) l10n.treasuryAutoChosen,
     ];
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.terreCuite.withValues(alpha: 0.06),
-        borderRadius: AppRadius.brMd,
-      ),
-      child: Row(
+    return TreasuryNoteBand(
+      icon: Icons.date_range,
+      text: TextSpan(
         children: [
-          const Icon(
-            Icons.date_range,
-            size: AppSpacing.lg,
-            color: AppColors.terreCuite,
+          TextSpan(
+            text: range,
+            style: const TextStyle(
+              color: AppColors.treasuryNoteStrong,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(parts.join(' · '), style: AppTypography.bodySmall),
-          ),
+          TextSpan(text: ' · ${rest.join(' · ')}'),
         ],
       ),
+      hint: onPointHint,
     );
   }
 }
@@ -264,5 +247,50 @@ class _CustomRange extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+/// Le rapport d'une tranche de courbe (R7) : la journée d'une heure ou d'un
+/// jour, la semaine ISO (lundi → samedi) d'une semaine, le mois d'un mois.
+Future<void> openPointReport(
+  BuildContext context,
+  EvolutionGranularity granularity,
+  EvolutionPoint point,
+) {
+  final l10n = AppLocalizations.of(context)!;
+  final start = SchoolTime.wallClock(point.start);
+  final day = DateTime(start.year, start.month, start.day);
+  final (id, from, to) = pointReport(granularity, day);
+  final title = granularity == EvolutionGranularity.month
+      ? l10n.treasuryMonthOf(from)
+      : from == to
+      ? l10n.treasuryReportDay(from)
+      : l10n.treasuryRangeLabel(from, to);
+  return openCashReport(
+    context,
+    id: id,
+    title: title,
+    format: CashReportFormat.pdf,
+  );
+}
+
+/// L'id du rapport d'une tranche et sa plage : la journée d'une heure ou
+/// d'un jour, la semaine ISO (lundi → samedi) d'une semaine même coupée au
+/// bord du mois, le mois civil d'un mois.
+(String, DateTime, DateTime) pointReport(
+  EvolutionGranularity granularity,
+  DateTime day,
+) {
+  switch (granularity) {
+    case EvolutionGranularity.hour || EvolutionGranularity.day:
+      return (CashReportIds.daily(day), day, day);
+    case EvolutionGranularity.week:
+      final monday = DateTime(day.year, day.month, day.day - day.weekday + 1);
+      final saturday = DateTime(monday.year, monday.month, monday.day + 5);
+      return (CashReportIds.weekly(monday, saturday), monday, saturday);
+    case EvolutionGranularity.month:
+      final first = DateTime(day.year, day.month);
+      final last = DateTime(day.year, day.month + 1, 0);
+      return (CashReportIds.monthly(first, last), first, last);
   }
 }

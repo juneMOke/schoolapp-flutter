@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une ligne du registre : heure, libellé (élidé), référence, étiquettes, et le
@@ -49,8 +50,8 @@ class _MovementRowState extends State<MovementRow> {
     final l10n = AppLocalizations.of(context)!;
     final m = widget.movement;
     final ink = m.direction == MovementDirection.inflow
-        ? AppColors.success
-        : AppColors.error;
+        ? TreasuryTones.inflow.ink
+        : TreasuryTones.outflow.ink;
     final tags = [
       if (m.source == MovementSource.bankDeposit)
         l10n.treasurySourceBankDeposit,
@@ -63,7 +64,7 @@ class _MovementRowState extends State<MovementRow> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: m.afterClosure ? AppColors.orDoux.withValues(alpha: 0.08) : null,
+        color: m.afterClosure ? TreasuryTones.pending.soft : null,
         border: const Border(top: BorderSide(color: AppColors.border)),
       ),
       child: Column(

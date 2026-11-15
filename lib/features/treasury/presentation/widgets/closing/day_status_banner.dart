@@ -5,6 +5,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le bandeau de la journée (B2) : « Journée en cours · 1 caisse sur 2
@@ -30,7 +32,8 @@ class DayStatusBanner extends StatelessWidget {
     final total = day.registers.length;
     final closed = day.closedCount;
     final done = total > 0 && closed == total;
-    final ink = done ? AppColors.success : AppColors.financeCrossedAccent;
+    final tone = done ? TreasuryTones.inflow : TreasuryTones.pending;
+    final ink = tone.ink;
     final close = onCloseNext;
     final next = nextRegisterName;
     return Container(
@@ -39,9 +42,11 @@ class DayStatusBanner extends StatelessWidget {
         vertical: AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: ink.withValues(alpha: 0.08),
-        borderRadius: AppRadius.brMd,
-        border: Border.all(color: ink.withValues(alpha: 0.3)),
+        color: tone.soft,
+        borderRadius: BorderRadius.circular(
+          AppDimensions.treasuryRemainingRadius,
+        ),
+        border: Border.all(color: tone.border),
       ),
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
@@ -52,18 +57,59 @@ class DayStatusBanner extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(done ? Icons.lock_outline : Icons.schedule, color: ink),
+              Container(
+                width: AppDimensions.treasuryReportPictogram,
+                height: AppDimensions.treasuryReportPictogram,
+                decoration: BoxDecoration(
+                  color: ink,
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.treasuryFormatButtonRadius,
+                  ),
+                ),
+                child: Icon(
+                  done ? Icons.lock_outline : Icons.schedule,
+                  size: AppSpacing.lg + 2,
+                  color: AppColors.surfaceRaised,
+                ),
+              ),
               const SizedBox(width: AppSpacing.md),
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      done
-                          ? l10n.treasuryDayClosedTitle
-                          : l10n.treasuryDayOpenTitle,
-                      style: AppTypography.titleSmall.copyWith(color: ink),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          done
+                              ? l10n.treasuryDayClosedTitle
+                              : l10n.treasuryDayOpenTitle,
+                          style: AppTypography.titleSmall.copyWith(color: ink),
+                        ),
+                        // Une pastille par caisse : pleine si clôturée.
+                        for (final r in day.registers)
+                          Tooltip(
+                            message: r.register.name,
+                            child: Container(
+                              width: AppSpacing.md,
+                              height: AppSpacing.md,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: r.isClosed
+                                    ? TreasuryTones.inflow.ink
+                                    : null,
+                                border: Border.all(
+                                  color: r.isClosed
+                                      ? TreasuryTones.inflow.ink
+                                      : TreasuryTones.pending.ink,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     Text(
                       '${l10n.treasuryClosedCount(closed, total)} · '

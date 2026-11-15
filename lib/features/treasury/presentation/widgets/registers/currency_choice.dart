@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/theme/currency_tones.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -10,6 +9,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_regist
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/domain/services/cash_register_rules.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le choix de la devise d'une nouvelle caisse : deux tuiles, celle qui est
@@ -83,41 +83,45 @@ class _CurrencyTile extends StatelessWidget {
         selected: selected,
         enabled: available,
         inMutuallyExclusiveGroup: true,
-        child: Material(
-          color: selected
-              ? CurrencyTones.pave(currency.code)
-              : AppColors.surfaceRaised,
-          shape: RoundedRectangleBorder(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: selected ? TreasuryTones.gradient(currency) : null,
             borderRadius: AppRadius.brMd,
-            side: BorderSide(
-              color: selected ? Colors.transparent : AppColors.border,
-            ),
           ),
-          child: InkWell(
-            borderRadius: AppRadius.brMd,
-            onTap: available ? onTap : null,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${TreasuryFormat.symbol(currency)} · $name',
-                    style: AppTypography.titleSmall.copyWith(
-                      color: available ? ink : AppColors.textMuted,
+          child: Material(
+            color: selected ? Colors.transparent : AppColors.surfaceRaised,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppRadius.brMd,
+              side: BorderSide(
+                color: selected ? Colors.transparent : AppColors.border,
+              ),
+            ),
+            child: InkWell(
+              borderRadius: AppRadius.brMd,
+              onTap: available ? onTap : null,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${TreasuryFormat.symbol(currency)} · $name',
+                      style: AppTypography.titleSmall.copyWith(
+                        color: available ? ink : AppColors.textMuted,
+                      ),
                     ),
-                  ),
-                  Text(
-                    available
-                        ? currency.code
-                        : l10n.treasuryCurrencyTaken(name.toLowerCase()),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: selected
-                          ? DashboardTones.inkSousLigne
-                          : AppColors.textSecondary,
+                    Text(
+                      available
+                          ? currency.code
+                          : l10n.treasuryCurrencyTaken(name.toLowerCase()),
+                      style: AppTypography.labelSmall.copyWith(
+                        color: selected
+                            ? DashboardTones.inkSousLigne
+                            : AppColors.textSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

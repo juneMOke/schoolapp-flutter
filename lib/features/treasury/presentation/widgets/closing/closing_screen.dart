@@ -23,6 +23,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/closin
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes de l'écran, câblés par la page ; `null` quand ils ne sont pas
@@ -81,6 +82,7 @@ class _ClosingScreenState extends State<ClosingScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             EteeloPageHeader(
+              titleStyle: TreasuryTitle.style(context),
               eyebrow: l10n.menuTreasury,
               title: l10n.treasuryClosingTitle,
               subtitle: l10n.treasuryClosingSubtitle,
@@ -89,13 +91,6 @@ class _ClosingScreenState extends State<ClosingScreen> {
             // Semaine et mois ne s'offrent qu'une fois les caisses connues :
             // leurs bornes viennent du jour du serveur et de la première mise
             // en service.
-            if (businessDate != null && state.historyStart != null) ...[
-              ClosingScopeTabs(
-                scope: _scope,
-                onChanged: (scope) => setState(() => _scope = scope),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-            ],
             if (_scope != ClosingScope.day &&
                 businessDate != null &&
                 state.historyStart != null)
@@ -107,7 +102,11 @@ class _ClosingScreenState extends State<ClosingScreen> {
                   today: businessDate,
                   historyStart: state.historyStart!,
                 )..load(),
-                child: PeriodView(onOpenDay: _openDay, today: businessDate),
+                child: PeriodView(
+                  onOpenDay: _openDay,
+                  today: businessDate,
+                  filters: _tabs(),
+                ),
               )
             // La barre reste dès que le serveur a dit quel jour on est, même
             // si la journée affichée échoue : on peut toujours en sortir.
@@ -121,6 +120,10 @@ class _ClosingScreenState extends State<ClosingScreen> {
                       : () => cubit.step(-1),
                   onNext: cubit.nextDay(1) == null ? null : () => cubit.step(1),
                   onToday: cubit.goToday,
+                  filters: state.historyStart == null ? null : _tabs(),
+                  onPickDate: state.historyStart == null
+                      ? null
+                      : () => _pickDate(context, state),
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],
@@ -130,6 +133,29 @@ class _ClosingScreenState extends State<ClosingScreen> {
         );
       },
     );
+  }
+
+  Widget _tabs() => ClosingScopeTabs(
+    scope: _scope,
+    onChanged: (scope) => setState(() => _scope = scope),
+  );
+
+  /// Le sélecteur de date du Journalier : borné au début de l'historique et
+  /// à aujourd'hui, dimanches exclus (R4).
+  Future<void> _pickDate(BuildContext context, CashClosingState state) async {
+    final today = state.businessDate;
+    final first = state.historyStart;
+    if (today == null || first == null) return;
+    final cubit = context.read<CashClosingCubit>();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: state.date,
+      firstDate: first,
+      lastDate: today,
+      selectableDayPredicate: (day) => day.weekday != DateTime.sunday,
+    );
+    if (picked == null || !context.mounted) return;
+    await cubit.load(picked);
   }
 
   Widget _body(BuildContext context, CashClosingState state) {

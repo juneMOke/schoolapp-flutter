@@ -108,7 +108,7 @@ class _Closed extends StatelessWidget {
           text:
               '$by · ${closure.hasGap ? l10n.treasuryClosedWithGap : l10n.treasuryClosedMatched}',
           icon: Icons.lock_outline,
-          ink: AppColors.success,
+          ink: AppColors.treasuryCdfInk,
         ),
         if (closure.hasGap) ...[
           const SizedBox(height: AppSpacing.sm),
@@ -116,7 +116,7 @@ class _Closed extends StatelessWidget {
         ],
         if (reopen != null) ...[
           const SizedBox(height: AppSpacing.sm),
-          EteeloButton.ghost(
+          EteeloButton.secondary(
             label: l10n.treasuryReopenButton,
             icon: Icons.lock_open_outlined,
             onPressed: reopen,
@@ -208,6 +208,7 @@ class _Note extends StatelessWidget {
     padding: const EdgeInsets.all(AppSpacing.md),
     decoration: BoxDecoration(
       color: ink.withValues(alpha: 0.08),
+      border: Border.all(color: ink.withValues(alpha: 0.2)),
       borderRadius: AppRadius.brMd,
     ),
     child: Row(

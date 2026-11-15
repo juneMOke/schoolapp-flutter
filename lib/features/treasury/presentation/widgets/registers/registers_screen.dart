@@ -17,6 +17,7 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_regi
 import 'package:school_app_flutter/features/treasury/presentation/widgets/registers/new_register_tile.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/registers/register_card.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Trésorerie ▸ Configuration des caisses : une carte par caisse, dans l'ordre
@@ -52,6 +53,7 @@ class RegistersScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             EteeloPageHeader(
+              titleStyle: TreasuryTitle.style(context),
               eyebrow: l10n.menuTreasury,
               title: l10n.treasuryConfigTitle,
               subtitle: l10n.treasuryConfigSubtitle,

@@ -1382,4 +1382,55 @@ class AppDimensions {
   /// Hauteur de la courbe d'une caisse ; plus basse sous 520 dp.
   static const treasuryChartHeight = 230.0;
   static const treasuryChartHeightCompact = 200.0;
+
+  /// Le contrôle segmenté terre cuite (spec A3) : piste r12, segment r9,
+  /// pad 15 de côté, une cible de 40.
+  static const treasuryFilterRadius = 12.0;
+  static const treasuryFilterItemRadius = 9.0;
+  static const treasuryFilterItemHeight = 40.0;
+  static const treasuryFilterItemPaddingH = 15.0;
+
+  /// Les cartes de caisse (A2) : rayon 20, pad 18 × 20, boîte d'icône 38.
+  static const treasuryRegisterCardRadius = 20.0;
+  static const treasuryRegisterCardPadV = 18.0;
+  static const treasuryRegisterCardPadH = 20.0;
+  static const treasuryIconBox = 38.0;
+  static const treasuryIconBoxRadius = 12.0;
+  static const treasuryKpiAmountSizeCompact = 26.0;
+
+  /// Les panneaux blancs (A3, A5) : rayon 16, pad 20.
+  static const treasuryPanelRadius = 16.0;
+  static const treasuryPanelPadding = 20.0;
+
+  /// Les pastilles chiffrées du graphique (A4) : pad 6 × 12, rayon 10.
+  static const treasuryFigurePadV = 6.0;
+  static const treasuryFigurePadH = 12.0;
+  static const treasuryFigureRadius = 10.0;
+
+  /// Les tableaux de rapports (A5) : ligne de 62 au moins, pictogramme 36,
+  /// colonne « Consulter » de 190, cartes sous 760.
+  static const treasuryReportRowMinHeight = 62.0;
+  static const treasuryReportPictogram = 36.0;
+  static const treasuryReportConsultWidth = 180.0;
+  static const treasuryReportPeriodWidth = 150.0;
+  static const treasuryReportStatusWidth = 180.0;
+  static const treasuryReportTitleMinWidth = 220.0;
+  static const treasuryReportCardsBelow = 760.0;
+  static const treasuryFormatButtonHeight = 36.0;
+  static const treasuryFormatButtonRadius = 10.0;
+  static const treasuryPaginationWidth = 300.0;
+
+  /// « Reste en caisse » (B3) : encadré r14, montant 800 24.
+  static const treasuryRemainingRadius = 14.0;
+  static const treasuryRemainingAmountSize = 24.0;
+
+  /// Montant d'une carte de configuration (C1) : 700 28.
+  static const treasuryConfigAmountSize = 28.0;
+
+  /// Les flèches ‹ › de la navigation de période (B1) : 40 × 40, r11.
+  static const treasuryNavButton = 40.0;
+  static const treasuryNavRadius = 11.0;
+
+  /// Le rond « + » de la tuile Nouvelle caisse (C1).
+  static const treasuryNewRegisterDot = 52.0;
 }
