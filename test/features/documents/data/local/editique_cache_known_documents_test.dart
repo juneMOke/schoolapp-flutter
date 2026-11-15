@@ -416,30 +416,77 @@ void main() {
           unidentifiedOnly: true,
         ))?.bytes;
 
-    test(
-      'le delta ne prête pas à la remplaçante les octets de la remplacée',
-      () async {
-        await seedUnidentifiedFirstEdition();
-
-        await cache.recordKnownDocuments([
-          known(
-            documentId: 'doc-ai-2',
-            documentNumber: number,
-            docType: 'AI',
-            edition: 2,
-          ),
-        ]);
-
-        expect(
-          await cache.readByDocumentId('doc-ai-2'),
-          isNull,
-          reason:
-              'ses octets ne sont pas là : un défaut de cache, jamais la '
-              'pièce qu elle remplace',
-        );
-        expect(await unidentifiedBytes(), equals(pdf('edition-1')));
-      },
+    EditiqueCacheEntry replaced() => known(
+      documentId: 'doc-ai-1',
+      documentNumber: number,
+      docType: 'AI',
+      cancelledAt: 900,
+      cancellationReason: 'Niveau corrigé',
     );
+
+    EditiqueCacheEntry replacement() => known(
+      documentId: 'doc-ai-2',
+      documentNumber: number,
+      docType: 'AI',
+      edition: 2,
+    );
+
+    // Ce que le cache garantit seul : la remplaçante est CONNUE sans octets, ce
+    // qui rend son identifiant décisif à la restitution (retéléchargement, pas
+    // repli sur le numéro — éprouvé côté repository), et la copie du même
+    // numéro garde ses octets sans rien hériter.
+    test('la remplaçante apprise seule est connue, sans octets', () async {
+      await seedUnidentifiedFirstEdition();
+
+      await cache.recordKnownDocuments([replacement()]);
+
+      expect(await cache.knowsDocumentId('doc-ai-2'), isTrue);
+      expect(await cache.readByDocumentId('doc-ai-2'), isNull);
+      final legacy = await index.findUnidentifiedByDocumentNumber(
+        schoolId: 'school-1',
+        documentNumber: number,
+      );
+      expect(legacy?.hasBytes, isTrue);
+      expect(legacy?.edition, isNull);
+    });
+
+    // La remplacée et la remplaçante sont scellées dans la même transaction :
+    // elles descendent ensemble, dans un ordre que rien ne fixe. Remplaçante
+    // d'abord, c'est l'ordre où l'adoption par le numéro lui donnait les
+    // octets de la remplacée.
+    for (final replacementFirst in [true, false]) {
+      test(
+        'après les deux lignes du delta, chacune a ce qui lui revient '
+        '(remplaçante ${replacementFirst ? 'en premier' : 'en second'})',
+        () async {
+          await seedUnidentifiedFirstEdition();
+
+          await cache.recordKnownDocuments(
+            replacementFirst
+                ? [replacement(), replaced()]
+                : [replaced(), replacement()],
+          );
+
+          expect(
+            (await index.findByDocumentId('doc-ai-1'))?.isCancelled,
+            isTrue,
+          );
+          expect(
+            (await cache.readByDocumentId('doc-ai-1'))?.bytes,
+            equals(pdf('edition-1')),
+            reason: 'la copie sans identifiant était la pièce remplacée',
+          );
+          expect(await cache.readByDocumentId('doc-ai-2'), isNull);
+          expect(await cache.knowsDocumentId('doc-ai-2'), isTrue);
+          expect(await index.count(), 2);
+        },
+      );
+    }
+
+    test('un identifiant jamais vu n est pas connu', () async {
+      expect(await cache.knowsDocumentId('jamais-vu'), isFalse);
+      expect(await cache.knowsDocumentId(''), isFalse);
+    });
 
     test('l émission de la remplaçante garde les deux copies', () async {
       await seedUnidentifiedFirstEdition();

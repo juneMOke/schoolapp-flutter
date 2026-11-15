@@ -357,7 +357,16 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
     try {
       var piece = id == null ? null : await cache.readByDocumentId(id);
 
-      if (piece == null && number != null) {
+      // L'identifiant est décisif : une pièce que l'index connaît sous lui,
+      // même sans ses octets, ne se cherche pas par son numéro — c'est un
+      // défaut de cache, que le retéléchargement répare. Une AI, une NP ou une
+      // FI remplaçante reprenant le numéro de celle qu'elle remplace (back
+      // v0.17.0), le repli servirait la pièce remplacée sous l'identifiant de
+      // la remplaçante. Le numéro ne vaut donc que faute de ligne pour
+      // l'identifiant (régime AM-5), ou faute d'identifiant.
+      if (piece == null &&
+          number != null &&
+          (id == null || !await cache.knowsDocumentId(id))) {
         final schoolId = currentUser.schoolId;
         // Le numéro n'est unique que **par école** : le chercher sans elle
         // rendrait la pièce d'un autre établissement.

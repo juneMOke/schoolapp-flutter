@@ -359,6 +359,23 @@ class EditiqueDocumentCache {
           ),
   );
 
+  /// Vrai si l'index connaît une pièce sous cet identifiant serveur, que la
+  /// tablette en détienne les octets ou non.
+  ///
+  /// C'est ce qui rend l'identifiant **décisif** à la restitution : une pièce
+  /// connue sous lui, même sans ses octets, ne se cherche pas ailleurs. Une
+  /// autre ligne du même numéro serait une autre édition — celle qu'elle
+  /// remplace, depuis que les AI, NP et FI reprennent leur numéro (back
+  /// v0.17.0). Ne lève jamais : ne pas savoir revient à ne pas connaître.
+  Future<bool> knowsDocumentId(String documentId) async {
+    try {
+      if (documentId.isEmpty || !await _access.isEntitled()) return false;
+      return await _index.findByDocumentId(documentId) != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<EditiqueCachedPiece?> _read(
     Future<EditiqueCacheEntry?> Function() locate,
   ) async {

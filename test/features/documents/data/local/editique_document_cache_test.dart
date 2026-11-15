@@ -792,6 +792,7 @@ void main() {
       access.entitled = false;
 
       expect(await cache.readByDocumentId('doc-1'), isNull);
+      expect(await cache.knowsDocumentId('doc-1'), isFalse);
       expect(
         await cache.readByDocumentNumber(
           schoolId: 'school-1',

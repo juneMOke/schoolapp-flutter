@@ -284,12 +284,24 @@ class DocumentsCatalogAction extends Equatable {
   /// échouerait ; annulée, il ressortirait un document sans valeur. Et la
   /// recherche ne s'arrête pas à la première ligne du type : une pièce retirée
   /// ne doit pas masquer une pièce plus ancienne qui, elle, tient toujours.
+  ///
+  /// Une pièce dont le numéro est déjà porté par une ligne plus récente du type
+  /// est écartée, octets ou non : depuis le back v0.17.0, une AI, une NP ou une
+  /// FI remplaçante reprend le numéro de celle qu'elle remplace. La plus
+  /// ancienne est donc remplacée, même tant que la tablette n'en a pas appris
+  /// l'annulation — la ressortir montrerait une pièce périmée comme en
+  /// vigueur, sous une ligne qui annonce l'édition suivante.
   static EditiqueCacheEntry? _findCached(
     List<EditiqueCacheEntry> cached,
     String code,
   ) {
+    final newerNumbers = <String>{};
     for (final entry in cached) {
       if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
+      final number = entry.documentNumber;
+      if (number != null && number.isNotEmpty && !newerNumbers.add(number)) {
+        continue;
+      }
       if (entry.hasBytes && !entry.isCancelled) return entry;
     }
     return null;

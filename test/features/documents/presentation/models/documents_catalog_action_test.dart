@@ -33,11 +33,12 @@ DocumentsCatalogAction _resolve(
 EditiqueCacheEntry _cached({
   required String docType,
   String id = 'c-1',
-  String documentId = 'doc-cache-1',
+  String? documentId = 'doc-cache-1',
   String documentNumber = 'ETL-AI-2526-000431',
   String? contentSha256 = 'abc',
   int? cancelledAt,
   String? cancellationReason,
+  int? edition,
 }) => EditiqueCacheEntry(
   id: id,
   documentId: documentId,
@@ -48,6 +49,7 @@ EditiqueCacheEntry _cached({
   contentSha256: contentSha256,
   cancelledAt: cancelledAt,
   cancellationReason: cancellationReason,
+  edition: edition,
   createdAt: 1000,
   lastAccessedAt: 1000,
 );
@@ -394,6 +396,62 @@ void main() {
   // un fait qu'on explique. Elle ne porte donc aucun geste, mais elle ne
   // disparaît pas pour autant — la taire ferait retomber la ligne sur
   // « Émettre » sans jamais dire pourquoi le papier d'hier n'a plus cours.
+  // Une AI, une NP ou une FI remplaçante reprend le numéro de celle qu'elle
+  // remplace (back v0.17.0). Tant que la tablette n'a pas appris l'annulation
+  // de la première, les deux lignes paraissent en vigueur — l'index les rend
+  // la plus récente d'abord.
+  group('deux éditions d un même numéro', () {
+    List<EditiqueCacheEntry> replacementWithoutBytes() => [
+      _cached(
+        docType: 'AI',
+        id: 'c-2',
+        documentId: 'doc-ai-2',
+        contentSha256: null,
+        edition: 2,
+      ),
+      _cached(docType: 'AI', id: 'c-1', documentId: null),
+    ];
+
+    test('la plus ancienne ne se consulte pas à la place de la suivante', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: replacementWithoutBytes(),
+      );
+
+      expect(action.cachedPiece, isNull);
+      expect(action.isRestitution, isFalse);
+      // La ligne annonce l'édition en vigueur, et c'est elle que le serveur
+      // re-servira.
+      expect(action.currentEdition, 2);
+      expect(action.isEnabled, isTrue);
+    });
+
+    test('hors ligne, rien à ressortir plutôt qu une pièce remplacée', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        isOffline: true,
+        cachedPieces: replacementWithoutBytes(),
+      );
+
+      expect(action.cachedPiece, isNull);
+      expect(action.kind, DocumentsCatalogActionKind.disabled);
+      expect(action.reason, DocumentsCatalogBlockReason.offline);
+    });
+
+    test('la remplaçante détenue se consulte', () {
+      final action = _resolve(
+        EditiqueDocumentType.enrollmentAttestation,
+        cachedPieces: [
+          _cached(docType: 'AI', id: 'c-2', documentId: 'doc-ai-2', edition: 2),
+          _cached(docType: 'AI', id: 'c-1', documentId: 'doc-ai-1'),
+        ],
+      );
+
+      expect(action.kind, DocumentsCatalogActionKind.consult);
+      expect(action.cachedPiece?.documentId, 'doc-ai-2');
+    });
+  });
+
   group('pièce annulée', () {
     EditiqueCacheEntry cancelled({
       String docType = 'AI',
