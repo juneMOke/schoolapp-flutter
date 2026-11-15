@@ -12908,6 +12908,7 @@
   "treasuryReportLockedLast": "Disponible après la clôture de la dernière caisse.",
   "treasuryReportLockedAll": "Disponible après la clôture de toutes les caisses.",
   "treasuryReportAfterClose": "PDF · Excel après clôture",
+  "treasuryReportNeverClosed": "Journée non clôturée : son rapport reste provisoire, consultable dans le tableau de bord.",
   "treasuryPagePrev": "Page précédente",
   "treasuryPageNext": "Page suivante",
   "treasuryPageOf": "Page {page} sur {total}",

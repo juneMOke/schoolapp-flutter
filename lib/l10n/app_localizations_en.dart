@@ -22959,6 +22959,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryReportAfterClose => 'PDF · Excel after closing';
 
   @override
+  String get treasuryReportNeverClosed =>
+      'Day not closed: its report stays provisional, available on the dashboard.';
+
+  @override
   String get treasuryPagePrev => 'Previous page';
 
   @override

@@ -162,7 +162,9 @@ class _Band extends StatelessWidget {
     );
     // La semaine se montre du lundi au samedi (R4), même si le serveur la
     // borne au dimanche ; « Aujourd'hui » n'est pas une plage.
-    final to = evolution.to.weekday == DateTime.sunday
+    final to =
+        evolution.period == EvolutionPeriod.week &&
+            evolution.to.weekday == DateTime.sunday
         ? DateTime(evolution.to.year, evolution.to.month, evolution.to.day - 1)
         : evolution.to;
     final range = evolution.period == EvolutionPeriod.today

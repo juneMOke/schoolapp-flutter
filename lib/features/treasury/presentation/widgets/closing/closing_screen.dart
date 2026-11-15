@@ -227,6 +227,7 @@ class _ClosingScreenState extends State<ClosingScreen> {
           ),
           reportId: CashReportIds.daily(day.date),
           remainingRegisters: day.registers.length - day.closedCount,
+          pastNotClosed: !day.isToday && day.closedCount < day.registers.length,
         ),
       ],
     );

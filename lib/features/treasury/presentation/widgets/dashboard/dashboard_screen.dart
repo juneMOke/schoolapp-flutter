@@ -71,6 +71,7 @@ class TreasuryDashboardScreen extends StatelessWidget {
                 semanticsLabel: l10n.treasuryDashboardLoading,
               ),
               TreasuryOverviewStatus.failure => TreasuryResultsErrorState(
+                notFoundMeansNoYear: true,
                 failure: state.failure ?? const ServerFailure(),
                 onRetry: context.read<TreasuryOverviewCubit>().load,
               ),

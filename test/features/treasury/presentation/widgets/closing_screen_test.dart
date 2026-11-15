@@ -343,6 +343,20 @@ void main() {
     expect(find.textContaining('RJ-20261022'), findsOneWidget);
     expect(find.text('PDF'), findsOneWidget);
   });
+
+  testWidgets(
+    'un jour passé non clôturé ne promet pas un rapport qui ne viendra pas',
+    (tester) async {
+      setTestWindow(tester, const Size(1280, 1600));
+      final past = DateTime(2026, 10, 21);
+      await _pump(tester, treasuryDay([usdDay()], date: past));
+      expect(
+        find.text('Disponible après la clôture de la dernière caisse.'),
+        findsNothing,
+      );
+      expect(find.textContaining('Journée non clôturée'), findsOneWidget);
+    },
+  );
 }
 
 bool _closeButtonEnabled(WidgetTester tester) {

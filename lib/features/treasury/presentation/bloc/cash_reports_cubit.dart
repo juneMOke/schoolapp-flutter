@@ -21,6 +21,10 @@ class CashReportsState extends Equatable {
   final DateTime customFrom;
   final DateTime customTo;
   final bool generating;
+
+  /// La page demandée en dernier : « Réessayer » la redemande, même si son
+  /// chargement a échoué.
+  final int requestedPage;
   final Failure? failure;
 
   const CashReportsState({
@@ -31,6 +35,7 @@ class CashReportsState extends Equatable {
     this.page,
     this.periodReports = const [],
     this.generating = false,
+    this.requestedPage = 0,
     this.failure,
   });
 
@@ -45,6 +50,7 @@ class CashReportsState extends Equatable {
     DateTime? customFrom,
     DateTime? customTo,
     bool? generating,
+    int? requestedPage,
     Failure? failure,
   }) => CashReportsState(
     status: status ?? this.status,
@@ -54,6 +60,7 @@ class CashReportsState extends Equatable {
     customFrom: customFrom ?? this.customFrom,
     customTo: customTo ?? this.customTo,
     generating: generating ?? this.generating,
+    requestedPage: requestedPage ?? this.requestedPage,
     failure: failure,
   );
 
@@ -97,7 +104,9 @@ class CashReportsCubit extends Cubit<CashReportsState> {
 
   Future<void> load([int page = 0]) async {
     if (state.kind == CashReportKind.period) return;
-    emit(state.copyWith(status: CashReportsStatus.loading));
+    emit(
+      state.copyWith(status: CashReportsStatus.loading, requestedPage: page),
+    );
     final generation = ++_generation;
     final result = await _repository.list(state.kind, page);
     if (isClosed || generation != _generation) return;

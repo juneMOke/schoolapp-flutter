@@ -119,7 +119,7 @@ class ReportsPanel extends StatelessWidget {
       ),
       CashReportsStatus.failure => TreasuryResultsErrorState(
         failure: state.failure ?? const ServerFailure(),
-        onRetry: () => cubit.load(page?.number ?? 0),
+        onRetry: () => cubit.load(state.requestedPage),
       ),
       CashReportsStatus.ready when page == null || page.items.isEmpty => Text(
         l10n.treasuryReportsEmpty,
@@ -180,6 +180,7 @@ class _ReportList extends StatelessWidget {
           for (final (index, report) in reports.indexed) ...[
             if (index > 0) const Divider(height: 1, color: AppColors.border),
             ReportRow(
+              key: ValueKey(report.id),
               report: report,
               isToday:
                   report.kind == CashReportKind.daily && report.from == today,

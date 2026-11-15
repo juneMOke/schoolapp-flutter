@@ -12725,6 +12725,7 @@
   "treasuryReportLockedLast": "Available once the last register is closed.",
   "treasuryReportLockedAll": "Available once every register is closed.",
   "treasuryReportAfterClose": "PDF · Excel after closing",
+  "treasuryReportNeverClosed": "Day not closed: its report stays provisional, available on the dashboard.",
   "treasuryPagePrev": "Previous page",
   "treasuryPageNext": "Next page",
   "treasuryPageOf": "Page {page} of {total}",

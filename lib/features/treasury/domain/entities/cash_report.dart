@@ -132,11 +132,18 @@ class CashReportFile extends Equatable {
 abstract final class CashReportIds {
   static String daily(DateTime day) => 'RJ-${_ymd(day)}';
 
+  /// Fin à 4 chiffres dans l'année du début ; en entier (`yyyyMMdd`) quand
+  /// elle tombe l'année suivante — règle commune à RH, RM et RP, confirmée par
+  /// le back (#229). Une seule forme par rapport : une fin longue dans l'année
+  /// du début répondrait `400 INVALID_REPORT_ID`.
   static String weekly(DateTime monday, DateTime saturday) =>
-      'RH-${_ymd(monday)}-${_md(saturday)}';
+      'RH-${_ymd(monday)}-${_end(monday, saturday)}';
 
   static String monthly(DateTime first, DateTime last) =>
-      'RM-${_ymd(first)}-${_md(last)}';
+      'RM-${_ymd(first)}-${_end(first, last)}';
+
+  static String _end(DateTime from, DateTime to) =>
+      to.year == from.year ? _md(to) : _ymd(to);
 
   static String _ymd(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}${_md(d)}';

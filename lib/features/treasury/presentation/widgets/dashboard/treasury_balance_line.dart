@@ -65,9 +65,16 @@ class TreasuryBalanceLine extends StatelessWidget {
     final bottom = values.reduce((a, b) => a < b ? a : b);
     // Jamais sous zéro, et une marge au-dessus pour que le dernier point ne
     // touche pas le bord (spec : + 14 %).
-    final maxY = (top * 1.14).clamp(1.0, double.infinity).ceilToDouble();
-    final minY = bottom <= 0 ? 0.0 : (bottom * 0.86).floorToDouble();
-    final interval = ((maxY - minY) / 2).clamp(1.0, double.infinity);
+    // Trois graduations (min, milieu, max) sur des multiples de l'intervalle :
+    // fl_chart cale sa grille sur zéro, et des bornes hors multiple
+    // ajoutaient une quatrième graduation collée au maximum.
+    final rawMin = bottom <= 0 ? 0.0 : bottom * 0.86;
+    final rawMax = (top * 1.14).clamp(1.0, double.infinity);
+    final interval = _niceStep((rawMax - rawMin) / 2);
+    final minY = (rawMin / interval).floorToDouble() * interval;
+    final maxY = minY + 2 * interval >= rawMax
+        ? minY + 2 * interval
+        : (rawMax / interval).ceilToDouble() * interval;
     return LayoutBuilder(
       builder: (context, constraints) {
         final step = chartLabelStep(
@@ -78,6 +85,9 @@ class TreasuryBalanceLine extends StatelessWidget {
         final lastKnown = known.isEmpty ? -1 : known.last.x.toInt();
         return LineChart(
           LineChartData(
+            // Un solde négatif (le serveur ne refuse jamais un fait d'argent)
+            // ne déborde pas sur les libellés.
+            clipData: const FlClipData.all(),
             minX: 0,
             maxX: (slots.length - 1).clamp(1, 1 << 30).toDouble(),
             minY: minY,
@@ -201,6 +211,19 @@ class TreasuryBalanceLine extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Un pas « rond » (1, 2 ou 5 × 10ⁿ) au moins égal à [raw].
+  static double _niceStep(double raw) {
+    if (raw <= 1) return 1;
+    var magnitude = 1.0;
+    while (magnitude * 10 <= raw) {
+      magnitude *= 10;
+    }
+    for (final m in const [1.0, 2.0, 5.0, 10.0]) {
+      if (m * magnitude >= raw) return m * magnitude;
+    }
+    return 10 * magnitude;
   }
 
   LineTooltipItem _tooltip(AppLocalizations l10n, int index) {

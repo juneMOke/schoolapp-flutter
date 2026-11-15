@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_reports_repository.dart';
@@ -245,5 +246,23 @@ void main() {
       expect(await cubit.generatePeriod(), isNull);
       verifyNever(() => reports.period(any(), any()));
     });
+  });
+
+  test('« Réessayer » redemande la page qui a échoué', () async {
+    final reports = _MockReports();
+    when(() => reports.list(any(), 0)).thenAnswer(
+      (_) async => Right(
+        CashReportPage(items: [cashReport()], number: 0, totalPages: 2),
+      ),
+    );
+    when(
+      () => reports.list(any(), 1),
+    ).thenAnswer((_) async => const Left(NetworkFailure()));
+    final cubit = CashReportsCubit(reports, today: demoDay);
+    addTearDown(cubit.close);
+    await cubit.load();
+    await cubit.load(1);
+    expect(cubit.state.status, CashReportsStatus.failure);
+    expect(cubit.state.requestedPage, 1);
   });
 }

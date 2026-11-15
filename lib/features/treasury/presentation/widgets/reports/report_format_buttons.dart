@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
@@ -39,14 +40,18 @@ class _ReportFormatButtonsState extends State<ReportFormatButtons> {
 
   Future<void> _open(CashReportFormat format) async {
     if (_busy != null) return;
+    // Pris AVANT l'appel : si la barre change de journée pendant le
+    // chargement, le fichier reçu garde son propre titre.
+    final id = widget.reportId;
+    final title = widget.title;
     setState(() => _busy = format);
     final result = await GetIt.instance<TreasuryReportsRepository>().file(
-      widget.reportId,
+      id,
       format,
     );
     if (!mounted) return;
-    setState(() => _busy = null);
-    await result.fold(_refused, _deliver);
+    await result.fold(_refused, (file) => _deliver(file, id, title));
+    if (mounted) setState(() => _busy = null);
   }
 
   Future<void> _refused(Failure failure) async {
@@ -59,27 +64,40 @@ class _ReportFormatButtonsState extends State<ReportFormatButtons> {
     );
   }
 
-  Future<void> _deliver(CashReportFile file) async {
+  Future<void> _deliver(CashReportFile file, String id, String title) async {
     final l10n = AppLocalizations.of(context)!;
     switch (file.format) {
       case CashReportFormat.pdf:
         await showEteeloDocumentViewer(
           context,
-          title: widget.title,
+          title: title,
           document: PrintableDocument(
             bytes: file.bytes,
             fileName: file.fileName,
             reference: file.status == CashReportStatus.provisional
-                ? l10n.treasuryReportProvisionalRef(widget.reportId)
-                : widget.reportId,
+                ? l10n.treasuryReportProvisionalRef(id)
+                : id,
           ),
         );
       case CashReportFormat.xlsx:
-        final path = await FilePicker.saveFile(
-          fileName: file.fileName,
-          bytes: file.bytes,
-        );
-        if (path != null && mounted) {
+        final String? path;
+        try {
+          path = await FilePicker.saveFile(
+            fileName: file.fileName,
+            bytes: file.bytes,
+          );
+        } catch (_) {
+          // Portail de fichiers absent, sélecteur déjà ouvert : on le dit.
+          if (mounted) {
+            AppSnackBar.showError(
+              context,
+              l10n.treasurySaveFailed(file.fileName),
+            );
+          }
+          return;
+        }
+        // Le web télécharge sans rendre de chemin.
+        if ((path != null || kIsWeb) && mounted) {
           AppSnackBar.showSuccess(
             context,
             l10n.treasuryReportSaved(file.fileName),

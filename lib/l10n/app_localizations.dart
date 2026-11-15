@@ -35316,6 +35316,12 @@ abstract class AppLocalizations {
   /// **'PDF · Excel after closing'**
   String get treasuryReportAfterClose;
 
+  /// No description provided for @treasuryReportNeverClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Day not closed: its report stays provisional, available on the dashboard.'**
+  String get treasuryReportNeverClosed;
+
   /// No description provided for @treasuryPagePrev.
   ///
   /// In en, this message translates to:

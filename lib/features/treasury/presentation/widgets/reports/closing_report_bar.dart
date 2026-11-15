@@ -22,12 +22,17 @@ class ClosingReportBar extends StatelessWidget {
   /// bouton. `0` : le rapport est disponible.
   final int remainingRegisters;
 
+  /// Un jour passé qu'on n'a pas clôturé : il ne le sera jamais (pas de
+  /// clôture rétroactive, R10). On le dit, sans promettre un rapport.
+  final bool pastNotClosed;
+
   const ClosingReportBar({
     super.key,
     required this.label,
     required this.title,
     required this.reportId,
     this.remainingRegisters = 0,
+    this.pastNotClosed = false,
   });
 
   @override
@@ -62,7 +67,9 @@ class ClosingReportBar extends StatelessWidget {
                     Text(label, style: AppTypography.titleSmall),
                     Text(
                       locked
-                          ? (remainingRegisters == 1
+                          ? (pastNotClosed
+                                ? l10n.treasuryReportNeverClosed
+                                : remainingRegisters == 1
                                 ? l10n.treasuryReportLockedLast
                                 : l10n.treasuryReportLockedAll)
                           : '$title · $reportId',
@@ -77,15 +84,19 @@ class ClosingReportBar extends StatelessWidget {
               ),
             ],
           ),
-          if (locked)
+          if (locked && !pastNotClosed)
             Text(
               l10n.treasuryReportAfterClose,
               style: AppTypography.labelSmall.copyWith(
                 color: AppColors.textSecondary,
               ),
             )
-          else
-            ReportFormatButtons(reportId: reportId, title: title),
+          else if (!locked)
+            ReportFormatButtons(
+              key: ValueKey(reportId),
+              reportId: reportId,
+              title: title,
+            ),
         ],
       ),
     );

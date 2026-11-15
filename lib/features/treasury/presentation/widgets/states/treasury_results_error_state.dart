@@ -14,10 +14,15 @@ class TreasuryResultsErrorState extends StatelessWidget {
   final Failure failure;
   final VoidCallback onRetry;
 
+  /// Un 404 veut dire « pas d'année scolaire en cours » sur la seule vue
+  /// d'ensemble (contrat) ; ailleurs, c'est une panne ordinaire.
+  final bool notFoundMeansNoYear;
+
   const TreasuryResultsErrorState({
     super.key,
     required this.failure,
     required this.onRetry,
+    this.notFoundMeansNoYear = false,
   });
 
   @override
@@ -26,7 +31,7 @@ class TreasuryResultsErrorState extends StatelessWidget {
     // Un refus métier (plage invalide…) ou l'absence d'année scolaire en
     // cours : rien ne changera en réessayant, et ce n'est pas une panne.
     final refused = failure is TreasuryRefusalFailure;
-    if (refused || failure is NotFoundFailure) {
+    if (refused || (notFoundMeansNoYear && failure is NotFoundFailure)) {
       return EteeloErrorResult(
         type: EteeloErrorType.unknown,
         title: l10n.treasuryErrorRefusedTitle,
