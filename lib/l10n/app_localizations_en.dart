@@ -22856,6 +22856,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryPeriodClosing => 'Balance at period end';
 
   @override
+  String get treasurySeeDay => 'See this register\'s day';
+
+  @override
   String get subMenuTreasuryDashboard => 'Dashboard';
 
   @override

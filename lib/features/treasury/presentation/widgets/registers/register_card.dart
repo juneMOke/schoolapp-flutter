@@ -27,11 +27,15 @@ class RegisterCard extends StatefulWidget {
   /// `null` hors promoteur : le bouton disparaît (§04).
   final VoidCallback? onAdjust;
 
+  /// « Voir la journée de cette caisse » : la clôture, journée du jour.
+  final VoidCallback? onSeeDay;
+
   const RegisterCard({
     super.key,
     required this.config,
     required this.isNew,
     this.onAdjust,
+    this.onSeeDay,
   });
 
   @override
@@ -98,6 +102,23 @@ class _RegisterCardState extends State<RegisterCard> {
                         icon: Icons.edit_outlined,
                         onPressed: adjust,
                       ),
+                  ],
+                  if (widget.onSeeDay case final seeDay?) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Center(
+                      child: TextButton.icon(
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(
+                            0,
+                            AppDimensions.minTouchTarget,
+                          ),
+                        ),
+                        onPressed: seeDay,
+                        icon: const Icon(Icons.arrow_forward),
+                        iconAlignment: IconAlignment.end,
+                        label: Text(l10n.treasurySeeDay),
+                      ),
+                    ),
                   ],
                 ],
               ),

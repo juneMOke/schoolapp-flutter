@@ -1360,6 +1360,10 @@ class AppDimensions {
   static const treasurySparklineWidth = 120.0;
   static const treasurySparklineHeight = 34.0;
 
+  /// La même courbe, plus petite, sur une carte de configuration (C1).
+  static const treasuryConfigSparklineWidth = 90.0;
+  static const treasuryConfigSparklineHeight = 30.0;
+
   /// Hauteur de la courbe d'une caisse ; plus basse sous 520 dp.
   static const treasuryChartHeight = 230.0;
   static const treasuryChartHeightCompact = 200.0;

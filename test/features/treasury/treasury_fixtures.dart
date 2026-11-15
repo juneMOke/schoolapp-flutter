@@ -34,11 +34,13 @@ RegisterConfig configOf(
   int balanceInCents = 482000,
   CashClosure? todayClosure,
   int adjustmentsCount = 0,
+  List<DayBalance> last8Days = const [],
 }) => RegisterConfig(
   register: register,
   balanceInCents: balanceInCents,
   todayClosure: todayClosure,
   adjustmentsCount: adjustmentsCount,
+  last8Days: last8Days,
 );
 
 final usdConfig = configOf(usdRegister);

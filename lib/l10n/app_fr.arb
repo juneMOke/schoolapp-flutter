@@ -12875,6 +12875,7 @@
   "treasuryCellGap": "écart {gap}",
   "@treasuryCellGap": {"placeholders": {"gap": {"type": "String"}}},
   "treasuryPeriodClosing": "Reste en fin de période",
+  "treasurySeeDay": "Voir la journée de cette caisse",
   "subMenuTreasuryDashboard": "Tableau de bord",
   "treasuryDashboardTitle": "Combien avons-nous en caisse ?",
   "treasuryDashboardSubtitle": "Situation au {date} · chaque caisse dans sa devise, jamais additionnées.",

@@ -35130,6 +35130,12 @@ abstract class AppLocalizations {
   /// **'Balance at period end'**
   String get treasuryPeriodClosing;
 
+  /// No description provided for @treasurySeeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'See this register\'s day'**
+  String get treasurySeeDay;
+
   /// No description provided for @subMenuTreasuryDashboard.
   ///
   /// In en, this message translates to:

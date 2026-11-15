@@ -12692,6 +12692,7 @@
   "treasuryCellGap": "gap {gap}",
   "@treasuryCellGap": {"placeholders": {"gap": {"type": "String"}}},
   "treasuryPeriodClosing": "Balance at period end",
+  "treasurySeeDay": "See this register's day",
   "subMenuTreasuryDashboard": "Dashboard",
   "treasuryDashboardTitle": "How much do we have in the registers?",
   "treasuryDashboardSubtitle": "As of {date} · each register in its own currency, never added together.",

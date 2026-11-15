@@ -28,6 +28,9 @@ class RegistersScreen extends StatelessWidget {
   final VoidCallback? onCreate;
   final ValueChanged<RegisterConfig>? onAdjust;
 
+  /// La journée d'une caisse dans Clôture de caisse.
+  final VoidCallback? onSeeDay;
+
   /// L'instant de référence de la pastille « Nouvelle » (injecté en test).
   final DateTime Function() now;
 
@@ -35,6 +38,7 @@ class RegistersScreen extends StatelessWidget {
     super.key,
     this.onCreate,
     this.onAdjust,
+    this.onSeeDay,
     this.now = DateTime.now,
   });
 
@@ -149,6 +153,7 @@ class RegistersScreen extends StatelessWidget {
               config: config,
               isNew: CashRegisterRules.isNew(config.register, at),
               onAdjust: adjust == null ? null : () => adjust(config),
+              onSeeDay: onSeeDay,
             );
           },
         ),

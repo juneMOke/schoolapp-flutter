@@ -1,3 +1,6 @@
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -43,6 +46,13 @@ class _RegistersBody extends StatelessWidget {
     return RegistersScreen(
       onCreate: canWrite ? actions.create : null,
       onAdjust: canWrite ? actions.adjust : null,
+      onSeeDay: () => context.read<NavigationBloc>().add(
+        SubMenuItemSelected(
+          menuId: MenuConstants.treasuryMenuId,
+          subMenuId: MenuConstants.treasuryClosingId,
+          title: AppLocalizations.of(context)!.subMenuTreasuryClosing,
+        ),
+      ),
     );
   }
 }

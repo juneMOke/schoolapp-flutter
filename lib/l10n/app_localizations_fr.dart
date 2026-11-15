@@ -23014,6 +23014,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get treasuryPeriodClosing => 'Reste en fin de période';
 
   @override
+  String get treasurySeeDay => 'Voir la journée de cette caisse';
+
+  @override
   String get subMenuTreasuryDashboard => 'Tableau de bord';
 
   @override
