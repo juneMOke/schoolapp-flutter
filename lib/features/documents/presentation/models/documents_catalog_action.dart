@@ -263,9 +263,10 @@ class DocumentsCatalogAction extends Equatable {
     return DocumentsCatalogAction._(
       // Une pièce retirée fait retomber la ligne sur « Émettre », jamais sur
       // « Consulter ». La trace locale porte encore son numéro, mais le serveur
-      // ne le re-servira plus : il traite une pièce annulée comme absente et en
-      // scellera une NEUVE. Promettre « Consulter » annoncerait donc le
-      // contraire de ce qui va se passer.
+      // ne re-servira plus cette pièce : il traite une pièce annulée comme
+      // absente et en scellera une NEUVE — sous le même numéro, en édition
+      // suivante, pour une AI, une NP ou une FI (back v0.17.0). Promettre
+      // « Consulter » annoncerait donc le contraire de ce qui va se passer.
       kind: (known == null || cancelled != null)
           ? DocumentsCatalogActionKind.emit
           : DocumentsCatalogActionKind.consult,

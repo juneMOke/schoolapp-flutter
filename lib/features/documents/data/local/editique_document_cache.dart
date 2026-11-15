@@ -11,6 +11,15 @@ import 'package:school_app_flutter/features/documents/domain/cache/editique_cach
 import 'package:school_app_flutter/features/documents/domain/cache/editique_cache_eviction_policy.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_cache_entry.dart';
 
+/// Une pièce détenue, telle que le cache la restitue : ses octets, relus et
+/// vérifiés, et la ligne d'index qui les décrit.
+///
+/// La ligne voyage avec les octets parce qu'un numéro ne désigne plus une seule
+/// pièce : une attestation, une note de perception ou une fiche réémise le
+/// reprend en édition suivante (back v0.17.0). Qui montre la pièce doit dire
+/// laquelle, et seule la ligne effectivement lue le sait.
+typedef EditiqueCachedPiece = ({EditiqueCacheEntry entry, Uint8List bytes});
+
 /// Le cache de restitution éditique **entier** : l'index en base et les octets
 /// sur le disque, tenus cohérents (ADR-012 D-2/D-7, AM-10).
 ///
@@ -140,6 +149,7 @@ class EditiqueDocumentCache {
             documentNumber: resolvedNumber,
             docType: docType,
             schoolId: schoolId,
+            edition: edition,
           ),
         );
         final id = existing?.id ?? _ids.newId();
@@ -320,18 +330,20 @@ class EditiqueDocumentCache {
 
   // ── Lecture ────────────────────────────────────────────────────────────────
 
-  /// Octets de la pièce portant cet identifiant serveur, `null` si elle n'est
-  /// pas en cache ou n'y est plus intègre.
-  Future<Uint8List?> readByDocumentId(String documentId) =>
+  /// La pièce portant cet identifiant serveur, `null` si elle n'est pas en
+  /// cache ou n'y est plus intègre.
+  Future<EditiqueCachedPiece?> readByDocumentId(String documentId) =>
       _read(() => _index.findByDocumentId(documentId));
 
-  /// Octets de la pièce portant ce numéro dans cette école. Repli du régime
-  /// AM-5, pour les pièces mises en cache avant que le serveur n'annonce leur
-  /// identifiant d'archive.
+  /// La pièce portant ce numéro dans cette école. Repli du régime AM-5, pour
+  /// les pièces mises en cache avant que le serveur n'annonce leur identifiant
+  /// d'archive. Le numéro partagé par plusieurs éditions, c'est la pièce en
+  /// vigueur qui répond, puis la plus haute édition : la ligne rendue dit
+  /// laquelle.
   ///
   /// [unidentifiedOnly] : l'appelant connaît l'identifiant de sa pièce, et une
   /// autre édition du même numéro n'est pas elle.
-  Future<Uint8List?> readByDocumentNumber({
+  Future<EditiqueCachedPiece?> readByDocumentNumber({
     required String schoolId,
     required String documentNumber,
     bool unidentifiedOnly = false,
@@ -347,7 +359,7 @@ class EditiqueDocumentCache {
           ),
   );
 
-  Future<Uint8List?> _read(
+  Future<EditiqueCachedPiece?> _read(
     Future<EditiqueCacheEntry?> Function() locate,
   ) async {
     try {
@@ -385,7 +397,7 @@ class EditiqueDocumentCache {
             return _forgetIfStillStale(locate);
           }
           await _touchQuietly(entry.id);
-          return blob.bytes;
+          return (entry: entry, bytes: blob.bytes);
       }
     } catch (_) {
       // Une restitution ne fait jamais tomber l'écran qui la demande.
@@ -402,7 +414,7 @@ class EditiqueDocumentCache {
   /// seule vue reviendrait à effacer une pièce parfaitement valide parce qu'on
   /// l'a regardée au mauvais moment — et à faire réinsérer sa ligne par
   /// l'écriture qui suit, cette fois sans fichier.
-  Future<Uint8List?> _forgetIfStillStale(
+  Future<EditiqueCachedPiece?> _forgetIfStillStale(
     Future<EditiqueCacheEntry?> Function() locate,
   ) {
     return _exclusive(() async {
@@ -417,7 +429,7 @@ class EditiqueDocumentCache {
           // L'écriture concurrente est terminée et tout concorde : il n'y a
           // rien à oublier, et la pièce est due à l'appelant.
           await _touchQuietly(entry.id);
-          return blob.bytes;
+          return (entry: entry, bytes: blob.bytes);
         case BlobFound():
         case BlobGone():
           // Fichier d'abord, octets de l'index ensuite : une ligne sans
@@ -558,13 +570,15 @@ class EditiqueDocumentCache {
   }
 
   /// Entrée de façade servant uniquement à poser la question d'identité —
-  /// identifiant serveur d'abord, numéro dans l'école ensuite. Ses autres
-  /// champs ne sont jamais lus.
+  /// identifiant serveur d'abord, numéro dans l'école ensuite, édition pour
+  /// départager deux pièces d'un même numéro. Ses autres champs ne sont jamais
+  /// lus.
   EditiqueCacheEntry _identityProbe({
     required String? documentId,
     required String? documentNumber,
     required String docType,
     required String schoolId,
+    required int? edition,
   }) => EditiqueCacheEntry(
     id: '',
     documentId: documentId,
@@ -573,6 +587,7 @@ class EditiqueDocumentCache {
     schoolId: schoolId,
     sizeBytes: 0,
     contentSha256: '',
+    edition: edition,
     createdAt: 0,
     lastAccessedAt: 0,
   );

@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_d
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_error_type.dart';
+import 'package:school_app_flutter/features/documents/presentation/helpers/document_edition_label.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/editique_document_preview.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/states/editique_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -452,10 +453,16 @@ class EditiqueDocumentDialogView extends StatelessWidget {
               children: [
                 _Header(
                   title: title,
+                  // Le numéro seul ne désigne plus une pièce : une pièce
+                  // réémise le garde, en édition suivante.
                   subtitle: document?.documentNumber == null
                       ? null
-                      : l10n.editiqueViewerDocumentNumberLabel(
-                          document!.documentNumber!,
+                      : withDocumentEdition(
+                          l10n,
+                          l10n.editiqueViewerDocumentNumberLabel(
+                            document!.documentNumber!,
+                          ),
+                          document.edition,
                         ),
                   onClose: () => _close(context),
                 ),

@@ -232,7 +232,10 @@ void main() {
       expect(entry.sizeBytes, pdf('reçu').length);
       expect(entry.createdAt, 1000);
       expect(filesOnDisk(), ['gen-1.enc']);
-      expect(await cache.readByDocumentId('doc-1'), equals(pdf('reçu')));
+      expect(
+        (await cache.readByDocumentId('doc-1'))?.bytes,
+        equals(pdf('reçu')),
+      );
     });
 
     test('retrouve une pièce par son numéro, à défaut d identifiant', () async {
@@ -249,7 +252,7 @@ void main() {
         documentNumber: 'ETL-NP-2526-000009',
       );
 
-      expect(octets, equals(pdf('note')));
+      expect(octets?.bytes, equals(pdf('note')));
     });
 
     // Le serveur ne conserve ni relevé ni quitus : une copie locale en serait
@@ -357,7 +360,10 @@ void main() {
         );
         expect(entry.lastAccessedAt, 2000);
         expect(filesOnDisk(), ['gen-1.enc']);
-        expect(await cache.readByDocumentId('doc-1'), equals(pdf('v2')));
+        expect(
+          (await cache.readByDocumentId('doc-1'))?.bytes,
+          equals(pdf('v2')),
+        );
       },
     );
 
@@ -375,7 +381,10 @@ void main() {
       await putReceipt(cache);
 
       expect(filesOnDisk(), ['gen-1.enc']);
-      expect(await cache.readByDocumentId('doc-1'), equals(pdf('reçu')));
+      expect(
+        (await cache.readByDocumentId('doc-1'))?.bytes,
+        equals(pdf('reçu')),
+      );
     });
 
     test('un magasin en panne ne fait pas échouer l appelant', () async {
@@ -420,7 +429,7 @@ void main() {
         expect(filesOnDisk(), ['gen-1.enc', 'gen-2.enc']);
         expect(await EditiqueCacheDao(db).count(), 2);
         expect(
-          await cache.readByDocumentId('doc-1'),
+          (await cache.readByDocumentId('doc-1'))?.bytes,
           equals(pdf('v1')),
           reason: 'la pièce d hier survit au refus d aujourd hui',
         );
@@ -516,7 +525,10 @@ void main() {
 
         index.touchLeve = true;
 
-        expect(await cache.readByDocumentId('doc-1'), equals(pdf('reçu')));
+        expect(
+          (await cache.readByDocumentId('doc-1'))?.bytes,
+          equals(pdf('reçu')),
+        );
       },
     );
 
@@ -898,7 +910,7 @@ void main() {
         index.pause = null;
         await reecriture;
 
-        expect(await restitution, equals(pdf('v2')));
+        expect((await restitution)?.bytes, equals(pdf('v2')));
         expect(filesOnDisk(), ['gen-1.enc']);
         expect(await EditiqueCacheDao(db).count(), 1);
       },

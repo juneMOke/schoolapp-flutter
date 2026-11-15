@@ -331,6 +331,12 @@ class EditiqueCacheDao {
   /// rattachée à l'édition précédente, une nouvelle édition hériterait de son
   /// annulation et de ses octets, et l'écraserait.
   ///
+  /// ⚠️ **Et seulement si elle est elle-même une première édition.** Une ligne
+  /// sans identifiant date d'avant les éditions (régime AM-5) : c'est une
+  /// première édition. Une édition suivante qui l'adopterait garderait ses
+  /// octets — un delta ne connaît que des métadonnées —, et la tablette
+  /// servirait sous le nom de la remplaçante la pièce qu'elle remplace.
+  ///
   /// Publique parce que le magasin d'octets doit poser **exactement** la même
   /// question avant d'écrire un fichier : c'est la clé locale de la ligne
   /// existante qui nomme ce fichier, et [upsert] la conserve. Écrire sous une
@@ -345,6 +351,7 @@ class EditiqueCacheDao {
     final number = entry.documentNumber;
     if (number == null || number.isEmpty) return null;
     if (documentId != null && documentId.isNotEmpty) {
+      if ((entry.edition ?? 1) > 1) return null;
       return findUnidentifiedByDocumentNumber(
         schoolId: entry.schoolId,
         documentNumber: number,

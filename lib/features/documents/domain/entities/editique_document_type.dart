@@ -13,7 +13,8 @@ enum EditiqueDocumentType {
   ///
   /// Une seule fiche en vigueur par (élève, année) : contenu inchangé, le
   /// serveur re-sert la même pièce ; contenu changé, il annule l'ancienne et en
-  /// scelle une nouvelle (« Annule et remplace »). Hors du delta éditique : la
+  /// scelle une nouvelle (« Annule et remplace ») — sous le même numéro, en
+  /// édition suivante, depuis le back v0.17.0. Hors du delta éditique : la
   /// tablette ne garde que celles qu'elle a demandées.
   enrollmentSheet('FI'),
 

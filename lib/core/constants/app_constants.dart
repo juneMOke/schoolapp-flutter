@@ -338,11 +338,16 @@ class AppConstants {
   //  - AI / NP / RC sont **archivés et idempotents** : réémettre re-sert les
   //    mêmes octets sous le même numéro — **tant que la pièce est en vigueur**.
   //    Depuis le lot back B5, une pièce ANNULÉE ne satisfait plus cette
-  //    promesse : le serveur la traite comme absente et en scelle une neuve,
-  //    donc un nouveau numéro est consommé et, pour le reçu, `payment.receiptId`
-  //    est repointé. Pour ressortir une pièce annulée il faut la RESTITUTION
-  //    (`GET .../editique/documents/{id}`), qui ne filtre pas l'annulation et
-  //    n'écrit rien — jamais une réémission ;
+  //    promesse : le serveur la traite comme absente et en scelle une
+  //    remplaçante, sous un autre identifiant. Depuis le back v0.17.0, une AI,
+  //    une NP ou une FI remplaçante reprend le NUMÉRO de celle qu'elle remplace,
+  //    en édition suivante (`X-Document-Edition`), dans toutes les écoles ; un
+  //    reçu ne le fait que dans une école passée à la numérotation par édition
+  //    (sinon un nouveau numéro est consommé), et `payment.receiptId` est
+  //    repointé sur le remplaçant. Une pièce se désigne donc par son
+  //    identifiant, jamais par son seul numéro. Pour ressortir une pièce annulée
+  //    il faut la RESTITUTION (`GET .../editique/documents/{id}`), qui ne filtre
+  //    pas l'annulation et n'écrit rien — jamais une réémission ;
   //  - RL / QT ne sont **jamais archivés** et consomment un numéro de séquence
   //    à CHAQUE appel. Un rejeu après échec crée une seconde pièce numérotée.
   static const String emitEnrollmentAttestationEndpoint =
@@ -350,7 +355,8 @@ class AppConstants {
 
   /// Fiche d'inscription scellée (`FI`) : une seule en vigueur par (élève,
   /// année). Contenu inchangé ⇒ le serveur ressert la même pièce ; changé ⇒ il
-  /// annule l'ancienne et en scelle une nouvelle (« Annule et remplace »).
+  /// annule l'ancienne et en scelle une nouvelle (« Annule et remplace »), sous
+  /// le même numéro en édition suivante depuis le back v0.17.0.
   static const String emitEnrollmentSheetEndpoint =
       '/api/v1/enrollments/{enrollmentId}/sheet';
   static const String emitNotePerceptionEndpoint =
