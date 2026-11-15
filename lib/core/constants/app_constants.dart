@@ -1686,6 +1686,18 @@ class AppConstants {
   static const String announcementTemplateEndpoint =
       '/api/v1/announcement-templates/{id}';
 
+  // ── Trésorerie (en ligne seulement — contrat PR back #222) ────────────────
+
+  /// **GET** = les caisses de l'école ; **POST** = créer la caisse d'une
+  /// devise (promoteur).
+  static const String treasuryCashRegistersEndpoint =
+      '/api/v1/treasury/cash-registers';
+
+  /// **GET** = l'historique des ajustements d'une caisse ; **POST** = ajuster
+  /// le montant qu'elle détient (promoteur).
+  static const String treasuryCashRegisterAdjustmentsEndpoint =
+      '/api/v1/treasury/cash-registers/{registerId}/adjustments';
+
   /// **GET** (web, même hôte que l'application) = la version déployée,
   /// écrite par `flutter build web` : `{version, build_number, …}`.
   static const String webVersionManifestPath = 'version.json';

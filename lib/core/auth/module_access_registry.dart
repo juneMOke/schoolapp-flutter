@@ -263,6 +263,12 @@ const ModuleAccess kEvaluationPublishAccess = ModuleAccess([
   Perm.academicsPublicationManage,
 ]);
 
+/// Créer une caisse, ajuster le montant qu'elle détient, rouvrir une journée :
+/// le promoteur seul (`POST /treasury/cash-registers…`).
+const ModuleAccess kTreasuryRegisterWriteAccess = ModuleAccess([
+  Perm.treasuryRegisterWrite,
+]);
+
 /// Toutes les actions d'écriture gardées, avec le libellé qui sert aux
 /// messages d'échec. Énumérées pour qu'un test puisse vérifier qu'aucune n'est
 /// hors de portée de tous les rôles.
@@ -360,6 +366,11 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // `expense.decide` la fermerait à celui qui dépose — or il doit y voir sa
     // demande attendre, et pouvoir la relancer ou la retirer.
     MenuConstants.expenseQueueId: ModuleAccess([Perm.expenseRead]),
+  },
+  // Les trois écrans de la trésorerie se LISENT sous `treasury.read` ; créer,
+  // ajuster et clôturer sont gardés geste par geste.
+  MenuConstants.treasuryMenuId: {
+    MenuConstants.treasuryConfigId: ModuleAccess([Perm.treasuryRead]),
   },
   // Le fichier se LIT sous `hr.staff.read` ; créer ou modifier une fiche,
   // poser un contrat, verser une pièce seront gardés geste par geste. Tant que

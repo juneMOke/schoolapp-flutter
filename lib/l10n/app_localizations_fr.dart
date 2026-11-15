@@ -22152,4 +22152,300 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get documentsReissuePriorTodayMessage =>
       'Cette pièce avait déjà été réémise aujourd\'hui, depuis ce poste ou un autre : le serveur l\'a rendue telle quelle, sans la recomposer. La réémettre à nouveau avec l\'état du jour ?';
+
+  @override
+  String get menuTreasury => 'Trésorerie';
+
+  @override
+  String get subMenuTreasuryConfig => 'Configuration';
+
+  @override
+  String get accueilModuleTreasuryDescription =>
+      'Les caisses en espèces de l\'école, une par devise : ce qu\'elles détiennent et leur clôture du soir.';
+
+  @override
+  String get treasuryConfigTitle => 'Configuration des caisses';
+
+  @override
+  String get treasuryConfigSubtitle =>
+      'Les caisses de l\'école et le montant que chacune détient. Une caisse = une seule devise.';
+
+  @override
+  String get treasuryNewRegister => 'Nouvelle caisse';
+
+  @override
+  String get treasuryNewRegisterHint => 'en dollars ou en francs congolais';
+
+  @override
+  String get treasuryCurrencyUsd => 'Dollars';
+
+  @override
+  String get treasuryCurrencyCdf => 'Francs congolais';
+
+  @override
+  String get treasuryBadgeNew => 'Nouvelle';
+
+  @override
+  String get treasuryHeldToday => 'détenu aujourd\'hui · journée ouverte';
+
+  @override
+  String treasuryDeclaredAt(String time) {
+    return 'déclaré à la clôture de $time';
+  }
+
+  @override
+  String treasuryDeclaredAtWithGap(String time, String gap) {
+    return 'déclaré à la clôture de $time · écart $gap';
+  }
+
+  @override
+  String get treasuryInService => 'Mise en service';
+
+  @override
+  String get treasuryOpeningAmount => 'Montant d\'ouverture';
+
+  @override
+  String get treasuryAdjustments => 'Ajustements';
+
+  @override
+  String treasuryAdjustmentsSee(int count) {
+    return '$count · voir';
+  }
+
+  @override
+  String get treasuryAdjustmentsHide => 'Masquer';
+
+  @override
+  String get treasuryAdjustmentsEmpty => 'Aucun ajustement.';
+
+  @override
+  String get treasuryAdjustmentsLoading => 'Chargement des ajustements';
+
+  @override
+  String treasuryAdjustmentsLoadFailed(String reason) {
+    return 'Historique indisponible : $reason';
+  }
+
+  @override
+  String treasuryAdjustmentLine(DateTime date, String time, String author) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString · $time · $author';
+  }
+
+  @override
+  String get treasuryAdjustButton => 'Ajuster le montant détenu';
+
+  @override
+  String get treasuryClosedShort =>
+      'Clôturée aujourd\'hui : ajustement possible demain';
+
+  @override
+  String get treasuryGoodToKnow =>
+      'Bon à savoir. Les montants en dollars et en francs ne sont jamais additionnés ni convertis. Changer le montant d\'une caisse existante crée un ajustement daté et motivé : le passé n\'est jamais réécrit. Les comptes bancaires et mobile money ne sont pas gérés dans cette version.';
+
+  @override
+  String get treasuryEmptyTitle => 'Aucune caisse';
+
+  @override
+  String get treasuryEmptyConfig =>
+      'Créez la caisse en dollars et la caisse en francs congolais, avec le montant qu\'elles contiennent aujourd\'hui.';
+
+  @override
+  String get treasuryCreateRegister => 'Créer une caisse';
+
+  @override
+  String get treasuryRegistersLoading => 'Chargement des caisses';
+
+  @override
+  String get treasuryReadOnlyPromoter =>
+      'Consultation seule : seul le promoteur crée une caisse ou ajuste son montant.';
+
+  @override
+  String get treasuryFormEyebrow => 'Trésorerie · Configuration';
+
+  @override
+  String get treasuryFormCurrency => 'Devise';
+
+  @override
+  String get treasuryFormName => 'Nom de la caisse';
+
+  @override
+  String treasuryCurrencyTaken(String currency) {
+    return 'L\'école a déjà sa caisse en $currency.';
+  }
+
+  @override
+  String get treasuryHoldsToday => 'Combien la caisse détient aujourd\'hui';
+
+  @override
+  String treasuryOneCurrencyHint(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Une caisse ne contient qu\'une seule devise. Ce montant devient son solde d\'ouverture à partir d\'aujourd\'hui ($dateString).';
+  }
+
+  @override
+  String get treasuryCreate => 'Créer la caisse';
+
+  @override
+  String get treasuryCancel => 'Annuler';
+
+  @override
+  String get treasuryAmountInvalid =>
+      'Saisissez un montant (0 si la caisse est vide).';
+
+  @override
+  String get treasuryAmountWholeFrancs =>
+      'Les francs congolais s\'écrivent sans centimes.';
+
+  @override
+  String get treasuryDuplicateName => 'Une caisse porte déjà ce nom.';
+
+  @override
+  String treasuryAdjustTitle(String name) {
+    return 'Ajuster le montant de $name';
+  }
+
+  @override
+  String get treasuryAdjustCurrent => 'Montant actuel (attendu)';
+
+  @override
+  String get treasuryAdjustAfter => 'Après ajustement';
+
+  @override
+  String get treasuryAdjustActual => 'Montant réellement détenu';
+
+  @override
+  String treasuryAdjustDelta(String delta) {
+    return 'Ajustement de $delta';
+  }
+
+  @override
+  String get treasuryAdjustReason => 'Motif (obligatoire)';
+
+  @override
+  String get treasuryAdjustReasonHint =>
+      'ex. Recomptage après inventaire de début d\'année';
+
+  @override
+  String get treasuryAdjustReasonShort =>
+      'Le motif doit faire au moins 5 caractères.';
+
+  @override
+  String get treasuryAdjustHint =>
+      'L\'ajustement est enregistré comme un mouvement daté d\'aujourd\'hui, avec votre nom et le motif. Il apparaît dans le détail et le rapport du jour ; les journées passées ne sont pas modifiées.';
+
+  @override
+  String get treasuryAdjustClosedWarning =>
+      'Cette caisse est déjà clôturée aujourd\'hui : l\'ajustement sera possible demain matin, à l\'ouverture.';
+
+  @override
+  String get treasuryAdjustSave => 'Enregistrer l\'ajustement';
+
+  @override
+  String get treasuryAdjustNoChange =>
+      'Le nouveau montant est égal au montant actuel.';
+
+  @override
+  String treasuryAdjustExpectedChanged(String before, String after) {
+    return 'Le montant actuel a changé pendant la saisie : il est passé de $before à $after. Vérifiez le nouveau montant avant d\'enregistrer.';
+  }
+
+  @override
+  String get treasuryMotif1 => 'Recomptage de la caisse';
+
+  @override
+  String get treasuryMotif2 => 'Erreur de saisie corrigée';
+
+  @override
+  String get treasuryMotif3 => 'Apport du promoteur';
+
+  @override
+  String get treasuryMotif4 => 'Retrait du promoteur';
+
+  @override
+  String treasuryRegisterCreated(String name, String amount) {
+    return '$name créée · $amount en caisse';
+  }
+
+  @override
+  String treasuryRegisterAdjusted(String name, String delta, String reference) {
+    return 'Montant de $name ajusté · $delta · $reference';
+  }
+
+  @override
+  String treasurySaveFailed(String reason) {
+    return 'Enregistrement impossible : $reason';
+  }
+
+  @override
+  String get treasuryErrorNetworkTitle => 'Connexion impossible';
+
+  @override
+  String get treasuryErrorNetwork =>
+      'La trésorerie se lit en ligne. Vérifiez la connexion de la tablette, puis réessayez.';
+
+  @override
+  String get treasuryErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get treasuryErrorUnauthorized => 'Reconnectez-vous pour continuer.';
+
+  @override
+  String get treasuryErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get treasuryErrorForbidden =>
+      'Votre compte n\'a pas accès à la trésorerie. Si c\'est une erreur, contactez l\'administrateur.';
+
+  @override
+  String get treasuryErrorServerTitle => 'Le serveur n\'a pas répondu';
+
+  @override
+  String get treasuryErrorServer =>
+      'Une erreur est survenue côté serveur. Réessayez dans un instant.';
+
+  @override
+  String get treasuryErrorContactAdmin => 'Contacter l\'administrateur';
+
+  @override
+  String get treasuryErrorReconnect => 'Se reconnecter';
+
+  @override
+  String get treasuryRetry => 'Réessayer';
+
+  @override
+  String treasuryErrorIncident(String code) {
+    return 'Code incident : $code';
+  }
+
+  @override
+  String get treasuryReasonNetwork =>
+      'Vérifiez la connexion, puis recommencez.';
+
+  @override
+  String get treasuryReasonForbidden => 'Votre compte n\'a pas ce droit.';
+
+  @override
+  String get treasuryReasonServer =>
+      'Le serveur n\'a pas pu traiter la demande. Réessayez dans un instant.';
+
+  @override
+  String get treasuryReasonClosed =>
+      'La caisse est déjà clôturée aujourd\'hui.';
+
+  @override
+  String get treasuryReasonCurrencyTaken =>
+      'L\'école a déjà une caisse dans cette devise.';
+
+  @override
+  String treasuryDateShort(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
 }

@@ -7,7 +7,7 @@ import 'package:school_app_flutter/features/communication/domain/entities/announ
 import 'package:school_app_flutter/features/communication/presentation/bloc/announcements_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/announcements_state.dart';
 import 'package:school_app_flutter/features/communication/presentation/projections/announcement_list_view.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_page_header.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/list/announcement_filters_card.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/list/announcement_group_list.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/states/announcements_empty_state.dart';
@@ -41,7 +41,7 @@ class AnnouncementsListScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        CommunicationPageHeader(
+        EteeloPageHeader(
           eyebrow: l10n.menuCommunication,
           title: l10n.subMenuAnnouncements,
           subtitle: l10n.communicationListSubtitle,

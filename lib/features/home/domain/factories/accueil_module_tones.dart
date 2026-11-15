@@ -72,6 +72,9 @@ class AccueilModuleTones {
     MenuConstants.recouvrementMenuId: _bleuArdoise,
     MenuConstants.boutiqueMenuId: _terreFoncee,
     MenuConstants.expenseMenuId: _terreFoncee,
+    // Entre la Boutique et les Dépenses (terre toutes deux) : l'ardoise, qui
+    // la distingue de ses deux voisines.
+    MenuConstants.treasuryMenuId: _bleuArdoise,
     // Des personnes, pas de l'argent : la famille bleue, comme Inscriptions.
     MenuConstants.hrMenuId: _bleuProfond,
     // Voisin des Ressources humaines dans la grille : l'ardoise, pour que les

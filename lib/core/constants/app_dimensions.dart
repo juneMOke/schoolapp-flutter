@@ -1320,4 +1320,17 @@ class AppDimensions {
   static const coteSkeletonHeader = 72.0;
   static const coteSkeletonListRows = 8;
   static const coteSkeletonGridRows = 9;
+
+  // ── Trésorerie · Configuration des caisses ──────────────────────────────
+  /// Largeur minimale d'une carte de caisse (grille auto-remplie, 300+).
+  static const treasuryRegisterCardMinWidth = 300.0;
+
+  /// Badge de devise (« $ » / « FC ») de l'en-tête d'une carte.
+  static const treasuryRegisterBadge = 36.0;
+
+  /// Hauteur plancher de la tuile « Nouvelle caisse ».
+  static const treasuryNewRegisterMinHeight = 240.0;
+
+  /// Modale de création ou d'ajustement d'une caisse.
+  static const treasuryRegisterModalMaxWidth = 540.0;
 }

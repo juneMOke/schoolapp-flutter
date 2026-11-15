@@ -28,6 +28,7 @@ class MenuFactory {
       _createFinancesMenu(l10n),
       _createFeeControlMenu(l10n),
       _createBoutiqueMenu(l10n),
+      _createTreasuryMenu(l10n),
       _createExpenseMenu(l10n),
       _createHrMenu(l10n),
       _createHrPersonnelMenu(l10n),
@@ -245,6 +246,23 @@ class MenuFactory {
           id: MenuConstants.expenseQueueId,
           title: l10n.subMenuExpenseQueue,
           route: AppRoutesNames.expenseQueue,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Trésorerie — les caisses en espèces. La configuration d'abord : sans
+  /// caisse, ni tableau de bord ni clôture n'ont rien à montrer.
+  static MenuItem _createTreasuryMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.treasuryMenuId,
+      title: l10n.menuTreasury,
+      icon: Icons.savings_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.treasuryConfigId,
+          title: l10n.subMenuTreasuryConfig,
+          route: AppRoutesNames.treasuryConfig,
         ),
       ],
     );

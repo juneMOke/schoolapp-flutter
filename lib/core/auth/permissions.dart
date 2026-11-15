@@ -116,6 +116,21 @@ enum Perm {
   expensePay('expense.pay'),
   expenseReopen('expense.reopen'),
 
+  // ── Trésorerie ────────────────────────────────────────────────────────────
+  // Les caisses en espèces (une par devise), leur clôture du soir et leur
+  // configuration. Lire n'est pas clôturer, et clôturer n'est pas tenir les
+  // caisses : la caissière (ACCOUNTANT) lit et clôture, le préfet
+  // (ACADEMIC_ADMIN) lit, le promoteur (DIRECTOR) fait tout — y compris créer
+  // une caisse, ajuster son montant et rouvrir la journée.
+  //
+  // ⚠️ **Déclarées avant que le serveur ne les sème** (lot back T1), comme le
+  // circuit des dépenses : tant qu'elles manquent, le menu reste masqué et
+  // aucun geste ne part. Elles ne figurent donc pas encore dans
+  // `kGuardedWriteActions`.
+  treasuryRead('treasury.read'),
+  treasuryClose('treasury.close'),
+  treasuryRegisterWrite('treasury.register.write'),
+
   // ── Communication ───────────────────────────────────────────────────────
   // Les communiqués aux parents (WhatsApp). Lire n'est pas envoyer : la
   // portée et la liste se consultent sans pouvoir prévenir une seule famille.

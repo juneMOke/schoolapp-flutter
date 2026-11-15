@@ -43,6 +43,9 @@ void main() {
     Perm.expenseDecide: 'expense.decide',
     Perm.expensePay: 'expense.pay',
     Perm.expenseReopen: 'expense.reopen',
+    Perm.treasuryRead: 'treasury.read',
+    Perm.treasuryClose: 'treasury.close',
+    Perm.treasuryRegisterWrite: 'treasury.register.write',
     Perm.hrStaffRead: 'hr.staff.read',
     Perm.hrStaffWrite: 'hr.staff.write',
     Perm.hrPayRead: 'hr.pay.read',
@@ -100,7 +103,7 @@ void main() {
   };
 
   test(
-    'le catalogue compte 81 permissions (v1.8 du catalogue serveur + RH + programme + publication + désactivation + réouverture)',
+    'le catalogue compte 81 permissions (v1.8 du catalogue serveur + RH + programme + publication + désactivation + réouverture + trésorerie)',
     () {
       // 48 → 49 : `attendance.amend` sépare corriger un appel d'un jour révolu de
       // le prendre. Un ajout, pas un renommage — aucune ligne de
@@ -178,7 +181,10 @@ void main() {
       // 82 → 83 : `enrollment.level.correct`, corriger le niveau d'un élève
       // (DIRECTOR, SECRETARY — étude « Changer un élève de niveau », D2).
       // ⚠️ Déclarée avant que le serveur ne la sème (lot back B).
-      expect(Perm.values, hasLength(83));
+      // 83 → 86 : `treasury.read`, `treasury.close`,
+      // `treasury.register.write` — la trésorerie (contrat PR back #222).
+      // ⚠️ Déclarées avant que le serveur ne les sème (lot back T1).
+      expect(Perm.values, hasLength(86));
     },
   );
 

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/theme/currency_tones.dart';
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -27,19 +28,14 @@ abstract final class BoutiqueDashboardTones {
   /// caisse : on y parle de ce que la boutique vend.
   static const Color articles = AppColors.terreCuite;
 
-  /// La teinte d'une devise — **celle de la caisse** (`tillCurrencyAccent`) :
-  /// les dollars en bleu ardoise, les francs en vert. Recopiée plutôt
-  /// qu'importée pour ne pas lier la boutique au module Finances ;
-  /// `boutique_dashboard_tones_test.dart` vérifie que les deux ne divergent
-  /// pas.
+  /// La teinte d'une devise — **celle de la caisse** ([CurrencyTones.accent]) :
+  /// les dollars en bleu ardoise, les francs en vert. Lue dans `core` : la
+  /// boutique ne dépend pas du module Finances, et les deux ne peuvent plus
+  /// diverger.
   ///
   /// « Recettes jour par jour » en prend le ton, et ses barres la couleur :
   /// comme à la caisse, la série suit la devise affichée.
-  static Color devise(String currency) => switch (currency) {
-    'USD' => AppColors.bleuArdoise,
-    'CDF' => AppColors.vertSavane,
-    _ => AppColors.textSecondary,
-  };
+  static Color devise(String currency) => CurrencyTones.accent(currency);
 
   /// Le bandeau, la zébrure et le cadre d'un tableau de ton [tone]. Les encres
   /// d'en-tête sont celles de la caisse, vérifiées sur ces deux bandeaux par

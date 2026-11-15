@@ -35,6 +35,7 @@ class AccueilModulesFactory {
       _finances(l10n),
       _feeControl(l10n),
       _boutique(l10n),
+      _treasury(l10n),
       _expenses(l10n),
       _humanResources(l10n),
       _hrPersonnel(l10n),
@@ -230,6 +231,25 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.expenseQueueId,
           title: l10n.subMenuExpenseQueue,
+        ),
+      ],
+    );
+  }
+
+  /// La trésorerie — une carte propre, comme le menu.
+  static AccueilModule _treasury(AppLocalizations l10n) {
+    const menuId = MenuConstants.treasuryMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuTreasury,
+      description: l10n.accueilModuleTreasuryDescription,
+      icon: Icons.savings_outlined,
+      tone: AccueilModuleTones.of(menuId),
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.treasuryConfigId,
+          title: l10n.subMenuTreasuryConfig,
         ),
       ],
     );

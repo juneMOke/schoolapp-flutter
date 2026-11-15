@@ -21998,4 +21998,298 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get documentsReissuePriorTodayMessage =>
       'This document had already been reissued today, from this device or another: the server returned it as it was, without recomposing it. Reissue it again with today\'s state?';
+
+  @override
+  String get menuTreasury => 'Treasury';
+
+  @override
+  String get subMenuTreasuryConfig => 'Configuration';
+
+  @override
+  String get accueilModuleTreasuryDescription =>
+      'The school\'s cash registers, one per currency: what they hold and their evening closing.';
+
+  @override
+  String get treasuryConfigTitle => 'Cash register settings';
+
+  @override
+  String get treasuryConfigSubtitle =>
+      'The school\'s registers and the amount each one holds. One register = one currency.';
+
+  @override
+  String get treasuryNewRegister => 'New register';
+
+  @override
+  String get treasuryNewRegisterHint => 'in dollars or Congolese francs';
+
+  @override
+  String get treasuryCurrencyUsd => 'Dollars';
+
+  @override
+  String get treasuryCurrencyCdf => 'Congolese francs';
+
+  @override
+  String get treasuryBadgeNew => 'New';
+
+  @override
+  String get treasuryHeldToday => 'held today · day open';
+
+  @override
+  String treasuryDeclaredAt(String time) {
+    return 'declared at the $time closing';
+  }
+
+  @override
+  String treasuryDeclaredAtWithGap(String time, String gap) {
+    return 'declared at the $time closing · gap $gap';
+  }
+
+  @override
+  String get treasuryInService => 'In service since';
+
+  @override
+  String get treasuryOpeningAmount => 'Opening amount';
+
+  @override
+  String get treasuryAdjustments => 'Adjustments';
+
+  @override
+  String treasuryAdjustmentsSee(int count) {
+    return '$count · view';
+  }
+
+  @override
+  String get treasuryAdjustmentsHide => 'Hide';
+
+  @override
+  String get treasuryAdjustmentsEmpty => 'No adjustment.';
+
+  @override
+  String get treasuryAdjustmentsLoading => 'Loading adjustments';
+
+  @override
+  String treasuryAdjustmentsLoadFailed(String reason) {
+    return 'History unavailable: $reason';
+  }
+
+  @override
+  String treasuryAdjustmentLine(DateTime date, String time, String author) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString · $time · $author';
+  }
+
+  @override
+  String get treasuryAdjustButton => 'Adjust the amount held';
+
+  @override
+  String get treasuryClosedShort =>
+      'Closed today: adjustment possible tomorrow';
+
+  @override
+  String get treasuryGoodToKnow =>
+      'Good to know. Dollar and franc amounts are never added together or converted. Changing the amount of an existing register creates a dated adjustment with a reason: the past is never rewritten. Bank and mobile money accounts are not handled in this version.';
+
+  @override
+  String get treasuryEmptyTitle => 'No register';
+
+  @override
+  String get treasuryEmptyConfig =>
+      'Create the dollar register and the Congolese franc register, with the amount they hold today.';
+
+  @override
+  String get treasuryCreateRegister => 'Create a register';
+
+  @override
+  String get treasuryRegistersLoading => 'Loading registers';
+
+  @override
+  String get treasuryReadOnlyPromoter =>
+      'Read only: only the promoter creates a register or adjusts its amount.';
+
+  @override
+  String get treasuryFormEyebrow => 'Treasury · Settings';
+
+  @override
+  String get treasuryFormCurrency => 'Currency';
+
+  @override
+  String get treasuryFormName => 'Register name';
+
+  @override
+  String treasuryCurrencyTaken(String currency) {
+    return 'The school already has its $currency register.';
+  }
+
+  @override
+  String get treasuryHoldsToday => 'How much the register holds today';
+
+  @override
+  String treasuryOneCurrencyHint(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'A register holds a single currency. This amount becomes its opening balance from today ($dateString).';
+  }
+
+  @override
+  String get treasuryCreate => 'Create the register';
+
+  @override
+  String get treasuryCancel => 'Cancel';
+
+  @override
+  String get treasuryAmountInvalid =>
+      'Enter an amount (0 if the register is empty).';
+
+  @override
+  String get treasuryAmountWholeFrancs => 'Congolese francs have no cents.';
+
+  @override
+  String get treasuryDuplicateName => 'A register already has this name.';
+
+  @override
+  String treasuryAdjustTitle(String name) {
+    return 'Adjust the amount of $name';
+  }
+
+  @override
+  String get treasuryAdjustCurrent => 'Current amount (expected)';
+
+  @override
+  String get treasuryAdjustAfter => 'After adjustment';
+
+  @override
+  String get treasuryAdjustActual => 'Amount actually held';
+
+  @override
+  String treasuryAdjustDelta(String delta) {
+    return 'Adjustment of $delta';
+  }
+
+  @override
+  String get treasuryAdjustReason => 'Reason (required)';
+
+  @override
+  String get treasuryAdjustReasonHint =>
+      'e.g. Recount after the start-of-year inventory';
+
+  @override
+  String get treasuryAdjustReasonShort =>
+      'The reason must be at least 5 characters long.';
+
+  @override
+  String get treasuryAdjustHint =>
+      'The adjustment is recorded as a movement dated today, with your name and the reason. It appears in the day\'s detail and report; past days are not changed.';
+
+  @override
+  String get treasuryAdjustClosedWarning =>
+      'This register is already closed today: the adjustment will be possible tomorrow morning, at opening.';
+
+  @override
+  String get treasuryAdjustSave => 'Save the adjustment';
+
+  @override
+  String get treasuryAdjustNoChange =>
+      'The new amount equals the current amount.';
+
+  @override
+  String treasuryAdjustExpectedChanged(String before, String after) {
+    return 'The current amount changed while you were typing: it went from $before to $after. Check the new amount before saving.';
+  }
+
+  @override
+  String get treasuryMotif1 => 'Register recount';
+
+  @override
+  String get treasuryMotif2 => 'Entry error corrected';
+
+  @override
+  String get treasuryMotif3 => 'Contribution from the promoter';
+
+  @override
+  String get treasuryMotif4 => 'Withdrawal by the promoter';
+
+  @override
+  String treasuryRegisterCreated(String name, String amount) {
+    return '$name created · $amount in the register';
+  }
+
+  @override
+  String treasuryRegisterAdjusted(String name, String delta, String reference) {
+    return '$name amount adjusted · $delta · $reference';
+  }
+
+  @override
+  String treasurySaveFailed(String reason) {
+    return 'Could not save: $reason';
+  }
+
+  @override
+  String get treasuryErrorNetworkTitle => 'No connection';
+
+  @override
+  String get treasuryErrorNetwork =>
+      'The treasury is read online. Check the tablet connection, then try again.';
+
+  @override
+  String get treasuryErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get treasuryErrorUnauthorized => 'Sign in again to continue.';
+
+  @override
+  String get treasuryErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get treasuryErrorForbidden =>
+      'Your account cannot access the treasury. If this is a mistake, contact the administrator.';
+
+  @override
+  String get treasuryErrorServerTitle => 'The server did not respond';
+
+  @override
+  String get treasuryErrorServer =>
+      'A server error occurred. Try again in a moment.';
+
+  @override
+  String get treasuryErrorContactAdmin => 'Contact the administrator';
+
+  @override
+  String get treasuryErrorReconnect => 'Sign in again';
+
+  @override
+  String get treasuryRetry => 'Try again';
+
+  @override
+  String treasuryErrorIncident(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get treasuryReasonNetwork => 'Check the connection, then try again.';
+
+  @override
+  String get treasuryReasonForbidden =>
+      'Your account does not have this permission.';
+
+  @override
+  String get treasuryReasonServer =>
+      'The server could not process the request. Try again in a moment.';
+
+  @override
+  String get treasuryReasonClosed => 'The register is already closed today.';
+
+  @override
+  String get treasuryReasonCurrencyTaken =>
+      'The school already has a register in this currency.';
+
+  @override
+  String treasuryDateShort(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
 }

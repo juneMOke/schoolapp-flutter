@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/theme/currency_tones.dart';
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_tone.dart';
@@ -27,9 +28,7 @@ class FinanceTillTones {
   /// Le garde-fou passe en premier par principe. Aucune des deux devises n'est
   /// substituée aujourd'hui — toutes deux sont des sens sombres — mais une
   /// troisième devise prend le gris du texte, qui lui **serait** substitué.
-  static Color paveDeCaisse(String currency) => DashboardTones.pave(
-    DashboardTones.paveAccentSur(tillCurrencyAccent(currency)),
-  );
+  static Color paveDeCaisse(String currency) => CurrencyTones.pave(currency);
 
   /// Fond plein de la tuile « Reçus émis » : `#855D0F`.
   ///
