@@ -10,27 +10,23 @@ class DayMovementsState extends Equatable {
   final DayMovementsStatus status;
   final List<CashMovement> items;
 
-  /// Les lignes de la journée qu'une autre ligne défait (une annulation, une
-  /// compensation), **dans les deux sens** : une entrée arrivée après une
-  /// clôture puis annulée n'attend plus de réponse, alors que son annulation
-  /// est une sortie.
-  final Set<String> undoneIds;
   final Failure? failure;
 
   const DayMovementsState({
     this.status = DayMovementsStatus.loading,
     this.items = const [],
-    this.undoneIds = const {},
     this.failure,
   });
 
-  /// Une ligne arrivée après une clôture, encore sans réponse, et que rien
-  /// n'a défaite : c'est elle qui retient la clôture (R19).
-  bool awaitsAnswer(CashMovement m) =>
-      m.awaitsAnswer && !undoneIds.contains(m.id);
+  /// Une ligne arrivée après une clôture, encore sans réponse : elle retient
+  /// la clôture (R19), **même défaite** — le serveur lui garde sa question
+  /// (PR back #230). Seule une correction sans argent rendu la passe à son
+  /// remplaçant, ce que la ligne ne dit pas encore : la réponse est alors
+  /// refusée (`NOT_AFTER_CLOSURE`) et la journée relue.
+  bool awaitsAnswer(CashMovement m) => m.awaitsAnswer;
 
   @override
-  List<Object?> get props => [status, items, undoneIds, failure];
+  List<Object?> get props => [status, items, failure];
 }
 
 /// Les entrées ou les sorties d'une caisse sur une journée, chargées quand on
@@ -68,10 +64,6 @@ class DayMovementsCubit extends Cubit<DayMovementsState> {
             for (final m in all)
               if (m.direction == direction) m,
           ],
-          undoneIds: {
-            for (final m in all)
-              if (m.undoesMovementId != null) m.undoesMovementId!,
-          },
         ),
       ),
     );

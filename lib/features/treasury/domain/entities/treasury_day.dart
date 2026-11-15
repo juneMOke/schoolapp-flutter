@@ -68,11 +68,17 @@ class TreasuryDay extends Equatable {
   final bool dayClosed;
   final List<CashDaySummary> registers;
 
+  /// La journée se clôture maintenant : c'est la journée en cours **et** le
+  /// jour civil de l'école est un jour de caisse — faux le dimanche, pour le
+  /// lundi affiché (PR back #230). `null` pour un serveur plus ancien.
+  final bool? closableToday;
+
   const TreasuryDay({
     required this.date,
     required this.businessDate,
     required this.dayClosed,
     required this.registers,
+    this.closableToday,
   });
 
   bool get isToday => date == businessDate;
@@ -80,5 +86,11 @@ class TreasuryDay extends Equatable {
   int get closedCount => registers.where((r) => r.isClosed).length;
 
   @override
-  List<Object?> get props => [date, businessDate, dayClosed, registers];
+  List<Object?> get props => [
+    date,
+    businessDate,
+    dayClosed,
+    registers,
+    closableToday,
+  ];
 }

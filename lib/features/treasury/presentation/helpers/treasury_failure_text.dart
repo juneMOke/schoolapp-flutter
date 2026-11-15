@@ -22,6 +22,9 @@ extension TreasuryFailureText on AppLocalizations {
         TreasuryRefusal.afterClosureAlreadyConfirmed =>
           treasuryReasonAlreadyAnswered,
         TreasuryRefusal.notAfterClosure => treasuryReasonNotAfterClosure,
+        TreasuryRefusal.afterClosureNotCovered =>
+          treasuryReasonAfterClosureNotCovered,
+        TreasuryRefusal.gestureIdReused => treasuryReasonGestureIdReused,
         TreasuryRefusal.closureNotToday ||
         TreasuryRefusal.reopenNotToday => treasuryReasonNotToday,
         TreasuryRefusal.gapJustificationRequired => treasuryGapReasonShort,

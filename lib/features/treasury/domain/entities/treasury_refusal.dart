@@ -16,6 +16,7 @@ enum TreasuryRefusal {
   afterClosureUnconfirmed('AFTER_CLOSURE_UNCONFIRMED'),
   afterClosureAlreadyConfirmed('AFTER_CLOSURE_ALREADY_CONFIRMED'),
   notAfterClosure('NOT_AFTER_CLOSURE'),
+  afterClosureNotCovered('AFTER_CLOSURE_NOT_COVERED'),
   closureNotToday('CLOSURE_NOT_TODAY'),
   gapJustificationRequired('GAP_JUSTIFICATION_REQUIRED'),
   invalidDeclaration('INVALID_DECLARATION'),
@@ -23,7 +24,11 @@ enum TreasuryRefusal {
   reopenNotToday('REOPEN_NOT_TODAY'),
   invalidDate('INVALID_DATE'),
   invalidRange('INVALID_RANGE'),
-  invalidReportId('INVALID_REPORT_ID');
+  invalidReportId('INVALID_REPORT_ID'),
+
+  /// L'id client d'un geste (clôture, ajustement, réponse, réouverture) est
+  /// déjà celui d'un autre : terminal, jamais rejoué tel quel.
+  gestureIdReused('GESTURE_ID_REUSED');
 
   const TreasuryRefusal(this.detailCode);
 

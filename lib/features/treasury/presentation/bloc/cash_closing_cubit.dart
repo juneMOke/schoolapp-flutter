@@ -31,6 +31,10 @@ class CashClosingState extends Equatable {
 
   /// Opérations du jour pas encore envoyées, par devise (aujourd'hui seulement).
   final Map<TreasuryCurrency, int> pendingSync;
+
+  /// La journée en cours ne se clôture pas encore : le jour civil de l'école
+  /// est un dimanche, la journée affichée est le lundi (`closableToday` faux).
+  final bool sunday;
   final Failure? failure;
 
   const CashClosingState({
@@ -40,6 +44,7 @@ class CashClosingState extends Equatable {
     this.businessDate,
     this.historyStart,
     this.pendingSync = const {},
+    this.sunday = false,
     this.failure,
   });
 
@@ -51,6 +56,7 @@ class CashClosingState extends Equatable {
     businessDate,
     historyStart,
     pendingSync,
+    sunday,
     failure,
   ];
 }
@@ -67,13 +73,18 @@ class CashClosingState extends Equatable {
 class CashClosingCubit extends Cubit<CashClosingState> {
   final TreasuryDayRepository _repository;
   final CashPendingProbe _pending;
+
+  /// Le jour civil de l'école, relu à chaque chargement (le dimanche).
+  final DateTime Function() _schoolToday;
   var _generation = 0;
 
   CashClosingCubit(
     this._repository,
     this._pending, {
     required DateTime initialDate,
-  }) : super(CashClosingState(date: CashClosingRules.cashDayOf(initialDate)));
+    DateTime Function()? schoolToday,
+  }) : _schoolToday = schoolToday ?? (() => initialDate),
+       super(CashClosingState(date: CashClosingRules.cashDayOf(initialDate)));
 
   Future<void> load([DateTime? date]) async {
     emit(
@@ -194,10 +205,20 @@ class CashClosingCubit extends Cubit<CashClosingState> {
             businessDate: day.businessDate,
             historyStart: _historyStartOf(day) ?? state.historyStart,
             pendingSync: pending,
+            sunday: _sundayOf(day),
           ),
         );
       },
     );
+  }
+
+  /// Le serveur le dit (`closableToday`) ; un serveur plus ancien, non :
+  /// on lit alors le jour civil de l'école sur l'appareil.
+  bool _sundayOf(TreasuryDay day) {
+    if (!day.isToday) return false;
+    final closable = day.closableToday;
+    if (closable != null) return !closable;
+    return _schoolToday().weekday == DateTime.sunday;
   }
 
   static DateTime? _businessDateOf(Failure failure) {

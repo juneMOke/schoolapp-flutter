@@ -34956,6 +34956,24 @@ abstract class AppLocalizations {
   /// **'This line did not arrive after a closing.'**
   String get treasuryReasonNotAfterClosure;
 
+  /// No description provided for @treasuryReasonAfterClosureNotCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'No closure covers this line any more (its day was reopened): answer “Arrived today”.'**
+  String get treasuryReasonAfterClosureNotCovered;
+
+  /// No description provided for @treasuryReasonGestureIdReused.
+  ///
+  /// In en, this message translates to:
+  /// **'This action carries the identifier of another one. Reload the page and try again.'**
+  String get treasuryReasonGestureIdReused;
+
+  /// No description provided for @treasuryCloseSunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday is not closed: its operations count for Monday, which is closed on Monday.'**
+  String get treasuryCloseSunday;
+
   /// No description provided for @treasuryReasonNotToday.
   ///
   /// In en, this message translates to:

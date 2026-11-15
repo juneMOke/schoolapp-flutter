@@ -100,6 +100,7 @@ void registerTreasury(GetIt getIt) {
         getIt<TreasuryDayRepository>(),
         getIt<CashPendingProbe>(),
         initialDate: SchoolTime.today(DateTime.now()),
+        schoolToday: () => SchoolTime.today(DateTime.now()),
       ),
     );
 }

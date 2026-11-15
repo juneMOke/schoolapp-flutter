@@ -6,6 +6,7 @@ void main() {
   group('blockOf — la première raison est celle qu on montre', () {
     ClosingBlock? block({
       bool isToday = true,
+      bool sunday = false,
       bool closed = false,
       bool canClose = true,
       bool online = true,
@@ -13,6 +14,7 @@ void main() {
       int pendingAfter = 0,
     }) => CashClosingRules.blockOf(
       isToday: isToday,
+      sunday: sunday,
       closed: closed,
       canClose: canClose,
       online: online,
@@ -28,6 +30,10 @@ void main() {
       'déjà clôturée',
       () => expect(block(closed: true), ClosingBlock.closed),
     );
+    test('le dimanche : le lundi affiché ne se clôture pas (R4)', () {
+      expect(block(sunday: true, online: false), ClosingBlock.sunday);
+      expect(block(sunday: true, closed: true), ClosingBlock.closed);
+    });
     test('sans le droit, avant le réseau', () {
       expect(block(canClose: false, online: false), ClosingBlock.noRight);
     });

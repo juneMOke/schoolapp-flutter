@@ -95,6 +95,43 @@ void main() {
     expect(movement.signedInCents, 2000);
   });
 
+  test('awaitsAnswer du serveur prime : question passée au remplaçant', () {
+    final movement = TreasuryWire.movementsFromJson({
+      'items': [
+        {
+          'id': 'mv-1',
+          'registerId': 'reg-usd',
+          'currency': 'USD',
+          'cashDay': '2026-10-22',
+          'businessDay': '2026-10-21',
+          'occurredAt': '2026-10-21T16:30:00Z',
+          'direction': 'IN',
+          'amountInCents': 2000,
+          'source': 'FEES',
+          'nature': 'ENTRY',
+          'label': 'Frais de scolarité — Kabongo Mwamba · 6e A',
+          'afterClosure': true,
+          'alreadyCounted': null,
+          'awaitsAnswer': false,
+        },
+      ],
+    }).single;
+    expect(movement.afterClosure, isTrue);
+    expect(movement.awaitsAnswer, isFalse);
+  });
+
+  test('closableToday se lit ; absent, il reste inconnu', () {
+    Map<String, Object?> day([bool? closable]) => {
+      'date': '2026-10-26',
+      'businessDate': '2026-10-26',
+      'dayClosed': false,
+      'registers': const [],
+      'closableToday': ?closable,
+    };
+    expect(TreasuryWire.dayFromJson(day(false)).closableToday, isFalse);
+    expect(TreasuryWire.dayFromJson(day()).closableToday, isNull);
+  });
+
   test('une source inconnue rend la ligne illisible, jamais devinée', () {
     expect(
       () => TreasuryWire.movementFromJson({'source': 'MOBILE_MONEY'}),

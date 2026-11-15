@@ -134,6 +134,7 @@ abstract final class TreasuryWire {
       date: _date(json, 'date'),
       businessDate: _date(json, 'businessDate'),
       dayClosed: json['dayClosed'] == true,
+      closableToday: json['closableToday'] as bool?,
       registers: [
         for (final entry in (json['registers'] as List?) ?? const [])
           _daySummaryFromJson(_map(entry)),
@@ -189,6 +190,7 @@ abstract final class TreasuryWire {
       createdByName: json['createdByName'] as String?,
       afterClosure: json['afterClosure'] == true,
       alreadyCounted: json['alreadyCounted'] as bool?,
+      awaitsAnswer: json['awaitsAnswer'] as bool?,
       undoesMovementId: json['undoesMovementId'] as String?,
     );
   }

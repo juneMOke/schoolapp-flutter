@@ -91,6 +91,11 @@ class CashMovement extends Equatable {
   /// La ligne que celle-ci défait (une annulation, une compensation R19).
   final String? undoesMovementId;
 
+  /// `awaitsAnswer` du serveur (PR back #230) : seul il distingue une ligne
+  /// qui attend de celle dont la question est passée au remplaçant d'une
+  /// correction. `null` pour un serveur plus ancien.
+  final bool? _awaitsAnswer;
+
   const CashMovement({
     required this.id,
     required this.registerId,
@@ -108,13 +113,18 @@ class CashMovement extends Equatable {
     this.afterClosure = false,
     this.alreadyCounted,
     this.undoesMovementId,
-  });
+    bool? awaitsAnswer,
+  }) : _awaitsAnswer = awaitsAnswer;
 
   /// Le montant signé, tel qu'il pèse dans le reste.
   int get signedInCents =>
       direction == MovementDirection.inflow ? amountInCents : -amountInCents;
 
-  bool get awaitsAnswer => afterClosure && alreadyCounted == null;
+  /// Elle retient la clôture (R19) : c'est là, et seulement là, qu'on offre
+  /// « Déjà en caisse » / « Arrivé aujourd'hui ». Même défaite, une ligne
+  /// garde sa question.
+  bool get awaitsAnswer =>
+      _awaitsAnswer ?? (afterClosure && alreadyCounted == null);
 
   @override
   List<Object?> get props => [
@@ -134,5 +144,6 @@ class CashMovement extends Equatable {
     afterClosure,
     alreadyCounted,
     undoesMovementId,
+    _awaitsAnswer,
   ];
 }

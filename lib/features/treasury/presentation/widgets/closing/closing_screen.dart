@@ -170,6 +170,7 @@ class _ClosingScreenState extends State<ClosingScreen> {
       for (final summary in day.registers)
         summary.register.id: CashClosingRules.blockOf(
           isToday: day.isToday,
+          sunday: state.sunday,
           closed: summary.isClosed,
           canClose: callbacks.close != null,
           online: online,

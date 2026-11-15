@@ -22747,6 +22747,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'This line did not arrive after a closing.';
 
   @override
+  String get treasuryReasonAfterClosureNotCovered =>
+      'No closure covers this line any more (its day was reopened): answer “Arrived today”.';
+
+  @override
+  String get treasuryReasonGestureIdReused =>
+      'This action carries the identifier of another one. Reload the page and try again.';
+
+  @override
+  String get treasuryCloseSunday =>
+      'Sunday is not closed: its operations count for Monday, which is closed on Monday.';
+
+  @override
   String get treasuryReasonNotToday => 'This can only be done for today.';
 
   @override

@@ -65,6 +65,49 @@ void main() {
     verifyNever(() => probe.pendingFor(any()));
   });
 
+  test('un dimanche, le lundi servi est marqué « dimanche »', () async {
+    final sunday = DateTime(2026, 10, 25);
+    final monday = DateTime(2026, 10, 26);
+    await cubit.close();
+    cubit = CashClosingCubit(
+      repo,
+      probe,
+      initialDate: sunday,
+      schoolToday: () => sunday,
+    );
+    when(() => repo.day(monday)).thenAnswer(
+      (_) async =>
+          Right(treasuryDay([usdDay()], date: monday, businessDate: monday)),
+    );
+    await cubit.load();
+    expect(cubit.state.date, monday);
+    expect(cubit.state.sunday, isTrue);
+  });
+
+  test('closableToday du serveur prime sur l horloge de l appareil', () async {
+    final monday = DateTime(2026, 10, 26);
+    await cubit.close();
+    // L'appareil se croit lundi ; le serveur dit que c'est encore dimanche.
+    cubit = CashClosingCubit(
+      repo,
+      probe,
+      initialDate: monday,
+      schoolToday: () => monday,
+    );
+    when(() => repo.day(monday)).thenAnswer(
+      (_) async => Right(
+        treasuryDay(
+          [usdDay()],
+          date: monday,
+          businessDate: monday,
+          closableToday: false,
+        ),
+      ),
+    );
+    await cubit.load();
+    expect(cubit.state.sunday, isTrue);
+  });
+
   test('‹ depuis le lundi : le samedi, jamais le dimanche', () async {
     final monday = DateTime(2026, 10, 19);
     final saturday = DateTime(2026, 10, 17);

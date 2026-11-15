@@ -69,7 +69,7 @@ class PeriodView extends StatelessWidget {
                 failure: state.failure ?? const ServerFailure(),
                 onRetry: cubit.load,
               ),
-              CashPeriodStatus.ready => _content(context, state.period!),
+              CashPeriodStatus.ready => _content(context, state, state.period!),
             },
           ],
         );
@@ -77,10 +77,17 @@ class PeriodView extends StatelessWidget {
     );
   }
 
-  Widget _content(BuildContext context, TreasuryPeriod period) {
+  Widget _content(
+    BuildContext context,
+    CashPeriodState state,
+    TreasuryPeriod period,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     final registers = [for (final t in period.registers) t.register];
-    final week = period.to.difference(period.from).inDays < 7;
+    // La plage DEMANDÉE : le serveur ramène `from` à la mise en service de la
+    // première caisse, ce qui ne change ni la semaine ni le mois du rapport.
+    final week = state.scope == ClosingScope.week;
+    final (from, to) = (state.from, state.to);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -89,13 +96,11 @@ class PeriodView extends StatelessWidget {
               ? l10n.treasuryReportOneWeekly
               : l10n.treasuryReportOneMonthly,
           title: capitalizeFirst(
-            week
-                ? l10n.treasuryWeekOf(period.from, period.to)
-                : l10n.treasuryMonthOf(period.from),
+            week ? l10n.treasuryWeekOf(from, to) : l10n.treasuryMonthOf(from),
           ),
           reportId: week
-              ? CashReportIds.weekly(period.from, period.to)
-              : CashReportIds.monthly(period.from, period.to),
+              ? CashReportIds.weekly(from, to)
+              : CashReportIds.monthly(from, to),
         ),
         const SizedBox(height: AppSpacing.lg),
         EteeloGridView(

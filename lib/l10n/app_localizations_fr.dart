@@ -22901,6 +22901,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette ligne n\'est pas arrivée après une clôture.';
 
   @override
+  String get treasuryReasonAfterClosureNotCovered =>
+      'Aucune clôture ne couvre plus cette ligne (sa journée a été rouverte) : répondez « Arrivé aujourd\'hui ».';
+
+  @override
+  String get treasuryReasonGestureIdReused =>
+      'Ce geste porte l\'identifiant d\'un autre. Rechargez la page et recommencez.';
+
+  @override
+  String get treasuryCloseSunday =>
+      'Le dimanche ne se clôture pas : ses opérations comptent pour lundi, qui se clôture lundi.';
+
+  @override
   String get treasuryReasonNotToday =>
       'Ce geste ne se fait que pour aujourd\'hui.';
 

@@ -115,11 +115,13 @@ TreasuryDay treasuryDay(
   List<CashDaySummary> registers, {
   DateTime? date,
   DateTime? businessDate,
+  bool? closableToday,
 }) => TreasuryDay(
   date: date ?? demoDay,
   businessDate: businessDate ?? demoDay,
   dayClosed: registers.every((r) => r.isClosed),
   registers: registers,
+  closableToday: closableToday,
 );
 
 /// Un paiement de 20 $ fait hier soir, arrivé après la clôture d'hier.

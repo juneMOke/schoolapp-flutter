@@ -39,6 +39,7 @@ class DayCardFooter extends StatelessWidget {
     final reason = switch (block) {
       null => null,
       ClosingBlock.notToday || ClosingBlock.closed => null,
+      ClosingBlock.sunday => l10n.treasuryCloseSunday,
       ClosingBlock.noRight => l10n.treasuryReadOnlyCashier,
       ClosingBlock.offline => l10n.treasuryCloseOffline,
       ClosingBlock.pendingSync => l10n.treasuryClosePending(pendingSyncCount),

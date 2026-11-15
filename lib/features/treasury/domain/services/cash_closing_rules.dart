@@ -6,6 +6,11 @@ enum ClosingBlock {
   /// Un jour passé ou futur : on ne clôture qu'aujourd'hui (R9).
   notToday,
 
+  /// Le dimanche n'est pas un jour de caisse : ses faits comptent pour le
+  /// lundi, qui se clôture le lundi (R4). Le serveur répond sinon
+  /// `CLOSURE_NOT_TODAY`.
+  sunday,
+
   /// Déjà clôturée aujourd'hui.
   closed,
 
@@ -36,6 +41,7 @@ abstract final class CashClosingRules {
 
   static ClosingBlock? blockOf({
     required bool isToday,
+    bool sunday = false,
     required bool closed,
     required bool canClose,
     required bool online,
@@ -44,6 +50,7 @@ abstract final class CashClosingRules {
   }) {
     if (!isToday) return ClosingBlock.notToday;
     if (closed) return ClosingBlock.closed;
+    if (sunday) return ClosingBlock.sunday;
     if (!canClose) return ClosingBlock.noRight;
     if (!online) return ClosingBlock.offline;
     if (pendingSyncCount > 0) return ClosingBlock.pendingSync;
