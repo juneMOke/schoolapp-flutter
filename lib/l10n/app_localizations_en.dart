@@ -22920,6 +22920,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'The designated list will be erased; reports not yet archived will use the default blocks again.';
 
   @override
+  String get treasuryReportColReport => 'Report';
+
+  @override
+  String get treasuryReportColPeriod => 'Period covered';
+
+  @override
+  String get treasuryReportColStatus => 'Status';
+
+  @override
+  String get treasuryReportColConsult => 'Open';
+
+  @override
+  String get treasuryReportUntilToday => 'until today';
+
+  @override
+  String get treasuryChartOpenHint => 'Tap a point to open its report';
+
+  @override
+  String treasuryReportDay(DateTime day) {
+    final intl.DateFormat dayDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dayString = dayDateFormat.format(day);
+
+    return '$dayString';
+  }
+
+  @override
   String get treasuryReasonNotToday => 'This can only be done for today.';
 
   @override

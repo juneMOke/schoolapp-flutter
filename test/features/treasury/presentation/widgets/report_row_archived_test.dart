@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/treasury/data/wire/treasury_wire.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/report_row.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/reports_table.dart';
 
 import '../../../../test_helpers/reference_formats.dart';
 import '../../treasury_fixtures.dart';
@@ -33,17 +33,26 @@ void main() {
     setTestWindow(tester, const Size(1280, 600));
     await tester.pumpWidget(
       treasuryHost(
-        ReportRow(report: TreasuryWire.reportFromJson(_json(archived: true))),
+        ReportsTable(
+          reports: [TreasuryWire.reportFromJson(_json(archived: true))],
+          today: demoDay,
+        ),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.text('Archivé'), findsOneWidget);
     expect(find.text('Définitif'), findsOneWidget);
+    // Le tableau : bandeau terre cuite et ses quatre colonnes.
+    expect(find.text('RAPPORT'), findsOneWidget);
+    expect(find.text('CONSULTER'), findsOneWidget);
+    expect(find.text('21 oct. 2026'), findsOneWidget);
   });
 
   testWidgets('sans archive, pas de pastille', (tester) async {
     setTestWindow(tester, const Size(1280, 600));
-    await tester.pumpWidget(treasuryHost(ReportRow(report: cashReport())));
+    await tester.pumpWidget(
+      treasuryHost(ReportsTable(reports: [cashReport()], today: demoDay)),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Archivé'), findsNothing);
   });

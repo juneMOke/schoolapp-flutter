@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/chart_label_density.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/helpers/number_formatter_helper.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/money/money_format.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/balance_chart_painters.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une tranche de la courbe : son libellé d'axe, son solde (`null` : à venir)
@@ -41,15 +44,24 @@ class TreasuryBalanceLine extends StatelessWidget {
   final int openingInCents;
   final Color lineColor;
 
+  /// Toucher un point ouvre le rapport de sa tranche (R7). `null` : rien.
+  final ValueChanged<int>? onOpenSlot;
+
   const TreasuryBalanceLine({
     super.key,
     required this.slots,
     required this.currency,
     required this.openingInCents,
     required this.lineColor,
+    this.onOpenSlot,
   });
 
-  static const double _axisReserved = 52;
+  /// Marge de l'axe des montants : 74, 52 sur téléphone (spec A4).
+  static double axisReservedOf(BuildContext context) =>
+      MediaQuery.sizeOf(context).width < AppBreakpoints.phoneNarrowMax
+      ? 52
+      : 74;
+  static const double _bottomReserved = 30;
 
   @override
   Widget build(BuildContext context) {
@@ -68,52 +80,60 @@ class TreasuryBalanceLine extends StatelessWidget {
     // Trois graduations (min, milieu, max) sur des multiples de l'intervalle :
     // fl_chart cale sa grille sur zéro, et des bornes hors multiple
     // ajoutaient une quatrième graduation collée au maximum.
-    final rawMin = bottom <= 0 ? 0.0 : bottom * 0.86;
-    final rawMax = (top * 1.14).clamp(1.0, double.infinity);
-    final interval = _niceStep((rawMax - rawMin) / 2);
-    final minY = (rawMin / interval).floorToDouble() * interval;
-    final maxY = minY + 2 * interval >= rawMax
-        ? minY + 2 * interval
-        : (rawMax / interval).ceilToDouble() * interval;
+    // Trois graduations : min, milieu, max de la plage, plus 14 % de marge
+    // de part et d'autre, jamais sous zéro (spec A4).
+    final span = top - bottom == 0 ? (top.abs() + 1) : top - bottom;
+    final minY = (bottom - span * 0.14).clamp(0.0, double.infinity);
+    final maxY = top + span * 0.14;
+    final interval = (maxY - minY) / 2;
+    // fl_chart cale ses graduations sur les multiples de l'intervalle à
+    // partir de zéro : on trace donc au-dessus du minimum (0 = min), et les
+    // libellés rajoutent ce minimum. Trois graduations exactes : min, milieu,
+    // max.
+    final plotted = [for (final spot in known) FlSpot(spot.x, spot.y - minY)];
+    final axisReserved = axisReservedOf(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final step = chartLabelStep(
           count: slots.length,
-          width: constraints.maxWidth - _axisReserved,
+          width: constraints.maxWidth - axisReserved,
           minSpacing: AppDimensions.chartAxisLabelMinSpacing,
         );
         final lastKnown = known.isEmpty ? -1 : known.last.x.toInt();
-        return LineChart(
+        final chart = LineChart(
           LineChartData(
             // Un solde négatif (le serveur ne refuse jamais un fait d'argent)
             // ne déborde pas sur les libellés.
             clipData: const FlClipData.all(),
             minX: 0,
             maxX: (slots.length - 1).clamp(1, 1 << 30).toDouble(),
-            minY: minY,
-            maxY: maxY,
+            minY: 0,
+            maxY: maxY - minY,
             gridData: FlGridData(
               drawVerticalLine: false,
               horizontalInterval: interval,
-              getDrawingHorizontalLine: (_) =>
-                  const FlLine(color: AppColors.border, strokeWidth: 1),
+              getDrawingHorizontalLine: (_) => const FlLine(
+                color: AppColors.treasuryChartGrid,
+                strokeWidth: 1,
+              ),
             ),
             borderData: FlBorderData(show: false),
             extraLinesData: ExtraLinesData(
               horizontalLines: [
                 HorizontalLine(
-                  y: opening,
-                  color: AppColors.terreCuite.withValues(alpha: 0.7),
+                  y: opening - minY,
+                  color: AppColors.treasuryOpeningLine.withValues(alpha: 0.7),
                   strokeWidth: 1.2,
                   dashArray: const [5, 5],
                   label: HorizontalLineLabel(
                     show: true,
                     alignment: Alignment.topRight,
                     style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.terreCuite,
+                      color: AppColors.treasuryOpeningLine,
                       fontWeight: FontWeight.w600,
                     ),
-                    labelResolver: (_) => l10n.treasuryOpening,
+                    labelResolver: (_) =>
+                        '${l10n.treasuryOpening} ${axisLabel(opening)}',
                   ),
                 ),
               ],
@@ -124,13 +144,19 @@ class TreasuryBalanceLine extends StatelessWidget {
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: _axisReserved,
+                  reservedSize: axisReserved,
                   interval: interval,
-                  // L'axe seul abrège (3 450 k) ; l'infobulle dit l'exact.
-                  getTitlesWidget: (value, meta) => Text(
-                    NumberFormatterHelper.formatYAxisLabel(value),
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.textSecondary,
+                  // L'axe seul abrège les francs (3 450 k) ; l'infobulle
+                  // dit l'exact.
+                  getTitlesWidget: (value, meta) => Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.sm),
+                    child: Text(
+                      axisLabel(value + minY),
+                      textAlign: TextAlign.end,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: AppColors.treasuryChartAxisInk,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                 ),
@@ -138,6 +164,7 @@ class TreasuryBalanceLine extends StatelessWidget {
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
+                  reservedSize: _bottomReserved,
                   interval: 1,
                   getTitlesWidget: (value, meta) {
                     final i = value.toInt();
@@ -148,17 +175,20 @@ class TreasuryBalanceLine extends StatelessWidget {
                       return const SizedBox.shrink();
                     }
                     final future = slots[i].balanceInCents == null;
-                    return Text(
-                      slots[i].label,
-                      style: AppTypography.labelSmall.copyWith(
-                        color: i == lastKnown
-                            ? AppColors.terreCuite
-                            : future
-                            ? AppColors.textMuted
-                            : AppColors.textSecondary,
-                        fontWeight: i == lastKnown
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+                    return Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.sm),
+                      child: Text(
+                        slots[i].label,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: i == lastKnown
+                              ? AppColors.terreCuite
+                              : future
+                              ? AppColors.treasuryChartFutureInk
+                              : AppColors.treasuryChartAxisInk,
+                          fontWeight: i == lastKnown
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
                       ),
                     );
                   },
@@ -166,6 +196,14 @@ class TreasuryBalanceLine extends StatelessWidget {
               ),
             ),
             lineTouchData: LineTouchData(
+              touchCallback: (event, response) {
+                final open = onOpenSlot;
+                final spot = response?.lineBarSpots?.firstOrNull;
+                if (open == null || spot == null || event is! FlTapUpEvent) {
+                  return;
+                }
+                open(spot.x.toInt());
+              },
               touchTooltipData: LineTouchTooltipData(
                 getTooltipColor: (_) => AppColors.bleuProfond,
                 getTooltipItems: (touched) => [
@@ -175,7 +213,7 @@ class TreasuryBalanceLine extends StatelessWidget {
             ),
             lineBarsData: [
               LineChartBarData(
-                spots: known,
+                spots: plotted,
                 color: lineColor,
                 barWidth: 3,
                 isStrokeJoinRound: true,
@@ -209,21 +247,43 @@ class TreasuryBalanceLine extends StatelessWidget {
             ],
           ),
         );
+        // Les tranches à venir, hachurées, et l'anneau du dernier point
+        // connu, peints sous la courbe dans le repère du tracé.
+        return CustomPaint(
+          painter: TreasuryChartBackdrop(
+            count: slots.length,
+            lastKnown: lastKnown,
+            left: axisReserved,
+            bottom: _bottomReserved,
+          ),
+          foregroundPainter: lastKnown < 0
+              ? null
+              : TreasuryChartRing(
+                  x: lastKnown,
+                  y: known.last.y - minY,
+                  count: slots.length,
+                  minY: 0,
+                  maxY: maxY - minY,
+                  left: axisReserved,
+                  bottom: _bottomReserved,
+                ),
+          child: chart,
+        );
       },
     );
   }
 
-  /// Un pas « rond » (1, 2 ou 5 × 10ⁿ) au moins égal à [raw].
-  static double _niceStep(double raw) {
-    if (raw <= 1) return 1;
-    var magnitude = 1.0;
-    while (magnitude * 10 <= raw) {
-      magnitude *= 10;
-    }
-    for (final m in const [1.0, 2.0, 5.0, 10.0]) {
-      if (m * magnitude >= raw) return m * magnitude;
-    }
-    return 10 * magnitude;
+  /// Un libellé d'axe : l'unité entière ; en milliers pour les francs
+  /// (« 3 450 k »).
+  String axisLabel(double value) {
+    final units = value.round();
+    final thousands = currency == TreasuryCurrency.cdf;
+    final shown = thousands ? (units / 1000).round() : units;
+    final digits = shown.abs().toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (_) => MoneyFormat.nbsp,
+    );
+    return '${shown < 0 ? '−' : ''}$digits${thousands ? ' k' : ''}';
   }
 
   LineTooltipItem _tooltip(AppLocalizations l10n, int index) {

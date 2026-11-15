@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -12,7 +13,10 @@ import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_reports_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_failure_text.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/report_row.dart';
+import 'package:school_app_flutter/core/components/tables/data_table_pagination_bar.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/reports_table.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -35,34 +39,13 @@ class ReportsPanel extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.description_outlined,
-                  color: AppColors.terreCuite,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.treasuryReportsTitle,
-                        style: AppTypography.titleMedium,
-                      ),
-                      Text(
-                        l10n.treasuryReportsSubtitle,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            TreasurySectionHeader(
+              icon: Icons.description_outlined,
+              title: l10n.treasuryReportsTitle,
+              subtitle: l10n.treasuryReportsSubtitle,
             ),
-            const SizedBox(height: AppSpacing.md),
             SegmentedTabFilter<CashReportKind>(
+              style: TreasuryTones.filter,
               semanticsLabel: l10n.treasuryReportsTitle,
               selected: state.kind,
               onSelected: cubit.kindChanged,
@@ -128,68 +111,29 @@ class ReportsPanel extends StatelessWidget {
       _ => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ReportList(reports: page!.items, today: today),
+          ReportsTable(reports: page!.items, today: today),
           if (page.totalPages > 1) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  tooltip: l10n.treasuryPagePrev,
-                  onPressed: page.number > 0
-                      ? () => cubit.load(page.number - 1)
-                      : null,
-                  icon: const Icon(Icons.chevron_left),
+            const SizedBox(height: AppSpacing.md),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppDimensions.treasuryPaginationWidth,
                 ),
-                Text(
-                  l10n.treasuryPageOf(page.number + 1, page.totalPages),
-                  style: AppTypography.bodySmall,
+                child: DataTablePaginationBar(
+                  currentPage: page.number + 1,
+                  totalPages: page.totalPages,
+                  onPrevious: () => cubit.load(page.number - 1),
+                  onNext: () => cubit.load(page.number + 1),
+                  pageLabel: l10n.treasuryPageOf,
                 ),
-                IconButton(
-                  tooltip: l10n.treasuryPageNext,
-                  onPressed: page.number + 1 < page.totalPages
-                      ? () => cubit.load(page.number + 1)
-                      : null,
-                  icon: const Icon(Icons.chevron_right),
-                ),
-              ],
+              ),
             ),
           ],
         ],
       ),
     };
   }
-}
-
-class _ReportList extends StatelessWidget {
-  final List<CashReport> reports;
-  final DateTime today;
-
-  const _ReportList({required this.reports, required this.today});
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      borderRadius: AppRadius.brMd,
-      border: Border.all(color: AppColors.border),
-    ),
-    child: ClipRRect(
-      borderRadius: AppRadius.brMd,
-      child: Column(
-        children: [
-          for (final (index, report) in reports.indexed) ...[
-            if (index > 0) const Divider(height: 1, color: AppColors.border),
-            ReportRow(
-              key: ValueKey(report.id),
-              report: report,
-              isToday:
-                  report.kind == CashReportKind.daily && report.from == today,
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
 }
 
 /// « Période » : Du / Au (14 derniers jours par défaut), « Générer le
@@ -308,7 +252,7 @@ class _PeriodReports extends StatelessWidget {
             ),
           )
         else
-          _ReportList(reports: state.periodReports, today: today),
+          ReportsTable(reports: state.periodReports, today: today),
       ],
     );
   }

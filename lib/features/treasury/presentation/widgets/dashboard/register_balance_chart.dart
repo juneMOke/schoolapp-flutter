@@ -5,13 +5,13 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/currency_tones.dart';
-import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/treasury_balance_line.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La courbe du solde d'une caisse sur la période (A4) : l'en-tête chiffré
@@ -26,11 +26,15 @@ class RegisterBalanceChart extends StatelessWidget {
   /// date (12 oct.).
   final EvolutionPeriod period;
 
+  /// Toucher un point ouvre le rapport de sa tranche (R7).
+  final ValueChanged<EvolutionPoint>? onOpenPoint;
+
   const RegisterBalanceChart({
     super.key,
     required this.series,
     required this.granularity,
     required this.period,
+    this.onOpenPoint,
   });
 
   @override
@@ -57,80 +61,28 @@ class RegisterBalanceChart extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.surfaceRaised,
-          borderRadius: AppRadius.brLg,
+          borderRadius: BorderRadius.circular(
+            AppDimensions.treasuryPanelRadius,
+          ),
           border: Border.all(color: AppColors.border),
-          boxShadow: DashboardTones.paveShadow,
+          boxShadow: TreasuryTones.cardShadow,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.all(AppDimensions.treasuryRegisterCardPadV),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Wrap(
-                spacing: AppSpacing.lg,
-                runSpacing: AppSpacing.sm,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(register.name, style: AppTypography.titleSmall),
-                      Text(
-                        l10n.treasuryChartBalance(
-                          granularityLabel(l10n, granularity),
-                        ),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  _Figure(
-                    label: l10n.treasuryOpening,
-                    value: TreasuryFormat.money(s.openingInCents, currency),
-                    ink: AppColors.terreCuite,
-                  ),
-                  _Figure(
-                    label: l10n.treasuryInflows,
-                    value: TreasuryFormat.signedMoney(
-                      s.inflowsInCents,
-                      currency,
-                    ),
-                    ink: AppColors.success,
-                  ),
-                  _Figure(
-                    label: l10n.treasuryOutflows,
-                    value: TreasuryFormat.signedMoney(
-                      -s.outflowsInCents,
-                      currency,
-                    ),
-                    ink: AppColors.error,
-                  ),
-                  _Figure(
-                    label: l10n.treasuryChartBalanceLabel,
-                    value:
-                        '${TreasuryFormat.money(s.closingInCents, currency)}'
-                        // « — » quand l'ouverture vaut 0 (R2).
-                        ' ${variation == null ? '—' : '${variation > 0
-                                  ? '▲ +'
-                                  : variation < 0
-                                  ? '▼ '
-                                  : ''}$variation %'}',
-                    ink: accent,
-                  ),
-                  // R17 : sans les écarts, ouverture + entrées − sorties ne
-                  // tomberait pas sur le solde.
-                  if (s.gapsInCents != 0)
-                    _Figure(
-                      label: l10n.treasuryChartGaps,
-                      value: TreasuryFormat.signedMoney(
-                        s.gapsInCents,
-                        currency,
-                      ),
-                      ink: AppColors.error,
-                    ),
-                ],
+              _Header(
+                series: series,
+                subtitle: l10n.treasuryChartBalance(
+                  granularityLabel(l10n, granularity),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              _BalanceBand(
+                currency: currency,
+                closingInCents: s.closingInCents,
+                variation: variation,
               ),
               const SizedBox(height: AppSpacing.lg),
               if (known.isEmpty)
@@ -149,6 +101,9 @@ class RegisterBalanceChart extends StatelessWidget {
                     currency: currency,
                     openingInCents: s.openingInCents,
                     lineColor: accent,
+                    onOpenSlot: onOpenPoint == null
+                        ? null
+                        : (index) => onOpenPoint!(series.points[index]),
                     slots: [
                       for (final (index, p) in series.points.indexed)
                         BalanceSlot(
@@ -211,40 +166,226 @@ class RegisterBalanceChart extends StatelessWidget {
   }
 }
 
+class _Header extends StatelessWidget {
+  final RegisterSeries series;
+  final String subtitle;
+
+  const _Header({required this.series, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final register = series.register;
+    final currency = register.currency;
+    final s = series.synthesis;
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: AppSpacing.md,
+      runSpacing: AppSpacing.sm,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: AppDimensions.treasuryIconBox,
+              height: AppDimensions.treasuryIconBox,
+              decoration: BoxDecoration(
+                gradient: TreasuryTones.gradient(currency),
+                borderRadius: BorderRadius.circular(
+                  AppDimensions.treasuryIconBoxRadius,
+                ),
+              ),
+              child: const Icon(
+                Icons.payments_outlined,
+                size: AppSpacing.lg + 2,
+                color: AppColors.surfaceRaised,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(register.name, style: AppTypography.titleSmall),
+                  Text(
+                    subtitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          alignment: WrapAlignment.end,
+          children: [
+            _Figure(
+              icon: Icons.calendar_today_outlined,
+              label: l10n.treasuryOpening,
+              value: TreasuryFormat.money(s.openingInCents, currency),
+              tone: TreasuryTones.opening,
+            ),
+            _Figure(
+              icon: Icons.download_outlined,
+              label: l10n.treasuryInflows,
+              value: TreasuryFormat.signedMoney(s.inflowsInCents, currency),
+              tone: TreasuryTones.inflow,
+            ),
+            _Figure(
+              icon: Icons.upload_outlined,
+              label: l10n.treasuryOutflows,
+              value: TreasuryFormat.signedMoney(-s.outflowsInCents, currency),
+              tone: TreasuryTones.outflow,
+            ),
+            // R17 : sans les écarts, ouverture + entrées − sorties ne
+            // tomberait pas sur le solde.
+            if (s.gapsInCents != 0)
+              _Figure(
+                icon: Icons.error_outline,
+                label: l10n.treasuryChartGaps,
+                value: TreasuryFormat.signedMoney(s.gapsInCents, currency),
+                tone: TreasuryTones.outflow,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Une pastille chiffrée : icône et libellé en capitales, montant exact.
 class _Figure extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  final Color ink;
+  final TreasuryTone tone;
 
-  const _Figure({required this.label, required this.value, required this.ink});
+  const _Figure({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.tone,
+  });
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.md,
-      vertical: AppSpacing.xs,
+      horizontal: AppDimensions.treasuryFigurePadH,
+      vertical: AppDimensions.treasuryFigurePadV,
     ),
     decoration: BoxDecoration(
-      color: ink.withValues(alpha: 0.08),
-      borderRadius: AppRadius.brMd,
+      color: tone.soft,
+      border: Border.all(color: tone.border),
+      borderRadius: BorderRadius.circular(AppDimensions.treasuryFigureRadius),
     ),
     child: Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          label.toUpperCase(),
-          style: AppTypography.labelCaps.copyWith(color: ink),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: AppSpacing.md - 1, color: tone.ink),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              label.toUpperCase(),
+              style: AppTypography.labelCaps.copyWith(color: tone.ink),
+            ),
+          ],
         ),
         Text(
           value,
           softWrap: false,
           style: AppTextStyles.moneyTabular.copyWith(
-            color: ink,
+            color: tone.ink,
             fontWeight: FontWeight.w700,
           ),
         ),
       ],
     ),
   );
+}
+
+/// Le solde de la plage, sur toute la largeur, au ton de la devise, et sa
+/// variation (entrées − sorties) / ouverture ; « — » si l'ouverture vaut 0.
+class _BalanceBand extends StatelessWidget {
+  final TreasuryCurrency currency;
+  final int closingInCents;
+  final int? variation;
+
+  const _BalanceBand({
+    required this.currency,
+    required this.closingInCents,
+    required this.variation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final tone = TreasuryTones.currency(currency);
+    final variation = this.variation;
+    final trend = variation == null
+        ? '—'
+        : '${variation > 0
+              ? '▲ +'
+              : variation < 0
+              ? '▼ '
+              : ''}$variation %';
+    final trendInk = variation == null || variation == 0
+        ? AppColors.textSecondary
+        : variation > 0
+        ? TreasuryTones.inflow.ink
+        : TreasuryTones.outflow.ink;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.treasuryFigurePadH,
+        vertical: AppDimensions.treasuryFigurePadV,
+      ),
+      decoration: BoxDecoration(
+        color: tone.soft,
+        border: Border.all(color: tone.border),
+        borderRadius: BorderRadius.circular(AppDimensions.treasuryFigureRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            l10n.treasuryChartBalanceLabel.toUpperCase(),
+            style: AppTypography.labelCaps.copyWith(color: tone.ink),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: TreasuryFormat.money(closingInCents, currency),
+                    style: AppTextStyles.moneyTabular.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: AppDimensions.treasuryPeriodTotalSize - 3,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '  $trend',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: trendInk,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              softWrap: false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

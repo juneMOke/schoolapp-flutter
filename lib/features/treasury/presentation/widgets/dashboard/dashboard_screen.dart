@@ -8,10 +8,8 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/reports_panel.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
@@ -21,6 +19,7 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/evolution_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_kpi_card.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Trésorerie ▸ Tableau de bord (A1-A4) : combien chaque caisse détient,
@@ -58,6 +57,7 @@ class TreasuryDashboardScreen extends StatelessWidget {
                   ? l10n.menuTreasury
                   : l10n.treasuryEyebrowYear(overview.academicYear.name),
               title: l10n.treasuryDashboardTitle,
+              titleStyle: TreasuryTitle.style(context),
               subtitle: overview == null
                   ? null
                   : l10n.treasuryDashboardSubtitle(overview.businessDate),
@@ -118,14 +118,9 @@ class TreasuryDashboardScreen extends StatelessWidget {
         ),
       ),
       const SizedBox(height: AppSpacing.xl),
-      DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
-          borderRadius: AppRadius.brLg,
-          border: Border.all(color: AppColors.border),
-        ),
+      TreasuryPanel(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: EdgeInsets.zero,
           // L'évolution naît une fois le jour du serveur connu : la plage
           // libre en part, jamais de l'horloge de la tablette (R15).
           child: BlocProvider(
@@ -144,14 +139,9 @@ class TreasuryDashboardScreen extends StatelessWidget {
         ),
       ),
       const SizedBox(height: AppSpacing.xl),
-      DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
-          borderRadius: AppRadius.brLg,
-          border: Border.all(color: AppColors.border),
-        ),
+      TreasuryPanel(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: EdgeInsets.zero,
           child: BlocProvider(
             create: (_) =>
                 reportsCubit?.call(overview.businessDate) ??

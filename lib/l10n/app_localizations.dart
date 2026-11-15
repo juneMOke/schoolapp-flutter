@@ -35232,6 +35232,48 @@ abstract class AppLocalizations {
   /// **'The designated list will be erased; reports not yet archived will use the default blocks again.'**
   String get treasurySignatoriesDefaultsConfirm;
 
+  /// No description provided for @treasuryReportColReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get treasuryReportColReport;
+
+  /// No description provided for @treasuryReportColPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period covered'**
+  String get treasuryReportColPeriod;
+
+  /// No description provided for @treasuryReportColStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get treasuryReportColStatus;
+
+  /// No description provided for @treasuryReportColConsult.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get treasuryReportColConsult;
+
+  /// No description provided for @treasuryReportUntilToday.
+  ///
+  /// In en, this message translates to:
+  /// **'until today'**
+  String get treasuryReportUntilToday;
+
+  /// No description provided for @treasuryChartOpenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a point to open its report'**
+  String get treasuryChartOpenHint;
+
+  /// No description provided for @treasuryReportDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{day}'**
+  String treasuryReportDay(DateTime day);
+
   /// No description provided for @treasuryReasonNotToday.
   ///
   /// In en, this message translates to:

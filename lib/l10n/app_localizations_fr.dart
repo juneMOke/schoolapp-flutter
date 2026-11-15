@@ -23074,6 +23074,33 @@ class AppLocalizationsFr extends AppLocalizations {
       'La liste désignée sera effacée ; les rapports non archivés reprendront les blocs par défaut.';
 
   @override
+  String get treasuryReportColReport => 'Rapport';
+
+  @override
+  String get treasuryReportColPeriod => 'Période couverte';
+
+  @override
+  String get treasuryReportColStatus => 'Statut';
+
+  @override
+  String get treasuryReportColConsult => 'Consulter';
+
+  @override
+  String get treasuryReportUntilToday => 'jusqu\'à aujourd\'hui';
+
+  @override
+  String get treasuryChartOpenHint =>
+      'Touchez un point pour ouvrir son rapport';
+
+  @override
+  String treasuryReportDay(DateTime day) {
+    final intl.DateFormat dayDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dayString = dayDateFormat.format(day);
+
+    return '$dayString';
+  }
+
+  @override
   String get treasuryReasonNotToday =>
       'Ce geste ne se fait que pour aujourd\'hui.';
 

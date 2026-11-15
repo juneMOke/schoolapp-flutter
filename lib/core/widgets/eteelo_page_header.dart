@@ -12,12 +12,18 @@ class EteeloPageHeader extends StatelessWidget {
   final String? subtitle;
   final List<Widget> actions;
 
+  /// Le style du titre, quand la spec d'un écran en impose un autre (la
+  /// Trésorerie : Lora 32, bleu profond). `null` — le défaut — : titre de
+  /// section habituel.
+  final TextStyle? titleStyle;
+
   const EteeloPageHeader({
     super.key,
     required this.eyebrow,
     required this.title,
     this.subtitle,
     this.actions = const [],
+    this.titleStyle,
   });
 
   @override
@@ -44,9 +50,11 @@ class EteeloPageHeader extends StatelessWidget {
               header: true,
               child: Text(
                 title,
-                style: AppTypography.headlineMedium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+                style:
+                    titleStyle ??
+                    AppTypography.headlineMedium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
               ),
             ),
             if (subtitle != null) ...[
