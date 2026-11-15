@@ -15,6 +15,8 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/closin
 import 'package:school_app_flutter/features/treasury/presentation/widgets/period/period_day_tile.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/period/period_totals_card.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Clôture de caisse, vues hebdomadaire et mensuelle (B7) : la navigation de
@@ -78,9 +80,24 @@ class PeriodView extends StatelessWidget {
   Widget _content(BuildContext context, TreasuryPeriod period) {
     final l10n = AppLocalizations.of(context)!;
     final registers = [for (final t in period.registers) t.register];
+    final week = period.to.difference(period.from).inDays < 7;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        ClosingReportBar(
+          label: week
+              ? l10n.treasuryReportOneWeekly
+              : l10n.treasuryReportOneMonthly,
+          title: capitalizeFirst(
+            week
+                ? l10n.treasuryWeekOf(period.from, period.to)
+                : l10n.treasuryMonthOf(period.from),
+          ),
+          reportId: week
+              ? CashReportIds.weekly(period.from, period.to)
+              : CashReportIds.monthly(period.from, period.to),
+        ),
+        const SizedBox(height: AppSpacing.lg),
         EteeloGridView(
           itemCount: period.registers.length,
           padding: EdgeInsets.zero,

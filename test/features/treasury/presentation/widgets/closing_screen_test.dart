@@ -321,6 +321,28 @@ void main() {
     expect(find.text('Jour par jour'), findsNothing);
     expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
   });
+
+  testWidgets('le journalier reste verrouillé tant qu une caisse est ouverte', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1600));
+    await _pump(
+      tester,
+      treasuryDay([usdDay(), cdfDay(closure: closedWithGap)]),
+    );
+    expect(
+      find.text('Disponible après la clôture de la dernière caisse.'),
+      findsOneWidget,
+    );
+    expect(find.text('PDF'), findsNothing);
+  });
+
+  testWidgets('journée clôturée : le rapport du jour s ouvre', (tester) async {
+    setTestWindow(tester, const Size(1280, 1600));
+    await _pump(tester, treasuryDay([cdfDay(closure: closedWithGap)]));
+    expect(find.textContaining('RJ-20261022'), findsOneWidget);
+    expect(find.text('PDF'), findsOneWidget);
+  });
 }
 
 bool _closeButtonEnabled(WidgetTester tester) {

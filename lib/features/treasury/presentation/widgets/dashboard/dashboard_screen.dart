@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_dashboard_repository.dart';
+import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_reports_repository.dart';
+import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_reports_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_evolution_cubit.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/reports_panel.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -29,15 +32,16 @@ class TreasuryDashboardScreen extends StatelessWidget {
   /// La configuration des caisses (état vide). `null` sans le droit.
   final VoidCallback? onConfigure;
 
-  /// Couture de test : fabrique le cubit d'évolution à partir du jour du
-  /// serveur.
+  /// Coutures de test : fabriquent les cubits à partir du jour du serveur.
   final TreasuryEvolutionCubit Function(DateTime today)? evolutionCubit;
+  final CashReportsCubit Function(DateTime today)? reportsCubit;
 
   const TreasuryDashboardScreen({
     super.key,
     this.onOpenClosing,
     this.onConfigure,
     this.evolutionCubit,
+    this.reportsCubit,
   });
 
   @override
@@ -132,6 +136,30 @@ class TreasuryDashboardScreen extends StatelessWidget {
                       )
                   ..load(),
             child: EvolutionPanel(
+              firstDay: overview.academicYear.startDate,
+              today: overview.businessDate,
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(height: AppSpacing.xl),
+      DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceRaised,
+          borderRadius: AppRadius.brLg,
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: BlocProvider(
+            create: (_) =>
+                reportsCubit?.call(overview.businessDate) ??
+                      CashReportsCubit(
+                        GetIt.instance<TreasuryReportsRepository>(),
+                        today: overview.businessDate,
+                      )
+                  ..load(),
+            child: ReportsPanel(
               firstDay: overview.academicYear.startDate,
               today: overview.businessDate,
             ),

@@ -10,6 +10,9 @@ import 'package:school_app_flutter/features/treasury/data/local/treasury_closure
 import 'package:school_app_flutter/features/treasury/data/sync/treasury_closure_puller.dart';
 import 'package:school_app_flutter/features/treasury/data/local/cash_pending_probe_sql.dart';
 import 'package:school_app_flutter/features/treasury/data/online/treasury_dashboard_api.dart';
+import 'package:school_app_flutter/features/treasury/data/online/treasury_reports_api.dart';
+import 'package:school_app_flutter/features/treasury/data/repositories/treasury_reports_repository_impl.dart';
+import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_reports_repository.dart';
 import 'package:school_app_flutter/features/treasury/data/repositories/treasury_dashboard_repository_impl.dart';
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_dashboard_repository.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_overview_cubit.dart';
@@ -71,6 +74,11 @@ void registerTreasury(GetIt getIt) {
       () => CashPendingProbeSql(getIt<Database>()),
     );
 
+  getIt.registerLazySingleton<TreasuryReportsRepository>(
+    () => TreasuryReportsRepositoryImpl(
+      TreasuryReportsApi(getIt<Dio>(), getIt<Map<String, dynamic>>()),
+    ),
+  );
   getIt.registerLazySingleton<TreasuryDashboardRepository>(
     () => TreasuryDashboardRepositoryImpl(
       TreasuryDashboardApi(getIt<Dio>(), getIt<Map<String, dynamic>>()),

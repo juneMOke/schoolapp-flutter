@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_closur
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
@@ -295,4 +296,20 @@ TreasuryEvolution treasuryEvolution() => TreasuryEvolution(
       ],
     ),
   ],
+);
+
+CashReport cashReport({
+  String id = 'RJ-20261022',
+  CashReportKind kind = CashReportKind.daily,
+  CashReportStatus status = CashReportStatus.provisional,
+  String title = 'Jeudi 22 octobre 2026',
+}) => CashReport(
+  id: id,
+  kind: kind,
+  from: demoDay,
+  to: demoDay,
+  title: title,
+  status: status,
+  inProgress: true,
+  currencies: const [TreasuryCurrency.usd, TreasuryCurrency.cdf],
 );

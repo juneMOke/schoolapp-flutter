@@ -21,6 +21,8 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/closin
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_nav_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_status_banner.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes de l'écran, câblés par la page ; `null` quand ils ne sont pas
@@ -216,6 +218,15 @@ class _ClosingScreenState extends State<ClosingScreen> {
               onAnswer: answer,
             );
           },
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        ClosingReportBar(
+          label: AppLocalizations.of(context)!.treasuryReportOneDaily,
+          title: capitalizeFirst(
+            AppLocalizations.of(context)!.treasuryDayLong(day.date),
+          ),
+          reportId: CashReportIds.daily(day.date),
+          remainingRegisters: day.registers.length - day.closedCount,
         ),
       ],
     );
