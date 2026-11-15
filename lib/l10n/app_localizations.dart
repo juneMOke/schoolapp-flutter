@@ -33594,6 +33594,12 @@ abstract class AppLocalizations {
   /// **'Collection on hold: this student\'s level correction is waiting to sync. It will resume as soon as the new amount due is received.'**
   String get levelCorrectionCollectionHeld;
 
+  /// No description provided for @cashRegisterClosedHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'The {currency} register is closed for today: no more cash collection in this currency until tomorrow, unless the promoter reopens it.'**
+  String cashRegisterClosedHeld(String currency);
+
   /// No description provided for @levelCorrectionAction.
   ///
   /// In en, this message translates to:

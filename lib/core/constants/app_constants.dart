@@ -880,7 +880,10 @@ class AppConstants {
   // pierre tombale. Colonne ajoutée, remplie par le flux.
   // v79 (2026-11-06) : `enrollment_level_corrections`, le geste « corriger le
   // niveau » en attente ou accusé. Table neuve, aucun backfill. Palier d'école.
-  static const int offlineDbSchemaVersion = 79;
+  // v80 (2026-11-15) : `treasury_closures`, les clôtures de caisse descendues
+  // par `treasury.closures` — une devise close aujourd'hui n'encaisse plus en
+  // espèces (R11). Table neuve, remplie par le flux. Palier d'école.
+  static const int offlineDbSchemaVersion = 80;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1717,6 +1720,12 @@ class AppConstants {
   /// **POST** = rouvrir la clôture du jour (promoteur, R20).
   static const String treasuryClosureReopeningEndpoint =
       '/api/v1/treasury/closures/{closureId}/reopening';
+
+  /// **GET** (keyset) = les clôtures de caisse de l'école, réouvertures
+  /// comprises (flux `treasury.closures`, `treasury.read`) : la tablette
+  /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).
+  static const String syncTreasuryClosuresEndpoint =
+      '/api/v1/sync/treasury/closures';
 
   /// **GET** (web, même hôte que l'application) = la version déployée,
   /// écrite par `flutter build web` : `{version, build_number, …}`.

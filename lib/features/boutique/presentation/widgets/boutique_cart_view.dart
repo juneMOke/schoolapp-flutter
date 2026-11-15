@@ -1,3 +1,6 @@
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -262,8 +265,23 @@ class _BoutiqueCartViewState extends State<BoutiqueCartView> {
       // La transition est lue dans ce sens précis — d'aucune vente vers une
       // vente écrite. Sans cela, un simple rebuild rouvrirait la modale.
       listenWhen: (previous, current) =>
-          previous.recordedSale == null && current.recordedSale != null,
-      listener: (context, state) => _closeSale(context, state.recordedSale!),
+          (previous.recordedSale == null && current.recordedSale != null) ||
+          (previous.saleFailure == null && current.saleFailure != null),
+      listener: (context, state) {
+        final sale = state.recordedSale;
+        if (sale != null) {
+          _closeSale(context, sale);
+          return;
+        }
+        // Une vente refusée ne se tait jamais : la caissière doit savoir que
+        // rien n'est écrit (caisse close, base illisible).
+        final l10n = AppLocalizations.of(context)!;
+        AppSnackBar.showError(context, switch (state.saleFailure) {
+          CashRegisterClosedFailure(:final currency) =>
+            l10n.cashRegisterClosedHeld(currency),
+          _ => l10n.offlineWriteError,
+        });
+      },
       builder: (context, state) {
         final bloc = context.read<BoutiqueBloc>();
 

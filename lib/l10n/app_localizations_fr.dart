@@ -22008,6 +22008,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Encaissement suspendu : la correction de niveau de cet élève attend sa synchronisation. Il reprendra dès que le nouveau dû sera reçu.';
 
   @override
+  String cashRegisterClosedHeld(String currency) {
+    return 'La caisse $currency est clôturée pour aujourd\'hui : plus aucun encaissement en espèces dans cette devise avant demain, sauf réouverture par le promoteur.';
+  }
+
+  @override
   String get levelCorrectionAction => 'Corriger le niveau';
 
   @override

@@ -21855,6 +21855,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Collection on hold: this student\'s level correction is waiting to sync. It will resume as soon as the new amount due is received.';
 
   @override
+  String cashRegisterClosedHeld(String currency) {
+    return 'The $currency register is closed for today: no more cash collection in this currency until tomorrow, unless the promoter reopens it.';
+  }
+
+  @override
   String get levelCorrectionAction => 'Correct the level';
 
   @override

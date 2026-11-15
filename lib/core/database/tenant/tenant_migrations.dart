@@ -19,6 +19,7 @@ import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dar
 import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/schema/ticket_print_jobs_schema.dart';
+import 'package:school_app_flutter/core/database/schema/treasury_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 part 'tenant_migrations_evaluation.dart';
@@ -163,6 +164,9 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(79)) {
     await _createTables(db, enrollmentLevelCorrectionTables);
+  }
+  if (upTo(80)) {
+    await _createTables(db, treasuryTables);
   }
 }
 

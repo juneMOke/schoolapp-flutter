@@ -12378,6 +12378,8 @@
   "levelCorrectionRefusedGeneric": "Level correction refused by the server.",
   "syncAggregateEnrollmentLevelCorrection": "Level correction",
   "levelCorrectionCollectionHeld": "Collection on hold: this student's level correction is waiting to sync. It will resume as soon as the new amount due is received.",
+  "cashRegisterClosedHeld": "The {currency} register is closed for today: no more cash collection in this currency until tomorrow, unless the promoter reopens it.",
+  "@cashRegisterClosedHeld": {"placeholders": {"currency": {"type": "String"}}},
   "levelCorrectionAction": "Correct the level",
   "levelCorrectionDialogEyebrow": "Enrollment",
   "levelCorrectionDialogTitle": "Correct the student's level",

@@ -56,8 +56,22 @@ class FinanceOfflineError extends FinanceOfflineState {
   /// de l'élève (D7). L'écran le dit tel quel, sans code d'incident.
   final bool heldByLevelCorrection;
 
-  const FinanceOfflineError(this.message, {this.heldByLevelCorrection = false});
+  /// Refus attendu aussi : la caisse de cette devise est close aujourd'hui
+  /// (R11). L'écran dit laquelle, sans code d'incident.
+  final String? closedRegisterCurrency;
+
+  const FinanceOfflineError(
+    this.message, {
+    this.heldByLevelCorrection = false,
+    this.closedRegisterCurrency,
+  });
+
+  bool get isHeld => heldByLevelCorrection || closedRegisterCurrency != null;
 
   @override
-  List<Object?> get props => [message, heldByLevelCorrection];
+  List<Object?> get props => [
+    message,
+    heldByLevelCorrection,
+    closedRegisterCurrency,
+  ];
 }
