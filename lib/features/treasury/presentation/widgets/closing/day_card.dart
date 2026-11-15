@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/currency_tones.dart';
-import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -18,6 +17,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/closin
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card_footer.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card_header.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/movements_list.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une caisse sur la journée affichée (B3) : l'ouverture, les entrées et les
@@ -63,7 +63,7 @@ class _DayCardState extends State<DayCard> {
         color: AppColors.surfaceRaised,
         borderRadius: AppRadius.brLg,
         border: Border.all(color: AppColors.border),
-        boxShadow: DashboardTones.paveShadow,
+        boxShadow: TreasuryTones.cardShadow,
       ),
       child: ClipRRect(
         borderRadius: AppRadius.brLg,
@@ -150,7 +150,7 @@ class _Remaining extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final currency = summary.register.currency;
-    final accent = CurrencyTones.accent(currency.code);
+    final tone = TreasuryTones.currency(currency);
     final closure = summary.closure;
     final withGap = closure != null && closure.locksRegister && closure.hasGap;
     final title = withGap
@@ -164,11 +164,16 @@ class _Remaining extends StatelessWidget {
           )
         : l10n.treasuryRemainingHint;
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md + 2,
+        vertical: AppSpacing.md,
+      ),
       decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.08),
-        borderRadius: AppRadius.brMd,
-        border: Border.all(color: accent.withValues(alpha: 0.25)),
+        color: tone.soft,
+        borderRadius: BorderRadius.circular(
+          AppDimensions.treasuryRemainingRadius,
+        ),
+        border: Border.all(color: tone.border),
       ),
       child: Row(
         children: [
@@ -178,9 +183,14 @@ class _Remaining extends StatelessWidget {
               children: [
                 Text(
                   title.toUpperCase(),
-                  style: AppTypography.labelCaps.copyWith(color: accent),
+                  style: AppTypography.labelCaps.copyWith(color: tone.ink),
                 ),
-                Text(hint, style: AppTypography.bodySmall),
+                Text(
+                  hint,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
@@ -192,8 +202,10 @@ class _Remaining extends StatelessWidget {
               child: Text(
                 TreasuryFormat.money(summary.closingBalanceInCents, currency),
                 softWrap: false,
-                style: AppTextStyles.totalAmountLora.copyWith(
-                  color: withGap ? AppColors.error : AppColors.bleuProfond,
+                style: AppTextStyles.moneyTabular.copyWith(
+                  color: withGap ? TreasuryTones.outflow.ink : tone.ink,
+                  fontWeight: FontWeight.w800,
+                  fontSize: AppDimensions.treasuryRemainingAmountSize,
                 ),
               ),
             ),

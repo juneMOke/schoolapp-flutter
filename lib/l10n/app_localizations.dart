@@ -35274,6 +35274,30 @@ abstract class AppLocalizations {
   /// **'{day}'**
   String treasuryReportDay(DateTime day);
 
+  /// No description provided for @treasuryNumericDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryNumericDate(DateTime date);
+
+  /// No description provided for @treasuryDayColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get treasuryDayColumn;
+
+  /// No description provided for @treasuryDayRegisterColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · in / out / balance'**
+  String treasuryDayRegisterColumn(String name);
+
+  /// No description provided for @treasuryClosureColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing'**
+  String get treasuryClosureColumn;
+
   /// No description provided for @treasuryReasonNotToday.
   ///
   /// In en, this message translates to:

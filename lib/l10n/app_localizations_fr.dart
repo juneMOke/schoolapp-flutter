@@ -23101,6 +23101,25 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String treasuryNumericDate(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get treasuryDayColumn => 'Journée';
+
+  @override
+  String treasuryDayRegisterColumn(String name) {
+    return '$name · E / S / reste';
+  }
+
+  @override
+  String get treasuryClosureColumn => 'Clôture';
+
+  @override
   String get treasuryReasonNotToday =>
       'Ce geste ne se fait que pour aujourd\'hui.';
 

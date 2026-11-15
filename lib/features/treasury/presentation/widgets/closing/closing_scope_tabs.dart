@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/features/treasury/domain/services/cash_closing_rules.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Journalier · Hebdomadaire · Mensuel (B1) ; Jour · Semaine · Mois sur un
@@ -25,6 +26,7 @@ class ClosingScopeTabs extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: SegmentedTabFilter<ClosingScope>(
+        style: TreasuryTones.filter,
         semanticsLabel: l10n.treasuryScopeLabel,
         selected: scope,
         onSelected: onChanged,

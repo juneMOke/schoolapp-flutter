@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
@@ -17,6 +19,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/period
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Clôture de caisse, vues hebdomadaire et mensuelle (B7) : la navigation de
@@ -28,7 +31,15 @@ class PeriodView extends StatelessWidget {
   /// « Aujourd'hui » selon le serveur, pour le badge de la ligne du jour.
   final DateTime today;
 
-  const PeriodView({super.key, required this.onOpenDay, required this.today});
+  /// Les filtres Journalier · Hebdomadaire · Mensuel, dans la même carte.
+  final Widget? filters;
+
+  const PeriodView({
+    super.key,
+    required this.onOpenDay,
+    required this.today,
+    this.filters,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +67,7 @@ class PeriodView extends StatelessWidget {
                   : () => cubit.step(-1),
               onNext: cubit.nextFrom(1) == null ? null : () => cubit.step(1),
               onToday: cubit.goCurrent,
+              filters: filters,
             ),
             const SizedBox(height: AppSpacing.lg),
             switch (state.status) {
@@ -112,14 +124,11 @@ class PeriodView extends StatelessWidget {
               PeriodTotalsCard(totals: period.registers[index]),
         ),
         const SizedBox(height: AppSpacing.xl),
-        Text(l10n.treasuryDayByDay, style: AppTypography.titleMedium),
-        Text(
-          l10n.treasuryDayByDayHint,
-          style: AppTypography.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-          ),
+        TreasurySectionHeader(
+          icon: Icons.list,
+          title: l10n.treasuryDayByDay,
+          subtitle: l10n.treasuryDayByDayHint,
         ),
-        const SizedBox(height: AppSpacing.md),
         if (period.days.isEmpty)
           Text(
             l10n.treasuryPeriodEmpty,
@@ -128,28 +137,29 @@ class PeriodView extends StatelessWidget {
             ),
           )
         else
-          DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.brMd,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: ClipRRect(
-              borderRadius: AppRadius.brMd,
-              child: Column(
-                children: [
-                  for (final (index, row) in period.days.indexed) ...[
-                    if (index > 0)
-                      const Divider(height: 1, color: AppColors.border),
-                    PeriodDayTile(
-                      row: row,
-                      registers: registers,
-                      isToday: row.day == today,
-                      onOpen: () => onOpenDay(row.day),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+          EteeloColumnTable(
+            raised: true,
+            tone: TreasuryTones.table,
+            cardsBelow: AppBreakpoints.dataTableCardsMax,
+            minWidth: PeriodDayColumns.minWidth(registers.length),
+            widths: PeriodDayColumns.widths(registers.length),
+            headers: [
+              l10n.treasuryDayColumn,
+              for (final r in registers) l10n.treasuryDayRegisterColumn(r.name),
+              l10n.treasuryClosureColumn,
+            ],
+            endAligned: {registers.length + 1},
+            rowCount: period.days.length,
+            row: (context, index) {
+              final row = period.days[index];
+              return periodDayRow(
+                context,
+                row: row,
+                registers: registers,
+                isToday: row.day == today,
+                onOpen: () => onOpenDay(row.day),
+              );
+            },
           ),
       ],
     );

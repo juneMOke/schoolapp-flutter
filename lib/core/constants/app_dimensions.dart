@@ -1419,4 +1419,18 @@ class AppDimensions {
   static const treasuryFormatButtonHeight = 36.0;
   static const treasuryFormatButtonRadius = 10.0;
   static const treasuryPaginationWidth = 300.0;
+
+  /// « Reste en caisse » (B3) : encadré r14, montant 800 24.
+  static const treasuryRemainingRadius = 14.0;
+  static const treasuryRemainingAmountSize = 24.0;
+
+  /// Montant d'une carte de configuration (C1) : 700 28.
+  static const treasuryConfigAmountSize = 28.0;
+
+  /// Les flèches ‹ › de la navigation de période (B1) : 40 × 40, r11.
+  static const treasuryNavButton = 40.0;
+  static const treasuryNavRadius = 11.0;
+
+  /// Le rond « + » de la tuile Nouvelle caisse (C1).
+  static const treasuryNewRegisterDot = 52.0;
 }

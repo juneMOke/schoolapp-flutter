@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -22,42 +23,48 @@ class NewRegisterTile extends StatelessWidget {
       excludeSemantics: true,
       onTap: onTap,
       child: Material(
-        color: AppColors.terreCuiteSoft,
-        shape: const RoundedRectangleBorder(
-          borderRadius: AppRadius.brLg,
-          side: BorderSide(color: AppColors.borderStrong, width: 2),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: AppRadius.brLg,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppDimensions.treasuryNewRegisterMinHeight,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircleAvatar(
-                    radius: AppSpacing.xl + 2,
-                    backgroundColor: AppColors.terreCuite,
-                    child: Icon(Icons.add, color: AppColors.textOnDark),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    l10n.treasuryNewRegister,
-                    textAlign: TextAlign.center,
-                    style: AppTypography.titleSmall,
-                  ),
-                  Text(
-                    l10n.treasuryNewRegisterHint,
-                    textAlign: TextAlign.center,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+        color: AppColors.surfaceRaised,
+        borderRadius: _radius,
+        clipBehavior: Clip.antiAlias,
+        child: CustomPaint(
+          painter: const _HatchPainter(),
+          foregroundPainter: const DashedRRectPainter(
+            color: AppColors.treasuryOpeningBorder,
+            borderRadius: _radius,
+            strokeWidth: 2,
+          ),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: AppRadius.brLg,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: AppDimensions.treasuryNewRegisterMinHeight,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircleAvatar(
+                      radius: AppDimensions.treasuryNewRegisterDot / 2,
+                      backgroundColor: AppColors.terreCuite,
+                      child: Icon(Icons.add, color: AppColors.textOnDark),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      l10n.treasuryNewRegister,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.titleSmall,
+                    ),
+                    Text(
+                      l10n.treasuryNewRegisterHint,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -65,6 +72,34 @@ class NewRegisterTile extends StatelessWidget {
       ),
     );
   }
+
+  static const BorderRadius _radius = BorderRadius.all(
+    Radius.circular(AppDimensions.treasuryPanelRadius),
+  );
+}
+
+/// Hachures terre cuite à 3,5 % (spec C1).
+class _HatchPainter extends CustomPainter {
+  const _HatchPainter();
+
+  static const double _gap = 10;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.terreCuite.withValues(alpha: 0.035)
+      ..strokeWidth = 4;
+    for (var x = -size.height; x < size.width; x += _gap) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_HatchPainter old) => false;
 }
 
 /// La note « Bon à savoir », sur toute la largeur, sous la grille.
@@ -75,9 +110,9 @@ class GoodToKnowNote extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(AppSpacing.lg),
     decoration: BoxDecoration(
-      color: AppColors.financeCrossedSurface,
-      borderRadius: AppRadius.brLg,
-      border: Border.all(color: AppColors.border),
+      color: AppColors.treasuryNoteBg,
+      borderRadius: BorderRadius.circular(AppDimensions.treasuryPanelRadius),
+      border: Border.all(color: AppColors.treasuryNoteBorder),
     ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +123,7 @@ class GoodToKnowNote extends StatelessWidget {
           child: Text(
             AppLocalizations.of(context)!.treasuryGoodToKnow,
             style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textPrimary,
+              color: AppColors.treasuryNoteText,
             ),
           ),
         ),

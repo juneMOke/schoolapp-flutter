@@ -4,7 +4,6 @@ import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -15,6 +14,7 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/register_
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/registers/register_adjustments_list.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/registers/register_card_header.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une caisse de l'écran Configuration : ce qu'elle détient, sa mise en
@@ -56,7 +56,7 @@ class _RegisterCardState extends State<RegisterCard> {
         color: AppColors.surfaceRaised,
         borderRadius: AppRadius.brLg,
         border: Border.all(color: AppColors.border),
-        boxShadow: DashboardTones.paveShadow,
+        boxShadow: TreasuryTones.cardShadow,
       ),
       child: ClipRRect(
         borderRadius: AppRadius.brLg,

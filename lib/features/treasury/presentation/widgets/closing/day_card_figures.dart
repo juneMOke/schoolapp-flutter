@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -8,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les trois cases chiffrées d'une carte du jour : Ouverture (fixe), Entrées
@@ -34,14 +34,14 @@ class DayCardFigures extends StatelessWidget {
         label: l10n.treasuryOpening,
         icon: Icons.calendar_today_outlined,
         value: TreasuryFormat.money(summary.openingInCents, currency),
-        ink: AppColors.terreCuite,
+        tone: TreasuryTones.opening,
       ),
       _Figure(
         label: l10n.treasuryInflows,
         icon: Icons.download,
         count: summary.inflowsCount,
         value: TreasuryFormat.signedMoney(summary.inflowsInCents, currency),
-        ink: AppColors.success,
+        tone: TreasuryTones.inflow,
         expanded: open == MovementDirection.inflow,
         onTap: () => onToggle(MovementDirection.inflow),
       ),
@@ -50,7 +50,7 @@ class DayCardFigures extends StatelessWidget {
         icon: Icons.upload,
         count: summary.outflowsCount,
         value: TreasuryFormat.signedMoney(-summary.outflowsInCents, currency),
-        ink: AppColors.error,
+        tone: TreasuryTones.outflow,
         expanded: open == MovementDirection.outflow,
         onTap: () => onToggle(MovementDirection.outflow),
       ),
@@ -70,11 +70,22 @@ class DayCardFigures extends StatelessWidget {
         // à la ligne.
         final width = ((constraints.maxWidth - gap * (perRow - 1)) / perRow)
             .floorToDouble();
+        // Les cases de la dernière rangée, incomplète, se partagent toute la
+        // largeur (flex 1 1 120 de la spec).
+        final lastRow = figures.length % perRow;
+        final lastWidth = lastRow == 0
+            ? width
+            : ((constraints.maxWidth - gap * (lastRow - 1)) / lastRow)
+                  .floorToDouble();
         return Wrap(
           spacing: gap,
           runSpacing: gap,
           children: [
-            for (final figure in figures) SizedBox(width: width, child: figure),
+            for (final (i, figure) in figures.indexed)
+              SizedBox(
+                width: i >= figures.length - lastRow ? lastWidth : width,
+                child: figure,
+              ),
           ],
         );
       },
@@ -86,7 +97,7 @@ class _Figure extends StatelessWidget {
   final String label;
   final IconData icon;
   final String value;
-  final Color ink;
+  final TreasuryTone tone;
   final int? count;
   final bool expanded;
   final VoidCallback? onTap;
@@ -95,7 +106,7 @@ class _Figure extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.value,
-    required this.ink,
+    required this.tone,
     this.count,
     this.expanded = false,
     this.onTap,
@@ -105,6 +116,7 @@ class _Figure extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tap = onTap;
+    final ink = tone.ink;
     final content = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -174,11 +186,13 @@ class _Figure extends StatelessWidget {
         button: tap != null,
         expanded: tap == null ? null : expanded,
         child: Material(
-          color: ink.withValues(alpha: 0.06),
+          color: tone.soft,
+          elevation: expanded ? 2 : 0,
+          shadowColor: ink.withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(
             borderRadius: AppRadius.brMd,
             side: BorderSide(
-              color: expanded ? ink : ink.withValues(alpha: 0.2),
+              color: expanded ? ink : tone.border,
               width: expanded ? 2 : 1,
             ),
           ),

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
-import 'package:school_app_flutter/core/theme/currency_tones.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'en-tête d'une carte « caisse du jour » : le pavé de la devise, le nom, la
@@ -33,7 +34,9 @@ class DayCardHeader extends StatelessWidget {
         horizontal: AppSpacing.lg + 2,
         vertical: AppSpacing.md + 2,
       ),
-      color: CurrencyTones.pave(register.currency.code),
+      decoration: BoxDecoration(
+        gradient: TreasuryTones.gradient(register.currency),
+      ),
       // Sur une carte étroite, la pastille passe sous le nom plutôt que de
       // tronquer l'état de la caisse.
       child: Wrap(
@@ -45,9 +48,22 @@ class DayCardHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                summary.isClosed ? Icons.lock_outline : Icons.payments_outlined,
-                color: DashboardTones.inkValeur,
+              Container(
+                width: AppDimensions.treasuryIconBox,
+                height: AppDimensions.treasuryIconBox,
+                decoration: BoxDecoration(
+                  color: DashboardTones.inkValeur.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.treasuryIconBoxRadius,
+                  ),
+                ),
+                child: Icon(
+                  summary.isClosed
+                      ? Icons.lock_outline
+                      : Icons.payments_outlined,
+                  size: AppSpacing.lg + 3,
+                  color: DashboardTones.inkValeur,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Flexible(

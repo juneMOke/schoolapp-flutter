@@ -4,13 +4,13 @@ import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/currency_tones.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'en-tête d'une carte de caisse : le pavé de la devise, son nom, et ce que
@@ -36,7 +36,7 @@ class RegisterCardHeader extends StatelessWidget {
         horizontal: AppSpacing.lg + 2,
         vertical: AppSpacing.lg,
       ),
-      color: CurrencyTones.pave(currency.code),
+      decoration: BoxDecoration(gradient: TreasuryTones.gradient(currency)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -97,8 +97,9 @@ class RegisterCardHeader extends StatelessWidget {
                   child: Text(
                     TreasuryFormat.money(config.balanceInCents, currency),
                     softWrap: false,
-                    style: AppTextStyles.totalAmountLora.copyWith(
-                      fontSize: 28,
+                    style: AppTextStyles.moneyTabular.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: AppDimensions.treasuryConfigAmountSize,
                       height: 1.1,
                       color: DashboardTones.inkValeur,
                     ),
