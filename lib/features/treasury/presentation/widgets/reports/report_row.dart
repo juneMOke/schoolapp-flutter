@@ -72,6 +72,15 @@ class ReportRow extends StatelessWidget {
               runSpacing: AppSpacing.sm,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                if (report.archived)
+                  Tooltip(
+                    message: l10n.treasuryReportArchivedHint,
+                    child: _Badge(
+                      label: l10n.treasuryReportArchived,
+                      ink: AppColors.textSecondary,
+                      icon: Icons.inventory_2_outlined,
+                    ),
+                  ),
                 if (provisional)
                   Tooltip(
                     message: l10n.treasuryReportProvisionalHint,

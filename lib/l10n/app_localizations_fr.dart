@@ -22922,6 +22922,158 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le dimanche ne se clôture pas : ses opérations comptent pour lundi, qui se clôture lundi.';
 
   @override
+  String get treasurySignatoriesTitle => 'Signataires des rapports';
+
+  @override
+  String get treasurySignatoriesSubtitle =>
+      'Imprimés au pied des rapports de caisse, de gauche à droite.';
+
+  @override
+  String get treasurySignatoriesLoading => 'Chargement des signataires';
+
+  @override
+  String get treasurySignatoriesDefaults =>
+      'Blocs par défaut : aucun signataire n\'est désigné. Les noms viennent des titulaires des rôles de l\'école.';
+
+  @override
+  String treasurySignatoriesUpdatedBy(String when, String name) {
+    return 'Modifiés le $when par $name.';
+  }
+
+  @override
+  String treasurySignatoriesUpdatedAt(String when) {
+    return 'Modifiés le $when.';
+  }
+
+  @override
+  String treasuryDateAtTime(String date, String time) {
+    return '$date à $time';
+  }
+
+  @override
+  String get treasurySignatoryBlank => 'Nom à écrire à la main';
+
+  @override
+  String get treasurySignatoryCloserHint =>
+      'Journalier : la personne qui a clôturé';
+
+  @override
+  String get treasurySignatoriesEdit => 'Modifier les signataires';
+
+  @override
+  String get treasurySignatoriesReadOnly =>
+      'Consultation seule : seul le promoteur modifie les signataires.';
+
+  @override
+  String get treasurySignatoriesEditHint =>
+      'Quatre blocs au plus, imprimés dans cet ordre. Un rapport déjà archivé garde ses signataires.';
+
+  @override
+  String treasurySignatoryBlock(int number) {
+    return 'Bloc $number';
+  }
+
+  @override
+  String treasurySignatoryUp(int number) {
+    return 'Monter le bloc $number';
+  }
+
+  @override
+  String treasurySignatoryDown(int number) {
+    return 'Descendre le bloc $number';
+  }
+
+  @override
+  String treasurySignatoryRemove(int number) {
+    return 'Retirer le bloc $number';
+  }
+
+  @override
+  String get treasurySignatoryCaption => 'Légende';
+
+  @override
+  String get treasurySignatoryCaptionHint => 'ÉTABLI PAR';
+
+  @override
+  String get treasurySignatoryName => 'Nom (facultatif)';
+
+  @override
+  String get treasurySignatoryNameHint => 'Vide : à signer à la main';
+
+  @override
+  String get treasurySignatoryFunction => 'Fonction';
+
+  @override
+  String get treasurySignatoryFunctionHint => 'Caissière';
+
+  @override
+  String get treasurySignatoryCloser =>
+      'Sur le journalier, mettre le nom de la personne qui a clôturé';
+
+  @override
+  String get treasurySignatoryCaptionRequired =>
+      'Légende obligatoire, 40 caractères au plus.';
+
+  @override
+  String get treasurySignatoryFunctionRequired =>
+      'Fonction obligatoire, 60 caractères au plus.';
+
+  @override
+  String get treasurySignatoryNameTooLong => '100 caractères au plus.';
+
+  @override
+  String get treasurySignatoryAdd => 'Ajouter un signataire';
+
+  @override
+  String treasurySignatoriesMax(int count) {
+    return '$count signataires au plus';
+  }
+
+  @override
+  String get treasurySignatoriesUseDefaults => 'Revenir aux blocs par défaut';
+
+  @override
+  String get treasurySignatoriesSave => 'Enregistrer';
+
+  @override
+  String get treasurySignatoriesSaved => 'Signataires enregistrés.';
+
+  @override
+  String get treasurySignatoriesRestored => 'Blocs par défaut rétablis.';
+
+  @override
+  String get treasurySignatoriesChanged =>
+      'La liste vient d\'être modifiée : la voici. Relisez-la avant d\'enregistrer.';
+
+  @override
+  String treasurySignatoriesChangedBy(String name) {
+    return '$name vient de modifier la liste : la voici. Relisez-la avant d\'enregistrer.';
+  }
+
+  @override
+  String get treasuryReasonSignatoriesChanged =>
+      'La liste des signataires a changé entre-temps.';
+
+  @override
+  String get treasuryReasonSignatoriesInvalid =>
+      'Un signataire est incomplet ou trop long.';
+
+  @override
+  String get treasuryReportArchived => 'Archivé';
+
+  @override
+  String get treasuryReportArchivedHint =>
+      'Contenu figé ; le PDF porte un QR de vérification.';
+
+  @override
+  String get treasurySignatoriesFreezeWarning =>
+      'Ce sont les blocs par défaut. Enregistrer désigne cette liste : ses noms ne suivront plus les titulaires des rôles.';
+
+  @override
+  String get treasurySignatoriesDefaultsConfirm =>
+      'La liste désignée sera effacée ; les rapports non archivés reprendront les blocs par défaut.';
+
+  @override
   String get treasuryReasonNotToday =>
       'Ce geste ne se fait que pour aujourd\'hui.';
 

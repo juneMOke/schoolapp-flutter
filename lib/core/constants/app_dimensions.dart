@@ -1334,6 +1334,13 @@ class AppDimensions {
   /// Modale de création ou d'ajustement d'une caisse.
   static const treasuryRegisterModalMaxWidth = 540.0;
 
+  /// Un bloc de signature dans Configuration ▸ Signataires des rapports.
+  static const treasurySignatoryTileMinWidth = 200.0;
+
+  /// Le texte d'introduction d'une section de la configuration, à côté de son
+  /// bouton.
+  static const treasurySectionIntroMaxWidth = 540.0;
+
   // ── Trésorerie · Clôture de caisse ──────────────────────────────────────
   /// Largeur minimale d'une carte « caisse du jour » (grille auto-remplie).
   static const treasuryDayCardMinWidth = 340.0;

@@ -10,7 +10,11 @@ import 'package:school_app_flutter/features/treasury/data/local/treasury_closure
 import 'package:school_app_flutter/features/treasury/data/sync/treasury_closure_puller.dart';
 import 'package:school_app_flutter/features/treasury/data/local/cash_pending_probe_sql.dart';
 import 'package:school_app_flutter/features/treasury/data/online/treasury_dashboard_api.dart';
+import 'package:school_app_flutter/features/treasury/data/online/report_signatories_api.dart';
 import 'package:school_app_flutter/features/treasury/data/online/treasury_reports_api.dart';
+import 'package:school_app_flutter/features/treasury/data/repositories/report_signatories_repository_impl.dart';
+import 'package:school_app_flutter/features/treasury/domain/repositories/report_signatories_repository.dart';
+import 'package:school_app_flutter/features/treasury/presentation/bloc/report_signatories_cubit.dart';
 import 'package:school_app_flutter/features/treasury/data/repositories/treasury_reports_repository_impl.dart';
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_reports_repository.dart';
 import 'package:school_app_flutter/features/treasury/data/repositories/treasury_dashboard_repository_impl.dart';
@@ -79,6 +83,11 @@ void registerTreasury(GetIt getIt) {
       TreasuryReportsApi(getIt<Dio>(), getIt<Map<String, dynamic>>()),
     ),
   );
+  getIt.registerLazySingleton<ReportSignatoriesRepository>(
+    () => ReportSignatoriesRepositoryImpl(
+      ReportSignatoriesApi(getIt<Dio>(), getIt<Map<String, dynamic>>()),
+    ),
+  );
   getIt.registerLazySingleton<TreasuryDashboardRepository>(
     () => TreasuryDashboardRepositoryImpl(
       TreasuryDashboardApi(getIt<Dio>(), getIt<Map<String, dynamic>>()),
@@ -86,6 +95,9 @@ void registerTreasury(GetIt getIt) {
   );
 
   // ── Écrans : cubits en fabrique, jamais singleton ──
+  getIt.registerFactory(
+    () => ReportSignatoriesCubit(getIt<ReportSignatoriesRepository>()),
+  );
   getIt.registerFactory(
     () => TreasuryOverviewCubit(getIt<TreasuryDashboardRepository>()),
   );

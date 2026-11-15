@@ -22768,6 +22768,158 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sunday is not closed: its operations count for Monday, which is closed on Monday.';
 
   @override
+  String get treasurySignatoriesTitle => 'Report signatories';
+
+  @override
+  String get treasurySignatoriesSubtitle =>
+      'Printed at the foot of cash reports, left to right.';
+
+  @override
+  String get treasurySignatoriesLoading => 'Loading signatories';
+
+  @override
+  String get treasurySignatoriesDefaults =>
+      'Default blocks: no signatory is designated. Names come from the holders of the school\'s roles.';
+
+  @override
+  String treasurySignatoriesUpdatedBy(String when, String name) {
+    return 'Changed on $when by $name.';
+  }
+
+  @override
+  String treasurySignatoriesUpdatedAt(String when) {
+    return 'Changed on $when.';
+  }
+
+  @override
+  String treasuryDateAtTime(String date, String time) {
+    return '$date at $time';
+  }
+
+  @override
+  String get treasurySignatoryBlank => 'Name to write by hand';
+
+  @override
+  String get treasurySignatoryCloserHint =>
+      'Daily report: the person who closed';
+
+  @override
+  String get treasurySignatoriesEdit => 'Edit signatories';
+
+  @override
+  String get treasurySignatoriesReadOnly =>
+      'Read only: only the promoter edits the signatories.';
+
+  @override
+  String get treasurySignatoriesEditHint =>
+      'Four blocks at most, printed in this order. An archived report keeps its signatories.';
+
+  @override
+  String treasurySignatoryBlock(int number) {
+    return 'Block $number';
+  }
+
+  @override
+  String treasurySignatoryUp(int number) {
+    return 'Move block $number up';
+  }
+
+  @override
+  String treasurySignatoryDown(int number) {
+    return 'Move block $number down';
+  }
+
+  @override
+  String treasurySignatoryRemove(int number) {
+    return 'Remove block $number';
+  }
+
+  @override
+  String get treasurySignatoryCaption => 'Caption';
+
+  @override
+  String get treasurySignatoryCaptionHint => 'PREPARED BY';
+
+  @override
+  String get treasurySignatoryName => 'Name (optional)';
+
+  @override
+  String get treasurySignatoryNameHint => 'Empty: signed by hand';
+
+  @override
+  String get treasurySignatoryFunction => 'Function';
+
+  @override
+  String get treasurySignatoryFunctionHint => 'Cashier';
+
+  @override
+  String get treasurySignatoryCloser =>
+      'On the daily report, use the name of the person who closed';
+
+  @override
+  String get treasurySignatoryCaptionRequired =>
+      'Caption required, 40 characters at most.';
+
+  @override
+  String get treasurySignatoryFunctionRequired =>
+      'Function required, 60 characters at most.';
+
+  @override
+  String get treasurySignatoryNameTooLong => '100 characters at most.';
+
+  @override
+  String get treasurySignatoryAdd => 'Add a signatory';
+
+  @override
+  String treasurySignatoriesMax(int count) {
+    return '$count signatories at most';
+  }
+
+  @override
+  String get treasurySignatoriesUseDefaults => 'Back to the default blocks';
+
+  @override
+  String get treasurySignatoriesSave => 'Save';
+
+  @override
+  String get treasurySignatoriesSaved => 'Signatories saved.';
+
+  @override
+  String get treasurySignatoriesRestored => 'Default blocks restored.';
+
+  @override
+  String get treasurySignatoriesChanged =>
+      'The list was just changed: here it is. Review it before saving.';
+
+  @override
+  String treasurySignatoriesChangedBy(String name) {
+    return '$name just changed the list: here it is. Review it before saving.';
+  }
+
+  @override
+  String get treasuryReasonSignatoriesChanged =>
+      'The list of signatories changed in the meantime.';
+
+  @override
+  String get treasuryReasonSignatoriesInvalid =>
+      'A signatory is incomplete or too long.';
+
+  @override
+  String get treasuryReportArchived => 'Archived';
+
+  @override
+  String get treasuryReportArchivedHint =>
+      'Frozen content; the PDF carries a verification QR code.';
+
+  @override
+  String get treasurySignatoriesFreezeWarning =>
+      'These are the default blocks. Saving designates this list: its names will no longer follow the role holders.';
+
+  @override
+  String get treasurySignatoriesDefaultsConfirm =>
+      'The designated list will be erased; reports not yet archived will use the default blocks again.';
+
+  @override
   String get treasuryReasonNotToday => 'This can only be done for today.';
 
   @override

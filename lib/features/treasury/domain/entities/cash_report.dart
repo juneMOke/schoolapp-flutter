@@ -63,6 +63,11 @@ class CashReport extends Equatable {
   final bool inProgress;
   final List<TreasuryCurrency> currencies;
 
+  /// Archivé (V212) : définitif, dernière journée passée, contenu figé — ses
+  /// signataires ne changent plus et son PDF porte un QR de vérification.
+  final bool archived;
+  final DateTime? archivedAt;
+
   const CashReport({
     required this.id,
     required this.kind,
@@ -72,6 +77,8 @@ class CashReport extends Equatable {
     required this.status,
     required this.inProgress,
     required this.currencies,
+    this.archived = false,
+    this.archivedAt,
   });
 
   bool get isFinal => status == CashReportStatus.finalReport;
@@ -86,6 +93,8 @@ class CashReport extends Equatable {
     status,
     inProgress,
     currencies,
+    archived,
+    archivedAt,
   ];
 }
 

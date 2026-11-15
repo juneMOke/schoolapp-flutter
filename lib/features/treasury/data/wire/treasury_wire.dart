@@ -344,6 +344,8 @@ abstract final class TreasuryWire {
         for (final code in (json['currencies'] as List?) ?? const [])
           ?TreasuryCurrency.fromCode(code as String?),
       ],
+      archived: json['archived'] == true,
+      archivedAt: DateTime.tryParse(json['archivedAt'] as String? ?? ''),
     );
   }
 

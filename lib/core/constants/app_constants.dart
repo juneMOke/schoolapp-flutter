@@ -1759,6 +1759,11 @@ class AppConstants {
   /// Le nombre de rapports par page de la liste (A5).
   static const int treasuryReportsPageSize = 8;
 
+  /// Les signataires imprimés au pied des rapports (GET `treasury.read`, PUT
+  /// `treasury.register.write`, V212) — en ligne seulement.
+  static const String treasuryReportSignatoriesEndpoint =
+      '/api/v1/treasury/report-signatories';
+
   /// **GET** (keyset) = les clôtures de caisse de l'école, réouvertures
   /// comprises (flux `treasury.closures`, `treasury.read`) : la tablette
   /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).

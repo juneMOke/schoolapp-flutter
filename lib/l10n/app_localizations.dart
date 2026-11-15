@@ -34992,6 +34992,246 @@ abstract class AppLocalizations {
   /// **'Sunday is not closed: its operations count for Monday, which is closed on Monday.'**
   String get treasuryCloseSunday;
 
+  /// No description provided for @treasurySignatoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report signatories'**
+  String get treasurySignatoriesTitle;
+
+  /// No description provided for @treasurySignatoriesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed at the foot of cash reports, left to right.'**
+  String get treasurySignatoriesSubtitle;
+
+  /// No description provided for @treasurySignatoriesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading signatories'**
+  String get treasurySignatoriesLoading;
+
+  /// No description provided for @treasurySignatoriesDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Default blocks: no signatory is designated. Names come from the holders of the school\'s roles.'**
+  String get treasurySignatoriesDefaults;
+
+  /// No description provided for @treasurySignatoriesUpdatedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed on {when} by {name}.'**
+  String treasurySignatoriesUpdatedBy(String when, String name);
+
+  /// No description provided for @treasurySignatoriesUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed on {when}.'**
+  String treasurySignatoriesUpdatedAt(String when);
+
+  /// No description provided for @treasuryDateAtTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} at {time}'**
+  String treasuryDateAtTime(String date, String time);
+
+  /// No description provided for @treasurySignatoryBlank.
+  ///
+  /// In en, this message translates to:
+  /// **'Name to write by hand'**
+  String get treasurySignatoryBlank;
+
+  /// No description provided for @treasurySignatoryCloserHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily report: the person who closed'**
+  String get treasurySignatoryCloserHint;
+
+  /// No description provided for @treasurySignatoriesEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit signatories'**
+  String get treasurySignatoriesEdit;
+
+  /// No description provided for @treasurySignatoriesReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only: only the promoter edits the signatories.'**
+  String get treasurySignatoriesReadOnly;
+
+  /// No description provided for @treasurySignatoriesEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Four blocks at most, printed in this order. An archived report keeps its signatories.'**
+  String get treasurySignatoriesEditHint;
+
+  /// No description provided for @treasurySignatoryBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Block {number}'**
+  String treasurySignatoryBlock(int number);
+
+  /// No description provided for @treasurySignatoryUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move block {number} up'**
+  String treasurySignatoryUp(int number);
+
+  /// No description provided for @treasurySignatoryDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move block {number} down'**
+  String treasurySignatoryDown(int number);
+
+  /// No description provided for @treasurySignatoryRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove block {number}'**
+  String treasurySignatoryRemove(int number);
+
+  /// No description provided for @treasurySignatoryCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption'**
+  String get treasurySignatoryCaption;
+
+  /// No description provided for @treasurySignatoryCaptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'PREPARED BY'**
+  String get treasurySignatoryCaptionHint;
+
+  /// No description provided for @treasurySignatoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get treasurySignatoryName;
+
+  /// No description provided for @treasurySignatoryNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty: signed by hand'**
+  String get treasurySignatoryNameHint;
+
+  /// No description provided for @treasurySignatoryFunction.
+  ///
+  /// In en, this message translates to:
+  /// **'Function'**
+  String get treasurySignatoryFunction;
+
+  /// No description provided for @treasurySignatoryFunctionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier'**
+  String get treasurySignatoryFunctionHint;
+
+  /// No description provided for @treasurySignatoryCloser.
+  ///
+  /// In en, this message translates to:
+  /// **'On the daily report, use the name of the person who closed'**
+  String get treasurySignatoryCloser;
+
+  /// No description provided for @treasurySignatoryCaptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption required, 40 characters at most.'**
+  String get treasurySignatoryCaptionRequired;
+
+  /// No description provided for @treasurySignatoryFunctionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Function required, 60 characters at most.'**
+  String get treasurySignatoryFunctionRequired;
+
+  /// No description provided for @treasurySignatoryNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'100 characters at most.'**
+  String get treasurySignatoryNameTooLong;
+
+  /// No description provided for @treasurySignatoryAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a signatory'**
+  String get treasurySignatoryAdd;
+
+  /// No description provided for @treasurySignatoriesMax.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} signatories at most'**
+  String treasurySignatoriesMax(int count);
+
+  /// No description provided for @treasurySignatoriesUseDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the default blocks'**
+  String get treasurySignatoriesUseDefaults;
+
+  /// No description provided for @treasurySignatoriesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get treasurySignatoriesSave;
+
+  /// No description provided for @treasurySignatoriesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Signatories saved.'**
+  String get treasurySignatoriesSaved;
+
+  /// No description provided for @treasurySignatoriesRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Default blocks restored.'**
+  String get treasurySignatoriesRestored;
+
+  /// No description provided for @treasurySignatoriesChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The list was just changed: here it is. Review it before saving.'**
+  String get treasurySignatoriesChanged;
+
+  /// No description provided for @treasurySignatoriesChangedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} just changed the list: here it is. Review it before saving.'**
+  String treasurySignatoriesChangedBy(String name);
+
+  /// No description provided for @treasuryReasonSignatoriesChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The list of signatories changed in the meantime.'**
+  String get treasuryReasonSignatoriesChanged;
+
+  /// No description provided for @treasuryReasonSignatoriesInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'A signatory is incomplete or too long.'**
+  String get treasuryReasonSignatoriesInvalid;
+
+  /// No description provided for @treasuryReportArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get treasuryReportArchived;
+
+  /// No description provided for @treasuryReportArchivedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen content; the PDF carries a verification QR code.'**
+  String get treasuryReportArchivedHint;
+
+  /// No description provided for @treasurySignatoriesFreezeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'These are the default blocks. Saving designates this list: its names will no longer follow the role holders.'**
+  String get treasurySignatoriesFreezeWarning;
+
+  /// No description provided for @treasurySignatoriesDefaultsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The designated list will be erased; reports not yet archived will use the default blocks again.'**
+  String get treasurySignatoriesDefaultsConfirm;
+
   /// No description provided for @treasuryReasonNotToday.
   ///
   /// In en, this message translates to:
