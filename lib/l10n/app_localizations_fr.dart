@@ -2503,6 +2503,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noteRejectionInvalid => 'Note invalide';
 
   @override
+  String get noteRejectionPointsMissing => 'Points manquants';
+
+  @override
+  String get noteRejectionPointsOutOfRange => 'Points hors barème';
+
+  @override
+  String get noteRejectionCommentTooLong => 'Commentaire trop long';
+
+  @override
   String get noteRejectionContextUnavailable => 'Contexte indisponible';
 
   @override

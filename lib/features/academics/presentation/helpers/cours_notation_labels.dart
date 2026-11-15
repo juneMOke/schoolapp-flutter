@@ -49,13 +49,20 @@ String evalRejectionLabel(AppLocalizations l10n, String code) => switch (code) {
   _ => l10n.evalRejectionGeneric,
 };
 
-/// Libellé du motif de rejet d'une note (`NoteLineOutcome.reason`) — `INVALID`
-/// porte un suffixe variable côté contrat (`INVALID: …`), reconnu par préfixe.
+/// Libellé du motif de rejet d'une note (`NoteLineOutcome.reason`).
+///
+/// Depuis le back v0.17.0, un refus de validation est un code stable préfixé
+/// `INVALID_` ; jusqu'à la v0.16, c'était `INVALID: <phrase>`. Le préfixe
+/// `INVALID` reste donc reconnu : il couvre les lignes rangées avant la mise à
+/// jour, et un code de validation que la tablette ne connaîtrait pas encore.
 String noteRejectionLabel(AppLocalizations l10n, String reason) =>
     switch (reason) {
       'UNKNOWN_EVALUATION' => l10n.noteRejectionUnknownEvaluation,
       'PERIODE_CLOSE' => l10n.noteRejectionPeriodeClose,
       'EVALUATION_CONTEXT_UNAVAILABLE' => l10n.noteRejectionContextUnavailable,
+      'INVALID_NOTE_POINTS_MISSING' => l10n.noteRejectionPointsMissing,
+      'INVALID_NOTE_POINTS_OUT_OF_RANGE' => l10n.noteRejectionPointsOutOfRange,
+      'INVALID_NOTE_COMMENT_TOO_LONG' => l10n.noteRejectionCommentTooLong,
       _ when reason.startsWith('INVALID') => l10n.noteRejectionInvalid,
       _ => l10n.noteRejectionGeneric,
     };

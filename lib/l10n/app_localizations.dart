@@ -3860,6 +3860,24 @@ abstract class AppLocalizations {
   /// **'Invalid grade'**
   String get noteRejectionInvalid;
 
+  /// No description provided for @noteRejectionPointsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Points missing'**
+  String get noteRejectionPointsMissing;
+
+  /// No description provided for @noteRejectionPointsOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Points out of range'**
+  String get noteRejectionPointsOutOfRange;
+
+  /// No description provided for @noteRejectionCommentTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment too long'**
+  String get noteRejectionCommentTooLong;
+
   /// No description provided for @noteRejectionContextUnavailable.
   ///
   /// In en, this message translates to:

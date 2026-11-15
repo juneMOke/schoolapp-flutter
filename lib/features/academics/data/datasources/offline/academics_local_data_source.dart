@@ -331,8 +331,9 @@ class AcademicsLocalDataSource {
   /// données, résolues par la clé naturelle `(evaluationId, studentId)`, avec la
   /// même garde LWW que [markNotesSynced] (ne touche pas une note ré-éditée
   /// depuis le push). [studentIdToReason] persiste le motif serveur
-  /// (`UNKNOWN_EVALUATION`/`PERIODE_CLOSE`/`INVALID: …`/
-  /// `EVALUATION_CONTEXT_UNAVAILABLE`) — surfacé à l'UI, jamais perdu en silence.
+  /// (`UNKNOWN_EVALUATION`/`PERIODE_CLOSE`/`EVALUATION_CONTEXT_UNAVAILABLE`, ou
+  /// un code préfixé `INVALID_` — avant le back v0.17.0, `INVALID: …`) —
+  /// surfacé à l'UI, jamais perdu en silence.
   Future<void> markNotesSyncError({
     required String evaluationId,
     required Map<String, int> studentIdToPushedUpdatedAt,
