@@ -38,11 +38,19 @@ class EnrollmentSheetAction extends StatefulWidget {
             if (e.docType == EditiqueDocumentType.enrollmentSheet.code &&
                 e.hasBytes)
               e,
-        ]..sort(
-          (a, b) => (b.emittedAt ?? b.createdAt).compareTo(
+        ]..sort((a, b) {
+          final byDay = (b.emittedAt ?? b.createdAt).compareTo(
             a.emittedAt ?? a.createdAt,
-          ),
-        );
+          );
+          if (byDay != 0) return byDay;
+          // Une fiche corrigée garde son numéro, en édition suivante, souvent
+          // le jour même : à jour égal, c'est l'édition qui dit la fiche en
+          // vigueur — jamais la stabilité du tri.
+          final byEdition = (b.edition ?? 1).compareTo(a.edition ?? 1);
+          return byEdition != 0
+              ? byEdition
+              : b.createdAt.compareTo(a.createdAt);
+        });
     return sheets.isEmpty ? null : sheets.first;
   }
 }
