@@ -9,6 +9,10 @@ import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/treasury/data/local/treasury_closure_dao.dart';
 import 'package:school_app_flutter/features/treasury/data/sync/treasury_closure_puller.dart';
 import 'package:school_app_flutter/features/treasury/data/local/cash_pending_probe_sql.dart';
+import 'package:school_app_flutter/features/treasury/data/online/treasury_dashboard_api.dart';
+import 'package:school_app_flutter/features/treasury/data/repositories/treasury_dashboard_repository_impl.dart';
+import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_dashboard_repository.dart';
+import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_overview_cubit.dart';
 import 'package:school_app_flutter/features/treasury/data/online/treasury_day_api.dart';
 import 'package:school_app_flutter/features/treasury/data/repositories/treasury_day_repository_impl.dart';
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_day_repository.dart';
@@ -67,7 +71,16 @@ void registerTreasury(GetIt getIt) {
       () => CashPendingProbeSql(getIt<Database>()),
     );
 
+  getIt.registerLazySingleton<TreasuryDashboardRepository>(
+    () => TreasuryDashboardRepositoryImpl(
+      TreasuryDashboardApi(getIt<Dio>(), getIt<Map<String, dynamic>>()),
+    ),
+  );
+
   // ── Écrans : cubits en fabrique, jamais singleton ──
+  getIt.registerFactory(
+    () => TreasuryOverviewCubit(getIt<TreasuryDashboardRepository>()),
+  );
   getIt
     ..registerFactory(
       () => CashRegistersCubit(getIt<CashRegistersRepository>()),

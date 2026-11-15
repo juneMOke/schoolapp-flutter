@@ -1350,4 +1350,17 @@ class AppDimensions {
 
   /// Modale de clôture.
   static const treasuryClosingModalMaxWidth = 560.0;
+
+  // ── Trésorerie · Tableau de bord ────────────────────────────────────────
+  /// Largeur minimale d'une carte KPI de caisse (grille auto-remplie : deux
+  /// colonnes sur tablette, une sur téléphone).
+  static const treasuryKpiCardMinWidth = 300.0;
+
+  /// La courbe des 8 derniers jours d'une carte KPI.
+  static const treasurySparklineWidth = 120.0;
+  static const treasurySparklineHeight = 34.0;
+
+  /// Hauteur de la courbe d'une caisse ; plus basse sous 520 dp.
+  static const treasuryChartHeight = 230.0;
+  static const treasuryChartHeightCompact = 200.0;
 }

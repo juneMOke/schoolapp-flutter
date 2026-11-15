@@ -374,6 +374,7 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // Les trois écrans de la trésorerie se LISENT sous `treasury.read` ; créer,
   // ajuster et clôturer sont gardés geste par geste.
   MenuConstants.treasuryMenuId: {
+    MenuConstants.treasuryDashboardId: ModuleAccess([Perm.treasuryRead]),
     MenuConstants.treasuryClosingId: ModuleAccess([Perm.treasuryRead]),
     MenuConstants.treasuryConfigId: ModuleAccess([Perm.treasuryRead]),
   },

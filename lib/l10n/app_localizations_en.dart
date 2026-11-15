@@ -22856,6 +22856,184 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryPeriodClosing => 'Balance at period end';
 
   @override
+  String get subMenuTreasuryDashboard => 'Dashboard';
+
+  @override
+  String get treasuryDashboardTitle => 'How much do we have in the registers?';
+
+  @override
+  String treasuryDashboardSubtitle(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'As of $dateString · each register in its own currency, never added together.';
+  }
+
+  @override
+  String treasuryEyebrowYear(String year) {
+    return 'Treasury · $year';
+  }
+
+  @override
+  String get treasuryKpiToClose => 'To close';
+
+  @override
+  String treasuryKpiClosedAt(String time) {
+    return 'Closed $time';
+  }
+
+  @override
+  String get treasuryKpiToday => 'today';
+
+  @override
+  String get treasuryKpiLast8Days => 'Last 8 days';
+
+  @override
+  String get treasuryKpiSeeClosing => 'See the register\'s closing';
+
+  @override
+  String get treasuryDashboardLoading => 'Loading the dashboard';
+
+  @override
+  String get treasuryEmptyDashboard =>
+      'Create at least one register, with its opening balance, to follow the treasury.';
+
+  @override
+  String get treasuryEvolutionTitle => 'Registers over time';
+
+  @override
+  String get treasuryEvolutionSubtitle =>
+      'One curve per register, each currency on its own axis';
+
+  @override
+  String get treasuryPeriodToday => 'Today';
+
+  @override
+  String get treasuryPeriodWeek => 'This week';
+
+  @override
+  String get treasuryPeriodMonth => 'This month';
+
+  @override
+  String get treasuryPeriodYear => 'This year';
+
+  @override
+  String get treasuryPeriodCustom => 'Range';
+
+  @override
+  String get treasuryRangeFrom => 'From';
+
+  @override
+  String get treasuryRangeTo => 'To';
+
+  @override
+  String get treasuryRangeInvalid => 'The end is before the start.';
+
+  @override
+  String get treasuryRangeChooseValid => 'Choose a valid range.';
+
+  @override
+  String treasuryRangeLabel(DateTime from, DateTime to) {
+    final intl.DateFormat fromDateFormat = intl.DateFormat.MMMd(localeName);
+    final String fromString = fromDateFormat.format(from);
+    final intl.DateFormat toDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String toString = toDateFormat.format(to);
+
+    return '$fromString → $toString';
+  }
+
+  @override
+  String treasuryCashDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cash days',
+      one: '1 cash day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get treasuryGranHour => 'hour by hour';
+
+  @override
+  String get treasuryGranDay => 'day by day';
+
+  @override
+  String get treasuryGranWeek => 'week by week';
+
+  @override
+  String get treasuryGranMonth => 'month by month';
+
+  @override
+  String treasuryDisplayAs(String granularity) {
+    return 'shown $granularity';
+  }
+
+  @override
+  String get treasuryAutoChosen => '(chosen automatically from the length)';
+
+  @override
+  String treasuryChartBalance(String granularity) {
+    return 'Balance $granularity';
+  }
+
+  @override
+  String get treasuryChartBalanceLabel => 'Balance';
+
+  @override
+  String get treasuryChartGaps => 'Gaps';
+
+  @override
+  String get treasuryChartNoPoint => 'No point in this range.';
+
+  @override
+  String get treasuryEvolutionLoading => 'Loading the evolution';
+
+  @override
+  String treasuryWeekBucket(int index) {
+    return 'W$index';
+  }
+
+  @override
+  String treasuryHourBucket(int hour) {
+    return '$hour:00';
+  }
+
+  @override
+  String treasuryDayBucket(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.E(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String treasuryMonthBucket(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMM(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String treasuryShortDateBucket(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String treasuryChartSemantics(
+    String register,
+    String opening,
+    String balance,
+  ) {
+    return '$register over time: opening $opening, balance $balance';
+  }
+
+  @override
   String get treasuryEmptyClosing =>
       'Create a register in Treasury ▸ Settings to get started.';
 

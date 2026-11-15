@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_closur
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 
@@ -244,6 +245,78 @@ abstract final class TreasuryWire {
       closingBalanceInCents: _int(json, 'closingBalanceInCents'),
       status: status,
       justification: justification is String ? justification : null,
+    );
+  }
+
+  // ── Tableau de bord (A1-A4) ───────────────────────────────────────────
+
+  static TreasuryOverview overviewFromJson(Object? body) {
+    final json = _map(body);
+    final year = _map(json['academicYear']);
+    return TreasuryOverview(
+      businessDate: _date(json, 'businessDate'),
+      academicYear: TreasuryAcademicYear(
+        id: _string(year, 'id'),
+        name: _string(year, 'name'),
+        startDate: _date(year, 'startDate'),
+        endDate: _date(year, 'endDate'),
+      ),
+      registers: [
+        for (final entry in _list(json['registers']))
+          RegisterOverview(
+            register: registerFromJson(entry['register']),
+            balanceInCents: _int(entry, 'balanceInCents'),
+            deltaTodayInCents: _int(entry, 'deltaTodayInCents'),
+            last8Days: [
+              for (final d in _list(entry['last8Days']))
+                DayBalance(
+                  day: _date(d, 'day'),
+                  balanceInCents: _int(d, 'balanceInCents'),
+                  closed: d['closed'] == true,
+                ),
+            ],
+            todayClosure: entry['todayClosure'] == null
+                ? null
+                : closureFromJson(entry['todayClosure']),
+          ),
+      ],
+    );
+  }
+
+  static TreasuryEvolution evolutionFromJson(Object? body) {
+    final json = _map(body);
+    final period = EvolutionPeriod.fromWire(json['period'] as String?);
+    final granularity = EvolutionGranularity.fromWire(
+      json['granularity'] as String?,
+    );
+    if (period == null || granularity == null) {
+      throw const FormatException('Évolution illisible');
+    }
+    return TreasuryEvolution(
+      period: period,
+      from: _date(json, 'from'),
+      to: _date(json, 'to'),
+      granularity: granularity,
+      cashDays: _int(json, 'cashDays'),
+      series: [
+        for (final entry in _list(json['series']))
+          RegisterSeries(
+            register: registerFromJson(entry['register']),
+            synthesis: synthesisFromJson(entry['synthesis']),
+            points: [
+              for (final p in _list(entry['points']))
+                EvolutionPoint(
+                  start: _instant(p, 'start'),
+                  end: _instant(p, 'end'),
+                  balanceInCents: (p['balanceInCents'] as num?)?.toInt(),
+                  inflowsInCents: _int(p, 'inflowsInCents'),
+                  outflowsInCents: _int(p, 'outflowsInCents'),
+                  gapsInCents: _int(p, 'gapsInCents'),
+                  partial: p['partial'] == true,
+                ),
+            ],
+          ),
+      ],
     );
   }
 

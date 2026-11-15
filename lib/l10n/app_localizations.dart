@@ -35130,6 +35130,256 @@ abstract class AppLocalizations {
   /// **'Balance at period end'**
   String get treasuryPeriodClosing;
 
+  /// No description provided for @subMenuTreasuryDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get subMenuTreasuryDashboard;
+
+  /// No description provided for @treasuryDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much do we have in the registers?'**
+  String get treasuryDashboardTitle;
+
+  /// No description provided for @treasuryDashboardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'As of {date} · each register in its own currency, never added together.'**
+  String treasuryDashboardSubtitle(DateTime date);
+
+  /// No description provided for @treasuryEyebrowYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Treasury · {year}'**
+  String treasuryEyebrowYear(String year);
+
+  /// No description provided for @treasuryKpiToClose.
+  ///
+  /// In en, this message translates to:
+  /// **'To close'**
+  String get treasuryKpiToClose;
+
+  /// No description provided for @treasuryKpiClosedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed {time}'**
+  String treasuryKpiClosedAt(String time);
+
+  /// No description provided for @treasuryKpiToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get treasuryKpiToday;
+
+  /// No description provided for @treasuryKpiLast8Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 8 days'**
+  String get treasuryKpiLast8Days;
+
+  /// No description provided for @treasuryKpiSeeClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'See the register\'s closing'**
+  String get treasuryKpiSeeClosing;
+
+  /// No description provided for @treasuryDashboardLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the dashboard'**
+  String get treasuryDashboardLoading;
+
+  /// No description provided for @treasuryEmptyDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Create at least one register, with its opening balance, to follow the treasury.'**
+  String get treasuryEmptyDashboard;
+
+  /// No description provided for @treasuryEvolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registers over time'**
+  String get treasuryEvolutionTitle;
+
+  /// No description provided for @treasuryEvolutionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One curve per register, each currency on its own axis'**
+  String get treasuryEvolutionSubtitle;
+
+  /// No description provided for @treasuryPeriodToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get treasuryPeriodToday;
+
+  /// No description provided for @treasuryPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get treasuryPeriodWeek;
+
+  /// No description provided for @treasuryPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get treasuryPeriodMonth;
+
+  /// No description provided for @treasuryPeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get treasuryPeriodYear;
+
+  /// No description provided for @treasuryPeriodCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get treasuryPeriodCustom;
+
+  /// No description provided for @treasuryRangeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get treasuryRangeFrom;
+
+  /// No description provided for @treasuryRangeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get treasuryRangeTo;
+
+  /// No description provided for @treasuryRangeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The end is before the start.'**
+  String get treasuryRangeInvalid;
+
+  /// No description provided for @treasuryRangeChooseValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a valid range.'**
+  String get treasuryRangeChooseValid;
+
+  /// No description provided for @treasuryRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} → {to}'**
+  String treasuryRangeLabel(DateTime from, DateTime to);
+
+  /// No description provided for @treasuryCashDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cash day} other{{count} cash days}}'**
+  String treasuryCashDays(int count);
+
+  /// No description provided for @treasuryGranHour.
+  ///
+  /// In en, this message translates to:
+  /// **'hour by hour'**
+  String get treasuryGranHour;
+
+  /// No description provided for @treasuryGranDay.
+  ///
+  /// In en, this message translates to:
+  /// **'day by day'**
+  String get treasuryGranDay;
+
+  /// No description provided for @treasuryGranWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'week by week'**
+  String get treasuryGranWeek;
+
+  /// No description provided for @treasuryGranMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'month by month'**
+  String get treasuryGranMonth;
+
+  /// No description provided for @treasuryDisplayAs.
+  ///
+  /// In en, this message translates to:
+  /// **'shown {granularity}'**
+  String treasuryDisplayAs(String granularity);
+
+  /// No description provided for @treasuryAutoChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'(chosen automatically from the length)'**
+  String get treasuryAutoChosen;
+
+  /// No description provided for @treasuryChartBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance {granularity}'**
+  String treasuryChartBalance(String granularity);
+
+  /// No description provided for @treasuryChartBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get treasuryChartBalanceLabel;
+
+  /// No description provided for @treasuryChartGaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Gaps'**
+  String get treasuryChartGaps;
+
+  /// No description provided for @treasuryChartNoPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'No point in this range.'**
+  String get treasuryChartNoPoint;
+
+  /// No description provided for @treasuryEvolutionLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the evolution'**
+  String get treasuryEvolutionLoading;
+
+  /// No description provided for @treasuryWeekBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'W{index}'**
+  String treasuryWeekBucket(int index);
+
+  /// No description provided for @treasuryHourBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{hour}:00'**
+  String treasuryHourBucket(int hour);
+
+  /// No description provided for @treasuryDayBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryDayBucket(DateTime date);
+
+  /// No description provided for @treasuryMonthBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryMonthBucket(DateTime date);
+
+  /// No description provided for @treasuryShortDateBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryShortDateBucket(DateTime date);
+
+  /// No description provided for @treasuryChartSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{register} over time: opening {opening}, balance {balance}'**
+  String treasuryChartSemantics(
+    String register,
+    String opening,
+    String balance,
+  );
+
   /// No description provided for @treasuryEmptyClosing.
   ///
   /// In en, this message translates to:

@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_closur
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_period.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -218,6 +219,77 @@ TreasuryPeriod treasuryWeek() => TreasuryPeriod(
           closingBalanceInCents: 495200,
           status: ClosureStatus.notClosed,
         ),
+      ],
+    ),
+  ],
+);
+
+/// Le tableau de bord du jeudi 22 octobre 2026 : la caisse USD ouverte, la
+/// caisse CDF close à 17:45 avec un écart.
+TreasuryOverview treasuryOverview({List<RegisterOverview>? registers}) =>
+    TreasuryOverview(
+      businessDate: demoDay,
+      academicYear: TreasuryAcademicYear(
+        id: 'ay-1',
+        name: '2026-2027',
+        startDate: DateTime(2026, 9, 1),
+        endDate: DateTime(2027, 7, 2),
+      ),
+      registers:
+          registers ??
+          [
+            RegisterOverview(
+              register: usdRegister,
+              balanceInCents: 481900,
+              deltaTodayInCents: -11400,
+              last8Days: [
+                for (var i = 0; i < 8; i++)
+                  DayBalance(
+                    day: DateTime(2026, 10, 13 + i),
+                    balanceInCents: 470000 + i * 2000,
+                    closed: i < 7,
+                  ),
+              ],
+            ),
+            RegisterOverview(
+              register: cdfRegister,
+              balanceInCents: 344500000,
+              deltaTodayInCents: 18000000,
+              last8Days: const [],
+              todayClosure: closedWithGap,
+            ),
+          ],
+    );
+
+/// Le mois d'octobre, semaine par semaine, pour la caisse USD.
+TreasuryEvolution treasuryEvolution() => TreasuryEvolution(
+  period: EvolutionPeriod.month,
+  from: DateTime(2026, 10),
+  to: DateTime(2026, 10, 31),
+  granularity: EvolutionGranularity.week,
+  cashDays: 19,
+  series: [
+    RegisterSeries(
+      register: usdRegister,
+      synthesis: const CashSynthesis(
+        openingInCents: 522000,
+        inflowsInCents: 614000,
+        outflowsInCents: 654000,
+        gapsInCents: 0,
+        closingInCents: 482000,
+        variationPercent: -8,
+      ),
+      points: [
+        for (var w = 0; w < 5; w++)
+          EvolutionPoint(
+            start: DateTime.utc(2026, 9, 30 + 7 * w, 23),
+            end: DateTime.utc(2026, 10, 7 + 7 * w, 23),
+            balanceInCents: w < 4 ? 500000 - w * 5000 : null,
+            inflowsInCents: 150000,
+            outflowsInCents: 160000,
+            gapsInCents: 0,
+            partial: w == 3,
+          ),
       ],
     ),
   ],

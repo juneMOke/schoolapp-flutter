@@ -116,6 +116,8 @@ class AppRoutesNames {
       '/${MenuConstants.communicationMenuId}/${MenuConstants.communicationTemplatesId}';
   static const String expenseQueue =
       '/${MenuConstants.expenseMenuId}/${MenuConstants.expenseQueueId}';
+  static const String treasuryDashboard =
+      '/${MenuConstants.treasuryMenuId}/${MenuConstants.treasuryDashboardId}';
   static const String treasuryClosing =
       '/${MenuConstants.treasuryMenuId}/${MenuConstants.treasuryClosingId}';
   static const String treasuryConfig =

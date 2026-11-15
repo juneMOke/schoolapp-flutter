@@ -124,6 +124,10 @@ class MenuConstants {
   /// écrans — une demande déposée le mois dernier attend toujours.
   static const String expenseQueueId = 'depenses-validations';
 
+  /// Tableau de bord de la trésorerie : combien chaque caisse détient, et
+  /// leur évolution.
+  static const String treasuryDashboardId = 'tr-dash';
+
   /// Configuration des caisses : une par devise, le montant que chacune
   /// détient, et ses ajustements.
   static const String treasuryConfigId = 'tr-config';

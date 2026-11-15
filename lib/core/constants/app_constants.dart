@@ -1726,6 +1726,16 @@ class AppConstants {
   /// journée écoulée, la plus récente en tête. `400 INVALID_RANGE`.
   static const String treasuryPeriodsEndpoint = '/api/v1/treasury/periods';
 
+  /// **GET** = combien chaque caisse détient maintenant (tableau de bord,
+  /// A2) : solde, variation du jour, 8 derniers jours, clôture du jour.
+  /// `404` sans année scolaire courante.
+  static const String treasuryOverviewEndpoint = '/api/v1/treasury/overview';
+
+  /// **GET** `?period=TODAY|WEEK|MONTH|YEAR|CUSTOM&from=&to=` = le solde de
+  /// chaque caisse sur la période, en tranches choisies par le serveur (R5).
+  /// `400 INVALID_RANGE`.
+  static const String treasuryEvolutionEndpoint = '/api/v1/treasury/evolution';
+
   /// **GET** (keyset) = les clôtures de caisse de l'école, réouvertures
   /// comprises (flux `treasury.closures`, `treasury.read`) : la tablette
   /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).

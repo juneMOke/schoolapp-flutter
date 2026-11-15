@@ -1,0 +1,124 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
+import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
+import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
+import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_overview_cubit.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/evolution_panel.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_kpi_card.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// Trésorerie ▸ Tableau de bord (A1-A4) : combien chaque caisse détient,
+/// puis leur évolution. Chaque caisse dans sa devise, jamais additionnées.
+class TreasuryDashboardScreen extends StatelessWidget {
+  /// La clôture de la caisse, journée du jour (A2). `null` sans le droit.
+  final VoidCallback? onOpenClosing;
+
+  /// La configuration des caisses (état vide). `null` sans le droit.
+  final VoidCallback? onConfigure;
+
+  const TreasuryDashboardScreen({
+    super.key,
+    this.onOpenClosing,
+    this.onConfigure,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return BlocBuilder<TreasuryOverviewCubit, TreasuryOverviewState>(
+      builder: (context, state) {
+        final overview = state.overview;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            EteeloPageHeader(
+              eyebrow: overview == null
+                  ? l10n.menuTreasury
+                  : l10n.treasuryEyebrowYear(overview.academicYear.name),
+              title: l10n.treasuryDashboardTitle,
+              subtitle: overview == null
+                  ? null
+                  : l10n.treasuryDashboardSubtitle(overview.businessDate),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            switch (state.status) {
+              TreasuryOverviewStatus.loading => EteeloListSkeleton(
+                rowCount: 3,
+                pillCount: 2,
+                showAvatar: false,
+                semanticsLabel: l10n.treasuryDashboardLoading,
+              ),
+              TreasuryOverviewStatus.failure => TreasuryResultsErrorState(
+                failure: state.failure ?? const ServerFailure(),
+                onRetry: context.read<TreasuryOverviewCubit>().load,
+              ),
+              _ when overview == null || overview.registers.isEmpty => _empty(
+                l10n,
+              ),
+              _ => _content(overview),
+            },
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _empty(AppLocalizations l10n) {
+    final configure = onConfigure;
+    return EteeloEmptyResult(
+      label: l10n.treasuryEmptyTitle,
+      description: l10n.treasuryEmptyDashboard,
+      medallionIcon: Icons.payments_outlined,
+      fullWidthCard: true,
+      primaryAction: configure == null
+          ? null
+          : EteeloButton.primary(
+              label: l10n.treasuryCreateRegister,
+              icon: Icons.add,
+              onPressed: configure,
+              fullWidth: false,
+            ),
+    );
+  }
+
+  Widget _content(TreasuryOverview overview) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      EteeloGridView(
+        itemCount: overview.registers.length,
+        padding: EdgeInsets.zero,
+        minItemWidth: AppDimensions.treasuryKpiCardMinWidth,
+        spacing: AppSpacing.lg,
+        itemBuilder: (context, index) => RegisterKpiCard(
+          overview: overview.registers[index],
+          onOpen: onOpenClosing,
+        ),
+      ),
+      const SizedBox(height: AppSpacing.xl),
+      DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceRaised,
+          borderRadius: AppRadius.brLg,
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: EvolutionPanel(
+            firstDay: overview.academicYear.startDate,
+            today: overview.businessDate,
+          ),
+        ),
+      ),
+    ],
+  );
+}

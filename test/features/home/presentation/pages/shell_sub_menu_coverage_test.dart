@@ -93,6 +93,7 @@ const Map<String, String> _constants = {
   'expenseDashboardId': 'depenses-tableau-de-bord',
   'expenseRegisterId': 'depenses-frais-fonctionnement',
   'expenseQueueId': 'depenses-validations',
+  'treasuryDashboardId': 'tr-dash',
   'treasuryConfigId': 'tr-config',
   'treasuryClosingId': 'tr-cloture',
   'communicationAnnouncementsId': 'communication-communiques',

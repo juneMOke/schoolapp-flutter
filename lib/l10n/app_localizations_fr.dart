@@ -23014,6 +23014,184 @@ class AppLocalizationsFr extends AppLocalizations {
   String get treasuryPeriodClosing => 'Reste en fin de période';
 
   @override
+  String get subMenuTreasuryDashboard => 'Tableau de bord';
+
+  @override
+  String get treasuryDashboardTitle => 'Combien avons-nous en caisse ?';
+
+  @override
+  String treasuryDashboardSubtitle(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Situation au $dateString · chaque caisse dans sa devise, jamais additionnées.';
+  }
+
+  @override
+  String treasuryEyebrowYear(String year) {
+    return 'Trésorerie · $year';
+  }
+
+  @override
+  String get treasuryKpiToClose => 'À clôturer';
+
+  @override
+  String treasuryKpiClosedAt(String time) {
+    return 'Clôturée $time';
+  }
+
+  @override
+  String get treasuryKpiToday => 'aujourd\'hui';
+
+  @override
+  String get treasuryKpiLast8Days => '8 derniers jours';
+
+  @override
+  String get treasuryKpiSeeClosing => 'Voir la clôture de la caisse';
+
+  @override
+  String get treasuryDashboardLoading => 'Chargement du tableau de bord';
+
+  @override
+  String get treasuryEmptyDashboard =>
+      'Créez au moins une caisse, avec son solde d\'ouverture, pour suivre la trésorerie.';
+
+  @override
+  String get treasuryEvolutionTitle => 'Évolution des caisses';
+
+  @override
+  String get treasuryEvolutionSubtitle =>
+      'Une courbe par caisse, chaque devise sur son propre axe';
+
+  @override
+  String get treasuryPeriodToday => 'Aujourd\'hui';
+
+  @override
+  String get treasuryPeriodWeek => 'Cette semaine';
+
+  @override
+  String get treasuryPeriodMonth => 'Ce mois';
+
+  @override
+  String get treasuryPeriodYear => 'Cette année';
+
+  @override
+  String get treasuryPeriodCustom => 'Période';
+
+  @override
+  String get treasuryRangeFrom => 'Du';
+
+  @override
+  String get treasuryRangeTo => 'Au';
+
+  @override
+  String get treasuryRangeInvalid => 'La fin est avant le début.';
+
+  @override
+  String get treasuryRangeChooseValid => 'Choisissez une période valide.';
+
+  @override
+  String treasuryRangeLabel(DateTime from, DateTime to) {
+    final intl.DateFormat fromDateFormat = intl.DateFormat.MMMd(localeName);
+    final String fromString = fromDateFormat.format(from);
+    final intl.DateFormat toDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String toString = toDateFormat.format(to);
+
+    return '$fromString → $toString';
+  }
+
+  @override
+  String treasuryCashDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours de caisse',
+      one: '1 jour de caisse',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get treasuryGranHour => 'heure par heure';
+
+  @override
+  String get treasuryGranDay => 'jour par jour';
+
+  @override
+  String get treasuryGranWeek => 'semaine par semaine';
+
+  @override
+  String get treasuryGranMonth => 'mois par mois';
+
+  @override
+  String treasuryDisplayAs(String granularity) {
+    return 'affichage $granularity';
+  }
+
+  @override
+  String get treasuryAutoChosen => '(choisi automatiquement selon la durée)';
+
+  @override
+  String treasuryChartBalance(String granularity) {
+    return 'Solde $granularity';
+  }
+
+  @override
+  String get treasuryChartBalanceLabel => 'Solde';
+
+  @override
+  String get treasuryChartGaps => 'Écarts';
+
+  @override
+  String get treasuryChartNoPoint => 'Aucun point sur cette période.';
+
+  @override
+  String get treasuryEvolutionLoading => 'Chargement de l\'évolution';
+
+  @override
+  String treasuryWeekBucket(int index) {
+    return 'S$index';
+  }
+
+  @override
+  String treasuryHourBucket(int hour) {
+    return '$hour h';
+  }
+
+  @override
+  String treasuryDayBucket(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.E(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String treasuryMonthBucket(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMM(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String treasuryShortDateBucket(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String treasuryChartSemantics(
+    String register,
+    String opening,
+    String balance,
+  ) {
+    return 'Évolution de $register : ouverture $opening, solde $balance';
+  }
+
+  @override
   String get treasuryEmptyClosing =>
       'Créez une caisse dans Trésorerie ▸ Configuration pour commencer.';
 
