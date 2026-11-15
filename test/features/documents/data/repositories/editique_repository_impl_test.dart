@@ -14,6 +14,8 @@ import 'package:school_app_flutter/features/documents/data/datasources/editique_
 import 'package:school_app_flutter/features/documents/data/repositories/editique_repository_impl.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 
+import '../local/editique_cache_fixtures.dart';
+
 class MockEditiqueRemoteDataSource extends Mock
     implements EditiqueRemoteDataSource {}
 
@@ -21,6 +23,21 @@ class MockConnectivityService extends Mock implements ConnectivityService {}
 
 Uint8List _pdfBytes() =>
     Uint8List.fromList(<int>[0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x37]);
+
+/// Une pièce détenue, telle que le cache la restitue : ses octets et la ligne
+/// d'index qui les décrit.
+EditiqueCachedPiece _cachedPiece({
+  String? documentId = 'doc-1',
+  String? documentNumber = 'ETL-RC-2526-000001',
+  int? edition,
+}) => (
+  entry: cacheEntry(
+    documentId: documentId,
+    documentNumber: documentNumber,
+    edition: edition,
+  ),
+  bytes: _pdfBytes(),
+);
 
 HttpResponse<Uint8List> _pdfResponse({
   String? contentDisposition,
@@ -81,6 +98,7 @@ void main() {
       ),
     ).thenAnswer((_) async => null);
     when(() => cache.readByDocumentId(any())).thenAnswer((_) async => null);
+    when(() => cache.knowsDocumentId(any())).thenAnswer((_) async => false);
     when(
       () => cache.readByDocumentNumber(
         schoolId: any(named: 'schoolId'),
@@ -501,7 +519,7 @@ void main() {
     test('sert la copie locale sans toucher au réseau', () async {
       when(
         () => cache.readByDocumentId('doc-1'),
-      ).thenAnswer((_) async => _pdfBytes());
+      ).thenAnswer((_) async => _cachedPiece());
 
       final result = await repository.restitute(
         type: EditiqueDocumentType.paymentReceipt,
@@ -526,7 +544,7 @@ void main() {
             schoolId: 'school-1',
             documentNumber: 'ETL-RC-2526-000001',
           ),
-        ).thenAnswer((_) async => _pdfBytes());
+        ).thenAnswer((_) async => _cachedPiece(documentId: null));
 
         final result = await repository.restitute(
           type: EditiqueDocumentType.paymentReceipt,
@@ -534,6 +552,136 @@ void main() {
         );
 
         expect(result.isRight(), isTrue);
+      },
+    );
+
+    // Une pièce réémise garde son numéro (back v0.17.0) : la visionneuse doit
+    // pouvoir dire laquelle elle montre, et seule la ligne lue le sait.
+    test('la copie locale porte l édition de la ligne lue', () async {
+      when(() => cache.readByDocumentId('doc-ai-2')).thenAnswer(
+        (_) async => _cachedPiece(
+          documentId: 'doc-ai-2',
+          documentNumber: 'ETL-AI-2526-000087',
+          edition: 2,
+        ),
+      );
+
+      final result = await repository.restitute(
+        type: EditiqueDocumentType.enrollmentAttestation,
+        documentId: 'doc-ai-2',
+        documentNumber: 'ETL-AI-2526-000087',
+      );
+
+      result.fold((f) => fail('attendu Right, reçu $f'), (document) {
+        expect(document.edition, 2);
+        expect(document.documentNumber, 'ETL-AI-2526-000087');
+      });
+    });
+
+    test(
+      'désignée par son seul identifiant, la copie reprend le numéro de sa ligne',
+      () async {
+        when(() => cache.readByDocumentId('doc-np-1')).thenAnswer(
+          (_) async => _cachedPiece(
+            documentId: 'doc-np-1',
+            documentNumber: 'ETL-NP-2526-000009',
+          ),
+        );
+
+        final result = await repository.restitute(
+          type: EditiqueDocumentType.notePerception,
+          documentId: 'doc-np-1',
+        );
+
+        result.fold((f) => fail('attendu Right, reçu $f'), (document) {
+          expect(document.documentNumber, 'ETL-NP-2526-000009');
+          expect(document.fileName, 'ETL-NP-2526-000009.pdf');
+          expect(document.edition, isNull);
+        });
+      },
+    );
+
+    // Connue sous son identifiant mais sans ses octets : un défaut de cache. La
+    // copie du même numéro serait l'édition qu'elle remplace (back v0.17.0).
+    group('identifiant connu de l index, octets absents', () {
+      const number = 'ETL-AI-2526-000087';
+
+      void verifyNoNumberFallback() => verifyNever(
+        () => cache.readByDocumentNumber(
+          schoolId: any(named: 'schoolId'),
+          documentNumber: any(named: 'documentNumber'),
+          unidentifiedOnly: any(named: 'unidentifiedOnly'),
+        ),
+      );
+
+      setUp(
+        () => when(
+          () => cache.knowsDocumentId('doc-ai-2'),
+        ).thenAnswer((_) async => true),
+      );
+
+      test('en ligne, la pièce se retélécharge par son identifiant', () async {
+        goOnline();
+        when(() => dataSource.downloadDocument(any(), any())).thenAnswer(
+          (_) async => _pdfResponse(
+            contentDisposition: 'attachment; filename="$number.pdf"',
+          ),
+        );
+
+        final result = await repository.restitute(
+          type: EditiqueDocumentType.enrollmentAttestation,
+          documentId: 'doc-ai-2',
+          documentNumber: number,
+        );
+
+        expect(result.isRight(), isTrue);
+        verify(() => dataSource.downloadDocument(auth, 'doc-ai-2')).called(1);
+        verifyNoNumberFallback();
+      });
+
+      test('hors ligne, l échec le dit, sans repli sur le numéro', () async {
+        goOffline();
+
+        final result = await repository.restitute(
+          type: EditiqueDocumentType.enrollmentAttestation,
+          documentId: 'doc-ai-2',
+          documentNumber: number,
+        );
+
+        expect(result.fold((f) => f, (_) => null), isA<NetworkFailure>());
+        verifyNoNumberFallback();
+      });
+    });
+
+    // Régime AM-5 : une pièce rangée avant que le serveur n'annonce ses
+    // identifiants. Faute de toute ligne pour l'identifiant, c'est elle.
+    test(
+      'un identifiant inconnu de l index retrouve la copie sans identifiant',
+      () async {
+        when(
+          () => cache.readByDocumentNumber(
+            schoolId: 'school-1',
+            documentNumber: 'ETL-AI-2526-000087',
+            unidentifiedOnly: true,
+          ),
+        ).thenAnswer(
+          (_) async => _cachedPiece(
+            documentId: null,
+            documentNumber: 'ETL-AI-2526-000087',
+          ),
+        );
+
+        final result = await repository.restitute(
+          type: EditiqueDocumentType.enrollmentAttestation,
+          documentId: 'doc-ai-1',
+          documentNumber: 'ETL-AI-2526-000087',
+        );
+
+        result.fold(
+          (f) => fail('attendu Right, reçu $f'),
+          (document) => expect(document.bytes, _pdfBytes()),
+        );
+        verifyNever(() => dataSource.downloadDocument(any(), any()));
       },
     );
 

@@ -355,28 +355,41 @@ class EditiqueRepositoryImpl implements EditiqueRepository {
     required String? number,
   }) async {
     try {
-      var bytes = id == null ? null : await cache.readByDocumentId(id);
+      var piece = id == null ? null : await cache.readByDocumentId(id);
 
-      if (bytes == null && number != null) {
+      // L'identifiant est décisif : une pièce que l'index connaît sous lui,
+      // même sans ses octets, ne se cherche pas par son numéro — c'est un
+      // défaut de cache, que le retéléchargement répare. Une AI, une NP ou une
+      // FI remplaçante reprenant le numéro de celle qu'elle remplace (back
+      // v0.17.0), le repli servirait la pièce remplacée sous l'identifiant de
+      // la remplaçante. Le numéro ne vaut donc que faute de ligne pour
+      // l'identifiant (régime AM-5), ou faute d'identifiant.
+      if (piece == null &&
+          number != null &&
+          (id == null || !await cache.knowsDocumentId(id))) {
         final schoolId = currentUser.schoolId;
         // Le numéro n'est unique que **par école** : le chercher sans elle
         // rendrait la pièce d'un autre établissement.
         if (schoolId != null && schoolId.isNotEmpty) {
-          bytes = await cache.readByDocumentNumber(
+          piece = await cache.readByDocumentNumber(
             schoolId: schoolId,
             documentNumber: number,
             unidentifiedOnly: id != null,
           );
         }
       }
-      if (bytes == null) return null;
+      if (piece == null) return null;
 
+      // La ligne lue dit quelle édition de ce numéro la tablette détient : une
+      // pièce réémise le garde, et la visionneuse doit pouvoir dire laquelle.
+      final resolvedNumber = number ?? _blankToNull(piece.entry.documentNumber);
       return EditiqueDocument(
         type: type,
-        bytes: bytes,
-        fileName: '${number ?? type.code.toLowerCase()}.pdf',
-        documentNumber: number,
+        bytes: piece.bytes,
+        fileName: '${resolvedNumber ?? type.code.toLowerCase()}.pdf',
+        documentNumber: resolvedNumber,
         documentId: id,
+        edition: piece.entry.edition,
       );
     } catch (_) {
       // Une lecture de cache ne remonte jamais d'erreur : au pire elle n'a rien

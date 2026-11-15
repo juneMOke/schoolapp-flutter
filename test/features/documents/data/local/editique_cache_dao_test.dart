@@ -531,6 +531,65 @@ void main() {
       expect(found?.id, 'c-1');
     });
 
+    // Une ligne sans identifiant date d'avant les éditions (régime AM-5) : c'est
+    // une première édition. La remplaçante qui reprend son numéro (une AI, une
+    // NP ou une FI réémise, back v0.17.0) est une autre pièce.
+    test(
+      'une édition suivante n adopte pas une pièce sans identifiant',
+      () async {
+        await dao.upsert(
+          cacheEntry(
+            id: 'c-1',
+            documentId: null,
+            documentNumber: 'ETL-AI-1',
+            docType: 'AI',
+            contentSha256: 'empreinte-edition-1',
+          ),
+        );
+
+        await dao.upsert(
+          cacheEntry(
+            id: 'c-2',
+            documentId: 'doc-2',
+            documentNumber: 'ETL-AI-1',
+            docType: 'AI',
+            contentSha256: null,
+            edition: 2,
+          ),
+        );
+
+        final legacy = await dao.findUnidentifiedByDocumentNumber(
+          schoolId: 'school-1',
+          documentNumber: 'ETL-AI-1',
+        );
+        final second = await dao.findByDocumentId('doc-2');
+        expect(legacy?.id, 'c-1');
+        expect(legacy?.contentSha256, 'empreinte-edition-1');
+        expect(second?.id, 'c-2');
+        expect(second?.contentSha256, isNull);
+      },
+    );
+
+    test(
+      'une première édition annoncée adopte toujours la pièce sans identifiant',
+      () async {
+        await dao.upsert(
+          cacheEntry(id: 'c-1', documentId: null, documentNumber: 'ETL-RC-1'),
+        );
+
+        await dao.upsert(
+          cacheEntry(
+            id: 'c-2',
+            documentId: 'doc-1',
+            documentNumber: 'ETL-RC-1',
+            edition: 1,
+          ),
+        );
+
+        expect((await dao.findByDocumentId('doc-1'))?.id, 'c-1');
+      },
+    );
+
     test('deux pièces sans identifiant ne partagent pas un numéro', () async {
       await db.insert('editique_cache_entries', {
         ...cacheEntry(id: 'c-1', documentId: null).toMap(),

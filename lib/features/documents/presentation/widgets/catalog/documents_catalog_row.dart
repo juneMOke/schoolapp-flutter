@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_c
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/presentation/bloc/editique_document_bloc.dart';
 import 'package:school_app_flutter/features/documents/presentation/context/documents_catalog_intent.dart';
+import 'package:school_app_flutter/features/documents/presentation/helpers/document_edition_label.dart';
 import 'package:school_app_flutter/features/documents/presentation/models/documents_catalog_action.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/catalog/documents_catalog_action_button.dart';
 import 'package:school_app_flutter/features/documents/presentation/widgets/catalog/documents_catalog_labels.dart';
@@ -290,8 +291,6 @@ class _DocumentsCatalogRowState extends State<DocumentsCatalogRow> {
             ),
             known.number,
           );
-    return edition == null
-        ? base
-        : '$base · ${l10n.documentsCurrentEdition(edition)}';
+    return withDocumentEdition(l10n, base, edition);
   }
 }

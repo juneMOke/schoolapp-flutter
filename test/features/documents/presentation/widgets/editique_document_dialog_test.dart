@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/features/documents/domain/usecases/reissue_document_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_sheet_use_case.dart';
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/editique_document.dart';
+import 'package:school_app_flutter/features/documents/domain/entities/editique_document_type.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_account_statement_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_enrollment_attestation_use_case.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/emit_financial_clearance_use_case.dart';
@@ -212,6 +214,86 @@ void main() {
       verify(() => useCase(any())).called(2);
     });
   });
+
+  // Une pièce réémise garde son numéro, en édition suivante (back v0.17.0) :
+  // le numéro seul ne dit plus laquelle on regarde.
+  group('en-tête', () {
+    testWidgets('dit l édition d une pièce remplacée sous son numéro', (
+      tester,
+    ) async {
+      await _pumpDocument(tester, edition: 2);
+
+      expect(
+        find.text('Pièce n° ETL-RC-2526-000042 · édition 2'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('une première édition ne montre que son numéro', (
+      tester,
+    ) async {
+      await _pumpDocument(tester, edition: 1);
+
+      expect(find.text('Pièce n° ETL-RC-2526-000042'), findsOneWidget);
+    });
+
+    testWidgets('une édition inconnue non plus', (tester) async {
+      await _pumpDocument(tester, edition: null);
+
+      expect(find.text('Pièce n° ETL-RC-2526-000042'), findsOneWidget);
+    });
+  });
+}
+
+/// Monte la modale sur une pièce reçue, d'édition donnée.
+Future<void> _pumpDocument(WidgetTester tester, {required int? edition}) async {
+  tester.view.physicalSize = _tabletLandscape;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+
+  final useCase = MockEmitPaymentReceiptUseCase();
+  when(() => useCase(any())).thenAnswer(
+    (_) async => Right(
+      EditiqueDocument(
+        type: EditiqueDocumentType.paymentReceipt,
+        bytes: Uint8List(4),
+        fileName: 'ETL-RC-2526-000042.pdf',
+        documentNumber: 'ETL-RC-2526-000042',
+        documentId: 'doc-rc-42',
+        edition: edition,
+      ),
+    ),
+  );
+
+  await tester.pumpWidget(
+    MaterialApp(
+      locale: const Locale('fr'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: BlocProvider<EditiqueDocumentBloc>(
+          create: (_) => EditiqueDocumentBloc(
+            emitEnrollmentSheetUseCase: MockEmitEnrollmentSheetUseCase(),
+            emitEnrollmentAttestationUseCase:
+                MockEmitEnrollmentAttestationUseCase(),
+            emitNotePerceptionUseCase: MockEmitNotePerceptionUseCase(),
+            emitPaymentReceiptUseCase: useCase,
+            emitAccountStatementUseCase: MockEmitAccountStatementUseCase(),
+            emitFinancialClearanceUseCase: MockEmitFinancialClearanceUseCase(),
+            restituteDocumentUseCase: MockRestituteDocumentUseCase(),
+            reissueDocumentUseCase: MockReissueDocumentUseCase(),
+          )..add(const EditiquePaymentReceiptRequested(paymentId: 'p-1')),
+          child: const EditiqueDocumentDialogView(
+            title: 'Reçu de paiement',
+            onRetry: _noopRetry,
+          ),
+        ),
+      ),
+    ),
+  );
+  // L'aperçu anime son gabarit : `pumpAndSettle` ne se poserait jamais.
+  await tester.pump();
+  await tester.pump();
 }
 
 /// Monte la modale sur un échec donné et rend le mock, pour vérifier le rejeu.

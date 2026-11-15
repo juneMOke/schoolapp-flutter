@@ -263,9 +263,10 @@ class DocumentsCatalogAction extends Equatable {
     return DocumentsCatalogAction._(
       // Une pièce retirée fait retomber la ligne sur « Émettre », jamais sur
       // « Consulter ». La trace locale porte encore son numéro, mais le serveur
-      // ne le re-servira plus : il traite une pièce annulée comme absente et en
-      // scellera une NEUVE. Promettre « Consulter » annoncerait donc le
-      // contraire de ce qui va se passer.
+      // ne re-servira plus cette pièce : il traite une pièce annulée comme
+      // absente et en scellera une NEUVE — sous le même numéro, en édition
+      // suivante, pour une AI, une NP ou une FI (back v0.17.0). Promettre
+      // « Consulter » annoncerait donc le contraire de ce qui va se passer.
       kind: (known == null || cancelled != null)
           ? DocumentsCatalogActionKind.emit
           : DocumentsCatalogActionKind.consult,
@@ -283,12 +284,24 @@ class DocumentsCatalogAction extends Equatable {
   /// échouerait ; annulée, il ressortirait un document sans valeur. Et la
   /// recherche ne s'arrête pas à la première ligne du type : une pièce retirée
   /// ne doit pas masquer une pièce plus ancienne qui, elle, tient toujours.
+  ///
+  /// Une pièce dont le numéro est déjà porté par une ligne plus récente du type
+  /// est écartée, octets ou non : depuis le back v0.17.0, une AI, une NP ou une
+  /// FI remplaçante reprend le numéro de celle qu'elle remplace. La plus
+  /// ancienne est donc remplacée, même tant que la tablette n'en a pas appris
+  /// l'annulation — la ressortir montrerait une pièce périmée comme en
+  /// vigueur, sous une ligne qui annonce l'édition suivante.
   static EditiqueCacheEntry? _findCached(
     List<EditiqueCacheEntry> cached,
     String code,
   ) {
+    final newerNumbers = <String>{};
     for (final entry in cached) {
       if (entry.docType.toUpperCase() != code.toUpperCase()) continue;
+      final number = entry.documentNumber;
+      if (number != null && number.isNotEmpty && !newerNumbers.add(number)) {
+        continue;
+      }
       if (entry.hasBytes && !entry.isCancelled) return entry;
     }
     return null;

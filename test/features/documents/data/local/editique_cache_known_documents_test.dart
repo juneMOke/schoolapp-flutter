@@ -99,6 +99,7 @@ void main() {
     int sizeBytes = 4096,
     int? cancelledAt,
     String? cancellationReason,
+    int? edition,
   }) => EditiqueCacheEntry(
     id: 'ignoré',
     documentId: documentId,
@@ -111,6 +112,7 @@ void main() {
     emittedAt: 500,
     cancelledAt: cancelledAt,
     cancellationReason: cancellationReason,
+    edition: edition,
     createdAt: 1000,
     lastAccessedAt: 1000,
   );
@@ -190,7 +192,10 @@ void main() {
       expect(apres.sizeBytes, avant.sizeBytes);
       expect(apres.id, avant.id, reason: 'la clé locale nomme le fichier');
       // Et la pièce se relit toujours.
-      expect(await cache.readByDocumentId('doc-1'), equals(pdf('note')));
+      expect(
+        (await cache.readByDocumentId('doc-1'))?.bytes,
+        equals(pdf('note')),
+      );
     });
 
     test('n évince jamais une pièce qu il vient d apprendre', () async {
@@ -327,7 +332,10 @@ void main() {
       // Les octets restent, et le fichier avec.
       expect(apres.hasBytes, isTrue);
       expect(apres.contentSha256, avant.contentSha256);
-      expect(await cache.readByDocumentId('doc-1'), equals(pdf('note')));
+      expect(
+        (await cache.readByDocumentId('doc-1'))?.bytes,
+        equals(pdf('note')),
+      );
       expect(cacheDir.listSync(), hasLength(1));
     });
 
@@ -383,6 +391,122 @@ void main() {
 
       expect((await index.findByDocumentId('doc-1'))!.isCancelled, isTrue);
       expect((await index.findByDocumentId('doc-2'))!.isCancelled, isFalse);
+    });
+  });
+
+  /// Une AI, une NP ou une FI réémise garde son numéro (back v0.17.0). Une
+  /// pièce rangée par son seul numéro (régime AM-5, d'avant les identifiants)
+  /// est une première édition : la remplaçante ne doit jamais la faire sienne.
+  group('une édition suivante face à une pièce sans identifiant', () {
+    const number = 'ETL-AI-2526-000087';
+
+    Future<void> seedUnidentifiedFirstEdition() => cache.put(
+      docType: 'AI',
+      documentNumber: number,
+      studentId: 's-1',
+      academicYearId: 'y-1',
+      schoolId: 'school-1',
+      bytes: pdf('edition-1'),
+    );
+
+    Future<Uint8List?> unidentifiedBytes() async =>
+        (await cache.readByDocumentNumber(
+          schoolId: 'school-1',
+          documentNumber: number,
+          unidentifiedOnly: true,
+        ))?.bytes;
+
+    EditiqueCacheEntry replaced() => known(
+      documentId: 'doc-ai-1',
+      documentNumber: number,
+      docType: 'AI',
+      cancelledAt: 900,
+      cancellationReason: 'Niveau corrigé',
+    );
+
+    EditiqueCacheEntry replacement() => known(
+      documentId: 'doc-ai-2',
+      documentNumber: number,
+      docType: 'AI',
+      edition: 2,
+    );
+
+    // Ce que le cache garantit seul : la remplaçante est CONNUE sans octets, ce
+    // qui rend son identifiant décisif à la restitution (retéléchargement, pas
+    // repli sur le numéro — éprouvé côté repository), et la copie du même
+    // numéro garde ses octets sans rien hériter.
+    test('la remplaçante apprise seule est connue, sans octets', () async {
+      await seedUnidentifiedFirstEdition();
+
+      await cache.recordKnownDocuments([replacement()]);
+
+      expect(await cache.knowsDocumentId('doc-ai-2'), isTrue);
+      expect(await cache.readByDocumentId('doc-ai-2'), isNull);
+      final legacy = await index.findUnidentifiedByDocumentNumber(
+        schoolId: 'school-1',
+        documentNumber: number,
+      );
+      expect(legacy?.hasBytes, isTrue);
+      expect(legacy?.edition, isNull);
+    });
+
+    // La remplacée et la remplaçante sont scellées dans la même transaction :
+    // elles descendent ensemble, dans un ordre que rien ne fixe. Remplaçante
+    // d'abord, c'est l'ordre où l'adoption par le numéro lui donnait les
+    // octets de la remplacée.
+    for (final replacementFirst in [true, false]) {
+      test(
+        'après les deux lignes du delta, chacune a ce qui lui revient '
+        '(remplaçante ${replacementFirst ? 'en premier' : 'en second'})',
+        () async {
+          await seedUnidentifiedFirstEdition();
+
+          await cache.recordKnownDocuments(
+            replacementFirst
+                ? [replacement(), replaced()]
+                : [replaced(), replacement()],
+          );
+
+          expect(
+            (await index.findByDocumentId('doc-ai-1'))?.isCancelled,
+            isTrue,
+          );
+          expect(
+            (await cache.readByDocumentId('doc-ai-1'))?.bytes,
+            equals(pdf('edition-1')),
+            reason: 'la copie sans identifiant était la pièce remplacée',
+          );
+          expect(await cache.readByDocumentId('doc-ai-2'), isNull);
+          expect(await cache.knowsDocumentId('doc-ai-2'), isTrue);
+          expect(await index.count(), 2);
+        },
+      );
+    }
+
+    test('un identifiant jamais vu n est pas connu', () async {
+      expect(await cache.knowsDocumentId('jamais-vu'), isFalse);
+      expect(await cache.knowsDocumentId(''), isFalse);
+    });
+
+    test('l émission de la remplaçante garde les deux copies', () async {
+      await seedUnidentifiedFirstEdition();
+
+      await cache.put(
+        docType: 'AI',
+        documentId: 'doc-ai-2',
+        documentNumber: number,
+        studentId: 's-1',
+        academicYearId: 'y-1',
+        schoolId: 'school-1',
+        edition: 2,
+        bytes: pdf('edition-2'),
+      );
+
+      final second = await cache.readByDocumentId('doc-ai-2');
+      expect(second?.bytes, equals(pdf('edition-2')));
+      expect(second?.entry.edition, 2);
+      expect(await unidentifiedBytes(), equals(pdf('edition-1')));
+      expect(await index.count(), 2);
     });
   });
 }

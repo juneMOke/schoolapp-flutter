@@ -31,19 +31,37 @@ class EnrollmentSheetAction extends StatefulWidget {
 
   /// La fiche la plus récente dont la tablette détient les octets ; une fiche
   /// remplacée n'est jamais préférée à sa remplaçante.
+  ///
+  /// Une fiche corrigée garde son numéro, en édition suivante (back v0.17.0) :
+  /// une fiche dont le numéro est porté par une ligne plus récente est donc
+  /// remplacée, et ne ressort pas même quand les octets de sa remplaçante ont
+  /// été évincés. Mieux vaut aucune fiche hors ligne qu'une fiche périmée
+  /// remise comme valable.
   static EditiqueCacheEntry? latestKeptSheet(List<EditiqueCacheEntry> kept) {
-    final sheets =
-        [
-          for (final e in kept)
-            if (e.docType == EditiqueDocumentType.enrollmentSheet.code &&
-                e.hasBytes)
-              e,
-        ]..sort(
-          (a, b) => (b.emittedAt ?? b.createdAt).compareTo(
-            a.emittedAt ?? a.createdAt,
-          ),
-        );
-    return sheets.isEmpty ? null : sheets.first;
+    final sheets = [
+      for (final e in kept)
+        if (e.docType == EditiqueDocumentType.enrollmentSheet.code) e,
+    ]..sort(_newestFirst);
+    final newerNumbers = <String>{};
+    for (final sheet in sheets) {
+      final number = sheet.documentNumber;
+      if (number != null && number.isNotEmpty && !newerNumbers.add(number)) {
+        continue;
+      }
+      if (sheet.hasBytes) return sheet;
+    }
+    return null;
+  }
+
+  static int _newestFirst(EditiqueCacheEntry a, EditiqueCacheEntry b) {
+    final byDay = (b.emittedAt ?? b.createdAt).compareTo(
+      a.emittedAt ?? a.createdAt,
+    );
+    if (byDay != 0) return byDay;
+    // Une fiche corrigée l'est souvent le jour même : à jour égal, c'est
+    // l'édition qui dit la fiche en vigueur — jamais la stabilité du tri.
+    final byEdition = (b.edition ?? 1).compareTo(a.edition ?? 1);
+    return byEdition != 0 ? byEdition : b.createdAt.compareTo(a.createdAt);
   }
 }
 

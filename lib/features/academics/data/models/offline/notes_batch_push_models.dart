@@ -114,7 +114,10 @@ class NoteSyncViewModel extends Equatable {
 /// `APPLIED` (retenue) | `SUPERSEDED` (un état serveur plus récent existait —
 /// LWW perdu, mais succès) | `REJECTED` (rejet métier terminal). `reason`
 /// précise un rejet : `UNKNOWN_EVALUATION` | `PERIODE_CLOSE` (arbitrée
-/// serveur) | `INVALID: …` | `EVALUATION_CONTEXT_UNAVAILABLE`. [note] porte
+/// serveur) | `EVALUATION_CONTEXT_UNAVAILABLE` | un refus de validation
+/// `INVALID_NOTE_POINTS_MISSING` | `INVALID_NOTE_POINTS_OUT_OF_RANGE` |
+/// `INVALID_NOTE_COMMENT_TOO_LONG` (avant le back v0.17.0 : `INVALID: …`,
+/// d'où la lecture par préfixe à l'affichage). [note] porte
 /// l'état canonique serveur — présent pour `APPLIED`/`SUPERSEDED`, absent pour
 /// `REJECTED`.
 class NoteOutcomeModel extends Equatable {
@@ -139,7 +142,8 @@ class NoteOutcomeModel extends Equatable {
     evaluationId: json['evaluationId'] as String?,
     // Champ wire réel : `status` (pas `outcome`) — `NoteLineOutcome.status`.
     outcome: (json['status'] as String?)?.toUpperCase() ?? 'UNKNOWN',
-    // Texte libre serveur (ex. `INVALID: hors bornes`) — jamais muté.
+    // Code serveur (ex. `INVALID_NOTE_POINTS_OUT_OF_RANGE` ; `INVALID: …`
+    // avant le back v0.17.0) — jamais muté.
     reason: json['reason'] as String?,
     note: json['note'] is Map<String, dynamic>
         ? NoteSyncViewModel.fromJson(json['note'] as Map<String, dynamic>)
