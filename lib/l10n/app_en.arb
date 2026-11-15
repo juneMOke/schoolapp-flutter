@@ -12646,7 +12646,7 @@
   "treasuryGapSuggest1": "Change-giving error",
   "treasuryGapSuggest2": "Banknote refused or damaged",
   "treasuryCloseWithGap": "Close with this gap",
-  "treasuryLockWarning": "After closing, this register's day is locked: no more collection or payment that day. A correction will go through an adjustment dated the next day.",
+  "treasuryLockWarning": "After closing, this register takes no more cash collection today. Outflows (expenses, payroll) remain possible and count for the next day. A correction will go through an adjustment dated the next day.",
   "treasuryClosedToastMatched": "{register} closed · remaining confirmed: {amount}",
   "@treasuryClosedToastMatched": {"placeholders": {"register": {"type": "String"}, "amount": {"type": "String"}}},
   "treasuryClosedToastGap": "{register} closed · justified gap of {gap}, included in the day's report",

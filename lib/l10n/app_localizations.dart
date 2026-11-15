@@ -34905,7 +34905,7 @@ abstract class AppLocalizations {
   /// No description provided for @treasuryLockWarning.
   ///
   /// In en, this message translates to:
-  /// **'After closing, this register\'s day is locked: no more collection or payment that day. A correction will go through an adjustment dated the next day.'**
+  /// **'After closing, this register takes no more cash collection today. Outflows (expenses, payroll) remain possible and count for the next day. A correction will go through an adjustment dated the next day.'**
   String get treasuryLockWarning;
 
   /// No description provided for @treasuryClosedToastMatched.

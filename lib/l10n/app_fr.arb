@@ -12829,7 +12829,7 @@
   "treasuryGapSuggest1": "Erreur de rendu de monnaie",
   "treasuryGapSuggest2": "Billet refusé ou abîmé",
   "treasuryCloseWithGap": "Clôturer avec cet écart",
-  "treasuryLockWarning": "Après la clôture, la journée de cette caisse est verrouillée : plus aucun encaissement ni paiement ce jour. Une correction passera par un ajustement daté du lendemain.",
+  "treasuryLockWarning": "Après la clôture, cette caisse n'accepte plus d'encaissement en espèces aujourd'hui. Les sorties (dépenses, paie) restent possibles et comptent pour la journée suivante. Une correction passera par un ajustement daté du lendemain.",
   "treasuryClosedToastMatched": "{register} clôturée · reste confirmé : {amount}",
   "@treasuryClosedToastMatched": {"placeholders": {"register": {"type": "String"}, "amount": {"type": "String"}}},
   "treasuryClosedToastGap": "{register} clôturée · écart de {gap} justifié, repris dans le rapport du jour",

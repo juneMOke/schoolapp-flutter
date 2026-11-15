@@ -22862,7 +22862,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get treasuryLockWarning =>
-      'Après la clôture, la journée de cette caisse est verrouillée : plus aucun encaissement ni paiement ce jour. Une correction passera par un ajustement daté du lendemain.';
+      'Après la clôture, cette caisse n\'accepte plus d\'encaissement en espèces aujourd\'hui. Les sorties (dépenses, paie) restent possibles et comptent pour la journée suivante. Une correction passera par un ajustement daté du lendemain.';
 
   @override
   String treasuryClosedToastMatched(String register, String amount) {
