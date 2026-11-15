@@ -30,6 +30,17 @@ void main() {
     ),
   );
 
+  testWidgets('Excel ouvre la visionneuse sur la feuille', (tester) async {
+    when(
+      () => reports.file(any(), any()),
+    ).thenAnswer((_) async => const Left(NetworkFailure()));
+    await pump(tester);
+    await tester.tap(find.text('Excel'));
+    await tester.pumpAndSettle();
+    verify(() => reports.file('RJ-20261022', CashReportFormat.xlsx)).called(1);
+    expect(find.text('Enregistrer la feuille'), findsOneWidget);
+  });
+
   testWidgets('le PDF se demande par l id du rapport', (tester) async {
     when(
       () => reports.file(any(), any()),

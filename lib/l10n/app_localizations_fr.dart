@@ -23120,6 +23120,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get treasuryClosureColumn => 'Clôture';
 
   @override
+  String get treasuryReportFormat => 'Format du rapport';
+
+  @override
+  String get treasuryViewerProvisional =>
+      'Rapport provisoire : la caisse n\'est pas encore clôturée, les chiffres peuvent encore changer. Le document porte la mention « PROVISOIRE ».';
+
+  @override
+  String get treasuryViewerLoading => 'Chargement du rapport';
+
+  @override
+  String get treasuryViewerSaveSheet => 'Enregistrer la feuille';
+
+  @override
+  String get treasuryXlsxSheets => 'Feuilles du classeur';
+
+  @override
+  String get treasuryXlsxEmptySheet => 'Cette feuille est vide.';
+
+  @override
+  String get treasuryXlsxUnreadable =>
+      'L\'aperçu de cette feuille n\'est pas disponible. Vous pouvez l\'enregistrer et l\'ouvrir dans Excel.';
+
+  @override
   String get treasuryReasonNotToday =>
       'Ce geste ne se fait que pour aujourd\'hui.';
 
@@ -23299,7 +23322,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get treasuryReportOpenPdf => 'Consulter le PDF';
 
   @override
-  String get treasuryReportOpenExcel => 'Enregistrer la feuille Excel';
+  String get treasuryReportOpenExcel => 'Consulter la feuille Excel';
 
   @override
   String treasuryReportSaved(String name) {

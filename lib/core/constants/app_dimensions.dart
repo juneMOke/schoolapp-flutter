@@ -1433,4 +1433,9 @@ class AppDimensions {
 
   /// Le rond « + » de la tuile Nouvelle caisse (C1).
   static const treasuryNewRegisterDot = 52.0;
+
+  /// L'aperçu d'une feuille Excel (A6) : colonnes bornées, lignes de 32.
+  static const treasuryXlsxColumnMin = 64.0;
+  static const treasuryXlsxColumnMax = 280.0;
+  static const treasuryXlsxRowHeight = 32.0;
 }

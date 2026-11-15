@@ -22965,6 +22965,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryClosureColumn => 'Closing';
 
   @override
+  String get treasuryReportFormat => 'Report format';
+
+  @override
+  String get treasuryViewerProvisional =>
+      'Provisional report: the register is not closed yet, figures may still change. The document is marked “PROVISIONAL”.';
+
+  @override
+  String get treasuryViewerLoading => 'Loading the report';
+
+  @override
+  String get treasuryViewerSaveSheet => 'Save the sheet';
+
+  @override
+  String get treasuryXlsxSheets => 'Workbook sheets';
+
+  @override
+  String get treasuryXlsxEmptySheet => 'This sheet is empty.';
+
+  @override
+  String get treasuryXlsxUnreadable =>
+      'This sheet cannot be previewed. You can save it and open it in Excel.';
+
+  @override
   String get treasuryReasonNotToday => 'This can only be done for today.';
 
   @override
@@ -23140,7 +23163,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryReportOpenPdf => 'View the PDF';
 
   @override
-  String get treasuryReportOpenExcel => 'Save the Excel sheet';
+  String get treasuryReportOpenExcel => 'Open the Excel sheet';
 
   @override
   String treasuryReportSaved(String name) {

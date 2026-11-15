@@ -27,17 +27,19 @@ class ReportFormatButtons extends StatefulWidget {
 }
 
 class _ReportFormatButtonsState extends State<ReportFormatButtons> {
-  CashReportFormat? _busy;
+  /// La visionneuse est ouverte : un second appui n'en ouvre pas une autre.
+  var _open = false;
 
-  Future<void> _open(CashReportFormat format) async {
-    if (_busy != null) return;
-    // Pris AVANT l'appel : si la barre change de journée pendant le
-    // chargement, le fichier reçu garde son propre titre.
-    final id = widget.reportId;
-    final title = widget.title;
-    setState(() => _busy = format);
-    await openCashReport(context, id: id, title: title, format: format);
-    if (mounted) setState(() => _busy = null);
+  Future<void> _show(CashReportFormat format) async {
+    if (_open) return;
+    _open = true;
+    await openCashReport(
+      context,
+      id: widget.reportId,
+      title: widget.title,
+      format: format,
+    );
+    _open = false;
   }
 
   @override
@@ -53,8 +55,7 @@ class _ReportFormatButtonsState extends State<ReportFormatButtons> {
           icon: Icons.description_outlined,
           ink: AppColors.treasuryPdfInk,
           fill: AppColors.treasuryPdfSoft,
-          busy: _busy == CashReportFormat.pdf,
-          onPressed: _busy == null ? () => _open(CashReportFormat.pdf) : null,
+          onPressed: () => _show(CashReportFormat.pdf),
         ),
         _FormatButton(
           label: l10n.treasuryReportExcel,
@@ -62,8 +63,7 @@ class _ReportFormatButtonsState extends State<ReportFormatButtons> {
           icon: Icons.grid_on,
           ink: AppColors.treasuryExcelInk,
           fill: AppColors.treasuryExcelSoft,
-          busy: _busy == CashReportFormat.xlsx,
-          onPressed: _busy == null ? () => _open(CashReportFormat.xlsx) : null,
+          onPressed: () => _show(CashReportFormat.xlsx),
         ),
       ],
     );
@@ -76,7 +76,6 @@ class _FormatButton extends StatelessWidget {
   final IconData icon;
   final Color ink;
   final Color fill;
-  final bool busy;
   final VoidCallback? onPressed;
 
   const _FormatButton({
@@ -85,7 +84,6 @@ class _FormatButton extends StatelessWidget {
     required this.icon,
     required this.ink,
     required this.fill,
-    required this.busy,
     this.onPressed,
   });
 
@@ -111,12 +109,7 @@ class _FormatButton extends StatelessWidget {
         ),
       ),
       onPressed: onPressed,
-      icon: busy
-          ? SizedBox.square(
-              dimension: AppSpacing.lg,
-              child: CircularProgressIndicator(strokeWidth: 2, color: ink),
-            )
-          : Icon(icon, size: AppSpacing.lg),
+      icon: Icon(icon, size: AppSpacing.lg),
       label: Text(label),
     ),
   );

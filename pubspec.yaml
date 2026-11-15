@@ -188,6 +188,9 @@ dependencies:
   # gzip/zlib pour tout le monde : `dart:io` les refuse dans le navigateur, et
   # `archive` choisit lui-même zlib natif ailleurs. Déjà tiré en transitif.
   archive: ^4.0.9
+  # Aperçu de la feuille Excel d'un rapport de caisse (Trésorerie A6) : un
+  # .xlsx est un zip de XML. Déjà tiré en transitif (flutter_svg).
+  xml: ^6.5.0
 
 
 dev_dependencies:
