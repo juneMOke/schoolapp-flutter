@@ -277,7 +277,9 @@ class _PeriodReports extends StatelessWidget {
         if (state.rangeInvalid) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(
-            l10n.treasuryRangeInvalid,
+            state.rangeReversed
+                ? l10n.treasuryRangeInvalid
+                : l10n.treasuryRangeTooLong(CashReportsState.maxPeriodDays),
             style: AppTypography.bodySmall.copyWith(color: AppColors.error),
           ),
         ],

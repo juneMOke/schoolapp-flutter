@@ -12939,6 +12939,7 @@
   "treasuryPeriodCustom": "Période",
   "treasuryRangeFrom": "Du",
   "treasuryRangeTo": "Au",
+  "treasuryRangeTooLong": "Une période tient au plus {days} jours.",
   "treasuryRangeInvalid": "La fin est avant le début.",
   "treasuryRangeChooseValid": "Choisissez une période valide.",
   "treasuryRangeLabel": "{from} → {to}",

@@ -23215,6 +23215,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get treasuryRangeTo => 'Au';
 
   @override
+  String treasuryRangeTooLong(int days) {
+    return 'Une période tient au plus $days jours.';
+  }
+
+  @override
   String get treasuryRangeInvalid => 'La fin est avant le début.';
 
   @override

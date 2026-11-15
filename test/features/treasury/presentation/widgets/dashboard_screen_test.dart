@@ -238,6 +238,18 @@ void main() {
       },
     );
 
+    test('366 jours bornes comprises passent ; 367, non', () async {
+      final reports = _MockReports();
+      final cubit = CashReportsCubit(reports, today: demoDay);
+      addTearDown(cubit.close);
+      cubit.rangeChanged(DateTime(2025, 10, 22), DateTime(2026, 10, 22));
+      expect(cubit.state.rangeTooLong, isFalse);
+      cubit.rangeChanged(DateTime(2025, 10, 21), DateTime(2026, 10, 22));
+      expect(cubit.state.rangeTooLong, isTrue);
+      expect(await cubit.generatePeriod(), isNull);
+      verifyNever(() => reports.period(any(), any()));
+    });
+
     test('une fin avant le début ne génère rien', () async {
       final reports = _MockReports();
       final cubit = CashReportsCubit(reports, today: demoDay);

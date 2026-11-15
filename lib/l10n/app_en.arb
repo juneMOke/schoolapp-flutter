@@ -12756,6 +12756,14 @@
   "treasuryPeriodCustom": "Range",
   "treasuryRangeFrom": "From",
   "treasuryRangeTo": "To",
+  "treasuryRangeTooLong": "A period spans at most {days} days.",
+  "@treasuryRangeTooLong": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "treasuryRangeInvalid": "The end is before the start.",
   "treasuryRangeChooseValid": "Choose a valid range.",
   "treasuryRangeLabel": "{from} → {to}",

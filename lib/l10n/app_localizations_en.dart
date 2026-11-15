@@ -23057,6 +23057,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryRangeTo => 'To';
 
   @override
+  String treasuryRangeTooLong(int days) {
+    return 'A period spans at most $days days.';
+  }
+
+  @override
   String get treasuryRangeInvalid => 'The end is before the start.';
 
   @override

@@ -35478,6 +35478,12 @@ abstract class AppLocalizations {
   /// **'To'**
   String get treasuryRangeTo;
 
+  /// No description provided for @treasuryRangeTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'A period spans at most {days} days.'**
+  String treasuryRangeTooLong(int days);
+
   /// No description provided for @treasuryRangeInvalid.
   ///
   /// In en, this message translates to:

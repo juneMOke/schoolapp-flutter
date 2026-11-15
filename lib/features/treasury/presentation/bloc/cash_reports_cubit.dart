@@ -39,7 +39,23 @@ class CashReportsState extends Equatable {
     this.failure,
   });
 
-  bool get rangeInvalid => customTo.isBefore(customFrom);
+  /// La plus longue « Période » que le serveur compose, bornes comprises
+  /// (sinon 400 `INVALID_RANGE`).
+  static const int maxPeriodDays = 366;
+
+  bool get rangeReversed => customTo.isBefore(customFrom);
+
+  /// Bornes comprises, en jours civils (un changement d'heure ne compte pas).
+  bool get rangeTooLong =>
+      DateTime.utc(customTo.year, customTo.month, customTo.day)
+              .difference(
+                DateTime.utc(customFrom.year, customFrom.month, customFrom.day),
+              )
+              .inDays +
+          1 >
+      maxPeriodDays;
+
+  bool get rangeInvalid => rangeReversed || rangeTooLong;
 
   CashReportsState copyWith({
     CashReportsStatus? status,
