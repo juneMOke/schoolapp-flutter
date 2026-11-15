@@ -3,15 +3,16 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 
-/// L'en-tête d'un écran du module : sur-titre, titre, sous-titre et actions.
+/// L'en-tête d'un écran : sur-titre, titre, sous-titre et actions (né dans
+/// Communication, partagé depuis la Trésorerie).
 /// Il reste visible dans tous les états, chargement et erreur compris.
-class CommunicationPageHeader extends StatelessWidget {
+class EteeloPageHeader extends StatelessWidget {
   final String eyebrow;
   final String title;
   final String? subtitle;
   final List<Widget> actions;
 
-  const CommunicationPageHeader({
+  const EteeloPageHeader({
     super.key,
     required this.eyebrow,
     required this.title,

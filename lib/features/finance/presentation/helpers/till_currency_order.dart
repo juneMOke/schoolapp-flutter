@@ -1,5 +1,5 @@
+import 'package:school_app_flutter/core/theme/currency_tones.dart';
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/finance_till.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -69,11 +69,7 @@ String? resolveSelectedTillCurrency(
 ///
 /// Une devise inconnue prend le gris du texte plutôt qu'une couleur inventée :
 /// une teinte choisie au hasard se lirait comme une troisième catégorie.
-Color tillCurrencyAccent(String currency) => switch (currency) {
-  'USD' => AppColors.bleuArdoise,
-  'CDF' => AppColors.vertSavane,
-  _ => AppColors.textSecondary,
-};
+Color tillCurrencyAccent(String currency) => CurrencyTones.accent(currency);
 
 // La teinte douce qui accompagnait [tillCurrencyAccent] vivait ici — le fond du
 // médaillon d'une tuile de caisse. Les tuiles étant devenues des pavés sombres,

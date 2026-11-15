@@ -10,7 +10,7 @@ import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/communication/domain/entities/announcement_template.dart';
 import 'package:school_app_flutter/features/communication/presentation/bloc/templates/announcement_templates_cubit.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_back_bar.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_page_header.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/states/communication_results_error_state.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/templates/template_card.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -48,7 +48,7 @@ class TemplatesScreen extends StatelessWidget {
           CommunicationBackBar(onBack: back),
           const SizedBox(height: AppSpacing.md),
         ],
-        CommunicationPageHeader(
+        EteeloPageHeader(
           eyebrow: l10n.menuCommunication,
           title: back == null
               ? l10n.subMenuAnnouncementTemplates

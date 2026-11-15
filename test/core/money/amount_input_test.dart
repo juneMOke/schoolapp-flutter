@@ -42,4 +42,14 @@ void main() {
       expect(AmountInput.toCents(AmountInput.fromCents(cents)), cents);
     }
   });
+
+  test('toCentsOrZero : 0 est un montant, l illisible reste null', () {
+    expect(AmountInput.toCentsOrZero('0'), 0);
+    expect(AmountInput.toCentsOrZero('0,00'), 0);
+    expect(AmountInput.toCentsOrZero('3 450 000'), 345000000);
+    expect(AmountInput.toCentsOrZero(''), isNull);
+    expect(AmountInput.toCentsOrZero('-5'), isNull);
+    // toCents garde sa règle : un décaissement est strictement positif.
+    expect(AmountInput.toCents('0'), isNull);
+  });
 }

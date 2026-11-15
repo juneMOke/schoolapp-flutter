@@ -41,6 +41,10 @@ class MenuConstants {
   /// en V1, et le ranger sous Finances laisserait croire le contraire.
   static const String expenseMenuId = 'depenses';
 
+  /// La trésorerie : les caisses en espèces, leur clôture et leur
+  /// configuration.
+  static const String treasuryMenuId = 'tresorerie';
+
   /// La communication aux parents — les communiqués et leurs modèles. Un menu
   /// propre : ce n'est ni de la scolarité ni de la caisse.
   static const String communicationMenuId = 'communication';
@@ -119,6 +123,10 @@ class MenuConstants {
   /// plus ancienne à la plus récente. Elle ignore la période des deux autres
   /// écrans — une demande déposée le mois dernier attend toujours.
   static const String expenseQueueId = 'depenses-validations';
+
+  /// Configuration des caisses : une par devise, le montant que chacune
+  /// détient, et ses ajustements.
+  static const String treasuryConfigId = 'tr-config';
 
   /// Le fichier du personnel : tous les agents de l'école, leur contrat et
   /// leur dossier administratif.

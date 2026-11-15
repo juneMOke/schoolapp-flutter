@@ -33827,6 +33827,480 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This document had already been reissued today, from this device or another: the server returned it as it was, without recomposing it. Reissue it again with today\'s state?'**
   String get documentsReissuePriorTodayMessage;
+
+  /// No description provided for @menuTreasury.
+  ///
+  /// In en, this message translates to:
+  /// **'Treasury'**
+  String get menuTreasury;
+
+  /// No description provided for @subMenuTreasuryConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get subMenuTreasuryConfig;
+
+  /// No description provided for @accueilModuleTreasuryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The school\'s cash registers, one per currency: what they hold and their evening closing.'**
+  String get accueilModuleTreasuryDescription;
+
+  /// No description provided for @treasuryConfigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash register settings'**
+  String get treasuryConfigTitle;
+
+  /// No description provided for @treasuryConfigSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The school\'s registers and the amount each one holds. One register = one currency.'**
+  String get treasuryConfigSubtitle;
+
+  /// No description provided for @treasuryNewRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'New register'**
+  String get treasuryNewRegister;
+
+  /// No description provided for @treasuryNewRegisterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'in dollars or Congolese francs'**
+  String get treasuryNewRegisterHint;
+
+  /// No description provided for @treasuryCurrencyUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'Dollars'**
+  String get treasuryCurrencyUsd;
+
+  /// No description provided for @treasuryCurrencyCdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Congolese francs'**
+  String get treasuryCurrencyCdf;
+
+  /// No description provided for @treasuryBadgeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get treasuryBadgeNew;
+
+  /// No description provided for @treasuryHeldToday.
+  ///
+  /// In en, this message translates to:
+  /// **'held today · day open'**
+  String get treasuryHeldToday;
+
+  /// No description provided for @treasuryDeclaredAt.
+  ///
+  /// In en, this message translates to:
+  /// **'declared at the {time} closing'**
+  String treasuryDeclaredAt(String time);
+
+  /// No description provided for @treasuryDeclaredAtWithGap.
+  ///
+  /// In en, this message translates to:
+  /// **'declared at the {time} closing · gap {gap}'**
+  String treasuryDeclaredAtWithGap(String time, String gap);
+
+  /// No description provided for @treasuryInService.
+  ///
+  /// In en, this message translates to:
+  /// **'In service since'**
+  String get treasuryInService;
+
+  /// No description provided for @treasuryOpeningAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening amount'**
+  String get treasuryOpeningAmount;
+
+  /// No description provided for @treasuryAdjustments.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustments'**
+  String get treasuryAdjustments;
+
+  /// No description provided for @treasuryAdjustmentsSee.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} · view'**
+  String treasuryAdjustmentsSee(int count);
+
+  /// No description provided for @treasuryAdjustmentsHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get treasuryAdjustmentsHide;
+
+  /// No description provided for @treasuryAdjustmentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No adjustment.'**
+  String get treasuryAdjustmentsEmpty;
+
+  /// No description provided for @treasuryAdjustmentsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading adjustments'**
+  String get treasuryAdjustmentsLoading;
+
+  /// No description provided for @treasuryAdjustmentsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'History unavailable: {reason}'**
+  String treasuryAdjustmentsLoadFailed(String reason);
+
+  /// No description provided for @treasuryAdjustmentLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {time} · {author}'**
+  String treasuryAdjustmentLine(DateTime date, String time, String author);
+
+  /// No description provided for @treasuryAdjustButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the amount held'**
+  String get treasuryAdjustButton;
+
+  /// No description provided for @treasuryClosedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed today: adjustment possible tomorrow'**
+  String get treasuryClosedShort;
+
+  /// No description provided for @treasuryGoodToKnow.
+  ///
+  /// In en, this message translates to:
+  /// **'Good to know. Dollar and franc amounts are never added together or converted. Changing the amount of an existing register creates a dated adjustment with a reason: the past is never rewritten. Bank and mobile money accounts are not handled in this version.'**
+  String get treasuryGoodToKnow;
+
+  /// No description provided for @treasuryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No register'**
+  String get treasuryEmptyTitle;
+
+  /// No description provided for @treasuryEmptyConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the dollar register and the Congolese franc register, with the amount they hold today.'**
+  String get treasuryEmptyConfig;
+
+  /// No description provided for @treasuryCreateRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a register'**
+  String get treasuryCreateRegister;
+
+  /// No description provided for @treasuryRegistersLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading registers'**
+  String get treasuryRegistersLoading;
+
+  /// No description provided for @treasuryReadOnlyPromoter.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only: only the promoter creates a register or adjusts its amount.'**
+  String get treasuryReadOnlyPromoter;
+
+  /// No description provided for @treasuryFormEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Treasury · Settings'**
+  String get treasuryFormEyebrow;
+
+  /// No description provided for @treasuryFormCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get treasuryFormCurrency;
+
+  /// No description provided for @treasuryFormName.
+  ///
+  /// In en, this message translates to:
+  /// **'Register name'**
+  String get treasuryFormName;
+
+  /// No description provided for @treasuryCurrencyTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'The school already has its {currency} register.'**
+  String treasuryCurrencyTaken(String currency);
+
+  /// No description provided for @treasuryHoldsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'How much the register holds today'**
+  String get treasuryHoldsToday;
+
+  /// No description provided for @treasuryOneCurrencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A register holds a single currency. This amount becomes its opening balance from today ({date}).'**
+  String treasuryOneCurrencyHint(DateTime date);
+
+  /// No description provided for @treasuryCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the register'**
+  String get treasuryCreate;
+
+  /// No description provided for @treasuryCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get treasuryCancel;
+
+  /// No description provided for @treasuryAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount (0 if the register is empty).'**
+  String get treasuryAmountInvalid;
+
+  /// No description provided for @treasuryAmountWholeFrancs.
+  ///
+  /// In en, this message translates to:
+  /// **'Congolese francs have no cents.'**
+  String get treasuryAmountWholeFrancs;
+
+  /// No description provided for @treasuryDuplicateName.
+  ///
+  /// In en, this message translates to:
+  /// **'A register already has this name.'**
+  String get treasuryDuplicateName;
+
+  /// No description provided for @treasuryAdjustTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the amount of {name}'**
+  String treasuryAdjustTitle(String name);
+
+  /// No description provided for @treasuryAdjustCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current amount (expected)'**
+  String get treasuryAdjustCurrent;
+
+  /// No description provided for @treasuryAdjustAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After adjustment'**
+  String get treasuryAdjustAfter;
+
+  /// No description provided for @treasuryAdjustActual.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount actually held'**
+  String get treasuryAdjustActual;
+
+  /// No description provided for @treasuryAdjustDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment of {delta}'**
+  String treasuryAdjustDelta(String delta);
+
+  /// No description provided for @treasuryAdjustReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (required)'**
+  String get treasuryAdjustReason;
+
+  /// No description provided for @treasuryAdjustReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Recount after the start-of-year inventory'**
+  String get treasuryAdjustReasonHint;
+
+  /// No description provided for @treasuryAdjustReasonShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The reason must be at least 5 characters long.'**
+  String get treasuryAdjustReasonShort;
+
+  /// No description provided for @treasuryAdjustHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The adjustment is recorded as a movement dated today, with your name and the reason. It appears in the day\'s detail and report; past days are not changed.'**
+  String get treasuryAdjustHint;
+
+  /// No description provided for @treasuryAdjustClosedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This register is already closed today: the adjustment will be possible tomorrow morning, at opening.'**
+  String get treasuryAdjustClosedWarning;
+
+  /// No description provided for @treasuryAdjustSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the adjustment'**
+  String get treasuryAdjustSave;
+
+  /// No description provided for @treasuryAdjustNoChange.
+  ///
+  /// In en, this message translates to:
+  /// **'The new amount equals the current amount.'**
+  String get treasuryAdjustNoChange;
+
+  /// No description provided for @treasuryAdjustExpectedChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The current amount changed while you were typing: it went from {before} to {after}. Check the new amount before saving.'**
+  String treasuryAdjustExpectedChanged(String before, String after);
+
+  /// No description provided for @treasuryMotif1.
+  ///
+  /// In en, this message translates to:
+  /// **'Register recount'**
+  String get treasuryMotif1;
+
+  /// No description provided for @treasuryMotif2.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry error corrected'**
+  String get treasuryMotif2;
+
+  /// No description provided for @treasuryMotif3.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution from the promoter'**
+  String get treasuryMotif3;
+
+  /// No description provided for @treasuryMotif4.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawal by the promoter'**
+  String get treasuryMotif4;
+
+  /// No description provided for @treasuryRegisterCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} created · {amount} in the register'**
+  String treasuryRegisterCreated(String name, String amount);
+
+  /// No description provided for @treasuryRegisterAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} amount adjusted · {delta} · {reference}'**
+  String treasuryRegisterAdjusted(String name, String delta, String reference);
+
+  /// No description provided for @treasurySaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save: {reason}'**
+  String treasurySaveFailed(String reason);
+
+  /// No description provided for @treasuryErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get treasuryErrorNetworkTitle;
+
+  /// No description provided for @treasuryErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The treasury is read online. Check the tablet connection, then try again.'**
+  String get treasuryErrorNetwork;
+
+  /// No description provided for @treasuryErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get treasuryErrorUnauthorizedTitle;
+
+  /// No description provided for @treasuryErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to continue.'**
+  String get treasuryErrorUnauthorized;
+
+  /// No description provided for @treasuryErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get treasuryErrorForbiddenTitle;
+
+  /// No description provided for @treasuryErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account cannot access the treasury. If this is a mistake, contact the administrator.'**
+  String get treasuryErrorForbidden;
+
+  /// No description provided for @treasuryErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not respond'**
+  String get treasuryErrorServerTitle;
+
+  /// No description provided for @treasuryErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'A server error occurred. Try again in a moment.'**
+  String get treasuryErrorServer;
+
+  /// No description provided for @treasuryErrorContactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the administrator'**
+  String get treasuryErrorContactAdmin;
+
+  /// No description provided for @treasuryErrorReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get treasuryErrorReconnect;
+
+  /// No description provided for @treasuryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get treasuryRetry;
+
+  /// No description provided for @treasuryErrorIncident.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String treasuryErrorIncident(String code);
+
+  /// No description provided for @treasuryReasonNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the connection, then try again.'**
+  String get treasuryReasonNetwork;
+
+  /// No description provided for @treasuryReasonForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account does not have this permission.'**
+  String get treasuryReasonForbidden;
+
+  /// No description provided for @treasuryReasonServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The server could not process the request. Try again in a moment.'**
+  String get treasuryReasonServer;
+
+  /// No description provided for @treasuryReasonClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'The register is already closed today.'**
+  String get treasuryReasonClosed;
+
+  /// No description provided for @treasuryReasonCurrencyTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'The school already has a register in this currency.'**
+  String get treasuryReasonCurrencyTaken;
+
+  /// No description provided for @treasuryDateShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryDateShort(DateTime date);
 }
 
 class _AppLocalizationsDelegate

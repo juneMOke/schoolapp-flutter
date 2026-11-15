@@ -5,7 +5,7 @@ import 'package:school_app_flutter/features/communication/presentation/bloc/edit
 import 'package:school_app_flutter/features/communication/presentation/bloc/editor/announcement_editor_state.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/audience/audience_section.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_back_bar.dart';
-import 'package:school_app_flutter/features/communication/presentation/widgets/common/communication_page_header.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/content_section.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/diffusion_section.dart';
 import 'package:school_app_flutter/features/communication/presentation/widgets/editor/editor_banners.dart';
@@ -39,7 +39,7 @@ class EditorForm extends StatelessWidget {
       children: [
         CommunicationBackBar(onBack: state.busy == null ? onBack : null),
         const SizedBox(height: AppSpacing.md),
-        CommunicationPageHeader(
+        EteeloPageHeader(
           eyebrow: l10n.menuCommunication,
           title: state.isNew
               ? l10n.communicationNew

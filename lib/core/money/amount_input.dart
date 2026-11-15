@@ -14,6 +14,16 @@ abstract final class AmountInput {
   /// Centimes lus, ou `null` si rien de lisible ou si le montant n'est pas
   /// strictement positif (« Indiquez le montant réellement décaissé. »).
   static int? toCents(String raw) {
+    final cents = _parse(raw);
+    return cents != null && cents > 0 ? cents : null;
+  }
+
+  /// Comme [toCents], mais **0 est un montant** : une caisse vide se déclare
+  /// (« Combien la caisse détient aujourd'hui », « Montant réellement
+  /// détenu »).
+  static int? toCentsOrZero(String raw) => _parse(raw);
+
+  static int? _parse(String raw) {
     final cleaned = raw.replaceAll(RegExp('[\\s  ]'), '');
     if (cleaned.isEmpty || RegExp(r'[^0-9.,]').hasMatch(cleaned)) return null;
 
@@ -33,8 +43,7 @@ abstract final class AmountInput {
     if (digits.isEmpty && fraction.isEmpty) return null;
     final whole = int.tryParse(digits.isEmpty ? '0' : digits);
     if (whole == null) return null;
-    final cents = whole * 100 + int.parse(fraction.padRight(2, '0'));
-    return cents > 0 ? cents : null;
+    return whole * 100 + int.parse(fraction.padRight(2, '0'));
   }
 
   /// Le montant rangé, réécrit pour le champ d'une modification : « 385000 »,
