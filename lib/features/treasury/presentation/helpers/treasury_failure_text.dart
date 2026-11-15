@@ -25,6 +25,12 @@ extension TreasuryFailureText on AppLocalizations {
         TreasuryRefusal.afterClosureNotCovered =>
           treasuryReasonAfterClosureNotCovered,
         TreasuryRefusal.gestureIdReused => treasuryReasonGestureIdReused,
+        TreasuryRefusal.signatoriesChanged => treasuryReasonSignatoriesChanged,
+        TreasuryRefusal.signatoryFieldRequired ||
+        TreasuryRefusal.signatoryFieldTooLong ||
+        TreasuryRefusal.tooManySignatories ||
+        TreasuryRefusal.invalidSignatoryRank ||
+        TreasuryRefusal.closerOnlyAtRankOne => treasuryReasonSignatoriesInvalid,
         TreasuryRefusal.closureNotToday ||
         TreasuryRefusal.reopenNotToday => treasuryReasonNotToday,
         TreasuryRefusal.gapJustificationRequired => treasuryGapReasonShort,

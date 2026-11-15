@@ -28,7 +28,17 @@ enum TreasuryRefusal {
 
   /// L'id client d'un geste (clôture, ajustement, réponse, réouverture) est
   /// déjà celui d'un autre : terminal, jamais rejoué tel quel.
-  gestureIdReused('GESTURE_ID_REUSED');
+  gestureIdReused('GESTURE_ID_REUSED'),
+
+  // ── Signataires des rapports (V212) ──
+  /// La liste a changé depuis qu'elle a été montrée ; `details` porte la
+  /// liste actuelle. Terminal : on la montre, on ne rejoue jamais.
+  signatoriesChanged('SIGNATORIES_CHANGED'),
+  signatoryFieldRequired('SIGNATORY_FIELD_REQUIRED'),
+  signatoryFieldTooLong('SIGNATORY_FIELD_TOO_LONG'),
+  tooManySignatories('TOO_MANY_SIGNATORIES'),
+  invalidSignatoryRank('INVALID_SIGNATORY_RANK'),
+  closerOnlyAtRankOne('CLOSER_ONLY_AT_RANK_ONE');
 
   const TreasuryRefusal(this.detailCode);
 
