@@ -16,7 +16,23 @@ extension TreasuryFailureText on AppLocalizations {
         TreasuryRefusal.registerNameTaken => treasuryDuplicateName,
         TreasuryRefusal.reasonRequired => treasuryAdjustReasonShort,
         TreasuryRefusal.noChange => treasuryAdjustNoChange,
-        TreasuryRefusal.expectedChanged => treasuryReasonServer,
+        TreasuryRefusal.expectedChanged => treasuryReasonExpectedChanged,
+        TreasuryRefusal.afterClosureUnconfirmed =>
+          treasuryReasonAfterClosurePending,
+        TreasuryRefusal.afterClosureAlreadyConfirmed =>
+          treasuryReasonAlreadyAnswered,
+        TreasuryRefusal.notAfterClosure => treasuryReasonNotAfterClosure,
+        TreasuryRefusal.afterClosureNotCovered =>
+          treasuryReasonAfterClosureNotCovered,
+        TreasuryRefusal.gestureIdReused => treasuryReasonGestureIdReused,
+        TreasuryRefusal.closureNotToday ||
+        TreasuryRefusal.reopenNotToday => treasuryReasonNotToday,
+        TreasuryRefusal.gapJustificationRequired => treasuryGapReasonShort,
+        TreasuryRefusal.invalidDeclaration => treasuryReasonInvalidDeclaration,
+        TreasuryRefusal.closureAlreadyReopened => treasuryReasonAlreadyReopened,
+        TreasuryRefusal.invalidDate => treasuryReasonInvalidDate,
+        TreasuryRefusal.invalidRange => treasuryReasonInvalidRange,
+        TreasuryRefusal.invalidReportId => treasuryReasonInvalidReportId,
       };
     }
     return switch (EteeloErrorType.fromFailure(failure)) {

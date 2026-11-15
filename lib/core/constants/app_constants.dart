@@ -886,7 +886,10 @@ class AppConstants {
   // pierre tombale. Colonne ajoutée, remplie par le flux.
   // v79 (2026-11-06) : `enrollment_level_corrections`, le geste « corriger le
   // niveau » en attente ou accusé. Table neuve, aucun backfill. Palier d'école.
-  static const int offlineDbSchemaVersion = 79;
+  // v80 (2026-11-15) : `treasury_closures`, les clôtures de caisse descendues
+  // par `treasury.closures` — une devise close aujourd'hui n'encaisse plus en
+  // espèces (R11). Table neuve, remplie par le flux. Palier d'école.
+  static const int offlineDbSchemaVersion = 80;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1703,6 +1706,64 @@ class AppConstants {
   /// le montant qu'elle détient (promoteur).
   static const String treasuryCashRegisterAdjustmentsEndpoint =
       '/api/v1/treasury/cash-registers/{registerId}/adjustments';
+
+  /// **GET** = une journée de caisse, caisse par caisse.
+  static const String treasuryDayEndpoint = '/api/v1/treasury/days/{date}';
+
+  /// **GET** = les mouvements d'une caisse sur une journée (`registerId`,
+  /// `direction` facultatif).
+  static const String treasuryDayMovementsEndpoint =
+      '/api/v1/treasury/days/{date}/movements';
+
+  /// **POST** = clôturer une caisse aujourd'hui (« Oui » / « Non »).
+  static const String treasuryDayClosuresEndpoint =
+      '/api/v1/treasury/days/{date}/closures';
+
+  /// **POST** = répondre à une ligne arrivée après une clôture (R19).
+  static const String treasuryAfterClosureConfirmationEndpoint =
+      '/api/v1/treasury/movements/{movementId}/after-closure-confirmation';
+
+  /// **POST** = rouvrir la clôture du jour (promoteur, R20).
+  static const String treasuryClosureReopeningEndpoint =
+      '/api/v1/treasury/closures/{closureId}/reopening';
+
+  /// **GET** `?from=&to=` (dates de l'école, incluses) = une semaine ou un
+  /// mois de l'écran de clôture (B7) : totaux par caisse, puis une ligne par
+  /// journée écoulée, la plus récente en tête. `400 INVALID_RANGE`.
+  static const String treasuryPeriodsEndpoint = '/api/v1/treasury/periods';
+
+  /// **GET** = combien chaque caisse détient maintenant (tableau de bord,
+  /// A2) : solde, variation du jour, 8 derniers jours, clôture du jour.
+  /// `404` sans année scolaire courante.
+  static const String treasuryOverviewEndpoint = '/api/v1/treasury/overview';
+
+  /// **GET** `?period=TODAY|WEEK|MONTH|YEAR|CUSTOM&from=&to=` = le solde de
+  /// chaque caisse sur la période, en tranches choisies par le serveur (R5).
+  /// `400 INVALID_RANGE`.
+  static const String treasuryEvolutionEndpoint = '/api/v1/treasury/evolution';
+
+  /// **GET** `?kind=DAILY|WEEKLY|MONTHLY|YEARLY&page=&size=` = les rapports
+  /// d'un type, le plus récent en tête ; **POST** `{from, to}` = le rapport
+  /// d'une plage (rien n'est créé, idempotent ; `400 INVALID_RANGE`).
+  static const String treasuryReportsEndpoint = '/api/v1/treasury/reports';
+
+  /// **GET** = un rapport décodé de son id, avec son statut du moment.
+  static const String treasuryReportEndpoint =
+      '/api/v1/treasury/reports/{reportId}';
+
+  /// **GET** `?format=pdf|xlsx` = le fichier, généré à chaque appel ;
+  /// `X-Report-Status: FINAL|PROVISIONAL`, `429` si un autre rendu PDF tourne.
+  static const String treasuryReportFileEndpoint =
+      '/api/v1/treasury/reports/{reportId}/file';
+
+  /// Le nombre de rapports par page de la liste (A5).
+  static const int treasuryReportsPageSize = 8;
+
+  /// **GET** (keyset) = les clôtures de caisse de l'école, réouvertures
+  /// comprises (flux `treasury.closures`, `treasury.read`) : la tablette
+  /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).
+  static const String syncTreasuryClosuresEndpoint =
+      '/api/v1/sync/treasury/closures';
 
   /// **GET** (web, même hôte que l'application) = la version déployée,
   /// écrite par `flutter build web` : `{version, build_number, …}`.

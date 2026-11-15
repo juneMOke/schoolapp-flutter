@@ -248,6 +248,16 @@ class AccueilModulesFactory {
       subModules: [
         _page(
           menuId: menuId,
+          subMenuId: MenuConstants.treasuryDashboardId,
+          title: l10n.subMenuTreasuryDashboard,
+        ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.treasuryClosingId,
+          title: l10n.subMenuTreasuryClosing,
+        ),
+        _page(
+          menuId: menuId,
           subMenuId: MenuConstants.treasuryConfigId,
           title: l10n.subMenuTreasuryConfig,
         ),

@@ -23,6 +23,7 @@ Future<void> _pump(
   bool promoter = true,
   void Function()? onCreate,
   ValueChanged<RegisterConfig>? onAdjust,
+  VoidCallback? onSeeDay,
 }) async {
   final repo = _MockRepository();
   when(() => repo.list()).thenAnswer((_) async => list);
@@ -34,6 +35,7 @@ Future<void> _pump(
           now: _now,
           onCreate: promoter ? (onCreate ?? () {}) : null,
           onAdjust: promoter ? (onAdjust ?? (_) {}) : null,
+          onSeeDay: onSeeDay,
         ),
       ),
     ),
@@ -150,5 +152,38 @@ void main() {
     setTestWindow(tester, const Size(1280, 900));
     await _pump(tester, list: Right([usdConfig, cdfConfig]));
     expect(find.text('Nouvelle'), findsOneWidget);
+  });
+
+  testAtReferenceFormats('avec historique et lien vers la journée', (
+    tester,
+    _,
+  ) async {
+    await _pump(
+      tester,
+      onSeeDay: () {},
+      list: Right([
+        configOf(
+          usdRegister,
+          last8Days: [
+            for (var i = 0; i < 8; i++)
+              DayBalance(
+                day: DateTime(2026, 10, 13 + i),
+                balanceInCents: 470000 + i * 2000,
+                closed: true,
+              ),
+          ],
+        ),
+        cdfConfig,
+      ]),
+    );
+    expect(find.text('Voir la journée de cette caisse'), findsNWidgets(2));
+  });
+
+  testWidgets('le lien ouvre la journée de la caisse', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    var opened = 0;
+    await _pump(tester, onSeeDay: () => opened++, list: Right([usdConfig]));
+    await tester.tap(find.text('Voir la journée de cette caisse'));
+    expect(opened, 1);
   });
 }

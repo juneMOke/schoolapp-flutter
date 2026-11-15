@@ -251,14 +251,25 @@ class MenuFactory {
     );
   }
 
-  /// Menu Trésorerie — les caisses en espèces. La configuration d'abord : sans
-  /// caisse, ni tableau de bord ni clôture n'ont rien à montrer.
+  /// Menu Trésorerie — les caisses en espèces : la clôture du soir, puis la
+  /// configuration des caisses, dans l'ordre de la spec (§04) : tableau de
+  /// bord, clôture, configuration.
   static MenuItem _createTreasuryMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.treasuryMenuId,
       title: l10n.menuTreasury,
       icon: Icons.savings_outlined,
       subMenus: [
+        SubMenuItem(
+          id: MenuConstants.treasuryDashboardId,
+          title: l10n.subMenuTreasuryDashboard,
+          route: AppRoutesNames.treasuryDashboard,
+        ),
+        SubMenuItem(
+          id: MenuConstants.treasuryClosingId,
+          title: l10n.subMenuTreasuryClosing,
+          route: AppRoutesNames.treasuryClosing,
+        ),
         SubMenuItem(
           id: MenuConstants.treasuryConfigId,
           title: l10n.subMenuTreasuryConfig,

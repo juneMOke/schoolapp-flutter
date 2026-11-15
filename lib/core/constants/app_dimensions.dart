@@ -1333,4 +1333,46 @@ class AppDimensions {
 
   /// Modale de création ou d'ajustement d'une caisse.
   static const treasuryRegisterModalMaxWidth = 540.0;
+
+  // ── Trésorerie · Clôture de caisse ──────────────────────────────────────
+  /// Largeur minimale d'une carte « caisse du jour » (grille auto-remplie).
+  static const treasuryDayCardMinWidth = 340.0;
+
+  /// Largeur maximale de la navigation ‹ date › : au-delà, la date ne
+  /// s'étire pas.
+  static const treasuryDayNavMaxWidth = 420.0;
+
+  /// Case chiffrée d'une carte du jour (Ouverture, Entrées, Sorties).
+  static const treasuryFigureMinWidth = 120.0;
+
+  /// Colonne « Heure » de la liste des mouvements.
+  static const treasuryMovesTimeColumn = 54.0;
+
+  /// Modale de clôture.
+  static const treasuryClosingModalMaxWidth = 560.0;
+
+  // ── Trésorerie · Tableau de bord ────────────────────────────────────────
+  /// Largeur minimale d'une carte KPI de caisse (grille auto-remplie : deux
+  /// colonnes sur tablette, une sur téléphone).
+  static const treasuryKpiCardMinWidth = 300.0;
+
+  /// La courbe des 8 derniers jours d'une carte KPI.
+  static const treasurySparklineWidth = 120.0;
+  static const treasurySparklineHeight = 34.0;
+
+  /// Le montant d'une carte KPI (A2) et le reste d'une carte de totaux (B7).
+  static const treasuryKpiAmountSize = 32.0;
+  static const treasuryPeriodTotalSize = 18.0;
+
+  /// Le trait et le dernier point de la courbe des 8 jours.
+  static const treasurySparklineStroke = 2.0;
+  static const treasurySparklineDot = 3.5;
+
+  /// La même courbe, plus petite, sur une carte de configuration (C1).
+  static const treasuryConfigSparklineWidth = 90.0;
+  static const treasuryConfigSparklineHeight = 30.0;
+
+  /// Hauteur de la courbe d'une caisse ; plus basse sous 520 dp.
+  static const treasuryChartHeight = 230.0;
+  static const treasuryChartHeightCompact = 200.0;
 }

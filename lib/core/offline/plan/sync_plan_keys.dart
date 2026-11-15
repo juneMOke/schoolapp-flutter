@@ -202,6 +202,10 @@ abstract final class SyncPlanKeys {
   /// Les périodes de désactivation des élèves (ouvertes et fermées), accordées
   /// par `enrollment.read`.
   static const String enrollmentSuspensions = 'enrollment.suspensions';
+
+  /// Les clôtures de caisse de l'école, réouvertures comprises, accordées par
+  /// `treasury.read` : une devise close aujourd'hui n'encaisse plus en espèces.
+  static const String treasuryClosures = 'treasury.closures';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -252,6 +256,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.hrPayrollArrearsPriorities: ['payroll_arrear_priorities'],
   SyncPlanKeys.studentPhotos: ['student_photos'],
   SyncPlanKeys.enrollmentSuspensions: ['enrollment_suspensions'],
+  SyncPlanKeys.treasuryClosures: ['treasury_closures'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -371,4 +376,6 @@ const Set<String> _kCursorKeyPrefixes = {
   // Cadré par l'école du jeton, comme les flux RH.
   'student_photos',
   'enrollment_suspensions',
+  // Les clôtures de caisse, cadrées par l'école du jeton.
+  'treasury_closures',
 };

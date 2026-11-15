@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_beneficiaries_cubit.dart';
 import 'package:school_app_flutter/features/boutique/presentation/bloc/dashboard/boutique_dashboard_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -134,7 +135,10 @@ void registerBoutiqueOffline(GetIt getIt) {
     ),
   );
   getIt.registerFactory<RecordBoutiqueSaleUseCase>(
-    () => RecordBoutiqueSaleUseCase(getIt<BoutiqueSaleRepository>()),
+    () => RecordBoutiqueSaleUseCase(
+      getIt<BoutiqueSaleRepository>(),
+      lock: _cashRegisterLock(),
+    ),
   );
 
   // ── Ventes du poste (lecture locale) ────────────────────────────────────
@@ -303,3 +307,10 @@ void _registerDashboard(GetIt getIt) {
     ),
   );
 }
+
+/// Le verrou des caisses closes, tenu par la Trésorerie (R11). Résolu à la
+/// création du cas d'usage, quand tous les modules sont enregistrés.
+CashRegisterLock? _cashRegisterLock() =>
+    GetIt.instance.isRegistered<CashRegisterLock>()
+    ? GetIt.instance<CashRegisterLock>()
+    : null;

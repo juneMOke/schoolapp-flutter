@@ -19,6 +19,7 @@ import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/schema/ticket_print_jobs_schema.dart';
+import 'package:school_app_flutter/core/database/schema/treasury_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
 /// Table `outbox` — file d'écriture différée idempotente (socle).
@@ -136,4 +137,5 @@ List<TableSchema> buildOfflineSchema() => [
   ...ticketPrintJobsTables, // Caisse — tickets à imprimer (continuité RC)
   ...coteSaisieTables, // Résultats — saisie des notes (cache et file d'envoi)
   ...enrollmentLevelCorrectionTables, // Inscriptions — correction de niveau
+  ...treasuryTables, // Trésorerie — clôtures de caisse (verrou des encaissements)
 ];

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
@@ -1033,6 +1034,10 @@ class _FacturationCreatePaymentViewState
                   LevelCorrectionHoldFailure() => AppLocalizations.of(
                     context,
                   )!.levelCorrectionCollectionHeld,
+                  CashRegisterClosedFailure(:final currency) =>
+                    AppLocalizations.of(
+                      context,
+                    )!.cashRegisterClosedHeld(currency),
                   final failure => failure?.message,
                 },
               ),

@@ -139,8 +139,9 @@ class FacturationConfirmOnlyLabels {
   });
 }
 
-/// `held` : la garde d'une correction de niveau a refusé l'écriture (D7) —
-/// rien n'est pris, et réessayer n'y changerait rien tant qu'elle tient.
+/// `held` : une garde a refusé l'écriture — une correction de niveau (D7), ou
+/// la caisse de la devise close aujourd'hui (R11). Rien n'est pris, et
+/// réessayer n'y changerait rien tant qu'elle tient.
 enum _Phase { confirm, processing, success, error, held }
 
 class _CollectFlowDialog extends StatefulWidget {
@@ -196,6 +197,10 @@ class _CollectFlowDialog extends StatefulWidget {
 class _CollectFlowDialogState extends State<_CollectFlowDialog> {
   _Phase _phase = _Phase.confirm;
   bool _awaitingBloc = false;
+
+  /// La devise dont la caisse close a retenu l'encaissement (R11) ; `null`
+  /// quand c'est une correction de niveau qui le retient.
+  String? _closedRegisterCurrency;
   bool _printing = false;
   String? _incidentCode;
 
@@ -258,9 +263,12 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
       // fermeture de la popin (cf. _onCollect).
       context.read<SyncStatusCubit>().notifyLocalWrite();
       setState(() => _phase = _Phase.success);
-    } else if (state is FinanceOfflineError && state.heldByLevelCorrection) {
+    } else if (state is FinanceOfflineError && state.isHeld) {
       _awaitingBloc = false;
-      setState(() => _phase = _Phase.held);
+      setState(() {
+        _phase = _Phase.held;
+        _closedRegisterCurrency = state.closedRegisterCurrency;
+      });
     } else if (state is FinanceOfflineError) {
       _awaitingBloc = false;
       setState(() {
@@ -368,6 +376,7 @@ class _CollectFlowDialogState extends State<_CollectFlowDialog> {
                           totalLabel: widget.totalLabel,
                           incidentCode: _incidentCode,
                           receiptNumber: watch.number,
+                          closedRegisterCurrency: _closedRegisterCurrency,
                         ),
                       ),
               ),
@@ -673,11 +682,15 @@ class _ResultBody extends StatelessWidget {
   /// Le numéro définitif du reçu, `null` tant qu'il n'est pas attribué.
   final String? receiptNumber;
 
+  /// La devise dont la caisse close retient l'encaissement (R11).
+  final String? closedRegisterCurrency;
+
   const _ResultBody({
     required this.phase,
     required this.totalLabel,
     required this.incidentCode,
     this.receiptNumber,
+    this.closedRegisterCurrency,
   });
 
   @override
@@ -698,7 +711,10 @@ class _ResultBody extends StatelessWidget {
       _Phase.held => (
         EteeloResultKind.error,
         l10n.facturationCollectHeldTitle,
-        l10n.levelCorrectionCollectionHeld,
+        switch (closedRegisterCurrency) {
+          final currency? => l10n.cashRegisterClosedHeld(currency),
+          null => l10n.levelCorrectionCollectionHeld,
+        },
       ),
       _ => (EteeloResultKind.processing, l10n.facturationCollectProcessing, ''),
     };

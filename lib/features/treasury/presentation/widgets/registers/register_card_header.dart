@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/balance_sparkline.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -87,18 +88,36 @@ class RegisterCardHeader extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           // Le montant ne passe jamais à la ligne et ne se tronque jamais :
           // s'il manque de place, il rétrécit.
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              TreasuryFormat.money(config.balanceInCents, currency),
-              softWrap: false,
-              style: AppTextStyles.totalAmountLora.copyWith(
-                fontSize: 28,
-                height: 1.1,
-                color: DashboardTones.inkValeur,
+          Row(
+            children: [
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    TreasuryFormat.money(config.balanceInCents, currency),
+                    softWrap: false,
+                    style: AppTextStyles.totalAmountLora.copyWith(
+                      fontSize: 28,
+                      height: 1.1,
+                      color: DashboardTones.inkValeur,
+                    ),
+                  ),
+                ),
               ),
-            ),
+              // Les 8 derniers jours, à droite du montant, quand la caisse a
+              // un historique (C1).
+              if (config.last8Days.length > 1) ...[
+                const SizedBox(width: AppSpacing.md),
+                BalanceSparkline(
+                  days: config.last8Days,
+                  size: const Size(
+                    AppDimensions.treasuryConfigSparklineWidth,
+                    AppDimensions.treasuryConfigSparklineHeight,
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(

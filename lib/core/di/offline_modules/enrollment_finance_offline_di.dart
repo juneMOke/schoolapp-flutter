@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_type_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_settings_dao.dart';
 import 'package:school_app_flutter/features/staff/data/local/staff_attendance_settings_dao.dart';
@@ -699,10 +700,16 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     () => FinalizeDraftUseCase(getIt<EnrollmentOfflineRepository>()),
   );
   getIt.registerFactory<RecordPaymentUseCase>(
-    () => RecordPaymentUseCase(getIt<FinanceOfflineRepository>()),
+    () => RecordPaymentUseCase(
+      getIt<FinanceOfflineRepository>(),
+      lock: _cashRegisterLock(),
+    ),
   );
   getIt.registerFactory<CorrectPaymentUseCase>(
-    () => CorrectPaymentUseCase(getIt<PaymentCorrectionRepository>()),
+    () => CorrectPaymentUseCase(
+      getIt<PaymentCorrectionRepository>(),
+      lock: _cashRegisterLock(),
+    ),
   );
   getIt.registerFactory<LoadPaymentCorrectionOriginUseCase>(
     () => LoadPaymentCorrectionOriginUseCase(
@@ -989,3 +996,10 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
     ..registerHandler(FinancePullHandler.studentCharges(financePullRepository))
     ..registerHandler(FinancePullHandler.payments(financePullRepository));
 }
+
+/// Le verrou des caisses closes, tenu par la Trésorerie (R11). Résolu à la
+/// création du cas d'usage, quand tous les modules sont enregistrés.
+CashRegisterLock? _cashRegisterLock() =>
+    GetIt.instance.isRegistered<CashRegisterLock>()
+    ? GetIt.instance<CashRegisterLock>()
+    : null;

@@ -33612,6 +33612,12 @@ abstract class AppLocalizations {
   /// **'Collection on hold: this student\'s level correction is waiting to sync. It will resume as soon as the new amount due is received.'**
   String get levelCorrectionCollectionHeld;
 
+  /// No description provided for @cashRegisterClosedHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'The {currency} register is closed for today: no more cash collection in this currency until tomorrow, unless the promoter reopens it.'**
+  String cashRegisterClosedHeld(String currency);
+
   /// No description provided for @levelCorrectionAction.
   ///
   /// In en, this message translates to:
@@ -34319,6 +34325,1342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{date}'**
   String treasuryDateShort(DateTime date);
+
+  /// No description provided for @subMenuTreasuryClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash closing'**
+  String get subMenuTreasuryClosing;
+
+  /// No description provided for @treasuryClosingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash closing'**
+  String get treasuryClosingTitle;
+
+  /// No description provided for @treasuryClosingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What came in and went out of each register, what remains, and the evening closing.'**
+  String get treasuryClosingSubtitle;
+
+  /// No description provided for @treasuryDayLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the day'**
+  String get treasuryDayLoading;
+
+  /// No description provided for @treasuryPrevDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous day'**
+  String get treasuryPrevDay;
+
+  /// No description provided for @treasuryNextDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Next day'**
+  String get treasuryNextDay;
+
+  /// No description provided for @treasuryToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get treasuryToday;
+
+  /// No description provided for @treasuryTodayLower.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get treasuryTodayLower;
+
+  /// No description provided for @treasuryDayLong.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryDayLong(DateTime date);
+
+  /// No description provided for @treasuryDayOpenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Day in progress'**
+  String get treasuryDayOpenTitle;
+
+  /// No description provided for @treasuryDayClosedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Day closed'**
+  String get treasuryDayClosedTitle;
+
+  /// No description provided for @treasuryClosedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{closed, plural, =0{No register closed out of {total}} =1{1 register out of {total} closed} other{{closed} registers out of {total} closed}}'**
+  String treasuryClosedCount(int closed, int total);
+
+  /// No description provided for @treasuryDayReportPending.
+  ///
+  /// In en, this message translates to:
+  /// **'the day\'s report will be available after the last closing.'**
+  String get treasuryDayReportPending;
+
+  /// No description provided for @treasuryDayReportAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'the day\'s reports are available.'**
+  String get treasuryDayReportAvailable;
+
+  /// No description provided for @treasuryCloseShortcut.
+  ///
+  /// In en, this message translates to:
+  /// **'Close {register}'**
+  String treasuryCloseShortcut(String register);
+
+  /// No description provided for @treasuryOpenToClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Open · to close'**
+  String get treasuryOpenToClose;
+
+  /// No description provided for @treasuryClosedAtShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed {time}'**
+  String treasuryClosedAtShort(String time);
+
+  /// No description provided for @treasuryClosedAtGapShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed {time} · gap'**
+  String treasuryClosedAtGapShort(String time);
+
+  /// No description provided for @treasuryNotClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not closed'**
+  String get treasuryNotClosed;
+
+  /// No description provided for @treasuryOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening'**
+  String get treasuryOpening;
+
+  /// No description provided for @treasuryInflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflows'**
+  String get treasuryInflows;
+
+  /// No description provided for @treasuryOutflows.
+  ///
+  /// In en, this message translates to:
+  /// **'Outflows'**
+  String get treasuryOutflows;
+
+  /// No description provided for @treasurySeeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Show detail'**
+  String get treasurySeeDetail;
+
+  /// No description provided for @treasuryHideDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide detail'**
+  String get treasuryHideDetail;
+
+  /// No description provided for @treasuryRemainingExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining in the register (expected)'**
+  String get treasuryRemainingExpected;
+
+  /// No description provided for @treasuryRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining in the register'**
+  String get treasuryRemaining;
+
+  /// No description provided for @treasuryRemainingDeclared.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining declared at closing'**
+  String get treasuryRemainingDeclared;
+
+  /// No description provided for @treasuryRemainingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening + inflows − outflows'**
+  String get treasuryRemainingHint;
+
+  /// No description provided for @treasuryExpectedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected {amount}'**
+  String treasuryExpectedShort(String amount);
+
+  /// No description provided for @treasuryCloseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At the end of the day, check that the remaining amount matches the money in the register.'**
+  String get treasuryCloseHint;
+
+  /// No description provided for @treasuryCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the register'**
+  String get treasuryCloseButton;
+
+  /// No description provided for @treasuryCloseOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing is not possible offline. Reconnect the tablet.'**
+  String get treasuryCloseOffline;
+
+  /// No description provided for @treasuryClosePending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 movement not yet sent to the server. Closing will be possible once everything is sent.} other{{count} movements not yet sent to the server. Closing will be possible once everything is sent.}}'**
+  String treasuryClosePending(int count);
+
+  /// No description provided for @treasuryCloseAfterClosurePending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment received after yesterday\'s closing to confirm.} other{{count} payments received after yesterday\'s closing to confirm.}}'**
+  String treasuryCloseAfterClosurePending(int count);
+
+  /// No description provided for @treasuryReadOnlyCashier.
+  ///
+  /// In en, this message translates to:
+  /// **'Read only: closing is done by the cashier or the promoter.'**
+  String get treasuryReadOnlyCashier;
+
+  /// No description provided for @treasuryClosedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed at {time} by {name}'**
+  String treasuryClosedBy(String time, String name);
+
+  /// No description provided for @treasuryClosedByPromoter.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed at {time} by {name} (promoter)'**
+  String treasuryClosedByPromoter(String time, String name);
+
+  /// No description provided for @treasuryClosedMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'the remaining amount matched the register'**
+  String get treasuryClosedMatched;
+
+  /// No description provided for @treasuryClosedWithGap.
+  ///
+  /// In en, this message translates to:
+  /// **'with a justified gap'**
+  String get treasuryClosedWithGap;
+
+  /// No description provided for @treasuryGapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing gap {gap}'**
+  String treasuryGapTitle(String gap);
+
+  /// No description provided for @treasuryGapMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'missing'**
+  String get treasuryGapMissing;
+
+  /// No description provided for @treasuryGapSurplus.
+  ///
+  /// In en, this message translates to:
+  /// **'surplus'**
+  String get treasuryGapSurplus;
+
+  /// No description provided for @treasuryExpectedDeclared.
+  ///
+  /// In en, this message translates to:
+  /// **'expected {expected} · declared {declared}'**
+  String treasuryExpectedDeclared(String expected, String declared);
+
+  /// No description provided for @treasuryGapAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Justification by {name} · {time} · included in the day\'s report'**
+  String treasuryGapAuthor(String name, String time);
+
+  /// No description provided for @treasuryReopenButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen the day'**
+  String get treasuryReopenButton;
+
+  /// No description provided for @treasuryReopenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen the closing of {register}'**
+  String treasuryReopenTitle(String register);
+
+  /// No description provided for @treasuryReopenReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for reopening (required)'**
+  String get treasuryReopenReason;
+
+  /// No description provided for @treasuryReopenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The closing stays readable: it is marked reopened, never deleted. Its gap is reversed, the day\'s report becomes provisional again, and the register can be closed again.'**
+  String get treasuryReopenHint;
+
+  /// No description provided for @treasuryReopenSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get treasuryReopenSave;
+
+  /// No description provided for @treasuryReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'{register} reopened · the {time} closing is cancelled. The day\'s report is provisional again.'**
+  String treasuryReopened(String register, String time);
+
+  /// No description provided for @treasuryMovesTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get treasuryMovesTime;
+
+  /// No description provided for @treasuryMovesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflow'**
+  String get treasuryMovesIn;
+
+  /// No description provided for @treasuryMovesOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Outflow'**
+  String get treasuryMovesOut;
+
+  /// No description provided for @treasuryMovesAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get treasuryMovesAmount;
+
+  /// No description provided for @treasuryMovesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 movement} other{{count} movements}}'**
+  String treasuryMovesCount(int count);
+
+  /// No description provided for @treasuryMovesEmptyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'No inflow that day.'**
+  String get treasuryMovesEmptyIn;
+
+  /// No description provided for @treasuryMovesEmptyOut.
+  ///
+  /// In en, this message translates to:
+  /// **'No outflow that day.'**
+  String get treasuryMovesEmptyOut;
+
+  /// No description provided for @treasuryMovesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading movements'**
+  String get treasuryMovesLoading;
+
+  /// No description provided for @treasuryMovesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Movements unavailable: {reason}'**
+  String treasuryMovesLoadFailed(String reason);
+
+  /// No description provided for @treasuryMovesSearchIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a student, a receipt…'**
+  String get treasuryMovesSearchIn;
+
+  /// No description provided for @treasuryMovesSearchOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Search an outflow, a voucher…'**
+  String get treasuryMovesSearchOut;
+
+  /// No description provided for @treasuryMovesNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No result for “{query}”.'**
+  String treasuryMovesNoResult(String query);
+
+  /// No description provided for @treasuryMovesShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show the other one} other{Show the {count} others}}'**
+  String treasuryMovesShowMore(int count);
+
+  /// No description provided for @treasuryMovesShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get treasuryMovesShowLess;
+
+  /// No description provided for @treasurySourceBankDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank deposit'**
+  String get treasurySourceBankDeposit;
+
+  /// No description provided for @treasurySourceGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing gap'**
+  String get treasurySourceGap;
+
+  /// No description provided for @treasuryNatureCancellation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation'**
+  String get treasuryNatureCancellation;
+
+  /// No description provided for @treasuryNatureOffset.
+  ///
+  /// In en, this message translates to:
+  /// **'Offset'**
+  String get treasuryNatureOffset;
+
+  /// No description provided for @treasuryAfterClosureLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'received after the closing of {date}'**
+  String treasuryAfterClosureLabel(DateTime date);
+
+  /// No description provided for @treasuryAfterClosureAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in the register yesterday'**
+  String get treasuryAfterClosureAlready;
+
+  /// No description provided for @treasuryAfterClosureToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived today'**
+  String get treasuryAfterClosureToday;
+
+  /// No description provided for @treasuryAfterClosureAnsweredAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'already counted the day before'**
+  String get treasuryAfterClosureAnsweredAlready;
+
+  /// No description provided for @treasuryAfterClosureAnsweredToday.
+  ///
+  /// In en, this message translates to:
+  /// **'counted today'**
+  String get treasuryAfterClosureAnsweredToday;
+
+  /// No description provided for @treasuryAfterClosureToastAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment confirmed · already in the register yesterday: it is not counted twice.'**
+  String get treasuryAfterClosureToastAlready;
+
+  /// No description provided for @treasuryAfterClosureToastToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment confirmed · arrived today: it counts in the day.'**
+  String get treasuryAfterClosureToastToday;
+
+  /// No description provided for @treasuryCloseAfterClosureWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer them in the inflow or outflow detail of the day they are recorded on.'**
+  String get treasuryCloseAfterClosureWhere;
+
+  /// No description provided for @treasuryCloseEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing · {date}'**
+  String treasuryCloseEyebrow(DateTime date);
+
+  /// No description provided for @treasuryCloseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close {register}'**
+  String treasuryCloseTitle(String register);
+
+  /// No description provided for @treasuryDayPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'The day at a glance'**
+  String get treasuryDayPoint;
+
+  /// No description provided for @treasuryLedgerOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Register opening'**
+  String get treasuryLedgerOpening;
+
+  /// No description provided for @treasuryLedgerFormula.
+  ///
+  /// In en, this message translates to:
+  /// **'opening + inflows − outflows'**
+  String get treasuryLedgerFormula;
+
+  /// No description provided for @treasuryCloseQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really have {amount} in the register?'**
+  String treasuryCloseQuestion(String amount);
+
+  /// No description provided for @treasuryCloseQuestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Count the money in the register and compare it with the remaining amount above.'**
+  String get treasuryCloseQuestionHint;
+
+  /// No description provided for @treasuryAnswerYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, it\'s right'**
+  String get treasuryAnswerYes;
+
+  /// No description provided for @treasuryAnswerYesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount matches the register'**
+  String get treasuryAnswerYesHint;
+
+  /// No description provided for @treasuryAnswerNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No, there is a difference'**
+  String get treasuryAnswerNo;
+
+  /// No description provided for @treasuryAnswerNoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'I enter what is really there'**
+  String get treasuryAnswerNoHint;
+
+  /// No description provided for @treasuryDeclaredQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How much is really in the register?'**
+  String get treasuryDeclaredQuestion;
+
+  /// No description provided for @treasuryGapMissingBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap {gap} · {amount} missing'**
+  String treasuryGapMissingBanner(String gap, String amount);
+
+  /// No description provided for @treasuryGapSurplusBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap {gap} · {amount} more than expected'**
+  String treasuryGapSurplusBanner(String gap, String amount);
+
+  /// No description provided for @treasuryNoGap.
+  ///
+  /// In en, this message translates to:
+  /// **'This is exactly the expected amount: there is no gap.'**
+  String get treasuryNoGap;
+
+  /// No description provided for @treasuryPickYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose “Yes”'**
+  String get treasuryPickYes;
+
+  /// No description provided for @treasuryGapReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap justification (required)'**
+  String get treasuryGapReason;
+
+  /// No description provided for @treasuryGapReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain where the difference comes from…'**
+  String get treasuryGapReasonHint;
+
+  /// No description provided for @treasuryGapReasonVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'The justification will appear in the day\'s report and when this day is viewed.'**
+  String get treasuryGapReasonVisible;
+
+  /// No description provided for @treasuryGapReasonShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The justification must be at least 5 characters long.'**
+  String get treasuryGapReasonShort;
+
+  /// No description provided for @treasuryGapSuggest1.
+  ///
+  /// In en, this message translates to:
+  /// **'Change-giving error'**
+  String get treasuryGapSuggest1;
+
+  /// No description provided for @treasuryGapSuggest2.
+  ///
+  /// In en, this message translates to:
+  /// **'Banknote refused or damaged'**
+  String get treasuryGapSuggest2;
+
+  /// No description provided for @treasuryCloseWithGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Close with this gap'**
+  String get treasuryCloseWithGap;
+
+  /// No description provided for @treasuryLockWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'After closing, this register takes no more cash collection today. Outflows (expenses, payroll) remain possible and count for the next day. A correction will go through an adjustment dated the next day.'**
+  String get treasuryLockWarning;
+
+  /// No description provided for @treasuryClosedToastMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'{register} closed · remaining confirmed: {amount}'**
+  String treasuryClosedToastMatched(String register, String amount);
+
+  /// No description provided for @treasuryClosedToastGap.
+  ///
+  /// In en, this message translates to:
+  /// **'{register} closed · justified gap of {gap}, included in the day\'s report'**
+  String treasuryClosedToastGap(String register, String gap);
+
+  /// No description provided for @treasuryAlreadyClosedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Register already closed at {time} by {name}: the figures have been updated.'**
+  String treasuryAlreadyClosedToast(String time, String name);
+
+  /// No description provided for @treasuryExpectedChangedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A movement arrived in the meantime: the expected amount went from {before} to {after}. Check the register and answer again.'**
+  String treasuryExpectedChangedMessage(String before, String after);
+
+  /// No description provided for @treasuryReasonExpectedChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The expected amount changed: check and answer again.'**
+  String get treasuryReasonExpectedChanged;
+
+  /// No description provided for @treasuryReasonAfterClosurePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments received after yesterday\'s closing are waiting for your answer.'**
+  String get treasuryReasonAfterClosurePending;
+
+  /// No description provided for @treasuryReasonAlreadyAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'This line has already been answered.'**
+  String get treasuryReasonAlreadyAnswered;
+
+  /// No description provided for @treasuryReasonNotAfterClosure.
+  ///
+  /// In en, this message translates to:
+  /// **'This line did not arrive after a closing.'**
+  String get treasuryReasonNotAfterClosure;
+
+  /// No description provided for @treasuryReasonAfterClosureNotCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'No closure covers this line any more (its day was reopened): answer “Arrived today”.'**
+  String get treasuryReasonAfterClosureNotCovered;
+
+  /// No description provided for @treasuryReasonGestureIdReused.
+  ///
+  /// In en, this message translates to:
+  /// **'This action carries the identifier of another one. Reload the page and try again.'**
+  String get treasuryReasonGestureIdReused;
+
+  /// No description provided for @treasuryCloseSunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday is not closed: its operations count for Monday, which is closed on Monday.'**
+  String get treasuryCloseSunday;
+
+  /// No description provided for @treasuryReasonNotToday.
+  ///
+  /// In en, this message translates to:
+  /// **'This can only be done for today.'**
+  String get treasuryReasonNotToday;
+
+  /// No description provided for @treasuryReasonInvalidDeclaration.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount different from the expected amount.'**
+  String get treasuryReasonInvalidDeclaration;
+
+  /// No description provided for @treasuryReasonAlreadyReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'This closing has already been reopened.'**
+  String get treasuryReasonAlreadyReopened;
+
+  /// No description provided for @treasuryReasonInvalidDate.
+  ///
+  /// In en, this message translates to:
+  /// **'This day is not a cash day.'**
+  String get treasuryReasonInvalidDate;
+
+  /// No description provided for @treasuryReasonInvalidRange.
+  ///
+  /// In en, this message translates to:
+  /// **'This period has not started yet.'**
+  String get treasuryReasonInvalidRange;
+
+  /// No description provided for @treasuryReasonInvalidReportId.
+  ///
+  /// In en, this message translates to:
+  /// **'This report does not exist.'**
+  String get treasuryReasonInvalidReportId;
+
+  /// No description provided for @treasuryScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get treasuryScopeLabel;
+
+  /// No description provided for @treasuryScopeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get treasuryScopeDay;
+
+  /// No description provided for @treasuryScopeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get treasuryScopeWeek;
+
+  /// No description provided for @treasuryScopeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get treasuryScopeMonth;
+
+  /// No description provided for @treasuryScopeDayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get treasuryScopeDayShort;
+
+  /// No description provided for @treasuryScopeWeekShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get treasuryScopeWeekShort;
+
+  /// No description provided for @treasuryScopeMonthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get treasuryScopeMonthShort;
+
+  /// No description provided for @treasuryWeekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {from} to {to}'**
+  String treasuryWeekOf(DateTime from, DateTime to);
+
+  /// No description provided for @treasuryMonthOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}'**
+  String treasuryMonthOf(DateTime month);
+
+  /// No description provided for @treasuryInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'in progress'**
+  String get treasuryInProgress;
+
+  /// No description provided for @treasuryCurrentWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get treasuryCurrentWeek;
+
+  /// No description provided for @treasuryCurrentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get treasuryCurrentMonth;
+
+  /// No description provided for @treasuryPrevPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get treasuryPrevPeriod;
+
+  /// No description provided for @treasuryNextPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get treasuryNextPeriod;
+
+  /// No description provided for @treasuryPeriodLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the period'**
+  String get treasuryPeriodLoading;
+
+  /// No description provided for @treasuryPeriodEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No elapsed cash day in this period.'**
+  String get treasuryPeriodEmpty;
+
+  /// No description provided for @treasuryDayByDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day by day'**
+  String get treasuryDayByDay;
+
+  /// No description provided for @treasuryDayByDayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to see its detail and its gaps.'**
+  String get treasuryDayByDayHint;
+
+  /// No description provided for @treasuryDayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryDayShort(DateTime date);
+
+  /// No description provided for @treasuryStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get treasuryStatusClosed;
+
+  /// No description provided for @treasuryStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get treasuryStatusOpen;
+
+  /// No description provided for @treasuryGapTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap'**
+  String get treasuryGapTag;
+
+  /// No description provided for @treasuryCellGap.
+  ///
+  /// In en, this message translates to:
+  /// **'gap {gap}'**
+  String treasuryCellGap(String gap);
+
+  /// No description provided for @treasuryPeriodClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance at period end'**
+  String get treasuryPeriodClosing;
+
+  /// No description provided for @treasurySeeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'See this register\'s day'**
+  String get treasurySeeDay;
+
+  /// No description provided for @treasuryReportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash reports'**
+  String get treasuryReportsTitle;
+
+  /// No description provided for @treasuryReportsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Look at a report before downloading, printing or sharing it.'**
+  String get treasuryReportsSubtitle;
+
+  /// No description provided for @treasuryReportKindDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get treasuryReportKindDaily;
+
+  /// No description provided for @treasuryReportKindWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get treasuryReportKindWeekly;
+
+  /// No description provided for @treasuryReportKindMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get treasuryReportKindMonthly;
+
+  /// No description provided for @treasuryReportKindYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get treasuryReportKindYearly;
+
+  /// No description provided for @treasuryReportKindPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get treasuryReportKindPeriod;
+
+  /// No description provided for @treasuryReportFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Final'**
+  String get treasuryReportFinal;
+
+  /// No description provided for @treasuryReportProvisionalDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional · not closed'**
+  String get treasuryReportProvisionalDay;
+
+  /// No description provided for @treasuryReportProvisionalPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional · in progress'**
+  String get treasuryReportProvisionalPeriod;
+
+  /// No description provided for @treasuryReportProvisionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The register is not closed yet: the figures may still change.'**
+  String get treasuryReportProvisionalHint;
+
+  /// No description provided for @treasuryReportGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate the report'**
+  String get treasuryReportGenerate;
+
+  /// No description provided for @treasuryReportEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No range report'**
+  String get treasuryReportEmptyTitle;
+
+  /// No description provided for @treasuryReportEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the dates, then « Generate the report ».'**
+  String get treasuryReportEmptyBody;
+
+  /// No description provided for @treasuryReportsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No report yet.'**
+  String get treasuryReportsEmpty;
+
+  /// No description provided for @treasuryReportsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the reports'**
+  String get treasuryReportsLoading;
+
+  /// No description provided for @treasuryReportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get treasuryReportPdf;
+
+  /// No description provided for @treasuryReportExcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel'**
+  String get treasuryReportExcel;
+
+  /// No description provided for @treasuryReportOpenPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'View the PDF'**
+  String get treasuryReportOpenPdf;
+
+  /// No description provided for @treasuryReportOpenExcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the Excel sheet'**
+  String get treasuryReportOpenExcel;
+
+  /// No description provided for @treasuryReportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Sheet saved: {name}'**
+  String treasuryReportSaved(String name);
+
+  /// No description provided for @treasuryReportBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Another report is being prepared: try again in a moment.'**
+  String get treasuryReportBusy;
+
+  /// No description provided for @treasuryReportProvisionalRef.
+  ///
+  /// In en, this message translates to:
+  /// **'{id} · provisional'**
+  String treasuryReportProvisionalRef(String id);
+
+  /// No description provided for @treasuryReportOneDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily report'**
+  String get treasuryReportOneDaily;
+
+  /// No description provided for @treasuryReportOneWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly report'**
+  String get treasuryReportOneWeekly;
+
+  /// No description provided for @treasuryReportOneMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly report'**
+  String get treasuryReportOneMonthly;
+
+  /// No description provided for @treasuryReportLockedLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Available once the last register is closed.'**
+  String get treasuryReportLockedLast;
+
+  /// No description provided for @treasuryReportLockedAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Available once every register is closed.'**
+  String get treasuryReportLockedAll;
+
+  /// No description provided for @treasuryReportAfterClose.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF · Excel after closing'**
+  String get treasuryReportAfterClose;
+
+  /// No description provided for @treasuryReportNeverClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Day not closed: its report stays provisional, available on the dashboard.'**
+  String get treasuryReportNeverClosed;
+
+  /// No description provided for @treasuryPagePrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get treasuryPagePrev;
+
+  /// No description provided for @treasuryPageNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get treasuryPageNext;
+
+  /// No description provided for @treasuryPageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {total}'**
+  String treasuryPageOf(int page, int total);
+
+  /// No description provided for @subMenuTreasuryDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get subMenuTreasuryDashboard;
+
+  /// No description provided for @treasuryDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much do we have in the registers?'**
+  String get treasuryDashboardTitle;
+
+  /// No description provided for @treasuryDashboardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'As of {date} · each register in its own currency, never added together.'**
+  String treasuryDashboardSubtitle(DateTime date);
+
+  /// No description provided for @treasuryEyebrowYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Treasury · {year}'**
+  String treasuryEyebrowYear(String year);
+
+  /// No description provided for @treasuryKpiToClose.
+  ///
+  /// In en, this message translates to:
+  /// **'To close'**
+  String get treasuryKpiToClose;
+
+  /// No description provided for @treasuryKpiClosedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed {time}'**
+  String treasuryKpiClosedAt(String time);
+
+  /// No description provided for @treasuryKpiToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get treasuryKpiToday;
+
+  /// No description provided for @treasuryKpiLast8Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 8 days'**
+  String get treasuryKpiLast8Days;
+
+  /// No description provided for @treasuryKpiSeeClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'See the register\'s closing'**
+  String get treasuryKpiSeeClosing;
+
+  /// No description provided for @treasuryDashboardLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the dashboard'**
+  String get treasuryDashboardLoading;
+
+  /// No description provided for @treasuryEmptyDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Create at least one register, with its opening balance, to follow the treasury.'**
+  String get treasuryEmptyDashboard;
+
+  /// No description provided for @treasuryEvolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registers over time'**
+  String get treasuryEvolutionTitle;
+
+  /// No description provided for @treasuryEvolutionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One curve per register, each currency on its own axis'**
+  String get treasuryEvolutionSubtitle;
+
+  /// No description provided for @treasuryPeriodToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get treasuryPeriodToday;
+
+  /// No description provided for @treasuryPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get treasuryPeriodWeek;
+
+  /// No description provided for @treasuryPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get treasuryPeriodMonth;
+
+  /// No description provided for @treasuryPeriodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get treasuryPeriodYear;
+
+  /// No description provided for @treasuryPeriodCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get treasuryPeriodCustom;
+
+  /// No description provided for @treasuryRangeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get treasuryRangeFrom;
+
+  /// No description provided for @treasuryRangeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get treasuryRangeTo;
+
+  /// No description provided for @treasuryRangeTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'A period spans at most {days} days.'**
+  String treasuryRangeTooLong(int days);
+
+  /// No description provided for @treasuryRangeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The end is before the start.'**
+  String get treasuryRangeInvalid;
+
+  /// No description provided for @treasuryRangeChooseValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a valid range.'**
+  String get treasuryRangeChooseValid;
+
+  /// No description provided for @treasuryRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} → {to}'**
+  String treasuryRangeLabel(DateTime from, DateTime to);
+
+  /// No description provided for @treasuryCashDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 cash day} other{{count} cash days}}'**
+  String treasuryCashDays(int count);
+
+  /// No description provided for @treasuryGranHour.
+  ///
+  /// In en, this message translates to:
+  /// **'hour by hour'**
+  String get treasuryGranHour;
+
+  /// No description provided for @treasuryGranDay.
+  ///
+  /// In en, this message translates to:
+  /// **'day by day'**
+  String get treasuryGranDay;
+
+  /// No description provided for @treasuryGranWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'week by week'**
+  String get treasuryGranWeek;
+
+  /// No description provided for @treasuryGranMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'month by month'**
+  String get treasuryGranMonth;
+
+  /// No description provided for @treasuryDisplayAs.
+  ///
+  /// In en, this message translates to:
+  /// **'shown {granularity}'**
+  String treasuryDisplayAs(String granularity);
+
+  /// No description provided for @treasuryAutoChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'(chosen automatically from the length)'**
+  String get treasuryAutoChosen;
+
+  /// No description provided for @treasuryChartBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance {granularity}'**
+  String treasuryChartBalance(String granularity);
+
+  /// No description provided for @treasuryChartBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get treasuryChartBalanceLabel;
+
+  /// No description provided for @treasuryChartGaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Gaps'**
+  String get treasuryChartGaps;
+
+  /// No description provided for @treasuryChartUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get treasuryChartUpcoming;
+
+  /// No description provided for @treasuryErrorRefusedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to show'**
+  String get treasuryErrorRefusedTitle;
+
+  /// No description provided for @treasuryErrorNoYear.
+  ///
+  /// In en, this message translates to:
+  /// **'The school has no current school year: the treasury has nothing to show yet.'**
+  String get treasuryErrorNoYear;
+
+  /// No description provided for @treasuryChartNoPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'No point in this range.'**
+  String get treasuryChartNoPoint;
+
+  /// No description provided for @treasuryEvolutionLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the evolution'**
+  String get treasuryEvolutionLoading;
+
+  /// No description provided for @treasuryWeekBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'W{index}'**
+  String treasuryWeekBucket(int index);
+
+  /// No description provided for @treasuryHourBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{hour}:00'**
+  String treasuryHourBucket(int hour);
+
+  /// No description provided for @treasuryDayBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryDayBucket(DateTime date);
+
+  /// No description provided for @treasuryMonthBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryMonthBucket(DateTime date);
+
+  /// No description provided for @treasuryShortDateBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String treasuryShortDateBucket(DateTime date);
+
+  /// No description provided for @treasuryChartSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{register} over time: opening {opening}, balance {balance}'**
+  String treasuryChartSemantics(
+    String register,
+    String opening,
+    String balance,
+  );
+
+  /// No description provided for @treasuryEmptyClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a register in Treasury ▸ Settings to get started.'**
+  String get treasuryEmptyClosing;
+
+  /// No description provided for @treasuryConfigureRegisters.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure the registers'**
+  String get treasuryConfigureRegisters;
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_payments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_local_student_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/record_payment_use_case.dart';
@@ -66,6 +67,9 @@ class FinanceOfflineBloc
         (f) => FinanceOfflineError(
           _map(f),
           heldByLevelCorrection: f is LevelCorrectionHoldFailure,
+          closedRegisterCurrency: f is CashRegisterClosedFailure
+              ? f.currency
+              : null,
         ),
         (id) => FinanceOfflinePaymentPendingSync(id),
       ),

@@ -124,9 +124,17 @@ class MenuConstants {
   /// écrans — une demande déposée le mois dernier attend toujours.
   static const String expenseQueueId = 'depenses-validations';
 
+  /// Tableau de bord de la trésorerie : combien chaque caisse détient, et
+  /// leur évolution.
+  static const String treasuryDashboardId = 'tr-dash';
+
   /// Configuration des caisses : une par devise, le montant que chacune
   /// détient, et ses ajustements.
   static const String treasuryConfigId = 'tr-config';
+
+  /// Clôture de caisse : ce qui est entré et sorti de chaque caisse, ce qu'il
+  /// reste, et la clôture du soir.
+  static const String treasuryClosingId = 'tr-cloture';
 
   /// Le fichier du personnel : tous les agents de l'école, leur contrat et
   /// leur dossier administratif.

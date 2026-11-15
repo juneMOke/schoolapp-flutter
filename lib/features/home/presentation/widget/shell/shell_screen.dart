@@ -32,7 +32,9 @@ import 'package:school_app_flutter/features/expense/presentation/pages/expense_d
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_feature_scope.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_queue_page.dart';
 import 'package:school_app_flutter/features/expense/presentation/pages/expense_register_page.dart';
+import 'package:school_app_flutter/features/treasury/presentation/pages/cash_closing_page.dart';
 import 'package:school_app_flutter/features/treasury/presentation/pages/cash_registers_page.dart';
+import 'package:school_app_flutter/features/treasury/presentation/pages/treasury_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
@@ -156,6 +158,10 @@ class ShellScreen extends StatelessWidget {
           key: ValueKey(MenuConstants.expenseQueueId),
           child: ExpenseQueuePage(),
         );
+      case MenuConstants.treasuryDashboardId:
+        return const TreasuryDashboardPage();
+      case MenuConstants.treasuryClosingId:
+        return const CashClosingPage();
       case MenuConstants.treasuryConfigId:
         return const CashRegistersPage();
       case MenuConstants.hrStaffFileId:

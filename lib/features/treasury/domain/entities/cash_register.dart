@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_closure.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 
 /// Une caisse de l'école : une seule devise, choisie à la création, jamais
@@ -37,38 +38,6 @@ class CashRegister extends Equatable {
   ];
 }
 
-/// Ce qu'il faut savoir de la clôture du jour pour l'écran Configuration.
-class TodayClosure extends Equatable {
-  final DateTime closedAt;
-  final int expectedInCents;
-  final int declaredInCents;
-  final int gapInCents;
-
-  /// La clôture a été rouverte par le promoteur : elle ne verrouille plus la
-  /// caisse.
-  final bool reopened;
-
-  const TodayClosure({
-    required this.closedAt,
-    required this.expectedInCents,
-    required this.declaredInCents,
-    required this.gapInCents,
-    this.reopened = false,
-  });
-
-  /// Une clôture rouverte ne compte plus.
-  bool get locksRegister => !reopened;
-
-  @override
-  List<Object?> get props => [
-    closedAt,
-    expectedInCents,
-    declaredInCents,
-    gapInCents,
-    reopened,
-  ];
-}
-
 /// Le solde de fin d'une journée de caisse (courbe des 8 derniers jours).
 class DayBalance extends Equatable {
   final DateTime day;
@@ -92,7 +61,10 @@ class RegisterConfig extends Equatable {
   /// Le déclaré si la caisse est clôturée aujourd'hui, l'attendu sinon. C'est
   /// le « montant actuel » d'un ajustement.
   final int balanceInCents;
-  final TodayClosure? todayClosure;
+
+  /// La clôture **vivante** du jour : après une réouverture, elle redevient
+  /// `null` (le serveur ne renvoie jamais ici une clôture rouverte).
+  final CashClosure? todayClosure;
   final int adjustmentsCount;
   final List<DayBalance> last8Days;
 
